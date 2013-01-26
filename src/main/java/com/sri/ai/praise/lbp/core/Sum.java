@@ -85,7 +85,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 	
 	@Override
 	public String getName() {
-		return "R_sum";
+		return R_sum;
 	}
 
 	/**
