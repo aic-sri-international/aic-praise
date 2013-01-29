@@ -252,10 +252,10 @@ import com.sri.ai.util.base.Triple;
  *            then expand_message_value_with_placeholders(M1, map_from_placeholder_to_bound)
  *            else expand_message_value_with_placeholders(M2, map_from_placeholder_to_bound)
  * else
- *     R_iterate_extrems({ message_value_with_placeholders }, // singleton set
+ *     iterate_extrema({ message_value_with_placeholders }, // singleton set
  *                       copy of map_from_placeholder_to_bound)
  * -----
- * R_iterate_extrema(message_values_set, map_from_placeholder_to_bound)
+ * iterate_extrema(message_values_set, map_from_placeholder_to_bound)
  * Receives an extensional set of message values with placeholders
  * and a map from placeholders to conditional bounds,
  * and replaces every message value in the set by all the possible message values
@@ -268,15 +268,15 @@ import com.sri.ai.util.base.Triple;
  *         elseMap <- copy of map_from_placeholder_to_bound with P mapping to B2
  *         return 
  *             if C
- *             then R_iterate_extrema(message_values_set, thenMap)
- *             else R_iterate_extrema(message_values_set, elseMap)
+ *             then iterate_extrema(message_values_set, thenMap)
+ *             else iterate_extrema(message_values_set, elseMap)
  *     else // replace all message values by their possibilities according to unconditional B
  *         new_message_values_set <- empty list
  *         for each message_value in message_values_set
  *             for each extremum value M of B
  *                 new_message_value <- R_simplify(message_value[P/M])
  *                 add new_message_value to new_message_values_set
- *         return R_iterate_extrema(new_message_values_set, map_from_placeholder_to_bound)
+ *         return iterate_extrema(new_message_values_set, map_from_placeholder_to_bound)
  *         
  * return message_values_set   
  *      
@@ -558,7 +558,7 @@ public class ConvexRewriterOnMessageBounds extends
 		}
 		else {
 			Trace.log("else");
-			Trace.log("    R_iterate_extrema({message_value_with_placeholders}, copy of map_from_placeholder_to_bound");
+			Trace.log("    iterate_extrema({message_value_with_placeholders}, copy of map_from_placeholder_to_bound");
 			result = iterateExtrema(ExtensionalSet.makeUniSet(messageValueWithPlaceholders), new LinkedHashMap<Placeholder, Expression>(mapFromPlaceholderToBound), process);
 		}
 
@@ -569,7 +569,7 @@ public class ConvexRewriterOnMessageBounds extends
 
 	
 	/**
-	 * R_iterate_extrema(message_values_set, map_from_placeholder_to_bound)
+	 * iterate_extrema(message_values_set, map_from_placeholder_to_bound)
 	 * Receives an extensional set of message values with placeholders and a map
 	 * from placeholders to conditional bounds, and replaces every message value
 	 * in the set by all the possible message values obtained by replacing each
@@ -588,7 +588,7 @@ public class ConvexRewriterOnMessageBounds extends
 	private Expression iterateExtrema(Expression messageValuesSet, Map<Placeholder, Expression> mapFromPlaceholderToBound, RewritingProcess process) {
 		Expression result = messageValuesSet;
 		
-		Trace.in("+R_iterate_extrema({})", messageValuesSet);
+		Trace.in("+iterate_extrema({})", messageValuesSet);
 
 		Trace.log("if there is a P in message_values_set and (P, B) is in map_from_placeholder_to_bound");
 		Pair<Placeholder, Expression> pairPB = null;	
@@ -608,7 +608,7 @@ public class ConvexRewriterOnMessageBounds extends
 				Trace.log("        elseMap <- copy of map_from_placeholder_to_bound with P mapping to B2");
 				final Map<Placeholder, Expression> elseMap = new LinkedHashMap<Placeholder, Expression>(mapFromPlaceholderToBound);
 				elseMap.put(placeholderP, IfThenElse.getElseBranch(expressionB));
-				Trace.log("        return if C then R_iterate_extrema(message_values_set, thenMap) else R_iterate_extrema(message_values_set, elseMap)");				
+				Trace.log("        return if C then iterate_extrema(message_values_set, thenMap) else iterate_extrema(message_values_set, elseMap)");				
 				result = GrinderUtil.branchAndMergeOnACondition(IfThenElse.getCondition(expressionB), 
 						new RewriteOnBranch() {	
 							@Override
@@ -647,7 +647,7 @@ public class ConvexRewriterOnMessageBounds extends
 						newMessageValuesSet.add(newMessageValue);
 					}
 				}
-				Trace.log("        return R_iterate_extrema(new_message_value_set, map_from_placeholder_to_bound)");
+				Trace.log("        return iterate_extrema(new_message_value_set, map_from_placeholder_to_bound)");
 				result = iterateExtrema(ExtensionalSet.makeUniSetExpression(newMessageValuesSet), mapFromPlaceholderToBound, process);
 			}
 		}
@@ -657,7 +657,7 @@ public class ConvexRewriterOnMessageBounds extends
 			Trace.log("return message_values_set");
 		}
 		
-		Trace.out("-R_iterate_extrema={}", result);
+		Trace.out("-iterate_extrema={}", result);
 		
 		return result;
 	}
