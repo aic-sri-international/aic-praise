@@ -199,16 +199,16 @@ public class RuleParserTest extends AbstractParserTest {
 	public void testRandomVariableExpression () {
 		String string;
 		string = "random +: Number x Number -> Number;";
-		test(string, new DefaultCompoundSyntaxTree("random variable", "+", "2", "Number", "Number", "Number"));
+		test(string, new DefaultCompoundSyntaxTree("randomVariable", "+", "2", "Number", "Number", "Number"));
 
 		string = "random father: People -> People;";
-		test(string, new DefaultCompoundSyntaxTree("random variable", "father", "1", "People", "People"));
+		test(string, new DefaultCompoundSyntaxTree("randomVariable", "father", "1", "People", "People"));
 
 		string = "random happy: People -> Boolean;";
-		test(string, new DefaultCompoundSyntaxTree("random variable", "happy", "1", "People", "Boolean"));
+		test(string, new DefaultCompoundSyntaxTree("randomVariable", "happy", "1", "People", "Boolean"));
 
 		string = "random president: -> People;";
-		test(string, new DefaultCompoundSyntaxTree("random variable", "president", "0", "People"));
+		test(string, new DefaultCompoundSyntaxTree("randomVariable", "president", "0", "People"));
 
 		System.out.println("test count = " + testCount);
 	}
@@ -269,7 +269,7 @@ public class RuleParserTest extends AbstractParserTest {
 		expected.add(new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
 		expected.add(new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", "rover"));
-		expected.add(new DefaultCompoundSyntaxTree("random variable", "+", "2", "Number", "Number", "Number"));
+		expected.add(new DefaultCompoundSyntaxTree("randomVariable", "+", "2", "Number", "Number", "Number"));
 		testAll(string, expected);
 		expected.clear();
 
