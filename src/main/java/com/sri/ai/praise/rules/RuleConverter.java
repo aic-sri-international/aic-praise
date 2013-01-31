@@ -50,9 +50,13 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
+import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.util.base.Pair;
 
 @Beta
 public class RuleConverter {
@@ -61,7 +65,7 @@ public class RuleConverter {
 	public static final String FUNCTOR_FOR_ALL                     = "for all . : .";
 	public static final String FUNCTOR_THERE_EXISTS                = "there exists . : .";
 
-	public static final String FUNCTOR_RANDOM_VARIABLE_DECLARATION = "random variable";
+	public static final String FUNCTOR_RANDOM_VARIABLE_DECLARATION = "randomVariable";
 	public static final String FUNCTOR_SORT                        = "sort";
 
 	public static final String FUNCTOR_ATOMIC_RULE                 = "atomic rule";
@@ -73,111 +77,202 @@ public class RuleConverter {
 
 	private RuleParserWrapper         ruleParser       = new RuleParserWrapper();
 //	private AntlrGrinderParserWrapper grinderParser    = new AntlrGrinderParserWrapper();
-//	private RewritingProcess          rewritingProcess = LBPFactory.newLBPProcess(DefaultSymbol.createSymbol(""));
+	private RewritingProcess          rewritingProcess = LBPFactory.newLBPProcess(DefaultSymbol.createSymbol(""));
 
 	private interface NodeInspector {
-		public boolean inspectNode(Expression parent, Expression child, Object context);
+		public boolean inspectNode(Expression parent, /*Expression child,*/ Object context);
 	}
 
-	private class TransformFunctionContext {
-		@SuppressWarnings("unused")
-		Expression                currentExpression;
-		@SuppressWarnings("unused")
-		List<Expression>          randomVariableDeclarations;
-		@SuppressWarnings("unused")
-		Map<String, Set<Integer>> randomVariableIndex;
+	public class ConverterContext {
+		public Expression                 currentExpression;
+		public List<Expression>           randomVariableDeclarations;
+		public Map<String, Set<Integer>>  randomVariableIndex;
+		public List<Expression>           parfactors;
+		public List<Expression>           sorts;
+		public List<Expression>           randomVariables;
+		
+		public List<Expression>           processedParfactors;
+		public Map<String, Set<Integer>>  functionsFound;
+		public int                        uniqueCount = 0;
+		public boolean                    runAgain;
 	}
-	
+
 
 	/*===================================================================================
 	 * PUBLIC METHODS
 	 *=================================================================================*/
 	public Model parseModel (String modelString) {
-		return parseModel(ruleParser.parseAll(modelString));
+		return parseModel("", "", modelString);
+	}
+
+	public Model parseModel (String name, String description, String modelString) {
+		return parseModel(name, description, ruleParser.parseAll(modelString));
 	}
 	
-
 	public Model parseModel (List<Expression> inputRules) {
-		List<Expression> parfactors                    = new ArrayList<Expression>();
-		List<Expression> sorts                         = new ArrayList<Expression>();
-		List<Expression> randomVariables               = new ArrayList<Expression>();
+		return parseModel("", "", inputRules);
+	}
+
+	public Model parseModel (String name, String description, List<Expression> inputRules) {
+		ConverterContext context = new ConverterContext();
+		context.parfactors                    = new ArrayList<Expression>();
+		context.sorts                         = new ArrayList<Expression>();
+		context.randomVariables               = new ArrayList<Expression>();
 //		Map<String, Expression> randomVariableNames    = new HashMap<String, Expression>();
-		Map<String, Set<Integer>> randomVariableIndex  = new HashMap<String, Set<Integer>>();
+		context.randomVariableIndex           = new HashMap<String, Set<Integer>>();
+		context.functionsFound                = new HashMap<String, Set<Integer>>();
 		
 		// Sort and convert the rules to their if-then-else forms.
 		for (Expression rule : inputRules) {
 			if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
-				parfactors.add(translateAtomicRule(rule));
+				context.parfactors.add(translateAtomicRule(rule));
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
-				parfactors.add(translatePrologRule(rule));
+				context.parfactors.add(translatePrologRule(rule));
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
-				parfactors.add(translateConditionalRule(rule));
+				context.parfactors.add(translateConditionalRule(rule));
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
-				randomVariables.add(this.updateRandomVariableDeclaration(rule));
-				String name = rule.get(0).toString();
-				if (randomVariableIndex.get(name) == null) {
+				context.randomVariables.add(this.updateRandomVariableDeclaration(rule));
+				String varName = rule.get(0).toString();
+				if (context.randomVariableIndex.get(varName) == null) {
 					Set<Integer> set = new HashSet<Integer>();
 					set.add(rule.get(1).intValue());
-					randomVariableIndex.put(name, set);
+					context.randomVariableIndex.put(varName, set);
 				}
 				else {
-					randomVariableIndex.get(name).add(rule.get(1).intValue());
+					context.randomVariableIndex.get(varName).add(rule.get(1).intValue());
 				}
 //				randomVariableNames.put(rule.get(0).toString(), rule);
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_SORT)) {
-				sorts.add(rule);
+				context.sorts.add(rule);
 			}
 		}
 //		System.out.println("var names: " + randomVariableNames.toString());
-		System.out.println("var index: " + randomVariableIndex.toString());
-		System.out.println("parfactors: " + parfactors.toString());
-		System.out.println("random variables: " + randomVariables.toString());
-		System.out.println("sorts: " + sorts.toString());
+		System.out.println("var index: " + context.randomVariableIndex.toString());
+		System.out.println("parfactors: " + context.parfactors.toString());
+		System.out.println("random variables: " + context.randomVariables.toString());
+		System.out.println("sorts: " + context.sorts.toString());
 
 		// Transform the functions.
-		TransformFunctionContext context = new TransformFunctionContext();
-		context.randomVariableDeclarations = randomVariables;
-		context.randomVariableIndex = randomVariableIndex;
-		for (Expression parfactor : parfactors) {
-			//boolean result = 
-			walkNode(parfactor, context, new NodeInspector() {
-				public boolean inspectNode(Expression parent, Expression child, Object context) {
-					if (parent.getFunctor().equals(FunctorConstants.EQUAL) && isRandomFunctionApplication(child)) {
-						// TODO: this doesn't do anything yet.
-						
-					}
-					if (parent.getFunctor().equals(FunctorConstants.INEQUALITY) && isRandomFunctionApplication(child)) {
-						// TODO: this doesn't do anything yet.
-						
-					}
-					if (isRandomFunctionApplication(parent) && isRandomFunctionApplication(child)) {
-						// TODO: this doesn't do anything yet.
-						
-					}
-					return true;
-				}
-			});
-		}
+		context.processedParfactors = new ArrayList<Expression>();
+		translateFunctions(context);
+		context.parfactors = context.processedParfactors;
+		context.processedParfactors = new ArrayList<Expression>();
+		
 		
 
 
 
-		// TODO: This is not the correct way to construct the model expression.
-		Expression union = new DefaultCompoundSyntaxTree("union", parfactors);
-		@SuppressWarnings("unused")
-		Expression modelExpression = new DefaultCompoundSyntaxTree("model", union);
+		// Create the model object output.
+		ArrayList<Expression> modelArgs = new ArrayList<Expression>();
+		modelArgs.add(DefaultSymbol.createSymbol(name));
+		modelArgs.add(DefaultSymbol.createSymbol(description));
+		for (Expression sort : context.sorts)
+			modelArgs.add(sort);
 
-//		return new Model(modelExpression, null);  // TODO: do we need to extract the random variable names?
-		return null;
+		Set<String> randomVariableNames = new HashSet<String>();
+		for (Expression randomVariable : context.randomVariables) {
+			modelArgs.add(randomVariable);
+			randomVariableNames.add(randomVariable.get(0).toString());
+		}
+		modelArgs.add(Expressions.apply("parfactors", context.parfactors));
+		Expression modelExpression = Expressions.apply("model", modelArgs);
+
+		return new Model(modelExpression, randomVariableNames);
+	}
+	
+	public void translateFunctions (ConverterContext context) {
+		for (Expression parfactor : context.parfactors) {
+			context.currentExpression = parfactor;
+			context.functionsFound = new HashMap<String, Set<Integer>>();
+			context.uniqueCount = 0;
+//			System.out.println("Converting: " + parfactor);
+			do {
+				context.runAgain = false;
+//				System.out.println("Iterating walkNode: " + context.currentExpression);
+				walkNode(context.currentExpression, context, new NodeInspector() {
+					public boolean inspectNode(Expression parent, /*Expression child,*/ Object context) {
+						if (parent.getArguments().size() == 0)
+							return true;
+//						System.out.println(parent);
+//						System.out.println("inspectNode: " + parent);
+						if (parent.getFunctor().equals(FunctorConstants.EQUAL) || parent.getFunctor().equals(FunctorConstants.INEQUALITY) ||
+								isRandomFunctionApplication(parent)) {
+							ConverterContext converterContext = (ConverterContext)context;
+							boolean isReplace = false;
+							List<Expression> arguments = new ArrayList<Expression>(); 
+							List<Expression> andArgs   = new ArrayList<Expression>();
+							for (Expression argument : parent.getArguments()) {
+								if (isRandomVariableValue(argument, converterContext.randomVariableIndex)) {
+									converterContext.runAgain = true;
+									isReplace = true;
+									Expression unique = Expressions.makeUniqueVariable(
+											"X" + converterContext.uniqueCount, converterContext.currentExpression, 
+											rewritingProcess);
+//									System.out.println("Incrementing unique count: " + converterContext.uniqueCount + ",  " + parent + " | " + argument);
+									converterContext.uniqueCount++;
+									arguments.add(unique);
+									List<Expression> newArgumentArgs = new ArrayList<Expression>(argument.getArguments());
+									newArgumentArgs.add(unique);
+
+									String name;
+									if (argument.getArguments().size() == 0)
+										name = argument.toString();
+									else
+										name = argument.getFunctor().toString();
+									andArgs.add(Expressions.make(name, newArgumentArgs));
+
+									// Note the function name and param count so can add additional rule enforcing functional
+									// relation later.
+									Set<Integer> paramCount;
+									paramCount = converterContext.functionsFound.get(name);
+									if (paramCount == null) {
+										paramCount = new HashSet<Integer>();
+										converterContext.functionsFound.put(name, paramCount);
+									}
+									paramCount.add(argument.getArguments().size());
+								}
+								else {
+									arguments.add(argument);
+								}
+							}
+							if(isReplace) {
+//								System.out.println("arguments: " + arguments);
+//								System.out.println("andArgs:   " + andArgs);
+								andArgs.add(Expressions.make(parent.getFunctor(), arguments));
+								Expression replacement = Expressions.make(FunctorConstants.AND, andArgs);
+//								System.out.println("Replace <" + parent + ">  with <" + replacement + ">");
+								converterContext.currentExpression = 
+										converterContext.currentExpression.replaceAllOccurrences(
+												parent, replacement, rewritingProcess);
+//								System.out.println("Current expression: "+ converterContext.currentExpression);
+								return false;
+							}
+
+						}
+						return true;
+					}
+				});
+			} while (context.runAgain);
+			
+			context.processedParfactors.add(context.currentExpression);
+		}
+
+//		System.out.println("Functions found: " + context.functionsFound);
+		for (String functor : context.functionsFound.keySet()) {
+			Set<Integer> counts = context.functionsFound.get(functor);
+			for (Integer count : counts) {
+				this.createTransformedFunctionConstraints(functor, count, context.processedParfactors);
+			}
+		}
 	}
 
 	public boolean isRandomFunctionApplication (Expression e) {
 		if (!e.getSyntacticFormType().equals("Function application")) {
-			System.out.println(e + " is not function application");
+//			System.out.println(e + " is not function application");
 			return false;
 		}
 
@@ -193,12 +288,21 @@ public class RuleConverter {
 		return true;
 	}
 
-	public boolean isRandomVariableValue (Expression e) {
+	public boolean isRandomVariableValue (Expression e, Map<String, Set<Integer>> randomVariableIndex) {
 		if (isRandomFunctionApplication(e))
 			return true;
 
-		if (e.getSyntacticFormType().equals("Symbol"))
-			return true;
+		if (e.getSyntacticFormType().equals("Symbol")) {
+			if (randomVariableIndex == null)
+				return false;
+
+			Expression functor = e.getFunctor();
+//			System.out.println("e: " + e);
+//			System.out.println("Functor: " + functor);
+			Set<Integer> paramCounts = randomVariableIndex.get(e.toString());
+			if (paramCounts != null && paramCounts.contains(0))
+				return true;
+		}
 
 		return false;
 	}
@@ -294,7 +398,7 @@ public class RuleConverter {
 		}
 		rule.append("Z);");
 
-		System.out.println(rule.toString());
+//		System.out.println(rule.toString());
 		parfactors.add(translateConditionalRule(ruleParser.parse(rule.toString())));
 
 		rule = new StringBuilder();
@@ -306,7 +410,7 @@ public class RuleConverter {
 		}
 		rule.append("Y);");
 
-		System.out.println(rule.toString());
+//		System.out.println(rule.toString());
 		parfactors.add(translateAtomicRule(ruleParser.parse(rule.toString())));
 	}
 
@@ -335,10 +439,14 @@ public class RuleConverter {
 	 * PRIVATE METHODS
 	 *=================================================================================*/
 	private void walkNode (Expression node, Object context, NodeInspector inspector) {
+//		System.out.println("walkNode: " + node);
 		List<Expression> children = node.getArguments();
-		for (Expression child : children) {
-			inspector.inspectNode(node, child, context);
-			walkNode(child, context, inspector);
+		boolean isContinue = inspector.inspectNode(node, /*child,*/ context);
+		if (isContinue) {
+			for (Expression child : children) {
+//				System.out.println("Calling walkNode: " + node + " : " + child);
+				walkNode(child, context, inspector);
+			}
 		}
 	}
 

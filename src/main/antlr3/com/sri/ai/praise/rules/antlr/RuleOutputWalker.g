@@ -70,7 +70,7 @@ expr returns [Expression value]
     | ^(PROLOGEXPRESSION1 a=expr)                         { $value = new DefaultCompoundSyntaxTree("prolog rule", 1, a); }
 
     | ^(RANDOM (a=expr {varargs.add(a); })+)              { varargs.insertElementAt(DefaultSymbol.createSymbol(varargs.size()-2), 1);
-                                                            $value = new DefaultCompoundSyntaxTree("random variable", varargs); }
+                                                            $value = new DefaultCompoundSyntaxTree("randomVariable", varargs); }
     | ^(SORT a=expr b=expr c=expr)                        { $value = new DefaultCompoundSyntaxTree("sort", a, b, c); }
 
     | ^(FORALL a=expr b=expr)                             { $value = new DefaultCompoundSyntaxTree("for all . : .", a, b); }
