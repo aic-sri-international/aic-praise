@@ -274,6 +274,7 @@ atomic_symbol
 atom
     : ID -> ^(SYMBOL ID)
     | STRING -> ^(SYMBOL ID[$STRING.text])
+    | OPEN_PAREN! formula CLOSE_PAREN!
     ;
 
 
