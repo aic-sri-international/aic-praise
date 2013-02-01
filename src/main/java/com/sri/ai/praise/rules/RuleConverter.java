@@ -56,7 +56,6 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
-import com.sri.ai.util.base.Pair;
 
 @Beta
 public class RuleConverter {
@@ -296,7 +295,7 @@ public class RuleConverter {
 			if (randomVariableIndex == null)
 				return false;
 
-			Expression functor = e.getFunctor();
+//			Expression functor = e.getFunctor();
 //			System.out.println("e: " + e);
 //			System.out.println("Functor: " + functor);
 			Set<Integer> paramCounts = randomVariableIndex.get(e.toString());
