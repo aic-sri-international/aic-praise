@@ -48,11 +48,13 @@ import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
@@ -158,6 +160,11 @@ public class RuleConverter {
 		// Transform the functions.
 		context.processedParfactors = new ArrayList<Expression>();
 		translateFunctions(context);
+
+		// Transform the quantifiers.
+		context.parfactors = context.processedParfactors;
+		context.processedParfactors = new ArrayList<Expression>();
+		translateQuantifiers(context);
 		context.parfactors = context.processedParfactors;
 		context.processedParfactors = new ArrayList<Expression>();
 		
@@ -183,6 +190,72 @@ public class RuleConverter {
 		return new Model(modelExpression, randomVariableNames);
 	}
 	
+
+
+
+	public Set<Expression> translateRules (List<Expression> rules) {
+		Set<Expression> result = new HashSet<Expression>();
+		for (Expression rule : rules) {
+			result.add(translateRule(rule));
+		}
+		return result;
+	}
+
+	public Expression translateRule (Expression rule) {
+		if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
+			return translateAtomicRule(rule);
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
+			return translatePrologRule(rule);
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
+			return translateConditionalRule(rule);
+		}
+		return rule;
+	}
+	
+	public Expression translateAtomicRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		if (args.size() != 2)
+			return null;
+
+		return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(0), 
+				args.get(1), oneMinusPotential(args.get(1)));
+	}
+	
+	public Expression translatePrologRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		
+		if (args.size() == 2) {
+			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(1), 
+					args.get(0), oneMinusPotential(args.get(0)));
+		}
+		else if (args.size() == 3){
+			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(2), 
+					new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(1), 
+							args.get(0), oneMinusPotential(args.get(0))),
+					0.5);
+		}
+
+		return null;
+	}
+	
+	public Expression translateConditionalRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		if (args.size() == 2) {
+			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(0), 
+					this.translateRule(args.get(1)),
+					0.5);
+		}
+		else if (args.size() == 3) {
+			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(0), 
+					this.translateRule(args.get(1)),
+					this.translateRule(args.get(2)));
+		}
+		return null;
+	}
+
+
 	public void translateFunctions (ConverterContext context) {
 		for (Expression parfactor : context.parfactors) {
 			context.currentExpression = parfactor;
@@ -306,76 +379,6 @@ public class RuleConverter {
 		return false;
 	}
 
-	
-	public Set<Expression> translateRules (List<Expression> rules) {
-		Set<Expression> result = new HashSet<Expression>();
-		for (Expression rule : rules) {
-			result.add(translateRule(rule));
-		}
-		return result;
-	}
-
-	public Expression translateRule (Expression rule) {
-		if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
-			return translateAtomicRule(rule);
-		}
-		else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
-			return translatePrologRule(rule);
-		}
-		else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
-			return translateConditionalRule(rule);
-		}
-		return rule;
-	}
-	
-	public Expression translateAtomicRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		if (args.size() != 2)
-			return null;
-
-		return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(0), 
-				args.get(1), oneMinusPotential(args.get(1)));
-	}
-	
-	public Expression translatePrologRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		
-		if (args.size() == 2) {
-			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(1), 
-					args.get(0), oneMinusPotential(args.get(0)));
-		}
-		else if (args.size() == 3){
-			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(2), 
-					new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(1), 
-							args.get(0), oneMinusPotential(args.get(0))),
-					0.5);
-		}
-
-		return null;
-	}
-	
-	public Expression translateConditionalRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		if (args.size() == 2) {
-			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(0), 
-					this.translateRule(args.get(1)),
-					0.5);
-		}
-		else if (args.size() == 3) {
-			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(0), 
-					this.translateRule(args.get(1)),
-					this.translateRule(args.get(2)));
-		}
-		return null;
-	}
-
-
-
-
-
-
-
-
 	public void createTransformedFunctionConstraints (String functionName, int numArgs, List<Expression> parfactors) {
 		StringBuilder rule = new StringBuilder();
 		int ii;
@@ -432,6 +435,52 @@ public class RuleConverter {
 		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
 	}
 
+	public void translateQuantifiers (ConverterContext context) {
+		for (Expression parfactor : context.parfactors) {
+			context.currentExpression = parfactor;
+			context.uniqueCount = 0;
+//			System.out.println("Converting: " + parfactor);
+			do {
+				context.runAgain = false;
+//				System.out.println("Iterating walkNode: " + context.currentExpression);
+				walkNode(context.currentExpression, context, new NodeInspector() {
+					public boolean inspectNode(Expression parent, /*Expression child,*/ Object context) {
+						if (parent.getArguments().size() == 0)
+							return true;
+						System.out.println("inspectNode: " + parent);
+						if (parent.getFunctor().equals(FunctorConstants.FOR_ALL) || 
+								parent.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
+							ConverterContext converterContext = (ConverterContext)context;
+							converterContext.runAgain = true;
+							Symbol newFunctor = DefaultSymbol.createSymbol(parent.toString());
+							Set<Expression> variables = Variables.freeVariables(parent, rewritingProcess);
+//							Set<Expression> variables = Variables.freeVariables(converterContext.currentExpression, rewritingProcess);
+							Expression newExpression = Expressions.make(newFunctor, variables);
+							System.out.println("Generated expression: " + newExpression);
+							if (parent.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
+								converterContext.processedParfactors.add(translateConditionalRule(
+										Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, parent, 
+												newExpression)));
+							}
+							else {
+								converterContext.processedParfactors.add(translateConditionalRule(
+										Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
+												Expressions.make(FunctorConstants.NOT, parent), 
+												Expressions.make(FunctorConstants.NOT, newExpression))));
+							}
+							converterContext.currentExpression = 
+									converterContext.currentExpression.replaceAllOccurrences(
+											parent, newExpression, rewritingProcess);
+						}
+						return true;
+					}
+				});
+			} while (context.runAgain);
+			
+			context.processedParfactors.add(context.currentExpression);
+		}
+		
+	}
 
 
 	/*===================================================================================
