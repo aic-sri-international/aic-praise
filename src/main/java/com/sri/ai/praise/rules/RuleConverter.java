@@ -53,21 +53,26 @@ import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.Variables;
+import com.sri.ai.grinder.library.boole.ForAll;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.RandomVariableDeclaration;
+import com.sri.ai.praise.model.SortDeclaration;
 
 @Beta
 public class RuleConverter {
 
-	public static final String FUNCTOR_IF_THEN_ELSE                = "if . then . else .";
-	public static final String FUNCTOR_FOR_ALL                     = "for all . : .";
-	public static final String FUNCTOR_THERE_EXISTS                = "there exists . : .";
+	public static final String FUNCTOR_IF_THEN_ELSE                = IfThenElse.FUNCTOR;
+	public static final String FUNCTOR_FOR_ALL                     = FunctorConstants.FOR_ALL;
+	public static final String FUNCTOR_THERE_EXISTS                = FunctorConstants.THERE_EXISTS;
 
-	public static final String FUNCTOR_RANDOM_VARIABLE_DECLARATION = "randomVariable";
-	public static final String FUNCTOR_SORT                        = "sort";
+	public static final String FUNCTOR_RANDOM_VARIABLE_DECLARATION = RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION;
+	public static final String FUNCTOR_SORT                        = SortDeclaration.FUNCTOR_SORT_DECLARATION;
 
 	public static final String FUNCTOR_ATOMIC_RULE                 = "atomic rule";
 	public static final String FUNCTOR_CONDITIONAL_RULE            = "conditional rule";
@@ -76,9 +81,9 @@ public class RuleConverter {
 	public static final String FUNCTOR_MAY_BE_SAME_AS              = "may be same as";
 
 
-	private RuleParserWrapper         ruleParser       = new RuleParserWrapper();
+	private RuleParserWrapper         ruleParser       = null;
 //	private AntlrGrinderParserWrapper grinderParser    = new AntlrGrinderParserWrapper();
-	private RewritingProcess          rewritingProcess = LBPFactory.newLBPProcess(DefaultSymbol.createSymbol(""));
+	private RewritingProcess          rewritingProcess = null;
 
 	private interface NodeInspector {
 		public boolean inspectNode(Expression parent, /*Expression child,*/ Object context);
@@ -102,6 +107,14 @@ public class RuleConverter {
 	/*===================================================================================
 	 * PUBLIC METHODS
 	 *=================================================================================*/
+	
+	public RuleConverter() {
+		// Ensure these are instantiated straight away and not when first referenced.
+		// This helps ensure any global dependencies are setup correctly.
+		rewritingProcess = LBPFactory.newLBPProcess(DefaultSymbol.createSymbol("true"));
+		ruleParser       = new RuleParserWrapper();
+	}
+	
 	public Model parseModel (String modelString) {
 		return parseModel("", "", modelString);
 	}

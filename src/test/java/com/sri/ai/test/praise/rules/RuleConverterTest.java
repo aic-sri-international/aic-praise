@@ -46,13 +46,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.sri.ai.brewer.BrewerConfiguration;
+import com.sri.ai.brewer.api.Grammar;
 import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
+import com.sri.ai.grinder.ui.TreeUtil;
+import com.sri.ai.praise.LPIGrammar;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.rules.RuleConverter;
@@ -67,10 +73,15 @@ public class RuleConverterTest {
 	private RuleConverter             converter;
 	private AntlrGrinderParserWrapper lowParser;
 	
-	
-	public RuleConverterTest () {
+	@Before
+	public void setUp () {
+		Grammar grammar = new LPIGrammar();
+		// Ensure the grammar class passed in is used where necessary.
+		BrewerConfiguration.setProperty(BrewerConfiguration.KEY_DEFAULT_GRAMMAR_CLASS, grammar.getClass().getName());
+		
 		parser = new RuleParserWrapper();
 		converter = new RuleConverter();
+		
 		lowParser = new AntlrGrinderParserWrapper();
 	}
 
@@ -509,6 +520,8 @@ public class RuleConverterTest {
 //		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 //		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
 //		assertEquals(expected, context.processedParfactors);
+		
+		doTreeUtilWaitUnilClosed(); 
 	}
 
 //	@Test
@@ -659,5 +672,14 @@ public class RuleConverterTest {
 		
 		return sb.toString();
 	}
+	
+	// Note: Pass the VM argument
+    // -Dgrinder.wait.until.ui.closed.enabled=true
+    // in the Eclipse run configuration for this test, in order for the tree to stay up when this is called.
+    protected void doTreeUtilWaitUnilClosed() {
+        if (GrinderConfiguration.isWaitUntilUIClosedEnabled()) {
+            TreeUtil.waitUntilUIClosed();
+        }
+    } 
 
 }
