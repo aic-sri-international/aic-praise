@@ -50,12 +50,12 @@ MAY            : 'may' ;
 BE             : 'be' ;
 SAME           : 'same' ;
 AS             : 'as' ;
-PLUS           : '+' ;
-DASH           : '-' ;
-MINUS          : 'minus' ;
-TIMES          : '*' ;
-DIVIDE         : '/' ;
-CARAT          : '^' ;
+//PLUS           : '+' ;
+//DASH           : '-' ;
+//MINUS          : 'minus' ;
+//TIMES          : '*' ;
+//DIVIDE         : '/' ;
+//CARAT          : '^' ;
 OPEN_PAREN     : '(' ;
 CLOSE_PAREN    : ')' ;
 COLON_DASH     : ':-' ;
@@ -74,7 +74,12 @@ STRING
     ;
 
 ID
-    : ALPHANUMERIC+ ('\'')*
+//    : ALPHANUMERIC+ ('\'')*
+    : (~( ' '
+        | '\t'
+        | '\r'
+        | '\n' 
+        | '"' | '\'' | '(' | ')' | ':' | ';' | '.' | ',' ))+ ('\'')*
     | FLOAT
 //    | INT
 //    | '-' NUMERIC+

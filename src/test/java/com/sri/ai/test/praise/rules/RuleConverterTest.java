@@ -509,7 +509,7 @@ public class RuleConverterTest {
 		ConverterContext context = converter.new ConverterContext();
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.converter.translateRule(this.parser.parse(
-				"if young(X) and (for all Y : friends(Y,X) => smokes(Y)) then smokes(X) 0.8;")));
+				"if young(X) and (for all Y : (friends(Y,X) => smokes(Y))) then smokes(X) 0.8;")));
 		context.processedParfactors = new ArrayList<Expression>();
 		converter.translateQuantifiers(context);
 		List<Expression> expected = new ArrayList<Expression>();

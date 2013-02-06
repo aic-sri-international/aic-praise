@@ -81,12 +81,12 @@ expr returns [Expression value]
     | ^(AND (a=expr {varargs.add(a); })*)                 { $value = new DefaultCompoundSyntaxTree("and", varargs); }
     | ^(EQUAL (a=expr {varargs.add(a); })*)               { $value = new DefaultCompoundSyntaxTree("=", varargs); }
     | ^(NOT_EQUAL (a=expr {varargs.add(a); })*)           { $value = new DefaultCompoundSyntaxTree("!=", varargs); }
-    | ^(PLUS (a=expr {varargs.add(a); })*)                { $value = new DefaultCompoundSyntaxTree("+", varargs); }
-    | ^(DASH (a=expr {varargs.add(a); })*)                { $value = new DefaultCompoundSyntaxTree("-", varargs); }
-    | ^(MINUS (a=expr {varargs.add(a); })*)               { $value = new DefaultCompoundSyntaxTree("minus", varargs); }
-    | ^(TIMES (a=expr {varargs.add(a); })*)               { $value = new DefaultCompoundSyntaxTree("*", varargs); }
-    | ^(DIVIDE (a=expr {varargs.add(a); })*)              { $value = new DefaultCompoundSyntaxTree("/", varargs); }
-    | ^(CARAT (a=expr {varargs.add(a); })*)               { $value = new DefaultCompoundSyntaxTree("^", varargs); }
+//    | ^(PLUS (a=expr {varargs.add(a); })*)                { $value = new DefaultCompoundSyntaxTree("+", varargs); }
+//    | ^(DASH (a=expr {varargs.add(a); })*)                { $value = new DefaultCompoundSyntaxTree("-", varargs); }
+//    | ^(MINUS (a=expr {varargs.add(a); })*)               { $value = new DefaultCompoundSyntaxTree("minus", varargs); }
+//    | ^(TIMES (a=expr {varargs.add(a); })*)               { $value = new DefaultCompoundSyntaxTree("*", varargs); }
+//    | ^(DIVIDE (a=expr {varargs.add(a); })*)              { $value = new DefaultCompoundSyntaxTree("/", varargs); }
+//    | ^(CARAT (a=expr {varargs.add(a); })*)               { $value = new DefaultCompoundSyntaxTree("^", varargs); }
     | ^(NOT (a=expr {varargs.add(a); })*)                 { $value = new DefaultCompoundSyntaxTree("not", varargs); }
     | ^(SET a=expr)                                       { $value = new DefaultCompoundSyntaxTree("{ . }", a); }
     | ^(MAYBESAMEAS (a=expr {varargs.add(a); })*)         { $value = new DefaultCompoundSyntaxTree("may be same as", varargs); }

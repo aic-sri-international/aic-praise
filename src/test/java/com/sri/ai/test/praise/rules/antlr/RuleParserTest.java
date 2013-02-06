@@ -80,6 +80,17 @@ public class RuleParserTest extends AbstractParserTest {
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("happy", "X")), "0.100000000"));
 
+		string = "sick(john) = sick(bob);";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("=", 
+						new DefaultCompoundSyntaxTree("sick", "john"), 
+						new DefaultCompoundSyntaxTree("sick", "bob")), "1"));
+
+		string = "sick(john) != sick(bob);";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("!=", 
+						new DefaultCompoundSyntaxTree("sick", "john"), 
+						new DefaultCompoundSyntaxTree("sick", "bob")), "1"));
 
 		System.out.println("test count = " + testCount);
 	}

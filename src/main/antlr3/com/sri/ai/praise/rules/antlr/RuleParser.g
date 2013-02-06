@@ -133,33 +133,33 @@ atomic_rule
 // FORMULA
 //=============================
 formula
-    : forall
+    : leg
     ;
 
-forall
-    : FOR ALL a=forall COLON b=forall -> ^(FORALL $a $b)
-    | exists
+leg
+    : eg (DOUBLE_ARROW^ eg)*
+    ;
+
+eg
+    : exists (ARROW^ exists)*
     ;
 
 exists
     : THERE EXISTS a=exists COLON b=exists -> ^(THEREEXISTS $a $b)
-    | eg
+    | forall
     ;
 
-eg
-    : leg (ARROW^ leg)*
-    ;
-
-leg
-    : or (DOUBLE_ARROW^ or)*
-    ;
-
-or
-    : and (OR^ and)*
+forall
+    : FOR ALL a=forall COLON b=forall -> ^(FORALL $a $b)
+    | and
     ;
 
 and
-    : not (AND^ not)*
+    : or (AND^ or)*
+    ;
+
+or
+    : not (OR^ not)*
     ;
 
 not
@@ -172,38 +172,39 @@ not
 // TERM
 //=============================
 term
-    : plus
+//    : plus
+    : equal
     ;
-
-plus
-    : dash (PLUS^ dash)*
-    ;
-
-dash
-    : minus (DASH^ minus)*
-    ;
-
-minus
-    : multiply (MINUS^ multiply)*
-    ;
-
-multiply
-    : divide (TIMES^ divide)*
-    ;
-
-divide
-    : carat (DIVIDE^ carat)*
-    ;
-
-carat
-    : negative (CARAT^ negative)*
-    ;
-
-negative
-    // Using "negative" instead of expected "atomic_symbol" so that we can support cases like "--x".
-    : DASH^ negative
-    | equal
-    ;
+//
+//plus
+//    : dash (PLUS^ dash)*
+//    ;
+//
+//dash
+//    : minus (DASH^ minus)*
+//    ;
+//
+//minus
+//    : multiply (MINUS^ multiply)*
+//    ;
+//
+//multiply
+//    : divide (TIMES^ divide)*
+//    ;
+//
+//divide
+//    : carat (DIVIDE^ carat)*
+//    ;
+//
+//carat
+//    : negative (CARAT^ negative)*
+//    ;
+//
+//negative
+//    // Using "negative" instead of expected "atomic_symbol" so that we can support cases like "--x".
+//    : DASH^ negative
+//    | equal
+//    ;
 
 equal
     : notequal (EQUAL^ notequal)*
@@ -246,12 +247,12 @@ atomic_symbol
     | EQUAL                -> ^(SYMBOL ID[$EQUAL.text])
     | NOT_EQUAL            -> ^(SYMBOL ID[$NOT_EQUAL.text])
     | X                    -> ^(SYMBOL ID[$X.text])
-    | PLUS                 -> ^(SYMBOL ID[$PLUS.text])
-    | DASH                 -> ^(SYMBOL ID[$DASH.text])
-    | MINUS                -> ^(SYMBOL ID[$MINUS.text])
-    | TIMES                -> ^(SYMBOL ID[$TIMES.text])
-    | DIVIDE               -> ^(SYMBOL ID[$DIVIDE.text])
-    | CARAT                -> ^(SYMBOL ID[$CARAT.text])
+//    | PLUS                 -> ^(SYMBOL ID[$PLUS.text])
+//    | DASH                 -> ^(SYMBOL ID[$DASH.text])
+//    | MINUS                -> ^(SYMBOL ID[$MINUS.text])
+//    | TIMES                -> ^(SYMBOL ID[$TIMES.text])
+//    | DIVIDE               -> ^(SYMBOL ID[$DIVIDE.text])
+//    | CARAT                -> ^(SYMBOL ID[$CARAT.text])
     | NOT                  -> ^(SYMBOL ID[$NOT.text])
 //    | IF                   -> ^(SYMBOL ID[$IF.text])
 //    | THEN                 -> ^(SYMBOL ID[$THEN.text])
