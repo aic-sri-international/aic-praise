@@ -48,6 +48,7 @@ import org.junit.Test;
 import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
+import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.test.praise.rules.AbstractParserTest;
 
@@ -55,6 +56,52 @@ public class RuleParserTest extends AbstractParserTest {
 
 	public RuleParserTest () {
 		parser = new RuleParserWrapper();
+	}
+	
+	@Test 
+	public void testComment () {
+		String string;
+		string = "sick(X); // This is a test.\n";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+		string = "// This is a test.\n sick(X);";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+		string = "sick(X); // This is a test.";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+		string = "sick // This is a test.\n (X);";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+		string = "// Test\n sick( // This is a test.\n X); // Test";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+		string = "sick(X); /* This is a test. */";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+		string = "/* This is a test. */ sick(X);";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+		string = "sick /* This is a test. */ (X);";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+		string = "sick( /* This is a test. */ X);";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+		string = "sick(X /* This is a test. */ );";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
+
+
 	}
 	
 	@Test
