@@ -31,7 +31,7 @@ pots = fg.factors(edgeFacNdx);
 npots = numel(pots);
 edgePots = cell(npots, 1);
 % Note: can map directly and ignore the linear ordering of the edges in 
-% the graph as we are using tabular factors and not numeric martices 
+% the graph as we are using tabular factors and not numeric matrices 
 % (see mrfCreate.m).
 for i=1:npots
     edgePots{i} = pots{i};
