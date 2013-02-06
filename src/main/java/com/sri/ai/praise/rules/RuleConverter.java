@@ -376,15 +376,17 @@ public class RuleConverter {
 			return true;
 
 		if (e.getSyntacticFormType().equals("Symbol")) {
-			if (randomVariableIndex == null)
+			if (randomVariableIndex == null) {
 				return false;
+			}
 
 //			Expression functor = e.getFunctor();
 //			System.out.println("e: " + e);
 //			System.out.println("Functor: " + functor);
 			Set<Integer> paramCounts = randomVariableIndex.get(e.toString());
-			if (paramCounts != null && paramCounts.contains(0))
+			if (paramCounts != null && paramCounts.contains(0)) {
 				return true;
+			}
 		}
 
 		return false;
@@ -456,32 +458,38 @@ public class RuleConverter {
 //				System.out.println("Iterating walkNode: " + context.currentExpression);
 				walkNode(context.currentExpression, context, new NodeInspector() {
 					public boolean inspectNode(Expression parent, /*Expression child,*/ Object context) {
-						if (parent.getArguments().size() == 0)
-							return true;
-						System.out.println("inspectNode: " + parent);
-						if (parent.getFunctor().equals(FunctorConstants.FOR_ALL) || 
-								parent.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
-							ConverterContext converterContext = (ConverterContext)context;
-							converterContext.runAgain = true;
-							Symbol newFunctor = DefaultSymbol.createSymbol(parent.toString());
-							Set<Expression> variables = Variables.freeVariables(parent, rewritingProcess);
-//							Set<Expression> variables = Variables.freeVariables(converterContext.currentExpression, rewritingProcess);
-							Expression newExpression = Expressions.make(newFunctor, variables);
-							System.out.println("Generated expression: " + newExpression);
-							if (parent.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
-								converterContext.processedParfactors.add(translateConditionalRule(
-										Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, parent, 
-												newExpression)));
+						if (parent.getArguments().size() > 0) {
+//						System.out.println("inspectNode: " + parent);
+							if (parent.getFunctor().equals(FunctorConstants.FOR_ALL) || 
+									parent.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
+								ConverterContext converterContext = (ConverterContext)context;
+								converterContext.runAgain = true;
+								Symbol newFunctor = DefaultSymbol.createSymbol(parent.toString());
+								Set<Expression> variables = Variables.freeVariables(parent, rewritingProcess);
+								Expression newExpression = Expressions.make(newFunctor, variables);
+//								System.out.println("Generated expression: " + newExpression);
+								if (parent.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
+									converterContext.processedParfactors.add(translateConditionalRule(
+											Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, parent.getArguments().get(0), 
+													Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newExpression, 1))));
+								}
+								else {
+									converterContext.processedParfactors.add(translateConditionalRule(
+											Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
+													Expressions.make(FunctorConstants.NOT, parent.getArguments().get(0)), 
+													Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, 
+															Expressions.make(FunctorConstants.NOT, newExpression), 1))));
+								}
+//								System.out.println("Replacing: " + parent + " with " + newExpression);
+//								System.out.println(converterContext.currentExpression);
+								converterContext.currentExpression = 
+										converterContext.currentExpression.replaceAllOccurrences(
+												parent, newExpression, rewritingProcess);
+//										converterContext.currentExpression.replaceAllOccurrences(
+//												parent, newExpression, rewritingProcess);
+//								System.out.println(converterContext.currentExpression);
+								return false;
 							}
-							else {
-								converterContext.processedParfactors.add(translateConditionalRule(
-										Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
-												Expressions.make(FunctorConstants.NOT, parent), 
-												Expressions.make(FunctorConstants.NOT, newExpression))));
-							}
-							converterContext.currentExpression = 
-									converterContext.currentExpression.replaceAllOccurrences(
-											parent, newExpression, rewritingProcess);
 						}
 						return true;
 					}

@@ -508,19 +508,52 @@ public class RuleConverterTest {
 	public void testTranslateQuantifiers () {
 		ConverterContext context = converter.new ConverterContext();
 		context.parfactors = new ArrayList<Expression>();
-//		context.parfactors.add(this.converter.translateRule(this.parser.parse(
-//				"if for all Y : friends(Y,X) => smokes(Y) then smokes(X) 0.8;")));
 		context.parfactors.add(this.converter.translateRule(this.parser.parse(
 				"if young(X) and (for all Y : friends(Y,X) => smokes(Y)) then smokes(X) 0.8;")));
 		context.processedParfactors = new ArrayList<Expression>();
 		converter.translateQuantifiers(context);
-		System.out.println(context.processedParfactors);
-//		List<Expression> expected = new ArrayList<Expression>();
-//		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = X1 then 1 else 0"));
-//		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
-//		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
-//		assertEquals(expected, context.processedParfactors);
-		
+		List<Expression> expected = new ArrayList<Expression>();
+		expected.add(converter.translateConditionalRule(parser.parse("if not (friends(Y, X) => smokes(Y)) then not 'for all Y : friends(Y, X) => smokes(Y)'(X);")));
+		expected.add(converter.translateConditionalRule(parser.parse("if young(X) and 'for all Y : friends(Y, X) => smokes(Y)'(X) then smokes(X) 0.8;")));
+		assertEquals(expected, context.processedParfactors);
+
+		context.parfactors = new ArrayList<Expression>();
+		context.parfactors.add(this.converter.translateRule(this.parser.parse(
+				"there exists X : president(X, Country);")));
+		context.processedParfactors = new ArrayList<Expression>();
+		converter.translateQuantifiers(context);
+//		System.out.println(context.processedParfactors);
+		expected = new ArrayList<Expression>();
+		expected.add(converter.translateRule(parser.parse("if president(X, Country) then 'there exists X : president(X, Country)'(Country);")));
+		expected.add(converter.translateRule(parser.parse("'there exists X : president(X, Country)'(Country);")));
+		assertEquals(expected, context.processedParfactors);
+
+		context.parfactors = new ArrayList<Expression>();
+		context.parfactors.add(this.converter.translateRule(this.parser.parse(
+				"friends(X,Y) and (there exists Z : friends(X,Z));")));
+		context.processedParfactors = new ArrayList<Expression>();
+		converter.translateQuantifiers(context);
+//		System.out.println(context.processedParfactors);
+		expected = new ArrayList<Expression>();
+		expected.add(converter.translateRule(parser.parse("if friends(X,Z) then 'there exists Z : friends(X, Z)'(X);")));
+		expected.add(converter.translateRule(parser.parse("friends(X,Y) and 'there exists Z : friends(X, Z)'(X);")));
+//		expected.add(lowParser.parse("if not (for all Y : friends(Y, X) => smokes(Y)) then not 'for all Y : friends(Y, X) => smokes(Y)'(X) else 0.500000000"));
+//		expected.add(converter.translateConditionalRule(parser.parse("if young(X) and 'for all Y : friends(Y, X) => smokes(Y)'(X) then smokes(X) 0.8;")));
+		assertEquals(expected, context.processedParfactors);
+
+		context.parfactors = new ArrayList<Expression>();
+		context.parfactors.add(this.converter.translateRule(this.parser.parse(
+				"friends(X,Y) and (there exists Z : Z may be same as X and loves(X,Z));")));
+		context.processedParfactors = new ArrayList<Expression>();
+		converter.translateQuantifiers(context);
+//		System.out.println(context.processedParfactors);
+		expected = new ArrayList<Expression>();
+		expected.add(converter.translateRule(parser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
+		expected.add(converter.translateRule(parser.parse("friends(X,Y) and 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
+//		expected.add(lowParser.parse("if not (for all Y : friends(Y, X) => smokes(Y)) then not 'for all Y : friends(Y, X) => smokes(Y)'(X) else 0.500000000"));
+//		expected.add(converter.translateConditionalRule(parser.parse("if young(X) and 'for all Y : friends(Y, X) => smokes(Y)'(X) then smokes(X) 0.8;")));
+		assertEquals(expected, context.processedParfactors);
+
 		doTreeUtilWaitUnilClosed(); 
 	}
 
@@ -681,5 +714,43 @@ public class RuleConverterTest {
             TreeUtil.waitUntilUIClosed();
         }
     } 
+	
+//	private void compareTree (Expression e1, Expression e2) {
+//		if (e1.equals(e2)) {
+//			System.out.println("True : " + e1 + " = " + e2);
+//		}
+//		else {
+//			System.out.println("False: " + e1 + " != " + e2);
+//		}
+//		if (e1.getArguments().size() > 0) {
+//			List<Expression> e1Args = e1.getArguments();
+//			List<Expression> e2Args = e2.getArguments();
+//			for (int i = 0; i < e1Args.size(); i++) {
+//				compareTree(e1Args.get(i), e2Args.get(i));
+//			}
+//		}
+//	}
+//	
+//	private void printTree (Expression e) {
+//		if (e.getArguments().size() == 0) {
+//			System.out.print(e.toString());
+//		}
+//		else {
+//			System.out.print(e.getFunctor());
+//			List<Expression> args = e.getArguments();
+//			System.out.print('(');
+//			boolean first = true;
+//			for (Expression arg : args) {
+//				if (first) {
+//					first = false;
+//				}
+//				else {
+//					System.out.print(", ");
+//				}
+//				printTree(arg);
+//			}
+//			System.out.print(')');
+//		}
+//	}
 
 }
