@@ -58,11 +58,9 @@ import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.lambda.LambdaApplication;
 import com.sri.ai.grinder.library.lambda.LambdaApplication.PerformApplication;
 import com.sri.ai.grinder.library.number.Plus;
-import com.sri.ai.grinder.library.set.extensional.ExtensionalSetSubExpressionsProvider;
 import com.sri.ai.grinder.library.set.extensional.ProductOnExtensionalSet;
 import com.sri.ai.grinder.library.set.extensional.UnionOnExtensionalSets;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSetSubExpressionsAndImposedConditionsProvider;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.CardinalityOfTypeAlwaysDistinctFromZero;
@@ -110,15 +108,7 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				// Support for: Bracketed Expressions
 				new Pair<Class<?>, Rewriter>(
 						IfThenElseSubExpressionsAndImposedConditionsProvider.class,
-						new BracketedExpressionSubExpressionsProvider()),	
-				//
-				// Support for: Intensional Sets
-				new Pair<Class<?>, Rewriter>(IfThenElseSubExpressionsAndImposedConditionsProvider.class,
-						new IntensionalSetSubExpressionsAndImposedConditionsProvider()),
-				// 
-				// Support for: Extensional Sets
-				new Pair<Class<?>, Rewriter>(IfThenElseSubExpressionsAndImposedConditionsProvider.class,
-						new ExtensionalSetSubExpressionsProvider()),		
+						new BracketedExpressionSubExpressionsProvider()),			
 				//
 				// Support for: type handling
 				// e.g.:
