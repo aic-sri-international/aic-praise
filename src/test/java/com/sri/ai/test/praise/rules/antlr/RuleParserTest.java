@@ -48,7 +48,6 @@ import org.junit.Test;
 import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.test.praise.rules.AbstractParserTest;
 
