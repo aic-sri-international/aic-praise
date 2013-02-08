@@ -115,6 +115,61 @@ public class RuleParserTest extends AbstractParserTest {
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), "0.300000000"));
 
+		string = "sick(X) 0.3 + 0.1;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("+", "0.300000000", "0.100000000")));
+
+		string = "sick(X) 0.3+0.1;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("+", "0.300000000", "0.100000000")));
+
+		string = "sick(X) 0.3 * 0.1;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("*", "0.300000000", "0.100000000")));
+
+		string = "sick(X) 0.3*0.1;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("*", "0.300000000", "0.100000000")));
+
+		string = "sick(X) 0.3 - 0.1;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("-", "0.300000000", "0.100000000")));
+
+		string = "sick(X) 0.3-0.1;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("-", "0.300000000", "0.100000000")));
+
+		string = "sick(X) 0.3 minus 0.1;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("minus", "0.300000000", "0.100000000")));
+
+		string = "sick(X) 0.3 / 2;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("/", "0.300000000", "2")));
+
+		string = "sick(X) 0.3/2;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("/", "0.300000000", "2")));
+
+		string = "sick(X) 0.3 ^ 2;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("^", "0.300000000", "2")));
+
+		string = "sick(X) 0.3^2;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("^", "0.300000000", "2")));
+
 		string = "sick(X) and happy(X);";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("and", 

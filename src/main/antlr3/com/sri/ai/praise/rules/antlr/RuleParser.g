@@ -172,39 +172,38 @@ not
 // TERM
 //=============================
 term
-//    : plus
-    : equal
+    : plus
     ;
-//
-//plus
-//    : dash (PLUS^ dash)*
-//    ;
-//
-//dash
-//    : minus (DASH^ minus)*
-//    ;
-//
-//minus
-//    : multiply (MINUS^ multiply)*
-//    ;
-//
-//multiply
-//    : divide (TIMES^ divide)*
-//    ;
-//
-//divide
-//    : carat (DIVIDE^ carat)*
-//    ;
-//
-//carat
-//    : negative (CARAT^ negative)*
-//    ;
-//
-//negative
-//    // Using "negative" instead of expected "atomic_symbol" so that we can support cases like "--x".
-//    : DASH^ negative
-//    | equal
-//    ;
+
+plus
+    : dash (PLUS^ dash)*
+    ;
+
+dash
+    : minus (DASH^ minus)*
+    ;
+
+minus
+    : multiply (MINUS^ multiply)*
+    ;
+
+multiply
+    : divide (TIMES^ divide)*
+    ;
+
+divide
+    : carat (DIVIDE^ carat)*
+    ;
+
+carat
+    : negative (CARAT^ negative)*
+    ;
+
+negative
+    // Using "negative" instead of expected "atomic_symbol" so that we can support cases like "--x".
+    : DASH^ negative
+    | equal
+    ;
 
 equal
     : notequal (EQUAL^ notequal)*
@@ -247,12 +246,12 @@ atomic_symbol
     | EQUAL                -> ^(SYMBOL ID[$EQUAL.text])
     | NOT_EQUAL            -> ^(SYMBOL ID[$NOT_EQUAL.text])
     | X                    -> ^(SYMBOL ID[$X.text])
-//    | PLUS                 -> ^(SYMBOL ID[$PLUS.text])
-//    | DASH                 -> ^(SYMBOL ID[$DASH.text])
-//    | MINUS                -> ^(SYMBOL ID[$MINUS.text])
-//    | TIMES                -> ^(SYMBOL ID[$TIMES.text])
-//    | DIVIDE               -> ^(SYMBOL ID[$DIVIDE.text])
-//    | CARAT                -> ^(SYMBOL ID[$CARAT.text])
+    | PLUS                 -> ^(SYMBOL ID[$PLUS.text])
+    | DASH                 -> ^(SYMBOL ID[$DASH.text])
+    | MINUS                -> ^(SYMBOL ID[$MINUS.text])
+    | TIMES                -> ^(SYMBOL ID[$TIMES.text])
+    | DIVIDE               -> ^(SYMBOL ID[$DIVIDE.text])
+    | CARAT                -> ^(SYMBOL ID[$CARAT.text])
     | NOT                  -> ^(SYMBOL ID[$NOT.text])
 //    | IF                   -> ^(SYMBOL ID[$IF.text])
 //    | THEN                 -> ^(SYMBOL ID[$THEN.text])

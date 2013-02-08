@@ -69,11 +69,9 @@ options {
         ^(FOO ^(FOO (a+=.)+) b=.)  ->  ^(FOO ($a)+ $b)
 */
 bottomup
-//    : ^(TIMES        ^(TIMES        (a+=.)+) b=.)  ->  ^(TIMES        ($a)+ $b)
-//    | ^(PLUS         ^(PLUS         (a+=.)+) b=.)  ->  ^(PLUS         ($a)+ $b)
-//    | ^(INTERSECTION ^(INTERSECTION (a+=.)+) b=.)  ->  ^(INTERSECTION ($a)+ $b)
-//    | ^(UNION        ^(UNION        (a+=.)+) b=.)  ->  ^(UNION        ($a)+ $b)
-    : ^(EQUAL        ^(EQUAL        (a+=.)+) b=.)  ->  ^(EQUAL        ($a)+ $b)
+    : ^(TIMES        ^(TIMES        (a+=.)+) b=.)  ->  ^(TIMES        ($a)+ $b)
+    | ^(PLUS         ^(PLUS         (a+=.)+) b=.)  ->  ^(PLUS         ($a)+ $b)
+    | ^(EQUAL        ^(EQUAL        (a+=.)+) b=.)  ->  ^(EQUAL        ($a)+ $b)
     | ^(AND          ^(AND          (a+=.)+) b=.)  ->  ^(AND          ($a)+ $b)
     | ^(OR           ^(OR           (a+=.)+) b=.)  ->  ^(OR           ($a)+ $b)
     ;
