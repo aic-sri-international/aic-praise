@@ -557,10 +557,10 @@ public class RuleConverterTest {
 		doTreeUtilWaitUnilClosed(); 
 	}
 	
-//	@Test
+	@Test
 	public void testDisembedConstraints () {
 		ConverterContext context = converter.new ConverterContext();
-		List<Expression> expected;
+//		List<Expression> expected;
 
 //		context.parfactors = new ArrayList<Expression>();
 //		context.parfactors.add(this.converter.translateRule(this.parser.parse(
@@ -581,7 +581,7 @@ public class RuleConverterTest {
 		context.processedParfactors = new ArrayList<Expression>();
 		converter.disembedConstraints(context);
 		System.out.println(context.processedParfactors);
-		expected = new ArrayList<Expression>();
+//		expected = new ArrayList<Expression>();
 //		expected.add(converter.translateRule(parser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
 //		expected.add(converter.translateRule(parser.parse("friends(X,Y) and 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
 //		assertEquals(expected, context.processedParfactors);

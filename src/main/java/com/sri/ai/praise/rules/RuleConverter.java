@@ -53,7 +53,6 @@ import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -65,7 +64,7 @@ import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.lbp.LBPFactory;
-import com.sri.ai.praise.lbp.core.CompleteSimplify;
+import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
@@ -107,7 +106,6 @@ public class RuleConverter {
 		public List<Expression>                  sorts;
 		public List<Expression>                  randomVariables;
 
-		public Rewriter                          simplifier;
 		public List<Expression>                  processedParfactors;
 		public Set<Pair<Expression, Expression>> mayBeSameAsSet;
 		public Map<String, Set<Integer>>         functionsFound;
@@ -554,7 +552,6 @@ public class RuleConverter {
 		List<Pair<Expression, List<Expression>>> setOfConstrainedPotentialExpressions = 
 				new ArrayList<Pair<Expression, List<Expression>>>();
 //		context.simplifier = new CompleteSimplify();//LBPFactory.newCompleteSimplify();
-		context.simplifier = LBPFactory.newSimplify();
 
 		for (Expression parfactor : context.parfactors) {
 			context.currentExpression = parfactor;
@@ -590,8 +587,7 @@ public class RuleConverter {
 												parent, Expressions.TRUE, rewritingProcess);
 								System.out.println("about to run simplify: " + newExpression);
 								converterContext.currentExpression = 
-										converterContext.simplifier.rewrite(
-												newExpression, rewritingProcess);
+										rewritingProcess.rewrite(LBPRewriter.R_simplify, newExpression);
 								System.out.println("done running simplify: " + converterContext.currentExpression);
 								return false;
 							}
@@ -649,13 +645,13 @@ public class RuleConverter {
 				List<Expression> constraints = new ArrayList<Expression>(pair.second);
 				constraints.add(result.get(2));
 				setOfConstrainedPotentialExpressions.add(new Pair<Expression, List<Expression>>(
-						context.simplifier.rewrite(result.get(0), rewritingProcess), constraints));
+						rewritingProcess.rewrite(LBPRewriter.R_simplify, result.get(0)), constraints));
 
 				// Add the negative case to the list of potential expressions for further processing.
 				constraints = new ArrayList<Expression>(pair.second);
 				constraints.add(Not.make(result.get(2)));
 				setOfConstrainedPotentialExpressions.add(new Pair<Expression, List<Expression>>(
-						context.simplifier.rewrite(result.get(1)), constraints));
+						rewritingProcess.rewrite(LBPRewriter.R_simplify, result.get(1)), constraints));
 			}
 
 		}
