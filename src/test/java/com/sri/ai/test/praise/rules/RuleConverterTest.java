@@ -556,6 +556,37 @@ public class RuleConverterTest {
 
 		doTreeUtilWaitUnilClosed(); 
 	}
+	
+//	@Test
+	public void testDisembedConstraints () {
+		ConverterContext context = converter.new ConverterContext();
+		List<Expression> expected;
+
+//		context.parfactors = new ArrayList<Expression>();
+//		context.parfactors.add(this.converter.translateRule(this.parser.parse(
+//				"if friends(X,Y) and likes(X,Z) and X may be same as Z then if likes(Y,Z) then 0.8 else 0.2;")));
+//		System.out.println(context.parfactors);
+//		context.processedParfactors = new ArrayList<Expression>();
+//		converter.disembedConstraints(context);
+//		System.out.println(context.processedParfactors);
+//		expected = new ArrayList<Expression>();
+////		expected.add(converter.translateRule(parser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
+////		expected.add(converter.translateRule(parser.parse("friends(X,Y) and 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
+////		assertEquals(expected, context.processedParfactors);
+		
+		context.parfactors = new ArrayList<Expression>();
+		context.parfactors.add(lowParser.parse(
+				"if colleagues(X,Y) and Y != bob then (if likes(X,Y) then 0.8 else 0.2) else 0.5"));
+		System.out.println(context.parfactors);
+		context.processedParfactors = new ArrayList<Expression>();
+		converter.disembedConstraints(context);
+		System.out.println(context.processedParfactors);
+		expected = new ArrayList<Expression>();
+//		expected.add(converter.translateRule(parser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
+//		expected.add(converter.translateRule(parser.parse("friends(X,Y) and 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
+//		assertEquals(expected, context.processedParfactors);
+		
+	}
 
 //	@Test
 	public void testParse () {
