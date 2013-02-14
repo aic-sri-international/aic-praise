@@ -62,7 +62,7 @@ import com.sri.ai.praise.LPIGrammar;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.rules.RuleConverter;
-import com.sri.ai.praise.rules.RuleConverter.ConverterContext;
+import com.sri.ai.praise.rules.RuleConverter.RulesConversionProcess;
 
 public class RuleConverterTest {
 
@@ -361,7 +361,7 @@ public class RuleConverterTest {
 	@Test
 	public void testTranslateFunctions ()
 	{
-		ConverterContext context = ruleConverter.new ConverterContext();
+		RulesConversionProcess context = ruleConverter.new RulesConversionProcess();
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob);")));
 		context.processedParfactors = new ArrayList<Expression>();
@@ -506,7 +506,7 @@ public class RuleConverterTest {
 
 	@Test
 	public void testTranslateQuantifiers () {
-		ConverterContext context = ruleConverter.new ConverterContext();
+		RulesConversionProcess context = ruleConverter.new RulesConversionProcess();
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"if young(X) and (for all Y : (friends(Y,X) => smokes(Y))) then smokes(X) 0.8;")));
@@ -555,7 +555,7 @@ public class RuleConverterTest {
 	
 	@Test
 	public void testDisembedConstraints () {
-		ConverterContext context = ruleConverter.new ConverterContext();
+		RulesConversionProcess context = ruleConverter.new RulesConversionProcess();
 		List<Expression> expected;
 
 		context.parfactors = new ArrayList<Expression>();

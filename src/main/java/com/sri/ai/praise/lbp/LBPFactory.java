@@ -106,6 +106,12 @@ public class LBPFactory {
 		return simplify;
 	}
 	
+	public static Rewriter newCompleteSimplify() {
+		CompleteSimplify completeSimplify = new CompleteSimplify();
+		
+		return completeSimplify;
+	}
+	
 	public static LBPConfiguration newLBPConfiguration() {
 		return new DefaultLBPConfiguration();
 	}

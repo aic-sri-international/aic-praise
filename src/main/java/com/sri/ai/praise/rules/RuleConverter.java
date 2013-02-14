@@ -99,7 +99,7 @@ public class RuleConverter {
 		public boolean inspectNode(Expression parent, /*Expression child,*/ Object context);
 	}
 
-	public class ConverterContext {
+	public class RulesConversionProcess {
 		public Expression                        currentExpression;
 		public List<Expression>                  randomVariableDeclarations;
 		public Map<String, Set<Integer>>         randomVariableIndex;
@@ -170,7 +170,7 @@ public class RuleConverter {
 	}
 
 	public Model parseModel (String name, String description, List<Expression> inputRules) {
-		ConverterContext context = new ConverterContext();
+		RulesConversionProcess context = new RulesConversionProcess();
 		context.parfactors                    = new ArrayList<Expression>();
 		context.sorts                         = new ArrayList<Expression>();
 		context.randomVariables               = new ArrayList<Expression>();
@@ -310,7 +310,7 @@ public class RuleConverter {
 	}
 
 
-	public void translateFunctions (ConverterContext context) {
+	public void translateFunctions (RulesConversionProcess context) {
 		for (Expression parfactor : context.parfactors) {
 			context.currentExpression = parfactor;
 			context.functionsFound = new HashMap<String, Set<Integer>>();
@@ -327,7 +327,7 @@ public class RuleConverter {
 //						System.out.println("inspectNode: " + parent);
 						if (parent.getFunctor().equals(FunctorConstants.EQUAL) || parent.getFunctor().equals(FunctorConstants.INEQUALITY) ||
 								isRandomFunctionApplication(parent)) {
-							ConverterContext converterContext = (ConverterContext)context;
+							RulesConversionProcess converterContext = (RulesConversionProcess)context;
 							boolean isReplace = false;
 							List<Expression> arguments = new ArrayList<Expression>(); 
 							List<Expression> andArgs   = new ArrayList<Expression>();
@@ -491,7 +491,7 @@ public class RuleConverter {
 		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
 	}
 
-	public void translateQuantifiers (ConverterContext context) {
+	public void translateQuantifiers (RulesConversionProcess context) {
 		for (Expression parfactor : context.parfactors) {
 			context.currentExpression = parfactor;
 			context.uniqueCount = 0;
@@ -505,7 +505,7 @@ public class RuleConverter {
 //						System.out.println("inspectNode: " + parent);
 							if (parent.getFunctor().equals(FunctorConstants.FOR_ALL) || 
 									parent.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
-								ConverterContext converterContext = (ConverterContext)context;
+								RulesConversionProcess converterContext = (RulesConversionProcess)context;
 								converterContext.runAgain = true;
 								Symbol newFunctor = DefaultSymbol.createSymbol(parent.toString());
 								Set<Expression> variables = Variables.freeVariables(parent, rewritingProcess);
@@ -544,7 +544,7 @@ public class RuleConverter {
 		
 	}
 
-	public void disembedConstraints (ConverterContext context) {
+	public void disembedConstraints (RulesConversionProcess context) {
 		List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions = 
 				new ArrayList<Pair<Expression, Expression>>();
 //		context.simplifier = new CompleteSimplify();//LBPFactory.newCompleteSimplify();
@@ -565,7 +565,7 @@ public class RuleConverter {
 							if (parent.getFunctor().equals(RuleConverter.FUNCTOR_MAY_BE_SAME_AS)) {
 //								System.out.println("Found 'may be same as'");
 
-								ConverterContext converterContext = (ConverterContext)context;
+								RulesConversionProcess converterContext = (RulesConversionProcess)context;
 								converterContext.runAgain = true;
 
 								// Add both variants of the pair.
@@ -639,35 +639,32 @@ public class RuleConverter {
 			else {
 				// Add the positive case to the list of potential expressions for further processing.
 				Expression constraints = pair.second;
-				constraints = And.make(constraints, result.get(2));
-//				setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(
-//						rewritingProcess.rewrite(LBPRewriter.R_simplify, result.get(0)), constraints));
-				Expression cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
-				if (!cPrime.equals(Expressions.FALSE)) {
-					RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
-					Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, result.get(0));
-					if (!Expressions.isNumber(pPrime)) {
-						setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
-					}
-				}
+				Expression additionalConstraint = result.get(2);
+				Expression potentialExpression = result.get(0);
+				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraints, additionalConstraint);
 
 				// Add the negative case to the list of potential expressions for further processing.
 				constraints = pair.second;
-				constraints = And.make(constraints, Not.make(result.get(2)));
-//				setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(
-//						rewritingProcess.rewrite(LBPRewriter.R_simplify, result.get(1)), constraints));
-				cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
-				if (!cPrime.equals(Expressions.FALSE)) {
-					RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
-					Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, result.get(1));
-					if (!Expressions.isNumber(pPrime)) {
-						setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
-					}
-				}
+				additionalConstraint = Not.make(result.get(2));
+				potentialExpression = result.get(1);
+				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraints, additionalConstraint);
 			}
 
 		}
 		
+	}
+
+	private void addFurtherConstrainedPotentialExpression(List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions, Expression potentialExpression, Expression constraints, Expression additionalConstraint) {
+		Expression cPrime;
+		constraints = And.make(constraints, additionalConstraint);
+		cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
+		if (!cPrime.equals(Expressions.FALSE)) {
+			RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
+			Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, potentialExpression);
+			if (!Expressions.isNumber(pPrime)) {
+				setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
+			}
+		}
 	}
 
 	public Expression createParfactor (Expression potentialExpression, List<Expression> constraints) {
