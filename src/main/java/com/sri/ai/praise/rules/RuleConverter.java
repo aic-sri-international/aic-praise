@@ -54,6 +54,7 @@ import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.Variables;
@@ -135,7 +136,7 @@ public class RuleConverter {
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
 			if (LPIUtil.isConstraint(expression, process)) {
-				System.out.println("Found constraint: " + expression);
+//				System.out.println("Found constraint: " + expression);
 				constraint = expression;
 				return constant;
 			}
@@ -206,10 +207,10 @@ public class RuleConverter {
 			}
 		}
 //		System.out.println("var names: " + randomVariableNames.toString());
-		System.out.println("var index: " + context.randomVariableIndex.toString());
-		System.out.println("parfactors: " + context.parfactors.toString());
-		System.out.println("random variables: " + context.randomVariables.toString());
-		System.out.println("sorts: " + context.sorts.toString());
+//		System.out.println("var index: " + context.randomVariableIndex.toString());
+//		System.out.println("parfactors: " + context.parfactors.toString());
+//		System.out.println("random variables: " + context.randomVariables.toString());
+//		System.out.println("sorts: " + context.sorts.toString());
 
 		// Transform the functions.
 		context.processedParfactors = new ArrayList<Expression>();
@@ -225,11 +226,6 @@ public class RuleConverter {
 		context.processedParfactors = new ArrayList<Expression>();
 		disembedConstraints(context);
 
-		
-		
-
-
-
 		// Create the model object output.
 		ArrayList<Expression> modelArgs = new ArrayList<Expression>();
 		modelArgs.add(DefaultSymbol.createSymbol(name));
@@ -242,7 +238,7 @@ public class RuleConverter {
 			modelArgs.add(randomVariable);
 			randomVariableNames.add(randomVariable.get(0).toString());
 		}
-		modelArgs.add(Expressions.apply("parfactors", context.parfactors));
+		modelArgs.add(Expressions.apply("parfactors", context.processedParfactors));
 		Expression modelExpression = Expressions.apply("model", modelArgs);
 
 		return new Model(modelExpression, randomVariableNames);
@@ -549,25 +545,25 @@ public class RuleConverter {
 	}
 
 	public void disembedConstraints (ConverterContext context) {
-		List<Pair<Expression, List<Expression>>> setOfConstrainedPotentialExpressions = 
-				new ArrayList<Pair<Expression, List<Expression>>>();
+		List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions = 
+				new ArrayList<Pair<Expression, Expression>>();
 //		context.simplifier = new CompleteSimplify();//LBPFactory.newCompleteSimplify();
 
 		for (Expression parfactor : context.parfactors) {
 			context.currentExpression = parfactor;
 			context.mayBeSameAsSet = new HashSet<Pair<Expression, Expression>>();
-			System.out.println("Searching for 'may be same as': " + parfactor);
+//			System.out.println("Searching for 'may be same as': " + parfactor);
 
 			// Gather instances of "may be same as".
 			do {
-				System.out.println("May be same as loop: begin");
+//				System.out.println("May be same as loop: begin");
 				context.runAgain = false;
 				walkNode(context.currentExpression, context, new NodeInspector() {
 					public boolean inspectNode(Expression parent, /*Expression child,*/ Object context) {
-						System.out.println("inspecting: " + parent);
+//						System.out.println("inspecting: " + parent);
 						if (parent.getArguments().size() > 0) {
 							if (parent.getFunctor().equals(RuleConverter.FUNCTOR_MAY_BE_SAME_AS)) {
-								System.out.println("Found 'may be same as'");
+//								System.out.println("Found 'may be same as'");
 
 								ConverterContext converterContext = (ConverterContext)context;
 								converterContext.runAgain = true;
@@ -579,16 +575,16 @@ public class RuleConverter {
 								converterContext.mayBeSameAsSet.add(
 										new Pair<Expression, Expression>(
 												parent.getArguments().get(1), parent.getArguments().get(0)));
-								System.out.println(converterContext.mayBeSameAsSet);
+//								System.out.println(converterContext.mayBeSameAsSet);
 
 								// Replace the "may be same as" expressions with true.
 								Expression newExpression = 
 										converterContext.currentExpression.replaceAllOccurrences(
 												parent, Expressions.TRUE, rewritingProcess);
-								System.out.println("about to run simplify: " + newExpression);
+//								System.out.println("about to run simplify: " + newExpression);
 								converterContext.currentExpression = 
 										rewritingProcess.rewrite(LBPRewriter.R_simplify, newExpression);
-								System.out.println("done running simplify: " + converterContext.currentExpression);
+//								System.out.println("done running simplify: " + converterContext.currentExpression);
 								return false;
 							}
 						}
@@ -597,14 +593,14 @@ public class RuleConverter {
 				});
 			} while (context.runAgain);
 
-			System.out.println("Completed search for may be same as expressions: " + context.mayBeSameAsSet);
-			System.out.println("Potential expression: " + context.currentExpression);
+//			System.out.println("Completed search for may be same as expressions: " + context.mayBeSameAsSet);
+//			System.out.println("Potential expression: " + context.currentExpression);
 
 			// Get free variables and create inequality constraints on all pairs except those
 			// pairs stated to be "may be same as".
 			List<Expression> constraints = new ArrayList<Expression>();
 			Set<Expression> variables = Variables.freeVariables(parfactor, rewritingProcess);
-			System.out.println("Free variables: " + variables);
+//			System.out.println("Free variables: " + variables);
 			Expression[] variableArray = new Expression[variables.size()];
 			variables.toArray(variableArray);
 			for (int ii = 0; ii < variables.size() - 1; ii++) {
@@ -619,17 +615,17 @@ public class RuleConverter {
 				}
 			}
 
-			System.out.println("Generated constraints: " + constraints);
+//			System.out.println("Generated constraints: " + constraints);
 			setOfConstrainedPotentialExpressions.add(
-					new Pair<Expression, List<Expression>>(context.currentExpression, constraints));
+					new Pair<Expression, Expression>(context.currentExpression, And.make(constraints)));
 		}
 
 		// Extract the embedded constraints from the potential expressions.
 		for (int ii = 0; ii < setOfConstrainedPotentialExpressions.size(); ii++) {
 
 			// Check if the potential expression has any more embedded constraints.
-			Pair<Expression, List<Expression>> pair = setOfConstrainedPotentialExpressions.get(ii);
-			System.out.println("Searching for embedded constraints " + ii + ": " + pair.first);
+			Pair<Expression, Expression> pair = setOfConstrainedPotentialExpressions.get(ii);
+//			System.out.println("Searching for embedded constraints " + ii + ": " + pair.first);
 			List<Expression> result = getReplacementsIfAny(pair.first, rewritingProcess);
 
 			// If the result is null, then were no more embedded constraints found.  If the
@@ -642,16 +638,32 @@ public class RuleConverter {
 			}
 			else {
 				// Add the positive case to the list of potential expressions for further processing.
-				List<Expression> constraints = new ArrayList<Expression>(pair.second);
-				constraints.add(result.get(2));
-				setOfConstrainedPotentialExpressions.add(new Pair<Expression, List<Expression>>(
-						rewritingProcess.rewrite(LBPRewriter.R_simplify, result.get(0)), constraints));
+				Expression constraints = pair.second;
+				constraints = And.make(constraints, result.get(2));
+//				setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(
+//						rewritingProcess.rewrite(LBPRewriter.R_simplify, result.get(0)), constraints));
+				Expression cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
+				if (!cPrime.equals(Expressions.FALSE)) {
+					RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
+					Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, result.get(0));
+					if (!Expressions.isNumber(pPrime)) {
+						setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
+					}
+				}
 
 				// Add the negative case to the list of potential expressions for further processing.
-				constraints = new ArrayList<Expression>(pair.second);
-				constraints.add(Not.make(result.get(2)));
-				setOfConstrainedPotentialExpressions.add(new Pair<Expression, List<Expression>>(
-						rewritingProcess.rewrite(LBPRewriter.R_simplify, result.get(1)), constraints));
+				constraints = pair.second;
+				constraints = And.make(constraints, Not.make(result.get(2)));
+//				setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(
+//						rewritingProcess.rewrite(LBPRewriter.R_simplify, result.get(1)), constraints));
+				cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
+				if (!cPrime.equals(Expressions.FALSE)) {
+					RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
+					Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, result.get(1));
+					if (!Expressions.isNumber(pPrime)) {
+						setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
+					}
+				}
 			}
 
 		}
@@ -729,9 +741,9 @@ public class RuleConverter {
 		result.add(pT);
 		result.add(pF);
 		result.add(negativeEmbeddedConstraintReplacementFunction.constraint);
-		System.out.println("Positive replacement: " + pT);
-		System.out.println("Negative replacement: " + pF);
-		System.out.println("Constraint: " + negativeEmbeddedConstraintReplacementFunction.constraint);
+//		System.out.println("Positive replacement: " + pT);
+//		System.out.println("Negative replacement: " + pF);
+//		System.out.println("Constraint: " + negativeEmbeddedConstraintReplacementFunction.constraint);
 		return result;
 	}
 
