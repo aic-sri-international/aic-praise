@@ -63,6 +63,7 @@ import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.praise.rules.RuleConverter.RulesConversionProcess;
+import com.sri.ai.util.base.Pair;
 
 public class RuleConverterTest {
 
@@ -358,139 +359,125 @@ public class RuleConverterTest {
 		System.out.println("created constraints: " + parfactors.toString());
 	}
 
-	@Test
+//	@Test
 	public void testTranslateFunctions ()
 	{
 		RulesConversionProcess context = ruleConverter.new RulesConversionProcess();
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob);")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		List<Expression> expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = X1 then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob) = jane;")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = X1 = jane then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 		
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = jane = mother(bob);")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = jane = X1 then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 		
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("jane = mother(john) = mother(bob);")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and jane = X0 = X1 then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 
 
 
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X));")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(X, X0) and sick(X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X), bob);")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(X, X0) and sick(X0, bob) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(X));")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(X, X0) and sick(bob, X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X), father(X));")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(X, X0) and father(X, X1) and sick(X0, X1) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
 		expected.add(lowParser.parse("if father(Y) then if not father(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : father(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
+
+		context.parfactors = new ArrayList<Expression>();
+		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(father(X)));")));
+		expected = new ArrayList<Expression>();
+		expected.add(lowParser.parse("if mother(X1, X0) and father(X, X1) and sick(X0) then 1 else 0"));
+		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
+		expected.add(lowParser.parse("if father(Y) then if not father(Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if there exists Y : father(Y) then 1 else 0"));
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = bestfriend(mother(bob));")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if and(mother(john, X0), and(mother(bob, X2), bestfriend(X2, X1)), (X0 = X1)) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
 		expected.add(lowParser.parse("if bestfriend(Y) then if not bestfriend(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : bestfriend(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 		// Test of zero arg function.
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(ruleParser.parse("if president = obama then government(socialism) else government(freedom);")));
-		context.processedParfactors = new ArrayList<Expression>();
 		Set<Integer> count = new HashSet<Integer>();
 		count.add(0);
 		context.randomVariableIndex = new HashMap<String, Set<Integer>>();
 		context.randomVariableIndex.put("president", count);
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if president(X0) and X0 = obama then if government(socialism) then 1 else 0 else (if government(freedom) then 1 else 0)"));
 		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : president(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 		// Test multiple tiered functions.
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(bestfriend(X)));")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if and(and(bestfriend(X, X1), mother(X1, X0)), sick(bob, X0)) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(Y) then if not mother(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : mother(Y) then 1 else 0"));
 		expected.add(lowParser.parse("if bestfriend(Y) then if not bestfriend(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : bestfriend(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 		context.parfactors = new ArrayList<Expression>();
 		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(bestfriend(father(X))));")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateFunctions(context);
 //		System.out.println(context.processedParfactors);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if and(and(and(father(X, X2), bestfriend(X2, X1)), mother(X1, X0)), sick(bob, X0)) then 1 else 0"));
@@ -500,87 +487,71 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if there exists Y : bestfriend(Y) then 1 else 0"));
 		expected.add(lowParser.parse("if father(Y) then if not father(Z) then 1 else 0 else 0.500000000"));
 		expected.add(lowParser.parse("if there exists Y : father(Y) then 1 else 0"));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateFunctions(context));
 
 	}
 
 	@Test
 	public void testTranslateQuantifiers () {
-		RulesConversionProcess context = ruleConverter.new RulesConversionProcess();
-		context.parfactors = new ArrayList<Expression>();
-		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse(
+		List<Expression> potentialExpressions = new ArrayList<Expression>();
+		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"if young(X) and (for all Y : (friends(Y,X) => smokes(Y))) then smokes(X) 0.8;")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateQuantifiers(context);
 		List<Expression> expected = new ArrayList<Expression>();
 		expected.add(ruleConverter.translateConditionalRule(ruleParser.parse("if not (friends(Y, X) => smokes(Y)) then not 'for all Y : friends(Y, X) => smokes(Y)'(X);")));
 		expected.add(ruleConverter.translateConditionalRule(ruleParser.parse("if young(X) and 'for all Y : friends(Y, X) => smokes(Y)'(X) then smokes(X) 0.8;")));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions));
 
-		context.parfactors = new ArrayList<Expression>();
-		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse(
+		potentialExpressions = new ArrayList<Expression>();
+		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"there exists X : president(X, Country);")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateQuantifiers(context);
-//		System.out.println(context.processedParfactors);
 		expected = new ArrayList<Expression>();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if president(X, Country) then 'there exists X : president(X, Country)'(Country);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("'there exists X : president(X, Country)'(Country);")));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions));
 
-		context.parfactors = new ArrayList<Expression>();
-		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse(
+		potentialExpressions = new ArrayList<Expression>();
+		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"friends(X,Y) and (there exists Z : friends(X,Z));")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateQuantifiers(context);
-//		System.out.println(context.processedParfactors);
 		expected = new ArrayList<Expression>();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if friends(X,Z) then 'there exists Z : friends(X, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("friends(X,Y) and 'there exists Z : friends(X, Z)'(X);")));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions));
 
-		context.parfactors = new ArrayList<Expression>();
-		context.parfactors.add(this.ruleConverter.translateRule(this.ruleParser.parse(
+		potentialExpressions = new ArrayList<Expression>();
+		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"friends(X,Y) and (there exists Z : Z may be same as X and loves(X,Z));")));
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.translateQuantifiers(context);
-//		System.out.println(context.processedParfactors);
 		expected = new ArrayList<Expression>();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("friends(X,Y) and 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
-		assertEquals(expected, context.processedParfactors);
+		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions));
 
 		doTreeUtilWaitUnilClosed(); 
 	}
 	
 	@Test
 	public void testDisembedConstraints () {
-		RulesConversionProcess context = ruleConverter.new RulesConversionProcess();
-		List<Expression> expected;
+		List<Expression> potentialExpressions;
+		List<Pair<Expression, Expression>> expected;
 
-		context.parfactors = new ArrayList<Expression>();
-		context.parfactors.add(lowParser.parse(
+		potentialExpressions = new ArrayList<Expression>();
+		potentialExpressions.add(lowParser.parse(
 				"if friends(X,Y) and likes(X,Z) and 'may be same as'(X, Z) then if likes(Y,Z) then 0.8 else 0.2 else 0.5"));
-		System.out.println(context.parfactors);
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.disembedConstraints(context);
-//		System.out.println(context.processedParfactors);
-		expected = new ArrayList<Expression>();
-		expected.add(lowParser.parse(
-				"{{ ( on Y, X, Z ) (if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.800000000 else 0.200000000 else 0.500000000) | Y != Z and Y != X }}"));
-		assertEquals(expected, context.processedParfactors);
+		System.out.println(potentialExpressions);
+		expected = new ArrayList<Pair<Expression, Expression>>();
+		expected.add(new Pair<Expression, Expression>(
+				lowParser.parse("if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.800000000 else 0.200000000 else 0.500000000"),
+				lowParser.parse("Y != Z and Y != X")));
+		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions));
 
-		context.parfactors = new ArrayList<Expression>();
-		context.parfactors.add(lowParser.parse(
+		potentialExpressions = new ArrayList<Expression>();
+		potentialExpressions.add(lowParser.parse(
 				"if colleagues(X,Y) and Y != bob then (if likes(X,Y) then 0.8 else 0.2) else 0.5"));
-		System.out.println(context.parfactors);
-		context.processedParfactors = new ArrayList<Expression>();
-		ruleConverter.disembedConstraints(context);
-//		System.out.println(context.processedParfactors);
-		expected = new ArrayList<Expression>();
-		expected.add(lowParser.parse(
-				"{{ ( on Y, X ) (if colleagues(X, Y) then if likes(X, Y) then 0.800000000 else 0.200000000 else 0.500000000) | Y != X and Y != bob }}"));
-		assertEquals(expected, context.processedParfactors);
+		System.out.println(potentialExpressions);
+		expected = new ArrayList<Pair<Expression, Expression>>();
+		expected.add(new Pair<Expression, Expression>(
+				lowParser.parse("if colleagues(X, Y) then if likes(X, Y) then 0.800000000 else 0.200000000 else 0.500000000"),
+				lowParser.parse("Y != X and Y != bob")));
+		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions));
 
 	}
 
