@@ -563,7 +563,7 @@ public class RuleConverterTest {
 
 	}
 
-	@Test
+//	@Test
 	public void testParse () {
 		String string;
 		string = "if circle(X) then round(X); sick(X); sort Dogs: 1000, rover; random +: Number x Number -> Number;";
