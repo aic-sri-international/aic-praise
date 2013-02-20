@@ -95,25 +95,14 @@ public class RuleConverter {
 	private ReplaceConstraintWithConstant positiveEmbeddedConstraintReplacementFunction = new ReplaceConstraintWithConstant(Expressions.TRUE);
 	private ReplaceConstraintWithConstant negativeEmbeddedConstraintReplacementFunction = new ReplaceConstraintWithConstant(Expressions.FALSE);
 
-	private interface NodeInspector {
-		public boolean inspectNode(Expression parent, /*Expression child,*/ Object context);
-	}
 
-	public class RulesConversionProcess {
-		public List<Expression>                   parfactors;
-		public List<Expression>                   sorts;
-		public List<Expression>                   randomVariables;
-
-		public Expression                         currentExpression;
-		public Map<String, Set<Integer>>          randomVariableIndex;
-
-		public List<Expression>                   processedParfactors;
-//		public List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions;
-//		public Set<Pair<Expression, Expression>>  mayBeSameAsSet;
-		public Map<String, Set<Integer>>          functionsFound;
-		public int                                uniqueCount = 0;
-		public boolean                            runAgain;
-	}
+//	public class RulesConversionProcess {
+//		public List<Expression>                   parfactors;
+//		public List<Expression>                   sorts;
+//		public List<Expression>                   randomVariables;
+//
+//		public Map<String, Set<Integer>>          randomVariableIndex;
+//	}
 
 	/**
 	 * Replacement function for use by function translator.
@@ -141,19 +130,15 @@ public class RuleConverter {
 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
-//			System.out.println("inspectNode: " + expression);
 			if (expression.getArguments().size() > 0) {
-//				System.out.println(expression);
-				System.out.println("inspectNode: " + expression);
+//				System.out.println("inspectNode: " + expression);
 				if (expression.getFunctor().equals(FunctorConstants.EQUAL) || expression.getFunctor().equals(FunctorConstants.INEQUALITY) ||
 						isRandomFunctionApplication(expression)) {
-//					RulesConversionProcess converterContext = (RulesConversionProcess)context;
 					boolean isReplace = false;
 					List<Expression> arguments = new ArrayList<Expression>(); 
 					List<Expression> andArgs   = new ArrayList<Expression>();
 					for (Expression argument : expression.getArguments()) {
 						if (isRandomVariableValue(argument, randomVariableIndex)) {
-//							converterContext.runAgain = true;
 							isReplace = true;
 							Expression unique = Expressions.makeUniqueVariable(
 									"X" + uniqueCount, currentExpression, 
@@ -191,10 +176,6 @@ public class RuleConverter {
 						andArgs.add(Expressions.make(expression.getFunctor(), arguments));
 						Expression replacement = And.make(andArgs);
 //						System.out.println("Replace <" + parent + ">  with <" + replacement + ">");
-//						converterContext.currentExpression = 
-//								converterContext.currentExpression.replaceAllOccurrences(
-//										parent, replacement, rewritingProcess);
-//						System.out.println("Current expression: "+ converterContext.currentExpression);
 						return replacement;
 					}
 
@@ -275,9 +256,6 @@ public class RuleConverter {
 				if (expression.getFunctor().equals(RuleConverter.FUNCTOR_MAY_BE_SAME_AS)) {
 //					System.out.println("Found 'may be same as'");
 
-//					RulesConversionProcess converterContext = (RulesConversionProcess)context;
-//					converterContext.runAgain = true;
-
 					// Add both variants of the pair.
 					mayBeSameAsSet.add(
 							new Pair<Expression, Expression>(
@@ -286,11 +264,6 @@ public class RuleConverter {
 							new Pair<Expression, Expression>(
 									expression.getArguments().get(1), expression.getArguments().get(0)));
 //					System.out.println(converterContext.mayBeSameAsSet);
-
-//					Expression newExpression = 
-//							converterContext.currentExpression.replaceAllOccurrences(
-//									parent, Expressions.TRUE, rewritingProcess);
-//					System.out.println("done running simplify: " + converterContext.currentExpression);
 
 					// Replace the "may be same as" expressions with true.
 					System.out.println("Replace with true.");
@@ -357,40 +330,38 @@ public class RuleConverter {
 	}
 
 	public Model parseModel (String name, String description, List<Expression> inputRules) {
-		RulesConversionProcess context = new RulesConversionProcess();
-		context.parfactors                    = new ArrayList<Expression>();
-		context.sorts                         = new ArrayList<Expression>();
-		context.randomVariables               = new ArrayList<Expression>();
-//		Map<String, Expression> randomVariableNames    = new HashMap<String, Expression>();
-		context.randomVariableIndex           = new HashMap<String, Set<Integer>>();
-		context.functionsFound                = new HashMap<String, Set<Integer>>();
+//		RulesConversionProcess context = new RulesConversionProcess();
+		List<Expression> potentialExpressions         = new ArrayList<Expression>();
+		List<Expression> sorts                        = new ArrayList<Expression>();
+		List<Expression> randomVariables              = new ArrayList<Expression>();
+		Map<String, Set<Integer>> randomVariableIndex = new HashMap<String, Set<Integer>>();
 		
 		// Sort and convert the rules to their if-then-else forms.
 		for (Expression rule : inputRules) {
 			if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
-				context.parfactors.add(translateAtomicRule(rule));
+				potentialExpressions.add(translateAtomicRule(rule));
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
-				context.parfactors.add(translatePrologRule(rule));
+				potentialExpressions.add(translatePrologRule(rule));
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
-				context.parfactors.add(translateConditionalRule(rule));
+				potentialExpressions.add(translateConditionalRule(rule));
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
-				context.randomVariables.add(this.updateRandomVariableDeclaration(rule));
+				randomVariables.add(this.updateRandomVariableDeclaration(rule));
 				String varName = rule.get(0).toString();
-				if (context.randomVariableIndex.get(varName) == null) {
+				if (randomVariableIndex.get(varName) == null) {
 					Set<Integer> set = new HashSet<Integer>();
 					set.add(rule.get(1).intValue());
-					context.randomVariableIndex.put(varName, set);
+					randomVariableIndex.put(varName, set);
 				}
 				else {
-					context.randomVariableIndex.get(varName).add(rule.get(1).intValue());
+					randomVariableIndex.get(varName).add(rule.get(1).intValue());
 				}
 //				randomVariableNames.put(rule.get(0).toString(), rule);
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_SORT)) {
-				context.sorts.add(rule);
+				sorts.add(rule);
 			}
 		}
 //		System.out.println("var names: " + randomVariableNames.toString());
@@ -398,37 +369,36 @@ public class RuleConverter {
 //		System.out.println("parfactors: " + context.parfactors.toString());
 //		System.out.println("random variables: " + context.randomVariables.toString());
 //		System.out.println("sorts: " + context.sorts.toString());
-		List<Expression> potentialExpressions = new ArrayList<Expression>();
 
 		// Translate the functions.
-		context.processedParfactors = new ArrayList<Expression>();
-		translateFunctions(context);
+		potentialExpressions = translateFunctions(potentialExpressions, randomVariableIndex);
 
 		// Translate the quantifiers.
-		potentialExpressions = translateQuantifiers(context.processedParfactors);
+		potentialExpressions = translateQuantifiers(potentialExpressions);
 
 		// Extract the embedded constraints.
-		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = disembedConstraints(potentialExpressions);
+		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = 
+				disembedConstraints(potentialExpressions);
 
 		// Translate the potential expression/constraint pair into a parfactor.
-		context.processedParfactors = new ArrayList<Expression>();
+		potentialExpressions = new ArrayList<Expression>();
 		for (Pair<Expression, Expression> pair : potentialExpressionAndConstraintList) {
-			context.processedParfactors.add(createParfactor(pair.first, pair.second));
+			potentialExpressions.add(createParfactor(pair.first, pair.second));
 		}
 		
 		// Create the model object output.
 		ArrayList<Expression> modelArgs = new ArrayList<Expression>();
 		modelArgs.add(DefaultSymbol.createSymbol(name));
 		modelArgs.add(DefaultSymbol.createSymbol(description));
-		for (Expression sort : context.sorts)
+		for (Expression sort : sorts)
 			modelArgs.add(sort);
 
 		Set<String> randomVariableNames = new HashSet<String>();
-		for (Expression randomVariable : context.randomVariables) {
+		for (Expression randomVariable : randomVariables) {
 			modelArgs.add(randomVariable);
 			randomVariableNames.add(randomVariable.get(0).toString());
 		}
-		modelArgs.add(Expressions.apply("parfactors", context.processedParfactors));
+		modelArgs.add(Expressions.apply("parfactors", potentialExpressions));
 		Expression modelExpression = Expressions.apply("model", modelArgs);
 
 		return new Model(modelExpression, randomVariableNames);
@@ -500,89 +470,29 @@ public class RuleConverter {
 	}
 
 
-	public List<Expression> translateFunctions (RulesConversionProcess context) {
+	public List<Expression> translateFunctions (List<Expression> potentialExpressions, 
+			Map<String, Set<Integer>> randomVariableIndex) {
 		List<Expression> result = new ArrayList<Expression>();
 		Map<String, Set<Integer>> functionsFound = new HashMap<String, Set<Integer>>();
 
-		for (Expression parfactor : context.parfactors) {
-//			context.currentExpression = parfactor;
-//			context.uniqueCount = 0;
-//			ReplaceFunctionFunction replacementFunction = 
-//					new ReplaceFunctionFunction(parfactor, result, context.randomVariableIndex, 
-//							context.functionsFound, context.uniqueCount);
-			result.add(parfactor.replaceAllOccurrences(
-					new ReplaceFunctionFunction(parfactor, context.randomVariableIndex, 
-							functionsFound), rewritingProcess));
-//			System.out.println("Converting: " + parfactor);
-//			do {
-//				context.runAgain = false;
-////				System.out.println("Iterating walkNode: " + context.currentExpression);
-//				walkNode(context.currentExpression, context, new NodeInspector() {
-//					public boolean inspectNode(Expression parent, /*Expression child,*/ Object context) {
-//						if (parent.getArguments().size() == 0)
-//							return true;
-////						System.out.println(parent);
-////						System.out.println("inspectNode: " + parent);
-//						if (parent.getFunctor().equals(FunctorConstants.EQUAL) || parent.getFunctor().equals(FunctorConstants.INEQUALITY) ||
-//								isRandomFunctionApplication(parent)) {
-//							RulesConversionProcess converterContext = (RulesConversionProcess)context;
-//							boolean isReplace = false;
-//							List<Expression> arguments = new ArrayList<Expression>(); 
-//							List<Expression> andArgs   = new ArrayList<Expression>();
-//							for (Expression argument : parent.getArguments()) {
-//								if (isRandomVariableValue(argument, converterContext.randomVariableIndex)) {
-//									converterContext.runAgain = true;
-//									isReplace = true;
-//									Expression unique = Expressions.makeUniqueVariable(
-//											"X" + converterContext.uniqueCount, converterContext.currentExpression, 
-//											rewritingProcess);
-////									System.out.println("Incrementing unique count: " + converterContext.uniqueCount + ",  " + parent + " | " + argument);
-//									converterContext.uniqueCount++;
-//									arguments.add(unique);
-//									List<Expression> newArgumentArgs = new ArrayList<Expression>(argument.getArguments());
-//									newArgumentArgs.add(unique);
-//
-//									String name;
-//									if (argument.getArguments().size() == 0)
-//										name = argument.toString();
-//									else
-//										name = argument.getFunctor().toString();
-//									andArgs.add(Expressions.make(name, newArgumentArgs));
-//
-//									// Note the function name and param count so can add additional rule enforcing functional
-//									// relation later.
-//									Set<Integer> paramCount;
-//									paramCount = converterContext.functionsFound.get(name);
-//									if (paramCount == null) {
-//										paramCount = new HashSet<Integer>();
-//										converterContext.functionsFound.put(name, paramCount);
-//									}
-//									paramCount.add(argument.getArguments().size());
-//								}
-//								else {
-//									arguments.add(argument);
-//								}
-//							}
-//							if(isReplace) {
-////								System.out.println("arguments: " + arguments);
-////								System.out.println("andArgs:   " + andArgs);
-//								andArgs.add(Expressions.make(parent.getFunctor(), arguments));
-//								Expression replacement = And.make(andArgs);
-////								System.out.println("Replace <" + parent + ">  with <" + replacement + ">");
-//								converterContext.currentExpression = 
-//										converterContext.currentExpression.replaceAllOccurrences(
-//												parent, replacement, rewritingProcess);
-////								System.out.println("Current expression: "+ converterContext.currentExpression);
-//								return false;
-//							}
-//
-//						}
-//						return true;
-//					}
-//				});
-//			} while (context.runAgain);
-//			
-//			context.processedParfactors.add(context.currentExpression);
+		for (Expression parfactor : potentialExpressions) {
+			Expression toReplace = parfactor;
+			Expression replaced  = parfactor;
+
+			ReplaceFunctionFunction replacementFunction = 
+					new ReplaceFunctionFunction(toReplace, randomVariableIndex, functionsFound);
+			do {
+			    toReplace = replaced;
+			    replaced = toReplace.replaceAllOccurrences(
+			    		replacementFunction,
+			    		rewritingProcess);
+			           
+			    // Update the reference for generating unique constant names.
+			    replacementFunction.currentExpression = replaced;
+			} while (replaced != toReplace);
+
+			// Save the result.
+	        result.add(replaced);
 		}
 
 //		System.out.println("Functions found: " + context.functionsFound);
@@ -623,9 +533,6 @@ public class RuleConverter {
 				return false;
 			}
 
-//			Expression functor = e.getFunctor();
-//			System.out.println("e: " + e);
-//			System.out.println("Functor: " + functor);
 			Set<Integer> paramCounts = randomVariableIndex.get(e.toString());
 			if (paramCounts != null && paramCounts.contains(0)) {
 				return true;
@@ -692,22 +599,35 @@ public class RuleConverter {
 	}
 
 	/**
-	 * 
-	 * @param potentialExpressions
-	 * @return
+	 * Removes the quantifiers from potential expressions.
+	 * @param potentialExpressions  The potential expressions to check for quantifiers.
+	 * @return  Quantifier free versions of the expressions.
 	 */
 	public List<Expression> translateQuantifiers (List<Expression> potentialExpressions) {
 		List<Expression> result = new ArrayList<Expression>();
-		for (Expression parfactor : potentialExpressions) {
-			result.add(parfactor.replaceAllOccurrences(new ReplaceQuantifierFunction(result), rewritingProcess));
+		List<Expression> expressionCopy = new ArrayList<Expression>(potentialExpressions);
+		for (int ii = 0; ii < expressionCopy.size(); ii++) {
+			Expression toReplace = expressionCopy.get(ii);
+			Expression replaced  = toReplace;
+
+			ReplaceQuantifierFunction replacementFunction = new ReplaceQuantifierFunction(expressionCopy);
+			do {
+			    toReplace = replaced;
+			    replaced = toReplace.replaceAllOccurrences(
+			    		replacementFunction,
+			    		rewritingProcess);
+			} while (replaced != toReplace);
+
+			// Save the result.
+			result.add(replaced);
 		}
 		return result;
 	}
 
 	/**
-	 * 
-	 * @param context
-	 * @return
+	 * Removes the constraints embedded in the given potential expressions.
+	 * @param potentialExpressions  The potential expressions to check for embedded constraints.
+	 * @return  A list of pairs of constraint-free potential expressions and the extracted constraints.
 	 */
 	public List<Pair<Expression, Expression>> disembedConstraints (List<Expression> potentialExpressions) {
 		List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions = 
@@ -719,7 +639,18 @@ public class RuleConverter {
 //			System.out.println("Searching for 'may be same as': " + parfactor);
 
 			// Gather instances of "may be same as".
-			potentialExpression = potentialExpression.replaceAllOccurrences(new ReplaceMayBeSameAsFunction(mayBeSameAsSet), rewritingProcess);
+			Expression toReplace = potentialExpression;
+			Expression replaced  = toReplace;
+
+			ReplaceMayBeSameAsFunction replacementFunction = new ReplaceMayBeSameAsFunction(mayBeSameAsSet);
+			do {
+			    toReplace = replaced;
+			    replaced = toReplace.replaceAllOccurrences(
+			    		replacementFunction,
+			    		rewritingProcess);
+			} while (replaced != toReplace);
+
+			potentialExpression = replaced;
 
 			// Simplify the updated expression.
 			potentialExpression = rewritingProcess.rewrite(LBPRewriter.R_simplify, potentialExpression);
@@ -827,15 +758,15 @@ public class RuleConverter {
 	 * @param context    Contextual information to pass to the node inspector.
 	 * @param inspector  The node inspector to call on each subnode.
 	 */
-	private void walkNode (Expression node, Object context, NodeInspector inspector) {
-		List<Expression> children = node.getArguments();
-		boolean isContinue = inspector.inspectNode(node, /*child,*/ context);
-		if (isContinue) {
-			for (Expression child : children) {
-				walkNode(child, context, inspector);
-			}
-		}
-	}
+//	private void walkNode (Expression node, Object context, NodeInspector inspector) {
+//		List<Expression> children = node.getArguments();
+//		boolean isContinue = inspector.inspectNode(node, /*child,*/ context);
+//		if (isContinue) {
+//			for (Expression child : children) {
+//				walkNode(child, context, inspector);
+//			}
+//		}
+//	}
 
 	/**
 	 * Generates an expression representing one minus the value given.
