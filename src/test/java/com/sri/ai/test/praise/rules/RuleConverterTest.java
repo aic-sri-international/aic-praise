@@ -563,11 +563,97 @@ public class RuleConverterTest {
 
 	}
 
+	@Test
+	public void testQueryRuleAndAtom () {
+		String string;
+		Pair<Expression, Expression> result, expected;
+		
+		string = "sick(john) and sick(mary)";
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query()"), 
+				ruleParser.parse("query() <=> sick(john) and sick(mary);"));
+		assertEquals(expected, result);
+
+		string = "not sick(X)";
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(X)"), 
+				ruleParser.parse("query(X) <=> not sick(X);"));
+		assertEquals(expected, result);
+
+		string = "there exists X : friends(X,Y)";
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(Y)"), 
+				ruleParser.parse("query(Y) <=> there exists X : friends(X,Y);"));
+		assertEquals(expected, result);
+
+		string = "conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z)";
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(C, Y, X, Z)"), 
+				ruleParser.parse("query(C, Y, X, Z) <=> conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z);"));
+		assertEquals(expected, result);
+
+		string = "mother(X) = lucy";
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(X)"), 
+				ruleParser.parse("query(X) <=> mother(X) = lucy;"));
+		assertEquals(expected, result);
+	}
+
+	@Test
+	public void testCreateModel () {
+		List<Expression> sorts = new ArrayList<Expression>();
+		sorts.add(lowParser.parse("sort(People,   Unknown, {ann, bob})"));
+		sorts.add(lowParser.parse("sort(Treasure, Unknown, {gold, silver, diamonds})"));
+		
+		List<Expression> randomVariables = new ArrayList<Expression>();
+		randomVariables.add(lowParser.parse("randomVariable(gaveTreasureTo, 3, People, Treasure, People)"));
+		randomVariables.add(lowParser.parse("randomVariable(owns, 2, People, Treasure)"));
+		randomVariables.add(lowParser.parse("randomVariable(rich, 1, People)"));
+
+		List<Expression> parfactors = new ArrayList<Expression>();
+		parfactors.add(lowParser.parse(
+				"{{(on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X,Z,Y) then (if owns(Y,Z) then 1 else 0)  else 1] }}"));
+		parfactors.add(lowParser.parse(
+				"{{(on X in People, Z in Treasure) [if owns(X,Z) then if rich(X) then 1 else 0 else 1] }}"));
+
+		Model model = ruleConverter.createModel("Gave Treasure To", 
+				"An example of how hard it is to model things without aggregate factors.", 
+				sorts, randomVariables, parfactors);
+		System.out.println(model);
+	}
+
 //	@Test
 	public void testParse () {
-		String string;
-		string = "if circle(X) then round(X); sick(X); sort Dogs: 1000, rover; random +: Number x Number -> Number;";
-		testParseModel("Test Model", "Description", string);
+		String modelString, queryString;
+		Model model;
+
+		modelString = "if mother(X) = Y then X != Y;" +
+				"if trait(mother(X)) then trait(X) 0.8 else trait(X) 0.3;" +
+				"there exists X : trait(X);" +
+				"mother(bob)=mary;" +
+				"mother(ann)=mary;" +
+				"mother(john)=ann;" +
+				"trait(john);";
+		queryString = "trait(mary)";
+//		model = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+//		System.out.println(model);
+//		Brewer.generateFunctionApplicationString(sb, model, 3, true);
+
+		modelString = "random president: -> People;" +
+				"random firstLady: -> People;" +
+				"president = barrackObama <=> firstLady = michelleObama;" +
+				"president = billClinton <=> firstLady = hillaryClinton;" +
+				"firstLady = michelleObama 0.9;";
+		queryString = "president";
+//		model = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+//		System.out.println(model);
+//		Brewer.generateFunctionApplicationString(sb, model, 3, true);
+
+		modelString = "there exists X : X = bestFriend(X) 0.9;";
+		queryString = "bestFriend(john)";
+		model = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+		System.out.println(model);
+//		Brewer.generateFunctionApplicationString(sb, model, 3, true);
 		
 	}
 	

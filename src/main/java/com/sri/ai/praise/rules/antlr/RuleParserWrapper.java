@@ -107,6 +107,42 @@ public class RuleParserWrapper implements Parser {
 			return null;
 		return result.get(0);
     }
+	
+	public Expression parseFormula (String string) {
+    	try {
+//    		System.out.println("\nAttempting to parse: " + string);
+    		CharStream cs = new ANTLRStringStream(string);
+    		RuleLexer lexer = new RuleLexer(cs);
+    		CommonTokenStream tokens = new CommonTokenStream(lexer);
+    		RuleParser parser = new RuleParser(tokens);
+    		CommonTree t = (CommonTree)parser.formula().getTree();
+//    		System.out.println("Original Tree: " + t.toStringTree());
+
+    		CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);//parser.start().getTree());
+
+//    		System.out.println("Attempting to flatten associative operations...");
+    		RuleAssociativeNodeWalker assoc = new RuleAssociativeNodeWalker(nodes);
+    		t = (CommonTree)assoc.downup(t);//.start().getTree();
+//    		System.out.println("New Tree: " + t.toStringTree());
+    		nodes = new CommonTreeNodeStream(t);
+
+    		RuleOutputWalker outputWalker = new RuleOutputWalker(nodes);
+    		List<Expression> ret = outputWalker.start();
+//    		System.out.println("Sucessful parse: " + ret);
+
+    		return ret.get(0);
+    	}
+    	catch (RecognitionException re) {
+    		System.out.println("**** Failed to parse: " + string);
+    		re.printStackTrace();
+    		return null;
+    	}
+    	catch (RuntimeException re) {
+    		System.out.println("**** Failed to parse: " + string);
+    		re.printStackTrace();
+    		return null;
+    	}
+	}
     
     @Override
     public void close() {
