@@ -45,11 +45,13 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.grinder.GrinderConfiguration;
+import com.sri.ai.grinder.demo.ExpressionEditor;
 import com.sri.ai.grinder.demo.OutputPanel;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JSplitPane;
 import java.awt.Dimension;
+import javax.swing.JTabbedPane;
 
 /**
  * 
@@ -60,6 +62,7 @@ import java.awt.Dimension;
 public class PRAiSEDemoApp {
 
 	private JFrame frame;
+	private ToolBarPanel toolBar = new ToolBarPanel();
 
 	/**
 	 * Launch the application.
@@ -110,7 +113,7 @@ public class PRAiSEDemoApp {
 		backgroundPanel.setLayout(new BorderLayout(0, 0));
 		
 		JSplitPane inputOutputSplitPane = new JSplitPane();
-		inputOutputSplitPane.setResizeWeight(0.3);
+		inputOutputSplitPane.setResizeWeight(0.9);
 		inputOutputSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		inputOutputSplitPane.setOneTouchExpandable(true);
 		backgroundPanel.add(inputOutputSplitPane, BorderLayout.CENTER);
@@ -128,6 +131,16 @@ public class PRAiSEDemoApp {
 		JPanel editorPanel = new JPanel();
 		editorPanel.setPreferredSize(new Dimension(400, 500));
 		splitPane.setLeftComponent(editorPanel);
+		editorPanel.setLayout(new BorderLayout(0, 0));
+		
+		JTabbedPane editorsTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		editorPanel.add(editorsTabbedPane);
+		
+		ExpressionEditor modelEditPanel = new ExpressionEditor();
+		editorsTabbedPane.addTab("Model", null, modelEditPanel, null);
+		
+		ExpressionEditor evidenceEditPanel = new ExpressionEditor();
+		editorsTabbedPane.addTab("Evidence", null, evidenceEditPanel, null);
 		
 		JPanel queryPanel = new JPanel();
 		queryPanel.setPreferredSize(new Dimension(300, 400));
@@ -138,6 +151,8 @@ public class PRAiSEDemoApp {
 		inputOutputSplitPane.setRightComponent(outputPanel);
 		
 		JPanel controlPanel = new JPanel();
+		controlPanel.setLayout(new BorderLayout(0, 0));
+		controlPanel.add(toolBar, BorderLayout.CENTER);
 		backgroundPanel.add(controlPanel, BorderLayout.NORTH);
 		
 		JPanel notificationPanel = new JPanel();
