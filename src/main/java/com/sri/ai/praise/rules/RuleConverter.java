@@ -330,6 +330,14 @@ public class RuleConverter {
 		return parseModel("", "", modelString, queryString);
 	}
 
+	/**
+	 * Parse the rules model.
+	 * @param name         The name for the model.
+	 * @param description  The description of the model.
+	 * @param inputRules   The rules string of the model.
+	 * @param query        The query string for the model.
+	 * @return  A Model instance of the parsed model.
+	 */
 	public Model parseModel (String name, String description, String modelString, String queryString) {
 		return parseModel(name, description, ruleParser.parseAll(modelString), ruleParser.parseFormula(queryString));
 	}
@@ -342,6 +350,14 @@ public class RuleConverter {
 		return parseModel(name, description, inputRules, null);
 	}
 
+	/**
+	 * Parse the rules model.
+	 * @param name         The name for the model.
+	 * @param description  The description of the model.
+	 * @param inputRules   The list of rule expressions of the model.
+	 * @param query        The query expression for the model.
+	 * @return  A Model instance of the parsed model.
+	 */
 	public Model parseModel (String name, String description, List<Expression> inputRules, Expression query) {
 //		RulesConversionProcess context = new RulesConversionProcess();
 		List<Expression> potentialExpressions         = new ArrayList<Expression>();
@@ -463,14 +479,19 @@ public class RuleConverter {
 	}
 
 
-	public Set<Expression> translateRules (List<Expression> rules) {
-		Set<Expression> result = new HashSet<Expression>();
-		for (Expression rule : rules) {
-			result.add(translateRule(rule));
-		}
-		return result;
-	}
+//	public List<Expression> translateRules (List<Expression> rules) {
+//		List<Expression> result = new ArrayList<Expression>();
+//		for (Expression rule : rules) {
+//			result.add(translateRule(rule));
+//		}
+//		return result;
+//	}
 
+	/**
+	 * Convert the given rule into its "if . then . else ." form.
+	 * @param rule  The rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the rule.
+	 */
 	public Expression translateRule (Expression rule) {
 		if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
 			return translateAtomicRule(rule);
@@ -484,6 +505,11 @@ public class RuleConverter {
 		return rule;
 	}
 	
+	/**
+	 * Convert the given atomic rule into its "if . then . else ." form.
+	 * @param rule  The atomic rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the atomic rule.
+	 */
 	public Expression translateAtomicRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
 		if (args.size() != 2)
@@ -493,6 +519,11 @@ public class RuleConverter {
 				args.get(1), oneMinusPotential(args.get(1)));
 	}
 	
+	/**
+	 * Convert the given prolog rule into its "if . then . else ." form.
+	 * @param rule  The prolog rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the prolog rule.
+	 */
 	public Expression translatePrologRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
 		
@@ -510,6 +541,11 @@ public class RuleConverter {
 		return null;
 	}
 	
+	/**
+	 * Convert the given conditional rule into its "if . then . else ." form.
+	 * @param rule  The conditional rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the conditional rule.
+	 */
 	public Expression translateConditionalRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
 		if (args.size() == 2) {
@@ -525,7 +561,13 @@ public class RuleConverter {
 		return null;
 	}
 
-
+	/**
+	 * Converts uses of functions in the potential expressions into relationships and
+	 * adds the supporting potential expressions necessary.
+	 * @param potentialExpressions  The potential expressions perform the function transformation upon.
+	 * @param randomVariableIndex   A mapping of known random variable names and the number of arguments they take.
+	 * @return  A list of potential expressions with the function references transformed.
+	 */
 	public List<Expression> translateFunctions (List<Expression> potentialExpressions, 
 			Map<String, Set<Integer>> randomVariableIndex) {
 		List<Expression> result = new ArrayList<Expression>();
@@ -562,6 +604,14 @@ public class RuleConverter {
 		return result;
 	}
 
+	/**
+	 * Checks if the given expression is a random function application.  It will screen out
+	 * instances of built in functors, such as "and", "not", "there exists . : .", "if . then . else .",
+	 * etc.
+	 * @param e  The expression to check.
+	 * @return  False if the expression is not a random function application or any of the built in
+	 *          expression types.
+	 */
 	public boolean isRandomFunctionApplication (Expression e) {
 		if (!e.getSyntacticFormType().equals("Function application")) {
 //			System.out.println(e + " is not function application");
@@ -580,6 +630,13 @@ public class RuleConverter {
 		return true;
 	}
 
+	/**
+	 * Checks if the given expression is a random function application.  It will catches
+	 * cases of functions that take no arguments
+	 * @param e                    The expression to check.
+	 * @param randomVariableIndex  An index of random variable names with the number of arguments.
+	 * @return  True if the expression is a random function application or a function that takes no arguments.
+	 */
 	public boolean isRandomVariableValue (Expression e, Map<String, Set<Integer>> randomVariableIndex) {
 		if (isRandomFunctionApplication(e))
 			return true;
@@ -598,7 +655,14 @@ public class RuleConverter {
 		return false;
 	}
 
-	public void createTransformedFunctionConstraints (String functionName, int numArgs, List<Expression> parfactors) {
+	/**
+	 * For the given function name and number of args, will create the additonal potential
+	 * expressions to add for function transformation.
+	 * @param functionName  The name of the function.
+	 * @param numArgs       The number of arguments of the function.
+	 * @param potentialExpressions  The list to add the new potential expressions to.
+	 */
+	public void createTransformedFunctionConstraints (String functionName, int numArgs, List<Expression> potentialExpressions) {
 		StringBuilder rule = new StringBuilder();
 		int ii;
 		rule.append("if ");
@@ -620,7 +684,7 @@ public class RuleConverter {
 		rule.append("Z);");
 
 //		System.out.println(rule.toString());
-		parfactors.add(translateConditionalRule(ruleParser.parse(rule.toString())));
+		potentialExpressions.add(translateConditionalRule(ruleParser.parse(rule.toString())));
 
 		rule = new StringBuilder();
 		rule.append("there exists Y : " + functionName + "(");
@@ -632,9 +696,14 @@ public class RuleConverter {
 		rule.append("Y);");
 
 //		System.out.println(rule.toString());
-		parfactors.add(translateAtomicRule(ruleParser.parse(rule.toString())));
+		potentialExpressions.add(translateAtomicRule(ruleParser.parse(rule.toString())));
 	}
 
+	/**
+	 * Takes a high-level random variable declaration and returns a low-level random variable declaration.
+	 * @param randomVariableDecl  The high-level random variable declaration.
+	 * @return  A low-level representation of the random variable declaration.
+	 */
 	public Expression updateRandomVariableDeclaration (Expression randomVariableDecl) {
 		if (!randomVariableDecl.getFunctor().equals(FUNCTOR_RANDOM_VARIABLE_DECLARATION))
 			return null;
