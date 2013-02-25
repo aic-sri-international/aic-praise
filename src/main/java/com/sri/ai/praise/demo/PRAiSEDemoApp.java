@@ -52,6 +52,9 @@ import java.awt.BorderLayout;
 import javax.swing.JSplitPane;
 import java.awt.Dimension;
 import javax.swing.JTabbedPane;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 /**
  * 
@@ -142,7 +145,7 @@ public class PRAiSEDemoApp {
 		ExpressionEditor evidenceEditPanel = new ExpressionEditor();
 		editorsTabbedPane.addTab("Evidence", null, evidenceEditPanel, null);
 		
-		JPanel queryPanel = new JPanel();
+		QueryPanel queryPanel = new QueryPanel();
 		queryPanel.setPreferredSize(new Dimension(300, 400));
 		splitPane.setRightComponent(queryPanel);
 		
@@ -157,6 +160,69 @@ public class PRAiSEDemoApp {
 		
 		JPanel notificationPanel = new JPanel();
 		backgroundPanel.add(notificationPanel, BorderLayout.SOUTH);
+		
+		JMenuBar menuBar = new JMenuBar();
+		frame.getContentPane().add(menuBar, BorderLayout.NORTH);
+		
+		JMenu mnFile = new JMenu("File");
+		menuBar.add(mnFile);
+		
+		JMenuItem mntmNew = new JMenuItem("New");
+		mnFile.add(mntmNew);
+		
+		JMenuItem mntmOpenFile = new JMenuItem("Open File...");
+		mnFile.add(mntmOpenFile);
+		
+		mnFile.addSeparator();
+		
+		JMenuItem mntmSave = new JMenuItem("Save");
+		mnFile.add(mntmSave);
+		
+		JMenuItem mntmSaveAs = new JMenuItem("Save As...");
+		mnFile.add(mntmSaveAs);
+		
+		JMenuItem mntmSaveAll = new JMenuItem("Save All");
+		mnFile.add(mntmSaveAll);
+		
+		mnFile.addSeparator();
+		
+		JMenuItem mntmExport = new JMenuItem("Export...");
+		mnFile.add(mntmExport);
+		
+		mnFile.addSeparator();
+		
+		JMenuItem mntmExit = new JMenuItem("Exit");
+		mnFile.add(mntmExit);
+		
+		JMenu mnEdit = new JMenu("Edit");
+		menuBar.add(mnEdit);
+		
+		JMenuItem mntmUndo = new JMenuItem("Undo");
+		mnEdit.add(mntmUndo);
+		
+		JMenuItem mntmRedo = new JMenuItem("Redo");
+		mnEdit.add(mntmRedo);
+		
+		JMenu mnRun = new JMenu("Run");
+		menuBar.add(mnRun);
+		
+		JMenuItem mntmValidate = new JMenuItem("Validate Model and Evidence");
+		mnRun.add(mntmValidate);
+		
+		JMenuItem mntmExecuteQuery = new JMenuItem("Execute Query");
+		mnRun.add(mntmExecuteQuery);
+		
+		JMenuItem mntmClearOutput = new JMenuItem("Clear Output");
+		mnRun.add(mntmClearOutput);
+		
+		JMenu mnWindow = new JMenu("Window");
+		menuBar.add(mnWindow);
+		
+		JMenuItem mntmNewWindow = new JMenuItem("New Window");
+		mnWindow.add(mntmNewWindow);
+		
+		JMenuItem mntmShowToolBar = new JMenuItem("Show Tool Bar");
+		mnWindow.add(mntmShowToolBar);
 	}
 
 }

@@ -68,7 +68,7 @@ public class ToolBarPanel extends JPanel {
 	private ImageIcon imageUndo         = createImageIcon("edit-undo"+ICON_RESOLUTION+".png");
 	private ImageIcon imageRedo         = createImageIcon("edit-redo"+ICON_RESOLUTION+".png");
 	private ImageIcon imageValidate     = createImageIcon("document-properties"+ICON_RESOLUTION+".png");
-	private ImageIcon imageExecuteQuery = createImageIcon("media-seek-forward"+ICON_RESOLUTION+".png");
+	private ImageIcon imageExecuteQuery = createImageIcon("media-seek-forward"+ICON_RESOLUTION+".png"); 
 	private ImageIcon imageClear        = createImageIcon("edit-clear"+ICON_RESOLUTION+".png");
 	private ImageIcon imageNewWindow    = createImageIcon("window-new"+ICON_RESOLUTION+".png");
 	private JComboBox exampleComboBox;
@@ -78,6 +78,11 @@ public class ToolBarPanel extends JPanel {
 	 */
 	public ToolBarPanel() {
 		initialize();
+	}
+	
+	public static ImageIcon getSmallExecuteQueryIcon() {
+		ImageIcon result = createImageIcon("media-seek-forward22x22.png");
+		return result;
 	}
 	
 	//
@@ -136,7 +141,7 @@ public class ToolBarPanel extends JPanel {
 		
 		JButton btnValidate = new JButton("");
 		btnValidate.setIcon(imageValidate);
-		btnValidate.setToolTipText("Validate");
+		btnValidate.setToolTipText("Validate Model and Evidence");
 		toolBar.add(btnValidate);
 		
 		JButton btnExecuteQuery = new JButton("");
