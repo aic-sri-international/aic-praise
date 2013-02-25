@@ -622,7 +622,7 @@ public class RuleConverterTest {
 		System.out.println(model);
 	}
 
-//	@Test
+	@Test
 	public void testParse () {
 		String modelString, queryString;
 		Model model;
@@ -635,8 +635,8 @@ public class RuleConverterTest {
 				"mother(john)=ann;" +
 				"trait(john);";
 		queryString = "trait(mary)";
-//		model = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-//		System.out.println(model);
+		model = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+		System.out.println(model);
 //		Brewer.generateFunctionApplicationString(sb, model, 3, true);
 
 		modelString = "random president: -> People;" +

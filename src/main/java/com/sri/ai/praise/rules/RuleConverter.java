@@ -774,23 +774,22 @@ public class RuleConverter {
 		
 	}
 
-	private void addFurtherConstrainedPotentialExpression(List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions, Expression potentialExpression, Expression constraints, Expression additionalConstraint) {
-		Expression cPrime;
-		constraints = And.make(constraints, additionalConstraint);
-		cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
-		if (!cPrime.equals(Expressions.FALSE)) {
-			RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
-			Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, potentialExpression);
-			if (!Expressions.isNumber(pPrime)) {
-				setOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
-			}
-		}
-	}
-
+	/**
+	 * Makes a parfactor from the given potential expression and a list of constraints.
+	 * @param potentialExpression  The potential expression to convert into a parfactor.
+	 * @param constraints          The list of the constraints for the parfactor.
+	 * @return A parfactor expression based on the potential expression on constraints.
+	 */
 	public Expression createParfactor (Expression potentialExpression, List<Expression> constraints) {
 		return createParfactor(potentialExpression, And.make(constraints));
 	}
 
+	/**
+	 * Makes a parfactor from the given potential expression and a list of constraints.
+	 * @param potentialExpression  The potential expression to convert into a parfactor.
+	 * @param constraints          The constraints for the parfactor.
+	 * @return A parfactor expression based on the potential expression on constraints.
+	 */
 	public Expression createParfactor (Expression potentialExpression, Expression constraints) {
 		Set<Expression> variableSet = Variables.freeVariables(potentialExpression, rewritingProcess);
 		List<Expression> variableList = new ArrayList<Expression>();
@@ -799,7 +798,8 @@ public class RuleConverter {
 		}
 		return IntensionalSet.makeMultiSetFromIndexExpressionsList(
 				variableList, 
-				potentialExpression, constraints);
+				Expressions.make(FunctorConstants.LEFT_DOT_RIGHT, potentialExpression), 
+				constraints);
 	}
 
 
@@ -824,6 +824,30 @@ public class RuleConverter {
 //	}
 
 	/**
+	 * Add a potential expression/constraint pair to a list of potential expression/constraint pairs.  
+	 * This method will simplify the potential expression and constraints and may eliminate the 
+	 * potential expression if it reduces out.
+	 * @param listOfConstrainedPotentialExpressions  The list of pairs to add the potential expression/constraint to.
+	 * @param potentialExpression                    The potential expression to add.
+	 * @param constraints                            The original list of constraints for the expression.
+	 * @param additionalConstraint                   An additional constraint to add to the list of constraints.
+	 */
+	private void addFurtherConstrainedPotentialExpression(
+			List<Pair<Expression, Expression>> listOfConstrainedPotentialExpressions, 
+			Expression potentialExpression, Expression constraints, Expression additionalConstraint) {
+		Expression cPrime;
+		constraints = And.make(constraints, additionalConstraint);
+		cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
+		if (!cPrime.equals(Expressions.FALSE)) {
+			RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
+			Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, potentialExpression);
+			if (!Expressions.isNumber(pPrime)) {
+				listOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
+			}
+		}
+	}
+
+	/**
 	 * Generates an expression representing one minus the value given.
 	 * @param potential   The reference value.
 	 * @return An expression representing 1 minus the given potential value.
@@ -844,8 +868,13 @@ public class RuleConverter {
 	}
 
 	/**
-	 * Returns list (Pt, Pf, Constraint) if potentialExpression (P, C) contains a constraint Constraint, and Pt and Pf are P[Constraint/true] and P[Constraint/false] respectively,
-	 * or null if there is no such constraint.
+	 * Looks for the first embedded constraint in a potential expression and returns two replacements; one 
+	 * with the embedded constraint replaced by True and one by False.
+	 * @param potentialExpression  The expression to search for embedded constraints.
+	 * @param process              The rewriting process.
+	 * @return  A list (Pt, Pf, Constraint) if potentialExpression (P, C) contains a constraint Constraint, 
+	 *          and Pt and Pf are P[Constraint/true] and P[Constraint/false] respectively.
+	 *          Null, if no constraint was found.
 	 */
 	private List<Expression> getReplacementsIfAny(Expression potentialExpression, RewritingProcess process) {
 		Expression pT = potentialExpression.replaceFirstOccurrence(positiveEmbeddedConstraintReplacementFunction, process);
