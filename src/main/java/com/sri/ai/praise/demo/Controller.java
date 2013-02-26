@@ -1,0 +1,163 @@
+/*
+ * Copyright (c) 2013, SRI International
+ * All rights reserved.
+ * Licensed under the The BSD 3-Clause License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ * 
+ * http://opensource.org/licenses/BSD-3-Clause
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * 
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * 
+ * Neither the name of the aic-expresso nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.sri.ai.praise.demo;
+
+import java.io.File;
+
+import javax.swing.Action;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+
+import com.google.common.annotations.Beta;
+import com.sri.ai.grinder.demo.ExpressionEditor;
+import com.sri.ai.praise.demo.action.ExitAction;
+import com.sri.ai.praise.demo.action.NewAction;
+import com.sri.ai.praise.demo.action.HideToolBarAction;
+import com.sri.ai.praise.demo.action.OpenFileAction;
+
+/**
+ * 
+ * @author oreilly
+ *
+ */
+@Beta
+public class Controller {
+
+	private PRAiSEDemoApp app = null;
+	private ExpressionEditor activeEditor;
+	private File currentModelFile = null;
+	private File currentEvidenceFile = null;
+	//
+	private NewAction newAction = null;
+	private OpenFileAction openFileAction = null;
+	private ExitAction exitAction = null;
+	private HideToolBarAction hideToolBarAction = null;
+	//
+	private JFileChooser fileChooser = new JFileChooser();
+
+	public Controller(PRAiSEDemoApp app) {
+		this.app = app;
+		updateAppTitle();
+	}
+	
+	public void setActiveEditor(ExpressionEditor ae) {
+		this.activeEditor = ae;
+	}
+	
+	public void newActiveEditorContent() {
+		activeEditor.setText("");
+// TODO - need to save first?		
+		if (activeEditor == app.modelEditPanel) {
+			currentModelFile = null;
+		}
+		else {
+			currentEvidenceFile = null;
+		}
+		updateAppTitle();
+	}
+	
+	public void openFile() {
+		int returnVal = fileChooser.showOpenDialog(app.toolBar.btnOpen);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+// TODO	- open and load the file into the active editor	
+		}
+	}
+	
+	public void exit() {	
+// TODO - save anything before closing?
+	}
+	
+	public JFrame getAppFrame() {
+		return app.frame;
+	}
+	
+	public ToolBarPanel getToolBar() {
+		return app.toolBar;
+	}
+
+	public Action getNewAction() {
+		if (null == newAction) {
+			newAction = new NewAction(this);
+		}
+		return newAction;
+	}
+	
+	public Action getOpenFileAction() {
+		if (null == openFileAction) {
+			openFileAction = new OpenFileAction(this);
+		}
+		return openFileAction;
+	}
+	
+	public Action getExitAction() {
+		if (null == exitAction) {
+			exitAction = new ExitAction(this);
+		}
+		return exitAction;
+	}
+
+	public Action getHideToolBarAction() {
+		if (null == hideToolBarAction) {
+			hideToolBarAction = new HideToolBarAction(this);
+		}
+		return hideToolBarAction;
+	}
+	
+	//
+	// PRIVATE
+	//
+	private void updateAppTitle() {
+		String title = "PRAiSE - ";
+		if (currentModelFile == null) {
+			title += "*";
+		}
+		else {
+			title += currentModelFile.getAbsolutePath(); 
+		}
+		
+		title += " :: ";
+		if (currentEvidenceFile == null) {
+			title += "*";
+		}
+		else {
+			title += currentEvidenceFile.getAbsolutePath();
+		}
+		
+		app.frame.setTitle(title);
+	}
+}

@@ -41,7 +41,6 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import java.awt.BorderLayout;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
@@ -57,32 +56,25 @@ import java.awt.Dimension;
  */
 @Beta
 public class ToolBarPanel extends JPanel {
-	private static final long serialVersionUID = 1L;
-	private static final String ICON_RESOLUTION = "32x32";
-	
+	private static final long serialVersionUID = 1L;	
 	//
-	private ImageIcon imageNew          = createImageIcon("document-new"+ICON_RESOLUTION+".png");
-	private ImageIcon imageOpen         = createImageIcon("document-open"+ICON_RESOLUTION+".png");
-	private ImageIcon imageSave         = createImageIcon("document-save"+ICON_RESOLUTION+".png");
-	private ImageIcon imageSaveAs       = createImageIcon("document-save-as"+ICON_RESOLUTION+".png");
-	private ImageIcon imageUndo         = createImageIcon("edit-undo"+ICON_RESOLUTION+".png");
-	private ImageIcon imageRedo         = createImageIcon("edit-redo"+ICON_RESOLUTION+".png");
-	private ImageIcon imageValidate     = createImageIcon("document-properties"+ICON_RESOLUTION+".png");
-	private ImageIcon imageExecuteQuery = createImageIcon("media-seek-forward"+ICON_RESOLUTION+".png"); 
-	private ImageIcon imageClear        = createImageIcon("edit-clear"+ICON_RESOLUTION+".png");
-	private ImageIcon imageNewWindow    = createImageIcon("window-new"+ICON_RESOLUTION+".png");
-	private JComboBox exampleComboBox;
+	public JComboBox exampleComboBox;
+	public JButton btnNew;
+	public JButton btnOpen;
+	public JButton btnSave;
+	public JButton btnSaveAll;
+	public JButton btnUndo;
+	public JButton btnRedo;
+	public JButton btnValidate;
+	public JButton btnExecuteQuery;
+	public JButton btnClearOutput;
+	public JButton btnNewWindow;
 
 	/**
 	 * Create the panel.
 	 */
 	public ToolBarPanel() {
 		initialize();
-	}
-	
-	public static ImageIcon getSmallExecuteQueryIcon() {
-		ImageIcon result = createImageIcon("media-seek-forward22x22.png");
-		return result;
 	}
 	
 	//
@@ -96,25 +88,29 @@ public class ToolBarPanel extends JPanel {
 		toolBar.setRollover(true);
 		add(toolBar, BorderLayout.NORTH);
 		
-		JButton btnNew = new JButton("");
-		btnNew.setIcon(imageNew);
+		btnNew = new JButton("");
+		btnNew.setHideActionText(true);
+		btnNew.setIcon(ImageLookup.NEW_LARGE);
 		btnNew.setToolTipText("New");
 		toolBar.add(btnNew);
 		
-		JButton btnOpen = new JButton("");
-		btnOpen.setIcon(imageOpen);
+		btnOpen = new JButton("");
+		btnOpen.setHideActionText(true);
+		btnOpen.setIcon(ImageLookup.OPEN_LARGE);
 		btnOpen.setToolTipText("Open");
 		toolBar.add(btnOpen);
 		
-		JButton btnSave = new JButton("");
-		btnSave.setIcon(imageSave);
+		btnSave = new JButton("");
+		btnSave.setHideActionText(true);
+		btnSave.setIcon(ImageLookup.SAVE_LARGE);
 		btnSave.setToolTipText("Save");
 		toolBar.add(btnSave);
 		
-		JButton btnSaveAs = new JButton("");
-		btnSaveAs.setIcon(imageSaveAs);
-		btnSaveAs.setToolTipText("Save As");
-		toolBar.add(btnSaveAs);
+		btnSaveAll = new JButton("");
+		btnSaveAll.setHideActionText(true);
+		btnSaveAll.setIcon(ImageLookup.SAVE_ALL_LARGE);
+		btnSaveAll.setToolTipText("Save All");
+		toolBar.add(btnSaveAll);
 		
 		toolBar.addSeparator();
 		
@@ -127,44 +123,44 @@ public class ToolBarPanel extends JPanel {
 		
 		toolBar.addSeparator();
 		
-		JButton btnUndo = new JButton("");
-		btnUndo.setIcon(imageUndo);
+		btnUndo = new JButton("");
+		btnUndo.setHideActionText(true);
+		btnUndo.setIcon(ImageLookup.UNDO_LARGE);
 		btnUndo.setToolTipText("Undo");
 		toolBar.add(btnUndo);
 		
-		JButton btnRedo = new JButton("");
-		btnRedo.setIcon(imageRedo);
+		btnRedo = new JButton("");
+		btnRedo.setHideActionText(true);
+		btnRedo.setIcon(ImageLookup.REDO_LARGE);
 		btnRedo.setToolTipText("Redo");
 		toolBar.add(btnRedo);
 		
 		toolBar.addSeparator();
 		
-		JButton btnValidate = new JButton("");
-		btnValidate.setIcon(imageValidate);
+		btnValidate = new JButton("");
+		btnValidate.setHideActionText(true);
+		btnValidate.setIcon(ImageLookup.VALIDATE_LARGE);
 		btnValidate.setToolTipText("Validate Model and Evidence");
 		toolBar.add(btnValidate);
 		
-		JButton btnExecuteQuery = new JButton("");
-		btnExecuteQuery.setIcon(imageExecuteQuery);
+		btnExecuteQuery = new JButton("");
+		btnExecuteQuery.setHideActionText(true);
+		btnExecuteQuery.setIcon(ImageLookup.EXECUTE_QUERY_LARGE);
 		btnExecuteQuery.setToolTipText("Execute Query");
 		toolBar.add(btnExecuteQuery);
 		
-		JButton btnClearOutput = new JButton("");
-		btnClearOutput.setIcon(imageClear);
+		btnClearOutput = new JButton("");
+		btnClearOutput.setHideActionText(true);
+		btnClearOutput.setIcon(ImageLookup.CLEAR_LARGE);
 		btnClearOutput.setToolTipText("Clear Output");
 		toolBar.add(btnClearOutput);
 		
 		toolBar.addSeparator();
 		
-		JButton btnNewWindow = new JButton("");
-		btnNewWindow.setIcon(imageNewWindow);
+		btnNewWindow = new JButton("");
+		btnNewWindow.setHideActionText(true);
+		btnNewWindow.setIcon(ImageLookup.NEW_WINDOW_LARGE);
 		btnNewWindow.setToolTipText("New Window");
 		toolBar.add(btnNewWindow);
 	}
-	
-	private static ImageIcon createImageIcon(String path) {
-	    java.net.URL imgURL = ToolBarPanel.class.getResource(path);
-	    return new ImageIcon(imgURL);
-	}
-
 }

@@ -55,6 +55,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * 
@@ -64,8 +68,30 @@ import javax.swing.JMenuItem;
 @Beta
 public class PRAiSEDemoApp {
 
-	private JFrame frame;
-	private ToolBarPanel toolBar = new ToolBarPanel();
+	JFrame frame;
+	ToolBarPanel toolBar = new ToolBarPanel();
+	JTabbedPane editorsTabbedPane;
+	ExpressionEditor modelEditPanel;
+	ExpressionEditor evidenceEditPanel;
+	QueryPanel queryPanel;
+	OutputPanel outputPanel;
+	//
+	private Controller controller = null;
+	//
+	private JMenuItem mntmNew;
+	private JMenuItem mntmOpenFile;
+	private JMenuItem mntmSave;
+	private JMenuItem mntmSaveAs;
+	private JMenuItem mntmSaveAll;
+	private JMenuItem mntmExport;
+	private JMenuItem mntmExit;
+	private JMenuItem mntmUndo;
+	private JMenuItem mntmRedo;
+	private JMenuItem mntmValidate;
+	private JMenuItem mntmExecuteQuery;
+	private JMenuItem mntmClearOutput;
+	private JMenuItem mntmNewWindow;
+	private JMenuItem mntmHideToolBar;
 
 	/**
 	 * Launch the application.
@@ -100,6 +126,7 @@ public class PRAiSEDemoApp {
 	 */
 	public PRAiSEDemoApp() {
 		initialize();
+		postGUIInitialization();
 	}
 
 	/**
@@ -107,8 +134,14 @@ public class PRAiSEDemoApp {
 	 */
 	private void initialize() {
 		frame = new JFrame();
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				controller.exit();
+			}
+		});
 		frame.setBounds(100, 100, 1000, 640);
-		frame.setTitle("PRAiSE: Relational Probabilistic Inference Demo");
+		frame.setTitle("PRAiSE");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JPanel backgroundPanel = new JPanel();
@@ -136,20 +169,32 @@ public class PRAiSEDemoApp {
 		splitPane.setLeftComponent(editorPanel);
 		editorPanel.setLayout(new BorderLayout(0, 0));
 		
-		JTabbedPane editorsTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		editorsTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		editorsTabbedPane.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (controller != null) {
+					if (editorsTabbedPane.getSelectedIndex() == 0) {
+						controller.setActiveEditor(modelEditPanel);
+					}
+					else {
+						controller.setActiveEditor(evidenceEditPanel);
+					}
+				}
+			}
+		});
 		editorPanel.add(editorsTabbedPane);
 		
-		ExpressionEditor modelEditPanel = new ExpressionEditor();
+		modelEditPanel = new ExpressionEditor();
 		editorsTabbedPane.addTab("Model", null, modelEditPanel, null);
 		
-		ExpressionEditor evidenceEditPanel = new ExpressionEditor();
+		evidenceEditPanel = new ExpressionEditor();
 		editorsTabbedPane.addTab("Evidence", null, evidenceEditPanel, null);
 		
-		QueryPanel queryPanel = new QueryPanel();
+		queryPanel = new QueryPanel();
 		queryPanel.setPreferredSize(new Dimension(300, 400));
 		splitPane.setRightComponent(queryPanel);
 		
-		OutputPanel outputPanel = new OutputPanel();
+		outputPanel = new OutputPanel();
 		outputPanel.setPreferredSize(new Dimension(400, 60));
 		inputOutputSplitPane.setRightComponent(outputPanel);
 		
@@ -158,71 +203,112 @@ public class PRAiSEDemoApp {
 		controlPanel.add(toolBar, BorderLayout.CENTER);
 		backgroundPanel.add(controlPanel, BorderLayout.NORTH);
 		
-		JPanel notificationPanel = new JPanel();
-		backgroundPanel.add(notificationPanel, BorderLayout.SOUTH);
-		
 		JMenuBar menuBar = new JMenuBar();
 		frame.getContentPane().add(menuBar, BorderLayout.NORTH);
 		
 		JMenu mnFile = new JMenu("File");
+		mnFile.setMnemonic('F');
 		menuBar.add(mnFile);
 		
-		JMenuItem mntmNew = new JMenuItem("New");
+		mntmNew = new JMenuItem("New");
 		mnFile.add(mntmNew);
 		
-		JMenuItem mntmOpenFile = new JMenuItem("Open File...");
+		mntmOpenFile = new JMenuItem("Open File...");
 		mnFile.add(mntmOpenFile);
 		
 		mnFile.addSeparator();
 		
-		JMenuItem mntmSave = new JMenuItem("Save");
+		mntmSave = new JMenuItem("Save");
 		mnFile.add(mntmSave);
 		
-		JMenuItem mntmSaveAs = new JMenuItem("Save As...");
+		mntmSaveAs = new JMenuItem("Save As...");
 		mnFile.add(mntmSaveAs);
 		
-		JMenuItem mntmSaveAll = new JMenuItem("Save All");
+		mntmSaveAll = new JMenuItem("Save All");
 		mnFile.add(mntmSaveAll);
 		
 		mnFile.addSeparator();
 		
-		JMenuItem mntmExport = new JMenuItem("Export...");
+		mntmExport = new JMenuItem("Export...");
 		mnFile.add(mntmExport);
 		
 		mnFile.addSeparator();
 		
-		JMenuItem mntmExit = new JMenuItem("Exit");
+		mntmExit = new JMenuItem("Exit");
 		mnFile.add(mntmExit);
 		
 		JMenu mnEdit = new JMenu("Edit");
+		mnEdit.setMnemonic('E');
 		menuBar.add(mnEdit);
 		
-		JMenuItem mntmUndo = new JMenuItem("Undo");
+		mntmUndo = new JMenuItem("Undo");
 		mnEdit.add(mntmUndo);
 		
-		JMenuItem mntmRedo = new JMenuItem("Redo");
+		mntmRedo = new JMenuItem("Redo");
 		mnEdit.add(mntmRedo);
 		
 		JMenu mnRun = new JMenu("Run");
+		mnRun.setMnemonic('R');
 		menuBar.add(mnRun);
 		
-		JMenuItem mntmValidate = new JMenuItem("Validate Model and Evidence");
+		mntmValidate = new JMenuItem("Validate Model and Evidence");
 		mnRun.add(mntmValidate);
 		
-		JMenuItem mntmExecuteQuery = new JMenuItem("Execute Query");
+		mntmExecuteQuery = new JMenuItem("Execute Query");
 		mnRun.add(mntmExecuteQuery);
 		
-		JMenuItem mntmClearOutput = new JMenuItem("Clear Output");
+		mntmClearOutput = new JMenuItem("Clear Output");
 		mnRun.add(mntmClearOutput);
 		
 		JMenu mnWindow = new JMenu("Window");
+		mnWindow.setMnemonic('W');
 		menuBar.add(mnWindow);
 		
-		JMenuItem mntmNewWindow = new JMenuItem("New Window");
+		mntmNewWindow = new JMenuItem("New Window");
 		mnWindow.add(mntmNewWindow);
 		
-		JMenuItem mntmShowToolBar = new JMenuItem("Show Tool Bar");
-		mnWindow.add(mntmShowToolBar);
+		mntmHideToolBar = new JMenuItem("Hide Tool Bar");
+		mnWindow.add(mntmHideToolBar);
+	}
+	
+	
+	private void postGUIInitialization() {
+		// Wire up the Controller
+		controller = new Controller(this);
+		controller.setActiveEditor(modelEditPanel);
+		
+		// 
+		// Wire up the Action handlers.
+		// New
+		mntmNew.setAction(controller.getNewAction());
+		toolBar.btnNew.setAction(controller.getNewAction());
+		// Open File...
+		mntmOpenFile.setAction(controller.getOpenFileAction());
+		toolBar.btnOpen.setAction(controller.getOpenFileAction());
+		// Save
+// TODO
+		// Save As...
+// TODO
+		// Save All
+// TODO
+		// Export...
+// TODO
+		// Exit
+		mntmExit.setAction(controller.getExitAction());
+		// Undo
+// TODO
+		// Redo
+// TODO
+		// Validate
+// TODO
+		// Execute Query
+// TODO
+		// Clear Output
+// TODO
+		// New Window
+// TODO
+		// Hide/Show Tool Bar
+		this.mntmHideToolBar.setAction(controller.getHideToolBarAction());
 	}
 
 }
