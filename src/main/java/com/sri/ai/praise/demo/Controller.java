@@ -59,6 +59,8 @@ import com.sri.ai.praise.demo.action.SaveAsAction;
 import com.sri.ai.praise.demo.action.UndoAction;
 import com.sri.ai.praise.demo.action.ValidateAction;
 import com.sri.ai.praise.demo.model.Example;
+import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.rules.RuleConverter;
 
 /**
  * 
@@ -173,7 +175,18 @@ System.out.println("Validate");
 	
 	public void executeQuery() {
 // TODO
-System.out.println("Execute Query");
+		try {
+			RuleConverter ruleConverter = new RuleConverter();
+			
+			Model model = ruleConverter.parseModel("'Name'", "'Description'",
+					app.modelEditPanel.getText()+"\n"+
+					app.evidenceEditPanel.getText());
+			
+			System.out.println("MODEL DECLARATION=\n"+model.getModelDeclaration());
+			
+		} catch (RuntimeException re) {
+			re.printStackTrace();
+		}
 	}
 	
 	public void clearOutput() {

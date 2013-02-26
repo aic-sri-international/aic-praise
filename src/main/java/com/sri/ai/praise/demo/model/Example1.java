@@ -52,39 +52,39 @@ public class Example1 extends Example {
 		" */\n"+
 		"//\n"+
 		"// SORT DECLARATIONS:\n"+
-		"sort People: 10, bob, dave, rodrigo, ciaran\n"+
+		"sort People: 10, bob, dave, rodrigo, ciaran;\n"+
 		"\n"+
 		"//\n"+
 		"// RANDOM VARIABLE DECLARATIONS:\n"+
-		"random epidemic: -> Boolean\n"+
-		"random sick: People -> Boolean\n"+
-		"random fever: People -> Boolean\n"+
-		"random rash: People -> Boolean\n"+
-		"random notAtWork: People -> Boolean\n" +
+		"random epidemic: -> Boolean;\n"+
+		"random sick: People -> Boolean;\n"+
+		"random fever: People -> Boolean;\n"+
+		"random rash: People -> Boolean;\n"+
+		"random notAtWork: People -> Boolean;\n" +
 		"\n"+
 		"//\n"+
 		"// RULES\n" +
-		"if epidemic then sick(X) 0.6 else sick(X) 0.05\n" +
-		"if sick(X) then fever(X) 0.7 else fever(X) 0.01\n"+
-		"if sick(X) then rash(X) 0.6 else rash(X) 0.07\n"+
-		"if sick(X) then notAtWork(X) 0.8 else notAtWork(X) 0.05\n"+
+		"if epidemic then sick(X) 0.6 else sick(X) 0.05;\n" +
+		"if sick(X) then fever(X) 0.7 else fever(X) 0.01;\n"+
+		"if sick(X) then rash(X) 0.6 else rash(X) 0.07;\n"+
+		"if sick(X) then notAtWork(X) 0.8 else notAtWork(X) 0.05;\n"+
 		"\n"+
 		"// By default, how likely is an epidemic?\n" +
-		"epidemic 0.001\n" +
+		"epidemic 0.001;\n" +
 		"\n"+
 		"//\n"+
 		"// By default, how likely are the following conditions?\n" +
-		"sick(X) 0.009\n"+
-		"rash(X) 0.005\n"+
-		"fever(X) 0.001\n"
+		"sick(X) 0.009;\n"+
+		"rash(X) 0.005;\n"+
+		"fever(X) 0.001;\n"
 		);
 		
 		setEvidence(
 		"//\n"+
 		"// EVIDENCE:\n"+
 		"// Dave rarely misses work compared to everyone else\n"+
-		"notAtWork(dave) 0.001\n"+
-		"notAtWork(X) and X != dave 0.008\n"
+		"notAtWork(dave) 0.001;\n"+
+		"notAtWork(X) and X != dave 0.008;\n"
 		);
 		
 		setQueryToRun("belief([sick(X)])");
