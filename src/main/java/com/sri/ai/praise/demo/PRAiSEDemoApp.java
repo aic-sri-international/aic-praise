@@ -45,7 +45,6 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.grinder.GrinderConfiguration;
-import com.sri.ai.grinder.demo.OutputPanel;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JSplitPane;
