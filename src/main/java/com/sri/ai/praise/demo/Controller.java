@@ -58,6 +58,7 @@ import com.sri.ai.praise.demo.action.SaveAllAction;
 import com.sri.ai.praise.demo.action.SaveAsAction;
 import com.sri.ai.praise.demo.action.UndoAction;
 import com.sri.ai.praise.demo.action.ValidateAction;
+import com.sri.ai.praise.demo.model.Example;
 
 /**
  * 
@@ -96,6 +97,19 @@ public class Controller {
 	
 	public void setActiveEditor(RuleEditor ae) {
 		this.activeEditor = ae;
+	}
+	
+	public void setExample(Example example) {
+// TODO - flesh out logic as regards replacing existing contents
+		
+		currentModelFile = null;
+		currentEvidenceFile = null;
+		
+		app.modelEditPanel.setText(example.getModel());
+		app.evidenceEditPanel.setText(example.getEvidence());
+		app.queryPanel.setCurrentQuery(example.getQueryToRun());
+		
+		updateAppTitle();
 	}
 	
 	public void newActiveEditorContent() {

@@ -73,7 +73,7 @@ import org.antlr.runtime.Token;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.DefaultSymbol;
-import com.sri.ai.grinder.parser.antlr.AntlrGrinderLexer;
+import com.sri.ai.praise.rules.antlr.RuleLexer;
 
 @Beta
 public class RuleEditor extends JPanel {
@@ -99,75 +99,55 @@ public class RuleEditor extends JPanel {
 	//
 	private static final Set<Integer> _terminals = new HashSet<Integer>();
 	{
-		_terminals.add(AntlrGrinderLexer.COLON);
-	    _terminals.add(AntlrGrinderLexer.DOUBLE_ARROW);
-	    _terminals.add(AntlrGrinderLexer.ARROW);
-	    _terminals.add(AntlrGrinderLexer.SINGLE_ARROW);
-	    _terminals.add(AntlrGrinderLexer.NOT_EQUAL);
-	    _terminals.add(AntlrGrinderLexer.GREATER_THAN_EQUAL);
-	    _terminals.add(AntlrGrinderLexer.GREATER_THAN);
-	    _terminals.add(AntlrGrinderLexer.LESS_THAN);
-	    _terminals.add(AntlrGrinderLexer.LESS_THAN_EQUAL);
-	    _terminals.add(AntlrGrinderLexer.EQUAL);
-	    _terminals.add(AntlrGrinderLexer.PLUS);
-	    _terminals.add(AntlrGrinderLexer.DASH);
-	    _terminals.add(AntlrGrinderLexer.TIMES);
-	    _terminals.add(AntlrGrinderLexer.DIVIDE);
-	    _terminals.add(AntlrGrinderLexer.CARAT);
-	    _terminals.add(AntlrGrinderLexer.CLOSE_SQUARE);
-	    _terminals.add(AntlrGrinderLexer.OPEN_SQUARE);
-	    _terminals.add(AntlrGrinderLexer.CLOSE_DOUBLE_CURLY);
-	    _terminals.add(AntlrGrinderLexer.OPEN_DOUBLE_CURLY);
-	    _terminals.add(AntlrGrinderLexer.UNDERSCORE_OPEN_CURLY);
-	    _terminals.add(AntlrGrinderLexer.CLOSE_CURLY);
-	    _terminals.add(AntlrGrinderLexer.OPEN_CURLY);
-	    _terminals.add(AntlrGrinderLexer.VERT_BAR);
-	    _terminals.add(AntlrGrinderLexer.OPEN_PAREN);
-	    _terminals.add(AntlrGrinderLexer.CLOSE_PAREN);
-	    _terminals.add(AntlrGrinderLexer.COMMA);
-	    _terminals.add(AntlrGrinderLexer.PERIOD);
+		_terminals.add(RuleLexer.ARROW);
+		_terminals.add(RuleLexer.DOUBLE_ARROW);
+		_terminals.add(RuleLexer.SINGLE_ARROW);
+		_terminals.add(RuleLexer.EQUAL);
+		_terminals.add(RuleLexer.NOT_EQUAL);
+		_terminals.add(RuleLexer.PLUS);
+		_terminals.add(RuleLexer.DASH);
+		_terminals.add(RuleLexer.TIMES);
+		_terminals.add(RuleLexer.DIVIDE);
+		_terminals.add(RuleLexer.CARAT);
+		_terminals.add(RuleLexer.OPEN_PAREN);
+		_terminals.add(RuleLexer.CLOSE_PAREN);
+		_terminals.add(RuleLexer.COLON_DASH);
+		_terminals.add(RuleLexer.COLON);
+		_terminals.add(RuleLexer.SEMICOLON);
+		_terminals.add(RuleLexer.PERIOD);
+		_terminals.add(RuleLexer.COMMA);
 	}
 	private static final Set<Integer> _keywords = new HashSet<Integer>();
 	{
-		_keywords.add(AntlrGrinderLexer.PREVIOUS);
-		_keywords.add(AntlrGrinderLexer.MESSAGE);
-		_keywords.add(AntlrGrinderLexer.LAMBDA);
-		_keywords.add(AntlrGrinderLexer.IF);
-		_keywords.add(AntlrGrinderLexer.THEN);
-		_keywords.add(AntlrGrinderLexer.ELSE);
-		_keywords.add(AntlrGrinderLexer.THERE);
-		_keywords.add(AntlrGrinderLexer.FOR);
-		_keywords.add(AntlrGrinderLexer.ALL);
-		_keywords.add(AntlrGrinderLexer.EXISTS);
-		_keywords.add(AntlrGrinderLexer.MINUS);
-		_keywords.add(AntlrGrinderLexer.NOT);
-		_keywords.add(AntlrGrinderLexer.IS);
-		_keywords.add(AntlrGrinderLexer.CASE);
-		_keywords.add(AntlrGrinderLexer.INDEX);
-		_keywords.add(AntlrGrinderLexer.OCCURS);
-		_keywords.add(AntlrGrinderLexer.FROM);
-		_keywords.add(AntlrGrinderLexer.VARIABLE);
-		_keywords.add(AntlrGrinderLexer.FACTOR);
-		_keywords.add(AntlrGrinderLexer.NEIGHBORS);
-		_keywords.add(AntlrGrinderLexer.VALUE);
-		_keywords.add(AntlrGrinderLexer.INTERSECTION);
-		_keywords.add(AntlrGrinderLexer.UNION);
-		_keywords.add(AntlrGrinderLexer.OR);
-		_keywords.add(AntlrGrinderLexer.AND);
-		_keywords.add(AntlrGrinderLexer.IN);
-		_keywords.add(AntlrGrinderLexer.OF);
-		_keywords.add(AntlrGrinderLexer.ON);
-		_keywords.add(AntlrGrinderLexer.TO);		
+		_keywords.add(RuleLexer.IF);
+		_keywords.add(RuleLexer.THEN);
+		_keywords.add(RuleLexer.ELSE);
+		_keywords.add(RuleLexer.SORT);
+		_keywords.add(RuleLexer.RANDOM);
+		_keywords.add(RuleLexer.X);
+		_keywords.add(RuleLexer.THERE);
+		_keywords.add(RuleLexer.EXISTS);
+		_keywords.add(RuleLexer.FOR);
+		_keywords.add(RuleLexer.ALL);
+		_keywords.add(RuleLexer.AND);
+		_keywords.add(RuleLexer.OR);
+		_keywords.add(RuleLexer.NOT);
+		_keywords.add(RuleLexer.MAY);
+		_keywords.add(RuleLexer.BE);
+		_keywords.add(RuleLexer.SAME);
+		_keywords.add(RuleLexer.AS);
+		_keywords.add(RuleLexer.MINUS);
 	}
 	
 	//
+	private JScrollPane editorScrollPane;
 	private JTextPane textPane;
 	
 	
 	public RuleEditor() {
 		setLayout(new BorderLayout(0, 0));
 		
-		JScrollPane editorScrollPane = new JScrollPane();
+		editorScrollPane = new JScrollPane();
 		add(editorScrollPane, BorderLayout.CENTER);
 		
 		textPane = new JTextPane();
@@ -202,7 +182,8 @@ public class RuleEditor extends JPanel {
 			// can always assume +1 for the line end, when trying
 			// to map between token positions and the underlying text.
 			text = text.replaceAll("\r\n", "\n");
-			styledDoc.insertString(0, text, null);	
+			styledDoc.insertString(0, text, null);
+			textPane.setCaretPosition(0);
 		} catch (BadLocationException ble) {
 				
 			ble.printStackTrace();
@@ -248,7 +229,7 @@ public class RuleEditor extends JPanel {
 		boolean result = false;
 		if (isSymbol(t)) {
 			String strValue = t.getText();
-			if (Character.isUpperCase(strValue.charAt(0)) || strValue.equals("_")) {
+			if (Character.isUpperCase(strValue.charAt(0))) {
 				result = true;
 			}
 		}
@@ -256,12 +237,11 @@ public class RuleEditor extends JPanel {
 	}	
 	
 	protected boolean isSymbol(Token t) {
-		// Note: Underscore is a prolog variable.
-		return t.getType() == AntlrGrinderLexer.ID || t.getType() == AntlrGrinderLexer.UNDERSCORE;
+		return t.getType() == RuleLexer.ID;
 	}
 	
 	protected boolean isString(Token t) {
-		return t.getType() == AntlrGrinderLexer.STRING;
+		return t.getType() == RuleLexer.STRING;
 	}
 	
 	//
@@ -393,7 +373,7 @@ public class RuleEditor extends JPanel {
 					ioe.printStackTrace();
 				}
 	    		CharStream cs = new ANTLRStringStream(expressionText);
-	    		AntlrGrinderLexer lexer = new AntlrGrinderLexer(cs);
+	    		RuleLexer lexer = new RuleLexer(cs);
 	    		CommonTokenStream tokens = new CommonTokenStream(lexer);
 	    		
 	    		Token token = null;
@@ -404,7 +384,7 @@ public class RuleEditor extends JPanel {
 	    		} catch (RuntimeException ex) {
 	    			lexerFailed = true;
 	    		}
-	    		while (!lexerFailed && token.getType() != AntlrGrinderLexer.EOF) {   			
+	    		while (!lexerFailed && token.getType() != RuleLexer.EOF) {   			
 	    			offset = lineOffsets.get(token.getLine()-1) + token.getCharPositionInLine();
 	    			int length = token.getText().length();
 	    			Style style  = styledDocument.getStyle(STYLE_REGULAR);

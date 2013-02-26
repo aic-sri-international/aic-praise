@@ -42,10 +42,13 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 
 import javax.swing.border.TitledBorder;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.MutableComboBoxModel;
+
 import java.awt.FlowLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -65,6 +68,8 @@ public class QueryPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	//
+	private MutableComboBoxModel queryModel = new DefaultComboBoxModel();
+	//
 	private JFormattedTextField domainSizeTextField = null;
 	private RuleEditor resultEditor = null;
 	private JComboBox queryComboBox;
@@ -77,6 +82,22 @@ public class QueryPanel extends JPanel {
 		initialize();
 	}
 
+	public void setCurrentQuery(String query) {
+		int idx = 0;
+		boolean exists = false;
+		for (int i = 0; i < queryModel.getSize(); i++) {
+			if (query.equals(queryModel.getElementAt(i))) {
+				idx = i;
+				exists = true;
+				break;
+			}
+		}
+		if (!exists) {
+			queryModel.insertElementAt(query, 0);
+		}
+		queryComboBox.setSelectedIndex(idx);
+	}
+	
 	//
 	// PRIVATE
 	//
@@ -92,7 +113,7 @@ public class QueryPanel extends JPanel {
 		queryAndOptionsPanel.add(queryPanel, BorderLayout.NORTH);
 		queryPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
-		queryComboBox = new JComboBox();
+		queryComboBox = new JComboBox(queryModel);
 		queryComboBox.setPreferredSize(new Dimension(250, 25));
 		queryComboBox.setEditable(true);
 		queryPanel.add(queryComboBox);

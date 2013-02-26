@@ -45,6 +45,9 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.grinder.GrinderConfiguration;
+import com.sri.ai.praise.demo.model.Example;
+import com.sri.ai.praise.demo.model.Example1;
+
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JSplitPane;
@@ -55,6 +58,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -314,7 +320,21 @@ public class PRAiSEDemoApp {
 		mntmNewWindow.setAction(controller.getNewWindowAction());
 		toolBar.btnNewWindow.setAction(controller.getNewWindowAction());
 		// Hide/Show Tool Bar
-		this.mntmHideToolBar.setAction(controller.getHideToolBarAction());
+		mntmHideToolBar.setAction(controller.getHideToolBarAction());
+		
+		
+		//
+		// Setup the examples
+		toolBar.exampleComboBox.addItem(new Example1());
+		toolBar.exampleComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int selectedIndex = toolBar.exampleComboBox.getSelectedIndex();
+				if (selectedIndex >= 0) {
+					controller.setExample((Example)toolBar.exampleComboBox.getItemAt(selectedIndex));
+				}
+			}
+		});
+		toolBar.exampleComboBox.setSelectedIndex(0);
 	}
 
 }
