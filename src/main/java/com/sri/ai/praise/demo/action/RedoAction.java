@@ -42,9 +42,11 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.demo.Controller;
+import com.sri.ai.praise.demo.ImageLookup;
 
 /**
  * 
@@ -52,29 +54,23 @@ import com.sri.ai.praise.demo.Controller;
  *
  */
 @Beta
-public class HideToolBarAction extends AbstractAction {
+public class RedoAction extends AbstractAction {
 	private static final long serialVersionUID = 1L;
 
 	private Controller controller = null;
 	
-	public HideToolBarAction(Controller controller) {
+	public RedoAction(Controller controller) {
 		this.controller = controller;
-		putValue(Action.NAME, "Hide Tool Bar");
-		putValue(Action.SHORT_DESCRIPTION, "Hide Tool Bar");
-		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
+		putValue(Action.NAME, "Redo");
+		putValue(Action.SHORT_DESCRIPTION, "Redo");
+		putValue(Action.LARGE_ICON_KEY, ImageLookup.REDO_LARGE);
+		putValue(Action.SMALL_ICON, ImageLookup.REDO_SMALL);
+		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);	
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, ActionEvent.CTRL_MASK));
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		if (controller.getToolBar().isVisible()) {
-			controller.getToolBar().setVisible(false);
-			putValue(Action.NAME, "Show Tool Bar");
-			putValue(Action.SHORT_DESCRIPTION, "Show Tool Bar");
-		}
-		else {
-			controller.getToolBar().setVisible(true);
-			putValue(Action.NAME, "Hide Tool Bar");
-			putValue(Action.SHORT_DESCRIPTION, "Hide Tool Bar");
-		}
+		controller.redo();
 	}
 }

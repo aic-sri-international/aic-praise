@@ -66,7 +66,7 @@ public class NewAction extends AbstractAction {
 		putValue(Action.LARGE_ICON_KEY, ImageLookup.NEW_LARGE);
 		putValue(Action.SMALL_ICON, ImageLookup.NEW_SMALL);
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);	
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK + ActionEvent.ALT_MASK));
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK | ActionEvent.ALT_MASK));
 	}
 	
 	@Override

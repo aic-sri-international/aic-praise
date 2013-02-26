@@ -45,6 +45,7 @@ import javax.swing.Action;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.demo.Controller;
+import com.sri.ai.praise.demo.ImageLookup;
 
 /**
  * 
@@ -52,29 +53,22 @@ import com.sri.ai.praise.demo.Controller;
  *
  */
 @Beta
-public class HideToolBarAction extends AbstractAction {
+public class NewWindowAction extends AbstractAction {
 	private static final long serialVersionUID = 1L;
 
 	private Controller controller = null;
 	
-	public HideToolBarAction(Controller controller) {
+	public NewWindowAction(Controller controller) {
 		this.controller = controller;
-		putValue(Action.NAME, "Hide Tool Bar");
-		putValue(Action.SHORT_DESCRIPTION, "Hide Tool Bar");
-		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
+		putValue(Action.NAME, "New Window");
+		putValue(Action.SHORT_DESCRIPTION, "New Window");
+		putValue(Action.LARGE_ICON_KEY, ImageLookup.NEW_WINDOW_LARGE);
+		putValue(Action.SMALL_ICON, ImageLookup.NEW_WINDOW_SMALL);
+		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_W);	
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		if (controller.getToolBar().isVisible()) {
-			controller.getToolBar().setVisible(false);
-			putValue(Action.NAME, "Show Tool Bar");
-			putValue(Action.SHORT_DESCRIPTION, "Show Tool Bar");
-		}
-		else {
-			controller.getToolBar().setVisible(true);
-			putValue(Action.NAME, "Hide Tool Bar");
-			putValue(Action.SHORT_DESCRIPTION, "Hide Tool Bar");
-		}
+		controller.newWindow();
 	}
 }

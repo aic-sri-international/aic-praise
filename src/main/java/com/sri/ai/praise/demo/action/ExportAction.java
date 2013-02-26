@@ -52,29 +52,20 @@ import com.sri.ai.praise.demo.Controller;
  *
  */
 @Beta
-public class HideToolBarAction extends AbstractAction {
+public class ExportAction extends AbstractAction {
 	private static final long serialVersionUID = 1L;
 
 	private Controller controller = null;
 	
-	public HideToolBarAction(Controller controller) {
+	public ExportAction(Controller controller) {
 		this.controller = controller;
-		putValue(Action.NAME, "Hide Tool Bar");
-		putValue(Action.SHORT_DESCRIPTION, "Hide Tool Bar");
-		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
+		putValue(Action.NAME, "Export...");
+		putValue(Action.SHORT_DESCRIPTION, "Export...");
+		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		if (controller.getToolBar().isVisible()) {
-			controller.getToolBar().setVisible(false);
-			putValue(Action.NAME, "Show Tool Bar");
-			putValue(Action.SHORT_DESCRIPTION, "Show Tool Bar");
-		}
-		else {
-			controller.getToolBar().setVisible(true);
-			putValue(Action.NAME, "Hide Tool Bar");
-			putValue(Action.SHORT_DESCRIPTION, "Hide Tool Bar");
-		}
+		controller.export();
 	}
 }

@@ -54,7 +54,6 @@ import javax.swing.JFormattedTextField;
 import java.awt.Component;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.grinder.demo.ExpressionEditor;
 
 /**
  * 
@@ -67,7 +66,7 @@ public class QueryPanel extends JPanel {
 	
 	//
 	private JFormattedTextField domainSizeTextField = null;
-	private ExpressionEditor resultExpressionEditor = null;
+	private RuleEditor resultEditor = null;
 	private JComboBox queryComboBox;
 	private JButton btnExecuteQuery;
 
@@ -160,8 +159,8 @@ public class QueryPanel extends JPanel {
 		add(resultPanel, BorderLayout.CENTER);
 		resultPanel.setLayout(new BorderLayout(0, 0));
 		
-		resultExpressionEditor = new ExpressionEditor();
-		resultExpressionEditor.setEditable(false);
-		resultPanel.add(resultExpressionEditor, BorderLayout.CENTER);
+		resultEditor = new RuleEditor();
+		resultEditor.setEditable(false);
+		resultPanel.add(resultEditor, BorderLayout.CENTER);
 	}
 }

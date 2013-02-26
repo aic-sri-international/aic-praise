@@ -44,11 +44,20 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.grinder.demo.ExpressionEditor;
+import com.sri.ai.praise.demo.action.ClearOutputAction;
+import com.sri.ai.praise.demo.action.ExecuteQueryAction;
 import com.sri.ai.praise.demo.action.ExitAction;
+import com.sri.ai.praise.demo.action.ExportAction;
 import com.sri.ai.praise.demo.action.NewAction;
 import com.sri.ai.praise.demo.action.HideToolBarAction;
+import com.sri.ai.praise.demo.action.NewWindowAction;
 import com.sri.ai.praise.demo.action.OpenFileAction;
+import com.sri.ai.praise.demo.action.RedoAction;
+import com.sri.ai.praise.demo.action.SaveAction;
+import com.sri.ai.praise.demo.action.SaveAllAction;
+import com.sri.ai.praise.demo.action.SaveAsAction;
+import com.sri.ai.praise.demo.action.UndoAction;
+import com.sri.ai.praise.demo.action.ValidateAction;
 
 /**
  * 
@@ -59,13 +68,23 @@ import com.sri.ai.praise.demo.action.OpenFileAction;
 public class Controller {
 
 	private PRAiSEDemoApp app = null;
-	private ExpressionEditor activeEditor;
+	private RuleEditor activeEditor;
 	private File currentModelFile = null;
 	private File currentEvidenceFile = null;
 	//
 	private NewAction newAction = null;
 	private OpenFileAction openFileAction = null;
+	private SaveAction saveAction = null;
+	private SaveAsAction saveAsAction = null;
+	private SaveAllAction saveAllAction = null;
+	private ExportAction exportAction = null;
 	private ExitAction exitAction = null;
+	private UndoAction undoAction = null;
+	private RedoAction redoAction = null;
+	private ValidateAction validateAction = null;
+	private ExecuteQueryAction executeQueryAction = null;
+	private ClearOutputAction clearOutputAction = null;
+	private NewWindowAction newWindowAction = null;
 	private HideToolBarAction hideToolBarAction = null;
 	//
 	private JFileChooser fileChooser = new JFileChooser();
@@ -75,7 +94,7 @@ public class Controller {
 		updateAppTitle();
 	}
 	
-	public void setActiveEditor(ExpressionEditor ae) {
+	public void setActiveEditor(RuleEditor ae) {
 		this.activeEditor = ae;
 	}
 	
@@ -98,8 +117,59 @@ public class Controller {
 		}
 	}
 	
+	public void save() {
+// TODO	
+System.out.println("Save");		
+	}
+	
+	public void saveAs() {
+// TODO
+System.out.println("Save As...");
+	}
+	
+	public void saveAll() {
+// TODO		
+System.out.println("Save All");
+	}
+	
+	public void export() {
+// TODO
+System.out.println("Export...");
+	}
+	
 	public void exit() {	
 // TODO - save anything before closing?
+System.out.println("exit");
+	}
+	
+	public void undo() {
+// TODO
+System.out.println("undo");
+	}
+	
+	public void redo() {
+// TODO
+System.out.println("redo");
+	}
+	
+	public void validate() {
+// TODO
+System.out.println("Validate");
+	}
+	
+	public void executeQuery() {
+// TODO
+System.out.println("Execute Query");
+	}
+	
+	public void clearOutput() {
+// TODO
+System.out.println("Clear Output");
+	}
+	
+	public void newWindow() {
+// TODO
+System.out.println("New Window");
 	}
 	
 	public JFrame getAppFrame() {
@@ -124,11 +194,81 @@ public class Controller {
 		return openFileAction;
 	}
 	
+	public Action getSaveAction() {
+		if (null == saveAction) {
+			saveAction = new SaveAction(this);
+		}
+		return saveAction;
+	}
+	
+	public Action getSaveAsAction() {
+		if (null == saveAsAction) {
+			saveAsAction = new SaveAsAction(this);
+		}
+		return saveAsAction;
+	}
+	
+	public Action getSaveAllAction() {
+		if (null == saveAllAction) {
+			saveAllAction = new SaveAllAction(this);
+		}
+		return saveAllAction;
+	}
+	
+	public Action getExportAction() {
+		if (null == exportAction) {
+			exportAction = new ExportAction(this);
+		}
+		return exportAction;
+	}
+	
 	public Action getExitAction() {
 		if (null == exitAction) {
 			exitAction = new ExitAction(this);
 		}
 		return exitAction;
+	}
+	
+	public Action getUndoAction() {
+		if (null == undoAction) {
+			undoAction = new UndoAction(this);
+		}
+		return undoAction;
+	}
+	
+	public Action getRedoAction() {
+		if (null == redoAction) {
+			redoAction = new RedoAction(this);
+		}
+		return redoAction;
+	}
+	
+	public Action getValidateAction() {
+		if (null == validateAction) {
+			validateAction = new ValidateAction(this);
+		}
+		return validateAction;
+	}
+	
+	public Action getExecuteQueryAction() {
+		if (null == executeQueryAction) {
+			executeQueryAction = new ExecuteQueryAction(this);
+		}
+		return executeQueryAction;
+	}
+	
+	public Action getClearOutputAction() {
+		if (null == clearOutputAction) {
+			clearOutputAction = new ClearOutputAction(this);
+		}
+		return clearOutputAction;
+	}
+	
+	public Action getNewWindowAction() {
+		if (null == newWindowAction) {
+			newWindowAction = new NewWindowAction(this);
+		}
+		return newWindowAction;
 	}
 
 	public Action getHideToolBarAction() {

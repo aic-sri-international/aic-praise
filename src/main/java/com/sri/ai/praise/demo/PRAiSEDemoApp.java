@@ -45,7 +45,6 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.grinder.GrinderConfiguration;
-import com.sri.ai.grinder.demo.ExpressionEditor;
 import com.sri.ai.grinder.demo.OutputPanel;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
@@ -71,8 +70,8 @@ public class PRAiSEDemoApp {
 	JFrame frame;
 	ToolBarPanel toolBar = new ToolBarPanel();
 	JTabbedPane editorsTabbedPane;
-	ExpressionEditor modelEditPanel;
-	ExpressionEditor evidenceEditPanel;
+	RuleEditor modelEditPanel;
+	RuleEditor evidenceEditPanel;
 	QueryPanel queryPanel;
 	OutputPanel outputPanel;
 	//
@@ -184,10 +183,10 @@ public class PRAiSEDemoApp {
 		});
 		editorPanel.add(editorsTabbedPane);
 		
-		modelEditPanel = new ExpressionEditor();
+		modelEditPanel = new RuleEditor();
 		editorsTabbedPane.addTab("Model", null, modelEditPanel, null);
 		
-		evidenceEditPanel = new ExpressionEditor();
+		evidenceEditPanel = new RuleEditor();
 		editorsTabbedPane.addTab("Evidence", null, evidenceEditPanel, null);
 		
 		queryPanel = new QueryPanel();
@@ -251,7 +250,7 @@ public class PRAiSEDemoApp {
 		mnRun.setMnemonic('R');
 		menuBar.add(mnRun);
 		
-		mntmValidate = new JMenuItem("Validate Model and Evidence");
+		mntmValidate = new JMenuItem("Validate Input...");
 		mnRun.add(mntmValidate);
 		
 		mntmExecuteQuery = new JMenuItem("Execute Query");
@@ -286,27 +285,35 @@ public class PRAiSEDemoApp {
 		mntmOpenFile.setAction(controller.getOpenFileAction());
 		toolBar.btnOpen.setAction(controller.getOpenFileAction());
 		// Save
-// TODO
+		mntmSave.setAction(controller.getSaveAction());
+		toolBar.btnSave.setAction(controller.getSaveAction());
 		// Save As...
-// TODO
+		mntmSaveAs.setAction(controller.getSaveAsAction());
 		// Save All
-// TODO
+		mntmSaveAll.setAction(controller.getSaveAllAction());
+		toolBar.btnSaveAll.setAction(controller.getSaveAllAction());		
 		// Export...
-// TODO
+		mntmExport.setAction(controller.getExportAction());
 		// Exit
 		mntmExit.setAction(controller.getExitAction());
 		// Undo
-// TODO
+		mntmUndo.setAction(controller.getUndoAction());
+		toolBar.btnUndo.setAction(controller.getUndoAction());
 		// Redo
-// TODO
+		mntmRedo.setAction(controller.getRedoAction());
+		toolBar.btnRedo.setAction(controller.getRedoAction());
 		// Validate
-// TODO
+		mntmValidate.setAction(controller.getValidateAction());
+		toolBar.btnValidate.setAction(controller.getValidateAction());
 		// Execute Query
-// TODO
+		mntmExecuteQuery.setAction(controller.getExecuteQueryAction());
+		toolBar.btnExecuteQuery.setAction(controller.getExecuteQueryAction());
 		// Clear Output
-// TODO
+		mntmClearOutput.setAction(controller.getClearOutputAction());
+		toolBar.btnClearOutput.setAction(controller.getClearOutputAction());
 		// New Window
-// TODO
+		mntmNewWindow.setAction(controller.getNewWindowAction());
+		toolBar.btnNewWindow.setAction(controller.getNewWindowAction());
 		// Hide/Show Tool Bar
 		this.mntmHideToolBar.setAction(controller.getHideToolBarAction());
 	}
