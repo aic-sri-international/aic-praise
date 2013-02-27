@@ -59,6 +59,8 @@ import com.sri.ai.praise.demo.action.SaveAsAction;
 import com.sri.ai.praise.demo.action.UndoAction;
 import com.sri.ai.praise.demo.action.ValidateAction;
 import com.sri.ai.praise.demo.model.Example;
+import com.sri.ai.praise.lbp.LBPFactory;
+import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.rules.RuleConverter;
 
@@ -70,6 +72,8 @@ import com.sri.ai.praise.rules.RuleConverter;
 @Beta
 public class Controller {
 
+	private LBPQueryEngine queryEngine = LBPFactory.newLBPQueryEngine();
+	//
 	private PRAiSEDemoApp app = null;
 	private RuleEditor activeEditor;
 	private File currentModelFile = null;
@@ -184,6 +188,10 @@ System.out.println("Validate");
 					app.queryPanel.getCurrentQuery());
 			
 			System.out.println("MODEL DECLARATION=\n"+model.getModelDeclaration());
+			
+			//String queryUUID = queryEngine.newQueryUUID();
+			
+			//queryEngine.queryBeliefOfRandomVariable(queryUUID, beliefQuery, modelDeclaration)
 			
 		} catch (RuntimeException re) {
 			re.printStackTrace();

@@ -67,13 +67,13 @@ import com.google.common.annotations.Beta;
 public class QueryPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
+	JButton btnExecuteQuery;
 	//
 	private MutableComboBoxModel queryModel = new DefaultComboBoxModel();
 	//
 	private JFormattedTextField domainSizeTextField = null;
 	private RuleEditor resultEditor = null;
 	private JComboBox queryComboBox;
-	private JButton btnExecuteQuery;
 
 	/**
 	 * Create the panel.

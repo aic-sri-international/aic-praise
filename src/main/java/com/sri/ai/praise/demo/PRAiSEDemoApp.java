@@ -319,6 +319,7 @@ public class PRAiSEDemoApp {
 		// Execute Query
 		mntmExecuteQuery.setAction(controller.getExecuteQueryAction());
 		toolBar.btnExecuteQuery.setAction(controller.getExecuteQueryAction());
+		queryPanel.btnExecuteQuery.setAction(controller.getExecuteQueryAction());
 		// Clear Output
 		mntmClearOutput.setAction(controller.getClearOutputAction());
 		toolBar.btnClearOutput.setAction(controller.getClearOutputAction());
