@@ -88,6 +88,8 @@ public class RuleConverter {
 
 	public static final String FUNCTOR_MAY_BE_SAME_AS              = "may be same as";
 
+	public static final String QUERY_STRING                        = "query";
+
 
 	private RuleParserWrapper         ruleParser       = null;
 //	private AntlrGrinderParserWrapper grinderParser    = new AntlrGrinderParserWrapper();
@@ -297,7 +299,7 @@ public class RuleConverter {
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
 			if (LPIUtil.isConstraint(expression, process)) {
-				System.out.println("Found constraint: " + expression);
+//				System.out.println("Found constraint: " + expression);
 				constraint = expression;
 				return constant;
 			}
@@ -318,15 +320,15 @@ public class RuleConverter {
 		ruleParser       = new RuleParserWrapper();
 	}
 	
-	public Pair<Expression, Model> parseModel (String modelString) {
+	public Pair<Expression, Model> parseModel (String modelString) throws ReservedWordException {
 		return parseModel("", "", modelString);
 	}
 
-	public Pair<Expression, Model> parseModel (String name, String description, String modelString) {
+	public Pair<Expression, Model> parseModel (String name, String description, String modelString) throws ReservedWordException {
 		return parseModel(name, description, ruleParser.parseAll(modelString));
 	}
 	
-	public Pair<Expression, Model> parseModel (String modelString, String queryString) {
+	public Pair<Expression, Model> parseModel (String modelString, String queryString) throws ReservedWordException {
 		return parseModel("", "", modelString, queryString);
 	}
 
@@ -337,16 +339,17 @@ public class RuleConverter {
 	 * @param inputRules   The rules string of the model.
 	 * @param query        The query string for the model.
 	 * @return  A Model instance of the parsed model.
+	 * @throws ReservedWordException 
 	 */
-	public Pair<Expression, Model> parseModel (String name, String description, String modelString, String queryString) {
+	public Pair<Expression, Model> parseModel (String name, String description, String modelString, String queryString) throws ReservedWordException {
 		return parseModel(name, description, ruleParser.parseAll(modelString), ruleParser.parseFormula(queryString));
 	}
 	
-	public Pair<Expression, Model> parseModel (List<Expression> inputRules) {
+	public Pair<Expression, Model> parseModel (List<Expression> inputRules) throws ReservedWordException {
 		return parseModel("", "", inputRules);
 	}
 
-	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules) {
+	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules) throws ReservedWordException {
 		return parseModel(name, description, inputRules, null);
 	}
 
@@ -357,8 +360,9 @@ public class RuleConverter {
 	 * @param inputRules   The list of rule expressions of the model.
 	 * @param query        The query expression for the model.
 	 * @return  A Model instance of the parsed model.
+	 * @throws ReservedWordException 
 	 */
-	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules, Expression query) {
+	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules, Expression query) throws ReservedWordException {
 //		RulesConversionProcess context = new RulesConversionProcess();
 		List<Expression> potentialExpressions         = new ArrayList<Expression>();
 		List<Expression> sorts                        = new ArrayList<Expression>();
@@ -372,6 +376,16 @@ public class RuleConverter {
 			if (queryPair != null) {
 				potentialExpressions.add(translateRule(queryPair.second));
 				queryAtom = queryPair.first;
+//				String queryName;
+//				if (queryAtom.getArguments().size() == 0) {
+//					queryName = queryAtom.toString();
+//				}
+//				else {
+//					queryName = queryAtom.getFunctor().toString();
+//				}
+//				if (queryName.equals(QUERY_STRING)) {
+//					randomVariables.add(e);
+//				}
 			}
 		}
 		
@@ -389,6 +403,10 @@ public class RuleConverter {
 			else if (rule.getFunctor().equals(FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
 				randomVariables.add(this.updateRandomVariableDeclaration(rule));
 				String varName = rule.get(0).toString();
+				if (varName.equals(QUERY_STRING)) {
+					throw new ReservedWordException("'" + QUERY_STRING + 
+							"' is a reserved word in the rules language.");
+				}
 				if (randomVariableIndex.get(varName) == null) {
 					Set<Integer> set = new HashSet<Integer>();
 					set.add(rule.get(1).intValue());
@@ -410,25 +428,25 @@ public class RuleConverter {
 //		System.out.println("sorts: " + context.sorts.toString());
 
 		// Translate the functions.
-		System.out.println("Starting translation: " + potentialExpressions);
+//		System.out.println("Starting translation: " + potentialExpressions);
 		potentialExpressions = translateFunctions(potentialExpressions, randomVariableIndex);
-		System.out.println("After translating functions: \n" + potentialExpressions);
+//		System.out.println("After translating functions: \n" + potentialExpressions);
 
 		// Translate the quantifiers.
 		potentialExpressions = translateQuantifiers(potentialExpressions);
-		System.out.println("After translating quantifiers: \n" + potentialExpressions);
+//		System.out.println("After translating quantifiers: \n" + potentialExpressions);
 
 		// Extract the embedded constraints.
 		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = 
 				disembedConstraints(potentialExpressions);
-		System.out.println("After extracting constraints: \n" + potentialExpressionAndConstraintList);
+//		System.out.println("After extracting constraints: \n" + potentialExpressionAndConstraintList);
 
 		// Translate the potential expression/constraint pair into a parfactor.
 		potentialExpressions = new ArrayList<Expression>();
 		for (Pair<Expression, Expression> pair : potentialExpressionAndConstraintList) {
 			potentialExpressions.add(createParfactor(pair.first, pair.second));
 		}
-		System.out.println("Final parfactors: \n" + potentialExpressions);
+//		System.out.println("Final parfactors: \n" + potentialExpressions);
 		
 		// Create the model object output.
 		return new Pair<Expression, Model>(queryAtom, createModel(name, description, sorts, randomVariables, potentialExpressions));
@@ -471,11 +489,19 @@ public class RuleConverter {
 	 */
 	public Pair<Expression, Expression> queryRuleAndAtom (Expression query) {
 		if (LPIUtil.isRandomVariableValueExpression(query, rewritingProcess)) {
+			System.out.println("Query: " + query + " is a random variable value expression.");
 			return new Pair<Expression, Expression>(query, Expressions.make(FUNCTOR_ATOMIC_RULE, query, 1));
 		}
 
+		System.out.println("Query: " + query + " is not a random variable value expression.");
 		Set<Expression> variables = Variables.freeVariables(query, rewritingProcess);
-		Expression queryAtom = Expressions.make("query", variables);
+		Expression queryAtom;
+		if (variables.size() > 0) {
+			queryAtom = Expressions.make(QUERY_STRING, variables);
+		}
+		else {
+			queryAtom = DefaultSymbol.createSymbol(QUERY_STRING);
+		}
 		Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);
 		return new Pair<Expression, Expression>(queryAtom, queryRule);
 	}
@@ -763,7 +789,7 @@ public class RuleConverter {
 
 		for (Expression potentialExpression : potentialExpressions) {
 			Set<Pair<Expression, Expression>> mayBeSameAsSet = new HashSet<Pair<Expression, Expression>>();
-			System.out.println("Searching for 'may be same as': " + potentialExpression);
+//			System.out.println("Searching for 'may be same as': " + potentialExpression);
 
 			// Gather instances of "may be same as".
 			Expression toReplace = potentialExpression;
@@ -783,13 +809,13 @@ public class RuleConverter {
 			potentialExpression = rewritingProcess.rewrite(LBPRewriter.R_simplify, potentialExpression);
 
 //			System.out.println("Completed search for may be same as expressions: " + context.mayBeSameAsSet);
-			System.out.println("Potential expression: " + potentialExpression);
+//			System.out.println("Potential expression: " + potentialExpression);
 
 			// Get free variables and create inequality constraints on all pairs except those
 			// pairs stated to be "may be same as".
 			List<Expression> constraints = new ArrayList<Expression>();
 			Set<Expression> variables = Variables.freeVariables(potentialExpression, rewritingProcess);
-			System.out.println("Free variables: " + variables);
+//			System.out.println("Free variables: " + variables);
 			Expression[] variableArray = new Expression[variables.size()];
 			variables.toArray(variableArray);
 			for (int ii = 0; ii < variables.size() - 1; ii++) {
@@ -804,7 +830,7 @@ public class RuleConverter {
 				}
 			}
 
-			System.out.println("Generated constraints: " + constraints);
+//			System.out.println("Generated constraints: " + constraints);
 			setOfConstrainedPotentialExpressions.add(
 					new Pair<Expression, Expression>(potentialExpression, And.make(constraints)));
 		}
@@ -814,7 +840,7 @@ public class RuleConverter {
 
 			// Check if the potential expression has any more embedded constraints.
 			Pair<Expression, Expression> pair = setOfConstrainedPotentialExpressions.get(ii);
-			System.out.println("Searching for embedded constraints " + ii + ": " + pair.first);
+//			System.out.println("Searching for embedded constraints " + ii + ": " + pair.first);
 			List<Expression> replacements = getReplacementsIfAny(pair.first, rewritingProcess);
 
 			// If the result is null, then were no more embedded constraints found.  If the
@@ -822,7 +848,7 @@ public class RuleConverter {
 			// potential expression to the end of the list of potential expressions to be process,
 			// so that we can check if there are more embedded constraints to extract.
 			if (replacements == null) {
-				System.out.println("Done extracting constraints: " + pair);
+//				System.out.println("Done extracting constraints: " + pair);
 				// Add the complete parfactor to the completely-processed parfactor list.
 				result.add(pair);
 			}

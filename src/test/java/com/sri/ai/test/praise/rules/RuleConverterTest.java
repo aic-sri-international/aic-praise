@@ -62,6 +62,7 @@ import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.LPIGrammar;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.util.base.Pair;
 
@@ -570,8 +571,8 @@ public class RuleConverterTest {
 		
 		string = "sick(john) and sick(mary)";
 		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
-		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query()"), 
-				ruleParser.parse("query() <=> sick(john) and sick(mary);"));
+		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query"), 
+				ruleParser.parse("query <=> sick(john) and sick(mary);"));
 		assertEquals(expected, result);
 
 		string = "not sick(X)";
@@ -635,10 +636,14 @@ public class RuleConverterTest {
 				"mother(john)=ann;" +
 				"trait(john);";
 		queryString = "trait(mary)";
-		result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-		System.out.println(result.first);
-		System.out.println(result.second);
-//		Brewer.generateFunctionApplicationString(sb, model, 3, true);
+		try {
+			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			System.out.println(result.first);
+			System.out.println(result.second);
+		}
+		catch (ReservedWordException e) {
+			e.printStackTrace();
+		}
 
 		modelString = "random president: -> People;" +
 				"random firstLady: -> People;" +
@@ -646,18 +651,67 @@ public class RuleConverterTest {
 				"president = billClinton <=> firstLady = hillaryClinton;" +
 				"firstLady = michelleObama 0.9;";
 		queryString = "president";
-//		result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-//		System.out.println(result.first);
-//		System.out.println(result.second);
-//		Brewer.generateFunctionApplicationString(sb, model, 3, true);
+//		try {
+//			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+//			System.out.println(result.first);
+//			System.out.println(result.second);
+//		}
+//		catch (ReservedWordException e) {
+//			e.printStackTrace();
+//		}
 
 		modelString = "there exists X : X = bestFriend(X) 0.9;";
 		queryString = "bestFriend(john)";
-		result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-		System.out.println(result.first);
-		System.out.println(result.second);
-//		Brewer.generateFunctionApplicationString(sb, model, 3, true);
+		try {
+			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			System.out.println(result.first);
+			System.out.println(result.second);
+		}
+		catch (ReservedWordException e) {
+			e.printStackTrace();
+		}
 		
+		modelString = "/**\n"+
+				" * Example 1: Epidemic and Sick with Symtoms.\n"+
+				" * An example of the interplay between symtoms.\n" +
+				" * Using Atomic and Conditional Rule Syntax.\n" +
+				" */\n"+
+				"//\n"+
+				"// SORT DECLARATIONS:\n"+
+				"sort People: 10, bob, dave, rodrigo, ciaran;\n"+
+				"\n"+
+				"//\n"+
+				"// RANDOM VARIABLE DECLARATIONS:\n"+
+				"random epidemic: -> Boolean;\n"+
+				"random sick: People -> Boolean;\n"+
+				"random fever: People -> Boolean;\n"+
+				"random rash: People -> Boolean;\n"+
+				"random notAtWork: People -> Boolean;\n" +
+				"\n"+
+				"//\n"+
+				"// RULES\n" +
+				"if epidemic then sick(X) 0.6 else sick(X) 0.05;\n" +
+				"if sick(X) then fever(X) 0.7 else fever(X) 0.01;\n"+
+				"if sick(X) then rash(X) 0.6 else rash(X) 0.07;\n"+
+				"if sick(X) then notAtWork(X) 0.8 else notAtWork(X) 0.05;\n"+
+				"\n"+
+				"// By default, how likely is an epidemic?\n" +
+				"epidemic 0.001;\n" +
+				"\n"+
+				"//\n"+
+				"// By default, how likely are the following conditions?\n" +
+				"sick(X) 0.009;\n"+
+				"rash(X) 0.005;\n"+
+				"fever(X) 0.001;\n";
+		queryString = "sick(X)";
+		try {
+			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			System.out.println(result.first);
+			System.out.println(result.second);
+		}
+		catch (ReservedWordException e) {
+			e.printStackTrace();
+		}
 	}
 	
 
@@ -757,28 +811,33 @@ public class RuleConverterTest {
 	protected void testParseModel (String name, String desc, String inputString, List<Expression> inputExpr, boolean expectSucceed, boolean checkResult, Expression expectedResult) {
 		testCount ++;
 		Model result;
-		if (inputExpr == null) {
-			result = ruleConverter.parseModel(name, desc, inputString).second;
-		} 
-		else {
-			result = ruleConverter.parseModel(name, desc, inputExpr).second;
-		}
-		if (expectSucceed) {
-			if (checkResult) {
-				assertEquals(expectedResult.toString(), result.toString());
+		try {
+			if (inputExpr == null) {
+				result = ruleConverter.parseModel(name, desc, inputString).second;
+			} 
+			else {
+				result = ruleConverter.parseModel(name, desc, inputExpr).second;
+			}
+			if (expectSucceed) {
+				if (checkResult) {
+					assertEquals(expectedResult.toString(), result.toString());
+				}
+				else {
+					if(result != null) {
+//						if (inputString != null)
+//							System.out.println("generated string for \"" + inputString + "\": " + generateBuildString(result) + "\n\n");
+//						else
+//							System.out.println("generated string : " + generateBuildString(result) + "\n\n");
+					}
+//					Assert.assertNotNull(result);
+				}
 			}
 			else {
-				if(result != null) {
-//					if (inputString != null)
-//						System.out.println("generated string for \"" + inputString + "\": " + generateBuildString(result) + "\n\n");
-//					else
-//						System.out.println("generated string : " + generateBuildString(result) + "\n\n");
-				}
-//				Assert.assertNotNull(result);
+				Assert.assertNull(result);
 			}
 		}
-		else {
-			Assert.assertNull(result);
+		catch (ReservedWordException e) {
+			e.printStackTrace();
 		}
 	}
 

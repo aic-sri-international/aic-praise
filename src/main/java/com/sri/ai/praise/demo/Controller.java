@@ -63,6 +63,7 @@ import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.util.base.Pair;
 
@@ -187,22 +188,29 @@ System.out.println("Validate");
 			
 			RuleConverter ruleConverter = new RuleConverter();
 			
-			Pair<Expression, Model> parseResult = ruleConverter.parseModel("'Name'", "'Description'",
-					app.modelEditPanel.getText()+"\n"+
-					app.evidenceEditPanel.getText(),
-					app.queryPanel.getCurrentQuery());
-			
-			System.out.println("MODEL DECLARATION=\n"+parseResult.second.getModelDeclaration());
-			System.out.println("QUERY=\n"+parseResult.first);
-			
-			String queryUUID = queryEngine.newQueryUUID();
-			
-			String belief = queryEngine.queryBeliefOfRandomVariable(queryUUID, 
-					"belief([" + parseResult.first + "])", parseResult.second.getModelDeclaration());
-			
-			System.out.println("BELIEF=\n"+belief);
-			
-			app.queryPanel.setResult(belief);
+			try {
+				Pair<Expression, Model> parseResult = ruleConverter.parseModel("'Name'", "'Description'",
+						app.modelEditPanel.getText()+"\n"+
+								app.evidenceEditPanel.getText(),
+								app.queryPanel.getCurrentQuery());
+
+				System.out.println("MODEL DECLARATION=\n"+parseResult.second.getModelDeclaration());
+
+				System.out.println("QUERY=\n"+parseResult.first);
+
+				String queryUUID = queryEngine.newQueryUUID();
+
+				String belief = queryEngine.queryBeliefOfRandomVariable(queryUUID, 
+						"belief([" + parseResult.first + "])", parseResult.second.getModelDeclaration());
+
+				System.out.println("BELIEF=\n"+belief);
+
+				app.queryPanel.setResult(belief);
+
+			}
+			catch (ReservedWordException e) {
+				e.printStackTrace();
+			}
 			
 		} catch (RuntimeException re) {
 			re.printStackTrace();
