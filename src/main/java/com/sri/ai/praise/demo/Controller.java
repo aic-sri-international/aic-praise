@@ -189,9 +189,11 @@ System.out.println("Validate");
 			
 			System.out.println("MODEL DECLARATION=\n"+model.getModelDeclaration());
 			
-			//String queryUUID = queryEngine.newQueryUUID();
+			String queryUUID = queryEngine.newQueryUUID();
 			
-			//queryEngine.queryBeliefOfRandomVariable(queryUUID, beliefQuery, modelDeclaration)
+			String belief = queryEngine.queryBeliefOfRandomVariable(queryUUID, "belief([query(X)])", model.getModelDeclaration());
+			
+			System.out.println("BELIEF=\n"+belief);
 			
 		} catch (RuntimeException re) {
 			re.printStackTrace();
