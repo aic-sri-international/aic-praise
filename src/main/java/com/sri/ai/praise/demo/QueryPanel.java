@@ -52,6 +52,7 @@ import javax.swing.MutableComboBoxModel;
 import java.awt.FlowLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 import javax.swing.JFormattedTextField;
 import java.awt.Component;
@@ -99,6 +100,24 @@ public class QueryPanel extends JPanel {
 		queryComboBox.setSelectedIndex(idx);
 	}
 	
+	public void addQuery(String query) {
+		boolean exists = false;	
+		for (int i = 0; i < queryModel.getSize(); i++) {
+			if (query.equals(queryModel.getElementAt(i))) {
+				// Move the query to the top of the list 
+				String existingQuery = queryModel.getElementAt(i).toString();
+				queryModel.removeElementAt(i);
+				queryModel.insertElementAt(existingQuery, 0);
+				exists = true;
+				break;
+			}
+		}
+		if (!exists) {
+			queryModel.insertElementAt(query, 0);
+		}
+		queryComboBox.setSelectedIndex(0);		
+	}
+	
 	public String getCurrentQuery() {
 		return queryComboBox.getEditor().getItem().toString();
 	}
@@ -125,6 +144,18 @@ public class QueryPanel extends JPanel {
 		queryComboBox = new JComboBox(queryModel);
 		queryComboBox.setPreferredSize(new Dimension(250, 25));
 		queryComboBox.setEditable(true);
+		queryComboBox.getEditor().getEditorComponent().addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				addQuery(getCurrentQuery());
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				// Do nothing
+			}
+		});
 		queryPanel.add(queryComboBox);
 		
 		btnExecuteQuery = new JButton("");
