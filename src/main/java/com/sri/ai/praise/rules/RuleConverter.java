@@ -376,6 +376,7 @@ public class RuleConverter {
 			if (queryPair != null) {
 				potentialExpressions.add(translateRule(queryPair.second));
 				queryAtom = queryPair.first;
+// TODO
 //				String queryName;
 //				if (queryAtom.getArguments().size() == 0) {
 //					queryName = queryAtom.toString();
@@ -748,6 +749,7 @@ public class RuleConverter {
 			else
 				newArgs.add(oldArgs.get(ii));
 		}
+		newArgs.add(DefaultSymbol.createSymbol("Boolean"));
 		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
 	}
 

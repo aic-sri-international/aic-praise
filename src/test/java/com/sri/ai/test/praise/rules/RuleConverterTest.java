@@ -287,18 +287,15 @@ public class RuleConverterTest {
 		Expression result, input;
 		input = new DefaultCompoundSyntaxTree("randomVariable", "mother", 1, "People", "People");
 		result = ruleConverter.updateRandomVariableDeclaration(input);
-		System.out.println("Updating: " + input);
-		System.out.println("To:       " + result);
+		assertEquals(lowParser.parse("randomVariable(mother, 2, People, People, Boolean)"), result);
 
 		input = new DefaultCompoundSyntaxTree("randomVariable", "president", 0, "People");
 		result = ruleConverter.updateRandomVariableDeclaration(input);
-		System.out.println("Updating: " + input);
-		System.out.println("To:       " + result);
+		assertEquals(lowParser.parse("randomVariable(president, 1, People, Boolean)"), result);
 
 		input = new DefaultCompoundSyntaxTree("sort", "sprinters", "bolt", "johnson");
 		result = ruleConverter.updateRandomVariableDeclaration(input);
-		System.out.println("Updating: " + input);
-		System.out.println("To:       " + result);
+		assertEquals(null, result);
 	}
 
 	@Test
@@ -347,17 +344,28 @@ public class RuleConverterTest {
 
 	@Test
 	public void testCreateTransformedFunctionConstraints () {
+		List<Expression> expected;
+
 		List<Expression> parfactors = new ArrayList<Expression>();
 		ruleConverter.createTransformedFunctionConstraints("president", 1, parfactors);
-		System.out.println("created constraints: " + parfactors.toString());
+		expected = new ArrayList<Expression>();
+		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if there exists Y : president(Y) then 1 else 0"));
+		assertEquals(expected, parfactors);
 
 		parfactors = new ArrayList<Expression>();
 		ruleConverter.createTransformedFunctionConstraints("mother", 2, parfactors);
-		System.out.println("created constraints: " + parfactors.toString());
+		expected = new ArrayList<Expression>();
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
+		assertEquals(expected, parfactors);
 
 		parfactors = new ArrayList<Expression>();
 		ruleConverter.createTransformedFunctionConstraints("foo", 4, parfactors);
-		System.out.println("created constraints: " + parfactors.toString());
+		expected = new ArrayList<Expression>();
+		expected.add(lowParser.parse("if foo(X0, X1, X2, Y) then if not foo(X0, X1, X2, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if there exists Y : foo(X0, X1, X2, Y) then 1 else 0"));
+		assertEquals(expected, parfactors);
 	}
 
 	@Test
@@ -545,7 +553,6 @@ public class RuleConverterTest {
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(lowParser.parse(
 				"if friends(X,Y) and likes(X,Z) and 'may be same as'(X, Z) then if likes(Y,Z) then 0.8 else 0.2 else 0.5"));
-		System.out.println(potentialExpressions);
 		expected = new ArrayList<Pair<Expression, Expression>>();
 		expected.add(new Pair<Expression, Expression>(
 				lowParser.parse("if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.800000000 else 0.200000000 else 0.500000000"),
