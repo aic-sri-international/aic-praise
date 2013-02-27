@@ -108,6 +108,7 @@ public class Model {
 			CONSTANT_IN_MORE_THAN_1_SORT
 		};
 
+		
 		//
 		private TYPE errorType = null;
 		private Expression inExpression = null;
@@ -123,6 +124,13 @@ public class Model {
 		private ModelError(TYPE errorType, Expression inExpression) {
 			this.errorType = errorType;
 			this.inExpression = inExpression;
+		}
+		
+		public String toString() {
+			String inExpressionString = inExpression.toString();
+			String typeString = errorType.name();
+			String result = typeString + " in " + inExpressionString;
+			return result;
 		}
 	}
 

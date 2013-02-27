@@ -62,8 +62,10 @@ import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.LPIGrammar;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.Model.ModelException;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
 public class RuleConverterTest {
@@ -651,6 +653,10 @@ public class RuleConverterTest {
 		catch (ReservedWordException e) {
 			e.printStackTrace();
 		}
+		catch (ModelException e) {
+			e.printStackTrace();
+			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
+		}
 
 		modelString = "random president: -> People;" +
 				"random firstLady: -> People;" +
@@ -666,6 +672,10 @@ public class RuleConverterTest {
 //		catch (ReservedWordException e) {
 //			e.printStackTrace();
 //		}
+//		catch (ModelException e) {
+//			e.printStackTrace();
+//			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
+//		}
 
 		modelString = "there exists X : X = bestFriend(X) 0.9;";
 		queryString = "bestFriend(john)";
@@ -676,6 +686,10 @@ public class RuleConverterTest {
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
+		}
+		catch (ModelException e) {
+			e.printStackTrace();
+			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
 		}
 		
 		modelString = "/**\n"+
@@ -718,6 +732,10 @@ public class RuleConverterTest {
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
+		}
+		catch (ModelException e) {
+			e.printStackTrace();
+			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
 		}
 	}
 	
