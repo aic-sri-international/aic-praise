@@ -184,12 +184,14 @@ System.out.println("Validate");
 		try {
 			RuleConverter ruleConverter = new RuleConverter();
 			
+			System.out.println("ABOUT TO RUN QUERY");
 			Pair<Expression, Model> parseResult = ruleConverter.parseModel("'Name'", "'Description'",
 					app.modelEditPanel.getText()+"\n"+
 					app.evidenceEditPanel.getText(),
 					app.queryPanel.getCurrentQuery());
 			
 			System.out.println("MODEL DECLARATION=\n"+parseResult.second.getModelDeclaration());
+			System.out.println("QUERY=\n"+parseResult.first);
 			
 			String queryUUID = queryEngine.newQueryUUID();
 			
