@@ -221,6 +221,9 @@ System.out.println("Validate");
 					executeQueryAction.setEnabled(true);
 				}
 				
+				System.out.flush();
+				System.err.flush();
+				
 				return "done";
 			}
 		};
