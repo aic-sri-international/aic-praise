@@ -39,6 +39,7 @@ package com.sri.ai.praise.demo;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 
@@ -141,7 +142,7 @@ public class Controller {
 	}
 	
 	public void setExample(Example example) {
-// TODO - flesh out logic as regards replacing existing contents
+		saveAll();
 		
 		currentModelFile = null;
 		currentEvidenceFile = null;
@@ -161,15 +162,10 @@ public class Controller {
 	public void newActiveEditorContent() {
 		saveIfRequired(activeEditor);
 		
-		activeEditor.setText("");		
-		if (activeEditor == app.modelEditPanel) {
-			currentModelFile = null;
-		}
-		else {
-			currentEvidenceFile = null;
-		}
+		activeEditor.setText("");
 		discardActiveEdits();
-		updateAppTitle();
+		
+		setOutputFile(activeEditor, null);
 	}
 	
 	public void openFile() {
@@ -193,14 +189,7 @@ public class Controller {
 					activeEditor.setText(sb.toString());
 					discardActiveEdits();
 					
-					if (activeEditor == app.modelEditPanel) {
-						currentModelFile = toOpen;
-					}
-					else {
-						currentEvidenceFile = toOpen;
-					}
-					
-					updateAppTitle();
+					setOutputFile(activeEditor, toOpen);
 				} catch (IOException ioe) {
 					error("Unable to open file: "+toOpen.getAbsolutePath());
 				}
@@ -212,28 +201,37 @@ public class Controller {
 	}
 	
 	public void save() {
-// TODO	
-printlnToConsole("Save");		
+		saveIfRequired(activeEditor);
 	}
 	
 	public void saveAs() {
-// TODO
-printlnToConsole("Save As...");
+		saveAs(activeEditor);
 	}
 	
 	public void saveAll() {
-// TODO		
-printlnToConsole("Save All");
+		saveIfRequired(app.modelEditPanel);
+		saveIfRequired(app.evidenceEditPanel);
 	}
 	
 	public void export() {
-// TODO
-printlnToConsole("Export...");
+// TODO		
+information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-praise/wiki/ExportingModels for more information.");
 	}
 	
-	public void exit() {	
-		saveIfRequired(app.modelEditPanel);
-		saveIfRequired(app.evidenceEditPanel);
+	public void exit() {
+		if (isASaveRequired()) {
+			
+			int option = JOptionPane.showConfirmDialog(
+				    app.frame,
+				    "Save changes before exiting?",
+				    "Save?",
+				    JOptionPane.YES_NO_OPTION);
+			
+			if (option == JOptionPane.YES_OPTION) {
+				saveIfRequired(app.modelEditPanel);
+				saveIfRequired(app.evidenceEditPanel);
+			}
+		}
 	}
 	
 	public void undo() {
@@ -262,11 +260,10 @@ printlnToConsole("Export...");
 	
 	public void validate() {
 // TODO
-printlnToConsole("Validate");
+information("Validate currently not implemented");
 	}
 	
 	public void executeQuery() {
-// TODO - clean up
 		executeQueryAction.setEnabled(false);
 		SwingWorker<String, Object> queryWorker = new SwingWorker<String, Object>() {
 			@Override
@@ -305,7 +302,7 @@ printlnToConsole("Validate");
 					executeQueryAction.setEnabled(true);
 				}
 				
-				printlnToConsole("----");
+				printlnToConsole("------");
 				
 				return "done";
 			}
@@ -320,7 +317,7 @@ printlnToConsole("Validate");
 	
 	public void newWindow() {
 // TODO
-printlnToConsole("New Window");
+information("New Window currently not implemented.");
 	}
 	
 	public JFrame getAppFrame() {
@@ -433,7 +430,7 @@ printlnToConsole("New Window");
 	// PRIVATE
 	//
 	private void updateAppTitle() {
-		String title = "PRAiSE - ";
+		String title = "PRAiSE - Model[";
 		if (currentModelFile == null) {
 			title += "*";
 		}
@@ -441,38 +438,125 @@ printlnToConsole("New Window");
 			title += currentModelFile.getAbsolutePath(); 
 		}
 		
-		title += " :: ";
+		title += "]::Evidence[";
 		if (currentEvidenceFile == null) {
 			title += "*";
 		}
 		else {
 			title += currentEvidenceFile.getAbsolutePath();
 		}
+		title += "]";
 		
 		app.frame.setTitle(title);
 	}
 	
 	private UndoManager getActiveUndoManager() {
+		return getUndoManager(activeEditor);
+	}
+	
+	private UndoManager getUndoManager(RuleEditor ruleEditor) {
 		UndoManager undoManager = modelUndoManager;
-		if (activeEditor == app.evidenceEditPanel) {
+		if (ruleEditor == app.evidenceEditPanel) {
 			undoManager = evidenceUndoManager;
 		}
 		return undoManager;
 	}
 	
+	public void setOutputFile(RuleEditor editor, File outFile) {
+		if (editor == app.modelEditPanel) {
+			currentModelFile = outFile;
+		}
+		else {
+			currentEvidenceFile = outFile;
+		}
+		updateAppTitle();
+	}
+	
+	public File getOutputFile(RuleEditor ruleEditor) {
+		File outFile = currentModelFile;
+		if (ruleEditor == app.evidenceEditPanel) {
+			outFile = currentEvidenceFile;
+		}
+		return outFile;
+	}
+	
 	private void handleUndoRedo(UndoManager undoManager) {
 		getUndoAction().setEnabled(undoManager.canUndo());
 		getRedoAction().setEnabled(undoManager.canRedo());
+		
+		if (getActiveUndoManager().canUndo()) {
+			getSaveAction().setEnabled(true);
+			getSaveAsAction().setEnabled(true);
+		}
+		else {
+			getSaveAction().setEnabled(false);
+			getSaveAsAction().setEnabled(false);
+		}
+		
+		if (isASaveRequired()) {
+			getSaveAllAction().setEnabled(true);
+		}
+		else {
+			getSaveAllAction().setEnabled(false);
+		}
+	}
+	
+	private boolean isASaveRequired() {
+		return modelUndoManager.canUndo() || evidenceUndoManager.canUndo();
 	}
 	
 	private void discardActiveEdits() {
-		getActiveUndoManager().discardAllEdits();
-		handleUndoRedo(getActiveUndoManager());
+		discardEdits(activeEditor);
+	}
+	
+	private void discardEdits(RuleEditor editor) {
+		UndoManager um = getUndoManager(editor);
+		um.discardAllEdits();
+		handleUndoRedo(um);
 	}
 	
 	private void saveIfRequired(RuleEditor editor) {
-// TODO	
-printlnToConsole("save if required!!!");		
+		if (getUndoManager(editor).canUndo()) {
+			File outFile = getOutputFile(editor);
+			if (outFile == null) {
+				saveAs(editor);
+			}
+			else {
+				saveToFile(editor.getText(), outFile, editor);
+			}
+		}
+	}
+	
+	private void saveAs(RuleEditor editor) {
+		if (getUndoManager(editor).canUndo()) {
+			File outFile = getOutputFile(editor);
+			if (outFile != null) {
+				fileChooser.setSelectedFile(outFile);
+			}
+			int returnVal = fileChooser.showSaveDialog(app.toolBar.btnSave);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				outFile = fileChooser.getSelectedFile();
+				saveToFile(editor.getText(), outFile, editor);
+			}
+		}
+	}
+	
+	private void saveToFile(String text, File file, RuleEditor editor) {
+		
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			
+			FileWriter fileWriter = new FileWriter(file);
+			fileWriter.write(text);
+			fileWriter.close();
+			
+			discardEdits(editor);
+			setOutputFile(editor, file);
+		} catch (IOException ioe) {
+			error("ERROR saving file:\n"+file.getAbsolutePath());
+		}
 	}
 	
 	private void printlnToConsole(String msg) {
@@ -486,5 +570,9 @@ printlnToConsole("save if required!!!");
 	
 	private void warning(String message) {
 		JOptionPane.showMessageDialog(app.frame, message, "Warning", JOptionPane.WARNING_MESSAGE, null);
+	}
+	
+	private void information(String message) {
+		JOptionPane.showMessageDialog(app.frame, message, "Information", JOptionPane.INFORMATION_MESSAGE, null);
 	}
 }
