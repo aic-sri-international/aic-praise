@@ -168,6 +168,7 @@ public class Controller {
 		else {
 			currentEvidenceFile = null;
 		}
+		discardActiveEdits();
 		updateAppTitle();
 	}
 	
@@ -190,8 +191,7 @@ public class Controller {
 					reader.close();
 					
 					activeEditor.setText(sb.toString());
-					getActiveUndoManager().discardAllEdits();
-					handleUndoRedo(getActiveUndoManager());
+					discardActiveEdits();
 					
 					if (activeEditor == app.modelEditPanel) {
 						currentModelFile = toOpen;
@@ -213,22 +213,22 @@ public class Controller {
 	
 	public void save() {
 // TODO	
-System.out.println("Save");		
+printlnToConsole("Save");		
 	}
 	
 	public void saveAs() {
 // TODO
-System.out.println("Save As...");
+printlnToConsole("Save As...");
 	}
 	
 	public void saveAll() {
 // TODO		
-System.out.println("Save All");
+printlnToConsole("Save All");
 	}
 	
 	public void export() {
 // TODO
-System.out.println("Export...");
+printlnToConsole("Export...");
 	}
 	
 	public void exit() {	
@@ -262,7 +262,7 @@ System.out.println("Export...");
 	
 	public void validate() {
 // TODO
-System.out.println("Validate");
+printlnToConsole("Validate");
 	}
 	
 	public void executeQuery() {
@@ -272,7 +272,7 @@ System.out.println("Validate");
 			@Override
 			public String doInBackground() {
 				try {
-					System.out.println("ABOUT TO RUN QUERY");
+					printlnToConsole("ABOUT TO RUN QUERY");
 
 					RuleConverter ruleConverter = new RuleConverter();
 
@@ -282,9 +282,9 @@ System.out.println("Validate");
 											+ app.evidenceEditPanel.getText(),
 									app.queryPanel.getCurrentQuery());
 
-					System.out.println("MODEL DECLARATION=\n"
+					printlnToConsole("MODEL DECLARATION=\n"
 							+ parseResult.second.getModelDeclaration());
-					System.out.println("QUERY=\n" + parseResult.first);
+					printlnToConsole("QUERY=\n" + parseResult.first);
 
 					String queryUUID = queryEngine.newQueryUUID();
 
@@ -292,7 +292,7 @@ System.out.println("Validate");
 							queryUUID, "belief([" + parseResult.first + "])",
 							parseResult.second.getModelDeclaration());
 
-					System.out.println("BELIEF=\n" + belief);					
+					printlnToConsole("BELIEF=\n" + belief);					
 
 					app.queryPanel.setResult(belief);
 
@@ -305,15 +305,12 @@ System.out.println("Validate");
 					executeQueryAction.setEnabled(true);
 				}
 				
-				System.out.flush();
-				System.err.flush();
+				printlnToConsole("----");
 				
 				return "done";
 			}
 		};
 		
-		System.out.flush();
-		System.err.flush();
 		queryWorker.execute();
 	}
 	
@@ -323,7 +320,7 @@ System.out.println("Validate");
 	
 	public void newWindow() {
 // TODO
-System.out.println("New Window");
+printlnToConsole("New Window");
 	}
 	
 	public JFrame getAppFrame() {
@@ -468,9 +465,19 @@ System.out.println("New Window");
 		getRedoAction().setEnabled(undoManager.canRedo());
 	}
 	
+	private void discardActiveEdits() {
+		getActiveUndoManager().discardAllEdits();
+		handleUndoRedo(getActiveUndoManager());
+	}
+	
 	private void saveIfRequired(RuleEditor editor) {
 // TODO	
-System.out.println("save if required!!!");		
+printlnToConsole("save if required!!!");		
+	}
+	
+	private void printlnToConsole(String msg) {
+		System.out.println(msg);
+		System.out.flush();
 	}
 	
 	private void error(String message) {
