@@ -42,7 +42,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -56,6 +55,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -64,6 +65,9 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
+import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CompoundEdit;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
@@ -140,6 +144,8 @@ public class RuleEditor extends JPanel {
 	}
 	
 	//
+	private CompoundUndoableEditListener compoundListener = new CompoundUndoableEditListener();
+	//
 	private JScrollPane editorScrollPane;
 	private JTextPane textPane;
 	
@@ -198,8 +204,8 @@ public class RuleEditor extends JPanel {
 		textPane.setEditable(editable);
 	}
 	
-	public void addFocusListener(FocusListener l) {
-		textPane.addFocusListener(l);
+	public void addUndoableEditListener(UndoableEditListener listener) {
+		compoundListener.undoableListeners.add(listener);
 	}
 	
 	//
@@ -254,6 +260,7 @@ public class RuleEditor extends JPanel {
 		    doc.setDocumentFilter(new ExpressionFormatFilter());
 		} 
 		addStylesToDocument(styledDoc);
+		styledDoc.addUndoableEditListener(compoundListener);
 		
 		textPane.getInputMap().put(KeyStroke.getKeyStroke("TAB"),
                 "doTab");
@@ -329,6 +336,8 @@ public class RuleEditor extends JPanel {
 			
 			super.remove(fb, offset, length);			
 			format(styledDocument);
+			
+			compoundListener.triggerUndoableEditEvent();		
 		}
 		
 		@Override
@@ -338,6 +347,8 @@ public class RuleEditor extends JPanel {
 			
 			super.insertString(fb, offset, string, attr);
 			format(styledDocument);
+			
+			compoundListener.triggerUndoableEditEvent();
 		}
 		
 		@Override
@@ -347,6 +358,8 @@ public class RuleEditor extends JPanel {
 			
 			super.replace(fb, offset, length, text, attrs);
 			format(styledDocument);
+			
+			compoundListener.triggerUndoableEditEvent();
 		}
 		
 		private void format(StyledDocument styledDocument) throws BadLocationException {
@@ -424,7 +437,48 @@ public class RuleEditor extends JPanel {
 	    		if (lexerFailed) {
 	    			styledDocument.setCharacterAttributes(lastMarkedUpPos, expressionText.length(), styledDocument.getStyle(STYLE_REGULAR), true);
 	    		}
+	    		
+	    		// Note: The following ensure the caret position is reset correctly after formatting occurs when a redo is applied 
+	    		// (otherwise the caret ends up going to the end of the document).
+	    		compoundListener.undoableEditHappened(new UndoableEditEvent(textPane, new AbstractUndoableEdit() {
+					private static final long serialVersionUID = 1L;
+					private int caretPosition = textPane.getCaretPosition();
+	    			@Override
+	    			public void redo() throws CannotRedoException {
+	    				super.redo();
+	    				textPane.setCaretPosition(caretPosition);
+	    			}
+	    		}));
 			}
+		}
+	}
+	
+	private class CompoundUndoableEditListener implements UndoableEditListener {
+		public List<UndoableEditListener> undoableListeners = new ArrayList<UndoableEditListener>();
+		public Object source = null;
+		public CompoundEdit compoundEdit = new CompoundEdit();
+		
+		public void triggerUndoableEditEvent() {
+			if (compoundEdit != null) {
+				compoundEdit.end();
+				UndoableEditEvent event = new UndoableEditEvent(source, compoundEdit);
+				
+				compoundEdit = null;
+				
+				// Notify listeners of event
+				for (UndoableEditListener l : undoableListeners) {
+					l.undoableEditHappened(event);
+				}
+			}
+		}
+		
+		@Override
+		public void undoableEditHappened(UndoableEditEvent e) {
+			this.source = e.getSource();
+			if (compoundEdit == null) {
+				compoundEdit = new CompoundEdit();
+			}
+			compoundEdit.addEdit(e.getEdit());
 		}
 	}
 }

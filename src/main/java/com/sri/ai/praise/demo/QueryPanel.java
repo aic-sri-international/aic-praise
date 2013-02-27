@@ -57,6 +57,7 @@ import javax.swing.JFormattedTextField;
 import java.awt.Component;
 
 import com.google.common.annotations.Beta;
+import javax.swing.JLabel;
 
 /**
  * 
@@ -138,6 +139,10 @@ public class QueryPanel extends JPanel {
 		queryAndOptionsPanel.add(optionsPanel, BorderLayout.CENTER);
 		optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
 		
+		JCheckBox chckbxNewCheckBox = new JCheckBox("Override Model's Domain Sizes (i.e. sort sizes)");
+		chckbxNewCheckBox.setPreferredSize(new Dimension(18, 25));
+		optionsPanel.add(chckbxNewCheckBox);
+		
 		JPanel knownSizePanel = new JPanel();
 		knownSizePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		FlowLayout flowLayout = (FlowLayout) knownSizePanel.getLayout();
@@ -145,6 +150,9 @@ public class QueryPanel extends JPanel {
 		flowLayout.setHgap(0);
 		flowLayout.setAlignment(FlowLayout.LEFT);
 		optionsPanel.add(knownSizePanel);
+		
+		JLabel lblNewLabel = new JLabel("      ");
+		knownSizePanel.add(lblNewLabel);
 		
 		JCheckBox chckbxKnownDomainSize = new JCheckBox("Known Domain Size");
 		knownSizePanel.add(chckbxKnownDomainSize);

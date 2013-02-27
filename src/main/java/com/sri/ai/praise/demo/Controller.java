@@ -43,6 +43,10 @@ import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.SwingWorker;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.UndoManager;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -82,6 +86,8 @@ public class Controller {
 	private RuleEditor activeEditor;
 	private File currentModelFile = null;
 	private File currentEvidenceFile = null;
+	private UndoManager modelUndoManager = new UndoManager();
+	private UndoManager evidenceUndoManager = new UndoManager();
 	//
 	private NewAction newAction = null;
 	private OpenFileAction openFileAction = null;
@@ -102,11 +108,32 @@ public class Controller {
 
 	public Controller(PRAiSEDemoApp app) {
 		this.app = app;
+		
+		modelUndoManager.setLimit(-1);
+		evidenceUndoManager.setLimit(-1);
+		app.modelEditPanel.addUndoableEditListener(new UndoableEditListener() {
+			
+			@Override
+			public void undoableEditHappened(UndoableEditEvent e) {
+				modelUndoManager.undoableEditHappened(e);
+				handleUndoRedo(modelUndoManager);
+			}
+		});
+		app.evidenceEditPanel.addUndoableEditListener(new UndoableEditListener() {
+			
+			@Override
+			public void undoableEditHappened(UndoableEditEvent e) {		
+				evidenceUndoManager.undoableEditHappened(e);
+				handleUndoRedo(evidenceUndoManager);
+			}
+		});
+		
 		updateAppTitle();
 	}
 	
 	public void setActiveEditor(RuleEditor ae) {
 		this.activeEditor = ae;
+		handleUndoRedo(getActiveUndoManager());
 	}
 	
 	public void setExample(Example example) {
@@ -118,6 +145,11 @@ public class Controller {
 		app.modelEditPanel.setText(example.getModel());
 		app.evidenceEditPanel.setText(example.getEvidence());
 		app.queryPanel.setCurrentQuery(example.getQueryToRun());
+		
+		modelUndoManager.discardAllEdits();
+		evidenceUndoManager.discardAllEdits();
+		
+		handleUndoRedo(getActiveUndoManager());
 		
 		updateAppTitle();
 	}
@@ -167,13 +199,27 @@ System.out.println("exit");
 	}
 	
 	public void undo() {
-// TODO
-System.out.println("undo");
+		UndoManager undoManager = getActiveUndoManager();
+		if (undoManager.canUndo()) {
+			try {
+				undoManager.undo();						
+			} catch (CannotRedoException cue) {
+				// ignore
+			}
+		}
+		handleUndoRedo(undoManager);
 	}
 	
 	public void redo() {
-// TODO
-System.out.println("redo");
+		UndoManager undoManager = getActiveUndoManager();
+		if (undoManager.canRedo()) {
+			try {
+				undoManager.redo();
+			} catch (CannotRedoException cue) {
+				// ignore
+			}
+		}
+		handleUndoRedo(undoManager);
 	}
 	
 	public void validate() {
@@ -369,5 +415,18 @@ System.out.println("New Window");
 		}
 		
 		app.frame.setTitle(title);
+	}
+	
+	private UndoManager getActiveUndoManager() {
+		UndoManager undoManager = modelUndoManager;
+		if (activeEditor == app.evidenceEditPanel) {
+			undoManager = evidenceUndoManager;
+		}
+		return undoManager;
+	}
+	
+	private void handleUndoRedo(UndoManager undoManager) {
+		getUndoAction().setEnabled(undoManager.canUndo());
+		getRedoAction().setEnabled(undoManager.canRedo());
 	}
 }
