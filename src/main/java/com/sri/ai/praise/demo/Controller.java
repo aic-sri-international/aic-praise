@@ -42,6 +42,7 @@ import java.io.File;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.SwingWorker;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -181,40 +182,52 @@ System.out.println("Validate");
 	}
 	
 	public void executeQuery() {
-// TODO
-		try {
-			System.out.println("ABOUT TO RUN QUERY");
-			System.out.flush();
-			
-			RuleConverter ruleConverter = new RuleConverter();
-			
-			try {
-				Pair<Expression, Model> parseResult = ruleConverter.parseModel("'Name'", "'Description'",
-						app.modelEditPanel.getText()+"\n"+
-								app.evidenceEditPanel.getText(),
-								app.queryPanel.getCurrentQuery());
+// TODO - clean up
+		executeQueryAction.setEnabled(false);
+		SwingWorker<String, Object> queryWorker = new SwingWorker<String, Object>() {
+			@Override
+			public String doInBackground() {
+				try {
+					System.out.println("ABOUT TO RUN QUERY");
 
-				System.out.println("MODEL DECLARATION=\n"+parseResult.second.getModelDeclaration());
+					RuleConverter ruleConverter = new RuleConverter();
 
-				System.out.println("QUERY=\n"+parseResult.first);
+					Pair<Expression, Model> parseResult = ruleConverter
+							.parseModel("'Name'", "'Description'",
+									app.modelEditPanel.getText() + "\n"
+											+ app.evidenceEditPanel.getText(),
+									app.queryPanel.getCurrentQuery());
 
-				String queryUUID = queryEngine.newQueryUUID();
+					System.out.println("MODEL DECLARATION=\n"
+							+ parseResult.second.getModelDeclaration());
+					System.out.println("QUERY=\n" + parseResult.first);
 
-				String belief = queryEngine.queryBeliefOfRandomVariable(queryUUID, 
-						"belief([" + parseResult.first + "])", parseResult.second.getModelDeclaration());
+					String queryUUID = queryEngine.newQueryUUID();
 
-				System.out.println("BELIEF=\n"+belief);
+					String belief = queryEngine.queryBeliefOfRandomVariable(
+							queryUUID, "belief([" + parseResult.first + "])",
+							parseResult.second.getModelDeclaration());
 
-				app.queryPanel.setResult(belief);
+					System.out.println("BELIEF=\n" + belief);					
 
+					app.queryPanel.setResult(belief);
+
+				} catch (ReservedWordException rwe) {
+					rwe.printStackTrace();
+				} catch (RuntimeException re) {
+					re.printStackTrace();
+				}
+				finally {
+					executeQueryAction.setEnabled(true);
+				}
+				
+				return "done";
 			}
-			catch (ReservedWordException e) {
-				e.printStackTrace();
-			}
-			
-		} catch (RuntimeException re) {
-			re.printStackTrace();
-		}
+		};
+		
+		System.out.flush();
+		System.err.flush();
+		queryWorker.execute();
 	}
 	
 	public void clearOutput() {

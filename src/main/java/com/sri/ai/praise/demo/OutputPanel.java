@@ -98,14 +98,6 @@ public class OutputPanel extends JPanel {
 		clearTraceTree();
 	}
 	
-	/**
-	 * Provides a print stream which can be used to redirect standard output
-	 * streams.
-	 */
-	public PrintStream getConsoleOutputPrintStream() {
-		return new PrintStream(new ConsoleOutputStream());
-	}
-	
 	public void notifySelected() {
 		if (loggerContext == null) {
 			while (loggerContext == null) {
@@ -200,6 +192,7 @@ public class OutputPanel extends JPanel {
 		
 		consoleOutputTextArea = new JTextArea();
 		consoleOutputTextArea.setEditable(false);
+		consoleOutputTextArea.setAutoscrolls(true);
 		consoleScrollPane.setViewportView(consoleOutputTextArea);
 		
 		JPanel justificationPanel = new JPanel();
@@ -239,6 +232,11 @@ public class OutputPanel extends JPanel {
 
 		TreeUtil.setWriter(DefaultWriter.newDefaultConfiguredWriter());
 		clearTraceTree();
+		
+		// Redirect the standard output and error to the console
+		PrintStream consoleOutput = new PrintStream(new ConsoleOutputStream());
+		System.setOut(consoleOutput);
+		System.setErr(consoleOutput);
 	}
 	
 	private void clearJustificationTree() {
@@ -284,10 +282,18 @@ public class OutputPanel extends JPanel {
 	
 	/** Writes everything into the text area. */
 	private class ConsoleOutputStream extends java.io.OutputStream {
+		private StringBuilder sb = new StringBuilder();
 		@Override
 		public void write(int b) throws java.io.IOException {
 			String s = new String(new char[] { (char) b });
-			consoleOutputTextArea.append(s);
+			sb.append(s);
+		}
+		
+		@Override
+		public void flush() {
+			consoleOutputTextArea.append(sb.toString());
+			consoleOutputTextArea.setCaretPosition(consoleOutputTextArea.getDocument().getLength());
+			sb.setLength(0);
 		}
 	}
 }

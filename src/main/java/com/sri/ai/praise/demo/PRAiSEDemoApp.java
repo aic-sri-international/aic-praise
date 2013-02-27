@@ -63,7 +63,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.PrintStream;
 
 /**
  * 
@@ -154,7 +153,7 @@ public class PRAiSEDemoApp {
 		backgroundPanel.setLayout(new BorderLayout(0, 0));
 		
 		JSplitPane inputOutputSplitPane = new JSplitPane();
-		inputOutputSplitPane.setResizeWeight(0.9);
+		inputOutputSplitPane.setResizeWeight(0.6);
 		inputOutputSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		inputOutputSplitPane.setOneTouchExpandable(true);
 		backgroundPanel.add(inputOutputSplitPane, BorderLayout.CENTER);
