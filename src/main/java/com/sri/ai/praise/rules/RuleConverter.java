@@ -318,15 +318,15 @@ public class RuleConverter {
 		ruleParser       = new RuleParserWrapper();
 	}
 	
-	public Model parseModel (String modelString) {
+	public Pair<Expression, Model> parseModel (String modelString) {
 		return parseModel("", "", modelString);
 	}
 
-	public Model parseModel (String name, String description, String modelString) {
+	public Pair<Expression, Model> parseModel (String name, String description, String modelString) {
 		return parseModel(name, description, ruleParser.parseAll(modelString));
 	}
 	
-	public Model parseModel (String modelString, String queryString) {
+	public Pair<Expression, Model> parseModel (String modelString, String queryString) {
 		return parseModel("", "", modelString, queryString);
 	}
 
@@ -338,15 +338,15 @@ public class RuleConverter {
 	 * @param query        The query string for the model.
 	 * @return  A Model instance of the parsed model.
 	 */
-	public Model parseModel (String name, String description, String modelString, String queryString) {
+	public Pair<Expression, Model> parseModel (String name, String description, String modelString, String queryString) {
 		return parseModel(name, description, ruleParser.parseAll(modelString), ruleParser.parseFormula(queryString));
 	}
 	
-	public Model parseModel (List<Expression> inputRules) {
+	public Pair<Expression, Model> parseModel (List<Expression> inputRules) {
 		return parseModel("", "", inputRules);
 	}
 
-	public Model parseModel (String name, String description, List<Expression> inputRules) {
+	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules) {
 		return parseModel(name, description, inputRules, null);
 	}
 
@@ -358,7 +358,7 @@ public class RuleConverter {
 	 * @param query        The query expression for the model.
 	 * @return  A Model instance of the parsed model.
 	 */
-	public Model parseModel (String name, String description, List<Expression> inputRules, Expression query) {
+	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules, Expression query) {
 //		RulesConversionProcess context = new RulesConversionProcess();
 		List<Expression> potentialExpressions         = new ArrayList<Expression>();
 		List<Expression> sorts                        = new ArrayList<Expression>();
@@ -366,10 +366,12 @@ public class RuleConverter {
 		Map<String, Set<Integer>> randomVariableIndex = new HashMap<String, Set<Integer>>();
 		
 		// Run a conversion on the query before processing it with the other rules.
+		Expression queryAtom = null;
 		if (query != null) {
 			Pair<Expression, Expression> queryPair = queryRuleAndAtom(query);
 			if (queryPair != null) {
 				potentialExpressions.add(translateRule(queryPair.second));
+				queryAtom = queryPair.first;
 			}
 		}
 		
@@ -429,7 +431,7 @@ public class RuleConverter {
 		System.out.println("Final parfactors: \n" + potentialExpressions);
 		
 		// Create the model object output.
-		return createModel(name, description, sorts, randomVariables, potentialExpressions);
+		return new Pair<Expression, Model>(queryAtom, createModel(name, description, sorts, randomVariables, potentialExpressions));
 	}
 
 	/**

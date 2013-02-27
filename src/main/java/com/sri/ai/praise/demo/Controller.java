@@ -44,6 +44,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.demo.action.ClearOutputAction;
 import com.sri.ai.praise.demo.action.ExecuteQueryAction;
 import com.sri.ai.praise.demo.action.ExitAction;
@@ -63,6 +64,7 @@ import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.rules.RuleConverter;
+import com.sri.ai.util.base.Pair;
 
 /**
  * 
@@ -182,16 +184,17 @@ System.out.println("Validate");
 		try {
 			RuleConverter ruleConverter = new RuleConverter();
 			
-			Model model = ruleConverter.parseModel("'Name'", "'Description'",
+			Pair<Expression, Model> parseResult = ruleConverter.parseModel("'Name'", "'Description'",
 					app.modelEditPanel.getText()+"\n"+
 					app.evidenceEditPanel.getText(),
 					app.queryPanel.getCurrentQuery());
 			
-			System.out.println("MODEL DECLARATION=\n"+model.getModelDeclaration());
+			System.out.println("MODEL DECLARATION=\n"+parseResult.second.getModelDeclaration());
 			
 			String queryUUID = queryEngine.newQueryUUID();
 			
-			String belief = queryEngine.queryBeliefOfRandomVariable(queryUUID, "belief([query(X)])", model.getModelDeclaration());
+			String belief = queryEngine.queryBeliefOfRandomVariable(queryUUID, 
+					"belief([" + parseResult.first + "])", parseResult.second.getModelDeclaration());
 			
 			System.out.println("BELIEF=\n"+belief);
 			

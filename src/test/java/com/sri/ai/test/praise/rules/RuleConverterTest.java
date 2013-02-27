@@ -625,7 +625,7 @@ public class RuleConverterTest {
 	@Test
 	public void testParse () {
 		String modelString, queryString;
-		Model model;
+		Pair<Expression, Model> result;
 
 		modelString = "if mother(X) = Y then X != Y;" +
 				"if trait(mother(X)) then trait(X) 0.8 else trait(X) 0.3;" +
@@ -635,8 +635,9 @@ public class RuleConverterTest {
 				"mother(john)=ann;" +
 				"trait(john);";
 		queryString = "trait(mary)";
-		model = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-		System.out.println(model);
+		result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+		System.out.println(result.first);
+		System.out.println(result.second);
 //		Brewer.generateFunctionApplicationString(sb, model, 3, true);
 
 		modelString = "random president: -> People;" +
@@ -645,14 +646,16 @@ public class RuleConverterTest {
 				"president = billClinton <=> firstLady = hillaryClinton;" +
 				"firstLady = michelleObama 0.9;";
 		queryString = "president";
-//		model = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-//		System.out.println(model);
+//		result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+//		System.out.println(result.first);
+//		System.out.println(result.second);
 //		Brewer.generateFunctionApplicationString(sb, model, 3, true);
 
 		modelString = "there exists X : X = bestFriend(X) 0.9;";
 		queryString = "bestFriend(john)";
-		model = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-		System.out.println(model);
+		result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+		System.out.println(result.first);
+		System.out.println(result.second);
 //		Brewer.generateFunctionApplicationString(sb, model, 3, true);
 		
 	}
@@ -755,10 +758,10 @@ public class RuleConverterTest {
 		testCount ++;
 		Model result;
 		if (inputExpr == null) {
-			result = ruleConverter.parseModel(name, desc, inputString);
+			result = ruleConverter.parseModel(name, desc, inputString).second;
 		} 
 		else {
-			result = ruleConverter.parseModel(name, desc, inputExpr);
+			result = ruleConverter.parseModel(name, desc, inputExpr).second;
 		}
 		if (expectSucceed) {
 			if (checkResult) {
