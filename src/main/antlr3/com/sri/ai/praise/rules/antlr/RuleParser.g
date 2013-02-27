@@ -94,9 +94,9 @@ random_variable_decl
     ;
 
 sort_decl
-    : SORT atomic_symbol COLON atomic_symbol COMMA kleene1 -> ^(SORT atomic_symbol+ kleene1)
-    | SORT atomic_symbol COLON atomic_symbol               -> ^(SORT atomic_symbol+ ^(KLEENE))
-    | SORT a=atomic_symbol                                 -> ^(SORT atomic_symbol ^(SYMBOL ID["Unknown"]) ^(KLEENE))
+    : SORT atomic_symbol COLON atomic_symbol COMMA kleene1 -> ^(SORT atomic_symbol+ ^(SET kleene1))
+    | SORT atomic_symbol COLON atomic_symbol               -> ^(SORT atomic_symbol+ ^(SET ^(KLEENE)))
+    | SORT a=atomic_symbol                                 -> ^(SORT atomic_symbol ^(SYMBOL ID["Unknown"]) ^(SET ^(KLEENE)))
     ;
 
 rule

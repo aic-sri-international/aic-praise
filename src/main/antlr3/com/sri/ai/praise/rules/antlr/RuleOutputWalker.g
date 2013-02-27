@@ -92,6 +92,7 @@ expr returns [Expression value]
     | ^(MAYBESAMEAS (a=expr {varargs.add(a); })*)         { $value = new DefaultCompoundSyntaxTree("may be same as", varargs); }
     | ^(FUNCTION a=expr (b=expr {varargs.add(b); })*)     { $value = new DefaultCompoundSyntaxTree(a, varargs); }
     | ^(SYMBOL ID)                                        { $value = DefaultSymbol.createSymbol($ID.text); }
+    | ^(SET a=expr)                                       { $value = new DefaultCompoundSyntaxTree("{ . }", a); }
     | ^(KLEENE (a=expr { varargs.add(a); })*)             { $value = new DefaultCompoundSyntaxTree("kleene list", varargs); }
     ;
 

@@ -330,22 +330,27 @@ public class RuleParserTest extends AbstractParserTest {
 		String string;
 		string = "sort People: 1000, bob, ann, mary;";
 		test(string, new DefaultCompoundSyntaxTree("sort", "People", "1000", 
-				new DefaultCompoundSyntaxTree("kleene list", "bob", "ann", "mary")));
+				new DefaultCompoundSyntaxTree("{ . }", 
+						new DefaultCompoundSyntaxTree("kleene list", "bob", "ann", "mary"))));
 
 		string = "sort Dogs: 1000;";
 		test(string, new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", 
-				new DefaultCompoundSyntaxTree("kleene list")));
+				new DefaultCompoundSyntaxTree("{ . }", 
+						new DefaultCompoundSyntaxTree("kleene list"))));
 
 		string = "sort Dogs: 1000, rover;";
-		test(string, new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", "rover"));
+		test(string, new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", 
+				new DefaultCompoundSyntaxTree("{ . }", "rover")));
 
 		string = "sort Cats: Unknown;";
 		test(string, new DefaultCompoundSyntaxTree("sort", "Cats", "Unknown", 
-				new DefaultCompoundSyntaxTree("kleene list")));
+				new DefaultCompoundSyntaxTree("{ . }", 
+						new DefaultCompoundSyntaxTree("kleene list"))));
 
 		string = "sort Rats;";
 		test(string, new DefaultCompoundSyntaxTree("sort", "Rats", "Unknown", 
-				new DefaultCompoundSyntaxTree("kleene list")));
+				new DefaultCompoundSyntaxTree("{ . }", 
+						new DefaultCompoundSyntaxTree("kleene list"))));
 
 		System.out.println("test count = " + testCount);
 	}
@@ -380,7 +385,8 @@ public class RuleParserTest extends AbstractParserTest {
 						new DefaultCompoundSyntaxTree("round", "X"), "1")));
 		expected.add(new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
-		expected.add(new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", "rover"));
+		expected.add(new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", 
+				new DefaultCompoundSyntaxTree("{ . }", "rover")));
 		expected.add(new DefaultCompoundSyntaxTree("randomVariable", "+", "2", "Number", "Number", "Number"));
 		testAll(string, expected);
 		expected.clear();
