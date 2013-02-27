@@ -38,10 +38,14 @@
 package com.sri.ai.praise.demo;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
@@ -155,8 +159,9 @@ public class Controller {
 	}
 	
 	public void newActiveEditorContent() {
-		activeEditor.setText("");
-// TODO - need to save first?		
+		saveIfRequired(activeEditor);
+		
+		activeEditor.setText("");		
 		if (activeEditor == app.modelEditPanel) {
 			currentModelFile = null;
 		}
@@ -169,7 +174,40 @@ public class Controller {
 	public void openFile() {
 		int returnVal = fileChooser.showOpenDialog(app.toolBar.btnOpen);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-// TODO	- open and load the file into the active editor	
+			File toOpen = fileChooser.getSelectedFile();
+			if (toOpen.exists()) {
+				
+				saveIfRequired(activeEditor);
+				
+				try {
+					LineNumberReader reader = new LineNumberReader(new FileReader(toOpen));
+					StringBuilder sb = new StringBuilder();
+					String line = null;
+					while ( (line = reader.readLine()) != null) {
+						sb.append(line);
+						sb.append("\n");
+					}
+					reader.close();
+					
+					activeEditor.setText(sb.toString());
+					getActiveUndoManager().discardAllEdits();
+					handleUndoRedo(getActiveUndoManager());
+					
+					if (activeEditor == app.modelEditPanel) {
+						currentModelFile = toOpen;
+					}
+					else {
+						currentEvidenceFile = toOpen;
+					}
+					
+					updateAppTitle();
+				} catch (IOException ioe) {
+					error("Unable to open file: "+toOpen.getAbsolutePath());
+				}
+			}
+			else {
+				warning("File ["+toOpen.getAbsolutePath()+"] does not exist.");
+			}
 		}
 	}
 	
@@ -194,8 +232,8 @@ System.out.println("Export...");
 	}
 	
 	public void exit() {	
-// TODO - save anything before closing?
-System.out.println("exit");
+		saveIfRequired(app.modelEditPanel);
+		saveIfRequired(app.evidenceEditPanel);
 	}
 	
 	public void undo() {
@@ -428,5 +466,18 @@ System.out.println("New Window");
 	private void handleUndoRedo(UndoManager undoManager) {
 		getUndoAction().setEnabled(undoManager.canUndo());
 		getRedoAction().setEnabled(undoManager.canRedo());
+	}
+	
+	private void saveIfRequired(RuleEditor editor) {
+// TODO	
+System.out.println("save if required!!!");		
+	}
+	
+	private void error(String message) {
+		JOptionPane.showMessageDialog(app.frame, message, "Error", JOptionPane.ERROR_MESSAGE, null);
+	}
+	
+	private void warning(String message) {
+		JOptionPane.showMessageDialog(app.frame, message, "Warning", JOptionPane.WARNING_MESSAGE, null);
 	}
 }
