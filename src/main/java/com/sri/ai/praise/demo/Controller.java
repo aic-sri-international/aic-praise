@@ -182,9 +182,11 @@ System.out.println("Validate");
 	public void executeQuery() {
 // TODO
 		try {
+			System.out.println("ABOUT TO RUN QUERY");
+			System.out.flush();
+			
 			RuleConverter ruleConverter = new RuleConverter();
 			
-			System.out.println("ABOUT TO RUN QUERY");
 			Pair<Expression, Model> parseResult = ruleConverter.parseModel("'Name'", "'Description'",
 					app.modelEditPanel.getText()+"\n"+
 					app.evidenceEditPanel.getText(),
@@ -200,14 +202,15 @@ System.out.println("Validate");
 			
 			System.out.println("BELIEF=\n"+belief);
 			
+			app.queryPanel.setResult(belief);
+			
 		} catch (RuntimeException re) {
 			re.printStackTrace();
 		}
 	}
 	
 	public void clearOutput() {
-// TODO
-System.out.println("Clear Output");
+		app.outputPanel.clearAllOutputs();
 	}
 	
 	public void newWindow() {

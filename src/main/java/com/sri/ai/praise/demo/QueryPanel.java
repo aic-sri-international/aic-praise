@@ -102,6 +102,10 @@ public class QueryPanel extends JPanel {
 		return queryComboBox.getEditor().getItem().toString();
 	}
 	
+	public void setResult(String result) {
+		resultEditor.setText(result);
+	}
+	
 	//
 	// PRIVATE
 	//
