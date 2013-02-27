@@ -80,7 +80,7 @@ public class PRAiSEDemoApp {
 	QueryPanel queryPanel;
 	OutputPanel outputPanel;
 	//
-	private Controller controller = null;
+	Controller controller = null;
 	//
 	private JMenuItem mntmNew;
 	private JMenuItem mntmOpenFile;
@@ -146,7 +146,7 @@ public class PRAiSEDemoApp {
 		});
 		frame.setBounds(100, 100, 1000, 640);
 		frame.setTitle("PRAiSE");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
 		JPanel backgroundPanel = new JPanel();
 		frame.getContentPane().add(backgroundPanel, BorderLayout.CENTER);

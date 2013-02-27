@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.demo;
 
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -142,7 +143,18 @@ public class Controller {
 	}
 	
 	public void setExample(Example example) {
-		saveAll();
+		if (isASaveRequired()) {
+			
+			int option = JOptionPane.showConfirmDialog(
+				    app.frame,
+				    "Save existing changes before switching to "+example.getName()+"?",
+				    "Save?",
+				    JOptionPane.YES_NO_OPTION);
+			
+			if (option == JOptionPane.YES_OPTION) {
+				saveAll();
+			}
+		}
 		
 		currentModelFile = null;
 		currentEvidenceFile = null;
@@ -228,8 +240,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 				    JOptionPane.YES_NO_OPTION);
 			
 			if (option == JOptionPane.YES_OPTION) {
-				saveIfRequired(app.modelEditPanel);
-				saveIfRequired(app.evidenceEditPanel);
+				saveAll();
 			}
 		}
 	}
@@ -316,8 +327,17 @@ information("Validate currently not implemented");
 	}
 	
 	public void newWindow() {
-// TODO
-information("New Window currently not implemented.");
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				PRAiSEDemoApp newWindow = new PRAiSEDemoApp();
+				int x = app.frame.getBounds().x + 15;
+				int y = app.frame.getBounds().y + 15;
+				newWindow.frame.setBounds(x, y, app.frame.getBounds().width, app.frame.getBounds().height);
+				newWindow.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newWindow.controller.setState(Controller.this);
+				newWindow.frame.setVisible(true);
+			}
+		});
 	}
 	
 	public JFrame getAppFrame() {
@@ -505,6 +525,11 @@ information("New Window currently not implemented.");
 		return modelUndoManager.canUndo() || evidenceUndoManager.canUndo();
 	}
 	
+	private void discardAllEdits() {
+		discardEdits(app.modelEditPanel);
+		discardEdits(app.evidenceEditPanel);
+	}
+	
 	private void discardActiveEdits() {
 		discardEdits(activeEditor);
 	}
@@ -574,5 +599,13 @@ information("New Window currently not implemented.");
 	
 	private void information(String message) {
 		JOptionPane.showMessageDialog(app.frame, message, "Information", JOptionPane.INFORMATION_MESSAGE, null);
+	}
+	
+	private void setState(Controller otherController) {
+		app.modelEditPanel.setText(otherController.app.modelEditPanel.getText());
+		app.evidenceEditPanel.setText(otherController.app.evidenceEditPanel.getText());
+		app.queryPanel.setState(otherController.app.queryPanel);
+		
+		discardAllEdits();
 	}
 }

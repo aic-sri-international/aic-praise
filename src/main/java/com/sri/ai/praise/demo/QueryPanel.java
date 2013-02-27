@@ -118,6 +118,13 @@ public class QueryPanel extends JPanel {
 		queryComboBox.setSelectedIndex(0);		
 	}
 	
+	public void setState(QueryPanel otherQueryPanel) {
+		MutableComboBoxModel otherQueryModel = otherQueryPanel.queryModel;
+		for (int i = otherQueryModel.getSize()-1; i >= 0; i--) {
+			addQuery(otherQueryModel.getElementAt(i).toString());
+		}
+	}
+	
 	public String getCurrentQuery() {
 		return queryComboBox.getEditor().getItem().toString();
 	}
