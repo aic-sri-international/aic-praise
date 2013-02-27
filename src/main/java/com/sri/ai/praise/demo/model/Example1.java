@@ -87,6 +87,6 @@ public class Example1 extends Example {
 		"notAtWork(X) and X != dave 0.008;\n"
 		);
 		
-		setQueryToRun("belief([sick(X)])");
+		setQueryToRun("sick(X)");
 	}
 }

@@ -180,7 +180,8 @@ System.out.println("Validate");
 			
 			Model model = ruleConverter.parseModel("'Name'", "'Description'",
 					app.modelEditPanel.getText()+"\n"+
-					app.evidenceEditPanel.getText());
+					app.evidenceEditPanel.getText(),
+					app.queryPanel.getCurrentQuery());
 			
 			System.out.println("MODEL DECLARATION=\n"+model.getModelDeclaration());
 			

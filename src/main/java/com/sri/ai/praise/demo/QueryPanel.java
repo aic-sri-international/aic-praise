@@ -98,6 +98,10 @@ public class QueryPanel extends JPanel {
 		queryComboBox.setSelectedIndex(idx);
 	}
 	
+	public String getCurrentQuery() {
+		return queryComboBox.getEditor().getItem().toString();
+	}
+	
 	//
 	// PRIVATE
 	//
