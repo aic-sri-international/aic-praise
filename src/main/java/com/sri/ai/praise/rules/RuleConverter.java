@@ -369,27 +369,6 @@ public class RuleConverter {
 		List<Expression> randomVariables              = new ArrayList<Expression>();
 		Map<String, Set<Integer>> randomVariableIndex = new HashMap<String, Set<Integer>>();
 		
-		// Run a conversion on the query before processing it with the other rules.
-		Expression queryAtom = null;
-		if (query != null) {
-			Pair<Expression, Expression> queryPair = queryRuleAndAtom(query);
-			if (queryPair != null) {
-				potentialExpressions.add(translateRule(queryPair.second));
-				queryAtom = queryPair.first;
-// TODO
-//				String queryName;
-//				if (queryAtom.getArguments().size() == 0) {
-//					queryName = queryAtom.toString();
-//				}
-//				else {
-//					queryName = queryAtom.getFunctor().toString();
-//				}
-//				if (queryName.equals(QUERY_STRING)) {
-//					randomVariables.add(e);
-//				}
-			}
-		}
-		
 		// Sort and convert the rules to their if-then-else forms.
 		for (Expression rule : inputRules) {
 			if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
@@ -422,6 +401,27 @@ public class RuleConverter {
 				sorts.add(rule);
 			}
 		}
+		
+		// Run a conversion on the query before processing it with the other rules.
+		Expression queryAtom = null;
+		if (query != null) {
+			Pair<Expression, Expression> queryPair = queryRuleAndAtom(query, randomVariableIndex);
+			if (queryPair != null) {
+				potentialExpressions.add(translateRule(queryPair.second));
+				queryAtom = queryPair.first;
+// TODO
+//				String queryName;
+//				if (queryAtom.getArguments().size() == 0) {
+//					queryName = queryAtom.toString();
+//				}
+//				else {
+//					queryName = queryAtom.getFunctor().toString();
+//				}
+//				if (queryName.equals(QUERY_STRING)) {
+//					randomVariables.add(e);
+//				}
+			}
+		}
 //		System.out.println("var names: " + randomVariableNames.toString());
 //		System.out.println("var index: " + context.randomVariableIndex.toString());
 //		System.out.println("parfactors: " + context.parfactors.toString());
@@ -429,25 +429,25 @@ public class RuleConverter {
 //		System.out.println("sorts: " + context.sorts.toString());
 
 		// Translate the functions.
-//		System.out.println("Starting translation: " + potentialExpressions);
+		System.out.println("Starting translation: " + potentialExpressions);
 		potentialExpressions = translateFunctions(potentialExpressions, randomVariableIndex);
-//		System.out.println("After translating functions: \n" + potentialExpressions);
+		System.out.println("After translating functions: \n" + potentialExpressions);
 
 		// Translate the quantifiers.
 		potentialExpressions = translateQuantifiers(potentialExpressions);
-//		System.out.println("After translating quantifiers: \n" + potentialExpressions);
+		System.out.println("After translating quantifiers: \n" + potentialExpressions);
 
 		// Extract the embedded constraints.
 		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = 
 				disembedConstraints(potentialExpressions);
-//		System.out.println("After extracting constraints: \n" + potentialExpressionAndConstraintList);
+		System.out.println("After extracting constraints: \n" + potentialExpressionAndConstraintList);
 
 		// Translate the potential expression/constraint pair into a parfactor.
 		potentialExpressions = new ArrayList<Expression>();
 		for (Pair<Expression, Expression> pair : potentialExpressionAndConstraintList) {
 			potentialExpressions.add(createParfactor(pair.first, pair.second));
 		}
-//		System.out.println("Final parfactors: \n" + potentialExpressions);
+		System.out.println("Final parfactors: \n" + potentialExpressions);
 		
 		// Create the model object output.
 		return new Pair<Expression, Model>(queryAtom, createModel(name, description, sorts, randomVariables, potentialExpressions));
@@ -488,13 +488,13 @@ public class RuleConverter {
 	 * @param query  The query expression
 	 * @return A pair with the query atom and query rule.
 	 */
-	public Pair<Expression, Expression> queryRuleAndAtom (Expression query) {
-		if (LPIUtil.isRandomVariableValueExpression(query, rewritingProcess)) {
+	public Pair<Expression, Expression> queryRuleAndAtom (Expression query, Map<String, Set<Integer>> randomVariableIndex) {
+		if (isRandomVariableValue(query, randomVariableIndex)) {
 			System.out.println("Query: " + query + " is a random variable value expression.");
 			return new Pair<Expression, Expression>(query, Expressions.make(FUNCTOR_ATOMIC_RULE, query, 1));
 		}
 
-		System.out.println("Query: " + query + " is not a random variable value expression.");
+		System.out.println("Query is not a random variable value expression:" + query);
 		Set<Expression> variables = Variables.freeVariables(query, rewritingProcess);
 		Expression queryAtom;
 		if (variables.size() > 0) {
@@ -648,7 +648,8 @@ public class RuleConverter {
 		}
 
 		Expression functor = e.getFunctor();
-		if (functor.equals(FunctorConstants.AND) || functor.equals(FunctorConstants.OR) || 
+		if (functor.equals(FunctorConstants.EQUAL) || functor.equals(FunctorConstants.INEQUALITY) || 
+				functor.equals(FunctorConstants.AND) || functor.equals(FunctorConstants.OR) || 
 				functor.equals(FunctorConstants.NOT) || functor.equals(FunctorConstants.EQUIVALENCE) ||
 				functor.equals(FunctorConstants.IMPLICATION) || functor.equals(FUNCTOR_IF_THEN_ELSE) ||
 				functor.equals(FUNCTOR_THERE_EXISTS) || functor.equals(FUNCTOR_FOR_ALL) ||
@@ -667,8 +668,9 @@ public class RuleConverter {
 	 * @return  True if the expression is a random function application or a function that takes no arguments.
 	 */
 	public boolean isRandomVariableValue (Expression e, Map<String, Set<Integer>> randomVariableIndex) {
-		if (isRandomFunctionApplication(e))
+		if (isRandomFunctionApplication(e)) {
 			return true;
+		}
 
 		if (e.getSyntacticFormType().equals("Symbol")) {
 			if (randomVariableIndex == null) {

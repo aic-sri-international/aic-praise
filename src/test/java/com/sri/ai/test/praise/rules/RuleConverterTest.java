@@ -340,7 +340,7 @@ public class RuleConverterTest {
 		Assert.assertEquals(true, ruleConverter.isRandomFunctionApplication(input));
 
 		input = new DefaultCompoundSyntaxTree("=", 1, 2, 3, 4);
-		Assert.assertEquals(true, ruleConverter.isRandomFunctionApplication(input));
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
 	}
 
@@ -578,32 +578,38 @@ public class RuleConverterTest {
 		String string;
 		Pair<Expression, Expression> result, expected;
 		
+		string = "sick(X)";
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
+		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("sick(X)"), 
+				ruleParser.parse("sick(X);"));
+		assertEquals(expected, result);
+		
 		string = "sick(john) and sick(mary)";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query"), 
 				ruleParser.parse("query <=> sick(john) and sick(mary);"));
 		assertEquals(expected, result);
 
 		string = "not sick(X)";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(X)"), 
 				ruleParser.parse("query(X) <=> not sick(X);"));
 		assertEquals(expected, result);
 
 		string = "there exists X : friends(X,Y)";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(Y)"), 
 				ruleParser.parse("query(Y) <=> there exists X : friends(X,Y);"));
 		assertEquals(expected, result);
 
 		string = "conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z)";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(C, Y, X, Z)"), 
 				ruleParser.parse("query(C, Y, X, Z) <=> conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z);"));
 		assertEquals(expected, result);
 
 		string = "mother(X) = lucy";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(X)"), 
 				ruleParser.parse("query(X) <=> mother(X) = lucy;"));
 		assertEquals(expected, result);
