@@ -277,12 +277,7 @@ public class PRAiSEDemoApp {
 	}
 	
 	
-	private void postGUIInitialization() {
-		// Redirect standard out and err to the console window
-		PrintStream consoleOutputStream = outputPanel.getConsoleOutputPrintStream();
-		System.setOut(consoleOutputStream);
-		System.setErr(consoleOutputStream);
-		
+	private void postGUIInitialization() {		
 		// Wire up the Controller
 		controller = new Controller(this);
 		controller.setActiveEditor(modelEditPanel);
