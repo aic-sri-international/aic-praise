@@ -74,6 +74,9 @@ import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.ParfactorsDeclaration;
+import com.sri.ai.praise.model.RandomVariableDeclaration;
+import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.util.base.Pair;
@@ -290,15 +293,35 @@ information("Validate currently not implemented");
 											+ app.evidenceEditPanel.getText(),
 									app.queryPanel.getCurrentQuery());
 
-					printlnToConsole("MODEL DECLARATION=\n"
-							+ parseResult.second.getModelDeclaration());
-					printlnToConsole("QUERY=\n" + parseResult.first);
+					Expression query = parseResult.first;
+					Model      model = parseResult.second;
+					
+					printlnToConsole("MODEL DECLARATION");
+					printlnToConsole("-----------------");
+					printlnToConsole("Name="+model.getName());
+					printlnToConsole("Desc="+model.getDescription());
+					printlnToConsole("\nSORTS=");
+					for (SortDeclaration sd : model.getSortDeclarations()) {
+						printlnToConsole(sd.getSortDeclaration().toString());
+					}
+					printlnToConsole("\nRANDOM VARIABLES=");
+					for (RandomVariableDeclaration rvd : model.getRandomVariableDeclarations()) {
+						printlnToConsole(rvd.getRandomVariableDeclaration().toString());
+					}
+					printlnToConsole("\nPARFACTORS=");
+					ParfactorsDeclaration pfd = model.getParfactorsDeclaration();
+					for (Expression parfactor : pfd.getParfactors()) {
+						printlnToConsole(parfactor.toString());
+					}
+					printlnToConsole("-----------------");
+					
+					printlnToConsole("QUERY=\n" + query);
 
 					String queryUUID = queryEngine.newQueryUUID();
 
 					String belief = queryEngine.queryBeliefOfRandomVariable(
-							queryUUID, "belief([" + parseResult.first + "])",
-							parseResult.second.getModelDeclaration());
+							queryUUID, "belief([" + query + "])",
+							model.getModelDeclaration());
 
 					printlnToConsole("BELIEF=\n" + belief);					
 
