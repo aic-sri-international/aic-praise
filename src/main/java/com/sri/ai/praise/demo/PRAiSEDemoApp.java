@@ -47,6 +47,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.demo.model.Example1;
+import com.sri.ai.praise.demo.model.Example2;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
@@ -327,6 +328,7 @@ public class PRAiSEDemoApp {
 		//
 		// Setup the examples
 		toolBar.exampleComboBox.addItem(new Example1());
+		toolBar.exampleComboBox.addItem(new Example2());
 		toolBar.exampleComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int selectedIndex = toolBar.exampleComboBox.getSelectedIndex();

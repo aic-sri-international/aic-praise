@@ -40,11 +40,11 @@ package com.sri.ai.praise.demo.model;
 import com.google.common.annotations.Beta;
 
 @Beta
-public class Example1 extends Example {
-	public Example1() {
-		super("Example 1");
-		setModel(getExampleFromResource("example1.model"));
-		setEvidence(getExampleFromResource("example1.es1"));
-		setQueryToRun("sick(X)");
+public class Example2 extends Example {
+	public Example2() {
+		super("Example 2");
+		setModel(getExampleFromResource("example2.model"));
+		setEvidence(getExampleFromResource("example2.es1"));
+		setQueryToRun("sick(dave)");
 	}
 }

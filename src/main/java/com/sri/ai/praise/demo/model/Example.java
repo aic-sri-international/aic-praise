@@ -37,6 +37,11 @@
  */
 package com.sri.ai.praise.demo.model;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+
 import com.google.common.annotations.Beta;
 
 @Beta
@@ -55,5 +60,25 @@ public abstract class Example extends AbstractQueryData {
 	@Override
 	public String toString() {
 		return getName();
+	}
+	
+	public static String getExampleFromResource(String resourceName) {
+		StringBuilder sb = new StringBuilder();
+		
+		try {
+			InputStream is = Example.class.getResourceAsStream(resourceName);
+			LineNumberReader reader = new LineNumberReader(new InputStreamReader(is));
+			String line = null;
+			while ( (line = reader.readLine()) != null) {
+				sb.append(line);
+				sb.append("\n");
+			}
+			reader.close();
+			
+		} catch (IOException ioe) {
+			// ignore
+		}
+		
+		return sb.toString();
 	}
 }

@@ -1,0 +1,5 @@
+//
+// EVIDENCE:
+// Dave rarely misses work compared to everyone else
+notAtWork(dave) 0.001;
+notAtWork(X) and X != dave 0.008;
