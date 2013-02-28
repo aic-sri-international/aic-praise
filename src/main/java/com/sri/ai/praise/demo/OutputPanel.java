@@ -48,36 +48,27 @@ import javax.swing.JTextArea;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.slf4j.ILoggerFactory;
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.AppenderBase;
+import org.slf4j.Marker;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.brewer.core.DefaultWriter;
-import com.sri.ai.grinder.helper.RewriterLoggingNamedRewriterFilter;
-import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.ui.ExpressionNode;
 import com.sri.ai.grinder.ui.ExpressionTreeView;
 import com.sri.ai.grinder.ui.TreeUtil;
-import com.sri.ai.util.log.LogX;
+import com.sri.ai.praise.lbp.LBPQueryEngine;
 
 @Beta
-public class OutputPanel extends JPanel {
+public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener, LBPQueryEngine.JustificationListener {
 	private static final long serialVersionUID = 1L;
 	
 	//
 	@SuppressWarnings("unused")
 	private ExpressionNode activeJustificationNode, rootJustificationNode = new ExpressionNode("", null);
 	private DefaultTreeModel treeJustificationModel = new DefaultTreeModel(rootJustificationNode);
+	private int traceCurrentIndentLevel = 0;
+	private boolean traceFirstTime = true;
 	private ExpressionNode activeTraceNode, rootTraceNode = new ExpressionNode("", null);
 	private DefaultTreeModel treeTraceModel = new DefaultTreeModel(rootTraceNode);
-	//
-	//
-	private LoggerContext               loggerContext = null;
-	private AppenderBase<ILoggingEvent> traceAppender = null;
 	//
 	private JTextArea consoleOutputTextArea;
 	private ExpressionTreeView justificationTree;
@@ -97,82 +88,73 @@ public class OutputPanel extends JPanel {
 		clearTraceTree();
 	}
 	
-	public void notifySelected() {
-		if (loggerContext == null) {
-			while (loggerContext == null) {
-				ILoggerFactory lf = LoggerFactory.getILoggerFactory();
-				if (lf instanceof LoggerContext) {
-					loggerContext = (LoggerContext) lf;
-				} 
-				else {
-					try {
-						Thread.sleep(100);
-					} catch (Exception ex) {
-						
-					}
-				}
-			}
-			traceAppender = new AppenderBase<ILoggingEvent>() {
-				//
-				private int currentIndentLevel = 0;
-				private boolean firstTime = true;
-				//
-				@Override
-				protected void append(ILoggingEvent eventObject) {
-					String msg = eventObject.getFormattedMessage();
-					Object[] args = eventObject.getArgumentArray();
-
-					int indentLevel = LogX.getTraceLevel(eventObject.getLoggerName());
-
-					while (indentLevel > currentIndentLevel) {
-						if (!firstTime) {
-							addTrace(">>");
-						}
-						startTraceLevel();
-						currentIndentLevel++;
-					}
-					
-					firstTime = false;
-
-					StringBuilder sb = new StringBuilder(msg);
-					while (indentLevel < currentIndentLevel) {
-						endTraceLevel();
-						currentIndentLevel--;
-					}
-					
-					// Suffix the profiler information to the message
-					// if available.
-					Long profileInfo = LogX.getProfileInfo(eventObject.getLoggerName());
-					if (profileInfo != null) {
-						sb.append(" [");
-						// Convert nanoseconds to milliseconds
-						sb.append(profileInfo / 1000000);
-						sb.append("ms.]");
-					}
-
-					if (msg != null && !msg.equals("")) {
-						addTrace(sb.toString());
-					}
-
-					if (args != null) {
-						for (Object arg : args) {
-							addTrace(arg);
-						}
-					}
-				}
-			};
-			
-			traceAppender.addFilter(new RewriterLoggingNamedRewriterFilter());
-			traceAppender.setContext(loggerContext);
-			loggerContext.getLogger(Trace.getDefaultLoggerName()).addAppender(traceAppender);
-		}
-		
-		traceAppender.start();
+	public void println(String line) {
+		consoleOutputTextArea.append(line);
+		consoleOutputTextArea.append("\n");
+		consoleOutputTextArea.setCaretPosition(consoleOutputTextArea.getDocument().getLength());
 	}
 	
-	public void notifyUnselected() {
-		traceAppender.stop();
+	//
+	// START LBPQueryEngine.TraceListener
+	@Override
+	public void traceEvent(String queryUUID, int traceLevel, Long profileInfo, Marker marker,
+			String formattedMsg, Object... args) {
+// TODO
+		StringBuilder consoleLine = new StringBuilder();
+		consoleLine.append(formattedMsg);
+		
+		if (profileInfo != null) {
+			consoleLine.append(" [");
+			// Convert nanoseconds to milliseconds
+			consoleLine.append(profileInfo / 1000000);
+			consoleLine.append("ms.]");
+		}
+		
+		StringBuilder tab = new StringBuilder();
+		for (int i = 0; i < traceLevel; i++) {
+			tab.append("  ");
+		}
+		tab.append(consoleLine);
+		println(tab.toString());
+		
+		
+		while (traceLevel > traceCurrentIndentLevel) {
+			if (!traceFirstTime) {
+				addTrace(">>");
+			}
+			startTraceLevel();
+			traceCurrentIndentLevel++;
+		}
+		traceFirstTime = false;
+		
+		while (traceLevel < traceCurrentIndentLevel) {
+			endTraceLevel();
+			traceCurrentIndentLevel--;
+		}
+		
+		if (formattedMsg != null && !formattedMsg.equals("")) {
+			addTrace(consoleLine.toString());
+		}
+
+		if (args != null) {
+			for (Object arg : args) {
+				addTrace(arg);
+			}
+		}
+		
 	}
+	// END LBPQueryEngine.TraceListener
+	//
+	
+	// 
+	// START LBPQueryEngine.JustificationListener
+	@Override
+	public void justificationEvent(String queryUUID, int justificationLevel, Marker marker,
+			String formattedMsg, Object... args) {		
+// TODO	
+	}
+	// END LBPQueryEngine.JustificationListener
+	//
 	
 	//
 	// PRIVATE
@@ -245,6 +227,8 @@ public class OutputPanel extends JPanel {
 		activeTraceNode = rootTraceNode;
 		treeTraceModel = new DefaultTreeModel(rootTraceNode);
 		traceTree.setModel(treeTraceModel);
+		traceCurrentIndentLevel = 0;
+		traceFirstTime = true;
 	}
 	
 	private void startTraceLevel() {
@@ -272,23 +256,5 @@ public class OutputPanel extends JPanel {
 				traceTree.restoreExpandedPaths();
 			}
 		});
-	}
-	
-	/** Writes everything into the text area. */
-	@SuppressWarnings("unused")
-	private class ConsoleOutputStream extends java.io.OutputStream {
-		private StringBuilder sb = new StringBuilder();
-		@Override
-		public void write(int b) throws java.io.IOException {
-			String s = new String(new char[] { (char) b });
-			sb.append(s);
-		}
-		
-		@Override
-		public void flush() {
-			consoleOutputTextArea.append(sb.toString());
-			consoleOutputTextArea.setCaretPosition(consoleOutputTextArea.getDocument().getLength());
-			sb.setLength(0);
-		}
 	}
 }

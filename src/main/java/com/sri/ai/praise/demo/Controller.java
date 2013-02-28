@@ -119,6 +119,9 @@ public class Controller {
 	public Controller(PRAiSEDemoApp app) {
 		this.app = app;
 		
+		queryEngine.addTraceListener(app.outputPanel);
+		queryEngine.addJustificationListener(app.outputPanel);
+		
 		modelUndoManager.setLimit(-1);
 		evidenceUndoManager.setLimit(-1);
 		app.modelEditPanel.addUndoableEditListener(new UndoableEditListener() {
@@ -612,8 +615,7 @@ information("Validate currently not implemented");
 	}
 	
 	private void printlnToConsole(String msg) {
-		System.out.println(msg);
-		System.out.flush();
+		app.outputPanel.println(msg);
 	}
 	
 	private void error(String message) {
