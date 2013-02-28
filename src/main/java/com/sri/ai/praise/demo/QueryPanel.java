@@ -50,6 +50,8 @@ import javax.swing.JCheckBox;
 import javax.swing.MutableComboBoxModel;
 
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -151,6 +153,16 @@ public class QueryPanel extends JPanel {
 		queryComboBox = new JComboBox(queryModel);
 		queryComboBox.setPreferredSize(new Dimension(250, 25));
 		queryComboBox.setEditable(true);
+		queryComboBox.getEditor().addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (btnExecuteQuery.isEnabled()) {
+					addQuery(getCurrentQuery());
+					btnExecuteQuery.doClick();
+				}
+			}
+		});
 		queryComboBox.getEditor().getEditorComponent().addFocusListener(new FocusListener() {
 			
 			@Override
