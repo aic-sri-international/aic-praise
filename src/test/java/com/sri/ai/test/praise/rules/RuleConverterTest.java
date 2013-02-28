@@ -664,24 +664,25 @@ public class RuleConverterTest {
 			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
 		}
 
+		// Missing sort declaration for People.
 		modelString = "random president: -> People;" +
 				"random firstLady: -> People;" +
 				"president = barrackObama <=> firstLady = michelleObama;" +
 				"president = billClinton <=> firstLady = hillaryClinton;" +
 				"firstLady = michelleObama 0.9;";
 		queryString = "president";
-//		try {
-//			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-//			System.out.println(result.first);
-//			System.out.println(result.second);
-//		}
-//		catch (ReservedWordException e) {
-//			e.printStackTrace();
-//		}
-//		catch (ModelException e) {
-//			e.printStackTrace();
-//			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
-//		}
+		try {
+			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			System.out.println(result.first);
+			System.out.println(result.second);
+		}
+		catch (ReservedWordException e) {
+			e.printStackTrace();
+		}
+		catch (ModelException e) {
+			e.printStackTrace();
+			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
+		}
 
 		modelString = "there exists X : X = bestFriend(X) 0.9;";
 		queryString = "bestFriend(john)";

@@ -62,6 +62,7 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
@@ -368,6 +369,7 @@ public class RuleConverter {
 		List<Expression> sorts                        = new ArrayList<Expression>();
 		List<Expression> randomVariables              = new ArrayList<Expression>();
 		Map<String, Set<Integer>> randomVariableIndex = new HashMap<String, Set<Integer>>();
+		Set<String> sortNames                         = new HashSet<String>();
 		
 		// Sort and convert the rules to their if-then-else forms.
 		for (Expression rule : inputRules) {
@@ -398,8 +400,29 @@ public class RuleConverter {
 //				randomVariableNames.put(rule.get(0).toString(), rule);
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_SORT)) {
+				sortNames.add(rule.getArguments().get(0).toString());
 				sorts.add(rule);
 			}
+		}
+		
+		// Look for missing sort declarations in the random variable declarations.
+		Set<String> missingSorts = new HashSet<String>();
+		for (Expression randomVariable : randomVariables) {
+			List<Expression> args = randomVariable.getArguments();
+			for (int ii = 2; ii < args.size() - 1; ii++) {
+				String argName = args.get(ii).toString();
+				if (!sortNames.contains(argName)) {
+					missingSorts.add(argName);
+				}
+			}
+		}
+
+		// Add declarations for the missing sorts.
+		for (String missingSort : missingSorts) {
+			sorts.add(Expressions.make("sort", missingSort, "Unknown", 
+					Expressions.make(ExtensionalSet.UNI_SET_LABEL, 
+							Expressions.make(FunctorConstants.KLEENE_LIST))));
+			sortNames.add(missingSort);
 		}
 		
 		// Run a conversion on the query before processing it with the other rules.
@@ -422,6 +445,7 @@ public class RuleConverter {
 //				}
 			}
 		}
+//		System.out.println("sort names: " + sortNames);
 //		System.out.println("var names: " + randomVariableNames.toString());
 //		System.out.println("var index: " + context.randomVariableIndex.toString());
 //		System.out.println("parfactors: " + context.parfactors.toString());
@@ -490,11 +514,11 @@ public class RuleConverter {
 	 */
 	public Pair<Expression, Expression> queryRuleAndAtom (Expression query, Map<String, Set<Integer>> randomVariableIndex) {
 		if (isRandomVariableValue(query, randomVariableIndex)) {
-			System.out.println("Query: " + query + " is a random variable value expression.");
+//			System.out.println("Query: " + query + " is a random variable value expression.");
 			return new Pair<Expression, Expression>(query, Expressions.make(FUNCTOR_ATOMIC_RULE, query, 1));
 		}
 
-		System.out.println("Query is not a random variable value expression:" + query);
+//		System.out.println("Query is not a random variable value expression:" + query);
 		Set<Expression> variables = Variables.freeVariables(query, rewritingProcess);
 		Expression queryAtom;
 		if (variables.size() > 0) {
