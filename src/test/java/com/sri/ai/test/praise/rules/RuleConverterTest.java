@@ -580,8 +580,7 @@ public class RuleConverterTest {
 		
 		string = "sick(X)";
 		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
-		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("sick(X)"), 
-				ruleParser.parse("sick(X);"));
+		expected = null;
 		assertEquals(expected, result);
 		
 		string = "sick(john) and sick(mary)";
