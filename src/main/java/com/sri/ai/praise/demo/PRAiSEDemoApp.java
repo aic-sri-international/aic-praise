@@ -156,7 +156,7 @@ public class PRAiSEDemoApp {
 		backgroundPanel.setLayout(new BorderLayout(0, 0));
 		
 		JSplitPane inputOutputSplitPane = new JSplitPane();
-		inputOutputSplitPane.setResizeWeight(0.7);
+		inputOutputSplitPane.setResizeWeight(0.65);
 		inputOutputSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		inputOutputSplitPane.setOneTouchExpandable(true);
 		backgroundPanel.add(inputOutputSplitPane, BorderLayout.CENTER);
