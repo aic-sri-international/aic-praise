@@ -287,7 +287,7 @@ information("Validate currently not implemented");
 			@Override
 			public String doInBackground() {
 				try {
-					printlnToConsole("ABOUT TO RUN QUERY");
+					printlnToConsole("ABOUT TO RUN QUERY: "+app.queryPanel.getCurrentQuery());
 
 					RuleConverter ruleConverter = new RuleConverter();
 
@@ -300,11 +300,9 @@ information("Validate currently not implemented");
 					Expression query = parseResult.first;
 					Model      model = parseResult.second;
 					
-					printlnToConsole("MODEL DECLARATION");
-					printlnToConsole("-----------------");
-					printlnToConsole("Name="+model.getName());
-					printlnToConsole("Desc="+model.getDescription());
-					printlnToConsole("\nSORTS=");
+					printlnToConsole("GENERATED MODEL DECLARATION");
+					printlnToConsole("---------------------------");
+					printlnToConsole("SORTS=");
 					for (SortDeclaration sd : model.getSortDeclarations()) {
 						printlnToConsole(sd.getSortDeclaration().toString());
 					}
@@ -317,9 +315,9 @@ information("Validate currently not implemented");
 					for (Expression parfactor : pfd.getParfactors()) {
 						printlnToConsole(parfactor.toString());
 					}
-					printlnToConsole("-----------------");
+					printlnToConsole("---------------------------");
 					
-					printlnToConsole("QUERY=\n" + query);
+					printlnToConsole("GENERATED QUERY=" + query);
 
 					LBPQueryEngine.QueryOptions queryOptions = new LBPQueryEngine.QueryOptions();
 					// Need to run with this as only versio that can handle loopy models

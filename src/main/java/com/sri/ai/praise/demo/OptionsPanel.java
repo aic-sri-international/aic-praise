@@ -68,16 +68,16 @@ import com.sri.ai.praise.lbp.LBPConfiguration;
 public class OptionsPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	//
-	private JFormattedTextField domainSizeTextField = null;
-	private JComboBox scheduleComboBox;
-	private JCheckBox chckbxJustificationToConsole;
-	private JCheckBox chckbxJustificationToJustTab;
-	private JCheckBox chckbxTraceToConsole;
-	private JCheckBox chckbxTraceToTrace;
-	private JCheckBox chckbxJustificationEnabled;
-	private JCheckBox chckbxTraceEnabled;
-	private JCheckBox chckbxOverrideModel;
-	private JCheckBox chckbxKnownDomainSize;
+	JFormattedTextField domainSizeTextField = null;
+	JComboBox scheduleComboBox;
+	JCheckBox chckbxJustificationToConsole;
+	JCheckBox chckbxJustificationToJustTab;
+	JCheckBox chckbxTraceToConsole;
+	JCheckBox chckbxTraceToTrace;
+	JCheckBox chckbxJustificationEnabled;
+	JCheckBox chckbxTraceEnabled;
+	JCheckBox chckbxOverrideModel;
+	JCheckBox chckbxKnownDomainSize;
 
 	/**
 	 * Create the panel.

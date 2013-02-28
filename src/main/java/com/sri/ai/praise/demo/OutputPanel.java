@@ -70,6 +70,8 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private ExpressionNode activeTraceNode, rootTraceNode = new ExpressionNode("", null);
 	private DefaultTreeModel treeTraceModel = new DefaultTreeModel(rootTraceNode);
 	//
+	private OptionsPanel options = null;
+	//
 	private JTextArea consoleOutputTextArea;
 	private ExpressionTreeView justificationTree;
 	private ExpressionTreeView traceTree;
@@ -100,54 +102,63 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		resultEditor.setText(result);
 	}
 	
+	public void setOptions(OptionsPanel options) {
+		this.options = options;
+	}
+	
 	//
 	// START LBPQueryEngine.TraceListener
 	@Override
 	public void traceEvent(String queryUUID, int traceLevel, Long profileInfo, Marker marker,
 			String formattedMsg, Object... args) {
-// TODO
-		StringBuilder consoleLine = new StringBuilder();
-		consoleLine.append(formattedMsg);
 		
-		if (profileInfo != null) {
-			consoleLine.append(" [");
-			// Convert nanoseconds to milliseconds
-			consoleLine.append(profileInfo / 1000000);
-			consoleLine.append("ms.]");
-		}
-		
-		StringBuilder tab = new StringBuilder();
-		for (int i = 0; i < traceLevel; i++) {
-			tab.append("  ");
-		}
-		tab.append(consoleLine);
-		println(tab.toString());
-		
-		
-		while (traceLevel > traceCurrentIndentLevel) {
-			if (!traceFirstTime) {
-				addTrace(">>");
+		if (options.chckbxTraceEnabled.isSelected()) {
+			StringBuilder consoleLine = new StringBuilder();
+			consoleLine.append(formattedMsg);
+			
+			if (profileInfo != null) {
+				consoleLine.append(" [");
+				// Convert nanoseconds to milliseconds
+				consoleLine.append(profileInfo / 1000000);
+				consoleLine.append("ms.]");
 			}
-			startTraceLevel();
-			traceCurrentIndentLevel++;
-		}
-		traceFirstTime = false;
+			
+			if (options.chckbxTraceToConsole.isSelected()) {
+				StringBuilder tab = new StringBuilder();
+				for (int i = 0; i < traceLevel; i++) {
+					tab.append("  ");
+				}
+				tab.append(consoleLine);		
+				println(tab.toString());
+			}
+			
+			
+			if (options.chckbxTraceToTrace.isSelected()) {
+				while (traceLevel > traceCurrentIndentLevel) {
+					if (!traceFirstTime) {
+						addTrace(">>");
+					}
+					startTraceLevel();
+					traceCurrentIndentLevel++;
+				}
+				traceFirstTime = false;
+				
+				while (traceLevel < traceCurrentIndentLevel) {
+					endTraceLevel();
+					traceCurrentIndentLevel--;
+				}
+				
+				if (formattedMsg != null && !formattedMsg.equals("")) {
+					addTrace(consoleLine.toString());
+				}
 		
-		while (traceLevel < traceCurrentIndentLevel) {
-			endTraceLevel();
-			traceCurrentIndentLevel--;
-		}
-		
-		if (formattedMsg != null && !formattedMsg.equals("")) {
-			addTrace(consoleLine.toString());
-		}
-
-		if (args != null) {
-			for (Object arg : args) {
-				addTrace(arg);
+				if (args != null) {
+					for (Object arg : args) {
+						addTrace(arg);
+					}
+				}
 			}
 		}
-		
 	}
 	// END LBPQueryEngine.TraceListener
 	//

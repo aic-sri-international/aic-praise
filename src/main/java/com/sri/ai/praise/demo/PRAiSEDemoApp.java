@@ -287,6 +287,8 @@ public class PRAiSEDemoApp {
 		controller = new Controller(this);
 		controller.setActiveEditor(modelEditPanel);
 		
+		outputPanel.setOptions(optionsPanel);
+		
 		// 
 		// Wire up the Action handlers.
 		// New
