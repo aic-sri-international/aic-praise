@@ -289,6 +289,9 @@ public class PRAiSEDemoApp {
 		
 		outputPanel.setOptions(optionsPanel);
 		
+		// Ensure the options panel is hidden by default
+		inputSplitPane.setDividerLocation(frame.getBounds().width);
+		
 		// 
 		// Wire up the Action handlers.
 		// New
