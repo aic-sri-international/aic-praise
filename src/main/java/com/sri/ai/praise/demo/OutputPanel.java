@@ -40,7 +40,6 @@ package com.sri.ai.praise.demo;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.io.PrintStream;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -232,11 +231,6 @@ public class OutputPanel extends JPanel {
 
 		TreeUtil.setWriter(DefaultWriter.newDefaultConfiguredWriter());
 		clearTraceTree();
-		
-		// Redirect the standard output and error to the console
-		PrintStream consoleOutput = new PrintStream(new ConsoleOutputStream());
-		System.setOut(consoleOutput);
-		System.setErr(consoleOutput);
 	}
 	
 	private void clearJustificationTree() {
@@ -281,6 +275,7 @@ public class OutputPanel extends JPanel {
 	}
 	
 	/** Writes everything into the text area. */
+	@SuppressWarnings("unused")
 	private class ConsoleOutputStream extends java.io.OutputStream {
 		private StringBuilder sb = new StringBuilder();
 		@Override

@@ -83,6 +83,9 @@ public class PRAiSEConfiguration extends Configuration {
 	public static final String  KEY_MODEL_ALL_TYPE_SIZES_KNOWN                                             = "praise.model.all.type.sizes.known";
 	public static final Boolean DEFAULT_VALUE_MODEL_ALL_TYPE_SIZES_KNOWN                                   = Boolean.TRUE; 
 	//
+	public static final String  KEY_MODEL_QUERY_ALWAYS_A_RANDOM_VARIABLE_NAME                              = "praise.model.query.always.a.random.varialbe.name";
+	public static final Boolean DEFAULT_VALUE_MODEL_QUERY_ALWAYS_A_RANDOM_VARIABLE_NAME                    = Boolean.TRUE;
+	//
 	public static final String  KEY_LBP_QUERY_ENGINE_CLASS                                                 = "praise.lbp.query.engine.class";
 	public static final String  DEFAULT_VALUE_LBP_QUERY_ENGINE_CLASS                                       = DefaultLBPQueryEngine.class.getName();
 
@@ -149,6 +152,12 @@ public class PRAiSEConfiguration extends Configuration {
 	
 	public static boolean isAllTypeSizesKnownInModel() {
 		boolean result = getBoolean(KEY_MODEL_ALL_TYPE_SIZES_KNOWN, DEFAULT_VALUE_MODEL_ALL_TYPE_SIZES_KNOWN);
+	
+		return result;
+	}
+	
+	public static boolean isQueryAlwaysARandomVariableNameInModel() {
+		boolean result = getBoolean(KEY_MODEL_QUERY_ALWAYS_A_RANDOM_VARIABLE_NAME, DEFAULT_VALUE_MODEL_QUERY_ALWAYS_A_RANDOM_VARIABLE_NAME);
 	
 		return result;
 	}

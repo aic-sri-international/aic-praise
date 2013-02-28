@@ -221,8 +221,6 @@ public class QueryPanel extends JPanel {
 				} catch (NumberFormatException nfe) {
 					domainSizeTextField.setValue(size);
 				}
-// TODO				
-				//getOptions().setDomainSize(size);
 			}
 		});
 		domainSizeTextField.setPreferredSize(new Dimension(80, 25));

@@ -86,6 +86,8 @@ import com.sri.ai.praise.PRAiSEConfiguration;
  */
 @Beta
 public class Model {
+	public static final String RANDOM_VARIABLE_NAME_QUERY = "query";
+	
 	public static class ModelError {
 		public static enum TYPE {
 			//
@@ -456,6 +458,12 @@ public class Model {
 		else {
 			knownVarNames.addAll(model.getKnownRandomVariableNames());
 		}
+		
+		if (PRAiSEConfiguration.isQueryAlwaysARandomVariableNameInModel()) {
+			// Always add 'query' to the lsit of known random variable names.
+			knownVarNames.add(RANDOM_VARIABLE_NAME_QUERY);
+		}
+		
 		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES,
 				knownVarNames);
 	}
