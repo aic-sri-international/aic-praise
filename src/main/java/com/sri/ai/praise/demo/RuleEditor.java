@@ -57,6 +57,7 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -156,7 +157,20 @@ public class RuleEditor extends JPanel {
 		editorScrollPane = new JScrollPane();
 		add(editorScrollPane, BorderLayout.CENTER);
 		
-		textPane = new JTextPane();
+		textPane = new JTextPane() {
+			private static final long serialVersionUID = 1L;
+			// Note: This turns off auto-wrapping of the text.
+			// Override getScrollableTracksViewportWidth
+			// to preserve the full width of the text
+			@Override
+			public boolean getScrollableTracksViewportWidth() {
+				Component parent = getParent();
+				ComponentUI ui = getUI();
+
+				return parent != null ? (ui.getPreferredSize(this).width <= parent
+						.getSize().width) : true;
+			}
+		};
 		editorScrollPane.setViewportView(textPane);
 		
 		postGUISetup();
