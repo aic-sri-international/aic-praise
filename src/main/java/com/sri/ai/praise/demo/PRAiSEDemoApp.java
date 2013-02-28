@@ -78,6 +78,7 @@ public class PRAiSEDemoApp {
 	JTabbedPane editorsTabbedPane;
 	RuleEditor modelEditPanel;
 	RuleEditor evidenceEditPanel;
+	OptionsPanel optionsPanel;
 	QueryPanel queryPanel;
 	OutputPanel outputPanel;
 	//
@@ -97,6 +98,7 @@ public class PRAiSEDemoApp {
 	private JMenuItem mntmClearOutput;
 	private JMenuItem mntmNewWindow;
 	private JMenuItem mntmHideToolBar;
+	private JSplitPane inputSplitPane;
 
 	/**
 	 * Launch the application.
@@ -154,24 +156,24 @@ public class PRAiSEDemoApp {
 		backgroundPanel.setLayout(new BorderLayout(0, 0));
 		
 		JSplitPane inputOutputSplitPane = new JSplitPane();
-		inputOutputSplitPane.setResizeWeight(0.6);
+		inputOutputSplitPane.setResizeWeight(0.7);
 		inputOutputSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		inputOutputSplitPane.setOneTouchExpandable(true);
 		backgroundPanel.add(inputOutputSplitPane, BorderLayout.CENTER);
 		
 		JPanel inputPanel = new JPanel();
-		inputPanel.setPreferredSize(new Dimension(400, 500));
+		inputPanel.setPreferredSize(new Dimension(400, 550));
 		inputOutputSplitPane.setLeftComponent(inputPanel);
 		inputPanel.setLayout(new BorderLayout(0, 0));
 		
-		JSplitPane splitPane = new JSplitPane();
-		splitPane.setOneTouchExpandable(true);
-		splitPane.setResizeWeight(0.9);
-		inputPanel.add(splitPane, BorderLayout.CENTER);
+		inputSplitPane = new JSplitPane();
+		inputSplitPane.setResizeWeight(1.0);
+		inputSplitPane.setOneTouchExpandable(true);
+		inputPanel.add(inputSplitPane, BorderLayout.CENTER);
 		
 		JPanel editorPanel = new JPanel();
-		editorPanel.setPreferredSize(new Dimension(400, 500));
-		splitPane.setLeftComponent(editorPanel);
+		editorPanel.setPreferredSize(new Dimension(400, 370));
+		inputSplitPane.setLeftComponent(editorPanel);
 		editorPanel.setLayout(new BorderLayout(0, 0));
 		
 		editorsTabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -196,11 +198,14 @@ public class PRAiSEDemoApp {
 		editorsTabbedPane.addTab("Evidence", null, evidenceEditPanel, null);
 		
 		queryPanel = new QueryPanel();
-		queryPanel.setPreferredSize(new Dimension(300, 400));
-		splitPane.setRightComponent(queryPanel);
+		editorPanel.add(queryPanel, BorderLayout.SOUTH);
+		
+		optionsPanel = new OptionsPanel();
+		optionsPanel.setPreferredSize(new Dimension(200, 370));
+		inputSplitPane.setRightComponent(optionsPanel);
 		
 		outputPanel = new OutputPanel();
-		outputPanel.setPreferredSize(new Dimension(400, 60));
+		outputPanel.setPreferredSize(new Dimension(400, 40));
 		inputOutputSplitPane.setRightComponent(outputPanel);
 		
 		JPanel controlPanel = new JPanel();
