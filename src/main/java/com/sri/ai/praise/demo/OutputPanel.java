@@ -62,10 +62,9 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private static final long serialVersionUID = 1L;
 	
 	//
-	@SuppressWarnings("unused")
 	private ExpressionNode activeJustificationNode, rootJustificationNode = new ExpressionNode("", null);
 	private DefaultTreeModel treeJustificationModel = new DefaultTreeModel(rootJustificationNode);
-	private int traceCurrentIndentLevel = 0;
+	private int traceCurrentIndentLevel = 0, justificationCurrentIndentLevel = 0;
 	private boolean traceFirstTime = true;
 	private ExpressionNode activeTraceNode, rootTraceNode = new ExpressionNode("", null);
 	private DefaultTreeModel treeTraceModel = new DefaultTreeModel(rootTraceNode);
@@ -168,7 +167,36 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	@Override
 	public void justificationEvent(String queryUUID, int justificationLevel, Marker marker,
 			String formattedMsg, Object... args) {		
-// TODO	
+		if (options.chckbxJustificationEnabled.isSelected()) {
+			StringBuilder consoleLine = new StringBuilder();
+			consoleLine.append(formattedMsg);
+			
+			if (options.chckbxJustificationToConsole.isSelected()) {
+				println(consoleLine.toString());
+			}
+			
+			if (options.chckbxJustificationToJustTab.isSelected()) {
+				while (justificationLevel > justificationCurrentIndentLevel) {
+					startJustificationLevel();
+					justificationCurrentIndentLevel++;
+				}
+				
+				while (justificationLevel < justificationCurrentIndentLevel) {
+					endJustificationLevel();
+					justificationCurrentIndentLevel--;
+				}
+				
+				if (formattedMsg != null && !formattedMsg.equals("")) {
+					addJustification(consoleLine.toString());
+				}
+		
+				if (args != null) {
+					for (Object arg : args) {
+						addJustification(arg);
+					}
+				}
+			}
+		}
 	}
 	// END LBPQueryEngine.JustificationListener
 	//
@@ -245,6 +273,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		activeJustificationNode = rootJustificationNode;
 		treeJustificationModel = new DefaultTreeModel(rootJustificationNode);
 		justificationTree.setModel(treeJustificationModel);
+		justificationCurrentIndentLevel = 0;
 	}
 	
 	private void clearTraceTree() {
@@ -256,6 +285,16 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		traceFirstTime = true;
 	}
 	
+	private void startJustificationLevel() {
+		if (activeJustificationNode.getChildCount() == 0) {
+			activeJustificationNode = rootJustificationNode;
+		} 
+		else {
+			activeJustificationNode = (ExpressionNode) activeJustificationNode
+					.getChildAt(activeJustificationNode.getChildCount() - 1);
+		}
+	}
+	
 	private void startTraceLevel() {
 		if (activeTraceNode.getChildCount() == 0) {
 			activeTraceNode = rootTraceNode;
@@ -263,6 +302,13 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		else {
 			activeTraceNode = (ExpressionNode) activeTraceNode
 					.getChildAt(activeTraceNode.getChildCount() - 1);
+		}
+	}
+	
+	private void endJustificationLevel() {
+		activeJustificationNode = (ExpressionNode) activeJustificationNode.getParent();
+		if (activeJustificationNode == null) {
+			activeJustificationNode = rootJustificationNode; 
 		}
 	}
 	
@@ -279,6 +325,16 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 			public void run() {
 				treeTraceModel.reload();
 				traceTree.restoreExpandedPaths();
+			}
+		});
+	}
+	
+	private void addJustification(Object obj) {
+		activeJustificationNode.add(obj);
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				treeJustificationModel.reload();
+				justificationTree.restoreExpandedPaths();
 			}
 		});
 	}
