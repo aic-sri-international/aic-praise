@@ -429,6 +429,7 @@ public class RuleConverter {
 		Expression queryAtom = null;
 		if (query != null) {
 			Pair<Expression, Expression> queryPair = queryRuleAndAtom(query, randomVariableIndex);
+			queryAtom = query;
 			if (queryPair != null) {
 				potentialExpressions.add(translateRule(queryPair.second));
 				queryAtom = queryPair.first;
@@ -515,7 +516,7 @@ public class RuleConverter {
 	public Pair<Expression, Expression> queryRuleAndAtom (Expression query, Map<String, Set<Integer>> randomVariableIndex) {
 		if (isRandomVariableValue(query, randomVariableIndex)) {
 //			System.out.println("Query: " + query + " is a random variable value expression.");
-			return new Pair<Expression, Expression>(query, Expressions.make(FUNCTOR_ATOMIC_RULE, query, 1));
+			return null;
 		}
 
 //		System.out.println("Query is not a random variable value expression:" + query);
