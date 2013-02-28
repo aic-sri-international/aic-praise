@@ -48,29 +48,31 @@ import com.google.common.annotations.Beta;
  */
 @Beta
 public class ImageLookup {	
-	public static final ImageIcon NEW_LARGE           = createImageIcon("document-new32x32.png");
-	public static final ImageIcon OPEN_LARGE          = createImageIcon("document-open32x32.png");
-	public static final ImageIcon SAVE_LARGE          = createImageIcon("document-save32x32.png");
-	public static final ImageIcon SAVE_AS_LARGE       = createImageIcon("document-save-as32x32.png");
-	public static final ImageIcon SAVE_ALL_LARGE      = createImageIcon("document-save-all32x32.png");
-	public static final ImageIcon UNDO_LARGE          = createImageIcon("edit-undo32x32.png");
-	public static final ImageIcon REDO_LARGE          = createImageIcon("edit-redo32x32.png");
-	public static final ImageIcon VALIDATE_LARGE      = createImageIcon("document-properties32x32.png");
-	public static final ImageIcon EXECUTE_QUERY_LARGE = createImageIcon("go-next32x32.png"); 
-	public static final ImageIcon CLEAR_LARGE         = createImageIcon("edit-clear32x32.png");
-	public static final ImageIcon NEW_WINDOW_LARGE    = createImageIcon("window-new32x32.png");
+	public static final ImageIcon NEW_LARGE             = createImageIcon("document-new32x32.png");
+	public static final ImageIcon OPEN_LARGE            = createImageIcon("document-open32x32.png");
+	public static final ImageIcon SAVE_LARGE            = createImageIcon("document-save32x32.png");
+	public static final ImageIcon SAVE_AS_LARGE         = createImageIcon("document-save-as32x32.png");
+	public static final ImageIcon SAVE_ALL_LARGE        = createImageIcon("document-save-all32x32.png");
+	public static final ImageIcon UNDO_LARGE            = createImageIcon("edit-undo32x32.png");
+	public static final ImageIcon REDO_LARGE            = createImageIcon("edit-redo32x32.png");
+	public static final ImageIcon VALIDATE_LARGE        = createImageIcon("document-properties32x32.png");
+	public static final ImageIcon EXECUTE_QUERY_LARGE   = createImageIcon("go-next32x32.png"); 
+	public static final ImageIcon CLEAR_LARGE           = createImageIcon("edit-clear32x32.png");
+	public static final ImageIcon NEW_WINDOW_LARGE      = createImageIcon("window-new32x32.png");
+	public static final ImageIcon PROCESS_WORKING_LARGE = createImageIcon("process-working32x32.png");
 	//
-	public static final ImageIcon NEW_SMALL           = createImageIcon("document-new22x22.png");
-	public static final ImageIcon OPEN_SMALL          = createImageIcon("document-open22x22.png");
-	public static final ImageIcon SAVE_SMALL          = createImageIcon("document-save22x22.png");
-	public static final ImageIcon SAVE_AS_SMALL       = createImageIcon("document-save-as22x22.png");
-	public static final ImageIcon SAVE_ALL_SMALL      = createImageIcon("document-save-all22x22.png");
-	public static final ImageIcon UNDO_SMALL          = createImageIcon("edit-undo22x22.png");
-	public static final ImageIcon REDO_SMALL          = createImageIcon("edit-redo22x22.png");
-	public static final ImageIcon VALIDATE_SMALL      = createImageIcon("document-properties22x22.png");
-	public static final ImageIcon EXECUTE_QUERY_SMALL = createImageIcon("go-next22x22.png"); 
-	public static final ImageIcon CLEAR_SMALL         = createImageIcon("edit-clear22x22.png");
-	public static final ImageIcon NEW_WINDOW_SMALL    = createImageIcon("window-new22x22.png");
+	public static final ImageIcon NEW_SMALL             = createImageIcon("document-new22x22.png");
+	public static final ImageIcon OPEN_SMALL            = createImageIcon("document-open22x22.png");
+	public static final ImageIcon SAVE_SMALL            = createImageIcon("document-save22x22.png");
+	public static final ImageIcon SAVE_AS_SMALL         = createImageIcon("document-save-as22x22.png");
+	public static final ImageIcon SAVE_ALL_SMALL        = createImageIcon("document-save-all22x22.png");
+	public static final ImageIcon UNDO_SMALL            = createImageIcon("edit-undo22x22.png");
+	public static final ImageIcon REDO_SMALL            = createImageIcon("edit-redo22x22.png");
+	public static final ImageIcon VALIDATE_SMALL        = createImageIcon("document-properties22x22.png");
+	public static final ImageIcon EXECUTE_QUERY_SMALL   = createImageIcon("go-next22x22.png"); 
+	public static final ImageIcon CLEAR_SMALL           = createImageIcon("edit-clear22x22.png");
+	public static final ImageIcon NEW_WINDOW_SMALL      = createImageIcon("window-new22x22.png");
+	public static final ImageIcon PROCESS_WORKING_SMALL = createImageIcon("process-working22x22.png");
 	
 	//
 	// PRIVATE

@@ -59,10 +59,15 @@ import javax.swing.JFormattedTextField;
 import java.awt.Component;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.lbp.LBPConfiguration;
+
 import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JSeparator;
+import javax.swing.JProgressBar;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 /**
  * 
@@ -84,6 +89,11 @@ public class QueryPanel extends JPanel {
 	private JCheckBox chckbxJustificationToJustTab;
 	private JCheckBox chckbxTraceToConsole;
 	private JCheckBox chckbxTraceToTrace;
+	private JCheckBox chckbxJustificationEnabled;
+	private JCheckBox chckbxTraceEnabled;
+	private JCheckBox chckbxOverrideModel;
+	private JCheckBox chckbxKnownDomainSize;
+	private JProgressBar progressBar;
 
 	/**
 	 * Create the panel.
@@ -91,6 +101,7 @@ public class QueryPanel extends JPanel {
 	public QueryPanel() {
 		setBorder(new EmptyBorder(0, 5, 0, 0));
 		initialize();
+		postGUIInitialization();
 	}
 
 	public void setCurrentQuery(String query) {
@@ -167,6 +178,18 @@ public class QueryPanel extends JPanel {
 		queryComboBox.setEditable(true);
 		
 		btnExecuteQuery = new JButton("");
+		btnExecuteQuery.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (btnExecuteQuery.isEnabled()) {
+					progressBar.setEnabled(false);
+					progressBar.setIndeterminate(false);
+				}
+				else {
+					progressBar.setEnabled(true);
+					progressBar.setIndeterminate(true);
+				}
+			}
+		});
 		panel.add(btnExecuteQuery);
 		btnExecuteQuery.setPreferredSize(new Dimension(40, 32));
 		btnExecuteQuery.setHideActionText(true);
@@ -203,17 +226,22 @@ public class QueryPanel extends JPanel {
 		JSeparator separator = new JSeparator();
 		optionsPanel.add(separator);
 		
-		JLabel label_4 = new JLabel("  ");
-		label_4.setPreferredSize(new Dimension(6, 8));
-		optionsPanel.add(label_4);
+		progressBar = new JProgressBar();
+		progressBar.setEnabled(false);
+		optionsPanel.add(progressBar);
+		
+		JSeparator separator_3 = new JSeparator();
+		optionsPanel.add(separator_3);
 		
 		JLabel lblOptions = new JLabel("Options");
 		lblOptions.setFont(new Font("SansSerif", Font.BOLD, 12));
 		optionsPanel.add(lblOptions);
 		
-		JLabel lblNewLabel_1 = new JLabel("  ");
-		lblNewLabel_1.setPreferredSize(new Dimension(6, 8));
-		optionsPanel.add(lblNewLabel_1);
+		JSeparator separator_5 = new JSeparator();
+		optionsPanel.add(separator_5);
+		
+		JSeparator separator_4 = new JSeparator();
+		optionsPanel.add(separator_4);
 		
 		JPanel schedulePanel = new JPanel();
 		schedulePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -227,9 +255,21 @@ public class QueryPanel extends JPanel {
 		scheduleComboBox.setPreferredSize(new Dimension(100, 25));
 		schedulePanel.add(scheduleComboBox);
 		
-		JCheckBox chckbxNewCheckBox = new JCheckBox("Override Model's Domain Sizes (i.e. sort sizes)");
-		chckbxNewCheckBox.setPreferredSize(new Dimension(18, 25));
-		optionsPanel.add(chckbxNewCheckBox);
+		chckbxOverrideModel = new JCheckBox("Override Model's Domain Sizes (i.e. sort sizes)");
+		chckbxOverrideModel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (chckbxOverrideModel.isSelected()) {
+					chckbxKnownDomainSize.setEnabled(true);
+					domainSizeTextField.setEnabled(true);
+				}
+				else {
+					chckbxKnownDomainSize.setEnabled(false);
+					domainSizeTextField.setEnabled(false);
+				}
+			}
+		});
+		chckbxOverrideModel.setPreferredSize(new Dimension(18, 25));
+		optionsPanel.add(chckbxOverrideModel);
 		
 		JPanel knownSizePanel = new JPanel();
 		knownSizePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -242,10 +282,13 @@ public class QueryPanel extends JPanel {
 		JLabel lblNewLabel = new JLabel("      ");
 		knownSizePanel.add(lblNewLabel);
 		
-		JCheckBox chckbxKnownDomainSize = new JCheckBox("Known Domain Size");
+		chckbxKnownDomainSize = new JCheckBox("Known Domain Size");
+		chckbxKnownDomainSize.setSelected(true);
+		chckbxKnownDomainSize.setEnabled(false);
 		knownSizePanel.add(chckbxKnownDomainSize);
 		
 		domainSizeTextField = new JFormattedTextField();
+		domainSizeTextField.setEnabled(false);
 		domainSizeTextField.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -272,7 +315,20 @@ public class QueryPanel extends JPanel {
 		JSeparator separator_1 = new JSeparator();
 		optionsPanel.add(separator_1);
 		
-		JCheckBox chckbxJustificationEnabled = new JCheckBox("Justification Enabled");
+		chckbxJustificationEnabled = new JCheckBox("Justification Enabled");
+		chckbxJustificationEnabled.setSelected(true);
+		chckbxJustificationEnabled.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (chckbxJustificationEnabled.isSelected()) {
+					chckbxJustificationToConsole.setEnabled(true);
+					chckbxJustificationToJustTab.setEnabled(true);
+				}
+				else {
+					chckbxJustificationToConsole.setEnabled(false);
+					chckbxJustificationToJustTab.setEnabled(false);
+				}
+			}
+		});
 		chckbxJustificationEnabled.setPreferredSize(new Dimension(175, 25));
 		optionsPanel.add(chckbxJustificationEnabled);
 		
@@ -303,13 +359,27 @@ public class QueryPanel extends JPanel {
 		justOutToJustPanel.add(label_1);
 		
 		chckbxJustificationToJustTab = new JCheckBox("Output to Justification Tab");
+		chckbxJustificationToJustTab.setSelected(true);
 		chckbxJustificationToJustTab.setPreferredSize(new Dimension(163, 25));
 		justOutToJustPanel.add(chckbxJustificationToJustTab);
 		
 		JSeparator separator_2 = new JSeparator();
 		optionsPanel.add(separator_2);
 		
-		JCheckBox chckbxTraceEnabled = new JCheckBox("Trace Enabled");
+		chckbxTraceEnabled = new JCheckBox("Trace Enabled");
+		chckbxTraceEnabled.setSelected(true);
+		chckbxTraceEnabled.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (chckbxTraceEnabled.isSelected()) {
+					chckbxTraceToConsole.setEnabled(true);
+					chckbxTraceToTrace.setEnabled(true);
+				}
+				else {
+					chckbxTraceToConsole.setEnabled(false);
+					chckbxTraceToTrace.setEnabled(false);
+				}
+			}
+		});
 		chckbxTraceEnabled.setPreferredSize(new Dimension(141, 25));
 		optionsPanel.add(chckbxTraceEnabled);
 		
@@ -340,7 +410,14 @@ public class QueryPanel extends JPanel {
 		traceOutputToTracePanel.add(label_3);
 		
 		chckbxTraceToTrace = new JCheckBox("Output to Trace Tab");
+		chckbxTraceToTrace.setSelected(true);
 		chckbxTraceToTrace.setPreferredSize(new Dimension(129, 25));
 		traceOutputToTracePanel.add(chckbxTraceToTrace);
+	}
+	
+	private void postGUIInitialization() {
+		scheduleComboBox.addItem(LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS.name());
+		scheduleComboBox.addItem("ASYNC INDIVIDUAL");
+		scheduleComboBox.addItem("ASYNC GROUP");
 	}
 }
