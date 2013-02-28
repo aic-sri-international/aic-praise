@@ -69,6 +69,7 @@ import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.lbp.LBPRewriter;
@@ -292,7 +293,10 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 				
 				// Step 2 create RewritingProcess
 				notifyListenersQueryStepStarting(queryUUID, STEP_2, stopWatch);
-				process = LBPFactory.newLBPProcess(queryExp);
+				LBPConfiguration configuration = LBPFactory.newLBPConfiguration();
+				// Set the update schedule.
+				configuration.setBeliefPropagationUpdateSchedule(options.getBeliefPropagationUpdateSchedule());
+				process = LBPFactory.newLBPProcess(queryExp, configuration);
 				notifyListenersQueryStepComplete(queryUUID, STEP_2, stopWatch);
 				
 				// Step 3 get the model as Expression

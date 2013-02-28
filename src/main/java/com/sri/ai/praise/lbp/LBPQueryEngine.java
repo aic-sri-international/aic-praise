@@ -45,6 +45,8 @@ import java.util.List;
 import org.slf4j.Marker;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.PRAiSEConfiguration;
+import com.sri.ai.praise.lbp.LBPConfiguration.BeliefPropagationUpdateSchedule;
 
 /**
  * Utility interface that encapsulates the logic required to call
@@ -68,11 +70,13 @@ public interface LBPQueryEngine {
 		private boolean knownDomainSizes = true;
 		private boolean traceOn          = true;
 		private boolean justificationsOn = true;
+		//
+		private BeliefPropagationUpdateSchedule beliefPropagationUpdateSchedule = BeliefPropagationUpdateSchedule.getUpdateSchedule(PRAiSEConfiguration.getLBPBeliefPropagationUpdateScheduleName());
 		
 		public QueryOptions() {
 			
 		}
-		
+
 		public QueryOptions(boolean knownDomainSizes, boolean traceOn, boolean justificationsOn) {
 			setKnownDomainSizes(knownDomainSizes);
 			setTraceOn(traceOn);
@@ -101,6 +105,15 @@ public interface LBPQueryEngine {
 
 		public void setJustificationsOn(boolean justificationsOn) {
 			this.justificationsOn = justificationsOn;
+		}
+		
+		public BeliefPropagationUpdateSchedule getBeliefPropagationUpdateSchedule() {
+			return beliefPropagationUpdateSchedule;
+		}
+
+		public void setBeliefPropagationUpdateSchedule(
+				BeliefPropagationUpdateSchedule beliefPropagationUpdateSchedule) {
+			this.beliefPropagationUpdateSchedule = beliefPropagationUpdateSchedule;
 		}
 	}
 

@@ -71,6 +71,7 @@ import com.sri.ai.praise.demo.action.SaveAsAction;
 import com.sri.ai.praise.demo.action.UndoAction;
 import com.sri.ai.praise.demo.action.ValidateAction;
 import com.sri.ai.praise.demo.model.Example;
+import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.model.Model;
@@ -317,6 +318,9 @@ information("Validate currently not implemented");
 					
 					printlnToConsole("QUERY=\n" + query);
 
+					LBPQueryEngine.QueryOptions queryOptions = new LBPQueryEngine.QueryOptions();
+					// Need to run with this as only versio that can handle loopy models
+					queryOptions.setBeliefPropagationUpdateSchedule(LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS);
 					String queryUUID = queryEngine.newQueryUUID();
 
 					String belief = queryEngine.queryBeliefOfRandomVariable(
