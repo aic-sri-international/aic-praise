@@ -56,6 +56,7 @@ import javax.swing.undo.UndoManager;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.praise.demo.action.ClearOutputAction;
 import com.sri.ai.praise.demo.action.ExecuteQueryAction;
 import com.sri.ai.praise.demo.action.ExitAction;
@@ -71,7 +72,6 @@ import com.sri.ai.praise.demo.action.SaveAsAction;
 import com.sri.ai.praise.demo.action.UndoAction;
 import com.sri.ai.praise.demo.action.ValidateAction;
 import com.sri.ai.praise.demo.model.Example;
-import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.model.Model;
@@ -300,7 +300,14 @@ information("Validate currently not implemented");
 					Expression query = parseResult.first;
 					Model      model = parseResult.second;
 					
-					printlnToConsole("GENERATED MODEL DECLARATION");
+					String overridden = "";
+					if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
+						model = new Model(model, app.optionsPanel.chckbxKnownDomainSize.isSelected(), 
+										        new Integer(app.optionsPanel.domainSizeTextField.getText()));
+						overridden = " (Sort Sizes Overridden with Specified Options)";
+					}
+					
+					printlnToConsole("GENERATED MODEL DECLARATION" + overridden);
 					printlnToConsole("---------------------------");
 					printlnToConsole("SORTS=");
 					for (SortDeclaration sd : model.getSortDeclarations()) {
@@ -320,9 +327,16 @@ information("Validate currently not implemented");
 					printlnToConsole("GENERATED QUERY=" + query);
 
 					LBPQueryEngine.QueryOptions queryOptions = new LBPQueryEngine.QueryOptions();
-					// Need to run with this as only versio that can handle loopy models
-					queryOptions.setBeliefPropagationUpdateSchedule(LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS);
-					String queryUUID = queryEngine.newQueryUUID();
+					// Assign the selected Options.
+					queryOptions.setBeliefPropagationUpdateSchedule(app.optionsPanel.getSelectedSchedule());
+					queryOptions.setJustificationsOn(app.optionsPanel.chckbxJustificationEnabled.isSelected());
+					queryOptions.setTraceOn(app.optionsPanel.chckbxTraceEnabled.isSelected());
+					queryOptions.setKnownDomainSizes(true); // By default.
+					if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
+						queryOptions.setKnownDomainSizes(app.optionsPanel.chckbxKnownDomainSize.isSelected());
+						GrinderConfiguration.setProperty(GrinderConfiguration.KEY_ASSUME_DOMAIN_ALWAYS_LARGE, ""+app.optionsPanel.chckbxAssumeDomainsAlwaysLarge.isSelected());
+					}					
+					String queryUUID = queryEngine.newQueryUUID(queryOptions);
 
 					String belief = queryEngine.queryBeliefOfRandomVariable(
 							queryUUID, "belief([" + query + "])",
@@ -332,8 +346,9 @@ information("Validate currently not implemented");
 
 					app.outputPanel.setResult(belief);
 				} catch (ReservedWordException rwe) {
-					rwe.printStackTrace();
+					error("Reserved word 'query' is used input Model or Evidence");
 				} catch (RuntimeException re) {
+					error("Error processing inputs:\n"+re.getMessage());
 					re.printStackTrace();
 				}
 				finally {

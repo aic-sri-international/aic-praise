@@ -58,6 +58,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lbp.LBPConfiguration;
+import com.sri.ai.util.Util;
 
 /**
  * 
@@ -67,6 +68,10 @@ import com.sri.ai.praise.lbp.LBPConfiguration;
 @Beta
 public class OptionsPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
+	//
+	private static final String SYNCHRONOUS      = "SYNCHRONOUS";
+	private static final String ASYNC_INDIVIDUAL = "ASYNC INDIVIDUAL";
+	private static final String ASYNC_GROUP      = "ASYNC GROUP";
 	//
 	JFormattedTextField domainSizeTextField = null;
 	JComboBox scheduleComboBox;
@@ -78,6 +83,7 @@ public class OptionsPanel extends JPanel {
 	JCheckBox chckbxTraceEnabled;
 	JCheckBox chckbxOverrideModel;
 	JCheckBox chckbxKnownDomainSize;
+	JCheckBox chckbxAssumeDomainsAlwaysLarge;
 
 	/**
 	 * Create the panel.
@@ -86,6 +92,27 @@ public class OptionsPanel extends JPanel {
 		setBorder(new EmptyBorder(0, 5, 0, 0));
 		initialize();
 		postGUIInitialization();
+	}
+	
+	public LBPConfiguration.BeliefPropagationUpdateSchedule getSelectedSchedule() {
+		LBPConfiguration.BeliefPropagationUpdateSchedule result = null;
+		
+		String scheduleName = scheduleComboBox.getItemAt(scheduleComboBox.getSelectedIndex()).toString();
+		
+		if (scheduleName.equals(SYNCHRONOUS)) {
+			result = LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS;
+		}
+		else if (scheduleName.equals(ASYNC_INDIVIDUAL)) {
+			result = LBPConfiguration.BeliefPropagationUpdateSchedule.ASYNCHRONOUS_INDIVIDUAL_BASED_CYCLE_DETECTION;
+		}
+		else if (scheduleName.equals(ASYNC_GROUP)) {
+			result = LBPConfiguration.BeliefPropagationUpdateSchedule.ASYNCHRONOUS_GROUP_BASED_CYCLE_DETECTION;
+		}
+		else {
+			Util.fatalError("Missing Schedule Mapping.");
+		}
+
+		return result;
 	}
 	
 	//
@@ -127,10 +154,12 @@ public class OptionsPanel extends JPanel {
 				if (chckbxOverrideModel.isSelected()) {
 					chckbxKnownDomainSize.setEnabled(true);
 					domainSizeTextField.setEnabled(true);
+					chckbxAssumeDomainsAlwaysLarge.setEnabled(true);
 				}
 				else {
 					chckbxKnownDomainSize.setEnabled(false);
 					domainSizeTextField.setEnabled(false);
+					chckbxAssumeDomainsAlwaysLarge.setEnabled(false);
 				}
 			}
 		});
@@ -174,9 +203,20 @@ public class OptionsPanel extends JPanel {
 		domainSizeTextField.setValue(new Integer(10));
 		knownSizePanel.add(domainSizeTextField);
 		
-		JCheckBox chckbxAssumeDomainsAlwaysLarge = new JCheckBox("Assume Domains Always Large");
+		JPanel assumePanel = new JPanel();
+		assumePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		FlowLayout flowLayout_1 = (FlowLayout) assumePanel.getLayout();
+		flowLayout_1.setVgap(0);
+		flowLayout_1.setHgap(0);
+		flowLayout_1.setAlignment(FlowLayout.LEFT);
+		optionsPanel.add(assumePanel);
+		
+		JLabel label_4 = new JLabel("      ");
+		assumePanel.add(label_4);
+		
+		chckbxAssumeDomainsAlwaysLarge = new JCheckBox("Assume Domains Always Large");
+		assumePanel.add(chckbxAssumeDomainsAlwaysLarge);
 		chckbxAssumeDomainsAlwaysLarge.setPreferredSize(new Dimension(198, 25));
-		optionsPanel.add(chckbxAssumeDomainsAlwaysLarge);
 		
 		JSeparator separator_1 = new JSeparator();
 		optionsPanel.add(separator_1);
@@ -280,10 +320,10 @@ public class OptionsPanel extends JPanel {
 		chckbxTraceToTrace.setPreferredSize(new Dimension(129, 25));
 		traceOutputToTracePanel.add(chckbxTraceToTrace);
 	}
-	
+
 	private void postGUIInitialization() {
-		scheduleComboBox.addItem(LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS.name());
-		scheduleComboBox.addItem("ASYNC INDIVIDUAL");
-		scheduleComboBox.addItem("ASYNC GROUP");
+		scheduleComboBox.addItem(SYNCHRONOUS);
+		scheduleComboBox.addItem(ASYNC_INDIVIDUAL);
+		scheduleComboBox.addItem(ASYNC_GROUP);
 	}
 }

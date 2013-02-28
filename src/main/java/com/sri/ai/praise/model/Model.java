@@ -231,12 +231,72 @@ public class Model {
 
 		collectAndValidateModelParts();
 	}
+	
+	/**
+	 * A copy constructor that lets you override the size information associated
+	 * with the model's sort declarations.
+	 * 
+	 * @param toCopy
+	 * @param knownDomainSize
+	 * @param size
+	 */
+	public Model(Model toCopy, boolean knownDomainSize, Integer size) {
+		List<Object> args = new ArrayList<Object>();
+		this.knownRandomVariableNames.addAll(toCopy.knownRandomVariableNames);
+		this.name = toCopy.name;
+		if (this.name != null) {
+			args.add(this.name);
+		}
+		this.description = toCopy.description;
+		if (this.description != null) {
+			args.add(this.description);
+		}
+		this.randomVariableDeclarations.addAll(toCopy.randomVariableDeclarations);
+		for (RandomVariableDeclaration rvd : this.randomVariableDeclarations) {
+			args.add(rvd);
+		}
+		this.parfactorsDeclaration = toCopy.parfactorsDeclaration;
+		args.add(this.parfactorsDeclaration);
+		
+		// Change the sort declarations
+		for (SortDeclaration toCopySortDeclaration : toCopy.sortDeclarations) {
+			SortDeclaration copySD = new SortDeclaration(toCopySortDeclaration, knownDomainSize, size);
+			this.sortDeclarations.add(copySD);
+			args.add(copySD);
+		}
+		this.modelDeclaration = null;
+		this.modelDefinition = Expressions.make(FUNCTOR_MODEL_DECLARATION, args);
+	}
 
 	/**
 	 * 
 	 * @return the declaration of the model.
 	 */
 	public String getModelDeclaration() {
+		if (modelDeclaration == null) {
+			StringBuilder md = new StringBuilder();
+			md.append(FUNCTOR_MODEL_DECLARATION);
+			md.append("(");
+			if (this.name != null) {
+				md.append(this.name.toString()+",\n");
+			}
+			if (this.description != null) {
+				md.append(this.description.toString()+",\n");
+			}
+			for (RandomVariableDeclaration rvd : this.randomVariableDeclarations) {
+				md.append(rvd.getRandomVariableDeclaration().toString());
+				md.append(",\n");
+			}
+			for (SortDeclaration sd: this.sortDeclarations) {
+				md.append(sd.getSortDeclaration().toString());
+				md.append(",\n");
+			}
+			md.append(this.parfactorsDeclaration.getDefinition().toString());
+			
+			md.append(")");
+			
+			modelDeclaration = md.toString();
+		}
 		return modelDeclaration;
 	}
 

@@ -167,6 +167,17 @@ public class SortDeclaration {
 			Expression constants) {
 		this(true, name, size, constants);
 	}
+	
+	/**
+	 * Copy constructor, so that size information can be overridden.
+	 * 
+	 * @param toCopy
+	 * @param knownDomainSize
+	 * @param size
+	 */
+	public SortDeclaration(SortDeclaration toCopy, boolean knownDomainSize, Integer size) {
+		this(false, toCopy.name, knownDomainSize ? DefaultSymbol.createSymbol(size) : UNKNOWN_SIZE, toCopy.constants);		
+	}
 
 	/**
 	 * 
