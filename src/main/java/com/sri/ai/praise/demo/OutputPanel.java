@@ -73,6 +73,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private JTextArea consoleOutputTextArea;
 	private ExpressionTreeView justificationTree;
 	private ExpressionTreeView traceTree;
+	private RuleEditor resultEditor;
 
 	/**
 	 * Create the panel.
@@ -83,6 +84,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	}
 	
 	public void clearAllOutputs() {
+		resultEditor.setText("");
 		consoleOutputTextArea.setText("");
 		clearJustificationTree();
 		clearTraceTree();
@@ -92,6 +94,10 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		consoleOutputTextArea.append(line);
 		consoleOutputTextArea.append("\n");
 		consoleOutputTextArea.setCaretPosition(consoleOutputTextArea.getDocument().getLength());
+	}
+	
+	public void setResult(String result) {
+		resultEditor.setText(result);
 	}
 	
 	//
@@ -163,6 +169,14 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		setLayout(new BorderLayout(0, 0));
 		JTabbedPane outputPane = new JTabbedPane(JTabbedPane.TOP);
 		add(outputPane);
+		
+		JPanel resultPanel = new JPanel();
+		outputPane.addTab("Result", null, resultPanel, null);
+		resultPanel.setLayout(new BorderLayout(0, 0));
+		
+		resultEditor = new RuleEditor();
+		resultEditor.setEditable(false);
+		resultPanel.add(resultEditor, BorderLayout.CENTER);
 		
 		JPanel consolePanel = new JPanel();
 		outputPane.addTab("Console", null, consolePanel, null);

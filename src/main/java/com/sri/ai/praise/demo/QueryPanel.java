@@ -41,7 +41,6 @@ import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
-import javax.swing.border.TitledBorder;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
@@ -61,6 +60,9 @@ import java.awt.Component;
 
 import com.google.common.annotations.Beta;
 import javax.swing.JLabel;
+import java.awt.Font;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JSeparator;
 
 /**
  * 
@@ -76,13 +78,18 @@ public class QueryPanel extends JPanel {
 	private MutableComboBoxModel queryModel = new DefaultComboBoxModel();
 	//
 	private JFormattedTextField domainSizeTextField = null;
-	private RuleEditor resultEditor = null;
 	private JComboBox queryComboBox;
+	private JComboBox scheduleComboBox;
+	private JCheckBox chckbxJustificationToConsole;
+	private JCheckBox chckbxJustificationToJustTab;
+	private JCheckBox chckbxTraceToConsole;
+	private JCheckBox chckbxTraceToTrace;
 
 	/**
 	 * Create the panel.
 	 */
 	public QueryPanel() {
+		setBorder(new EmptyBorder(0, 5, 0, 0));
 		initialize();
 	}
 
@@ -131,10 +138,6 @@ public class QueryPanel extends JPanel {
 		return queryComboBox.getEditor().getItem().toString();
 	}
 	
-	public void setResult(String result) {
-		resultEditor.setText(result);
-	}
-	
 	//
 	// PRIVATE
 	//
@@ -146,13 +149,29 @@ public class QueryPanel extends JPanel {
 		queryAndOptionsPanel.setLayout(new BorderLayout(0, 0));
 		
 		JPanel queryPanel = new JPanel();
-		queryPanel.setBorder(new TitledBorder(null, "Query", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		queryPanel.setBorder(null);
 		queryAndOptionsPanel.add(queryPanel, BorderLayout.NORTH);
-		queryPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		queryPanel.setLayout(new BoxLayout(queryPanel, BoxLayout.X_AXIS));
+		
+		JLabel lblQuery = new JLabel("Query:      ");
+		lblQuery.setFont(new Font("SansSerif", Font.BOLD, 12));
+		queryPanel.add(lblQuery);
+		
+		JPanel panel = new JPanel();
+		queryPanel.add(panel);
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		
 		queryComboBox = new JComboBox(queryModel);
+		panel.add(queryComboBox);
 		queryComboBox.setPreferredSize(new Dimension(250, 25));
 		queryComboBox.setEditable(true);
+		
+		btnExecuteQuery = new JButton("");
+		panel.add(btnExecuteQuery);
+		btnExecuteQuery.setPreferredSize(new Dimension(40, 32));
+		btnExecuteQuery.setHideActionText(true);
+		btnExecuteQuery.setIcon(ImageLookup.EXECUTE_QUERY_LARGE);
+		btnExecuteQuery.setToolTipText("Execute Query");
 		queryComboBox.getEditor().addActionListener(new ActionListener() {
 			
 			@Override
@@ -175,19 +194,38 @@ public class QueryPanel extends JPanel {
 				// Do nothing
 			}
 		});
-		queryPanel.add(queryComboBox);
-		
-		btnExecuteQuery = new JButton("");
-		btnExecuteQuery.setPreferredSize(new Dimension(40, 36));
-		btnExecuteQuery.setHideActionText(true);
-		btnExecuteQuery.setIcon(ImageLookup.EXECUTE_QUERY_LARGE);
-		btnExecuteQuery.setToolTipText("Execute Query");
-		queryPanel.add(btnExecuteQuery);
 		
 		JPanel optionsPanel = new JPanel();
-		optionsPanel.setBorder(new TitledBorder(null, "Options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		optionsPanel.setBorder(null);
 		queryAndOptionsPanel.add(optionsPanel, BorderLayout.CENTER);
 		optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+		
+		JSeparator separator = new JSeparator();
+		optionsPanel.add(separator);
+		
+		JLabel label_4 = new JLabel("  ");
+		label_4.setPreferredSize(new Dimension(6, 8));
+		optionsPanel.add(label_4);
+		
+		JLabel lblOptions = new JLabel("Options");
+		lblOptions.setFont(new Font("SansSerif", Font.BOLD, 12));
+		optionsPanel.add(lblOptions);
+		
+		JLabel lblNewLabel_1 = new JLabel("  ");
+		lblNewLabel_1.setPreferredSize(new Dimension(6, 8));
+		optionsPanel.add(lblNewLabel_1);
+		
+		JPanel schedulePanel = new JPanel();
+		schedulePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		optionsPanel.add(schedulePanel);
+		schedulePanel.setLayout(new BoxLayout(schedulePanel, BoxLayout.X_AXIS));
+		
+		JLabel lblSchedule = new JLabel("Schedule:");
+		schedulePanel.add(lblSchedule);
+		
+		scheduleComboBox = new JComboBox();
+		scheduleComboBox.setPreferredSize(new Dimension(100, 25));
+		schedulePanel.add(scheduleComboBox);
 		
 		JCheckBox chckbxNewCheckBox = new JCheckBox("Override Model's Domain Sizes (i.e. sort sizes)");
 		chckbxNewCheckBox.setPreferredSize(new Dimension(18, 25));
@@ -231,21 +269,78 @@ public class QueryPanel extends JPanel {
 		chckbxAssumeDomainsAlwaysLarge.setPreferredSize(new Dimension(198, 25));
 		optionsPanel.add(chckbxAssumeDomainsAlwaysLarge);
 		
-		JCheckBox chckbxJustificationEnabled = new JCheckBox("Justification Output Enabled");
+		JSeparator separator_1 = new JSeparator();
+		optionsPanel.add(separator_1);
+		
+		JCheckBox chckbxJustificationEnabled = new JCheckBox("Justification Enabled");
 		chckbxJustificationEnabled.setPreferredSize(new Dimension(175, 25));
 		optionsPanel.add(chckbxJustificationEnabled);
 		
-		JCheckBox chckbxTraceEnabled = new JCheckBox("Trace Output Enabled");
+		JPanel justOutToConsolePanel = new JPanel();
+		FlowLayout flowLayout_2 = (FlowLayout) justOutToConsolePanel.getLayout();
+		flowLayout_2.setVgap(0);
+		flowLayout_2.setHgap(0);
+		flowLayout_2.setAlignment(FlowLayout.LEFT);
+		justOutToConsolePanel.setAlignmentX(0.0f);
+		optionsPanel.add(justOutToConsolePanel);
+		
+		JLabel label = new JLabel("      ");
+		justOutToConsolePanel.add(label);
+		
+		chckbxJustificationToConsole = new JCheckBox("Output to Console Tab");
+		chckbxJustificationToConsole.setPreferredSize(new Dimension(145, 25));
+		justOutToConsolePanel.add(chckbxJustificationToConsole);
+		
+		JPanel justOutToJustPanel = new JPanel();
+		FlowLayout flowLayout_3 = (FlowLayout) justOutToJustPanel.getLayout();
+		flowLayout_3.setVgap(0);
+		flowLayout_3.setHgap(0);
+		flowLayout_3.setAlignment(FlowLayout.LEFT);
+		justOutToJustPanel.setAlignmentX(0.0f);
+		optionsPanel.add(justOutToJustPanel);
+		
+		JLabel label_1 = new JLabel("      ");
+		justOutToJustPanel.add(label_1);
+		
+		chckbxJustificationToJustTab = new JCheckBox("Output to Justification Tab");
+		chckbxJustificationToJustTab.setPreferredSize(new Dimension(163, 25));
+		justOutToJustPanel.add(chckbxJustificationToJustTab);
+		
+		JSeparator separator_2 = new JSeparator();
+		optionsPanel.add(separator_2);
+		
+		JCheckBox chckbxTraceEnabled = new JCheckBox("Trace Enabled");
 		chckbxTraceEnabled.setPreferredSize(new Dimension(141, 25));
 		optionsPanel.add(chckbxTraceEnabled);
 		
-		JPanel resultPanel = new JPanel();
-		resultPanel.setBorder(new TitledBorder(null, "Result", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		add(resultPanel, BorderLayout.CENTER);
-		resultPanel.setLayout(new BorderLayout(0, 0));
+		JPanel traceOutToConsolePanel = new JPanel();
+		FlowLayout flowLayout_4 = (FlowLayout) traceOutToConsolePanel.getLayout();
+		flowLayout_4.setVgap(0);
+		flowLayout_4.setHgap(0);
+		flowLayout_4.setAlignment(FlowLayout.LEFT);
+		traceOutToConsolePanel.setAlignmentX(0.0f);
+		optionsPanel.add(traceOutToConsolePanel);
 		
-		resultEditor = new RuleEditor();
-		resultEditor.setEditable(false);
-		resultPanel.add(resultEditor, BorderLayout.CENTER);
+		JLabel label_2 = new JLabel("      ");
+		traceOutToConsolePanel.add(label_2);
+		
+		chckbxTraceToConsole = new JCheckBox("Output to Console Tab");
+		chckbxTraceToConsole.setPreferredSize(new Dimension(145, 25));
+		traceOutToConsolePanel.add(chckbxTraceToConsole);
+		
+		JPanel traceOutputToTracePanel = new JPanel();
+		FlowLayout flowLayout_5 = (FlowLayout) traceOutputToTracePanel.getLayout();
+		flowLayout_5.setVgap(0);
+		flowLayout_5.setHgap(0);
+		flowLayout_5.setAlignment(FlowLayout.LEFT);
+		traceOutputToTracePanel.setAlignmentX(0.0f);
+		optionsPanel.add(traceOutputToTracePanel);
+		
+		JLabel label_3 = new JLabel("      ");
+		traceOutputToTracePanel.add(label_3);
+		
+		chckbxTraceToTrace = new JCheckBox("Output to Trace Tab");
+		chckbxTraceToTrace.setPreferredSize(new Dimension(129, 25));
+		traceOutputToTracePanel.add(chckbxTraceToTrace);
 	}
 }

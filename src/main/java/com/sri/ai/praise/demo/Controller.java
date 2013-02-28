@@ -332,8 +332,7 @@ information("Validate currently not implemented");
 
 					printlnToConsole("BELIEF=\n" + belief);					
 
-					app.queryPanel.setResult(belief);
-
+					app.outputPanel.setResult(belief);
 				} catch (ReservedWordException rwe) {
 					rwe.printStackTrace();
 				} catch (RuntimeException re) {
