@@ -549,39 +549,6 @@ public class RuleConverter {
 		}
 		return ruleExpression;
 	}
-	
-	public String resultRuleToString(Expression ruleExpression) {
-		StringBuilder sb = new StringBuilder();
-		
-		resultRuleToString(ruleExpression, sb);
-		
-		return sb.toString();
-	}
-	
-	public void resultRuleToString(Expression ruleExpression, StringBuilder sb) {
-		if (ruleExpression.equals(Expressions.TRUE)) {
-			sb.append("1");
-		}
-		else if (ruleExpression.hasFunctor(FUNCTOR_ATOMIC_RULE)) {
-			sb.append(ruleExpression.get(0).toString());
-			sb.append(" ");
-			sb.append(ruleExpression.get(1).toString());
-		}
-		else if (ruleExpression.hasFunctor(FUNCTOR_CONDITIONAL_RULE)) {
-			sb.append("if ");
-			sb.append(ruleExpression.get(0).toString());
-			sb.append(" then ");
-			StringBuilder thenSB = new StringBuilder();
-			resultRuleToString(ruleExpression.get(1), thenSB);
-			sb.append(thenSB);
-			if (ruleExpression.numberOfArguments() == 3) {
-				sb.append(" else ");
-				StringBuilder elseSB = new StringBuilder();
-				resultRuleToString(ruleExpression.get(2), elseSB);
-				sb.append(elseSB);
-			}
-		}
-	}
 
 	public Expression potentialExpressionToRule(Expression input) {
 		boolean isIfThenElse = IfThenElse.isIfThenElse(input);

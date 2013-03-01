@@ -369,7 +369,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		
 						printlnToConsole("RULE BELIEF=\n"+ruleBelief.toString());
 						
-						String translatedRule = ruleConverter.resultRuleToString(ruleBelief);
+						String translatedRule = ruleConverter.toRuleString(ruleBelief);
 						
 						app.outputPanel.setResult(translatedRule);
 						
