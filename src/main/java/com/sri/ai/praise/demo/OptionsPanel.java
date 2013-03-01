@@ -216,7 +216,7 @@ public class OptionsPanel extends JPanel {
 		
 		chckbxAssumeDomainsAlwaysLarge = new JCheckBox("Assume Domains Always Large");
 		assumePanel.add(chckbxAssumeDomainsAlwaysLarge);
-		chckbxAssumeDomainsAlwaysLarge.setPreferredSize(new Dimension(198, 25));
+		chckbxAssumeDomainsAlwaysLarge.setPreferredSize(new Dimension(240, 25));
 		
 		JSeparator separator_1 = new JSeparator();
 		optionsPanel.add(separator_1);
@@ -250,7 +250,7 @@ public class OptionsPanel extends JPanel {
 		justOutToConsolePanel.add(label);
 		
 		chckbxJustificationToConsole = new JCheckBox("Output to Console Tab");
-		chckbxJustificationToConsole.setPreferredSize(new Dimension(145, 25));
+		chckbxJustificationToConsole.setPreferredSize(new Dimension(200, 25));
 		justOutToConsolePanel.add(chckbxJustificationToConsole);
 		
 		JPanel justOutToJustPanel = new JPanel();
@@ -266,7 +266,7 @@ public class OptionsPanel extends JPanel {
 		
 		chckbxJustificationToJustTab = new JCheckBox("Output to Justification Tab");
 		chckbxJustificationToJustTab.setSelected(true);
-		chckbxJustificationToJustTab.setPreferredSize(new Dimension(163, 25));
+		chckbxJustificationToJustTab.setPreferredSize(new Dimension(200, 25));
 		justOutToJustPanel.add(chckbxJustificationToJustTab);
 		
 		JSeparator separator_2 = new JSeparator();
@@ -301,7 +301,7 @@ public class OptionsPanel extends JPanel {
 		traceOutToConsolePanel.add(label_2);
 		
 		chckbxTraceToConsole = new JCheckBox("Output to Console Tab");
-		chckbxTraceToConsole.setPreferredSize(new Dimension(145, 25));
+		chckbxTraceToConsole.setPreferredSize(new Dimension(200, 25));
 		traceOutToConsolePanel.add(chckbxTraceToConsole);
 		
 		JPanel traceOutputToTracePanel = new JPanel();
@@ -317,7 +317,7 @@ public class OptionsPanel extends JPanel {
 		
 		chckbxTraceToTrace = new JCheckBox("Output to Trace Tab");
 		chckbxTraceToTrace.setSelected(true);
-		chckbxTraceToTrace.setPreferredSize(new Dimension(129, 25));
+		chckbxTraceToTrace.setPreferredSize(new Dimension(200, 25));
 		traceOutputToTracePanel.add(chckbxTraceToTrace);
 	}
 
