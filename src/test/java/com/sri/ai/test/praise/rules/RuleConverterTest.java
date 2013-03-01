@@ -62,9 +62,9 @@ import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.LPIGrammar;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.Model.ModelException;
+import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
-import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
@@ -785,6 +785,147 @@ public class RuleConverterTest {
 		result = ruleConverter.potentialExpressionToRule(input);
 		expected = ruleParser.parse("if X = bob then sick(bob) 0.7 else sick(X) 0.2;");
 		assertEquals(expected, result);
+	}
+
+	@Test
+	public void testToRuleString () {
+		String string, result;
+
+		// Testing atomic rules.
+		string = "sick(X);";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3 + 0.1;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3+0.1;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3 * 0.1;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3*0.1;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3 - 0.1;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3-0.1;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3 minus 0.1;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3 / 2;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3/2;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3 ^ 2;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) 0.3^2;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) and happy(X);";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X) and happy(X) 0.1;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(john) = sick(bob);";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(john) != sick(bob);";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		// Testing conditional rules.
+		string = "if circle(X) then round(X);";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "if epidemic then sick(X) 0.7;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "if epidemic then sick(X) and unhappy(X) 0.9;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "if chilly(P) and live(X, P) then sick(X) 0.6;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "if colleagues(X,Y) then likes(X,Y) 0.8;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Z) else sick(A);";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y) 0.3;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "if epidemic then 0.7 sick(X) :- not vaccinated(X). else 0.7 sick(X).;";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		// Testing prolog rules.
+		string = "sick(john).";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "sick(X).";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "not sick(mary).";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "0.3 sick(X).";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "round(X) :- circle(X).";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+
+		string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
+		result = ruleConverter.toRuleString(ruleParser.parse(string));
+		System.out.println(result);
+		
 	}
 	
 

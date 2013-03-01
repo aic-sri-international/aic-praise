@@ -351,16 +351,19 @@ public class RuleConverter {
 
 
 	/*===================================================================================
-	 * PUBLIC METHODS
+	 * CONSTRUCTORS
 	 *=================================================================================*/
-	
 	public RuleConverter() {
 		// Ensure these are instantiated straight away and not when first referenced.
 		// This helps ensure any global dependencies are setup correctly.
 		rewritingProcess = LBPFactory.newLBPProcess(DefaultSymbol.createSymbol("true"));
 		ruleParser       = new RuleParserWrapper();
 	}
-	
+
+
+	/*===================================================================================
+	 * PUBLIC METHODS
+	 *=================================================================================*/
 	public Pair<Expression, Model> parseModel (String modelString) throws ReservedWordException {
 		return parseModel("", "", modelString);
 	}
@@ -395,12 +398,12 @@ public class RuleConverter {
 	}
 
 	/**
-	 * Parse the rules model.
+	 * Parse the rules model and query and generates a low-level model object.
 	 * @param name         The name for the model.
 	 * @param description  The description of the model.
 	 * @param inputRules   The list of rule expressions of the model.
 	 * @param query        The query expression for the model.
-	 * @return  A Model instance of the parsed model.
+	 * @return  A pair consisting of the query expression (if inserted during translation) and a Model instance of the parsed model.
 	 * @throws ReservedWordException 
 	 */
 	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules, Expression query) throws ReservedWordException {
@@ -625,6 +628,76 @@ public class RuleConverter {
 		//of value.  We simply return true here
 		return Expressions.TRUE;
 		
+	}
+
+	public String toRuleString (Expression expression) {
+		StringBuffer sb = new StringBuffer();
+		toRuleString(expression, sb, true);
+		return sb.toString();
+	}
+
+	private void toRuleString (Expression expression, StringBuffer sb) {
+		toRuleString(expression, sb, false);
+	}
+
+	private void toRuleString (Expression expression, StringBuffer sb, boolean isFirst) {
+		// If the expression is a symbol, just append the symbol name.
+//		System.out.println(0);
+		if (expression.getSyntacticFormType().equals("Symbol")) {
+//			System.out.println(1);
+			sb.append(expression.toString());
+			return;
+		}
+//		System.out.println(2);
+
+		Expression functor = expression.getFunctor();
+		String functorString = ((DefaultSymbol)functor).getValue().toString();
+//		System.out.println(functorString);
+		if (functorString.equals(FUNCTOR_ATOMIC_RULE)) {
+//			System.out.println(3);
+			toRuleString(expression.get(0), sb);
+			sb.append(' ');
+			toRuleString(expression.get(1), sb);
+			if (isFirst) {
+				sb.append(';');
+			}
+			return;
+		}
+//		System.out.println(4);
+
+		if (functorString.equals(FUNCTOR_CONDITIONAL_RULE)) {
+//			System.out.println(5);
+			List<Expression> args = expression.getArguments();
+			sb.append("if ");
+			toRuleString(args.get(0), sb);
+			sb.append(" then ");
+			toRuleString(args.get(1), sb);
+			if (args.size() == 3) {
+				sb.append(" else ");
+				toRuleString(args.get(2), sb);
+			}
+			if (isFirst) {
+				sb.append(';');
+			}
+			return;
+		}
+
+		if (functorString.equals(FUNCTOR_PROLOG_RULE)) {
+//			System.out.println(6);
+			List<Expression> args = expression.getArguments();
+			toRuleString(args.get(0), sb);
+			sb.append(' ');
+			toRuleString(args.get(1), sb);
+			if (args.size() == 3) {
+				sb.append(" :- ");
+				toRuleString(args.get(2), sb);
+			}
+			sb.append('.');
+			return;
+		}
+
+//		System.out.println(7);
+		sb.append(expression.toString());
 	}
 
 	/**
