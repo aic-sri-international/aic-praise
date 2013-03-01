@@ -327,7 +327,7 @@ public class OptionsPanel extends JPanel {
 		scheduleComboBox.addItem(ASYNC_GROUP);
 		
 		// Don't select by default.
-		chckbxJustificationEnabled.setSelected(false);
-		chckbxTraceEnabled.setSelected(false);
+		chckbxJustificationEnabled.doClick();
+		chckbxTraceEnabled.doClick();
 	}
 }
