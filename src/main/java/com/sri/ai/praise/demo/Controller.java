@@ -68,6 +68,7 @@ import org.antlr.runtime.tree.CommonTreeNodeStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.demo.action.ClearOutputAction;
@@ -305,7 +306,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 				public String doInBackground() {
 					try {
 						printlnToConsole("ABOUT TO RUN QUERY: "+app.queryPanel.getCurrentQuery());
-						System.gc();
+						cleanupMemory();
 						
 						RuleConverter ruleConverter = new RuleConverter();
 		
@@ -812,5 +813,10 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		}
 		
 		return offset;
+	}
+	
+	private void cleanupMemory() {
+		DefaultSymbol.flushGlobalSymbolTable();
+		System.gc();
 	}
 }
