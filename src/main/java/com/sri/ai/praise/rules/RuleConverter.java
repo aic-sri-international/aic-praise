@@ -348,6 +348,74 @@ public class RuleConverter {
 		}
 	}
 
+	/**
+	 * Used for searching for the function argument with the given name.
+	 * @author etsai
+	 *
+	 */
+	private class SearchFunctionArgumentFunction implements ReplacementFunctionWithContextuallyUpdatedProcess {
+		private Expression                searchTerm;
+		private Map<String, Set<Integer>> randomVariableIndex;
+
+		public Expression randomVariableName = null;
+		public int        argumentIndex      = 0;
+
+		public SearchFunctionArgumentFunction (Expression searchTerm, Map<String, Set<Integer>> randomVariableIndex) {
+			this.searchTerm = searchTerm;
+			this.randomVariableIndex = randomVariableIndex;
+		}
+
+		@Override
+		public Expression apply(Expression expression) {
+			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
+		}
+
+		@Override
+		public Expression apply(Expression expression, RewritingProcess process) {
+			if (isRandomFunctionApplication(expression)) {
+				int index = 0;
+				for (Expression arg : expression.getArguments()) {
+					if (arg.equals(searchTerm)) {
+						this.randomVariableName = expression.getFunctor();
+						this.argumentIndex = index;
+						return Expressions.TRUE;  // Mark that a match was made.
+					}
+					index++;
+				}
+			}
+			else if (expression.hasFunctor(FunctorConstants.EQUAL) || 
+					expression.hasFunctor(FunctorConstants.INEQUALITY)) {
+				// Check for cases where the expression is "X = foo(...)"
+				List<Expression> args = expression.getArguments();
+				for (int ii = 0; ii < args.size(); ii++) {
+					Expression arg = args.get(ii);
+					if (arg.equals(searchTerm)) {
+						for (int jj = 0; jj < args.size(); jj++) {
+							if (jj == ii) {
+								continue;
+							}
+							arg = args.get(jj);
+							if (isRandomVariableValue(arg, randomVariableIndex)) {
+								this.randomVariableName = arg.getFunctorOrSymbol();
+								// Assume that the argument position for the return type
+								// in the random variable declarations come right after
+								// the argument types.
+								if (arg.getArguments() == null) {
+									this.argumentIndex = 0;
+								}
+								else {
+									this.argumentIndex = arg.getArguments().size();
+								}
+								return Expressions.TRUE;  // Mark that a match was made.
+							}
+						}
+					}
+				}
+			}
+			return expression;
+		}
+	}
+	
 
 
 	/*===================================================================================
@@ -476,17 +544,10 @@ public class RuleConverter {
 			if (queryPair != null) {
 				potentialExpressions.add(translateRule(queryPair.second));
 				queryAtom = queryPair.first;
-				// TODO: Add random variable declaration for query(...).
-//				String queryName;
-//				if (queryAtom.getArguments().size() == 0) {
-//					queryName = queryAtom.toString();
-//				}
-//				else {
-//					queryName = queryAtom.getFunctor().toString();
-//				}
-//				if (queryName.equals(QUERY_STRING)) {
-//					randomVariables.add(e);
-//				}
+
+				// Add random variable declaration for query(...).
+				randomVariables.add(this.createQueryDeclaration(
+						queryAtom, query, randomVariables, randomVariableIndex));
 			}
 		}
 //		System.out.println("sort names: " + sortNames);
@@ -522,12 +583,50 @@ public class RuleConverter {
 	}
 
 	/**
+	 * Creates a random variable declaration for the query atom.
+	 * @param queryAtom            The query atom expression in the form of "query(...)"
+	 * @param query                What the query atom is equivalent to.
+	 * @param randomVariables      The random variable declarations
+	 * @param randomVariableIndex  The index of random variable names and number of arguments they take.
+	 * @return  A random variable declaration for the query.
+	 */
+	public Expression createQueryDeclaration (Expression queryAtom, Expression query, 
+			List<Expression> randomVariables, Map<String, Set<Integer>> randomVariableIndex) {
+		Expression result = null;
+		List<Expression> resultArgs = new ArrayList<Expression>();
+
+		resultArgs.add(DefaultSymbol.createSymbol(QUERY_STRING));
+		resultArgs.add(DefaultSymbol.createSymbol(queryAtom.getArguments().size()));
+		
+		List<Expression> queryArgs = queryAtom.getArguments();
+		for (Expression queryArg : queryArgs) {
+			SearchFunctionArgumentFunction searchFunction = 
+					new SearchFunctionArgumentFunction(queryArg, randomVariableIndex);
+			query.replaceFirstOccurrence(searchFunction, rewritingProcess);
+			if (searchFunction.randomVariableName == null) {
+				return null;
+			}
+			for (Expression randomVariable : randomVariables) {
+				if (randomVariable.get(0).equals(searchFunction.randomVariableName)) {
+					resultArgs.add(randomVariable.get(searchFunction.argumentIndex + 2));
+				}
+			}
+		}
+
+		resultArgs.add(DefaultSymbol.createSymbol("Boolean"));
+		if (resultArgs.size() == queryArgs.size() + 3) {
+			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
+		}
+
+		return result;
+	}
+
+	/**
 	 * Translates a potential expression to a rule expression.  Will replace any 
 	 * instances of "query" in the expression with its equivalent.
 	 * @param result     The potential expression to translate into a rule expression.
 	 * @param queryAtom  The "query(...)" format.  If null, then this method will do the translation, but not substitution.
 	 * @param query      The original form of the query.  What "query(...)" is equivalent to.
-	 * @param process    A rewriting process for doing the translation.
 	 * @return           A rule expression with the instances of "query(...)" replaced.
 	 */
 	public Expression queryResultToRule (Expression result, Expression queryAtom, 
@@ -550,6 +649,11 @@ public class RuleConverter {
 		return ruleExpression;
 	}
 
+	/**
+	 * Translates a potential expression to a rule expression.
+	 * @param input     The potential expression to translate into a rule expression.
+	 * @return           A rule expression version of the potential expression.
+	 */
 	public Expression potentialExpressionToRule(Expression input) {
 		boolean isIfThenElse = IfThenElse.isIfThenElse(input);
 		

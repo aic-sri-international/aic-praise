@@ -623,6 +623,65 @@ public class RuleConverterTest {
 	}
 
 	@Test
+	public void testCreateQueryDeclaration () {
+		Expression queryAtom, query, result, expected;
+		List<Expression> randomVariables;
+		Map<String, Set<Integer>> randomVariableIndex;
+
+		query = ruleParser.parseFormula("sick(john) and sick(mary)");
+		queryAtom = lowParser.parse("query");
+		randomVariables = new ArrayList<Expression>();
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, null);
+		expected = ruleParser.parse("random query: -> Boolean;");
+		assertEquals(expected, result);
+
+		query = ruleParser.parseFormula("not sick(X)");
+		queryAtom = lowParser.parse("query(X)");
+		randomVariables = ruleParser.parseAll("random sick: People -> Boolean;");
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, null);
+		expected = ruleParser.parse("random query: People -> Boolean;");
+		assertEquals(expected, result);
+
+		query = ruleParser.parseFormula("there exists X : friends(X,Y)");
+		queryAtom = lowParser.parse("query(Y)");
+		randomVariables = ruleParser.parseAll("random friends: People x People -> Boolean;");
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, null);
+		expected = ruleParser.parse("random query: People -> Boolean;");
+		assertEquals(expected, result);
+
+		query = ruleParser.parseFormula("conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z)");
+		queryAtom = lowParser.parse("query(C, Y, X, Z)");
+		randomVariables = ruleParser.parseAll("random conspiracy: Concept -> Boolean;" +
+				"random leader: Concept x People -> Boolean;" +
+				"random member: Concept x People -> Boolean;");
+		randomVariableIndex = new HashMap<String, Set<Integer>>();
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, randomVariableIndex);
+		expected = ruleParser.parse("random query: Concept x People x People x People -> Boolean;");
+		assertEquals(expected, result);
+
+		query = ruleParser.parseFormula("conspiracy(C) and leader = X and member(C,Y) and member(C,Z)");
+		queryAtom = lowParser.parse("query(C, Y, X, Z)");
+		randomVariables = ruleParser.parseAll("random conspiracy: Concept -> Boolean;" +
+				"random leader: People -> Boolean;" +
+				"random member: Concept x People -> Boolean;");
+		randomVariableIndex = new HashMap<String, Set<Integer>>();
+		randomVariableIndex.put("leader", new HashSet<Integer>());
+		randomVariableIndex.get("leader").add(0);
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, randomVariableIndex);
+		expected = ruleParser.parse("random query: Concept x People x People x People -> Boolean;");
+		assertEquals(expected, result);
+
+		query = ruleParser.parseFormula("mother(X) = lucy");
+		queryAtom = lowParser.parse("query(X)");
+		randomVariables = ruleParser.parseAll("random mother: People x People -> Boolean;");
+		randomVariableIndex = new HashMap<String, Set<Integer>>();
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, randomVariableIndex);
+		expected = ruleParser.parse("random query: People -> Boolean;");
+		assertEquals(expected, result);
+		
+	}
+
+	@Test
 	public void testCreateModel () {
 		List<Expression> sorts = new ArrayList<Expression>();
 		sorts.add(lowParser.parse("sort(People,   Unknown, {ann, bob})"));
