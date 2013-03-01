@@ -56,13 +56,17 @@ import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.GrinderConfiguration;
+import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.LPIGrammar;
+import com.sri.ai.praise.result.ResultConverter;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.Model.ModelException;
+import com.sri.ai.praise.model.example.TrivialEpidemicSickbob;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.util.Util;
@@ -743,6 +747,48 @@ public class RuleConverterTest {
 			e.printStackTrace();
 			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
 		}
+	}
+	
+	@Test
+	public void testQueryResultToRule () {
+		Expression input, queryAtom, query, result, expected;
+
+		input = lowParser.parse("if query then 0.3 else 0.7");
+		queryAtom = lowParser.parse("query");
+		query = lowParser.parse("sick(bob)");
+		result = ruleConverter.queryResultToRule(input, queryAtom, query);
+		expected = ruleParser.parse("sick(bob) 0.3;");
+		assertEquals(expected, result);
+
+		input = lowParser.parse("if query(bob) then 0.3 else 0.7");
+		queryAtom = lowParser.parse("query(X)");
+		query = lowParser.parse("sick(X)");
+		result = ruleConverter.queryResultToRule(input, queryAtom, query);
+		expected = ruleParser.parse("sick(bob) 0.3;");
+		assertEquals(expected, result);
+
+		input = lowParser.parse("if query(bob, mary) then 0.3 else 0.7");
+		queryAtom = lowParser.parse("query(X, Y)");
+		query = lowParser.parse("sick(X) = cold(Y)");
+		result = ruleConverter.queryResultToRule(input, queryAtom, query);
+		expected = ruleParser.parse("sick(bob) = cold(mary) 0.3;");
+		assertEquals(expected, result);
+
+	}
+
+	@Test
+	public void testPotentialExpressionToRule () {
+		Expression input, result, expected;
+
+		input = lowParser.parse("if sick(bob) then 0.3 else 0.7");
+		result = ruleConverter.potentialExpressionToRule(input);
+		expected = ruleParser.parse("sick(bob) 0.3;");
+		assertEquals(expected, result);
+
+		input = lowParser.parse("if X = bob then if sick(bob) then 0.7 else 0.3 else if sick(X) then 0.2 else 0.8");
+		result = ruleConverter.potentialExpressionToRule(input);
+		expected = ruleParser.parse("if X = bob then sick(bob) 0.7 else sick(X) 0.2;");
+		assertEquals(expected, result);
 	}
 	
 

@@ -307,6 +307,46 @@ public class RuleConverter {
 			return expression;
 		}
 	}
+	
+	/**
+	 * Replacement function for use by the query result to rule translator.
+	 * @author etsai
+	 *
+	 */
+	private class ReplaceQueryFunction implements ReplacementFunctionWithContextuallyUpdatedProcess {
+		private Expression queryAtom;
+		private Expression query;
+
+		public ReplaceQueryFunction(Expression queryAtom, Expression query) {
+			this.queryAtom = queryAtom;
+			this.query = query;
+		}
+
+		@Override
+		public Expression apply(Expression expression) {
+			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
+		}
+
+		@Override
+		public Expression apply(Expression expression, RewritingProcess process) {
+			if (expression.getFunctorOrSymbol().toString().equals(RuleConverter.QUERY_STRING)) {
+				Expression result = query;
+				
+				List<Expression> queryAtomArgs = queryAtom.getArguments();
+				List<Expression> expressionArgs = expression.getArguments();
+				// Replace the variables in the replacement value with the values
+				// used in the expression.
+				// If the number of args don't match, something goofy is going on and bail.
+				if (queryAtomArgs.size() == expressionArgs.size()) {
+					for (int ii = 0; ii < queryAtomArgs.size(); ii++) {
+						result = result.replaceAllOccurrences(queryAtomArgs.get(ii), expressionArgs.get(ii), rewritingProcess);
+					}
+				}
+				return result;
+			}
+			return expression;
+		}
+	}
 
 
 
@@ -433,7 +473,7 @@ public class RuleConverter {
 			if (queryPair != null) {
 				potentialExpressions.add(translateRule(queryPair.second));
 				queryAtom = queryPair.first;
-// TODO
+				// TODO: Add random variable declaration for query(...).
 //				String queryName;
 //				if (queryAtom.getArguments().size() == 0) {
 //					queryName = queryAtom.toString();
@@ -476,6 +516,82 @@ public class RuleConverter {
 		
 		// Create the model object output.
 		return new Pair<Expression, Model>(queryAtom, createModel(name, description, sorts, randomVariables, potentialExpressions));
+	}
+
+	/**
+	 * Translates a potential expression to a rule expression.  Will replace any 
+	 * instances of "query" in the expression with its equivalent.
+	 * @param result     The potential expression to translate into a rule expression.
+	 * @param queryAtom  The "query(...)" format.  If null, then this method will do the translation, but not substitution.
+	 * @param query      The original form of the query.  What "query(...)" is equivalent to.
+	 * @param process    A rewriting process for doing the translation.
+	 * @return           A rule expression with the instances of "query(...)" replaced.
+	 */
+	public Expression queryResultToRule (Expression result, Expression queryAtom, 
+			Expression query) {
+		// Translate the result to a rule.
+		Expression ruleExpression = potentialExpressionToRule(result);
+
+		// Perform the substitution of the query(...) with its equivalent.
+		if (queryAtom != null && query != null) {
+			List<Expression> queryAtomArgs = queryAtom.getArguments();
+			Set<Expression> queryVariables = Variables.freeVariables(query, rewritingProcess);
+			if (queryVariables.containsAll(queryAtomArgs)) {
+				ruleExpression = ruleExpression.replaceAllOccurrences(new ReplaceQueryFunction(queryAtom, query), rewritingProcess);
+			}
+			
+			
+			
+			
+		}
+		return ruleExpression;
+	}
+
+	public Expression potentialExpressionToRule(Expression input) {
+		boolean isIfThenElse = IfThenElse.isIfThenElse(input);
+		
+		//we can only really simplify if then else expressions
+		if (isIfThenElse) {
+			Expression condition = IfThenElse.getCondition(input);
+			boolean isConstraint = LPIUtil.isConstraint(condition, rewritingProcess);
+			if (isConstraint) {
+				Expression translationOfE1 = potentialExpressionToRule(input.get(1));
+				Expression translationOfE2 = potentialExpressionToRule(input.get(2));
+				
+				//if both clauses are true, result is true
+				if (translationOfE1.equals(Expressions.TRUE) && translationOfE2.equals(Expressions.TRUE)) {
+					return Expressions.TRUE;
+				} 
+				//if the then clause is true, return the else clause
+				else if (translationOfE1.equals(Expressions.TRUE)) {
+					return new DefaultCompoundSyntaxTree("conditional rule",
+							Not.make(condition),
+							translationOfE2);
+				} 
+				//if the else clause is true, return the if clause
+				else if (translationOfE2.equals(Expressions.TRUE)) {
+					return new DefaultCompoundSyntaxTree("conditional rule",
+							condition,
+							translationOfE1);
+				}
+				//if neither is true, then return the simplified form
+				else {
+					return new DefaultCompoundSyntaxTree("conditional rule", 
+							condition, 
+							translationOfE1, 
+							translationOfE2);
+				}
+			}
+			else {
+				//assume that the 'condition' is a random variable value
+				return Expressions.apply("atomic rule", condition, input.get(1));
+			}
+		}
+		
+		//the statement must have a constant potential, so it adds nothing
+		//of value.  We simply return true here
+		return Expressions.TRUE;
+		
 	}
 
 	/**
