@@ -38,11 +38,15 @@
 package com.sri.ai.praise.demo;
 
 import java.awt.EventQueue;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.JFileChooser;
@@ -53,6 +57,14 @@ import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.UndoManager;
+
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CharStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.Token;
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.CommonTreeNodeStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -80,6 +92,10 @@ import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
+import com.sri.ai.praise.rules.antlr.RuleAssociativeNodeWalker;
+import com.sri.ai.praise.rules.antlr.RuleLexer;
+import com.sri.ai.praise.rules.antlr.RuleOutputWalker;
+import com.sri.ai.praise.rules.antlr.RuleParser;
 import com.sri.ai.util.base.Pair;
 
 /**
@@ -277,8 +293,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	public void validate() {
-// TODO
-information("Validate currently not implemented");
+		validateInput(true);
 	}
 	
 	public void executeQuery() {
@@ -288,6 +303,8 @@ information("Validate currently not implemented");
 			public String doInBackground() {
 				try {
 					printlnToConsole("ABOUT TO RUN QUERY: "+app.queryPanel.getCurrentQuery());
+					
+					validateInput(false);
 
 					RuleConverter ruleConverter = new RuleConverter();
 
@@ -648,5 +665,94 @@ information("Validate currently not implemented");
 		app.queryPanel.setState(otherController.app.queryPanel);
 		
 		discardAllEdits();
+	}
+	
+	private void validateInput(boolean displayInfoOnSuccess) {
+		int modelParseError    = validateParse(app.modelEditPanel.getText());
+		if (modelParseError != -1) {
+			app.modelEditPanel.indicateErrorAtPosition(modelParseError);
+		}
+		int evidenceParseError = validateParse(app.evidenceEditPanel.getText());
+		if (evidenceParseError != -1) {
+			app.evidenceEditPanel.indicateErrorAtPosition(evidenceParseError);
+		}
+		//int queryParseError    = validateParse(app.queryPanel.getCurrentQuery());
+	}
+	
+	private int validateParse(String string) {
+		int result = -1;
+    	try {
+    		CharStream cs = new ANTLRStringStream(string);
+    		RuleLexer lexer = new RuleLexer(cs);
+    		CommonTokenStream tokens = new CommonTokenStream(lexer);
+    		RuleParser parser = new RuleParser(tokens);
+    		CommonTree t = (CommonTree)parser.start().getTree();
+
+    		CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+    		
+    		RuleAssociativeNodeWalker assoc = new RuleAssociativeNodeWalker(nodes);
+    		t = (CommonTree)assoc.downup(t);//.start().getTree();
+    		nodes = new CommonTreeNodeStream(t);
+
+    		RuleOutputWalker outputWalker = new RuleOutputWalker(nodes);
+    		outputWalker.start();
+
+    		result = -1; // All ok.
+    	}
+    	catch (RecognitionException re) {
+    		result = calculateTokenOffset(re.index, string);
+    	}
+    	catch (RuntimeException re) {
+    		result = 0; // Don't know where the parse error is.
+    		re.printStackTrace();
+    	}
+    	return result;
+	}
+	
+	private int calculateTokenOffset(int tokenIdx, String string) {
+		List<String> lines        = new ArrayList<String>();
+		List<Integer> lineOffsets = new ArrayList<Integer>();
+		BufferedReader reader = new BufferedReader(new StringReader(string));
+		String line;
+		int offset = 0;
+		try {				
+			while ((line = reader.readLine()) != null) {
+				lines.add(line);
+				lineOffsets.add(offset);
+				
+				offset += line.length()+1; // i.e. include the newline.
+			}
+			reader.close();
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+		CharStream cs = new ANTLRStringStream(string);
+		RuleLexer lexer = new RuleLexer(cs);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		
+		Token token = null;
+		boolean lexerFailed = false;
+		int consumed = 1;
+		try {
+			token = tokens.LT(1);
+		} catch (RuntimeException ex) {
+			lexerFailed = true;
+		}
+		while (!lexerFailed && token.getType() != RuleLexer.EOF) {   			
+			offset = lineOffsets.get(token.getLine()-1) + token.getCharPositionInLine();
+			try {
+    			tokens.consume();
+    			consumed++;
+    			if (consumed >= tokenIdx) {
+    				break;
+    			}
+				token = tokens.LT(1);
+			} catch (RuntimeException ex) {
+				// ignore and exit.
+				lexerFailed = true;
+			}
+		}
+		
+		return offset;
 	}
 }

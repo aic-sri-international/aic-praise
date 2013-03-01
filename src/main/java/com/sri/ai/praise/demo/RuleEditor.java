@@ -61,6 +61,7 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -149,6 +150,9 @@ public class RuleEditor extends JPanel {
 	//
 	private JScrollPane editorScrollPane;
 	private JTextPane textPane;
+	//
+	private DefaultHighlightPainter errorPainter = new DefaultHighlightPainter(new Color(250, 114, 148));
+	private Object activeErrorHighlight = null;
 	
 	
 	public RuleEditor() {
@@ -216,6 +220,16 @@ public class RuleEditor extends JPanel {
 	
 	public void setEditable(boolean editable) {
 		textPane.setEditable(editable);
+	}
+	
+	public void indicateErrorAtPosition(int position) {	
+		try{
+			removeExistingErrorHighlights();
+			textPane.setCaretPosition(position);
+			activeErrorHighlight = textPane.getHighlighter().addHighlight(0, position, errorPainter);
+		} catch (BadLocationException ble) {
+			// ignore
+		}		
 	}
 	
 	public void addUndoableEditListener(UndoableEditListener listener) {
@@ -338,6 +352,13 @@ public class RuleEditor extends JPanel {
         StyleConstants.setForeground(s, COLOR_STRING); 
 	}
 	
+	private void removeExistingErrorHighlights() {
+		if (activeErrorHighlight != null) {
+			textPane.getHighlighter().removeHighlight(activeErrorHighlight);
+			activeErrorHighlight = null;
+		}
+	}
+	
 	private class ExpressionFormatFilter extends DocumentFilter {
 		public ExpressionFormatFilter() {
 			
@@ -377,6 +398,7 @@ public class RuleEditor extends JPanel {
 		}
 		
 		private void format(StyledDocument styledDocument) throws BadLocationException {
+			removeExistingErrorHighlights();
 			if (styledDocument.getLength() > 0) {
 				String expressionText = styledDocument.getText(0, styledDocument.getLength());
 				

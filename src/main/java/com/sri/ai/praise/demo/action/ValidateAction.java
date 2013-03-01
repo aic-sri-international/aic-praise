@@ -42,6 +42,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.demo.Controller;
@@ -65,6 +66,7 @@ public class ValidateAction extends AbstractAction {
 		putValue(Action.LARGE_ICON_KEY, ImageLookup.VALIDATE_LARGE);
 		putValue(Action.SMALL_ICON, ImageLookup.VALIDATE_SMALL);
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_V);
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, ActionEvent.CTRL_MASK));
 	}
 	
 	@Override
