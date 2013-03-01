@@ -309,14 +309,16 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 						
 						RuleConverter ruleConverter = new RuleConverter();
 		
+						Expression inputQuery = lowLevelParse(app.queryPanel.getCurrentQuery());
+						
 						Pair<Expression, Model> parseResult = ruleConverter
 								.parseModel("'Name'", "'Description'",
 										app.modelEditPanel.getText() + "\n"
 												+ app.evidenceEditPanel.getText(),
-										app.queryPanel.getCurrentQuery());
+										inputQuery.toString());
 		
-						Expression query = parseResult.first;
-						Model      model = parseResult.second;
+						Expression queryAtom = parseResult.first;
+						Model      model     = parseResult.second;
 						
 						String overridden = "";
 						if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
@@ -342,7 +344,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 						}
 						printlnToConsole("---------------------------");
 						
-						printlnToConsole("GENERATED QUERY=" + query);
+						printlnToConsole("GENERATED QUERY=" + queryAtom);
 		
 						LBPQueryEngine.QueryOptions queryOptions = new LBPQueryEngine.QueryOptions();
 						// Assign the selected Options.
@@ -357,12 +359,19 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 						String queryUUID = queryEngine.newQueryUUID(queryOptions);
 		
 						String belief = queryEngine.queryBeliefOfRandomVariable(
-								queryUUID, "belief([" + query + "])",
+								queryUUID, "belief([" + queryAtom + "])",
 								model.getModelDeclaration());
 		
-						printlnToConsole("BELIEF=\n" + belief);					
+						printlnToConsole("BELIEF=\n" + belief);	
+						
+						Expression exprBelief = lowLevelParse(belief);
+						Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, inputQuery);
 		
-						app.outputPanel.setResult(belief);
+						printlnToConsole("RULE BELIEF=\n"+ruleBelief.toString());
+						
+						String translatedRule = ruleConverter.resultRuleToString(ruleBelief);
+						
+						app.outputPanel.setResult(translatedRule);
 					} catch (ReservedWordException rwe) {
 						error("Reserved word 'query' is used input Model or Evidence");
 					} catch (RuntimeException re) {
@@ -690,8 +699,8 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		else {
 			app.evidenceEditPanel.removeExistingErrorHighlights();
 		}
-		int queryParseError = validateQueryParse(app.queryPanel.getCurrentQuery());
-		if (queryParseError != -1) {
+		Expression queryParse = lowLevelParse(app.queryPanel.getCurrentQuery());
+		if (queryParse == null) {
 			app.outputPanel.addProblem("ERROR: Query is invalid.");
 			error = true;
 		}
@@ -736,14 +745,9 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
     	return result;
 	}
 	
-	private int validateQueryParse(String string) {
-		int result = -1;
-		
+	private Expression lowLevelParse(String string) {
 		AntlrGrinderParserWrapper parser = new AntlrGrinderParserWrapper();
-		if (parser.parse(string) == null) {
-			result = 1;
-		}
-		
+		Expression result = parser.parse(string);
 		return result;
 	}
 	
