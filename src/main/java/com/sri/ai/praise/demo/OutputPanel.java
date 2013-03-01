@@ -294,6 +294,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 
 		TreeUtil.setWriter(DefaultWriter.newDefaultConfiguredWriter());
 		clearTraceTree();
+		clearJustificationTree();
 	}
 	
 	private void clearJustificationTree() {
