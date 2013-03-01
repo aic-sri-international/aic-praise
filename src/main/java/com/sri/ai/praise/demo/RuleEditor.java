@@ -151,7 +151,7 @@ public class RuleEditor extends JPanel {
 	private JScrollPane editorScrollPane;
 	private JTextPane textPane;
 	//
-	private DefaultHighlightPainter errorPainter = new DefaultHighlightPainter(new Color(250, 114, 148));
+	private DefaultHighlightPainter errorPainter = new DefaultHighlightPainter(Color.YELLOW); 
 	private Object activeErrorHighlight = null;
 	
 	
@@ -225,7 +225,9 @@ public class RuleEditor extends JPanel {
 	public void indicateErrorAtPosition(int position) {	
 		try{
 			removeExistingErrorHighlights();
-			textPane.setCaretPosition(position);
+			if (position >= textPane.getDocument().getLength()) {
+				position = textPane.getDocument().getLength()-1;
+			}
 			activeErrorHighlight = textPane.getHighlighter().addHighlight(0, position, errorPainter);
 		} catch (BadLocationException ble) {
 			// ignore

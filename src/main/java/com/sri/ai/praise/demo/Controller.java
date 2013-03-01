@@ -681,31 +681,33 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	
 	private int validateParse(String string) {
 		int result = -1;
-    	try {
-    		CharStream cs = new ANTLRStringStream(string);
-    		RuleLexer lexer = new RuleLexer(cs);
-    		CommonTokenStream tokens = new CommonTokenStream(lexer);
-    		RuleParser parser = new RuleParser(tokens);
-    		CommonTree t = (CommonTree)parser.start().getTree();
-
-    		CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-    		
-    		RuleAssociativeNodeWalker assoc = new RuleAssociativeNodeWalker(nodes);
-    		t = (CommonTree)assoc.downup(t);//.start().getTree();
-    		nodes = new CommonTreeNodeStream(t);
-
-    		RuleOutputWalker outputWalker = new RuleOutputWalker(nodes);
-    		outputWalker.start();
-
-    		result = -1; // All ok.
-    	}
-    	catch (RecognitionException re) {
-    		result = calculateTokenOffset(re.index, string);
-    	}
-    	catch (RuntimeException re) {
-    		result = 0; // Don't know where the parse error is.
-    		re.printStackTrace();
-    	}
+		if (string.trim().length() > 0) {
+	    	try {
+	    		CharStream cs = new ANTLRStringStream(string);
+	    		RuleLexer lexer = new RuleLexer(cs);
+	    		CommonTokenStream tokens = new CommonTokenStream(lexer);
+	    		RuleParser parser = new RuleParser(tokens);
+	    		CommonTree t = (CommonTree)parser.start().getTree();
+	
+	    		CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+	    		
+	    		RuleAssociativeNodeWalker assoc = new RuleAssociativeNodeWalker(nodes);
+	    		t = (CommonTree)assoc.downup(t);//.start().getTree();
+	    		nodes = new CommonTreeNodeStream(t);
+	
+	    		RuleOutputWalker outputWalker = new RuleOutputWalker(nodes);
+	    		outputWalker.start();
+	
+	    		result = -1; // All ok.
+	    	}
+	    	catch (RecognitionException re) {
+	    		result = calculateTokenOffset(re.index, string);
+	    	}
+	    	catch (RuntimeException re) {
+	    		result = string.length()-1; // Don't know where the parse error is.
+	    		re.printStackTrace();
+	    	}
+		}
     	return result;
 	}
 	
