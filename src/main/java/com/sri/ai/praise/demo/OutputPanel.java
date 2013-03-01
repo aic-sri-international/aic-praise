@@ -94,7 +94,6 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		consoleOutputTextArea.setText("");
 		clearJustificationTree();
 		clearTraceTree();
-		System.gc();
 	}
 	
 	public void println(String line) {

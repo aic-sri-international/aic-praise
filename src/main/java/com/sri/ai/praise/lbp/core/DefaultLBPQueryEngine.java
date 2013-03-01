@@ -224,7 +224,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 	}
 	
 	protected class RunLBPQuery implements Runnable {
-		private RewritingProcess  process				 = null;
+		private RewritingProcess  process				= null;
 		private Parser            parser                = new AntlrGrinderParserWrapper();
 		private String            queryUUID             = null;
 		private QueryOptions      options               = null;

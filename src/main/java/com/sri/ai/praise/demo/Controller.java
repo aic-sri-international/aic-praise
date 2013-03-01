@@ -68,15 +68,14 @@ import org.antlr.runtime.tree.CommonTreeNodeStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.demo.action.ClearOutputAction;
 import com.sri.ai.praise.demo.action.ExecuteQueryAction;
 import com.sri.ai.praise.demo.action.ExitAction;
 import com.sri.ai.praise.demo.action.ExportAction;
-import com.sri.ai.praise.demo.action.NewAction;
 import com.sri.ai.praise.demo.action.HideToolBarAction;
+import com.sri.ai.praise.demo.action.NewAction;
 import com.sri.ai.praise.demo.action.NewWindowAction;
 import com.sri.ai.praise.demo.action.OpenFileAction;
 import com.sri.ai.praise.demo.action.RedoAction;
@@ -373,6 +372,8 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 						String translatedRule = ruleConverter.resultRuleToString(ruleBelief);
 						
 						app.outputPanel.setResult(translatedRule);
+						
+						cleanupMemory();
 					} catch (ReservedWordException rwe) {
 						error("Reserved word 'query' is used input Model or Evidence");
 					} catch (RuntimeException re) {
@@ -395,6 +396,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	
 	public void clearOutput() {
 		app.outputPanel.clearAllOutputs();
+		cleanupMemory();
 	}
 	
 	public void newWindow() {
@@ -816,7 +818,6 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	private void cleanupMemory() {
-		DefaultSymbol.flushGlobalSymbolTable();
 		System.gc();
 	}
 }
