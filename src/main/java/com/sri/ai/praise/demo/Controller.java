@@ -672,18 +672,18 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	private boolean validateInput(boolean displayInfoOnSuccess) {
 		app.outputPanel.clearProblems();
 		boolean error = false;
-		int modelParseError = validateRuleParse(app.modelEditPanel.getText());
-		if (modelParseError != -1) {
-			app.modelEditPanel.indicateErrorAtPosition(modelParseError);
+		int[] modelParseError = validateRuleParse(app.modelEditPanel.getText(), true);
+		if (modelParseError != null) {
+			app.modelEditPanel.indicateErrorAtPosition(modelParseError[0], modelParseError[1]);
 			app.outputPanel.addProblem("ERROR: Model is invalid.");
 			error = true;
 		}
 		else {
 			app.modelEditPanel.removeExistingErrorHighlights();
 		}
-		int evidenceParseError = validateRuleParse(app.evidenceEditPanel.getText());
-		if (evidenceParseError != -1) {
-			app.evidenceEditPanel.indicateErrorAtPosition(evidenceParseError);
+		int[] evidenceParseError = validateRuleParse(app.evidenceEditPanel.getText(), true);
+		if (evidenceParseError != null) {
+			app.evidenceEditPanel.indicateErrorAtPosition(evidenceParseError[0], evidenceParseError[1]);
 			app.outputPanel.addProblem("ERROR: Evidence is invalid.");
 			error = true;
 		}
@@ -705,8 +705,8 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		return !error;
 	}
 	
-	private int validateRuleParse(String string) {
-		int result = -1;
+	private int[] validateRuleParse(String string, boolean calculateErrorBeginIndex) {
+		int[] result = null;
 		if (string.trim().length() > 0) {
 	    	try {
 	    		CharStream cs = new ANTLRStringStream(string);
@@ -724,14 +724,13 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	    		RuleOutputWalker outputWalker = new RuleOutputWalker(nodes);
 	    		outputWalker.start();
 	
-	    		result = -1; // All ok.
+	    		result = null; // All ok.
 	    	}
 	    	catch (RecognitionException re) {
-	    		result = calculateTokenOffset(re.index, string);
+	    		result = new int[] {calculateErrorBeginIndex ? calculateErrorBeginIndex(re.index, string) : 0, calculateTokenOffset(re.index, string)};
 	    	}
 	    	catch (RuntimeException re) {
-	    		result = string.length()-1; // Don't know where the parse error is.
-	    		re.printStackTrace();
+	    		result = new int[] {0, string.length()-1}; // Don't know where the parse error is.
 	    	}
 		}
     	return result;
@@ -743,6 +742,22 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		AntlrGrinderParserWrapper parser = new AntlrGrinderParserWrapper();
 		if (parser.parse(string) == null) {
 			result = 1;
+		}
+		
+		return result;
+	}
+	
+	private int calculateErrorBeginIndex(int errorAtTokenIdx, String string) {
+		int result = 0;
+		
+		int priorIndex = errorAtTokenIdx-1;
+		while (priorIndex >= 0) {
+			result = calculateTokenOffset(priorIndex, string);
+			int[] error = validateRuleParse(string.substring(0, result), false);
+			if (error == null) {
+				priorIndex = 0;
+			}
+			priorIndex--;
 		}
 		
 		return result;

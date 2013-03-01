@@ -222,13 +222,13 @@ public class RuleEditor extends JPanel {
 		textPane.setEditable(editable);
 	}
 	
-	public void indicateErrorAtPosition(int position) {	
+	public void indicateErrorAtPosition(int startPosition, int endPosition) {	
 		try{
 			removeExistingErrorHighlights();
-			if (position >= textPane.getDocument().getLength()) {
-				position = textPane.getDocument().getLength()-1;
+			if (endPosition >= textPane.getDocument().getLength()) {
+				endPosition = textPane.getDocument().getLength()-1;
 			}
-			activeErrorHighlight = textPane.getHighlighter().addHighlight(0, position, errorPainter);
+			activeErrorHighlight = textPane.getHighlighter().addHighlight(startPosition, endPosition, errorPainter);
 		} catch (BadLocationException ble) {
 			// ignore
 		}		
