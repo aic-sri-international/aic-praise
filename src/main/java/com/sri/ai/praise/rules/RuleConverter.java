@@ -386,7 +386,7 @@ public class RuleConverter {
 	 * @throws ReservedWordException 
 	 */
 	public Pair<Expression, Model> parseModel (String name, String description, String modelString, String queryString) throws ReservedWordException {
-		return parseModel(name, description, ruleParser.parseAll(modelString), ruleParser.parseFormula(queryString));
+		return parseModel(name, description, ruleParser.parseAll(modelString), queryString != null ? ruleParser.parseFormula(queryString) : null);
 	}
 	
 	public Pair<Expression, Model> parseModel (List<Expression> inputRules) throws ReservedWordException {
@@ -854,7 +854,7 @@ public class RuleConverter {
 		rule.append("if ");
 		rule.append(functionName);
 		rule.append('(');
-		for (ii = 0; ii < numArgs-1; ii++) {
+		for (ii = 0; ii < numArgs; ii++) {
 			rule.append('X');
 			rule.append(ii);
 			rule.append(',');
@@ -862,7 +862,7 @@ public class RuleConverter {
 		rule.append("Y) then not ");
 		rule.append(functionName);
 		rule.append('(');
-		for (ii = 0; ii < numArgs-1; ii++) {
+		for (ii = 0; ii < numArgs; ii++) {
 			rule.append('X');
 			rule.append(ii);
 			rule.append(',');
@@ -874,7 +874,7 @@ public class RuleConverter {
 
 		rule = new StringBuilder();
 		rule.append("there exists Y : " + functionName + "(");
-		for (ii = 0; ii < numArgs-1; ii++) {
+		for (ii = 0; ii < numArgs; ii++) {
 			rule.append('X');
 			rule.append(ii);
 			rule.append(',');
