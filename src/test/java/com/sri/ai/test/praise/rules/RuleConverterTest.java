@@ -797,7 +797,7 @@ public class RuleConverterTest {
 				"sick(X) 0.009;\n"+
 				"rash(X) 0.005;\n"+
 				"fever(X) 0.001;\n";
-		queryString = null;
+		queryString = "sick(X)";
 		try {
 			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
 			System.out.println(result.first);
@@ -825,6 +825,7 @@ public class RuleConverterTest {
 				"\n"+
 				"if epidemic then sick(X) 0.6 else not sick(X);\n" +
 				"if sick(mother(X)) then sick(X) 0.5 else sick(X) 0.1;\n";
+		queryString = "sick(mother(X)) and happy(Y)";
 		try {
 			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
 			System.out.println(result.first);
