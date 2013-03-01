@@ -597,74 +597,15 @@ public class RuleConverter {
 		
 	}
 
+	/**
+	 * Generates a string in the rules format for the given expression.
+	 * @param expression  A rules expression.
+	 * @return            The string format for the rules expression.
+	 */
 	public String toRuleString (Expression expression) {
 		StringBuffer sb = new StringBuffer();
 		toRuleString(expression, sb, true);
 		return sb.toString();
-	}
-
-	private void toRuleString (Expression expression, StringBuffer sb) {
-		toRuleString(expression, sb, false);
-	}
-
-	private void toRuleString (Expression expression, StringBuffer sb, boolean isFirst) {
-		// If the expression is a symbol, just append the symbol name.
-//		System.out.println(0);
-		if (expression.getSyntacticFormType().equals("Symbol")) {
-//			System.out.println(1);
-			sb.append(expression.toString());
-			return;
-		}
-//		System.out.println(2);
-
-		Expression functor = expression.getFunctor();
-		String functorString = ((DefaultSymbol)functor).getValue().toString();
-//		System.out.println(functorString);
-		if (functorString.equals(FUNCTOR_ATOMIC_RULE)) {
-//			System.out.println(3);
-			toRuleString(expression.get(0), sb);
-			sb.append(' ');
-			toRuleString(expression.get(1), sb);
-			if (isFirst) {
-				sb.append(';');
-			}
-			return;
-		}
-//		System.out.println(4);
-
-		if (functorString.equals(FUNCTOR_CONDITIONAL_RULE)) {
-//			System.out.println(5);
-			List<Expression> args = expression.getArguments();
-			sb.append("if ");
-			toRuleString(args.get(0), sb);
-			sb.append(" then ");
-			toRuleString(args.get(1), sb);
-			if (args.size() == 3) {
-				sb.append(" else ");
-				toRuleString(args.get(2), sb);
-			}
-			if (isFirst) {
-				sb.append(';');
-			}
-			return;
-		}
-
-		if (functorString.equals(FUNCTOR_PROLOG_RULE)) {
-//			System.out.println(6);
-			List<Expression> args = expression.getArguments();
-			toRuleString(args.get(0), sb);
-			sb.append(' ');
-			toRuleString(args.get(1), sb);
-			if (args.size() == 3) {
-				sb.append(" :- ");
-				toRuleString(args.get(2), sb);
-			}
-			sb.append('.');
-			return;
-		}
-
-//		System.out.println(7);
-		sb.append(expression.toString());
 	}
 
 	/**
@@ -1122,23 +1063,6 @@ public class RuleConverter {
 	 * PRIVATE METHODS
 	 *=================================================================================*/
 	/**
-	 * Recursively walks the tree subnodes of the given expression, calling the node inspector at
-	 * every subnode, including the given expression itself.
-	 * @param node       The current expression/subexpression to inspect.
-	 * @param context    Contextual information to pass to the node inspector.
-	 * @param inspector  The node inspector to call on each subnode.
-	 */
-//	private void walkNode (Expression node, Object context, NodeInspector inspector) {
-//		List<Expression> children = node.getArguments();
-//		boolean isContinue = inspector.inspectNode(node, /*child,*/ context);
-//		if (isContinue) {
-//			for (Expression child : children) {
-//				walkNode(child, context, inspector);
-//			}
-//		}
-//	}
-
-	/**
 	 * Add a potential expression/constraint pair to a list of potential expression/constraint pairs.  
 	 * This method will simplify the potential expression and constraints and may eliminate the 
 	 * potential expression if it reduces out.
@@ -1209,20 +1133,85 @@ public class RuleConverter {
 	}
 
 	/**
-	 * Returns list of fours elements ( (P,C), Pt, Pf, Constraint) ) where (P,C) is the first constrained potential expression that has a constraint Constraint,
-	 * and Pt and Pf are P[Constraint/true] and P[Constraint/false] respectively,
-	 * or null if there is no such constrained potential expression.
+	 * Generates a string in the rules format for the given expression and
+	 * appends it to the string buffer.
+	 * Call this to generate a raw rule string without the semicolon.
+	 * @param expression  The expression to generate a string for.
+	 * @param sb          The string buffer to append the string to.
 	 */
-//	private List<Object> getConstrainedPotentialExpressionReplacementsIfAny(List<Pair<Expression,Expression>> constrainedPotentialExpressions, RewritingProcess process) {
-//		for (Pair<Expression, Expression> constrainedPotentialExpression : constrainedPotentialExpressions) {
-//			List<Object> result= getReplacementsIfAny(constrainedPotentialExpression.first , process);
-//			if (result!= null) {
-//				((ArrayList<Object>)result).add(0, constrainedPotentialExpression);
-//				return result;
-//			}
-//		}
-//		return null;
-//	}
+	private void toRuleString (Expression expression, StringBuffer sb) {
+		toRuleString(expression, sb, false);
+	}
+
+	/**
+	 * Generates a string in the rules format for the given expression and
+	 * appends it to the string buffer.
+	 * @param expression  The expression to generate a string for.
+	 * @param sb          The string buffer to append the string to.
+	 * @param isFirst     True if want a closing semicolon at the end of atomic and conditional rules.
+	 */
+	private void toRuleString (Expression expression, StringBuffer sb, boolean isFirst) {
+		// If the expression is a symbol, just append the symbol name.
+		if (expression.getSyntacticFormType().equals("Symbol")) {
+			sb.append(expression.toString());
+			return;
+		}
+
+		Expression functor = expression.getFunctor();
+		String functorString = ((DefaultSymbol)functor).getValue().toString();
+
+		// Handle atomic rules
+		if (functorString.equals(FUNCTOR_ATOMIC_RULE)) {
+			toRuleString(expression.get(0), sb);
+			sb.append(' ');
+			toRuleString(expression.get(1), sb);
+			if (isFirst) {
+				sb.append(';');
+			}
+			return;
+		}
+
+		// Handle conditional rules.
+		if (functorString.equals(FUNCTOR_CONDITIONAL_RULE)) {
+			List<Expression> args = expression.getArguments();
+			sb.append("if ");
+			toRuleString(args.get(0), sb);
+			sb.append(" then ");
+			toRuleString(args.get(1), sb);
+			if (args.size() == 3) {
+				sb.append(" else ");
+				toRuleString(args.get(2), sb);
+			}
+			if (isFirst) {
+				sb.append(';');
+			}
+			return;
+		}
+
+		// Handle prolog rules.
+		if (functorString.equals(FUNCTOR_PROLOG_RULE)) {
+			List<Expression> args = expression.getArguments();
+			toRuleString(args.get(0), sb);
+			sb.append(' ');
+			toRuleString(args.get(1), sb);
+			if (args.size() == 3) {
+				sb.append(" :- ");
+				toRuleString(args.get(2), sb);
+			}
+			sb.append('.');
+			return;
+		}
+
+		// Handle minus expression.
+		if (functorString.equals("minus") && expression.getArguments().size() == 2) {
+			toRuleString(expression.get(0), sb);
+			sb.append(" minus ");
+			toRuleString(expression.get(1), sb);
+			return;
+		}
+
+		sb.append(expression.toString());
+	}
 
 
 }
