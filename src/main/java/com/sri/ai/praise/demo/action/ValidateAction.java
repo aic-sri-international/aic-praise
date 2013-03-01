@@ -61,7 +61,7 @@ public class ValidateAction extends AbstractAction {
 	
 	public ValidateAction(Controller controller) {
 		this.controller = controller;
-		putValue(Action.NAME, "Validate Input...");
+		putValue(Action.NAME, "Validate Input");
 		putValue(Action.SHORT_DESCRIPTION, "Validate Query Input");
 		putValue(Action.LARGE_ICON_KEY, ImageLookup.VALIDATE_LARGE);
 		putValue(Action.SMALL_ICON, ImageLookup.VALIDATE_SMALL);

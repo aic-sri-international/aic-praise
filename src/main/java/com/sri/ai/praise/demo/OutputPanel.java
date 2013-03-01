@@ -41,6 +41,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Font;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -56,6 +57,7 @@ import com.sri.ai.grinder.ui.ExpressionNode;
 import com.sri.ai.grinder.ui.ExpressionTreeView;
 import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
+import javax.swing.JList;
 
 @Beta
 public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener, LBPQueryEngine.JustificationListener {
@@ -68,6 +70,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private boolean traceFirstTime = true;
 	private ExpressionNode activeTraceNode, rootTraceNode = new ExpressionNode("", null);
 	private DefaultTreeModel treeTraceModel = new DefaultTreeModel(rootTraceNode);
+	private DefaultListModel problemListModel = new DefaultListModel();
 	//
 	private OptionsPanel options = null;
 	//
@@ -75,6 +78,8 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private ExpressionTreeView justificationTree;
 	private ExpressionTreeView traceTree;
 	private RuleEditor resultEditor;
+	private JList problemsList;
+	private JTabbedPane outputTabbedPane;
 
 	/**
 	 * Create the panel.
@@ -89,6 +94,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		consoleOutputTextArea.setText("");
 		clearJustificationTree();
 		clearTraceTree();
+		System.gc();
 	}
 	
 	public void println(String line) {
@@ -103,6 +109,18 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	
 	public void setOptions(OptionsPanel options) {
 		this.options = options;
+	}
+	
+	public void clearProblems() {
+		problemListModel.removeAllElements();
+	}
+	
+	public void addProblem(Object problem) {
+		problemListModel.addElement(problem);
+	}
+	
+	public void gotoProblemTab() {
+		outputTabbedPane.setSelectedIndex(1);
 	}
 	
 	//
@@ -206,19 +224,29 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	//
 	private void initialize() {
 		setLayout(new BorderLayout(0, 0));
-		JTabbedPane outputPane = new JTabbedPane(JTabbedPane.TOP);
-		add(outputPane);
+		outputTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		add(outputTabbedPane);
 		
 		JPanel resultPanel = new JPanel();
-		outputPane.addTab("Result", null, resultPanel, null);
+		outputTabbedPane.addTab("Result", null, resultPanel, null);
 		resultPanel.setLayout(new BorderLayout(0, 0));
 		
 		resultEditor = new RuleEditor();
 		resultEditor.setEditable(false);
 		resultPanel.add(resultEditor, BorderLayout.CENTER);
 		
+		JPanel problemsPanel = new JPanel();
+		outputTabbedPane.addTab("Problems", null, problemsPanel, null);
+		problemsPanel.setLayout(new BorderLayout(0, 0));
+		
+		JScrollPane problemsScrollPane = new JScrollPane();
+		problemsPanel.add(problemsScrollPane, BorderLayout.CENTER);
+		
+		problemsList = new JList(problemListModel);
+		problemsScrollPane.setViewportView(problemsList);
+		
 		JPanel consolePanel = new JPanel();
-		outputPane.addTab("Console", null, consolePanel, null);
+		outputTabbedPane.addTab("Console", null, consolePanel, null);
 		consolePanel.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane consoleScrollPane = new JScrollPane();
@@ -230,7 +258,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		consoleScrollPane.setViewportView(consoleOutputTextArea);
 		
 		JPanel justificationPanel = new JPanel();
-		outputPane.addTab("Justification", null, justificationPanel, null);
+		outputTabbedPane.addTab("Justification", null, justificationPanel, null);
 		justificationPanel.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane justificationTreeScrollPane = new JScrollPane();
@@ -245,7 +273,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		justificationTreeScrollPane.setViewportView(justificationTree);
 		
 		JPanel tracePanel = new JPanel();
-		outputPane.addTab("Trace", null, tracePanel, null);
+		outputTabbedPane.addTab("Trace", null, tracePanel, null);
 		tracePanel.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane traceTreeScrollPane = new JScrollPane();

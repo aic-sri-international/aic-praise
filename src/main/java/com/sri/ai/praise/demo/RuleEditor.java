@@ -234,6 +234,13 @@ public class RuleEditor extends JPanel {
 		}		
 	}
 	
+	public void removeExistingErrorHighlights() {
+		if (activeErrorHighlight != null) {
+			textPane.getHighlighter().removeHighlight(activeErrorHighlight);
+			activeErrorHighlight = null;
+		}
+	}
+	
 	public void addUndoableEditListener(UndoableEditListener listener) {
 		compoundListener.undoableListeners.add(listener);
 	}
@@ -352,13 +359,6 @@ public class RuleEditor extends JPanel {
  
         s = doc.addStyle(STYLE_STRING, regular);
         StyleConstants.setForeground(s, COLOR_STRING); 
-	}
-	
-	private void removeExistingErrorHighlights() {
-		if (activeErrorHighlight != null) {
-			textPane.getHighlighter().removeHighlight(activeErrorHighlight);
-			activeErrorHighlight = null;
-		}
 	}
 	
 	private class ExpressionFormatFilter extends DocumentFilter {
