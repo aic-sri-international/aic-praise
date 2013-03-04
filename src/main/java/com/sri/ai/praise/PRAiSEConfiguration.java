@@ -50,14 +50,16 @@ import com.sri.ai.util.Configuration;
 @Beta
 public class PRAiSEConfiguration extends Configuration {
 
-	public static final String  KEY_USE_SINGLETON_RELEVANT_RANGE_HEURISTIC                                 = "praise.use.singleton.relevant.range.heuristic";
-	public static final Boolean DEFAULT_VALUE_USE_SINGLETON_RELEVANT_RANGE_HEURISTIC                       = Boolean.TRUE;
+
 	//
 	public static final String  KEY_PERFORM_MAX_ALLOWED_SIZE_CHECK_FOR_GROUNDED_MODEL                      = "praise.perform.max.allowed.size.check.for.grounded.model";
 	public static final Boolean DEFAULT_VALUE_PERFORM_MAX_ALLOWED_SIZE_CHECK_FOR_GROUNDED_MODEL            = Boolean.TRUE;
 	//
 	public static final String  KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL                                    = "praise.max.allowed.size.for.grounded.model";
 	public static final Integer DEFAULT_VALUE_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL                          = new Integer(10000);
+	//
+	public static final String  KEY_LBP_USE_SINGLETON_RELEVANT_RANGE_HEURISTIC                             = "praise.lbp.use.singleton.relevant.range.heuristic";
+	public static final Boolean DEFAULT_VALUE_LBP_USE_SINGLETON_RELEVANT_RANGE_HEURISTIC                   = Boolean.TRUE;
 	//
 	public static final String  KEY_LBP_MAX_NUMBER_OF_ITERATIONS_FOR_CONVERGENCE                           = "praise.lbp.max.number.of.iterations.for.convergence";
 	public static final Integer DEFAULT_VALUE_LBP_MAX_NUMBER_OF_ITERATIONS_FOR_CONVERGENCE                 = new Integer(10);
@@ -74,6 +76,9 @@ public class PRAiSEConfiguration extends Configuration {
 	public static final String  KEY_LBP_QUERY_ENGINE_ROUND_RESULT_TO                                       = "praise.lbp.query.engine.round.result.to";
 	public static final Integer DEFAULT_VALUE_LBP_QUERY_ENGINE_ROUND_RESULT_TO                             = new Integer(6);
 	//
+	public static final String  KEY_LBP_QUERY_ENGINE_CLASS                                                 = "praise.lbp.query.engine.class";
+	public static final String  DEFAULT_VALUE_LBP_QUERY_ENGINE_CLASS                                       = DefaultLBPQueryEngine.class.getName();
+	//
 	public static final String  KEY_MODEL_CARDINALITY_OF_TYPES_ALWAYS_GREATER_THAN_ZERO                    = "praise.model.cardinality.of.types.always.greater.than.zero";
 	public static final Boolean DEFAULT_VALUE_MODEL_CARDINALITY_OF_TYPES_ALWAYS_GREATER_THAN_ZERO          = Boolean.TRUE;
 	// Note: a value < 0 for this properties implies it is INFINITY and therefore unknown.
@@ -82,16 +87,6 @@ public class PRAiSEConfiguration extends Configuration {
 	// Note: by default we assume true and use the default (above) if not explicitly specified.
 	public static final String  KEY_MODEL_ALL_TYPE_SIZES_KNOWN                                             = "praise.model.all.type.sizes.known";
 	public static final Boolean DEFAULT_VALUE_MODEL_ALL_TYPE_SIZES_KNOWN                                   = Boolean.TRUE; 
-	//
-	public static final String  KEY_LBP_QUERY_ENGINE_CLASS                                                 = "praise.lbp.query.engine.class";
-	public static final String  DEFAULT_VALUE_LBP_QUERY_ENGINE_CLASS                                       = DefaultLBPQueryEngine.class.getName();
-
-
-	public static boolean isUseSingletonRelevantRangeHeuristic() {
-		boolean result = getBoolean(KEY_USE_SINGLETON_RELEVANT_RANGE_HEURISTIC, DEFAULT_VALUE_USE_SINGLETON_RELEVANT_RANGE_HEURISTIC);
-		
-		return result;
-	}
 	
 	public static boolean isPerformMaxAllowedSizeCheckForGroundedModel() {
 		boolean result = getBoolean(KEY_PERFORM_MAX_ALLOWED_SIZE_CHECK_FOR_GROUNDED_MODEL, DEFAULT_VALUE_PERFORM_MAX_ALLOWED_SIZE_CHECK_FOR_GROUNDED_MODEL);
@@ -101,6 +96,12 @@ public class PRAiSEConfiguration extends Configuration {
 	
 	public static int getMaxAllowedSizeForGroundedModel() {
 		int result = getInt(KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, DEFAULT_VALUE_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL);
+		
+		return result;
+	}
+	
+	public static boolean isLBPUseSingletonRelevantRangeHeuristic() {
+		boolean result = getBoolean(KEY_LBP_USE_SINGLETON_RELEVANT_RANGE_HEURISTIC, DEFAULT_VALUE_LBP_USE_SINGLETON_RELEVANT_RANGE_HEURISTIC);
 		
 		return result;
 	}
@@ -135,6 +136,12 @@ public class PRAiSEConfiguration extends Configuration {
 		return result;
 	}
 	
+	public static String getLBPQueryEngineClass() {
+		String result = getString(KEY_LBP_QUERY_ENGINE_CLASS, DEFAULT_VALUE_LBP_QUERY_ENGINE_CLASS);
+		
+		return result;
+	}
+	
 	public static boolean isCardinalityOfTypesAlwaysGreaterThanZero() {
 		boolean result = getBoolean(KEY_MODEL_CARDINALITY_OF_TYPES_ALWAYS_GREATER_THAN_ZERO, DEFAULT_VALUE_MODEL_CARDINALITY_OF_TYPES_ALWAYS_GREATER_THAN_ZERO);
 		
@@ -150,12 +157,6 @@ public class PRAiSEConfiguration extends Configuration {
 	public static boolean isAllTypeSizesKnownInModel() {
 		boolean result = getBoolean(KEY_MODEL_ALL_TYPE_SIZES_KNOWN, DEFAULT_VALUE_MODEL_ALL_TYPE_SIZES_KNOWN);
 	
-		return result;
-	}
-	
-	public static String getLBPQueryEngineClass() {
-		String result = getString(KEY_LBP_QUERY_ENGINE_CLASS, DEFAULT_VALUE_LBP_QUERY_ENGINE_CLASS);
-		
 		return result;
 	}
 }

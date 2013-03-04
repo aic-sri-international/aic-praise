@@ -62,7 +62,7 @@ public class DefaultLBPConfiguration implements LBPConfiguration {
 	private BeliefValueAtIterationCollector beliefValueAtIterationCollector = null;
 	private int sumRewriterTestMessageCounter = 0;
 	private boolean sumRewriterUsingSingletonRelevantRangeHeuristic = PRAiSEConfiguration
-			.isUseSingletonRelevantRangeHeuristic();
+			.isLBPUseSingletonRelevantRangeHeuristic();
 	
 	public DefaultLBPConfiguration() {
 		
