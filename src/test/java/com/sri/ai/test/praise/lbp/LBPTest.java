@@ -3925,21 +3925,25 @@ public class LBPTest extends AbstractLPITest {
 //					false,
 //					// TODO - is this correct (10 iterations)?
 //					"if m(X) then 0.0000000000147024292 else 1"),
+					
+				// #6
+			    // TODO - appears not to stop processing:
+//				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+//					new com.sri.ai.lpi.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
+//					"belief([smoker(ann)])",
+//					false,
+//					"TODO"),
 		};
 		
-//		perform(new TestData[] {
-//			// #5	
-//		    // Very slow to process:
-//          // old version of model with no constraints 4 hours 40 min.
-//		    // new version of model with constraints on groups 2 hours 5 min.
-//		    // good for working on optimzations to algorithms.
-//			new LoopyBeliefTestData(Expressions.TRUE.toString(),
-//				new com.sri.ai.lpi.model.example.TrivialLoopyMisconceptionExample(),
-//				"belief([m(X)])",
-//				false,
-//				// TODO - is this correct (10 iterations)?
-//				"if m(X) then 0.0000000000147024292 else 1"),
-//		});
+// 		perform(new TestData[] {
+// 			// #6: TODO - appears not to stop processing.
+// 			new LoopyBeliefTestData(Expressions.TRUE.toString(),
+// 			new com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
+// 			"belief([smoker(ann)])",
+// 			false,
+// 			"TODO"
+// 			),
+// 		});
 		
 		perform(tests);
 	}
