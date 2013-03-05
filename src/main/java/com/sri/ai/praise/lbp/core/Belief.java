@@ -390,10 +390,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						Expressions.make(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, destination, origin),
 						msgExpansions.size());
 				
-				Trace.log("        msg_expansions <- msg_expansions union {{ (on I) (Destination, Origin, expansion) | C }}");
+				Trace.log("        msg_expansion <- {{ (on I) (Destination, Origin, expansion) | C }}");
 				Expression msgExpansion = IntensionalSet.makeMultiSet(expressionI, 
-												Tuple.make(Arrays.asList(destination, origin, expansion)), 
-												conditionC);
+						Tuple.make(Arrays.asList(destination, origin, expansion)), 
+						conditionC);
+				Trace.log("        msg_expansions <- msg_expansions union msg_expansion");
 				msgExpansions.add(msgExpansion);
 				
 				Trace.log("        msgs_already_expanded <- msgs_already_expanded union { (on I) (Destination, Origin) | C }");
@@ -402,7 +403,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						                        conditionC);
 				msgsAlreadyExpandedUnionArgs.add(alreadyExpanded);
 				
-				Trace.log("        msgs_to_be_expanded <- msgs_to_be_expanded union R_extract_previous_msg_sets(expansion)");
+				Trace.log("        msgs_to_be_expanded <- msgs_to_be_expanded union R_extract_previous_msg_sets(msg_expansion)");
 
 				Expression newMsgSetsToBeExpanded = process.rewrite(R_extract_previous_msg_sets, msgExpansion);
 
