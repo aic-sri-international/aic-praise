@@ -37,11 +37,14 @@
  */
 package com.sri.ai.praise.lbp.core;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -103,11 +106,11 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 		
 		Expression result = null;
 
-		List<Expression> extractedPreviousMessages = new LinkedList<Expression>();
+		Set<Expression> extractedPreviousMessages = new LinkedHashSet<Expression>();
 			
 		extractPreviousMessages(extractedPreviousMessages, expressionE, scopingVariables.getArguments(), process.getContextualConstraint(), process);	
 
-		result = CommutativeAssociative.make(FunctorConstants.UNION, extractedPreviousMessages, Sets.EMPTY_SET);
+		result = CommutativeAssociative.make(FunctorConstants.UNION, new ArrayList<Expression>(extractedPreviousMessages), Sets.EMPTY_SET);
 		
 		return result;
 	}
@@ -115,7 +118,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 	//
 	// PRIVATE METHODS
 	//
-	private void extractPreviousMessages(List<Expression> extractedPreviousMessages, Expression expressionE, List<Expression> scopingVariables, Expression constrainingCondition, RewritingProcess process) {
+	private void extractPreviousMessages(Set<Expression> extractedPreviousMessages, Expression expressionE, List<Expression> scopingVariables, Expression constrainingCondition, RewritingProcess process) {
 		if (LPIUtil.isPreviousMessage(expressionE)) {
 			Expression tuplePair         = Tuple.make(Arrays.asList(expressionE.get(0), expressionE.get(1)));
 			Expression scopingExpression = IntensionalSet.makeScopingExpression(scopingVariables);
