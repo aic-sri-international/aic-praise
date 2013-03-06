@@ -135,33 +135,45 @@ public class RuleConverter {
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
 			if (expression.getArguments().size() > 0) {
-//				System.out.println("inspectNode: " + expression);
-				if (expression.getFunctor().equals(FunctorConstants.EQUAL) || expression.getFunctor().equals(FunctorConstants.INEQUALITY) ||
+				// Looking for cases of nested functions (e.g. "foo(bar(X))") or 
+				// functions nested in equality (e.g. "foo(X) = bar(Y)")
+				if (expression.getFunctor().equals(FunctorConstants.EQUAL) || 
+						expression.getFunctor().equals(FunctorConstants.INEQUALITY) ||
 						isRandomFunctionApplication(expression)) {
 					boolean isReplace = false;
+
+					// We will start compiling a duplicate list of arguments for this expression,
+					// in case it turns out to be one of the above cases.  If so, we will need
+					// to replace the location of the nested function with a new variable.
 					List<Expression> arguments = new ArrayList<Expression>(); 
 					List<Expression> andArgs   = new ArrayList<Expression>();
 					for (Expression argument : expression.getArguments()) {
 						if (isRandomVariableValue(argument, randomVariableIndex)) {
 							isReplace = true;
+
+							// We need to replace the function call with a new variable.
 							Expression unique = Expressions.makeUniqueVariable(
 									"X" + uniqueCount, currentExpression, 
 									rewritingProcess);
-//							System.out.println("Incrementing unique count: " + converterContext.uniqueCount + ",  " + parent + " | " + argument);
 							uniqueCount++;
 							arguments.add(unique);
+							
+							// Create a new version of the argument expression with the
+							// new variable added to the end of the argument list.
 							List<Expression> newArgumentArgs = new ArrayList<Expression>(argument.getArguments());
 							newArgumentArgs.add(unique);
-
 							String name;
 							if (argument.getArguments().size() == 0)
 								name = argument.toString();
 							else
 								name = argument.getFunctor().toString();
+							
+							// Put the new version of the child expression in a list to
+							// be "and"ed together with a new version of the parent expression.
 							andArgs.add(Expressions.make(name, newArgumentArgs));
 
 							// Note the function name and param count so can add additional rule enforcing functional
-							// relation later.
+							// relation after this replacement function is done running.
 							Set<Integer> paramCount;
 							paramCount = functionsFound.get(name);
 							if (paramCount == null) {
@@ -175,11 +187,13 @@ public class RuleConverter {
 						}
 					}
 					if(isReplace) {
-//						System.out.println("arguments: " + arguments);
-//						System.out.println("andArgs:   " + andArgs);
+						// When done iterating through the parent expression's children,
+						// we need to create a new version of the parent expressions,
+						// with the function arguments replaced by new variable names,
+						// and "and"ed together with the new child function expressions.
+						// This will replace the original expression.
 						andArgs.add(Expressions.make(expression.getFunctor(), arguments));
 						Expression replacement = And.make(andArgs);
-//						System.out.println("Replace <" + parent + ">  with <" + replacement + ">");
 						return replacement;
 					}
 
@@ -209,31 +223,37 @@ public class RuleConverter {
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
 			if (expression.getArguments().size() > 0) {
-//				System.out.println("inspectNode: " + parent);
-					if (expression.getFunctor().equals(FunctorConstants.FOR_ALL) || 
-							expression.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
-						Symbol newFunctor = DefaultSymbol.createSymbol(expression.toString());
-						Set<Expression> variables = Variables.freeVariables(expression, rewritingProcess);
-						Expression newExpression = Expressions.make(newFunctor, variables);
-//						System.out.println("Generated expression: " + newExpression);
-						if (expression.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
-							result.add(translateConditionalRule(
-									Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, expression.getArguments().get(0), 
-											Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newExpression, 1))));
-						}
-						else {
-							result.add(translateConditionalRule(
-									Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
-											Not.make(expression.getArguments().get(0)), 
-											Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, 
-													Not.make(newExpression), 1))));
-						}
-//						System.out.println("Replacing: " + parent + " with " + newExpression);
-//						System.out.println(converterContext.currentExpression);
-						return newExpression;
+				// Find all instances of the quantifiers: "for all" and "there exists".
+				if (expression.getFunctor().equals(FunctorConstants.FOR_ALL) || 
+						expression.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
+					// Create a new symbol based on the name of the quantifier expression.
+					// This will be used as the name of a new random variable.
+					Symbol newFunctor = DefaultSymbol.createSymbol(expression.toString());
+					
+					// Get all the free variables in the quantifier expression to create a
+					// call to our new random variable expression.
+					Set<Expression> variables = Variables.freeVariables(expression, rewritingProcess);
+					Expression newExpression = Expressions.make(newFunctor, variables);
+
+					// Then create a new rule based on the new expression.
+					if (expression.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
+						result.add(translateConditionalRule(
+								Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, expression.getArguments().get(0), 
+										Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newExpression, 1))));
 					}
+					else {
+						result.add(translateConditionalRule(
+								Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
+										Not.make(expression.getArguments().get(0)), 
+										Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, 
+												Not.make(newExpression), 1))));
+					}
+
+					// Replace the quantifier expression with the new random variable expression.
+					return newExpression;
 				}
-				return expression;
+			}
+			return expression;
 		}
 	}
 
@@ -257,20 +277,21 @@ public class RuleConverter {
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
 			if (expression.getArguments().size() > 0) {
+				// Check for instances of "may be same as".
 				if (expression.getFunctor().equals(RuleConverter.FUNCTOR_MAY_BE_SAME_AS)) {
-//					System.out.println("Found 'may be same as'");
-
-					// Add both variants of the pair.
+					// Mark which variables may be the same as each other.  We'll add
+					// two versions of the pair, one with one variable in front and the other
+					// with the other variable in front.  Later, when we're creating != constraints
+					// for all the free variables, this will make checking whether to make 
+					// the constraint easier.
 					mayBeSameAsSet.add(
 							new Pair<Expression, Expression>(
 									expression.getArguments().get(0), expression.getArguments().get(1)));
 					mayBeSameAsSet.add(
 							new Pair<Expression, Expression>(
 									expression.getArguments().get(1), expression.getArguments().get(0)));
-//					System.out.println(converterContext.mayBeSameAsSet);
 
-					// Replace the "may be same as" expressions with true.
-					System.out.println("Replace with true.");
+					// Replace the "may be same as" expression with True.
 					return Expressions.TRUE;
 				}
 			}
@@ -299,6 +320,10 @@ public class RuleConverter {
 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
+			// If we find a constraint, replace it with the given constant value 
+			// (in usage, the constant will be either True or False.)  Also, note
+			// the constraint so we can put it with other constraints on the 
+			// potential expression.
 			if (LPIUtil.isConstraint(expression, process)) {
 //				System.out.println("Found constraint: " + expression);
 				constraint = expression;
@@ -329,6 +354,8 @@ public class RuleConverter {
 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
+			// Look for instances of "query" in the query output and replace it with the equivalent
+			// expression.
 			if (expression.getFunctorOrSymbol().toString().equals(RuleConverter.QUERY_STRING)) {
 				Expression result = query;
 				
@@ -349,7 +376,8 @@ public class RuleConverter {
 	}
 
 	/**
-	 * Used for searching for the function argument with the given name.
+	 * Used for searching for the function argument with the given name.  This is
+	 * used for figuring out the type of the arguments for the query expression.
 	 * @author etsai
 	 *
 	 */
@@ -376,6 +404,9 @@ public class RuleConverter {
 				int index = 0;
 				for (Expression arg : expression.getArguments()) {
 					if (arg.equals(searchTerm)) {
+						// If we found the argument name, then mark the random
+						// variable that it was found in and the position of
+						// the argument in the argument list.
 						this.randomVariableName = expression.getFunctor();
 						this.argumentIndex = index;
 						return Expressions.TRUE;  // Mark that a match was made.
@@ -385,11 +416,19 @@ public class RuleConverter {
 			}
 			else if (expression.hasFunctor(FunctorConstants.EQUAL) || 
 					expression.hasFunctor(FunctorConstants.INEQUALITY)) {
-				// Check for cases where the expression is "X = foo(...)"
+				// Check for cases where the expression is "X = foo(...)".
+				// In this case, the argument is equal to the return value
+				// of foo.
+				// First, we check the arguments of the =/!= to see if the
+				// search term is there.
 				List<Expression> args = expression.getArguments();
 				for (int ii = 0; ii < args.size(); ii++) {
 					Expression arg = args.get(ii);
 					if (arg.equals(searchTerm)) {
+						// If the search term was found, then check the other
+						// arguments to see if one is a random variable value.
+						// The return type of the random variable can then be
+						// used to determine the type of the search term.
 						for (int jj = 0; jj < args.size(); jj++) {
 							if (jj == ii) {
 								continue;
@@ -546,8 +585,11 @@ public class RuleConverter {
 				queryAtom = queryPair.first;
 
 				// Add random variable declaration for query(...).
-				randomVariables.add(this.createQueryDeclaration(
-						queryAtom, query, randomVariables, randomVariableIndex));
+				Expression queryDeclaration = this.createQueryDeclaration(
+						queryAtom, query, randomVariables, randomVariableIndex);
+				if (queryDeclaration != null) {
+					randomVariables.add(queryDeclaration);
+				}
 			}
 		}
 //		System.out.println("sort names: " + sortNames);
@@ -600,6 +642,10 @@ public class RuleConverter {
 		
 		List<Expression> queryArgs = queryAtom.getArguments();
 		for (Expression queryArg : queryArgs) {
+			// For each free variable in the query, search through the query's equivalent
+			// for the same variable.  We need the name of the function the variable shows
+			// up in and the position of the variable in the function (or if it's equal to the
+			// return value of the function.)
 			SearchFunctionArgumentFunction searchFunction = 
 					new SearchFunctionArgumentFunction(queryArg, randomVariableIndex);
 			query.replaceFirstOccurrence(searchFunction, rewritingProcess);
@@ -607,6 +653,8 @@ public class RuleConverter {
 				return null;
 			}
 			for (Expression randomVariable : randomVariables) {
+				// Once we know the function name and the argument position, we can look
+				// up the declaration for that function and look up the type for the argument.
 				if (randomVariable.get(0).equals(searchFunction.randomVariableName)) {
 					resultArgs.add(randomVariable.get(searchFunction.argumentIndex + 2));
 				}
