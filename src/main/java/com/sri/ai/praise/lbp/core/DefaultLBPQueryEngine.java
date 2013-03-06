@@ -44,12 +44,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.profiler.StopWatch;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
@@ -94,6 +96,26 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 	private static final String STEP_5 = "Step 5 extend model with evidence";
 	private static final String STEP_6 = "Step 6 create new Belief expression from 1 and 2 using step 4";
 	private static final String STEP_7 = "Step 7 set precision on result of step 6";
+	//
+	private static LoggerContext _loggerContext = null;
+	{
+		while (_loggerContext == null) {
+			ILoggerFactory lf = LoggerFactory.getILoggerFactory();
+			if (lf instanceof LoggerContext) {
+				_loggerContext = (LoggerContext) lf;
+			} 
+			else {
+				try {
+					Thread.sleep(100);
+				} catch (Exception ex) {
+					
+				}
+			}
+		}
+	}
+	private static AtomicInteger _numberTraceListeners         = new AtomicInteger(0);
+	private static AtomicInteger _numberJustificationListeners = new AtomicInteger(0);
+	//
 	
 	private List<QueryStepListener>     queryStepListeners     = new ArrayList<QueryStepListener>();
 	private List<TraceListener>         traceListeners         = new ArrayList<TraceListener>();
@@ -126,6 +148,9 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		synchronized (traceListeners) {
 			if (!this.traceListeners.contains(listener)) {
 				traceListeners.add(listener);
+				if (_numberTraceListeners.incrementAndGet() == 1) {
+					_loggerContext.getLogger(Trace.getDefaultLoggerName()).setLevel(Level.TRACE);
+				}
 			}
 		}
 	}
@@ -133,7 +158,11 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 	@Override
 	public void removeTraceListener(TraceListener listener) {
 		synchronized (traceListeners) {
-			traceListeners.remove(listener);
+			if (traceListeners.remove(listener)) {
+				if (_numberTraceListeners.decrementAndGet() == 0) {
+					_loggerContext.getLogger(Trace.getDefaultLoggerName()).setLevel(Level.OFF);
+				}
+			}
 		}
 	}
 	
@@ -142,6 +171,9 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		synchronized (justificationListeners) {
 			if (!justificationListeners.contains(listener)) {
 				justificationListeners.add(listener);
+				if (_numberJustificationListeners.incrementAndGet() == 1) {
+					_loggerContext.getLogger(Justification.getDefaultLoggerName()).setLevel(Level.TRACE);
+				}
 			}
 		}
 	}
@@ -149,7 +181,11 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 	@Override
 	public void removeJustificationListener(JustificationListener listener) {
 		synchronized (justificationListeners) {
-			justificationListeners.remove(listener);
+			if (justificationListeners.remove(listener)) {
+				if (_numberJustificationListeners.decrementAndGet() == 0) {
+					_loggerContext.getLogger(Justification.getDefaultLoggerName()).setLevel(Level.OFF);
+				}
+			}
 		}
 	}
 	
@@ -238,7 +274,6 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		private List<QueryError>  queryErrors           = new ArrayList<QueryError>();
 		private Throwable         cause                 = null;
 		//
-		private LoggerContext               loggerContext         = null;
 		private AppenderBase<ILoggingEvent> traceAppender         = null;
 		private AppenderBase<ILoggingEvent> justificationAppender = null;
 		private Filter<ILoggingEvent>       queryUUIDFilter       = null;
@@ -388,20 +423,6 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 			// Set up the relevant trace and query information
 			// specific for this query.
 			RewriterLogging.setUUID(queryUUID);
-			loggerContext = null;
-			while (loggerContext == null) {
-				ILoggerFactory lf = LoggerFactory.getILoggerFactory();
-				if (lf instanceof LoggerContext) {
-					loggerContext = (LoggerContext) lf;
-				} 
-				else {
-					try {
-						Thread.sleep(100);
-					} catch (Exception ex) {
-						
-					}
-				}
-			}
 			
 			traceAppender = new AppenderBase<ILoggingEvent>() {
 				@Override
@@ -431,7 +452,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 				}
 			};
 			traceAppender.addFilter(new RewriterLoggingNamedRewriterFilter());
-			traceAppender.setContext(loggerContext);
+			traceAppender.setContext(_loggerContext);
 			
 			justificationAppender = new AppenderBase<ILoggingEvent>() {
 				@Override
@@ -446,7 +467,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 				}
 			};
 			justificationAppender.addFilter(new RewriterLoggingNamedRewriterFilter());
-			justificationAppender.setContext(loggerContext);
+			justificationAppender.setContext(_loggerContext);
 			
 			queryUUIDFilter = new Filter<ILoggingEvent>() {
 				@Override
@@ -466,7 +487,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 					return FilterReply.DENY;
 				}
 			};
-			queryUUIDFilter.setContext(loggerContext);
+			queryUUIDFilter.setContext(_loggerContext);
 			
 			traceAppender.addFilter(queryUUIDFilter);
 			justificationAppender.addFilter(queryUUIDFilter);
@@ -475,16 +496,16 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 			traceAppender.start();
 			justificationAppender.start();
 			
-			loggerContext.getLogger(Trace.getDefaultLoggerName()).addAppender(traceAppender);
-			loggerContext.getLogger(Justification.getDefaultLoggerName()).addAppender(justificationAppender);
+			_loggerContext.getLogger(Trace.getDefaultLoggerName()).addAppender(traceAppender);
+			_loggerContext.getLogger(Justification.getDefaultLoggerName()).addAppender(justificationAppender);
 		}
 		
 		private void cleanupLogging() {
 			queryUUIDFilter.stop();
 			traceAppender.stop();
 			justificationAppender.stop();
-			loggerContext.getLogger(Trace.getDefaultLoggerName()).detachAppender(traceAppender);
-			loggerContext.getLogger(Justification.getDefaultLoggerName()).detachAppender(justificationAppender);
+			_loggerContext.getLogger(Trace.getDefaultLoggerName()).detachAppender(traceAppender);
+			_loggerContext.getLogger(Justification.getDefaultLoggerName()).detachAppender(justificationAppender);
 		}
 		
 		/**

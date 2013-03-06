@@ -104,6 +104,14 @@ public class PRAiSEDemoApp {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		// Explicitly turn both of these off up front.
+		// The LBPQueryEngine will re-enable them if necessary.
+		// This improves performance by not generating trace
+		// and justification formatted messages, even if no 
+		// relevant appenders are registered.
+		GrinderConfiguration.disableTrace();
+		GrinderConfiguration.disableJustification();
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {

@@ -38,6 +38,8 @@
 package com.sri.ai.praise.demo;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -136,8 +138,21 @@ public class Controller {
 	public Controller(PRAiSEDemoApp app) {
 		this.app = app;
 		
-		queryEngine.addTraceListener(app.outputPanel);
-		queryEngine.addJustificationListener(app.outputPanel);
+		app.optionsPanel.chckbxJustificationEnabled.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				manageTraceAndJustificationListening();
+			}
+		});
+		app.optionsPanel.chckbxTraceEnabled.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				manageTraceAndJustificationListening();
+			}
+		});
+		
+		manageTraceAndJustificationListening();
 		
 		modelUndoManager.setLimit(-1);
 		evidenceUndoManager.setLimit(-1);
@@ -815,6 +830,23 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		}
 		
 		return offset;
+	}
+	
+	private void manageTraceAndJustificationListening() {
+	
+		if (app.optionsPanel.chckbxTraceEnabled.isSelected()) {
+			queryEngine.addTraceListener(app.outputPanel);
+		} 
+		else {
+			queryEngine.removeTraceListener(app.outputPanel);
+		}
+		
+		if (app.optionsPanel.chckbxJustificationEnabled.isSelected()) {
+			queryEngine.addJustificationListener(app.outputPanel);
+		}
+		else {
+			queryEngine.removeJustificationListener(app.outputPanel);
+		}
 	}
 	
 	private void cleanupMemory() {
