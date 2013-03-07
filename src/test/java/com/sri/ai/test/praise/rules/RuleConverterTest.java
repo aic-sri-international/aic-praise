@@ -909,7 +909,23 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(X) 1;";
+		expected = "sick(X);";
+		assertEquals(expected, result);
+		assertEquals(inputExpression, outputExpression);
+
+		string = "sick(X) 1.0;";
+		inputExpression = ruleParser.parse(string);
+		result = ruleConverter.toRuleString(inputExpression);
+		outputExpression = ruleParser.parse(result);
+		expected = "sick(X);";
+		assertEquals(expected, result);
+		assertEquals(inputExpression, outputExpression);
+
+		string = "sick(X) 1.000000;";
+		inputExpression = ruleParser.parse(string);
+		result = ruleConverter.toRuleString(inputExpression);
+		outputExpression = ruleParser.parse(result);
+		expected = "sick(X);";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1013,7 +1029,7 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(X) and happy(X) 1;";
+		expected = "sick(X) and happy(X);";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1029,7 +1045,7 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(john) = sick(bob) 1;";
+		expected = "sick(john) = sick(bob);";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1037,7 +1053,7 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(john) != sick(bob) 1;";
+		expected = "sick(john) != sick(bob);";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1046,7 +1062,7 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "if circle(X) then round(X) 1;";
+		expected = "if circle(X) then round(X);";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1094,7 +1110,7 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "if epidemic then if sick(X) and friends(X, Y) then sick(Y) 0.800000000 else sick(Z) 1 else sick(A) 1;";
+		expected = "if epidemic then if sick(X) and friends(X, Y) then sick(Y) 0.800000000 else sick(Z) else sick(A);";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1102,7 +1118,7 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "if sick(X) and friends(X, Y) then sick(Y) 0.800000000 else sick(Y) 1;";
+		expected = "if sick(X) and friends(X, Y) then sick(Y) 0.800000000 else sick(Y);";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1127,7 +1143,23 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "1 sick(john).";
+		expected = "sick(john).";
+		assertEquals(expected, result);
+		assertEquals(inputExpression, outputExpression);
+
+		string = "1 sick(john).";
+		inputExpression = ruleParser.parse(string);
+		result = ruleConverter.toRuleString(inputExpression);
+		outputExpression = ruleParser.parse(result);
+		expected = "sick(john).";
+		assertEquals(expected, result);
+		assertEquals(inputExpression, outputExpression);
+
+		string = "1.0 sick(john).";
+		inputExpression = ruleParser.parse(string);
+		result = ruleConverter.toRuleString(inputExpression);
+		outputExpression = ruleParser.parse(result);
+		expected = "sick(john).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1135,7 +1167,7 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "1 sick(X).";
+		expected = "sick(X).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1143,7 +1175,7 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "1 not sick(mary).";
+		expected = "not sick(mary).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
@@ -1159,7 +1191,7 @@ public class RuleConverterTest {
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "1 round(X) :- circle(X).";
+		expected = "round(X) :- circle(X).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 

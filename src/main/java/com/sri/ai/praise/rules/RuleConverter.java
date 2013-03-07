@@ -970,8 +970,11 @@ public class RuleConverter {
 		// Handle atomic rules
 		if (functorString.equals(FUNCTOR_ATOMIC_RULE)) {
 			toRuleString(expression.get(0), sb);
-			sb.append(' ');
-			toRuleString(expression.get(1), sb);
+			Expression arg = expression.get(1);
+			if (!arg.equals(1)) {
+				sb.append(' ');
+				toRuleString(expression.get(1), sb);
+			}
 			if (isFirst) {
 				sb.append(';');
 			}
@@ -998,8 +1001,11 @@ public class RuleConverter {
 		// Handle prolog rules.
 		if (functorString.equals(FUNCTOR_PROLOG_RULE)) {
 			List<Expression> args = expression.getArguments();
-			toRuleString(args.get(0), sb);
-			sb.append(' ');
+			Expression arg = expression.get(0);
+			if (!arg.equals(1)) {
+				toRuleString(arg, sb);
+				sb.append(' ');
+			}
 			toRuleString(args.get(1), sb);
 			if (args.size() == 3) {
 				sb.append(" :- ");
