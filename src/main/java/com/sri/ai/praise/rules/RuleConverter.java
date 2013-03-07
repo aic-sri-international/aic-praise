@@ -76,20 +76,13 @@ import com.sri.ai.util.base.Pair;
 @Beta
 public class RuleConverter {
 
-	public static final String FUNCTOR_IF_THEN_ELSE                = IfThenElse.FUNCTOR;
-	public static final String FUNCTOR_FOR_ALL                     = FunctorConstants.FOR_ALL;
-	public static final String FUNCTOR_THERE_EXISTS                = FunctorConstants.THERE_EXISTS;
+	public static final String FUNCTOR_ATOMIC_RULE       = "atomic rule";
+	public static final String FUNCTOR_CONDITIONAL_RULE  = "conditional rule";
+	public static final String FUNCTOR_PROLOG_RULE       = "prolog rule";
 
-	public static final String FUNCTOR_RANDOM_VARIABLE_DECLARATION = RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION;
-	public static final String FUNCTOR_SORT                        = SortDeclaration.FUNCTOR_SORT_DECLARATION;
+	public static final String FUNCTOR_MAY_BE_SAME_AS    = "may be same as";
 
-	public static final String FUNCTOR_ATOMIC_RULE                 = "atomic rule";
-	public static final String FUNCTOR_CONDITIONAL_RULE            = "conditional rule";
-	public static final String FUNCTOR_PROLOG_RULE                 = "prolog rule";
-
-	public static final String FUNCTOR_MAY_BE_SAME_AS              = "may be same as";
-
-	public static final String QUERY_STRING                        = "query";
+	public static final String QUERY_STRING              = "query";
 
 
 	private RuleParserWrapper         ruleParser       = null;
@@ -107,6 +100,934 @@ public class RuleConverter {
 //
 //		public Map<String, Set<Integer>>          randomVariableIndex;
 //	}
+
+
+
+	/*===================================================================================
+	 * CONSTRUCTORS
+	 *=================================================================================*/
+	public RuleConverter() {
+		// Ensure these are instantiated straight away and not when first referenced.
+		// This helps ensure any global dependencies are setup correctly.
+		rewritingProcess = LBPFactory.newLBPProcess(DefaultSymbol.createSymbol("true"));
+		ruleParser       = new RuleParserWrapper();
+	}
+
+
+	/*===================================================================================
+	 * PUBLIC METHODS
+	 *=================================================================================*/
+	public Pair<Expression, Model> parseModel (String modelString) throws ReservedWordException {
+		return parseModel("", "", modelString);
+	}
+
+	public Pair<Expression, Model> parseModel (String name, String description, String modelString) throws ReservedWordException {
+		return parseModel(name, description, ruleParser.parseAll(modelString));
+	}
+	
+	public Pair<Expression, Model> parseModel (String modelString, String queryString) throws ReservedWordException {
+		return parseModel("", "", modelString, queryString);
+	}
+
+	/**
+	 * Parse the rules model.
+	 * @param name         The name for the model.
+	 * @param description  The description of the model.
+	 * @param inputRules   The rules string of the model.
+	 * @param query        The query string for the model.
+	 * @return  A Model instance of the parsed model.
+	 * @throws ReservedWordException 
+	 */
+	public Pair<Expression, Model> parseModel (String name, String description, String modelString, String queryString) throws ReservedWordException {
+		return parseModel(name, description, ruleParser.parseAll(modelString), queryString != null ? ruleParser.parseFormula(queryString) : null);
+	}
+	
+	public Pair<Expression, Model> parseModel (List<Expression> inputRules) throws ReservedWordException {
+		return parseModel("", "", inputRules);
+	}
+
+	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules) throws ReservedWordException {
+		return parseModel(name, description, inputRules, null);
+	}
+
+	/**
+	 * Parse the rules model and query and generates a low-level model object.
+	 * @param name         The name for the model.
+	 * @param description  The description of the model.
+	 * @param inputRules   The list of rule expressions of the model.
+	 * @param query        The query expression for the model.
+	 * @return  A pair consisting of the query expression (if inserted during translation) and a Model instance of the parsed model.
+	 * @throws ReservedWordException 
+	 */
+	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules, Expression query) throws ReservedWordException {
+//		RulesConversionProcess context = new RulesConversionProcess();
+		List<Expression> potentialExpressions         = new ArrayList<Expression>();
+		List<Expression> sorts                        = new ArrayList<Expression>();
+		List<Expression> randomVariables              = new ArrayList<Expression>();
+		Map<String, Set<Integer>> randomVariableIndex = new HashMap<String, Set<Integer>>();
+		Set<String> sortNames                         = new HashSet<String>();
+		
+		// Sort and convert the rules to their if-then-else forms.
+		for (Expression rule : inputRules) {
+			if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
+				potentialExpressions.add(translateAtomicRule(rule));
+			}
+			else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
+				potentialExpressions.add(translatePrologRule(rule));
+			}
+			else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
+				potentialExpressions.add(translateConditionalRule(rule));
+			}
+			else if (rule.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
+				randomVariables.add(this.updateRandomVariableDeclaration(rule));
+				String varName = rule.get(0).toString();
+				if (varName.equals(QUERY_STRING)) {
+					throw new ReservedWordException("'" + QUERY_STRING + 
+							"' is a reserved word in the rules language.");
+				}
+				if (randomVariableIndex.get(varName) == null) {
+					Set<Integer> set = new HashSet<Integer>();
+					set.add(rule.get(1).intValue());
+					randomVariableIndex.put(varName, set);
+				}
+				else {
+					randomVariableIndex.get(varName).add(rule.get(1).intValue());
+				}
+//				randomVariableNames.put(rule.get(0).toString(), rule);
+			}
+			else if (rule.getFunctor().equals(SortDeclaration.FUNCTOR_SORT_DECLARATION)) {
+				sortNames.add(rule.getArguments().get(0).toString());
+				sorts.add(rule);
+			}
+		}
+		
+		// Look for missing sort declarations in the random variable declarations.
+		Set<String> missingSorts = new HashSet<String>();
+		for (Expression randomVariable : randomVariables) {
+			List<Expression> args = randomVariable.getArguments();
+			for (int ii = 2; ii < args.size() - 1; ii++) {
+				String argName = args.get(ii).toString();
+				if (!sortNames.contains(argName)) {
+					missingSorts.add(argName);
+				}
+			}
+		}
+
+		// Add declarations for the missing sorts.
+		for (String missingSort : missingSorts) {
+			sorts.add(Expressions.make("sort", missingSort, "Unknown", 
+					Expressions.make(ExtensionalSet.UNI_SET_LABEL, 
+							Expressions.make(FunctorConstants.KLEENE_LIST))));
+			sortNames.add(missingSort);
+		}
+		
+		// Run a conversion on the query before processing it with the other rules.
+		Expression queryAtom = null;
+		if (query != null) {
+			Pair<Expression, Expression> queryPair = queryRuleAndAtom(query, randomVariableIndex);
+			queryAtom = query;
+			if (queryPair != null) {
+				potentialExpressions.add(translateRule(queryPair.second));
+				queryAtom = queryPair.first;
+
+				// Add random variable declaration for query(...).
+				Expression queryDeclaration = this.createQueryDeclaration(
+						queryAtom, query, randomVariables, randomVariableIndex);
+				if (queryDeclaration != null) {
+					randomVariables.add(queryDeclaration);
+				}
+			}
+		}
+//		System.out.println("sort names: " + sortNames);
+//		System.out.println("var names: " + randomVariableNames.toString());
+//		System.out.println("var index: " + context.randomVariableIndex.toString());
+//		System.out.println("parfactors: " + context.parfactors.toString());
+//		System.out.println("random variables: " + context.randomVariables.toString());
+//		System.out.println("sorts: " + context.sorts.toString());
+
+		// Translate the functions.
+		System.out.println("Starting translation: " + potentialExpressions);
+		potentialExpressions = translateFunctions(potentialExpressions, randomVariableIndex);
+		System.out.println("After translating functions: \n" + potentialExpressions);
+
+		// Translate the quantifiers.
+		potentialExpressions = translateQuantifiers(potentialExpressions);
+		System.out.println("After translating quantifiers: \n" + potentialExpressions);
+
+		// Extract the embedded constraints.
+		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = 
+				disembedConstraints(potentialExpressions);
+		System.out.println("After extracting constraints: \n" + potentialExpressionAndConstraintList);
+
+		// Translate the potential expression/constraint pair into a parfactor.
+		potentialExpressions = new ArrayList<Expression>();
+		for (Pair<Expression, Expression> pair : potentialExpressionAndConstraintList) {
+			potentialExpressions.add(createParfactor(pair.first, pair.second));
+		}
+		System.out.println("Final parfactors: \n" + potentialExpressions);
+		
+		// Create the model object output.
+		return new Pair<Expression, Model>(queryAtom, createModel(name, description, sorts, randomVariables, potentialExpressions));
+	}
+
+	/**
+	 * Translates a potential expression to a rule expression.  Will replace any 
+	 * instances of "query" in the expression with its equivalent.
+	 * @param result       The potential expression to translate into a rule expression.
+	 * @param queryAtom    The "query(...)" format.  If null, then this method will do the translation, but not substitution.
+	 * @param queryString  The original form of the query.  What "query(...)" is equivalent to.
+	 * @return             A rule expression with the instances of "query(...)" replaced.
+	 */
+	public Expression queryResultToRule (Expression result, Expression queryAtom, 
+			String queryString) {
+		return queryResultToRule(result, queryAtom, ruleParser.parseFormula(queryString));
+	}
+
+	/**
+	 * Translates a potential expression to a rule expression.  Will replace any 
+	 * instances of "query" in the expression with its equivalent.
+	 * @param result     The potential expression to translate into a rule expression.
+	 * @param queryAtom  The "query(...)" format.  If null, then this method will do the translation, but not substitution.
+	 * @param query      The original form of the query.  What "query(...)" is equivalent to.
+	 * @return           A rule expression with the instances of "query(...)" replaced.
+	 */
+	public Expression queryResultToRule (Expression result, Expression queryAtom, 
+			Expression query) {
+		// Translate the result to a rule.
+		Expression ruleExpression = potentialExpressionToRule(result);
+
+		// Perform the substitution of the query(...) with its equivalent.
+		if (queryAtom != null && query != null) {
+			List<Expression> queryAtomArgs = queryAtom.getArguments();
+			Set<Expression> queryVariables = Variables.freeVariables(query, rewritingProcess);
+			if (queryVariables.containsAll(queryAtomArgs)) {
+				ruleExpression = ruleExpression.replaceAllOccurrences(new ReplaceQueryFunction(queryAtom, query), rewritingProcess);
+			}
+			
+		}
+		return ruleExpression;
+	}
+
+	/**
+	 * Translates a potential expression to a rule expression.
+	 * @param input     The potential expression to translate into a rule expression.
+	 * @return           A rule expression version of the potential expression.
+	 */
+	public Expression potentialExpressionToRule(Expression input) {
+		boolean isIfThenElse = IfThenElse.isIfThenElse(input);
+		
+		//we can only really simplify if then else expressions
+		if (isIfThenElse) {
+			Expression condition = IfThenElse.getCondition(input);
+			boolean isConstraint = LPIUtil.isConstraint(condition, rewritingProcess);
+			if (isConstraint) {
+				Expression translationOfE1 = potentialExpressionToRule(input.get(1));
+				Expression translationOfE2 = potentialExpressionToRule(input.get(2));
+				
+				//if both clauses are true, result is true
+				if (translationOfE1.equals(Expressions.TRUE) && translationOfE2.equals(Expressions.TRUE)) {
+					return Expressions.TRUE;
+				} 
+				//if the then clause is true, return the else clause
+				else if (translationOfE1.equals(Expressions.TRUE)) {
+					return new DefaultCompoundSyntaxTree("conditional rule",
+							Not.make(condition),
+							translationOfE2);
+				} 
+				//if the else clause is true, return the if clause
+				else if (translationOfE2.equals(Expressions.TRUE)) {
+					return new DefaultCompoundSyntaxTree("conditional rule",
+							condition,
+							translationOfE1);
+				}
+				//if neither is true, then return the simplified form
+				else {
+					return new DefaultCompoundSyntaxTree("conditional rule", 
+							condition, 
+							translationOfE1, 
+							translationOfE2);
+				}
+			}
+			else {
+				//assume that the 'condition' is a random variable value
+				return Expressions.apply("atomic rule", condition, input.get(1));
+			}
+		}
+		
+		//the statement must have a constant potential, so it adds nothing
+		//of value.  We simply return true here
+		return Expressions.TRUE;
+		
+	}
+
+	/**
+	 * Generates a string in the rules format for the given expression.
+	 * @param expression  A rules expression.
+	 * @return            The string format for the rules expression.
+	 */
+	public String toRuleString (Expression expression) {
+		StringBuffer sb = new StringBuffer();
+		toRuleString(expression, sb, true);
+		return sb.toString();
+	}
+
+
+	/*===================================================================================
+	 * PUBLIC METHODS FOR TESING ONLY
+	 *=================================================================================*/
+	/**
+	 * Creates a random variable declaration for the query atom.
+	 * @param queryAtom            The query atom expression in the form of "query(...)"
+	 * @param query                What the query atom is equivalent to.
+	 * @param randomVariables      The random variable declarations
+	 * @param randomVariableIndex  The index of random variable names and number of arguments they take.
+	 * @return  A random variable declaration for the query.
+	 */
+	public Expression createQueryDeclaration (Expression queryAtom, Expression query, 
+			List<Expression> randomVariables, Map<String, Set<Integer>> randomVariableIndex) {
+		Expression result = null;
+		List<Expression> resultArgs = new ArrayList<Expression>();
+
+		resultArgs.add(DefaultSymbol.createSymbol(QUERY_STRING));
+		resultArgs.add(DefaultSymbol.createSymbol(queryAtom.getArguments().size()));
+		
+		List<Expression> queryArgs = queryAtom.getArguments();
+		for (Expression queryArg : queryArgs) {
+			// For each free variable in the query, search through the query's equivalent
+			// for the same variable.  We need the name of the function the variable shows
+			// up in and the position of the variable in the function (or if it's equal to the
+			// return value of the function.)
+			SearchFunctionArgumentFunction searchFunction = 
+					new SearchFunctionArgumentFunction(queryArg, randomVariableIndex);
+			query.replaceFirstOccurrence(searchFunction, rewritingProcess);
+			if (searchFunction.randomVariableName == null) {
+				return null;
+			}
+			for (Expression randomVariable : randomVariables) {
+				// Once we know the function name and the argument position, we can look
+				// up the declaration for that function and look up the type for the argument.
+				if (randomVariable.get(0).equals(searchFunction.randomVariableName)) {
+					resultArgs.add(randomVariable.get(searchFunction.argumentIndex + 2));
+				}
+			}
+		}
+
+		resultArgs.add(DefaultSymbol.createSymbol("Boolean"));
+		if (resultArgs.size() == queryArgs.size() + 3) {
+			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Creates an instance of Model from the given components.
+	 * @param name             The name of the model.
+	 * @param description      Description of the model.
+	 * @param sorts            The sorts in the model.
+	 * @param randomVariables  The random variable declarations in the model.
+	 * @param parfactors       The parfactors in the model. 
+	 * @return                 A Model representation of the given model components.
+	 */
+	public Model createModel (String name, String description, 
+			List<Expression> sorts, List<Expression> randomVariables,
+			List<Expression> potentialExpressions) {
+		ArrayList<Expression> modelArgs = new ArrayList<Expression>();
+		modelArgs.add(DefaultSymbol.createSymbol(name));
+		modelArgs.add(DefaultSymbol.createSymbol(description));
+		for (Expression sort : sorts)
+			modelArgs.add(sort);
+
+		Set<String> randomVariableNames = new HashSet<String>();
+		for (Expression randomVariable : randomVariables) {
+			modelArgs.add(randomVariable);
+			randomVariableNames.add(randomVariable.get(0).toString());
+		}
+		modelArgs.add(Expressions.apply("parfactors", potentialExpressions));
+		Expression modelExpression = Expressions.apply("model", modelArgs);
+		System.out.println("The model: " + modelExpression);
+
+		return new Model(modelExpression, randomVariableNames);
+	}
+
+	/**
+	 * Converts a query expression into a query atom and a query rule.
+	 * @param query  The query expression
+	 * @return A pair with the query atom and query rule.
+	 */
+	public Pair<Expression, Expression> queryRuleAndAtom (Expression query, Map<String, Set<Integer>> randomVariableIndex) {
+		if (isRandomVariableValue(query, randomVariableIndex)) {
+			return null;
+		}
+
+		Set<Expression> variables = Variables.freeVariables(query, rewritingProcess);
+		Expression queryAtom;
+		if (variables.size() > 0) {
+			queryAtom = Expressions.make(QUERY_STRING, variables);
+		}
+		else {
+			queryAtom = DefaultSymbol.createSymbol(QUERY_STRING);
+		}
+		Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);
+		return new Pair<Expression, Expression>(queryAtom, queryRule);
+	}
+
+
+//	public List<Expression> translateRules (List<Expression> rules) {
+//		List<Expression> result = new ArrayList<Expression>();
+//		for (Expression rule : rules) {
+//			result.add(translateRule(rule));
+//		}
+//		return result;
+//	}
+
+	/**
+	 * Convert the given rule into its "if . then . else ." form.
+	 * @param rule  The rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the rule.
+	 */
+	public Expression translateRule (Expression rule) {
+		if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
+			return translateAtomicRule(rule);
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
+			return translatePrologRule(rule);
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
+			return translateConditionalRule(rule);
+		}
+		return rule;
+	}
+	
+	/**
+	 * Convert the given atomic rule into its "if . then . else ." form.
+	 * @param rule  The atomic rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the atomic rule.
+	 */
+	public Expression translateAtomicRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		if (args.size() != 2)
+			return null;
+
+		return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
+				args.get(1), oneMinusPotential(args.get(1)));
+	}
+	
+	/**
+	 * Convert the given prolog rule into its "if . then . else ." form.
+	 * @param rule  The prolog rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the prolog rule.
+	 */
+	public Expression translatePrologRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		
+		if (args.size() == 2) {
+			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(1), 
+					args.get(0), oneMinusPotential(args.get(0)));
+		}
+		else if (args.size() == 3){
+			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(2), 
+					new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(1), 
+							args.get(0), oneMinusPotential(args.get(0))),
+					0.5);
+		}
+
+		return null;
+	}
+	
+	/**
+	 * Convert the given conditional rule into its "if . then . else ." form.
+	 * @param rule  The conditional rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the conditional rule.
+	 */
+	public Expression translateConditionalRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		if (args.size() == 2) {
+			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
+					this.translateRule(args.get(1)),
+					0.5);
+		}
+		else if (args.size() == 3) {
+			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
+					this.translateRule(args.get(1)),
+					this.translateRule(args.get(2)));
+		}
+		return null;
+	}
+
+	/**
+	 * Converts uses of functions in the potential expressions into relationships and
+	 * adds the supporting potential expressions necessary.
+	 * @param potentialExpressions  The potential expressions perform the function transformation upon.
+	 * @param randomVariableIndex   A mapping of known random variable names and the number of arguments they take.
+	 * @return  A list of potential expressions with the function references transformed.
+	 */
+	public List<Expression> translateFunctions (List<Expression> potentialExpressions, 
+			Map<String, Set<Integer>> randomVariableIndex) {
+		List<Expression> result = new ArrayList<Expression>();
+		Map<String, Set<Integer>> functionsFound = new HashMap<String, Set<Integer>>();
+
+		// For each potential expression, translate the functions.
+		for (Expression parfactor : potentialExpressions) {
+			Expression toReplace = parfactor;
+			Expression replaced  = parfactor;
+
+			// Replace the functions in the potential expression until there are no more.
+			ReplaceFunctionFunction replacementFunction = 
+					new ReplaceFunctionFunction(toReplace, randomVariableIndex, functionsFound);
+			do {
+			    toReplace = replaced;
+			    replaced = toReplace.replaceAllOccurrences(
+			    		replacementFunction,
+			    		rewritingProcess);
+			           
+			    // Update the reference for generating unique constant names.
+			    replacementFunction.currentExpression = replaced;
+			} while (replaced != toReplace);
+
+			// Save the result.
+	        result.add(replaced);
+		}
+
+		// For each of the functions found, create the additional rules defining the 
+		// functional relationship.
+		for (String functor : functionsFound.keySet()) {
+			Set<Integer> counts = functionsFound.get(functor);
+			for (Integer count : counts) {
+				this.createTransformedFunctionConstraints(functor, count, result);
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Checks if the given expression is a random function application.  It will catches
+	 * cases of functions that take no arguments
+	 * @param e                    The expression to check.
+	 * @param randomVariableIndex  An index of random variable names with the number of arguments.
+	 * @return  True if the expression is a random function application or a function that takes no arguments.
+	 */
+	public boolean isRandomVariableValue (Expression e, Map<String, Set<Integer>> randomVariableIndex) {
+		// If the expression is a random function application, return true.
+		if (isRandomFunctionApplication(e)) {
+			return true;
+		}
+
+		// If it is a symbol representing a function that takes no arguments, return true.
+		if (e.getSyntacticFormType().equals("Symbol")) {
+			if (randomVariableIndex == null) {
+				return false;
+			}
+
+			Set<Integer> paramCounts = randomVariableIndex.get(e.toString());
+			if (paramCounts != null && paramCounts.contains(0)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if the given expression is a random function application.  It will screen out
+	 * instances of built in functors, such as "and", "not", "there exists . : .", "if . then . else .",
+	 * etc.
+	 * @param e  The expression to check.
+	 * @return  False if the expression is not a random function application or any of the built in
+	 *          expression types.
+	 */
+	public boolean isRandomFunctionApplication (Expression e) {
+		// If the expression is not a function application, return false.
+		if (!e.getSyntacticFormType().equals("Function application")) {
+			return false;
+		}
+
+		// If the expression is one of the known operations, return false.
+		Expression functor = e.getFunctor();
+		if (functor.equals(FunctorConstants.EQUAL) || functor.equals(FunctorConstants.INEQUALITY) || 
+				functor.equals(FunctorConstants.AND) || functor.equals(FunctorConstants.OR) || 
+				functor.equals(FunctorConstants.NOT) || functor.equals(FunctorConstants.EQUIVALENCE) ||
+				functor.equals(FunctorConstants.IMPLICATION) || functor.equals(IfThenElse.FUNCTOR) ||
+				functor.equals(FunctorConstants.THERE_EXISTS) || functor.equals(FunctorConstants.FOR_ALL) ||
+				functor.equals(FUNCTOR_MAY_BE_SAME_AS)) {
+			return false;
+		}
+
+		// Else, return true.
+		return true;
+	}
+
+	/**
+	 * For the given function name and number of args, will create the additonal potential
+	 * expressions to add for function transformation.
+	 * @param functionName  The name of the function.
+	 * @param numArgs       The number of arguments of the function.
+	 * @param potentialExpressions  The list to add the new potential expressions to.
+	 */
+	public void createTransformedFunctionConstraints (String functionName, int numArgs, List<Expression> potentialExpressions) {
+		StringBuilder rule = new StringBuilder();
+		int ii;
+		rule.append("if ");
+		rule.append(functionName);
+		rule.append('(');
+		for (ii = 0; ii < numArgs; ii++) {
+			rule.append('X');
+			rule.append(ii);
+			rule.append(',');
+		}
+		rule.append("Y) then not ");
+		rule.append(functionName);
+		rule.append('(');
+		for (ii = 0; ii < numArgs; ii++) {
+			rule.append('X');
+			rule.append(ii);
+			rule.append(',');
+		}
+		rule.append("Z);");
+
+		potentialExpressions.add(translateConditionalRule(ruleParser.parse(rule.toString())));
+
+		rule = new StringBuilder();
+		rule.append("there exists Y : " + functionName + "(");
+		for (ii = 0; ii < numArgs; ii++) {
+			rule.append('X');
+			rule.append(ii);
+			rule.append(',');
+		}
+		rule.append("Y);");
+
+		potentialExpressions.add(translateAtomicRule(ruleParser.parse(rule.toString())));
+	}
+
+	/**
+	 * Takes a high-level random variable declaration and returns a low-level random variable declaration.
+	 * @param randomVariableDecl  The high-level random variable declaration.
+	 * @return  A low-level representation of the random variable declaration.
+	 */
+	public Expression updateRandomVariableDeclaration (Expression randomVariableDecl) {
+		if (!randomVariableDecl.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION))
+			return null;
+
+		// If the return type is Boolean, don't update the declaration.
+		List<Expression> oldArgs = randomVariableDecl.getArguments();
+		if (oldArgs.get(oldArgs.size()-1).equals("Boolean"))
+			return randomVariableDecl;
+
+		// Transfer all the args, but change the arg defining how many args the 
+		// random variable has.
+		List<Expression> newArgs = new ArrayList<Expression>(oldArgs.size()+1);
+		for (int ii = 0; ii < oldArgs.size(); ii++) {
+			if (ii == 1)
+				newArgs.add(DefaultSymbol.createSymbol(oldArgs.size() - 2));
+			else
+				newArgs.add(oldArgs.get(ii));
+		}
+
+		// Change the return type to boolean.
+		newArgs.add(DefaultSymbol.createSymbol("Boolean"));
+		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
+	}
+
+	/**
+	 * Removes the quantifiers from potential expressions.
+	 * @param potentialExpressions  The potential expressions to check for quantifiers.
+	 * @return  Quantifier free versions of the expressions.
+	 */
+	public List<Expression> translateQuantifiers (List<Expression> potentialExpressions) {
+		List<Expression> result = new ArrayList<Expression>();
+		List<Expression> expressionCopy = new ArrayList<Expression>(potentialExpressions);
+		// Translate the quantifiers in each potential expression.
+		for (int ii = 0; ii < expressionCopy.size(); ii++) {
+			Expression toReplace = expressionCopy.get(ii);
+			Expression replaced  = toReplace;
+
+			ReplaceQuantifierFunction replacementFunction = new ReplaceQuantifierFunction(expressionCopy);
+			do {
+				// Replace the quantifiers until there are none left in the potential expression.
+			    toReplace = replaced;
+			    replaced = toReplace.replaceAllOccurrences(
+			    		replacementFunction,
+			    		rewritingProcess);
+			} while (replaced != toReplace);
+
+			// Save the result.
+			result.add(replaced);
+		}
+		return result;
+	}
+
+	/**
+	 * Removes the constraints embedded in the given potential expressions.
+	 * @param potentialExpressions  The potential expressions to check for embedded constraints.
+	 * @return  A list of pairs of constraint-free potential expressions and the extracted constraints.
+	 */
+	public List<Pair<Expression, Expression>> disembedConstraints (List<Expression> potentialExpressions) {
+		List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions = 
+				new ArrayList<Pair<Expression, Expression>>();
+		List<Pair<Expression, Expression>> result = new ArrayList<Pair<Expression, Expression>>();
+
+		for (Expression potentialExpression : potentialExpressions) {
+			Set<Pair<Expression, Expression>> mayBeSameAsSet = new HashSet<Pair<Expression, Expression>>();
+
+			// Gather instances of "may be same as".
+			Expression toReplace = potentialExpression;
+			Expression replaced  = toReplace;
+
+			ReplaceMayBeSameAsFunction replacementFunction = new ReplaceMayBeSameAsFunction(mayBeSameAsSet);
+			do {
+			    toReplace = replaced;
+			    replaced = toReplace.replaceAllOccurrences(
+			    		replacementFunction,
+			    		rewritingProcess);
+			} while (replaced != toReplace);
+
+			potentialExpression = replaced;
+
+			// Simplify the updated expression.
+			potentialExpression = rewritingProcess.rewrite(LBPRewriter.R_simplify, potentialExpression);
+
+			// Get free variables and create inequality constraints on all pairs except those
+			// pairs stated to be "may be same as".
+			List<Expression> constraints = new ArrayList<Expression>();
+			Set<Expression> variables = Variables.freeVariables(potentialExpression, rewritingProcess);
+			Expression[] variableArray = new Expression[variables.size()];
+			variables.toArray(variableArray);
+			for (int ii = 0; ii < variables.size() - 1; ii++) {
+				for (int jj = ii+1; jj < variables.size(); jj++) {
+					// Check if this pair is in the "may be same as" set.
+					Expression arg1 = variableArray[ii];
+					Expression arg2 = variableArray[jj];
+					if (!mayBeSameAsSet.contains(new Pair<Expression, Expression>(arg1, arg2))) {
+						// If the pair is not in the "may be same as" set, then add it to the list of constraints.
+						constraints.add(Disequality.make(arg1, arg2));
+					}
+				}
+			}
+
+			setOfConstrainedPotentialExpressions.add(
+					new Pair<Expression, Expression>(potentialExpression, And.make(constraints)));
+		}
+
+		// Extract the embedded constraints from the potential expressions.
+		for (int ii = 0; ii < setOfConstrainedPotentialExpressions.size(); ii++) {
+
+			// Check if the potential expression has any more embedded constraints.
+			Pair<Expression, Expression> pair = setOfConstrainedPotentialExpressions.get(ii);
+			List<Expression> replacements = getReplacementsIfAny(pair.first, rewritingProcess);
+
+			// If the result is null, then were no more embedded constraints found.  If the
+			// result is non-null, then we add the true and false substituted versions of the
+			// potential expression to the end of the list of potential expressions to be process,
+			// so that we can check if there are more embedded constraints to extract.
+			if (replacements == null) {
+				// Add the complete parfactor to the completely-processed parfactor list.
+				result.add(pair);
+			}
+			else {
+				// Add the positive case to the list of potential expressions for further processing.
+				Expression constraints = pair.second;
+				Expression additionalConstraint = replacements.get(2);
+				Expression potentialExpression = replacements.get(0);
+				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraints, additionalConstraint);
+
+				// Add the negative case to the list of potential expressions for further processing.
+				constraints = pair.second;
+				additionalConstraint = Not.make(replacements.get(2));
+				potentialExpression = replacements.get(1);
+				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraints, additionalConstraint);
+			}
+
+		}
+		return result;
+		
+	}
+
+	/**
+	 * Makes a parfactor from the given potential expression and a list of constraints.
+	 * @param potentialExpression  The potential expression to convert into a parfactor.
+	 * @param constraints          The list of the constraints for the parfactor.
+	 * @return A parfactor expression based on the potential expression on constraints.
+	 */
+	public Expression createParfactor (Expression potentialExpression, List<Expression> constraints) {
+		return createParfactor(potentialExpression, And.make(constraints));
+	}
+
+	/**
+	 * Makes a parfactor from the given potential expression and a list of constraints.
+	 * @param potentialExpression  The potential expression to convert into a parfactor.
+	 * @param constraints          The constraints for the parfactor.
+	 * @return A parfactor expression based on the potential expression on constraints.
+	 */
+	public Expression createParfactor (Expression potentialExpression, Expression constraints) {
+		Set<Expression> variableSet = Variables.freeVariables(potentialExpression, rewritingProcess);
+		List<Expression> variableList = new ArrayList<Expression>();
+		for (Expression variable : variableSet) {
+			variableList.add(variable);
+		}
+		return IntensionalSet.makeMultiSetFromIndexExpressionsList(
+				variableList, 
+				Expressions.make(FunctorConstants.LEFT_DOT_RIGHT, potentialExpression), 
+				constraints);
+	}
+
+
+	/*===================================================================================
+	 * PRIVATE METHODS
+	 *=================================================================================*/
+	/**
+	 * Add a potential expression/constraint pair to a list of potential expression/constraint pairs.  
+	 * This method will simplify the potential expression and constraints and may eliminate the 
+	 * potential expression if it reduces out.
+	 * @param listOfConstrainedPotentialExpressions  The list of pairs to add the potential expression/constraint to.
+	 * @param potentialExpression                    The potential expression to add.
+	 * @param constraints                            The original list of constraints for the expression.
+	 * @param additionalConstraint                   An additional constraint to add to the list of constraints.
+	 */
+	private void addFurtherConstrainedPotentialExpression(
+			List<Pair<Expression, Expression>> listOfConstrainedPotentialExpressions, 
+			Expression potentialExpression, Expression constraints, Expression additionalConstraint) {
+		Expression cPrime;
+		constraints = And.make(constraints, additionalConstraint);
+		cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
+		if (!cPrime.equals(Expressions.FALSE)) {
+			RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
+			Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, potentialExpression);
+			if (!Expressions.isNumber(pPrime)) {
+				listOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
+			}
+		}
+	}
+
+	/**
+	 * Generates an expression representing one minus the value given.
+	 * @param potential   The reference value.
+	 * @return An expression representing 1 minus the given potential value.
+	 */
+	private Expression oneMinusPotential (Expression potential) {
+
+		if (potential instanceof DefaultSymbol) {
+			try {
+				NumberFormat format = NumberFormat.getNumberInstance();
+				Number number = format.parse(potential.toString());
+				return DefaultSymbol.createSymbol(1 - number.doubleValue());
+			}
+			catch(ParseException e) {
+				
+			}
+		}
+		return new DefaultCompoundSyntaxTree("-", 1, potential);
+	}
+
+	/**
+	 * Looks for the first embedded constraint in a potential expression and returns two replacements; one 
+	 * with the embedded constraint replaced by True and one by False.
+	 * @param potentialExpression  The expression to search for embedded constraints.
+	 * @param process              The rewriting process.
+	 * @return  A list (Pt, Pf, Constraint) if potentialExpression (P, C) contains a constraint Constraint, 
+	 *          and Pt and Pf are P[Constraint/true] and P[Constraint/false] respectively.
+	 *          Null, if no constraint was found.
+	 */
+	private List<Expression> getReplacementsIfAny(Expression potentialExpression, RewritingProcess process) {
+		Expression pT = potentialExpression.replaceFirstOccurrence(positiveEmbeddedConstraintReplacementFunction, process);
+		if (pT == potentialExpression) {
+			return null;
+		}
+
+		Expression pF = potentialExpression.replaceFirstOccurrence(negativeEmbeddedConstraintReplacementFunction, process);
+		List<Expression> result = new ArrayList<Expression>();
+		result.add(pT);
+		result.add(pF);
+		result.add(negativeEmbeddedConstraintReplacementFunction.constraint);
+		return result;
+	}
+
+	/**
+	 * Generates a string in the rules format for the given expression and
+	 * appends it to the string buffer.
+	 * Call this to generate a raw rule string without the semicolon.
+	 * @param expression  The expression to generate a string for.
+	 * @param sb          The string buffer to append the string to.
+	 */
+	private void toRuleString (Expression expression, StringBuffer sb) {
+		toRuleString(expression, sb, false);
+	}
+
+	/**
+	 * Generates a string in the rules format for the given expression and
+	 * appends it to the string buffer.
+	 * @param expression  The expression to generate a string for.
+	 * @param sb          The string buffer to append the string to.
+	 * @param isFirst     True if want a closing semicolon at the end of atomic and conditional rules.
+	 */
+	private void toRuleString (Expression expression, StringBuffer sb, boolean isFirst) {
+		// If the expression is a symbol, just append the symbol name.
+		if (expression.getSyntacticFormType().equals("Symbol")) {
+			sb.append(expression.toString());
+			return;
+		}
+
+		Expression functor = expression.getFunctor();
+		String functorString = ((DefaultSymbol)functor).getValue().toString();
+
+		// Handle atomic rules
+		if (functorString.equals(FUNCTOR_ATOMIC_RULE)) {
+			toRuleString(expression.get(0), sb);
+			sb.append(' ');
+			toRuleString(expression.get(1), sb);
+			if (isFirst) {
+				sb.append(';');
+			}
+			return;
+		}
+
+		// Handle conditional rules.
+		if (functorString.equals(FUNCTOR_CONDITIONAL_RULE)) {
+			List<Expression> args = expression.getArguments();
+			sb.append("if ");
+			toRuleString(args.get(0), sb);
+			sb.append(" then ");
+			toRuleString(args.get(1), sb);
+			if (args.size() == 3) {
+				sb.append(" else ");
+				toRuleString(args.get(2), sb);
+			}
+			if (isFirst) {
+				sb.append(';');
+			}
+			return;
+		}
+
+		// Handle prolog rules.
+		if (functorString.equals(FUNCTOR_PROLOG_RULE)) {
+			List<Expression> args = expression.getArguments();
+			toRuleString(args.get(0), sb);
+			sb.append(' ');
+			toRuleString(args.get(1), sb);
+			if (args.size() == 3) {
+				sb.append(" :- ");
+				toRuleString(args.get(2), sb);
+			}
+			sb.append('.');
+			return;
+		}
+
+		// Handle minus expression.
+		if (functorString.equals("minus") && expression.getArguments().size() == 2) {
+			toRuleString(expression.get(0), sb);
+			sb.append(" minus ");
+			toRuleString(expression.get(1), sb);
+			return;
+		}
+
+		sb.append(expression.toString());
+	}
+
+
+
+	/*===================================================================================
+	 * PRIVATE CLASSES
+	 *=================================================================================*/
 
 	/**
 	 * Replacement function for use by function translator.
@@ -325,7 +1246,6 @@ public class RuleConverter {
 			// the constraint so we can put it with other constraints on the 
 			// potential expression.
 			if (LPIUtil.isConstraint(expression, process)) {
-//				System.out.println("Found constraint: " + expression);
 				constraint = expression;
 				return constant;
 			}
@@ -496,916 +1416,6 @@ public class RuleConverter {
 		}
 	}
 	
-
-
-	/*===================================================================================
-	 * CONSTRUCTORS
-	 *=================================================================================*/
-	public RuleConverter() {
-		// Ensure these are instantiated straight away and not when first referenced.
-		// This helps ensure any global dependencies are setup correctly.
-		rewritingProcess = LBPFactory.newLBPProcess(DefaultSymbol.createSymbol("true"));
-		ruleParser       = new RuleParserWrapper();
-	}
-
-
-	/*===================================================================================
-	 * PUBLIC METHODS
-	 *=================================================================================*/
-	public Pair<Expression, Model> parseModel (String modelString) throws ReservedWordException {
-		return parseModel("", "", modelString);
-	}
-
-	public Pair<Expression, Model> parseModel (String name, String description, String modelString) throws ReservedWordException {
-		return parseModel(name, description, ruleParser.parseAll(modelString));
-	}
-	
-	public Pair<Expression, Model> parseModel (String modelString, String queryString) throws ReservedWordException {
-		return parseModel("", "", modelString, queryString);
-	}
-
-	/**
-	 * Parse the rules model.
-	 * @param name         The name for the model.
-	 * @param description  The description of the model.
-	 * @param inputRules   The rules string of the model.
-	 * @param query        The query string for the model.
-	 * @return  A Model instance of the parsed model.
-	 * @throws ReservedWordException 
-	 */
-	public Pair<Expression, Model> parseModel (String name, String description, String modelString, String queryString) throws ReservedWordException {
-		return parseModel(name, description, ruleParser.parseAll(modelString), queryString != null ? ruleParser.parseFormula(queryString) : null);
-	}
-	
-	public Pair<Expression, Model> parseModel (List<Expression> inputRules) throws ReservedWordException {
-		return parseModel("", "", inputRules);
-	}
-
-	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules) throws ReservedWordException {
-		return parseModel(name, description, inputRules, null);
-	}
-
-	/**
-	 * Parse the rules model and query and generates a low-level model object.
-	 * @param name         The name for the model.
-	 * @param description  The description of the model.
-	 * @param inputRules   The list of rule expressions of the model.
-	 * @param query        The query expression for the model.
-	 * @return  A pair consisting of the query expression (if inserted during translation) and a Model instance of the parsed model.
-	 * @throws ReservedWordException 
-	 */
-	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules, Expression query) throws ReservedWordException {
-//		RulesConversionProcess context = new RulesConversionProcess();
-		List<Expression> potentialExpressions         = new ArrayList<Expression>();
-		List<Expression> sorts                        = new ArrayList<Expression>();
-		List<Expression> randomVariables              = new ArrayList<Expression>();
-		Map<String, Set<Integer>> randomVariableIndex = new HashMap<String, Set<Integer>>();
-		Set<String> sortNames                         = new HashSet<String>();
-		
-		// Sort and convert the rules to their if-then-else forms.
-		for (Expression rule : inputRules) {
-			if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
-				potentialExpressions.add(translateAtomicRule(rule));
-			}
-			else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
-				potentialExpressions.add(translatePrologRule(rule));
-			}
-			else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
-				potentialExpressions.add(translateConditionalRule(rule));
-			}
-			else if (rule.getFunctor().equals(FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
-				randomVariables.add(this.updateRandomVariableDeclaration(rule));
-				String varName = rule.get(0).toString();
-				if (varName.equals(QUERY_STRING)) {
-					throw new ReservedWordException("'" + QUERY_STRING + 
-							"' is a reserved word in the rules language.");
-				}
-				if (randomVariableIndex.get(varName) == null) {
-					Set<Integer> set = new HashSet<Integer>();
-					set.add(rule.get(1).intValue());
-					randomVariableIndex.put(varName, set);
-				}
-				else {
-					randomVariableIndex.get(varName).add(rule.get(1).intValue());
-				}
-//				randomVariableNames.put(rule.get(0).toString(), rule);
-			}
-			else if (rule.getFunctor().equals(FUNCTOR_SORT)) {
-				sortNames.add(rule.getArguments().get(0).toString());
-				sorts.add(rule);
-			}
-		}
-		
-		// Look for missing sort declarations in the random variable declarations.
-		Set<String> missingSorts = new HashSet<String>();
-		for (Expression randomVariable : randomVariables) {
-			List<Expression> args = randomVariable.getArguments();
-			for (int ii = 2; ii < args.size() - 1; ii++) {
-				String argName = args.get(ii).toString();
-				if (!sortNames.contains(argName)) {
-					missingSorts.add(argName);
-				}
-			}
-		}
-
-		// Add declarations for the missing sorts.
-		for (String missingSort : missingSorts) {
-			sorts.add(Expressions.make("sort", missingSort, "Unknown", 
-					Expressions.make(ExtensionalSet.UNI_SET_LABEL, 
-							Expressions.make(FunctorConstants.KLEENE_LIST))));
-			sortNames.add(missingSort);
-		}
-		
-		// Run a conversion on the query before processing it with the other rules.
-		Expression queryAtom = null;
-		if (query != null) {
-			Pair<Expression, Expression> queryPair = queryRuleAndAtom(query, randomVariableIndex);
-			queryAtom = query;
-			if (queryPair != null) {
-				potentialExpressions.add(translateRule(queryPair.second));
-				queryAtom = queryPair.first;
-
-				// Add random variable declaration for query(...).
-				Expression queryDeclaration = this.createQueryDeclaration(
-						queryAtom, query, randomVariables, randomVariableIndex);
-				if (queryDeclaration != null) {
-					randomVariables.add(queryDeclaration);
-				}
-			}
-		}
-//		System.out.println("sort names: " + sortNames);
-//		System.out.println("var names: " + randomVariableNames.toString());
-//		System.out.println("var index: " + context.randomVariableIndex.toString());
-//		System.out.println("parfactors: " + context.parfactors.toString());
-//		System.out.println("random variables: " + context.randomVariables.toString());
-//		System.out.println("sorts: " + context.sorts.toString());
-
-		// Translate the functions.
-		System.out.println("Starting translation: " + potentialExpressions);
-		potentialExpressions = translateFunctions(potentialExpressions, randomVariableIndex);
-		System.out.println("After translating functions: \n" + potentialExpressions);
-
-		// Translate the quantifiers.
-		potentialExpressions = translateQuantifiers(potentialExpressions);
-		System.out.println("After translating quantifiers: \n" + potentialExpressions);
-
-		// Extract the embedded constraints.
-		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = 
-				disembedConstraints(potentialExpressions);
-		System.out.println("After extracting constraints: \n" + potentialExpressionAndConstraintList);
-
-		// Translate the potential expression/constraint pair into a parfactor.
-		potentialExpressions = new ArrayList<Expression>();
-		for (Pair<Expression, Expression> pair : potentialExpressionAndConstraintList) {
-			potentialExpressions.add(createParfactor(pair.first, pair.second));
-		}
-		System.out.println("Final parfactors: \n" + potentialExpressions);
-		
-		// Create the model object output.
-		return new Pair<Expression, Model>(queryAtom, createModel(name, description, sorts, randomVariables, potentialExpressions));
-	}
-
-	/**
-	 * Translates a potential expression to a rule expression.  Will replace any 
-	 * instances of "query" in the expression with its equivalent.
-	 * @param result     The potential expression to translate into a rule expression.
-	 * @param queryAtom  The "query(...)" format.  If null, then this method will do the translation, but not substitution.
-	 * @param query      The original form of the query.  What "query(...)" is equivalent to.
-	 * @return           A rule expression with the instances of "query(...)" replaced.
-	 */
-	public Expression queryResultToRule (Expression result, Expression queryAtom, 
-			Expression query) {
-		// Translate the result to a rule.
-		Expression ruleExpression = potentialExpressionToRule(result);
-
-		// Perform the substitution of the query(...) with its equivalent.
-		if (queryAtom != null && query != null) {
-			List<Expression> queryAtomArgs = queryAtom.getArguments();
-			Set<Expression> queryVariables = Variables.freeVariables(query, rewritingProcess);
-			if (queryVariables.containsAll(queryAtomArgs)) {
-				ruleExpression = ruleExpression.replaceAllOccurrences(new ReplaceQueryFunction(queryAtom, query), rewritingProcess);
-			}
-			
-		}
-		return ruleExpression;
-	}
-
-	/**
-	 * Translates a potential expression to a rule expression.
-	 * @param input     The potential expression to translate into a rule expression.
-	 * @return           A rule expression version of the potential expression.
-	 */
-	public Expression potentialExpressionToRule(Expression input) {
-		boolean isIfThenElse = IfThenElse.isIfThenElse(input);
-		
-		//we can only really simplify if then else expressions
-		if (isIfThenElse) {
-			Expression condition = IfThenElse.getCondition(input);
-			boolean isConstraint = LPIUtil.isConstraint(condition, rewritingProcess);
-			if (isConstraint) {
-				Expression translationOfE1 = potentialExpressionToRule(input.get(1));
-				Expression translationOfE2 = potentialExpressionToRule(input.get(2));
-				
-				//if both clauses are true, result is true
-				if (translationOfE1.equals(Expressions.TRUE) && translationOfE2.equals(Expressions.TRUE)) {
-					return Expressions.TRUE;
-				} 
-				//if the then clause is true, return the else clause
-				else if (translationOfE1.equals(Expressions.TRUE)) {
-					return new DefaultCompoundSyntaxTree("conditional rule",
-							Not.make(condition),
-							translationOfE2);
-				} 
-				//if the else clause is true, return the if clause
-				else if (translationOfE2.equals(Expressions.TRUE)) {
-					return new DefaultCompoundSyntaxTree("conditional rule",
-							condition,
-							translationOfE1);
-				}
-				//if neither is true, then return the simplified form
-				else {
-					return new DefaultCompoundSyntaxTree("conditional rule", 
-							condition, 
-							translationOfE1, 
-							translationOfE2);
-				}
-			}
-			else {
-				//assume that the 'condition' is a random variable value
-				return Expressions.apply("atomic rule", condition, input.get(1));
-			}
-		}
-		
-		//the statement must have a constant potential, so it adds nothing
-		//of value.  We simply return true here
-		return Expressions.TRUE;
-		
-	}
-
-	/**
-	 * Generates a string in the rules format for the given expression.
-	 * @param expression  A rules expression.
-	 * @return            The string format for the rules expression.
-	 */
-	public String toRuleString (Expression expression) {
-		StringBuffer sb = new StringBuffer();
-		toRuleString(expression, sb, true);
-		return sb.toString();
-	}
-
-
-	/*===================================================================================
-	 * PUBLIC METHODS FOR TESING ONLY
-	 *=================================================================================*/
-	/**
-	 * Creates a random variable declaration for the query atom.
-	 * @param queryAtom            The query atom expression in the form of "query(...)"
-	 * @param query                What the query atom is equivalent to.
-	 * @param randomVariables      The random variable declarations
-	 * @param randomVariableIndex  The index of random variable names and number of arguments they take.
-	 * @return  A random variable declaration for the query.
-	 */
-	public Expression createQueryDeclaration (Expression queryAtom, Expression query, 
-			List<Expression> randomVariables, Map<String, Set<Integer>> randomVariableIndex) {
-		Expression result = null;
-		List<Expression> resultArgs = new ArrayList<Expression>();
-
-		resultArgs.add(DefaultSymbol.createSymbol(QUERY_STRING));
-		resultArgs.add(DefaultSymbol.createSymbol(queryAtom.getArguments().size()));
-		
-		List<Expression> queryArgs = queryAtom.getArguments();
-		for (Expression queryArg : queryArgs) {
-			// For each free variable in the query, search through the query's equivalent
-			// for the same variable.  We need the name of the function the variable shows
-			// up in and the position of the variable in the function (or if it's equal to the
-			// return value of the function.)
-			SearchFunctionArgumentFunction searchFunction = 
-					new SearchFunctionArgumentFunction(queryArg, randomVariableIndex);
-			query.replaceFirstOccurrence(searchFunction, rewritingProcess);
-			if (searchFunction.randomVariableName == null) {
-				return null;
-			}
-			for (Expression randomVariable : randomVariables) {
-				// Once we know the function name and the argument position, we can look
-				// up the declaration for that function and look up the type for the argument.
-				if (randomVariable.get(0).equals(searchFunction.randomVariableName)) {
-					resultArgs.add(randomVariable.get(searchFunction.argumentIndex + 2));
-				}
-			}
-		}
-
-		resultArgs.add(DefaultSymbol.createSymbol("Boolean"));
-		if (resultArgs.size() == queryArgs.size() + 3) {
-			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
-		}
-
-		return result;
-	}
-
-	/**
-	 * Creates an instance of Model from the given components.
-	 * @param name             The name of the model.
-	 * @param description      Description of the model.
-	 * @param sorts            The sorts in the model.
-	 * @param randomVariables  The random variable declarations in the model.
-	 * @param parfactors       The parfactors in the model. 
-	 * @return                 A Model representation of the given model components.
-	 */
-	public Model createModel (String name, String description, 
-			List<Expression> sorts, List<Expression> randomVariables,
-			List<Expression> potentialExpressions) {
-		ArrayList<Expression> modelArgs = new ArrayList<Expression>();
-		modelArgs.add(DefaultSymbol.createSymbol(name));
-		modelArgs.add(DefaultSymbol.createSymbol(description));
-		for (Expression sort : sorts)
-			modelArgs.add(sort);
-
-		Set<String> randomVariableNames = new HashSet<String>();
-		for (Expression randomVariable : randomVariables) {
-			modelArgs.add(randomVariable);
-			randomVariableNames.add(randomVariable.get(0).toString());
-		}
-		modelArgs.add(Expressions.apply("parfactors", potentialExpressions));
-		Expression modelExpression = Expressions.apply("model", modelArgs);
-		System.out.println("The model: " + modelExpression);
-
-		return new Model(modelExpression, randomVariableNames);
-	}
-
-	/**
-	 * Converts a query expression into a query atom and a query rule.
-	 * @param query  The query expression
-	 * @return A pair with the query atom and query rule.
-	 */
-	public Pair<Expression, Expression> queryRuleAndAtom (Expression query, Map<String, Set<Integer>> randomVariableIndex) {
-		if (isRandomVariableValue(query, randomVariableIndex)) {
-//			System.out.println("Query: " + query + " is a random variable value expression.");
-			return null;
-		}
-
-//		System.out.println("Query is not a random variable value expression:" + query);
-		Set<Expression> variables = Variables.freeVariables(query, rewritingProcess);
-		Expression queryAtom;
-		if (variables.size() > 0) {
-			queryAtom = Expressions.make(QUERY_STRING, variables);
-		}
-		else {
-			queryAtom = DefaultSymbol.createSymbol(QUERY_STRING);
-		}
-		Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);
-		return new Pair<Expression, Expression>(queryAtom, queryRule);
-	}
-
-
-//	public List<Expression> translateRules (List<Expression> rules) {
-//		List<Expression> result = new ArrayList<Expression>();
-//		for (Expression rule : rules) {
-//			result.add(translateRule(rule));
-//		}
-//		return result;
-//	}
-
-	/**
-	 * Convert the given rule into its "if . then . else ." form.
-	 * @param rule  The rule to translate.
-	 * @return  The equivalent "if . then . else ." form of the rule.
-	 */
-	public Expression translateRule (Expression rule) {
-		if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
-			return translateAtomicRule(rule);
-		}
-		else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
-			return translatePrologRule(rule);
-		}
-		else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
-			return translateConditionalRule(rule);
-		}
-		return rule;
-	}
-	
-	/**
-	 * Convert the given atomic rule into its "if . then . else ." form.
-	 * @param rule  The atomic rule to translate.
-	 * @return  The equivalent "if . then . else ." form of the atomic rule.
-	 */
-	public Expression translateAtomicRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		if (args.size() != 2)
-			return null;
-
-		return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(0), 
-				args.get(1), oneMinusPotential(args.get(1)));
-	}
-	
-	/**
-	 * Convert the given prolog rule into its "if . then . else ." form.
-	 * @param rule  The prolog rule to translate.
-	 * @return  The equivalent "if . then . else ." form of the prolog rule.
-	 */
-	public Expression translatePrologRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		
-		if (args.size() == 2) {
-			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(1), 
-					args.get(0), oneMinusPotential(args.get(0)));
-		}
-		else if (args.size() == 3){
-			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(2), 
-					new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(1), 
-							args.get(0), oneMinusPotential(args.get(0))),
-					0.5);
-		}
-
-		return null;
-	}
-	
-	/**
-	 * Convert the given conditional rule into its "if . then . else ." form.
-	 * @param rule  The conditional rule to translate.
-	 * @return  The equivalent "if . then . else ." form of the conditional rule.
-	 */
-	public Expression translateConditionalRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		if (args.size() == 2) {
-			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(0), 
-					this.translateRule(args.get(1)),
-					0.5);
-		}
-		else if (args.size() == 3) {
-			return new DefaultCompoundSyntaxTree(FUNCTOR_IF_THEN_ELSE, args.get(0), 
-					this.translateRule(args.get(1)),
-					this.translateRule(args.get(2)));
-		}
-		return null;
-	}
-
-	/**
-	 * Converts uses of functions in the potential expressions into relationships and
-	 * adds the supporting potential expressions necessary.
-	 * @param potentialExpressions  The potential expressions perform the function transformation upon.
-	 * @param randomVariableIndex   A mapping of known random variable names and the number of arguments they take.
-	 * @return  A list of potential expressions with the function references transformed.
-	 */
-	public List<Expression> translateFunctions (List<Expression> potentialExpressions, 
-			Map<String, Set<Integer>> randomVariableIndex) {
-		List<Expression> result = new ArrayList<Expression>();
-		Map<String, Set<Integer>> functionsFound = new HashMap<String, Set<Integer>>();
-
-		for (Expression parfactor : potentialExpressions) {
-			Expression toReplace = parfactor;
-			Expression replaced  = parfactor;
-
-			ReplaceFunctionFunction replacementFunction = 
-					new ReplaceFunctionFunction(toReplace, randomVariableIndex, functionsFound);
-			do {
-			    toReplace = replaced;
-			    replaced = toReplace.replaceAllOccurrences(
-			    		replacementFunction,
-			    		rewritingProcess);
-			           
-			    // Update the reference for generating unique constant names.
-			    replacementFunction.currentExpression = replaced;
-			} while (replaced != toReplace);
-
-			// Save the result.
-	        result.add(replaced);
-		}
-
-//		System.out.println("Functions found: " + context.functionsFound);
-		for (String functor : functionsFound.keySet()) {
-			Set<Integer> counts = functionsFound.get(functor);
-			for (Integer count : counts) {
-				this.createTransformedFunctionConstraints(functor, count, result);
-			}
-		}
-
-		return result;
-	}
-
-	/**
-	 * Checks if the given expression is a random function application.  It will screen out
-	 * instances of built in functors, such as "and", "not", "there exists . : .", "if . then . else .",
-	 * etc.
-	 * @param e  The expression to check.
-	 * @return  False if the expression is not a random function application or any of the built in
-	 *          expression types.
-	 */
-	public boolean isRandomFunctionApplication (Expression e) {
-		if (!e.getSyntacticFormType().equals("Function application")) {
-//			System.out.println(e + " is not function application");
-			return false;
-		}
-
-		Expression functor = e.getFunctor();
-		if (functor.equals(FunctorConstants.EQUAL) || functor.equals(FunctorConstants.INEQUALITY) || 
-				functor.equals(FunctorConstants.AND) || functor.equals(FunctorConstants.OR) || 
-				functor.equals(FunctorConstants.NOT) || functor.equals(FunctorConstants.EQUIVALENCE) ||
-				functor.equals(FunctorConstants.IMPLICATION) || functor.equals(FUNCTOR_IF_THEN_ELSE) ||
-				functor.equals(FUNCTOR_THERE_EXISTS) || functor.equals(FUNCTOR_FOR_ALL) ||
-				functor.equals(FUNCTOR_MAY_BE_SAME_AS)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Checks if the given expression is a random function application.  It will catches
-	 * cases of functions that take no arguments
-	 * @param e                    The expression to check.
-	 * @param randomVariableIndex  An index of random variable names with the number of arguments.
-	 * @return  True if the expression is a random function application or a function that takes no arguments.
-	 */
-	public boolean isRandomVariableValue (Expression e, Map<String, Set<Integer>> randomVariableIndex) {
-		if (isRandomFunctionApplication(e)) {
-			return true;
-		}
-
-		if (e.getSyntacticFormType().equals("Symbol")) {
-			if (randomVariableIndex == null) {
-				return false;
-			}
-
-			Set<Integer> paramCounts = randomVariableIndex.get(e.toString());
-			if (paramCounts != null && paramCounts.contains(0)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * For the given function name and number of args, will create the additonal potential
-	 * expressions to add for function transformation.
-	 * @param functionName  The name of the function.
-	 * @param numArgs       The number of arguments of the function.
-	 * @param potentialExpressions  The list to add the new potential expressions to.
-	 */
-	public void createTransformedFunctionConstraints (String functionName, int numArgs, List<Expression> potentialExpressions) {
-		StringBuilder rule = new StringBuilder();
-		int ii;
-		rule.append("if ");
-		rule.append(functionName);
-		rule.append('(');
-		for (ii = 0; ii < numArgs; ii++) {
-			rule.append('X');
-			rule.append(ii);
-			rule.append(',');
-		}
-		rule.append("Y) then not ");
-		rule.append(functionName);
-		rule.append('(');
-		for (ii = 0; ii < numArgs; ii++) {
-			rule.append('X');
-			rule.append(ii);
-			rule.append(',');
-		}
-		rule.append("Z);");
-
-//		System.out.println(rule.toString());
-		potentialExpressions.add(translateConditionalRule(ruleParser.parse(rule.toString())));
-
-		rule = new StringBuilder();
-		rule.append("there exists Y : " + functionName + "(");
-		for (ii = 0; ii < numArgs; ii++) {
-			rule.append('X');
-			rule.append(ii);
-			rule.append(',');
-		}
-		rule.append("Y);");
-
-//		System.out.println(rule.toString());
-		potentialExpressions.add(translateAtomicRule(ruleParser.parse(rule.toString())));
-	}
-
-	/**
-	 * Takes a high-level random variable declaration and returns a low-level random variable declaration.
-	 * @param randomVariableDecl  The high-level random variable declaration.
-	 * @return  A low-level representation of the random variable declaration.
-	 */
-	public Expression updateRandomVariableDeclaration (Expression randomVariableDecl) {
-		if (!randomVariableDecl.getFunctor().equals(FUNCTOR_RANDOM_VARIABLE_DECLARATION))
-			return null;
-
-		// If the return type is Boolean, don't update the declaration.
-		List<Expression> oldArgs = randomVariableDecl.getArguments();
-		if (oldArgs.get(oldArgs.size()-1).equals("Boolean"))
-			return randomVariableDecl;
-
-		List<Expression> newArgs = new ArrayList<Expression>(oldArgs.size()+1);
-		for (int ii = 0; ii < oldArgs.size(); ii++) {
-			if (ii == 1)
-				newArgs.add(DefaultSymbol.createSymbol(oldArgs.size() - 2));
-			else
-				newArgs.add(oldArgs.get(ii));
-		}
-		newArgs.add(DefaultSymbol.createSymbol("Boolean"));
-		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
-	}
-
-	/**
-	 * Removes the quantifiers from potential expressions.
-	 * @param potentialExpressions  The potential expressions to check for quantifiers.
-	 * @return  Quantifier free versions of the expressions.
-	 */
-	public List<Expression> translateQuantifiers (List<Expression> potentialExpressions) {
-		List<Expression> result = new ArrayList<Expression>();
-		List<Expression> expressionCopy = new ArrayList<Expression>(potentialExpressions);
-		for (int ii = 0; ii < expressionCopy.size(); ii++) {
-			Expression toReplace = expressionCopy.get(ii);
-			Expression replaced  = toReplace;
-
-			ReplaceQuantifierFunction replacementFunction = new ReplaceQuantifierFunction(expressionCopy);
-			do {
-			    toReplace = replaced;
-			    replaced = toReplace.replaceAllOccurrences(
-			    		replacementFunction,
-			    		rewritingProcess);
-			} while (replaced != toReplace);
-
-			// Save the result.
-			result.add(replaced);
-		}
-		return result;
-	}
-
-	/**
-	 * Removes the constraints embedded in the given potential expressions.
-	 * @param potentialExpressions  The potential expressions to check for embedded constraints.
-	 * @return  A list of pairs of constraint-free potential expressions and the extracted constraints.
-	 */
-	public List<Pair<Expression, Expression>> disembedConstraints (List<Expression> potentialExpressions) {
-		List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions = 
-				new ArrayList<Pair<Expression, Expression>>();
-		List<Pair<Expression, Expression>> result = new ArrayList<Pair<Expression, Expression>>();
-
-		for (Expression potentialExpression : potentialExpressions) {
-			Set<Pair<Expression, Expression>> mayBeSameAsSet = new HashSet<Pair<Expression, Expression>>();
-//			System.out.println("Searching for 'may be same as': " + potentialExpression);
-
-			// Gather instances of "may be same as".
-			Expression toReplace = potentialExpression;
-			Expression replaced  = toReplace;
-
-			ReplaceMayBeSameAsFunction replacementFunction = new ReplaceMayBeSameAsFunction(mayBeSameAsSet);
-			do {
-			    toReplace = replaced;
-			    replaced = toReplace.replaceAllOccurrences(
-			    		replacementFunction,
-			    		rewritingProcess);
-			} while (replaced != toReplace);
-
-			potentialExpression = replaced;
-
-			// Simplify the updated expression.
-			potentialExpression = rewritingProcess.rewrite(LBPRewriter.R_simplify, potentialExpression);
-
-//			System.out.println("Completed search for may be same as expressions: " + context.mayBeSameAsSet);
-//			System.out.println("Potential expression: " + potentialExpression);
-
-			// Get free variables and create inequality constraints on all pairs except those
-			// pairs stated to be "may be same as".
-			List<Expression> constraints = new ArrayList<Expression>();
-			Set<Expression> variables = Variables.freeVariables(potentialExpression, rewritingProcess);
-//			System.out.println("Free variables: " + variables);
-			Expression[] variableArray = new Expression[variables.size()];
-			variables.toArray(variableArray);
-			for (int ii = 0; ii < variables.size() - 1; ii++) {
-				for (int jj = ii+1; jj < variables.size(); jj++) {
-					// Check if this pair is in the "may be same as" set.
-					Expression arg1 = variableArray[ii];
-					Expression arg2 = variableArray[jj];
-					if (!mayBeSameAsSet.contains(new Pair<Expression, Expression>(arg1, arg2))) {
-						// If the pair is not in the "may be same as" set, then add it to the list of constraints.
-						constraints.add(Disequality.make(arg1, arg2));
-					}
-				}
-			}
-
-//			System.out.println("Generated constraints: " + constraints);
-			setOfConstrainedPotentialExpressions.add(
-					new Pair<Expression, Expression>(potentialExpression, And.make(constraints)));
-		}
-
-		// Extract the embedded constraints from the potential expressions.
-		for (int ii = 0; ii < setOfConstrainedPotentialExpressions.size(); ii++) {
-
-			// Check if the potential expression has any more embedded constraints.
-			Pair<Expression, Expression> pair = setOfConstrainedPotentialExpressions.get(ii);
-//			System.out.println("Searching for embedded constraints " + ii + ": " + pair.first);
-			List<Expression> replacements = getReplacementsIfAny(pair.first, rewritingProcess);
-
-			// If the result is null, then were no more embedded constraints found.  If the
-			// result is non-null, then we add the true and false substituted versions of the
-			// potential expression to the end of the list of potential expressions to be process,
-			// so that we can check if there are more embedded constraints to extract.
-			if (replacements == null) {
-//				System.out.println("Done extracting constraints: " + pair);
-				// Add the complete parfactor to the completely-processed parfactor list.
-				result.add(pair);
-			}
-			else {
-				// Add the positive case to the list of potential expressions for further processing.
-				Expression constraints = pair.second;
-				Expression additionalConstraint = replacements.get(2);
-				Expression potentialExpression = replacements.get(0);
-				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraints, additionalConstraint);
-
-				// Add the negative case to the list of potential expressions for further processing.
-				constraints = pair.second;
-				additionalConstraint = Not.make(replacements.get(2));
-				potentialExpression = replacements.get(1);
-				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraints, additionalConstraint);
-			}
-
-		}
-		return result;
-		
-	}
-
-	/**
-	 * Makes a parfactor from the given potential expression and a list of constraints.
-	 * @param potentialExpression  The potential expression to convert into a parfactor.
-	 * @param constraints          The list of the constraints for the parfactor.
-	 * @return A parfactor expression based on the potential expression on constraints.
-	 */
-	public Expression createParfactor (Expression potentialExpression, List<Expression> constraints) {
-		return createParfactor(potentialExpression, And.make(constraints));
-	}
-
-	/**
-	 * Makes a parfactor from the given potential expression and a list of constraints.
-	 * @param potentialExpression  The potential expression to convert into a parfactor.
-	 * @param constraints          The constraints for the parfactor.
-	 * @return A parfactor expression based on the potential expression on constraints.
-	 */
-	public Expression createParfactor (Expression potentialExpression, Expression constraints) {
-		Set<Expression> variableSet = Variables.freeVariables(potentialExpression, rewritingProcess);
-		List<Expression> variableList = new ArrayList<Expression>();
-		for (Expression variable : variableSet) {
-			variableList.add(variable);
-		}
-		return IntensionalSet.makeMultiSetFromIndexExpressionsList(
-				variableList, 
-				Expressions.make(FunctorConstants.LEFT_DOT_RIGHT, potentialExpression), 
-				constraints);
-	}
-
-
-	/*===================================================================================
-	 * PRIVATE METHODS
-	 *=================================================================================*/
-	/**
-	 * Add a potential expression/constraint pair to a list of potential expression/constraint pairs.  
-	 * This method will simplify the potential expression and constraints and may eliminate the 
-	 * potential expression if it reduces out.
-	 * @param listOfConstrainedPotentialExpressions  The list of pairs to add the potential expression/constraint to.
-	 * @param potentialExpression                    The potential expression to add.
-	 * @param constraints                            The original list of constraints for the expression.
-	 * @param additionalConstraint                   An additional constraint to add to the list of constraints.
-	 */
-	private void addFurtherConstrainedPotentialExpression(
-			List<Pair<Expression, Expression>> listOfConstrainedPotentialExpressions, 
-			Expression potentialExpression, Expression constraints, Expression additionalConstraint) {
-		Expression cPrime;
-		constraints = And.make(constraints, additionalConstraint);
-		cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
-		if (!cPrime.equals(Expressions.FALSE)) {
-			RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
-			Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, potentialExpression);
-			if (!Expressions.isNumber(pPrime)) {
-				listOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
-			}
-		}
-	}
-
-	/**
-	 * Generates an expression representing one minus the value given.
-	 * @param potential   The reference value.
-	 * @return An expression representing 1 minus the given potential value.
-	 */
-	private Expression oneMinusPotential (Expression potential) {
-
-		if (potential instanceof DefaultSymbol) {
-			try {
-				NumberFormat format = NumberFormat.getNumberInstance();
-				Number number = format.parse(potential.toString());
-				return DefaultSymbol.createSymbol(1 - number.doubleValue());
-			}
-			catch(ParseException e) {
-				
-			}
-		}
-		return new DefaultCompoundSyntaxTree("-", 1, potential);
-	}
-
-	/**
-	 * Looks for the first embedded constraint in a potential expression and returns two replacements; one 
-	 * with the embedded constraint replaced by True and one by False.
-	 * @param potentialExpression  The expression to search for embedded constraints.
-	 * @param process              The rewriting process.
-	 * @return  A list (Pt, Pf, Constraint) if potentialExpression (P, C) contains a constraint Constraint, 
-	 *          and Pt and Pf are P[Constraint/true] and P[Constraint/false] respectively.
-	 *          Null, if no constraint was found.
-	 */
-	private List<Expression> getReplacementsIfAny(Expression potentialExpression, RewritingProcess process) {
-		Expression pT = potentialExpression.replaceFirstOccurrence(positiveEmbeddedConstraintReplacementFunction, process);
-		if (pT == potentialExpression) {
-			return null;
-		}
-
-		Expression pF = potentialExpression.replaceFirstOccurrence(negativeEmbeddedConstraintReplacementFunction, process);
-		List<Expression> result = new ArrayList<Expression>();
-		result.add(pT);
-		result.add(pF);
-		result.add(negativeEmbeddedConstraintReplacementFunction.constraint);
-//		System.out.println("Positive replacement: " + pT);
-//		System.out.println("Negative replacement: " + pF);
-//		System.out.println("Constraint: " + negativeEmbeddedConstraintReplacementFunction.constraint);
-		return result;
-	}
-
-	/**
-	 * Generates a string in the rules format for the given expression and
-	 * appends it to the string buffer.
-	 * Call this to generate a raw rule string without the semicolon.
-	 * @param expression  The expression to generate a string for.
-	 * @param sb          The string buffer to append the string to.
-	 */
-	private void toRuleString (Expression expression, StringBuffer sb) {
-		toRuleString(expression, sb, false);
-	}
-
-	/**
-	 * Generates a string in the rules format for the given expression and
-	 * appends it to the string buffer.
-	 * @param expression  The expression to generate a string for.
-	 * @param sb          The string buffer to append the string to.
-	 * @param isFirst     True if want a closing semicolon at the end of atomic and conditional rules.
-	 */
-	private void toRuleString (Expression expression, StringBuffer sb, boolean isFirst) {
-		// If the expression is a symbol, just append the symbol name.
-		if (expression.getSyntacticFormType().equals("Symbol")) {
-			sb.append(expression.toString());
-			return;
-		}
-
-		Expression functor = expression.getFunctor();
-		String functorString = ((DefaultSymbol)functor).getValue().toString();
-
-		// Handle atomic rules
-		if (functorString.equals(FUNCTOR_ATOMIC_RULE)) {
-			toRuleString(expression.get(0), sb);
-			sb.append(' ');
-			toRuleString(expression.get(1), sb);
-			if (isFirst) {
-				sb.append(';');
-			}
-			return;
-		}
-
-		// Handle conditional rules.
-		if (functorString.equals(FUNCTOR_CONDITIONAL_RULE)) {
-			List<Expression> args = expression.getArguments();
-			sb.append("if ");
-			toRuleString(args.get(0), sb);
-			sb.append(" then ");
-			toRuleString(args.get(1), sb);
-			if (args.size() == 3) {
-				sb.append(" else ");
-				toRuleString(args.get(2), sb);
-			}
-			if (isFirst) {
-				sb.append(';');
-			}
-			return;
-		}
-
-		// Handle prolog rules.
-		if (functorString.equals(FUNCTOR_PROLOG_RULE)) {
-			List<Expression> args = expression.getArguments();
-			toRuleString(args.get(0), sb);
-			sb.append(' ');
-			toRuleString(args.get(1), sb);
-			if (args.size() == 3) {
-				sb.append(" :- ");
-				toRuleString(args.get(2), sb);
-			}
-			sb.append('.');
-			return;
-		}
-
-		// Handle minus expression.
-		if (functorString.equals("minus") && expression.getArguments().size() == 2) {
-			toRuleString(expression.get(0), sb);
-			sb.append(" minus ");
-			toRuleString(expression.get(1), sb);
-			return;
-		}
-
-		sb.append(expression.toString());
-	}
 
 
 }
