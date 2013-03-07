@@ -160,7 +160,6 @@ public class RuleConverter {
 	 * @throws ReservedWordException 
 	 */
 	public Pair<Expression, Model> parseModel (String name, String description, List<Expression> inputRules, Expression query) throws ReservedWordException {
-//		RulesConversionProcess context = new RulesConversionProcess();
 		List<Expression> potentialExpressions         = new ArrayList<Expression>();
 		List<Expression> sorts                        = new ArrayList<Expression>();
 		List<Expression> randomVariables              = new ArrayList<Expression>();
@@ -193,7 +192,6 @@ public class RuleConverter {
 				else {
 					randomVariableIndex.get(varName).add(rule.get(1).intValue());
 				}
-//				randomVariableNames.put(rule.get(0).toString(), rule);
 			}
 			else if (rule.getFunctor().equals(SortDeclaration.FUNCTOR_SORT_DECLARATION)) {
 				sortNames.add(rule.getArguments().get(0).toString());
@@ -239,32 +237,31 @@ public class RuleConverter {
 			}
 		}
 //		System.out.println("sort names: " + sortNames);
-//		System.out.println("var names: " + randomVariableNames.toString());
 //		System.out.println("var index: " + context.randomVariableIndex.toString());
 //		System.out.println("parfactors: " + context.parfactors.toString());
 //		System.out.println("random variables: " + context.randomVariables.toString());
 //		System.out.println("sorts: " + context.sorts.toString());
 
 		// Translate the functions.
-		System.out.println("Starting translation: " + potentialExpressions);
+//		System.out.println("Starting translation: " + potentialExpressions);
 		potentialExpressions = translateFunctions(potentialExpressions, randomVariableIndex);
-		System.out.println("After translating functions: \n" + potentialExpressions);
+//		System.out.println("After translating functions: \n" + potentialExpressions);
 
 		// Translate the quantifiers.
 		potentialExpressions = translateQuantifiers(potentialExpressions);
-		System.out.println("After translating quantifiers: \n" + potentialExpressions);
+//		System.out.println("After translating quantifiers: \n" + potentialExpressions);
 
 		// Extract the embedded constraints.
 		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = 
 				disembedConstraints(potentialExpressions);
-		System.out.println("After extracting constraints: \n" + potentialExpressionAndConstraintList);
+//		System.out.println("After extracting constraints: \n" + potentialExpressionAndConstraintList);
 
 		// Translate the potential expression/constraint pair into a parfactor.
 		potentialExpressions = new ArrayList<Expression>();
 		for (Pair<Expression, Expression> pair : potentialExpressionAndConstraintList) {
 			potentialExpressions.add(createParfactor(pair.first, pair.second));
 		}
-		System.out.println("Final parfactors: \n" + potentialExpressions);
+//		System.out.println("Final parfactors: \n" + potentialExpressions);
 		
 		// Create the model object output.
 		return new Pair<Expression, Model>(queryAtom, createModel(name, description, sorts, randomVariables, potentialExpressions));
