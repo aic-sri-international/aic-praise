@@ -866,6 +866,22 @@ public class RuleConverterTest {
 		expected = ruleParser.parse("sick(bob) = cold(mary) 0.3;");
 		assertEquals(expected, result);
 
+		input = lowParser.parse("if query(X = bob, Z) then 0.3 else 0.7");
+		queryAtom = lowParser.parse("query(X, Y)");
+		query = lowParser.parse("sick(X) = cold(Y)");
+		result = ruleConverter.queryResultToRule(input, queryAtom, query);
+		expected = ruleParser.parse("sick(X = bob) = cold(Z) 0.3;");
+		assertEquals(expected, result);
+
+		// Test a case where there is overlap between the query args in the input
+		// and the query atom's args.
+		input = lowParser.parse("if query(Y, X) then 0.3 else 0.7");
+		queryAtom = lowParser.parse("query(X, Y)");
+		query = lowParser.parse("sick(X) = cold(Y)");
+		result = ruleConverter.queryResultToRule(input, queryAtom, query);
+		expected = ruleParser.parse("sick(Y) = cold(X) 0.3;");
+		assertEquals(expected, result);
+
 	}
 
 	@Test

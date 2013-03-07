@@ -365,8 +365,49 @@ public class RuleConverter {
 				// used in the expression.
 				// If the number of args don't match, something goofy is going on and bail.
 				if (queryAtomArgs.size() == expressionArgs.size()) {
-					for (int ii = 0; ii < queryAtomArgs.size(); ii++) {
-						result = result.replaceAllOccurrences(queryAtomArgs.get(ii), expressionArgs.get(ii), rewritingProcess);
+					// First check if any of the arguments are the same.
+					boolean isDuplicate = false;
+					for (Expression queryArg : queryAtomArgs) {
+						for (Expression expressionArg : expressionArgs) {
+							if (queryArg.equals(expressionArg)) {
+								isDuplicate = true;
+								break;
+							}
+						}
+					}
+
+					if (!isDuplicate) {
+						// If there are no duplicates in the args, then we can do a simple replacement.
+						for (int ii = 0; ii < queryAtomArgs.size(); ii++) {
+							result = result.replaceAllOccurrences(
+									queryAtomArgs.get(ii), expressionArgs.get(ii), rewritingProcess);
+						}
+					}
+					else {
+						// If there are duplicates, then we need to do the replacement in two
+						// steps.  First, replace the args in the expression with a unique value, 
+						// then replace the unique values with the final replacement values.
+						List<Expression> uniques = new ArrayList<Expression>();
+						int uniqueCount = 0;
+						
+						// First, replace the args in the query equivalent expression with a unique
+						// variable.
+						for (Expression queryAtomArg : queryAtomArgs) {
+							Expression unique = Expressions.makeUniqueVariable(
+									"Unique" + uniqueCount, result, 
+									rewritingProcess);
+							uniqueCount++;
+							uniques.add(unique);
+							result = result.replaceAllOccurrences(
+									queryAtomArg, unique, rewritingProcess);
+						}
+
+						// Then replace the unique variables with the args from the query expression.
+						for (int ii = 0; ii < queryAtomArgs.size(); ii++) {
+							result = result.replaceAllOccurrences(
+									uniques.get(ii), expressionArgs.get(ii), rewritingProcess);
+						}
+						
 					}
 				}
 				return result;
@@ -625,51 +666,6 @@ public class RuleConverter {
 	}
 
 	/**
-	 * Creates a random variable declaration for the query atom.
-	 * @param queryAtom            The query atom expression in the form of "query(...)"
-	 * @param query                What the query atom is equivalent to.
-	 * @param randomVariables      The random variable declarations
-	 * @param randomVariableIndex  The index of random variable names and number of arguments they take.
-	 * @return  A random variable declaration for the query.
-	 */
-	public Expression createQueryDeclaration (Expression queryAtom, Expression query, 
-			List<Expression> randomVariables, Map<String, Set<Integer>> randomVariableIndex) {
-		Expression result = null;
-		List<Expression> resultArgs = new ArrayList<Expression>();
-
-		resultArgs.add(DefaultSymbol.createSymbol(QUERY_STRING));
-		resultArgs.add(DefaultSymbol.createSymbol(queryAtom.getArguments().size()));
-		
-		List<Expression> queryArgs = queryAtom.getArguments();
-		for (Expression queryArg : queryArgs) {
-			// For each free variable in the query, search through the query's equivalent
-			// for the same variable.  We need the name of the function the variable shows
-			// up in and the position of the variable in the function (or if it's equal to the
-			// return value of the function.)
-			SearchFunctionArgumentFunction searchFunction = 
-					new SearchFunctionArgumentFunction(queryArg, randomVariableIndex);
-			query.replaceFirstOccurrence(searchFunction, rewritingProcess);
-			if (searchFunction.randomVariableName == null) {
-				return null;
-			}
-			for (Expression randomVariable : randomVariables) {
-				// Once we know the function name and the argument position, we can look
-				// up the declaration for that function and look up the type for the argument.
-				if (randomVariable.get(0).equals(searchFunction.randomVariableName)) {
-					resultArgs.add(randomVariable.get(searchFunction.argumentIndex + 2));
-				}
-			}
-		}
-
-		resultArgs.add(DefaultSymbol.createSymbol("Boolean"));
-		if (resultArgs.size() == queryArgs.size() + 3) {
-			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
-		}
-
-		return result;
-	}
-
-	/**
 	 * Translates a potential expression to a rule expression.  Will replace any 
 	 * instances of "query" in the expression with its equivalent.
 	 * @param result     The potential expression to translate into a rule expression.
@@ -689,9 +685,6 @@ public class RuleConverter {
 			if (queryVariables.containsAll(queryAtomArgs)) {
 				ruleExpression = ruleExpression.replaceAllOccurrences(new ReplaceQueryFunction(queryAtom, query), rewritingProcess);
 			}
-			
-			
-			
 			
 		}
 		return ruleExpression;
@@ -758,6 +751,55 @@ public class RuleConverter {
 		StringBuffer sb = new StringBuffer();
 		toRuleString(expression, sb, true);
 		return sb.toString();
+	}
+
+
+	/*===================================================================================
+	 * PUBLIC METHODS FOR TESING ONLY
+	 *=================================================================================*/
+	/**
+	 * Creates a random variable declaration for the query atom.
+	 * @param queryAtom            The query atom expression in the form of "query(...)"
+	 * @param query                What the query atom is equivalent to.
+	 * @param randomVariables      The random variable declarations
+	 * @param randomVariableIndex  The index of random variable names and number of arguments they take.
+	 * @return  A random variable declaration for the query.
+	 */
+	public Expression createQueryDeclaration (Expression queryAtom, Expression query, 
+			List<Expression> randomVariables, Map<String, Set<Integer>> randomVariableIndex) {
+		Expression result = null;
+		List<Expression> resultArgs = new ArrayList<Expression>();
+
+		resultArgs.add(DefaultSymbol.createSymbol(QUERY_STRING));
+		resultArgs.add(DefaultSymbol.createSymbol(queryAtom.getArguments().size()));
+		
+		List<Expression> queryArgs = queryAtom.getArguments();
+		for (Expression queryArg : queryArgs) {
+			// For each free variable in the query, search through the query's equivalent
+			// for the same variable.  We need the name of the function the variable shows
+			// up in and the position of the variable in the function (or if it's equal to the
+			// return value of the function.)
+			SearchFunctionArgumentFunction searchFunction = 
+					new SearchFunctionArgumentFunction(queryArg, randomVariableIndex);
+			query.replaceFirstOccurrence(searchFunction, rewritingProcess);
+			if (searchFunction.randomVariableName == null) {
+				return null;
+			}
+			for (Expression randomVariable : randomVariables) {
+				// Once we know the function name and the argument position, we can look
+				// up the declaration for that function and look up the type for the argument.
+				if (randomVariable.get(0).equals(searchFunction.randomVariableName)) {
+					resultArgs.add(randomVariable.get(searchFunction.argumentIndex + 2));
+				}
+			}
+		}
+
+		resultArgs.add(DefaultSymbol.createSymbol("Boolean"));
+		if (resultArgs.size() == queryArgs.size() + 3) {
+			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
+		}
+
+		return result;
 	}
 
 	/**
