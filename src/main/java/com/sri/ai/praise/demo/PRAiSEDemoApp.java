@@ -53,6 +53,7 @@ import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JSplitPane;
 import java.awt.Dimension;
+
 import javax.swing.JTabbedPane;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -64,6 +65,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
  * 
@@ -333,6 +336,21 @@ public class PRAiSEDemoApp {
 		mntmExecuteQuery.setAction(controller.getExecuteQueryAction());
 		toolBar.btnExecuteQuery.setAction(controller.getExecuteQueryAction());
 		queryPanel.btnExecuteQuery.setAction(controller.getExecuteQueryAction());
+		controller.getExecuteQueryAction().addPropertyChangeListener(new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (controller.getExecuteQueryAction().isRunQueryState()) {
+					queryPanel.progressBar.setEnabled(false);
+					queryPanel.progressBar.setIndeterminate(false);
+				}
+				else {
+					queryPanel.progressBar.setEnabled(true);
+					queryPanel.progressBar.setIndeterminate(true);
+				}	
+			}
+		});
+		
 		// Clear Output
 		mntmClearOutput.setAction(controller.getClearOutputAction());
 		toolBar.btnClearOutput.setAction(controller.getClearOutputAction());

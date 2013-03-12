@@ -522,7 +522,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		return validateAction;
 	}
 	
-	public Action getExecuteQueryAction() {
+	public ExecuteQueryAction getExecuteQueryAction() {
 		if (null == executeQueryAction) {
 			executeQueryAction = new ExecuteQueryAction(this);
 		}

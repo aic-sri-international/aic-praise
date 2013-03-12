@@ -54,8 +54,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.MutableComboBoxModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.google.common.annotations.Beta;
 
@@ -69,11 +67,11 @@ public class QueryPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	JButton btnExecuteQuery;
+	JProgressBar progressBar;
 	//
 	private MutableComboBoxModel queryModel = new DefaultComboBoxModel();
 	//
 	private JComboBox queryComboBox;
-	private JProgressBar progressBar;
 
 	/**
 	 * Create the panel.
@@ -154,18 +152,6 @@ public class QueryPanel extends JPanel {
 		queryComboBox.setEditable(true);
 		
 		btnExecuteQuery = new JButton("");
-		btnExecuteQuery.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				if (btnExecuteQuery.isEnabled()) {
-					progressBar.setEnabled(false);
-					progressBar.setIndeterminate(false);
-				}
-				else {
-					progressBar.setEnabled(true);
-					progressBar.setIndeterminate(true);
-				}
-			}
-		});
 		panel.add(btnExecuteQuery);
 		btnExecuteQuery.setPreferredSize(new Dimension(40, 32));
 		btnExecuteQuery.setHideActionText(true);
