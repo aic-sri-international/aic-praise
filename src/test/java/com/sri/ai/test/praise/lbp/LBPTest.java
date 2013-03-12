@@ -4077,7 +4077,7 @@ public class LBPTest extends AbstractLPITest {
 		
 		// Note: old R_basic result
 		// Assert.assertEquals("if rich(X) then (1 + 2 ^ | People |) ^ | Treasure | / ((1 + 2 ^ | People |) ^ | Treasure | + 1) else 1 / ((1 + 2 ^ | People |) ^ | Treasure | + 1)", results.get(queryUUID1));
-		Assert.assertEquals("if rich(X) then 1 else 0.000000000000000000000000000000781198000", results.get(queryUUID1));
+		Assert.assertEquals("if rich(X) then 1 else 0.000000000000000000000000000000781198", results.get(queryUUID1));
 		// Note: old R_basic result
 		// Assert.assertEquals("if rich(bob) then (1 + 2 ^ | People |) ^ | Treasure | / ((1 + 2 ^ | People |) ^ | Treasure | + 1) else 1 / ((1 + 2 ^ | People |) ^ | Treasure | + 1)", results.get(queryUUID2));
 		Assert.assertEquals("if rich(bob) then (1 + 2 ^ | type(X) |) ^ | type(Z) | / ((1 + 2 ^ | type(X) |) ^ | type(Z) | + 1) else 1 / ((1 + 2 ^ | type(X) |) ^ | type(Z) | + 1)", results.get(queryUUID2));
