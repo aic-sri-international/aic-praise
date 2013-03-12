@@ -290,6 +290,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		private Map<String, Long> rewriterProfiledTimes = new LinkedHashMap<String, Long>();
 		private List<QueryError>  queryErrors           = new ArrayList<QueryError>();
 		private Throwable         cause                 = null;
+		private boolean           intentionallyStoped   = false;
 		//
 		private AppenderBase<ILoggingEvent> traceAppender         = null;
 		private AppenderBase<ILoggingEvent> justificationAppender = null;
@@ -339,6 +340,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 				}
 			}
 			if (process != null) {
+				intentionallyStoped = true;
 				process.interrupt();
 			}
 		}
@@ -449,8 +451,11 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 					}
 				}
 			} catch (Throwable t) {
-				queryErrors.add(new QueryError(TYPE.UNEXPECTED_PROCESSING_ERROR, t.getMessage()));
-				cause = t;
+				if (intentionallyStoped) {
+					addError(new QueryError(TYPE.QUERY_INTENTIONALLY_STOPPED, "Query Intentionally Stopped."), null);
+				} else {
+					addError(new QueryError(TYPE.UNEXPECTED_PROCESSING_ERROR, t.getMessage()), t);
+				}
 			}
 			
 			// Cleanup the Trace and Justification related to this query

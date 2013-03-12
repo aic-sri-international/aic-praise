@@ -409,7 +409,13 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							for (LBPQueryEngine.QueryError error : qe.getErrors()) {
 								app.outputPanel.addProblem(error.toString());
 							}
-							app.outputPanel.gotoProblemTab();
+							
+							if (qe.getErrors().size() == 1 && qe.getErrors().get(0).getErrorType() == LBPQueryEngine.QueryError.TYPE.QUERY_INTENTIONALLY_STOPPED) {
+								app.outputPanel.setResult("");
+							}
+							else {
+								app.outputPanel.gotoProblemTab();
+							}
 						} catch (RuntimeException re) {
 							if (!intentionallyInterrupted) {
 								error("Error processing inputs:\n"+re.getMessage());
