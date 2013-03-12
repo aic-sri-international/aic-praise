@@ -57,6 +57,7 @@ public class ImageLookup {
 	public static final ImageIcon REDO_LARGE            = createImageIcon("edit-redo32x32.png");
 	public static final ImageIcon VALIDATE_LARGE        = createImageIcon("document-properties32x32.png");
 	public static final ImageIcon EXECUTE_QUERY_LARGE   = createImageIcon("go-next32x32.png"); 
+	public static final ImageIcon STOP_QUERY_LARGE      = createImageIcon("process-stop22x22.png");
 	public static final ImageIcon CLEAR_LARGE           = createImageIcon("edit-clear32x32.png");
 	public static final ImageIcon NEW_WINDOW_LARGE      = createImageIcon("window-new32x32.png");
 	public static final ImageIcon PROCESS_WORKING_LARGE = createImageIcon("process-working32x32.png");
@@ -70,6 +71,7 @@ public class ImageLookup {
 	public static final ImageIcon REDO_SMALL            = createImageIcon("edit-redo22x22.png");
 	public static final ImageIcon VALIDATE_SMALL        = createImageIcon("document-properties22x22.png");
 	public static final ImageIcon EXECUTE_QUERY_SMALL   = createImageIcon("go-next22x22.png"); 
+	public static final ImageIcon STOP_QUERY_SMALL      = createImageIcon("process-stop22x22.png");
 	public static final ImageIcon CLEAR_SMALL           = createImageIcon("edit-clear22x22.png");
 	public static final ImageIcon NEW_WINDOW_SMALL      = createImageIcon("window-new22x22.png");
 	public static final ImageIcon PROCESS_WORKING_SMALL = createImageIcon("process-working22x22.png");

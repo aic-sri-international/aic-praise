@@ -109,7 +109,9 @@ import com.sri.ai.util.base.Pair;
 @Beta
 public class Controller {
 
-	private LBPQueryEngine queryEngine = LBPFactory.newLBPQueryEngine();
+	private LBPQueryEngine queryEngine              = LBPFactory.newLBPQueryEngine();
+	private String         activeQueryUUID          = null;
+	private boolean        intentionallyInterrupted = false;
 	//
 	private PRAiSEDemoApp app = null;
 	private RuleEditor activeEditor;
@@ -313,99 +315,113 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	public void executeQuery() {
-		if (validateInput(false)) {
-			executeQueryAction.setEnabled(false);
-			SwingWorker<String, Object> queryWorker = new SwingWorker<String, Object>() {
-				@Override
-				public String doInBackground() {
-					try {
-						printlnToConsole("ABOUT TO RUN QUERY: "+app.queryPanel.getCurrentQuery());
-						cleanupMemory();
-						
-						RuleConverter ruleConverter = new RuleConverter();
-		
-						Expression inputQuery = lowLevelParse(app.queryPanel.getCurrentQuery());
-						
-						Pair<Expression, Model> parseResult = ruleConverter
-								.parseModel("'Name'", "'Description'",
-										app.modelEditPanel.getText() + "\n"
-												+ app.evidenceEditPanel.getText(),
-										inputQuery.toString());
-		
-						Expression queryAtom = parseResult.first;
-						Model      model     = parseResult.second;
-						
-						String overridden = "";
-						if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
-							model = new Model(model, app.optionsPanel.chckbxKnownDomainSize.isSelected(), 
-											        new Integer(app.optionsPanel.domainSizeTextField.getText()));
-							overridden = " (Sort Sizes Overridden with Specified Options)";
-						}
-						
-						printlnToConsole("GENERATED MODEL DECLARATION" + overridden);
-						printlnToConsole("---------------------------");
-						printlnToConsole("SORTS=");
-						for (SortDeclaration sd : model.getSortDeclarations()) {
-							printlnToConsole(sd.getSortDeclaration().toString());
-						}
-						printlnToConsole("\nRANDOM VARIABLES=");
-						for (RandomVariableDeclaration rvd : model.getRandomVariableDeclarations()) {
-							printlnToConsole(rvd.getRandomVariableDeclaration().toString());
-						}
-						printlnToConsole("\nPARFACTORS=");
-						ParfactorsDeclaration pfd = model.getParfactorsDeclaration();
-						for (Expression parfactor : pfd.getParfactors()) {
-							printlnToConsole(parfactor.toString());
-						}
-						printlnToConsole("---------------------------");
-						
-						printlnToConsole("GENERATED QUERY=" + queryAtom);
-		
-						LBPQueryEngine.QueryOptions queryOptions = new LBPQueryEngine.QueryOptions();
-						// Assign the selected Options.
-						queryOptions.setBeliefPropagationUpdateSchedule(app.optionsPanel.getSelectedSchedule());
-						queryOptions.setJustificationsOn(app.optionsPanel.chckbxJustificationEnabled.isSelected());
-						queryOptions.setTraceOn(app.optionsPanel.chckbxTraceEnabled.isSelected());
-						queryOptions.setKnownDomainSizes(true); // By default.
-						if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
-							queryOptions.setKnownDomainSizes(app.optionsPanel.chckbxKnownDomainSize.isSelected());
-							GrinderConfiguration.setProperty(GrinderConfiguration.KEY_ASSUME_DOMAIN_ALWAYS_LARGE, ""+app.optionsPanel.chckbxAssumeDomainsAlwaysLarge.isSelected());
-						}					
-						String queryUUID = queryEngine.newQueryUUID(queryOptions);
-		
-						String belief = queryEngine.queryBeliefOfRandomVariable(
-								queryUUID, "belief([" + queryAtom + "])",
-								model.getModelDeclaration());
-		
-						printlnToConsole("BELIEF=\n" + belief);	
-						
-						Expression exprBelief = lowLevelParse(belief);
-						Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, inputQuery);
-		
-						printlnToConsole("RULE BELIEF=\n"+ruleBelief.toString());
-						
-						String translatedRule = ruleConverter.toRuleString(ruleBelief);
-						
-						app.outputPanel.setResult(translatedRule);
-						
-						cleanupMemory();
-					} catch (ReservedWordException rwe) {
-						error("Reserved word 'query' is used input Model or Evidence");
-					} catch (RuntimeException re) {
-						error("Error processing inputs:\n"+re.getMessage());
-						re.printStackTrace();
-					}
-					finally {
-						executeQueryAction.setEnabled(true);
-					}
-					
-					printlnToConsole("------");
-					
-					return "done";
-				}
-			};
+		if (executeQueryAction.isStopQueryState()) {
+			printlnToConsole("Canceling Query");
+			if (activeQueryUUID != null) {
+				intentionallyInterrupted = true;
+				queryEngine.stopQuery(activeQueryUUID);
+				activeQueryUUID = null;
+			}
+		}
+		else {
+			activeQueryUUID          = null;
+			intentionallyInterrupted = false;
+			if (validateInput(false)) {
+				executeQueryAction.setStopQueryState();
+				SwingWorker<String, Object> queryWorker = new SwingWorker<String, Object>() {
+					@Override
+					public String doInBackground() {
+						try {
+							printlnToConsole("ABOUT TO RUN QUERY: "+app.queryPanel.getCurrentQuery());
+							cleanupMemory();
+							
+							RuleConverter ruleConverter = new RuleConverter();
 			
-			queryWorker.execute();
+							Expression inputQuery = lowLevelParse(app.queryPanel.getCurrentQuery());
+							
+							Pair<Expression, Model> parseResult = ruleConverter
+									.parseModel("'Name'", "'Description'",
+											app.modelEditPanel.getText() + "\n"
+													+ app.evidenceEditPanel.getText(),
+											inputQuery.toString());
+			
+							Expression queryAtom = parseResult.first;
+							Model      model     = parseResult.second;
+							
+							String overridden = "";
+							if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
+								model = new Model(model, app.optionsPanel.chckbxKnownDomainSize.isSelected(), 
+												        new Integer(app.optionsPanel.domainSizeTextField.getText()));
+								overridden = " (Sort Sizes Overridden with Specified Options)";
+							}
+							
+							printlnToConsole("GENERATED MODEL DECLARATION" + overridden);
+							printlnToConsole("---------------------------");
+							printlnToConsole("SORTS=");
+							for (SortDeclaration sd : model.getSortDeclarations()) {
+								printlnToConsole(sd.getSortDeclaration().toString());
+							}
+							printlnToConsole("\nRANDOM VARIABLES=");
+							for (RandomVariableDeclaration rvd : model.getRandomVariableDeclarations()) {
+								printlnToConsole(rvd.getRandomVariableDeclaration().toString());
+							}
+							printlnToConsole("\nPARFACTORS=");
+							ParfactorsDeclaration pfd = model.getParfactorsDeclaration();
+							for (Expression parfactor : pfd.getParfactors()) {
+								printlnToConsole(parfactor.toString());
+							}
+							printlnToConsole("---------------------------");
+							
+							printlnToConsole("GENERATED QUERY=" + queryAtom);
+			
+							LBPQueryEngine.QueryOptions queryOptions = new LBPQueryEngine.QueryOptions();
+							// Assign the selected Options.
+							queryOptions.setBeliefPropagationUpdateSchedule(app.optionsPanel.getSelectedSchedule());
+							queryOptions.setJustificationsOn(app.optionsPanel.chckbxJustificationEnabled.isSelected());
+							queryOptions.setTraceOn(app.optionsPanel.chckbxTraceEnabled.isSelected());
+							queryOptions.setKnownDomainSizes(true); // By default.
+							if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
+								queryOptions.setKnownDomainSizes(app.optionsPanel.chckbxKnownDomainSize.isSelected());
+								GrinderConfiguration.setProperty(GrinderConfiguration.KEY_ASSUME_DOMAIN_ALWAYS_LARGE, ""+app.optionsPanel.chckbxAssumeDomainsAlwaysLarge.isSelected());
+							}					
+							activeQueryUUID = queryEngine.newQueryUUID(queryOptions);
+			
+							String belief = queryEngine.queryBeliefOfRandomVariable(
+									activeQueryUUID, "belief([" + queryAtom + "])",
+									model.getModelDeclaration());
+			
+							printlnToConsole("BELIEF=\n" + belief);	
+							
+							Expression exprBelief = lowLevelParse(belief);
+							Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, inputQuery);
+			
+							printlnToConsole("RULE BELIEF=\n"+ruleBelief.toString());
+							
+							String translatedRule = ruleConverter.toRuleString(ruleBelief);
+							
+							app.outputPanel.setResult(translatedRule);
+							
+							cleanupMemory();
+						} catch (ReservedWordException rwe) {
+							error("Reserved word 'query' is used input Model or Evidence");
+						} catch (RuntimeException re) {
+							if (!intentionallyInterrupted) {
+								error("Error processing inputs:\n"+re.getMessage());
+								re.printStackTrace();
+							}
+						}
+						finally {
+							executeQueryAction.setRunQueryState();
+						}
+						
+						printlnToConsole("------");
+						
+						return "done";
+					}
+				};
+				
+				queryWorker.execute();
+			}
 		}
 	}
 	

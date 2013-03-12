@@ -121,6 +121,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 	private List<TraceListener>         traceListeners         = new ArrayList<TraceListener>();
 	private List<JustificationListener> justificationListeners = new ArrayList<JustificationListener>();
 	private Map<String, QueryOptions>   openQueryUUIDs         = new HashMap<String, QueryOptions>(); 
+	private Map<String, RunLBPQuery>    activeQueries          = new HashMap<String, RunLBPQuery>();
 
 	public DefaultLBPQueryEngine() {
 	}
@@ -216,6 +217,19 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		return queryRun.getResultAsString();
 	}
 	
+	@Override
+	public boolean stopQuery(String queryUUID) {
+		boolean result = false;
+		
+		RunLBPQuery activeQuery = activeQueries.remove(queryUUID);
+		if (activeQuery != null) {
+			activeQuery.interrupt();
+			result = true;
+		}
+		
+		return result;
+	}
+	
 	// END-LBPQueryEngine
 	//
 	
@@ -235,7 +249,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		}
 		
 		RunLBPQuery query  = new RunLBPQuery(queryUUID, options, beliefQuery, modelDeclaration, evidenceDeclaration);
-		
+		activeQueries.put(queryUUID, query);
 		try {
 			Thread queryThread = new Thread(query);
 			PRAiSEConfiguration.inheritConfiguration(Thread.currentThread(), queryThread);
@@ -246,6 +260,9 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 			queryThread.join();
 		} catch (InterruptedException ie) {
 			query.addError(new QueryError(TYPE.UNEXPECTED_PROCESSING_ERROR, "Query Thread Interruped"), ie);
+		} 
+		finally {
+			activeQueries.remove(queryUUID);
 		}
 		
 		if (query.getQueryErrors().size() > 0) {
@@ -309,6 +326,23 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 			return cause;
 		}
 		
+		public void interrupt() {
+			while (process == null) {
+				if (queryErrors.size() > 0) {
+					break;
+				}
+				try {
+					Thread.sleep(100);
+				} 
+				catch (InterruptedException ie) {
+					// ignore
+				}
+			}
+			if (process != null) {
+				process.interrupt();
+			}
+		}
+		
 		@Override 
 		public void run() {			
 			// Setup the options for this query.
@@ -361,54 +395,58 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 					}
 					notifyListenersQueryStepComplete(queryUUID, STEP_4, stopWatch);
 					
-					// Step 5 extend model with evidence
-					notifyListenersQueryStepStarting(queryUUID, STEP_5, stopWatch);
-					if (evidenceDeclaration != null) {
-						try {
-							Expression            evidenceDefinition = parser.parse(evidenceDeclaration);
-							ParfactorsDeclaration evidenceParfactors = new ParfactorsDeclaration(evidenceDefinition);
-							if (ParfactorsDeclaration.isEvidenceOnly(evidenceParfactors, process)) {
-								List<Expression> extendedParfactors = new ArrayList<Expression>();
-								extendedParfactors.addAll(model.getParfactorsDeclaration().getParfactors());
-								extendedParfactors.addAll(evidenceParfactors.getParfactors());
-								
-								ParfactorsDeclaration extendedParfactorsDeclaration = 
-										ParfactorsDeclaration.makeParfactorsDeclaration(extendedParfactors.toArray(new Expression[extendedParfactors.size()]));
-								
-								// Extend the model
-								model = Model.constructFromParts(model.getName(), 
-										model.getDescription(), 
-										model.getSortDeclarations(), 
-										model.getRandomVariableDeclarations(), 
-										extendedParfactorsDeclaration, 
-										model.getKnownRandomVariableNames());
-								// Update the model associated to the process to be the extended version.
-								Model.setRewritingProcessesModel(model.getModelDefinition(), model.getKnownRandomVariableNames(), process);
-							} 
-							else {
-								queryErrors.add(new QueryError(TYPE.INVALID_EVIDENCE_DECLARATION,"Evidence Declaration does not contain only extensionally defined factors."));
+					if (queryErrors.size() == 0) {
+						// Step 5 extend model with evidence
+						notifyListenersQueryStepStarting(queryUUID, STEP_5, stopWatch);
+						if (evidenceDeclaration != null) {
+							try {
+								Expression            evidenceDefinition = parser.parse(evidenceDeclaration);
+								ParfactorsDeclaration evidenceParfactors = new ParfactorsDeclaration(evidenceDefinition);
+								if (ParfactorsDeclaration.isEvidenceOnly(evidenceParfactors, process)) {
+									List<Expression> extendedParfactors = new ArrayList<Expression>();
+									extendedParfactors.addAll(model.getParfactorsDeclaration().getParfactors());
+									extendedParfactors.addAll(evidenceParfactors.getParfactors());
+									
+									ParfactorsDeclaration extendedParfactorsDeclaration = 
+											ParfactorsDeclaration.makeParfactorsDeclaration(extendedParfactors.toArray(new Expression[extendedParfactors.size()]));
+									
+									// Extend the model
+									model = Model.constructFromParts(model.getName(), 
+											model.getDescription(), 
+											model.getSortDeclarations(), 
+											model.getRandomVariableDeclarations(), 
+											extendedParfactorsDeclaration, 
+											model.getKnownRandomVariableNames());
+									// Update the model associated to the process to be the extended version.
+									Model.setRewritingProcessesModel(model.getModelDefinition(), model.getKnownRandomVariableNames(), process);
+								} 
+								else {
+									queryErrors.add(new QueryError(TYPE.INVALID_EVIDENCE_DECLARATION,"Evidence Declaration does not contain only extensionally defined factors."));
+								}
+							} catch (IllegalArgumentException iae) {
+								queryErrors.add(new QueryError(TYPE.INVALID_EVIDENCE_DECLARATION, iae.getMessage()));
+							} catch (ModelException mex) {
+								queryErrors.add(new QueryError(TYPE.INVALID_EVIDENCE_DECLARATION, mex.getMessage()));
 							}
-						} catch (IllegalArgumentException iae) {
-							queryErrors.add(new QueryError(TYPE.INVALID_EVIDENCE_DECLARATION, iae.getMessage()));
-						} catch (ModelException mex) {
-							queryErrors.add(new QueryError(TYPE.INVALID_EVIDENCE_DECLARATION, mex.getMessage()));
+						}
+						notifyListenersQueryStepComplete(queryUUID, STEP_5, stopWatch);
+						
+						if (queryErrors.size() == 0) {
+							// Step 6 create new Belief expression from 1 and 2
+							notifyListenersQueryStepStarting(queryUUID, STEP_6, stopWatch);
+							// Extend the process by any logical variables in the query.
+							process = GrinderUtil.extendContextualVariables(queryExp, process);
+							Expression belief = process.rewrite(LBPRewriter.R_belief, queryExp);
+							notifyListenersQueryStepComplete(queryUUID, STEP_6, stopWatch, rewriterProfiledTimes);
+							
+							// Step 7 set precision on result of step 6
+							notifyListenersQueryStepStarting(queryUUID, STEP_7, stopWatch);
+							resultAsExpression = Expressions.roundToAGivenPrecision(belief, 
+									PRAiSEConfiguration.getLBPQueryEngineRoundResultTo());
+							resultAsString = resultAsExpression.toString();
+							notifyListenersQueryStepComplete(queryUUID, STEP_7, stopWatch);
 						}
 					}
-					notifyListenersQueryStepComplete(queryUUID, STEP_5, stopWatch);
-					
-					// Step 6 create new Belief expression from 1 and 2
-					notifyListenersQueryStepStarting(queryUUID, STEP_6, stopWatch);
-					// Extend the process by any logical variables in the query.
-					process = GrinderUtil.extendContextualVariables(queryExp, process);
-					Expression belief = process.rewrite(LBPRewriter.R_belief, queryExp);
-					notifyListenersQueryStepComplete(queryUUID, STEP_6, stopWatch, rewriterProfiledTimes);
-					
-					// Step 7 set precision on result of step 6
-					notifyListenersQueryStepStarting(queryUUID, STEP_7, stopWatch);
-					resultAsExpression = Expressions.roundToAGivenPrecision(belief, 
-							PRAiSEConfiguration.getLBPQueryEngineRoundResultTo());
-					resultAsString = resultAsExpression.toString();
-					notifyListenersQueryStepComplete(queryUUID, STEP_7, stopWatch);
 				}
 			} catch (Throwable t) {
 				queryErrors.add(new QueryError(TYPE.UNEXPECTED_PROCESSING_ERROR, t.getMessage()));

@@ -434,4 +434,14 @@ public interface LBPQueryEngine {
 	 */
 	String queryBeliefOfRandomVariable(String queryUUID, String beliefQuery,
 			String modelDeclaration, String evidenceDeclaration);
+	
+	/**
+	 * Stop a specified query.
+	 * 
+	 * @param queryUUID
+	 *            a queryUUID that must be currently in use by one of the
+	 *            query...() methods.
+	 * @return true if the query was stopped successfully, false otherwise.
+	 */
+	boolean stopQuery(String queryUUID);
 }

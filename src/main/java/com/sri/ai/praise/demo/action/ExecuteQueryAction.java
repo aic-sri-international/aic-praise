@@ -56,21 +56,44 @@ import com.sri.ai.praise.demo.ImageLookup;
 @Beta
 public class ExecuteQueryAction extends AbstractAction {
 	private static final long serialVersionUID = 1L;
+	
+	private static final String RUN_QUERY  = "Execute Query";
+	private static final String STOP_QUERY = "Stop Query";
 
 	private Controller controller = null;
 	
 	public ExecuteQueryAction(Controller controller) {
 		this.controller = controller;
-		putValue(Action.NAME, "Execute Query");
-		putValue(Action.SHORT_DESCRIPTION, "Execute Query");
-		putValue(Action.LARGE_ICON_KEY, ImageLookup.EXECUTE_QUERY_LARGE);
-		putValue(Action.SMALL_ICON, ImageLookup.EXECUTE_QUERY_SMALL);
+	
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);	
 		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F11, ActionEvent.CTRL_MASK));
+		setRunQueryState();
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent ae) {
 		controller.executeQuery();
+	}
+	
+	public boolean isRunQueryState() {
+		return getValue(Action.NAME).equals(RUN_QUERY);
+	}
+	
+	public void setRunQueryState() {
+		putValue(Action.NAME, RUN_QUERY);
+		putValue(Action.SHORT_DESCRIPTION, RUN_QUERY);
+		putValue(Action.LARGE_ICON_KEY, ImageLookup.EXECUTE_QUERY_LARGE);
+		putValue(Action.SMALL_ICON, ImageLookup.EXECUTE_QUERY_SMALL);
+	}
+	
+	public boolean isStopQueryState() {
+		return getValue(Action.NAME).equals(STOP_QUERY);
+	}
+	
+	public void setStopQueryState() {
+		putValue(Action.NAME, STOP_QUERY);
+		putValue(Action.SHORT_DESCRIPTION, STOP_QUERY);
+		putValue(Action.LARGE_ICON_KEY, ImageLookup.STOP_QUERY_LARGE);
+		putValue(Action.SMALL_ICON, ImageLookup.STOP_QUERY_SMALL);
 	}
 }
