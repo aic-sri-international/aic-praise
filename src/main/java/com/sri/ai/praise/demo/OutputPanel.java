@@ -53,6 +53,7 @@ import org.slf4j.Marker;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.brewer.core.DefaultWriter;
+import com.sri.ai.grinder.ui.BaseTreeUtilAppender;
 import com.sri.ai.grinder.ui.ExpressionNode;
 import com.sri.ai.grinder.ui.ExpressionTreeView;
 import com.sri.ai.grinder.ui.TreeUtil;
@@ -164,7 +165,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 					traceCurrentIndentLevel--;
 				}
 				
-				if (formattedMsg != null && !formattedMsg.equals("")) {
+				if (formattedMsg != null && !formattedMsg.equals("") && BaseTreeUtilAppender.outputFormattedMessage(formattedMsg, args)) {
 					addTrace(consoleLine.toString());
 				}
 		
@@ -203,7 +204,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 					justificationCurrentIndentLevel--;
 				}
 				
-				if (formattedMsg != null && !formattedMsg.equals("")) {
+				if (formattedMsg != null && !formattedMsg.equals("") && BaseTreeUtilAppender.outputFormattedMessage(formattedMsg, args)) {
 					addJustification(consoleLine.toString());
 				}
 		
