@@ -442,7 +442,7 @@ public class RuleConverter {
 		}
 		modelArgs.add(Expressions.apply("parfactors", potentialExpressions));
 		Expression modelExpression = Expressions.apply("model", modelArgs);
-		System.out.println("The model: " + modelExpression);
+//		System.out.println("The model: " + modelExpression);
 
 		return new Model(modelExpression, randomVariableNames);
 	}

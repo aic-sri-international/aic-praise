@@ -147,6 +147,11 @@ public interface LBPQueryEngine {
 		public String getDescription() {
 			return description;
 		}
+		
+		@Override
+		public String toString() {
+			return errorType.name() + ": " + description;
+		}
 	}
 
 	/**

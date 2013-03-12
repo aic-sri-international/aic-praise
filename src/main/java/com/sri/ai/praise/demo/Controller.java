@@ -403,7 +403,13 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							
 							cleanupMemory();
 						} catch (ReservedWordException rwe) {
-							error("Reserved word 'query' is used input Model or Evidence");
+							app.outputPanel.addProblem("ERROR: Reserved word 'query' is used in input Model or Evidence");
+							app.outputPanel.gotoProblemTab();
+						} catch (LBPQueryEngine.QueryException qe) {
+							for (LBPQueryEngine.QueryError error : qe.getErrors()) {
+								app.outputPanel.addProblem(error.toString());
+							}
+							app.outputPanel.gotoProblemTab();
 						} catch (RuntimeException re) {
 							if (!intentionallyInterrupted) {
 								error("Error processing inputs:\n"+re.getMessage());
