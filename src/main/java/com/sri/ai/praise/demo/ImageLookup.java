@@ -57,7 +57,7 @@ public class ImageLookup {
 	public static final ImageIcon REDO_LARGE            = createImageIcon("edit-redo32x32.png");
 	public static final ImageIcon VALIDATE_LARGE        = createImageIcon("document-properties32x32.png");
 	public static final ImageIcon EXECUTE_QUERY_LARGE   = createImageIcon("go-next32x32.png"); 
-	public static final ImageIcon STOP_QUERY_LARGE      = createImageIcon("process-stop22x22.png");
+	public static final ImageIcon STOP_QUERY_LARGE      = createImageIcon("process-stop32x32.png");
 	public static final ImageIcon CLEAR_LARGE           = createImageIcon("edit-clear32x32.png");
 	public static final ImageIcon NEW_WINDOW_LARGE      = createImageIcon("window-new32x32.png");
 	public static final ImageIcon PROCESS_WORKING_LARGE = createImageIcon("process-working32x32.png");

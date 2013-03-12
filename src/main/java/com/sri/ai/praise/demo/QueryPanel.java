@@ -147,13 +147,14 @@ public class QueryPanel extends JPanel {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		
 		queryComboBox = new JComboBox(queryModel);
+		queryComboBox.setFont(new Font("Dialog", Font.PLAIN, 14));
 		panel.add(queryComboBox);
 		queryComboBox.setPreferredSize(new Dimension(250, 25));
 		queryComboBox.setEditable(true);
 		
 		btnExecuteQuery = new JButton("");
 		panel.add(btnExecuteQuery);
-		btnExecuteQuery.setPreferredSize(new Dimension(40, 32));
+		btnExecuteQuery.setPreferredSize(new Dimension(40, 40));
 		btnExecuteQuery.setHideActionText(true);
 		btnExecuteQuery.setIcon(ImageLookup.EXECUTE_QUERY_LARGE);
 		btnExecuteQuery.setToolTipText("Execute Query");
