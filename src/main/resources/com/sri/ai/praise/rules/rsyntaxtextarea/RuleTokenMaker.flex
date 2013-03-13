@@ -2,7 +2,7 @@
  * RuleTokenMaker.java - Token maker for the PRAISE rule language.
  * 
  * To generate this file, run:
- *     jflex RuleTokenMaker.flex
+ *     jflex /src/main/resources/com/sri/ai/praise/rules/rsyntaxtextarea/RuleTokenMaker.flex
  * 
  * Then delete the generated versions of yyreset(Reader) and zzRefill() so
  * that we use the versions defined in this file.  This will eliminate 
