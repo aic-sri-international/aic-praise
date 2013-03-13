@@ -91,7 +91,11 @@
 			<version>${antlr.version}</version>
 			<scope>compile</scope>
 		</dependency>
-		<!-- Testing Dependencies -->
+		<dependency>
+			<groupId>com.fifesoft</groupId>
+			<artifactId>rsyntaxtextarea</artifactId>
+			<version>2.0.6</version>
+		</dependency>		<!-- Testing Dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
