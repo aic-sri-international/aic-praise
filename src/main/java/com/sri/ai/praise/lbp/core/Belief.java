@@ -171,13 +171,13 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression factorIndex = Expressions.makeUniqueVariable("F", randomVariable, process);
 
 		if (Justification.isEnabled()) {
-			Justification.begin(Expressions.apply(LPIUtil.FUNCTOR_BELIEF, randomVariable, Model.getModelDefinition(process)));
+			Justification.current(Expressions.apply(LPIUtil.FUNCTOR_BELIEF, randomVariable, Model.getModelDefinition(process)));
 
-			Justification.beginStepWithJustification("lifted belief propagation");
+			Justification.beginStep("lifted belief propagation");
 
-			Justification.begin(belief); // detailed justification
+			Justification.current(belief); // detailed justification
 
-			Justification.beginStepWithJustification("definition of belief");
+			Justification.beginStep("definition of belief");
 
 			Expression expandedBelief =
 					Expressions.apply(
@@ -188,11 +188,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 									Expressions.apply(LPIUtil.FUNCTOR_MSG_TO_FROM, randomVariable, factorIndex),
 									Expressions.TRUE));
 
-			Justification.endStepWithResult(expandedBelief);
+			Justification.endStep(expandedBelief);
 		}
 
 		// R_neigh_v(Neigh(V))
-		Justification.beginStepWithJustification("neighbors of random variable");
+		Justification.beginStep("neighbors of random variable");
 
 		Expression neighV          = Expressions.make(LPIUtil.FUNCTOR_NEIGHBOR, randomVariable);
 		Expression rewriteOfNeighV = process.rewrite(R_neigh_v, neighV);
@@ -201,16 +201,16 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression product = LPIUtil.makeProductOfMessages(factorIndex, rewriteOfNeighV, msgToV_F, Expressions.TRUE);
 
 		if (Justification.isEnabled()) {
-			Justification.endStepWithResult(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, product));
+			Justification.endStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, product));
 		}
 
 		// R_prod_factor(prod_F in R_neigh_v(Neigh(V)) m_V<-F)
-		Justification.beginStepWithJustification("product of messages over factors");
+		Justification.beginStep("product of messages over factors");
 
 		Expression beliefExpansion = process.rewrite(R_prod_factor, LPIUtil.argForProductFactorRewriteCall(product, beingComputed));
 
 		if (Justification.isEnabled()) {
-			Justification.endStepWithResult(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
+			Justification.endStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
 		}
 		
 		Trace.log("belief_expansion <- R_complete_simplify(belief_expansion)");
@@ -218,12 +218,12 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	
 		Expression result = null;
 		if (!LPIUtil.containsPreviousMessageExpressions(beliefExpansion)) {
-			Trace.log("if belief_expansion does not contain `previous message' expressions");
+			Trace.log("if belief_expansion does not contain 'previous message' expressions");
 			Trace.log("    return R_normalize(V, belief_expansion)");
 			
-			Justification.beginStepWithJustification("normalization");
+			Justification.beginStep("normalization");
 			Expression normalizedBeliefExpansion = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefExpansion));
-			Justification.endStepWithResult(normalizedBeliefExpansion);
+			Justification.endStep(normalizedBeliefExpansion);
 			
 			result = normalizedBeliefExpansion;
 		} 
@@ -287,17 +287,14 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			
 			Trace.log("return R_normalize(V, belief_value)");
 			
-			Justification.beginStepWithJustification("normalization");
+			Justification.beginStep("normalization");
 			Expression normalizedBeliefValue = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefValue));
-			Justification.endStepWithResult(normalizedBeliefValue);
+			Justification.endStep(normalizedBeliefValue);
 			
 			result = normalizedBeliefValue;
 		}
 		
-		
-		Justification.end(); // end of detailed justification
-		Justification.endStepWithResult(result);
-		Justification.end(); // end of top-level justification
+		Justification.endStep(result);
 		
 		return result;
 	}

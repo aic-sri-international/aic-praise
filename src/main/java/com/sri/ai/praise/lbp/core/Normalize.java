@@ -90,7 +90,7 @@ public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRew
 		Expression result = null;
 
 		if (Justification.isEnabled()) {
-			Justification.begin(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, expressionE));
+			Justification.current(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, expressionE));
 		}
 
 		if (IfThenElse.isIfThenElse(expressionE)) {
@@ -104,14 +104,14 @@ public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRew
 				Trace.log("Externalizing conditional");
 
 				if (Justification.isEnabled()) {
-					Justification.beginStepWithJustification("externalization of conditional");
+					Justification.beginStep("externalization of conditional");
 					Expression externalized = IfThenElse.make(condition,
 							Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, thenBranch),
 							Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, elseBranch));
-					Justification.endStepWithResult(externalized);
+					Justification.endStep(externalized);
 				}
 
-				Justification.beginStepWithJustification("solving internal normalizations");
+				Justification.beginStep("solving internal normalizations");
 				result = GrinderUtil.branchAndMergeOnACondition(
 						condition,
 						newNormalize(), new Expression[] { randomVariable, thenBranch },
@@ -131,13 +131,13 @@ public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRew
 			else if (thenBranch.equals(Expressions.ZERO)) {
 				Trace.log("    if Alpha = 0");
 				Trace.log("        return if v then 0 else 1");
-				Justification.beginStepWithJustification("deterministic message because of 0 in then branch");
+				Justification.beginStep("deterministic message because of 0 in then branch");
 				result = IfThenElse.make(condition, Expressions.ZERO, Expressions.ONE);
 			} 
 			else if (elseBranch.equals(Expressions.ZERO)) {
 				Trace.log("    if Beta = 0");
 				Trace.log("        return if v then 1 else 0");
-				Justification.beginStepWithJustification("deterministic message because of 0 in else branch");
+				Justification.beginStep("deterministic message because of 0 in else branch");
 				result = IfThenElse.make(condition, Expressions.ONE, Expressions.ZERO);
 			} 
 			else {
@@ -145,7 +145,7 @@ public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRew
 				Expression partitionZ = process.rewrite(R_basic, Expressions.apply(FunctorConstants.PLUS, thenBranch, elseBranch));
 
 				Trace.log("    return if v then R_basic(Alpha/Z) else R_basic(Beta/Z)");
-				Justification.beginStepWithJustification("apply partition function to each branch");
+				Justification.beginStep("apply partition function to each branch");
 				
 				BranchRewriteTask[] taskRewriters = new BranchRewriteTask[] {
 					new BranchRewriteTask(newPartition(), new Expression[] {thenBranch, partitionZ}),
@@ -164,14 +164,12 @@ public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRew
 			Trace.log("otherewise // not a conditional on v");
 			Trace.log("    return 0.5");
 			Justification
-					.beginStepWithJustification("normalization of a constant");
+					.beginStep("normalization of a constant");
 			result = DefaultSymbol.createSymbol(0.5);
 		}
 
-		
-		Justification.endStepWithResult(result);
-		Justification.end();
-		
+		Justification.endStep(result);
+
 		return result;
 	}
 	

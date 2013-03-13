@@ -118,11 +118,11 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 				new SimplifyTestData(Expressions.TRUE.toString(), 
 						new TrivialPQBothArity2(), 
 						"[p(a, X)] = [p(Y, b)]", 
-						"a = Y and X = b"),
+						"Y = a and X = b"),
 				new SimplifyTestData(Expressions.TRUE.toString(), 
 						new TrivialPQBothArity2(), 
 						"[p(a, X)] != [p(Y, b)]", 
-						"a != Y or X != b"),
+						"Y != a or X != b"),
 				new SimplifyTestData(Expressions.TRUE.toString(), 
 						new TrivialPQBothArity2(), 
 						"[if p(X, Y) then 0.5 else 0.1] = [if p(Y, Z) then 0.5 else 0.1]", 
@@ -205,7 +205,7 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 				new SimplifyTestData(Expressions.TRUE.toString(), 
 						new TrivialPQR(),
 						"(X, 2) = (1, Y)",
-						"X = 1 and 2 = Y"),
+						"X = 1 and Y = 2"),
 				//
 				new SimplifyTestData(Expressions.TRUE.toString(), 
 						new TrivialPQR(),
@@ -220,7 +220,7 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 				new SimplifyTestData(Expressions.TRUE.toString(), 
 						new TrivialPQR(),
 						"{{ ( on X, Y ) ([ if p(b) and q(X, Y) and r then 1 else 0 ]) | X != a }} union {{ ( on X, Y ) ([ if p(X) or p(Y) then 1 else 0 ]) | [ p(b) ] = [ p(X) ] or [ p(b) ] = [ p(Y) ] }}",
-						"{{ ( on X, Y ) ([ if p(b) and q(X, Y) and r then 1 else 0 ]) | X != a }} union {{ ( on X, Y ) ([ if p(X) or p(Y) then 1 else 0 ]) | b = X or b = Y }}"),
+						"{{ ( on X, Y ) ([ if p(b) and q(X, Y) and r then 1 else 0 ]) | X != a }} union {{ ( on X, Y ) ([ if p(X) or p(Y) then 1 else 0 ]) | X = b or Y = b }}"),
 				new SimplifyTestData(Expressions.TRUE.toString(), 
 						new TrivialPQR(),
 						"[if p(X) then 0.1 else 0.2] = [if p(X) then 0.1 else 0.2]",
@@ -242,15 +242,15 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 						"if [ p(a1) ] = [ p(X) ] then 2 ^ |People| else 3 ^ |People| ",
 						// Note: old result before CardinalityTypeOfLogicalVariable added support for looking up logical variables
 						// representing the size of a domain.
-						//"if a1 = X then 2 ^ |People| else 3 ^ |People|",
-						"if a1 = X then 1267650600228229401496703205376 else 515377520732011331036461129765621272702107522001"),
+						//"if X = a1 then 2 ^ |People| else 3 ^ |People|",
+						"if X = a1 then 1267650600228229401496703205376 else 515377520732011331036461129765621272702107522001"),
 			    new SimplifyTestData(Expressions.TRUE.toString(), 
 			    		new TrivialPQR(),
 			    		"(if [ p(a1) ] = [ p(X) ] then 2 else 3) ^ |People|",
 						// Note: old result before CardinalityTypeOfLogicalVariable added support for looking up logical variables
 						// representing the size of a domain.
-			    		//"if a1 = X then 2 ^ |People| else 3 ^ |People|".
-			    		"if a1 = X then 1267650600228229401496703205376 else 515377520732011331036461129765621272702107522001"),
+			    		//"if X = a1 then 2 ^ |People| else 3 ^ |People|".
+			    		"if X = a1 then 1267650600228229401496703205376 else 515377520732011331036461129765621272702107522001"),
 				//
 				// Test: Type Rewriter capability
 				new SimplifyTestData(Expressions.TRUE.toString(),  // Should not be rewritten
@@ -321,11 +321,11 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 						new TrivialPQR(),
 						"if [ p(a1) ] = [ p(X) ] and q(X) then 2 ^ |People| else 3 ^ |People| ",
 						// Note: assigning variables to their contextual values is no longer part of simplification
-						// "if a1 = X then if q(a1) then 2 ^ |People| else 3 ^ |People| else 3 ^ |People|"
+						// "if X = a1 then if q(a1) then 2 ^ |People| else 3 ^ |People| else 3 ^ |People|"
 						// Note: old result before CardinalityTypeOfLogicalVariable added support for looking up logical variables
 						// representing the size of a domain.
-						//"if a1 = X then if q(X) then 2 ^ |People| else 3 ^ |People| else 3 ^ |People|"
-						"if a1 = X then if q(a1) then 1267650600228229401496703205376 else 515377520732011331036461129765621272702107522001 else 515377520732011331036461129765621272702107522001"),
+						//"if X = a1 then if q(X) then 2 ^ |People| else 3 ^ |People| else 3 ^ |People|"
+						"if X = a1 then if q(a1) then 1267650600228229401496703205376 else 515377520732011331036461129765621272702107522001 else 515377520732011331036461129765621272702107522001"),
 				new SimplifyTestData(Expressions.TRUE.toString(), 
 						new TrivialPQR(),
 						"if X = a and Y = b and p(X) and q(X, Y) then E1 else E2",
@@ -344,14 +344,14 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 				new SimplifyTestData(Expressions.TRUE.toString(), 
 						new TrivialLoopyPQandb(),
 						"(if if b = X then false else p(b) then product({{ ( on X', Y ) (('lambda . : .'(q(X', Y), previous message to [ if p(b) and q(X', Y) then 2 else 1 ] from [ q(X', Y) ]))(false) + 2 * ('lambda . : .'(q(X', Y), previous message to [ if p(b) and q(X', Y) then 2 else 1 ] from [ q(X', Y) ]))(true)) | X' != a and X = b }}) else product({{ ( on X', Y ) (('lambda . : .'(q(X', Y), previous message to [ if p(b) and q(X', Y) then 2 else 1 ] from [ q(X', Y) ]))(false) + ('lambda . : .'(q(X', Y), previous message to [ if p(b) and q(X', Y) then 2 else 1 ] from [ q(X', Y) ]))(true)) | X' != a and X = b }})) ",
-						"if b = X then product({{ ( on X', Y ) (('lambda . : .'(q(X', Y), previous message to [ if p(b) and q(X', Y) then 2 else 1 ] from [ q(X', Y) ]))(false) + ('lambda . : .'(q(X', Y), previous message to [ if p(b) and q(X', Y) then 2 else 1 ] from [ q(X', Y) ]))(true)) | X' != a }}) else 1"),
+						"if X = b then product({{ ( on X', Y ) (('lambda . : .'(q(X', Y), previous message to [ if p(b) and q(X', Y) then 2 else 1 ] from [ q(X', Y) ]))(false) + ('lambda . : .'(q(X', Y), previous message to [ if p(b) and q(X', Y) then 2 else 1 ] from [ q(X', Y) ]))(true)) | X' != a }}) else 1"),
 //
 // Note: these kinds of simplifications (i.e. cardinality on extensional sets) are currently
 // not to be supported by R_simplify.
 //				new SimplifyTestData(Expressions.TRUE.toString(), 
 //						new TrivialPQRWithPriors(),
 //						"(if p(b) and q(X', Y) then if [ p(b) ] = [ p(X) ] then 2 else 4 else 0) ^ | {{ ( on X', Y ) E | X' != a and X = b }} |",
-//					    "if b = X then if p(b) and q(X', Y) then 2 ^ (| type(Y) | * | type(X') - { a } |) else 0 ^ (| type(Y) | * | type(X') - { a } |) else 1"),
+//					    "if X = b then if p(b) and q(X', Y) then 2 ^ (| type(Y) | * | type(X') - { a } |) else 0 ^ (| type(Y) | * | type(X') - { a } |) else 1"),
 		};
 		perform(tests);
 

@@ -102,7 +102,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Expression set2 = expression.get(1);
 		
 		if (Justification.isEnabled()) {
-			Justification.begin(Expressions.apply(FunctorConstants.SET_DIFFERENCE, set1, set2));
+			Justification.current(Expressions.apply(FunctorConstants.SET_DIFFERENCE, set1, set2));
 		}
 		
 		Expression result = null;
@@ -208,8 +208,6 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			throw new IllegalArgumentException("Arguments set1 and set2 do not conform to expected types");
 		}
 
-		Justification.end();
-		
 		return result;
 	}
 
@@ -302,24 +300,24 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Expression thenBranch = IfThenElse.getThenBranch(set1);
 		Expression elseBranch = IfThenElse.getElseBranch(set1);
 
-		Justification.beginStepWithJustification("externalizing conditional");
+		Justification.beginStep("externalizing conditional");
 		if (Justification.isEnabled()) {
 			Expression currentExpression =
 				IfThenElse.make(
 						condition,
 						Expressions.apply(FunctorConstants.SET_DIFFERENCE, thenBranch, set2),
 						Expressions.apply(FunctorConstants.SET_DIFFERENCE, elseBranch, set2));
-			Justification.endStepWithResult(currentExpression);
+			Justification.endStep(currentExpression);
 		}
 		
-		Justification.beginStepWithJustification("solving set differences in then and else branches");
+		Justification.beginStep("solving set differences in then and else branches");
 		Expression result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
 				newCallSetDifferenceRewrite(), new Expression[] { thenBranch, set2 },
 				newCallSetDifferenceRewrite(), new Expression[] { elseBranch, set2 },
 				R_check_branch_reachable, 
 				R_basic, process);
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}
@@ -332,24 +330,24 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Expression thenBranch = IfThenElse.getThenBranch(set2);
 		Expression elseBranch = IfThenElse.getElseBranch(set2);
 
-		Justification.beginStepWithJustification("externalizing conditional");
+		Justification.beginStep("externalizing conditional");
 		if (Justification.isEnabled()) {
 			Expression currentExpression =
 				IfThenElse.make(
 						condition,
 						Expressions.apply(FunctorConstants.SET_DIFFERENCE, set1, thenBranch),
 						Expressions.apply(FunctorConstants.SET_DIFFERENCE, set1, elseBranch));
-			Justification.endStepWithResult(currentExpression);
+			Justification.endStep(currentExpression);
 		}
 		
-		Justification.beginStepWithJustification("solving set differences in then and else branches");
+		Justification.beginStep("solving set differences in then and else branches");
 		Expression result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
 				newCallSetDifferenceRewrite(), new Expression[] { set1, thenBranch },
 				newCallSetDifferenceRewrite(), new Expression[] { set1, elseBranch },
 				R_check_branch_reachable, 
 				R_basic, process);
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}
@@ -363,23 +361,23 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("// S11={}", set11);
 		Trace.log("// S1rest={}", set1rest);
 
-		Justification.beginStepWithJustification("distributing difference over union");
+		Justification.beginStep("distributing difference over union");
 		if (Justification.isEnabled()) {
 			Expression currentExpression =
 				Expressions.apply(
 						FunctorConstants.UNION,
 						Expressions.apply(FunctorConstants.SET_DIFFERENCE, set11, set2),
 						Expressions.apply(FunctorConstants.SET_DIFFERENCE, set1rest, set2));
-			Justification.endStepWithResult(currentExpression);
+			Justification.endStep(currentExpression);
 		}
 		
-		Justification.beginStepWithJustification("solving set differences inside union");
+		Justification.beginStep("solving set differences inside union");
 		Expression d1 = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set11, set2));
 		Trace.log("// R_set_diff(S11 \\ S2)={}", d1);
 		Expression d2 = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1rest, set2));
 		Trace.log("// R_set_diff(S1rest \\ S2)={}", d2);
 		Expression result = Expressions.make(FunctorConstants.UNION, d1, d2);
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}
@@ -393,27 +391,27 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("// S21={}", set21);
 		Trace.log("// S2rest={}", set2rest);
 
-		Justification.beginStepWithJustification("difference from union is successive differences");
+		Justification.beginStep("difference from union is successive differences");
 		if (Justification.isEnabled()) {
 			Expression currentExpression =
 				Expressions.apply(
 						FunctorConstants.SET_DIFFERENCE,
 						Expressions.apply(FunctorConstants.SET_DIFFERENCE, set1, set21),
 						set2rest);
-			Justification.endStepWithResult(currentExpression);
+			Justification.endStep(currentExpression);
 		}
 		
-		Justification.beginStepWithJustification("solving first difference");
+		Justification.beginStep("solving first difference");
 		Expression d1 = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, set21));
 		if (Justification.isEnabled()) {
 			Expression currentExpression = Expressions.apply(FunctorConstants.SET_DIFFERENCE, d1, set2rest);
-			Justification.endStepWithResult(currentExpression);
+			Justification.endStep(currentExpression);
 		}
 
-		Justification.beginStepWithJustification("solving remaining difference");
+		Justification.beginStep("solving remaining difference");
 		Trace.log("// R_set_diff(S1 \\ S21)={}", d1);
 		Expression result = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(d1, set2rest));
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}
@@ -434,7 +432,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 
 		Expression result = null;
 		
-		Justification.beginStepWithJustification("if single element in second set is in first set in the union, subtract from it; otherwise, subtract from the remaining sets");
+		Justification.beginStep("if single element in second set is in first set in the union, subtract from it; otherwise, subtract from the remaining sets");
 		Expression currentExpression = null;
 		if (Justification.isEnabled()) {
 			currentExpression =
@@ -449,16 +447,16 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 								FunctorConstants.UNION,
 								set11,
 								Expressions.apply("-", set1Rest, set2)));
-			Justification.endStepWithResult(currentExpression);
+			Justification.endStep(currentExpression);
 		}
 
 		// Create the condition
 		// if R_in(b in S11)
-		Justification.beginStepWithJustification("computing condition");
+		Justification.beginStep("computing condition");
 		Expression condition = process.rewrite(R_in, LPIUtil.argForInRewriteCall(b, set11));
 		if (Justification.isEnabled()) {
 			currentExpression = currentExpression.set(0, condition);
-			Justification.endStepWithResult(currentExpression);
+			Justification.endStep(currentExpression);
 		}
 
 		// Create the then branch computation routine
@@ -483,14 +481,14 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			}
 		};
 
-		Justification.beginStepWithJustification("computing differences at then and else branches");
+		Justification.beginStep("computing differences at then and else branches");
 		result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
 				callSetDifferenceRewriteOnThenBranch, new Expression[] { set11,    set2 },
 				callSetDifferenceRewriteOnElseBranch, new Expression[] { set1Rest, set2 },
 				R_check_branch_reachable, 
 				R_basic, process);
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}
@@ -499,10 +497,10 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("if S1 is {{a1,...,an}} and S2 is { b }");
 		Trace.log("   return R_DifferenceOfExtensionalAndExtensionalSet({{a1,...,an}}, {b}, 1, 1)");
 
-		Justification.beginStepWithJustification("computing difference of extensional sets");
+		Justification.beginStep("computing difference of extensional sets");
 		Expression result = process.rewrite(R_DifferenceOfExtensionalAndExtensionalSet,
 								LPIUtil.argForDifferenceOfExtensionalAndExtensionalSetRewriteCall(set1, set2, 0, 0));
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}
@@ -513,7 +511,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 
 		Expression b = ExtensionalSet.getElements(set2).get(0);
 
-		Justification.beginStepWithJustification("difference is intensional set constrained so that its elements are not equal to " + b);
+		Justification.beginStep("difference is intensional set constrained so that its elements are not equal to " + b);
 		
 		Expression saS1 = StandardizedApartFrom
 				.standardizedApartFrom(
@@ -533,23 +531,23 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		
 		if (Justification.isEnabled()) {
 			Expression currentExpression = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimeAndNotAlphaPrimeEqualb);
-			Justification.endStepWithResult(currentExpression);
+			Justification.endStep(currentExpression);
 		}
 		
 		Trace.log("    C'' <- R_formula_simplification(C' and not Alpha' = b) with cont. variables extended by I'");
-		Justification.beginStepWithJustification("simplifying condition");
+		Justification.beginStep("simplifying condition");
 		
 		RewritingProcess processIPrime  = GrinderUtil.extendContextualVariables(iPrime, process);
 		Expression       cPrimePrime    = processIPrime.rewrite(R_formula_simplification, cPrimeAndNotAlphaPrimeEqualb);
 		Expression       result         = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
 		
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 		
 		Trace.log("    return R_basic({{ Alpha' | C'' }}_I')");
 
-		Justification.beginStepWithJustification("simplifying overall expression");
+		Justification.beginStep("simplifying overall expression");
 		result = process.rewrite(R_basic, result);
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}
@@ -558,14 +556,14 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("if S1 is a multiset and S2 is {b1, ..., bm}");
 		Trace.log("    return R_set_diff(R_set_diff(S1, {b1}), {b2,...,bm})");
 		
-		Justification.beginStepWithJustification("computing difference of multiset and extensional uniset");
+		Justification.beginStep("computing difference of multiset and extensional uniset");
 		
 		Expression b1             = ExtensionalSet.makeSingletonOfSameTypeAs(set2, ExtensionalSet.getElements(set2).get(0));
 		Expression s1DiffB1Result = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, b1));
 		Expression b2ToBm         = ExtensionalSet.removeNonDestructively(set2, 0);
 		Expression result         = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(s1DiffB1Result, b2ToBm));
 		
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 		
 		return result;
 	}
@@ -574,7 +572,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("if S1 is a multiset and S2 is S21 union ... union S2m");
 		Trace.log("    return R_set_diff(R_set_diff(S1, S21), S22 union ... union S2m)");
 		
-		Justification.beginStepWithJustification("computing difference of multiset and union");
+		Justification.beginStep("computing difference of multiset and union");
 		
 		Expression s21             = set2.get(0);
 		Expression s1DiffS21Result = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, s21));
@@ -582,7 +580,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Expression s22UnionS2m     = Expressions.make(FunctorConstants.UNION, rest);
 		Expression result          = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(s1DiffS21Result, s22UnionS2m));
 		
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 		
 		return result;
 	}
@@ -592,10 +590,10 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("if S1 is {a1,...,an} and S2 is {b1,...,bm}");
 		Trace.log("    return R_DifferenceOfExtensionalAndExtensionalSet({a1,...,an}, {b1,...,bm}, 1, 1)");
 
-		Justification.beginStepWithJustification("computing difference of extensional sets");
+		Justification.beginStep("computing difference of extensional sets");
 		Expression result = process.rewrite(R_DifferenceOfExtensionalAndExtensionalSet,
 								LPIUtil.argForDifferenceOfExtensionalAndExtensionalSetRewriteCall(set1, set2, 0, 0));
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 		
 		return result;
 	}
@@ -606,7 +604,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 
 		Expression result = null;
 		if (ExtensionalSet.cardinality(set2) == 0) {
-			Justification.beginStepWithJustification("second set is empty, so result is simply the first set"); // * - closed at end
+			Justification.beginStep("second set is empty, so result is simply the first set"); // * - closed at end
 			result = set1;
 		} 
 		else {
@@ -627,7 +625,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 				disjuncts.add(equality);
 			}
 			
-			Justification.beginStepWithJustification("difference is intensional set constrained so that its elements are not equal any element in " + set2);
+			Justification.beginStep("difference is intensional set constrained so that its elements are not equal any element in " + set2);
 			
 			Trace.log("    C'' <- R_formula_implification(C' and not (Disjunction_i Alpha' = b_i)) with cont. variables extended by I'");
 			RewritingProcess processIPrime = GrinderUtil.extendContextualVariables(iPrime, process);
@@ -653,25 +651,25 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 				Trace.log("// Shortcircuited, disjunct always true, therefore FALSE.");
 				// C' and not or( ..., true, ...) is always false
 				cPrimePrime = Expressions.FALSE;
-				Justification.beginStepWithJustification("last simplified condition is always true, so set condition is always false"); // * - closed at end
+				Justification.beginStep("last simplified condition is always true, so set condition is always false"); // * - closed at end
 			} 
 			else {
 				Expression notDisjunction          = Not.make(disjunction);
 				Expression cPrimeAndNotDisjunction = CardinalityUtil.makeAnd(cPrime, notDisjunction);
-				Justification.beginStepWithJustification("simplifying set condition"); // * - closed at end
+				Justification.beginStep("simplifying set condition"); // * - closed at end
 				cPrimePrime = processIPrime.rewrite(R_formula_simplification, cPrimeAndNotDisjunction);
 			}
 			result = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
 		}
 
 		// * - this is closing three beginSteps above, marked with *
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		Trace.log("    return R_basic({ Alpha' | C'' }_I')");
 		
-		Justification.beginStepWithJustification("simplifying overall expression");
+		Justification.beginStep("simplifying overall expression");
 		result = process.rewrite(R_basic, result);
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}
@@ -701,22 +699,22 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Expression cAndForAllPrimeI = CardinalityUtil.makeAnd(c, forAllIPrime);
 
 		if (Justification.isEnabled()) {
-			Justification.beginStepWithJustification("difference set is an intensional set with the condition of the first and the negation of the condition of the second");
+			Justification.beginStep("difference set is an intensional set with the condition of the first and the negation of the condition of the second");
 			Expression currentExpression = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cAndForAllPrimeI);
-			Justification.endStepWithResult(currentExpression);
+			Justification.endStep(currentExpression);
 		}
 		
 		Trace.log("    C''<- R_formula_simplification(C and for all I' : C' => Alpha != Alpha') with cont. variables extended by I");
-		Justification.beginStepWithJustification("simplifying set condition");
+		Justification.beginStep("simplifying set condition");
 		RewritingProcess processI    = GrinderUtil.extendContextualVariables(i, process);
 		Expression       cPrimePrime = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
 		Expression       result      = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cPrimePrime);
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 		
 		Trace.log("    return R_basic({ Alpha | C'' }_I)");
-		Justification.beginStepWithJustification("simplifying overall expression");
+		Justification.beginStep("simplifying overall expression");
 		result = process.rewrite(R_basic, result);
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}
@@ -725,10 +723,10 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("if S1 is {a1,...,an} and S2 is { Alpha | C }_I");
 		Trace.log("     return R_DifferenceOfExtensionalAndIntensionalSet ({a1,...,an}, { Alpha | C }_I, 1)");
 
-		Justification.beginStepWithJustification("difference between extensional and intensional set");
+		Justification.beginStep("difference between extensional and intensional set");
 		Expression result = process.rewrite(R_DifferenceOfExtensionalAndIntensionalSet,
 								LPIUtil.argForDifferenceOfExtensionalAndIntensionalSetRewriteCall(set1, set2, 0));
-		Justification.endStepWithResult(result);
+		Justification.endStep(result);
 
 		return result;
 	}

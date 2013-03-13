@@ -107,7 +107,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 							+ msgToV_F);
 		}
 		
-		Justification.begin(msgToV_F);
+		Justification.current(msgToV_F);
 
 		Expression randomVariable = msgToV_F.get(0);
 		Expression factor         = msgToV_F.get(1);
@@ -161,8 +161,6 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				R_check_branch_reachable, 
 				R_basic, process);
 			
-		Justification.end();
-
 		return result;
 	}
 	
@@ -198,16 +196,16 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				
 				Trace.log("under contextual constraint incremented by 'not In'");
 		
-				Justification.beginStepWithJustification("by the definition of messages to random variables");
+				Justification.beginStep("by the definition of messages to random variables");
 				Expression currentExpression = null;
 				if (Justification.isEnabled()) {
 					Expression NBeforeEvaluation = Expressions.apply(FunctorConstants.SET_DIFFERENCE, neighF, ExtensionalSet.makeSingleton(V));
 					currentExpression = makeCurrentExpressionGivenExpressionForN(NBeforeEvaluation, VPrime, E, msgToF_VPrime);
-					Justification.endStepWithResult(currentExpression);
+					Justification.endStep(currentExpression);
 				}
 				
 				if (Justification.isEnabled()) {
-					Justification.beginStepWithJustification("by computing neighbors of " + F);
+					Justification.beginStep("by computing neighbors of " + F);
 				}
 				
 				Trace.log("    N <- R_set_diff(R_neigh_f(Neigh(F)) \\ V)");
@@ -216,19 +214,19 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				if (Justification.isEnabled()) {
 					Expression newDifference = Expressions.apply(FunctorConstants.SET_DIFFERENCE, neighborsOfF, ExtensionalSet.makeSingleton(V));
 					currentExpression = makeCurrentExpressionGivenExpressionForN(newDifference, VPrime, E, msgToF_VPrime);
-					Justification.endStepWithResult(currentExpression);
+					Justification.endStep(currentExpression);
 				}
 				
-				Justification.beginStepWithJustification("by set difference");
+				Justification.beginStep("by set difference");
 				
 				Expression N = LPIUtil.callSetDiff(neighborsOfF, V, elseBranchProcess);
 				
 				if (Justification.isEnabled()) {
 					currentExpression = makeCurrentExpressionGivenExpressionForN(N, VPrime, E, msgToF_VPrime);
-					Justification.endStepWithResult(currentExpression);
+					Justification.endStep(currentExpression);
 				}
 		
-				Justification.beginStepWithJustification("by summing random variable values out");
+				Justification.beginStep("by summing random variable values out");
 				
 				Trace.log("    M <- R_sum(sum_N value(F) prod_{V' in N} m_F<-V', V, beingComputed)");
 				Expression productOfVariablesToFactor = LPIUtil.makeProductOfMessages(VPrime, N, msgToF_VPrime, Expressions.TRUE);
@@ -236,7 +234,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				Expression M = elseBranchProcess.rewrite(R_sum, 
 									LPIUtil.argForSumRewriteCall(N, E, productOfVariablesToFactor, V, beingComputed));
 				
-				Justification.endStepWithResult(M);
+				Justification.endStep(M);
 				
 				return M;
 			}

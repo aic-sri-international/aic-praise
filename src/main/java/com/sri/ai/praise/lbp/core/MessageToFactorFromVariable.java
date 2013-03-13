@@ -91,7 +91,7 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 		Expression messageToFFromV = Tuple.get(expression, 0);  
 		Expression beingComputed   = Tuple.get(expression, 1);
 		
-		Justification.begin(messageToFFromV);
+		Justification.current(messageToFFromV);
 		
 		LPIUtil.assertMessageToFromOk(messageToFFromV, process);
 
@@ -134,8 +134,6 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 				R_check_branch_reachable, 
 				R_basic, process);
 
-		Justification.end();
-		
 		return result;
 	}
 	
@@ -172,7 +170,7 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 				
 				Expression currentExpression = null;
 				if (Justification.isEnabled()) {
-					Justification.beginStepWithJustification("definition of message to a factor from a random variable");
+					Justification.beginStep("definition of message to a factor from a random variable");
 
 					Expression factorDomainBeforeEvaluation = Expressions.apply(FunctorConstants.SET_DIFFERENCE, neighV, ExtensionalSet.makeSingleton(factor));
 					Expression indexExpression              = Expressions.apply(LPIUtil.FUNCTOR_IN, factorIndexPrime, factorDomainBeforeEvaluation);
@@ -185,10 +183,10 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 										msgToV_FPrime,
 										Expressions.TRUE));
 					
-					Justification.endStepWithResult(currentExpression);
+					Justification.endStep(currentExpression);
 				}
 
-				Justification.beginStepWithJustification("computing neighbors of " + randomVariable + " and excluding " + factor);
+				Justification.beginStep("computing neighbors of " + randomVariable + " and excluding " + factor);
 				Expression neighborsOfV       = elseBranchProcess.rewrite(R_neigh_v, neighV);
 				Expression neighborsOfVMinusF = LPIUtil.callSetDiff(neighborsOfV, factor, elseBranchProcess);
 
@@ -201,16 +199,16 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 										msgToV_FPrime,
 										Expressions.TRUE));
 					
-					Justification.endStepWithResult(currentExpression);
+					Justification.endStep(currentExpression);
 				}
 
 				Expression product = LPIUtil.makeProductOfMessages(factorIndexPrime, neighborsOfVMinusF, msgToV_FPrime, Expressions.TRUE);
 
-				Justification.beginStepWithJustification("computing product of incoming messages");
+				Justification.beginStep("computing product of incoming messages");
 				Expression beingComputedUnionV_F = LPIUtil.extendBeingComputed(beingComputed, pairF_V, elseBranchProcess);
 				Expression result                = elseBranchProcess.rewrite(R_prod_factor,
 														LPIUtil.argForProductFactorRewriteCall(product, beingComputedUnionV_F));
-				Justification.endStepWithResult(result);
+				Justification.endStep(result);
 			
 				return result;
 			}

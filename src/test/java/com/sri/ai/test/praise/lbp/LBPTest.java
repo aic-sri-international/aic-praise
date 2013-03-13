@@ -55,13 +55,13 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
-import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.LBPQueryEngine.QueryStep;
+import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.example.IntensionalFanIn;
 import com.sri.ai.praise.model.example.TrivialEpidemicAndSickNotbob;
@@ -534,7 +534,7 @@ public class LBPTest extends AbstractLPITest {
 				new DifferenceOfExtensionalAndExtensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{a}", "{B}", 
 						false,
-						"if a = B then { } else { a }"),
+						"if B = a then { } else { a }"),
 				new DifferenceOfExtensionalAndExtensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{A}", "{B}", 
 						false,
@@ -1199,7 +1199,7 @@ public class LBPTest extends AbstractLPITest {
 				new SetDifferenceTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{(on X) a | X != a }", "{X}", 
 						false,
-						"{(on X') a | X' != a and a != X}"),
+						"{(on X') a | X' != a and X != a}"),
 				//
 				// Basic: if S1 is { Alpha | C }_I and S2 is { Alpha' | C' }_I'
 				//
@@ -1542,7 +1542,7 @@ public class LBPTest extends AbstractLPITest {
 						// Note: old R_basic result
 						// "if X = a then if p(a) then 0.2 else 0.3 else 1"
 						// Note: no constraint applier used in R_simplify so p(X) instead of p(a).
-						"if a = X then if p(a) then 0.20 else 0.30 else 1"
+						"if X = a then if p(a) then 0.20 else 0.30 else 1"
 				),
 				// From ALBPTest.testMessageToFactorFromVariable()
 				new MsgToFFromVTestData(Expressions.TRUE.toString(), 
@@ -1594,11 +1594,11 @@ public class LBPTest extends AbstractLPITest {
 				new NRVTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"Neigh([p(z)])", 
 						false, 
-						"{{ ( on X, Y ) ([ if p(X) or p(Y) then 1 else 0 ]) | z = X or z = Y }}"),
+						"{{ ( on X, Y ) ([ if p(X) or p(Y) then 1 else 0 ]) | X = z or Y = z }}"),
 				new NRVTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"Neigh([p(b)])", 
 						false, 
-						"{{ ( on X, Y ) ([if p(b) and q(X, Y) and r then 1 else 0]) | X != a }} union {{ ( on X, Y ) ([if p(X) or p(Y) then 1 else 0]) | b = X or b = Y }}"),
+						"{{ ( on X, Y ) ([if p(b) and q(X, Y) and r then 1 else 0]) | X != a }} union {{ ( on X, Y ) ([if p(X) or p(Y) then 1 else 0]) | X = b or Y = b }}"),
 				new NRVTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"Neigh([p(Z)])", 
 						false, 
@@ -1742,13 +1742,13 @@ public class LBPTest extends AbstractLPITest {
 						false, 
 						// Note: old R_formula_simplification result
 						// "{ (on X in {a,b,c}, Y in {d,e,f}) [if p(X) and p(Y) then 1 else 0] | X = a or (X != d and Y = a) }"
-						"{ (on X in {a,b,c}, Y in {d,e,f}) [if p(X) and p(Y) then 1 else 0] |X != d and (a = X or a = Y) }"),
+						"{ (on X in {a,b,c}, Y in {d,e,f}) [if p(X) and p(Y) then 1 else 0] |X != d and (X = a or Y = a) }"),
 				new NRVIPFTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"[p(a)]", "{{ (on X in {a,b,c}, Y in {d, e, f}) [if p(X) and p(Y) then 1 else 0] | X != d }}", 
 						false,
 						// Note: old R_formula_simplification result
 						// "{{ (on X in {a,b,c}, Y in {d,e,f}) [if p(X) and p(Y) then 1 else 0] | X = a or (X != d and Y = a) }}"
-						"{{ (on X in {a,b,c}, Y in {d,e,f}) [if p(X) and p(Y) then 1 else 0] | X != d and (a = X or a = Y) }}"),
+						"{{ (on X in {a,b,c}, Y in {d,e,f}) [if p(X) and p(Y) then 1 else 0] | X != d and (X = a or Y = a) }}"),
 				// false C
 				new NRVIPFTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"[p(a)]", "{ (on X in {a,b,c}) [if p(a) then 1 else 0] | false }", 
@@ -1773,13 +1773,13 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						// Note: old R_formula_simplification result
 						// "{ ( on X ) ([ if p(X) then 1 else 0 ]) | X = Z = a }"
-						"if a = Z then { ([ if p(Z) then 1 else 0 ]) } else { }"),
+						"if Z = a then { ([ if p(Z) then 1 else 0 ]) } else { }"),
 				new NRVIPFTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"[p(a)]", "{{ (on X) [if p(X) then 1 else 0] | Z = X }}", 
 						false, 
 						// Note: old R_formula_simplification result
 						// "{{ ( on X ) ([ if p(X) then 1 else 0 ]) | X = Z = a }}"
-						"if a = Z then {{ ([ if p(Z) then 1 else 0 ]) }} else { }"),
+						"if Z = a then {{ ([ if p(Z) then 1 else 0 ]) }} else { }"),
 				// Standardize Apart
 				new NRVIPFTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"[p(X)]", "{ (on X in {a,b,c}) [if p(X) then 1 else 0] | X != d }", 
@@ -1918,7 +1918,7 @@ public class LBPTest extends AbstractLPITest {
 				new UnionTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"{{ ( on X, Y ) ([ if p(b) and q(X, Y) and r then 1 else 0 ]) | X != a }} union {{ ( on X, Y ) ([ if p(X) or p(Y) then 1 else 0 ]) | [ p(b) ] = [ p(X) ] or [ p(b) ] = [ p(Y) ] }}", 
 						false, 
-						"{{ ( on X, Y ) ([ if p(b) and q(X, Y) and r then 1 else 0 ]) | X != a }} union {{ ( on X, Y ) ([ if p(X) or p(Y) then 1 else 0 ]) | b = X or b = Y }}"),
+						"{{ ( on X, Y ) ([ if p(b) and q(X, Y) and r then 1 else 0 ]) | X != a }} union {{ ( on X, Y ) ([ if p(X) or p(Y) then 1 else 0 ]) | X = b or Y = b }}"),
 				//
 				// Basic: Illegal Argument Exceptions
 				//
@@ -3926,10 +3926,10 @@ public class LBPTest extends AbstractLPITest {
 //					// TODO - is this correct (10 iterations)?
 //					"if m(X) then 0.0000000000147024292 else 1"),
 					
-				// #6
-			    // TODO - appears not to stop processing:
+//				// #6
+//			    // TODO - appears not to stop processing:
 //				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-//					new com.sri.ai.lpi.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
+//					new com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
 //					"belief([smoker(ann)])",
 //					false,
 //					"TODO"),
