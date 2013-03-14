@@ -105,6 +105,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	
 	public void setResult(String result) {
 		resultEditor.setText(result);
+		resultEditor.discardAllEdits();
 	}
 	
 	public void setOptions(OptionsPanel options) {
