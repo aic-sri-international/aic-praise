@@ -39,196 +39,121 @@ package com.sri.ai.praise.demo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.KeyStroke;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
-import javax.swing.plaf.ComponentUI;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
+import javax.swing.JPopupMenu;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
-import javax.swing.text.DocumentFilter;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
-import javax.swing.undo.AbstractUndoableEdit;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CompoundEdit;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.Token;
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.api.Symbol;
-import com.sri.ai.expresso.core.DefaultSymbol;
-import com.sri.ai.praise.rules.antlr.RuleLexer;
+import com.sri.ai.praise.rules.rsyntaxtextarea.RuleTokenMaker;
 
 @Beta
 public class RuleEditor extends JPanel {
 	private static final long serialVersionUID = 1L;
-	
-	private static final String STYLE_REGULAR  = "regular";
-	private static final String STYLE_COMMENT  = "comment";
-	private static final String STYLE_TERMINAL = "terminal";
-	private static final String STYLE_KEYWORD  = "keyword";
-	private static final String STYLE_NUMBER   = "number";
-	private static final String STYLE_VARIABLE = "variable";
-	private static final String STYLE_SYMBOL   = "symbol";
-	private static final String STYLE_STRING   = "string";
-	
-	private static final Color COLOR_REGULAR  = Color.BLACK;
-	private static final Color COLOR_COMMENT  = new Color(63,  127,  95);
-	private static final Color COLOR_TERMINAL = COLOR_REGULAR;
-	private static final Color COLOR_KEYWORD  = new Color(127,   0,  85);
-	private static final Color COLOR_NUMBER   = new Color(125, 125, 125);
-	private static final Color COLOR_VARIABLE = COLOR_REGULAR;
-	private static final Color COLOR_SYMBOL   = COLOR_REGULAR;
-	private static final Color COLOR_STRING   = new Color(42,    0, 255);
 	//
-	private static final Set<Integer> _terminals = new HashSet<Integer>();
-	{
-		_terminals.add(RuleLexer.ARROW);
-		_terminals.add(RuleLexer.DOUBLE_ARROW);
-		_terminals.add(RuleLexer.SINGLE_ARROW);
-		_terminals.add(RuleLexer.EQUAL);
-		_terminals.add(RuleLexer.NOT_EQUAL);
-		_terminals.add(RuleLexer.PLUS);
-		_terminals.add(RuleLexer.DASH);
-		_terminals.add(RuleLexer.TIMES);
-		_terminals.add(RuleLexer.DIVIDE);
-		_terminals.add(RuleLexer.CARAT);
-		_terminals.add(RuleLexer.OPEN_PAREN);
-		_terminals.add(RuleLexer.CLOSE_PAREN);
-		_terminals.add(RuleLexer.COLON_DASH);
-		_terminals.add(RuleLexer.COLON);
-		_terminals.add(RuleLexer.SEMICOLON);
-		_terminals.add(RuleLexer.PERIOD);
-		_terminals.add(RuleLexer.COMMA);
-	}
-	private static final Set<Integer> _keywords = new HashSet<Integer>();
-	{
-		_keywords.add(RuleLexer.IF);
-		_keywords.add(RuleLexer.THEN);
-		_keywords.add(RuleLexer.ELSE);
-		_keywords.add(RuleLexer.SORT);
-		_keywords.add(RuleLexer.RANDOM);
-		_keywords.add(RuleLexer.X);
-		_keywords.add(RuleLexer.THERE);
-		_keywords.add(RuleLexer.EXISTS);
-		_keywords.add(RuleLexer.FOR);
-		_keywords.add(RuleLexer.ALL);
-		_keywords.add(RuleLexer.AND);
-		_keywords.add(RuleLexer.OR);
-		_keywords.add(RuleLexer.NOT);
-		_keywords.add(RuleLexer.MAY);
-		_keywords.add(RuleLexer.BE);
-		_keywords.add(RuleLexer.SAME);
-		_keywords.add(RuleLexer.AS);
-		_keywords.add(RuleLexer.MINUS);
-	}
-	
+	private static final String SYNTAX_STYLE_RULES = "Rule Syntax Style";
 	//
-	private CompoundUndoableEditListener compoundListener = new CompoundUndoableEditListener();
+	private RuleRSyntaxTextArea textArea;
+	private RTextScrollPane editorScrollPane;
 	//
-	private JScrollPane editorScrollPane;
-	private JTextPane textPane;
-	//
-	private DefaultHighlightPainter errorPainter = new DefaultHighlightPainter(Color.YELLOW); 
+	private DefaultHighlightPainter errorPainter = new DefaultHighlightPainter(Color.ORANGE); 
 	private Object activeErrorHighlight = null;
-	
 	
 	public RuleEditor() {
 		setLayout(new BorderLayout(0, 0));
-		
-		editorScrollPane = new JScrollPane();
-		add(editorScrollPane, BorderLayout.CENTER);
-		
-		textPane = new JTextPane() {
-			private static final long serialVersionUID = 1L;
-			// Note: This turns off auto-wrapping of the text.
-			// Override getScrollableTracksViewportWidth
-			// to preserve the full width of the text
-			@Override
-			public boolean getScrollableTracksViewportWidth() {
-				Component parent = getParent();
-				ComponentUI ui = getUI();
 
-				return parent != null ? (ui.getPreferredSize(this).width <= parent
-						.getSize().width) : true;
-			}
-		};
-		editorScrollPane.setViewportView(textPane);
+		textArea = new RuleRSyntaxTextArea(20, 80);
+		textArea.setTabsEmulated(false);
+		textArea.setTabSize(4);
+		textArea.setCodeFoldingEnabled(false);
+		
+		// The next four lines of code are the important ones to copy when using
+		// RSyntaxTextArea
+		// for the rules syntax highlighting.
+		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
+		atmf.putMapping(SYNTAX_STYLE_RULES, RuleTokenMaker.class.getName());
+		TokenMakerFactory.setDefaultInstance(atmf);
+		textArea.setSyntaxEditingStyle(SYNTAX_STYLE_RULES);
+
+		editorScrollPane = new RTextScrollPane(textArea);
+		editorScrollPane.setFoldIndicatorEnabled(false);
+		add(editorScrollPane, BorderLayout.CENTER);
 		
 		postGUISetup();
 	}
 	
 	public String getText() {
-		String result = "";
-		StyledDocument styledDoc = textPane.getStyledDocument();
-		
-		try {
-			result = styledDoc.getText(0, styledDoc.getLength());
-		} catch (BadLocationException ble) {
-			ble.printStackTrace();
-		}
+		String result = textArea.getText();
 		
 		return result;
 	}
 	
 	public void setText(String text) {
-		try {
-			StyledDocument styledDoc = textPane.getStyledDocument();		
-			
-			if (styledDoc.getLength() > 0) {
-				styledDoc.remove(0, styledDoc.getLength());
-			}
-			// Ensure carriage return linefeeds are replaced with just
-			// a single linefeed. This will ensure that the logic in:
-		    // ExpressionFormatFilter.format()
-			// can always assume +1 for the line end, when trying
-			// to map between token positions and the underlying text.
-			text = text.replaceAll("\r\n", "\n");
-			styledDoc.insertString(0, text, null);
-			textPane.setCaretPosition(0);
-		} catch (BadLocationException ble) {
-				
-			ble.printStackTrace();
-		}
+		textArea.setText(text);
+		textArea.setCaretPosition(0);
 	}
 	
 	public boolean isEditable() {
-		return textPane.isEditable();
+		return textArea.isEditable();
 	}
 	
 	public void setEditable(boolean editable) {
-		textPane.setEditable(editable);
+		textArea.setEditable(editable);
+	}
+	
+	public boolean isLineNumbersEnabled() {
+		return editorScrollPane.getLineNumbersEnabled();
+	}
+	
+	public void setLineNumbersEnabled(boolean enabled) {
+		editorScrollPane.setLineNumbersEnabled(false);
+	}
+	
+	public boolean isHighlightCurrentLine() {
+		return textArea.getHighlightCurrentLine();
+	}
+	
+	public void setHighlightCurrentLine(boolean highlight) {
+		textArea.setHighlightCurrentLine(highlight);
+	}
+
+	public boolean canUndo() {
+		return textArea.canUndo();
+	}
+	
+	public void undo() {
+		textArea.undoLastAction();
+	}
+	
+	public boolean canRedo() {
+		return textArea.canRedo();
+	}
+	
+	public void redo() {
+		textArea.redoLastAction();
+	}
+	
+	public void discardAllEdits() {
+		textArea.discardAllEdits();
 	}
 	
 	public void indicateErrorAtPosition(int startPosition, int endPosition) {	
 		try{
 			removeExistingErrorHighlights();
-			if (endPosition >= textPane.getDocument().getLength()) {
-				endPosition = textPane.getDocument().getLength()-1;
+			if (endPosition >= textArea.getDocument().getLength()) {
+				endPosition = textArea.getDocument().getLength()-1;
 			}
-			activeErrorHighlight = textPane.getHighlighter().addHighlight(startPosition, endPosition, errorPainter);
+			activeErrorHighlight = textArea.getHighlighter().addHighlight(startPosition, endPosition, errorPainter);
 		} catch (BadLocationException ble) {
 			// ignore
 		}		
@@ -236,287 +161,146 @@ public class RuleEditor extends JPanel {
 	
 	public void removeExistingErrorHighlights() {
 		if (activeErrorHighlight != null) {
-			textPane.getHighlighter().removeHighlight(activeErrorHighlight);
+			textArea.getHighlighter().removeHighlight(activeErrorHighlight);
 			activeErrorHighlight = null;
 		}
 	}
 	
-	public void addUndoableEditListener(UndoableEditListener listener) {
-		compoundListener.undoableListeners.add(listener);
+	public Action getCutAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION);
 	}
 	
-	//
-	// PROTECTED
-	//
-	protected boolean isTerminal(Token t) {
-		return _terminals.contains(t.getType());
+	public Action getCopyAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION);
 	}
 	
-	
-	protected boolean isKeyword(Token t) {
-		return _keywords.contains(t.getType());
+	public Action getPasteAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION);
 	}
 	
-	protected boolean isNumber(Token t) {
-		boolean result = false;
-		if (isSymbol(t)) {
-			Symbol s = DefaultSymbol.createSymbol(t.getText());
-			if (s.getValue() instanceof Number) {
-				result = true;
-			}
-		}
-		return result;
+	public Action getDeleteAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION);
 	}
 	
-	protected boolean isVariable(Token t) {
-		boolean result = false;
-		if (isSymbol(t)) {
-			String strValue = t.getText();
-			if (Character.isUpperCase(strValue.charAt(0))) {
-				result = true;
-			}
-		}
-		return result;
-	}	
-	
-	protected boolean isSymbol(Token t) {
-		return t.getType() == RuleLexer.ID;
+	public Action getSelectAllAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.SELECT_ALL_ACTION);
 	}
 	
-	protected boolean isString(Token t) {
-		return t.getType() == RuleLexer.STRING;
+	public Action getUndoAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION);
+	}
+	
+	public Action getRedoAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION);
 	}
 	
 	//
 	// PRIVATE
 	//
 	private void postGUISetup() {
-		StyledDocument styledDoc = textPane.getStyledDocument();
-		if (styledDoc instanceof AbstractDocument) {
-			AbstractDocument doc = (AbstractDocument)styledDoc;
-		    doc.setDocumentFilter(new ExpressionFormatFilter());
-		} 
-		addStylesToDocument(styledDoc);
-		styledDoc.addUndoableEditListener(compoundListener);
-		
-		textPane.getInputMap().put(KeyStroke.getKeyStroke("TAB"),
-                "doTab");
-		
-		textPane.getActionMap().put("doTab", new AbstractAction() {
-			private static final long serialVersionUID = 1L;
-
+		textArea.getDocument().addDocumentListener(new DocumentListener() {
+			
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				Component comp = textPane.getFocusTraversalPolicy().getComponentAfter(textPane.getFocusCycleRootAncestor(), textPane);
-				comp.requestFocus();			
+			public void removeUpdate(DocumentEvent e) {
+				removeExistingErrorHighlights();
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				removeExistingErrorHighlights();	
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				removeExistingErrorHighlights();
 			}
 		});
 		
-		textPane.getInputMap().put(KeyStroke.getKeyStroke("shift TAB"),
-                "doShiftTab");
-		textPane.getActionMap().put("doShiftTab", new AbstractAction() {
-			private static final long serialVersionUID = 1L;
+		// Forces the menu to be created.
+		textArea.getPopupMenu();
+	}
+	
+	private class RuleRSyntaxTextArea extends RSyntaxTextArea {
+		private static final long serialVersionUID = 1L;
+	
+		private JMenuItem undoMenuItem;
+		private JMenuItem redoMenuItem;
+		private JMenuItem cutMenuItem;
+		private JMenuItem copyMenuItem;
+		private JMenuItem pasteMenuItem;
+		private JMenuItem deleteMenuItem;
+		
+		public RuleRSyntaxTextArea(int rows, int cols) {
+			super(rows, cols);
+			
+			RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_CUT_SMALL);
+			RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_COPY_SMALL);
+			RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_PASTE_SMALL);
+			RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_DELETE_SMALL);
+			RSyntaxTextArea.getAction(RSyntaxTextArea.SELECT_ALL_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_SELECT_ALL_SMALL);
+			
+			RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION).putValue(Action.SMALL_ICON, ImageLookup.UNDO_SMALL);
+			RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION).putValue(Action.LARGE_ICON_KEY, ImageLookup.UNDO_LARGE);
+			
+			RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION).putValue(Action.SMALL_ICON, ImageLookup.REDO_SMALL);
+			RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION).putValue(Action.LARGE_ICON_KEY, ImageLookup.REDO_LARGE);
+		}
+		
+		@Override
+		protected void configurePopupMenu(JPopupMenu popupMenu) {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Component comp = textPane.getFocusTraversalPolicy().getComponentBefore(textPane.getFocusCycleRootAncestor(), textPane);
-				comp.requestFocus();			
+			boolean canType = isEditable() && isEnabled();
+
+			// Since the user can customize the popup menu, these actions may not
+			// have been created.
+			if (undoMenuItem != null) {
+				undoMenuItem.setEnabled(canUndo() && canType);
 			}
-		});
-	}
-	
-	private void addStylesToDocument(StyledDocument doc) {
-        //Initialize some styles.
-        Style def = StyleContext.getDefaultStyleContext().
-                        getStyle(StyleContext.DEFAULT_STYLE);
- 
-        Style regular = doc.addStyle(STYLE_REGULAR, def);
-        StyleConstants.setFontSize(regular, 12);
-        StyleConstants.setFontFamily(regular, Font.MONOSPACED);
-        StyleConstants.setBackground(regular, Color.WHITE);
-        StyleConstants.setForeground(regular, COLOR_REGULAR);
- 
-        Style s = doc.addStyle(STYLE_COMMENT, regular);
-        StyleConstants.setForeground(s, COLOR_COMMENT);
- 
-        s = doc.addStyle(STYLE_TERMINAL, regular);
-        StyleConstants.setForeground(s, COLOR_TERMINAL);
-        
-        s = doc.addStyle(STYLE_KEYWORD, regular);
-        StyleConstants.setForeground(s, COLOR_KEYWORD);
-        
-        s = doc.addStyle(STYLE_NUMBER, regular);
-        StyleConstants.setForeground(s, COLOR_NUMBER);
-        
-        s = doc.addStyle(STYLE_VARIABLE, regular);
-        StyleConstants.setBold(s, true);
-        StyleConstants.setItalic(s, true);
-        StyleConstants.setFontSize(s, 14);
-        StyleConstants.setForeground(s, COLOR_VARIABLE);
-        
-        s = doc.addStyle(STYLE_SYMBOL, regular);
-        StyleConstants.setForeground(s, COLOR_SYMBOL);
- 
-        s = doc.addStyle(STYLE_STRING, regular);
-        StyleConstants.setForeground(s, COLOR_STRING); 
-	}
-	
-	private class ExpressionFormatFilter extends DocumentFilter {
-		public ExpressionFormatFilter() {
-			
+			if (redoMenuItem != null) {
+				redoMenuItem.setEnabled(canRedo() && canType);
+			}
+			cutMenuItem.setEnabled(RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION).isEnabled() && canType);
+			copyMenuItem.setEnabled(RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION).isEnabled());
+			pasteMenuItem.setEnabled(RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION).isEnabled() && canType);
+			deleteMenuItem.setEnabled(RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION).isEnabled() && canType);			
 		}
 		
 		@Override
-		public void remove(DocumentFilter.FilterBypass fb, int offset, int length) throws BadLocationException {
+		protected JPopupMenu createPopupMenu() {			
+			JPopupMenu menu = new JPopupMenu();
 			
-			StyledDocument styledDocument = (StyledDocument)fb.getDocument();
+			menu.add(undoMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION)));
+			menu.add(redoMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION)));
+			menu.addSeparator();
+			menu.add(cutMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION)));
+			menu.add(copyMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION)));
+			menu.add(pasteMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION)));
+			menu.addSeparator();
+			menu.add(deleteMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION)));
+			menu.add(createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.SELECT_ALL_ACTION)));			
 			
-			super.remove(fb, offset, length);			
-			format(styledDocument);
-			
-			compoundListener.triggerUndoableEditEvent();		
+			return menu;
 		}
-		
-		@Override
-		public void insertString(DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-			
-			StyledDocument styledDocument = (StyledDocument)fb.getDocument();
-			
-			super.insertString(fb, offset, string, attr);
-			format(styledDocument);
-			
-			compoundListener.triggerUndoableEditEvent();
-		}
-		
-		@Override
-		public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-			
-			StyledDocument styledDocument = (StyledDocument)fb.getDocument();
-			
-			super.replace(fb, offset, length, text, attrs);
-			format(styledDocument);
-			
-			compoundListener.triggerUndoableEditEvent();
-		}
-		
-		private void format(StyledDocument styledDocument) throws BadLocationException {
-			removeExistingErrorHighlights();
-			if (styledDocument.getLength() > 0) {
-				String expressionText = styledDocument.getText(0, styledDocument.getLength());
-				
-				// Everything is considered a comment up front (i.e. these won't be tokenized)
-				styledDocument.setCharacterAttributes(0, expressionText.length(), styledDocument.getStyle(STYLE_COMMENT), true);
-				
-				List<String> lines        = new ArrayList<String>();
-				List<Integer> lineOffsets = new ArrayList<Integer>();
-				BufferedReader reader = new BufferedReader(new StringReader(expressionText));
-				String line;
-				int offset = 0;
-				try {				
-					while ((line = reader.readLine()) != null) {
-						lines.add(line);
-						lineOffsets.add(offset);
-						
-						offset += line.length()+1; // i.e. include the newline.
-					}
-					reader.close();
-				} catch (IOException ioe) {
-					ioe.printStackTrace();
+
+
+		/**
+		 * Creates and configures a menu item for used in the popup menu.
+		 *
+		 * @param a The action for the menu item.
+		 * @return The menu item.
+		 * @see #createPopupMenu()
+		 */
+		protected JMenuItem createPopupMenuItem(Action a) {
+			JMenuItem item = new JMenuItem(a) {
+				private static final long serialVersionUID = 1L;
+
+				public void setToolTipText(String text) {
+					// Ignore!  Actions (e.g. undo/redo) set this when changing
+					// their text due to changing enabled state.
 				}
-	    		CharStream cs = new ANTLRStringStream(expressionText);
-	    		RuleLexer lexer = new RuleLexer(cs);
-	    		CommonTokenStream tokens = new CommonTokenStream(lexer);
-	    		
-	    		Token token = null;
-	    		int lastMarkedUpPos = 0;
-	    		boolean lexerFailed = false;
-	    		try {
-	    			token = tokens.LT(1);
-	    		} catch (RuntimeException ex) {
-	    			lexerFailed = true;
-	    		}
-	    		while (!lexerFailed && token.getType() != RuleLexer.EOF) {   			
-	    			offset = lineOffsets.get(token.getLine()-1) + token.getCharPositionInLine();
-	    			int length = token.getText().length();
-	    			Style style  = styledDocument.getStyle(STYLE_REGULAR);
-	    			if (isTerminal(token)) {     				
-	    				style = styledDocument.getStyle(STYLE_TERMINAL);
-	    			}
-	    			else if (isKeyword(token)) {
-	    				style = styledDocument.getStyle(STYLE_KEYWORD);
-	    			}
-	    			else if (isNumber(token)) {
-	    				style = styledDocument.getStyle(STYLE_NUMBER);
-	    			}
-	    			else if (isVariable(token)) {
-	    				style = styledDocument.getStyle(STYLE_VARIABLE);
-	    			}
-	    			// Note: Test isSymbol after isNumber and isVariable as both of them are 
-	    			// types of symbols.
-	    			else if (isSymbol(token)) {
-	    				style = styledDocument.getStyle(STYLE_SYMBOL);
-	    			}
-	    			else if (isString(token)) {
-	    				style = styledDocument.getStyle(STYLE_STRING);
-	    				length += 2;
-	    			}
-	    			    			
-	    			styledDocument.setCharacterAttributes(offset, length, style, true);
-	    			lastMarkedUpPos = offset + length;
-	    			try {
-	        			tokens.consume();
-	    				token = tokens.LT(1);
-	    			} catch (RuntimeException ex) {
-	    				// ignore and exit.
-	    				lexerFailed = true;
-	    			}
-	    		}
-	    		
-	    		if (lexerFailed) {
-	    			styledDocument.setCharacterAttributes(lastMarkedUpPos, expressionText.length(), styledDocument.getStyle(STYLE_REGULAR), true);
-	    		}
-	    		
-	    		// Note: The following ensure the caret position is reset correctly after formatting occurs when a redo is applied 
-	    		// (otherwise the caret ends up going to the end of the document).
-	    		compoundListener.undoableEditHappened(new UndoableEditEvent(textPane, new AbstractUndoableEdit() {
-					private static final long serialVersionUID = 1L;
-					private int caretPosition = textPane.getCaretPosition();
-	    			@Override
-	    			public void redo() throws CannotRedoException {
-	    				super.redo();
-	    				textPane.setCaretPosition(caretPosition);
-	    			}
-	    		}));
-			}
-		}
-	}
-	
-	private class CompoundUndoableEditListener implements UndoableEditListener {
-		public List<UndoableEditListener> undoableListeners = new ArrayList<UndoableEditListener>();
-		public Object source = null;
-		public CompoundEdit compoundEdit = new CompoundEdit();
-		
-		public void triggerUndoableEditEvent() {
-			if (compoundEdit != null) {
-				compoundEdit.end();
-				UndoableEditEvent event = new UndoableEditEvent(source, compoundEdit);
-				
-				compoundEdit = null;
-				
-				// Notify listeners of event
-				for (UndoableEditListener l : undoableListeners) {
-					l.undoableEditHappened(event);
-				}
-			}
-		}
-		
-		@Override
-		public void undoableEditHappened(UndoableEditEvent e) {
-			this.source = e.getSource();
-			if (compoundEdit == null) {
-				compoundEdit = new CompoundEdit();
-			}
-			compoundEdit.addEdit(e.getEdit());
+			};
+			item.setAccelerator(null);
+			return item;
 		}
 	}
 }

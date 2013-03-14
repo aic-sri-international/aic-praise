@@ -75,6 +75,11 @@ public class ImageLookup {
 	public static final ImageIcon CLEAR_SMALL           = createImageIcon("edit-clear22x22.png");
 	public static final ImageIcon NEW_WINDOW_SMALL      = createImageIcon("window-new22x22.png");
 	public static final ImageIcon PROCESS_WORKING_SMALL = createImageIcon("process-working22x22.png");
+	public static final ImageIcon EDIT_COPY_SMALL       = createImageIcon("edit-copy22x22.png");
+	public static final ImageIcon EDIT_CUT_SMALL        = createImageIcon("edit-cut22x22.png");
+	public static final ImageIcon EDIT_PASTE_SMALL      = createImageIcon("edit-paste22x22.png");
+	public static final ImageIcon EDIT_DELETE_SMALL     = createImageIcon("edit-delete22x22.png");
+	public static final ImageIcon EDIT_SELECT_ALL_SMALL = createImageIcon("edit-select-all22x22.png");
 	
 	//
 	// PRIVATE

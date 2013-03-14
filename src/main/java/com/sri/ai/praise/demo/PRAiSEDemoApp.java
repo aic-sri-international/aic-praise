@@ -102,6 +102,11 @@ public class PRAiSEDemoApp {
 	private JMenuItem mntmNewWindow;
 	private JMenuItem mntmHideToolBar;
 	private JSplitPane inputSplitPane;
+	private JMenuItem mntmCut;
+	private JMenuItem mntmCopy;
+	private JMenuItem mntmPaste;
+	private JMenuItem mntmDelete;
+	private JMenuItem mntmSelectAll;
 
 	/**
 	 * Launch the application.
@@ -268,6 +273,25 @@ public class PRAiSEDemoApp {
 		mntmRedo = new JMenuItem("Redo");
 		mnEdit.add(mntmRedo);
 		
+		mnEdit.addSeparator();
+		
+		mntmCut = new JMenuItem("Cut");
+		mnEdit.add(mntmCut);
+		
+		mntmCopy = new JMenuItem("Copy");
+		mnEdit.add(mntmCopy);
+		
+		mntmPaste = new JMenuItem("Paste");
+		mnEdit.add(mntmPaste);
+		
+		mnEdit.addSeparator();
+		
+		mntmDelete = new JMenuItem("Delete");
+		mnEdit.add(mntmDelete);
+		
+		mntmSelectAll = new JMenuItem("Select All");
+		mnEdit.add(mntmSelectAll);
+		
 		JMenu mnRun = new JMenu("Run");
 		mnRun.setMnemonic('R');
 		menuBar.add(mnRun);
@@ -296,6 +320,7 @@ public class PRAiSEDemoApp {
 	private void postGUIInitialization() {		
 		// Wire up the Controller
 		controller = new Controller(this);
+		
 		controller.setActiveEditor(modelEditPanel);
 		
 		outputPanel.setOptions(optionsPanel);
@@ -324,11 +349,21 @@ public class PRAiSEDemoApp {
 		// Exit
 		mntmExit.setAction(controller.getExitAction());
 		// Undo
-		mntmUndo.setAction(controller.getUndoAction());
-		toolBar.btnUndo.setAction(controller.getUndoAction());
+		mntmUndo.setAction(modelEditPanel.getUndoAction());
+		toolBar.btnUndo.setAction(modelEditPanel.getUndoAction());
 		// Redo
-		mntmRedo.setAction(controller.getRedoAction());
-		toolBar.btnRedo.setAction(controller.getRedoAction());
+		mntmRedo.setAction(modelEditPanel.getRedoAction());
+		toolBar.btnRedo.setAction(modelEditPanel.getRedoAction());
+		// Cut
+		mntmCut.setAction(modelEditPanel.getCutAction());
+		// Copy
+		mntmCopy.setAction(modelEditPanel.getCopyAction());
+		// Paste
+		mntmPaste.setAction(modelEditPanel.getPasteAction());
+		// Delete
+		mntmDelete.setAction(modelEditPanel.getDeleteAction());
+		// Select All
+		mntmSelectAll.setAction(modelEditPanel.getSelectAllAction());
 		// Validate
 		mntmValidate.setAction(controller.getValidateAction());
 		toolBar.btnValidate.setAction(controller.getValidateAction());

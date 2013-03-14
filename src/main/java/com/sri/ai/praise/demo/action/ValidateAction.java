@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.demo.action;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -61,12 +62,13 @@ public class ValidateAction extends AbstractAction {
 	
 	public ValidateAction(Controller controller) {
 		this.controller = controller;
+		int mod = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 		putValue(Action.NAME, "Validate Input");
 		putValue(Action.SHORT_DESCRIPTION, "Validate Query Input");
 		putValue(Action.LARGE_ICON_KEY, ImageLookup.VALIDATE_LARGE);
 		putValue(Action.SMALL_ICON, ImageLookup.VALIDATE_SMALL);
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_V);
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, ActionEvent.CTRL_MASK));
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, mod));
 	}
 	
 	@Override

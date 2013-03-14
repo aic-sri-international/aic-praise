@@ -233,6 +233,8 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		
 		resultEditor = new RuleEditor();
 		resultEditor.setEditable(false);
+		resultEditor.setLineNumbersEnabled(false);
+		resultEditor.setHighlightCurrentLine(false);
 		resultPanel.add(resultEditor, BorderLayout.CENTER);
 		
 		JPanel problemsPanel = new JPanel();
@@ -316,22 +318,22 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	
 	private void startJustificationLevel() {
 		if (activeJustificationNode.getChildCount() == 0) {
-			activeJustificationNode = rootJustificationNode;
-		} 
-		else {
-			activeJustificationNode = (ExpressionNode) activeJustificationNode
-					.getChildAt(activeJustificationNode.getChildCount() - 1);
+			addJustification(">>");
 		}
+		
+		activeJustificationNode = (ExpressionNode) activeJustificationNode
+					.getChildAt(activeJustificationNode.getChildCount() - 1);
+
 	}
 	
 	private void startTraceLevel() {
 		if (activeTraceNode.getChildCount() == 0) {
-			activeTraceNode = rootTraceNode;
+			addTrace(">>");
 		} 
-		else {
-			activeTraceNode = (ExpressionNode) activeTraceNode
+
+		activeTraceNode = (ExpressionNode) activeTraceNode
 					.getChildAt(activeTraceNode.getChildCount() - 1);
-		}
+
 	}
 	
 	private void endJustificationLevel() {

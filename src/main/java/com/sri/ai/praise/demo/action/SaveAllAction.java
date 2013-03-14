@@ -61,6 +61,7 @@ public class SaveAllAction extends AbstractAction {
 	
 	public SaveAllAction(Controller controller) {
 		this.controller = controller;
+		
 		putValue(Action.NAME, "Save All");
 		putValue(Action.SHORT_DESCRIPTION, "Save All");
 		putValue(Action.LARGE_ICON_KEY, ImageLookup.SAVE_ALL_LARGE);

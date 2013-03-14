@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.demo.action;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -64,9 +65,9 @@ public class ExecuteQueryAction extends AbstractAction {
 	
 	public ExecuteQueryAction(Controller controller) {
 		this.controller = controller;
-	
+		int mod = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);	
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F11, ActionEvent.CTRL_MASK));
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F11, mod));
 		setRunQueryState();
 	}
 	

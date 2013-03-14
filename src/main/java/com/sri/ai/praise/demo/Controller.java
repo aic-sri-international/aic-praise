@@ -40,6 +40,8 @@ package com.sri.ai.praise.demo;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -55,10 +57,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.UndoManager;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
@@ -80,11 +79,9 @@ import com.sri.ai.praise.demo.action.HideToolBarAction;
 import com.sri.ai.praise.demo.action.NewAction;
 import com.sri.ai.praise.demo.action.NewWindowAction;
 import com.sri.ai.praise.demo.action.OpenFileAction;
-import com.sri.ai.praise.demo.action.RedoAction;
 import com.sri.ai.praise.demo.action.SaveAction;
 import com.sri.ai.praise.demo.action.SaveAllAction;
 import com.sri.ai.praise.demo.action.SaveAsAction;
-import com.sri.ai.praise.demo.action.UndoAction;
 import com.sri.ai.praise.demo.action.ValidateAction;
 import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.lbp.LBPFactory;
@@ -117,8 +114,6 @@ public class Controller {
 	private RuleEditor activeEditor;
 	private File currentModelFile = null;
 	private File currentEvidenceFile = null;
-	private UndoManager modelUndoManager = new UndoManager();
-	private UndoManager evidenceUndoManager = new UndoManager();
 	//
 	private NewAction newAction = null;
 	private OpenFileAction openFileAction = null;
@@ -127,8 +122,6 @@ public class Controller {
 	private SaveAllAction saveAllAction = null;
 	private ExportAction exportAction = null;
 	private ExitAction exitAction = null;
-	private UndoAction undoAction = null;
-	private RedoAction redoAction = null;
 	private ValidateAction validateAction = null;
 	private ExecuteQueryAction executeQueryAction = null;
 	private ClearOutputAction clearOutputAction = null;
@@ -156,31 +149,22 @@ public class Controller {
 		
 		manageTraceAndJustificationListening();
 		
-		modelUndoManager.setLimit(-1);
-		evidenceUndoManager.setLimit(-1);
-		app.modelEditPanel.addUndoableEditListener(new UndoableEditListener() {
+		PropertyChangeListener pl = new PropertyChangeListener() {
 			
 			@Override
-			public void undoableEditHappened(UndoableEditEvent e) {
-				modelUndoManager.undoableEditHappened(e);
-				handleUndoRedo(modelUndoManager);
+			public void propertyChange(PropertyChangeEvent evt) {
+				handleUndoRedo();				
 			}
-		});
-		app.evidenceEditPanel.addUndoableEditListener(new UndoableEditListener() {
-			
-			@Override
-			public void undoableEditHappened(UndoableEditEvent e) {		
-				evidenceUndoManager.undoableEditHappened(e);
-				handleUndoRedo(evidenceUndoManager);
-			}
-		});
+		};
+		
+		app.modelEditPanel.getUndoAction().addPropertyChangeListener(pl);
 		
 		updateAppTitle();
 	}
 	
 	public void setActiveEditor(RuleEditor ae) {
 		this.activeEditor = ae;
-		handleUndoRedo(getActiveUndoManager());
+		handleUndoRedo();
 	}
 	
 	public void setExample(Example example) {
@@ -204,10 +188,9 @@ public class Controller {
 		app.evidenceEditPanel.setText(example.getEvidence());
 		app.queryPanel.setCurrentQuery(example.getQueryToRun());
 		
-		modelUndoManager.discardAllEdits();
-		evidenceUndoManager.discardAllEdits();
+		discardAllEdits();
 		
-		handleUndoRedo(getActiveUndoManager());
+		handleUndoRedo();
 		
 		updateAppTitle();
 	}
@@ -286,28 +269,26 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		}
 	}
 	
-	public void undo() {
-		UndoManager undoManager = getActiveUndoManager();
-		if (undoManager.canUndo()) {
+	public void undo() {		
+		if (activeEditor.canUndo()) {
 			try {
-				undoManager.undo();						
+				activeEditor.undo();						
 			} catch (CannotRedoException cue) {
 				// ignore
 			}
 		}
-		handleUndoRedo(undoManager);
+		handleUndoRedo();
 	}
 	
-	public void redo() {
-		UndoManager undoManager = getActiveUndoManager();
-		if (undoManager.canRedo()) {
+	public void redo() {	
+		if (activeEditor.canRedo()) {
 			try {
-				undoManager.redo();
+				activeEditor.redo();
 			} catch (CannotRedoException cue) {
 				// ignore
 			}
 		}
-		handleUndoRedo(undoManager);
+		handleUndoRedo();
 	}
 	
 	public void validate() {
@@ -513,20 +494,6 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		return exitAction;
 	}
 	
-	public Action getUndoAction() {
-		if (null == undoAction) {
-			undoAction = new UndoAction(this);
-		}
-		return undoAction;
-	}
-	
-	public Action getRedoAction() {
-		if (null == redoAction) {
-			redoAction = new RedoAction(this);
-		}
-		return redoAction;
-	}
-	
 	public Action getValidateAction() {
 		if (null == validateAction) {
 			validateAction = new ValidateAction(this);
@@ -586,18 +553,6 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		app.frame.setTitle(title);
 	}
 	
-	private UndoManager getActiveUndoManager() {
-		return getUndoManager(activeEditor);
-	}
-	
-	private UndoManager getUndoManager(RuleEditor ruleEditor) {
-		UndoManager undoManager = modelUndoManager;
-		if (ruleEditor == app.evidenceEditPanel) {
-			undoManager = evidenceUndoManager;
-		}
-		return undoManager;
-	}
-	
 	public void setOutputFile(RuleEditor editor, File outFile) {
 		if (editor == app.modelEditPanel) {
 			currentModelFile = outFile;
@@ -616,11 +571,8 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		return outFile;
 	}
 	
-	private void handleUndoRedo(UndoManager undoManager) {
-		getUndoAction().setEnabled(undoManager.canUndo());
-		getRedoAction().setEnabled(undoManager.canRedo());
-		
-		if (getActiveUndoManager().canUndo()) {
+	private void handleUndoRedo() {
+		if (activeEditor.canUndo()) {
 			getSaveAction().setEnabled(true);
 			getSaveAsAction().setEnabled(true);
 		}
@@ -638,7 +590,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	private boolean isASaveRequired() {
-		return modelUndoManager.canUndo() || evidenceUndoManager.canUndo();
+		return app.modelEditPanel.canUndo() || app.evidenceEditPanel.canUndo();
 	}
 	
 	private void discardAllEdits() {
@@ -651,13 +603,12 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	private void discardEdits(RuleEditor editor) {
-		UndoManager um = getUndoManager(editor);
-		um.discardAllEdits();
-		handleUndoRedo(um);
+		editor.discardAllEdits();
+		handleUndoRedo();
 	}
 	
 	private void saveIfRequired(RuleEditor editor) {
-		if (getUndoManager(editor).canUndo()) {
+		if (editor.canUndo()) {
 			File outFile = getOutputFile(editor);
 			if (outFile == null) {
 				saveAs(editor);
@@ -669,7 +620,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	private void saveAs(RuleEditor editor) {
-		if (getUndoManager(editor).canUndo()) {
+		if (editor.canUndo()) {
 			File outFile = getOutputFile(editor);
 			if (outFile != null) {
 				fileChooser.setSelectedFile(outFile);

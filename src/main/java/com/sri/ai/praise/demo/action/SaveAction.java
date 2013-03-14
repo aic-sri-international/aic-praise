@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.demo.action;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -61,12 +62,13 @@ public class SaveAction extends AbstractAction {
 	
 	public SaveAction(Controller controller) {
 		this.controller = controller;
+		int mod = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 		putValue(Action.NAME, "Save");
 		putValue(Action.SHORT_DESCRIPTION, "Save");
 		putValue(Action.LARGE_ICON_KEY, ImageLookup.SAVE_LARGE);
 		putValue(Action.SMALL_ICON, ImageLookup.SAVE_SMALL);
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);	
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, mod));
 	}
 	
 	@Override
