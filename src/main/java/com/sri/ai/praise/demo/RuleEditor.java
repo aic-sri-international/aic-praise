@@ -39,6 +39,7 @@ package com.sri.ai.praise.demo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.io.IOException;
 
 import javax.swing.Action;
 import javax.swing.JMenuItem;
@@ -51,6 +52,7 @@ import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
@@ -198,6 +200,14 @@ public class RuleEditor extends JPanel {
 	// PRIVATE
 	//
 	private void postGUISetup() {
+		// Set the Rule Editor Theme
+		try {
+			Theme theme = Theme.load(RuleEditor.class.getResourceAsStream("ruleeditor.theme"));
+			theme.apply(textArea);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+				
 		textArea.getDocument().addDocumentListener(new DocumentListener() {
 			
 			@Override

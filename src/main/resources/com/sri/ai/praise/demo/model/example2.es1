@@ -5,7 +5,7 @@
 //   Run the query:
 // sick(dave)
 //   should give you something like this:
-//       if sick(dave) then 0.0110023000 else 0.988998000
+//       if sick(dave) then 0.0110023 else 0.988998
 notAtWork(X) 0.001;
 //
 // - Step 2:
@@ -14,7 +14,7 @@ notAtWork(X) 0.001;
 //   Run the query:
 // sick(dave)
 //   should give you something like this:
-//     if sick(dave) then 0.0111278000 else 0.988872000
+//     if sick(dave) then 0.0111278 else 0.988872
 //
 // - Step 3:
 //   Comment out the above rule and uncomment this rule (i.e. dave is not at work):
@@ -22,14 +22,14 @@ notAtWork(X) 0.001;
 //   Run the query:
 // sick(dave)
 //   should give you something like this:
-//       if sick(dave) then 0.460003000 else 0.539997000
+//       if sick(dave) then 0.460003 else 0.539997
 //  i.e. it is much more likely that dave is sick now.
 //
 // - Step 4:
 //   Run the query:
 // epidemic
 //   should give you something like this:
-//       if epidemic then 0.00568747000 else 0.994313000
+//       if epidemic then 0.00568747 else 0.994313
 //
 // - Step 5:
 //   Comment out the above rule and uncomment this rule (i.e. no one has shown up to work):
@@ -37,4 +37,4 @@ notAtWork(X) 0.001;
 //   Run the query:
 // epidemic
 //   should give you something like this:
-//      if epidemic then 0.999973000 else 0.0000269113000
+//      if epidemic then 0.999973 else 0.0000269113
