@@ -69,37 +69,47 @@ import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.ParfactorsDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.util.base.Pair;
 
+/**
+ * This class contains methods for dealing with the rules syntax.  It contains
+ * methods for converting from the rules syntax to the lower-level syntax, and
+ * vice versa.  It also contains methods for generating a rules string from a
+ * rules expression.
+ * 
+ * More information about the rules syntax and converting from the rules syntax
+ * to the low level syntax can be found her:
+ * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+ * http://code.google.com/p/aic-praise/wiki/TranslatingInferenceInputAndOutput 
+ * @author etsai
+ *
+ */
 @Beta
 public class RuleConverter {
 
-	public static final String FUNCTOR_ATOMIC_RULE       = "atomic rule";
-	public static final String FUNCTOR_CONDITIONAL_RULE  = "conditional rule";
-	public static final String FUNCTOR_PROLOG_RULE       = "prolog rule";
+	public static final String FUNCTOR_ATOMIC_RULE        = "atomic rule";
+	public static final String FUNCTOR_CONDITIONAL_RULE   = "conditional rule";
+	public static final String FUNCTOR_PROLOG_RULE        = "prolog rule";
 
-	public static final String FUNCTOR_MAY_BE_SAME_AS    = "may be same as";
+	public static final String FUNCTOR_MAY_BE_SAME_AS     = "may be same as";
+	public static final String FUNCTOR_SORT               = "sort";
 
-	public static final String QUERY_STRING              = "query";
+	public static final String TYPE_BOOLEAN               = "Boolean";
+
+	public static final String SYNTACTIC_FORM_TYPE_SYMBOL = "Symbol";
+	public static final String SYNTACTIC_FORM_TYPE_FUNCTION_APPLICATION = "Function application";
+
+	public static final String QUERY_STRING               = "query";
 
 
-	private RuleParserWrapper         ruleParser       = null;
-//	private AntlrGrinderParserWrapper grinderParser    = new AntlrGrinderParserWrapper();
-	private RewritingProcess          rewritingProcess = null;
+	private RuleParserWrapper  ruleParser        = null;
+	private RewritingProcess   rewritingProcess  = null;
 
 	private ReplaceConstraintWithConstant positiveEmbeddedConstraintReplacementFunction = new ReplaceConstraintWithConstant(Expressions.TRUE);
 	private ReplaceConstraintWithConstant negativeEmbeddedConstraintReplacementFunction = new ReplaceConstraintWithConstant(Expressions.FALSE);
-
-
-//	public class RulesConversionProcess {
-//		public List<Expression>                   parfactors;
-//		public List<Expression>                   sorts;
-//		public List<Expression>                   randomVariables;
-//
-//		public Map<String, Set<Integer>>          randomVariableIndex;
-//	}
 
 
 
@@ -109,7 +119,7 @@ public class RuleConverter {
 	public RuleConverter() {
 		// Ensure these are instantiated straight away and not when first referenced.
 		// This helps ensure any global dependencies are setup correctly.
-		rewritingProcess = LBPFactory.newLBPProcess(DefaultSymbol.createSymbol("true"));
+		rewritingProcess = LBPFactory.newLBPProcess(Expressions.TRUE);
 		ruleParser       = new RuleParserWrapper();
 	}
 
@@ -213,7 +223,7 @@ public class RuleConverter {
 
 		// Add declarations for the missing sorts.
 		for (String missingSort : missingSorts) {
-			sorts.add(Expressions.make("sort", missingSort, "Unknown", 
+			sorts.add(Expressions.make(FUNCTOR_SORT, missingSort, SortDeclaration.UNKNOWN_SIZE, 
 					Expressions.make(ExtensionalSet.UNI_SET_LABEL, 
 							Expressions.make(FunctorConstants.KLEENE_LIST))));
 			sortNames.add(missingSort);
@@ -236,32 +246,22 @@ public class RuleConverter {
 				}
 			}
 		}
-//		System.out.println("sort names: " + sortNames);
-//		System.out.println("var index: " + context.randomVariableIndex.toString());
-//		System.out.println("parfactors: " + context.parfactors.toString());
-//		System.out.println("random variables: " + context.randomVariables.toString());
-//		System.out.println("sorts: " + context.sorts.toString());
 
 		// Translate the functions.
-//		System.out.println("Starting translation: " + potentialExpressions);
 		potentialExpressions = translateFunctions(potentialExpressions, randomVariableIndex);
-//		System.out.println("After translating functions: \n" + potentialExpressions);
 
 		// Translate the quantifiers.
 		potentialExpressions = translateQuantifiers(potentialExpressions);
-//		System.out.println("After translating quantifiers: \n" + potentialExpressions);
 
 		// Extract the embedded constraints.
 		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = 
 				disembedConstraints(potentialExpressions);
-//		System.out.println("After extracting constraints: \n" + potentialExpressionAndConstraintList);
 
 		// Translate the potential expression/constraint pair into a parfactor.
 		potentialExpressions = new ArrayList<Expression>();
 		for (Pair<Expression, Expression> pair : potentialExpressionAndConstraintList) {
 			potentialExpressions.add(createParfactor(pair.first, pair.second));
 		}
-//		System.out.println("Final parfactors: \n" + potentialExpressions);
 		
 		// Create the model object output.
 		return new Pair<Expression, Model>(queryAtom, createModel(name, description, sorts, randomVariables, potentialExpressions));
@@ -327,19 +327,19 @@ public class RuleConverter {
 				} 
 				//if the then clause is true, return the else clause
 				else if (translationOfE1.equals(Expressions.TRUE)) {
-					return new DefaultCompoundSyntaxTree("conditional rule",
+					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE,
 							Not.make(condition),
 							translationOfE2);
 				} 
 				//if the else clause is true, return the if clause
 				else if (translationOfE2.equals(Expressions.TRUE)) {
-					return new DefaultCompoundSyntaxTree("conditional rule",
+					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE,
 							condition,
 							translationOfE1);
 				}
 				//if neither is true, then return the simplified form
 				else {
-					return new DefaultCompoundSyntaxTree("conditional rule", 
+					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE, 
 							condition, 
 							translationOfE1, 
 							translationOfE2);
@@ -347,7 +347,7 @@ public class RuleConverter {
 			}
 			else {
 				//assume that the 'condition' is a random variable value
-				return Expressions.apply("atomic rule", condition, input.get(1));
+				return Expressions.apply(FUNCTOR_ATOMIC_RULE, condition, input.get(1));
 			}
 		}
 		
@@ -409,7 +409,7 @@ public class RuleConverter {
 			}
 		}
 
-		resultArgs.add(DefaultSymbol.createSymbol("Boolean"));
+		resultArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
 		if (resultArgs.size() == queryArgs.size() + 3) {
 			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
 		}
@@ -440,9 +440,8 @@ public class RuleConverter {
 			modelArgs.add(randomVariable);
 			randomVariableNames.add(randomVariable.get(0).toString());
 		}
-		modelArgs.add(Expressions.apply("parfactors", potentialExpressions));
-		Expression modelExpression = Expressions.apply("model", modelArgs);
-//		System.out.println("The model: " + modelExpression);
+		modelArgs.add(Expressions.apply(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION, potentialExpressions));
+		Expression modelExpression = Expressions.apply(Model.FUNCTOR_MODEL_DECLARATION, modelArgs);
 
 		return new Model(modelExpression, randomVariableNames);
 	}
@@ -469,14 +468,6 @@ public class RuleConverter {
 		return new Pair<Expression, Expression>(queryAtom, queryRule);
 	}
 
-
-//	public List<Expression> translateRules (List<Expression> rules) {
-//		List<Expression> result = new ArrayList<Expression>();
-//		for (Expression rule : rules) {
-//			result.add(translateRule(rule));
-//		}
-//		return result;
-//	}
 
 	/**
 	 * Convert the given rule into its "if . then . else ." form.
@@ -612,7 +603,7 @@ public class RuleConverter {
 		}
 
 		// If it is a symbol representing a function that takes no arguments, return true.
-		if (e.getSyntacticFormType().equals("Symbol")) {
+		if (e.getSyntacticFormType().equals(SYNTACTIC_FORM_TYPE_SYMBOL)) {
 			if (randomVariableIndex == null) {
 				return false;
 			}
@@ -636,7 +627,7 @@ public class RuleConverter {
 	 */
 	public boolean isRandomFunctionApplication (Expression e) {
 		// If the expression is not a function application, return false.
-		if (!e.getSyntacticFormType().equals("Function application")) {
+		if (!e.getSyntacticFormType().equals(SYNTACTIC_FORM_TYPE_FUNCTION_APPLICATION)) {
 			return false;
 		}
 
@@ -708,7 +699,7 @@ public class RuleConverter {
 
 		// If the return type is Boolean, don't update the declaration.
 		List<Expression> oldArgs = randomVariableDecl.getArguments();
-		if (oldArgs.get(oldArgs.size()-1).equals("Boolean"))
+		if (oldArgs.get(oldArgs.size()-1).equals(TYPE_BOOLEAN))
 			return randomVariableDecl;
 
 		// Transfer all the args, but change the arg defining how many args the 
@@ -722,7 +713,7 @@ public class RuleConverter {
 		}
 
 		// Change the return type to boolean.
-		newArgs.add(DefaultSymbol.createSymbol("Boolean"));
+		newArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
 		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
 	}
 
@@ -913,7 +904,7 @@ public class RuleConverter {
 				
 			}
 		}
-		return new DefaultCompoundSyntaxTree("-", 1, potential);
+		return new DefaultCompoundSyntaxTree(FunctorConstants.MINUS, 1, potential);
 	}
 
 	/**
@@ -959,7 +950,7 @@ public class RuleConverter {
 	 */
 	private void toRuleString (Expression expression, StringBuffer sb, boolean isFirst) {
 		// If the expression is a symbol, just append the symbol name.
-		if (expression.getSyntacticFormType().equals("Symbol")) {
+		if (expression.getSyntacticFormType().equals(SYNTACTIC_FORM_TYPE_SYMBOL)) {
 			sb.append(expression.toString());
 			return;
 		}
