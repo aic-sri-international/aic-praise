@@ -493,8 +493,9 @@ public class RuleConverter {
 	 */
 	public Expression translateAtomicRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
-		if (args.size() != 2)
+		if (args.size() != 2) {
 			return null;
+		}
 
 		return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
 				args.get(1), oneMinusPotential(args.get(1)));
@@ -693,22 +694,26 @@ public class RuleConverter {
 	 * @return  A low-level representation of the random variable declaration.
 	 */
 	public Expression updateRandomVariableDeclaration (Expression randomVariableDecl) {
-		if (!randomVariableDecl.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION))
+		if (!randomVariableDecl.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
 			return null;
+		}
 
 		// If the return type is Boolean, don't update the declaration.
 		List<Expression> oldArgs = randomVariableDecl.getArguments();
-		if (oldArgs.get(oldArgs.size()-1).equals(TYPE_BOOLEAN))
+		if (oldArgs.get(oldArgs.size()-1).equals(TYPE_BOOLEAN)) {
 			return randomVariableDecl;
+		}
 
 		// Transfer all the args, but change the arg defining how many args the 
 		// random variable has.
 		List<Expression> newArgs = new ArrayList<Expression>(oldArgs.size()+1);
 		for (int ii = 0; ii < oldArgs.size(); ii++) {
-			if (ii == 1)
+			if (ii == 1) {
 				newArgs.add(DefaultSymbol.createSymbol(oldArgs.size() - 2));
-			else
+			}
+			else {
 				newArgs.add(oldArgs.get(ii));
+			}
 		}
 
 		// Change the return type to boolean.
