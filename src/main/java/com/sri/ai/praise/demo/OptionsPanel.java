@@ -78,8 +78,9 @@ public class OptionsPanel extends JPanel {
 	private static final String ASYNC_INDIVIDUAL = "ASYNC INDIVIDUAL";
 	private static final String ASYNC_GROUP      = "ASYNC GROUP";
 	// Note: These are global options, that apply to all open windows at the same time.
-	private static SpinnerNumberModel _precisionModel        = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_PRECISION, 1, 80, 1);
-	private static SpinnerNumberModel _scientificOutputModel = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_SCIENTIFIC_AFTER, 2, 80, 1);
+	private static SpinnerNumberModel _precisionModel               = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_PRECISION, 1, 80, 1);
+	private static SpinnerNumberModel _scientificGreaterOutputModel = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_SCIENTIFIC_GREATER, 2, 80, 1);
+	private static SpinnerNumberModel _scientificAfterOutputModel   = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_SCIENTIFIC_AFTER, 2, 80, 1);
 	{
 		_precisionModel.addChangeListener(new ChangeListener() {
 			
@@ -88,11 +89,18 @@ public class OptionsPanel extends JPanel {
 				DefaultSymbol.setNumericDisplayPrecision((Integer)_precisionModel.getValue());				
 			}
 		});
-		_scientificOutputModel.addChangeListener(new ChangeListener() {
+		_scientificGreaterOutputModel.addChangeListener(new ChangeListener() {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				DefaultSymbol.setDisplayScientificAfterNDecimalPlaces((Integer)_scientificOutputModel.getValue());	
+				DefaultSymbol.setDisplayScientificGreaterNIntegerPlaces((Integer)_scientificGreaterOutputModel.getValue());	
+			}
+		});
+		_scientificAfterOutputModel.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				DefaultSymbol.setDisplayScientificAfterNDecimalPlaces((Integer)_scientificAfterOutputModel.getValue());	
 			}
 		});
 	}
@@ -109,7 +117,8 @@ public class OptionsPanel extends JPanel {
 	JCheckBox chckbxKnownDomainSize;
 	JCheckBox chckbxAssumeDomainsAlwaysLarge;
 	private JSpinner precisionSpinner;
-	private JSpinner scientificOutputSpinner;
+	private JSpinner scientificAfterSpinner;
+	private JSpinner scientificGreaterSpinner;
 
 	/**
 	 * Create the panel.
@@ -352,26 +361,37 @@ public class OptionsPanel extends JPanel {
 		JPanel precisionPanel = new JPanel();
 		precisionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		optionsPanel.add(precisionPanel);
-		precisionPanel.setLayout(new BorderLayout(0, 0));
+		precisionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		
+		JLabel precisionLabel = new JLabel("Numeric Precision:");
+		precisionPanel.add(precisionLabel);
 		
 		precisionSpinner = new JSpinner();
 		precisionSpinner.setModel(_precisionModel);
-		precisionPanel.add(precisionSpinner, BorderLayout.WEST);
-		
-		JLabel precisionLabel = new JLabel("Numeric Precision");
-		precisionPanel.add(precisionLabel, BorderLayout.CENTER);
+		precisionPanel.add(precisionSpinner);
 		
 		JPanel scientificOutputPanel = new JPanel();
 		scientificOutputPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		optionsPanel.add(scientificOutputPanel);
-		scientificOutputPanel.setLayout(new BorderLayout(0, 0));
+		scientificOutputPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
-		scientificOutputSpinner = new JSpinner();
-		scientificOutputSpinner.setModel(_scientificOutputModel);
-		scientificOutputPanel.add(scientificOutputSpinner, BorderLayout.WEST);
+		JPanel scientificGreaterPanel = new JPanel();
+		scientificOutputPanel.add(scientificGreaterPanel);
+		scientificGreaterPanel.setLayout(new BoxLayout(scientificGreaterPanel, BoxLayout.X_AXIS));
 		
-		JLabel scientificLabel = new JLabel("Display Scientific After N Decimal Places");
-		scientificOutputPanel.add(scientificLabel, BorderLayout.CENTER);
+		JLabel scientificLabel = new JLabel("Use Scientific When Outside Range: ");
+		scientificGreaterPanel.add(scientificLabel);
+		
+		scientificGreaterSpinner = new JSpinner();
+		scientificGreaterPanel.add(scientificGreaterSpinner);
+		scientificGreaterSpinner.setModel(_scientificGreaterOutputModel);
+		
+		JLabel dotLabel = new JLabel(".");
+		scientificGreaterPanel.add(dotLabel);
+		
+		scientificAfterSpinner = new JSpinner();
+		scientificGreaterPanel.add(scientificAfterSpinner);
+		scientificAfterSpinner.setModel(_scientificAfterOutputModel);
 	}
 
 	private void postGUIInitialization() {

@@ -713,7 +713,8 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	
 	private int[] validateRuleParse(String string, boolean calculateErrorBeginIndex) {
 		int[] result = null;
-		if (string.trim().length() > 0) {
+		// Ensure at least one token exists, i.e. could be all comments or whitespace.
+		if (containsRules(string)) {
 	    	try {
 	    		CharStream cs = new ANTLRStringStream(string);
 	    		RuleLexer lexer = new RuleLexer(cs);
@@ -759,6 +760,29 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 				priorIndex = 0;
 			}
 			priorIndex--;
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Checks to ensure the passed in string is not whitespace or comments only.
+	 * @param string
+	 * @return
+	 */
+	private boolean containsRules(String string) {
+		boolean result = true;
+		CharStream cs = new ANTLRStringStream(string.trim());
+		RuleLexer lexer = new RuleLexer(cs);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		try {
+			Token token = tokens.LT(1);
+			if (token.getType() == RuleLexer.EOF) {
+				result = false;
+			}
+		} catch (RuntimeException ex) {
+			// This is another problem, i.e. invalid token, so will let follow
+			// on logic handle this when it tries to parse.
 		}
 		
 		return result;

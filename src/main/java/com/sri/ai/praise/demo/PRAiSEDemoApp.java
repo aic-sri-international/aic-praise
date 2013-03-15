@@ -76,8 +76,9 @@ import java.beans.PropertyChangeListener;
  */
 @Beta
 public class PRAiSEDemoApp {
-	public static final int DISPLAY_PRECISION        = 2;
-	public static final int DISPLAY_SCIENTIFIC_AFTER = 4; 
+	public static final int DISPLAY_PRECISION          = 2;
+	public static final int DISPLAY_SCIENTIFIC_GREATER = 6;
+	public static final int DISPLAY_SCIENTIFIC_AFTER   = 4; 
 
 	JFrame frame;
 	ToolBarPanel toolBar = new ToolBarPanel();
@@ -125,6 +126,7 @@ public class PRAiSEDemoApp {
 		
 		// Assign display defaults for numerics
 		DefaultSymbol.setNumericDisplayPrecision(DISPLAY_PRECISION);
+		DefaultSymbol.setDisplayScientificGreaterNIntegerPlaces(DISPLAY_SCIENTIFIC_GREATER);
 		DefaultSymbol.setDisplayScientificAfterNDecimalPlaces(DISPLAY_SCIENTIFIC_AFTER);
 		
 		EventQueue.invokeLater(new Runnable() {
