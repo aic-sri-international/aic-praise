@@ -224,8 +224,7 @@ public class RuleConverter {
 		// Add declarations for the missing sorts.
 		for (String missingSort : missingSorts) {
 			sorts.add(Expressions.make(FUNCTOR_SORT, missingSort, SortDeclaration.UNKNOWN_SIZE, 
-					Expressions.make(ExtensionalSet.UNI_SET_LABEL, 
-							Expressions.make(FunctorConstants.KLEENE_LIST))));
+					ExtensionalSet.makeEmptySetExpression()));
 			sortNames.add(missingSort);
 		}
 		
