@@ -44,6 +44,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.demo.model.Example1;
@@ -119,6 +120,10 @@ public class PRAiSEDemoApp {
 		// relevant appenders are registered.
 		GrinderConfiguration.disableTrace();
 		GrinderConfiguration.disableJustification();
+		
+		// Assign display defaults for numerics
+		DefaultSymbol.setNumericDisplayPrecision(2);
+		DefaultSymbol.setDisplayScientificAfterNDecimalPlaces(4);
 		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
