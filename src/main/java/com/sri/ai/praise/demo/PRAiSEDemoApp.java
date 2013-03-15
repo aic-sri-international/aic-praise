@@ -76,6 +76,8 @@ import java.beans.PropertyChangeListener;
  */
 @Beta
 public class PRAiSEDemoApp {
+	public static final int DISPLAY_PRECISION        = 2;
+	public static final int DISPLAY_SCIENTIFIC_AFTER = 4; 
 
 	JFrame frame;
 	ToolBarPanel toolBar = new ToolBarPanel();
@@ -122,8 +124,8 @@ public class PRAiSEDemoApp {
 		GrinderConfiguration.disableJustification();
 		
 		// Assign display defaults for numerics
-		DefaultSymbol.setNumericDisplayPrecision(2);
-		DefaultSymbol.setDisplayScientificAfterNDecimalPlaces(4);
+		DefaultSymbol.setNumericDisplayPrecision(DISPLAY_PRECISION);
+		DefaultSymbol.setDisplayScientificAfterNDecimalPlaces(DISPLAY_SCIENTIFIC_AFTER);
 		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {

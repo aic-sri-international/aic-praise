@@ -55,10 +55,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.util.Util;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 /**
  * 
@@ -72,6 +77,25 @@ public class OptionsPanel extends JPanel {
 	private static final String SYNCHRONOUS      = "SYNCHRONOUS";
 	private static final String ASYNC_INDIVIDUAL = "ASYNC INDIVIDUAL";
 	private static final String ASYNC_GROUP      = "ASYNC GROUP";
+	// Note: These are global options, that apply to all open windows at the same time.
+	private static SpinnerNumberModel _precisionModel        = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_PRECISION, 1, 80, 1);
+	private static SpinnerNumberModel _scientificOutputModel = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_SCIENTIFIC_AFTER, 2, 80, 1);
+	{
+		_precisionModel.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				DefaultSymbol.setNumericDisplayPrecision((Integer)_precisionModel.getValue());				
+			}
+		});
+		_scientificOutputModel.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				DefaultSymbol.setDisplayScientificAfterNDecimalPlaces((Integer)_scientificOutputModel.getValue());	
+			}
+		});
+	}
 	//
 	JFormattedTextField domainSizeTextField = null;
 	JComboBox scheduleComboBox;
@@ -84,6 +108,8 @@ public class OptionsPanel extends JPanel {
 	JCheckBox chckbxOverrideModel;
 	JCheckBox chckbxKnownDomainSize;
 	JCheckBox chckbxAssumeDomainsAlwaysLarge;
+	private JSpinner precisionSpinner;
+	private JSpinner scientificOutputSpinner;
 
 	/**
 	 * Create the panel.
@@ -319,6 +345,33 @@ public class OptionsPanel extends JPanel {
 		chckbxTraceToTrace.setSelected(true);
 		chckbxTraceToTrace.setPreferredSize(new Dimension(200, 25));
 		traceOutputToTracePanel.add(chckbxTraceToTrace);
+		
+		JSeparator separator = new JSeparator();
+		optionsPanel.add(separator);
+		
+		JPanel precisionPanel = new JPanel();
+		precisionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		optionsPanel.add(precisionPanel);
+		precisionPanel.setLayout(new BorderLayout(0, 0));
+		
+		precisionSpinner = new JSpinner();
+		precisionSpinner.setModel(_precisionModel);
+		precisionPanel.add(precisionSpinner, BorderLayout.WEST);
+		
+		JLabel precisionLabel = new JLabel("Numeric Precision");
+		precisionPanel.add(precisionLabel, BorderLayout.CENTER);
+		
+		JPanel scientificOutputPanel = new JPanel();
+		scientificOutputPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		optionsPanel.add(scientificOutputPanel);
+		scientificOutputPanel.setLayout(new BorderLayout(0, 0));
+		
+		scientificOutputSpinner = new JSpinner();
+		scientificOutputSpinner.setModel(_scientificOutputModel);
+		scientificOutputPanel.add(scientificOutputSpinner, BorderLayout.WEST);
+		
+		JLabel scientificLabel = new JLabel("Display Scientific After N Decimal Places");
+		scientificOutputPanel.add(scientificLabel, BorderLayout.CENTER);
 	}
 
 	private void postGUIInitialization() {
