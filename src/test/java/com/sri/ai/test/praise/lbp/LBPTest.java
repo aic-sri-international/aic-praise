@@ -3980,7 +3980,7 @@ public class LBPTest extends AbstractLPITest {
 				}
 			}
 		});
-		queryEngine.addTraceListener(new LBPQueryEngine.TraceListener() {
+		LBPQueryEngine.TraceListener traceListener = new LBPQueryEngine.TraceListener() {
 			
 			@Override
 			public void traceEvent(String queryUUID, int traceLevel, Long profileInfo, Marker marker,
@@ -3991,9 +3991,9 @@ public class LBPTest extends AbstractLPITest {
 				sb.append(formattedMsg);
 				sb.append("\n");
 			}
-		});
-		queryEngine.addJustificationListener(new LBPQueryEngine.JustificationListener() {
-			
+		};
+		queryEngine.addTraceListener(traceListener);
+		LBPQueryEngine.JustificationListener justificationListener = new LBPQueryEngine.JustificationListener() {			
 			@Override
 			public void justificationEvent(String queryUUID, int justificationLevel,
 					Marker marker, String formattedMsg, Object... args) {
@@ -4006,7 +4006,8 @@ public class LBPTest extends AbstractLPITest {
 				}
 				sb.append("\n");
 			}
-		});
+		};
+		queryEngine.addJustificationListener(justificationListener);
 		
 		final Map<String, String> results = new HashMap<String, String>();
 		
@@ -4059,6 +4060,9 @@ public class LBPTest extends AbstractLPITest {
 		} catch (InterruptedException ie) {
 			Assert.fail();
 		} 
+		
+		queryEngine.removeTraceListener(traceListener);
+		queryEngine.removeJustificationListener(justificationListener);
 		
 		System.out.println("QUERY 1 - TRACE");
 		System.out.println(queryTraceOutput.get(queryUUID1).toString());

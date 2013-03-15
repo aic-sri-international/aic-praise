@@ -97,7 +97,9 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 	private static final String STEP_6 = "Step 6 create new Belief expression from 1 and 2 using step 4";
 	private static final String STEP_7 = "Step 7 set precision on result of step 6";
 	//
-	private static LoggerContext _loggerContext = null;
+	private static LoggerContext _loggerContext             = null;
+	private static Level         _traceInitialLevel         = null;
+	private static Level         _justificationInitialLevel = null;
 	{
 		while (_loggerContext == null) {
 			ILoggerFactory lf = LoggerFactory.getILoggerFactory();
@@ -112,6 +114,8 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 				}
 			}
 		}
+		_traceInitialLevel         = _loggerContext.getLogger(Trace.getDefaultLoggerName()).getLevel();
+		_justificationInitialLevel = _loggerContext.getLogger(Justification.getDefaultLoggerName()).getLevel();
 	}
 	private static AtomicInteger _numberTraceListeners         = new AtomicInteger(0);
 	private static AtomicInteger _numberJustificationListeners = new AtomicInteger(0);
@@ -161,7 +165,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		synchronized (traceListeners) {
 			if (traceListeners.remove(listener)) {
 				if (_numberTraceListeners.decrementAndGet() == 0) {
-					_loggerContext.getLogger(Trace.getDefaultLoggerName()).setLevel(Level.OFF);
+					_loggerContext.getLogger(Trace.getDefaultLoggerName()).setLevel(_traceInitialLevel);
 				}
 			}
 		}
@@ -184,7 +188,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		synchronized (justificationListeners) {
 			if (justificationListeners.remove(listener)) {
 				if (_numberJustificationListeners.decrementAndGet() == 0) {
-					_loggerContext.getLogger(Justification.getDefaultLoggerName()).setLevel(Level.OFF);
+					_loggerContext.getLogger(Justification.getDefaultLoggerName()).setLevel(_justificationInitialLevel);
 				}
 			}
 		}
