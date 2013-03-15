@@ -93,6 +93,8 @@ public class RuleConverter {
 	public static final String FUNCTOR_ATOMIC_RULE        = "atomic rule";
 	public static final String FUNCTOR_CONDITIONAL_RULE   = "conditional rule";
 	public static final String FUNCTOR_PROLOG_RULE        = "prolog rule";
+	public static final String FUNCTOR_STANDARD_PROB_RULE = "standard probability rule";
+	public static final String FUNCTOR_CAUSAL_RULE        = "causal rule";
 
 	public static final String FUNCTOR_MAY_BE_SAME_AS     = "may be same as";
 	public static final String FUNCTOR_SORT               = "sort";
@@ -193,6 +195,12 @@ public class RuleConverter {
 			}
 			else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
 				potentialExpressions.add(translateConditionalRule(rule));
+			}
+			else if (rule.getFunctor().equals(FUNCTOR_STANDARD_PROB_RULE)) {
+				potentialExpressions.add(translateStandardProbabilityRule(rule));
+			}
+			else if (rule.getFunctor().equals(FUNCTOR_CAUSAL_RULE)) {
+				potentialExpressions.add(translateCausalRule(rule));
 			}
 			else if (rule.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
 				randomVariables.add(this.updateRandomVariableDeclaration(rule));
@@ -511,6 +519,12 @@ public class RuleConverter {
 		else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
 			return translateConditionalRule(rule);
 		}
+		else if (rule.getFunctor().equals(FUNCTOR_STANDARD_PROB_RULE)) {
+			return translateStandardProbabilityRule(rule);
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_CAUSAL_RULE)) {
+			return translateCausalRule(rule);
+		}
 		return rule;
 	}
 	
@@ -588,6 +602,24 @@ public class RuleConverter {
 			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
 					this.translateRule(args.get(1)),
 					this.translateRule(args.get(2)));
+		}
+		return null;
+	}
+
+	public Expression translateStandardProbabilityRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		if (args.size() == 3) {
+			return this.translateConditionalRule(Expressions.make(FUNCTOR_CONDITIONAL_RULE, args.get(1), 
+					Expressions.make(FUNCTOR_ATOMIC_RULE, args.get(0), args.get(2))));
+		}
+		return null;
+	}
+
+	public Expression translateCausalRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		if (args.size() == 2) {
+			return this.translateConditionalRule(Expressions.make(FUNCTOR_CONDITIONAL_RULE, args.get(0), 
+					args.get(1)));
 		}
 		return null;
 	}
@@ -1114,6 +1146,34 @@ public class RuleConverter {
 			sb.append('.');
 			return;
 		}
+
+		// Handle standard probability rules.
+		if (functorString.equals(FUNCTOR_STANDARD_PROB_RULE)) {
+			List<Expression> args = expression.getArguments();
+			sb.append("P(");
+			toRuleString(args.get(0), sb);
+			sb.append(" | ");
+			toRuleString(args.get(1), sb);
+			sb.append(") = ");
+			toRuleString(args.get(2), sb);
+			if (isFirst) {
+				sb.append(';');
+			}
+			return;
+		}
+
+		// Handle causal rules.
+		if (functorString.equals(FUNCTOR_CAUSAL_RULE)) {
+			List<Expression> args = expression.getArguments();
+			toRuleString(args.get(0), sb);
+			sb.append(" -> ");
+			toRuleString(args.get(1), sb);
+			if (isFirst) {
+				sb.append(';');
+			}
+			return;
+		}
+
 
 		// Handle minus expression.
 		if (functorString.equals("minus") && expression.getArguments().size() == 2) {

@@ -36,6 +36,9 @@ tokens {
     PROLOGEXPRESSION3 ;
     PROLOGEXPRESSION4 ;
 
+    STANDARDPROBABILITYEXPRESSION ;
+    CAUSALEXPRESSION ;
+
     THEREEXISTS ;
     FORALL ;
     MAYBESAMEAS ;
@@ -102,12 +105,16 @@ sort_decl
 rule
     : prolog_rule
     | conditional_rule SEMICOLON!
+    | standard_probability_rule SEMICOLON!
+    | causal_rule SEMICOLON!
     | atomic_rule SEMICOLON!
     ;
 
 raw_rule
     : prolog_rule
     | conditional_rule
+    | standard_probability_rule
+    | causal_rule
     | atomic_rule
     ;
 
@@ -128,6 +135,13 @@ atomic_rule
     | formula           -> ^(POTENTIALEXPRESSION1 formula)
     ;
 
+standard_probability_rule
+    : P OPEN_PAREN formula VERT_BAR formula CLOSE_PAREN EQUAL potential -> ^(STANDARDPROBABILITYEXPRESSION formula+ potential)
+    ;
+
+causal_rule
+    : formula SINGLE_ARROW raw_rule -> ^(CAUSALEXPRESSION formula raw_rule)
+    ;
 
 //=============================
 // FORMULA
@@ -253,6 +267,7 @@ atomic_symbol
     | DIVIDE               -> ^(SYMBOL ID[$DIVIDE.text])
     | CARAT                -> ^(SYMBOL ID[$CARAT.text])
     | NOT                  -> ^(SYMBOL ID[$NOT.text])
+    | P                    -> ^(SYMBOL ID[$P.text])
 //    | IF                   -> ^(SYMBOL ID[$IF.text])
 //    | THEN                 -> ^(SYMBOL ID[$THEN.text])
 //    | ELSE                 -> ^(SYMBOL ID[$ELSE.text])

@@ -112,62 +112,62 @@ public class RuleParserTest extends AbstractParserTest {
 
 		string = "sick(X) 0.3;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
-				new DefaultCompoundSyntaxTree("sick", "X"), "0.300000000"));
+				new DefaultCompoundSyntaxTree("sick", "X"), "0.3"));
 
 		string = "sick(X) 0.3 + 0.1;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("+", "0.300000000", "0.100000000")));
+				new DefaultCompoundSyntaxTree("+", "0.3", "0.1")));
 
 		string = "sick(X) 0.3+0.1;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("+", "0.300000000", "0.100000000")));
+				new DefaultCompoundSyntaxTree("+", "0.3", "0.1")));
 
 		string = "sick(X) 0.3 * 0.1;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("*", "0.300000000", "0.100000000")));
+				new DefaultCompoundSyntaxTree("*", "0.3", "0.1")));
 
 		string = "sick(X) 0.3*0.1;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("*", "0.300000000", "0.100000000")));
+				new DefaultCompoundSyntaxTree("*", "0.3", "0.1")));
 
 		string = "sick(X) 0.3 - 0.1;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("-", "0.300000000", "0.100000000")));
+				new DefaultCompoundSyntaxTree("-", "0.3", "0.1")));
 
 		string = "sick(X) 0.3-0.1;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("-", "0.300000000", "0.100000000")));
+				new DefaultCompoundSyntaxTree("-", "0.3", "0.1")));
 
 		string = "sick(X) 0.3 minus 0.1;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("minus", "0.300000000", "0.100000000")));
+				new DefaultCompoundSyntaxTree("minus", "0.3", "0.1")));
 
 		string = "sick(X) 0.3 / 2;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("/", "0.300000000", "2")));
+				new DefaultCompoundSyntaxTree("/", "0.3", "2")));
 
 		string = "sick(X) 0.3/2;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("/", "0.300000000", "2")));
+				new DefaultCompoundSyntaxTree("/", "0.3", "2")));
 
 		string = "sick(X) 0.3 ^ 2;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("^", "0.300000000", "2")));
+				new DefaultCompoundSyntaxTree("^", "0.3", "2")));
 
 		string = "sick(X) 0.3^2;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("^", "0.300000000", "2")));
+				new DefaultCompoundSyntaxTree("^", "0.3", "2")));
 
 		string = "sick(X) and happy(X);";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
@@ -179,7 +179,7 @@ public class RuleParserTest extends AbstractParserTest {
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
-						new DefaultCompoundSyntaxTree("happy", "X")), "0.100000000"));
+						new DefaultCompoundSyntaxTree("happy", "X")), "0.1"));
 
 		string = "sick(john) = sick(bob);";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
@@ -208,14 +208,14 @@ public class RuleParserTest extends AbstractParserTest {
 		string = "if epidemic then sick(X) 0.7;";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "X"), "0.700000000")));
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.7")));
 
 		string = "if epidemic then sick(X) and unhappy(X) 0.9;";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
 				new DefaultCompoundSyntaxTree("atomic rule", 
 						new DefaultCompoundSyntaxTree("and", 
 								new DefaultCompoundSyntaxTree("sick", "X"), 
-								new DefaultCompoundSyntaxTree("unhappy", "X")), "0.900000000")));
+								new DefaultCompoundSyntaxTree("unhappy", "X")), "0.9")));
 
 		string = "if chilly(P) and live(X, P) then sick(X) 0.6;";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", 
@@ -223,13 +223,13 @@ public class RuleParserTest extends AbstractParserTest {
 						new DefaultCompoundSyntaxTree("chilly", "P"), 
 						new DefaultCompoundSyntaxTree("live", "X", "P")), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "X"), "0.600000000")));
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.6")));
 
 		string = "if colleagues(X,Y) then likes(X,Y) 0.8;";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("colleagues", "X", "Y"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("likes", "X", "Y"), "0.800000000")));
+						new DefaultCompoundSyntaxTree("likes", "X", "Y"), "0.8")));
 
 		string = "if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8;";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
@@ -238,7 +238,7 @@ public class RuleParserTest extends AbstractParserTest {
 								new DefaultCompoundSyntaxTree("sick", "X"), 
 								new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 						new DefaultCompoundSyntaxTree("atomic rule", 
-								new DefaultCompoundSyntaxTree("sick", "Y"), "0.800000000"))));
+								new DefaultCompoundSyntaxTree("sick", "Y"), "0.8"))));
 
 		string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", 
@@ -246,7 +246,7 @@ public class RuleParserTest extends AbstractParserTest {
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "0.800000000"), 
+						new DefaultCompoundSyntaxTree("sick", "Y"), "0.8"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
 						new DefaultCompoundSyntaxTree("sick", "Y"), 1)));
 
@@ -256,17 +256,17 @@ public class RuleParserTest extends AbstractParserTest {
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "0.800000000"), 
+						new DefaultCompoundSyntaxTree("sick", "Y"), "0.8"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "0.300000000")));
+						new DefaultCompoundSyntaxTree("sick", "Y"), "0.3")));
 
 		string = "if epidemic then 0.7 sick(X) :- not vaccinated(X). else 0.7 sick(X).;";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
-				new DefaultCompoundSyntaxTree("prolog rule", "0.700000000", 
+				new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("not", 
 								new DefaultCompoundSyntaxTree("vaccinated", "X"))), 
-				new DefaultCompoundSyntaxTree("prolog rule", "0.700000000", 
+				new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
 						new DefaultCompoundSyntaxTree("sick", "X"))));
 
 		System.out.println("test count = " + testCount);
@@ -289,7 +289,7 @@ public class RuleParserTest extends AbstractParserTest {
 				new DefaultCompoundSyntaxTree("sick", "mary"))));
 
 		string = "0.3 sick(X).";
-		test(string, new DefaultCompoundSyntaxTree("prolog rule", "0.300000000", 
+		test(string, new DefaultCompoundSyntaxTree("prolog rule", "0.3", 
 				new DefaultCompoundSyntaxTree("sick", "X")));
 
 		string = "round(X) :- circle(X).";
@@ -298,13 +298,51 @@ public class RuleParserTest extends AbstractParserTest {
 				new DefaultCompoundSyntaxTree("circle", "X")));
 
 		string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
-		test(string, new DefaultCompoundSyntaxTree("prolog rule", "0.700000000", 
+		test(string, new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
 				new DefaultCompoundSyntaxTree("and", "epidemic", 
 						new DefaultCompoundSyntaxTree("not", 
 								new DefaultCompoundSyntaxTree("vaccinated", "X")))));
 
 		System.out.println("test count = " + testCount);
+	}
+
+	@Test
+	public void testStandardProbabilityExpression () {
+		String string;
+		string = "P(sick(X) | epidemic) = 0.8;";
+		test(string, new DefaultCompoundSyntaxTree("standard probability rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "epidemic", "0.8"));
+
+		string = "P(sick(X) and happy(Y) | mother(Z)) = 0.4;";
+		test(string, new DefaultCompoundSyntaxTree("standard probability rule", 
+				new DefaultCompoundSyntaxTree("and", 
+						new DefaultCompoundSyntaxTree("sick", "X"), 
+						new DefaultCompoundSyntaxTree("happy", "Y")), 
+				new DefaultCompoundSyntaxTree("mother", "Z"), "0.4"));
+
+		string = "P(sick(X) | epidemic);";
+		testFail(string);
+
+	}
+
+	@Test
+	public void testCausalExpression () {
+		String string;
+		string = "sick(X) -> fever(X) 0.6;";
+		test(string, new DefaultCompoundSyntaxTree("causal rule", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("atomic rule", 
+						new DefaultCompoundSyntaxTree("fever", "X"), "0.6")));
+		
+		string = "sick(X) and happy(Y) -> fever(X) 0.6;";
+		test(string, new DefaultCompoundSyntaxTree("causal rule", 
+				new DefaultCompoundSyntaxTree("and", 
+						new DefaultCompoundSyntaxTree("sick", "X"), 
+						new DefaultCompoundSyntaxTree("happy", "Y")), 
+				new DefaultCompoundSyntaxTree("atomic rule", 
+						new DefaultCompoundSyntaxTree("fever", "X"), "0.6")));
+
 	}
 
 	@Test

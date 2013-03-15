@@ -28,6 +28,7 @@ public void recover(RecognitionException e) {
     ------------------------
     Add any terminal symbols in the new grammar rules to the list below.
 */
+P              : 'P' ;
 IF             : 'if' ;
 THEN           : 'then' ;
 ELSE           : 'else' ;
@@ -63,6 +64,7 @@ COLON          : ':' ;
 SEMICOLON      : ';' ;
 PERIOD         : '.' ;
 COMMA          : ',' ;
+VERT_BAR       : '|' ;
 
 
 STRING

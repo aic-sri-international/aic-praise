@@ -93,7 +93,7 @@ public class RuleConverterTest {
 	@Test
 	public void testTranslateRules () {
 		// Atomic rule tests
-//		String string;
+		String string;
 //		string = "sick(X);";
 		testTranslateRules(new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), "1"), 
@@ -120,11 +120,11 @@ public class RuleConverterTest {
 		testTranslateRules(new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
-						new DefaultCompoundSyntaxTree("happy", "X")), "0.100000000"),
+						new DefaultCompoundSyntaxTree("happy", "X")), "0.1"),
 			new DefaultCompoundSyntaxTree("if . then . else .", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
-						new DefaultCompoundSyntaxTree("happy", "X")), "0.100000000", "0.900000000"));
+						new DefaultCompoundSyntaxTree("happy", "X")), "0.1", "0.9"));
 
 		// Prolog rule tests
 //		string = "sick(john).";
@@ -148,10 +148,10 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("sick", "mary")), "1", "0"));
 
 //		string = "0.3 sick(X).";
-		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.300000000", 
+		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.3", 
 				new DefaultCompoundSyntaxTree("sick", "X")), 
 			new DefaultCompoundSyntaxTree("if . then . else .", 
-				new DefaultCompoundSyntaxTree("sick", "X"), "0.300000000", "0.700000000"));
+				new DefaultCompoundSyntaxTree("sick", "X"), "0.3", "0.7"));
 
 //		string = "round(X) :- circle(X).";
 		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
@@ -160,10 +160,10 @@ public class RuleConverterTest {
 			new DefaultCompoundSyntaxTree("if . then . else .", 
 				new DefaultCompoundSyntaxTree("circle", "X"), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
-					new DefaultCompoundSyntaxTree("round", "X"), "1", "0"), "0.500000000"));
+					new DefaultCompoundSyntaxTree("round", "X"), "1", "0"), "0.5"));
 
 //		string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
-		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.700000000", 
+		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
 				new DefaultCompoundSyntaxTree("and", "epidemic", 
 						new DefaultCompoundSyntaxTree("not", 
@@ -173,7 +173,7 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("not", 
 								new DefaultCompoundSyntaxTree("vaccinated", "X"))), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("sick", "X"), "0.700000000", "0.300000000"), "0.500000000"));
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.7", "0.3"), "0.5"));
 
 		// Conditional rule tests
 //		string = "if circle(X) then round(X);";
@@ -184,27 +184,27 @@ public class RuleConverterTest {
 			new DefaultCompoundSyntaxTree("if . then . else .", 
 				new DefaultCompoundSyntaxTree("circle", "X"), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("round", "X"), "1", "0"), "0.500000000"));
+						new DefaultCompoundSyntaxTree("round", "X"), "1", "0"), "0.5"));
 
 //		string = "if epidemic then sick(X) 0.7;";
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "X"), "0.700000000")), 
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.7")), 
 			new DefaultCompoundSyntaxTree("if . then . else .", "epidemic", 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("sick", "X"), "0.700000000", "0.300000000"), "0.500000000"));
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.7", "0.3"), "0.5"));
 
 //		string = "if epidemic then sick(X) and unhappy(X) 0.9;";
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
 				new DefaultCompoundSyntaxTree("atomic rule", 
 						new DefaultCompoundSyntaxTree("and", 
 								new DefaultCompoundSyntaxTree("sick", "X"), 
-								new DefaultCompoundSyntaxTree("unhappy", "X")), "0.900000000")), 
+								new DefaultCompoundSyntaxTree("unhappy", "X")), "0.9")), 
 			new DefaultCompoundSyntaxTree("if . then . else .", "epidemic", 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("and", 
 								new DefaultCompoundSyntaxTree("sick", "X"), 
-								new DefaultCompoundSyntaxTree("unhappy", "X")), "0.900000000", "0.100000000"), "0.500000000"));
+								new DefaultCompoundSyntaxTree("unhappy", "X")), "0.9", "0.1"), "0.5"));
 
 //		string = "if chilly(P) and live(X, P) then sick(X) 0.6;";
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
@@ -212,23 +212,23 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("chilly", "P"), 
 						new DefaultCompoundSyntaxTree("live", "X", "P")), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "X"), "0.600000000")), 
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.6")), 
 			new DefaultCompoundSyntaxTree("if . then . else .", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("chilly", "P"), 
 						new DefaultCompoundSyntaxTree("live", "X", "P")), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("sick", "X"), "0.600000000", "0.400000000"), "0.500000000"));
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.6", "0.4"), "0.5"));
 
 //		string = "if colleagues(X,Y) then likes(X,Y) 0.8;";
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("colleagues", "X", "Y"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("likes", "X", "Y"), "0.800000000")), 
+						new DefaultCompoundSyntaxTree("likes", "X", "Y"), "0.8")), 
 			new DefaultCompoundSyntaxTree("if . then . else .", 
 				new DefaultCompoundSyntaxTree("colleagues", "X", "Y"), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("likes", "X", "Y"), "0.800000000", "0.200000000"), "0.500000000"));
+						new DefaultCompoundSyntaxTree("likes", "X", "Y"), "0.8", "0.2"), "0.5"));
 
 //		string = "if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8;";
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
@@ -237,14 +237,14 @@ public class RuleConverterTest {
 								new DefaultCompoundSyntaxTree("sick", "X"), 
 								new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 						new DefaultCompoundSyntaxTree("atomic rule", 
-								new DefaultCompoundSyntaxTree("sick", "Y"), "0.800000000"))), 
+								new DefaultCompoundSyntaxTree("sick", "Y"), "0.8"))), 
 			new DefaultCompoundSyntaxTree("if . then . else .", "epidemic", 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("and", 
 								new DefaultCompoundSyntaxTree("sick", "X"), 
 								new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 						new DefaultCompoundSyntaxTree("if . then . else .", 
-								new DefaultCompoundSyntaxTree("sick", "Y"), "0.800000000", "0.200000000"), "0.500000000"), "0.500000000"));
+								new DefaultCompoundSyntaxTree("sick", "Y"), "0.8", "0.2"), "0.5"), "0.5"));
 
 //		string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);";
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
@@ -252,7 +252,7 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "0.800000000"), 
+						new DefaultCompoundSyntaxTree("sick", "Y"), "0.8"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
 						new DefaultCompoundSyntaxTree("sick", "Y"), 1)), 
 			new DefaultCompoundSyntaxTree("if . then . else .", 
@@ -260,7 +260,7 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "0.800000000", "0.200000000"), 
+						new DefaultCompoundSyntaxTree("sick", "Y"), "0.8", "0.2"), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("sick", "Y"), "1", "0")));
 
@@ -270,17 +270,35 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "0.800000000"), 
+						new DefaultCompoundSyntaxTree("sick", "Y"), "0.8"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "0.300000000")), 
+						new DefaultCompoundSyntaxTree("sick", "Y"), "0.3")), 
 			new DefaultCompoundSyntaxTree("if . then . else .", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "0.800000000", "0.200000000"), 
+						new DefaultCompoundSyntaxTree("sick", "Y"), "0.8", "0.2"), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "0.300000000", "0.700000000")));
+						new DefaultCompoundSyntaxTree("sick", "Y"), "0.3", "0.7")));
+
+		// Standard probability rule tests.
+		string = "P(sick(X) | epidemic) = 0.8;";
+		testTranslateRules(ruleParser.parse(string), 
+				lowParser.parse("if epidemic then if sick(X) then 0.8 else 0.2 else 0.5"));
+
+		string = "P(sick(X) and happy(Y) | mother(Z)) = 0.4;";
+		testTranslateRules(ruleParser.parse(string), 
+				lowParser.parse("if mother(Z) then if sick(X) and happy(Y) then 0.4 else 0.6 else 0.5"));
+
+		// Causal rule tests.
+		string = "sick(X) -> fever(X) 0.6;";
+		testTranslateRules(ruleParser.parse(string), 
+				lowParser.parse("if sick(X) then (if fever(X) then 0.6 else 0.4) else 0.5"));
+
+		string = "sick(X) and happy(Y) -> fever(X) 0.6;";
+		testTranslateRules(ruleParser.parse(string), 
+				lowParser.parse("if sick(X) and happy(Y) then (if fever(X) then 0.6 else 0.4) else 0.5"));
 
 	}
 
@@ -351,21 +369,21 @@ public class RuleConverterTest {
 		List<Expression> parfactors = new ArrayList<Expression>();
 		ruleConverter.createTransformedFunctionConstraints("president", 0, parfactors);
 		expected = new ArrayList<Expression>();
-		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : president(Y) then 1 else 0"));
 		assertEquals(expected, parfactors);
 
 		parfactors = new ArrayList<Expression>();
 		ruleConverter.createTransformedFunctionConstraints("mother", 1, parfactors);
 		expected = new ArrayList<Expression>();
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, parfactors);
 
 		parfactors = new ArrayList<Expression>();
 		ruleConverter.createTransformedFunctionConstraints("foo", 3, parfactors);
 		expected = new ArrayList<Expression>();
-		expected.add(lowParser.parse("if foo(X0, X1, X2, Y) then if not foo(X0, X1, X2, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if foo(X0, X1, X2, Y) then if not foo(X0, X1, X2, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : foo(X0, X1, X2, Y) then 1 else 0"));
 		assertEquals(expected, parfactors);
 	}
@@ -377,7 +395,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob);")));
 		List<Expression> expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = X1 then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 
@@ -385,7 +403,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob) = jane;")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = X1 = jane then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 		
@@ -393,7 +411,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = jane = mother(bob);")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = jane = X1 then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 		
@@ -401,7 +419,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("jane = mother(john) = mother(bob);")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and jane = X0 = X1 then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 
@@ -412,7 +430,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X));")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(X, X0) and sick(X0) then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 
@@ -420,7 +438,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X, Y, Z));")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(X, Y, Z, X0) and sick(X0) then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, X1, X2, Y) then if not mother(X0, X1, X2, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, X1, X2, Y) then if not mother(X0, X1, X2, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, X1, X2, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 
@@ -428,7 +446,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X), bob);")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(X, X0) and sick(X0, bob) then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 
@@ -436,7 +454,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(X));")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(X, X0) and sick(bob, X0) then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 
@@ -444,9 +462,9 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X), father(X));")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(X, X0) and father(X, X1) and sick(X0, X1) then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : father(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 
@@ -454,9 +472,9 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(father(X)));")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if 'and'(father(X, X1), mother(X1, X0)) and sick(X0) then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : father(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 
@@ -464,9 +482,9 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = bestfriend(mother(bob));")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if and(mother(john, X0), and(mother(bob, X2), bestfriend(X2, X1)), (X0 = X1)) then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : bestfriend(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
 
@@ -479,7 +497,7 @@ public class RuleConverterTest {
 		randomVariableIndex.put("president", count);
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if president(X0) and X0 = obama then if government(socialism) then 1 else 0 else (if government(freedom) then 1 else 0)"));
-		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : president(Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableIndex));
 
@@ -488,9 +506,9 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(bestfriend(X)));")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if and(and(bestfriend(X, X1), mother(X1, X0)), sick(bob, X0)) then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : bestfriend(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableIndex));
 
@@ -498,11 +516,11 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(bestfriend(father(X))));")));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if and(and(and(father(X, X2), bestfriend(X2, X1)), mother(X1, X0)), sick(bob, X0)) then 1 else 0"));
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : bestfriend(X0, Y) then 1 else 0"));
-		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.500000000"));
+		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : father(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableIndex));
 
@@ -565,7 +583,7 @@ public class RuleConverterTest {
 				"if friends(X,Y) and likes(X,Z) and 'may be same as'(X, Z) then if likes(Y,Z) then 0.8 else 0.2 else 0.5"));
 		expected = new ArrayList<Pair<Expression, Expression>>();
 		expected.add(new Pair<Expression, Expression>(
-				lowParser.parse("if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.800000000 else 0.200000000 else 0.500000000"),
+				lowParser.parse("if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.8 else 0.2 else 0.5"),
 				lowParser.parse("Y != Z and Y != X")));
 		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions));
 
@@ -575,7 +593,7 @@ public class RuleConverterTest {
 		System.out.println(potentialExpressions);
 		expected = new ArrayList<Pair<Expression, Expression>>();
 		expected.add(new Pair<Expression, Expression>(
-				lowParser.parse("if colleagues(X, Y) then if likes(X, Y) then 0.800000000 else 0.200000000 else 0.500000000"),
+				lowParser.parse("if colleagues(X, Y) then if likes(X, Y) then 0.8 else 0.2 else 0.5"),
 				lowParser.parse("Y != X and Y != bob")));
 		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions));
 
@@ -1203,6 +1221,39 @@ public class RuleConverterTest {
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 		
+		// Standard probability rules.
+		string = "P(sick(X) | epidemic) = 0.8;";
+		inputExpression = ruleParser.parse(string);
+		result = ruleConverter.toRuleString(inputExpression);
+		outputExpression = ruleParser.parse(result);
+		expected = "P(sick(X) | epidemic) = 0.8;";
+		assertEquals(expected, result);
+		assertEquals(inputExpression, outputExpression);
+
+		string = "P(sick(X) and happy(Y) | mother(Z)) = 0.4;";
+		inputExpression = ruleParser.parse(string);
+		result = ruleConverter.toRuleString(inputExpression);
+		outputExpression = ruleParser.parse(result);
+		expected = "P(sick(X) and happy(Y) | mother(Z)) = 0.4;";
+		assertEquals(expected, result);
+		assertEquals(inputExpression, outputExpression);
+
+		// Causal rules.
+		string = "sick(X) -> fever(X) 0.6;";
+		inputExpression = ruleParser.parse(string);
+		result = ruleConverter.toRuleString(inputExpression);
+		outputExpression = ruleParser.parse(result);
+		expected = "sick(X) -> fever(X) 0.6;";
+		assertEquals(expected, result);
+		assertEquals(inputExpression, outputExpression);
+
+		string = "sick(X) and happy(Y) -> fever(X) 0.6;";
+		inputExpression = ruleParser.parse(string);
+		result = ruleConverter.toRuleString(inputExpression);
+		outputExpression = ruleParser.parse(result);
+		expected = "sick(X) and happy(Y) -> fever(X) 0.6;";
+		assertEquals(expected, result);
+		assertEquals(inputExpression, outputExpression);
 	}
 	
 
