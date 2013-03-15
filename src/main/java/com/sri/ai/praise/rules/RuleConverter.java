@@ -162,6 +162,13 @@ public class RuleConverter {
 
 	/**
 	 * Parse the rules model and query and generates a low-level model object.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslate
+	 * 
 	 * @param name         The name for the model.
 	 * @param description  The description of the model.
 	 * @param inputRules   The list of rule expressions of the model.
@@ -306,6 +313,13 @@ public class RuleConverter {
 
 	/**
 	 * Translates a potential expression to a rule expression.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingInferenceInputAndOutput
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeQueryAnswerPotentialExpression2Rule
+	 * 
 	 * @param input     The potential expression to translate into a rule expression.
 	 * @return           A rule expression version of the potential expression.
 	 */
@@ -447,6 +461,13 @@ public class RuleConverter {
 
 	/**
 	 * Converts a query expression into a query atom and a query rule.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingInferenceInputAndOutput
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeQueryRuleAndAtom
+	 * 
 	 * @param query  The query expression
 	 * @return A pair with the query atom and query rule.
 	 */
@@ -470,6 +491,13 @@ public class RuleConverter {
 
 	/**
 	 * Convert the given rule into its "if . then . else ." form.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
+	 * 
 	 * @param rule  The rule to translate.
 	 * @return  The equivalent "if . then . else ." form of the rule.
 	 */
@@ -488,6 +516,13 @@ public class RuleConverter {
 	
 	/**
 	 * Convert the given atomic rule into its "if . then . else ." form.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
+	 * 
 	 * @param rule  The atomic rule to translate.
 	 * @return  The equivalent "if . then . else ." form of the atomic rule.
 	 */
@@ -503,6 +538,13 @@ public class RuleConverter {
 	
 	/**
 	 * Convert the given prolog rule into its "if . then . else ." form.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
+	 * 
 	 * @param rule  The prolog rule to translate.
 	 * @return  The equivalent "if . then . else ." form of the prolog rule.
 	 */
@@ -525,6 +567,13 @@ public class RuleConverter {
 	
 	/**
 	 * Convert the given conditional rule into its "if . then . else ." form.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
+	 * 
 	 * @param rule  The conditional rule to translate.
 	 * @return  The equivalent "if . then . else ." form of the conditional rule.
 	 */
@@ -546,6 +595,13 @@ public class RuleConverter {
 	/**
 	 * Converts uses of functions in the potential expressions into relationships and
 	 * adds the supporting potential expressions necessary.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateFunctions
+	 * 
 	 * @param potentialExpressions  The potential expressions perform the function transformation upon.
 	 * @param randomVariableIndex   A mapping of known random variable names and the number of arguments they take.
 	 * @return  A list of potential expressions with the function references transformed.
@@ -592,6 +648,13 @@ public class RuleConverter {
 	/**
 	 * Checks if the given expression is a random function application.  It will catches
 	 * cases of functions that take no arguments
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeIsRandomVariableValue
+	 * 
 	 * @param e                    The expression to check.
 	 * @param randomVariableIndex  An index of random variable names with the number of arguments.
 	 * @return  True if the expression is a random function application or a function that takes no arguments.
@@ -621,6 +684,13 @@ public class RuleConverter {
 	 * Checks if the given expression is a random function application.  It will screen out
 	 * instances of built in functors, such as "and", "not", "there exists . : .", "if . then . else .",
 	 * etc.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeIsRandomFunctionApplication
+	 * 
 	 * @param e  The expression to check.
 	 * @return  False if the expression is not a random function application or any of the built in
 	 *          expression types.
@@ -649,6 +719,13 @@ public class RuleConverter {
 	/**
 	 * For the given function name and number of args, will create the additonal potential
 	 * expressions to add for function transformation.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateFunctions
+	 * 
 	 * @param functionName  The name of the function.
 	 * @param numArgs       The number of arguments of the function.
 	 * @param potentialExpressions  The list to add the new potential expressions to.
@@ -723,6 +800,13 @@ public class RuleConverter {
 
 	/**
 	 * Removes the quantifiers from potential expressions.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateQuantifiers
+	 * 
 	 * @param potentialExpressions  The potential expressions to check for quantifiers.
 	 * @return  Quantifier free versions of the expressions.
 	 */
@@ -751,6 +835,13 @@ public class RuleConverter {
 
 	/**
 	 * Removes the constraints embedded in the given potential expressions.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeDisembedConstraints
+	 * 
 	 * @param potentialExpressions  The potential expressions to check for embedded constraints.
 	 * @return  A list of pairs of constraint-free potential expressions and the extracted constraints.
 	 */
@@ -837,6 +928,13 @@ public class RuleConverter {
 
 	/**
 	 * Makes a parfactor from the given potential expression and a list of constraints.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeConstraintedPotentialExpressions2Parfactors
+	 * 
 	 * @param potentialExpression  The potential expression to convert into a parfactor.
 	 * @param constraints          The list of the constraints for the parfactor.
 	 * @return A parfactor expression based on the potential expression on constraints.
@@ -847,6 +945,13 @@ public class RuleConverter {
 
 	/**
 	 * Makes a parfactor from the given potential expression and a list of constraints.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeConstraintedPotentialExpressions2Parfactors
+	 * 
 	 * @param potentialExpression  The potential expression to convert into a parfactor.
 	 * @param constraints          The constraints for the parfactor.
 	 * @return A parfactor expression based on the potential expression on constraints.
@@ -1029,6 +1134,13 @@ public class RuleConverter {
 
 	/**
 	 * Replacement function for use by function translator.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateFunctions
+	 * 
 	 * @author etsai
 	 *
 	 */
@@ -1124,6 +1236,13 @@ public class RuleConverter {
 
 	/**
 	 * Replacement function for use by quantifier translator.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateQuantifiers
+	 * 
 	 * @author etsai
 	 *
 	 */
@@ -1178,6 +1297,13 @@ public class RuleConverter {
 
 	/**
 	 * Replacement function for use by "may be same as" extractor.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeDisembedConstraints
+	 * 
 	 * @author etsai
 	 *
 	 */
@@ -1220,6 +1346,13 @@ public class RuleConverter {
 
 	/**
 	 * Replacement function for use by embedded constraint extractor.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeDisembedConstraints
+	 * 
 	 * @author etsai
 	 *
 	 */
