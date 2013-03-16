@@ -49,6 +49,7 @@ import com.sri.ai.praise.lbp.LBPConfiguration;
  */
 @Beta
 public class DefaultLBPConfiguration implements LBPConfiguration {
+	private static final long serialVersionUID = 1L;
 	//
 	//
 	private boolean beliefUseCache = PRAiSEConfiguration.getLBPBeliefUseCache();

@@ -368,9 +368,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 				
 				// Step 2 create RewritingProcess
 				notifyListenersQueryStepStarting(queryUUID, STEP_2, stopWatch);
-				LBPConfiguration configuration = LBPFactory.newLBPConfiguration();
-				// Set the update schedule.
-				configuration.setBeliefPropagationUpdateSchedule(options.getBeliefPropagationUpdateSchedule());
+				LBPConfiguration configuration = options.getLBPConfiguration();
 				process = LBPFactory.newLBPProcess(queryExp, configuration);
 				notifyListenersQueryStepComplete(queryUUID, STEP_2, stopWatch);
 				

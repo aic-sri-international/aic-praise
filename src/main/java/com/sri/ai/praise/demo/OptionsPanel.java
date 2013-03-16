@@ -60,7 +60,9 @@ import javax.swing.event.ChangeListener;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
+import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.util.Util;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -81,6 +83,8 @@ public class OptionsPanel extends JPanel {
 	private static SpinnerNumberModel _precisionModel               = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_PRECISION, 1, 80, 1);
 	private static SpinnerNumberModel _scientificGreaterOutputModel = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_SCIENTIFIC_GREATER, 2, 80, 1);
 	private static SpinnerNumberModel _scientificAfterOutputModel   = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_SCIENTIFIC_AFTER, 2, 80, 1);
+	private static SpinnerNumberModel _deadEndsCacheSizeModel       = new SpinnerNumberModel(PRAiSEDemoApp.DEAD_ENDS_CACHE_SIZE, -1, 10000, 1);
+	private static SpinnerNumberModel _rewriterCacheSizeModel       = new SpinnerNumberModel(PRAiSEDemoApp.REWRITER_CACHE_SIZE, -1, 10000, 1);
 	{
 		_precisionModel.addChangeListener(new ChangeListener() {
 			
@@ -102,7 +106,23 @@ public class OptionsPanel extends JPanel {
 			public void stateChanged(ChangeEvent e) {
 				DefaultSymbol.setDisplayScientificAfterNDecimalPlaces((Integer)_scientificAfterOutputModel.getValue());	
 			}
+		});	
+		_deadEndsCacheSizeModel.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				GrinderConfiguration.setProperty(GrinderConfiguration.KEY_REWRITE_DEAD_ENDS_CACHE_MAXIMUM_SIZE, ""+_deadEndsCacheSizeModel.getValue());
+				
+			}
 		});
+		_rewriterCacheSizeModel.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {		
+				GrinderConfiguration.setProperty(GrinderConfiguration.KEY_REWRITING_PROCESS_CACHE_MAXIMUM_SIZE, ""+_rewriterCacheSizeModel.getValue());
+			}
+		});
+		
 	}
 	//
 	JFormattedTextField domainSizeTextField = null;
@@ -116,9 +136,14 @@ public class OptionsPanel extends JPanel {
 	JCheckBox chckbxOverrideModel;
 	JCheckBox chckbxKnownDomainSize;
 	JCheckBox chckbxAssumeDomainsAlwaysLarge;
-	private JSpinner precisionSpinner;
+	JCheckBox chckbxUseBeliefCache;
+	JSpinner lbpPrecisionSpinner;
+	JSpinner lbpMaxNumIterationsSpinner;
+	private JSpinner displayPrecisionSpinner;
 	private JSpinner scientificAfterSpinner;
 	private JSpinner scientificGreaterSpinner;
+	private JSpinner rewriterCacheSizeSpinner;
+	private JSpinner deadEndCacheSizeSpinner;
 
 	/**
 	 * Create the panel.
@@ -198,6 +223,10 @@ public class OptionsPanel extends JPanel {
 				}
 			}
 		});
+		
+		chckbxUseBeliefCache = new JCheckBox("Use Belief Cache");
+		chckbxUseBeliefCache.setSelected(true);
+		optionsPanel.add(chckbxUseBeliefCache);
 		chckbxOverrideModel.setPreferredSize(new Dimension(18, 25));
 		optionsPanel.add(chckbxOverrideModel);
 		
@@ -252,6 +281,30 @@ public class OptionsPanel extends JPanel {
 		chckbxAssumeDomainsAlwaysLarge = new JCheckBox("Assume Domains Always Large");
 		assumePanel.add(chckbxAssumeDomainsAlwaysLarge);
 		chckbxAssumeDomainsAlwaysLarge.setPreferredSize(new Dimension(240, 25));
+		
+		JPanel lbpPrecisionPanel = new JPanel();
+		lbpPrecisionPanel.setAlignmentX(0.0f);
+		optionsPanel.add(lbpPrecisionPanel);
+		lbpPrecisionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		
+		JLabel lblPrecision = new JLabel("Limit Precision To: ");
+		lbpPrecisionPanel.add(lblPrecision);
+		
+		lbpPrecisionSpinner = new JSpinner();
+		lbpPrecisionSpinner.setModel(new SpinnerNumberModel(20, 1, 80, 1));
+		lbpPrecisionPanel.add(lbpPrecisionSpinner);
+		
+		JPanel lbpIterationsPanel = new JPanel();
+		lbpIterationsPanel.setAlignmentX(0.0f);
+		optionsPanel.add(lbpIterationsPanel);
+		lbpIterationsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		
+		JLabel lblMaxIterations = new JLabel("Max # Iterations for Convergence: ");
+		lbpIterationsPanel.add(lblMaxIterations);
+		
+		lbpMaxNumIterationsSpinner = new JSpinner();
+		lbpMaxNumIterationsSpinner.setModel(new SpinnerNumberModel(10, 1, 10000, 1));
+		lbpIterationsPanel.add(lbpMaxNumIterationsSpinner);
 		
 		JSeparator separator_1 = new JSeparator();
 		optionsPanel.add(separator_1);
@@ -363,12 +416,12 @@ public class OptionsPanel extends JPanel {
 		optionsPanel.add(precisionPanel);
 		precisionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
-		JLabel precisionLabel = new JLabel("Numeric Precision:");
+		JLabel precisionLabel = new JLabel("Display Numeric Precision:");
 		precisionPanel.add(precisionLabel);
 		
-		precisionSpinner = new JSpinner();
-		precisionSpinner.setModel(_precisionModel);
-		precisionPanel.add(precisionSpinner);
+		displayPrecisionSpinner = new JSpinner();
+		displayPrecisionSpinner.setModel(_precisionModel);
+		precisionPanel.add(displayPrecisionSpinner);
 		
 		JPanel scientificOutputPanel = new JPanel();
 		scientificOutputPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -392,12 +445,52 @@ public class OptionsPanel extends JPanel {
 		scientificAfterSpinner = new JSpinner();
 		scientificGreaterPanel.add(scientificAfterSpinner);
 		scientificAfterSpinner.setModel(_scientificAfterOutputModel);
+		
+		JSeparator separator_3 = new JSeparator();
+		optionsPanel.add(separator_3);
+		
+		JPanel deadEndsCacheSizePanel = new JPanel();
+		deadEndsCacheSizePanel.setAlignmentX(0.0f);
+		optionsPanel.add(deadEndsCacheSizePanel);
+		deadEndsCacheSizePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		
+		JLabel lblDeadEndsCache = new JLabel("Cache Size ");
+		deadEndsCacheSizePanel.add(lblDeadEndsCache);
+		
+		deadEndCacheSizeSpinner = new JSpinner();
+		deadEndCacheSizeSpinner.setModel(_deadEndsCacheSizeModel);
+		deadEndsCacheSizePanel.add(deadEndCacheSizeSpinner);
+		
+		JLabel lblNewLabel_1 = new JLabel(" for Dead Ends.");
+		deadEndsCacheSizePanel.add(lblNewLabel_1);
+		
+		JPanel rewriterCacheSizePanel = new JPanel();
+		rewriterCacheSizePanel.setAlignmentX(0.0f);
+		optionsPanel.add(rewriterCacheSizePanel);
+		rewriterCacheSizePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		
+		JLabel lblRewriterCacheSize = new JLabel("Cache Size ");
+		rewriterCacheSizePanel.add(lblRewriterCacheSize);
+		
+		rewriterCacheSizeSpinner = new JSpinner();
+		rewriterCacheSizeSpinner.setModel(_rewriterCacheSizeModel);
+		rewriterCacheSizePanel.add(rewriterCacheSizeSpinner);
+		
+		JLabel lblNewLabel_2 = new JLabel(" for Rewriters.");
+		rewriterCacheSizePanel.add(lblNewLabel_2);
 	}
 
 	private void postGUIInitialization() {
 		scheduleComboBox.addItem(SYNCHRONOUS);
 		scheduleComboBox.addItem(ASYNC_INDIVIDUAL);
 		scheduleComboBox.addItem(ASYNC_GROUP);
+		
+		LBPConfiguration defaultConfig = LBPFactory.newLBPConfiguration();
+		chckbxUseBeliefCache.setSelected(defaultConfig.isBeliefUseCache());
+		lbpMaxNumIterationsSpinner.setValue(defaultConfig.getMaxNumberOfIterationsForConvergence());
+		lbpPrecisionSpinner.setValue(defaultConfig.getLimitPrecisionToNumberOfSignificantDecimals());
+		deadEndCacheSizeSpinner.setValue(PRAiSEDemoApp.DEAD_ENDS_CACHE_SIZE);
+		rewriterCacheSizeSpinner.setValue(PRAiSEDemoApp.REWRITER_CACHE_SIZE);
 		
 		// Don't select by default.
 		chckbxJustificationEnabled.doClick();

@@ -79,6 +79,8 @@ public class PRAiSEDemoApp {
 	public static final int DISPLAY_PRECISION          = 2;
 	public static final int DISPLAY_SCIENTIFIC_GREATER = 6;
 	public static final int DISPLAY_SCIENTIFIC_AFTER   = 4; 
+	public static final int DEAD_ENDS_CACHE_SIZE       = 100;
+	public static final int REWRITER_CACHE_SIZE        = 100;
 
 	JFrame frame;
 	ToolBarPanel toolBar = new ToolBarPanel();
@@ -132,6 +134,9 @@ public class PRAiSEDemoApp {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					GrinderConfiguration.setProperty(GrinderConfiguration.KEY_REWRITE_DEAD_ENDS_CACHE_MAXIMUM_SIZE, ""+DEAD_ENDS_CACHE_SIZE);
+					GrinderConfiguration.setProperty(GrinderConfiguration.KEY_REWRITING_PROCESS_CACHE_MAXIMUM_SIZE, ""+REWRITER_CACHE_SIZE);
+					
 					String configuredLookAndFeel = GrinderConfiguration.getDemoAppDefaultLookAndFeel();
 				    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				        if (configuredLookAndFeel.equals(info.getName())) {
@@ -172,7 +177,7 @@ public class PRAiSEDemoApp {
 				controller.exit();
 			}
 		});
-		frame.setBounds(100, 100, 1000, 640);
+		frame.setBounds(100, 100, 1000, 720);
 		frame.setTitle("PRAiSE");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		

@@ -70,6 +70,7 @@ import org.antlr.runtime.tree.CommonTreeNodeStream;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.GrinderConfiguration;
+import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.demo.action.ClearOutputAction;
 import com.sri.ai.praise.demo.action.ExecuteQueryAction;
@@ -96,6 +97,7 @@ import com.sri.ai.praise.rules.antlr.RuleAssociativeNodeWalker;
 import com.sri.ai.praise.rules.antlr.RuleLexer;
 import com.sri.ai.praise.rules.antlr.RuleOutputWalker;
 import com.sri.ai.praise.rules.antlr.RuleParser;
+import com.sri.ai.util.Configuration;
 import com.sri.ai.util.base.Pair;
 
 /**
@@ -305,6 +307,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 			}
 		}
 		else {
+			final Thread currentThread = Thread.currentThread();
 			activeQueryUUID          = null;
 			intentionallyInterrupted = false;
 			if (validateInput(false)) {
@@ -312,6 +315,8 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 				SwingWorker<String, Object> queryWorker = new SwingWorker<String, Object>() {
 					@Override
 					public String doInBackground() {
+						// Ensure configuration information is inherited correctly.
+						Configuration.inheritConfiguration(currentThread, Thread.currentThread());
 						try {
 							printlnToConsole("ABOUT TO RUN QUERY: "+app.queryPanel.getCurrentQuery());
 							cleanupMemory();
@@ -357,7 +362,11 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 			
 							LBPQueryEngine.QueryOptions queryOptions = new LBPQueryEngine.QueryOptions();
 							// Assign the selected Options.
-							queryOptions.setBeliefPropagationUpdateSchedule(app.optionsPanel.getSelectedSchedule());
+							queryOptions.getLBPConfiguration().setBeliefUseCache(app.optionsPanel.chckbxUseBeliefCache.isSelected());
+							queryOptions.getLBPConfiguration().setBeliefPropagationUpdateSchedule(app.optionsPanel.getSelectedSchedule());
+							queryOptions.getLBPConfiguration().setLimitPrecisionToNumberOfSignificantDecimals((Integer)app.optionsPanel.lbpPrecisionSpinner.getValue());
+							queryOptions.getLBPConfiguration().setMaxNumberOfIterationsForConvergence((Integer)app.optionsPanel.lbpMaxNumIterationsSpinner.getValue());
+							
 							queryOptions.setJustificationsOn(app.optionsPanel.chckbxJustificationEnabled.isSelected());
 							queryOptions.setTraceOn(app.optionsPanel.chckbxTraceEnabled.isSelected());
 							queryOptions.setKnownDomainSizes(true); // By default.
@@ -853,6 +862,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	private void cleanupMemory() {
+		DefaultRewritingProcess.cleanUpGlobalRewritingProcessForKnowledgeBasedExpressions();
 		System.gc();
 	}
 }

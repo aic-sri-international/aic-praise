@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.lbp;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -52,7 +53,7 @@ import com.sri.ai.expresso.api.Expression;
  *
  */
 @Beta
-public interface LBPConfiguration {
+public interface LBPConfiguration extends Serializable {
 	/**
 	 * Different types of Belief Propagation Update Schedules supported.
 	 *  
