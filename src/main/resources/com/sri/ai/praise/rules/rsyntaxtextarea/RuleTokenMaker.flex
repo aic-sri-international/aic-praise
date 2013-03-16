@@ -130,6 +130,12 @@ import org.fife.ui.rsyntaxtextarea.TokenMaker;
 				state = MLC;
 				start = text.offset;
 				break;
+			case Token.LITERAL_STRING_DOUBLE_QUOTE:
+				state = LONG_STRING_2;
+				break;
+			case Token.LITERAL_CHAR:
+				state = LONG_STRING_1;
+				break;
 			default:
 				state = Token.NULL;
 		}
@@ -148,6 +154,7 @@ import org.fife.ui.rsyntaxtextarea.TokenMaker;
 	}
 
 
+	/* Keep this version of the method. */
 	/**
 	 * Resets the scanner to read from a new input stream.
 	 * Does not close the old reader.
@@ -178,6 +185,7 @@ import org.fife.ui.rsyntaxtextarea.TokenMaker;
 	}
 
 
+	/* Keep this version of the method. */
 	/**
 	 * Refills the input buffer.
 	 *
@@ -197,13 +205,9 @@ letter				= ({lowercase}|{uppercase})
 lowercase			= ([a-z])
 uppercase			= ([A-Z])
 digit				= ([0-9])
-stringliteral		= ({stringprefix}?{shortstring})
-stringprefix		= ("r"|"u"[rR]?|"R"|"U"[rR]?)
-shortstring1		= ([\']{shortstring1item}*[\']?)
-shortstring2		= ([\"]{shortstring2item}*[\"]?)
-shortstring			= ({shortstring1}|{shortstring2})
-shortstring1item	= ({shortstring1char}|{escapeseq})
-shortstring2item	= ({shortstring2char}|{escapeseq})
+stringliteral		= ({shortstring})
+shortstring1item	= ({shortstring1char}|{escapeseq}|[\\])
+shortstring2item	= ({shortstring2char}|{escapeseq}|[\\])
 shortstring1char	= ([^\\\n\'])
 shortstring2char	= ([^\\\n\"])
 escapeseq			= ([\\].)
@@ -225,6 +229,9 @@ imagnumber			= (({floatnumber}|{intpart})[jJ])
 ErrorNumberFormat	= ({digit}{NonSeparator}+)
 NonSeparator		= ([^\t\f\r\n\ \(\)\{\}\[\]\;\,\.\=\>\<\!\~\?\:\+\-\*\/\&\|\^\%\"\']|"#")
 
+LongStringDelimiter1	= "'"
+LongStringDelimiter2	= "\""
+
 LineTerminator		= (\n)
 WhiteSpace			= ([ \t\f])
 
@@ -240,6 +247,8 @@ URLCharacters			= ({URLCharacter}*)
 URLEndCharacter			= ([\/\$]|{letter}|{digit})
 URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 
+%state LONG_STRING_1
+%state LONG_STRING_2
 %state MLC
 %state EOL_COMMENT
 
@@ -263,7 +272,7 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 <YYINITIAL> "sort"					{ addToken(Token.RESERVED_WORD); }
 <YYINITIAL> "then"					{ addToken(Token.RESERVED_WORD); }
 <YYINITIAL> "there"					{ addToken(Token.RESERVED_WORD); }
-<YYINITIAL> "x"						{ addToken(Token.RESERVED_WORD); }
+<YYINITIAL> "P"						{ addToken(Token.RESERVED_WORD); }
 
 
 <YYINITIAL> {
@@ -275,7 +284,8 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 	{WhiteSpace}+					{ addToken(Token.WHITESPACE); }
 
 	/* String/Character Literals. */
-	{stringliteral}					{ addToken(Token.LITERAL_STRING_DOUBLE_QUOTE); }
+	{LongStringDelimiter1}			{ yybegin(LONG_STRING_1); addToken(Token.LITERAL_CHAR); }
+	{LongStringDelimiter2}			{ yybegin(LONG_STRING_2); addToken(Token.LITERAL_STRING_DOUBLE_QUOTE); }
 
 	/* Comment Literals. */
 	"/**/"							{ addToken(Token.COMMENT_MULTILINE); }
@@ -285,6 +295,9 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 	/* Separators. */
 	"("								{ addToken(Token.SEPARATOR); }
 	")"								{ addToken(Token.SEPARATOR); }
+	","								{ addToken(Token.SEPARATOR); }
+	"x"								{ addToken(Token.SEPARATOR); }
+	"|"								{ addToken(Token.SEPARATOR); }
 
 	/* Operators. */
 	"!="							{ addToken(Token.OPERATOR); }
@@ -310,7 +323,6 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 
 	/* Other punctuation, we'll highlight it as "identifiers." */
 	"."								{ addToken(Token.IDENTIFIER); }
-	","								{ addToken(Token.IDENTIFIER); }
 	";"								{ addToken(Token.IDENTIFIER); }
 
 	/* Ended with a line not in a string or comment. */
@@ -321,16 +333,38 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 
 }
 
+<LONG_STRING_1> {
+	{shortstring1item}+			{ addToken(Token.LITERAL_CHAR); }
+	"'"							{ yybegin(YYINITIAL); addToken(Token.LITERAL_CHAR); }
+	<<EOF>>						{
+									if (firstToken==null) {
+										addToken(Token.LITERAL_CHAR); 
+									}
+									return firstToken;
+								}
+}
+
+<LONG_STRING_2> {
+	{shortstring2item}+			{ addToken(Token.LITERAL_STRING_DOUBLE_QUOTE); }
+	\"							{ yybegin(YYINITIAL); addToken(Token.LITERAL_STRING_DOUBLE_QUOTE); }
+	<<EOF>>						{
+									if (firstToken==null) {
+										addToken(Token.LITERAL_STRING_DOUBLE_QUOTE); 
+									}
+									return firstToken;
+								}
+}
+
 <MLC> {
 
 	[^hwf\n\*]+				{}
-	{URL}					{ int temp=zzStartRead; addToken(start,zzStartRead-1, Token.COMMENT_MULTILINE); addHyperlinkToken(temp,zzMarkedPos-1, Token.COMMENT_MULTILINE); start = zzMarkedPos; }
+	{URL}					{ int temp=zzStartRead; addToken(start, zzStartRead-1, Token.COMMENT_MULTILINE); addHyperlinkToken(temp,zzMarkedPos-1, Token.COMMENT_MULTILINE); start = zzMarkedPos; }
 	[hwf]					{}
 
-	\n						{ addToken(start,zzStartRead-1, Token.COMMENT_MULTILINE); return firstToken; }
-	{MLCEnd}					{ yybegin(YYINITIAL); addToken(start,zzStartRead+1, Token.COMMENT_MULTILINE); }
+	\n						{ addToken(start, zzStartRead-1, Token.COMMENT_MULTILINE); return firstToken; }
+	{MLCEnd}				{ yybegin(YYINITIAL); addToken(start, zzStartRead+1, Token.COMMENT_MULTILINE); }
 	\*						{}
-	<<EOF>>					{ addToken(start,zzStartRead-1, Token.COMMENT_MULTILINE); return firstToken; }
+	<<EOF>>					{ addToken(start, zzStartRead-1, Token.COMMENT_MULTILINE); return firstToken; }
 
 }
 
