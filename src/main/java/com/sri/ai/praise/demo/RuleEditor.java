@@ -58,6 +58,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.rules.rsyntaxtextarea.RuleTokenMaker;
+import javax.swing.ScrollPaneConstants;
 
 @Beta
 public class RuleEditor extends JPanel {
@@ -74,7 +75,7 @@ public class RuleEditor extends JPanel {
 	public RuleEditor() {
 		setLayout(new BorderLayout(0, 0));
 
-		textArea = new RuleRSyntaxTextArea(20, 80);
+		textArea = new RuleRSyntaxTextArea(1, 1);
 		textArea.setTabsEmulated(false);
 		textArea.setTabSize(4);
 		textArea.setCodeFoldingEnabled(false);
@@ -88,6 +89,7 @@ public class RuleEditor extends JPanel {
 		textArea.setSyntaxEditingStyle(SYNTAX_STYLE_RULES);
 
 		editorScrollPane = new RTextScrollPane(textArea);
+		editorScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		editorScrollPane.setFoldIndicatorEnabled(false);
 		add(editorScrollPane, BorderLayout.CENTER);
 		
