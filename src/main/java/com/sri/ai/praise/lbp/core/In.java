@@ -91,7 +91,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Expression set   = expression.get(1);
 		
 		if (Justification.isEnabled()) {
-			Justification.current(expression);
+			Justification.log(expression);
 		}
 
 		Expression result = null;
@@ -139,24 +139,24 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Expression thenBranch = IfThenElse.getThenBranch(alpha);
 		Expression elseBranch = IfThenElse.getElseBranch(alpha);
 
-		Justification.beginStep("externalizing condition " + alpha);
+		Justification.beginEqualityStep("externalizing condition " + alpha);
 		if (Justification.isEnabled()) {
 			Expression currentExpression =
 				IfThenElse.make(
 						condition,
 						Expressions.apply("in", thenBranch, set),
 						Expressions.apply("in", elseBranch, set));
-			Justification.endStep(currentExpression);
+			Justification.endEqualityStep(currentExpression);
 		}
 		
-		Justification.beginStep("solving 'in' on then and else branches");
+		Justification.beginEqualityStep("solving 'in' on then and else branches");
 		Expression result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
 				newRewriteInOnBranch(), new Expression[] { thenBranch, set },
 				newRewriteInOnBranch(), new Expression[] { elseBranch, set },
 				R_check_branch_reachable, 
 				R_basic, process);
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 
 		return result;
 	}
@@ -169,24 +169,24 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Expression thenBranch = IfThenElse.getThenBranch(set);
 		Expression elseBranch = IfThenElse.getElseBranch(set);
 
-		Justification.beginStep("externalizing conditional Set");
+		Justification.beginEqualityStep("externalizing conditional Set");
 		if (Justification.isEnabled()) {
 			Expression currentExpression =
 				IfThenElse.make(
 						condition,
 						Expressions.apply("in", alpha, thenBranch),
 						Expressions.apply("in", alpha, elseBranch));
-			Justification.endStep(currentExpression);
+			Justification.endEqualityStep(currentExpression);
 		}
 		
-		Justification.beginStep("solving in on then and else branches");
+		Justification.beginEqualityStep("solving in on then and else branches");
 		Expression result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
 				newRewriteInOnBranch(), new Expression[] { alpha, thenBranch },
 				newRewriteInOnBranch(), new Expression[] { alpha, elseBranch },
 				R_check_branch_reachable, 
 				R_basic, process);
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 
 		return result;
 	}
@@ -195,7 +195,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Trace.log("if Set is Set_1 union ... union Set_n");
 		Trace.log("    return R_formula_simplification(Disjunction_i R_in(alpha, Set_i))");
 		
-		Justification.beginStep("Set is Set_1 union ... union Set_n");
+		Justification.beginEqualityStep("Set is Set_1 union ... union Set_n");
 		
 		Expression result = null;
 		switch(set.numberOfArguments()) {
@@ -221,7 +221,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 			break;
 		}
 
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 		
 		return result;
 	}
@@ -230,7 +230,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Trace.log("if Set is { a1,..., an } or {{ a1,..., an }}");
 		Trace.log("    return R_formula_simplification(Disjunction_i Alpha = ai)");
 		
-		Justification.beginStep("Set is extensional");
+		Justification.beginEqualityStep("Set is extensional");
 		
 		// Disjunction here is a meta, preferably short-circuited, operation.
 		BranchRewriteTask[] disjunctRewriters = new BranchRewriteTask[set.numberOfArguments()];
@@ -256,7 +256,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		// that can arise when iterating over elements in a multiset.
 		Expression result = process.rewrite(R_formula_simplification, disjunction);
 		
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 		
 		return result;
 	}
@@ -266,7 +266,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Trace.log("    { Beta' | C' }_I' <- standardize { Beta | C }_I apart from Alpha");
 		Trace.log("    return R_basic(there exists I' : C' and Alpha = Beta')");
 		
-		Justification.beginStep("Set is intensional");
+		Justification.beginEqualityStep("Set is intensional");
 
 		Expression setPrime = StandardizedApartFrom
 				.standardizedApartFrom(
@@ -282,7 +282,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Expression thereExists = ThereExists.make(indexExpressionsPrime, and);
 		Expression result      = process.rewrite(R_basic, thereExists);
 	
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 		
 		return result;
 	}

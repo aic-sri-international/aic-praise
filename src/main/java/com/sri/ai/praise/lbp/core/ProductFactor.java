@@ -96,7 +96,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 		
 		Expression result = null;
 
-		Justification.current(productOfFactorsToVariable);
+		Justification.log(productOfFactorsToVariable);
 
 		// Cases for input:
 		if (IfThenElse.isIfThenElse(productOfFactorsToVariable)) {
@@ -122,9 +122,9 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				Trace.log("prod_F in {} m_V<-F");
 				Trace.log("    return 1");
 
-				Justification.beginStep("no factors, so it is just a constant message");
+				Justification.beginEqualityStep("no factors, so it is just a constant message");
 				result = Expressions.ONE;
-				Justification.endStep(result);
+				Justification.endEqualityStep(result);
 				
 			} 
 			else if (Sets.isExtensionalSet(domainS) && ExtensionalSet.isSingleton(domainS)) {
@@ -132,14 +132,14 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				Trace.log("prod_F in {F1} m_V<-F");
 				Trace.log("    return R_m_to_v_from_f(m_V<-F1)");
 
-				Justification.beginStep("product of a singleton set is just its own single element");
+				Justification.beginEqualityStep("product of a singleton set is just its own single element");
 				Expression msgToV_F1 = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), domainS.get(0));
-				Justification.endStep(msgToV_F1);
+				Justification.endEqualityStep(msgToV_F1);
 
-				Justification.beginStep("by solving message to variable from factor");
+				Justification.beginEqualityStep("by solving message to variable from factor");
 				result = process.rewrite(R_m_to_v_from_f, 
 							LPIUtil.argForMessageToVariableFromFactorRewriteCall(msgToV_F1, beingComputed));
-				Justification.endStep(result);
+				Justification.endEqualityStep(result);
 
 			} 
 			else if (Sets.isIntensionalMultiSet(domainS)) {
@@ -156,27 +156,27 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				Expression       cPrime           = cPrimeSubProcess.getContextualConstraint();
 
 				if (Justification.isEnabled()) {
-					Justification.beginStep("re-indexing set of messages");
+					Justification.beginEqualityStep("re-indexing set of messages");
 					Expression newSetOfMessages  = IntensionalSet.makeMultiSet(scopingExpressionI, msgToV_F1, cPrime);
 					Expression currentExpression = Expressions.apply(FunctorConstants.PRODUCT, newSetOfMessages);
-					Justification.endStep(currentExpression);
+					Justification.endEqualityStep(currentExpression);
 				}
 
-				Justification.beginStep("solve message to variable from factor");
+				Justification.beginEqualityStep("solve message to variable from factor");
 				Expression R_msgToV_F1 = cPrimeSubProcess.rewrite(R_m_to_v_from_f,
 											LPIUtil.argForMessageToVariableFromFactorRewriteCall(msgToV_F1, cPrime, scopingExpressionI, beingComputed));
 
 				Expression messageSet        = IntensionalSet.makeMultiSet(scopingExpressionI, R_msgToV_F1, cPrime);
 				Expression productOfMessages = Expressions.apply(FunctorConstants.PRODUCT, messageSet);
 				if (Justification.isEnabled()) {
-					Justification.endStep(productOfMessages);
+					Justification.endEqualityStep(productOfMessages);
 				}
 				
 				Trace.log("    return R_basic(prod_{{ (on I) message | C' }})");
 
-				Justification.beginStep("simplify intensionally defined product");
+				Justification.beginEqualityStep("simplify intensionally defined product");
 				result = process.rewrite(R_basic, productOfMessages);
-				Justification.endStep(result);
+				Justification.endEqualityStep(result);
 
 				// Note: restriction to extensional multi-sets is required (see assertIsLegalUnionDomain() for details).
 			} 
@@ -225,7 +225,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 					Expression productOfFactorsInSetToVariable = LPIUtil
 							.makeProductOfMessages(factorIndexF, set, msgToV_F, prodScopingCondition);
 
-					Justification.beginStep("by solving product of messages from first factor set");
+					Justification.beginEqualityStep("by solving product of messages from first factor set");
 					Expression message = process.rewrite(R_prod_factor, 
 											LPIUtil.argForProductFactorRewriteCall(productOfFactorsInSetToVariable, beingComputed));
 
@@ -234,14 +234,14 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 							.makeProductOfMessages(factorIndexF, union, msgToV_F, prodScopingCondition);
 					
 					if (Justification.isEnabled()) {
-						Justification.endStep(
+						Justification.endEqualityStep(
 								Expressions.make(FunctorConstants.TIMES, message, productOfFactorsInUnionToVariable));
 					}
 
-					Justification.beginStep("by multiplying this message to the product of remaining messages");
+					Justification.beginEqualityStep("by multiplying this message to the product of remaining messages");
 					result = process.rewrite(R_prod_m_and_prod_factor,
 								LPIUtil.argForProductMessageAndProductFactorRewriteCall(message, productOfFactorsInUnionToVariable, beingComputed));
-					Justification.endStep(result);
+					Justification.endEqualityStep(result);
 
 				} 
 				else {
@@ -287,18 +287,18 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				.getElseBranch(productOfFactorsToVariable);
 
 		if (Justification.isEnabled()) {
-			Justification.beginStep("by externalizing conditional");
-			Justification.endStep(IfThenElse.make(condition, productThen, productElse));
+			Justification.beginEqualityStep("by externalizing conditional");
+			Justification.endEqualityStep(IfThenElse.make(condition, productThen, productElse));
 		}
 
-		Justification.beginStep("by solving then and else branches");
+		Justification.beginEqualityStep("by solving then and else branches");
 		Expression result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
 				newCallProductFactorRewrite(), new Expression[] { productThen, beingComputed},
 				newCallProductFactorRewrite(), new Expression[] { productElse, beingComputed},
 				R_check_branch_reachable, 
 				R_basic, process);
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 
 		return result;
 	}
@@ -323,11 +323,11 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				factorIndexF, s2, msgToV_F, prodScopingCondition);
 		
 		if (Justification.isEnabled()) {
-			Justification.beginStep("by externalizing conditional set " + domainS);
-			Justification.endStep(IfThenElse.make(condition, productThen, productElse));
+			Justification.beginEqualityStep("by externalizing conditional set " + domainS);
+			Justification.endEqualityStep(IfThenElse.make(condition, productThen, productElse));
 		}
 
-		Justification.beginStep("by solving then and else branches");
+		Justification.beginEqualityStep("by solving then and else branches");
 
 		Expression result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
@@ -336,7 +336,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				R_check_branch_reachable, 
 				R_basic, process);
 
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 
 		return result;
 	}

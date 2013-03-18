@@ -99,7 +99,7 @@ public class NeighborsFactor extends AbstractLBPHierarchicalRewriter implements 
 		Trace.log("         where v1, ..., vn are the subexpressions of Ef that are random variable value expressions.");
 
 		if (Justification.isEnabled()) {
-			Justification.current(expression);
+			Justification.log(expression);
 		}
 		
 		Expression factorValue = LPIUtil.getFactorValueExpression(factor, process);
@@ -121,13 +121,13 @@ public class NeighborsFactor extends AbstractLBPHierarchicalRewriter implements 
 		randomVariables   = new ArrayList<Expression>(new LinkedHashSet<Expression>(randomVariables));
 		Expression uniset = ExtensionalSet.makeUniSet(randomVariables);
 
-		Justification.beginStep("definition of neighbors of a factor");
-		Justification.endStep(uniset);
+		Justification.beginEqualityStep("definition of neighbors of a factor");
+		Justification.endEqualityStep(uniset);
 
-		Justification.beginStep("checking for duplicate neighbors");
+		Justification.beginEqualityStep("checking for duplicate neighbors");
 		Expression normalizedUniSet = rNormalizeExtensionalSet.rewrite(uniset, process);
 		result = process.rewrite(R_basic, normalizedUniSet);
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 		
 		return result;
 	}

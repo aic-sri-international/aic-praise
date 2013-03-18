@@ -96,7 +96,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 		Expression currentExpression = null;
 		if (Justification.isEnabled()) {
 			currentExpression = Expressions.apply(LPIUtil.FUNCTOR_NEIGHBOR, randomVariable, parfactor);
-			Justification.current(currentExpression);
+			Justification.log(currentExpression);
 		}
 		
 		LPIUtil.assertRandomVariableOk(randomVariable, process);
@@ -125,38 +125,38 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			
 			Expression union = Expressions.apply(FunctorConstants.UNION, unionArguments);
 
-			Justification.beginStep("each factor is a neighbor only if random variable occurs in it");
-			Justification.endStep(union);
+			Justification.beginEqualityStep("each factor is a neighbor only if random variable occurs in it");
+			Justification.endEqualityStep(union);
 
 			int argumentIndex = 0;
 			for (Expression fI : union.getArguments()) {
 				Expression factorValue = IfThenElse.getCondition(fI).get(1);
 				
-				Justification.beginStep("by determining occurrence conditions");
+				Justification.beginEqualityStep("by determining occurrence conditions");
 				Expression rvIsReferencedBy = 
 						LPIUtil.randomVariableIsReferencedByExpression(randomVariable, factorValue, process);
 				union = union.set(argumentIndex, IfThenElse.copyWithReplacedCondition(fI, rvIsReferencedBy));
-				Justification.endStep(union);
+				Justification.endEqualityStep(union);
 
 				argumentIndex++;
 			}
 			
-			Justification.beginStep("by simplifying");
+			Justification.beginEqualityStep("by simplifying");
 			result = process.rewrite(R_basic, union);
-			Justification.endStep(result);
+			Justification.endEqualityStep(result);
 
 		} 
 		else if (IntensionalSet.isIntensionalSet(parfactor)) {
 			Trace.log("if PF is an intensionally defined set {{ [ Ef ] | C }}_I) (where [ Ef ] is a factor expression)");
 			Trace.log("    {{ [ Ef' ] | C' }}_I' <- standardize {{ [ Ef ] | C }}_I apart from [ Ev ]");
 
-			Justification.beginStep("standardizing apart");
+			Justification.beginEqualityStep("standardizing apart");
 			Expression saParfactor = StandardizedApartFrom
 					.standardizedApartFrom(
 							parfactor, randomVariable, process);
 			if (Justification.isEnabled()) {
 				currentExpression = currentExpression.set(1, saParfactor);
-				Justification.endStep(currentExpression);
+				Justification.endEqualityStep(currentExpression);
 			}
 			
 			Expression factorPrime            = IntensionalSet.getHead(saParfactor);
@@ -171,7 +171,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			Trace.log("                    {{ [ Ef' ] | R_formula_simplification(C' and rv_is_referenced_by([Ev], Ef')) }}_I')");
 			
 			if (Justification.isEnabled()) {
-				Justification.beginStep("set of neighbors is set of factors restricted to those in which the random variable occurs");
+				Justification.beginEqualityStep("set of neighbors is set of factors restricted to those in which the random variable occurs");
 				currentExpression = IntensionalSet.make(
 						Sets.getLabel(parfactor),
 						scopingExpressionPrime,
@@ -179,24 +179,24 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 						CardinalityUtil.makeAnd(
 								conditionPrime,
 								Expressions.apply("referenced by", randomVariable, factorValuePrime)));
-				Justification.endStep(currentExpression);
+				Justification.endEqualityStep(currentExpression);
 			}
 
-			Justification.beginStep("by computing conditions for occurrence");
+			Justification.beginEqualityStep("by computing conditions for occurrence");
 			Expression conditionForBeingReferencedBy = LPIUtil.randomVariableIsReferencedByExpression(randomVariable, factorValuePrime, processIPrime);
 			Expression finalUnsimplifiedCondition    = And.make(conditionPrime, conditionForBeingReferencedBy);
 			if (Justification.isEnabled()) {
 				currentExpression = IntensionalSet.make(Sets.getLabel(parfactor), scopingExpressionPrime, factorPrime, finalUnsimplifiedCondition);
 			}
-			Justification.endStep(currentExpression);
+			Justification.endEqualityStep(currentExpression);
 			
-			Justification.beginStep("by simplifying condition");
+			Justification.beginEqualityStep("by simplifying condition");
 			Expression simplified = processIPrime.rewrite(R_formula_simplification, finalUnsimplifiedCondition);
 			currentExpression     = IntensionalSet.make(Sets.getLabel(parfactor), scopingExpressionPrime, factorPrime, simplified);
 			// the above line is needed even without justifications because it is used below.
-			Justification.endStep(currentExpression);
+			Justification.endEqualityStep(currentExpression);
 
-			Justification.beginStep("by simplifying intensional set");
+			Justification.beginEqualityStep("by simplifying intensional set");
 			// Ensure is not simplified to an extensional or conditional on creation.
 			if (IntensionalSet.isIntensionalSet(currentExpression)) {
 				result = processIPrime.rewrite(R_intensional_simplification, currentExpression);
@@ -204,7 +204,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			else {
 				result = currentExpression;
 			}
-			Justification.endStep(result);
+			Justification.endEqualityStep(result);
 			
 		} 
 		else {

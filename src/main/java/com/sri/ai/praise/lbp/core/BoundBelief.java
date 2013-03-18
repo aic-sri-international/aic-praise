@@ -92,13 +92,13 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 		Expression factorIndex = Expressions.makeUniqueVariable("F", randomVariable, process);
 
 		if (Justification.isEnabled()) {
-			Justification.current(Expressions.apply(LPIUtil.FUNCTOR_BELIEF, randomVariable, Model.getModelDefinition(process)));
+			Justification.log(Expressions.apply(LPIUtil.FUNCTOR_BELIEF, randomVariable, Model.getModelDefinition(process)));
 
-			Justification.beginStep("lifted bound belief");
+			Justification.beginEqualityStep("lifted bound belief");
 
-			Justification.current(belief); // detailed justification
+			Justification.log(belief); // detailed justification
 
-			Justification.beginStep("definition of bound  belief");
+			Justification.beginEqualityStep("definition of bound  belief");
 
 			Expression expandedBelief =
 					Expressions.apply(
@@ -109,11 +109,11 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 									Expressions.apply(LPIUtil.FUNCTOR_MSG_TO_FROM, randomVariable, factorIndex),
 									Expressions.TRUE));
 
-			Justification.endStep(expandedBelief);
+			Justification.endEqualityStep(expandedBelief);
 		}
 
 		// R_neigh_v(Neigh(V))
-		Justification.beginStep("neighbors of random variable");
+		Justification.beginEqualityStep("neighbors of random variable");
 
 		Expression neighV          = Expressions.make(LPIUtil.FUNCTOR_NEIGHBOR, randomVariable);
 		Expression rewriteOfNeighV = process.rewrite(R_neigh_v, neighV);
@@ -122,16 +122,16 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 		Expression product = LPIUtil.makeProductOfMessages(factorIndex, rewriteOfNeighV, msgToV_F, Expressions.TRUE);
 
 		if (Justification.isEnabled()) {
-			Justification.endStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, product));
+			Justification.endEqualityStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, product));
 		}
 
 		// R_prod_factor(prod_F in R_neigh_v(Neigh(V)) m_V<-F)
-		Justification.beginStep("product of messages over factors");
+		Justification.beginEqualityStep("product of messages over factors");
 
 		Expression beliefExpansion = process.rewrite(R_bound_prod_factor, Tuple.make(LPIUtil.argForProductFactorRewriteCall(product, beingComputed), timestep));
 
 		if (Justification.isEnabled()) {
-			Justification.endStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
+			Justification.endEqualityStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
 		}
 		
 		Trace.log("belief_expansion <- R_complete_simplify(belief_expansion)");
@@ -144,14 +144,14 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 		}
 		else {
 			Trace.log("    return R_normalize(V, belief_expansion)");
-			Justification.beginStep("normalization");
+			Justification.beginEqualityStep("normalization");
 			Expression normalizedBeliefExpansion = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefExpansion));
-			Justification.endStep(normalizedBeliefExpansion);
+			Justification.endEqualityStep(normalizedBeliefExpansion);
 			
 			result = normalizedBeliefExpansion;
 		}	
 		
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 		
 		return result;
 	}

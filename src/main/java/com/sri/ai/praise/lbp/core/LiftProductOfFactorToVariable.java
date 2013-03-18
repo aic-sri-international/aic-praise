@@ -47,6 +47,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
+import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.boole.And;
@@ -143,10 +144,12 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 					if (singleAlpha != null) {
 						// return alpha ^ {@link Cardinality R_card}(| C |_I)
 						List<Expression> setIndices = new ArrayList<Expression>(IntensionalSet.getIndices(prodSet));
-						Expression cardinalityOfInexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, setIndices.toArray(new Expression[setIndices.size()]));
-						Expression cardinality    = process.rewrite(CardinalityRewriter.R_card, cardinalityOfInexedFormula);
+						Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, setIndices.toArray(new Expression[setIndices.size()]));
+						Justification.beginEqualityStep("cardinality of equality boolean formula");
+						Justification.log(cardinalityOfIndexedFormula);
+						Expression cardinality    = process.rewrite(CardinalityRewriter.R_card, cardinalityOfIndexedFormula);
+						Justification.endEqualityStep(cardinality);
 						Expression exponentiation = Expressions.apply(FunctorConstants.EXPONENTIATION, singleAlpha, cardinality);
-						
 						result = exponentiation;
 					}
 				}

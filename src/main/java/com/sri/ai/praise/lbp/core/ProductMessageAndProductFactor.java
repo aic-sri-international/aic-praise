@@ -93,7 +93,7 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 		Expression result = null;
 		
 		if (Justification.isEnabled()) {
-			Justification.current(times);
+			Justification.log(times);
 		}
 		
 		// Cases:
@@ -127,26 +127,26 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 			else if (isSingularlyDeterministic(conditionalMessage, randomVariableValueExpression, process)) {
 				Trace.log("m is deterministic");
 				Trace.log("    return m");
-				Justification.beginStep("first message is deterministic, so we ignore the remaining ones");
+				Justification.beginEqualityStep("first message is deterministic, so we ignore the remaining ones");
 				result = conditionalMessage;
-				Justification.endStep(result);
+				Justification.endEqualityStep(result);
 			} 
 			else {
 				Trace.log("else m is not deterministic");
 				Trace.log("    return R_simplify(m * R_prod_factor(prod_F in S m_V<-F, beingComputed, C))");
 
-				Justification.beginStep("computing product of remaining messages");
+				Justification.beginEqualityStep("computing product of remaining messages");
 				Expression rewriteOfProductOfFactorsToVariable = process.rewrite(R_prod_factor,
 																	LPIUtil.argForProductFactorRewriteCall(productOfFactorsToVariable, beingComputed));
 				Expression productOfMessagesToSimplify = Expressions.apply(FunctorConstants.TIMES, conditionalMessage, rewriteOfProductOfFactorsToVariable);
 				if (Justification.isEnabled()) {
 					Expression currentExpression = productOfMessagesToSimplify;
-					Justification.endStep(currentExpression);
+					Justification.endEqualityStep(currentExpression);
 				}
 
-				Justification.beginStep("multiplying the two messages");
+				Justification.beginEqualityStep("multiplying the two messages");
 				result = process.rewrite(R_simplify, productOfMessagesToSimplify);
-				Justification.endStep(result);
+				Justification.endEqualityStep(result);
 			}
 		}
 
@@ -165,7 +165,7 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 		Trace.log("                   then R_prod_m_and_prod_factor(ExprM1 * prod_F in S m_V<-F, beingComputed)");
 		Trace.log("                   else R_prod_m_and_prod_factor(ExprM2 * prod_F in S m_V<-F, beingComputed))");
 
-		Justification.beginStep("externalizing conditional on initial message");
+		Justification.beginEqualityStep("externalizing conditional on initial message");
 		Expression condition = IfThenElse.getCondition(conditionalMessage);
 		Expression m1        = IfThenElse.getThenBranch(conditionalMessage);
 		Expression m2        = IfThenElse.getElseBranch(conditionalMessage);
@@ -175,17 +175,17 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 						condition,
 						Expressions.apply("*", m1, productOfFactorsToVariable),
 						Expressions.apply("*", m2, productOfFactorsToVariable));
-			Justification.endStep(currentExpression);
+			Justification.endEqualityStep(currentExpression);
 		}
 
-		Justification.beginStep("computing products in then and else branches");
+		Justification.beginEqualityStep("computing products in then and else branches");
 		Expression result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
 				newCallProductMessageAndProductFactorRewrite(), new Expression[] { m1, productOfFactorsToVariable, beingComputed },
 				newCallProductMessageAndProductFactorRewrite(), new Expression[] { m2, productOfFactorsToVariable, beingComputed },
 				R_check_branch_reachable, 
 				R_basic, process);
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 
 		return result;
 	}
@@ -200,7 +200,7 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 		Trace.log("                   then R_prod_m_and_prod_factor(m * ExprPi1, beingComputed)");
 		Trace.log("                   else R_prod_m_and_prod_factor(m * ExprPi2, beingComputed))");
 
-		Justification.beginStep("externalizing conditional on remaining product of messages");
+		Justification.beginEqualityStep("externalizing conditional on remaining product of messages");
 		Expression condition   = IfThenElse.getCondition(productOfFactorsToVariable);
 		Expression productThen = IfThenElse.getThenBranch(productOfFactorsToVariable);
 		Expression productElse = IfThenElse.getElseBranch(productOfFactorsToVariable);
@@ -210,17 +210,17 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 						condition,
 						Expressions.apply("*", conditionalMessage, productThen),
 						Expressions.apply("*", conditionalMessage, productElse));
-			Justification.endStep(currentExpression);
+			Justification.endEqualityStep(currentExpression);
 		}
 
-		Justification.beginStep("computing products in then and else branches");
+		Justification.beginEqualityStep("computing products in then and else branches");
 		Expression result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
 				newCallProductMessageAndProductFactorRewrite(), new Expression[] { conditionalMessage, productThen, beingComputed },
 				newCallProductMessageAndProductFactorRewrite(), new Expression[] { conditionalMessage, productElse, beingComputed },
 				R_check_branch_reachable, 
 				R_basic, process);
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 
 		return result;
 	}

@@ -51,6 +51,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ExpressionAndContext;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.library.CommutativeAssociative;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.ScopedVariables;
@@ -88,6 +89,8 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 		Expression expressionE = null;
 		Expression scopingVariables = null;
 		
+		Justification.begin("Going to extract messages embedded in {}", expression);
+		
 		// Assert input arguments
 		// It can be either
 		// a tuple of the form: (E, tuple(I1, ..., In))
@@ -112,6 +115,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 
 		result = CommutativeAssociative.make(FunctorConstants.UNION, new ArrayList<Expression>(extractedPreviousMessages), Sets.EMPTY_SET);
 		
+		Justification.end("Embedded messages are {}", result);
 		return result;
 	}
 	

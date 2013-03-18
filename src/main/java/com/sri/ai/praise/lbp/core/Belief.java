@@ -171,13 +171,13 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression factorIndex = Expressions.makeUniqueVariable("F", randomVariable, process);
 
 		if (Justification.isEnabled()) {
-			Justification.current(Expressions.apply(LPIUtil.FUNCTOR_BELIEF, randomVariable, Model.getModelDefinition(process)));
+			Justification.log(Expressions.apply(LPIUtil.FUNCTOR_BELIEF, randomVariable, Model.getModelDefinition(process)));
 
-			Justification.beginStep("lifted belief propagation");
+			Justification.beginEqualityStep("lifted belief propagation");
 
-			Justification.current(belief); // detailed justification
+			Justification.log(belief); // detailed justification
 
-			Justification.beginStep("definition of belief");
+			Justification.beginEqualityStep("definition of belief");
 
 			Expression expandedBelief =
 					Expressions.apply(
@@ -188,11 +188,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 									Expressions.apply(LPIUtil.FUNCTOR_MSG_TO_FROM, randomVariable, factorIndex),
 									Expressions.TRUE));
 
-			Justification.endStep(expandedBelief);
+			Justification.endEqualityStep(expandedBelief);
 		}
 
 		// R_neigh_v(Neigh(V))
-		Justification.beginStep("neighbors of random variable");
+		Justification.beginEqualityStep("neighbors of random variable");
 
 		Expression neighV          = Expressions.make(LPIUtil.FUNCTOR_NEIGHBOR, randomVariable);
 		Expression rewriteOfNeighV = process.rewrite(R_neigh_v, neighV);
@@ -201,33 +201,41 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression product = LPIUtil.makeProductOfMessages(factorIndex, rewriteOfNeighV, msgToV_F, Expressions.TRUE);
 
 		if (Justification.isEnabled()) {
-			Justification.endStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, product));
+			Justification.endEqualityStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, product));
 		}
 
 		// R_prod_factor(prod_F in R_neigh_v(Neigh(V)) m_V<-F)
-		Justification.beginStep("product of messages over factors");
+		Justification.beginEqualityStep("product of messages over factors");
 
 		Expression beliefExpansion = process.rewrite(R_prod_factor, LPIUtil.argForProductFactorRewriteCall(product, beingComputed));
 
 		if (Justification.isEnabled()) {
-			Justification.endStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
+			Justification.endEqualityStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
 		}
 		
+		Justification.beginEqualityStep("complete simplification of unnormalized belief expansion");
+		Justification.log(beliefExpansion);
 		Trace.log("belief_expansion <- R_complete_simplify(belief_expansion)");
 		beliefExpansion = process.rewrite(R_complete_simplify, beliefExpansion);
+		if (Justification.isEnabled()) {
+			Justification.endEqualityStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
+		}
 	
 		Expression result = null;
 		if (!LPIUtil.containsPreviousMessageExpressions(beliefExpansion)) {
+			Justification.beginEqualityStep("normalize and return belief since it does not depend on previous iteration messages");
 			Trace.log("if belief_expansion does not contain 'previous message' expressions");
 			Trace.log("    return R_normalize(V, belief_expansion)");
 			
-			Justification.beginStep("normalization");
+			Justification.beginEqualityStep("normalization");
 			Expression normalizedBeliefExpansion = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefExpansion));
-			Justification.endStep(normalizedBeliefExpansion);
+			Justification.endEqualityStep(normalizedBeliefExpansion);
 			
+			Justification.endEqualityStep(normalizedBeliefExpansion);
 			result = normalizedBeliefExpansion;
 		} 
 		else {
+			Justification.beginEqualityStep("since belief does depends on previous iteration messages, we expand them too and iterate over all of them");
 			// At this point, belief_expansion is a basic expression containing 'previous message' expressions
 			
 			Trace.log("msg_sets <- R_extract_previous_msg_sets(belief_expansion)");
@@ -276,25 +284,30 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			int iteration = 1;
 			beliefValue = useValuesForPreviousMessages(beliefExpansion, msgValues, previousMessageToMsgValueCache, process);
 			notifyCollector(randomVariable, beliefValue, 1, process);
+			Justification.log("Initial belief value {}", beliefValue);
 			while (notFinal(beliefValue, priorBeliefValue, msgValues, priorMsgValues, iteration)) {
 				priorBeliefValue = beliefValue;
 				priorMsgValues   = msgValues;
+				Justification.beginEqualityStep("iteration");
 				msgValues        = iterateValuesUsingExpansions(msgValues, msgExpansions, previousMessageToMsgValueCache, process);
 				beliefValue      = useValuesForPreviousMessages(beliefExpansion, msgValues, previousMessageToMsgValueCache, process);
 				iteration++;			
 				notifyCollector(randomVariable, beliefValue, iteration, process);
+				Justification.endEqualityStep(beliefValue);
 			}
 			
 			Trace.log("return R_normalize(V, belief_value)");
 			
-			Justification.beginStep("normalization");
+			Justification.log("Normalization of final unnormalized belief value {}", beliefValue);
+			Justification.beginEqualityStep("normalization");
 			Expression normalizedBeliefValue = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefValue));
-			Justification.endStep(normalizedBeliefValue);
+			Justification.endEqualityStep(normalizedBeliefValue);
 			
+			Justification.endEqualityStep(normalizedBeliefValue); // this endStep closes entire set of iterations
 			result = normalizedBeliefValue;
 		}
 		
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 		
 		return result;
 	}
@@ -327,6 +340,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		List<Expression> msgsAlreadyExpandedUnionArgs = new ArrayList<Expression>();
 		List<Expression> msgsToBeExpanded             = new ArrayList<Expression>(msgSets);
 		
+		Justification.begin("Going to expand messages in {}", msgSets);
+		
 		Trace.log("while msgs_to_be_expanded is not empty");
 		while (msgsToBeExpanded.size() > 0) {
 			Trace.log("    msg_set <- remove a union argument from msgs_to_be_expanded");
@@ -335,23 +350,28 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// Ensure is a legal msg_set expression
 			assertIsLegalMsgSet(msgSet);
 	
+			Justification.begin("Going to expand message set {}", msgSet);
+			
 			// Note - approach discussed with Rodrigo to work around R_set_diff 
 			// not supporting both arguments being intensional multisets:
 			// "I realize now that for dealing with this situation with (D,O) pairs we
 			//  don't need to extend the routine. Because they are guaranteed to have 
 			//  unique elements, we can simply convert them to uni-sets before doing the
 			//  set difference."
+			Justification.begin("Going to subtract message instantiations that were already expanded");
 			Expression msgsAlreadyExpanded = createUnionFromArgs(msgsAlreadyExpandedUnionArgs);
 			Trace.log("    msg_set <- R_set_diff(msg_set minus msgs_already_expanded)");
 			Expression uniMsgSet = convertIntensionalMultiSetToUniSet(msgSet);
 			msgSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(uniMsgSet, msgsAlreadyExpanded));
 			Trace.log("    msg_set <- R_complete_simplify(msg_set)");
 			msgSet = process.rewrite(R_complete_simplify, msgSet);
+			Justification.end("Remaining, non-expanded messages are {}", msgSet);
 			
 			if (!Sets.isEmptySet(msgSet)) {
 				// convert msg set back to a multiset
 				msgSet = convertIntensionalUniSetToMultiSet(msgSet);
 				
+				Justification.begin("Going to re-arrange as message expression");
 				Trace.log("    if msg_set is not empty");
 				// represent msg_set as {{ (on I) (Destination, Origin) | C }}
 				Expression expressionI            = IntensionalSet.getScopingExpression(msgSet);
@@ -365,8 +385,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Expression       msgTo_From    = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, destination, origin);
 				// Set up the contextual constraint
 				RewritingProcess cSubProcess   = GrinderUtil.extendContextualVariablesAndConstraint(expressionI, conditionC, process);
+				Justification.end("Message expression is {}", msgTo_From);
 				
+				Justification.begin("Going to symbolically compute message expression");
 				Expression expansion = null;
+				Justification.begin("Going to symbolically compute unsimplified message expression");
 				// Determine which 'message to . from .' rewriter to call
 				if (BracketedExpressionSubExpressionsProvider.isRandomVariable(destination, process)) {
 					expansion = cSubProcess.rewrite(R_m_to_v_from_f,
@@ -376,9 +399,13 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					expansion = cSubProcess.rewrite(R_m_to_f_from_v,
 									LPIUtil.argForMessageToFactorFromVariableRewriteCall(msgTo_From, LPIUtil.createNewBeingComputedExpression()));
 				}
+				Justification.end("Obtained unsimplified message expansion {}", expansion);
 				
+				Justification.begin("Going to simplify {}", expansion);
 				Trace.log("        expansion <- R_complete_simplify(expansion)");
 				expansion = process.rewrite(R_complete_simplify, expansion);
+				Justification.end("Obtained simplified message expansion {}", expansion);
+				Justification.end("Obtained message expansion {}", expansion);
 				
 				Trace.log("        index <- size of msg_expansions");
 				Trace.log("        cache index as msg_value_index corresponding to 'previous message to Destination from Origin' under constraining condition C");
@@ -402,9 +429,15 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				
 				Trace.log("        msgs_to_be_expanded <- msgs_to_be_expanded union R_extract_previous_msg_sets(msg_expansion)");
 
+				Justification.begin("Going to identify messages inside expansion and schedule them for their own expansion");
 				Expression newMsgSetsToBeExpanded = process.rewrite(R_extract_previous_msg_sets, msgExpansion);
-
 				msgsToBeExpanded.addAll(getEntriesFromUnion(newMsgSetsToBeExpanded));
+				Justification.end("Messages inside expansion identified: {}", newMsgSetsToBeExpanded);
+
+				Justification.end("Message set expanded. See inside for details.");
+			}
+			else {
+				Justification.end("All messages in this set have already been expanded, so there is nothing to do.");
 			}
 		}
 		
@@ -412,6 +445,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		Trace.out("-get_msg_expansions={}", Expressions.apply("list", msgExpansions));
 		
+		Justification.end("Messages expansions are {}", msgExpansions);
+
 		return msgExpansions;
 	}
 	

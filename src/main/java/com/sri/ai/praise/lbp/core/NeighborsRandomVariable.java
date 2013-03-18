@@ -89,7 +89,7 @@ public class NeighborsRandomVariable extends AbstractLBPHierarchicalRewriter imp
 		Expression result = null;
 
 		if (Justification.isEnabled()) {
-			Justification.current(expression);
+			Justification.log(expression);
 		}
 		
 		Trace.log("return R_union(R_neigh_v_parf(V,PF_1)");
@@ -115,9 +115,9 @@ public class NeighborsRandomVariable extends AbstractLBPHierarchicalRewriter imp
 		List<Expression> unionArgs = GrinderUtil.branchAndMergeTasks(taskRewriters, process);
 		Expression       union     = Expressions.apply(FunctorConstants.UNION, unionArgs);
 
-		Justification.beginStep("union");
+		Justification.beginEqualityStep("union");
 		result = process.rewrite(R_union, union);
-		Justification.endStep(result);
+		Justification.endEqualityStep(result);
 
 		return result;
 	}

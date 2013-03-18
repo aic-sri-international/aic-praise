@@ -3836,103 +3836,103 @@ public class LBPTest extends AbstractLPITest {
 				// Basic:
 				// 
 				
-				// #1
-				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-					new TrivialLoopyPQ(), 
-					"belief([p(X)])", 
-					false, 
-					// Note: (LBP 10 iterations) - these values oscillate
-					// and this can be seen in grounded versions of
-					// this model (domain size 10).
-					// --------------------
-					// MRF - varelim
-					// --------------------
-					//                 True    False
-					//     p(obj1) 0.749878 0.250122
-					//     q(obj1) 0.749878 0.250122
-					// ...
-					// --------------------
-					// MRF - libdaiBP
-					// --------------------
-					//                 True    False
-					//     p(obj1) 0.998927 0.001073
-					//     q(obj1) 0.505314 0.494686
-					// ...
-					"if p(X) then 0.998927766 else 0.00107223386"
-					 ),
-					
-				// #2
-				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-					new TrivialLoopyPQWithPriors(), 
-					"belief([p(X)])", 
-					false, 
-					// Note: (LBP 10 iterations) - these values are equivalent
-					// to the values returned from running variable eliminations (i.e. exact)
-					// on a grounded version of this model (domain size 10).
-					// --------------------
-					// MRF - varelim
-					// --------------------
-					//                 True    False
-					//     p(obj1) 0.996017 0.003983
-					//     q(obj1) 0.997635 0.002365
-					//     ...
-					"if p(X) then 0.996016637 else 0.00398336255"
-					),
-
-// Too slow right now, again. :-(
-//				// #3
+//				// #1
 //				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-//					new TrivialLoopyPQandb(), 
+//					new TrivialLoopyPQ(), 
 //					"belief([p(X)])", 
 //					false, 
-//					// TODO -  is this correct (> 2 iterations, doesn't matter as large
-//					// # calculated gets reduced to 1 in R_normalize logic)?
-//					"if X = b then if p(b) then 1 else 0 else if p(X) then 1 else 0"),
-//				
-					
-				// #4
-				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-					new TrivialLoopyParfactorsExample(),
-					"belief([m(X)])",
-					false,
-					// Note: (LBP 10 iterations)
-					// --------------------
-					// MRF - varelim
-					// --------------------
-					//                 True    False
-					//     g(obj1) 0.246396 0.753604
-					//     m(obj1) 0.246396 0.753604
-					// ...
-					// --------------------
-					// MRF - libdaiBP
-					// --------------------
-					//                 True    False
-					//     g(obj1) 0.225974 0.774026
-					//     m(obj1) 0.225974 0.774026
-				    // ...
-					// Appears not to be converging.
-					"if m(X) then 0.103394195 else 0.896605805"
-					),
-					
-				// #5
-			    // Very slow to process:
-	            // old version of model with no constraints 4 hours 40 min.
-			    // new version of model with constraints on groups 2 hours 5 min.
-			    // good for working on optimzations to algorithms.
+//					// Note: (LBP 10 iterations) - these values oscillate
+//					// and this can be seen in grounded versions of
+//					// this model (domain size 10).
+//					// --------------------
+//					// MRF - varelim
+//					// --------------------
+//					//                 True    False
+//					//     p(obj1) 0.749878 0.250122
+//					//     q(obj1) 0.749878 0.250122
+//					// ...
+//					// --------------------
+//					// MRF - libdaiBP
+//					// --------------------
+//					//                 True    False
+//					//     p(obj1) 0.998927 0.001073
+//					//     q(obj1) 0.505314 0.494686
+//					// ...
+//					"if p(X) then 0.998927766 else 0.00107223386"
+//					 ),
+//					
+//				// #2
 //				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-//					new com.sri.ai.lpi.model.example.TrivialLoopyMisconceptionExample(),
+//					new TrivialLoopyPQWithPriors(), 
+//					"belief([p(X)])", 
+//					false, 
+//					// Note: (LBP 10 iterations) - these values are equivalent
+//					// to the values returned from running variable eliminations (i.e. exact)
+//					// on a grounded version of this model (domain size 10).
+//					// --------------------
+//					// MRF - varelim
+//					// --------------------
+//					//                 True    False
+//					//     p(obj1) 0.996017 0.003983
+//					//     q(obj1) 0.997635 0.002365
+//					//     ...
+//					"if p(X) then 0.996016637 else 0.00398336255"
+//					),
+//
+//// Too slow right now, again. :-(
+////				// #3
+////				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+////					new TrivialLoopyPQandb(), 
+////					"belief([p(X)])", 
+////					false, 
+////					// TODO -  is this correct (> 2 iterations, doesn't matter as large
+////					// # calculated gets reduced to 1 in R_normalize logic)?
+////					"if X = b then if p(b) then 1 else 0 else if p(X) then 1 else 0"),
+////				
+//					
+//				// #4
+//				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+//					new TrivialLoopyParfactorsExample(),
 //					"belief([m(X)])",
 //					false,
-//					// TODO - is this correct (10 iterations)?
-//					"if m(X) then 0.0000000000147024292 else 1"),
+//					// Note: (LBP 10 iterations)
+//					// --------------------
+//					// MRF - varelim
+//					// --------------------
+//					//                 True    False
+//					//     g(obj1) 0.246396 0.753604
+//					//     m(obj1) 0.246396 0.753604
+//					// ...
+//					// --------------------
+//					// MRF - libdaiBP
+//					// --------------------
+//					//                 True    False
+//					//     g(obj1) 0.225974 0.774026
+//					//     m(obj1) 0.225974 0.774026
+//				    // ...
+//					// Appears not to be converging.
+//					"if m(X) then 0.103394195 else 0.896605805"
+//					),
+//					
+//				// #5
+//			    // Very slow to process:
+//	            // old version of model with no constraints 4 hours 40 min.
+//			    // new version of model with constraints on groups 2 hours 5 min.
+//			    // good for working on optimzations to algorithms.
+////				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+////					new com.sri.ai.lpi.model.example.TrivialLoopyMisconceptionExample(),
+////					"belief([m(X)])",
+////					false,
+////					// TODO - is this correct (10 iterations)?
+////					"if m(X) then 0.0000000000147024292 else 1"),
 					
-//				// #6
-//			    // TODO - appears not to stop processing:
-//				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-//					new com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
-//					"belief([smoker(ann)])",
-//					false,
-//					"TODO"),
+				// #6
+			    // TODO - appears not to stop processing:
+				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+					new com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
+					"belief([smoker(ann)])",
+					false,
+					"TODO"),
 		};
 		
 // 		perform(new TestData[] {
