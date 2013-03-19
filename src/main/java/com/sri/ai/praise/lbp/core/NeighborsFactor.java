@@ -117,6 +117,10 @@ public class NeighborsFactor extends AbstractLBPHierarchicalRewriter implements 
 		return result;
 	}
 
+	/**
+	 * Returns the set of random variables used in an expression assumed to have the same context all over,
+	 * that is, an expression that does not involve conditions on logical variables.
+	 */
 	public static Expression getRandomVariablesUsedIn(Expression expression, RewritingProcess process) {
 		SubExpressionsDepthFirstIterator subExpressionsDepthFirstIterator =
 			new SubExpressionsDepthFirstIterator(expression);
