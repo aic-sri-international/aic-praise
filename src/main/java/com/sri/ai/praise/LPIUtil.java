@@ -51,7 +51,6 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.DefaultSymbol;
-import com.sri.ai.expresso.helper.Apply;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
@@ -75,7 +74,6 @@ import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.RandomPredicate;
 import com.sri.ai.praise.model.RandomPredicateCatalog;
 import com.sri.ai.util.Util;
-import com.sri.ai.util.collect.PredicateIterator;
 
 /**
  * General purpose utility routines related to lifted belief propagation.
@@ -1402,25 +1400,5 @@ public class LPIUtil {
 		}
 		
 		return result;
-	}
-
-	public static Expression getRandomVariablesUsedIn(Expression expression, RewritingProcess process) {
-		SubExpressionsDepthFirstIterator subExpressionsDepthFirstIterator =
-			new SubExpressionsDepthFirstIterator(expression);
-	
-		Iterator<Expression> randomVariableValuesIterator =
-			new PredicateIterator<Expression>(
-					subExpressionsDepthFirstIterator,
-					new IsRandomVariableValueExpression(process));
-	
-		List<Expression> randomVariables =
-			Util.mapIntoList(
-					randomVariableValuesIterator,
-					new Apply(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL));
-	
-		// Ensure duplicates are removed (want to maintain order).
-		randomVariables   = new ArrayList<Expression>(new LinkedHashSet<Expression>(randomVariables));
-		Expression uniset = ExtensionalSet.makeUniSet(randomVariables);
-		return uniset;
 	}
 }

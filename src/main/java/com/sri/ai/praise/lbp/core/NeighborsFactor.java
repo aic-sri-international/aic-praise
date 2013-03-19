@@ -37,15 +37,26 @@
  */
 package com.sri.ai.praise.lbp.core;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Apply;
+import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.Trace;
+import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.extensional.NormalizeExtensionalUniSet;
+import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.model.IsRandomVariableValueExpression;
+import com.sri.ai.util.Util;
+import com.sri.ai.util.collect.PredicateIterator;
 
 /**
  * Default implementation of {@link LBPRewriter#R_neigh_f}.
@@ -93,16 +104,36 @@ public class NeighborsFactor extends AbstractLBPHierarchicalRewriter implements 
 		
 		Expression factorValue = LPIUtil.getFactorValueExpression(factor, process);
 
-		Expression randomVariablesUniset = LPIUtil.getRandomVariablesUsedIn(factorValue, process);
+		Expression uniset = getRandomVariablesUsedIn(factorValue, process);
 
 		Justification.beginEqualityStep("definition of neighbors of a factor");
-		Justification.endEqualityStep(randomVariablesUniset);
+		Justification.endEqualityStep(uniset);
 
 		Justification.beginEqualityStep("checking for duplicate neighbors");
-		Expression normalizedUniSet = rNormalizeExtensionalSet.rewrite(randomVariablesUniset, process);
+		Expression normalizedUniSet = rNormalizeExtensionalSet.rewrite(uniset, process);
 		result = process.rewrite(R_basic, normalizedUniSet);
 		Justification.endEqualityStep(result);
 		
 		return result;
+	}
+
+	public static Expression getRandomVariablesUsedIn(Expression expression, RewritingProcess process) {
+		SubExpressionsDepthFirstIterator subExpressionsDepthFirstIterator =
+			new SubExpressionsDepthFirstIterator(expression);
+
+		Iterator<Expression> randomVariableValuesIterator =
+			new PredicateIterator<Expression>(
+					subExpressionsDepthFirstIterator,
+					new IsRandomVariableValueExpression(process));
+
+		List<Expression> randomVariables =
+			Util.mapIntoList(
+					randomVariableValuesIterator,
+					new Apply(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL));
+
+		// Ensure duplicates are removed (want to maintain order).
+		randomVariables   = new ArrayList<Expression>(new LinkedHashSet<Expression>(randomVariables));
+		Expression uniset = ExtensionalSet.makeUniSet(randomVariables);
+		return uniset;
 	}
 }
