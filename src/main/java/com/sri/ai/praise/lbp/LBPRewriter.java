@@ -720,7 +720,7 @@ public interface LBPRewriter extends Rewriter {
 	 *             M <- 1 // message is irrelevant as value of v' will be v anyway
 	 *                    // this assumes the message would be consistent with E
 	 *                    // and put all weight on v as well,
-	 *                    // so it is a heuristic; for exactness, ignore this then clause
+	 *                    // so it is a heuristic; for exactness, always execute else clause
 	 *         else
 	 *             M <- {@link #R_m_to_f_from_v}(m_F<-V', beingComputed)
 	 *             if M contains previous message to F from V'
