@@ -172,6 +172,8 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				Expression NPrime              = IntensionalSet.getDomain(indexExpression);
 				
 				Trace.log("N' <- N' intersection RV_in_E");
+				NPrime = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(NPrime, rvInE));
+
 				if (IfThenElse.isIfThenElse(NPrime)) {
 					// Externalizes conditionals on N'
 					// if N' is 'if C' then N1' else N2''

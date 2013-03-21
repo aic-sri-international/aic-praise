@@ -680,64 +680,58 @@ public interface LBPRewriter extends Rewriter {
 	 * R_sum(sum_N E * prod_{V in N'} m_F<-V, T, beingComputed)
 	 * N is a conditional extensionally defined set of random variables indexing the summation
 	 * // (see note at end of {@link #R_m_to_v_from_f}(m_V<-F) for details)
-	 * N' is a conditional extensionally defined set of random variables
-	 * Either N = N', or N' is unconditional
-	 * When N is unconditional, it contains all elements of N'
-	 * E is a basic expression
+	 * N' is a conditional extensionally defined set of random variables.
+	 * For any assignment \theta to logical variables, N\theta contains N'\theta.
+	 * E is a basic expression.
 	 * T is the target random variable on which the message is being computed.
 	 * beingComputed is a conditional union of sets of pairs of nodes, representing messages being computed and
 	 * depending on this computation.
 	 * Returns an equivalent conditional basic expression (an expression with numeric and boolean operators only) up to a constant.
-	 * Externalizes conditionals on E
-	 * Cases:
-	 * if N is of the form if C' then N1 else N2 (thus N is the same as N')
-	 *     return {@link #R_simplify}(if C'
-	 *            then R_sum(sum_{N1} E prod_{V in N1} m_F<-V, T, beingComputed)  under C'
-	 *            else R_sum(sum_{N2} E prod_{V in N2} m_F<-V, T, beingComputed)) under not C'
-	 * else // we have sum_N E * prod_{V in N'} m_F<-V,  N, N' and E unconditional
 	 * 
-	 *     N <- N minus { [v] in N : v does not occur in E}
+	 * Externalizes conditionals on N, N' and E
+	 * 
+	 * RV_in_E <- getRandomVariablesUsedIn(E)
 	 *     
-	 *     if N is the empty set
-	 *         // then we know N' is also the empty set because N includes all elements in N'.
-	 *         return E
+	 * N <- N intersection RV_in_E
+	 * if N is the empty set
+	 *     // then we know N' is also the empty set because N includes all elements in N'.
+	 *     return E
 	 *         
-	 *     N' <- N' minus { [v] in N' : v does not occur in E }
-	 * 
-	 *     if N' is not the empty set
-	 *         toBeSummedOut <- N'
+	 * N' <- N' intersection RV_in_E
+	 * if N' is not the empty set
+	 *     toBeSummedOut <- N'
+	 * else
+	 *     toBeSummedOut <- N
+	 * pick V' in toBeSummedOut(V' has the form [v'])
+	 *     
+	 * relevantRange = {v in range(v') : {@link #R_basic}(E[v'/v]) is not zero}
+	 * if relevantRange is {}
+	 *     throw exception: model does not validate any values for V'
+	 *         
+	 * if N' is not the empty set
+	 *     products <- prod_{V in {@link #R_set_diff}(N'\{V'})} m_F<-V
+	 *     if relevantRange is singleton {v}
+	 *         M <- 1 // message is irrelevant as value of v' will be v anyway
+	 *                // this assumes the message would be consistent with E
+	 *                // and put all weight on v as well,
+	 *                // so it is a heuristic; for exactness, always execute else clause
 	 *     else
-	 *         toBeSummedOut <- N
-	 *     pick V' in toBeSummedOut(V' has the form [v'])
-	 *     
-	 *     relevantRange = {v in range(v') : {@link #R_basic}(E[v'/v]) is not zero}
-	 *     if relevantRange is {}
-	 *         throw exception: model does not validate any values for V'
-	 *         
-	 *     if N' is not the empty set
-	 *         products <- prod_{V in {@link #R_set_diff}(N'\{V'})} m_F<-V
-	 *         if relevantRange is singleton {v}
-	 *             M <- 1 // message is irrelevant as value of v' will be v anyway
-	 *                    // this assumes the message would be consistent with E
-	 *                    // and put all weight on v as well,
-	 *                    // so it is a heuristic; for exactness, always execute else clause
+	 *         M <- {@link #R_m_to_f_from_v}(m_F<-V', beingComputed)
+	 *         if M contains previous message to F from V'
+	 *              M <- (lambda v' : previous message to F from V')(v')
 	 *         else
-	 *             M <- {@link #R_m_to_f_from_v}(m_F<-V', beingComputed)
-	 *             if M contains previous message to F from V'
-	 *                  M <- (lambda v' : previous message to F from V')(v')
-	 *             else
-	 *                  relevantRange = {v in relevantRange : R_basic(M[v'/v]) is not zero }
-	 *                  if relevantRange is {}
-	 *                       throw exception: model does not validate any values for V'
-	 *     else
-	 *         products <- 1
-	 *         M <- 1
+	 *              relevantRange = {v in relevantRange : R_basic(M[v'/v]) is not zero }
+	 *              if relevantRange is {}
+	 *                   throw exception: model does not validate any values for V'
+	 * else
+	 *     products <- 1
+	 *     M <- 1
 	 *         
-	 *     return R_sum(sum_{{@link #R_set_diff}(N\{V'})}
-	 *                            {@link #R_basic}((E*M)[v'/v1] + ... + (E*M)[v'/vn])
-	 *                            * products,
-	 *                  T, beingComputed)
-	 *            for relevantRange in the form {v1,...,vn}
+	 * return R_sum(sum_{{@link #R_set_diff}(N\{V'})}
+	 *              {@link #R_basic}((E*M)[v'/v1] + ... + (E*M)[v'/vn])
+	 *              * products,
+	 *              T, beingComputed)
+	 *        for relevantRange in the form {v1,...,vn}
 	 * </pre>
 	 */
 	String R_sum = LBP_NAMESPACE+"R_sum";
