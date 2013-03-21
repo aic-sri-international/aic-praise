@@ -69,6 +69,7 @@ import com.sri.ai.praise.model.example.TrivialEpidemicSickEveryone;
 import com.sri.ai.praise.model.example.TrivialEpidemicSickEveryoneNotbobAmaryAjohn;
 import com.sri.ai.praise.model.example.TrivialEpidemicSickbob;
 import com.sri.ai.praise.model.example.TrivialGaveTreasureToOwnsRich;
+import com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample;
 import com.sri.ai.praise.model.example.TrivialLoopyPQ;
 import com.sri.ai.praise.model.example.TrivialLoopyPQWithPriors;
 import com.sri.ai.praise.model.example.TrivialLoopyPQandb;
@@ -1361,6 +1362,10 @@ public class LBPTest extends AbstractLPITest {
 					"{a, b, c}", "{a}", 
 					false, 
 					"{a}"),
+			new IntersectionTestData("Y != X and X = ann", new TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
+					"{ ([ friends(ann, Y) ]), ([ smoker(Y) ]) }", "{ ([ friends(X, Y) ]), ([ smoker(X) ]), ([ smoker(Y) ]) }", 
+					false, 
+					"{ ([ friends(ann, Y) ]), ([ smoker(Y) ]) }"),
 // TODO 
 			//
 			// Basic: Conditional S1

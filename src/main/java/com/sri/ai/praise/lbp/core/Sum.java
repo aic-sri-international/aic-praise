@@ -329,9 +329,10 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 
 		Trace.log("else // we have sum_N E * prod_{V in N'} m_F<-V,   E, N, and N' unconditional");
 
-		Trace.log("// N = {}", summationIndexN);
-		Trace.log("// E = {}", E);
-		Trace.log("// T = {}", T);
+		Trace.log("// N  = {}", summationIndexN);
+		Trace.log("// E  = {}", E);
+		Trace.log("// N' = {}", NPrime);
+		Trace.log("// T  = {}", T);
 
 		LPIUtil.assertProductOk(productOfIncomingMessages);
 
@@ -342,7 +343,6 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression F                            = msgToF_V.get(0);
 		Expression incomingMessagesSetCondition = IntensionalSet.getCondition(incomingMessagesSet);
 
-		Trace.log("// N' = {}", NPrime);
 		Expression toBeSummedOut = null;
 		if (!ExtensionalSet.isEmptySet(NPrime)) {
 			Trace.log("if N' is not the empty set");
