@@ -1356,13 +1356,21 @@ public class LBPTest extends AbstractLPITest {
 					false, 
 					"{{ (on X', X) [ p(X') ] | X' = X and X' != a and X != a}}"),
 			//
-			// Basic: Illegal Argument Exceptions
-			//
-			// Intensional Multisets currently only supported.
+			// Basic: Extensional Set
 			new IntersectionTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 					"{a, b, c}", "{a}", 
-					true, 
-					"N/A"),	
+					false, 
+					"{a}"),
+// TODO 
+			//
+			// Basic: Conditional S1
+// TODO
+			//
+			// Basic: Conditional S2
+// TODO
+			//
+			// Basic: Illegal Argument Exceptions
+			//
 			new IntersectionTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 					"{{ (on X) X | X != a}}", "{ (on Y) Y | Y != a }", 
 					true, 

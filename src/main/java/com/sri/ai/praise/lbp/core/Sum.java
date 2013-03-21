@@ -39,7 +39,6 @@ package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
@@ -62,7 +61,6 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
-import com.sri.ai.praise.ValueOfRandomVariableOccursIn;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
@@ -139,19 +137,56 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			// else R_sum(sum_N E2 prod_{V in N'} m_F<-V, T, beingComputed)) under not C'
 			result = rewriteExternalizeE(summationIndexN, E, productOfIncomingMessages, currentExpression, T, beingComputed, process);
 		} 
-		else if (IfThenElse.isIfThenElse(summationIndexN)) {
-			// if N is of the form if C' then N1 else N2
-			// (thus N is the same as N')
-			// return R_simplify(if C'
-			// then R_sum(sum_{N1} E prod_{V in N1} m_F<-V, T, beingComputed)  under C'
-			// else R_sum(sum_{N2} E prod_{V in N2} m_F<-V, T, beingComputed)) under not C'
-			result = rewriteExternalizeN(summationIndexN, E, productOfIncomingMessages, currentExpression, T, beingComputed, process);
-		} 
 		else {
-			// else
-			// we have sum_N E * prod_{V in N'} m_F<-V, N, N' and E unconditional
-			// ...
-			result = rewriteUnconditional(summationIndexN, E, productOfIncomingMessages, currentExpression, T, beingComputed, process);
+			Trace.log("RV_in_E <- getRandomVariablesUsedIn(E)");
+			Expression rvInE = LPIUtil.getRandomVariablesUsedIn(E, process);
+			
+			Trace.log("N <- N intersection RV_in_E");
+			summationIndexN = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(summationIndexN, rvInE));
+			
+			if (IfThenElse.isIfThenElse(summationIndexN)) {
+				
+				// Externalizes conditionals on N
+				// if N is 'if C' then N1 else N2'
+				// return R_simplify(if C'
+				// then R_sum(sum_{N1} E prod_{V in N'} m_F<-V, T, beingComputed)  under C'
+				// else R_sum(sum_{N2} E prod_{V in N'} m_F<-V, T, beingComputed)) under not C'
+				result = rewriteExternalizeN(summationIndexN, E, productOfIncomingMessages, currentExpression, T, beingComputed, process);
+			} 
+			else if (ExtensionalSet.isEmptySet(summationIndexN)) {
+				Trace.log("if N is the empty set");
+				Trace.log("    // then we know N' is also the empty set because N includes all elements in N'.");
+				Trace.log("    return E");
+
+				if (Justification.isEnabled()) {
+					Justification.beginEqualityStep("summation on no random variables evaluates to its summand; incoming messages, if any, can be discarded");
+					Justification.endEqualityStep(E);
+				}
+
+				result = E;
+			}
+			else {
+				
+				Expression incomingMessagesSet = productOfIncomingMessages.get(0);
+				Expression indexExpression     = IntensionalSet.getIndexExpressions(incomingMessagesSet).get(0);
+				Expression NPrime              = IntensionalSet.getDomain(indexExpression);
+				
+				Trace.log("N' <- N' intersection RV_in_E");
+				if (IfThenElse.isIfThenElse(NPrime)) {
+					// Externalizes conditionals on N'
+					// if N' is 'if C' then N1' else N2''
+					// return R_simplify(if C'
+					// then R_sum(sum_{N} E prod_{V in N1'} m_F<-V, T, beingComputed)  under C'
+					// else R_sum(sum_{N} E prod_{V in N2'} m_F<-V, T, beingComputed)) under not C'
+					result = rewriteExternalizeNPrime(summationIndexN, E, productOfIncomingMessages, NPrime, currentExpression, T, beingComputed, process);
+				}
+				else {			
+					// else
+					// we have sum_N E * prod_{V in N'} m_F<-V, N, N' and E unconditional
+					// ...
+					result = rewriteUnconditional(summationIndexN, E, productOfIncomingMessages, NPrime, currentExpression, T, beingComputed, process);
+				}
+			}
 		}
 
 		return result;
@@ -166,7 +201,8 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 	}
 
 	private Expression rewriteExternalizeE(Expression summationIndexN,
-			Expression E, Expression productOfIncomingMessages,
+			Expression E, 
+			Expression productOfIncomingMessages,
 			Expression currentExpression, 
 			Expression T,
 			Expression beingComputed,
@@ -201,30 +237,22 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 	}
 
 	private Expression rewriteExternalizeN(Expression summationIndexN,
-			Expression E, Expression productOfIncomingMessages,
+			Expression E, 
+			Expression productOfIncomingMessages,
 			Expression currentExpression, 
 			Expression T,
 			Expression beingComputed,
 			RewritingProcess process) {
-		Trace.log("if N is of the form if C' then N1 else N2 (thus N is the same as N')");
+		Trace.log("if N is of the form if C' then N1 else N2");
 		Trace.log("    return R_simplify(if C'");
-		Trace.log("           then R_sum(sum_{N1} E prod_{V in N1} m_F<-V, T, beingComputed)  under C'");
-		Trace.log("           else R_sum(sum_{N2} E prod_{V in N2} m_F<-V, T, beingComputed)) under not C'");
+		Trace.log("           then R_sum(sum_{N1} E prod_{V in N'} m_F<-V, T, beingComputed)  under C'");
+		Trace.log("           else R_sum(sum_{N2} E prod_{V in N'} m_F<-V, T, beingComputed)) under not C'");
 
 		LPIUtil.assertProductOk(productOfIncomingMessages);
 
 		Expression condition = IfThenElse.getCondition(summationIndexN);
 		Expression n1        = IfThenElse.getThenBranch(summationIndexN);
 		Expression n2        = IfThenElse.getElseBranch(summationIndexN);
-
-		Expression prodIntensionalSet   = productOfIncomingMessages.get(0);
-		Expression indexExpression      = IntensionalSet.getIndexExpressions( prodIntensionalSet).get(0);
-		Expression index                = IntensionalSet.getIndex(indexExpression);
-		Expression msgToF_V             = IntensionalSet.getHead(prodIntensionalSet);
-		Expression prodScopingCondition = IntensionalSet.getCondition(prodIntensionalSet);
-
-		Expression productOfIncomingMessagesN1 = LPIUtil.makeProductOfMessages(index, n1, msgToF_V, prodScopingCondition);
-		Expression productOfIncomingMessagesN2 = LPIUtil.makeProductOfMessages(index, n2, msgToF_V, prodScopingCondition);
 
 		if (Justification.isEnabled()) {
 			Justification.beginEqualityStep("externalizing conditional on neighbors");
@@ -239,8 +267,48 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Justification.beginEqualityStep("solving summations at then and else branches");
 		Expression result = GrinderUtil.branchAndMergeOnACondition(
 				condition,
-				newCallSumRewrite(), new Expression[] { n1, E, productOfIncomingMessagesN1, T, beingComputed },
-				newCallSumRewrite(), new Expression[] { n2, E, productOfIncomingMessagesN2, T, beingComputed },
+				newCallSumRewrite(), new Expression[] { n1, E, productOfIncomingMessages, T, beingComputed },
+				newCallSumRewrite(), new Expression[] { n2, E, productOfIncomingMessages, T, beingComputed },
+				R_check_branch_reachable,
+				R_simplify, process);
+		Justification.endEqualityStep(result);
+
+		return result;
+	}
+	
+	private Expression rewriteExternalizeNPrime(Expression summationIndexN,
+			Expression E, 
+			Expression productOfIncomingMessages,
+			Expression NPrime,
+			Expression currentExpression, 
+			Expression T,
+			Expression beingComputed,
+			RewritingProcess process) {
+		Trace.log("if N' is of the form if C' then N1' else N2'");
+		Trace.log("    return R_simplify(if C'");
+		Trace.log("           then R_sum(sum_{N} E prod_{V in N1'} m_F<-V, T, beingComputed)  under C'");
+		Trace.log("           else R_sum(sum_{N} E prod_{V in N2'} m_F<-V, T, beingComputed)) under not C'");
+
+		LPIUtil.assertProductOk(productOfIncomingMessages);
+
+		Expression condition = IfThenElse.getCondition(NPrime);
+		Expression n1        = IfThenElse.getThenBranch(NPrime);
+		Expression n2        = IfThenElse.getElseBranch(NPrime);
+
+		Expression prodIntensionalSet   = productOfIncomingMessages.get(0);
+		Expression indexExpression      = IntensionalSet.getIndexExpressions( prodIntensionalSet).get(0);
+		Expression index                = IntensionalSet.getIndex(indexExpression);
+		Expression msgToF_V             = IntensionalSet.getHead(prodIntensionalSet);
+		Expression prodScopingCondition = IntensionalSet.getCondition(prodIntensionalSet);
+
+		Expression productOfIncomingMessagesN1 = LPIUtil.makeProductOfMessages(index, n1, msgToF_V, prodScopingCondition);
+		Expression productOfIncomingMessagesN2 = LPIUtil.makeProductOfMessages(index, n2, msgToF_V, prodScopingCondition);
+		
+		Justification.beginEqualityStep("solving summations at then and else branches");
+		Expression result = GrinderUtil.branchAndMergeOnACondition(
+				condition,
+				newCallSumRewrite(), new Expression[] { summationIndexN, E, productOfIncomingMessagesN1, T, beingComputed },
+				newCallSumRewrite(), new Expression[] { summationIndexN, E, productOfIncomingMessagesN2, T, beingComputed },
 				R_check_branch_reachable,
 				R_simplify, process);
 		Justification.endEqualityStep(result);
@@ -249,80 +317,36 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 	}
 
 	private Expression rewriteUnconditional(Expression summationIndexN,
-			Expression E, Expression productOfIncomingMessages,
+			Expression E, 
+			Expression productOfIncomingMessages,
+			Expression NPrime,
 			Expression currentExpression, 
 			Expression T,
 			Expression beingComputed,
 			RewritingProcess process) {
 
-		Trace.log("else // we have sum_N E * prod_{V in N'} m_F<-V,   N, N' and E unconditional");
+		Trace.log("else // we have sum_N E * prod_{V in N'} m_F<-V,   E, N, and N' unconditional");
 
 		Trace.log("// N = {}", summationIndexN);
 		Trace.log("// E = {}", E);
 		Trace.log("// T = {}", T);
-		Expression previousSummationIndexN = summationIndexN;
-		summationIndexN = removeRandomVariablesNotOccurringIn(E, summationIndexN, process);
-		
-		if (summationIndexN != previousSummationIndexN) {
-			Trace.log("N <- N  minus { [v] in N : v does not occur in E }");
-			Trace.log("// After removing non-present random variables, N = {}", summationIndexN);
-			if (Justification.isEnabled()) {
-				Justification.beginEqualityStep("by removing non-occurring random variables");
-				currentExpression = replaceN(currentExpression, summationIndexN);
-				Justification.endEqualityStep(currentExpression);
-			}
-		}
-
-		if (ExtensionalSet.isEmptySet(summationIndexN)) {
-			Trace.log("if N is the empty set");
-			Trace.log("    // then we know N' is also the empty set because N includes all elements in N'.");
-			Trace.log("    return E");
-
-			if (Justification.isEnabled()) {
-				Justification.beginEqualityStep("summation on no random variables evaluates to its summand; incoming messages, if any, can be discarded");
-				Justification.endEqualityStep(E);
-			}
-
-			return E;
-		}
 
 		LPIUtil.assertProductOk(productOfIncomingMessages);
 
 		Expression incomingMessagesSet          = productOfIncomingMessages.get(0);
 		Expression indexExpression              = IntensionalSet.getIndexExpressions(incomingMessagesSet).get(0);
 		Expression indexOfOfIncomingMessagesSet = IntensionalSet.getIndex(indexExpression);
-		Expression NPrime                       = IntensionalSet.getDomain(indexExpression);
 		Expression msgToF_V                     = IntensionalSet.getHead(incomingMessagesSet);
 		Expression F                            = msgToF_V.get(0);
 		Expression incomingMessagesSetCondition = IntensionalSet.getCondition(incomingMessagesSet);
 
 		Trace.log("// N' = {}", NPrime);
-		Trace.log("// E = {}", E);
-		Expression previousNPrime = NPrime;
-		NPrime = removeRandomVariablesNotOccurringIn(E, NPrime, process);
-		if (NPrime != previousNPrime) {
-			Trace.log("N' <- N'  minus { [v] in N' : v does not occur in E }");
-			Trace.log("// Now, N' = {}", NPrime);
-			if (Justification.isEnabled()) {
-				Justification.beginEqualityStep("by removing irrelevant incoming messages");
-				Expression newProductOfIncomingMessages =
-					LPIUtil.makeProductOfMessages(
-							indexOfOfIncomingMessagesSet,
-							NPrime,
-							msgToF_V,
-							incomingMessagesSetCondition);
-				Expression newHead = Expressions.apply(FunctorConstants.TIMES, E, newProductOfIncomingMessages);
-				currentExpression = replaceHead(currentExpression, newHead);
-				Justification.endEqualityStep(currentExpression);
-			}
-		}
-
 		Expression toBeSummedOut = null;
 		if (!ExtensionalSet.isEmptySet(NPrime)) {
 			Trace.log("if N' is not the empty set");
 			Trace.log("    toBeSummedOut <- N'");
 			toBeSummedOut = NPrime;
-		} 
+		}
 		else {
 			Trace.log("else N' is the empty set");
 			Trace.log("    toBeSummedOut <- N");
@@ -498,21 +522,6 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			newSet = ExtensionalSet.makeSingletonOfSameTypeAs(currentExpression.get(0), newHead);
 		}
 		Expression result = Expressions.apply(FunctorConstants.SUM, newSet);
-		return result;
-	}
-
-	private static Expression removeRandomVariablesNotOccurringIn(
-			Expression expression, Expression extensionalSetOfRandomVariables, RewritingProcess process) {
-		
-		List<Expression> randomVariables = new LinkedList<Expression>(
-				ExtensionalSet.getElements(extensionalSetOfRandomVariables));
-		List<Expression> occurringRandomVariables = (List<Expression>) Util
-				.addElementsSatisfying(randomVariables,
-						new ValueOfRandomVariableOccursIn(expression, process));
-		if (randomVariables.size() == occurringRandomVariables.size()) {
-			return extensionalSetOfRandomVariables;
-		}
-		Expression result = ExtensionalSet.makeOfSameTypeAs(extensionalSetOfRandomVariables, occurringRandomVariables);
 		return result;
 	}
 

@@ -45,14 +45,20 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.Trace;
+import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.StandardizedApartFrom;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
+import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
 
 /**
@@ -86,7 +92,13 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 		Expression set1 = Tuple.get(expression, 0);
 		Expression set2 = Tuple.get(expression, 1);
 		
-		if (Sets.isIntensionalMultiSet(set1) && Sets.isIntensionalMultiSet(set2)) {
+		if (IfThenElse.isIfThenElse(set1)) {
+			result = rewriteS1Conditional(set1, set2, process);
+		}
+		else if (IfThenElse.isIfThenElse(set2)) {
+			result = rewriteS2Conditional(set1, set2, process);
+		}
+		else if (Sets.isIntensionalMultiSet(set1) && Sets.isIntensionalMultiSet(set2)) {
 			Trace.log("Set1 is {{ (on I1) Alpha1 | C1 }} and Set2 is {{ (on I2) Alpha2 | C2 }}");
 			Trace.log("    standardize Set1 apart from (I2, Alpha2, C2)");
 			Expression i2              = IntensionalSet.getScopingExpression(set2);
@@ -117,6 +129,12 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 				result = IntensionalSet.makeMultiSetFromIndexExpressionsList(i, alpha1, c);
 			}
 		} 
+		else if (Sets.isExtensionalUniSet(set1) && Sets.isExtensionalUniSet(set2)) {
+			Trace.log("Set1 is {...} and Set2 is {...}");
+			Trace.log("    return R_set_diff(S1 \\ R_set_diff(S1 \\ S21))");
+			Expression s1DiffS2 = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, set2));
+			result = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, s1DiffS2));
+		}
 		else {
 			Trace.log("Else");
 			Trace.log("    \"Not currently supported\"");
@@ -124,5 +142,75 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 		}
 		
 		return result;
+	}
+	
+	private Expression rewriteS1Conditional(Expression set1, Expression set2, RewritingProcess process) {
+		Trace.log("if S1 is 'if C then Alpha else Beta'");
+		Trace.log("    return R_basic(if C then R_intersection(Alpha intersection S2) else R_intersection(Beta intersection S2))");
+
+		Expression condition  = IfThenElse.getCondition(set1);
+		Expression thenBranch = IfThenElse.getThenBranch(set1);
+		Expression elseBranch = IfThenElse.getElseBranch(set1);
+
+		Justification.beginEqualityStep("externalizing conditional");
+		if (Justification.isEnabled()) {
+			Expression currentExpression =
+				IfThenElse.make(
+						condition,
+						Expressions.apply(FunctorConstants.INTERSECTION, thenBranch, set2),
+						Expressions.apply(FunctorConstants.INTERSECTION, elseBranch, set2));
+			Justification.endEqualityStep(currentExpression);
+		}
+		
+		Justification.beginEqualityStep("solving intersection in then and else branches");
+		Expression result = GrinderUtil.branchAndMergeOnACondition(
+				condition,
+				newCallIntersectionRewrite(), new Expression[] { thenBranch, set2 },
+				newCallIntersectionRewrite(), new Expression[] { elseBranch, set2 },
+				R_check_branch_reachable, 
+				R_basic, process);
+		Justification.endEqualityStep(result);
+
+		return result;
+	}
+	
+	private Expression rewriteS2Conditional(Expression set1, Expression set2, RewritingProcess process) {
+		Trace.log("if S2 is 'if C then Alpha else Beta'");
+		Trace.log("    return R_basic(if C then R_intersection(S1 intersection Alpha) else R_intersection(S1 intersection Beta))");
+
+		Expression condition  = IfThenElse.getCondition(set2);
+		Expression thenBranch = IfThenElse.getThenBranch(set2);
+		Expression elseBranch = IfThenElse.getElseBranch(set2);
+
+		Justification.beginEqualityStep("externalizing conditional");
+		if (Justification.isEnabled()) {
+			Expression currentExpression =
+				IfThenElse.make(
+						condition,
+						Expressions.apply(FunctorConstants.SET_DIFFERENCE, set1, thenBranch),
+						Expressions.apply(FunctorConstants.SET_DIFFERENCE, set1, elseBranch));
+			Justification.endEqualityStep(currentExpression);
+		}
+		
+		Justification.beginEqualityStep("solving intersection in then and else branches");
+		Expression result = GrinderUtil.branchAndMergeOnACondition(
+				condition,
+				newCallIntersectionRewrite(), new Expression[] { set1, thenBranch },
+				newCallIntersectionRewrite(), new Expression[] { set1, elseBranch },
+				R_check_branch_reachable, 
+				R_basic, process);
+		Justification.endEqualityStep(result);
+
+		return result;
+	}
+	
+	private RewriteOnBranch newCallIntersectionRewrite() {
+		return new RewriteOnBranch() {
+			@Override
+			public Expression rewrite(Expression[] expressions, RewritingProcess process) {
+				Expression result = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(expressions[0], expressions[1]));
+				return result;
+			}
+		};
 	}
 }
