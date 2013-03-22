@@ -37,19 +37,22 @@
  */
 package com.sri.ai.praise;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ExpressionAndContext;
 import com.sri.ai.expresso.api.SyntaxTree;
-import com.sri.ai.expresso.core.DefaultExpressionAndContext;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
+import com.sri.ai.expresso.core.DefaultExpressionAndContext;
+import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.ExpressionKnowledgeModule;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SubSyntaxTreeAndPathWhoseParentsSatisfyAGivenPredicateIterator;
@@ -85,6 +88,8 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	private static List<Expression> _emptyExpressionList = Collections.emptyList();
 	//
 	public static final String SYNTAX_TREE_LABEL = "[ . ]";
+	//
+	private Cache<Expression, Expression> injectiveFunctionTokenCache = CacheBuilder.newBuilder().maximumSize(100).build();
 
 	public static boolean isBracketedExpression(Expression expression) {
 		return expression.getSyntaxTree().getLabel().equals(SYNTAX_TREE_LABEL);
@@ -204,35 +209,41 @@ MutuallyExclusiveCoDomainsModule.Provider {
 			RewritingProcess process) {
 		return IsRandomVariableValueExpression.apply(getExpressionInBrackets(expression), process);
 	}
-
+	
+	// TODO - currently does not handle bracketed expressions containing quantified sub-expressions.
 	@Override
 	public Object getInjectiveFunctionToken(Expression expression, RewritingProcess process) {
+		Expression result = null;
 		if (isBracketedExpression(expression)) {
-			Expression lambdaBody = expression;
-			int parameterIndex = 1;
-			List<Expression> parameters = new LinkedList<Expression>();
-			Iterator<ExpressionAndContext> subExpressionsIterator = this.getImmediateSubExpressionsAndContextsIterator(expression, process);
-			while (subExpressionsIterator.hasNext()) {
-				ExpressionAndContext subExpressionAndContext = subExpressionsIterator.next();
-				if (subExpressionAndContext.getQuantifiedVariables().isEmpty()) {
-					List<Integer> path = subExpressionAndContext.getPath();
-					Expression parameter = getParameter(parameterIndex++, lambdaBody, parameters, process);
-					lambdaBody = Expressions.replaceAtPath(lambdaBody, path, parameter);
+			// Check if we have already calculated first
+			result = injectiveFunctionTokenCache.getIfPresent(expression);
+			if (result == null) {
+				// Collect up the expressions to be parameterized and their corresponding paths.
+				// (i.e. constants and logical variables used inside of random variable predicates).		
+				Iterator<ExpressionAndContext> subExpressionsIterator = this.getImmediateSubExpressionsAndContextsIterator(expression, process);
+				int i = 1;
+				List<Expression> parameters = new ArrayList<Expression>();
+				Expression       lambdaBody = expression;
+				while (subExpressionsIterator.hasNext()) {
+					ExpressionAndContext subExpressionAndContext = subExpressionsIterator.next();
+					
+					// Note: By using paths for the replacement call, 
+					// we don't need to worry about having to ensure there is not a 
+					// clash between the normalized parameter names to be used (i.e. X1 to Xn) 
+					// and the existing parameters, as each instance of an existing parameter (even if repeated)
+					// is replaced with a new unique normalized parameter.
+					Expression parameter = DefaultSymbol.createSymbol("X"+i++);
+					parameters.add(parameter);
+					lambdaBody = Expressions.replaceAtPath(lambdaBody, subExpressionAndContext.getPath(), parameter);
 				}
+				
+				// Create the token
+				result = Lambda.make(parameters, lambdaBody);
+				
+				injectiveFunctionTokenCache.put(expression, result);
 			}
-			Expression result = Lambda.make(parameters, lambdaBody);
-			return result;
 		}
-		return null;
-	}
-
-	public static Expression getParameter(int parameterIndex,
-			Expression lambdaBody, List<Expression> parameters,
-			RewritingProcess process) {
-		String parameterName = "X" + parameterIndex;
-		Expression parameter = Expressions.makeUniqueVariable(parameterName, lambdaBody, process);
-		parameters.add(parameter);
-		return parameter;
+		return result;
 	}
 	
 	public static class GetRandomVariableValueExpression implements Function<SyntaxTree, SyntaxTree> {
