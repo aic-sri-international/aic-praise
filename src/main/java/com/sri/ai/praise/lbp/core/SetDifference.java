@@ -58,6 +58,7 @@ import com.sri.ai.grinder.library.boole.ForAll;
 import com.sri.ai.grinder.library.boole.Implication;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -675,46 +676,63 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 	}
 
 	private Expression rewriteS1andS2IntensionalUniSets(Expression set1, Expression set2, RewritingProcess process) {
-
+		Expression result = null;
+		
 		Trace.log("if S1 is { Alpha | C }_I and S2 is { Alpha' | C' }_I'");
 		
-		Expression alpha = IntensionalSet.getHead(set1);
-		Expression c     = IntensionalSet.getCondition(set1);
-		Expression i     = IntensionalSet.getScopingExpression(set1);
-
-		Trace.log("    { Alpha' | C' }_I' <- standardize { Alpha' | C' }_I' apart from (Alpha, C)");
+		Expression alpha      = IntensionalSet.getHead(set1);
+		Expression alphaPrime = IntensionalSet.getHead(set2); 
 		
-		Expression tupleAlphaC = Tuple.make(Arrays.asList(alpha, c));
-		Expression saS2        = StandardizedApartFrom
-				.standardizedApartFrom(
-						set2, tupleAlphaC, process);
-		
-		Expression       alphaPrime = IntensionalSet.getHead(saS2); 
-		Expression       cPrime     = IntensionalSet.getCondition(saS2);
-		List<Expression> iPrime     = IntensionalSet.getIndexExpressions(saS2);
-
-		Expression neq              = Disequality.make(alpha, alphaPrime);
-		Expression impl             = Implication.make(cPrime, neq);
-		Expression forAllIPrime     = ForAll.make(iPrime, impl);
-		Expression cAndForAllPrimeI = CardinalityUtil.makeAnd(c, forAllIPrime);
-
-		if (Justification.isEnabled()) {
-			Justification.beginEqualityStep("difference set is an intensional set with the condition of the first and the negation of the condition of the second");
-			Expression currentExpression = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cAndForAllPrimeI);
-			Justification.endEqualityStep(currentExpression);
+		// Perform a cheap disequality first
+		if (CheapDisequalityModule.isACheapDisequality(alpha, alphaPrime, process)) {
+			Justification.beginEqualityStep("is guaranteed Alpha != Alpha'");
+			
+			Trace.log("    is guaranteed Alpha != Alpha'");
+			Trace.log("    return S1"); 
+			
+			result = set1;
+			
+			Justification.endEqualityStep(result);
 		}
-		
-		Trace.log("    C''<- R_formula_simplification(C and for all I' : C' => Alpha != Alpha') with cont. variables extended by I");
-		Justification.beginEqualityStep("simplifying set condition");
-		RewritingProcess processI    = GrinderUtil.extendContextualVariables(i, process);
-		Expression       cPrimePrime = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
-		Expression       result      = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cPrimePrime);
-		Justification.endEqualityStep(result);
-		
-		Trace.log("    return R_basic({ Alpha | C'' }_I)");
-		Justification.beginEqualityStep("simplifying overall expression");
-		result = process.rewrite(R_basic, result);
-		Justification.endEqualityStep(result);
+		else {			
+			Expression c = IntensionalSet.getCondition(set1);
+			Expression i = IntensionalSet.getScopingExpression(set1);
+
+			Trace.log("    { Alpha' | C' }_I' <- standardize { Alpha' | C' }_I' apart from (Alpha, C)");
+			
+			Expression tupleAlphaC = Tuple.make(Arrays.asList(alpha, c));
+			Expression saS2        = StandardizedApartFrom
+					.standardizedApartFrom(
+							set2, tupleAlphaC, process);
+			
+			alphaPrime              = IntensionalSet.getHead(saS2); 
+			Expression       cPrime = IntensionalSet.getCondition(saS2);
+			List<Expression> iPrime = IntensionalSet.getIndexExpressions(saS2);
+	
+			Expression neq              = Disequality.make(alpha, alphaPrime);
+			Expression impl             = Implication.make(cPrime, neq);
+			Expression forAllIPrime     = ForAll.make(iPrime, impl);
+			Expression cAndForAllPrimeI = CardinalityUtil.makeAnd(c, forAllIPrime);
+	
+			if (Justification.isEnabled()) {
+				Justification.beginEqualityStep("difference set is an intensional set with the condition of the first and the negation of the condition of the second");
+				Expression currentExpression = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cAndForAllPrimeI);
+				Justification.endEqualityStep(currentExpression);
+			}
+			
+			Trace.log("    C''<- R_formula_simplification(C and for all I' : C' => Alpha != Alpha') with cont. variables extended by I");
+			Justification.beginEqualityStep("simplifying set condition");
+			RewritingProcess processI    = GrinderUtil.extendContextualVariables(i, process);
+			Expression       cPrimePrime = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
+			
+			result = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cPrimePrime);
+			Justification.endEqualityStep(result);
+			
+			Trace.log("    return R_basic({ Alpha | C'' }_I)");
+			Justification.beginEqualityStep("simplifying overall expression");
+			result = process.rewrite(R_basic, result);
+			Justification.endEqualityStep(result);
+		}
 
 		return result;
 	}

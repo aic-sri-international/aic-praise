@@ -61,6 +61,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.core.FunctionApplicationProvider;
 import com.sri.ai.grinder.library.ScopedVariables;
+import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.function.InjectiveModule;
 import com.sri.ai.grinder.library.function.MutuallyExclusiveCoDomainsModule;
 import com.sri.ai.grinder.library.lambda.Lambda;
@@ -82,6 +83,7 @@ implements
 NoOpRewriter,
 ScopedVariables.Provider,
 ExpressionKnowledgeModule.Provider,
+CheapDisequalityModule.Provider,
 InjectiveModule.Provider,
 MutuallyExclusiveCoDomainsModule.Provider {
 
@@ -166,6 +168,11 @@ MutuallyExclusiveCoDomainsModule.Provider {
 		if (knowledgeBasedExpressionModule != null) {
 			knowledgeBasedExpressionModule.register(this);
 		}
+		
+		CheapDisequalityModule cheapDisequalityModule = (CheapDisequalityModule) process.findModule(CheapDisequalityModule.class);
+		if (cheapDisequalityModule != null) {
+			cheapDisequalityModule.register(this);
+		}
 
 		InjectiveModule injectiveModuleModule = (InjectiveModule) process.findModule(InjectiveModule.class);
 		if (injectiveModuleModule != null) {
@@ -210,7 +217,30 @@ MutuallyExclusiveCoDomainsModule.Provider {
 		return IsRandomVariableValueExpression.apply(getExpressionInBrackets(expression), process);
 	}
 	
-	// TODO - currently does not handle bracketed expressions containing quantified sub-expressions.
+	@Override
+	public boolean isCheapDisequality(Expression e1, Expression e2, RewritingProcess process) {
+		boolean result = false;
+		
+		if (isBracketedExpression(e1) && isBracketedExpression(e2)) {
+			if (!getInjectiveFunctionToken(e1, process).equals(getInjectiveFunctionToken(e2, process))) {
+				// if e1 and e2's injective function tokens are different we are guaranteed
+				// that they are not equal. 
+				result = true;
+			}
+		}
+		
+		return result;
+	}
+	
+	
+	
+// TODO - currently does not handle bracketed expressions containing quantified sub-expressions.
+	// Note: The injective function token for a bracketed expression consists of constructing a lambda
+	// expression, where a normalized parameter is created per sub-expression position in the original
+	// bracketed expression. Sub-expressions of a bracketed expression are the constants and logical
+	// variables contained in random variable value expressions within the bracketed expression.
+	// Theses will be substituted with the normalized parameters when constructing the
+	// lambda injective function token.
 	@Override
 	public Object getInjectiveFunctionToken(Expression expression, RewritingProcess process) {
 		Expression result = null;
@@ -218,9 +248,9 @@ MutuallyExclusiveCoDomainsModule.Provider {
 			// Check if we have already calculated first
 			result = injectiveFunctionTokenCache.getIfPresent(expression);
 			if (result == null) {
-				// Collect up the expressions to be parameterized and their corresponding paths.
+				// Collect up the sub-expressions to be parameterized and their corresponding paths.
 				// (i.e. constants and logical variables used inside of random variable predicates).		
-				Iterator<ExpressionAndContext> subExpressionsIterator = this.getImmediateSubExpressionsAndContextsIterator(expression, process);
+				Iterator<ExpressionAndContext> subExpressionsIterator = getImmediateSubExpressionsAndContextsIterator(expression, process);
 				int i = 1;
 				List<Expression> parameters = new ArrayList<Expression>();
 				Expression       lambdaBody = expression;
