@@ -53,6 +53,7 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.StandardizedApartFrom;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -262,27 +263,40 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 	}
 	
 	private Expression rewriteSetIsIntensional(Expression alpha, Expression set, RewritingProcess process) {
+		Expression result = null;
 		Trace.log("if Set is { Beta | C }_I or {{ Beta | C }}_I");
-		Trace.log("    { Beta' | C' }_I' <- standardize { Beta | C }_I apart from Alpha");
-		Trace.log("    return R_basic(there exists I' : C' and Alpha = Beta')");
 		
-		Justification.beginEqualityStep("Set is intensional");
-
-		Expression setPrime = StandardizedApartFrom
-				.standardizedApartFrom(
-						set, alpha, process);
-
-		List<Expression> indexExpressionsPrime = IntensionalSet.getIndexExpressions(setPrime);
-		Expression       conditionPrime        = IntensionalSet.getCondition(setPrime);
-		Expression       headBetaPrime         = IntensionalSet.getHead(setPrime);
-
-		Expression alphaEqBetaPrime = Equality.make(alpha, headBetaPrime);
-		Expression and              = CardinalityUtil.makeAnd(conditionPrime, alphaEqBetaPrime);
-
-		Expression thereExists = ThereExists.make(indexExpressionsPrime, and);
-		Expression result      = process.rewrite(R_basic, thereExists);
+		Expression beta = IntensionalSet.getHead(set);
+		
+		if (CheapDisequalityModule.isACheapDisequality(alpha, beta, process)) {
+			Trace.log("    is guaranteed Alpha != Beta");
+			Trace.log("    return \"false\""); 
+			
+			result = Expressions.FALSE;
+		}
+		else {
+			Trace.log("    { Beta' | C' }_I' <- standardize { Beta | C }_I apart from Alpha");
+			Trace.log("    return R_basic(there exists I' : C' and Alpha = Beta')");
+			
+			Justification.beginEqualityStep("Set is intensional");
 	
-		Justification.endEqualityStep(result);
+			Expression setPrime = StandardizedApartFrom
+					.standardizedApartFrom(
+							set, alpha, process);
+	
+			List<Expression> indexExpressionsPrime = IntensionalSet.getIndexExpressions(setPrime);
+			Expression       conditionPrime        = IntensionalSet.getCondition(setPrime);
+			Expression       headBetaPrime         = IntensionalSet.getHead(setPrime);
+	
+			Expression alphaEqBetaPrime = Equality.make(alpha, headBetaPrime);
+			Expression and              = CardinalityUtil.makeAnd(conditionPrime, alphaEqBetaPrime);
+	
+			Expression thereExists = ThereExists.make(indexExpressionsPrime, and);
+			
+			result = process.rewrite(R_basic, thereExists);
+		
+			Justification.endEqualityStep(result);
+		}
 		
 		return result;
 	}

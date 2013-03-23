@@ -53,6 +53,7 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.StandardizedApartFrom;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -100,33 +101,41 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 		}
 		else if (Sets.isIntensionalMultiSet(set1) && Sets.isIntensionalMultiSet(set2)) {
 			Trace.log("Set1 is {{ (on I1) Alpha1 | C1 }} and Set2 is {{ (on I2) Alpha2 | C2 }}");
-			Trace.log("    standardize Set1 apart from (I2, Alpha2, C2)");
-			Expression i2              = IntensionalSet.getScopingExpression(set2);
-			Expression alpha2          = IntensionalSet.getHead(set2);
-			Expression c2              = IntensionalSet.getCondition(set2);
-			Expression tupleI2Alpha2C2 = Tuple.make(Arrays.asList(i2, alpha2, c2));
-			
-			Expression saSet1          = StandardizedApartFrom
-					.standardizedApartFrom(
-							set1, tupleI2Alpha2C2, process);
-			
-			Trace.log("    C <- R_complete_simplify(Alpha1 = Alpha2 and C1 and C2)");
-			Expression alpha1 = IntensionalSet.getHead(saSet1);
-			Expression c1     = IntensionalSet.getCondition(saSet1);
-			Expression c      = process.rewrite(R_complete_simplify, CardinalityUtil.makeAnd(Equality.make(alpha1, alpha2), CardinalityUtil.makeAnd(c1, c2)));
-			if (c.equals(Expressions.FALSE)) {
-				Trace.log("    if C is \"false\"") ;
-				Trace.log("        return {}");
-				result = _emptySet;
-			} 
-			else {
-				Trace.log("    I <- concatenation of I1 and I2");
-				Trace.log("    return {{ (on I) Alpha1 | C }}");
-				List<Expression> i = new ArrayList<Expression>();
-				i.addAll(IntensionalSet.getIndexExpressions(saSet1));
-				i.addAll(IntensionalSet.getIndexExpressions(set2));
+			if (CheapDisequalityModule.isACheapDisequality(IntensionalSet.getHead(set1), IntensionalSet.getHead(set2), process)) {
+				Trace.log("    is guaranteed Alpha1 != Alpha2");
+				Trace.log("    return {}"); 
 				
-				result = IntensionalSet.makeMultiSetFromIndexExpressionsList(i, alpha1, c);
+				result = _emptySet;
+			}
+			else {
+				Trace.log("    standardize Set1 apart from (I2, Alpha2, C2)");
+				Expression i2              = IntensionalSet.getScopingExpression(set2);
+				Expression alpha2          = IntensionalSet.getHead(set2);
+				Expression c2              = IntensionalSet.getCondition(set2);
+				Expression tupleI2Alpha2C2 = Tuple.make(Arrays.asList(i2, alpha2, c2));
+				
+				Expression saSet1          = StandardizedApartFrom
+						.standardizedApartFrom(
+								set1, tupleI2Alpha2C2, process);
+				
+				Trace.log("    C <- R_complete_simplify(Alpha1 = Alpha2 and C1 and C2)");
+				Expression alpha1 = IntensionalSet.getHead(saSet1);
+				Expression c1     = IntensionalSet.getCondition(saSet1);
+				Expression c      = process.rewrite(R_complete_simplify, CardinalityUtil.makeAnd(Equality.make(alpha1, alpha2), CardinalityUtil.makeAnd(c1, c2)));
+				if (c.equals(Expressions.FALSE)) {
+					Trace.log("    if C is \"false\"") ;
+					Trace.log("        return {}");
+					result = _emptySet;
+				} 
+				else {
+					Trace.log("    I <- concatenation of I1 and I2");
+					Trace.log("    return {{ (on I) Alpha1 | C }}");
+					List<Expression> i = new ArrayList<Expression>();
+					i.addAll(IntensionalSet.getIndexExpressions(saSet1));
+					i.addAll(IntensionalSet.getIndexExpressions(set2));
+					
+					result = IntensionalSet.makeMultiSetFromIndexExpressionsList(i, alpha1, c);
+				}
 			}
 		} 
 		else if (Sets.isExtensionalUniSet(set1) && Sets.isExtensionalUniSet(set2)) {
