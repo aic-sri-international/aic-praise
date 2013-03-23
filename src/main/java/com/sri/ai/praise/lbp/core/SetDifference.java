@@ -158,7 +158,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			// {b}, 1, 1)
 			result = rewriteS1ExtensionalMultiSet(set1, set2, process);
 		} 
-		else if (Sets.isIntensionalMultiSet(set1) && Sets.isSingletonExtensionalSet(set2)) {
+		else if (Sets.isIntensionalMultiSet(set1) && Sets.isSingletonExtensionalSet(set2)) {			
 			// if S1 is {{ Alpha | C }}_I and S2 is { b }
 			// {{ Alpha' | C' }}_I' <- standardize {{ Alpha | C}}_I apart from {b}
 			// C'' <- R_formula_simplification(C' and not Alpha' = b)  with cont. variables extended by I'
@@ -507,48 +507,62 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 	}
 
 	private Expression rewriteS1IntensionalMultiSet(Expression set1, Expression set2, RewritingProcess process) {
+		Expression result = null;
+		
 		Trace.log("if S1 is {{ Alpha | C }}_I and S2 is { b }");
-		Trace.log("    {{ Alpha' | C' }}_I' <- standardize {{ Alpha | C}}_I apart from {b}");
 
 		Expression b = ExtensionalSet.getElements(set2).get(0);
-
-		Justification.beginEqualityStep("difference is intensional set constrained so that its elements are not equal to " + b);
 		
-		Expression saS1 = StandardizedApartFrom
-				.standardizedApartFrom(
-						set1, set2, process);
-
-		Trace.log("// {{ Alpha' | C' }}_I'={}", saS1);
-		
-
-		Expression alphaPrime = IntensionalSet.getHead(saS1);
-		Expression cPrime     = IntensionalSet.getCondition(saS1);
-		Expression iPrime     = IntensionalSet.getScopingExpression(saS1);
-
-		Expression alphaPrimeEqualb    = Equality.make(alphaPrime, b);
-		Expression notAlphaPrimeEqualb = Not.make(alphaPrimeEqualb);
-
-		Expression cPrimeAndNotAlphaPrimeEqualb = CardinalityUtil.makeAnd(cPrime, notAlphaPrimeEqualb);
-		
-		if (Justification.isEnabled()) {
-			Expression currentExpression = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimeAndNotAlphaPrimeEqualb);
-			Justification.endEqualityStep(currentExpression);
+		if (CheapDisequalityModule.isACheapDisequality(IntensionalSet.getHead(set1), b, process)) {
+			Justification.beginEqualityStep("is guaranteed Alpha != b'");
+			
+			Trace.log("    is guaranteed Alpha != b'");
+			Trace.log("    return S1"); 
+			
+			result = set1;
+			
+			Justification.endEqualityStep(result);
+		} else {
+			Trace.log("    {{ Alpha' | C' }}_I' <- standardize {{ Alpha | C}}_I apart from {b}");
+			Justification.beginEqualityStep("difference is intensional set constrained so that its elements are not equal to " + b);
+			
+			Expression saS1 = StandardizedApartFrom
+					.standardizedApartFrom(
+							set1, set2, process);
+	
+			Trace.log("// {{ Alpha' | C' }}_I'={}", saS1);
+			
+	
+			Expression alphaPrime = IntensionalSet.getHead(saS1);
+			Expression cPrime     = IntensionalSet.getCondition(saS1);
+			Expression iPrime     = IntensionalSet.getScopingExpression(saS1);
+	
+			Expression alphaPrimeEqualb    = Equality.make(alphaPrime, b);
+			Expression notAlphaPrimeEqualb = Not.make(alphaPrimeEqualb);
+	
+			Expression cPrimeAndNotAlphaPrimeEqualb = CardinalityUtil.makeAnd(cPrime, notAlphaPrimeEqualb);
+			
+			if (Justification.isEnabled()) {
+				Expression currentExpression = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimeAndNotAlphaPrimeEqualb);
+				Justification.endEqualityStep(currentExpression);
+			}
+			
+			Trace.log("    C'' <- R_formula_simplification(C' and not Alpha' = b) with cont. variables extended by I'");
+			Justification.beginEqualityStep("simplifying condition");
+			
+			RewritingProcess processIPrime  = GrinderUtil.extendContextualVariables(iPrime, process);
+			Expression       cPrimePrime    = processIPrime.rewrite(R_formula_simplification, cPrimeAndNotAlphaPrimeEqualb);
+			
+			result = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
+			
+			Justification.endEqualityStep(result);
+			
+			Trace.log("    return R_basic({{ Alpha' | C'' }}_I')");
+	
+			Justification.beginEqualityStep("simplifying overall expression");
+			result = process.rewrite(R_basic, result);
+			Justification.endEqualityStep(result);			
 		}
-		
-		Trace.log("    C'' <- R_formula_simplification(C' and not Alpha' = b) with cont. variables extended by I'");
-		Justification.beginEqualityStep("simplifying condition");
-		
-		RewritingProcess processIPrime  = GrinderUtil.extendContextualVariables(iPrime, process);
-		Expression       cPrimePrime    = processIPrime.rewrite(R_formula_simplification, cPrimeAndNotAlphaPrimeEqualb);
-		Expression       result         = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
-		
-		Justification.endEqualityStep(result);
-		
-		Trace.log("    return R_basic({{ Alpha' | C'' }}_I')");
-
-		Justification.beginEqualityStep("simplifying overall expression");
-		result = process.rewrite(R_basic, result);
-		Justification.endEqualityStep(result);
 
 		return result;
 	}

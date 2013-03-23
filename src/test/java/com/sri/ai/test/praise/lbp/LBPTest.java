@@ -1109,7 +1109,7 @@ public class LBPTest extends AbstractLPITest {
 				new SetDifferenceTestData(Expressions.TRUE.toString(), new TrivialPQ(), 
 						"{{(on X) [ if p(X) then 1 else 0 ] | X != a }}", "{ [ if q(X) then 1 else 0 ] }", 
 						false, 
-						"{{(on X') [ if p(X') then 1 else 0 ] | X' != a }}"),
+						"{{(on X) [ if p(X) then 1 else 0 ] | X != a }}"),
 			    //
 			    // Basic: if S1 is a multiset and S2 is {b1,..., bm}
 				//
