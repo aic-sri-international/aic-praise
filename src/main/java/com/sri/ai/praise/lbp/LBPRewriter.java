@@ -356,9 +356,14 @@ public interface LBPRewriter extends Rewriter {
 	 * if Set is { a1,..., an } or {{ a1,..., an }}
 	 *     return {@link #R_formula_simplification}(Disjunction_i Alpha = ai)
 	 *     // Disjunction here is a meta, preferably short-circuited, operation.
-	 * if Set is { Beta | C }_I or {{ Beta | C }}_I
+	 * if Set is { Beta | C }_I or {{ Beta | C }}_I (1)
 	 *     { Beta' | C' }_I' <- standardize { Beta | C }_I apart from Alpha
 	 *     return {@link #R_basic}(there exists I' : C' and Alpha = Beta')
+	 *     
+	 * 
+     * Implementation Note:
+     * (1) CheapDisequalityModule.isACheapDisequality() can be used to cheaply check whether 
+     *     Alpha != Beta, in which case 'false' should be returned.
 	 * </pre>
 	 */
 	String R_in = LBP_NAMESPACE+"R_in";
@@ -383,7 +388,7 @@ public interface LBPRewriter extends Rewriter {
 	 * Set1 and Set2 are sets
 	 * Returns the intersection set of Set1 and Set2, guaranteed to be expression "{}" if it is empty.
 	 * Cases:
-	 * Set1 is {{ (on I1) Alpha1 | C1 }} and Set2 is {{ (on I2) Alpha2 | C2 }}
+	 * Set1 is {{ (on I1) Alpha1 | C1 }} and Set2 is {{ (on I2) Alpha2 | C2 }} (1)
 	 *     standardize Set1 apart from (I2, Alpha2, C2)
 	 *     C <- R_complete_simplify(Alpha1 = Alpha2 and C1 and C2)
 	 *     if C is "false"
@@ -392,6 +397,10 @@ public interface LBPRewriter extends Rewriter {
 	 *     return {{ (on I) Alpha1 | C }}
 	 * Else
 	 *     "Not currently supported"
+	 *     
+	 * Implementation Note:
+     * (1) CheapDisequalityModule.isACheapDisequality() can be used to cheaply check whether 
+     *     Alpha1 != Alpha2, in which case {} should be returned. 
 	 * </pre>
 	 */
 	String R_intersection = LBP_NAMESPACE+"R_intersection";
@@ -616,7 +625,7 @@ public interface LBPRewriter extends Rewriter {
 	 *              else S11 union R_set_diff(S1rest \ S2))
 	 * if S1 is {{a1,...,an}} and S2 is { b }
 	 *     return R_DifferenceOfExtensionalAndExtensionalSet({{a1,...,an}}, {b}, 1, 1) 
-	 * if S1 is {{ Alpha | C }}_I and S2 is { b }
+	 * if S1 is {{ Alpha | C }}_I and S2 is { b } (1)
 	 *     {{ Alpha' | C' }}_I' <- standardize {{ Alpha | C}}_I apart from {b}
 	 *     C'' <- {@link #R_formula_simplification}(C' and not Alpha' = b) with cont. variables extended by I'
 	 *     return {@link #R_basic}({{ Alpha' | C'' }}_I')
@@ -630,13 +639,19 @@ public interface LBPRewriter extends Rewriter {
 	 *     { Alpha' | C' }_I' <- standardize { Alpha | C }_I apart from {b1,...,bm}
 	 *     C'' <- {@link #R_formula_simplification}(C' and not (Disjunction_i Alpha' = b_i)) with cont. variables extended by I'
 	 *     return {@link #R_basic}({ Alpha' | C'' }_I')
-	 * if S1 is { Alpha | C }_I and S2 is { Alpha' | C' }_I'
+	 * if S1 is { Alpha | C }_I and S2 is { Alpha' | C' }_I' (2)
 	 *     { Alpha' | C' }_I' <- standardize { Alpha' | C' }_I' apart from (Alpha, C)
 	 *     C'' <- {@link #R_formula_simplification}(C and for all I' : C' => Alpha != Alpha') with cont. variables extended by I
 	 *     return {@link #R_basic}({ Alpha | C'' }_I)
 	 * if S1 is {a1,...,an} and S2 is { Alpha | C }_I
 	 *     return {@link #R_DifferenceOfExtensionalAndIntensionalSet}({a1,...,an}, { Alpha | C }_I, 1)
 	 * </pre>
+	 * 
+	 * Implementation Note:
+     * (1) CheapDisequalityModule.isACheapDisequality() can be used to cheaply check whether Alpha != b, 
+     *     in which case S1 should be returned.
+     * (2) CheapDisequalityModule.isACheapDisequality() can be used to cheaply check whether Alpha != Alpha', 
+     *     in which case S1 should be returned. 
 	 * 
 	 * Note: From Rodrigo as regards multisets - the cases of differences
 	 * involving multisets that we actually need in ALBP are fairly restricted.
