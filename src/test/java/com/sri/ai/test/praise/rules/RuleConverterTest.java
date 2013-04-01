@@ -246,6 +246,22 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("if . then . else .", 
 								new DefaultCompoundSyntaxTree("sick", "Y"), "0.8", "0.2"), "0.5"), "0.5"));
 
+//		string = "if sick(X) and friends(X,Y) then 0.5 else sick(Y);";
+		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
+				new DefaultCompoundSyntaxTree("and", 
+						new DefaultCompoundSyntaxTree("sick", "X"), 
+						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
+				"0.5", 
+				new DefaultCompoundSyntaxTree("atomic rule", 
+						new DefaultCompoundSyntaxTree("sick", "Y"), 1)), 
+			new DefaultCompoundSyntaxTree("if . then . else .", 
+				new DefaultCompoundSyntaxTree("and", 
+						new DefaultCompoundSyntaxTree("sick", "X"), 
+						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
+				"0.5", 
+				new DefaultCompoundSyntaxTree("if . then . else .", 
+						new DefaultCompoundSyntaxTree("sick", "Y"), "1", "0")));
+
 //		string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);";
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("and", 
@@ -301,6 +317,115 @@ public class RuleConverterTest {
 				lowParser.parse("if sick(X) and happy(Y) then (if fever(X) then 0.6 else 0.4) else 0.5"));
 
 	}
+
+	@Test
+	public void testTranslateConjunctions () {
+		List<Expression> input, result, expected;
+
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("sick(X) 0.8 and sick(john) 0.3;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("sick(X) 0.8; sick(john) 0.3;"));
+		assertEquals(expected, result);
+
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("sick(X) 0.8 and happy(X);"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("sick(X) 0.8; happy(X);"));
+		assertEquals(expected, result);
+
+		input = new ArrayList<Expression>();
+		input.addAll(ruleParser.parseAll("sick(X) 0.8 and happy(X); mother(Y);"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("sick(X) 0.8; happy(X); mother(Y);"));
+		assertEquals(expected, result);
+
+		// Testing conditional rule lists.
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("if epidemic then sick(john) 0.3 and sick(mary) 0.4;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("if epidemic then sick(john) 0.3; if epidemic then sick(mary) 0.4;"));
+		assertEquals(expected, result);
+
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("sick(X) 0.4 and if epidemic then sick(john) 0.3 and sick(mary) 0.4;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("sick(X) 0.4; if epidemic then sick(john) 0.3; if epidemic then sick(mary) 0.4;"));
+		assertEquals(expected, result);
+
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("if epidemic then sick(john) 0.3 and sick(mary) 0.4 else sick(X) 0.8;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("if epidemic then sick(john) 0.3 else sick(X) 0.8;"));
+		expected.add(lowParser.parse("'conditional rule'(epidemic, 'atomic rule'(sick(mary), 0.4), 0.5)"));
+		assertEquals(expected, result);
+
+		// Should not change anything.
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("if epidemic then sick(X) 0.7 else sick(X) 0.4;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("if epidemic then sick(X) 0.7 else sick(X) 0.4;"));
+		assertEquals(expected, result);
+
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("if epidemic then sick(X) 0.7 else sick(john) 0.2 and sick(mary) 0.3;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("if epidemic then sick(X) 0.7 else sick(john) 0.2;"));
+		expected.add(lowParser.parse("'conditional rule'(epidemic, 0.5, 'atomic rule'(sick(mary), 0.3))"));
+		assertEquals(expected, result);
+
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("if epidemic then sick(X) 0.7 and sick(X) 0.8 else sick(john) 0.2 and sick(mary) 0.3;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("if epidemic then sick(X) 0.7 else sick(john) 0.2;" +
+				"if epidemic then sick(X) 0.8 else sick(mary) 0.3;"));
+		assertEquals(expected, result);
+
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("if epidemic then sick(X) 0.7 and if panic then sick(X) 0.8 and flu(Y) 0.9 else sick(X) 0.3 and sick(X) 0.4 else sick(john) 0.2 and sick(mary) 0.3;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("if epidemic then sick(X) 0.7 else sick(john) 0.2;" +
+				"if epidemic then if panic then sick(X) 0.8 else sick(X) 0.3 else sick(mary) 0.3;" +
+				"if epidemic then if panic then flu(Y) 0.9 else sick(X) 0.4 else sick(mary) 0.3;"));
+		assertEquals(expected, result);
+
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("if epidemic then sick(X) 0.7 and if panic then sick(X) 0.8 and flu(Y) 0.9 else sick(john) 0.2 and sick(mary) 0.3;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("if epidemic then sick(X) 0.7;" +
+				"if epidemic then if panic then sick(X) 0.8 else sick(john) 0.2;" +
+				"if epidemic then if panic then flu(Y) 0.9 else sick(mary) 0.3;"));
+		assertEquals(expected, result);
+
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("if epidemic then sick(X) 0.7 and (if panic then sick(X) 0.8 and flu(Y) 0.9) else sick(john) 0.2 and sick(mary) 0.3;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("if epidemic then sick(X) 0.7 else sick(john) 0.2;" +
+				"if epidemic then (if panic then sick(X) 0.8) else sick(mary) 0.3;" +
+				"if epidemic then (if panic then flu(Y) 0.9) else sick(mary) 0.3;"));
+		assertEquals(expected, result);
+
+		// Testing causal rule lists.
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("sick(X) -> fever(X) 0.6 and flu;"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("sick(X) -> fever(X) 0.6; sick(X) -> flu;"));
+		assertEquals(expected, result);
+
+		}
 
 	@Test
 	public void testUpdateRandomVariableDeclaration () {
@@ -839,9 +964,9 @@ public class RuleConverterTest {
 				"//\n" +
 				"// RULES\n" +
 				"// By default, how likely is an epidemic?\n" +
-				"epidemic 0.01;\n" +
+				"epidemic 0.01 and \n" +
 				"\n"+
-				"if epidemic then sick(X) 0.6 else not sick(X);\n" +
+				"(if epidemic then sick(X) 0.6 else not sick(X)) and \n" +
 				"if sick(mother(X)) then sick(X) 0.5 else sick(X) 0.1;\n";
 		queryString = "sick(mother(X)) and happy(Y)";
 		try {
@@ -1157,67 +1282,67 @@ public class RuleConverterTest {
 		assertEquals(inputExpression, outputExpression);
 
 		// Testing prolog rules.
-		string = "sick(john).";
+		string = "sick(john). ;";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(john).";
+		expected = "sick(john). ;";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "1 sick(john).";
+		string = "1 sick(john). ;";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(john).";
+		expected = "sick(john). ;";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "1.0 sick(john).";
+		string = "1.0 sick(john). ;";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(john).";
+		expected = "sick(john). ;";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "sick(X).";
+		string = "sick(X). ;";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(X).";
+		expected = "sick(X). ;";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "not sick(mary).";
+		string = "not sick(mary). ;";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "not sick(mary).";
+		expected = "not sick(mary). ;";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "0.3 sick(X).";
+		string = "0.3 sick(X). ;";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "0.3 sick(X).";
+		expected = "0.3 sick(X). ;";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "round(X) :- circle(X).";
+		string = "round(X) :- circle(X). ;";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "round(X) :- circle(X).";
+		expected = "round(X) :- circle(X). ;";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
+		string = "0.7 sick(X) :- epidemic and not vaccinated(X). ;";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "0.7 sick(X) :- epidemic and not vaccinated(X).";
+		expected = "0.7 sick(X) :- epidemic and not vaccinated(X). ;";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 		

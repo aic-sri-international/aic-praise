@@ -268,6 +268,26 @@ public class RuleParserTest extends AbstractParserTest {
 								new DefaultCompoundSyntaxTree("vaccinated", "X"))), 
 				new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
 						new DefaultCompoundSyntaxTree("sick", "X"))));
+		
+		string = "if epidemic then sick(X) 0.7 and (if panic then sick(X) 0.8 and flu(Y) 0.9) else sick(john) 0.2 and sick(mary) 0.3;";
+		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
+				new DefaultCompoundSyntaxTree("( . )", 
+						new DefaultCompoundSyntaxTree("kleene list", 
+								new DefaultCompoundSyntaxTree("atomic rule", 
+										new DefaultCompoundSyntaxTree("sick", "X"), "0.7"), 
+								new DefaultCompoundSyntaxTree("conditional rule", "panic", 
+										new DefaultCompoundSyntaxTree("( . )", 
+												new DefaultCompoundSyntaxTree("kleene list", 
+														new DefaultCompoundSyntaxTree("atomic rule", 
+																new DefaultCompoundSyntaxTree("sick", "X"), "0.8"), 
+														new DefaultCompoundSyntaxTree("atomic rule", 
+																new DefaultCompoundSyntaxTree("flu", "Y"), "0.9")))))), 
+				new DefaultCompoundSyntaxTree("( . )", 
+						new DefaultCompoundSyntaxTree("kleene list", 
+								new DefaultCompoundSyntaxTree("atomic rule", 
+										new DefaultCompoundSyntaxTree("sick", "john"), "0.2"), 
+								new DefaultCompoundSyntaxTree("atomic rule", 
+										new DefaultCompoundSyntaxTree("sick", "mary"), "0.3")))));
 
 		System.out.println("test count = " + testCount);
 	}
@@ -275,29 +295,29 @@ public class RuleParserTest extends AbstractParserTest {
 	@Test
 	public void testPrologExpression () {
 		String string;
-		string = "sick(john).";
+		string = "sick(john). ;";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "1", 
 				new DefaultCompoundSyntaxTree("sick", "john")));
 
-		string = "sick(X).";
+		string = "sick(X). ;";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "1", 
 				new DefaultCompoundSyntaxTree("sick", "X")));
 
-		string = "not sick(mary).";
+		string = "not sick(mary). ;";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "1", 
 				new DefaultCompoundSyntaxTree("not", 
 				new DefaultCompoundSyntaxTree("sick", "mary"))));
 
-		string = "0.3 sick(X).";
+		string = "0.3 sick(X). ;";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "0.3", 
 				new DefaultCompoundSyntaxTree("sick", "X")));
 
-		string = "round(X) :- circle(X).";
+		string = "round(X) :- circle(X). ;";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "1", 
 				new DefaultCompoundSyntaxTree("round", "X"), 
 				new DefaultCompoundSyntaxTree("circle", "X")));
 
-		string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
+		string = "0.7 sick(X) :- epidemic and not vaccinated(X). ;";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
 				new DefaultCompoundSyntaxTree("and", "epidemic", 
@@ -342,6 +362,75 @@ public class RuleParserTest extends AbstractParserTest {
 						new DefaultCompoundSyntaxTree("happy", "Y")), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
 						new DefaultCompoundSyntaxTree("fever", "X"), "0.6")));
+
+	}
+
+	@Test
+	public void testConjunctions () {
+		String string;
+		string = "sick(X) 0.8 and sick(john) 0.3;";
+		test(string, new DefaultCompoundSyntaxTree("( . )", 
+				new DefaultCompoundSyntaxTree("kleene list", 
+						new DefaultCompoundSyntaxTree("atomic rule", 
+								new DefaultCompoundSyntaxTree("sick", "X"), "0.8"), 
+						new DefaultCompoundSyntaxTree("atomic rule", 
+								new DefaultCompoundSyntaxTree("sick", "john"), "0.3"))));
+
+		// Testing associativity.
+		string = "sick(X) 0.8 and sick(john) 0.3 and sick(mary) 0.5 and sick(peter);";
+		test(string, new DefaultCompoundSyntaxTree("( . )", 
+				new DefaultCompoundSyntaxTree("kleene list", 
+						new DefaultCompoundSyntaxTree("atomic rule", 
+								new DefaultCompoundSyntaxTree("sick", "X"), "0.8"), 
+						new DefaultCompoundSyntaxTree("atomic rule", 
+								new DefaultCompoundSyntaxTree("sick", "john"), "0.3"),
+						new DefaultCompoundSyntaxTree("atomic rule", 
+								new DefaultCompoundSyntaxTree("sick", "mary"), "0.5"),
+						new DefaultCompoundSyntaxTree("atomic rule", 
+								new DefaultCompoundSyntaxTree("sick", "peter"), 1))));
+
+		string = "sick(X) 0.8 and happy(X);";
+		test(string, new DefaultCompoundSyntaxTree("( . )", 
+				new DefaultCompoundSyntaxTree("kleene list", 
+						new DefaultCompoundSyntaxTree("atomic rule", 
+								new DefaultCompoundSyntaxTree("sick", "X"), "0.8"), 
+						new DefaultCompoundSyntaxTree("atomic rule", 
+								new DefaultCompoundSyntaxTree("happy", "X"), "1"))));
+
+		// This is not a conjunction.
+		string = "sick(X) and happy(X);";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
+				new DefaultCompoundSyntaxTree("and", 
+						new DefaultCompoundSyntaxTree("sick", "X"), 
+						new DefaultCompoundSyntaxTree("happy", "X")), "1"));
+
+		// Test parsing of conjunctions in conditional rules.
+		string = "if epidemic then sick(john) 0.3 and sick(mary) 0.4;";
+		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
+				new DefaultCompoundSyntaxTree("( . )", 
+						new DefaultCompoundSyntaxTree("kleene list", 
+								new DefaultCompoundSyntaxTree("atomic rule", 
+										new DefaultCompoundSyntaxTree("sick", "john"), "0.3"), 
+								new DefaultCompoundSyntaxTree("atomic rule", 
+										new DefaultCompoundSyntaxTree("sick", "mary"), "0.4")))));
+
+		string = "if epidemic then sick(X) 0.7 else sick(X) 0.4;";  // Not a conjunction.
+		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
+				new DefaultCompoundSyntaxTree("atomic rule", 
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.7"), 
+				new DefaultCompoundSyntaxTree("atomic rule", 
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.4")));
+
+		string = "if epidemic then sick(X) 0.7 else sick(john) 0.2 and sick(mary) 0.3;";
+		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
+				new DefaultCompoundSyntaxTree("atomic rule", 
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.7"), 
+				new DefaultCompoundSyntaxTree("( . )", 
+						new DefaultCompoundSyntaxTree("kleene list", 
+								new DefaultCompoundSyntaxTree("atomic rule", 
+										new DefaultCompoundSyntaxTree("sick", "john"), "0.2"), 
+								new DefaultCompoundSyntaxTree("atomic rule", 
+										new DefaultCompoundSyntaxTree("sick", "mary"), "0.3")))));
 
 	}
 

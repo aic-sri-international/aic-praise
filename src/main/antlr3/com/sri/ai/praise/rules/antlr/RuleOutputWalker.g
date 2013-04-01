@@ -72,6 +72,10 @@ expr returns [Expression value]
     | ^(STANDARDPROBABILITYEXPRESSION a=expr b=expr c=expr) { $value = new DefaultCompoundSyntaxTree("standard probability rule", a, b, c); }
     | ^(CAUSALEXPRESSION a=expr b=expr)                     { $value = new DefaultCompoundSyntaxTree("causal rule", a, b); }
 
+    // For conjunctions, we package it as a tuple.
+    | ^(CONJUNCTION (a=expr {varargs.add(a); })*)           { $value = new DefaultCompoundSyntaxTree("( . )", 
+                                                                  new DefaultCompoundSyntaxTree("kleene list", varargs)); }
+
     | ^(RANDOM (a=expr {varargs.add(a); })+)                { varargs.insertElementAt(DefaultSymbol.createSymbol(varargs.size()-2), 1);
                                                               $value = new DefaultCompoundSyntaxTree("randomVariable", varargs); }
     | ^(SORT a=expr b=expr c=expr)                          { $value = new DefaultCompoundSyntaxTree("sort", a, b, c); }

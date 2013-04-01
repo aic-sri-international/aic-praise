@@ -47,6 +47,8 @@ tokens {
     FUNCTION ;
     KLEENE ;
     SYMBOL ;
+    
+    CONJUNCTION ;
 }
 
 
@@ -103,11 +105,12 @@ sort_decl
     ;
 
 rule
-    : prolog_rule
-    | conditional_rule SEMICOLON!
-    | standard_probability_rule SEMICOLON!
-    | causal_rule SEMICOLON!
-    | atomic_rule SEMICOLON!
+    : rule_conjunction SEMICOLON!
+    ;
+
+rule_conjunction
+    : raw_rule (AND raw_rule)+ -> ^(CONJUNCTION raw_rule+)
+    | raw_rule -> raw_rule
     ;
 
 raw_rule
@@ -116,6 +119,7 @@ raw_rule
     | standard_probability_rule
     | causal_rule
     | atomic_rule
+    | OPEN_PAREN! rule_conjunction CLOSE_PAREN!
     ;
 
 prolog_rule
@@ -126,8 +130,8 @@ prolog_rule
     ;
 
 conditional_rule
-    : IF formula THEN raw_rule ELSE raw_rule -> ^(CONDITIONALEXPRESSION2 formula raw_rule+)
-    | IF formula THEN raw_rule               -> ^(CONDITIONALEXPRESSION1 formula raw_rule)
+    : IF formula THEN rule_conjunction ELSE rule_conjunction -> ^(CONDITIONALEXPRESSION2 formula rule_conjunction+)
+    | IF formula THEN rule_conjunction                       -> ^(CONDITIONALEXPRESSION1 formula rule_conjunction)
     ;
 
 atomic_rule
@@ -140,7 +144,7 @@ standard_probability_rule
     ;
 
 causal_rule
-    : formula SINGLE_ARROW raw_rule -> ^(CAUSALEXPRESSION formula raw_rule)
+    : formula SINGLE_ARROW rule_conjunction -> ^(CAUSALEXPRESSION formula rule_conjunction)
     ;
 
 //=============================
