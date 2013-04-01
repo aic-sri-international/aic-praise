@@ -663,8 +663,12 @@ public class RuleConverter {
 			Expression ruleArg = args.get(1);
 			if (Tuple.isTuple(ruleArg)) {
 				// If the rule argument is a conjunction, create new causal rules for each one.
-				for (Expression conjunctionMember : ruleArg.getArguments()) {
-					result.add(Expressions.make(rule.getFunctor(), formula, conjunctionMember));
+				for (Expression conjunctionElement : ruleArg.getArguments()) {
+					// Check for more conjunctions in the conjunction element.
+					List<Expression> translatedList = this.translateConditionalConjunctions(conjunctionElement);
+					for (Expression translatedElement: translatedList) {
+						result.add(Expressions.make(rule.getFunctor(), formula, translatedElement));
+					}
 				}
 			}
 			else {

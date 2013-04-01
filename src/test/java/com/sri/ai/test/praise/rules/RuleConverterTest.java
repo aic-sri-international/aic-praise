@@ -425,6 +425,14 @@ public class RuleConverterTest {
 		expected.addAll(ruleParser.parseAll("sick(X) -> fever(X) 0.6; sick(X) -> flu;"));
 		assertEquals(expected, result);
 
+		input = new ArrayList<Expression>();
+		input.add(ruleParser.parse("sick(X) -> fever(X) 0.6 and flu 0.5 and coughing(Y) -> pneumonia(Y) 0.7 and strep(Y);"));
+		result = ruleConverter.translateConjunctions(input);
+		expected = new ArrayList<Expression>();
+		expected.addAll(ruleParser.parseAll("sick(X) -> fever(X) 0.6; sick(X) -> flu 0.5;" +
+				"sick(X) -> coughing(Y) -> pneumonia(Y) 0.7; sick(X) -> coughing(Y) -> strep(Y);"));
+		assertEquals(expected, result);
+
 	}
 	
 	@Test(expected=UnsupportedOperationException.class)
