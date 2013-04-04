@@ -276,9 +276,7 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 		int nonZeroCount = 0;
 
 		for (Expression vVal : Model.range(randomVariableValueExpression, process)) {
-			Expression subM =
-				Substitute.replace(
-						conditionalMessage, randomVariableValueExpression, vVal, true, process);
+			Expression subM   = Substitute.replace(conditionalMessage, randomVariableValueExpression, vVal, process);
 			Expression basicE = process.rewrite(R_basic, subM);
 
 			if (!Expressions.ZERO.equals(basicE)) {

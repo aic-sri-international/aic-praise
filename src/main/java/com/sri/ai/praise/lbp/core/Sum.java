@@ -472,7 +472,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression[] substitutions = new Expression[relevantRange.size()];
 		for (int i = 0; i < substitutions.length; i++) {
 			Expression v     = relevantRange.get(i);
-			substitutions[i] = Substitute.replace(EByM, vPrimeValue, v, true, process);
+			substitutions[i] = Substitute.replace(EByM, vPrimeValue, v, process);
 		}
 		Expression sumOfSubstitutions = Plus.make(Arrays.asList(substitutions));
 
@@ -531,7 +531,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		// relevantRange = {v in range(v') : R_basic(E[v'/v]) is not zero}
 		List<Expression> relevantRange = new ArrayList<Expression>();
 		for (Expression v : Model.range(vPrimeValue, process)) {
-			Expression subE = Substitute.replace(E, vPrimeValue, v, true, process);
+			Expression subE = Substitute.replace(E, vPrimeValue, v, process);
 			Expression basicE = process.rewrite(R_basic, subE);
 			if (!basicE.equals(Expressions.ZERO)) {
 				relevantRange.add(v);

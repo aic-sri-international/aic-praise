@@ -1219,8 +1219,8 @@ public class LPIUtil {
 			
 			if (value != null) {
 				Trace.log("return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })");
-				Expression alphaSubX          = Substitute.replace(alpha, variableX, value, true, process);
-				Expression formulaCSubX       = Substitute.replace(formulaC, variableX, value, true, process);
+				Expression alphaSubX          = Substitute.replace(alpha, variableX, value, process);
+				Expression formulaCSubX       = Substitute.replace(formulaC, variableX, value, process);
 				Expression intensionalSetSubX = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressionsIPrime, alphaSubX, formulaCSubX);
 	
 				result = pickSingleElement(intensionalSetSubX, process);

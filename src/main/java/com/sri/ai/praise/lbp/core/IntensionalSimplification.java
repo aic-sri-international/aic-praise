@@ -137,8 +137,8 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 			Expression beta   = (Expression) cPrimeAndiEqualsBeta[2];
 			Expression index  = IntensionalSet.getIndex(intSetIndexExpressions.get(i));
 
-			Expression substitutedAlpha  = Substitute.replace(intSetHead, index, beta, true, process);
-			Expression substitutedCPrime = Substitute.replace(cPrime, index, beta, true, process);
+			Expression substitutedAlpha  = Substitute.replace(intSetHead, index, beta, process);
+			Expression substitutedCPrime = Substitute.replace(cPrime, index, beta, process);
 			
 			intSetIndexExpressions.remove(i);
 
