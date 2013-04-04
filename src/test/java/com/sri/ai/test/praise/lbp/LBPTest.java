@@ -3928,16 +3928,14 @@ public class LBPTest extends AbstractLPITest {
 					),
 					
 				// #5
-			    // Very slow to process:
-	            // old version of model with no constraints 4 hours 40 min.
-			    // new version of model with constraints on groups 2 hours 5 min.
-			    // good for working on optimzations to algorithms.
+				// Note: if caches can grow unbounded then run with: -Xms2G -Xmx16G
+		        // Note: Slow to process, takes approx 6.3 minutes (as of April 2013, had been 2 hours 5 min before Oct 2012).
 //				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-//					new com.sri.ai.lpi.model.example.TrivialLoopyMisconceptionExample(),
+//					new com.sri.ai.praise.model.example.TrivialLoopyMisconceptionExample(),
 //					"belief([m(X)])",
 //					false,
 //					// TODO - is this correct (10 iterations)?
-//					"if m(X) then 0.0000000000147024292 else 1"),
+//					"if m(X) then 0.432395068 else 0.567604932"),
 					
 				// #6
 			    // TODO - appears not to stop processing:
