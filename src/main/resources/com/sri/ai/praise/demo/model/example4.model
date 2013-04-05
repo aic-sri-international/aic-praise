@@ -1,7 +1,7 @@
 /**
  * Example 4: NLP Coreference problem.
  *
- * Sentence being parse:
+ * Sentence being parsed:
  * "Obama has told the senator that his constituency would not support the measure." 
  *
  * Given the knowledge below, obama is picked for query referenceOf(w7) 
@@ -40,7 +40,6 @@ random gender: Object x Object -> Boolean;
 random mention: Object x Object -> Boolean;
 //
 random entityOf: Object x Object -> Boolean;
-random entityOfMention: Object x Object -> Boolean; // TODO - is this required, can we not just use entityOf? 
 random mentionOf: Object x Object -> Boolean;
 random referenceOf: Object x Object -> Boolean;
 random wordOf: Object x Object -> Boolean;
@@ -50,7 +49,6 @@ random wordOf: Object x Object -> Boolean;
 random 'there exists Y : gender(X0, Y)': Object -> Boolean;
 random 'there exists Y : mention(X0, Y)': Object -> Boolean;
 random 'there exists Y : entityOf(X0, Y)': Object -> Boolean;
-random 'there exists Y : entityOfMention(X0, Y)': Object -> Boolean; // TODO - remove (see entityOfMention TODO above)?
 random 'there exists Y : mentionOf(X0, Y)': Object -> Boolean;
 random 'there exists Y : referenceOf(X0, Y)': Object -> Boolean;
 random 'there exists Y : wordOf(X0, Y)': Object -> Boolean;
@@ -80,9 +78,9 @@ if possessive(Word) and dependency(AnotherWord, Word) then canHave(entityOf(refe
 //
 // Evidence coming from lower-level NLP system:
 mention(w1) = m1;
-entityOfMention(m1) = obama;
+entityOf(m1) = obama;
 mention(w5) = m2;
-entityOfMention(m2) = e2;
+entityOf(m2) = e2;
 isSenator(e2);
 possessive(w7);
 wordOf(w7) = his;
