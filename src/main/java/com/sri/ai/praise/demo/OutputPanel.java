@@ -275,6 +275,8 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		justificationTree.setShowsRootHandles(true);
 		justificationTreeScrollPane.setViewportView(justificationTree);
 		
+		justificationPanel.add(justificationTree.getFindPanel(), BorderLayout.SOUTH);
+		
 		JPanel tracePanel = new JPanel();
 		outputTabbedPane.addTab("Trace", null, tracePanel, null);
 		tracePanel.setLayout(new BorderLayout(0, 0));
@@ -289,6 +291,8 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
 		traceTree.setShowsRootHandles(true);
 		traceTreeScrollPane.setViewportView(traceTree);
+		
+		tracePanel.add(traceTree.getFindPanel(), BorderLayout.SOUTH);
 	}
 	
 	private void postGUIInitialization() {
