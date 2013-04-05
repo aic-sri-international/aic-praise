@@ -27,6 +27,7 @@ sort Object: 100; // What is a good # here?
 
 //
 // RANDOM VARIABLE DECLARATIONS:
+random canHave: Object x Object -> Boolean;
 random dependency: Object x Object -> Boolean;
 random isPresident: Object -> Boolean;
 random isSenator: Object -> Boolean;
@@ -71,6 +72,11 @@ isPresident(obama);
 if entityOf(mentionOf(Word)) = Entity then entityOf(Word) = Entity;
 if possessive(Possessive) and noun(AnotherWord) and gender(Possessive) = gender(entityOf(AnotherWord)) then referenceOf(Possessive) = entityOf(AnotherWord) 0.7; 
 
+// Further knowledge:
+if isSenator(Entity) then canHave(Entity, constituency) 0.95;
+if isPresident(Entity) then canHave(Entity, constituency) 0.05;
+if possessive(Word) and dependency(AnotherWord, Word) then canHave(entityOf(referenceOf(Word)), AnotherWord);
+ 
 //
 // Evidence coming from lower-level NLP system:
 mention(w1) = m1;
