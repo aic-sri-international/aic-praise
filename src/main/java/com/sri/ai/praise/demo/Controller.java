@@ -395,7 +395,14 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 						} catch (ReservedWordException rwe) {
 							app.outputPanel.addProblem("ERROR: Reserved word 'query' is used in input Model or Evidence");
 							app.outputPanel.gotoProblemTab();
+						} catch (Model.ModelException me) {
+							app.outputPanel.addProblem(me.getMessage());
+							for (Model.ModelError error : me.getErrors()) {
+								app.outputPanel.addProblem(error.toString());
+							}
+							app.outputPanel.gotoProblemTab();
 						} catch (LBPQueryEngine.QueryException qe) {
+							app.outputPanel.addProblem(qe.getMessage());
 							for (LBPQueryEngine.QueryError error : qe.getErrors()) {
 								app.outputPanel.addProblem(error.toString());
 							}
