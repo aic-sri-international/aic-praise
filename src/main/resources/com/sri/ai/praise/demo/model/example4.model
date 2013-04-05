@@ -67,10 +67,7 @@ gender(his) = male;
 gender(obama) = male;
 isPresident(obama); 
 
-// Linguistic generic background knowledge: 
-// TODO - fix error: 
-// F is unhandled:if Word = X2 and X1 = X0 then true else (if X1 = X0 then | type(Entity) | = 0 else true)
-// for this rule during conversion:
+// Linguistic generic background knowledge:
 if entityOf(mentionOf(Word)) = Entity then entityOf(Word) = Entity;
 if possessive(Possessive) and noun(AnotherWord) and gender(Possessive) = gender(entityOf(AnotherWord)) then referenceOf(Possessive) = entityOf(AnotherWord) 0.7; 
 

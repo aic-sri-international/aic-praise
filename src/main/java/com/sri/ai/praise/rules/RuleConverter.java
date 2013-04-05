@@ -62,6 +62,7 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
@@ -114,8 +115,6 @@ public class RuleConverter {
 	private ReplaceConstraintWithConstant positiveEmbeddedConstraintReplacementFunction = new ReplaceConstraintWithConstant(Expressions.TRUE);
 	private ReplaceConstraintWithConstant negativeEmbeddedConstraintReplacementFunction = new ReplaceConstraintWithConstant(Expressions.FALSE);
 
-
-
 	/*===================================================================================
 	 * CONSTRUCTORS
 	 *=================================================================================*/
@@ -123,6 +122,13 @@ public class RuleConverter {
 		// Ensure these are instantiated straight away and not when first referenced.
 		// This helps ensure any global dependencies are setup correctly.
 		rewritingProcess = LBPFactory.newLBPProcess(Expressions.TRUE);
+		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable() {
+			@Override
+			public Integer size(Expression logicalVariable, RewritingProcess process) {
+// TODO - should this be looked up based on what is being converted or is this sufficient for the calls to R_simplify that are made?				
+				return 100;
+			}
+		}, rewritingProcess);
 		ruleParser       = new RuleParserWrapper();
 	}
 
