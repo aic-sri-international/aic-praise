@@ -376,9 +376,13 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							}					
 							activeQueryUUID = queryEngine.newQueryUUID(queryOptions);
 			
+							long start = System.currentTimeMillis();
+							
 							String belief = queryEngine.queryBeliefOfRandomVariable(
 									activeQueryUUID, "belief([" + queryAtom + "])",
 									model.getModelDeclaration());
+							
+							printlnToConsole(duration("Query Took: ", System.currentTimeMillis() - start));
 			
 							printlnToConsole("BELIEF=\n" + belief);	
 							
@@ -866,6 +870,28 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		else {
 			queryEngine.removeJustificationListener(app.outputPanel);
 		}
+	}
+	
+	private String duration(String prefix, long duration) {
+		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
+		
+		if (duration != 0) {
+			hours    = duration / 3600000;
+			duration = duration % 3600000; 
+		}
+		if (duration != 0) {
+			minutes  = duration / 60000;
+			duration = duration % 60000;
+		}
+		if (duration != 0) {
+			seconds  = duration / 1000;
+			duration = duration % 1000;
+		}
+		milliseconds = duration;
+		
+		String result = prefix + hours + " hours " + minutes + " minutes and " + seconds + "." + milliseconds + " seconds.";
+		
+		return result;
 	}
 	
 	private void cleanupMemory() {
