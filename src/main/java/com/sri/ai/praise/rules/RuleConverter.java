@@ -1193,6 +1193,14 @@ public class RuleConverter {
 		for (Expression variable : variableSet) {
 			variableList.add(variable);
 		}
+// TODO - correct this logic and make pseudo-code correct, this is currently to handle situations like:
+// entityOf(m1) = obama;
+// ->
+// {{ ( on ) ([ if entityOf(m1, obama) then 1 else 0 ]) | X0 = obama }} 
+// incorrectly.
+		if (variableSet.size() == 0 && Variables.freeVariables(constraints, rewritingProcess).size() > 0) {
+			constraints = Expressions.TRUE;
+		}
 		return IntensionalSet.makeMultiSetFromIndexExpressionsList(
 				variableList, 
 				Expressions.make(FunctorConstants.LEFT_DOT_RIGHT, potentialExpression), 
