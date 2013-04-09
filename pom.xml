@@ -155,9 +155,9 @@
 					<testFailureIgnore>true</testFailureIgnore>
 					<forkMode>always</forkMode>
 					<parallel>methods</parallel>
-					<threadCount>8</threadCount>
+					<threadCount>4</threadCount>
 					<perCoreThreadCount>true</perCoreThreadCount>
-					<argLine>-Xms512m -Xmx1500m</argLine>
+					<argLine>-Xms256m -Xmx1028m</argLine>
 					<reportFormat>plain</reportFormat>
 					<trimStackTrace>false</trimStackTrace>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
