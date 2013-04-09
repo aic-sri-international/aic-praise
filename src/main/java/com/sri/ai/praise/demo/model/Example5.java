@@ -45,6 +45,6 @@ public class Example5 extends Example {
 		super("Example 5");
 		setModel(getExampleFromResource("example5.model"));
 		setEvidence(getExampleFromResource("example5.es1"));
-		setQueryToRun("TODO");
+		setQueryToRun("isSameReferent(c3, X) ");
 	}
 }

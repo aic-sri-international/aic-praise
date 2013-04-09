@@ -416,6 +416,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							}
 							else {
 								app.outputPanel.gotoProblemTab();
+								qe.printStackTrace();
 							}
 						} catch (RuntimeException re) {
 							if (!intentionallyInterrupted) {
