@@ -1,0 +1,24 @@
+/**
+ * Example 5: NLP Coreference Resolution.
+ *
+ */
+ 
+//
+// RANDOM VARIABLE DECLARATIONS:
+
+
+//
+// SORT DECLARATIONS:
+sort Universe: 100; // What is a good # here, possibly the number of words in the document being processed?
+
+//
+// RANDOM VARIABLE DECLARATIONS:
+random corefCluster: Universe -> Boolean;
+random mention: Universe -> Boolean;
+random referent: Universe -> Boolean;
+random word: Universe -> Boolean;
+
+
+//
+// Evidence coming from lower-level NLP system:
+
