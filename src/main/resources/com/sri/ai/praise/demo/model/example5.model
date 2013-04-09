@@ -13,12 +13,10 @@ sort Universe: 14; // What is a good # here, possibly the number of words in the
 //
 random corefChain: Universe -> Boolean;
 random mention: Universe -> Boolean;
-random referent: Universe -> Boolean;
 random word: Universe -> Boolean;
-random wordOffset: Universe -> Boolean;
 //
 random corefChainMention: Universe x Universe -> Boolean; // coref_chain x mention
-random mentionWord: Universe x Universe -> Boolean;       // word x mention
+random mentionWord: Universe x Universe -> Boolean;       // mention x word
 //
 // Information from NLP system with respect to mentions and words
 random typeOfMention: Universe -> Boolean; // { PRONOMINAL, NOMINAL, PROPER }
@@ -26,24 +24,27 @@ random gender: Universe -> Boolean;        // { MALE, FEMALE, NEUTRAL, UNKNOWN }
 random number: Universe -> Boolean;        // {SINGULAR, PLURAL, UNKNOWN }
 random animacy: Universe -> Boolean;       // { ANIMATE, INANIMATE, UNKNOWN }
 random person: Universe -> Boolean;        // { I, YOU, HE, SHE, WE, THEY, IT, UNKNOWN} -> first, second, third and unknown
-// TODO 'case' is essentially a reseverd word to aic-expresso
-random caseType: Universe -> Boolean;    // { subject, object, possessive, unknown}
+// TODO 'case' is essentially a reserved word to aic-expresso
+random caseType: Universe -> Boolean;      // { subject, object, possessive, unknown}
 //
-// TODO
 random mentionType: Universe x Universe   -> Boolean;  // mention x type_of_mention
 random mentionGender: Universe x Universe -> Boolean;  // mention x gender
 random mentionNumber: Universe x Universe -> Boolean;  // mention x number
 random mentionAnimacy: Universe x Universe -> Boolean; // mention x animacy
 random mentionPerson: Universe x Universe -> Boolean;  // mention x person
 //
-random isSameReferent: Universe x Universe -> Boolean; 
+random isSameReferent: Universe x Universe -> Boolean;       // coref_chain x coref_chain
+random canMapToSameReferent: Universe x Universe -> Boolean; // coref_chain x coref_chain
 
 //
 // RULES:
 //
 
-isSameReferent(X, Y) and corefChain(X) and corefChain(Y) and X != Y 1.0;
-if isSameReferent(X, Y) then corefChain(X) and corefChain(Y) and corefChainMention(X, XM) and corefChainMention(Y, YM) and mentionGender(XM, G) and mentionGender(YM, G) 0.7;
+//
+// High Level Rules for isSameReferent
+
+// Matching gender of mentions between cluster chains increases probability
+if canMapToSameReferent(X, Y) then if corefChainMention(X, XM) and corefChainMention(Y, YM) and mentionGender(XM, G) and mentionGender(YM, G) then isSameReferent(X, Y) 0.7;
 
 //
 // Background Knowledge
@@ -118,3 +119,10 @@ mentionPerson(m3, third);
 corefChain(c1); corefChainMention(c1, m1);
 corefChain(c2); corefChainMention(c2, m2);
 corefChain(c3); corefChainMention(c3, m3);
+
+canMapToSameReferent(c1, c2);
+canMapToSameReferent(c1, c3);
+canMapToSameReferent(c2, c1);
+canMapToSameReferent(c2, c3);
+canMapToSameReferent(c3, c1);
+canMapToSameReferent(c3, c2);
