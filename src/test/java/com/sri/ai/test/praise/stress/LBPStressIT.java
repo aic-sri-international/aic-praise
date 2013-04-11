@@ -19,7 +19,7 @@ import com.sri.ai.test.praise.AbstractLPITest;
  * Lifted Belief Propagation Stress Tests.
  * 
  * @author oreilly
- * 
+ *
  */
 public class LBPStressIT extends AbstractLPITest {
 	
