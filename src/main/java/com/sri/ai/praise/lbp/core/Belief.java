@@ -331,7 +331,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	}
 	
 	private List<Expression> getMessageExpansions(List<Expression> msgSets, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {		
-		Trace.in("+get_msg_expansions({})", msgSets);
+		Trace.in("+get_msg_expansions({})", Tuple.make(msgSets));
 		
 		Trace.log("msg_expansions         <- empty set");
 		Trace.log("msgs_alreaded_expanded <- empty set");
@@ -366,10 +366,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Trace.log("    msg_set <- R_complete_simplify(msg_set)");
 			msgSet = process.rewrite(R_complete_simplify, msgSet);
 			Justification.end("Remaining, non-expanded messages are {}", msgSet);
+			Trace.log("    // msg_set = {}", msgSet);
 			
 			if (!Sets.isEmptySet(msgSet)) {
 				// convert msg set back to a multiset
-				msgSet = convertIntensionalUniSetToMultiSet(msgSet);
+				msgSet = convertUniSetToIntensionalMultiSet(msgSet);
 				
 				Justification.begin("Going to re-arrange as message expression");
 				Trace.log("    if msg_set is not empty");
@@ -404,6 +405,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Justification.begin("Going to simplify {}", expansion);
 				Trace.log("        expansion <- R_complete_simplify(expansion)");
 				expansion = process.rewrite(R_complete_simplify, expansion);
+				Trace.log("        // expansion = {}", expansion);
 				Justification.end("Obtained simplified message expansion {}", expansion);
 				Justification.end("Obtained message expansion {}", expansion);
 				
@@ -426,6 +428,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						                     	Tuple.make(Arrays.asList(destination, origin)),
 						                        conditionC);
 				msgsAlreadyExpandedUnionArgs.add(alreadyExpanded);
+				Trace.log("        // msgs_already_expanded = {}", Expressions.apply(FunctorConstants.UNION, msgsAlreadyExpandedUnionArgs));
 				
 				Trace.log("        msgs_to_be_expanded <- msgs_to_be_expanded union R_extract_previous_msg_sets(msg_expansion)");
 
@@ -433,6 +436,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Expression newMsgSetsToBeExpanded = process.rewrite(R_extract_previous_msg_sets, msgExpansion);
 				msgsToBeExpanded.addAll(getEntriesFromUnion(newMsgSetsToBeExpanded));
 				Justification.end("Messages inside expansion identified: {}", newMsgSetsToBeExpanded);
+				Trace.log("        // msgs_to_be_expanded = {}", Tuple.make(msgsToBeExpanded));
 
 				Justification.end("Message set expanded. See inside for details.");
 			}
@@ -881,13 +885,30 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return result;
 	}
 	
-	private static Expression convertIntensionalUniSetToMultiSet(Expression intensionalUniSet) {
-		if (!Sets.isIntensionalUniSet(intensionalUniSet)) {
-			throw new IllegalStateException("Unhandled case where msgSet is not an intensional uniset:"+intensionalUniSet);
+	private static Expression convertUniSetToIntensionalMultiSet(Expression uniSet) {
+		if (!Sets.isUniSet(uniSet)) {
+			throw new IllegalStateException("Unhandled case where msgSet is not a uniset: " + uniSet);
 		}
-		Expression result = IntensionalSet.makeMultiSet(IntensionalSet.getScopingExpression(intensionalUniSet), 
-				IntensionalSet.getHead(intensionalUniSet), IntensionalSet.getCondition(intensionalUniSet));
+		if (Sets.isExtensionalSet(uniSet) && ! Sets.isSingletonExtensionalSet(uniSet)) {
+			throw new IllegalStateException("Unhandled case where msgSet is an extensional set but not a singleton: " + uniSet);
+		}
+		Expression scopingExpression = null;
+		Expression head              = null;
+		Expression condition         = null;
 		
+		if (Sets.isIntensionalSet(uniSet)) {
+			scopingExpression = IntensionalSet.getScopingExpression(uniSet);
+			head              = IntensionalSet.getHead(uniSet);
+			condition         = IntensionalSet.getCondition(uniSet);
+		}
+		else {
+			scopingExpression = IntensionalSet.EMPTY_SCOPING_EXPRESSION;
+			head              = ExtensionalSet.getElements(uniSet).get(0);
+			condition         = Expressions.TRUE;
+		}
+		
+		Expression result = IntensionalSet.makeMultiSet(scopingExpression, head, condition);
+
 		return result;
 	}
 	

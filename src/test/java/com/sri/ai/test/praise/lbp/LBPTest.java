@@ -1211,7 +1211,7 @@ public class LBPTest extends AbstractLPITest {
 						//"{ ( on X ) X | X != a and | type(Y) - { b } | = 0 }"
 						// Note: old R_basic result:
 						// "{ b }"
-						"{ ( on X ) b | X = b }"),
+						"{ (on ) b | true }"),
 				// Ensure standardize apart works
 				new SetDifferenceTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{(on X) X | X != a }", "{(on X) X | X != b }", 
@@ -1220,7 +1220,7 @@ public class LBPTest extends AbstractLPITest {
 						// "{ ( on X ) X | X != a and | type(X) - { b } | = 0 }"	
 						// Note: old R_basic result:
 						// "{ b }"
-						"{ ( on X ) b | X = b }"),
+						"{ (on ) b | true }"),
 				//
 				// Basic: if S1 is {a1,...,an} and S2 is { Alpha | C }_I
 				//
@@ -1231,7 +1231,7 @@ public class LBPTest extends AbstractLPITest {
 				new SetDifferenceTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{a, b, c}", "{(on X) X | X != b }", 
 						false,
-						"{b}"),
+						"{ b }"),
 				//
 				// Basic: if S1 is 'if C then Alpha else Beta'
 				//
