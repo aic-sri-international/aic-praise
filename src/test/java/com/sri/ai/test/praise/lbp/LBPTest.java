@@ -1273,8 +1273,9 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						// Note: old R_basic result:
 						// "{ a } union { c }"
-// TODO - can we do better than this with the new R_simplify logic?						
-						"{ ( on X ) X | (X = a or X = b) and X != b and X != d } union { ( on X ) X | (X = c or X = d) and X != b and X != d }"),
+// TODO - can we do better than this with the new R_simplify logic?
+// Doing better now, but conversion from { (on ) alpha | C } to if C then { alpha } else {} breaking BP tests at the moment, so it's disabled 						
+						"{ (on ) a | true } union { (on ) c | true }"),
 				//
 				// Basic: Illegal Argument Exceptions
 				//
@@ -1786,13 +1787,13 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						// Note: old R_formula_simplification result
 						// "{ ( on X ) ([ if p(X) then 1 else 0 ]) | X = Z = a }"
-						"if Z = a then { ([ if p(Z) then 1 else 0 ]) } else { }"),
+						"if Z = a then { ([ if p(a) then 1 else 0 ]) } else { }"),
 				new NRVIPFTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"[p(a)]", "{{ (on X) [if p(X) then 1 else 0] | Z = X }}", 
 						false, 
 						// Note: old R_formula_simplification result
 						// "{{ ( on X ) ([ if p(X) then 1 else 0 ]) | X = Z = a }}"
-						"if Z = a then {{ ([ if p(Z) then 1 else 0 ]) }} else { }"),
+						"if Z = a then {{ ([ if p(a) then 1 else 0 ]) }} else { }"),
 				// Standardize Apart
 				new NRVIPFTestData(Expressions.TRUE.toString(), new TrivialPQR(), 
 						"[p(X)]", "{ (on X in {a,b,c}) [if p(X) then 1 else 0] | X != d }", 
@@ -3265,7 +3266,7 @@ public class LBPTest extends AbstractLPITest {
 						new TrivialPQ(), 
 						"previous message to [p(a)] from [ Beta ]",
 						false,
-						"{{ (on ) ([p(a)], [Beta]) | X = a}}"),
+						"{{ (on ) ([p(a)], [Beta]) | X = a }}"),
 				// An intensional set without indices should be returned
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
@@ -3502,7 +3503,7 @@ public class LBPTest extends AbstractLPITest {
 					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }}",
 					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0 ) ) | X != c }}",
 					false,
-					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then if p(b,Y) then 1 else 0 else 0.5 ) ) | X != c }}"),
+					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then if p(b,a) then 1 else 0 else 0.5 ) ) | X != c }}"),
 		};
 		
 		perform(tests);
@@ -3550,14 +3551,14 @@ public class LBPTest extends AbstractLPITest {
 						"{{ (on X) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }}",
 						false,
 						"if Y != d then if p(b,Z) then 1 else 0 else 0"),
-				// Variant of Example 1 from the pseudo-code (on X, Z) insted of (on X)
+				// Variant of Example 1 from the pseudo-code (on X, Z) instead of (on X)
 				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
 						new TrivialPQWithPArity2AndQArity1(),
 						"if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0",
 						"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }}",
 						false,
-						"if Y != d then if p(b,Y) then 1 else 0 else 0"),
-				// Variant of Example 1 from the pseudo-code (on X, Z) insted of (on X) and [p(X, Z)] instead of [p(X,a)]
+						"if Y != d then if p(b,a) then 1 else 0 else 0"),
+				// Variant of Example 1 from the pseudo-code (on X, Z) instead of (on X) and [p(X, Z)] instead of [p(X,a)]
 				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
 						new TrivialPQWithPArity2AndQArity1(),
 						"if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0",
@@ -3572,25 +3573,24 @@ public class LBPTest extends AbstractLPITest {
 	@Test
 	public void testPickSingleElement() {
 		class PickSingleElementTestData extends TestData {
-			private String     intensionalSet;
-			private Expression exprIntensionalSet;
+			private String     intensionalSetString;
+			private Expression intensionalSet;
 			
 			public PickSingleElementTestData(String contextualConstraint, Model model, String intensionalSet, boolean illegalArgumentTest, String expected) {
 				super(contextualConstraint, model, illegalArgumentTest, expected);
-				this.intensionalSet = intensionalSet;
+				this.intensionalSetString = intensionalSet;
 
 			};
 			
 			@Override
 			public Expression getTopExpression() {
-				exprIntensionalSet = parse(intensionalSet);
-				
-				return exprIntensionalSet;
+				intensionalSet = parse(intensionalSetString);
+				return intensionalSet;
 			}
 			
 			@Override
 			public Expression callRewrite(RewritingProcess process) {
-				Expression result = LPIUtil.pickSingleElement(exprIntensionalSet, process);
+				Expression result = LPIUtil.pickSingleElement(intensionalSet, process);
 				
 				return result;
 			}
@@ -3648,12 +3648,15 @@ public class LBPTest extends AbstractLPITest {
 						"if sick(X) then 1 else 0"
 						),	
 				// Ensure the free Variable X is selected and not the scoped W variable
-				new PickSingleElementTestData(Expressions.TRUE.toString(),
-						new TrivialSickbob(),
-						"{ ( on W in People, X' in People ) (if sick(X') then 1 else 0) | W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3 }",
-						false,
-						"if sick(X) then 1 else 0"
-						),	
+				// Used to be a test but it was incorrect, since it was picking X as a value but the set if not a singleton
+				// It started doing the right thing (returning null) after adding {@link ConjunctsHoldTrueForEachOther} -- not sure why.
+				// Since that simplification is optional, it means the pick single element is not quite correct.
+//				new PickSingleElementTestData(Expressions.TRUE.toString(),
+//						new TrivialSickbob(),
+//						"{ ( on W in People, X' in People ) (if sick(X') then 1 else 0) | W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3 }",
+//						false,
+//						"if sick(X) then 1 else 0"
+//						),	
 				// Ensure the free Variable X is selected and not the scoped W variable
 				new PickSingleElementTestData(Expressions.TRUE.toString(),
 						new TrivialSickbob(),
@@ -3772,14 +3775,16 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						"X"
 						),
-				new PickValueTestData(Expressions.TRUE.toString(), 
-						new TrivialPQ(),
-						"X'",
-						"{X', W}",
-						"W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3",
-						false,
-						"X"
-						),
+// Not sure the test below is valid since X' does not have a single value, although it does have a single non-free variable to refer
+// to; the function definition must be refined to make these distinctions more clear.
+//				new PickValueTestData(Expressions.TRUE.toString(), 
+//						new TrivialPQ(),
+//						"X'",
+//						"{X', W}",
+//						"W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3",
+//						false,
+//						"X"
+//						),
 				new PickValueTestData(Expressions.TRUE.toString(), 
 						new TrivialPQ(),
 						"X'",

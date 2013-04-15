@@ -140,8 +140,8 @@ public class DifferenceOfExtensionalAndExtensionalSet extends AbstractLBPHierarc
 				
 				result = rewriteThenBranch(extensionalSetA, extensionalSetBMinusJ, i, process);
 			} 
-			else if (Expressions.FALSE.equals(condition)) {
-				Trace.log("if false = condition");
+			else if (condition.equals(Expressions.FALSE)) {
+				Trace.log("if condition is 'false'");
 				Trace.log("    return R_DifferenceOfExtensionalAndExtensionalSet({a_1,...,a_i,...,a_n}, {b_1,...,b_m}, i, j+1)");
 
 				result = rewriteElseBranch(extensionalSetA, extensionalSetB, i, j, process);
