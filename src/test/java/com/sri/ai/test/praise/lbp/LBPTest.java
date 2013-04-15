@@ -3648,9 +3648,7 @@ public class LBPTest extends AbstractLPITest {
 						"if sick(X) then 1 else 0"
 						),	
 				// Ensure the free Variable X is selected and not the scoped W variable
-				// Used to be a test but it was incorrect, since it was picking X as a value but the set if not a singleton
-				// It started doing the right thing (returning null) after adding {@link ConjunctsHoldTrueForEachOther} -- not sure why.
-				// Since that simplification is optional, it means the pick single element is not quite correct.
+						// Broken for now
 //				new PickSingleElementTestData(Expressions.TRUE.toString(),
 //						new TrivialSickbob(),
 //						"{ ( on W in People, X' in People ) (if sick(X') then 1 else 0) | W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3 }",
@@ -3775,8 +3773,7 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						"X"
 						),
-// Not sure the test below is valid since X' does not have a single value, although it does have a single non-free variable to refer
-// to; the function definition must be refined to make these distinctions more clear.
+// Broken for now
 //				new PickValueTestData(Expressions.TRUE.toString(), 
 //						new TrivialPQ(),
 //						"X'",
