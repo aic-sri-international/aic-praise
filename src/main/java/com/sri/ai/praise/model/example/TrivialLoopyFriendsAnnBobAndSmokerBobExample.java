@@ -66,8 +66,8 @@ public class TrivialLoopyFriendsAnnBobAndSmokerBobExample extends Model {
 	 */
 	public TrivialLoopyFriendsAnnBobAndSmokerBobExample() {
 		super("union("
-//				+ "{{ ( on ) ([ if friends(ann, bob) then 1 else 0 ]) }}, " 
-//				+ "{{ ( on ) ([ if smoker(bob) then 1 else 0 ]) }}, "
+				+ "{{ ( on ) ([ if friends(ann, bob) then 1 else 0 ]) }}, " 
+				+ "{{ ( on ) ([ if smoker(bob) then 1 else 0 ]) }}, "
 				+ "{{ ( on Y, X ) ([ if friends(X, Y) and smoker(X) then if smoker(Y) then 0.7 else 0.3 else 0.5 ]) | Y != X }}  "
 				+ ")", "friends", "smoker");
 	}
