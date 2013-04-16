@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
@@ -29,7 +28,6 @@ public class LBPStressIT extends AbstractLPITest {
 		Assume.assumeFalse("Stress Tests Ignored.", Boolean.getBoolean("ignore.stress.tests"));
 	}
 	
-	@Ignore("TODO - issues with all tests now")
 	@Test
 	public void testBeliefForLoopyModels() {
 		class LoopyBeliefTestData extends TestData {
@@ -78,12 +76,12 @@ public class LBPStressIT extends AbstractLPITest {
 				// #1
 				// Note: if caches can grow unbounded then run with: -Xms2G -Xmx16G
 		        // Note: Slow to process, takes approx 6.3 minutes (as of April 2013, had been 2 hours 5 min before Oct 2012).
-				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-					new com.sri.ai.praise.model.example.TrivialLoopyMisconceptionExample(),
-					"belief([m(X)])",
-					false,
-					// TODO - is this correct (10 iterations)?
-					"if m(X) then 0.432395068 else 0.567604932"),
+//				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+//					new com.sri.ai.praise.model.example.TrivialLoopyMisconceptionExample(),
+//					"belief([m(X)])",
+//					false,
+//					// TODO - is this correct (10 iterations)?
+//					"if m(X) then 0.432395068 else 0.567604932"),
 
 //				// #2
 //                // TODO - appears not to stop processing
@@ -96,13 +94,12 @@ public class LBPStressIT extends AbstractLPITest {
 ////					"if X = b then if p(b) then 1 else 0 else if p(X) then 1 else 0"),
 				
 					
-//				// #3
-//			    // TODO - appears not to stop processing:
-//				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-//					new com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
-//					"belief([smoker(ann)])",
-//					false,
-//					"TODO"),
+				// #3
+				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+					new com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
+					"belief([smoker(ann)])",
+					false,
+					"if smoker(ann) then 0.995514833 else 0.00448516689"),
 		};
 		
 		perform(tests);
