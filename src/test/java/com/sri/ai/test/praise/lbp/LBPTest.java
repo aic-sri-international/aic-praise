@@ -3648,13 +3648,12 @@ public class LBPTest extends AbstractLPITest {
 						"if sick(X) then 1 else 0"
 						),	
 				// Ensure the free Variable X is selected and not the scoped W variable
-						// Broken for now
-//				new PickSingleElementTestData(Expressions.TRUE.toString(),
-//						new TrivialSickbob(),
-//						"{ ( on W in People, X' in People ) (if sick(X') then 1 else 0) | W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3 }",
-//						false,
-//						"if sick(X) then 1 else 0"
-//						),	
+				new PickSingleElementTestData(Expressions.TRUE.toString(),
+						new TrivialSickbob(),
+						"{ ( on W in People, X' in People ) (if sick(X') then 1 else 0) | W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3 }",
+						false,
+						"if sick(X) then 1 else 0"
+						),	
 				// Ensure the free Variable X is selected and not the scoped W variable
 				new PickSingleElementTestData(Expressions.TRUE.toString(),
 						new TrivialSickbob(),
@@ -3773,15 +3772,14 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						"X"
 						),
-// Broken for now
-//				new PickValueTestData(Expressions.TRUE.toString(), 
-//						new TrivialPQ(),
-//						"X'",
-//						"{X', W}",
-//						"W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3",
-//						false,
-//						"X"
-//						),
+				new PickValueTestData(Expressions.TRUE.toString(), 
+						new TrivialPQ(),
+						"X'",
+						"{X', W}",
+						"W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3",
+						false,
+						"X"
+						),
 				new PickValueTestData(Expressions.TRUE.toString(), 
 						new TrivialPQ(),
 						"X'",

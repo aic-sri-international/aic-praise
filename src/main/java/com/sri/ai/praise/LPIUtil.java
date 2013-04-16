@@ -57,8 +57,10 @@ import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Trace;
+import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.SubExpressionSelection;
 import com.sri.ai.grinder.library.Substitute;
 import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.boole.And;
@@ -66,6 +68,7 @@ import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.Cardinality;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -1254,7 +1257,7 @@ public class LPIUtil {
 	 * @return a value v such that there exists I : C <=> X = v or null if not
 	 *         able to pick.
 	 */
-	public static Expression pickValue(Expression variableX, Expression variablesI, Expression formulaC, RewritingProcess process) {
+	public static Expression pickValue(Expression variableX, Expression variablesI, Expression formulaC, final RewritingProcess process) {
 		Expression result = null;
 		
 		Trace.in("+pick_value({}, {}, {})", variableX, variablesI, formulaC);
@@ -1280,6 +1283,34 @@ public class LPIUtil {
 			Expression formulaOnX  = process.rewrite(LBPRewriter.R_formula_simplification, thereExists);
 			
 			result = extractValueForXFromFormula(variableX, variablesI, formulaOnX, process);
+			
+			if (result == null) {
+				Set<Expression> constsAndFreeVars = new LinkedHashSet<Expression>();
+				
+				constsAndFreeVars.addAll(SubExpressionSelection.get(formulaC, new Predicate<Expression>() {
+					@Override
+					public boolean apply(Expression arg) {
+						return process.isConstant(arg);
+					}
+				}));
+				constsAndFreeVars.addAll(SubExpressionSelection.get(formulaC, new Predicate<Expression>() {
+					@Override
+					public boolean apply(Expression arg) {
+						return process.isVariable(arg);
+					}
+				}));
+				
+				constsAndFreeVars.removeAll(ExtensionalSet.getElements(variablesI));
+				for (Expression alpha : constsAndFreeVars) {
+					Expression xNotEqualAlpha = Disequality.make(variableX, alpha);
+					Expression satisfiable    = process.rewrite(Cardinality.R_complete_simplify, CardinalityUtil.makeAnd(xNotEqualAlpha, formulaC));
+					if (satisfiable.equals(Expressions.FALSE)) {
+						result = alpha;
+						break;
+					}
+				}
+			}
+			
 		} 
 		
 		Trace.out("-pick_value={}", result);
