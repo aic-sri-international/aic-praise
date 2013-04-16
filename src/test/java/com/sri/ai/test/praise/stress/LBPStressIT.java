@@ -85,13 +85,13 @@ public class LBPStressIT extends AbstractLPITest {
 
 //				// #2
 //                // TODO - appears not to stop processing
-////				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-////					new TrivialLoopyPQandb(), 
-////					"belief([p(X)])", 
-////					false, 
-////					// TODO -  is this correct (> 2 iterations, doesn't matter as large
-////					// # calculated gets reduced to 1 in R_normalize logic)?
-////					"if X = b then if p(b) then 1 else 0 else if p(X) then 1 else 0"),
+				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+					new com.sri.ai.praise.model.example.TrivialLoopyPQandb(), 
+					"belief([p(X)])", 
+					false, 
+					// TODO -  is this correct (> 2 iterations, doesn't matter as large
+					// # calculated gets reduced to 1 in R_normalize logic)?
+					"if X = b then if p(b) then 1 else 0 else if p(X) then 1 else 0"),
 				
 					
 				// #3
