@@ -1236,14 +1236,22 @@ public class LPIUtil {
 	/**
 	 * <pre>
 	 * pick_value(X, I, C)
-	 * Takes a variable X, a set of variables I, and a formula C
+	 * Takes a variable X, a set of variables I (which C is dependent/scoped by), and a formula C
 	 * Assumes that there is a single assignment to X and I satisfying C
 	 * Returns a value v such that there exists I : C <=> X = v or null if it cannot be determined.
 	 * if C is a conjunction containing conjunct X = value
 	 * 	    return value
 	 * formula_on_X = R_formula_simplification(there exists I’ : C) // where I' is I \ {X}
-	 * // formula_on_X must be of the form X = value
-	 * return value
+	 * if X = value can be unambiguously extracted from formula_on_X
+	 *      return value
+	 * // Need to use full satisfiability check to pick value
+	 * for alpha in ((constants of C) union (variables of C \ I)) // (1) (2)
+	 *      if R_complete_simplify(X != alpha and C) is "False"
+	 *           return alpha
+	 * 
+	 * Implementation Notes:
+	 * (1) Preference is to check constants before free variables.
+	 * (2) (variables of C \ I) gives you the set of free variables in C.
 	 * </pre>
 	 * 
 	 * @param variableX
@@ -1270,8 +1278,6 @@ public class LPIUtil {
 		} 
 		else {
 			Trace.log("formula_on_X = R_formula_simplification(there exists I’ : C)"); 
-			Trace.log("// formula_on_X must be of the form X = value");
-			Trace.log("    return value");
 			List<Expression> variablesIPrime = new ArrayList<Expression>();
 			for (Expression i : ExtensionalSet.getElements(variablesI)) {
 				// where I' is I \ {X}
@@ -1283,8 +1289,12 @@ public class LPIUtil {
 			Expression formulaOnX  = process.rewrite(LBPRewriter.R_formula_simplification, thereExists);
 			
 			result = extractValueForXFromFormula(variableX, variablesI, formulaOnX, process);
-			
-			if (result == null) {
+			if (result != null) {
+				Trace.log("if X = value can be unambiguously extracted from formula_on_X");
+				Trace.log("    return value");
+			}
+			else {
+				Trace.log("for alpha in ((constants of C) union (variables of C \\ I))");				
 				Set<Expression> constsAndFreeVars = new LinkedHashSet<Expression>();
 				
 				constsAndFreeVars.addAll(SubExpressionSelection.get(formulaC, new Predicate<Expression>() {
@@ -1303,8 +1313,10 @@ public class LPIUtil {
 				constsAndFreeVars.removeAll(ExtensionalSet.getElements(variablesI));
 				for (Expression alpha : constsAndFreeVars) {
 					Expression xNotEqualAlpha = Disequality.make(variableX, alpha);
+					Trace.log("    if R_complete_simplify(X != alpha and C) is \"False\"");
 					Expression satisfiable    = process.rewrite(Cardinality.R_complete_simplify, CardinalityUtil.makeAnd(xNotEqualAlpha, formulaC));
-					if (satisfiable.equals(Expressions.FALSE)) {
+					if (satisfiable.equals(Expressions.FALSE)) {						
+						Trace.log("        return alpha");
 						result = alpha;
 						break;
 					}
