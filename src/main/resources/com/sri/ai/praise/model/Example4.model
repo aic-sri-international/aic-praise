@@ -1,6 +1,6 @@
 model(
-'Example 4', 
-'Example 4',
+'Example4', 
+'Example4',
 sort(OBJ, 12, { }),
 randomVariable(canHave, 2, OBJ, OBJ, Boolean),
 randomVariable(dependency, 2, OBJ, OBJ, Boolean),
