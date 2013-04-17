@@ -71,7 +71,6 @@ import com.sri.ai.praise.model.ModelGrounding;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.model.ModelGrounding.GroundedModelResult;
-import com.sri.ai.praise.model.experiment.ExperimentLoopyParfactorsExample;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 import com.sri.ai.util.math.MixedRadixNumber;
@@ -94,15 +93,18 @@ public class ExportToPMTK3FactorGraph {
 	public static void main(String[] args) throws Exception {
 		Parser  parser  = new AntlrGrinderParserWrapper();
 		
-		String modelDeclaration =  (new ExperimentLoopyParfactorsExample()).getModelDeclaration();
+		boolean outputLBPBeliefs = false;
+		Integer size             = 12;
+		
+		String modelDeclaration =  Model.getModelDeclarationFromResource("Example4.model");
 
 		Map<Expression, Expression> globalObjects = new HashMap<Expression, Expression>();
-		Integer size = 10;
 		globalObjects.put(parser.parse("| OBJ |"), DefaultSymbol.createSymbol(size)); 
 		// Ensure domain sizes match up.
 		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());
 		
 		Expression modelDefinition = parser.parse(modelDeclaration);
+	
 		Set<String> emptySet = Collections.emptySet();
 		Model modelToExport = new Model(modelDefinition, emptySet);
 		
@@ -116,7 +118,7 @@ public class ExportToPMTK3FactorGraph {
 			groundedModelResult = ModelGrounding.groundModel(process);
 		
 			StringWriter stringWriter = new StringWriter();
-			export(groundedModelResult, stringWriter, process);
+			export(groundedModelResult, stringWriter, outputLBPBeliefs, process);
 		
 			System.out.print(stringWriter.toString());
 		} catch (ModelGrounding.ModelGroundingException mge) {
@@ -127,7 +129,7 @@ public class ExportToPMTK3FactorGraph {
 		}
 	}
 	
-	public static void export(ModelGrounding.GroundedModelResult groundedModelResult, Writer output, RewritingProcess process) 
+	public static void export(ModelGrounding.GroundedModelResult groundedModelResult, Writer output, boolean outputLBPBeliefs, RewritingProcess process) 
 		throws IOException {
 		
 		Model originalModel = groundedModelResult.getGroundedFrom();
@@ -164,7 +166,9 @@ public class ExportToPMTK3FactorGraph {
 		
 		// output LBP's beliefs for each random variable
 		// in order to simplify comparisons.
-		outputLBPBeliefs(originalModel, output, process);
+		if (outputLBPBeliefs) {
+			outputLBPBeliefs(originalModel, output, process);
+		}
 		// for convenience output all the domain id to random variable ids
 		output.write("%\n");
 		for (Map.Entry<Integer, Expression> rvEntry : pmtk3IdToRandomVariable.entrySet()) {
@@ -543,7 +547,7 @@ public class ExportToPMTK3FactorGraph {
 		if (expressionE.getFunctor() != null) {		
 			Symbol predicateSymbol = (Symbol) expressionE.getFunctor();
 			if (predicateSymbol.getValue() instanceof String) {
-				if (groundedModel.getKnownRandomVariableNames().contains(predicateSymbol.getValue())) {
+				if (groundedModel.getKnownRandomVariableNames().contains(predicateSymbol.toString())) {
 					result = true;
 				}
 			}
@@ -571,6 +575,7 @@ public class ExportToPMTK3FactorGraph {
 		
 		@Override
 		public Expression apply(Expression expressionE, RewritingProcess process) {
+			
 			// if a random variable value expression and we've not seen already.
 			if (isRandomVariableValueExpression(groundedModel, expressionE) &&
 				!randomVariableValueExpressions.contains(expressionE)) {

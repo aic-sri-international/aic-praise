@@ -37,6 +37,10 @@
  */
 package com.sri.ai.praise.model;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -660,6 +664,32 @@ public class Model {
 		Model model = new Model(modelDefinition, knownRandomVariableNames);
 
 		return model;
+	}
+	
+	/**
+	 * Load a model declaration from a specified resource.
+	 * 
+	 * @param resourceName
+	 * @return the model declaration contained in the resource.
+	 */
+	public static String getModelDeclarationFromResource(String resourceName) {
+		StringBuilder sb = new StringBuilder();
+		
+		try {
+			InputStream is = Model.class.getResourceAsStream(resourceName);
+			LineNumberReader reader = new LineNumberReader(new InputStreamReader(is));
+			String line = null;
+			while ( (line = reader.readLine()) != null) {
+				sb.append(line);
+				sb.append("\n");
+			}
+			reader.close();
+			
+		} catch (IOException ioe) {
+			// ignore
+		}
+		
+		return sb.toString();
 	}
 
 	//
