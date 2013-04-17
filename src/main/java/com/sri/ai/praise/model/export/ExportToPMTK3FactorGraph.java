@@ -97,7 +97,7 @@ public class ExportToPMTK3FactorGraph {
 		boolean outputLBPBeliefs = false;
 		Integer size             = 12;
 		
-		String modelDeclaration =  Model.getModelDeclarationFromResource("Example4.model");
+		String modelDeclaration =  Model.getModelDeclarationFromResource("Example4Stage2.model");
 
 		Map<Expression, Expression> globalObjects = new HashMap<Expression, Expression>();
 		globalObjects.put(parser.parse("| OBJ |"), DefaultSymbol.createSymbol(size)); 

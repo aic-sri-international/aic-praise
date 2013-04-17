@@ -3,11 +3,13 @@ function aicPRAiSE()
 %       propositional versions of the algorithm.
     disp('AIC-PRAiSE.');
 
-    %mkFactorGraphFunctionHandle = @mkExamplePairwiseLPIModelFactorGraph;
+    mkFactorGraphFunctionHandle = @mkExamplePairwiseLPIModelFactorGraph;
     %mkFactorGraphFunctionHandle = @mkExampleGeneralLPIModelFactorGraph;
     %mkFactorGraphFunctionHandle = @mkExperimentLoopyPQFactorGraph;
     %mkFactorGraphFunctionHandle = @mkExperimentLoopyPQWithPriorsFactorGraph;
-    mkFactorGraphFunctionHandle = @mkExperimentLoopyParfactorsExampleFactorGraph;
+    %mkFactorGraphFunctionHandle = @mkExperimentLoopyParfactorsExampleFactorGraph;
+    %mkFactorGraphFunctionHandle = @mkExample4Stage1ModelFactorGraph
+    %mkFactorGraphFunctionHandle = @mkExample4Stage2ModelFactorGraph.m
 
     % 'jtree', 'varelim', 'bp', 'enum'
     % 'libdai*'
