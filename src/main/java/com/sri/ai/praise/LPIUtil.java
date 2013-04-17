@@ -613,7 +613,7 @@ public class LPIUtil {
 			if (predicateSymbol.getValue() instanceof String) {
 				Set<String> knownRandomVariableNames = Model.getKnownRandomVariableNames(process);
 				if (knownRandomVariableNames != null
-						&& knownRandomVariableNames.contains(predicateSymbol.getValue())) {
+						&& knownRandomVariableNames.contains(predicateSymbol.toString())) {
 					return true;
 				}
 				return false;

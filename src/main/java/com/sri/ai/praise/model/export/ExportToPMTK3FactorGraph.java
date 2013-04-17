@@ -59,6 +59,7 @@ import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.PRAiSEConfiguration;
@@ -122,6 +123,7 @@ public class ExportToPMTK3FactorGraph {
 		
 			System.out.print(stringWriter.toString());
 		} catch (ModelGrounding.ModelGroundingException mge) {
+			System.err.println("Model Ground Exception: "+mge.getMessage());
 			for (ModelGrounding.ModelGroundingError error : mge.getErrors()) {
 				System.err.println(error.getErrorType());
 				System.err.println(error.getInExpression());
@@ -163,7 +165,9 @@ public class ExportToPMTK3FactorGraph {
 				factorsOnSameDomains.add(tabularFactor);
 			}
 		}
-		
+		output.write("%\n");
+		output.write("% # of ground factors (Note can be merged) = "+ExtensionalSet.cardinality(groundedModelResult.getGroundedModel().getParfactorsDeclaration().getParfactors().get(0)));
+		output.write("\n");
 		// output LBP's beliefs for each random variable
 		// in order to simplify comparisons.
 		if (outputLBPBeliefs) {
@@ -213,6 +217,12 @@ public class ExportToPMTK3FactorGraph {
 			TabularFactor pmtk3TabularFactor = new TabularFactor(domainToFactors.getValue());
 			
 			output.write("\n");
+			int noMerged = domainToFactors.getValue().size();
+			if (noMerged > 1) {
+				output.write(_indent);
+				output.write("% Merged "+noMerged+" ground factors:");
+				output.write("\n");
+			}
 			// output the ground factors merged into this factor
 			for (TabularFactor factor : domainToFactors.getValue()) {
 				output.write(_indent);
@@ -354,7 +364,10 @@ public class ExportToPMTK3FactorGraph {
 		output.write("varNames = cell("+randomVariableToPmtk3Id.size()+", 1);\n");
 		for (Map.Entry<Expression, Integer> entry : randomVariableToPmtk3Id.entrySet()) {
 			output.write(_indent);
-			output.write("varNames{"+entry.getValue()+"} = '"+entry.getKey()+"';\n");
+			String varName = entry.getKey().toString();
+			// Escape (i.e. Matlab) all quotes
+			varName = varName.replaceAll("'", "''");
+			output.write("varNames{"+entry.getValue()+"} = '"+varName+"';\n");
 		}
 		output.write("end\n");
 	}

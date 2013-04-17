@@ -307,7 +307,7 @@ public class ModelGrounding {
 			if (PRAiSEConfiguration.isPerformMaxAllowedSizeCheckForGroundedModel()
 				&& groundFactors.size() > PRAiSEConfiguration.getMaxAllowedSizeForGroundedModel()) {
 				
-				throw new ModelGroundingException("Ground model size exceeds maximum allowed size",
+				throw new ModelGroundingException("Ground model size so far of "+groundFactors.size()+" exceeds maximum allowed size of " + PRAiSEConfiguration.getMaxAllowedSizeForGroundedModel(),
 						Arrays.asList(new ModelGroundingError(
 								ModelGroundingError.TYPE.GROUND_MODEL_EXCEEDS_MAX_ALLOWED_SIZE, 
 								DefaultSymbol.createSymbol(PRAiSEConfiguration.getMaxAllowedSizeForGroundedModel()))));
@@ -315,7 +315,7 @@ public class ModelGrounding {
 		}
 		
 
-		// Construct the grounded model from the ground ground factors
+		// Construct the grounded model from the ground factors
 		Expression groundParfactor = ExtensionalSet.makeUniSetExpression(new ArrayList<Expression>(groundFactors));
 		ParfactorsDeclaration groundParfactorsDeclaration = ParfactorsDeclaration.makeParfactorsDeclaration(groundParfactor);
 		

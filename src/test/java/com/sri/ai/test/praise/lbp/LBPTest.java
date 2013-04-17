@@ -85,7 +85,9 @@ import com.sri.ai.praise.model.example.TrivialPeopleAmericanTallIntelligentUnint
 import com.sri.ai.praise.model.example.TrivialSickSmokerbob;
 import com.sri.ai.praise.model.example.TrivialSickbob;
 import com.sri.ai.praise.model.example.TrivialSunnyAvailableCanPlayWith;
+import com.sri.ai.praise.model.example.TrivialThereExistsPQWithPriors;
 import com.sri.ai.praise.model.example.WeightedPQWithPriors;
+import com.sri.ai.praise.model.example.WeightedThereExistsPQWithPriors;
 import com.sri.ai.test.praise.AbstractLPITest;
 import com.sri.ai.util.Util;
 
@@ -2801,8 +2803,15 @@ public class LBPTest extends AbstractLPITest {
 						"belief([q(X)])", 
 						false, 
 						"if q(X) then 1 else 0"),
-				new BeliefTestData(Expressions.TRUE.toString(), 
-						new WeightedPQWithPriors(), 
+				new BeliefTestData(Expressions.TRUE.toString(), new TrivialThereExistsPQWithPriors(), 
+						"belief(['there exists Y : p(X0, Y)'(X)])", 
+						false, 
+						"if 'there exists Y : p(X0, Y)'(X) then 1 else 0"),
+				new BeliefTestData(Expressions.TRUE.toString(), new TrivialThereExistsPQWithPriors(), 
+						"belief(['there exists Y : q(X0, Y)'(X)])", 
+						false, 
+						"if 'there exists Y : q(X0, Y)'(X) then 1 else 0"),
+				new BeliefTestData(Expressions.TRUE.toString(), new WeightedPQWithPriors(), 
 						"belief([p(X)])", 
 						false, 
 						"if p(X) then 0.223300971 else 0.776699029"),
@@ -2810,6 +2819,14 @@ public class LBPTest extends AbstractLPITest {
 						"belief([q(X)])", 
 						false, 
 						"if q(X) then 0.320388350 else 0.679611650"),
+				new BeliefTestData(Expressions.TRUE.toString(), new WeightedThereExistsPQWithPriors(), 
+						"belief(['there exists Y : p(X0, Y)'(X)])", 
+						false, 
+						"if 'there exists Y : p(X0, Y)'(X) then 0.223300971 else 0.776699029"),
+				new BeliefTestData(Expressions.TRUE.toString(), new WeightedThereExistsPQWithPriors(), 
+						"belief(['there exists Y : q(X0, Y)'(X)])", 
+						false, 
+						"if 'there exists Y : q(X0, Y)'(X) then 0.320388350 else 0.679611650"),
 	
 				// From ALBPTest.testIntensionalFanIn()
 				new BeliefTestData(Expressions.TRUE.toString(), new TrivialPQPeoplea1Anda2(), 

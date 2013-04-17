@@ -43,40 +43,34 @@ import com.sri.ai.praise.model.Model;
 /**
  * <pre>
  * union( 
- * {{ (on X) [if p(X) and q(X) then 1 else 0]}}
- * {{ (on Y) [if p(Y) then 0.2 else 0.8] }},
- * {{ (on Z) [if q(Z) then 0.3 else 0.7] }}
+ * {{ (on X) [if 'there exists Y : p(X0, Y)'(X) and 'there exists Y : q(X0, Y)'(X) then 0.6 else 0.4]}}
+ * {{ (on Y) [if 'there exists Y : p(X0, Y)'(Y) then 0.2 else 0.8] }},
+ * {{ (on Z) [if 'there exists Y : q(X0, Y)'(Z) then 0.3 else 0.7] }}
  * )
  *       
- * random variable names=p,q.
+ * random variable names='there exists Y : p(X0, Y)', 'there exists Y : q(X0, Y)'.
  * </pre>
  */
 @Beta
-public class TrivialPQWithPriors extends Model {
+public class WeightedThereExistsPQWithPriors extends Model {
 
 	/**
 	 * <pre>
 	 * union( 
-	 * {{ (on X) [if p(X) and q(X) then 1 else 0]}}
-	 * {{ (on Y) [if p(Y) then 0.2 else 0.8] }},
-	 * {{ (on Z) [if q(Z) then 0.3 else 0.7] }}
+	 * {{ (on X) [if 'there exists Y : p(X0, Y)'(X) and 'there exists Y : q(X0, Y)'(X) then 0.6 else 0.4]}}
+	 * {{ (on Y) [if 'there exists Y : p(X0, Y)'(Y) then 0.2 else 0.8] }},
+	 * {{ (on Z) [if 'there exists Y : q(X0, Y)'(Z) then 0.3 else 0.7] }}
 	 * )
 	 *       
-	 * random variable names=p,q.
+	 * random variable names='there exists Y : p(X0, Y)', 'there exists Y : q(X0, Y)'.
 	 * </pre>
 	 */
-	public TrivialPQWithPriors() {
-		super(
-				"model("
-				+ "'Trivial PQ with priors.',"
-				+ "'A basic model with priors.',"
-				+ "sort(UniverseOfDiscourse, Unknown, {}), "
-				+ "randomVariable(p, 1, UniverseOfDiscourse, Boolean), "
-				+ "randomVariable(q, 1, UniverseOfDiscourse, Boolean), "
-			    + "parfactors(union(" 
-				+ "{{ (on X) [if p(X) and q(X) then 1 else 0]}}" + ","
-				+ "{{ (on Y) [if p(Y) then 0.2 else 0.8] }}" + ","
-				+ "{{ (on Z) [if q(Z) then 0.3 else 0.7] }}" + "))"
-				+ ")");
+	public WeightedThereExistsPQWithPriors() {
+		super("union(" 
+				+ "{{ (on X) [if 'there exists Y : p(X0, Y)'(X) and 'there exists Y : q(X0, Y)'(X) then 0.6 else 0.4]}}" + "," 
+				+ "{{ (on Y) [if 'there exists Y : p(X0, Y)'(Y) then 0.2 else 0.8] }}" + ","
+				+ "{{ (on Z) [if 'there exists Y : q(X0, Y)'(Z) then 0.3 else 0.7] }}" + ")", 
+				"'there exists Y : p(X0, Y)'", 
+				"'there exists Y : q(X0, Y)'");
 	}
 }

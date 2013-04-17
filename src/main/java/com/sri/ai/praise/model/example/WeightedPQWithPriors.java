@@ -66,8 +66,9 @@ public class WeightedPQWithPriors extends Model {
 	 * </pre>
 	 */
 	public WeightedPQWithPriors() {
-		super("union(" + "{{ (on X) [if p(X) and q(X) then 0.6 else 0.4]}}"
-				+ "," + "{{ (on Y) [if p(Y) then 0.2 else 0.8] }}" + ","
+		super("union(" 
+				+ "{{ (on X) [if p(X) and q(X) then 0.6 else 0.4]}}" + "," 
+				+ "{{ (on Y) [if p(Y) then 0.2 else 0.8] }}" + ","
 				+ "{{ (on Z) [if q(Z) then 0.3 else 0.7] }}" + ")", "p", "q");
 	}
 }
