@@ -22,6 +22,7 @@ function aicPRAiSE()
     doBPBeliefs       = false;
     doLibdaiBPBeliefs = true;
     doLBPBeliefs      = false;
+    doLargeIterations = false;
     
     if doVarelim == true
         % 'jtree', 'varelim', 'bp', 'enum'
@@ -32,15 +33,20 @@ function aicPRAiSE()
         disp(logZ);
     end
 
-    iterations = [10, 500, ...
-        1000, 1500, 2000, 2500, 3000, 3500, 4000, ...
-        4500, 5000, 5500, 6000, 6500, 7000, 7500, ...
-        8000, 8500, 9000, 9500, 10000];
+    if doLargeIterations == true
+        iterations = [10, 500, ...
+            1000, 1500, 2000, 2500, 3000, 3500, 4000, ...
+            4500, 5000, 5500, 6000, 6500, 7000, 7500, ...
+            8000, 8500, 9000, 9500, 10000];
+    else
+        iterations = [10, 500, 1000];
+    end
 
     bpBeliefs       = cell(1,1);
     libdaiBPBeliefs = cell(1,1);
     lbpBeliefs      = cell(1,1);
     for i = 1:size(iterations, 2)
+    	disp(sprintf('On run = %i of %i for %i iterations.', i, size(iterations, 2), iterations(i)));
         if doBPBeliefs == true
             [beliefs, ~] = testLPIModelToMRF(mkFactorGraphFunctionHandle, 'bp', ...
                  'infEngArgs', {'updateProtocol', 'sync', ...
