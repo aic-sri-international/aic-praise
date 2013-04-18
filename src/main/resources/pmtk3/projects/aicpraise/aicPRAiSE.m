@@ -3,20 +3,34 @@ function aicPRAiSE()
 %       propositional versions of the algorithm.
     disp('AIC-PRAiSE.');
 
+    %
+    % Model to run:
+    %
     mkFactorGraphFunctionHandle = @mkExamplePairwiseLPIModelFactorGraph;
     %mkFactorGraphFunctionHandle = @mkExampleGeneralLPIModelFactorGraph;
     %mkFactorGraphFunctionHandle = @mkExperimentLoopyPQFactorGraph;
     %mkFactorGraphFunctionHandle = @mkExperimentLoopyPQWithPriorsFactorGraph;
     %mkFactorGraphFunctionHandle = @mkExperimentLoopyParfactorsExampleFactorGraph;
-    %mkFactorGraphFunctionHandle = @mkExample4Stage1ModelFactorGraph
-    %mkFactorGraphFunctionHandle = @mkExample4Stage2ModelFactorGraph.m
+    %mkFactorGraphFunctionHandle = @mkExample4Stage1ModelFactorGraph;
+    %mkFactorGraphFunctionHandle = @mkExample4Stage2ModelFactorGraph;
 
-    % 'jtree', 'varelim', 'bp', 'enum'
-    % 'libdai*'
-    [beliefs, logZ] = testLPIModelToMRF(mkFactorGraphFunctionHandle, 'varelim');
-    displayBeliefs('varelim', beliefs);
-    disp('logZ =');
-    disp(logZ);
+    %
+    % Inference Algorithms to run:
+    %
+    % only set to true (i.e. non zero) if the model being tested is small enough
+    doVarelim         = false;
+    doBPBeliefs       = false;
+    doLibdaiBPBeliefs = true;
+    doLBPBeliefs      = false;
+    
+    if doVarelim == true
+        % 'jtree', 'varelim', 'bp', 'enum'
+        % 'libdai*'
+        [beliefs, logZ] = testLPIModelToMRF(mkFactorGraphFunctionHandle, 'varelim');
+        displayBeliefs('varelim', beliefs);
+        disp('logZ =');
+        disp(logZ);
+    end
 
     iterations = [10, 500, ...
         1000, 1500, 2000, 2500, 3000, 3500, 4000, ...
@@ -27,31 +41,43 @@ function aicPRAiSE()
     libdaiBPBeliefs = cell(1,1);
     lbpBeliefs      = cell(1,1);
     for i = 1:size(iterations, 2)
-        [beliefs, ~] = testLPIModelToMRF(mkFactorGraphFunctionHandle, 'bp', ...
-            'infEngArgs', {'updateProtocol', 'sync', ...
-            'maxIter',        iterations(i)});
+        if doBPBeliefs == true
+            [beliefs, ~] = testLPIModelToMRF(mkFactorGraphFunctionHandle, 'bp', ...
+                 'infEngArgs', {'updateProtocol', 'sync', ...
+                 'maxIter',        iterations(i)});
 
-        bpBeliefs = extendBeliefs(bpBeliefs, beliefs);
+            bpBeliefs = extendBeliefs(bpBeliefs, beliefs);
+        end
+        
+        if doLibdaiBPBeliefs == true
+            [beliefs, ~] = testLPIModelToMRF(mkFactorGraphFunctionHandle, 'libdaiBP', ...
+                'infEngArgs', {'BP', ...
+                ['[inference=SUMPROD,updates=SEQMAX,logdomain=0,tol=1e-9,maxiter=' ...
+                num2str(iterations(i)) ',damping=0.0]']});
 
-        [beliefs, ~] = testLPIModelToMRF(mkFactorGraphFunctionHandle, 'libdaiBP', ...
-            'infEngArgs', {'BP', ...
-            ['[inference=SUMPROD,updates=SEQMAX,logdomain=0,tol=1e-9,maxiter=' ...
-            num2str(iterations(i)) ',damping=0.0]']});
+            libdaiBPBeliefs = extendBeliefs(libdaiBPBeliefs, beliefs);
+        end
 
-        libdaiBPBeliefs = extendBeliefs(libdaiBPBeliefs, beliefs);
+        if doLBPBeliefs == true
+            % 'Block_MF' (blocks required), 'Exact', 'LBP', 'MeanField' (maxIter required), 'TRBP'
+            % 'Chain' assumes graph is chain.
+            % 'Tree' assumes graph is a simple tree.
+            [beliefs, ~] = testLPIModelToMRF2(mkFactorGraphFunctionHandle, 'LBP', ...
+                'maxIter', iterations(i));
 
-        % 'Block_MF' (blocks required), 'Exact', 'LBP', 'MeanField' (maxIter required), 'TRBP'
-        % 'Chain' assumes graph is chain.
-        % 'Tree' assumes graph is a simple tree.
-        [beliefs, ~] = testLPIModelToMRF2(mkFactorGraphFunctionHandle, 'LBP', ...
-            'maxIter', iterations(i));
-
-        lbpBeliefs = extendBeliefs(lbpBeliefs, beliefs);
+            lbpBeliefs = extendBeliefs(lbpBeliefs, beliefs);
+        end
     end
 
-    displayBeliefs(['bp ' sprintf('%6i', iterations)],       bpBeliefs);
-    displayBeliefs(['libdaiBP ' sprintf('%6i', iterations)], libdaiBPBeliefs);
-    displayBeliefs(['LBP ' sprintf('%6i', iterations)],      lbpBeliefs);
+    if doBPBeliefs == true
+        displayBeliefs(['bp ' sprintf('%6i', iterations)],       bpBeliefs);
+    end
+    if doLibdaiBPBeliefs == true
+        displayBeliefs(['libdaiBP ' sprintf('%6i', iterations)], libdaiBPBeliefs);
+    end
+    if doLBPBeliefs == true
+        displayBeliefs(['LBP ' sprintf('%6i', iterations)],      lbpBeliefs);
+    end
 end
 
 function [beliefs, logZ] = testLPIModelToMRF(mkFactorGraphFunctionHandle, infEngine, varargin)
