@@ -55,6 +55,7 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.equality.cardinality.direct.CardinalityRewriter;
+import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.LPIUtil;
@@ -112,7 +113,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 				if (IfThenElse.isIfThenElse(alpha)) {
 					Expression conditionCPrime = IfThenElse.getCondition(alpha);
 					// where C' is a formula depending on I 
-					if (CardinalityUtil.isFormula(conditionCPrime, process) 
+					if (FormulaUtil.isFormula(conditionCPrime, process) 
 						&&
 						dependsOnTheIndices(conditionCPrime, onI, process)
 						) {

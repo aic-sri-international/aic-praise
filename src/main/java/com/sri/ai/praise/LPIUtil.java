@@ -60,7 +60,6 @@ import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.SubExpressionSelection;
 import com.sri.ai.grinder.library.Substitute;
 import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.boole.And;
@@ -69,6 +68,7 @@ import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.Cardinality;
+import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -887,7 +887,7 @@ public class LPIUtil {
 	
 	/** Indicates whether an expression is a constraint as used in LPI. */
 	public static boolean isConstraint(Expression expression, RewritingProcess process) {
-		return CardinalityUtil.isFormula(expression, process);
+		return FormulaUtil.isFormula(expression, process);
 	}
 	
 	/**
@@ -1294,29 +1294,15 @@ public class LPIUtil {
 				Trace.log("    return value");
 			}
 			else {
-				Trace.log("for alpha in ((constants of C) union (variables of C \\ I))");				
+				Trace.log("for alpha in ((constants of C) union (variables of C \\ I))");
+				
+				// Want to prefer picking constants over variables
 				Set<Expression> constsAndFreeVars = new LinkedHashSet<Expression>();
-				
-				Iterator<Expression> subExpressionsIterator =  new SubExpressionsDepthFirstIterator(formulaC);
-				while (subExpressionsIterator.hasNext()) {
-					Expression expression = subExpressionsIterator.next();
-					if (Equality.isEquality(expression) || Disequality.isDisequality(expression)) {
-						for (Expression term : expression.getArguments()) {
-							if (process.isConstant(term)) {
-								constsAndFreeVars.add(term);
-							}
-						}
-					}
-				}
-				
-				constsAndFreeVars.addAll(SubExpressionSelection.get(formulaC, new Predicate<Expression>() {
-					@Override
-					public boolean apply(Expression arg) {
-						return process.isVariable(arg);
-					}
-				}));
-				
+				constsAndFreeVars.addAll(FormulaUtil.getConstants(formulaC, process));
+				constsAndFreeVars.addAll(Variables.get(formulaC, process));
+				// Remove the bound variables.
 				constsAndFreeVars.removeAll(ExtensionalSet.getElements(variablesI));
+				
 				for (Expression alpha : constsAndFreeVars) {
 					Expression xNotEqualAlpha = Disequality.make(variableX, alpha);
 					Trace.log("    if R_complete_simplify(X != alpha and C) is \"False\"");

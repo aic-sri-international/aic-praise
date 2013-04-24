@@ -56,6 +56,7 @@ import com.sri.ai.grinder.library.CommutativeAssociative;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.ScopedVariables;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
+import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
@@ -147,7 +148,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 				Expression extentendedConstrainingCondition      = constrainingCondition;
 				if (!subExpressionEConstrainingCondition.equals(Expressions.TRUE) 
 					&&
-					CardinalityUtil.isFormula(subExpressionEConstrainingCondition, process)) {
+					FormulaUtil.isFormula(subExpressionEConstrainingCondition, process)) {
 					extentendedConstrainingCondition = CardinalityUtil.makeAnd(constrainingCondition, subExpressionEConstrainingCondition);
 				}
 
