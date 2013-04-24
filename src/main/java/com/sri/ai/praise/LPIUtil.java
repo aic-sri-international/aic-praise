@@ -1297,12 +1297,18 @@ public class LPIUtil {
 				Trace.log("for alpha in ((constants of C) union (variables of C \\ I))");				
 				Set<Expression> constsAndFreeVars = new LinkedHashSet<Expression>();
 				
-				constsAndFreeVars.addAll(SubExpressionSelection.get(formulaC, new Predicate<Expression>() {
-					@Override
-					public boolean apply(Expression arg) {
-						return process.isConstant(arg);
+				Iterator<Expression> subExpressionsIterator =  new SubExpressionsDepthFirstIterator(formulaC);
+				while (subExpressionsIterator.hasNext()) {
+					Expression expression = subExpressionsIterator.next();
+					if (Equality.isEquality(expression) || Disequality.isDisequality(expression)) {
+						for (Expression term : expression.getArguments()) {
+							if (process.isConstant(term)) {
+								constsAndFreeVars.add(term);
+							}
+						}
 					}
-				}));
+				}
+				
 				constsAndFreeVars.addAll(SubExpressionSelection.get(formulaC, new Predicate<Expression>() {
 					@Override
 					public boolean apply(Expression arg) {
