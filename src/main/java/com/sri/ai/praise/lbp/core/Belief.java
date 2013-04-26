@@ -484,11 +484,16 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					Expression value = useValuesForPreviousMessages(expansion, msgValues, previousMessageToMsgValueCache, subProcess);
 					Trace.log("    // value={}", value);
 					
-					if (LPIUtil.containsPreviousMessageExpressions(value)) {
-						throw new IllegalStateException("new msg_value contains previous message to . from . :"+value);
-					}
-					if (LPIUtil.containsProductExpressions(value)) {
-						throw new IllegalStateException("new msg_value contains product(...):"+value);
+					if (LPIUtil.containsPreviousMessageExpressions(value) || LPIUtil.containsProductExpressions(value)) {	
+						// Output some useful information before throwing the exception
+						System.err.println("IllegalStateException: invalid message value.");
+						System.err.println("expansion ="+expansion);
+						System.err.println("value     ="+value);
+						System.err.println("msg_values=");
+						for (Expression m : msgValues) {
+							System.err.println(""+m);
+						}
+						throw new IllegalStateException("new msg_value contains previous message to . from . or product(...):"+value);
 					}
 					
 					// Normalize and manage precision
