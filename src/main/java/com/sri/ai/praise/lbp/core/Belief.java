@@ -285,7 +285,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			beliefValue = useValuesForPreviousMessages(beliefExpansion, msgValues, previousMessageToMsgValueCache, process);
 			notifyCollector(randomVariable, beliefValue, 1, process);
 			Justification.log("Initial belief value {}", beliefValue);
-			while (notFinal(beliefValue, priorBeliefValue, msgValues, priorMsgValues, iteration)) {
+			while (notFinal(beliefValue, priorBeliefValue, msgValues, priorMsgValues, iteration)) {				
 				priorBeliefValue = beliefValue;
 				priorMsgValues   = msgValues;
 				Justification.beginEqualityStep("iteration");
@@ -709,6 +709,19 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// v <- pick_single_element(pickFrom)
 		Trace.log("v <- pick_single_element({})", pickFrom); 
 		Expression v = LPIUtil.pickSingleElement(pickFrom, process);
+		if (v == null) {
+			// Output some useful information before throwing the exception
+			System.err.println("IllegalStateException: failed to pick single element.");
+			System.err.println("prev_msg    ="+prevMessage);
+			System.err.println("msg_value   ="+msgValue);
+			System.err.println("intersection="+intersection);
+			System.err.println("pickFrom    ="+pickFrom);
+			System.err.println("msg_values  =");
+			for (Expression m : msgValues) {
+				System.err.println(""+m);
+			}
+			throw new IllegalStateException("Failed to pick single element:"+pickFrom);
+		}
 		Trace.out("-findMsgValueMatchingPreviousMessage={}", v);
 		// return v
 		result = v;
