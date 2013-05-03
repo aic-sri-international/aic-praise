@@ -56,6 +56,7 @@ import com.sri.ai.grinder.helper.concurrent.BranchRewriteTask;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.StandardizedApartFrom;
+import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -359,7 +360,20 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			//  unique elements, we can simply convert them to uni-sets before doing the
 			//  set difference."
 			Justification.begin("Going to subtract message instantiations that were already expanded");
-			Expression msgsAlreadyExpanded = createUnionFromArgs(msgsAlreadyExpandedUnionArgs);
+			
+			// Note: Minor Optimization, up front limit msgs_already_expanded to only those 
+			// that can possibly intersect.
+			List<Expression> possibleIntersectionUnionArgs = new ArrayList<Expression>();
+			Expression alpha = IntensionalSet.getHead(msgSet);
+			for (Expression maeua : msgsAlreadyExpandedUnionArgs) {				
+				Expression alphaPrime = IntensionalSet.getHead(maeua); 
+				// Perform a cheap disequality first
+				if (!CheapDisequalityModule.isACheapDisequality(alpha, alphaPrime, process)) {
+					possibleIntersectionUnionArgs.add(maeua);
+				}
+			}
+			Expression msgsAlreadyExpanded = createUnionFromArgs(possibleIntersectionUnionArgs);
+			
 			Trace.log("    msg_set <- R_set_diff(msg_set minus msgs_already_expanded)");
 			Expression uniMsgSet = convertIntensionalMultiSetToUniSet(msgSet);
 			msgSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(uniMsgSet, msgsAlreadyExpanded));
