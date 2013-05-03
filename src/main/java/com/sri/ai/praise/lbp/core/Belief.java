@@ -609,7 +609,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// msg_value    <- null
 		Expression intersection = null;
 		Expression msgValue     = null;
-		CachedMsgValueIntersection cachedMsgValueIntersection = null;
+		CachedMsgValueIntersection cachedMsgValueIntersection    = null;
+		boolean                    newCachedMsgValueIntersection = true;
 		Integer cachedIndex = previousMessageToMsgValueCache.getCachedMessageValueIndex(process, prevMessage);
 		// if previous_message msg_value_index cached
 		if (cachedIndex != null) {
@@ -624,6 +625,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			cachedMsgValueIntersection = previousMessageToMsgValueCache.getCachedMsgValueIntersection(process, prevMessage);
 			// if Intersection cached for previous_message
 			if (cachedMsgValueIntersection != null) {
+				newCachedMsgValueIntersection = false;
 				// Intersection <- cache
 				intersection = cachedMsgValueIntersection.intersection;
 				Trace.log("Cached intersection for {}: {}", prevMessage, intersection);
@@ -690,6 +692,20 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		if (!cachedScopingExpressionFromMsgValue.equals(currentScopingExpressionFromMsgValue)
 			||
 			!cachedMsgValueIntersection.conditionFromMsgValue.equals(IntensionalSet.getCondition(msgValue))) {
+			// Output some useful information before throwing the exception
+			System.err.println("IllegalStateException: cache and message value mismatch.");
+			System.err.println("prev_msg      ="+prevMessage);
+			System.err.println("intersection  ="+intersection);
+			System.err.println("cachedIndex   ="+cachedIndex);
+			if (cachedIndex != null) {
+				System.err.println("new cached    ="+newCachedMsgValueIntersection);
+				System.err.println("msg_value(idx)="+msgValues.get(cachedIndex));
+			}
+			System.err.println("msg_value     ="+msgValue);
+			System.err.println("msg_values    =");
+			for (Expression m : msgValues) {
+				System.err.println(""+m);
+			}
 			throw new IllegalStateException("Cached msgValue scoping expression ["
 						+cachedMsgValueIntersection.scopingExpressionFromMsgValue
 						+"] or cached condition [" 
