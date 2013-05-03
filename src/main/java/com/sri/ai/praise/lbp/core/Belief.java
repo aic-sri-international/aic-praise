@@ -694,6 +694,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			!cachedMsgValueIntersection.conditionFromMsgValue.equals(IntensionalSet.getCondition(msgValue))) {
 			// Output some useful information before throwing the exception
 			System.err.println("IllegalStateException: cache and message value mismatch.");
+			System.err.println("context       ="+process.getContextualConstraint());
+			System.err.println("context vars  ="+process.getContextualVariables());
 			System.err.println("prev_msg      ="+prevMessage);
 			System.err.println("intersection  ="+intersection);
 			System.err.println("cachedIndex   ="+cachedIndex);
@@ -728,6 +730,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		if (v == null) {
 			// Output some useful information before throwing the exception
 			System.err.println("IllegalStateException: failed to pick single element.");
+			System.err.println("context     ="+process.getContextualConstraint());
+			System.err.println("context vars="+process.getContextualVariables());
 			System.err.println("prev_msg    ="+prevMessage);
 			System.err.println("msg_value   ="+msgValue);
 			System.err.println("intersection="+intersection);
