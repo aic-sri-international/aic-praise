@@ -39,10 +39,13 @@ package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
@@ -56,6 +59,8 @@ import com.sri.ai.grinder.helper.concurrent.BranchRewriteTask;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.StandardizedApartFrom;
+import com.sri.ai.grinder.library.SubExpressionSelection;
+import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -286,7 +291,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			beliefValue = useValuesForPreviousMessages(beliefExpansion, msgValues, previousMessageToMsgValueCache, process);
 			notifyCollector(randomVariable, beliefValue, 1, process);
 			Justification.log("Initial belief value {}", beliefValue);
-			while (notFinal(beliefValue, priorBeliefValue, msgValues, priorMsgValues, iteration)) {				
+			while (notFinal(beliefValue, priorBeliefValue, msgValues, priorMsgValues, iteration)) {
 				priorBeliefValue = beliefValue;
 				priorMsgValues   = msgValues;
 				Justification.beginEqualityStep("iteration");
@@ -434,6 +439,18 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Expression msgExpansion = IntensionalSet.makeMultiSet(expressionI, 
 						Tuple.make(Arrays.asList(destination, origin, expansion)), 
 						conditionC);
+				
+				if (isAnswerDependentOnLogicalVariableMessageIsNot(msgExpansion, process)) {
+					System.err.println("IllegalStateException: msg_expansion has answer dependent on logical variable that value is not.");
+					System.err.println("msg_expansion ="+msgExpansion);
+					System.err.println("msg_set       ="+msgSet);
+					System.err.println("msg_expansions=");
+					for (Expression me : msgExpansions) {
+						System.err.println(me);
+					}
+					throw new IllegalStateException("IllegalStateException: msg_expansion has answer dependent on logical variable that value is not: "+msgExpansion);
+				}
+				
 				Trace.log("        msg_expansions <- msg_expansions union msg_expansion");
 				msgExpansions.add(msgExpansion);
 				
@@ -501,9 +518,12 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					if (LPIUtil.containsPreviousMessageExpressions(value) || LPIUtil.containsProductExpressions(value)) {	
 						// Output some useful information before throwing the exception
 						System.err.println("IllegalStateException: invalid message value.");
-						System.err.println("expansion ="+expansion);
-						System.err.println("value     ="+value);
-						System.err.println("msg_values=");
+						System.err.println("context       ="+process.getContextualConstraint());
+						System.err.println("context vars  ="+process.getContextualVariables());
+						System.err.println("union arg     ="+unionArgument);
+						System.err.println("expansion     ="+expansion);
+						System.err.println("value         ="+value);
+						System.err.println("msg_values    =");
 						for (Expression m : msgValues) {
 							System.err.println(""+m);
 						}
@@ -532,6 +552,27 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 														IntensionalSet.getIndexExpressions(unionArgument), 
 														tupleTriple, 
 														IntensionalSet.getCondition(unionArgument));
+					
+					if (isAnswerDependentOnLogicalVariableMessageIsNot(newMsgValue, process)) {
+						System.err.println("IllegalStateException: new_msg_value has answer dependent on logical variable that value is not.");
+						System.err.println("context       ="+process.getContextualConstraint());
+						System.err.println("context vars  ="+process.getContextualVariables());
+						System.err.println("union arg     ="+unionArgument);
+						System.err.println("msgValue      ="+msgExpansionTuple);
+						System.err.println("expansion     ="+expansion);
+						System.err.println("value         ="+value);
+						System.err.println("new_msg_value ="+newMsgValue);
+						System.err.println("msg_expansions=");
+						for (Expression me : msgExpansions) {
+							System.err.println(me);
+						}
+						System.err.println("msg_values    =");
+						for (Expression mv : msgValues) {
+							System.err.println(mv);
+						}
+						throw new IllegalStateException("IllegalStateException: new_msg_value has answer dependent on logical variable that value is not: "+newMsgValue);
+					}
+					
 					return newMsgValue;
 				}
 			};
@@ -994,6 +1035,51 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					}
 				}, 
 				process);
+		
+		return result;
+	}
+	
+	private boolean isAnswerDependentOnLogicalVariableMessageIsNot(Expression msgExpansionOrValue, final RewritingProcess process) {
+		boolean result = false;
+		
+		Expression head = IntensionalSet.getHead(msgExpansionOrValue);	
+		Set<Expression> destinationVariables = Variables.get(Tuple.get(head, 0), process);
+		Set<Expression> originVariables      = Variables.get(Tuple.get(head, 1), process);
+		Set<Expression> destOriginSet        = new HashSet<Expression>();
+		destOriginSet.addAll(destinationVariables);
+		destOriginSet.addAll(originVariables);
+		destOriginSet.retainAll(IntensionalSet.getIndices(msgExpansionOrValue));
+		
+		Set<Expression> rvValueVariables     = new HashSet<Expression>();
+		Set<Expression> rvValues             = SubExpressionSelection.get(Tuple.get(head, 2), new Predicate<Expression>() {
+			@Override
+			public boolean apply(Expression arg) {
+				boolean result = LPIUtil.isRandomVariableValueExpression(arg, process);
+				return result;
+			}
+		});
+		for (Expression rvv : rvValues) {
+			rvValueVariables.addAll(Variables.get(rvv, process));
+		}
+		// Only keep random variable value logical variables that are not internally
+		// scoped (e.g. in a product message from an expansion).
+		rvValueVariables.retainAll(Variables.freeVariables(Tuple.get(head, 2), process));
+		
+		Set<Expression> testSet = new HashSet<Expression>();
+		testSet.addAll(Variables.freeVariables(Tuple.get(head, 2), process));
+		testSet.retainAll(IntensionalSet.getIndices(msgExpansionOrValue));
+		testSet.removeAll(destOriginSet);
+		testSet.removeAll(rvValueVariables);
+				
+		if (testSet.size() > 0) {
+			System.err.println("expansion or value  ="+msgExpansionOrValue);
+			System.err.println("tesSet              ="+testSet);
+			System.err.println("destOriginSet       ="+destOriginSet);
+			System.err.println("destinationVariables="+destinationVariables);
+			System.err.println("originVariables     ="+originVariables);
+			System.err.println("rvValueVariables    ="+rvValueVariables);
+			result = true;
+		}
 		
 		return result;
 	}

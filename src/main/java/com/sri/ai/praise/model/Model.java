@@ -159,6 +159,7 @@ public class Model {
 	public static final String GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES = "known random variable names";
 	public static final String GLOBAL_KEY_MODEL = "model";
 	public static final String GLOBAL_KEY_MODEL_PARFACTORS = "model parfactors";
+	public static final String GLOBAL_KEY_MODEL_SORT_NAMES = "model sort names";
 	public static final String GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG = "model random predicate catalog";
 	public static final String GLOBAL_KEY_MODEL_CARDINALITY_OF_TYPES_ALWAYS_GREATER_THAN_ZERO = "model cardinality of types always greater than zero";
 
@@ -522,8 +523,14 @@ public class Model {
 			knownVarNames.addAll(model.getKnownRandomVariableNames());
 		}
 		
-		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES,
-				knownVarNames);
+		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES, knownVarNames);
+		
+		// Setup the sort names for easy access
+		List<Expression> sortNames = new ArrayList<Expression>();
+		for (SortDeclaration sd : model.getSortDeclarations()) {
+			sortNames.add(sd.getName());
+		}
+		process.putGlobalObject(GLOBAL_KEY_MODEL_SORT_NAMES, sortNames);
 	}
 
 	/**
@@ -594,6 +601,34 @@ public class Model {
 		parfactors.addAll((List<Expression>) modelParfactors);
 
 		return parfactors;
+	}
+	
+	/**
+	 * Get the sort names from from the model.
+	 * 
+	 * @param process
+	 *            the process in which the rewriting is occurring.
+	 * @return the sort names in the model.
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Expression> getSortNames(RewritingProcess process) {
+		List<Expression> sortNames = new ArrayList<Expression>();
+		
+		Object modelSortNames = process.getGlobalObject(GLOBAL_KEY_MODEL_SORT_NAMES);
+		if (modelSortNames == null) {
+			// This to be backward compatible with code that creates
+			// the model and assigns it to a map of global objects
+			// before it creates the process.
+			// These calls will ensure everything gets setup
+			// as expected from this point onwards.
+			Expression modelExpression = getModelDefinition(process);
+			setRewritingProcessesModel(modelExpression, process);
+			modelSortNames = process.getGlobalObject(GLOBAL_KEY_MODEL_SORT_NAMES);
+		}
+
+		sortNames.addAll((List<Expression>) modelSortNames);
+		
+		return sortNames;
 	}
 
 	/**
