@@ -371,32 +371,22 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			
 			// Note: Minor Optimization, up front limit msgs_already_expanded to only those 
 			// that can possibly intersect.
-			List<Expression> possibleIntersectionMsgsAlreadyExpandedUnionArgs = new ArrayList<Expression>();
+			List<Expression> possibleIntersectionUnionArgs = new ArrayList<Expression>();
 			Expression alpha = IntensionalSet.getHead(msgSet);
 			for (Expression maeua : msgsAlreadyExpandedUnionArgs) {				
 				Expression alphaPrime = IntensionalSet.getHead(maeua); 
 				// Perform a cheap disequality first
 				if (!CheapDisequalityModule.isACheapDisequality(alpha, alphaPrime, process)) {
-					possibleIntersectionMsgsAlreadyExpandedUnionArgs.add(maeua);
+					possibleIntersectionUnionArgs.add(maeua);
 				}
 			}
+			Expression msgsAlreadyExpanded = createUnionFromArgs(possibleIntersectionUnionArgs);
 			
 			Trace.log("    msg_set <- R_set_diff(msg_set minus msgs_already_expanded)");
-			msgSet = convertIntensionalMultiSetToUniSet(msgSet);
-			// Note: Minor Optimization.
-			// We will do an R_set_diff on each union arg at a time so that
-			// we can complete simplify the result on each as this may allow
-			// us to detect an empty set much earlier as well as usually simplifying
-			// the expressions on consecutive diff calls on the remaining union args.
-			for (Expression msgAlreadyExpanded : possibleIntersectionMsgsAlreadyExpandedUnionArgs) {
-				msgSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(msgSet, msgAlreadyExpanded));
-				Trace.log("    msg_set <- R_complete_simplify(msg_set)");
-				msgSet = process.rewrite(R_complete_simplify, msgSet);
-				if (Sets.isEmptySet(msgSet)) {
-					break;
-				}
-			}
-
+			Expression uniMsgSet = convertIntensionalMultiSetToUniSet(msgSet);
+			msgSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(uniMsgSet, msgsAlreadyExpanded));
+			Trace.log("    msg_set <- R_complete_simplify(msg_set)");
+			msgSet = process.rewrite(R_complete_simplify, msgSet);
 			Justification.end("Remaining, non-expanded messages are {}", msgSet);
 			Trace.log("    // msg_set = {}", msgSet);
 			
