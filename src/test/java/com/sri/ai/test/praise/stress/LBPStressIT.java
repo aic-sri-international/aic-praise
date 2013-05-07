@@ -71,20 +71,18 @@ public class LBPStressIT extends AbstractLPITest {
 		TestData[] tests = new TestData[] {
 				//
 				// Basic:
-				// 
-// TODO - fix, throwing assertion exception in iteration logic.				
+				// 		
 				// #1
 				// Note: if caches can grow unbounded then run with: -Xms2G -Xmx16G
 		        // Note: Slow to process, takes approx 6.3 minutes (as of April 2013, had been 2 hours 5 min before Oct 2012).
-//				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-//					new com.sri.ai.praise.model.example.TrivialLoopyMisconceptionExample(),
-//					"belief([m(X)])",
-//					false,
-//					// TODO - is this correct (10 iterations)?
-//					"if m(X) then 0.432395068 else 0.567604932"),
+				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+					new com.sri.ai.praise.model.example.TrivialLoopyMisconceptionExample(),
+					"belief([m(X)])",
+					false,
+					// TODO - is this correct (10 iterations)?
+					"if m(X) then 0.00646884468 else 0.993531155"),
 
-//				// #2
-//                // TODO - appears not to stop processing
+				// #2
 				new LoopyBeliefTestData(Expressions.TRUE.toString(),
 					new com.sri.ai.praise.model.example.TrivialLoopyPQandb(), 
 					"belief([p(X)])", 

@@ -70,6 +70,7 @@ import com.sri.ai.praise.model.example.TrivialEpidemicSickEveryoneNotbobAmaryAjo
 import com.sri.ai.praise.model.example.TrivialEpidemicSickbob;
 import com.sri.ai.praise.model.example.TrivialGaveTreasureToOwnsRich;
 import com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample;
+import com.sri.ai.praise.model.example.TrivialLoopyMisconceptionExample;
 import com.sri.ai.praise.model.example.TrivialLoopyPQ;
 import com.sri.ai.praise.model.example.TrivialLoopyPQWithPriors;
 import com.sri.ai.praise.model.example.TrivialLoopyPQandb;
@@ -1278,6 +1279,14 @@ public class LBPTest extends AbstractLPITest {
 // TODO - can we do better than this with the new R_simplify logic?
 // Doing better now, but conversion from { (on ) alpha | C } to if C then { alpha } else {} breaking BP tests at the moment, so it's disabled 						
 						"{ (on ) a | true } union { (on ) c | true }"),
+				//
+				// Fix for failing test: use to remove the A index making it free
+				//
+				new SetDifferenceTestData(Expressions.TRUE.toString(), new TrivialLoopyMisconceptionExample(),
+						"{ ( on A, A', B ) ( ([ m(A) ]), ([ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else (if m(B) then 5 else 30) else 1 ]) ) | A != X and A' != B and (A = A' or A = B) and (A' != A or B != X) }",
+						"{ ( on B, A, B' ) ( ([ m(B) ]), ([ if gA(A) and gB(B') then if m(A) then if m(B') then 10 else 1 else (if m(B') then 5 else 30) else 1 ]) ) | X != B and A != B' and (B = A or B = B') and (A != X or B' != B) }",
+						false,
+						"{ ( on A) ( ([ m(A) ]), ([ if gA(X) and gB(A) then if m(X) then if m(A) then 10 else 1 else (if m(A) then 5 else 30) else 1 ]) ) | X != A }"),
 				//
 				// Basic: Illegal Argument Exceptions
 				//
