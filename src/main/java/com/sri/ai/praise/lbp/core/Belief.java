@@ -426,7 +426,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				
 				Justification.begin("Going to simplify {}", expansion);
 				Trace.log("        expansion <- R_complete_simplify(expansion)");
-				expansion = process.rewrite(R_complete_simplify, expansion);
+				// Note: use cSubProcess for R_complete_simplify call as this is the context
+				// under which the expansion was generated and we want to remove any
+				// invalid branches based on this.
+				expansion = cSubProcess.rewrite(R_complete_simplify, expansion);
 				Trace.log("        // expansion = {}", expansion);
 				Justification.end("Obtained simplified message expansion {}", expansion);
 				Justification.end("Obtained message expansion {}", expansion);
