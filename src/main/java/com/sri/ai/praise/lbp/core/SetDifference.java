@@ -736,8 +736,20 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			
 			Trace.log("    C''<- R_formula_simplification(C and for all I' : C' => Alpha != Alpha') with cont. variables extended by I");
 			Justification.beginEqualityStep("simplifying set condition");
-			RewritingProcess processI    = GrinderUtil.extendContextualVariables(i, process);
-			Expression       cPrimePrime = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
+			
+			// Note: As an optimization, instead of simplifying the overall conjunct as described in the
+			// pseudo-code in a single shot, i.e:
+			//    RewritingProcess processI = GrinderUtil.extendContextualVariables(i, process);
+			//    Expression    cPrimePrime = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
+			// We will break it apart so that the more expensive quantified formula is resolved first.
+			// However, we do this simplification under the assumption 'c' is true (this is the same
+			// theory/logic used in ConjunctsHoldTrueForEachOther). A more constrained context can
+			// help improve overall performance.
+			RewritingProcess processI = GrinderUtil.extendContextualVariablesAndConstraint(i, c, process);
+			forAllIPrime              = processI.rewrite(R_simplify, forAllIPrime);
+			cAndForAllPrimeI          = CardinalityUtil.makeAnd(c, forAllIPrime);
+			processI                  = GrinderUtil.extendContextualVariables(i, process);
+			Expression cPrimePrime    = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
 			
 			result = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cPrimePrime);
 			Justification.endEqualityStep(result);
