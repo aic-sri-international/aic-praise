@@ -475,8 +475,6 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Expression alreadyExpanded = IntensionalSet.makeUniSet(expressionI, 
 						                     	Tuple.make(Arrays.asList(destination, origin)),
 						                        conditionC);
-				// This should simplify it to help with processing during R_set_diff calls later.
-				alreadyExpanded = process.rewrite(R_simplify, alreadyExpanded);
 				
 				msgsAlreadyExpandedUnionArgs.add(alreadyExpanded);
 				Trace.log("        // msgs_already_expanded = {}", Expressions.apply(FunctorConstants.UNION, msgsAlreadyExpandedUnionArgs));
