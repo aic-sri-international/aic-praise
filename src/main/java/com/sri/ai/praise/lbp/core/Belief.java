@@ -541,6 +541,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						System.err.println("union arg     ="+unionArgument);
 						System.err.println("expansion     ="+expansion);
 						System.err.println("value         ="+value);
+						System.err.println("msg_expansions=");
+						for (Expression me : msgExpansions) {
+							System.err.println(me);
+						}
 						System.err.println("msg_values    =");
 						for (Expression m : msgValues) {
 							System.err.println(""+m);
