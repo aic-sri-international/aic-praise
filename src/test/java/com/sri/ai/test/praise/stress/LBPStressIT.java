@@ -79,6 +79,17 @@ public class LBPStressIT extends AbstractLPITest {
 						"TODO")});
 	}
 	
+	@Ignore
+	@Test
+	public void testStressTest4DefectIteration2() {
+		perform(new TestData[] {
+				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+						new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
+						"belief([r(w7, X)])",
+						false,
+						"TODO")});
+	}
+	
 	private class LoopyBeliefTestData extends TestData {
 		private String belief; 
 		private Expression exprBelief;
