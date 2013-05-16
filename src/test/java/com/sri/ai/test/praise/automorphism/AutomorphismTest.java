@@ -45,8 +45,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.core.ExhaustiveRewriter;
-import com.sri.ai.grinder.core.RewriteOnce;
+import com.sri.ai.grinder.core.TotalRewriter;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.extensional.EqualityOfExtensionalUniSets;
 import com.sri.ai.grinder.library.set.intensional.EqualityOfIntensionalUniSets;
@@ -168,12 +167,14 @@ public class AutomorphismTest extends AbstractLPITest {
 			
 			// get rid of equalities of intensional sets first
 			Rewriter exhaustiveEqualityOfIntensionalUniSets =
-					new ExhaustiveRewriter(new RewriteOnce(Util.<Rewriter>list(new EqualityOfIntensionalUniSets())));
+					new TotalRewriter(AutomorphismTest.class.getName()+" exhaustiveEqualityOfIntensionalUniSets RewriteOnce", 
+										Util.<Rewriter>list(new EqualityOfIntensionalUniSets()));
 			exprE = exhaustiveEqualityOfIntensionalUniSets.rewrite(exprE, process);
 
 			// get rid of equalities of extensional sets
 			Rewriter exhaustiveEqualityOfExtensionalUniSets =
-					new ExhaustiveRewriter(new RewriteOnce(Util.<Rewriter>list(new EqualityOfExtensionalUniSets())));
+					new TotalRewriter(AutomorphismTest.class.getName()+" exhaustiveEqualityOfExtensionalUniSets RewriteOnce", 
+										Util.<Rewriter>list(new EqualityOfExtensionalUniSets()));
 			exprE = exhaustiveEqualityOfExtensionalUniSets.rewrite(exprE, process);
 			
 			// a more thorough simplification 
