@@ -514,20 +514,20 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Trace.log("for each union argument {{ (on I) (Destination, Origin, Expansion) | C }} in msg_expansions");
 		BranchRewriteTask[] iterateValueTasks = new BranchRewriteTask[msgExpansions.size()];
 		for (int i = 0; i < msgExpansions.size(); i++) {
-			Expression unionArgument = msgExpansions.get(i);
+			Expression msgExpansion = msgExpansions.get(i);
 			
 			RewriteOnBranch iterateValueTask = new RewriteOnBranch() {
 				@Override
 				public Expression rewrite(Expression[] expressions, RewritingProcess process) {
-					Expression unionArgument     = expressions[0];
-					Expression msgExpansionTuple = IntensionalSet.getHead(unionArgument);
+					Expression msgExpansion      = expressions[0];
+					Expression msgExpansionTuple = IntensionalSet.getHead(msgExpansion);
 					Expression destination       = Tuple.get(msgExpansionTuple, 0);
 					Expression origin            = Tuple.get(msgExpansionTuple, 1);
 					Expression expansion         = Tuple.get(msgExpansionTuple, 2);
-					Trace.log("    // msgValue={}", msgExpansionTuple);
-					Trace.log("    // expansion={}", expansion);
+					Trace.log("    // msgExpansion={}", msgExpansion);
+					Trace.log("    // expansion   ={}", expansion);
 					
-					RewritingProcess subProcess = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(unionArgument, process);
+					RewritingProcess subProcess = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(msgExpansion, process);
 					
 					Trace.log("    value <- use_values_for_previous_msgs(Expansion, msg_values) under contextual constraint expanded by C");
 					Expression value = useValuesForPreviousMessages(expansion, msgValues, previousMessageToMsgValueCache, subProcess);
@@ -536,16 +536,16 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					if (LPIUtil.containsPreviousMessageExpressions(value) || LPIUtil.containsProductExpressions(value)) {	
 						// Output some useful information before throwing the exception
 						System.err.println("IllegalStateException: invalid message value.");
-						System.err.println("context       ="+process.getContextualConstraint());
-						System.err.println("context vars  ="+process.getContextualVariables());
-						System.err.println("union arg     ="+unionArgument);
-						System.err.println("expansion     ="+expansion);
-						System.err.println("value         ="+value);
-						System.err.println("msg_expansions=");
+						System.err.println("sub.context      ="+subProcess.getContextualConstraint());
+						System.err.println("sub.context vars ="+subProcess.getContextualVariables());
+						System.err.println("msg_expansion    ="+msgExpansion);
+						System.err.println("expansion        ="+expansion);
+						System.err.println("value            ="+value);
+						System.err.println("msg_expansions   =");
 						for (Expression me : msgExpansions) {
 							System.err.println(me);
 						}
-						System.err.println("msg_values    =");
+						System.err.println("msg_values       =");
 						for (Expression m : msgValues) {
 							System.err.println(""+m);
 						}
@@ -571,24 +571,23 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					Expression tupleTriple       = Tuple.make(Arrays.asList(destination, origin, normalizedValue));
 					Expression newMsgValue = IntensionalSet
 												.makeMultiSetFromIndexExpressionsList(
-														IntensionalSet.getIndexExpressions(unionArgument), 
+														IntensionalSet.getIndexExpressions(msgExpansion), 
 														tupleTriple, 
-														IntensionalSet.getCondition(unionArgument));
+														IntensionalSet.getCondition(msgExpansion));
 					
 					if (isFreeVariablesIntroduced(newMsgValue, freeVariablesFromBeliefQuery, process)) {
 						System.err.println("IllegalStateException: introduced additional free variables into new_msg_value.");
-						System.err.println("context       ="+process.getContextualConstraint());
-						System.err.println("context vars  ="+process.getContextualVariables());
-						System.err.println("union arg     ="+unionArgument);
-						System.err.println("msgValue      ="+msgExpansionTuple);
-						System.err.println("expansion     ="+expansion);
-						System.err.println("value         ="+value);
-						System.err.println("new_msg_value ="+newMsgValue);
-						System.err.println("msg_expansions=");
+						System.err.println("sub.context      ="+subProcess.getContextualConstraint());
+						System.err.println("sub.context vars ="+subProcess.getContextualVariables());
+						System.err.println("msg_expansion    ="+msgExpansion);
+						System.err.println("expansion        ="+expansion);
+						System.err.println("value            ="+value);
+						System.err.println("new_msg_value    ="+newMsgValue);
+						System.err.println("msg_expansions   =");
 						for (Expression me : msgExpansions) {
 							System.err.println(me);
 						}
-						System.err.println("msg_values    =");
+						System.err.println("msg_values       =");
 						for (Expression mv : msgValues) {
 							System.err.println(mv);
 						}
@@ -597,18 +596,17 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					
 					if (isAnswerDependentOnLogicalVariableMessageIsNot(newMsgValue, process)) {
 						System.err.println("IllegalStateException: new_msg_value has answer dependent on logical variable that value is not.");
-						System.err.println("context       ="+process.getContextualConstraint());
-						System.err.println("context vars  ="+process.getContextualVariables());
-						System.err.println("union arg     ="+unionArgument);
-						System.err.println("msgValue      ="+msgExpansionTuple);
-						System.err.println("expansion     ="+expansion);
-						System.err.println("value         ="+value);
-						System.err.println("new_msg_value ="+newMsgValue);
-						System.err.println("msg_expansions=");
+						System.err.println("sub.context      ="+subProcess.getContextualConstraint());
+						System.err.println("sub.context vars ="+subProcess.getContextualVariables());
+						System.err.println("msg_expansion    ="+msgExpansion);
+						System.err.println("expansion        ="+expansion);
+						System.err.println("value            ="+value);
+						System.err.println("new_msg_value    ="+newMsgValue);
+						System.err.println("msg_expansions   =");
 						for (Expression me : msgExpansions) {
 							System.err.println(me);
 						}
-						System.err.println("msg_values    =");
+						System.err.println("msg_values       =");
 						for (Expression mv : msgValues) {
 							System.err.println(mv);
 						}
@@ -619,7 +617,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				}
 			};
 			
-			iterateValueTasks[i] = new BranchRewriteTask(iterateValueTask, new Expression[] {unionArgument});
+			iterateValueTasks[i] = new BranchRewriteTask(iterateValueTask, new Expression[] {msgExpansion});
 		}
 		
 		List<Expression> taskResults = GrinderUtil.branchAndMergeTasks(iterateValueTasks, process);
