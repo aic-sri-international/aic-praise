@@ -66,7 +66,7 @@ public class RandomPredicateCatalog extends HashMap<Expression, RandomPredicate>
 	
 	/**
 	 * Determines the set of predicates in the model associated with the process.
-	 * which must be a union of intensional sets of factors represented as bracketed expressions.
+	 * This must be a union of intensional sets of factors represented as bracketed expressions.
 	 */
 	public static RandomPredicateCatalog getFromBracketedModel(RewritingProcess process) {
 		RandomPredicateCatalog result = Model.getRandomPredicateCatalog(process);

@@ -53,8 +53,8 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
+import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
@@ -62,16 +62,16 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
-import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.ModelGrounding;
+import com.sri.ai.praise.model.ModelGrounding.GroundedModelResult;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
-import com.sri.ai.praise.model.ModelGrounding.GroundedModelResult;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 import com.sri.ai.util.math.MixedRadixNumber;
@@ -569,7 +569,7 @@ public class ExportToPMTK3FactorGraph {
 		return result;
 	}
 	
-	private static class CollectRandomVariableValueExpressions implements ReplacementFunctionWithContextuallyUpdatedProcess { 
+	private static class CollectRandomVariableValueExpressions extends AbstractReplacementFunctionWithContextuallyUpdatedProcess { 
 		private Model            groundedModel                  = null;
 		private List<Expression> randomVariableValueExpressions = null;
 		
@@ -581,11 +581,6 @@ public class ExportToPMTK3FactorGraph {
 		
 		//
 		// START-ReplacementFunctionWithContextuallyUpdatedProcess
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
-		}
-		
 		@Override
 		public Expression apply(Expression expressionE, RewritingProcess process) {
 			
@@ -602,7 +597,7 @@ public class ExportToPMTK3FactorGraph {
 		//
 	}
 	
-	private static class ValueReplacementFunction implements ReplacementFunctionWithContextuallyUpdatedProcess {
+	private static class ValueReplacementFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		private Model            groundedModel                  = null;
 		private List<Expression> randomVariableValueExpressions = null;
 		private List<Expression> rangeValues                    = null;
@@ -615,11 +610,6 @@ public class ExportToPMTK3FactorGraph {
 		
 		//
 		// START-ReplacementFunctionWithContextuallyUpdatedProcess
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
-		}
-		
 		@Override
 		public Expression apply(Expression expressionE, RewritingProcess process) {
 			Expression result = expressionE;

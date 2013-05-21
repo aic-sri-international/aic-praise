@@ -389,9 +389,7 @@ public class Model {
 	 */
 	public void setRewritingProcessesModel(RewritingProcess process) {
 		assertDefined();
-
-		setRewritingProcessesModel(modelDefinition, knownRandomVariableNames,
-				process);
+		setRewritingProcessesModel(modelDefinition, knownRandomVariableNames, process);
 	}
 
 	//
@@ -455,15 +453,14 @@ public class Model {
 	 * @return the set of known random variable names associated with the
 	 *         rewriting process's model.
 	 */
-	public static Set<String> getKnownRandomVariableNames(
-			RewritingProcess process) {
+	public static Set<String> getKnownRandomVariableNames(RewritingProcess process) {
 		@SuppressWarnings("unchecked")
-		Set<String> krvns = (Set<String>) process
+		Set<String> knownRandomVariableNames = (Set<String>) process
 				.getGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES);
-		if (null == krvns) {
-			krvns = Collections.emptySet();
+		if (null == knownRandomVariableNames) {
+			knownRandomVariableNames = Collections.emptySet();
 		}
-		return krvns;
+		return knownRandomVariableNames;
 	}
 
 	/**

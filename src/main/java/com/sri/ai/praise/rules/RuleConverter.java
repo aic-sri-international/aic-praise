@@ -48,8 +48,8 @@ import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
+import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
@@ -1414,7 +1414,7 @@ public class RuleConverter {
 	 * @author etsai
 	 *
 	 */
-	private class ReplaceFunctionFunction implements ReplacementFunctionWithContextuallyUpdatedProcess {
+	private class ReplaceFunctionFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		public Map<String, Set<Integer>> randomVariableIndex;
 		public Map<String, Set<Integer>> functionsFound;
 		public Expression                currentExpression;
@@ -1426,11 +1426,6 @@ public class RuleConverter {
 			this.currentExpression = currentExpression;
 			this.randomVariableIndex = randomVariableIndex;
 			this.functionsFound = functionsFound;
-		}
-
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
 		}
 
 		@Override
@@ -1516,16 +1511,11 @@ public class RuleConverter {
 	 * @author etsai
 	 *
 	 */
-	private class ReplaceQuantifierFunction implements ReplacementFunctionWithContextuallyUpdatedProcess {
+	private class ReplaceQuantifierFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		public List<Expression> result;
 
 		public ReplaceQuantifierFunction(List<Expression> result) {
 			this.result = result;
-		}
-
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
 		}
 
 		@Override
@@ -1577,16 +1567,11 @@ public class RuleConverter {
 	 * @author etsai
 	 *
 	 */
-	private class ReplaceMayBeSameAsFunction implements ReplacementFunctionWithContextuallyUpdatedProcess {
+	private class ReplaceMayBeSameAsFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		public Set<Pair<Expression, Expression>>  mayBeSameAsSet;
 
 		public ReplaceMayBeSameAsFunction(Set<Pair<Expression, Expression>> mayBeSameAsSet) {
 			this.mayBeSameAsSet = mayBeSameAsSet;
-		}
-
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
 		}
 
 		@Override
@@ -1626,18 +1611,13 @@ public class RuleConverter {
 	 * @author etsai
 	 *
 	 */
-	private class ReplaceConstraintWithConstant implements ReplacementFunctionWithContextuallyUpdatedProcess {
+	private class ReplaceConstraintWithConstant extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		private Expression constant;
 
 		public Expression constraint;
 
 		public ReplaceConstraintWithConstant(Expression constant) {
 			this.constant = constant;
-		}
-
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
 		}
 
 		@Override
@@ -1659,18 +1639,13 @@ public class RuleConverter {
 	 * @author etsai
 	 *
 	 */
-	private class ReplaceQueryFunction implements ReplacementFunctionWithContextuallyUpdatedProcess {
+	private class ReplaceQueryFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		private Expression queryAtom;
 		private Expression query;
 
 		public ReplaceQueryFunction(Expression queryAtom, Expression query) {
 			this.queryAtom = queryAtom;
 			this.query = query;
-		}
-
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
 		}
 
 		@Override
@@ -1743,7 +1718,7 @@ public class RuleConverter {
 	 * @author etsai
 	 *
 	 */
-	private class SearchFunctionArgumentFunction implements ReplacementFunctionWithContextuallyUpdatedProcess {
+	private class SearchFunctionArgumentFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		private Expression                searchTerm;
 		private Map<String, Set<Integer>> randomVariableIndex;
 
@@ -1753,11 +1728,6 @@ public class RuleConverter {
 		public SearchFunctionArgumentFunction (Expression searchTerm, Map<String, Set<Integer>> randomVariableIndex) {
 			this.searchTerm = searchTerm;
 			this.randomVariableIndex = randomVariableIndex;
-		}
-
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
 		}
 
 		@Override

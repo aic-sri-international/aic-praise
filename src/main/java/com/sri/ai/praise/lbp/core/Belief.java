@@ -49,6 +49,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
+import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -298,7 +299,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				priorBeliefValue = beliefValue;
 				priorMsgValues   = msgValues;
 				Justification.beginEqualityStep("iteration");
+				LiftProductOfFactorToVariable.MUST_ALWAYS_LIFT = true;
 				msgValues        = iterateValuesUsingExpansions(msgValues, msgExpansions, previousMessageToMsgValueCache, freeVariablesFromBeliefQuery, process);
+				LiftProductOfFactorToVariable.MUST_ALWAYS_LIFT = false;
 				beliefValue      = useValuesForPreviousMessages(beliefExpansion, msgValues, previousMessageToMsgValueCache, process);
 				iteration++;			
 				notifyCollector(randomVariable, beliefValue, iteration, process);
@@ -1137,7 +1140,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return result;
 	}
 	
-	private class PreviousMessageReplacementFunction implements ReplacementFunctionWithContextuallyUpdatedProcess {
+	private class PreviousMessageReplacementFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		
 		private List<Expression> msgValues;
 		private PreviousMessageToMsgValueCache previousMessageToMsgValueCache;
@@ -1149,11 +1152,6 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		//
 		// START-ReplacementFunctionWithContextuallyUpdatedProcess
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
-		}
-		
 		@Override
 		public Expression apply(Expression expressionE, RewritingProcess process) {
 			Expression result = null;

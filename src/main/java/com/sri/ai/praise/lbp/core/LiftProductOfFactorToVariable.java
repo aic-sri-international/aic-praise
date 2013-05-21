@@ -48,6 +48,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.helper.Justification;
+import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.boole.And;
@@ -86,6 +87,13 @@ import com.sri.ai.praise.LPIUtil;
 @Beta
 public class LiftProductOfFactorToVariable extends AbstractRewriter {
 	
+	/**
+	 * A field that, when set, throws an exception when it is not possible to lift the given set.
+	 * This is useful when we get to stages of algorithms in which we know that only direct message values
+	 * will be used (as opposed to things like previous message expressions in the context of loopy BP).
+	 */
+	public static boolean MUST_ALWAYS_LIFT = false;
+
 	public LiftProductOfFactorToVariable() {
 	}
 	
@@ -152,6 +160,10 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 						Justification.endEqualityStep(cardinality);
 						Expression exponentiation = Expressions.apply(FunctorConstants.EXPONENTIATION, singleAlpha, cardinality);
 						result = exponentiation;
+					}
+					else if (MUST_ALWAYS_LIFT) {
+						Trace.log("Unable to lift {}", expression);
+						throw new IllegalStateException("Unable to lift " + expression);
 					}
 				}
 			}

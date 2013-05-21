@@ -49,6 +49,7 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Apply;
@@ -73,11 +74,13 @@ import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
+import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.RandomPredicate;
 import com.sri.ai.praise.model.RandomPredicateCatalog;
 import com.sri.ai.util.Util;
+import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.PredicateIterator;
 
 /**
@@ -316,7 +319,7 @@ public class LPIUtil {
 	}
 
 	/**
-	 * Utility for testing if two random variable value expressions match.
+	 * Utility for testing if two random variable value expressions match, that is, have the same functor and the same number of arguments
 	 * 
 	 * @param v1
 	 *            the first random variable value expression to compare.
@@ -1323,8 +1326,8 @@ public class LPIUtil {
 	}
 	
 	/**
-	 * Returns the set of random variables used in an expression assumed to have the same context all over,
-	 * that is, an expression that does not involve conditions on logical variables.
+	 * Returns the set of random variables used in an expression assumed to have the same
+	 * se of logical variables everywhere, that is, an expression that does not quantify over logical variables.
 	 */
 	public static Expression getRandomVariablesUsedIn(Expression expression, RewritingProcess process) {
 		SubExpressionsDepthFirstIterator subExpressionsDepthFirstIterator =
@@ -1344,6 +1347,39 @@ public class LPIUtil {
 		randomVariables   = new ArrayList<Expression>(new LinkedHashSet<Expression>(randomVariables));
 		Expression uniset = ExtensionalSet.makeUniSet(randomVariables);
 		return uniset;
+	}
+	
+	/**
+	 * Detects pairs of random variable value expressions and their respective contexts that do not unify with a given random variable expression.
+	 * This method can be used to test message values against the occurrence of random variable values other than
+	 * the one they are supposed to use (destination random variable value, if this is a message to an RV, or
+	 * origin random variable value, if this is a message *from* an RV).
+	 * STILL BEING TESTED.
+	 */
+	public static List<Pair<Expression,Expression>> findRandomVariableValueExpressionsThatAreNotAGivenOne(Expression expression, final Expression randomVariableValue, RewritingProcess process) {
+
+		final List<Pair<Expression,Expression>> result = new LinkedList<Pair<Expression,Expression>>();
+		
+		ReplacementFunctionWithContextuallyUpdatedProcess searchFunction = new ReplacementFunctionWithContextuallyUpdatedProcess() {
+			public Expression apply(Expression expression) {
+				throw new Error("Cannot invoke apply(Expression)");
+			}
+			public Expression apply(Expression subExpression, RewritingProcess process) {
+				if (LPIUtil.isRandomVariableValueExpression(subExpression, process) && ! subExpression.equals(randomVariableValue)) {
+					Expression randomVariable = BracketedExpressionSubExpressionsProvider.make(randomVariableValue);
+					Expression subExpressionRandomVariable = BracketedExpressionSubExpressionsProvider.make(subExpression);
+					Expression comparison = LBPFactory.newCompleteSimplify().rewrite(Equality.make(subExpressionRandomVariable, randomVariable), process);
+					if ( ! comparison.equals(Expressions.TRUE)) { // that is, it is not guaranteed to be the same random variable value expression in this context
+						result.add(new Pair<Expression, Expression>(subExpression, process.getContextualConstraint()));
+					}
+				}
+				return subExpression; // never replaces anything, just collects information
+			}
+		};
+		
+		expression.replaceAllOccurrences(searchFunction, process);
+		
+		return result;
 	}
 	
 	//

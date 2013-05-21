@@ -37,11 +37,15 @@
  */
 package com.sri.ai.test.praise.lbp;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Marker;
 
@@ -91,6 +95,7 @@ import com.sri.ai.praise.model.example.WeightedPQWithPriors;
 import com.sri.ai.praise.model.example.WeightedThereExistsPQWithPriors;
 import com.sri.ai.test.praise.AbstractLPITest;
 import com.sri.ai.util.Util;
+import com.sri.ai.util.base.Pair;
 
 /**
  * Consolidated TestCase for all of the rewriters involved in Lifted Belief Propagation (LBP).
@@ -113,6 +118,28 @@ public class LBPTest extends AbstractLPITest {
 		Expression result = process.rewrite(LBPRewriter.R_basic, testExpression);
 		System.out.println(result);
 	}
+	
+	@Ignore
+	@SuppressWarnings({ "unchecked" })
+	@Test
+	public void testFindRandomVariableValueExpressionsThatAreNotAGivenOne() {
+		Expression expression;
+		Expression randomVariableValue;
+		RewritingProcess process;
+		List<Pair<Expression,Expression>> expected;
+		List<Pair<Expression,Expression>> otherRandomVariableValuesAndContexts;
+		
+		expression = parse("if p(X) and p(Z) then if q(X) then if Y != X then p(a) else p(Y) else 0 else 0");
+		randomVariableValue = parse("p(X)");
+		expected = Util.list(
+				Util.pair(parse("p"), parse("true")),
+				Util.pair(parse("q(X)"), parse("true")),
+				Util.pair(parse("q"), parse("true"))
+				);
+		process = LBPFactory.newLBPProcess(expression);
+		process.putGlobalObject(Model.GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES, Util.set("p", "q"));
+		otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotAGivenOne(expression, randomVariableValue, process);
+		assertEquals(expected, otherRandomVariableValuesAndContexts);	}
 	
 	@Test
 	public void testDifferenceOfExtensionalAndIntensionalSet() {
