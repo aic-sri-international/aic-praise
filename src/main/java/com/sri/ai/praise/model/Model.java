@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.DefaultSymbol;
@@ -56,6 +57,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
+import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.PRAiSEConfiguration;
 
 /**
@@ -87,15 +89,13 @@ import com.sri.ai.praise.PRAiSEConfiguration;
  * been instantiated with this definition (required by most of the API methods). The reason for using
  * a 'Model Declaration' is that it lets you declare a model without needing to worry about how it
  * should be instantiated (i.e. no need to have a rewriting process or a parser when declaring a model). 
- * When the model is to be used the following check should be performed:
+ * When the model is to be used and a definition is required it will automatically instantiate it using
+ * a default parser for the model's language, In addition it will likely be necessary to register the model
+ * with a rewriting process as follows:
  * 
  * <pre>
- * // Note: A parse routine and a RewritingProcess is available at this point:
- * if (!model.isDefined()) {
- *     model = new Model(parse(model.getModelDeclaration()), model.getKnownRandomVariableNames());
- *     // Associate the model with the rewriting process.
-	   model.setRewritingProcessesModel(process);
- * }
+ * // Note: A RewritingProcess is available at this point:
+ * model.setRewritingProcessesModel(process);
  * </pre>
  * 
  * @see SortDeclaration
@@ -218,6 +218,7 @@ public class Model {
 		}
 		this.knownRandomVariableNames = Collections
 				.unmodifiableSet(this.knownRandomVariableNames);
+		ensureDefined();
 	}
 
 	/**
@@ -330,20 +331,9 @@ public class Model {
 
 	/**
 	 * 
-	 * @return true if the model is defined (i.e. is represented as an
-	 *         expression) or not;
-	 */
-	public boolean isDefined() {
-		return modelDefinition != null;
-	}
-
-	/**
-	 * 
 	 * @return an Expression representing the definition of the model.
 	 */
 	public Expression getModelDefinition() {
-		assertDefined();
-
 		return modelDefinition;
 	}
 
@@ -352,8 +342,6 @@ public class Model {
 	 * @return the model definition's name.
 	 */
 	public Expression getName() {
-		assertDefined();
-
 		return name;
 	}
 
@@ -362,8 +350,6 @@ public class Model {
 	 * @return a description of the model definition.
 	 */
 	public Expression getDescription() {
-		assertDefined();
-
 		return description;
 	}
 
@@ -372,8 +358,6 @@ public class Model {
 	 * @return the sort declarations associated with the model.
 	 */
 	public List<SortDeclaration> getSortDeclarations() {
-		assertDefined();
-
 		return Collections.unmodifiableList(sortDeclarations);
 	}
 
@@ -381,8 +365,6 @@ public class Model {
 	 * @return the random variable declarations associated with the model.
 	 */
 	public List<RandomVariableDeclaration> getRandomVariableDeclarations() {
-		assertDefined();
-
 		return randomVariableDeclarations;
 	}
 
@@ -391,8 +373,6 @@ public class Model {
 	 * @return the parfactors declartion associated with the model.
 	 */
 	public ParfactorsDeclaration getParfactorsDeclaration() {
-		assertDefined();
-
 		return parfactorsDeclaration;
 	}
 
@@ -404,7 +384,6 @@ public class Model {
 	 *            the process in which the rewriting is occurring.
 	 */
 	public void setRewritingProcessesModel(RewritingProcess process) {
-		assertDefined();
 		setRewritingProcessesModel(modelDefinition, knownRandomVariableNames, process);
 	}
 
@@ -747,14 +726,10 @@ public class Model {
 	 * associated with this Model's declaration (i.e. its string
 	 * representation).
 	 */
-	private void assertDefined() {
-		if (!isDefined()) {
-			throw new IllegalStateException(
-					"This model has no definition associated with it (i.e. is purely a declaration)."+
-			        "\n"+
-					"You must parse the model declaration into an expression and instantiate a Model instance with this expression in order for it to be properly defined." +
-			        "\n"+
-					"See class Javadoc for more details.");
+	private void ensureDefined() {
+		if (modelDefinition == null) {
+			Parser parser = new AntlrGrinderParserWrapper();
+			modelDefinition = parser.parse(modelDeclaration);
 		}
 	}
 

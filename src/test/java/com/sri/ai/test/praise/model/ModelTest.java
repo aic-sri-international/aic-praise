@@ -590,7 +590,7 @@ public class ModelTest extends AbstractLPITest {
 	}
 
 	@Test
-	public void testModelDeclaration() {
+	public void testModelDeclarationAutoDefines() {
 		
 		// Declare but don't define the model
 		Model model = new Model("union({{(on X,Y) [if p(X) and q(Y) then 1 else 0]}})",
@@ -598,54 +598,15 @@ public class ModelTest extends AbstractLPITest {
 		
 		// Ensure declaration attributes are valid
 		Assert.assertEquals(Util.set("p", "q"), model.getKnownRandomVariableNames());
-	
-		// Should not be defined
-		Assert.assertFalse(model.isDefined());
 		
 		//
-		// The following calls should throw exceptions if the model is not defined
-		
-		try {
-			model.getModelDefinition();
-			Assert.fail("An IllegalStateException should have been thrown.");
-		} catch (IllegalStateException ise) {
-			// Expected
-		}
-		
-		try {
-			model.getName();
-			Assert.fail("An IllegalStateException should have been thrown.");
-		} catch (IllegalStateException ise) {
-			// Expected
-		}
-		
-		try {
-			model.getDescription();
-			Assert.fail("An IllegalStateException should have been thrown.");
-		} catch (IllegalStateException ise) {
-			// Expected
-		}
-		
-		try {
-			model.getSortDeclarations();
-			Assert.fail("An IllegalStateException should have been thrown.");
-		} catch (IllegalStateException ise) {
-			// Expected
-		}
-		
-		try {
-			model.getRandomVariableDeclarations();
-			Assert.fail("An IllegalStateException should have been thrown.");
-		} catch (IllegalStateException ise) {
-			// Expected
-		}
-		
-		try {
-			model.getParfactorsDeclaration();
-			Assert.fail("An IllegalStateException should have been thrown.");
-		} catch (IllegalStateException ise) {
-			// Expected
-		}
+		// The following calls should no longer throw exceptions as the model should auto-define.
+		model.getModelDefinition();
+		model.getName();
+		model.getDescription();
+		model.getSortDeclarations();
+		model.getRandomVariableDeclarations();
+		model.getParfactorsDeclaration();
 	}
 
 	@Test

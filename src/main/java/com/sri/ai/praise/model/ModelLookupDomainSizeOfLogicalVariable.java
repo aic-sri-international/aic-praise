@@ -81,16 +81,15 @@ public class ModelLookupDomainSizeOfLogicalVariable implements
 			// Now determine what sort the logical variable belongs to.
 			// Start with the Universe of discourse initially.
 			Symbol sortNameForLogicalVariable = SortDeclaration.UNIVERSE_OF_DISCOURSE;
-			if (model.isDefined()) {
-				// TODO - add support for when there is more than 1 sort defined in the model, i.e:
-				// ALBP-199 Retrieve domain information associated with logical variables from models 
-				// with multiple domains
-				if (model.getSortDeclarations().size() == 1) {
-					SortDeclaration sortDeclaration = model.getSortDeclarations().get(0);
-					sortNameForLogicalVariable = (Symbol) sortDeclaration.getName();
-					
-					size = possiblyUpdateSize(size, sortDeclaration.getSize());
-				}
+
+			// TODO - add support for when there is more than 1 sort defined in the model, i.e:
+			// ALBP-199 Retrieve domain information associated with logical variables from models 
+			// with multiple domains
+			if (model.getSortDeclarations().size() == 1) {
+				SortDeclaration sortDeclaration = model.getSortDeclarations().get(0);
+				sortNameForLogicalVariable = (Symbol) sortDeclaration.getName();
+				
+				size = possiblyUpdateSize(size, sortDeclaration.getSize());
 			}
 			
 			// Now see if the user has explicitly overridden the size of the sort 

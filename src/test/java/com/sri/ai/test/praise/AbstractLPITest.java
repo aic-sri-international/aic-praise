@@ -178,8 +178,7 @@ public abstract class AbstractLPITest {
 			}
 			
 			if (null != model) {
-				Expression modelExpression = parse(model.getModelDeclaration());
-				Model.setRewritingProcessesModel(modelExpression, model.getKnownRandomVariableNames(), process);
+				model.setRewritingProcessesModel(process);
 			}
 
 			Expression expectedExpression = parse(expected);
