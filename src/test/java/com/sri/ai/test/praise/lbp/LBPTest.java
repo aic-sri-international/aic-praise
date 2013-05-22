@@ -145,7 +145,8 @@ public class LBPTest extends AbstractLPITest {
         process = LBPFactory.newLBPProcess(expression);
         Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNames(), process); 
         otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(expression, randomVariableValue, process);
-        assertEquals(expected, otherRandomVariableValuesAndContexts);	}
+        assertEquals(expected, otherRandomVariableValuesAndContexts);	
+    }
 	
 	@Test
 	public void testDifferenceOfExtensionalAndIntensionalSet() {
