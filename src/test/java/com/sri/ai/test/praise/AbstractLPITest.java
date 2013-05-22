@@ -167,7 +167,7 @@ public abstract class AbstractLPITest {
 		public String perform(int i) {
 			Expression topExpression;
 			RewritingProcess process;
-			Expression actual;
+			Expression actual = null;
 
 			topExpression = getTopExpression();
 			process = newRewritingProcess(topExpression);
@@ -199,12 +199,25 @@ public abstract class AbstractLPITest {
 			} 
 			else {
 				long startTime = System.currentTimeMillis();
-				actual = callRewrite(process);
+				Throwable thrown = null;
+				try {
+					actual = callRewrite(process);
+				} catch (Throwable t) {
+					thrown = t;
+				}
 				long rewroteIn = System.currentTimeMillis()-startTime;
 				System.out.println("tests["+ i +" rewrote in "+(rewroteIn)+"ms]:" + topExpression + "\n--->\n" + actual);
 				// Ensure all notifications and cache output are noted if configured that way.
 				process.notifyEndOfRewritingProcess();
-				if (!expectedExpression.equals(actual)) {
+				if (thrown != null) {
+					String errorMessage = "ERROR tests[" + i + "] = " + topExpression 
+							+ "\nexpected: " + expectedExpression // better to show expectedExpression than expression, because parsing errors will be more clear
+							+ "\n but an unhandled throwable exception was thrown instead: " + thrown.getMessage();
+							System.out.println(errorMessage);
+							thrown.printStackTrace();
+							return errorMessage; // indicates that we need to break test loop
+				}
+				else if (!expectedExpression.equals(actual)) {
 					String errorMessage = "ERROR tests[" + i + "] = " + topExpression 
 					+ "\nexpected: " + expectedExpression // better to show expectedExpression than expression, because parsing errors will be more clear
 					+ "\n but was: " + actual;
