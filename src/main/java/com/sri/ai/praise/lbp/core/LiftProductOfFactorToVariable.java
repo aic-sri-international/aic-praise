@@ -88,13 +88,49 @@ import com.sri.ai.praise.LPIUtil;
 public class LiftProductOfFactorToVariable extends AbstractRewriter {
 	
 	/**
-	 * A field that, when set, throws an exception when it is not possible to lift the given set.
-	 * This is useful when we get to stages of algorithms in which we know that only direct message values
-	 * will be used (as opposed to things like previous message expressions in the context of loopy BP).
+	 * A key for the rewriting process global objects map, that when set, throws
+	 * an exception when it is not possible to lift the given set. This is
+	 * useful when we get to stages of algorithms in which we know that only
+	 * direct message values will be used (as opposed to things like previous
+	 * message expressions in the context of loopy BP).
 	 */
-	public static boolean MUST_ALWAYS_LIFT = false;
+	public static final String GLOBAL_KEY_LIFT_PRODUCT_OF_FACTOR_TO_VARIABLE_MUST_ALWAYS_LIFT = "LiftProductOfFactorToVariable must always lift";
 
 	public LiftProductOfFactorToVariable() {
+	}
+	
+	/**
+	 * Determine if an exception should be thrown if it is not possible to lift
+	 * a given set.
+	 * 
+	 * @param process
+	 *            the current rewriting process.
+	 * @return true if an exception should be thrown if it is not possible to
+	 *         lift a given set, false otherwise.
+	 */
+	public static boolean isMustAlwaysLift(RewritingProcess process) {
+		boolean result = false; // By default we assume we must not always lift
+		
+		Boolean mustAlwaysLift = (Boolean) process.getGlobalObject(GLOBAL_KEY_LIFT_PRODUCT_OF_FACTOR_TO_VARIABLE_MUST_ALWAYS_LIFT);
+		if (mustAlwaysLift != null) {
+			// Use the value set on the global process.
+			result = mustAlwaysLift;
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Set whether an exception should be thrown if it is not possible to lift a
+	 * given set.
+	 * 
+	 * @param mustAlwaysLift
+	 *            true if an exception should be thrown, false otherwise.
+	 * @param process
+	 *            the current rewriting process.
+	 */
+	public static void setMustAlwaysLift(boolean mustAlwaysLift, RewritingProcess process) {
+		process.getGlobalObjects().put(GLOBAL_KEY_LIFT_PRODUCT_OF_FACTOR_TO_VARIABLE_MUST_ALWAYS_LIFT, mustAlwaysLift);
 	}
 	
 	//
@@ -161,7 +197,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 						Expression exponentiation = Expressions.apply(FunctorConstants.EXPONENTIATION, singleAlpha, cardinality);
 						result = exponentiation;
 					}
-					else if (MUST_ALWAYS_LIFT) {
+					else if (isMustAlwaysLift(process)) {
 						Trace.log("Unable to lift {}", expression);
 						throw new IllegalStateException("Unable to lift " + expression);
 					}

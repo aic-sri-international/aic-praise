@@ -300,10 +300,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				priorBeliefValue = beliefValue;
 				priorMsgValues   = msgValues;
 				Justification.beginEqualityStep("iteration");
-				LiftProductOfFactorToVariable.MUST_ALWAYS_LIFT = true;
+				LiftProductOfFactorToVariable.setMustAlwaysLift(true, process);
 				msgValues        = iterateValuesUsingExpansions(msgValues, msgExpansions, previousMessageToMsgValueCache, freeVariablesFromBeliefQuery, process);
 				beliefValue      = useValuesForPreviousMessages(beliefExpansion, msgValues, previousMessageToMsgValueCache, process);
-				LiftProductOfFactorToVariable.MUST_ALWAYS_LIFT = false;
+				LiftProductOfFactorToVariable.setMustAlwaysLift(false, process);
 				iteration++;			
 				notifyCollector(randomVariable, beliefValue, iteration, process);
 				Justification.endEqualityStep(beliefValue);
