@@ -3559,10 +3559,10 @@ public class LBPTest extends AbstractLPITest {
 			// Basic:
 			new IterateValuesUsingExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPQWithPArity2AndQArity1(),
-					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }}",
-					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0 ) ) | X != c }}",
+					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,a) then 1 else 0 ) ) | X != c }}",
+					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then (previous message to [p(X,a)] from [if p(X,a) and q(Y) then 1 else 0]) else 0 ) ) | X != c }}",
 					false,
-					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then if p(b,a) then 1 else 0 else 0.5 ) ) | X != c }}"),
+					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then if p(X,a) then 1 else 0 else 0.5 ) ) | X != c }}"),
 		};
 		
 		perform(tests);
