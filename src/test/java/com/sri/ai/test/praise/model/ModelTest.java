@@ -446,6 +446,18 @@ public class ModelTest extends AbstractLPITest {
 
 		// Construct legal populated parfactors declarations
 		parfactorsDeclaration = new ParfactorsDeclaration(
+				parse("{[if q(a1) then 1 else 0], [if q(a2) then 1 else 0]}"));
+		Assert.assertEquals(1, parfactorsDeclaration.getParfactors().size());
+		parfactorsDeclaration = new ParfactorsDeclaration(
+				parse("{{[if q(a1) then 1 else 0], [if q(a2) then 1 else 0]}}"));
+		Assert.assertEquals(1, parfactorsDeclaration.getParfactors().size());
+		parfactorsDeclaration = new ParfactorsDeclaration(
+				parse("{ (on X in People, Y) [if p(X) and q(X, Y) then 1 else 0] | X != a1}"));
+		Assert.assertEquals(1, parfactorsDeclaration.getParfactors().size());
+		parfactorsDeclaration = new ParfactorsDeclaration(
+				parse("{{ (on X in People, Y) [if p(X) and q(X, Y) then 1 else 0] | X != a1}}"));
+		Assert.assertEquals(1, parfactorsDeclaration.getParfactors().size());
+		parfactorsDeclaration = new ParfactorsDeclaration(
 				parse("parfactors({[if q(a1) then 1 else 0], [if q(a2) then 1 else 0]})"));
 		Assert.assertEquals(1, parfactorsDeclaration.getParfactors().size());
 		parfactorsDeclaration = new ParfactorsDeclaration(
@@ -474,6 +486,7 @@ public class ModelTest extends AbstractLPITest {
 		Assert.assertTrue(ParfactorsDeclaration.isParfactorsDeclaration(parse("parfactors(union({[if q(a1) then 1 else 0]}))")));
 		Assert.assertTrue(ParfactorsDeclaration.isParfactorsDeclaration(parse("parfactors(partition({[if q(a1) then 1 else 0]}))")));
 		Assert.assertTrue(ParfactorsDeclaration.isParfactorsDeclaration(parse("union({[if q(a1) then 1 else 0]})")));
+		Assert.assertTrue(ParfactorsDeclaration.isParfactorsDeclaration(parse("{[if q(a1) then 1 else 0]}")));
 		Assert.assertTrue(ParfactorsDeclaration.isParfactorsDeclaration(parse("partition({[if q(a1) then 1 else 0]})")));
 
 		
@@ -806,6 +819,16 @@ public class ModelTest extends AbstractLPITest {
 			Assert.assertEquals(ModelError.TYPE.CONSTANT_IN_MORE_THAN_1_SORT, mex.getErrors().get(0).getErrorType());
 			Assert.assertEquals(parse("sort(ASort2, Unknown, {AConstant})"), mex.getErrors().get(0).getInExpression());
 		}
+	}
+	
+	@Test
+	public void testLegalTrivialModelDefinition() {
+		Model model = new Model(parse("{{(on X in People) [if epidemic then if sick(X) then 0.4 else 0.6 else if sick(X) then 0.01 else 0.99]}}"),
+								Util.set("epidemic", "sick"));
+		Assert.assertEquals(1, model.getSortDeclarations().size());
+		Assert.assertEquals(0, model.getRandomVariableDeclarations().size());
+		Assert.assertEquals(2, model.getKnownRandomVariableNames().size());
+		Assert.assertEquals(1, model.getParfactorsDeclaration().getParfactors().size());
 	}
 	
 	@Test

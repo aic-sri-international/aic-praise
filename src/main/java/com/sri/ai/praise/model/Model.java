@@ -82,6 +82,22 @@ import com.sri.ai.praise.PRAiSEConfiguration;
  * )
  * </pre>
  * 
+ * Note: The term 'Model Declaration' refers to the string representation of a model as defined above.
+ * A 'Model Definition' is one where the declaration has been parsed into an expression and the model has
+ * been instantiated with this definition (required by most of the API methods). The reason for using
+ * a 'Model Declaration' is that it lets you declare a model without needing to worry about how it
+ * should be instantiated (i.e. no need to have a rewriting process or a parser when declaring a model). 
+ * When the model is to be used the following check should be performed:
+ * 
+ * <pre>
+ * // Note: A parse routine and a RewritingProcess is available at this point:
+ * if (!model.isDefined()) {
+ *     model = new Model(parse(model.getModelDeclaration()), model.getKnownRandomVariableNames());
+ *     // Associate the model with the rewriting process.
+	   model.setRewritingProcessesModel(process);
+ * }
+ * </pre>
+ * 
  * @see SortDeclaration
  * @see RandomVariableDeclaration
  * @see ParfactorsDeclaration
@@ -439,8 +455,7 @@ public class Model {
 	 *            the process in which the rewriting is occurring.
 	 * @return the range of the Random Variable [ v ].
 	 */
-	public static List<Expression> range(
-			Expression aRandomVariableValueExpression, RewritingProcess process) {
+	public static List<Expression> range(Expression aRandomVariableValueExpression, RewritingProcess process) {
 		return _defaultRVRange;
 	}
 
@@ -735,7 +750,11 @@ public class Model {
 	private void assertDefined() {
 		if (!isDefined()) {
 			throw new IllegalStateException(
-					"This model has no definition associated with it (i.e. is purely a declaration).");
+					"This model has no definition associated with it (i.e. is purely a declaration)."+
+			        "\n"+
+					"You must parse the model declaration into an expression and instantiate a Model instance with this expression in order for it to be properly defined." +
+			        "\n"+
+					"See class Javadoc for more details.");
 		}
 	}
 

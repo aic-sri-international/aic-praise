@@ -61,13 +61,13 @@ import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
  *     'union or partition'(parfactor1,...,parfactorN)
  * )
  * 
- * 'union or parition'(...):
+ * 'union or parition'(...) or {...} or {{...}}:
  * . mandatory: a single union or partition of parfactors decribing the model
  *   or alternatively a list of parfactors.
  *   
  *   Note: it is legal to construct a parfactor declaration directly using a 
- *   union or partition instead of explicitly creating a surrounding 
- *   'parfactors()' expression.
+ *   union, partition, or a single uni or multiset parfactor declaration, 
+ *   instead of explicitly creating a surrounding 'parfactors()' expression.
  *   
  * . parfactor(s): (extensionally or intensionally defined sets of parameterized factors) 
  *   ::defined via an extensional (uni or multi) set:
@@ -333,7 +333,7 @@ public class ParfactorsDeclaration {
 		Expression unionOrPartition = expression;
 		if (Expressions.hasFunctor(expression, FUNCTOR_PARFACTORS_DECLARATION)) {
 			// Can only have a single argument if defined via:
-			// parfactor('union | parition'());
+			// parfactors('union | parition'());
 			if (expression.numberOfArguments() == 1) {
 				if (Sets.isSet(expression.get(0))) {
 					// Is a set argument therefore treat as a single element
@@ -358,6 +358,11 @@ public class ParfactorsDeclaration {
 		} 
 		else {
 			unionOrPartition = expression;
+			if (Sets.isSet(unionOrPartition)) {
+				// Is a set argument therefore treat as a single element
+				// union for processing purposes.
+				unionOrPartition = Expressions.make(FunctorConstants.UNION, unionOrPartition);
+			}
 		}
 
 		if (Expressions.hasFunctor(unionOrPartition, FunctorConstants.UNION)
