@@ -109,6 +109,7 @@ import com.sri.ai.util.base.Pair;
  * GeNIe & SMILE - http://genie.sis.pitt.edu/networks.html<br>
  * 
  */
+@SuppressWarnings("unused")
 public class LBPTest extends AbstractLPITest {
 	
 	@Test
@@ -119,7 +120,6 @@ public class LBPTest extends AbstractLPITest {
 		System.out.println(result);
 	}
 	
-	@Ignore
 	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void testFindRandomVariableValueExpressionsThatAreNotAGivenOne() {
@@ -128,18 +128,24 @@ public class LBPTest extends AbstractLPITest {
 		RewritingProcess process;
 		List<Pair<Expression,Expression>> expected;
 		List<Pair<Expression,Expression>> otherRandomVariableValuesAndContexts;
+		Model model;
 		
-		expression = parse("if p(X) and p(Z) then if q(X) then if Y != X then p(a) else p(Y) else 0 else 0");
-		randomVariableValue = parse("p(X)");
+        model = new Model(
+                "union({{(on X in People) [if epidemic then if sick(X) then 0.4 else 0.6 else if sick(X) then 0.01 else 0.99]}})",
+                "epidemic", "sick"
+        );
+        expression = parse("if sick(X) and sick(Y) then if Z != X then (if epidemic and sick(Z) then 1 else 0) else (if sick(Z) and sick(W) and sick(X) then 1 else 0) else 0");
+		randomVariableValue = parse("sick(X)");
 		expected = Util.list(
-				Util.pair(parse("p"), parse("true")),
-				Util.pair(parse("q(X)"), parse("true")),
-				Util.pair(parse("q"), parse("true"))
+				Util.pair(parse("sick(Y)"), parse("true")),
+				Util.pair(parse("epidemic"), parse("Z != X")),
+				Util.pair(parse("sick(Z)"), parse("Z != X")),
+				Util.pair(parse("sick(W)"), parse("not (Z != X)"))
 				);
-		process = LBPFactory.newLBPProcess(expression);
-		process.putGlobalObject(Model.GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES, Util.set("p", "q"));
-		otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotAGivenOne(expression, randomVariableValue, process);
-		assertEquals(expected, otherRandomVariableValuesAndContexts);	}
+        process = LBPFactory.newLBPProcess(expression);
+        Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNames(), process); 
+        otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(expression, randomVariableValue, process);
+        assertEquals(expected, otherRandomVariableValuesAndContexts);	}
 	
 	@Test
 	public void testDifferenceOfExtensionalAndIntensionalSet() {

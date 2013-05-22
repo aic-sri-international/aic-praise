@@ -212,8 +212,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 		return false;
 	}
 
-	public static boolean isRandomVariable(Expression expression,
-			RewritingProcess process) {
+	public static boolean isRandomVariable(Expression expression, RewritingProcess process) {
 		return IsRandomVariableValueExpression.apply(getExpressionInBrackets(expression), process);
 	}
 	

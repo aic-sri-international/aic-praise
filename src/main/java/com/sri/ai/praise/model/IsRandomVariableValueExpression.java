@@ -41,6 +41,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.praise.LPIUtil;
 
 /**
  * Indicates whether an expression is the value of a random variable catalogued
@@ -63,8 +64,6 @@ public class IsRandomVariableValueExpression implements Predicate<Expression> {
 	}
 
 	public static boolean apply(Expression expression, RewritingProcess process) {
-		RandomPredicateCatalog catalog = RandomPredicateCatalog.getFromBracketedModel(process);
-		RandomPredicate randomPredicate = new RandomPredicate(expression);
-		return catalog == null? false : catalog.contains(randomPredicate);
+		return LPIUtil.isRandomVariableValueExpression(expression, process);
 	}
 }

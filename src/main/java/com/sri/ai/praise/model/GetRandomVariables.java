@@ -84,7 +84,7 @@ public class GetRandomVariables {
 			Expression expression,
 			RewritingProcess process) {
 		Predicate<Expression> isRandomVariableValueExpressionPredicate =
-			new HasFunctorOrSymbolNameRegisteredAsRandomVariablePredicateNameInRewritingProcess(process);
+			new IsRandomVariableValueExpressionCandidate(process);
 		SubExpressionsDepthFirstIterator subExpressionsIterator = new SubExpressionsDepthFirstIterator(expression);
 		subExpressionsIterator.setPruneChildrenPredicate(isRandomVariableValueExpressionPredicate);
 
@@ -101,22 +101,21 @@ public class GetRandomVariables {
 
 	/**
 	 * Predicate indicating whether an expression
-	 * has a functor, or is a symbol,
-	 * with the name of a registered
-	 * random variable registered in the global object "known random variable names".
+	 * is a random variable value expression candidate,
+	 * per {@link LPIUtil#isRandomVariableValueExpressionCandidate(Expression, RewritingProcess)}.
 	 */
-	public static class HasFunctorOrSymbolNameRegisteredAsRandomVariablePredicateNameInRewritingProcess implements Predicate<Expression> {
+	public static class IsRandomVariableValueExpressionCandidate implements Predicate<Expression> {
 
 		private final RewritingProcess process;
 
-		public HasFunctorOrSymbolNameRegisteredAsRandomVariablePredicateNameInRewritingProcess(RewritingProcess process) {
+		public IsRandomVariableValueExpressionCandidate(RewritingProcess process) {
 			super();
 			this.process = process;
 		}
 		
 		@Override
 		public boolean apply(Expression expression) {
-			return LPIUtil.isRandomVariableValueExpression(expression, process);
+			return LPIUtil.isRandomVariableValueExpressionCandidate(expression, process);
 		}
 	}
 	

@@ -75,6 +75,7 @@ import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.MessageExpansions;
 import com.sri.ai.praise.lbp.UseValuesForPreviousMessages;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;
 
@@ -301,8 +302,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Justification.beginEqualityStep("iteration");
 				LiftProductOfFactorToVariable.MUST_ALWAYS_LIFT = true;
 				msgValues        = iterateValuesUsingExpansions(msgValues, msgExpansions, previousMessageToMsgValueCache, freeVariablesFromBeliefQuery, process);
-				LiftProductOfFactorToVariable.MUST_ALWAYS_LIFT = false;
 				beliefValue      = useValuesForPreviousMessages(beliefExpansion, msgValues, previousMessageToMsgValueCache, process);
+				LiftProductOfFactorToVariable.MUST_ALWAYS_LIFT = false;
 				iteration++;			
 				notifyCollector(randomVariable, beliefValue, iteration, process);
 				Justification.endEqualityStep(beliefValue);
@@ -554,6 +555,33 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						}
 						throw new IllegalStateException("new msg_value contains previous message to . from . or product(...):"+value);
 					}
+					
+//					Expression destinationOrOriginRandomVariable = LPIUtil.isRandomVariable(destination, subProcess)? destination : origin;
+//					Expression destinationOrOriginRandomVariableValue = BracketedExpressionSubExpressionsProvider.getRandomVariableValueExpression(destinationOrOriginRandomVariable);
+//					List<Pair<Expression, Expression>> otherRandomVariables;
+//					if ((otherRandomVariables = LPIUtil.findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(value, destinationOrOriginRandomVariableValue, subProcess)
+//							).size() != 0) {
+//						// Output some useful information before throwing the exception
+//						System.err.println("IllegalStateException: value depends on random variable value other than its own destination/origin random variable.");
+//						System.err.println("Destination: " + destination);
+//						System.err.println("Origin: "      + origin);
+//						System.err.println("Random variable value should be a function of: " + destinationOrOriginRandomVariable);
+//						System.err.println("Other random variable values and contexts in which they appear:\n" + Util.join(otherRandomVariables, "\n"));
+//						System.err.println("sub.context      ="+subProcess.getContextualConstraint());
+//						System.err.println("sub.context vars ="+subProcess.getContextualVariables());
+//						System.err.println("msg_expansion    ="+msgExpansion);
+//						System.err.println("expansion        ="+expansion);
+//						System.err.println("value            ="+value);
+//						System.err.println("msg_expansions   =");
+//						for (Expression me : msgExpansions) {
+//							System.err.println(me);
+//						}
+//						System.err.println("msg_values       =");
+//						for (Expression m : msgValues) {
+//							System.err.println(""+m);
+//						}
+//						throw new IllegalStateException("value depends on random variable value other than its own destination/origin random variable: " + value);
+//					}
 					
 					// Normalize and manage precision
 					Expression normalizedValue = value;
@@ -1110,7 +1138,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Set<Expression> rvValues             = SubExpressionSelection.get(Tuple.get(head, 2), new Predicate<Expression>() {
 			@Override
 			public boolean apply(Expression arg) {
-				boolean result = LPIUtil.isRandomVariableValueExpression(arg, process);
+				boolean result = LPIUtil.isRandomVariableValueExpressionCandidate(arg, process);
 				return result;
 			}
 		});

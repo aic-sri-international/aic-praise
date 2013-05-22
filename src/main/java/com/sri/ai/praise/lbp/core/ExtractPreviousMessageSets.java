@@ -137,7 +137,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 			List<Expression> newTotalScopingVariables = new LinkedList<Expression>(scopingVariables);
 			List<Expression> scopedVariablesInE = ScopedVariables.get(expressionE, process);
 			newTotalScopingVariables.addAll(scopedVariablesInE);
-			Util.removeElementsSatisfying(newTotalScopingVariables, new LPIUtil.IsRandomVariableValueExpression(process));
+			Util.removeElementsSatisfying(newTotalScopingVariables, new LPIUtil.IsRandomVariableValueExpressionCandidate(process));
 			// the above is needed because we may have lambda expressions scoped by random variable values
 
 			Iterator<ExpressionAndContext> subExpressionAndContextsIterator = expressionE.getImmediateSubExpressionsAndContextsIterator(process);

@@ -79,7 +79,7 @@ public class LBPStressIT extends AbstractLPITest {
 						"TODO")});
 	}
 	
-	@Ignore
+	//@Ignore
 	@Test
 	public void testStressTest4DefectIteration2() {
 		perform(new TestData[] {
