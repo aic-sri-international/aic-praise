@@ -1190,10 +1190,10 @@ public class LPIUtil {
 	 * pick_single_element({ (on I) Alpha | C })
 	 * Assumes that the given intensional set is a singleton
 	 * Returns its singleton element or null if it cannot be determined.
-	 * I <- indices in I that Alpha depends on 
-	 * if I is empty, return Alpha.
-	 * let X be an index in I
-	 * let I' be the remaining indices
+	 * R <- indices in I that Alpha depends on 
+	 * if R is empty, return Alpha.
+	 * let X be an index in R
+	 * let I' be I - X
 	 * value = pick_value(X, I, C)
 	 * return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })
 	 * </pre>
@@ -1212,31 +1212,31 @@ public class LPIUtil {
 			throw new IllegalArgumentException("Not a valid intensional set expression:"+intensionalSet);
 		}
 		
-		Trace.log("I <- indices in {} that {} depends on", IntensionalSet.getScopingExpression(intensionalSet), IntensionalSet.getHead(intensionalSet));
-		Expression       alpha     = IntensionalSet.getHead(intensionalSet);
-		Set<Expression>  alphaVars = Variables.freeVariables(alpha, process);
-		Set<Expression>  indices   = new LinkedHashSet<Expression>(IntensionalSet.getIndices(intensionalSet));
-		indices.retainAll(alphaVars);
-		List<Expression> indicesI  = new ArrayList<Expression>(indices);
-		Trace.log("// I = {}", indicesI);
+		Expression       alpha       = IntensionalSet.getHead(intensionalSet);
+		Trace.log("R <- indices in {} that {} depends on", IntensionalSet.getScopingExpression(intensionalSet), alpha);
+		Set<Expression>  alphaVars   = Variables.freeVariables(alpha, process);
+		List<Expression> indicesI    = new ArrayList<Expression>(IntensionalSet.getIndices(intensionalSet));
+		Set<Expression>  tempIndices = new LinkedHashSet<Expression>(indicesI);
+		tempIndices.retainAll(alphaVars);
+		List<Expression> indicesR  = new ArrayList<Expression>(tempIndices);
+		Trace.log("// R = {}", indicesR);
 		
-		if (indicesI.size() == 0) {
-			Trace.log("if I is empty");
+		if (indicesR.size() == 0) {
+			Trace.log("if R is empty");
 			Trace.log("    return Alpha");
 			result = alpha;
 		} 
 		else {
+			Trace.log("let X be an index in R");
+			Expression variableX = indicesR.get(0); 
 			
-			Trace.log("let X be an index in I");
-			Expression variableX = IntensionalSet.getIndex(indicesI.get(0)); 
-			
-			Trace.log("let I' be the remaining indices");
-			List<Expression> indexExpressionsIPrime = indicesI.subList(1, indicesI.size());
+			Trace.log("let I' be I - X");
+			List<Expression> indexExpressionsIPrime = new ArrayList<Expression>(indicesI);
+			indexExpressionsIPrime.remove(variableX);
 			
 			Trace.log("value = pick_value(X, I, C)");
-			List<Expression> iVariables = new ArrayList<Expression>(IntensionalSet.getIndices(intensionalSet));
-			Expression       variablesI = ExtensionalSet.makeUniSetExpression(iVariables);
-			Expression       formulaC   = IntensionalSet.getCondition(intensionalSet);
+			Expression variablesI = ExtensionalSet.makeUniSetExpression(indicesI);
+			Expression formulaC   = IntensionalSet.getCondition(intensionalSet);
 	
 			Expression value = pickValue(variableX, variablesI, formulaC, process);
 			
