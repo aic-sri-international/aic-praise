@@ -666,7 +666,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			RewritingProcess process) {
 		Expression result = null;
 
-		Trace.in("+use_values_for_previous_msgs({}, {})", expansion, msgValues);
+		Trace.in("+use_values_for_previous_msgs({}, {})", expansion, Expressions.apply("list", msgValues)); // "list" used so msgValues is properly shown in trace tree.
 		Trace.log("substituted <- expansion");
 		Expression substituted = expansion;
 
@@ -729,7 +729,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	private Expression findMsgValueMatchingPreviousMessage(Expression prevMessage, List<Expression> msgValues, 
 			PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {
 		Expression result = null;
-		Trace.in("+findMsgValueMatchingPreviousMessage({},{})", prevMessage, msgValues);
+		Trace.in("+findMsgValueMatchingPreviousMessage({},{})", prevMessage, Expressions.apply("list", msgValues));
 		//
 		// Intersection <- null
 		// msg_value    <- null
@@ -742,11 +742,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		if (cachedIndex != null) {
 			// index <- index from cache
 			int index = cachedIndex;
-			Trace.log("Set of msg values set cached for {}: {}", prevMessage, msgValues.get(index));
+			Trace.log("Set of msg values set cached for {} under contextual constraint {}: {}", prevMessage, process.getContextualConstraint(), msgValues.get(index));
 			// msg_value <- standardize msg_values[index] apart from prev_message
-			msgValue = StandardizedApartFrom
-					.standardizedApartFrom(
-							msgValues.get(index), prevMessage, process);
+			msgValue = StandardizedApartFrom.standardizedApartFrom(msgValues.get(index), prevMessage, process);
 			Trace.log("When standardized apart, it is {}", msgValue);
 			cachedMsgValueIntersection = previousMessageToMsgValueCache.getCachedMsgValueIntersection(process, prevMessage);
 			// if Intersection cached for previous_message
@@ -776,9 +774,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			for (int i = 0; i < msgValues.size(); i++) {
 				// msg_value    <- standardize msg_values[i] apart from prev_message
 				Trace.log("Examining candidate {}", msgValues.get(i));
-				msgValue = StandardizedApartFrom
-						.standardizedApartFrom(
-								msgValues.get(i), prevMessage, process);
+				msgValue = StandardizedApartFrom.standardizedApartFrom(msgValues.get(i), prevMessage, process);
 				Trace.log("When standardized apart, it is {}", msgValue);
 				// Intersection <- calculate_intersection(prev_message, msg_value)
 				intersection = calculateIntersection(prevMessage, msgValue, process);
