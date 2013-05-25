@@ -714,7 +714,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 
 			Trace.log("    { Alpha' | C' }_I' <- standardize { Alpha' | C' }_I' apart from (Alpha, C)");
 			
-			Expression tupleAlphaC = Tuple.make(Arrays.asList(alpha, c));
+			Expression tupleAlphaC = Tuple.make(alpha, c);
 			Expression saS2        = StandardizedApartFrom
 					.standardizedApartFrom(
 							set2, tupleAlphaC, process);

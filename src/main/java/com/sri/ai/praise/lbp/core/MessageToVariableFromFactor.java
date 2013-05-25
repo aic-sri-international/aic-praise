@@ -113,7 +113,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 		Expression factor         = msgToV_F.get(1);
 
 		Trace.log("In <- R_in(m_V<-F in beingComputed)");
-		Expression pairV_F = Tuple.make(Arrays.asList(randomVariable, factor));
+		Expression pairV_F = Tuple.make(randomVariable, factor);
 		Expression in      = null;
 		LBPConfiguration.BeliefPropagationUpdateSchedule beliefPropagationUpdateSchedule = configuration.getBeliefPropagationUpdateSchedule();
 		if (beliefPropagationUpdateSchedule == LBPConfiguration.BeliefPropagationUpdateSchedule.ASYNCHRONOUS_INDIVIDUAL_BASED_CYCLE_DETECTION) { 

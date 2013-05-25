@@ -101,7 +101,7 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 		LPIUtil.assertFactorOk(factor, process);
 		LPIUtil.assertRandomVariableOk(randomVariable, process);
 		
-		Expression pairF_V = Tuple.make(Arrays.asList(factor, randomVariable));
+		Expression pairF_V = Tuple.make(factor, randomVariable);
 		Expression in      = null;
 		LBPConfiguration.BeliefPropagationUpdateSchedule beliefPropagationUpdateSchedule = configuration.getBeliefPropagationUpdateSchedule();
 		if (LBPConfiguration.BeliefPropagationUpdateSchedule.isAsynchronous(beliefPropagationUpdateSchedule)) {

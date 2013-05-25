@@ -930,7 +930,7 @@ public class LPIUtil {
 			Expression extensionalSetA, Expression extensionalSetB, int i, int j) {
 		
 		Expression setDiff = Expressions.make(FunctorConstants.SET_DIFFERENCE, extensionalSetA, extensionalSetB);
-		Expression result  = Tuple.make(Arrays.asList(setDiff, DefaultSymbol.createSymbol(i), DefaultSymbol.createSymbol(j)));
+		Expression result  = Tuple.make(setDiff, DefaultSymbol.createSymbol(i), DefaultSymbol.createSymbol(j));
 
 		return result;
 	}
@@ -952,7 +952,7 @@ public class LPIUtil {
 	public static Expression argForDifferenceOfExtensionalAndIntensionalSetRewriteCall(
 			Expression extensionalSet, Expression intensionalSet, int i) {
 		Expression setDiff = Expressions.make(FunctorConstants.SET_DIFFERENCE, extensionalSet, intensionalSet);
-		Expression result  = Tuple.make(Arrays.asList(setDiff, DefaultSymbol.createSymbol(i)));
+		Expression result  = Tuple.make(setDiff, DefaultSymbol.createSymbol(i));
 		
 		return result;
 	}
@@ -987,7 +987,7 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: (Set1, Set2)
 	 */
 	public static Expression argForIntersectionRewriteCall(Expression set1, Expression set2) {
-		Expression result = Tuple.make(Arrays.asList(set1, set2));
+		Expression result = Tuple.make(set1, set2);
 
 		return result;
 	}
@@ -1007,7 +1007,7 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: (m_F<-V, beingComputed)
 	 */
 	public static Expression argForMessageToFactorFromVariableRewriteCall(Expression messageToFFromV, Expression beingComputed) {
-		Expression result = Tuple.make(Arrays.asList(messageToFFromV, beingComputed));
+		Expression result = Tuple.make(messageToFFromV, beingComputed);
 
 		return result;
 	}
@@ -1029,7 +1029,7 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: (m_V<-F, true, (on ), beingComputed)
 	 */
 	public static Expression argForMessageToVariableFromFactorRewriteCall(Expression msgToV_F, Expression beingComputed) {
-		Expression result = Tuple.make(Arrays.asList(msgToV_F, Expressions.TRUE, IntensionalSet.EMPTY_SCOPING_EXPRESSION, beingComputed));
+		Expression result = Tuple.make(msgToV_F, Expressions.TRUE, IntensionalSet.EMPTY_SCOPING_EXPRESSION, beingComputed);
 		
 		return result;
 	}
@@ -1056,7 +1056,7 @@ public class LPIUtil {
 	 */
 	public static Expression argForMessageToVariableFromFactorRewriteCall(Expression msgToV_F,
 			Expression conditionC, Expression scopingExpressionI, Expression beingComputed) {
-		Expression result = Tuple.make(Arrays.asList(msgToV_F, conditionC, scopingExpressionI, beingComputed));
+		Expression result = Tuple.make(msgToV_F, conditionC, scopingExpressionI, beingComputed);
 		
 		return result;
 	}
@@ -1074,7 +1074,7 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: ([ Ev ], PF)
 	 */
 	public static Expression argForNeighborsOfRandomVariableInParfactorRewriteCall(Expression randomVariable, Expression parfactor) {
-		Expression result = Tuple.make(Arrays.asList(randomVariable, parfactor));
+		Expression result = Tuple.make(randomVariable, parfactor);
 		
 		return result;
 	}
@@ -1092,7 +1092,7 @@ public class LPIUtil {
 	 * @return  a tuple argument of the form: ([ v ], E)
 	 */
 	public static Expression argForNormalizeRewriteCall(Expression randomVariable, Expression expressionE) {
-		Expression result = Tuple.make(Arrays.asList(randomVariable, expressionE));
+		Expression result = Tuple.make(randomVariable, expressionE);
 
 		return result;
 	}
@@ -1111,7 +1111,7 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: (prod_F in S m_V<-F, beingComputed).
 	 */
 	public static Expression argForProductFactorRewriteCall(Expression productOfFactorsToVariable, Expression beingComputed) {
-		Expression result = Tuple.make(Arrays.asList(productOfFactorsToVariable, beingComputed));
+		Expression result = Tuple.make(productOfFactorsToVariable, beingComputed);
 
 		return result;
 	}
@@ -1134,7 +1134,7 @@ public class LPIUtil {
 	public static Expression argForProductMessageAndProductFactorRewriteCall(
 			Expression conditionalMessage, Expression productOfFactorsToVariable, Expression beingComputed) {
 		Expression times  = Expressions.make(FunctorConstants.TIMES, Arrays.asList(conditionalMessage, productOfFactorsToVariable));
-		Expression result = Tuple.make(Arrays.asList(times, beingComputed));
+		Expression result = Tuple.make(times, beingComputed);
 		
 		return result;
 	}
@@ -1180,7 +1180,7 @@ public class LPIUtil {
 	 */
 	public static Expression argForSumRewriteCall(Expression summationIndexN, Expression E,
 			Expression productOfIncomingMessages, Expression expressionT, Expression beingComputed) {
-		Expression result = Tuple.make(Arrays.asList(summationIndexN, E, productOfIncomingMessages, expressionT, beingComputed));
+		Expression result = Tuple.make(summationIndexN, E, productOfIncomingMessages, expressionT, beingComputed);
 
 		return result;
 	}

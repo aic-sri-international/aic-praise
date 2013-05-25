@@ -112,7 +112,7 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 				Expression i2              = IntensionalSet.getScopingExpression(set2);
 				Expression alpha2          = IntensionalSet.getHead(set2);
 				Expression c2              = IntensionalSet.getCondition(set2);
-				Expression tupleI2Alpha2C2 = Tuple.make(Arrays.asList(i2, alpha2, c2));
+				Expression tupleI2Alpha2C2 = Tuple.make(i2, alpha2, c2);
 				
 				Expression saSet1          = StandardizedApartFrom
 						.standardizedApartFrom(

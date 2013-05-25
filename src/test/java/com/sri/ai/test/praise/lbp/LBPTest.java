@@ -3542,7 +3542,7 @@ public class LBPTest extends AbstractLPITest {
 			public Expression getTopExpression() {
 				exprMsgValues     = parse(msgValues);
 				exprMsgExpansions = parse(msgExpansions);
-				Expression top = Tuple.make(Arrays.asList(exprMsgValues, exprMsgExpansions));
+				Expression top = Tuple.make(exprMsgValues, exprMsgExpansions);
 				
 				return top;
 			}
@@ -3587,7 +3587,7 @@ public class LBPTest extends AbstractLPITest {
 				exprExpansion = parse(expansion);
 				exprMsgValues = parse(msgValues);
 				
-				Expression top = Tuple.make(Arrays.asList(exprExpansion, exprMsgValues));
+				Expression top = Tuple.make(exprExpansion, exprMsgValues);
 				
 				return top;
 			}
@@ -3767,7 +3767,7 @@ public class LBPTest extends AbstractLPITest {
 				this.exprI = parse(I);
 				this.exprC = parse(C);
 				
-				Expression top = Tuple.make(Arrays.asList(exprX, exprI, exprC));
+				Expression top = Tuple.make(exprX, exprI, exprC);
 				
 				return top;
 			}
