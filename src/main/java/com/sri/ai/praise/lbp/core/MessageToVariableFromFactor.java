@@ -37,8 +37,6 @@
  */
 package com.sri.ai.praise.lbp.core;
 
-import java.util.Arrays;
-
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;

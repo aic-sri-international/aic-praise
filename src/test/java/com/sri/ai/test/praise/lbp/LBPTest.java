@@ -3326,68 +3326,68 @@ public class LBPTest extends AbstractLPITest {
 						new TrivialPQ(), 
 						"previous message to [p(a)] from [ Beta ]",
 						false,
-						"{{ (on ) ([p(a)], [Beta]) | X = a }}"),
+						"{ (on ) ([p(a)], [Beta]) | X = a }"),
 				// An intensional set without indices should be returned
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"previous message to [p(X)] from [ Alpha ]",
 						false,
-						"{{ (on ) ([p(X)], [Alpha]) }}"),
+						"{ (on ) ([p(X)], [Alpha]) }"),
 				// An intensional set should be returned
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
-						"{{ (on X) previous message to [p(X)] from [ Alpha ] }}",
+						"{ (on X) previous message to [p(X)] from [ Alpha ] }",
 						false,
-						"{{ (on X) ([p(X)], [Alpha]) }}"),
+						"{ (on X) ([p(X)], [Alpha]) }"),
 				// An intensional set should be returned
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"previous message to [p(X)] from [ if p(Y) then 1 else 0 ]",
 						false,
-						"{{ (on ) ([p(X)], [if p(Y) then 1 else 0]) }}"),
+						"{ (on ) ([p(X)], [if p(Y) then 1 else 0]) }"),
 				// Example from pseudo-code
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"if X != a then (previous message to [p(X)] from [ Alpha ]) else (previous message to [p(a)] from [ Beta ])",
 						false,
-						"{{ (on ) ([p(X)], [Alpha]) | X != a}} union {{ (on ) ([p(a)], [Beta]) | not(X != a) }}"),
+						"{ (on ) ([p(X)], [Alpha]) | X != a} union { (on ) ([p(a)], [Beta]) | not(X != a) }"),
 				// Variants of example from pseudo-code
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"if X != a then (previous message to [p(X)] from [ Alpha ]) else 1",
 						false,
-						"{{ (on ) ([p(X)], [Alpha]) | X != a }}"),
+						"{ (on ) ([p(X)], [Alpha]) | X != a }"),
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"if X != a then 1 else (previous message to [p(a)] from [ Beta ])",
 						false,
-						"{{ (on ) ([p(a)], [Beta]) | not (X != a) }}"),
+						"{ (on ) ([p(a)], [Beta]) | not (X != a) }"),
 				// More than 1 level of nesting
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQR(), 
 						"if X != a " + 
 				        "then (if Y != b then (previous message to [q(X, Y)] from [ Alpha1 ]) else 1) " + 
-						"else (if Y != c then (previous message to [q(X, Y)] from [ Beta1 ])  else product({{ (on Y) (previous message to [q(X, Y)] from [ Beta2 ]) }} ) )",
+						"else (if Y != c then (previous message to [q(X, Y)] from [ Beta1 ])  else product({ (on Y) (previous message to [q(X, Y)] from [ Beta2 ]) } ) )",
 						false,
-						"{{ ( on ) ( ([ q(X, Y) ]), ([ Alpha1 ]) ) | X != a and Y != b }} union {{ ( on ) ( ([ q(X, Y) ]), ([ Beta1 ]) ) | not (X != a) and Y != c }} union {{ ( on Y ) ( ([ q(X, Y) ]), ([ Beta2 ]) ) | not (X != a) and not (Y != c) }}"),		
+						"{ ( on ) ( ([ q(X, Y) ]), ([ Alpha1 ]) ) | X != a and Y != b } union { ( on ) ( ([ q(X, Y) ]), ([ Beta1 ]) ) | not (X != a) and Y != c } union { ( on Y ) ( ([ q(X, Y) ]), ([ Beta2 ]) ) | not (X != a) and not (Y != c) }"),		
 				// Embedded as a term in an arithmetic expression
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"if X != a then 1 else (1 + (previous message to [p(a)] from [ Beta ]))",
 						false,
-						"{{ ( on ) ( ([ p(a) ]), ([ Beta ]) ) | not (X != a) }}"),	
+						"{ ( on ) ( ([ p(a) ]), ([ Beta ]) ) | not (X != a) }"),	
 				// Embedded as a term in an exponentiation expression
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"if X != a then 1 else (previous message to [p(a)] from [ Beta ])^2",
 						false,
-						"{{ ( on ) ( ([ p(a) ]), ([ Beta ]) ) | not (X != a) }}"),	
+						"{ ( on ) ( ([ p(a) ]), ([ Beta ]) ) | not (X != a) }"),	
 			    // Embedded a term in a product expression and sub conditional expression
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
-						"product({{ (on A, D) if A != a then 1 else (previous message to [p(a)] from [ Beta ]) | A != D and (X = A or X = D) and A = X }})",
+						"product({ (on A, D) if A != a then 1 else (previous message to [p(a)] from [ Beta ]) | A != D and (X = A or X = D) and A = X })",
 						false,
-						"{{ ( on A, D ) ( ([ p(a) ]), ([ Beta ]) ) | A != D and (X = A or X = D) and A = X and not (A != a) }}"),	
+						"{ ( on A, D ) ( ([ p(a) ]), ([ Beta ]) ) | A != D and (X = A or X = D) and A = X and not (A != a) }"),	
 				//
 				// Basic: Contextual Constraint Tests
 				//
@@ -3453,70 +3453,70 @@ public class LBPTest extends AbstractLPITest {
 			// R_msg_to_v_f
 			new GetMessageExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPeopleAmericanTallIntelligentUnintelligent(),
-					"{{ (on X) ([intelligent(X)], [if intelligent(X) <=> not unintelligent(X) then 1 else 0]) }}",
+					"{ (on X) ([intelligent(X)], [if intelligent(X) <=> not unintelligent(X) then 1 else 0]) }",
 					false,
-					"{{ (on X) ([intelligent(X)], [if intelligent(X) <=> not unintelligent(X) then 1 else 0], 1) }}"
+					"{ (on X) ([intelligent(X)], [if intelligent(X) <=> not unintelligent(X) then 1 else 0], 1) }"
 					),
 			// R_msg_to_f_v
 			new GetMessageExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPQWithPriors(),
-					"{{ (on X) ([if p(X) and q(X) then 1 else 0], [p(X)]) }}",
+					"{ (on X) ([if p(X) and q(X) then 1 else 0], [p(X)]) }",
 					false,
-					"{{ (on X) ([if p(X) and q(X) then 1 else 0], [p(X)], (if p(X) then 0.2 else 0.8)) }}"
+					"{ (on X) ([if p(X) and q(X) then 1 else 0], [p(X)], (if p(X) then 0.2 else 0.8)) }"
 					),		
 			// union msgSets
 			new GetMessageExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPeopleAmericanTallIntelligentUnintelligent(),
-					"{{ (on X) ([tall(X)], [if tall(X) then 2 else 8]) }} union {{ (on X) ([tall(X)], [if tall(X) and american(X) then 7 else 1]) }}",
+					"{ (on X) ([tall(X)], [if tall(X) then 2 else 8]) } union { (on X) ([tall(X)], [if tall(X) and american(X) then 7 else 1]) }",
 					false,
-					"{{ (on X) ([tall(X)], [if tall(X) then 2 else 8], (if tall(X) then 2 else 8)) }}" +
+					"{ (on X) ([tall(X)], [if tall(X) then 2 else 8], (if tall(X) then 2 else 8)) }" +
 					" union " +
-					"{{ (on X) ([tall(X)], [if tall(X) and american(X) then 7 else 1], (if tall(X) then 8 else 2)) }}"
+					"{ (on X) ([tall(X)], [if tall(X) and american(X) then 7 else 1], (if tall(X) then 8 else 2)) }"
 					),
 		    // duplicate union arguments
 			new GetMessageExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPeopleAmericanTallIntelligentUnintelligent(),
-					"{{ (on X) ([tall(X)], [if tall(X) then 2 else 8]) }} union {{ (on X) ([tall(X)], [if tall(X) and american(X) then 7 else 1]) }} union {{ (on Y) ([tall(Y)], [if tall(Y) then 2 else 8]) }}",
+					"{ (on X) ([tall(X)], [if tall(X) then 2 else 8]) } union { (on X) ([tall(X)], [if tall(X) and american(X) then 7 else 1]) } union { (on Y) ([tall(Y)], [if tall(Y) then 2 else 8]) }",
 					false,
-					"{{ (on X) ([tall(X)], [if tall(X) then 2 else 8], (if tall(X) then 2 else 8)) }}" +
+					"{ (on X) ([tall(X)], [if tall(X) then 2 else 8], (if tall(X) then 2 else 8)) }" +
 					" union " +
-					"{{ (on X) ([tall(X)], [if tall(X) and american(X) then 7 else 1], (if tall(X) then 8 else 2)) }}"
+					"{ (on X) ([tall(X)], [if tall(X) and american(X) then 7 else 1], (if tall(X) then 8 else 2)) }"
 					),
 			//
 			// Basic: Illegal Argument Exceptions
 			//
-			// not a multiset
+			// not a uniset
 			new GetMessageExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPeopleAmericanTallIntelligentUnintelligent(),
-					"{ ([intelligent(a)], [if intelligent(a) <=> not unintelligent(a) then 1 else 0]) }",
+					"{{ ([intelligent(a)], [if intelligent(a) <=> not unintelligent(a) then 1 else 0]) }}",
 					true,
 					"{}"
 					),
-			// not a singleton multiset
+			// not a singleton extensional uniset
 			new GetMessageExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPeopleAmericanTallIntelligentUnintelligent(),
-					"{{ ([intelligent(a)], [if intelligent(a) <=> not unintelligent(a) then 1 else 0]), ([intelligent(b)], [if intelligent(b) <=> not unintelligent(b) then 1 else 0]) }}",
+					"{ ([intelligent(a)], [if intelligent(a) <=> not unintelligent(a) then 1 else 0]), ([intelligent(b)], [if intelligent(b) <=> not unintelligent(b) then 1 else 0]) }",
 					true,
 					"{}"
 					),
 			// not a tuple
 			new GetMessageExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPeopleAmericanTallIntelligentUnintelligent(),
-					"{{ [intelligent(a)] }}",
+					"{ [intelligent(a)] }",
 					true,
 					"{}"
 					),
 			// not a tuple pair
 			new GetMessageExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPeopleAmericanTallIntelligentUnintelligent(),
-					"{{ tuple([intelligent(a)]) }}",
+					"{ tuple([intelligent(a)]) }",
 					true,
 					"{}"
 					),
 			// not a tuple with bracketed expressions
 			new GetMessageExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPeopleAmericanTallIntelligentUnintelligent(),
-					"{{ (intelligent(a), unintelligent(b)) }}",
+					"{ (intelligent(a), unintelligent(b)) }",
 					true,
 					"{}"
 					),
@@ -3560,10 +3560,10 @@ public class LBPTest extends AbstractLPITest {
 			// Basic:
 			new IterateValuesUsingExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPQWithPArity2AndQArity1(),
-					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,a) then 1 else 0 ) ) | X != c }}",
-					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then (previous message to [p(X,a)] from [if p(X,a) and q(Y) then 1 else 0]) else 0 ) ) | X != c }}",
+					"{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,a) then 1 else 0 ) ) | X != c }",
+					"{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then (previous message to [p(X,a)] from [if p(X,a) and q(Y) then 1 else 0]) else 0 ) ) | X != c }",
 					false,
-					"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then if p(X,a) then 1 else 0 else 0.5 ) ) | X != c }}"),
+					"{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then if p(X,a) then 1 else 0 else 0.5 ) ) | X != c }"),
 		};
 		
 		perform(tests);
@@ -3608,21 +3608,21 @@ public class LBPTest extends AbstractLPITest {
 				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
 						new TrivialPQWithPArity2AndQArity1(),
 						"if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0",
-						"{{ (on X) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }}",
+						"{ (on X) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }",
 						false,
 						"if Y != d then if p(b,Z) then 1 else 0 else 0"),
 				// Variant of Example 1 from the pseudo-code (on X, Z) instead of (on X)
 				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
 						new TrivialPQWithPArity2AndQArity1(),
 						"if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0",
-						"{{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }}",
+						"{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }",
 						false,
 						"if Y != d then if p(b,a) then 1 else 0 else 0"),
 				// Variant of Example 1 from the pseudo-code (on X, Z) instead of (on X) and [p(X, Z)] instead of [p(X,a)]
 				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
 						new TrivialPQWithPArity2AndQArity1(),
 						"if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0",
-						"{{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }}",
+						"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }",
 						false,
 						"if Y != d then if p(b,Y) then 1 else 0 else 0"),
 		};

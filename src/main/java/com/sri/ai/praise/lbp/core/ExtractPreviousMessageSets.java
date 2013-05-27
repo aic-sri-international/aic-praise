@@ -38,7 +38,6 @@
 package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -127,7 +126,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 		if (LPIUtil.isPreviousMessage(expressionE)) {
 			Expression tuplePair         = Tuple.make(expressionE.get(0), expressionE.get(1));
 			Expression scopingExpression = IntensionalSet.makeScopingExpression(scopingVariables);
-			Expression set = IntensionalSet.makeMultiSet(scopingExpression, tuplePair, constrainingCondition);
+			Expression set = IntensionalSet.makeUniSet(scopingExpression, tuplePair, constrainingCondition);
 			// at some point I tried simplifying the set here, but because its condition is the contextual constraint in the process,
 			// this would cause the condition to be always simplified to true (since it implies itself).
 			// if we attempt simplification here, it needs to be with a process with contextual constraint equal to true.

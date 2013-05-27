@@ -38,7 +38,6 @@
 package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
@@ -99,8 +98,10 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 		else if (IfThenElse.isIfThenElse(set2)) {
 			result = rewriteS2Conditional(set1, set2, process);
 		}
-		else if (Sets.isIntensionalMultiSet(set1) && Sets.isIntensionalMultiSet(set2)) {
-			Trace.log("Set1 is {{ (on I1) Alpha1 | C1 }} and Set2 is {{ (on I2) Alpha2 | C2 }}");
+		else if ((Sets.isIntensionalMultiSet(set1) && Sets.isIntensionalMultiSet(set2))
+				||
+				(Sets.isIntensionalUniSet(set1) && Sets.isIntensionalUniSet(set2))) {
+			Trace.log("Set1 is { (on I1) Alpha1 | C1 } and Set2 is { (on I2) Alpha2 | C2 } (or multiset version)");
 			if (CheapDisequalityModule.isACheapDisequality(IntensionalSet.getHead(set1), IntensionalSet.getHead(set2), process)) {
 				Trace.log("    is guaranteed Alpha1 != Alpha2");
 				Trace.log("    return {}"); 
@@ -129,12 +130,12 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 				} 
 				else {
 					Trace.log("    I <- concatenation of I1 and I2");
-					Trace.log("    return {{ (on I) Alpha1 | C }}");
+					Trace.log("    return { (on I) Alpha1 | C } (or multiset version)");
 					List<Expression> i = new ArrayList<Expression>();
 					i.addAll(IntensionalSet.getIndexExpressions(saSet1));
 					i.addAll(IntensionalSet.getIndexExpressions(set2));
 					
-					result = IntensionalSet.makeMultiSetFromIndexExpressionsList(i, alpha1, c);
+					result = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(set1), i, alpha1, c);
 				}
 			}
 		} 

@@ -38,7 +38,6 @@
 package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.annotations.Beta;

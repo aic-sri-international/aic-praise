@@ -38,7 +38,6 @@
 package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -150,11 +149,12 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression result = null;
 		
 		List<Expression> msgValuesUnionArguments = getEntriesFromUnion(msgValues);
-		
-		result = useValuesForPreviousMessages(expansion, msgValuesUnionArguments,
-												new PreviousMessageToMsgValueCache(),
-												process);
-		
+
+		result = useValuesForPreviousMessages(
+				expansion, msgValuesUnionArguments,
+				new PreviousMessageToMsgValueCache(),
+				process);
+
 		return result;
 	}
 
@@ -276,8 +276,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 													   Tuple.get(tupleExpansion, 1),
 													   Expressions.ONE);
 				// {{ (on I) (Destination, Origin, 1) | C }}
-				Expression msgValue               = IntensionalSet.make(
-																Sets.getLabel(msgExpansion), 
+				Expression msgValue       = IntensionalSet.make(Sets.getLabel(msgExpansion), 
 																IntensionalSet.getScopingExpression(msgExpansion),
 																tuple, 
 																IntensionalSet.getCondition(msgExpansion));
@@ -387,7 +386,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Expression msgsAlreadyExpanded = createUnionFromArgs(possibleIntersectionUnionArgs);
 			
 			Trace.log("    msg_set <- R_set_diff(msg_set minus msgs_already_expanded)");
-			Expression uniMsgSet = convertIntensionalMultiSetToUniSet(msgSet);
+			Expression uniMsgSet = msgSet; //convertIntensionalMultiSetToUniSet(msgSet);
 			msgSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(uniMsgSet, msgsAlreadyExpanded));
 			Trace.log("    msg_set <- R_complete_simplify(msg_set)");
 			msgSet = process.rewrite(R_complete_simplify, msgSet);
@@ -396,11 +395,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			
 			if (!Sets.isEmptySet(msgSet)) {
 				// convert msg set back to a multiset
-				msgSet = convertUniSetToIntensionalMultiSet(msgSet);
+				//msgSet = convertUniSetToIntensionalMultiSet(msgSet);
 				
 				Justification.begin("Going to re-arrange as message expression");
 				Trace.log("    if msg_set is not empty");
-				// represent msg_set as {{ (on I) (Destination, Origin) | C }}
+				// represent msg_set as { (on I) (Destination, Origin) | C }
 				Expression expressionI            = IntensionalSet.getScopingExpression(msgSet);
 				Expression tupleDestinationOrigin = IntensionalSet.getHead(msgSet);
 				Expression destination            = Tuple.get(tupleDestinationOrigin, 0);
@@ -446,7 +445,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						msgExpansions.size());
 				
 				Trace.log("        msg_expansion <- {{ (on I) (Destination, Origin, expansion) | C }}");
-				Expression msgExpansion = IntensionalSet.makeMultiSet(expressionI, 
+				Expression msgExpansion = IntensionalSet.makeUniSet(expressionI, 
 						Tuple.make(destination, origin, expansion), 
 						conditionC);
 				
@@ -601,7 +600,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					Trace.log("    next_msg_values <- next_msg_values union {{ (on I) (Destination, Origin, value) | C }}");
 					Expression tupleTriple       = Tuple.make(destination, origin, normalizedValue);
 					Expression newMsgValue = IntensionalSet
-												.makeMultiSetFromIndexExpressionsList(
+												.makeUniSetFromIndexExpressionsList(
 														IntensionalSet.getIndexExpressions(msgExpansion), 
 														tupleTriple, 
 														IntensionalSet.getCondition(msgExpansion));
@@ -901,7 +900,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// Intersection <- R_intersection(
 		//     {{ (on I) (Destination, Origin) | C }}
 		Expression msgValueTuple   = IntensionalSet.getHead(msgValue);
-		Expression msgValueNoValue = IntensionalSet.makeMultiSet(
+		Expression msgValueNoValue = IntensionalSet.makeUniSet(
 				IntensionalSet.getScopingExpression(msgValue),
 				Tuple.make(
 						Tuple.get(msgValueTuple, 0),
@@ -912,7 +911,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression destinationPrime = prevMessage.get(0);
 		Expression originPrime      = prevMessage.get(1);
 		Expression previousMsgTuple = Tuple.make(destinationPrime, originPrime);			
-		Expression previousMsgSet   = IntensionalSet.makeMultiSetFromIndexExpressionsList(new ArrayList<Expression>(), previousMsgTuple, Expressions.TRUE);
+		Expression previousMsgSet   = IntensionalSet.makeUniSetFromIndexExpressionsList(new ArrayList<Expression>(), previousMsgTuple, Expressions.TRUE);
 		
 		Trace.log("    Intersection <- R_intersection(");
 		Trace.log("    {}", msgValueNoValue);
@@ -999,10 +998,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	private static void assertIsLegalMsgSet(Expression msgSet) {
 		boolean    legal = true;
 		Expression tuple = null;
-		if (!Sets.isMultiSet(msgSet)) {
+		if (!Sets.isUniSet(msgSet)) {
 			legal = false;
 		} 
-		else if (Sets.isExtensionalMultiSet(msgSet)) {
+		else if (Sets.isExtensionalUniSet(msgSet)) {
 			if (!Sets.isSingletonExtensionalSet(msgSet)) {
 				legal = false;
 			} 
@@ -1010,7 +1009,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				tuple = msgSet.get(0);
 			}
 		} 
-		else if (Sets.isIntensionalMultiSet(msgSet)) {
+		else if (Sets.isIntensionalUniSet(msgSet)) {
 			tuple = IntensionalSet.getHead(msgSet);
 		}
 		
@@ -1030,46 +1029,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		}
 		
 		if (!legal) {
-			throw new IllegalArgumentException("msg_set is not an expression of the form {{ (on I) (Destination, Origin) | C }}:"+msgSet);
+			throw new IllegalArgumentException("msg_set is not an expression of the form { (on I) (Destination, Origin) | C }:"+msgSet);
 		}
-	}
-	
-	private static Expression convertIntensionalMultiSetToUniSet(Expression intensionalMultiSet) {
-		if (!Sets.isIntensionalMultiSet(intensionalMultiSet)) {
-			throw new IllegalStateException("Unhandled case where msgSet is not an intensional multiset:"+intensionalMultiSet);
-		}
-		
-		Expression result = IntensionalSet.makeUniSet(IntensionalSet.getScopingExpression(intensionalMultiSet), 
-				IntensionalSet.getHead(intensionalMultiSet), IntensionalSet.getCondition(intensionalMultiSet));
-		
-		return result;
-	}
-	
-	private static Expression convertUniSetToIntensionalMultiSet(Expression uniSet) {
-		if (!Sets.isUniSet(uniSet)) {
-			throw new IllegalStateException("Unhandled case where msgSet is not a uniset: " + uniSet);
-		}
-		if (Sets.isExtensionalSet(uniSet) && ! Sets.isSingletonExtensionalSet(uniSet)) {
-			throw new IllegalStateException("Unhandled case where msgSet is an extensional set but not a singleton: " + uniSet);
-		}
-		Expression scopingExpression = null;
-		Expression head              = null;
-		Expression condition         = null;
-		
-		if (Sets.isIntensionalSet(uniSet)) {
-			scopingExpression = IntensionalSet.getScopingExpression(uniSet);
-			head              = IntensionalSet.getHead(uniSet);
-			condition         = IntensionalSet.getCondition(uniSet);
-		}
-		else {
-			scopingExpression = IntensionalSet.EMPTY_SCOPING_EXPRESSION;
-			head              = ExtensionalSet.getElements(uniSet).get(0);
-			condition         = Expressions.TRUE;
-		}
-		
-		Expression result = IntensionalSet.makeMultiSet(scopingExpression, head, condition);
-
-		return result;
 	}
 	
 	private Expression limitPrecisionToNumberOfSignificantDecimalPlaces(Expression normalizedValue, RewritingProcess process) {
