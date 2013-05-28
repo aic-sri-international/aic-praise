@@ -266,7 +266,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// a union of sets of tuples (N1, N2, value) where (N1,N2) represents a message and value
 			// is a basic expression representing its value at the current loopy BP iteration
 			// (this expression is therefore free of previous message expressions).
-			// {{ (on I) (Destination, Origin, 1) | C }} union ...
+			// { (on I) (Destination, Origin, 1) | C } union ...
 			List<Expression> msgValues = new ArrayList<Expression>();
 			for (Expression msgExpansion : msgExpansions) {
 				// i.e. (Destination, Origin, Expansion)
@@ -275,7 +275,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Expression tuple          = Tuple.make(Tuple.get(tupleExpansion, 0),
 													   Tuple.get(tupleExpansion, 1),
 													   Expressions.ONE);
-				// {{ (on I) (Destination, Origin, 1) | C }}
+				// { (on I) (Destination, Origin, 1) | C }
 				Expression msgValue       = IntensionalSet.make(Sets.getLabel(msgExpansion), 
 																IntensionalSet.getScopingExpression(msgExpansion),
 																tuple, 
@@ -363,13 +363,6 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			assertIsLegalMsgSet(msgSet);
 	
 			Justification.begin("Going to expand message set {}", msgSet);
-			
-			// Note - approach discussed with Rodrigo to work around R_set_diff 
-			// not supporting both arguments being intensional multisets:
-			// "I realize now that for dealing with this situation with (D,O) pairs we
-			//  don't need to extend the routine. Because they are guaranteed to have 
-			//  unique elements, we can simply convert them to uni-sets before doing the
-			//  set difference."
 			Justification.begin("Going to subtract message instantiations that were already expanded");
 			
 			// Note: Minor Optimization, up front limit msgs_already_expanded to only those 
@@ -441,7 +434,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						Expressions.make(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, destination, origin),
 						msgExpansions.size());
 				
-				Trace.log("        msg_expansion <- {{ (on I) (Destination, Origin, expansion) | C }}");
+				Trace.log("        msg_expansion <- { (on I) (Destination, Origin, expansion) | C }");
 				Expression msgExpansion = IntensionalSet.makeUniSet(expressionI, 
 						Tuple.make(destination, origin, expansion), 
 						conditionC);
@@ -511,7 +504,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		Trace.log("next_msg_values <- empty set ");
 		List<Expression> nextMsgValuesUnionArguments = new ArrayList<Expression>();
-		Trace.log("for each union argument {{ (on I) (Destination, Origin, Expansion) | C }} in msg_expansions");
+		Trace.log("for each union argument { (on I) (Destination, Origin, Expansion) | C } in msg_expansions");
 		BranchRewriteTask[] iterateValueTasks = new BranchRewriteTask[msgExpansions.size()];
 		for (int i = 0; i < msgExpansions.size(); i++) {
 			Expression msgExpansion = msgExpansions.get(i);
@@ -594,8 +587,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						normalizedValue = limitPrecisionToNumberOfSignificantDecimalPlaces(normalizedValue, process);
 					}
 					
-					Trace.log("    next_msg_values <- next_msg_values union {{ (on I) (Destination, Origin, value) | C }}");
-					Expression tupleTriple       = Tuple.make(destination, origin, normalizedValue);
+					Trace.log("    next_msg_values <- next_msg_values union { (on I) (Destination, Origin, value) | C }");
+					Expression tupleTriple = Tuple.make(destination, origin, normalizedValue);
 					Expression newMsgValue = IntensionalSet
 												.makeUniSetFromIndexExpressionsList(
 														IntensionalSet.getIndexExpressions(msgExpansion), 
@@ -684,7 +677,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	 * <pre>
      * find_msg_value_matching_previous_message(prev_message, msg_values)
      * prev_message is of the form: previous message to Destination' from Origin'
-     * msg_value is of the form: {{ (on I) (Destination, Origin, value) | C }}
+     * msg_value is of the form: { (on I) (Destination, Origin, value) | C }
      * 
      * Intersection <- null
      * msg_value    <- null
@@ -871,31 +864,31 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	 * <pre>
 	 * calculate_intersection(prev_message, msg_value)
 	 * prev_message is of the form: previous message to Destination' from Origin'
-	 * msg_value is of the form: {{ (on I) (Destination, Origin, value) | C }}
+	 * msg_value is of the form: { (on I) (Destination, Origin, value) | C }
 	 * 
 	 * // We want to find out if this previous message is covered by
-	 * // {{ (on I) (Destination, Origin, value) | C }}
+	 * // { (on I) (Destination, Origin, value) | C }
 	 * // This can be done by computing the intersection below,
 	 * // where we range over all possible values
 	 * // for the previous message by excluding them:
 	 * Intersection <- R_intersection(
-	 *                 {{ (on I) (Destination, Origin) | C }}
+	 *                 { (on I) (Destination, Origin) | C }
 	 *                 intersection
-	 *                 {{ (Destination', Origin') }})
+	 *                 { (Destination', Origin') })
 	 * // Above rewriter guarantees representations of set is {}
-	 * // if it is empty, instead of {{ (on I) (Destination, Origin) | UnsatisfiableConstraint }}
+	 * // if it is empty, instead of { (on I) (Destination, Origin) | UnsatisfiableConstraint }
 	 * 
-	 * return Intersection // {{ (on I) (Destination, Origin) | D }}
+	 * return Intersection // { (on I) (Destination, Origin) | D }
 	 * <pre>
 	 */
 	private Expression calculateIntersection(Expression prevMessage, Expression msgValue, RewritingProcess process) {		
 		// We want to find out if this previous message is covered by
-		// {{ (on I) (Destination, Origin, value) | C }}
+		// { (on I) (Destination, Origin, value) | C }
 		// This can be done by computing the intersection below,
 		// where we assume that we range over all possible values
 		// for the previous message by excluding them:
 		// Intersection <- R_intersection(
-		//     {{ (on I) (Destination, Origin) | C }}
+		//     { (on I) (Destination, Origin) | C }
 		Expression msgValueTuple   = IntensionalSet.getHead(msgValue);
 		Expression msgValueNoValue = IntensionalSet.makeUniSet(
 				IntensionalSet.getScopingExpression(msgValue),
@@ -904,7 +897,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						Tuple.get(msgValueTuple, 1)), 
 				IntensionalSet.getCondition(msgValue));
 		//	   intersection
-		//     {{ (Destination', Origin') }})
+		//     { (Destination', Origin') })
 		Expression destinationPrime = prevMessage.get(0);
 		Expression originPrime      = prevMessage.get(1);
 		Expression previousMsgTuple = Tuple.make(destinationPrime, originPrime);			
@@ -916,7 +909,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Trace.log("    {} }} )", previousMsgSet);
 		
 		Expression intersection = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(msgValueNoValue, previousMsgSet));
-		// return Intersection // {{ (on I) (Destination, Origin) | D }}
+		// return Intersection // { (on I) (Destination, Origin) | D }
 		return intersection;
 	}
 	

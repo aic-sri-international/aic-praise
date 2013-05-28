@@ -51,9 +51,9 @@ public interface IterateValuesUsingExpansions {
 	 * the result as the new value after one iteration of loopy BP.
 	 * 
 	 * next_msg_values <- empty set 
-	 * for each union argument {{ (on I) (Destination, Origin, Expansion) | C }} in msg_expansions
+	 * for each union argument { (on I) (Destination, Origin, Expansion) | C } in msg_expansions
 	 *     value <- use_values_for_previous_msgs(Expansion, msg_values)
-	 *     next_msg_values <- next_msg_values union {{ (on I) (Destination, Origin, value) | C }}
+	 *     next_msg_values <- next_msg_values union { (on I) (Destination, Origin, value) | C }
 	 * return next_msg_values
 	 * </pre>
 	 * 

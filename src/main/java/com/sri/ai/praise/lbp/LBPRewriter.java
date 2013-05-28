@@ -306,7 +306,7 @@ public interface LBPRewriter extends Rewriter {
 	 * variables.
 	 * 
 	 * if E is previous message to N1 from N2
-	 *     return {{ (N1, N2) | C }} where C is the current contextual constraint
+	 *     return { (N1, N2) | C } where C is the current contextual constraint
 	 * else
 	 *     let E1, ..., En be the sub-expressions of E
 	 *     let Ci be the conditions E imposes on the free variables of Ei
@@ -327,8 +327,8 @@ public interface LBPRewriter extends Rewriter {
 	 * The union of sets will be:
 	 * 
 	 * <pre>
-	 * {{ (on X) ([p(X)], [Alpha]) | X != a }} union
-	 * {{ ([p(a)], [Beta]) | X = a }}
+	 * { (on X) ([p(X)], [Alpha]) | X != a } union
+	 * { ([p(a)], [Beta]) | X = a }
 	 * </pre>
 	 */
 	String R_extract_previous_msg_sets = LBP_NAMESPACE+"R_extract_previous_msg_sets";
@@ -388,13 +388,15 @@ public interface LBPRewriter extends Rewriter {
 	 * Set1 and Set2 are sets
 	 * Returns the intersection set of Set1 and Set2, guaranteed to be expression "{}" if it is empty.
 	 * Cases:
-	 * Set1 is {{ (on I1) Alpha1 | C1 }} and Set2 is {{ (on I2) Alpha2 | C2 }} (1)
+	 * Set1 is { (on I1) Alpha1 | C1 } and Set2 is { (on I2) Alpha2 | C2 } (or multiset version) (1)
 	 *     standardize Set1 apart from (I2, Alpha2, C2)
 	 *     C <- R_complete_simplify(Alpha1 = Alpha2 and C1 and C2)
 	 *     if C is "false"
 	 *         return {}
 	 *     I <- concatenation of I1 and I2
-	 *     return {{ (on I) Alpha1 | C }}
+	 *     return { (on I) Alpha1 | C } (or multiset version)
+	 * Set1 is {...} and Set2 is {...}
+	 *     return R_set_diff(S1 \ R_set_diff(S1 \ S21))
 	 * Else
 	 *     "Not currently supported"
 	 *     
