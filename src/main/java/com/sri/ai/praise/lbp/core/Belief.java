@@ -386,16 +386,13 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Expression msgsAlreadyExpanded = createUnionFromArgs(possibleIntersectionUnionArgs);
 			
 			Trace.log("    msg_set <- R_set_diff(msg_set minus msgs_already_expanded)");
-			Expression uniMsgSet = msgSet; //convertIntensionalMultiSetToUniSet(msgSet);
-			msgSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(uniMsgSet, msgsAlreadyExpanded));
+			msgSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(msgSet, msgsAlreadyExpanded));
 			Trace.log("    msg_set <- R_complete_simplify(msg_set)");
 			msgSet = process.rewrite(R_complete_simplify, msgSet);
 			Justification.end("Remaining, non-expanded messages are {}", msgSet);
 			Trace.log("    // msg_set = {}", msgSet);
 			
 			if (!Sets.isEmptySet(msgSet)) {
-				// convert msg set back to a multiset
-				//msgSet = convertUniSetToIntensionalMultiSet(msgSet);
 				
 				Justification.begin("Going to re-arrange as message expression");
 				Trace.log("    if msg_set is not empty");

@@ -1224,7 +1224,7 @@ public class LBPTest extends AbstractLPITest {
 				new SetDifferenceTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{(on X) a | X != a }", "{b, c}", 
 						false,
-						"{(on X) a | X != a}"),
+					    "{(on ) a | true}"),
 				new SetDifferenceTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{(on X) X | X != a }", "{ }", 
 						false,
@@ -1237,7 +1237,7 @@ public class LBPTest extends AbstractLPITest {
 				new SetDifferenceTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{(on X) a | X != a }", "{X}", 
 						false,
-						"{(on X') a | X' != a and X != a}"),
+					    "{(on ) a | X != a}"),
 				//
 				// Basic: if S1 is { Alpha | C }_I and S2 is { Alpha' | C' }_I'
 				//
