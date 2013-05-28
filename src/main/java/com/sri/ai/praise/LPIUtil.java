@@ -75,7 +75,6 @@ import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.RandomPredicate;
@@ -1380,9 +1379,9 @@ public class LPIUtil {
 		ReplacementFunctionWithContextuallyUpdatedProcess searchFunction = new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {
 			public Expression apply(Expression subExpression, RewritingProcess process) {
 				if (LPIUtil.isRandomVariableValueExpression(subExpression, process) && ! subExpression.equals(randomVariableValue)) {
-					Expression randomVariable = BracketedExpressionSubExpressionsProvider.make(randomVariableValue);
+					Expression randomVariable              = BracketedExpressionSubExpressionsProvider.make(randomVariableValue);
 					Expression subExpressionRandomVariable = BracketedExpressionSubExpressionsProvider.make(subExpression);
-					Expression comparison = LBPFactory.newCompleteSimplify().rewrite(Equality.make(subExpressionRandomVariable, randomVariable), process);
+					Expression comparison                  = process.rewrite(LBPRewriter.R_complete_simplify, Equality.make(subExpressionRandomVariable, randomVariable));
 					if ( ! comparison.equals(Expressions.TRUE)) { // that is, it is not guaranteed to be the same random variable value expression in this context
 						result.add(new Pair<Expression, Expression>(subExpression, process.getContextualConstraint()));
 					}
