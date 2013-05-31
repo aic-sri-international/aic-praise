@@ -180,7 +180,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 					}
 				} 
 				
-				// if is not 'Alpha is if C' then Alpha_1 else Alpha_2 where C' is a formula depending on I'
+				// Alpha isn't if C' then Alpha_1 else Alpha_2, where C' is a formula depending on I'
 				if (result == expression) { 
 					// if Alpha <- pick_single_element({{(on I) Alpha | C}}) succeeds 			
 					// Note: pick_single_element expects uni-intensional sets.

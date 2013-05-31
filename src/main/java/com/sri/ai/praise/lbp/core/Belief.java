@@ -39,6 +39,7 @@ package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +63,7 @@ import com.sri.ai.grinder.library.StandardizedApartFrom;
 import com.sri.ai.grinder.library.SubExpressionSelection;
 import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
+import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -252,7 +254,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Trace.log("msg_sets <- R_extract_previous_msg_sets(belief_expansion)");
 			// a union of sets of pairs (N1, N2), with each pair representing an occurrence of 
 			// "previous message" on that pair occurring in belief_expansion.
-			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, beliefExpansion));		
+//			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, beliefExpansion));		
+			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, Lambda.make(new LinkedList<Expression>(freeVariablesFromBeliefQuery), beliefExpansion)));		
 		
 			Trace.log("msg_expansions <- get_msg_expansions(msg_sets)");
 			// a union of intensional sets containing tuples of the form:
@@ -863,8 +866,15 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	/**
 	 * <pre>
 	 * calculate_intersection(prev_message, msg_value)
-	 * prev_message is of the form: previous message to Destination' from Origin'
-	 * msg_value is of the form: { (on I) (Destination, Origin, value) | C }
+ 	 * inputs: prev_message, which is of the form: 
+ 	 *         previous message to Destination' from Origin'
+ 	 *         msg_value is of the form: 
+ 	 *         { (on I) (Destination, Origin, value) | C }
+  	 * output: the intersection of { (Destination', Origin') } and { (on I) (Destination, Origin) | C },
+ 	 *         which is going to be either an intensional set expression involving the variables
+ 	 *         in Destination' and Origin' as free variables, or the empty set {}.
+ 	 *         The output is guaranteed to be {} if the set is indeed empty,
+ 	 *         that is, it will not be an intensional set expression with an unsatisfiable condition.
 	 * 
 	 * // We want to find out if this previous message is covered by
 	 * // { (on I) (Destination, Origin, value) | C }
@@ -878,7 +888,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	 * // Above rewriter guarantees representations of set is {}
 	 * // if it is empty, instead of { (on I) (Destination, Origin) | UnsatisfiableConstraint }
 	 * 
-	 * return Intersection // { (on I) (Destination, Origin) | D }
+	 * return Intersection
 	 * <pre>
 	 */
 	private Expression calculateIntersection(Expression prevMessage, Expression msgValue, RewritingProcess process) {		
@@ -909,7 +919,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Trace.log("    {} }} )", previousMsgSet);
 		
 		Expression intersection = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(msgValueNoValue, previousMsgSet));
-		// return Intersection // { (on I) (Destination, Origin) | D }
+		// return Intersection
 		return intersection;
 	}
 	
