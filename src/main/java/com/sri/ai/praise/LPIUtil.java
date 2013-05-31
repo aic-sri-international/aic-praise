@@ -1187,18 +1187,18 @@ public class LPIUtil {
 	/**
 	 * <pre>
 	 * pick_single_element({ (on I) Alpha | C })
-	 * Assumes that the given intensional set is a singleton
-	 * Returns its singleton element or null if it cannot be determined.
+	 * Returns its singleton element if the given uniset is a singleton, or null otherwise.
 	 * R <- indices in I that Alpha depends on 
 	 * if R is empty, return Alpha.
 	 * let X be an index in R
 	 * let I' be I - X
 	 * value = pick_value(X, I, C)
+	 * if value is null, return null
 	 * return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })
 	 * </pre>
 	 * 
 	 * @param intensionalSet
-	 *            an intensional uni-set that is assumed to be a singleton.
+	 *            an intensional uniset that is assumed to be a singleton.
 	 * @param process
 	 *            the process in which the rewriting is occurring.
 	 * @return its singleton element or null if one cannot be determined..
@@ -1246,6 +1246,9 @@ public class LPIUtil {
 				Expression intensionalSetSubX = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressionsIPrime, alphaSubX, formulaCSubX);
 	
 				result = pickSingleElement(intensionalSetSubX, process);
+			}
+			else {
+				Trace.log("if value is null, return null");
 			}
 		}
 		
