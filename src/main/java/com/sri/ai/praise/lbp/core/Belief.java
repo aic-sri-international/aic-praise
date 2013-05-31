@@ -679,12 +679,26 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	/**
 	 * <pre>
      * find_msg_value_matching_previous_message(prev_message, msg_values)
-     * prev_message is of the form: previous message to Destination' from Origin'
-     * msg_value is of the form: { (on I) (Destination, Origin, value) | C }
+     *  inputs: prev_message is of the form: 
+     *         previous message to Destination' from Origin'
+     *         msg_values, with entris of the form: 
+     *         { (on I) (Destination, Origin, value) | C }
+     * output: intuitively, we interpret each entry in msg_values as storing the
+     *         parameterized value of a message from Origin to Destination, valid for
+     *         instantiations satisfying C, and return the value of prev_message
+     *         according to these values (provided by the entries unifying with it; there
+     *         may be several).
+     *         Formally, if L are the free logical variables in prev_message,
+     *         then the function returns a (conditional) value
+     *             if <condition on L>
+     *                then <value defined by msg_values under the condition on L>
+     *                else <find_msg_value_matching_previous_message(
+     *                           prev_message, msg_values)
+     *                           under the complement of the condition>
      * 
      * Intersection <- null
      * msg_value    <- null
-     * if previous_message msg_value_index cached
+     * if previous_message index in msg_values is cached
      *     index     <- from cache
      *     msg_value <- standardize msg_values[index] apart from prev_message
      *     if Intersection cached for previous_message
@@ -703,7 +717,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
      *             cache Intersection under prev_message’s contextual constraint
      *             exit for each loop
      *             
-     * pickFrom = { (on I) value | Condition from Intersection }
+     * // msg_value is represented as { (on I) (Destination, Origin, value) | C }
+     * // Intersection is represented as { (on I) (Destination', Origin') | C' }
+     * pickFrom = { (on I) value | C' }
      * v <- pick_single_element(pickFrom)
      * // pick_single_element returns a representation of the single
      * // element of this set in terms of the free variables in the
@@ -831,7 +847,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// End Implementation Sanity check logic
 		//
 		
-		// pickFrom = { (on I) value | Condition from Intersection }
+		// msg_value is represented as { (on I) (Destination, Origin, value) | C }
+		// Intersection is represented as { (on I) (Destination', Origin') | C' }
+		// pickFrom = { (on I) value | C' }
 		Expression pickFrom = IntensionalSet.makeUniSet(
 				IntensionalSet.getScopingExpression(msgValue),
 				Tuple.get(IntensionalSet.getHead(msgValue), 2), 
