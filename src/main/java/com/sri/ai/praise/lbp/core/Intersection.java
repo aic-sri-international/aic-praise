@@ -141,9 +141,9 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 		} 
 		else if (Sets.isExtensionalUniSet(set1) && Sets.isExtensionalUniSet(set2)) {
 			Trace.log("Set1 is {...} and Set2 is {...}");
-			Trace.log("    return R_set_diff(S1 \\ R_set_diff(S1 \\ S21))");
-			Expression s1DiffS2 = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, set2));
-			result = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, s1DiffS2));
+			Trace.log("    return R_set_diff(Set1 \\ R_set_diff(Set1 \\ Set2))");
+			Expression set1DiffSet2 = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, set2));
+			result = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, set1DiffSet2));
 		}
 		else {
 			Trace.log("Else");

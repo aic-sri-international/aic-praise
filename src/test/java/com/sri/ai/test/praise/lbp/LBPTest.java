@@ -3035,7 +3035,6 @@ public class LBPTest extends AbstractLPITest {
 						"belief([ sick(bob) ])", 
 						false, 
 						"if sick(bob) then 1 else 0"),
-								
 				new BeliefTestData(Expressions.TRUE.toString(), new TrivialEpidemicSickEveryone(), 
 						"belief([ epidemic ])", 
 						false, 
