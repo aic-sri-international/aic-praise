@@ -396,7 +396,7 @@ public interface LBPRewriter extends Rewriter {
 	 *     I <- concatenation of I1 and I2
 	 *     return { (on I) Alpha1 | C } (or multiset version)
 	 * Set1 is {...} and Set2 is {...}
-	 *     return R_set_diff(S1 \ R_set_diff(S1 \ S21))
+	 *     return R_set_diff(Set1 \ R_set_diff(Set1 \ Set2))
 	 * Else
 	 *     "Not currently supported"
 	 *     

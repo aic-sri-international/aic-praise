@@ -752,9 +752,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// msg_value    <- null
 		Expression intersection = null;
 		Expression msgValue     = null;
-		CachedMsgValueIntersection cachedMsgValueIntersection    = null;
-		boolean                    newCachedMsgValueIntersection = true;
-		Integer cachedIndex = previousMessageToMsgValueCache.getCachedMessageValueIndex(process, prevMessage);
+		Integer    cachedIndex  = previousMessageToMsgValueCache.getCachedMessageValueIndex(process, prevMessage);
 		// if previous_message msg_value_index cached
 		if (cachedIndex != null) {
 			// index <- index from cache
@@ -763,24 +761,21 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// msg_value <- standardize msg_values[index] apart from prev_message
 			msgValue = StandardizedApartFrom.standardizedApartFrom(msgValues.get(index), prevMessage, process);
 			Trace.log("When standardized apart, it is {}", msgValue);
-			cachedMsgValueIntersection = previousMessageToMsgValueCache.getCachedMsgValueIntersection(process, prevMessage);
+			// Note: msg_value is passed through to the cache so that we can guarantee that the current msg_value
+			// and the cached intersection are scoped by the same indices.
+			intersection = previousMessageToMsgValueCache.getCachedMsgValueIntersection(process, prevMessage, msgValue);
 			// if Intersection cached for previous_message
-			if (cachedMsgValueIntersection != null) {
-				newCachedMsgValueIntersection = false;
+			if (intersection != null) {
 				// Intersection <- cache
-				intersection = cachedMsgValueIntersection.intersection;
 				Trace.log("Cached intersection for {}: {}", prevMessage, intersection);
 			} 
 			else {
-				Trace.log("No intersection cached for {}", prevMessage);
+				Trace.log("No intersection cached for {} and {}", prevMessage, msgValue);
 				// Intersection <- calculate_intersection(prev_message, msg_value)
 				intersection = calculateIntersection(prevMessage, msgValue, process);
 				Trace.log("Intersection calculated as {}", intersection);
 				// cache Intersection under prev_message’s contextual constraint
-				cachedMsgValueIntersection = new CachedMsgValueIntersection(intersection,
-						IntensionalSet.getScopingExpression(msgValue),
-						IntensionalSet.getCondition(msgValue));
-				previousMessageToMsgValueCache.addCachedMsgValueIntersection(process, prevMessage, cachedMsgValueIntersection);
+				previousMessageToMsgValueCache.addCachedMsgValueIntersection(process, prevMessage, intersection);
 				Trace.log("Adding cache item for {}: intersection {}, scoping expression of msg value {}, condition {}",
 						prevMessage, intersection, IntensionalSet.getScopingExpression(msgValue), IntensionalSet.getCondition(msgValue));
 			}
@@ -805,11 +800,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					// cache index
 					previousMessageToMsgValueCache.addPreviousMessageToMsgValueIndex(process.getContextualConstraint(), prevMessage, index);
 					// cache Intersection under prev_message’s contextual constraint
-					cachedMsgValueIntersection = new CachedMsgValueIntersection(intersection,
-							IntensionalSet.getScopingExpression(msgValue),
-							IntensionalSet.getCondition(msgValue));
-					
-					previousMessageToMsgValueCache.addCachedMsgValueIntersection(process, prevMessage, cachedMsgValueIntersection);
+					previousMessageToMsgValueCache.addCachedMsgValueIntersection(process, prevMessage, intersection);
 					Trace.log("Adding cache item for {}: intersection {}, scoping expression of msg value {}, condition {}",
 							prevMessage, intersection, IntensionalSet.getScopingExpression(msgValue), IntensionalSet.getCondition(msgValue));
 					// exit "for each" loop
@@ -818,7 +809,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			}
 		}
 		
-		if (cachedMsgValueIntersection == null) {
+		if (intersection == null) {
 			System.err.println("IllegalStateException: unable to find intersection.");
 			System.err.println("context      ="+process.getContextualConstraint());
 			System.err.println("prev_message ="+prevMessage);
@@ -828,44 +819,6 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			}
 			throw new IllegalStateException("Unable to find intersection: "+prevMessage+" under: "+process.getContextualConstraint());
 		}
-		
-		//
-		// Implementation Sanity check logic to ensure things are being matched up as expected.
-		Expression cachedScopingExpressionFromMsgValue = cachedMsgValueIntersection.scopingExpressionFromMsgValue;
-		if (cachedScopingExpressionFromMsgValue == null) {
-			cachedScopingExpressionFromMsgValue = IntensionalSet.EMPTY_SCOPING_EXPRESSION;
-		}
-		Expression currentScopingExpressionFromMsgValue = IntensionalSet.getScopingExpression(msgValue);
-		if (currentScopingExpressionFromMsgValue == null) {
-			currentScopingExpressionFromMsgValue = IntensionalSet.EMPTY_SCOPING_EXPRESSION;
-		}
-		if (!cachedScopingExpressionFromMsgValue.equals(currentScopingExpressionFromMsgValue)
-			||
-			!cachedMsgValueIntersection.conditionFromMsgValue.equals(IntensionalSet.getCondition(msgValue))) {
-			// Output some useful information before throwing the exception
-			System.err.println("IllegalStateException: cache and message value mismatch.");
-			System.err.println("context       ="+process.getContextualConstraint());
-			System.err.println("context vars  ="+process.getContextualVariables());
-			System.err.println("prev_msg      ="+prevMessage);
-			System.err.println("intersection  ="+intersection);
-			System.err.println("cachedIndex   ="+cachedIndex);
-			if (cachedIndex != null) {
-				System.err.println("new cached    ="+newCachedMsgValueIntersection);
-				System.err.println("msg_value(idx)="+msgValues.get(cachedIndex));
-			}
-			System.err.println("msg_value     ="+msgValue);
-			System.err.println("msg_values    =");
-			for (Expression m : msgValues) {
-				System.err.println(""+m);
-			}
-			throw new IllegalStateException("Cached msgValue scoping expression ["
-						+cachedMsgValueIntersection.scopingExpressionFromMsgValue
-						+"] or cached condition [" 
-						+cachedMsgValueIntersection.conditionFromMsgValue
-						+"] don't match indexed msgValue="+msgValue);
-		}	
-		// End Implementation Sanity check logic
-		//
 		
 		// msg_value is represented as { (on I) (Destination, Origin, value) | C }
 		// Intersection is represented as { (on I) (Destination', Origin') | C' }
@@ -1208,46 +1161,94 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	}
 	
 	private class PreviousMessageToMsgValueCache {
-		ConcurrentHashMap<Pair<Expression, Expression>, Integer>                    previousMessageToMsgValueIndex              = new ConcurrentHashMap<Pair<Expression, Expression>, Integer>();
-		ConcurrentHashMap<Pair<Expression, Expression>, CachedMsgValueIntersection> previousMessageToCachedMsgValueIntersection = new ConcurrentHashMap<Pair<Expression, Expression>, CachedMsgValueIntersection>();
+		// key= (context, prev_message), value = msg_value_index to use.
+		ConcurrentHashMap<Expression, Integer>    previousMessageToMsgValueIndex              = new ConcurrentHashMap<Expression, Integer>();
+		// key= (context, prev_message, scoping expression for intersection), value=intersection
+		ConcurrentHashMap<Expression, Expression> previousMessageToCachedMsgValueIntersection = new ConcurrentHashMap<Expression, Expression>();
 		boolean useCache = true;
 		
 		public PreviousMessageToMsgValueCache() {
 			useCache = configuration.isBeliefUseCache();
 		}
 		
+		/**
+		 * Add a prev_message -> msg_value_index to the cache.
+		 * 
+		 * @param contextualConstraint
+		 *            the context prev_message is under.
+		 * @param previousMessage
+		 *            the prev_message to be mapped to a msg_value index.
+		 * @param msgValueIndex
+		 *            the index of the msg_value the prev_message under the
+		 *            given context is represented by.
+		 */
 		public void addPreviousMessageToMsgValueIndex(Expression contextualConstraint, Expression previousMessage, int msgValueIndex) {
 			if (useCache) {
-				previousMessageToMsgValueIndex.put(new Pair<Expression, Expression>(contextualConstraint, previousMessage), msgValueIndex);
+				previousMessageToMsgValueIndex.put(Tuple.make(contextualConstraint, previousMessage), msgValueIndex);
 			}
 		}
 		
+		/**
+		 * Get the msg_value_index associated with the given prev_message under
+		 * the current context.
+		 * 
+		 * @param process
+		 *            the rewriting process containing the current context for
+		 *            prev_message.
+		 * @param previousMessage
+		 *            the prev_messages whose msg_value_index is to be looked up
+		 *            in the cache.
+		 * @return the msg_value_index associated with the prev_message under
+		 *         the given context if in the cache, null otherwise.
+		 */
 		public Integer getCachedMessageValueIndex(RewritingProcess process, Expression previousMessage) {
-			return previousMessageToMsgValueIndex.get(new Pair<Expression, Expression>(process.getContextualConstraint(), previousMessage));
+			return previousMessageToMsgValueIndex.get(Tuple.make(process.getContextualConstraint(), previousMessage));
 		}
 		
-		public void addCachedMsgValueIntersection(RewritingProcess process, Expression previousMessage, CachedMsgValueIntersection cachedMsgValueIntersection) {
+		/**
+		 * Will store an entry in the cache where intersection is represented
+		 * as: { (on I) (Destination', Origin') | C' }<br>
+		 * 
+		 * <pre>
+		 * key   = (context, prev_message, (on I)), 
+		 * value = intersection
+		 * </pre>
+		 * 
+		 * @param process
+		 *            the rewriting process containing the current context for
+		 *            prev_message.
+		 * @param previousMessage
+		 *            the prev_messages whose intersection with a msg_value is
+		 *            to be added to the cache.
+		 * @param intersection
+		 *            the intersection to be added.
+		 */
+		public void addCachedMsgValueIntersection(RewritingProcess process, Expression previousMessage, Expression intersection) {
 			if (useCache) {
-				previousMessageToCachedMsgValueIntersection.put(new Pair<Expression, Expression>(process.getContextualConstraint(), previousMessage), 
-						cachedMsgValueIntersection);
+				previousMessageToCachedMsgValueIntersection.put(Tuple.make(process.getContextualConstraint(), previousMessage, IntensionalSet.getScopingExpression(intersection)), 
+						intersection);
 			}
 		}
 		
-		public CachedMsgValueIntersection getCachedMsgValueIntersection(RewritingProcess process, Expression previousMessage) {
-			return previousMessageToCachedMsgValueIntersection.get(new Pair<Expression, Expression>(process.getContextualConstraint(), previousMessage));
-		}
-	}
-	
-	private class CachedMsgValueIntersection {
-		public Expression intersection;
-		public Expression scopingExpressionFromMsgValue;
-		public Expression conditionFromMsgValue;
-		
-		public CachedMsgValueIntersection(Expression intersection,
-				Expression scopingExpressionFromMsgValue, Expression conditionFromMsgValue) {
-			this.intersection                      = intersection;
-			this.scopingExpressionFromMsgValue     = scopingExpressionFromMsgValue;
-			this.conditionFromMsgValue             = conditionFromMsgValue;
+		/**
+		 * Get the cached intersection for a prev_message and msg_value under
+		 * the current context for prev_message.
+		 * 
+		 * @param process
+		 *            the rewriting process containing the current context for
+		 *            prev_message.
+		 * @param previousMessage
+		 *            the prev_messages whose intersection with a msg_value is
+		 *            to be looked up in the cache.
+		 * @param msgValue
+		 *            the msg_value that prev_message is meant to intersect
+		 *            with. Will use the scoping expression from the msg_value
+		 *            to ensure the msg_value and cached intersection are always
+		 *            scoped by the same indices.
+		 * @return the cached intersection if one exists, false otherwise.
+		 */
+		public Expression getCachedMsgValueIntersection(RewritingProcess process, Expression previousMessage, Expression msgValue) {
+			return previousMessageToCachedMsgValueIntersection.get(Tuple.make(process.getContextualConstraint(), previousMessage, IntensionalSet.getScopingExpression(msgValue)));
 		}
 	}
 }
