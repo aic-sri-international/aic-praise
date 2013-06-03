@@ -56,7 +56,7 @@ public interface UseValuesForPreviousMessages {
 	 *         
 	 * substituted <- expansion
 	 * 
-	 * replace all expressions in substituted with the following replacement function: 
+	 * exhaustively replace all expressions in substituted with the following replacement function: 
 	 * // use ReplacementFunctionWithContextuallyUpdatedProcess        
 	 * lambda E {
 	 *     if E is not of the form "previous message to Destination' from Origin'

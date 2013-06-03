@@ -3560,10 +3560,12 @@ public class LBPTest extends AbstractLPITest {
 			// Basic:
 			new IterateValuesUsingExpansionsTestData(Expressions.TRUE.toString(),
 					new TrivialPQWithPArity2AndQArity1(),
-					"{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,a) then 1 else 0 ) ) | X != c }",
-					"{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then (previous message to [p(X,a)] from [if p(X,a) and q(Y) then 1 else 0]) else 0 ) ) | X != c }",
+					// msg values
+					"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }",
+					// msg expansions
+					"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if Z != d then (previous message to [p(X,Z)] from [if p(X,Z) and q(Z) then 1 else 0]) else 0 ) ) | X != c }",
 					false,
-					"{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if Y != d then if p(X,a) then 1 else 0 else 0.5 ) ) | X != c }"),
+					"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if Z != d then if p(X,Z) then 1 else 0 else 0.5 ) ) | X != c }"),
 		};
 		
 		perform(tests);
@@ -3604,21 +3606,16 @@ public class LBPTest extends AbstractLPITest {
 				//
 				// Basic:
 				//
-				// Example 1 from pseudo-code (no longer in latest version of doc)
+				// Example 1:
 				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
 						new TrivialPQWithPArity2AndQArity1(),
 						"if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0",
-						"{ (on X) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }",
+						"{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }" +
+						" union " +
+						"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c and Z != a}",
 						false,
-						"if Y != d then if p(b,Z) then 1 else 0 else 0"),
-				// Variant of Example 1 from the pseudo-code (on X, Z) instead of (on X)
-				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
-						new TrivialPQWithPArity2AndQArity1(),
-						"if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0",
-						"{ (on X, Z) ( [p(X,a)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }",
-						false,
-						"if Y != d then if p(b,a) then 1 else 0 else 0"),
-				// Variant of Example 1 from the pseudo-code (on X, Z) instead of (on X) and [p(X, Z)] instead of [p(X,a)]
+						"if Y != d then if Y = a then if p(b, a) then 1 else 0 else (if p(b, Y) then 1 else 0) else 0"),
+				// Example 2:
 				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
 						new TrivialPQWithPArity2AndQArity1(),
 						"if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0",
@@ -3708,11 +3705,11 @@ public class LBPTest extends AbstractLPITest {
 						"if sick(X) then 1 else 0"
 						),	
 				// Ensure the free Variable X is selected and not the scoped W variable
-				new PickSingleElementTestData(Expressions.TRUE.toString(),
+				new PickSingleElementTestData("X = person1 or X = person2 or X = person3",
 						new TrivialSickbob(),
 						"{ ( on W in People, X' in People ) (if sick(X') then 1 else 0) | W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3 }",
 						false,
-						"if sick(X) then 1 else 0"
+						"if sick(if X = person1 then person1 else (if X = person2 then person2 else person3)) then 1 else 0"
 						),	
 				// Ensure the free Variable X is selected and not the scoped W variable
 				new PickSingleElementTestData(Expressions.TRUE.toString(),
@@ -3743,6 +3740,58 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						"if p(X) then 2 else 1"
 						),
+				//
+				// Complex Case 1: from running R_belief with partitioning on intersection logic
+				new PickSingleElementTestData("X != w7 and X != X3 and X3 != w7 and X1 != X2 and X1 != X3 and X2 != X3 and (X2 != w7 or X1 != X) and X' != Y and X' != Z and Z != Y and (X2 = X' and X1 = Y or X2 = X' and X1 = Z) and not (X != w7 and X1 != w7 and X1 != X and X' != Y and X' != Z and Z != Y and (X' = w7 and X1 = Y or X' = w7 and X1 = Z) and X2 = w7) and X != w7 and X1 != X2 and (X2 != w7 or X1 != X) and X' != Y and X' != Z and Z != Y and (X2 = X' and X1 = Y or X2 = X' and X1 = Z) and (X2 != w7 or X2 = w7 and (X1 = X or X1 = w7 or (X' != w7 or X1 != Y) and (X' != w7 or X1 != Z) or X' = w7 and Y = X and Z = X1)) and (X2 = w7 and X1 != X and X1 != w7 and (X' = w7 and X1 = Y or X' = w7 and X1 = Z) and (X' != w7 or Y != X or Z != X1) or X1 != w7 and X1 != X and X' = w7 and Y = X and Z = X1 and X2 = w7)",
+						new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
+						"{ ( on Z'', X'', Y', Z' ) (if Y' = Z'' then 0.5 else (if not r(X'', Z') then 0.75 else 0.25)) }",
+						false,
+						// Note: Was -
+						// "if w7 = w7 then 0.5 else (if not r(w7, w7) then 0.75 else 0.25)"
+						// Now -
+						"if X1 = X1 then 0.5 else (if not r(X1, X1) then 0.75 else 0.25)"
+						),
+				//
+				// Complex Case 2: from running R_belief with partitioning on intersection logic
+				// LBPStressIT.testStressTest2() example that arises when using new intersection one liner: 
+				new PickSingleElementTestData("X != b and X != Y and Y != Y' and (Y' = X' or Y' = Y'') and (X' != Y or Y'' != Y') and not (X != Y' and (X' != X or Y'' != Y')) and not (X = X' and Y' = Y'' and Y' != X) and not ((X = Y' or X' = X and Y'' = Y') and (Y' = X or X' != X or Y'' != Y'))",
+				        new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
+				        "{ ( on Y''', X'', Y'''' ) (if X'' = Y'''' then if p(X'') or p(Y'''') then 1 else 0 else (if X'' = Y''' then if p(X'') then 0.666666667 else 0.333333333 else (if p(Y'''') then 0.666666667 else 0.333333333))) }",
+				        false,
+				        // Note: Was -
+				        // "if b = b then if p(b) or p(b) then 1 else 0 else (if b = b then if p(b) then 0.666666667 else 0.333333333 else (if p(b) then 0.666666667 else 0.333333333))"
+				        // Now -
+				        "if Y' = Y' then if p(Y') or p(Y') then 1 else 0 else (if Y' = Y' then if p(Y') then 0.666666667 else 0.333333333 else (if p(Y') then 0.666666667 else 0.333333333))"
+				        ), 		
+				//
+				// Complex Case 3: from running R_belief with partitioning on intersection logic
+				// LBPStressIT.testStressTest3() example that arises when using new intersection one liner:
+		        new PickSingleElementTestData("Y' != bob and Y != X and (Y' = X or Y' = Y) and (X != bob or Y != Y') and not (Y' != ann and (X != ann or Y != Y')) and not (X = ann and Y' = Y and Y' != ann) and not ((Y' = ann or X = ann and Y = Y') and (Y' = ann or X != ann or Y != Y'))",
+		                new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
+		                "{ ( on Y'', Y''', X' ) (if X' = Y'' then 0.5 else (if smoker(Y''') then 0.55 else 0.45)) }",
+		                false,
+		                // Note: Was -
+		                // "if bob = bob then 0.5 else (if smoker(bob) then 0.55 else 0.45)"
+		                // Now -
+		                "if Y' = Y' then 0.5 else (if smoker(Y') then 0.55 else 0.45)"
+		                ),
+				//
+				// Complex Case 4: from running R_belief with partitioning on intersection logic
+		        // LBPStressIT.testStressTest4DefectIteration2() example that arises when using new intersection one liner: 
+		        new PickSingleElementTestData("Z != X and X != w7 and Z != w7 and Z' != Z and Z' != w7",
+		        		new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
+		                "{ ( on X3 ) (if Z' != X then 1 else (if X != X3 then 1 else 1)) | Z' != X3 and X3 != w7 }",
+		                false,
+		                "if Z' != X then 1 else (if X != (if Z' != X then X else Z) then 1 else 1)"
+		                ),
+		        //
+		        // Complex Case 5: conditional single value example
+		        new PickSingleElementTestData(Expressions.TRUE.toString(),
+		        		new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
+		                "{ (on X) X | (Z = a => X = c) and (Z != a => X = d) }",
+		                false,
+		                "if Z = a then c else d"
+		                ),
 		};
 		
 		perform(tests);
@@ -3824,7 +3873,7 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						"person1"
 						),
-				new PickValueTestData(Expressions.TRUE.toString(), 
+				new PickValueTestData("X = person1 or X = person2 or X = person3", 
 						new TrivialPQ(),
 						"X'",
 						"{X'}",
@@ -3832,13 +3881,13 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						"X"
 						),
-				new PickValueTestData(Expressions.TRUE.toString(), 
+				new PickValueTestData("X = person1 or X = person2 or X = person3", 
 						new TrivialPQ(),
 						"X'",
 						"{X', W}",
 						"W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3",
 						false,
-						"X"
+						"if X = person1 then person1 else (if X = person2 then person2 else person3)"
 						),
 				new PickValueTestData(Expressions.TRUE.toString(), 
 						new TrivialPQ(),

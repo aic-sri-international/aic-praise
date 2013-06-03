@@ -58,8 +58,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Trace;
-import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.Substitute;
@@ -69,7 +69,6 @@ import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
-import com.sri.ai.grinder.library.equality.cardinality.direct.core.Cardinality;
 import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -1239,16 +1238,16 @@ public class LPIUtil {
 	
 			Expression value = pickValue(variableX, variablesI, formulaC, process);
 			
-			if (value != null) {
+			if (value == null) {
+				Trace.log("if value is null, return null");
+			}
+			else {
 				Trace.log("return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })");
 				Expression alphaSubX          = Substitute.replace(alpha, variableX, value, process);
 				Expression formulaCSubX       = Substitute.replace(formulaC, variableX, value, process);
 				Expression intensionalSetSubX = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressionsIPrime, alphaSubX, formulaCSubX);
 	
 				result = pickSingleElement(intensionalSetSubX, process);
-			}
-			else {
-				Trace.log("if value is null, return null");
 			}
 		}
 		
@@ -1266,14 +1265,15 @@ public class LPIUtil {
 	 * formula_on_X = R_formula_simplification(there exists I’ : C) // where I' is I \ {X}
 	 * if X = value can be unambiguously extracted from formula_on_X
 	 *      return value
+	 *      
 	 * // Need to use full satisfiability check to pick value
-	 * for alpha in ((constants of C) union (variables of C \ I)) // (1) (2)
-	 *      if R_complete_simplify(X != alpha and C) is "False"
-	 *           return alpha
+	 * possible_values <- (constants of C) union ( (free variables of formula_on_X and context) \ {X}) // (1)
+	 * result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_values)
+	 * if result is null, return null
+	 * return R_complete_simplify(result)
 	 * 
 	 * Implementation Notes:
 	 * (1) Preference is to check constants before free variables.
-	 * (2) (variables of C \ I) gives you the set of free variables in C.
 	 * </pre>
 	 * 
 	 * @param variableX
@@ -1316,30 +1316,110 @@ public class LPIUtil {
 				Trace.log("    return value");
 			}
 			else {
-				Trace.log("for alpha in ((constants of C) union (variables of C \\ I))");
+				// Need to use full satisfiability check to pick value
+								
+				Trace.log("possible_values <- (constants of C) union ( (free variables of formula_on_X and context) \\ {X})");
 				
-				// Want to prefer picking constants over variables
-				Set<Expression> constsAndFreeVars = new LinkedHashSet<Expression>();
-				constsAndFreeVars.addAll(FormulaUtil.getConstants(formulaC, process));
-				constsAndFreeVars.addAll(Variables.get(formulaC, process));
-				// Remove the bound variables.
-				constsAndFreeVars.removeAll(ExtensionalSet.getElements(variablesI));
+				// (1) Preference is to check constants before free variables.
+				Set<Expression> possibleValues = new LinkedHashSet<Expression>();
+				// constants of C
+				possibleValues.addAll(FormulaUtil.getConstants(formulaC, process));
+				// union ( (free variables of formula_on_X and context) \\ {X})
+				Expression formulaOnXAndContext = CardinalityUtil.makeAnd(formulaOnX, process.getContextualConstraint());
+				possibleValues.addAll(Variables.freeVariables(formulaOnXAndContext, process));
+				possibleValues.remove(variableX);
+				Trace.log("// possible_values = {}", possibleValues);
 				
-				for (Expression alpha : constsAndFreeVars) {
-					Expression xNotEqualAlpha = Disequality.make(variableX, alpha);
-					Trace.log("    if R_complete_simplify(X != alpha and C) is \"False\"");
-					Expression satisfiable    = process.rewrite(Cardinality.R_complete_simplify, CardinalityUtil.makeAnd(xNotEqualAlpha, formulaC));
-					if (satisfiable.equals(Expressions.FALSE)) {						
-						Trace.log("        return alpha");
-						result = alpha;
-						break;
-					}
+				Trace.log("result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_values)");
+				result = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, possibleValues, process);
+				if (result == null) {
+					Trace.log("if result is null, return null");
+				}
+				else {
+					Trace.log("return R_complete_simplify(result)");
+					result = process.rewrite(LBPRewriter.R_complete_simplify, result);		
 				}
 			}
 			
 		} 
 		
 		Trace.out("-pick_value={}", result);
+		
+		return result;
+	}
+	
+	/**
+	 * <pre>
+	 * get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_values)
+	 * 
+	 * if possible_values is empty, return null // X can be any value not forbidden by context, so it is not constrained to a single value
+	 * (first, remaining_possible_values) <- get_first_and_remaining(possible_values)
+	 * condition_for_first <- R_complete_simplify(formula_on_X[X/first])
+	 * if condition_for_first is 'true'
+	 *     return first
+	 * among_remaining <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, remaining_possible_values) under context extended by not(condition_for_first)
+	 * if among_remaining is null
+	 *     return null
+	 * return if condition_for_first then first else among_remaining 
+	 * 
+	 * Implementation Notes:
+	 * (1) Preference is to check constants before free variables.
+	 * </pre>
+	 * 
+	 * @param variableX
+	 *            a variable X
+	 * @param formulaOnX
+	 *            a formula on X
+	 * @param possibleValues
+	 *            possible values for X
+	 * @param process
+	 *            the process in which the rewriting is occurring.
+	 * @return a conditional single value for X or null if not defined in all contexts.
+	 */
+	public static Expression getConditionalSingleValueOrNullIfNotDefinedInAllContexts(Expression variableX, Expression formulaOnX, Set<Expression> possibleValues, RewritingProcess process) {
+		Expression result = null;
+		
+		Trace.in("+get_conditional_single_value_or_null_if_not_defined_in_all_contexts({}, {}, {}) under: {}", variableX, formulaOnX, possibleValues, process.getContextualConstraint());
+		
+		if (possibleValues.size() == 0) {
+			Trace.log("if possible_values is empty, return null // X can be any value not forbidden by context, so it is not constrained to a single value");
+			result = null;
+		}
+		else {
+			Trace.log("(first, remaining_possible_values) <- get_first_and_remaining(possible_values)");
+			Expression first = possibleValues.iterator().next();
+			Set<Expression> remainingPossibleValues = new LinkedHashSet<Expression>(possibleValues);
+			remainingPossibleValues.remove(first);
+			Trace.log("// first                    : {}", first);
+			Trace.log("// remaining_possible_values: {}", remainingPossibleValues);
+			
+			Trace.log("condition_for_first <- R_complete_simplify(formula_on_X[X/first])");
+			Expression conditionForFirst = formulaOnX.replaceAllOccurrences(variableX, first, process);
+			conditionForFirst = process.rewrite(LBPRewriter.R_complete_simplify, conditionForFirst);
+			Trace.log("// condition_for_first: {}, first: {}", conditionForFirst, first);
+			if (conditionForFirst.equals(Expressions.TRUE)) {
+				Trace.log("if condition_for_first is \"true\"");
+				Trace.log("    return first");
+				result = first;
+			}
+			else {
+				Trace.log("among_remaining <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, remaining_possible_values) under context extended by not(condition_for_first)");
+				//  under context extended by not(condition_for_first)
+				RewritingProcess underNotConditionForFirst = GrinderUtil.extendContextualConstraint(CardinalityUtil.makeNot(conditionForFirst), process);
+				Expression amongRemaining = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, remainingPossibleValues, underNotConditionForFirst);
+				if (amongRemaining == null) {
+					Trace.log("if among_remaining is null");
+					Trace.log("    return null");
+					result = null;
+				}
+				else {
+					Trace.log("return if condition_for_first then first else among_remaining");
+					result = IfThenElse.make(conditionForFirst, first, amongRemaining);
+				}				
+			}
+		}
+				
+		Trace.out("-get_conditional_single_value_or_null_if_not_defined_in_all_contexts={}", result);
 		
 		return result;
 	}

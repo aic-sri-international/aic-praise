@@ -40,7 +40,6 @@ package com.sri.ai.praise.lbp.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -50,7 +49,6 @@ import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -73,7 +71,6 @@ import com.sri.ai.praise.LPIUtil;
  * or the input argument if it cannot be lifted.
  * Cases:
  * Alpha is if C' then Alpha_1 else Alpha_2
- *     where C' is a formula depending on I
  *     return R_lift_product_of_factor_to_variable(prod_{{(on I) Alpha_1 | C and C'}}) * R_lift_product_of_factor_to_variable(prod_{{(on I) Alpha_2 | C and not C'})
  * if Alpha <- pick_single_element({{(on I) Alpha | C}}) succeed
  *     return Alpha ^ {@link Cardinality R_card}(| C |_I)
@@ -156,11 +153,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 				// Alpha is if C' then Alpha_1 else Alpha_2
 				if (IfThenElse.isIfThenElse(alpha)) {
 					Expression conditionCPrime = IfThenElse.getCondition(alpha);
-					// where C' is a formula depending on I 
-					if (FormulaUtil.isFormula(conditionCPrime, process) 
-						&&
-						dependsOnTheIndices(conditionCPrime, onI, process)
-						) {
+					if (FormulaUtil.isFormula(conditionCPrime, process)) {
 						// return R_lift_product(prod_{{(on I) Alpha_1 | C and C'}}) * R_lift_product(prod_{{(on I) Alpha_2 | C and not C'})
 						Expression alpha1        = IfThenElse.getThenBranch(alpha);
 						Expression thenCondition = And.make(conditionC, conditionCPrime);
@@ -230,23 +223,6 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 		}
 		else {
 			result = LPIUtil.isMessageValue(alpha, process);
-		}
-		
-		return result;
-	}
-	
-	private boolean dependsOnTheIndices(Expression expression, Expression onI, RewritingProcess process) {
-		boolean result = false;
-		
-		Set<Expression> expressionVars = Variables.freeVariables(expression, process);
-		Set<Expression> onIVars        = Variables.freeVariables(onI, process);
-		
-		// If the set reduces in size, this indicates
-		// expression is dependent on the indices
-		int expressionVarsInitialSize = expressionVars.size();
-		expressionVars.removeAll(onIVars);
-		if (expressionVars.size() != expressionVarsInitialSize) {
-			result = true;
 		}
 		
 		return result;

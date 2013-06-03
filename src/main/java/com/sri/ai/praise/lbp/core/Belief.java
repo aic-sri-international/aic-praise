@@ -39,7 +39,6 @@ package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,8 +61,9 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.StandardizedApartFrom;
 import com.sri.ai.grinder.library.SubExpressionSelection;
 import com.sri.ai.grinder.library.Variables;
+import com.sri.ai.grinder.library.boole.ThereExists;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
-import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -662,10 +662,16 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Trace.log("substituted <- expansion");
 		Expression substituted = expansion;
 
-		Trace.log("replace all expressions in substituted with the following replacement function:");
-		substituted = substituted.replaceAllOccurrences(
+		Trace.log("exhaustively replace all expressions in substituted with the following replacement function:");
+
+		// Ensure we exhaustively replace
+		Expression toSubstitute;
+		do {
+			toSubstitute = substituted;	
+			substituted  = toSubstitute.replaceAllOccurrences(
 										new PreviousMessageReplacementFunction(msgValues, previousMessageToMsgValueCache), 
 										process);
+		} while (substituted != toSubstitute);
 			
 		Trace.log("// substituted = {}", substituted);
 		Trace.log("return R_complete_simplify(substituted)");
@@ -731,7 +737,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
      * // It is the intersection of a singleton set and another set because the second set in calculate_intersection
      * // is a singleton.
      * 
-     * return v
+     * // Partition the value based on its intersection:
+     * // Intersection is of the form { (on I) (Destination, Origin) | C' }
+     * D <- there exists I : C'
+     * return R_simplify(if D then v else prev_message)
 	 * </pre>
 	 */
 	private Expression findMsgValueMatchingPreviousMessage(Expression prevMessage, List<Expression> msgValues, 
@@ -809,6 +818,17 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			}
 		}
 		
+		if (cachedMsgValueIntersection == null) {
+			System.err.println("IllegalStateException: unable to find intersection.");
+			System.err.println("context      ="+process.getContextualConstraint());
+			System.err.println("prev_message ="+prevMessage);
+			System.err.println("msg_values   =");
+			for (Expression m : msgValues) {
+				System.err.println(""+m);
+			}
+			throw new IllegalStateException("Unable to find intersection: "+prevMessage+" under: "+process.getContextualConstraint());
+		}
+		
 		//
 		// Implementation Sanity check logic to ensure things are being matched up as expected.
 		Expression cachedScopingExpressionFromMsgValue = cachedMsgValueIntersection.scopingExpressionFromMsgValue;
@@ -872,11 +892,19 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			for (Expression m : msgValues) {
 				System.err.println(""+m);
 			}
-			throw new IllegalStateException("Failed to pick single element:"+pickFrom);
+			throw new IllegalStateException("Failed to pick single element: "+pickFrom + " under: "+process.getContextualConstraint());
 		}
-		Trace.out("-findMsgValueMatchingPreviousMessage={}", v);
-		// return v
-		result = v;
+		
+		// Partition the value based on its intersection:
+		// Intersection is of the form { (on I) (Destination, Origin) | C' }
+		Trace.log("D <- there exists I : C'");
+		Expression expressionD = ThereExists.make(new ArrayList<Expression>(IntensionalSet.getIndices(intersection)), 
+												  IntensionalSet.getCondition(intersection));
+		Trace.log("return R_simplify(if D then v else prev_message)"); 
+		Expression conditionalD = IfThenElse.make(expressionD, v, prevMessage);
+		result = process.rewrite(R_simplify, conditionalD);
+
+		Trace.out("-findMsgValueMatchingPreviousMessage={}", result);
 		
 		return result;
 	}

@@ -58,6 +58,7 @@ public class LBPStressIT extends AbstractLPITest {
 	}
 	
 	// Note: This is based on PRAiSE Demo App Example 3.
+	@Ignore
 	@Test
 	public void testStressTest3() {
 		perform(new TestData[] {
