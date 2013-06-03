@@ -39,6 +39,7 @@ package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,6 +65,7 @@ import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
+import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -254,8 +256,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Trace.log("msg_sets <- R_extract_previous_msg_sets(belief_expansion)");
 			// a union of sets of pairs (N1, N2), with each pair representing an occurrence of 
 			// "previous message" on that pair occurring in belief_expansion.
-			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, beliefExpansion));		
-//			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, Lambda.make(new LinkedList<Expression>(freeVariablesFromBeliefQuery), beliefExpansion)));		
+			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, Lambda.make(new LinkedList<Expression>(freeVariablesFromBeliefQuery), beliefExpansion)));		
 		
 			Trace.log("msg_expansions <- get_msg_expansions(msg_sets)");
 			// a union of intensional sets containing tuples of the form:
