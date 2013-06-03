@@ -1279,7 +1279,7 @@ public class LPIUtil {
 	 * @param variableX
 	 *            a variable X
 	 * @param variablesI
-	 *            a set of variables I
+	 *            an extensional uni-set of indices variables I
 	 * @param formulaC
 	 *            a formula C
 	 * @param process
@@ -1293,13 +1293,13 @@ public class LPIUtil {
 		Trace.in("+pick_value({}, {}, {})", variableX, variablesI, formulaC);
 		
 		// if C is a conjunction containing conjunct X = value, return value
-		result = extractValueForXFromConjunction(variableX, variablesI, formulaC, process);
+		result = extractValueForXFromConjunction(variableX, ExtensionalSet.getElements(variablesI), formulaC, process);
 		if (result != null) {
 			Trace.log("if C is a conjunction containing conjunct X = value");
 			Trace.log("    return value");
 		} 
 		else {
-			Trace.log("formula_on_X = R_formula_simplification(there exists I’ : C)"); 
+			Trace.log("formula_on_X = R_formula_simplification(there exists I' : C)"); 
 			List<Expression> variablesIPrime = new ArrayList<Expression>();
 			for (Expression i : ExtensionalSet.getElements(variablesI)) {
 				// where I' is I \ {X}
@@ -1310,7 +1310,7 @@ public class LPIUtil {
 			Expression thereExists = ThereExists.make(variablesIPrime, formulaC);
 			Expression formulaOnX  = process.rewrite(LBPRewriter.R_formula_simplification, thereExists);
 			
-			result = extractValueForXFromFormula(variableX, variablesI, formulaOnX, process);
+			result = extractValueForXFromFormula(variableX, ExtensionalSet.getElements(variablesI), formulaOnX, process);
 			if (result != null) {
 				Trace.log("if X = value can be unambiguously extracted from formula_on_X");
 				Trace.log("    return value");
@@ -1481,7 +1481,7 @@ public class LPIUtil {
 	//
 	// PRIVATE
 	//
-	private static Expression extractValueForXFromConjunction(Expression variableX, Expression variablesI, Expression expression, RewritingProcess process) {
+	private static Expression extractValueForXFromConjunction(Expression variableX, List<Expression> variablesI, Expression expression, RewritingProcess process) {
 		Expression result = null;
 		
 		if (And.isConjunction(expression) || expression.hasFunctor(FunctorConstants.EQUAL)) {
@@ -1491,10 +1491,8 @@ public class LPIUtil {
 		return result;
 	}
 	
-	private static Expression extractValueForXFromFormula(Expression variableX, Expression variablesI, Expression formula, RewritingProcess process) {
+	private static Expression extractValueForXFromFormula(Expression variableX, List<Expression> variablesI, Expression formula, RewritingProcess process) {
 		Expression result = null;
-		
-		List<Expression> variablesIList = Arrays.asList(variablesI);
 		
 		for (Expression possibleValue : extractPossibleValuesForXFromFormula(variableX, formula, process)) {
 			if (process.isConstant(possibleValue)) {
@@ -1505,7 +1503,7 @@ public class LPIUtil {
 				// variable assignments take precedence
 				if (result == null) {
 					// Only assign free variables
-					if (isIndependentOf(possibleValue, variablesIList, process)) {
+					if (isIndependentOf(possibleValue, variablesI, process)) {					
 						result = possibleValue;
 					}
 				}
@@ -1573,7 +1571,7 @@ public class LPIUtil {
 		return result;
 	}
 	
-	private static boolean isIndependentOf(Expression alpha, List<Expression> indexExpressionsI, RewritingProcess process) {
+	private static boolean isIndependentOf(Expression alpha, List<Expression> indicesI, RewritingProcess process) {
 		boolean result = false;
 		
 		Set<Expression> alphaFreeVariables            = new HashSet<Expression>();
@@ -1581,15 +1579,13 @@ public class LPIUtil {
 		
 		// Collect the free variables
 		alphaFreeVariables.addAll(Variables.freeVariables(alpha, process));
-		for (Expression indexExpression : indexExpressionsI) {
-			indexExpressionsFreeVariables.addAll(Variables.freeVariables(indexExpression, process));
-		}
+		indexExpressionsFreeVariables.addAll(indicesI);
 		
 		// check the intersection
 		alphaFreeVariables.retainAll(indexExpressionsFreeVariables);
 		if (alphaFreeVariables.size() == 0) {
 			// to see if its empty
-			result = true; // is indepenent if interection if empty
+			result = true; // is independent if intersection if empty
 		}
 		
 		return result;
