@@ -674,7 +674,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 										process);
 		} while (substituted != toSubstitute);
 			
-		Trace.log("// substituted = {}", substituted);
+		Trace.log("// substituted = {}, constrained by {}", substituted, process.getContextualConstraint());
 		Trace.log("return R_complete_simplify(substituted)");
 		result = process.rewrite(R_complete_simplify, substituted);
 		
