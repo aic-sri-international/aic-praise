@@ -32,7 +32,6 @@ public class LBPStressIT extends AbstractLPITest {
 	// #1
 	// Note: if caches can grow unbounded then run with: -Xms2G -Xmx16G
     // Note: Slow to process, takes approx 6.3 minutes (as of April 2013, had been 2 hours 5 min before Oct 2012).
-	@Ignore // Currently failing assertion 'value depends on random variable value other than its own destination/origin'. 
 	@Test
 	public void testStressTest1() {
 		
@@ -42,7 +41,10 @@ public class LBPStressIT extends AbstractLPITest {
 				"belief([m(X)])",
 				false,
 				// TODO - is this correct (10 iterations)?
-				"if m(X) then 0.00646884468 else 0.993531155")});
+				// Was -
+				// "if m(X) then 0.00646884468 else 0.993531155"
+				// Now -
+				"if m(X) then 0.432395068 else 0.567604932")});
 	}
 
 	@Test
@@ -66,7 +68,10 @@ public class LBPStressIT extends AbstractLPITest {
 						new com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample(),
 						"belief([smoker(ann)])",
 						false,
-						"if smoker(ann) then 0.995514833 else 0.00448516689")});
+						// Was -
+						//"if smoker(ann) then 0.995514833 else 0.00448516689"
+						// Now -
+						"if smoker(ann) then 0.995514917 else 0.0044850832")});
 	}
 	
 	// Note: This is based on PRAiSE Demo App Example 4.
@@ -89,7 +94,7 @@ public class LBPStressIT extends AbstractLPITest {
 						new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
 						"belief([r(w7, X)])",
 						false,
-						"TODO")});
+						"if X != w7 then if r(w7, X) then 1 else 9.53674316E-207 else 0.5")});
 	}
 	
 	private class LoopyBeliefTestData extends TestData {
