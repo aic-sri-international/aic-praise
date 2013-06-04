@@ -1210,6 +1210,8 @@ public class LPIUtil {
 			throw new IllegalArgumentException("Not a valid intensional set expression:"+intensionalSet);
 		}
 		
+		Trace.in("+pick_single_element({}) constrained by {}", intensionalSet, process.getContextualConstraint());
+		
 		Expression       alpha       = IntensionalSet.getHead(intensionalSet);
 		Trace.log("R <- indices in {} that {} depends on", IntensionalSet.getScopingExpression(intensionalSet), alpha);
 		Set<Expression>  alphaVars   = Variables.freeVariables(alpha, process);
@@ -1250,6 +1252,8 @@ public class LPIUtil {
 				result = pickSingleElement(intensionalSetSubX, process);
 			}
 		}
+		
+		Trace.out("-pick_single_element={}", result);
 		
 		return result;
 	}
