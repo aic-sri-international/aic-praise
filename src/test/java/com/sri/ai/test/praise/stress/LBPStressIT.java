@@ -32,7 +32,7 @@ public class LBPStressIT extends AbstractLPITest {
 	// #1
 	// Note: if caches can grow unbounded then run with: -Xms2G -Xmx16G
     // Note: Slow to process, takes approx 6.3 minutes (as of April 2013, had been 2 hours 5 min before Oct 2012).
-	// Note: 47 seconds to run as of June 2013.
+	// Note: 57 seconds to run as of June 2013.
 	@Test
 	public void testStressTest1() {
 		
@@ -61,7 +61,7 @@ public class LBPStressIT extends AbstractLPITest {
 	}
 	
 	// Note: This is based on PRAiSE Demo App Example 3.
-	@Ignore
+	//@Ignore
 	@Test
 	public void testStressTest3() {
 		perform(new TestData[] {
@@ -87,7 +87,7 @@ public class LBPStressIT extends AbstractLPITest {
 						"TODO")});
 	}
 	
-	@Ignore
+	//@Ignore
 	@Test
 	public void testStressTest4DefectIteration2() {
 		perform(new TestData[] {
