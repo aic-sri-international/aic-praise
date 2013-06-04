@@ -191,8 +191,8 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 						result = exponentiation;
 					}
 					else if (isMustAlwaysLift(process)) {
-						Trace.log("Unable to lift {}", expression);
-						throw new IllegalStateException("Unable to lift " + expression);
+						Trace.log("Unable to lift {} constrained by {} ", expression, process.getContextualConstraint());
+						throw new IllegalStateException("Unable to lift " + expression + " constrained by "+process.getContextualConstraint());
 					}
 				}
 			}
