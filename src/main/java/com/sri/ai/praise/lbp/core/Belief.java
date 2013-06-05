@@ -61,7 +61,6 @@ import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.StandardizedApartFrom;
 import com.sri.ai.grinder.library.SubExpressionSelection;
-import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
@@ -114,7 +113,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression result = null;
 	
 		List<Expression> msgSetUnionArguments        = getEntriesFromUnion(msgSets);
-		List<Expression> msgExpansionsUnionArguments = getMessageExpansions(msgSetUnionArguments, new PreviousMessageToMsgValueCache(), Variables.freeVariables(msgSets, process), process);
+		List<Expression> msgExpansionsUnionArguments = getMessageExpansions(msgSetUnionArguments, new PreviousMessageToMsgValueCache(), Expressions.freeVariables(msgSets, process), process);
 		
 		result = createUnionFromArgs(msgExpansionsUnionArguments);
 		
@@ -136,7 +135,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		List<Expression> nextMsgValuesUnionArguments = iterateValuesUsingExpansions(msgValuesUnionArguments, 
 															msgExpansionsUnionArguments, 
 															new PreviousMessageToMsgValueCache(),
-															Variables.freeVariables(msgExpansions, process),
+															Expressions.freeVariables(msgExpansions, process),
 															process);
 		
 		result = createUnionFromArgs(nextMsgValuesUnionArguments);
@@ -176,7 +175,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		Expression randomVariable = belief.get(0);
 		
-		Set<Expression> freeVariablesFromBeliefQuery = Variables.freeVariables(randomVariable, process);
+		Set<Expression> freeVariablesFromBeliefQuery = Expressions.freeVariables(randomVariable, process);
 		
 		Trace.log("beingComputed    <- empty set");
 		Expression beingComputed = LPIUtil.createNewBeingComputedExpression();
@@ -1070,7 +1069,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	private boolean isFreeVariablesIntroduced(Expression msgExpansionOrValue, Set<Expression> freeVariablesFromBeliefQuery, RewritingProcess process) {
 		boolean result = false;
 		
-		Set<Expression> freeInMsg = Variables.freeVariables(msgExpansionOrValue, process);
+		Set<Expression> freeInMsg = Expressions.freeVariables(msgExpansionOrValue, process);
 		freeInMsg.removeAll(Model.getSortNames(process)); // Ensure sort names are not included in this list.
 		
 		if (!freeVariablesFromBeliefQuery.containsAll(freeInMsg)) {
@@ -1084,15 +1083,15 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		boolean result = false;
 		
 		Expression head = IntensionalSet.getHead(msgExpansionOrValue);	
-		Set<Expression> destinationVariables = Variables.get(Tuple.get(head, 0), process);
-		Set<Expression> originVariables      = Variables.get(Tuple.get(head, 1), process);
+		Set<Expression> destinationVariables = Expressions.getVariables(Tuple.get(head, 0), process);
+		Set<Expression> originVariables      = Expressions.getVariables(Tuple.get(head, 1), process);
 		Set<Expression> destOriginSet        = new HashSet<Expression>();
 		destOriginSet.addAll(destinationVariables);
 		destOriginSet.addAll(originVariables);
 		destOriginSet.retainAll(IntensionalSet.getIndices(msgExpansionOrValue));
 		
 		Set<Expression> rvValueVariables     = new HashSet<Expression>();
-		Set<Expression> rvValues             = SubExpressionSelection.get(Tuple.get(head, 2), new Predicate<Expression>() {
+		Set<Expression> rvValues             = SubExpressionSelection.getVariables(Tuple.get(head, 2), new Predicate<Expression>() {
 			@Override
 			public boolean apply(Expression arg) {
 				boolean result = LPIUtil.isRandomVariableValueExpressionCandidate(arg, process);
@@ -1100,14 +1099,14 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			}
 		});
 		for (Expression rvv : rvValues) {
-			rvValueVariables.addAll(Variables.get(rvv, process));
+			rvValueVariables.addAll(Expressions.getVariables(rvv, process));
 		}
 		// Only keep random variable value logical variables that are not internally
 		// scoped (e.g. in a product message from an expansion).
-		rvValueVariables.retainAll(Variables.freeVariables(Tuple.get(head, 2), process));
+		rvValueVariables.retainAll(Expressions.freeVariables(Tuple.get(head, 2), process));
 		
 		Set<Expression> testSet = new HashSet<Expression>();
-		testSet.addAll(Variables.freeVariables(Tuple.get(head, 2), process));
+		testSet.addAll(Expressions.freeVariables(Tuple.get(head, 2), process));
 		testSet.retainAll(IntensionalSet.getIndices(msgExpansionOrValue));
 		testSet.removeAll(destOriginSet);
 		testSet.removeAll(rvValueVariables);

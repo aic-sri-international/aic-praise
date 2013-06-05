@@ -57,7 +57,6 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
 import com.sri.ai.grinder.library.boole.Not;
@@ -321,7 +320,7 @@ public class RuleConverter {
 		// Perform the substitution of the query(...) with its equivalent.
 		if (queryAtom != null && query != null) {
 			List<Expression> queryAtomArgs = queryAtom.getArguments();
-			Set<Expression> queryVariables = Variables.freeVariables(query, rewritingProcess);
+			Set<Expression> queryVariables = Expressions.freeVariables(query, rewritingProcess);
 			if (queryVariables.containsAll(queryAtomArgs)) {
 				ruleExpression = ruleExpression.replaceAllOccurrences(new ReplaceQueryFunction(queryAtom, query), rewritingProcess);
 			}
@@ -495,7 +494,7 @@ public class RuleConverter {
 			return null;
 		}
 
-		Set<Expression> variables = Variables.freeVariables(query, rewritingProcess);
+		Set<Expression> variables = Expressions.freeVariables(query, rewritingProcess);
 		Expression queryAtom;
 		if (variables.size() > 0) {
 			queryAtom = Expressions.make(QUERY_STRING, variables);
@@ -1104,7 +1103,7 @@ public class RuleConverter {
 			// Get free variables and create inequality constraints on all pairs except those
 			// pairs stated to be "may be same as".
 			List<Expression> constraints = new ArrayList<Expression>();
-			Set<Expression> variables = Variables.freeVariables(potentialExpression, rewritingProcess);
+			Set<Expression> variables = Expressions.freeVariables(potentialExpression, rewritingProcess);
 			Expression[] variableArray = new Expression[variables.size()];
 			variables.toArray(variableArray);
 			for (int ii = 0; ii < variables.size() - 1; ii++) {
@@ -1188,7 +1187,7 @@ public class RuleConverter {
 	 * @return A parfactor expression based on the potential expression on constraints.
 	 */
 	public Expression createParfactor (Expression potentialExpression, Expression constraints) {
-		Set<Expression> variableSet = Variables.freeVariables(potentialExpression, rewritingProcess);
+		Set<Expression> variableSet = Expressions.freeVariables(potentialExpression, rewritingProcess);
 		List<Expression> variableList = new ArrayList<Expression>();
 		for (Expression variable : variableSet) {
 			variableList.add(variable);
@@ -1198,7 +1197,7 @@ public class RuleConverter {
 // ->
 // {{ ( on ) ([ if entityOf(m1, obama) then 1 else 0 ]) | X0 = obama }} 
 // incorrectly.
-		if (variableSet.size() == 0 && Variables.freeVariables(constraints, rewritingProcess).size() > 0) {
+		if (variableSet.size() == 0 && Expressions.freeVariables(constraints, rewritingProcess).size() > 0) {
 			constraints = Expressions.TRUE;
 		}
 		return IntensionalSet.makeMultiSetFromIndexExpressionsList(
@@ -1530,7 +1529,7 @@ public class RuleConverter {
 					
 					// Get all the free variables in the quantifier expression to create a
 					// call to our new random variable expression.
-					Set<Expression> variables = Variables.freeVariables(expression, rewritingProcess);
+					Set<Expression> variables = Expressions.freeVariables(expression, rewritingProcess);
 					Expression newExpression = Expressions.make(newFunctor, variables);
 
 					// Then create a new rule based on the new expression.

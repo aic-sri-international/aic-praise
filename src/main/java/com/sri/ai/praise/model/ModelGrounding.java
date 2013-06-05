@@ -54,7 +54,6 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.Substitute;
-import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -379,7 +378,7 @@ public class ModelGrounding {
 		private void ensureNoFreeVariables(Model model, RewritingProcess process) {
 			for (Expression parfactor : model.getParfactorsDeclaration()
 					.getParfactors()) {
-				Set<Expression> freeVariables = Variables.freeVariables(parfactor, process);
+				Set<Expression> freeVariables = Expressions.freeVariables(parfactor, process);
 				if (freeVariables.size() > 0) {
 					// Ensure the free variables returned are not sort names
 					Set<Expression> sorts = new LinkedHashSet<Expression>();

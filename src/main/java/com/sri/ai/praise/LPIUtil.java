@@ -63,7 +63,6 @@ import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.Substitute;
-import com.sri.ai.grinder.library.Variables;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.boole.ThereExists;
@@ -1214,7 +1213,7 @@ public class LPIUtil {
 		
 		Expression       alpha       = IntensionalSet.getHead(intensionalSet);
 		Trace.log("R <- indices in {} that {} depends on", IntensionalSet.getScopingExpression(intensionalSet), alpha);
-		Set<Expression>  alphaVars   = Variables.freeVariables(alpha, process);
+		Set<Expression>  alphaVars   = Expressions.freeVariables(alpha, process);
 		List<Expression> indicesI    = new ArrayList<Expression>(IntensionalSet.getIndices(intensionalSet));
 		Set<Expression>  tempIndices = new LinkedHashSet<Expression>(indicesI);
 		tempIndices.retainAll(alphaVars);
@@ -1330,7 +1329,7 @@ public class LPIUtil {
 				possibleValues.addAll(FormulaUtil.getConstants(formulaC, process));
 				// union ( (free variables of formula_on_X and context) \\ {X})
 				Expression formulaOnXAndContext = CardinalityUtil.makeAnd(formulaOnX, process.getContextualConstraint());
-				possibleValues.addAll(Variables.freeVariables(formulaOnXAndContext, process));
+				possibleValues.addAll(Expressions.freeVariables(formulaOnXAndContext, process));
 				possibleValues.remove(variableX);
 				Trace.log("// possible_values = {}", possibleValues);
 				
@@ -1582,7 +1581,7 @@ public class LPIUtil {
 		Set<Expression> indexExpressionsFreeVariables = new HashSet<Expression>();
 		
 		// Collect the free variables
-		alphaFreeVariables.addAll(Variables.freeVariables(alpha, process));
+		alphaFreeVariables.addAll(Expressions.freeVariables(alpha, process));
 		indexExpressionsFreeVariables.addAll(indicesI);
 		
 		// check the intersection
