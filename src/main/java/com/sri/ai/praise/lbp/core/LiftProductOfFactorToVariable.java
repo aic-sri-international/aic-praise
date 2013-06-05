@@ -56,8 +56,10 @@ import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.equality.cardinality.direct.CardinalityRewriter;
 import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.number.Times;
+import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.lbp.LBPRewriter;
 
 /**
  * <pre>
@@ -72,7 +74,9 @@ import com.sri.ai.praise.LPIUtil;
  * Cases:
  * Alpha is if C' then Alpha_1 else Alpha_2
  *     return R_lift_product_of_factor_to_variable(prod_{{(on I) Alpha_1 | C and C'}}) * R_lift_product_of_factor_to_variable(prod_{{(on I) Alpha_2 | C and not C'})
- * if Alpha <- pick_single_element({{(on I) Alpha | C}}) succeed
+ * if R_complete_simplify({(on I) true | C}) is empty set
+ *     return 1
+ * if Alpha <- pick_single_element({(on I) Alpha | C}) succeed
  *     return Alpha ^ {@link Cardinality R_card}(| C |_I)
  * otherwise
  *     return input expression
@@ -175,24 +179,31 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 				
 				// Alpha isn't if C' then Alpha_1 else Alpha_2, where C' is a formula depending on I'
 				if (result == expression) { 
-					// if Alpha <- pick_single_element({{(on I) Alpha | C}}) succeeds 			
-					// Note: pick_single_element expects uni-intensional sets.
-					Expression singletonIntensionalSet = IntensionalSet.makeUniSet(onI, alpha, conditionC);
-					Expression singleAlpha             = LPIUtil.pickSingleElement(singletonIntensionalSet, process);				
-					if (singleAlpha != null) {
-						// return alpha ^ {@link Cardinality R_card}(| C |_I)
-						List<Expression> setIndices = new ArrayList<Expression>(IntensionalSet.getIndices(prodSet));
-						Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, setIndices.toArray(new Expression[setIndices.size()]));
-						Justification.beginEqualityStep("cardinality of equality boolean formula");
-						Justification.log(cardinalityOfIndexedFormula);
-						Expression cardinality    = process.rewrite(CardinalityRewriter.R_card, cardinalityOfIndexedFormula);
-						Justification.endEqualityStep(cardinality);
-						Expression exponentiation = Expressions.apply(FunctorConstants.EXPONENTIATION, singleAlpha, cardinality);
-						result = exponentiation;
+					// if R_complete_simplify({(on I) true | C}) is empty set
+					Expression isEmptySet = process.rewrite(LBPRewriter.R_complete_simplify, IntensionalSet.makeUniSet(onI, Expressions.TRUE, conditionC));
+					if (Sets.isEmptySet(isEmptySet)) {
+						// then return 1
+						result = Expressions.ONE;
 					}
-					else if (isMustAlwaysLift(process)) {
-						Trace.log("Unable to lift {} constrained by {} ", expression, process.getContextualConstraint());
-						throw new IllegalStateException("Unable to lift " + expression + " constrained by "+process.getContextualConstraint());
+					else {
+						// if Alpha <- pick_single_element({(on I) Alpha | C}) succeeds
+						Expression singletonIntensionalSet = IntensionalSet.makeUniSet(onI, alpha, conditionC);
+						Expression singleAlpha             = LPIUtil.pickSingleElement(singletonIntensionalSet, process);				
+						if (singleAlpha != null) {
+							// return alpha ^ {@link Cardinality R_card}(| C |_I)
+							List<Expression> setIndices = new ArrayList<Expression>(IntensionalSet.getIndices(prodSet));
+							Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, setIndices.toArray(new Expression[setIndices.size()]));
+							Justification.beginEqualityStep("cardinality of equality boolean formula");
+							Justification.log(cardinalityOfIndexedFormula);
+							Expression cardinality    = process.rewrite(CardinalityRewriter.R_card, cardinalityOfIndexedFormula);
+							Justification.endEqualityStep(cardinality);
+							Expression exponentiation = Expressions.apply(FunctorConstants.EXPONENTIATION, singleAlpha, cardinality);
+							result = exponentiation;
+						}
+						else if (isMustAlwaysLift(process)) {
+							Trace.log("Unable to lift {} constrained by {} ", expression, process.getContextualConstraint());
+							throw new IllegalStateException("Unable to lift " + expression + " constrained by "+process.getContextualConstraint());
+						}
 					}
 				}
 			}

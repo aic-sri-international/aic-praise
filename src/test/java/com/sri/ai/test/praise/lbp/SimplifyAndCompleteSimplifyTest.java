@@ -64,7 +64,7 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
     public void testExpandsIndefinitelyUsingSimplify() {
         TestData[] tests = new TestData[] {
             // This instance (found from from LBPStressTest#2 4 June 2013) 
-        	// appears not expand its rewriting indefinitely using R_simplify.
+        	// appears to expand its rewriting indefinitely using R_simplify.
             new SimplifyTestData("X != b and X != Y",
                 new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
                 "(if p(b) then 1 else 0) ^ (if Y = b then 90 else 0) * ((if p(Y) or p(Y) then 1 else 0) ^ 1 * ((if p(Y) then 0.666666667 else 0.333333333) ^ 9 * (if p(Y) then 0.666666667 else 0.333333333) ^ 8))",
@@ -80,7 +80,7 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
     public void testExpandsIndefinitelyUsingCompleteSimplify() {
         TestData[] tests = new TestData[] {
             // This instance (found from from LBPStressTest#2 4 June 2013) 
-        	// appears not expand its rewriting indefinitely using R_complete_simplify.
+        	// appears to expand its rewriting indefinitely using R_complete_simplify.
             new CompleteSimplifyTestData("X != b and X != Y",
                 new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
                 "(if p(b) then 1 else 0) ^ (if Y = b then 90 else 0) * ((if p(Y) or p(Y) then 1 else 0) ^ 1 * ((if p(Y) then 0.666666667 else 0.333333333) ^ 9 * (if p(Y) then 0.666666667 else 0.333333333) ^ 8))",
