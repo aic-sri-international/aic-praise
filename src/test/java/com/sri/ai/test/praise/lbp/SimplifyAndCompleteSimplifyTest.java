@@ -90,6 +90,22 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
        
         perform(tests);
     } 
+    
+    @Ignore("Currently looks like it hangs (i.e. trace output stops)")
+    @Test
+    public void testAppearsToHangTimeOfProductsCompleteSimplify() {
+    	TestData[] tests = new TestData[] {
+	        // This instance (found from from LBPStressTest#4 June 2013) 
+	    	// appears to hang during processing using R_complete_simplify.
+	        new CompleteSimplifyTestData("Word != constituency and Word != w7 and Word != Y",
+	        		new Model(Model.getModelDeclarationFromResource("Example4.model")),
+        		"product({{ ( on AnotherWord ) (if AnotherWord != constituency and Y != w7 and Y != constituency then if referenceOf(Word, Y) then 0.571428571 else 0.428571429 else (if Y != w7 and (Y = constituency or AnotherWord = constituency) then if referenceOf(Word, Y) then 0.571428571 else 0.428571429 else (if referenceOf(Word, Y) then 0.571428571 else 0.428571429))) | Y != AnotherWord and Word != AnotherWord }}) * product({{ ( on X0, Y', Z ) (if Y != w7 and Y != constituency then if Y' = Y then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25) else (if Y = constituency then if Y' = constituency then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25) else (if Y' = Y then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25)))) | X0 != Y' and X0 != Z and Z != Y' and (Word = X0 and Y = Y' or Word = X0 and Y = Z) }})",
+                "TODO"
+	            ),
+    	};
+    	
+    	perform(tests);
+    }
 
 	@Test
 	public void testSimplifyPassesFormulaSimplificationTests() {
