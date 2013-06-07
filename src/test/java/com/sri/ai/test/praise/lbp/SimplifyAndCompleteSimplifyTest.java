@@ -39,7 +39,6 @@ package com.sri.ai.test.praise.lbp;
 
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
@@ -58,73 +57,6 @@ import com.sri.ai.praise.model.example.TrivialPRWithNonDeterministicFactor;
 import com.sri.ai.test.praise.AbstractLPITest;
 
 public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
-	
-	@Ignore("Currently expands indefinitely")
-    @Test
-    public void testExpandsIndefinitelyUsingSimplify() {
-        TestData[] tests = new TestData[] {
-            // This instance (found from from LBPStressTest#2 4 June 2013) 
-        	// appears to expand its rewriting indefinitely using R_simplify.
-            new SimplifyTestData("X != b and X != Y",
-                new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
-                "(if p(b) then 1 else 0) ^ (if Y = b then 90 else 0) * ((if p(Y) or p(Y) then 1 else 0) ^ 1 * ((if p(Y) then 0.666666667 else 0.333333333) ^ 9 * (if p(Y) then 0.666666667 else 0.333333333) ^ 8))",
-                "TODO"
-                ),
-        };
-       
-        perform(tests);
-    } 
-    
-    @Ignore("Currently expands indefinitely")
-    @Test
-    public void testExpandsIndefinitelyUsingCompleteSimplify() {
-        TestData[] tests = new TestData[] {
-            // This instance (found from from LBPStressTest#2 4 June 2013) 
-        	// appears to expand its rewriting indefinitely using R_complete_simplify.
-            new CompleteSimplifyTestData("X != b and X != Y",
-                new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
-                "(if p(b) then 1 else 0) ^ (if Y = b then 90 else 0) * ((if p(Y) or p(Y) then 1 else 0) ^ 1 * ((if p(Y) then 0.666666667 else 0.333333333) ^ 9 * (if p(Y) then 0.666666667 else 0.333333333) ^ 8))",
-                "TODO"
-                ),
-        };
-       
-        perform(tests);
-    } 
-    
-    @Ignore("Currently looks like it hangs (i.e. trace output stops)")
-    @Test
-    public void testAppearsToHangTimeOfProductsCompleteSimplify() {
-    	TestData[] tests = new TestData[] {
-	        // This instance (found from from LBPStressTest#4 June 2013) 
-	    	// appears to hang during processing using R_complete_simplify.
-	        new CompleteSimplifyTestData("Word != constituency and Word != w7 and Word != Y",
-	        	new Model(Model.getModelDeclarationFromResource("Example4.model")),
-        		"product({{ ( on AnotherWord ) (if AnotherWord != constituency and Y != w7 and Y != constituency then if referenceOf(Word, Y) then 0.571428571 else 0.428571429 else (if Y != w7 and (Y = constituency or AnotherWord = constituency) then if referenceOf(Word, Y) then 0.571428571 else 0.428571429 else (if referenceOf(Word, Y) then 0.571428571 else 0.428571429))) | Y != AnotherWord and Word != AnotherWord }}) * product({{ ( on X0, Y', Z ) (if Y != w7 and Y != constituency then if Y' = Y then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25) else (if Y = constituency then if Y' = constituency then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25) else (if Y' = Y then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25)))) | X0 != Y' and X0 != Z and Z != Y' and (Word = X0 and Y = Y' or Word = X0 and Y = Z) }})",
-                "TODO"
-	            ),
-    	};
-    	
-    	perform(tests);
-    }
-    
-    @Ignore("Currently looks like it hangs (i.e. trace output stops)")
-    @Test
-    public void testAppearsToHangStressTest4Interation4CompleteSimplify() {
-    	TestData[] tests = new TestData[] {
-	        // This instance (found from from LBPStressTest#4 June 2013) 
-	    	// appears to hang during processing using R_complete_simplify.
-	        new CompleteSimplifyTestData("Word != constituency and Word != w7 and Word != Y",
-	        	new Model(Model.getModelDeclarationFromResource("Example4.model")),
-	        	// Complete Expression
-	        	// "product({{ ( on AnotherWord ) (if AnotherWord != constituency and Y != w7 and Y != constituency then if referenceOf(Word, Y) then 0.5 else 0.5 else (if Y != w7 and (Y = constituency or AnotherWord = constituency) then if referenceOf(Word, Y) then 0.5 else 0.5 else (if referenceOf(Word, Y) then 0.5 else 0.5))) | Y != AnotherWord and Word != AnotherWord }}) * product({{ ( on X0, Y', Z ) (if Y != w7 and Y != constituency then if Y' = Y then if referenceOf(X0, Y') then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681) else (if Y = constituency then if Y' = constituency then if referenceOf(X0, constituency) then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681) else (if Y' = Y then if referenceOf(X0, Y') then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681)))) | X0 != Y' and X0 != Z and Z != Y' and (Word = X0 and Y = Y' or Word = X0 and Y = Z) }})"
-	        	// 2nd product of above only.
-        		"product({{ ( on X0, Y', Z ) (if Y != w7 and Y != constituency then if Y' = Y then if referenceOf(X0, Y') then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681) else (if Y = constituency then if Y' = constituency then if referenceOf(X0, constituency) then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681) else (if Y' = Y then if referenceOf(X0, Y') then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681)))) | X0 != Y' and X0 != Z and Z != Y' and (Word = X0 and Y = Y' or Word = X0 and Y = Z) }})",
-        		"TODO"
-	            ),
-    	};
-    	
-    	perform(tests);
-    }
 
 	@Test
 	public void testSimplifyPassesFormulaSimplificationTests() {
@@ -594,6 +526,69 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 		perform(tests);
 	}
 	
+    @Test
+    public void testExpandsIndefinitelyUsingSimplify() {
+        TestData[] tests = new TestData[] {
+            // This instance (found from from LBPStressTest#2 4 June 2013) 
+        	// appears to expand its rewriting indefinitely using R_simplify.
+            new SimplifyTestData("X != b and X != Y",
+                new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
+                "(if p(b) then 1 else 0) ^ (if Y = b then 90 else 0) * ((if p(Y) or p(Y) then 1 else 0) ^ 1 * ((if p(Y) then 0.666666667 else 0.333333333) ^ 9 * (if p(Y) then 0.666666667 else 0.333333333) ^ 8))",
+                "if Y = b then if p(b) then 0.00101495924 else 0 else (if p(Y) then 0.00101495924 else 0)"
+                ),
+        };
+       
+        perform(tests);
+    } 
+    
+    @Test
+    public void testExpandsIndefinitelyUsingCompleteSimplify() {
+        TestData[] tests = new TestData[] {
+            // This instance (found from from LBPStressTest#2 4 June 2013) 
+        	// appears to expand its rewriting indefinitely using R_complete_simplify.
+            new CompleteSimplifyTestData("X != b and X != Y",
+                new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
+                "(if p(b) then 1 else 0) ^ (if Y = b then 90 else 0) * ((if p(Y) or p(Y) then 1 else 0) ^ 1 * ((if p(Y) then 0.666666667 else 0.333333333) ^ 9 * (if p(Y) then 0.666666667 else 0.333333333) ^ 8))",
+                "if Y = b then if p(b) then 0.00101495924 else 0 else (if p(Y) then 0.00101495924 else 0)"
+                ),
+        };
+       
+        perform(tests);
+    } 
+    
+    @Test
+    public void testAppearsToHangTimeOfProductsCompleteSimplify() {
+    	TestData[] tests = new TestData[] {
+	        // This instance (found from from LBPStressTest#4 June 2013) 
+	    	// appears to hang during processing using R_complete_simplify.
+	        new CompleteSimplifyTestData("Word != constituency and Word != w7 and Word != Y",
+	        	new Model(Model.getModelDeclarationFromResource("Example4.model")),
+        		"product({{ ( on AnotherWord ) (if AnotherWord != constituency and Y != w7 and Y != constituency then if referenceOf(Word, Y) then 0.571428571 else 0.428571429 else (if Y != w7 and (Y = constituency or AnotherWord = constituency) then if referenceOf(Word, Y) then 0.571428571 else 0.428571429 else (if referenceOf(Word, Y) then 0.571428571 else 0.428571429))) | Y != AnotherWord and Word != AnotherWord }}) * product({{ ( on X0, Y', Z ) (if Y != w7 and Y != constituency then if Y' = Y then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25) else (if Y = constituency then if Y' = constituency then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25) else (if Y' = Y then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25)))) | X0 != Y' and X0 != Z and Z != Y' and (Word = X0 and Y = Y' or Word = X0 and Y = Z) }})",
+                "if Y != w7 and Y != constituency then if referenceOf(Word, Y) then 4.78027049E-113 else 1.56077148E-78 else (if Y = constituency then if referenceOf(Word, constituency) then 4.78027049E-113 else 1.56077148E-78 else (if referenceOf(Word, w7) then 4.78027049E-113 else 1.56077148E-78))"
+	            ),
+    	};
+    	
+    	perform(tests);
+    }
+    
+    @Test
+    public void testAppearsToHangStressTest4Interation4CompleteSimplify() {
+    	TestData[] tests = new TestData[] {
+	        // This instance (found from from LBPStressTest#4 June 2013) 
+	    	// appears to hang during processing using R_complete_simplify.
+	        new CompleteSimplifyTestData("Word != constituency and Word != w7 and Word != Y",
+	        	new Model(Model.getModelDeclarationFromResource("Example4.model")),
+	        	// Complete Expression
+	        	// "product({{ ( on AnotherWord ) (if AnotherWord != constituency and Y != w7 and Y != constituency then if referenceOf(Word, Y) then 0.5 else 0.5 else (if Y != w7 and (Y = constituency or AnotherWord = constituency) then if referenceOf(Word, Y) then 0.5 else 0.5 else (if referenceOf(Word, Y) then 0.5 else 0.5))) | Y != AnotherWord and Word != AnotherWord }}) * product({{ ( on X0, Y', Z ) (if Y != w7 and Y != constituency then if Y' = Y then if referenceOf(X0, Y') then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681) else (if Y = constituency then if Y' = constituency then if referenceOf(X0, constituency) then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681) else (if Y' = Y then if referenceOf(X0, Y') then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681)))) | X0 != Y' and X0 != Z and Z != Y' and (Word = X0 and Y = Y' or Word = X0 and Y = Z) }})"
+	        	// 2nd product of above only.
+        		"product({{ ( on X0, Y', Z ) (if Y != w7 and Y != constituency then if Y' = Y then if referenceOf(X0, Y') then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681) else (if Y = constituency then if Y' = constituency then if referenceOf(X0, constituency) then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681) else (if Y' = Y then if referenceOf(X0, Y') then 0.666466241 else 0.333533759 else (if not referenceOf(X0, Z) then 0.500150319 else 0.499849681)))) | X0 != Y' and X0 != Z and Z != Y' and (Word = X0 and Y = Y' or Word = X0 and Y = Z) }})",
+        		"if Y = constituency then if referenceOf(Word, constituency) then 1.64635067E-47 else 6.01941278E-77 else (if Y = w7 then if referenceOf(Word, w7) then 1.64635067E-47 else 6.01941278E-77 else (if referenceOf(Word, Y) then 1.64635067E-47 else 6.01941278E-77))"
+	            ),
+    	};
+    	
+    	perform(tests);
+    }
+	
 	//
 	// PRIVATE METHODS
 	//
@@ -649,7 +644,11 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 		//
 		// PROTECTED METHODS
 		protected Expression simplify(Expression expression, RewritingProcess process) {
-			return process.rewrite(LBPRewriter.R_simplify, expression);
+			Expression result = process.rewrite(LBPRewriter.R_simplify, expression);
+			
+			result = Expressions.roundToAGivenPrecision(result, 9);
+			
+			return result;
 		}
 	};
 	
@@ -664,7 +663,11 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 		
 		@Override
 		protected Expression simplify(Expression expression, RewritingProcess process) {
-			return process.rewrite(LBPRewriter.R_complete_simplify, expression);
+			Expression result = process.rewrite(LBPRewriter.R_complete_simplify, expression);
+			
+			result = Expressions.roundToAGivenPrecision(result, 9);
+			
+			return result;
 		}
 	}
 }

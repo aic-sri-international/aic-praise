@@ -740,7 +740,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
      * // Partition the value based on its intersection:
      * // Intersection is of the form { (on I) (Destination, Origin) | C' }
      * D <- there exists I : C'
-     * return R_complete_simplify(if D then v else prev_message)
+     * return R_simplify(if D then v else prev_message)
 	 * </pre>
 	 */
 	private Expression findMsgValueMatchingPreviousMessage(Expression prevMessage, List<Expression> msgValues, 
@@ -853,9 +853,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Trace.log("D <- there exists I : C'");
 		Expression expressionD = ThereExists.make(new ArrayList<Expression>(IntensionalSet.getIndices(intersection)), 
 												  IntensionalSet.getCondition(intersection));
-		Trace.log("return R_complete_simplify(if D then v else prev_message)"); 
+		Trace.log("return R_simplify(if D then v else prev_message)"); 
 		Expression conditionalD = IfThenElse.make(expressionD, v, prevMessage);
-		result = process.rewrite(R_complete_simplify, conditionalD);
+		result = process.rewrite(R_simplify, conditionalD);
 
 		Trace.out("-findMsgValueMatchingPreviousMessage={}", result);
 		
