@@ -85,7 +85,7 @@ public class RuleConverterTest {
 		lowParser = new AntlrGrinderParserWrapper();
 	}
 	
-	//
+	// Tests for:
 	// http://code.google.com/p/aic-praise/wiki/SyntaxAndMeaningOfProbabilisticRules
 	// http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
 	//

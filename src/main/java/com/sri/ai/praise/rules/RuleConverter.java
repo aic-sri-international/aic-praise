@@ -1166,32 +1166,11 @@ public class RuleConverter {
 	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeConstraintedPotentialExpressions2Parfactors
 	 * 
 	 * @param potentialExpression  The potential expression to convert into a parfactor.
-	 * @param constraints          The list of the constraints for the parfactor.
-	 * @return A parfactor expression based on the potential expression on constraints.
-	 */
-	public Expression createParfactor (Expression potentialExpression, List<Expression> constraints) {
-		return createParfactor(potentialExpression, And.make(constraints));
-	}
-
-	/**
-	 * Makes a parfactor from the given potential expression and a list of constraints.
-	 * 
-	 * Description of function:
-	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
-	 * 
-	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeConstraintedPotentialExpressions2Parfactors
-	 * 
-	 * @param potentialExpression  The potential expression to convert into a parfactor.
 	 * @param constraints          The constraints for the parfactor.
 	 * @return A parfactor expression based on the potential expression on constraints.
 	 */
 	public Expression createParfactor (Expression potentialExpression, Expression constraints) {
 		Set<Expression> variableSet = Expressions.freeVariables(potentialExpression, rewritingProcess);
-		List<Expression> variableList = new ArrayList<Expression>();
-		for (Expression variable : variableSet) {
-			variableList.add(variable);
-		}
 // TODO - correct this logic and make pseudo-code correct, this is currently to handle situations like:
 // entityOf(m1) = obama;
 // ->
@@ -1201,7 +1180,7 @@ public class RuleConverter {
 			constraints = Expressions.TRUE;
 		}
 		return IntensionalSet.makeMultiSetFromIndexExpressionsList(
-				variableList, 
+				 new ArrayList<Expression>(variableSet), 
 				Expressions.make(FunctorConstants.LEFT_DOT_RIGHT, potentialExpression), 
 				constraints);
 	}
