@@ -87,22 +87,30 @@ public class RuleConverterTest {
 
 
 	@Test
-	public void testTranslateRules () {
-		// Atomic rule tests
-		String string;
-//		string = "sick(X);";
+	public void testTranslateAtomicRules () {
+
+		// string = "sick(X);";
+		testTranslateRules(ruleParser.parse("sick(X);"), 
+				lowParser.parse("if sick(X) then 1 else 0"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), "1"), 
 			new DefaultCompoundSyntaxTree("if . then . else .", 
 				new DefaultCompoundSyntaxTree("sick", "X"), "1", "0"));
 
-//		string = "sick(X) 0.3;";
+		// string = "sick(X) 0.3;";
+		testTranslateRules(ruleParser.parse("sick(X) 0.3;"), 
+				lowParser.parse("if sick(X) then 0.3 else 0.7"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), "0.3"),
 			new DefaultCompoundSyntaxTree("if . then . else .", 
 				new DefaultCompoundSyntaxTree("sick", "X"), "0.3", "0.7"));
 
-//		string = "sick(X) and happy(X);";
+		// string = "sick(X) and happy(X);";
+		testTranslateRules(ruleParser.parse("sick(X) and happy(X);"), 
+				lowParser.parse("if sick(X) and happy(X) then 1 else 0"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
@@ -112,7 +120,10 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("happy", "X")), "1", "0"));
 
-//		string = "sick(X) and happy(X) 0.1;";
+		// string = "sick(X) and happy(X) 0.1;";
+		testTranslateRules(ruleParser.parse("sick(X) and happy(X) 0.1;"), 
+				lowParser.parse("if sick(X) and happy(X) then 0.1 else 0.9"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
@@ -121,58 +132,15 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
 						new DefaultCompoundSyntaxTree("happy", "X")), "0.1", "0.9"));
-
-		// Prolog rule tests
-//		string = "sick(john).";
-		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
-				new DefaultCompoundSyntaxTree("sick", "john")),
-			new DefaultCompoundSyntaxTree("if . then . else .", 
-				new DefaultCompoundSyntaxTree("sick", "john"), "1", "0"));
-
-//		string = "sick(X).";
-		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
-				new DefaultCompoundSyntaxTree("sick", "X")), 
-			new DefaultCompoundSyntaxTree("if . then . else .", 
-				new DefaultCompoundSyntaxTree("sick", "X"), "1", "0"));
-
-//		string = "not sick(mary).";
-		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
-				new DefaultCompoundSyntaxTree("not", 
-						new DefaultCompoundSyntaxTree("sick", "mary"))), 
-			new DefaultCompoundSyntaxTree("if . then . else .", 
-				new DefaultCompoundSyntaxTree("not", 
-						new DefaultCompoundSyntaxTree("sick", "mary")), "1", "0"));
-
-//		string = "0.3 sick(X).";
-		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.3", 
-				new DefaultCompoundSyntaxTree("sick", "X")), 
-			new DefaultCompoundSyntaxTree("if . then . else .", 
-				new DefaultCompoundSyntaxTree("sick", "X"), "0.3", "0.7"));
-
-//		string = "round(X) :- circle(X).";
-		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
-				new DefaultCompoundSyntaxTree("round", "X"), 
-				new DefaultCompoundSyntaxTree("circle", "X")), 
-			new DefaultCompoundSyntaxTree("if . then . else .", 
-				new DefaultCompoundSyntaxTree("circle", "X"), 
-				new DefaultCompoundSyntaxTree("if . then . else .", 
-					new DefaultCompoundSyntaxTree("round", "X"), "1", "0"), "0.5"));
-
-//		string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
-		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
-				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("and", "epidemic", 
-						new DefaultCompoundSyntaxTree("not", 
-								new DefaultCompoundSyntaxTree("vaccinated", "X")))),
-			new DefaultCompoundSyntaxTree("if . then . else .", 
-				new DefaultCompoundSyntaxTree("and", "epidemic", 
-						new DefaultCompoundSyntaxTree("not", 
-								new DefaultCompoundSyntaxTree("vaccinated", "X"))), 
-				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("sick", "X"), "0.7", "0.3"), "0.5"));
-
+	}
+	
+	@Test
+	public void testTranslateConditionalRules() {
 		// Conditional rule tests
-//		string = "if circle(X) then round(X);";
+		// string = "if circle(X) then round(X);";
+		testTranslateRules(ruleParser.parse("if circle(X) then round(X);"), 
+				lowParser.parse("if circle(X) then if round(X) then 1 else 0 else 0.5"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("circle", "X"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
@@ -182,7 +150,10 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("round", "X"), "1", "0"), "0.5"));
 
-//		string = "if epidemic then sick(X) 0.7;";
+		// string = "if epidemic then sick(X) 0.7;";
+		testTranslateRules(ruleParser.parse("if epidemic then sick(X) 0.7;"), 
+				lowParser.parse("if epidemic then if sick(X) then 0.7 else 0.3 else 0.5"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
 				new DefaultCompoundSyntaxTree("atomic rule", 
 						new DefaultCompoundSyntaxTree("sick", "X"), "0.7")), 
@@ -190,7 +161,10 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("sick", "X"), "0.7", "0.3"), "0.5"));
 
-//		string = "if epidemic then sick(X) and unhappy(X) 0.9;";
+		// string = "if epidemic then sick(X) and unhappy(X) 0.9;";
+		testTranslateRules(ruleParser.parse("if epidemic then sick(X) and unhappy(X) 0.9;"), 
+				lowParser.parse("if epidemic then if sick(X) and unhappy(X) then 0.9 else 0.1 else 0.5"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
 				new DefaultCompoundSyntaxTree("atomic rule", 
 						new DefaultCompoundSyntaxTree("and", 
@@ -202,7 +176,10 @@ public class RuleConverterTest {
 								new DefaultCompoundSyntaxTree("sick", "X"), 
 								new DefaultCompoundSyntaxTree("unhappy", "X")), "0.9", "0.1"), "0.5"));
 
-//		string = "if chilly(P) and live(X, P) then sick(X) 0.6;";
+		// string = "if chilly(P) and live(X, P) then sick(X) 0.6;";
+		testTranslateRules(ruleParser.parse("if chilly(P) and live(X, P) then sick(X) 0.6;"), 
+				lowParser.parse("if chilly(P) and live(X, P) then if sick(X) then 0.6 else 0.4 else 0.5"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("chilly", "P"), 
@@ -216,7 +193,10 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("sick", "X"), "0.6", "0.4"), "0.5"));
 
-//		string = "if colleagues(X,Y) then likes(X,Y) 0.8;";
+		// string = "if colleagues(X,Y) then likes(X,Y) 0.8;";
+		testTranslateRules(ruleParser.parse("if colleagues(X,Y) then likes(X,Y) 0.8;"), 
+				lowParser.parse("if colleagues(X,Y) then if likes(X,Y) then 0.8 else 0.2 else 0.5"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("colleagues", "X", "Y"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
@@ -226,7 +206,10 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("likes", "X", "Y"), "0.8", "0.2"), "0.5"));
 
-//		string = "if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8;";
+		// string = "if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8;";
+		testTranslateRules(ruleParser.parse("if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8;"), 
+				lowParser.parse("if epidemic then if sick(X) and friends(X, Y) then if sick(Y) then 0.8 else 0.2 else 0.5 else 0.5"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
 				new DefaultCompoundSyntaxTree("conditional rule", 
 						new DefaultCompoundSyntaxTree("and", 
@@ -242,7 +225,12 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("if . then . else .", 
 								new DefaultCompoundSyntaxTree("sick", "Y"), "0.8", "0.2"), "0.5"), "0.5"));
 
-//		string = "if sick(X) and friends(X,Y) then 0.5 else sick(Y);";
+		// string = "if sick(X) and friends(X,Y) then 0.5 else sick(Y);";
+// TODO - this looks incorrect!!!! i.e.: if 0.5 then 1 else 0	
+// http://code.google.com/p/aic-praise/issues/detail?id=19
+		testTranslateRules(ruleParser.parse("if sick(X) and friends(X,Y) then 0.5 else sick(Y);"), 
+				lowParser.parse("if sick(X) and friends(X,Y) then if 0.5 then 1 else 0 else if sick(Y) then 1 else 0"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
@@ -258,7 +246,10 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("sick", "Y"), "1", "0")));
 
-//		string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);";
+		// string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);";
+		testTranslateRules(ruleParser.parse("if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);"), 
+				lowParser.parse("if sick(X) and friends(X,Y) then if sick(Y) then 0.8 else 0.2 else if sick(Y) then 1 else 0"));
+		
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
@@ -276,7 +267,10 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("sick", "Y"), "1", "0")));
 
-//		string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y) 0.3;";
+		// string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y) 0.3;";
+		testTranslateRules(ruleParser.parse("if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y) 0.3;"), 
+				lowParser.parse("if sick(X) and friends(X,Y) then if sick(Y) then 0.8 else 0.2 else if sick(Y) then 0.3 else 0.7"));
+
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("and", 
 						new DefaultCompoundSyntaxTree("sick", "X"), 
@@ -293,29 +287,82 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("sick", "Y"), "0.8", "0.2"), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("sick", "Y"), "0.3", "0.7")));
-
-		// Standard probability rule tests.
-		string = "P(sick(X) | epidemic) = 0.8;";
-		testTranslateRules(ruleParser.parse(string), 
-				lowParser.parse("if epidemic then if sick(X) then 0.8 else 0.2 else 0.5"));
-
-		string = "P(sick(X) and happy(Y) | mother(Z)) = 0.4;";
-		testTranslateRules(ruleParser.parse(string), 
-				lowParser.parse("if mother(Z) then if sick(X) and happy(Y) then 0.4 else 0.6 else 0.5"));
-
-		// Causal rule tests.
-		string = "sick(X) -> fever(X) 0.6;";
-		testTranslateRules(ruleParser.parse(string), 
-				lowParser.parse("if sick(X) then (if fever(X) then 0.6 else 0.4) else 0.5"));
-
-		string = "sick(X) and happy(Y) -> fever(X) 0.6;";
-		testTranslateRules(ruleParser.parse(string), 
-				lowParser.parse("if sick(X) and happy(Y) then (if fever(X) then 0.6 else 0.4) else 0.5"));
-
 	}
-
+	
 	@Test
-	public void testTranslateConjunctions () {
+	public void testTranslatePrologRules () {
+// TODO - can we not just get away with a trailing period instead of '.;' for prolog rules?
+// http://code.google.com/p/aic-praise/issues/detail?id=18
+		
+		// Prolog rule tests		
+		testTranslateRules(ruleParser.parse("sick(john).;"), 
+				lowParser.parse("if sick(john) then 1 else 0"));
+
+		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
+				new DefaultCompoundSyntaxTree("sick", "john")),
+			new DefaultCompoundSyntaxTree("if . then . else .", 
+				new DefaultCompoundSyntaxTree("sick", "john"), "1", "0"));
+
+		// string = "sick(X).";
+		testTranslateRules(ruleParser.parse("sick(X).;"), 
+				lowParser.parse("if sick(X) then 1 else 0"));
+		
+		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
+				new DefaultCompoundSyntaxTree("sick", "X")), 
+			new DefaultCompoundSyntaxTree("if . then . else .", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "1", "0"));
+
+		// string = "not sick(mary).";
+		testTranslateRules(ruleParser.parse("not sick(mary).;"), 
+				lowParser.parse("if not sick(mary) then 1 else 0"));
+		
+		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
+				new DefaultCompoundSyntaxTree("not", 
+						new DefaultCompoundSyntaxTree("sick", "mary"))), 
+			new DefaultCompoundSyntaxTree("if . then . else .", 
+				new DefaultCompoundSyntaxTree("not", 
+						new DefaultCompoundSyntaxTree("sick", "mary")), "1", "0"));
+
+		// string = "0.3 sick(X).";
+		testTranslateRules(ruleParser.parse("0.3 sick(X).;"), 
+				lowParser.parse("if sick(X) then 0.3 else 0.7"));
+		
+		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.3", 
+				new DefaultCompoundSyntaxTree("sick", "X")), 
+			new DefaultCompoundSyntaxTree("if . then . else .", 
+				new DefaultCompoundSyntaxTree("sick", "X"), "0.3", "0.7"));
+
+		// string = "round(X) :- circle(X).";
+		testTranslateRules(ruleParser.parse("round(X) :- circle(X).;"), 
+				lowParser.parse("if circle(X) then if round(X) then 1 else 0 else 0.5"));
+		
+		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
+				new DefaultCompoundSyntaxTree("round", "X"), 
+				new DefaultCompoundSyntaxTree("circle", "X")), 
+			new DefaultCompoundSyntaxTree("if . then . else .", 
+				new DefaultCompoundSyntaxTree("circle", "X"), 
+				new DefaultCompoundSyntaxTree("if . then . else .", 
+					new DefaultCompoundSyntaxTree("round", "X"), "1", "0"), "0.5"));
+
+		// string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
+		testTranslateRules(ruleParser.parse("0.7 sick(X) :- epidemic and not vaccinated(X).;"), 
+				lowParser.parse("if epidemic and not vaccinated(X) then if sick(X) then 0.7 else 0.3 else 0.5"));
+		
+		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
+				new DefaultCompoundSyntaxTree("sick", "X"), 
+				new DefaultCompoundSyntaxTree("and", "epidemic", 
+						new DefaultCompoundSyntaxTree("not", 
+								new DefaultCompoundSyntaxTree("vaccinated", "X")))),
+			new DefaultCompoundSyntaxTree("if . then . else .", 
+				new DefaultCompoundSyntaxTree("and", "epidemic", 
+						new DefaultCompoundSyntaxTree("not", 
+								new DefaultCompoundSyntaxTree("vaccinated", "X"))), 
+				new DefaultCompoundSyntaxTree("if . then . else .", 
+						new DefaultCompoundSyntaxTree("sick", "X"), "0.7", "0.3"), "0.5"));
+	}
+	
+	@Test
+	public void testTranslateConjunctionOfRules () {
 		List<Expression> input, result, expected;
 
 		input = new ArrayList<Expression>();
@@ -432,13 +479,37 @@ public class RuleConverterTest {
 	}
 	
 	@Test(expected=UnsupportedOperationException.class)
-	public void testTranslateConjuntionFail () {
+	public void testTranslateConjuntionOfRulesFail () {
 		List<Expression> input;
 
 		input = new ArrayList<Expression>();
 		input.add(ruleParser.parse("if epidemic then (if panic then sick(X) 0.8 and flu(Y) 0.9) else if panic then sick(john) 0.2 and sick(mary) 0.3;"));
 		ruleConverter.translateConjunctions(input);
 		
+	}
+	
+	@Test
+	public void testTranslateStandardProbabilityNotationStyleRules () {
+		// Standard probability rule tests.
+		String string = "P(sick(X) | epidemic) = 0.8;";
+		testTranslateRules(ruleParser.parse(string), 
+				lowParser.parse("if epidemic then if sick(X) then 0.8 else 0.2 else 0.5"));
+
+		string = "P(sick(X) and happy(Y) | mother(Z)) = 0.4;";
+		testTranslateRules(ruleParser.parse(string), 
+				lowParser.parse("if mother(Z) then if sick(X) and happy(Y) then 0.4 else 0.6 else 0.5"));
+	}
+	
+	@Test
+	public void testTranslateCausalEffectStyleRules() {
+		// Causal rule tests.
+		String string = "sick(X) -> fever(X) 0.6;";
+		testTranslateRules(ruleParser.parse(string), 
+				lowParser.parse("if sick(X) then (if fever(X) then 0.6 else 0.4) else 0.5"));
+
+		string = "sick(X) and happy(Y) -> fever(X) 0.6;";
+		testTranslateRules(ruleParser.parse(string), 
+				lowParser.parse("if sick(X) and happy(Y) then (if fever(X) then 0.6 else 0.4) else 0.5"));
 	}
 
 	@Test
@@ -561,9 +632,6 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
-
-
-
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X));")));
@@ -1499,15 +1567,6 @@ public class RuleConverterTest {
 				if (checkResult) {
 					assertEquals(expectedResult.toString(), result.toString());
 				}
-				else {
-					if(result != null) {
-//						if (inputString != null)
-//							System.out.println("generated string for \"" + inputString + "\": " + generateBuildString(result) + "\n\n");
-//						else
-//							System.out.println("generated string : " + generateBuildString(result) + "\n\n");
-					}
-//					Assert.assertNotNull(result);
-				}
 			}
 			else {
 				Assert.assertNull(result);
@@ -1545,43 +1604,4 @@ public class RuleConverterTest {
             TreeUtil.waitUntilUIClosed();
         }
     } 
-	
-//	private void compareTree (Expression e1, Expression e2) {
-//		if (e1.equals(e2)) {
-//			System.out.println("True : " + e1 + " = " + e2);
-//		}
-//		else {
-//			System.out.println("False: " + e1 + " != " + e2);
-//		}
-//		if (e1.getArguments().size() > 0) {
-//			List<Expression> e1Args = e1.getArguments();
-//			List<Expression> e2Args = e2.getArguments();
-//			for (int i = 0; i < e1Args.size(); i++) {
-//				compareTree(e1Args.get(i), e2Args.get(i));
-//			}
-//		}
-//	}
-//	
-//	private void printTree (Expression e) {
-//		if (e.getArguments().size() == 0) {
-//			System.out.print(e.toString());
-//		}
-//		else {
-//			System.out.print(e.getFunctor());
-//			List<Expression> args = e.getArguments();
-//			System.out.print('(');
-//			boolean first = true;
-//			for (Expression arg : args) {
-//				if (first) {
-//					first = false;
-//				}
-//				else {
-//					System.out.print(", ");
-//				}
-//				printTree(arg);
-//			}
-//			System.out.print(')');
-//		}
-//	}
-
 }
