@@ -84,6 +84,11 @@ public class RuleConverterTest {
 		
 		lowParser = new AntlrGrinderParserWrapper();
 	}
+	
+	//
+	// http://code.google.com/p/aic-praise/wiki/SyntaxAndMeaningOfProbabilisticRules
+	// http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	//
 
 
 	@Test
@@ -512,95 +517,9 @@ public class RuleConverterTest {
 		testTranslateRules(ruleParser.parse(string), 
 				lowParser.parse("if sick(X) and happy(Y) then (if fever(X) then 0.6 else 0.4) else 0.5"));
 	}
-
+	
 	@Test
-	public void testUpdateRandomVariableDeclaration () {
-		Expression result, input;
-		input = new DefaultCompoundSyntaxTree("randomVariable", "mother", 1, "People", "People");
-		result = ruleConverter.updateRandomVariableDeclaration(input);
-		assertEquals(lowParser.parse("randomVariable(mother, 2, People, People, Boolean)"), result);
-
-		input = new DefaultCompoundSyntaxTree("randomVariable", "president", 0, "People");
-		result = ruleConverter.updateRandomVariableDeclaration(input);
-		assertEquals(lowParser.parse("randomVariable(president, 1, People, Boolean)"), result);
-
-		input = new DefaultCompoundSyntaxTree("sort", "sprinters", "bolt", "johnson");
-		result = ruleConverter.updateRandomVariableDeclaration(input);
-		assertEquals(null, result);
-	}
-
-	@Test
-	public void testIsRandomFunctionApplication () {
-		Expression input;
-		input = new DefaultCompoundSyntaxTree ("if . then . else .", 1, 2, 3);
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = DefaultSymbol.createSymbol("foo");
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree ("and", 1, 2, 3);
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree ("or", 1, 2, 3);
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree ("not", 1, 2, 3);
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree ("<=>", 1, 2, 3);
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree ("=>", 1, 2, 3);
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree ("there exists . : .", 1, 2, 3);
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree ("for all . : .", 1, 2, 3);
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree ("may be same as", "A", "B");
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree("mother", 1, 2, 3, 4);
-		Assert.assertEquals(true, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree("+", 1, 2, 3, 4);
-		Assert.assertEquals(true, ruleConverter.isRandomFunctionApplication(input));
-
-		input = new DefaultCompoundSyntaxTree("=", 1, 2, 3, 4);
-		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
-
-	}
-
-	@Test
-	public void testCreateTransformedFunctionConstraints () {
-		List<Expression> expected;
-
-		List<Expression> parfactors = new ArrayList<Expression>();
-		ruleConverter.createTransformedFunctionConstraints("president", 0, parfactors);
-		expected = new ArrayList<Expression>();
-		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.5"));
-		expected.add(lowParser.parse("if there exists Y : president(Y) then 1 else 0"));
-		assertEquals(expected, parfactors);
-
-		parfactors = new ArrayList<Expression>();
-		ruleConverter.createTransformedFunctionConstraints("mother", 1, parfactors);
-		expected = new ArrayList<Expression>();
-		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
-		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		assertEquals(expected, parfactors);
-
-		parfactors = new ArrayList<Expression>();
-		ruleConverter.createTransformedFunctionConstraints("foo", 3, parfactors);
-		expected = new ArrayList<Expression>();
-		expected.add(lowParser.parse("if foo(X0, X1, X2, Y) then if not foo(X0, X1, X2, Z) then 1 else 0 else 0.5"));
-		expected.add(lowParser.parse("if there exists Y : foo(X0, X1, X2, Y) then 1 else 0"));
-		assertEquals(expected, parfactors);
-	}
-
-	@Test
-	public void testTranslateFunctions ()
+	public void testTranslatePotentialExpressionsWithFunctionsIntoPotentialExpressionsWithoutFunctions()
 	{
 		List<Expression> potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob);")));
@@ -733,9 +652,30 @@ public class RuleConverterTest {
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableIndex));
 
 	}
+	
+	@Test
+	public void testUpdatingRandomVariableDeclaration () {
+		Expression result, input;
+		input = new DefaultCompoundSyntaxTree("randomVariable", "mother", 1, "People", "People");
+		result = ruleConverter.updateRandomVariableDeclaration(input);
+		assertEquals(lowParser.parse("randomVariable(mother, 2, People, People, Boolean)"), result);
+
+		input = new DefaultCompoundSyntaxTree("randomVariable", "president", 0, "People");
+		result = ruleConverter.updateRandomVariableDeclaration(input);
+		assertEquals(lowParser.parse("randomVariable(president, 1, People, Boolean)"), result);
+
+		input = new DefaultCompoundSyntaxTree("sort", "sprinters", "bolt", "johnson");
+		result = ruleConverter.updateRandomVariableDeclaration(input);
+		assertEquals(null, result);
+	}
+	
+	@Test
+	public void testDifferentiatingNullaryRandomFunctionsAndConstants() {
+// TODO		
+	}
 
 	@Test
-	public void testTranslateQuantifiers () {
+	public void testTranslateQuantifiedPotentialExpressionsIntoQuantifierFreePotentialExpressions() {
 		List<Expression> potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"if young(X) and (for all Y : (friends(Y,X) => smokes(Y))) then smokes(X) 0.8;")));
@@ -806,9 +746,36 @@ public class RuleConverterTest {
 		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions));
 
 	}
+	
+	@Test
+	public void testCreateModel () {
+		List<Expression> sorts = new ArrayList<Expression>();
+		sorts.add(lowParser.parse("sort(People,   Unknown, {ann, bob})"));
+		sorts.add(lowParser.parse("sort(Treasure, Unknown, {gold, silver, diamonds})"));
+		
+		List<Expression> randomVariables = new ArrayList<Expression>();
+		randomVariables.add(lowParser.parse("randomVariable(gaveTreasureTo, 3, People, Treasure, People)"));
+		randomVariables.add(lowParser.parse("randomVariable(owns, 2, People, Treasure)"));
+		randomVariables.add(lowParser.parse("randomVariable(rich, 1, People)"));
+
+		List<Expression> parfactors = new ArrayList<Expression>();
+		parfactors.add(lowParser.parse(
+				"{{(on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X,Z,Y) then (if owns(Y,Z) then 1 else 0)  else 1] }}"));
+		parfactors.add(lowParser.parse(
+				"{{(on X in People, Z in Treasure) [if owns(X,Z) then if rich(X) then 1 else 0 else 1] }}"));
+
+		Model model = ruleConverter.createModel("Gave Treasure To", 
+				"An example of how hard it is to model things without aggregate factors.", 
+				sorts, randomVariables, parfactors);
+		System.out.println(model);
+	}
+	
+	// Tests For:
+	// http://code.google.com/p/aic-praise/wiki/TranslatingInferenceInputAndOutput
+	//
 
 	@Test
-	public void testQueryRuleAndAtom () {
+	public void testEncodingQueries() {
 		String string;
 		Pair<Expression, Expression> result, expected;
 		
@@ -846,6 +813,96 @@ public class RuleConverterTest {
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(X)"), 
 				ruleParser.parse("query(X) <=> mother(X) = lucy;"));
 		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testTransformingQueryOutputsIntoHighLevelSyntax() {
+		Expression input, result, expected;
+
+		input = lowParser.parse("if sick(bob) then 0.3 else 0.7");
+		result = ruleConverter.potentialExpressionToRule(input);
+		expected = ruleParser.parse("sick(bob) 0.3;");
+		assertEquals(expected, result);
+
+		input = lowParser.parse("if X = bob then if sick(bob) then 0.7 else 0.3 else if sick(X) then 0.2 else 0.8");
+		result = ruleConverter.potentialExpressionToRule(input);
+		expected = ruleParser.parse("if X = bob then sick(bob) 0.7 else sick(X) 0.2;");
+		assertEquals(expected, result);
+	}
+
+	
+	//
+	// Test Supporting Routines
+	//
+	
+	@Test
+	public void testCreateTransformedFunctionConstraints () {
+		List<Expression> expected;
+
+		List<Expression> parfactors = new ArrayList<Expression>();
+		ruleConverter.createTransformedFunctionConstraints("president", 0, parfactors);
+		expected = new ArrayList<Expression>();
+		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.5"));
+		expected.add(lowParser.parse("if there exists Y : president(Y) then 1 else 0"));
+		assertEquals(expected, parfactors);
+
+		parfactors = new ArrayList<Expression>();
+		ruleConverter.createTransformedFunctionConstraints("mother", 1, parfactors);
+		expected = new ArrayList<Expression>();
+		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
+		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
+		assertEquals(expected, parfactors);
+
+		parfactors = new ArrayList<Expression>();
+		ruleConverter.createTransformedFunctionConstraints("foo", 3, parfactors);
+		expected = new ArrayList<Expression>();
+		expected.add(lowParser.parse("if foo(X0, X1, X2, Y) then if not foo(X0, X1, X2, Z) then 1 else 0 else 0.5"));
+		expected.add(lowParser.parse("if there exists Y : foo(X0, X1, X2, Y) then 1 else 0"));
+		assertEquals(expected, parfactors);
+	}
+		
+	@Test
+	public void testIsRandomFunctionApplication () {
+		Expression input;
+		input = new DefaultCompoundSyntaxTree ("if . then . else .", 1, 2, 3);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = DefaultSymbol.createSymbol("foo");
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree ("and", 1, 2, 3);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree ("or", 1, 2, 3);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree ("not", 1, 2, 3);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree ("<=>", 1, 2, 3);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree ("=>", 1, 2, 3);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree ("there exists . : .", 1, 2, 3);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree ("for all . : .", 1, 2, 3);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree ("may be same as", "A", "B");
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree("mother", 1, 2, 3, 4);
+		Assert.assertEquals(true, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree("+", 1, 2, 3, 4);
+		Assert.assertEquals(true, ruleConverter.isRandomFunctionApplication(input));
+
+		input = new DefaultCompoundSyntaxTree("=", 1, 2, 3, 4);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+
 	}
 
 	@Test
@@ -906,166 +963,6 @@ public class RuleConverterTest {
 		assertEquals(expected, result);
 		
 	}
-
-	@Test
-	public void testCreateModel () {
-		List<Expression> sorts = new ArrayList<Expression>();
-		sorts.add(lowParser.parse("sort(People,   Unknown, {ann, bob})"));
-		sorts.add(lowParser.parse("sort(Treasure, Unknown, {gold, silver, diamonds})"));
-		
-		List<Expression> randomVariables = new ArrayList<Expression>();
-		randomVariables.add(lowParser.parse("randomVariable(gaveTreasureTo, 3, People, Treasure, People)"));
-		randomVariables.add(lowParser.parse("randomVariable(owns, 2, People, Treasure)"));
-		randomVariables.add(lowParser.parse("randomVariable(rich, 1, People)"));
-
-		List<Expression> parfactors = new ArrayList<Expression>();
-		parfactors.add(lowParser.parse(
-				"{{(on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X,Z,Y) then (if owns(Y,Z) then 1 else 0)  else 1] }}"));
-		parfactors.add(lowParser.parse(
-				"{{(on X in People, Z in Treasure) [if owns(X,Z) then if rich(X) then 1 else 0 else 1] }}"));
-
-		Model model = ruleConverter.createModel("Gave Treasure To", 
-				"An example of how hard it is to model things without aggregate factors.", 
-				sorts, randomVariables, parfactors);
-		System.out.println(model);
-	}
-
-	@Test
-	public void testParse () {
-		String modelString, queryString;
-		Pair<Expression, Model> result;
-
-		modelString = "if mother(X) = Y then X != Y;" +
-				"if trait(mother(X)) then trait(X) 0.8 else trait(X) 0.3;" +
-				"there exists X : trait(X);" +
-				"mother(bob)=mary;" +
-				"mother(ann)=mary;" +
-				"mother(john)=ann;" +
-				"trait(john);";
-		queryString = "trait(mary)";
-		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
-		}
-		catch (ReservedWordException e) {
-			e.printStackTrace();
-		}
-		catch (ModelException e) {
-			e.printStackTrace();
-			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
-		}
-
-		// Missing sort declaration for People.
-		modelString = "random president: -> People;" +
-				"random firstLady: -> People;" +
-				"president = barrackObama <=> firstLady = michelleObama;" +
-				"president = billClinton <=> firstLady = hillaryClinton;" +
-				"firstLady = michelleObama 0.9;";
-		queryString = "president";
-		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
-		}
-		catch (ReservedWordException e) {
-			e.printStackTrace();
-		}
-		catch (ModelException e) {
-			e.printStackTrace();
-			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
-		}
-
-		modelString = "there exists X : X = bestFriend(X) 0.9;";
-		queryString = "bestFriend(john)";
-		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
-		}
-		catch (ReservedWordException e) {
-			e.printStackTrace();
-		}
-		catch (ModelException e) {
-			e.printStackTrace();
-			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
-		}
-		
-		modelString = "/**\n"+
-				" * Example 1: Epidemic and Sick with Symtoms.\n"+
-				" * An example of the interplay between symtoms.\n" +
-				" * Using Atomic and Conditional Rule Syntax.\n" +
-				" */\n"+
-				"//\n"+
-				"// SORT DECLARATIONS:\n"+
-				"sort People: 10, bob, dave, rodrigo, ciaran;\n"+
-				"\n"+
-				"//\n"+
-				"// RANDOM VARIABLE DECLARATIONS:\n"+
-				"random epidemic: -> Boolean;\n"+
-				"random sick: People -> Boolean;\n"+
-				"random fever: People -> Boolean;\n"+
-				"random rash: People -> Boolean;\n"+
-				"random notAtWork: People -> Boolean;\n" +
-				"\n"+
-				"//\n"+
-				"// RULES\n" +
-				"if epidemic then sick(X) 0.6 else sick(X) 0.05;\n" +
-				"if sick(X) then fever(X) 0.7 else fever(X) 0.01;\n"+
-				"if sick(X) then rash(X) 0.6 else rash(X) 0.07;\n"+
-				"if sick(X) then notAtWork(X) 0.8 else notAtWork(X) 0.05;\n"+
-				"\n"+
-				"// By default, how likely is an epidemic?\n" +
-				"epidemic 0.001;\n" +
-				"\n"+
-				"//\n"+
-				"// By default, how likely are the following conditions?\n" +
-				"sick(X) 0.009;\n"+
-				"rash(X) 0.005;\n"+
-				"fever(X) 0.001;\n";
-		queryString = "sick(X)";
-		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
-		}
-		catch (ReservedWordException e) {
-			e.printStackTrace();
-		}
-		catch (ModelException e) {
-			e.printStackTrace();
-			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
-		}
-
-		modelString = "// RANDOM VARIABLE DECLARATIONS:" +
-				"random epidemic: -> Boolean;\n" +
-				"random sick: People -> Boolean;\n" +
-				"random fever: People -> Boolean;\n" +
-				"random happy: People -> Boolean;\n" +
-				"random mother: People -> People;\n" +
-				"\n"+
-				"//\n" +
-				"// RULES\n" +
-				"// By default, how likely is an epidemic?\n" +
-				"epidemic 0.01 and \n" +
-				"\n"+
-				"(if epidemic then sick(X) 0.6 else not sick(X)) and \n" +
-				"if sick(mother(X)) then sick(X) 0.5 else sick(X) 0.1;\n";
-		queryString = "sick(mother(X)) and happy(Y)";
-		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
-		}
-		catch (ReservedWordException e) {
-			e.printStackTrace();
-		}
-		catch (ModelException e) {
-			e.printStackTrace();
-			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
-		}
-
-	}
 	
 	@Test
 	public void testQueryResultToRule () {
@@ -1108,21 +1005,6 @@ public class RuleConverterTest {
 		expected = ruleParser.parse("sick(Y) = cold(X) 0.3;");
 		assertEquals(expected, result);
 
-	}
-
-	@Test
-	public void testPotentialExpressionToRule () {
-		Expression input, result, expected;
-
-		input = lowParser.parse("if sick(bob) then 0.3 else 0.7");
-		result = ruleConverter.potentialExpressionToRule(input);
-		expected = ruleParser.parse("sick(bob) 0.3;");
-		assertEquals(expected, result);
-
-		input = lowParser.parse("if X = bob then if sick(bob) then 0.7 else 0.3 else if sick(X) then 0.2 else 0.8");
-		result = ruleConverter.potentialExpressionToRule(input);
-		expected = ruleParser.parse("if X = bob then sick(bob) 0.7 else sick(X) 0.2;");
-		assertEquals(expected, result);
 	}
 
 	@Test
@@ -1462,6 +1344,143 @@ public class RuleConverterTest {
 		expected = "sick(X) and happy(Y) -> fever(X) 0.6;";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
+	}
+	
+	@Test
+	public void testParse () {
+		String modelString, queryString;
+		Pair<Expression, Model> result;
+
+		modelString = "if mother(X) = Y then X != Y;" +
+				"if trait(mother(X)) then trait(X) 0.8 else trait(X) 0.3;" +
+				"there exists X : trait(X);" +
+				"mother(bob)=mary;" +
+				"mother(ann)=mary;" +
+				"mother(john)=ann;" +
+				"trait(john);";
+		queryString = "trait(mary)";
+		try {
+			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			System.out.println(result.first);
+			System.out.println(result.second);
+		}
+		catch (ReservedWordException e) {
+			e.printStackTrace();
+		}
+		catch (ModelException e) {
+			e.printStackTrace();
+			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
+		}
+
+		// Missing sort declaration for People.
+		modelString = "random president: -> People;" +
+				"random firstLady: -> People;" +
+				"president = barrackObama <=> firstLady = michelleObama;" +
+				"president = billClinton <=> firstLady = hillaryClinton;" +
+				"firstLady = michelleObama 0.9;";
+		queryString = "president";
+		try {
+			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			System.out.println(result.first);
+			System.out.println(result.second);
+		}
+		catch (ReservedWordException e) {
+			e.printStackTrace();
+		}
+		catch (ModelException e) {
+			e.printStackTrace();
+			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
+		}
+
+		modelString = "there exists X : X = bestFriend(X) 0.9;";
+		queryString = "bestFriend(john)";
+		try {
+			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			System.out.println(result.first);
+			System.out.println(result.second);
+		}
+		catch (ReservedWordException e) {
+			e.printStackTrace();
+		}
+		catch (ModelException e) {
+			e.printStackTrace();
+			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
+		}
+		
+		modelString = "/**\n"+
+				" * Example 1: Epidemic and Sick with Symtoms.\n"+
+				" * An example of the interplay between symtoms.\n" +
+				" * Using Atomic and Conditional Rule Syntax.\n" +
+				" */\n"+
+				"//\n"+
+				"// SORT DECLARATIONS:\n"+
+				"sort People: 10, bob, dave, rodrigo, ciaran;\n"+
+				"\n"+
+				"//\n"+
+				"// RANDOM VARIABLE DECLARATIONS:\n"+
+				"random epidemic: -> Boolean;\n"+
+				"random sick: People -> Boolean;\n"+
+				"random fever: People -> Boolean;\n"+
+				"random rash: People -> Boolean;\n"+
+				"random notAtWork: People -> Boolean;\n" +
+				"\n"+
+				"//\n"+
+				"// RULES\n" +
+				"if epidemic then sick(X) 0.6 else sick(X) 0.05;\n" +
+				"if sick(X) then fever(X) 0.7 else fever(X) 0.01;\n"+
+				"if sick(X) then rash(X) 0.6 else rash(X) 0.07;\n"+
+				"if sick(X) then notAtWork(X) 0.8 else notAtWork(X) 0.05;\n"+
+				"\n"+
+				"// By default, how likely is an epidemic?\n" +
+				"epidemic 0.001;\n" +
+				"\n"+
+				"//\n"+
+				"// By default, how likely are the following conditions?\n" +
+				"sick(X) 0.009;\n"+
+				"rash(X) 0.005;\n"+
+				"fever(X) 0.001;\n";
+		queryString = "sick(X)";
+		try {
+			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			System.out.println(result.first);
+			System.out.println(result.second);
+		}
+		catch (ReservedWordException e) {
+			e.printStackTrace();
+		}
+		catch (ModelException e) {
+			e.printStackTrace();
+			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
+		}
+
+		modelString = "// RANDOM VARIABLE DECLARATIONS:" +
+				"random epidemic: -> Boolean;\n" +
+				"random sick: People -> Boolean;\n" +
+				"random fever: People -> Boolean;\n" +
+				"random happy: People -> Boolean;\n" +
+				"random mother: People -> People;\n" +
+				"\n"+
+				"//\n" +
+				"// RULES\n" +
+				"// By default, how likely is an epidemic?\n" +
+				"epidemic 0.01 and \n" +
+				"\n"+
+				"(if epidemic then sick(X) 0.6 else not sick(X)) and \n" +
+				"if sick(mother(X)) then sick(X) 0.5 else sick(X) 0.1;\n";
+		queryString = "sick(mother(X)) and happy(Y)";
+		try {
+			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			System.out.println(result.first);
+			System.out.println(result.second);
+		}
+		catch (ReservedWordException e) {
+			e.printStackTrace();
+		}
+		catch (ModelException e) {
+			e.printStackTrace();
+			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
+		}
+
 	}
 	
 
