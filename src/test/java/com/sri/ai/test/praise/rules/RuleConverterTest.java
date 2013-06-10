@@ -193,10 +193,11 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("sick", "X"), "0.6", "0.4"), "0.5"));
 
-		// string = "if colleagues(X,Y) then likes(X,Y) 0.8;";
-		testTranslateRules(ruleParser.parse("if colleagues(X,Y) then likes(X,Y) 0.8;"), 
-				lowParser.parse("if colleagues(X,Y) then if likes(X,Y) then 0.8 else 0.2 else 0.5"));
+		// string = "if colleagues(X,Y) and Y != bob then likes(X,Y) 0.8;";	
+		testTranslateRules(ruleParser.parse("if colleagues(X,Y) and Y != bob then likes(X,Y) 0.8;"), 
+				lowParser.parse("if colleagues(X,Y) and Y != bob then if likes(X,Y) then 0.8 else 0.2 else 0.5"));
 		
+		// string = "if colleagues(X,Y) then likes(X,Y) 0.8;";
 		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("colleagues", "X", "Y"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
@@ -224,27 +225,6 @@ public class RuleConverterTest {
 								new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
 						new DefaultCompoundSyntaxTree("if . then . else .", 
 								new DefaultCompoundSyntaxTree("sick", "Y"), "0.8", "0.2"), "0.5"), "0.5"));
-
-		// string = "if sick(X) and friends(X,Y) then 0.5 else sick(Y);";
-// TODO - this looks incorrect!!!! i.e.: if 0.5 then 1 else 0	
-// http://code.google.com/p/aic-praise/issues/detail?id=19
-		testTranslateRules(ruleParser.parse("if sick(X) and friends(X,Y) then 0.5 else sick(Y);"), 
-				lowParser.parse("if sick(X) and friends(X,Y) then if 0.5 then 1 else 0 else if sick(Y) then 1 else 0"));
-		
-		testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
-				new DefaultCompoundSyntaxTree("and", 
-						new DefaultCompoundSyntaxTree("sick", "X"), 
-						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
-				"0.5", 
-				new DefaultCompoundSyntaxTree("atomic rule", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), 1)), 
-			new DefaultCompoundSyntaxTree("if . then . else .", 
-				new DefaultCompoundSyntaxTree("and", 
-						new DefaultCompoundSyntaxTree("sick", "X"), 
-						new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
-				"0.5", 
-				new DefaultCompoundSyntaxTree("if . then . else .", 
-						new DefaultCompoundSyntaxTree("sick", "Y"), "1", "0")));
 
 		// string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);";
 		testTranslateRules(ruleParser.parse("if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);"), 
@@ -287,6 +267,27 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("sick", "Y"), "0.8", "0.2"), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("sick", "Y"), "0.3", "0.7")));
+		
+			// string = "if sick(X) and friends(X,Y) then 0.5 else sick(Y);";
+// TODO - this looks incorrect!!!! i.e.: if 0.5 then 1 else 0	
+// http://code.google.com/p/aic-praise/issues/detail?id=19
+			testTranslateRules(ruleParser.parse("if sick(X) and friends(X,Y) then 0.5 else sick(Y);"), 
+					lowParser.parse("if sick(X) and friends(X,Y) then if 0.5 then 1 else 0 else if sick(Y) then 1 else 0"));
+			
+			testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
+					new DefaultCompoundSyntaxTree("and", 
+							new DefaultCompoundSyntaxTree("sick", "X"), 
+							new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
+					"0.5", 
+					new DefaultCompoundSyntaxTree("atomic rule", 
+							new DefaultCompoundSyntaxTree("sick", "Y"), 1)), 
+				new DefaultCompoundSyntaxTree("if . then . else .", 
+					new DefaultCompoundSyntaxTree("and", 
+							new DefaultCompoundSyntaxTree("sick", "X"), 
+							new DefaultCompoundSyntaxTree("friends", "X", "Y")), 
+					"0.5", 
+					new DefaultCompoundSyntaxTree("if . then . else .", 
+							new DefaultCompoundSyntaxTree("sick", "Y"), "1", "0")));		
 	}
 	
 	@Test
@@ -1503,10 +1504,12 @@ public class RuleConverterTest {
 
 	protected void testTranslateRules (String inputString, Expression inputExpr, boolean expectSucceed, boolean checkResult, Expression expectedResult) {
 		Expression result;
-		if (inputExpr == null)
+		if (inputExpr == null) {
 			result = ruleConverter.translateRule(ruleParser.parse(inputString));
-		else
+		} 
+		else {
 			result = ruleConverter.translateRule(inputExpr);
+		}
 		if (expectSucceed) {
 			if (checkResult) {
 				assertEquals(expectedResult.toString(), result.toString());
