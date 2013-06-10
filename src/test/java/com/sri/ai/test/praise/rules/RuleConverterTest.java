@@ -69,10 +69,6 @@ import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
 public class RuleConverterTest {
-
-	@SuppressWarnings("unused")
-	private static int testCount = 0;
-
 	private RuleParserWrapper         ruleParser;
 	private RuleConverter             ruleConverter;
 	private AntlrGrinderParserWrapper lowParser;
@@ -1438,7 +1434,6 @@ public class RuleConverterTest {
 	}
 
 	protected void testTranslateRules (String inputString, Expression inputExpr, boolean expectSucceed, boolean checkResult, Expression expectedResult) {
-		testCount ++;
 		Expression result;
 		if (inputExpr == null)
 			result = ruleConverter.translateRule(ruleParser.parse(inputString));
@@ -1462,8 +1457,6 @@ public class RuleConverterTest {
 			Assert.assertNull(result);
 		}
 	}
-
-
 
 	protected void testParseModel (String name, String desc, String input) {
 		testParseModel(name, desc, input, true);
@@ -1494,7 +1487,6 @@ public class RuleConverterTest {
 	}
 
 	protected void testParseModel (String name, String desc, String inputString, List<Expression> inputExpr, boolean expectSucceed, boolean checkResult, Expression expectedResult) {
-		testCount ++;
 		Model result;
 		try {
 			if (inputExpr == null) {

@@ -323,13 +323,13 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							
 							RuleConverter ruleConverter = new RuleConverter();
 			
-							Expression inputQuery = lowLevelParse(app.queryPanel.getCurrentQuery());
+							String currentQuery = app.queryPanel.getCurrentQuery();
 							
 							Pair<Expression, Model> parseResult = ruleConverter
 									.parseModel("'Name'", "'Description'",
 											app.modelEditPanel.getText() + "\n"
 													+ app.evidenceEditPanel.getText(),
-											inputQuery.toString());
+											currentQuery);
 			
 							Expression queryAtom = parseResult.first;
 							Model      model     = parseResult.second;
@@ -387,7 +387,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							printlnToConsole("BELIEF=\n" + belief);	
 							
 							Expression exprBelief = lowLevelParse(belief);
-							Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, inputQuery);
+							Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, currentQuery);
 			
 							printlnToConsole("RULE BELIEF=\n"+ruleBelief.toString());
 							
