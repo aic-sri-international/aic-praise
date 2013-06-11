@@ -901,9 +901,9 @@ public class RuleConverter {
 		Map<String, Set<Integer>> functionsFound = new HashMap<String, Set<Integer>>();
 
 		// For each potential expression, translate the functions.
-		for (Expression parfactor : potentialExpressions) {
-			Expression toReplace = parfactor;
-			Expression replaced  = parfactor;
+		for (Expression potentialExpression : potentialExpressions) {
+			Expression toReplace = potentialExpression;
+			Expression replaced  = potentialExpression;
 
 			// Replace the functions in the potential expression until there are no more.
 			ReplaceFunctionFunction replacementFunction = 
@@ -927,7 +927,7 @@ public class RuleConverter {
 		for (String functor : functionsFound.keySet()) {
 			Set<Integer> counts = functionsFound.get(functor);
 			for (Integer count : counts) {
-				this.createTransformedFunctionConstraints(functor, count, result);
+				createTransformedFunctionConstraints(functor, count, result);
 			}
 		}
 
@@ -1501,10 +1501,12 @@ public class RuleConverter {
 							List<Expression> newArgumentArgs = new ArrayList<Expression>(argument.getArguments());
 							newArgumentArgs.add(unique);
 							String name;
-							if (argument.getArguments().size() == 0)
+							if (argument.getArguments().size() == 0) {
 								name = argument.toString();
-							else
+							}
+							else {
 								name = argument.getFunctor().toString();
+							}
 							
 							// Put the new version of the child expression in a list to
 							// be "and"ed together with a new version of the parent expression.
