@@ -44,6 +44,7 @@ import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -522,6 +523,30 @@ public class Model {
 			sortNames.add(sd.getName());
 		}
 		process.putGlobalObject(GLOBAL_KEY_MODEL_SORT_NAMES, sortNames);
+	}
+	
+	/**
+	 * Set up the known random variables and random prediate catalog to be
+	 * associated with the passed in rewriting process.
+	 * 
+	 * @param randomVariableDefinitions
+	 *            the random variable definitions from which to instantiate the
+	 *            known random variable names and catalog to be associated with
+	 *            the passed in rewriting process.
+	 * @param process
+	 *            the rewriting process to wire up known random variable names
+	 *            and a random predicate catalog to.
+	 */
+	public static void setRandomVariables(Set<Expression> randomVariableDefinitions, RewritingProcess process) {
+		Set<RandomPredicate> randomPredicates = new LinkedHashSet<RandomPredicate>();
+		Set<String> knownVarNames = new LinkedHashSet<String>();
+		for (Expression rvd : randomVariableDefinitions) {
+			randomPredicates.add(new RandomPredicate(rvd.get(0), rvd.get(1).intValue()));
+			knownVarNames.add(rvd.get(0).toString());
+		}
+		
+		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES, knownVarNames);
+		process.putGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG, new RandomPredicateCatalog(randomPredicates));
 	}
 
 	/**

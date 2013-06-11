@@ -326,7 +326,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							String currentQuery = app.queryPanel.getCurrentQuery();
 							
 							Pair<Expression, Model> parseResult = ruleConverter
-									.parseModel("'Name'", "'Description'",
+									.convert("'Name'", "'Description'",
 											app.modelEditPanel.getText() + "\n"
 													+ app.evidenceEditPanel.getText(),
 											currentQuery);

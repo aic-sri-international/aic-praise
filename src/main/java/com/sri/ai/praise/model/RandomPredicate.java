@@ -53,8 +53,12 @@ public class RandomPredicate {
 	public int arity;
 	
 	public RandomPredicate(Expression expression) {
-		this.functorOrSymbol = expression.getFunctorOrSymbol();
-		this.arity = expression.numberOfArguments();
+		this(expression.getFunctorOrSymbol(), expression.numberOfArguments());
+	}
+	
+	public RandomPredicate(Expression functorOrSymbol, int arity) {
+		this.functorOrSymbol = functorOrSymbol;
+		this.arity = arity;
 	}
 	
 	public boolean equals(Object another) {

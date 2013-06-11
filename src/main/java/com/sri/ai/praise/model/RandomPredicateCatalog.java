@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.model;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -75,6 +76,12 @@ public class RandomPredicateCatalog extends HashMap<Expression, RandomPredicate>
 
 	//
 	// PACKAGE PROTECTED - so can be constructed from within Model while not being available for general use
+	RandomPredicateCatalog(Collection<RandomPredicate> randomPredicates) {
+		for (RandomPredicate rp : randomPredicates) {
+			put(rp.functorOrSymbol, rp);
+		}
+	}
+	
 	RandomPredicateCatalog(List<Expression> setsOfFactors, RewritingProcess process) {
 		for (Expression setOfFactors : setsOfFactors) {
 

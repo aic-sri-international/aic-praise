@@ -40,10 +40,8 @@ package com.sri.ai.test.praise.rules;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -52,7 +50,6 @@ import org.junit.Test;
 
 import com.sri.ai.brewer.BrewerConfiguration;
 import com.sri.ai.brewer.api.Grammar;
-import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
@@ -62,9 +59,9 @@ import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.LPIGrammar;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.Model.ModelException;
-import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
+import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
@@ -522,12 +519,13 @@ public class RuleConverterTest {
 	public void testTranslatePotentialExpressionsWithFunctionsIntoPotentialExpressionsWithoutFunctions()
 	{
 		List<Expression> potentialExpressions = new ArrayList<Expression>();
+		Set<Expression> randomVariableDefinitions = new LinkedHashSet<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob);")));
 		List<Expression> expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = X1 then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob) = jane;")));
@@ -535,7 +533,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = X1 = jane then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 		
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = jane = mother(bob);")));
@@ -543,7 +541,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = jane = X1 then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 		
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("jane = mother(john) = mother(bob);")));
@@ -551,7 +549,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and jane = X0 = X1 then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X));")));
@@ -559,7 +557,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if mother(X, X0) and sick(X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X, Y, Z));")));
@@ -567,7 +565,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if mother(X, Y, Z, X0) and sick(X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, X1, X2, Y) then if not mother(X0, X1, X2, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, X1, X2, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X), bob);")));
@@ -575,7 +573,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if mother(X, X0) and sick(X0, bob) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(X));")));
@@ -583,7 +581,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if mother(X, X0) and sick(bob, X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X), father(X));")));
@@ -593,7 +591,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : father(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(father(X)));")));
@@ -603,7 +601,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : father(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = bestfriend(mother(bob));")));
@@ -613,20 +611,18 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : bestfriend(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, null));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		// Test of zero arg function.
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(ruleParser.parse("if president = obama then government(socialism) else government(freedom);")));
-		Set<Integer> count = new HashSet<Integer>();
-		count.add(0);
-		Map<String, Set<Integer>> randomVariableIndex = new HashMap<String, Set<Integer>>();
-		randomVariableIndex.put("president", count);
+		randomVariableDefinitions.clear();
+		randomVariableDefinitions.add(lowParser.parse("randomVariable(president, 0, Boolean)"));
 		expected = new ArrayList<Expression>();
 		expected.add(lowParser.parse("if president(X0) and X0 = obama then if government(socialism) then 1 else 0 else (if government(freedom) then 1 else 0)"));
 		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : president(Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableIndex));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		// Test multiple tiered functions.
 		potentialExpressions = new ArrayList<Expression>();
@@ -637,7 +633,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : bestfriend(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableIndex));
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(bestfriend(father(X))));")));
@@ -649,8 +645,7 @@ public class RuleConverterTest {
 		expected.add(lowParser.parse("if there exists Y : bestfriend(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : father(X0, Y) then 1 else 0"));
-		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableIndex));
-
+		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
 	}
 	
 	@Test
@@ -676,13 +671,15 @@ public class RuleConverterTest {
 
 	@Test
 	public void testTranslateQuantifiedPotentialExpressionsIntoQuantifierFreePotentialExpressions() {
+		Set<Expression> randomVariableDefinitions = new LinkedHashSet<Expression>();
+		
 		List<Expression> potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"if young(X) and (for all Y : (friends(Y,X) => smokes(Y))) then smokes(X) 0.8;")));
 		List<Expression> expected = new ArrayList<Expression>();
 		expected.add(ruleConverter.translateConditionalRule(ruleParser.parse("if young(X) and 'for all Y : friends(Y, X) => smokes(Y)'(X) then smokes(X) 0.8;")));
 		expected.add(ruleConverter.translateConditionalRule(ruleParser.parse("if not (friends(Y, X) => smokes(Y)) then not 'for all Y : friends(Y, X) => smokes(Y)'(X);")));
-		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions));
+		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
@@ -690,7 +687,7 @@ public class RuleConverterTest {
 		expected = new ArrayList<Expression>();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("'there exists X : president(X, Country)'(Country);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if president(X, Country) then 'there exists X : president(X, Country)'(Country);")));
-		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions));
+		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
@@ -698,7 +695,7 @@ public class RuleConverterTest {
 		expected = new ArrayList<Expression>();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("friends(X,Y) and 'there exists Z : friends(X, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if friends(X,Z) then 'there exists Z : friends(X, Z)'(X);")));
-		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions));
+		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
@@ -706,7 +703,7 @@ public class RuleConverterTest {
 		expected = new ArrayList<Expression>();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("friends(X,Y) and 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
-		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions));
+		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
 
 		// Test nested quantifiers.
 		potentialExpressions = new ArrayList<Expression>();
@@ -716,7 +713,7 @@ public class RuleConverterTest {
 		expected.add(ruleConverter.translateRule(ruleParser.parse("'there exists Z : for all Y : loves(X, Y, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if 'for all Y : loves(X, Y, Z)'(X, Z) then 'there exists Z : for all Y : loves(X, Y, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if not loves(X, Y, Z) then not 'for all Y : loves(X, Y, Z)'(X, Z);")));
-		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions));
+		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
 
 		doTreeUtilWaitUnilClosed(); 
 	}
@@ -747,16 +744,16 @@ public class RuleConverterTest {
 	
 	@Test
 	public void testCreateModel () {
-		List<Expression> sorts = new ArrayList<Expression>();
+		Set<Expression> sorts = new LinkedHashSet<Expression>();
 		sorts.add(lowParser.parse("sort(People,   Unknown, {ann, bob})"));
 		sorts.add(lowParser.parse("sort(Treasure, Unknown, {gold, silver, diamonds})"));
 		
-		List<Expression> randomVariables = new ArrayList<Expression>();
+		Set<Expression> randomVariables = new LinkedHashSet<Expression>();
 		randomVariables.add(lowParser.parse("randomVariable(gaveTreasureTo, 3, People, Treasure, People)"));
 		randomVariables.add(lowParser.parse("randomVariable(owns, 2, People, Treasure)"));
 		randomVariables.add(lowParser.parse("randomVariable(rich, 1, People)"));
 
-		List<Expression> parfactors = new ArrayList<Expression>();
+		Set<Expression> parfactors = new LinkedHashSet<Expression>();
 		parfactors.add(lowParser.parse(
 				"{{(on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X,Z,Y) then (if owns(Y,Z) then 1 else 0)  else 1] }}"));
 		parfactors.add(lowParser.parse(
@@ -778,36 +775,37 @@ public class RuleConverterTest {
 		Pair<Expression, Expression> result, expected;
 		
 		string = "sick(X)";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
-		expected = null;
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
+		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(X)"), 
+				ruleParser.parse("query(X) <=> sick(X);"));
 		assertEquals(expected, result);
 		
 		string = "sick(john) and sick(mary)";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query"), 
 				ruleParser.parse("query <=> sick(john) and sick(mary);"));
 		assertEquals(expected, result);
 
 		string = "not sick(X)";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(X)"), 
 				ruleParser.parse("query(X) <=> not sick(X);"));
 		assertEquals(expected, result);
 
 		string = "there exists X : friends(X,Y)";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(Y)"), 
 				ruleParser.parse("query(Y) <=> there exists X : friends(X,Y);"));
 		assertEquals(expected, result);
 
 		string = "conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z)";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(C, Y, X, Z)"), 
 				ruleParser.parse("query(C, Y, X, Z) <=> conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z);"));
 		assertEquals(expected, result);
 
 		string = "mother(X) = lucy";
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), null);
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string));
 		expected = new Pair<Expression, Expression>(ruleParser.parseFormula("query(X)"), 
 				ruleParser.parse("query(X) <=> mother(X) = lucy;"));
 		assertEquals(expected, result);
@@ -832,7 +830,7 @@ public class RuleConverterTest {
 	// Tests for additional issues that have been encountered
 	//
 	@Test
-	public void testIssue6() {
+	public void testIssue6() throws ReservedWordException {
 		// Test for issue #6
 		// http://code.google.com/p/aic-praise/issues/detail?id=6
 		//
@@ -840,27 +838,28 @@ public class RuleConverterTest {
 		// ->
 		// {{ ( on ) ([ if entityOf(m1, obama) then 1 else 0 ]) | X0 = obama }} 
 		// incorrectly.
+		List<Expression> inputRules = new ArrayList<Expression>();
+		inputRules.add(ruleParser.parse("entityOf(m1) = obama;"));
+		RuleConverter.LowLevelSyntax lowLevelSyntax = ruleConverter.convertToLowLevelSyntax(inputRules);
+		
+		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ (on) [if entityOf(m1, obama) then 1 else 0] | true }}")));
+		
+		// Additional case with explicit assignment for just 1 of the terms
+		inputRules.clear();
+		inputRules.add(ruleParser.parse("entityOf(X0) = obama;"));
+		lowLevelSyntax = ruleConverter.convertToLowLevelSyntax(inputRules);
+		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ (on X0) [if entityOf(X0, obama) then 1 else 0] | X0 != obama }}")));
 
-		// Second:
-		// Disembed Constraints
-		List<Expression> potentialExpressions = new ArrayList<Expression>();
-		List<Pair<Expression, Expression>> expected = new ArrayList<Pair<Expression, Expression>>();
-		// Note:
-		// entityOf(m1) = obama;
-		// is translated to:
-		// if entityOf(m1, X0) and X0 = obama then 1 else 0
-		// during the removal of function applications in a potential expression.
-		potentialExpressions.add(lowParser.parse("if entityOf(m1, X0) and X0 = obama then 1 else 0"));
-		expected.add(new Pair<Expression, Expression>(
-				lowParser.parse("if entityOf(m1, obama) then 1 else 0"),
-				lowParser.parse("true")));
-		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions));
+		// Additional case with explicit assignment for just 1 of the terms
+		inputRules.clear();
+		inputRules.add(ruleParser.parse("if entityOf(X, Y) and X may be same as Y and Y = obama then 1;"));
+		lowLevelSyntax = ruleConverter.convertToLowLevelSyntax(inputRules);
+		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ ( on X ) ([ if entityOf(X, obama) then if 1 then true else 0 else 0.5 ]) | true }}")));
 	}
 	
 	//
 	// Test Supporting Routines
-	//
-	
+	//	
 	@Test
 	public void testCreateTransformedFunctionConstraints () {
 		List<Expression> expected;
@@ -934,57 +933,56 @@ public class RuleConverterTest {
 	@Test
 	public void testCreateQueryDeclaration () {
 		Expression queryAtom, query, result, expected;
-		List<Expression> randomVariables;
-		Map<String, Set<Integer>> randomVariableIndex;
+		Set<Expression> randomVariables = new LinkedHashSet<Expression>();
 
 		query = ruleParser.parseFormula("sick(john) and sick(mary)");
 		queryAtom = lowParser.parse("query");
-		randomVariables = new ArrayList<Expression>();
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, null);
+		randomVariables.clear();
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables);
 		expected = ruleParser.parse("random query: -> Boolean;");
 		assertEquals(expected, result);
 
 		query = ruleParser.parseFormula("not sick(X)");
 		queryAtom = lowParser.parse("query(X)");
-		randomVariables = ruleParser.parseAll("random sick: People -> Boolean;");
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, null);
+		randomVariables.clear();
+		randomVariables.addAll(ruleParser.parseAll("random sick: People -> Boolean;"));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables);
 		expected = ruleParser.parse("random query: People -> Boolean;");
 		assertEquals(expected, result);
 
 		query = ruleParser.parseFormula("there exists X : friends(X,Y)");
 		queryAtom = lowParser.parse("query(Y)");
-		randomVariables = ruleParser.parseAll("random friends: People x People -> Boolean;");
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, null);
+		randomVariables.clear();
+		randomVariables.addAll(ruleParser.parseAll("random friends: People x People -> Boolean;"));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables);
 		expected = ruleParser.parse("random query: People -> Boolean;");
 		assertEquals(expected, result);
 
 		query = ruleParser.parseFormula("conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z)");
 		queryAtom = lowParser.parse("query(C, Y, X, Z)");
-		randomVariables = ruleParser.parseAll("random conspiracy: Concept -> Boolean;" +
+		randomVariables.clear();
+		randomVariables.addAll(ruleParser.parseAll("random conspiracy: Concept -> Boolean;" +
 				"random leader: Concept x People -> Boolean;" +
-				"random member: Concept x People -> Boolean;");
-		randomVariableIndex = new HashMap<String, Set<Integer>>();
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, randomVariableIndex);
+				"random member: Concept x People -> Boolean;"));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables);
 		expected = ruleParser.parse("random query: Concept x People x People x People -> Boolean;");
 		assertEquals(expected, result);
 
 		query = ruleParser.parseFormula("conspiracy(C) and leader = X and member(C,Y) and member(C,Z)");
 		queryAtom = lowParser.parse("query(C, Y, X, Z)");
-		randomVariables = ruleParser.parseAll("random conspiracy: Concept -> Boolean;" +
+		randomVariables.clear();
+		randomVariables.addAll(ruleParser.parseAll("random conspiracy: Concept -> Boolean;" +
 				"random leader: People -> Boolean;" +
-				"random member: Concept x People -> Boolean;");
-		randomVariableIndex = new HashMap<String, Set<Integer>>();
-		randomVariableIndex.put("leader", new HashSet<Integer>());
-		randomVariableIndex.get("leader").add(0);
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, randomVariableIndex);
+				"random member: Concept x People -> Boolean;"));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables);
 		expected = ruleParser.parse("random query: Concept x People x People x People -> Boolean;");
 		assertEquals(expected, result);
 
 		query = ruleParser.parseFormula("mother(X) = lucy");
 		queryAtom = lowParser.parse("query(X)");
-		randomVariables = ruleParser.parseAll("random mother: People x People -> Boolean;");
-		randomVariableIndex = new HashMap<String, Set<Integer>>();
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, randomVariableIndex);
+		randomVariables.clear();
+		randomVariables.addAll(ruleParser.parseAll("random mother: People x People -> Boolean;"));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables);
 		expected = ruleParser.parse("random query: People -> Boolean;");
 		assertEquals(expected, result);
 		
@@ -1373,7 +1371,7 @@ public class RuleConverterTest {
 	}
 	
 	@Test
-	public void testParse () {
+	public void testConvert() {
 		String modelString, queryString;
 // TODO - test result is what is expected.		
 		@SuppressWarnings("unused")
@@ -1388,7 +1386,7 @@ public class RuleConverterTest {
 				"trait(john);";
 		queryString = "trait(mary)";
 		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1407,7 +1405,7 @@ public class RuleConverterTest {
 				"firstLady = michelleObama 0.9;";
 		queryString = "president";
 		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1421,7 +1419,7 @@ public class RuleConverterTest {
 		modelString = "there exists X : X = bestFriend(X) 0.9;";
 		queryString = "bestFriend(john)";
 		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1466,7 +1464,7 @@ public class RuleConverterTest {
 				"fever(X) 0.001;\n";
 		queryString = "sick(X)";
 		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1493,7 +1491,7 @@ public class RuleConverterTest {
 				"if sick(mother(X)) then sick(X) 0.5 else sick(X) 0.1;\n";
 		queryString = "sick(mother(X)) and happy(Y)";
 		try {
-			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1508,42 +1506,13 @@ public class RuleConverterTest {
 
 
 	/*===================================================================================
-	 * PROTECTED METHODS
-	 *=================================================================================*/
-
-	protected void testTranslateRules (String input) {
-		testTranslateRules(input, true);
-	}
-	
-	protected void testTranslateRules (String input, Expression expectedResult) {
-		testTranslateRules(input, null, true, true, expectedResult);
-	}
-	
-	protected void testTranslateRulesFail (String input) {
-		testTranslateRules(input, false);
-	}
-	
-	protected void testTranslateRules (String input, boolean expectSucceed) {
-		testTranslateRules(input, null, expectSucceed, false, null);
-	}
-
-	protected void testTranslateRules (Expression input) {
-		testTranslateRules(input, true);
-	}
-	
-	protected void testTranslateRules(Expression input, Expression expectedResult) {
+	 * PRIVATE METHODS
+	 *=================================================================================*/		
+	private void testTranslateRules(Expression input, Expression expectedResult) {
 		testTranslateRules(null, input, true, true, expectedResult);
 	}
-	
-	protected void testTranslateRulesFail (Expression input) {
-		testTranslateRules(input, false);
-	}
-	
-	protected void testTranslateRules (Expression input, boolean expectSucceed) {
-		testTranslateRules(null, input, expectSucceed, false, null);
-	}
 
-	protected void testTranslateRules (String inputString, Expression inputExpr, boolean expectSucceed, boolean checkResult, Expression expectedResult) {
+	private void testTranslateRules (String inputString, Expression inputExpr, boolean expectSucceed, boolean checkResult, Expression expectedResult) {
 		Expression result;
 		if (inputExpr == null) {
 			result = ruleConverter.translateRule(ruleParser.parse(inputString));
@@ -1563,81 +1532,11 @@ public class RuleConverterTest {
 			Assert.assertNull(result);
 		}
 	}
-
-	protected void testParseModel (String name, String desc, String input) {
-		testParseModel(name, desc, input, true);
-	}
-	
-	protected void testParseModel (String name, String desc, String input, Expression expectedResult) {
-		testParseModel(name, desc, input, null, true, true, expectedResult);
-	}
-	
-	protected void testParseModel (String name, String desc, String input, boolean expectSucceed) {
-		testParseModel(name, desc, input, null, expectSucceed, false, null);
-	}
-
-	protected void testParseModel (String name, String desc, List<Expression> input) {
-		testParseModel(name, desc, input, true);
-	}
-	
-	protected void testParseModel(String name, String desc, List<Expression> input, Expression expectedResult) {
-		testParseModel(name, desc, null, input, true, true, expectedResult);
-	}
-	
-	protected void testParseModelFail (String name, String desc, List<Expression> input) {
-		testParseModel(name, desc, input, false);
-	}
-	
-	protected void testParseModel (String name, String desc, List<Expression> input, boolean expectSucceed) {
-		testParseModel(name, desc, null, input, expectSucceed, false, null);
-	}
-
-	protected void testParseModel (String name, String desc, String inputString, List<Expression> inputExpr, boolean expectSucceed, boolean checkResult, Expression expectedResult) {
-		Model result;
-		try {
-			if (inputExpr == null) {
-				result = ruleConverter.parseModel(name, desc, inputString).second;
-			} 
-			else {
-				result = ruleConverter.parseModel(name, desc, inputExpr).second;
-			}
-			if (expectSucceed) {
-				if (checkResult) {
-					assertEquals(expectedResult.toString(), result.toString());
-				}
-			}
-			else {
-				Assert.assertNull(result);
-			}
-		}
-		catch (ReservedWordException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Call this to generate the Java code to produce the given expression object.
-	 * @param expr  The expression object.
-	 * @return      A string of Java code for generating the given object.
-	 */
-	protected String generateBuildString (List<Expression> exprs) {
-		StringBuffer sb = new StringBuffer();
-
-		if (exprs == null) {
-			return "";
-		}
-
-		for(Expression expr : exprs) {
-			Brewer.generateFunctionApplicationString(sb, expr, 3, true);
-		}
-		
-		return sb.toString();
-	}
 	
 	// Note: Pass the VM argument
     // -Dgrinder.wait.until.ui.closed.enabled=true
     // in the Eclipse run configuration for this test, in order for the tree to stay up when this is called.
-    protected void doTreeUtilWaitUnilClosed() {
+	private void doTreeUtilWaitUnilClosed() {
         if (GrinderConfiguration.isWaitUntilUIClosedEnabled()) {
             TreeUtil.waitUntilUIClosed();
         }
