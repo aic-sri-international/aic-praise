@@ -56,6 +56,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.Disequality;
+import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
@@ -73,6 +74,7 @@ import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.ParfactorsDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
 /**
@@ -1078,8 +1080,7 @@ public class RuleConverter {
 	public List<Pair<Expression, Expression>> disembedConstraints (List<Expression> potentialExpressions) {
 		List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions = 
 				new ArrayList<Pair<Expression, Expression>>();
-		List<Pair<Expression, Expression>> result = new ArrayList<Pair<Expression, Expression>>();
-
+		
 		for (Expression potentialExpression : potentialExpressions) {
 			Set<Pair<Expression, Expression>> mayBeSameAsSet = new HashSet<Pair<Expression, Expression>>();
 
@@ -1123,11 +1124,12 @@ public class RuleConverter {
 		}
 
 		// Extract the embedded constraints from the potential expressions.
+		List<Pair<Expression, Expression>> result = new ArrayList<Pair<Expression, Expression>>();
 		for (int ii = 0; ii < setOfConstrainedPotentialExpressions.size(); ii++) {
 
 			// Check if the potential expression has any more embedded constraints.
 			Pair<Expression, Expression> pair = setOfConstrainedPotentialExpressions.get(ii);
-			List<Expression> replacements = getReplacementsIfAny(pair.first, rewritingProcess);
+			List<Expression> replacements = getPositiveAndNegativeConstraintReplacementsIfAny(pair.first, rewritingProcess);
 
 			// If the result is null, then were no more embedded constraints found.  If the
 			// result is non-null, then we add the true and false substituted versions of the
@@ -1138,6 +1140,8 @@ public class RuleConverter {
 				result.add(pair);
 			}
 			else {
+				// for Assumption in (Constraint, not Constraint)
+				
 				// Add the positive case to the list of potential expressions for further processing.
 				Expression constraints = pair.second;
 				Expression additionalConstraint = replacements.get(2);
@@ -1150,10 +1154,9 @@ public class RuleConverter {
 				potentialExpression = replacements.get(1);
 				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraints, additionalConstraint);
 			}
-
 		}
-		return result;
 		
+		return result;		
 	}
 
 	/**
@@ -1171,14 +1174,7 @@ public class RuleConverter {
 	 */
 	public Expression createParfactor (Expression potentialExpression, Expression constraints) {
 		Set<Expression> variableSet = Expressions.freeVariables(potentialExpression, rewritingProcess);
-// TODO - correct this logic and make pseudo-code correct, this is currently to handle situations like:
-// entityOf(m1) = obama;
-// ->
-// {{ ( on ) ([ if entityOf(m1, obama) then 1 else 0 ]) | X0 = obama }} 
-// incorrectly.
-		if (variableSet.size() == 0 && Expressions.freeVariables(constraints, rewritingProcess).size() > 0) {
-			constraints = Expressions.TRUE;
-		}
+
 		return IntensionalSet.makeMultiSetFromIndexExpressionsList(
 				 new ArrayList<Expression>(variableSet), 
 				Expressions.make(FunctorConstants.LEFT_DOT_RIGHT, potentialExpression), 
@@ -1195,20 +1191,35 @@ public class RuleConverter {
 	 * potential expression if it reduces out.
 	 * @param listOfConstrainedPotentialExpressions  The list of pairs to add the potential expression/constraint to.
 	 * @param potentialExpression                    The potential expression to add.
-	 * @param constraints                            The original list of constraints for the expression.
-	 * @param additionalConstraint                   An additional constraint to add to the list of constraints.
+	 * @param constraintC                            The original constraint condition for the expression.
+	 * @param assumption                             An additional constraint to add to the list of constraints.
 	 */
 	private void addFurtherConstrainedPotentialExpression(
 			List<Pair<Expression, Expression>> listOfConstrainedPotentialExpressions, 
-			Expression potentialExpression, Expression constraints, Expression additionalConstraint) {
+			Expression potentialExpression, Expression constraintC, Expression assumption) {
+		// C' <- R_complete_simplify(C and Assumption)
 		Expression cPrime;
-		constraints = And.make(constraints, additionalConstraint);
-		cPrime = rewritingProcess.rewrite(LBPRewriter.R_simplify, constraints);
+		Expression constraintCAndAssumption = And.make(constraintC, assumption);
+		cPrime = rewritingProcess.rewrite(LBPRewriter.R_complete_simplify, constraintCAndAssumption);
+		
+		// if C' is not false
 		if (!cPrime.equals(Expressions.FALSE)) {
+			// P' <- R_complete_simplify(P) under C'
 			RewritingProcess processUnderAssumption  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
-			Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_simplify, potentialExpression);
+			Expression pPrime = processUnderAssumption.rewrite(LBPRewriter.R_complete_simplify, potentialExpression);			
+			// if P' is not a numeric constant
 			if (!Expressions.isNumber(pPrime)) {
-				listOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
+				// if size of ((vars in assumption) intersection (free vars in P')) is 0
+				Set<Expression> assumptionVars = Expressions.freeVariables(assumption, rewritingProcess);
+				Set<Expression> pPrimeVars     = Expressions.freeVariables(pPrime, rewritingProcess);
+				if (assumptionVars.size() > 0 && !Util.intersect(pPrimeVars, assumptionVars)) {
+					// setOfConstrainedPotentialExpressions <- add (P', C)
+					listOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, constraintC));
+				}
+				else {
+					// setOfConstrainedPotentialExpressions <- add (P', C')
+					listOfConstrainedPotentialExpressions.add(new Pair<Expression, Expression>(pPrime, cPrime));
+				}
 			}
 		}
 	}
@@ -1242,7 +1253,7 @@ public class RuleConverter {
 	 *          and Pt and Pf are P[Constraint/true] and P[Constraint/false] respectively.
 	 *          Null, if no constraint was found.
 	 */
-	private List<Expression> getReplacementsIfAny(Expression potentialExpression, RewritingProcess process) {
+	private List<Expression> getPositiveAndNegativeConstraintReplacementsIfAny(Expression potentialExpression, RewritingProcess process) {
 		Expression pT = potentialExpression.replaceFirstOccurrence(positiveEmbeddedConstraintReplacementFunction, process);
 		if (pT == potentialExpression) {
 			return null;
@@ -1600,11 +1611,13 @@ public class RuleConverter {
 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
-			// If we find a constraint, replace it with the given constant value 
-			// (in usage, the constant will be either True or False.)  Also, note
-			// the constraint so we can put it with other constraints on the 
-			// potential expression.
-			if (LPIUtil.isConstraint(expression, process)) {
+			// If we find an atomic constraint (a constraint involving only
+			// equalities and disequalities), replace it with the given constant
+			// value (in usage, the constant will be either True or False.)
+			// Also, note the constraint so we can put it with other constraints
+			// on the potential expression.
+			if (LPIUtil.isConstraint(expression, process) &&
+				(Equality.isEquality(expression) || Disequality.isDisequality(expression))) {
 				constraint = expression;
 				return constant;
 			}

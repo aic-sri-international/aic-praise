@@ -738,13 +738,11 @@ public class RuleConverterTest {
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(lowParser.parse(
 				"if colleagues(X,Y) and Y != bob then (if likes(X,Y) then 0.8 else 0.2) else 0.5"));
-		System.out.println(potentialExpressions);
 		expected = new ArrayList<Pair<Expression, Expression>>();
 		expected.add(new Pair<Expression, Expression>(
 				lowParser.parse("if colleagues(X, Y) then if likes(X, Y) then 0.8 else 0.2 else 0.5"),
 				lowParser.parse("Y != X and Y != bob")));
 		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions));
-
 	}
 	
 	@Test
@@ -764,10 +762,10 @@ public class RuleConverterTest {
 		parfactors.add(lowParser.parse(
 				"{{(on X in People, Z in Treasure) [if owns(X,Z) then if rich(X) then 1 else 0 else 1] }}"));
 
-		Model model = ruleConverter.createModel("Gave Treasure To", 
+		ruleConverter.createModel("Gave Treasure To", 
 				"An example of how hard it is to model things without aggregate factors.", 
 				sorts, randomVariables, parfactors);
-		System.out.println(model);
+// TODO test the created model is as expected.		
 	}
 	
 	// Tests For:
@@ -829,7 +827,35 @@ public class RuleConverterTest {
 		expected = ruleParser.parse("if X = bob then sick(bob) 0.7 else sick(X) 0.2;");
 		assertEquals(expected, result);
 	}
+	
+	//
+	// Tests for additional issues that have been encountered
+	//
+	@Test
+	public void testIssue6() {
+		// Test for issue #6
+		// http://code.google.com/p/aic-praise/issues/detail?id=6
+		//
+		// entityOf(m1) = obama;
+		// ->
+		// {{ ( on ) ([ if entityOf(m1, obama) then 1 else 0 ]) | X0 = obama }} 
+		// incorrectly.
 
+		// Second:
+		// Disembed Constraints
+		List<Expression> potentialExpressions = new ArrayList<Expression>();
+		List<Pair<Expression, Expression>> expected = new ArrayList<Pair<Expression, Expression>>();
+		// Note:
+		// entityOf(m1) = obama;
+		// is translated to:
+		// if entityOf(m1, X0) and X0 = obama then 1 else 0
+		// during the removal of function applications in a potential expression.
+		potentialExpressions.add(lowParser.parse("if entityOf(m1, X0) and X0 = obama then 1 else 0"));
+		expected.add(new Pair<Expression, Expression>(
+				lowParser.parse("if entityOf(m1, obama) then 1 else 0"),
+				lowParser.parse("true")));
+		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions));
+	}
 	
 	//
 	// Test Supporting Routines
@@ -1349,6 +1375,8 @@ public class RuleConverterTest {
 	@Test
 	public void testParse () {
 		String modelString, queryString;
+// TODO - test result is what is expected.		
+		@SuppressWarnings("unused")
 		Pair<Expression, Model> result;
 
 		modelString = "if mother(X) = Y then X != Y;" +
@@ -1361,11 +1389,10 @@ public class RuleConverterTest {
 		queryString = "trait(mary)";
 		try {
 			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
+			Assert.fail("Unexpected reserved word exception thrown");
 		}
 		catch (ModelException e) {
 			e.printStackTrace();
@@ -1381,11 +1408,10 @@ public class RuleConverterTest {
 		queryString = "president";
 		try {
 			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
+			Assert.fail("Unexpected reserved word exception thrown");
 		}
 		catch (ModelException e) {
 			e.printStackTrace();
@@ -1396,11 +1422,10 @@ public class RuleConverterTest {
 		queryString = "bestFriend(john)";
 		try {
 			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
+			Assert.fail("Unexpected reserved word exception thrown");
 		}
 		catch (ModelException e) {
 			e.printStackTrace();
@@ -1442,11 +1467,10 @@ public class RuleConverterTest {
 		queryString = "sick(X)";
 		try {
 			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
+			Assert.fail("Unexpected reserved word exception thrown");
 		}
 		catch (ModelException e) {
 			e.printStackTrace();
@@ -1470,17 +1494,15 @@ public class RuleConverterTest {
 		queryString = "sick(mother(X)) and happy(Y)";
 		try {
 			result = ruleConverter.parseModel("Test Model", "Description", modelString, queryString);
-			System.out.println(result.first);
-			System.out.println(result.second);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
+			Assert.fail("Unexpected reserved word exception thrown");
 		}
 		catch (ModelException e) {
 			e.printStackTrace();
 			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
 		}
-
 	}
 	
 
@@ -1534,12 +1556,6 @@ public class RuleConverterTest {
 				assertEquals(expectedResult.toString(), result.toString());
 			}
 			else {
-				if(result != null) {
-					if (inputString != null)
-						System.out.println("generated string for \"" + inputString + "\": " + Brewer.generateBuildString(result) + "\n\n");
-					else
-						System.out.println("generated string : " + Brewer.generateBuildString(result) + "\n\n");
-				}
 				Assert.assertNotNull(result);
 			}
 		}
