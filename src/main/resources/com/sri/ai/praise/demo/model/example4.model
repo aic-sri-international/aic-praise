@@ -34,24 +34,13 @@ random isSenator: Object -> Boolean;
 random noun: Object -> Boolean;
 random possessive: Object -> Boolean;
 
-// TODO: Should be auto-generated 
-// (i.e. functions mapped to relations or if already declared redefined with additional parameter)
-random gender: Object x Object -> Boolean;
-//
-random entityOfWord: Object x Object -> Boolean;
-random entityOfMention: Object x Object -> Boolean;
-random mentionOf: Object x Object -> Boolean;
-random referenceOf: Object x Object -> Boolean;
-random wordOf: Object x Object -> Boolean;
-
-
-// TODO: Should be auto-generated (i.e. special random variables for quantified formulas).
-random 'there exists Y : gender(X0, Y)': Object -> Boolean;
-random 'there exists Y : entityOfWord(X0, Y)': Object -> Boolean;
-random 'there exists Y : entityOfMention(X0, Y)': Object -> Boolean;
-random 'there exists Y : mentionOf(X0, Y)': Object -> Boolean;
-random 'there exists Y : referenceOf(X0, Y)': Object -> Boolean;
-random 'there exists Y : wordOf(X0, Y)': Object -> Boolean;
+// FUNCTION DECLARATIONS (Note the CoDomain differs):
+random gender: Object -> Object;
+random entityOfWord: Object -> Object;
+random entityOfMention: Object -> Object;
+random mentionOf: Object -> Object;
+random referenceOf: Object -> Object;
+random wordOf: Object -> Object;
 
 //
 // RULES:

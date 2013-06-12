@@ -214,7 +214,7 @@ public class RuleConverter {
 			queryAtom = query;
 			if (queryPair != null) {
 				// Add random variable declaration for query(...).
-				Expression queryDeclaration = this.createQueryDeclaration(
+				Expression queryDeclaration = createQueryDeclaration(
 						queryAtom, query, lowLevelSyntax.getRandomVariableDefinitions());
 				if (queryDeclaration != null) {
 					lowLevelSyntax.getRandomVariableDefinitions().add(queryDeclaration);
@@ -470,23 +470,30 @@ public class RuleConverter {
 	 */
 	public Expression createQueryDeclaration (Expression queryAtom, Expression query, 
 			Set<Expression> randomVariableDefinitions) {
+		
+		Expression result = createNewRandomVariableDefinition(queryAtom, query, randomVariableDefinitions);
+
+		return result;
+	}
+	
+	public Expression createNewRandomVariableDefinition(Expression randomVariableValue, Expression randomVariableUsedIn, Set<Expression> randomVariableDefinitions) {
 		Expression result = null;
 		List<Expression> resultArgs = new ArrayList<Expression>();
 
-		resultArgs.add(DefaultSymbol.createSymbol(QUERY_STRING));
-		resultArgs.add(DefaultSymbol.createSymbol(queryAtom.getArguments().size()));
+		resultArgs.add(randomVariableValue.getFunctorOrSymbol());
+		resultArgs.add(DefaultSymbol.createSymbol(randomVariableValue.numberOfArguments()));
 		
-		List<Expression> queryArgs = queryAtom.getArguments();
-		for (Expression queryArg : queryArgs) {
+		List<Expression> rvValueArgs = randomVariableValue.getArguments();
+		for (Expression rvArg : rvValueArgs) {
 			// For each free variable in the query, search through the query's equivalent
 			// for the same variable.  We need the name of the function the variable shows
 			// up in and the position of the variable in the function (or if it's equal to the
 			// return value of the function.)
 			SearchFunctionArgumentFunction searchFunction = 
-					new SearchFunctionArgumentFunction(queryArg, randomVariableDefinitions);
-			query.replaceFirstOccurrence(searchFunction, rewritingProcess);
+					new SearchFunctionArgumentFunction(rvArg, randomVariableDefinitions);
+			randomVariableUsedIn.replaceFirstOccurrence(searchFunction, rewritingProcess);
 			if (searchFunction.randomVariableName == null) {
-				return null;
+				break;
 			}
 			for (Expression randomVariableDefinition : randomVariableDefinitions) {
 				// Once we know the function name and the argument position, we can look
@@ -499,10 +506,10 @@ public class RuleConverter {
 		}
 
 		resultArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
-		if (resultArgs.size() == queryArgs.size() + 3) {
+		if (resultArgs.size() == rvValueArgs.size() + 3) {
 			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
 		}
-
+		
 		return result;
 	}
 
@@ -1113,6 +1120,13 @@ public class RuleConverter {
 			    		replacementFunction,
 			    		rewritingProcess);
 			} while (replaced != toReplace);
+			
+			for (Pair<Expression, Expression> newRandomVariableValueAndContext : replacementFunction.newQuantifierRandomVariablesAndContext) {
+				Expression newRandomVariableDefinition = createNewRandomVariableDefinition(newRandomVariableValueAndContext.first, newRandomVariableValueAndContext.second, randomVariableDefinitions);
+				if (newRandomVariableDefinition != null) {
+					randomVariableDefinitions.add(newRandomVariableDefinition);
+				}
+			}
 
 			// Save the result.
 			result.add(replaced);
@@ -1557,6 +1571,7 @@ public class RuleConverter {
 	 */
 	private class ReplaceQuantifierFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		public List<Expression> result;
+		public List<Pair<Expression, Expression>> newQuantifierRandomVariablesAndContext = new ArrayList<Pair<Expression, Expression>>();
 
 		public ReplaceQuantifierFunction(List<Expression> result) {
 			this.result = result;
@@ -1578,18 +1593,23 @@ public class RuleConverter {
 					Expression newExpression = Expressions.make(newFunctor, variables);
 
 					// Then create a new rule based on the new expression.
+					Expression newRule;
 					if (expression.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
-						result.add(translateConditionalRule(
+						newRule = translateConditionalRule(
 								Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, expression.getArguments().get(0), 
-										Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newExpression, 1))));
+										Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newExpression, 1)));
 					}
 					else {
-						result.add(translateConditionalRule(
+						newRule = translateConditionalRule(
 								Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
 										Not.make(expression.getArguments().get(0)), 
 										Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, 
-												Not.make(newExpression), 1))));
+												Not.make(newExpression), 1)));
+						
 					}
+					result.add(newRule);
+					
+					newQuantifierRandomVariablesAndContext.add(new Pair<Expression, Expression>(newExpression, newRule));
 
 					// Replace the quantifier expression with the new random variable expression.
 					return newExpression;

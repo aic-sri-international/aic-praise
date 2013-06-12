@@ -24,7 +24,6 @@ random gender: Universe -> Boolean;        // { MALE, FEMALE, NEUTRAL, UNKNOWN }
 random number: Universe -> Boolean;        // {SINGULAR, PLURAL, UNKNOWN }
 random animacy: Universe -> Boolean;       // { ANIMATE, INANIMATE, UNKNOWN }
 random person: Universe -> Boolean;        // { I, YOU, HE, SHE, WE, THEY, IT, UNKNOWN} -> first, second, third and unknown
-// TODO 'case' is essentially a reserved word to aic-expresso
 random caseType: Universe -> Boolean;      // { subject, object, possessive, unknown}
 //
 random mentionType: Universe x Universe   -> Boolean;  // mention x type_of_mention

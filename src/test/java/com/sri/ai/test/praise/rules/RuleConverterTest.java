@@ -690,48 +690,71 @@ public class RuleConverterTest {
 	@Test
 	public void testTranslateQuantifiedPotentialExpressionsIntoQuantifierFreePotentialExpressions() {
 		Set<Expression> randomVariableDefinitions = new LinkedHashSet<Expression>();
-		
 		List<Expression> potentialExpressions = new ArrayList<Expression>();
+		List<Expression> expected = new ArrayList<Expression>();
+		
+		randomVariableDefinitions.clear();
+		randomVariableDefinitions.add(lowParser.parse("randomVariable(young, 1, Person, Boolean)"));
+		randomVariableDefinitions.add(lowParser.parse("randomVariable(friends, 2, Person, Person, Boolean)"));
+		randomVariableDefinitions.add(lowParser.parse("randomVariable(smokes, 1, Person, Boolean)"));
+		potentialExpressions.clear();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"if young(X) and (for all Y : (friends(Y,X) => smokes(Y))) then smokes(X) 0.8;")));
-		List<Expression> expected = new ArrayList<Expression>();
+		expected.clear();
 		expected.add(ruleConverter.translateConditionalRule(ruleParser.parse("if young(X) and 'for all Y : friends(Y, X) => smokes(Y)'(X) then smokes(X) 0.8;")));
 		expected.add(ruleConverter.translateConditionalRule(ruleParser.parse("if not (friends(Y, X) => smokes(Y)) then not 'for all Y : friends(Y, X) => smokes(Y)'(X);")));
 		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
+		assertEquals(4, randomVariableDefinitions.size());
+		Assert.assertTrue(randomVariableDefinitions.contains(lowParser.parse("randomVariable('for all Y : friends(Y, X) => smokes(Y)', 1, Person, Boolean)")));
 
-		potentialExpressions = new ArrayList<Expression>();
-		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
-				"there exists X : president(X, Country);")));
-		expected = new ArrayList<Expression>();
+		randomVariableDefinitions.clear();
+		randomVariableDefinitions.add(lowParser.parse("randomVariable(president, 2, Person, Nation, Boolean)"));
+		potentialExpressions.clear();
+		potentialExpressions.add(this.ruleConverter.translateRule(ruleParser.parse("there exists X : president(X, Country);")));
+		expected.clear();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("'there exists X : president(X, Country)'(Country);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if president(X, Country) then 'there exists X : president(X, Country)'(Country);")));
 		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
+		assertEquals(2, randomVariableDefinitions.size());		
+		Assert.assertTrue(randomVariableDefinitions.contains(lowParser.parse("randomVariable('there exists X : president(X, Country)', 1, Nation, Boolean)")));
 
-		potentialExpressions = new ArrayList<Expression>();
-		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
-				"friends(X,Y) and (there exists Z : friends(X,Z));")));
-		expected = new ArrayList<Expression>();
+		randomVariableDefinitions.clear();
+		randomVariableDefinitions.add(lowParser.parse("randomVariable(friends, 2, Person, Person, Boolean)"));
+		potentialExpressions.clear();
+		potentialExpressions.add(ruleConverter.translateRule(this.ruleParser.parse("friends(X,Y) and (there exists Z : friends(X,Z));")));
+		expected.clear();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("friends(X,Y) and 'there exists Z : friends(X, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if friends(X,Z) then 'there exists Z : friends(X, Z)'(X);")));
 		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
+		assertEquals(2, randomVariableDefinitions.size());		
+		Assert.assertTrue(randomVariableDefinitions.contains(lowParser.parse("randomVariable('there exists Z : friends(X, Z)', 1, Person, Boolean)")));
 
-		potentialExpressions = new ArrayList<Expression>();
+		randomVariableDefinitions.clear();
+		randomVariableDefinitions.add(lowParser.parse("randomVariable(friends, 2, Person, Person, Boolean)"));
+		randomVariableDefinitions.add(lowParser.parse("randomVariable(loves, 2, Person, Person, Boolean)"));
+		potentialExpressions.clear();
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"friends(X,Y) and (there exists Z : Z may be same as X and loves(X,Z));")));
-		expected = new ArrayList<Expression>();
+		expected.clear();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("friends(X,Y) and 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
 		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
+		assertEquals(3, randomVariableDefinitions.size());		
+		Assert.assertTrue(randomVariableDefinitions.contains(lowParser.parse("randomVariable('there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)', 1, Person, Boolean)")));
 
 		// Test nested quantifiers.
-		potentialExpressions = new ArrayList<Expression>();
-		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
-				"there exists Z : for all Y : loves(X, Y, Z);")));
-		expected = new ArrayList<Expression>();
+		randomVariableDefinitions.clear();
+		randomVariableDefinitions.add(lowParser.parse("randomVariable(loves, 3, Person, Amount, Object, Boolean)"));
+		potentialExpressions.clear();
+		potentialExpressions.add(ruleConverter.translateRule(this.ruleParser.parse("there exists Z : for all Y : loves(X, Y, Z);")));
+		expected.clear();
 		expected.add(ruleConverter.translateRule(ruleParser.parse("'there exists Z : for all Y : loves(X, Y, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if 'for all Y : loves(X, Y, Z)'(X, Z) then 'there exists Z : for all Y : loves(X, Y, Z)'(X);")));
 		expected.add(ruleConverter.translateRule(ruleParser.parse("if not loves(X, Y, Z) then not 'for all Y : loves(X, Y, Z)'(X, Z);")));
 		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
+		assertEquals(3, randomVariableDefinitions.size());		
+		Assert.assertTrue(randomVariableDefinitions.contains(lowParser.parse("randomVariable('for all Y : loves(X, Y, Z)', 2, Person, Object, Boolean)")));
+		Assert.assertTrue(randomVariableDefinitions.contains(lowParser.parse("randomVariable('there exists Z : for all Y : loves(X, Y, Z)', 1, Person, Boolean)")));
 
 		doTreeUtilWaitUnilClosed(); 
 	}
