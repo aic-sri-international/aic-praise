@@ -80,15 +80,20 @@ import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.util.base.Pair;
 
 /**
- * This class contains methods for dealing with the rules syntax.  It contains
+ * This class contains methods for dealing with the rules syntax. It contains 
  * methods for converting from the rules syntax to the lower-level syntax, and
  * vice versa.  It also contains methods for generating a rules string from a
- * rules expression.
- * 
+ * rules expression.<br>
+ * <br>
  * More information about the rules syntax and converting from the rules syntax
- * to the low level syntax can be found her:
+ * to the low level syntax can be found here:<br>
+ * http://code.google.com/p/aic-praise/wiki/SyntaxAndMeaningOfProbabilisticRules
+ * <br>
  * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+ * <br>
  * http://code.google.com/p/aic-praise/wiki/TranslatingInferenceInputAndOutput 
+ * <br>
+ * 
  * @author etsai
  *
  */
@@ -162,31 +167,7 @@ public class RuleConverter {
 	/*===================================================================================
 	 * PUBLIC METHODS
 	 *=================================================================================*/
-	public Pair<Expression, Model> convert(String modelString) throws ReservedWordException {
-		return convert("", "", modelString);
-	}
-
-	public Pair<Expression, Model> convert(String name, String description, String modelString) throws ReservedWordException {
-		return convert(name, description, ruleParser.parseAll(modelString));
-	}
-
-	/**
-	 * Convert the rules model to the low level model used for inference.
-	 * @param name         The name for the model.
-	 * @param description  The description of the model.
-	 * @param inputRules   The rules string of the model.
-	 * @param query        The query string for the model.
-	 * @return  A Model instance of the parsed model.
-	 * @throws ReservedWordException 
-	 */
-	public Pair<Expression, Model> convert(String name, String description, String modelString, String queryString) throws ReservedWordException {
-		return convert(name, description, ruleParser.parseAll(modelString), queryString != null ? ruleParser.parseFormula(queryString) : null);
-	}
-
-	public Pair<Expression, Model> convert(String name, String description, List<Expression> inputRules) throws ReservedWordException {
-		return convert(name, description, inputRules, null);
-	}
-
+	
 	/**
 	 * Converts the rules model and query and generates a low-level model object and query.
 	 * 
@@ -195,6 +176,7 @@ public class RuleConverter {
 	 * 
 	 * Pseudocode: 
 	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeQuery
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeIncrementalQuery
 	 * 
 	 * @param name         The name for the model.
 	 * @param description  The description of the model.
@@ -203,9 +185,9 @@ public class RuleConverter {
 	 * @return  A pair consisting of the query expression (if inserted during translation) and a Model instance of the parsed model.
 	 * @throws ReservedWordException 
 	 */
-	public Pair<Expression, Model> convert(String name, String description, List<Expression> inputRules, Expression query) throws ReservedWordException {
+	public Pair<Expression, Model> translateQuery(String name, String description, List<Expression> inputRules, Expression query) throws ReservedWordException {
 
-		LowLevelSyntax lowLevelSyntax = convertToLowLevelSyntax(inputRules);
+		LowLevelSyntax lowLevelSyntax = translateToLowLevelSyntax(inputRules);
 		
 		// Run a conversion on the query before processing it with the other rules.
 		Expression queryAtom = null;
@@ -222,7 +204,7 @@ public class RuleConverter {
 				
 				Expression queryPotentialExpression = translateRule(queryPair.second);
 				
-				lowLevelSyntax.getParfactors().addAll(convertToParfactors(Arrays.asList(queryPotentialExpression), lowLevelSyntax.getRandomVariableDefinitions()));
+				lowLevelSyntax.getParfactors().addAll(translateToParfactors(Arrays.asList(queryPotentialExpression), lowLevelSyntax.getRandomVariableDefinitions()));
 				
 				queryAtom = queryPair.first;
 			}
@@ -232,13 +214,21 @@ public class RuleConverter {
 		return new Pair<Expression, Model>(queryAtom, createModel(name, description, lowLevelSyntax.getSortDefinitions(), lowLevelSyntax.getRandomVariableDefinitions(), lowLevelSyntax.getParfactors()));
 	}
 	
+	//
+	// Versions of translateQuery with default arguments.
+	public Pair<Expression, Model> translateQuery(String name, String description, String modelString, String queryString) throws ReservedWordException {
+		return translateQuery(name, description, ruleParser.parseAll(modelString), queryString != null ? ruleParser.parseFormula(queryString) : null);
+	}
+	
 	/**
-	 * Converts the high level rules into their low level syntax equivalents.
+	 * Translates the high level rules into their low level syntax equivalents.
 	 * 
 	 * Description of function: http://code.google.com/p/aic-praise/wiki/
 	 * TranslatingFromHighToLowLevelModelSyntax
 	 * 
-	 * Pseudocode: http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslate
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslate
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRuleList2PotentialExpressions
 	 * 
 	 * @param inputRules
 	 *            the high level rules to be converted into low level syntax.
@@ -247,7 +237,7 @@ public class RuleConverter {
 	 * 
 	 * @throws ReservedWordException
 	 */
-	public LowLevelSyntax convertToLowLevelSyntax(List<Expression> inputRules) throws ReservedWordException {
+	public LowLevelSyntax translateToLowLevelSyntax(List<Expression> inputRules) throws ReservedWordException {
 		LowLevelSyntax result = null;
 		
 		List<Expression> inputRulesCopy;
@@ -309,7 +299,7 @@ public class RuleConverter {
 			sortNames.add(missingSort);
 		}
 		
-		Set<Expression> parfactors = convertToParfactors(potentialExpressions, randomVariableDefinitions);
+		Set<Expression> parfactors = translateToParfactors(potentialExpressions, randomVariableDefinitions);
 		
 		result = new LowLevelSyntax(sortDefinitions, randomVariableDefinitions, parfactors);
 		
@@ -317,261 +307,121 @@ public class RuleConverter {
 	}
 	
 	/**
-	 * Convert a list of potential expressions into parfactors.
-	 * 
-	 * @param potentialExpressions
-	 *            the potential expressions to be converted to parfactors.
-	 * @param randomVariableDefinitions
-	 *            random variable definitions associated with the parfactors.
-	 * @return a set of parfactors generated from the give potential
-	 *         expressions.
-	 */
-	public Set<Expression> convertToParfactors(List<Expression> potentialExpressions, Set<Expression> randomVariableDefinitions) {
-		
-		// Translate the functions.
-		potentialExpressions = translateFunctions(potentialExpressions, randomVariableDefinitions);
-
-		// Translate the quantifiers.
-		potentialExpressions = translateQuantifiers(potentialExpressions, randomVariableDefinitions);
-		
-		Model.setRandomVariables(randomVariableDefinitions, rewritingProcess);
-
-		// Extract the embedded constraints.
-		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = 
-				disembedConstraints(potentialExpressions);
-
-		// Translate the potential expression/constraint pair into a parfactor.
-		Set<Expression> parfactors = new LinkedHashSet<Expression>();
-		for (Pair<Expression, Expression> pair : potentialExpressionAndConstraintList) {
-			parfactors.add(createParfactor(pair.first, pair.second));
-		}
-		
-		return parfactors;
-	}
-
-	/**
-	 * Translates a potential expression to a rule expression.  Will replace any 
-	 * instances of "query" in the expression with its equivalent.
-	 * @param result       The potential expression to translate into a rule expression.
-	 * @param queryAtom    The "query(...)" format.  If null, then this method will do the translation, but not substitution.
-	 * @param queryString  The original form of the query.  What "query(...)" is equivalent to.
-	 * @return             A rule expression with the instances of "query(...)" replaced.
-	 */
-	public Expression queryResultToRule (Expression result, Expression queryAtom, 
-			String queryString) {
-		return queryResultToRule(result, queryAtom, ruleParser.parseFormula(queryString));
-	}
-
-	/**
-	 * Translates a potential expression to a rule expression.  Will replace any 
-	 * instances of "query" in the expression with its equivalent.
-	 * @param result     The potential expression to translate into a rule expression.
-	 * @param queryAtom  The "query(...)" format.  If null, then this method will do the translation, but not substitution.
-	 * @param query      The original form of the query.  What "query(...)" is equivalent to.
-	 * @return           A rule expression with the instances of "query(...)" replaced.
-	 */
-	public Expression queryResultToRule (Expression result, Expression queryAtom, 
-			Expression query) {
-		// Translate the result to a rule.
-		Expression ruleExpression = potentialExpressionToRule(result);
-
-		// Perform the substitution of the query(...) with its equivalent.
-		if (queryAtom != null && query != null) {
-			List<Expression> queryAtomArgs = queryAtom.getArguments();
-			Set<Expression> queryVariables = Expressions.freeVariables(query, rewritingProcess);
-			if (queryVariables.containsAll(queryAtomArgs)) {
-				ruleExpression = ruleExpression.replaceAllOccurrences(new ReplaceQueryFunction(queryAtom, query), rewritingProcess);
-			}
-			
-		}
-		return ruleExpression;
-	}
-
-	/**
-	 * Translates a potential expression to a rule expression.
+	 * Convert the given rule into its "if . then . else ." form.
 	 * 
 	 * Description of function:
-	 * http://code.google.com/p/aic-praise/wiki/TranslatingInferenceInputAndOutput
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
 	 * 
 	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeQueryAnswerPotentialExpression2Rule
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
 	 * 
-	 * @param input     The potential expression to translate into a rule expression.
-	 * @return           A rule expression version of the potential expression.
+	 * @param rule  The rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the rule.
 	 */
-	public Expression potentialExpressionToRule(Expression input) {
-		boolean isIfThenElse = IfThenElse.isIfThenElse(input);
-		
-		//we can only really simplify if then else expressions
-		if (isIfThenElse) {
-			Expression condition = IfThenElse.getCondition(input);
-			boolean isConstraint = LPIUtil.isConstraint(condition, rewritingProcess);
-			if (isConstraint) {
-				Expression translationOfE1 = potentialExpressionToRule(input.get(1));
-				Expression translationOfE2 = potentialExpressionToRule(input.get(2));
-				
-				//if both clauses are true, result is true
-				if (translationOfE1.equals(Expressions.TRUE) && translationOfE2.equals(Expressions.TRUE)) {
-					return Expressions.TRUE;
-				} 
-				//if the then clause is true, return the else clause
-				else if (translationOfE1.equals(Expressions.TRUE)) {
-					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE,
-							Not.make(condition),
-							translationOfE2);
-				} 
-				//if the else clause is true, return the if clause
-				else if (translationOfE2.equals(Expressions.TRUE)) {
-					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE,
-							condition,
-							translationOfE1);
-				}
-				//if neither is true, then return the simplified form
-				else {
-					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE, 
-							condition, 
-							translationOfE1, 
-							translationOfE2);
-				}
-			}
-			else {
-				//assume that the 'condition' is a random variable value
-				return Expressions.apply(FUNCTOR_ATOMIC_RULE, condition, input.get(1));
-			}
+	public Expression translateRule (Expression rule) {
+		Expression result;
+		if (rule.getFunctor() == null) {
+			result = rule;
 		}
-		
-		//the statement must have a constant potential, so it adds nothing
-		//of value.  We simply return true here
-		return Expressions.TRUE;
-		
-	}
-
-	/**
-	 * Generates a string in the rules format for the given expression.
-	 * @param expression  A rules expression.
-	 * @return            The string format for the rules expression.
-	 */
-	public String toRuleString (Expression expression) {
-		StringBuffer sb = new StringBuffer();
-		toRuleString(expression, sb, true);
-		return sb.toString();
-	}
-
-
-	/*===================================================================================
-	 * PUBLIC METHODS FOR TESING ONLY
-	 *=================================================================================*/
-	/**
-	 * Creates a random variable declaration for the query atom.
-	 * @param queryAtom            The query atom expression in the form of "query(...)"
-	 * @param query                What the query atom is equivalent to.
-	 * @param randomVariableDefinitions The random variable definitions.
-	 * @return  A random variable declaration for the query.
-	 */
-	public Expression createQueryDeclaration (Expression queryAtom, Expression query, 
-			Set<Expression> randomVariableDefinitions) {
-		
-		Expression result = createNewRandomVariableDefinition(queryAtom, query, randomVariableDefinitions);
-
+		else if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
+			result = translateAtomicRule(rule);
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
+			result = translateConditionalRule(rule);
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
+			result = translatePrologRule(rule);
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_STANDARD_PROB_RULE)) {
+			result = translateStandardProbabilityRule(rule);
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_CAUSAL_RULE)) {
+			result = translateCausalRule(rule);
+		}
+		else {
+			result = rule;
+		}
 		return result;
 	}
 	
-	public Expression createNewRandomVariableDefinition(Expression randomVariableValue, Expression randomVariableUsedIn, Set<Expression> randomVariableDefinitions) {
-		Expression result = null;
-		List<Expression> resultArgs = new ArrayList<Expression>();
-
-		resultArgs.add(randomVariableValue.getFunctorOrSymbol());
-		resultArgs.add(DefaultSymbol.createSymbol(randomVariableValue.numberOfArguments()));
-		
-		List<Expression> rvValueArgs = randomVariableValue.getArguments();
-		for (Expression rvArg : rvValueArgs) {
-			// For each free variable in the query, search through the query's equivalent
-			// for the same variable.  We need the name of the function the variable shows
-			// up in and the position of the variable in the function (or if it's equal to the
-			// return value of the function.)
-			SearchFunctionArgumentFunction searchFunction = 
-					new SearchFunctionArgumentFunction(rvArg, randomVariableDefinitions);
-			randomVariableUsedIn.replaceFirstOccurrence(searchFunction, rewritingProcess);
-			if (searchFunction.randomVariableName == null) {
-				break;
-			}
-			for (Expression randomVariableDefinition : randomVariableDefinitions) {
-				// Once we know the function name and the argument position, we can look
-				// up the declaration for that function and look up the type for the argument.
-				if (randomVariableDefinition.get(0).equals(searchFunction.randomVariableName)) {
-					resultArgs.add(randomVariableDefinition.get(searchFunction.argumentIndex + 2));
-					break;
-				}
-			}
-		}
-
-		resultArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
-		if (resultArgs.size() == rvValueArgs.size() + 3) {
-			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
-		}
-		
-		return result;
-	}
-
 	/**
-	 * Creates an instance of Model from the given components.
-	 * @param name             The name of the model.
-	 * @param description      Description of the model.
-	 * @param sorts            The sorts in the model.
-	 * @param randomVariables  The random variable declarations in the model.
-	 * @param parfactors       The parfactors in the model. 
-	 * @return                 A Model representation of the given model components.
-	 */
-	public Model createModel (String name, String description, 
-			Set<Expression> sorts, Set<Expression> randomVariables,
-			Set<Expression> parfactors) {
-		ArrayList<Expression> modelArgs = new ArrayList<Expression>();
-		modelArgs.add(DefaultSymbol.createSymbol(name));
-		modelArgs.add(DefaultSymbol.createSymbol(description));
-		for (Expression sort : sorts)
-			modelArgs.add(sort);
-
-		Set<String> randomVariableNames = new HashSet<String>();
-		for (Expression randomVariable : randomVariables) {
-			modelArgs.add(randomVariable);
-			randomVariableNames.add(randomVariable.get(0).toString());
-		}
-		modelArgs.add(Expressions.apply(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION, parfactors));
-		Expression modelExpression = Expressions.apply(Model.FUNCTOR_MODEL_DECLARATION, modelArgs);
-
-		return new Model(modelExpression, randomVariableNames);
-	}
-
-	/**
-	 * Converts a query expression into a query atom and a query rule.
+	 * Convert the given atomic rule into its "if . then . else ." form.
 	 * 
 	 * Description of function:
-	 * http://code.google.com/p/aic-praise/wiki/TranslatingInferenceInputAndOutput
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
 	 * 
 	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeQueryRuleAndAtom
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
 	 * 
-	 * @param query  
-	 * 			The query expression
-	 * @return A pair with the query atom and query rule.
+	 * @param rule  The atomic rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the atomic rule.
 	 */
-	public Pair<Expression, Expression> queryRuleAndAtom (Expression query) {
-		if (Model.getKnownRandomVariableNames(rewritingProcess).contains(query.getFunctorOrSymbol().toString())) {
+	public Expression translateAtomicRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		if (args.size() != 2) {
 			return null;
 		}
 
-		Set<Expression> variables = Expressions.freeVariables(query, rewritingProcess);
-		Expression queryAtom;
-		if (variables.size() > 0) {
-			queryAtom = Expressions.make(QUERY_STRING, variables);
-		}
-		else {
-			queryAtom = DefaultSymbol.createSymbol(QUERY_STRING);
-		}
-		Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);
-		return new Pair<Expression, Expression>(queryAtom, queryRule);
+		return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
+				args.get(1), oneMinusPotential(args.get(1)));
 	}
+	
+	/**
+	 * Convert the given conditional rule into its "if . then . else ." form.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
+	 * 
+	 * @param rule  The conditional rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the conditional rule.
+	 */
+	public Expression translateConditionalRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		if (args.size() == 2) {
+			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
+					this.translateRule(args.get(1)),
+					0.5);
+		}
+		else if (args.size() == 3) {
+			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
+					this.translateRule(args.get(1)),
+					this.translateRule(args.get(2)));
+		}
+		return null;
+	}
+	
+	/**
+	 * Convert the given prolog rule into its "if . then . else ." form.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
+	 * 
+	 * @param rule  The prolog rule to translate.
+	 * @return  The equivalent "if . then . else ." form of the prolog rule.
+	 */
+	public Expression translatePrologRule (Expression rule) {
+		List<Expression> args = rule.getArguments();
+		
+		if (args.size() == 2) {
+			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(1), 
+					args.get(0), oneMinusPotential(args.get(0)));
+		}
+		else if (args.size() == 3){
+			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(2), 
+					new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(1), 
+							args.get(0), oneMinusPotential(args.get(0))),
+					0.5);
+		}
 
+		return null;
+	}
+	
 	/**
 	 * Takes a list of rules and converts any instances of rule conjunctions found within it.
 	 * 
@@ -753,123 +603,13 @@ public class RuleConverter {
 		return result;
 	}
 
-
 	/**
-	 * Convert the given rule into its "if . then . else ." form.
-	 * 
 	 * Description of function:
-	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * http://code.google.com/p/aic-praise/wiki/SyntaxAndMeaningOfProbabilisticRules
 	 * 
-	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
-	 * 
-	 * @param rule  The rule to translate.
-	 * @return  The equivalent "if . then . else ." form of the rule.
+	 * @param rule
+	 * @return
 	 */
-	public Expression translateRule (Expression rule) {
-		Expression result;
-		if (rule.getFunctor() == null) {
-			result = rule;
-		}
-		else if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
-			result = translateAtomicRule(rule);
-		}
-		else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
-			result = translatePrologRule(rule);
-		}
-		else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
-			result = translateConditionalRule(rule);
-		}
-		else if (rule.getFunctor().equals(FUNCTOR_STANDARD_PROB_RULE)) {
-			result = translateStandardProbabilityRule(rule);
-		}
-		else if (rule.getFunctor().equals(FUNCTOR_CAUSAL_RULE)) {
-			result = translateCausalRule(rule);
-		}
-		else {
-			result = rule;
-		}
-		return result;
-	}
-	
-	/**
-	 * Convert the given atomic rule into its "if . then . else ." form.
-	 * 
-	 * Description of function:
-	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
-	 * 
-	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
-	 * 
-	 * @param rule  The atomic rule to translate.
-	 * @return  The equivalent "if . then . else ." form of the atomic rule.
-	 */
-	public Expression translateAtomicRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		if (args.size() != 2) {
-			return null;
-		}
-
-		return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
-				args.get(1), oneMinusPotential(args.get(1)));
-	}
-	
-	/**
-	 * Convert the given prolog rule into its "if . then . else ." form.
-	 * 
-	 * Description of function:
-	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
-	 * 
-	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
-	 * 
-	 * @param rule  The prolog rule to translate.
-	 * @return  The equivalent "if . then . else ." form of the prolog rule.
-	 */
-	public Expression translatePrologRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		
-		if (args.size() == 2) {
-			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(1), 
-					args.get(0), oneMinusPotential(args.get(0)));
-		}
-		else if (args.size() == 3){
-			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(2), 
-					new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(1), 
-							args.get(0), oneMinusPotential(args.get(0))),
-					0.5);
-		}
-
-		return null;
-	}
-	
-	/**
-	 * Convert the given conditional rule into its "if . then . else ." form.
-	 * 
-	 * Description of function:
-	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
-	 * 
-	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeRule2PotentialExpression
-	 * 
-	 * @param rule  The conditional rule to translate.
-	 * @return  The equivalent "if . then . else ." form of the conditional rule.
-	 */
-	public Expression translateConditionalRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		if (args.size() == 2) {
-			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
-					this.translateRule(args.get(1)),
-					0.5);
-		}
-		else if (args.size() == 3) {
-			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
-					this.translateRule(args.get(1)),
-					this.translateRule(args.get(2)));
-		}
-		return null;
-	}
-
 	public Expression translateStandardProbabilityRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
 		if (args.size() == 3) {
@@ -879,6 +619,13 @@ public class RuleConverter {
 		return null;
 	}
 
+	/**
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/SyntaxAndMeaningOfProbabilisticRules
+	 * 
+	 * @param rule
+	 * @return
+	 */
 	public Expression translateCausalRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
 		if (args.size() == 2) {
@@ -887,7 +634,42 @@ public class RuleConverter {
 		}
 		return null;
 	}
+	
+	/**
+	 * Convert a list of potential expressions into parfactors.
+	 * 
+	 * @param potentialExpressions
+	 *            the potential expressions to be converted to parfactors.
+	 * @param randomVariableDefinitions
+	 *            random variable definitions associated with the parfactors.
+	 * @return a set of parfactors generated from the give potential
+	 *         expressions.
+	 */
+	public Set<Expression> translateToParfactors(List<Expression> potentialExpressions, Set<Expression> randomVariableDefinitions) {
+		
+		// Translate the functions.
+		potentialExpressions = translateFunctions(potentialExpressions, randomVariableDefinitions);
 
+		// Translate the quantifiers.
+		potentialExpressions = translateQuantifiers(potentialExpressions, randomVariableDefinitions);
+		
+		// Note: This is required to ensure random variable information is available on
+		// the rewriting process when performing R_simplify and R_complete_simplify operations.
+		Model.setKnownRandomVariables(randomVariableDefinitions, rewritingProcess);
+
+		// Extract the embedded constraints.
+		List<Pair<Expression, Expression>> potentialExpressionAndConstraintList = 
+				disembedConstraints(potentialExpressions);
+
+		// Translate the potential expression/constraint pair into a parfactor.
+		Set<Expression> parfactors = new LinkedHashSet<Expression>();
+		for (Pair<Expression, Expression> pair : potentialExpressionAndConstraintList) {
+			parfactors.add(createParfactor(pair.first, pair.second));
+		}
+		
+		return parfactors;
+	}
+	
 	/**
 	 * Converts uses of functions in the potential expressions into relationships and
 	 * adds the supporting potential expressions necessary.
@@ -897,6 +679,7 @@ public class RuleConverter {
 	 * 
 	 * Pseudocode: 
 	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateFunctions
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeFunctorAndArguments
 	 * 
 	 * @param potentialExpressions  The potential expressions perform the function transformation upon.
 	 * @param randomVariableDefinitions A set of known random variable definitions.
@@ -942,38 +725,6 @@ public class RuleConverter {
 	}
 
 	/**
-	 * Checks if the given expression is a random function application.  It will catches
-	 * cases of functions that take no arguments
-	 * 
-	 * Description of function:
-	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
-	 * 
-	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeIsRandomVariableValue
-	 * 
-	 * @param e                    The expression to check.
-	 * @param randomVariableDefinitions  A set of random variable definitions.
-	 * @return  True if the expression is a random function application or a function that takes no arguments.
-	 */
-	public boolean isRandomVariableValue (Expression e, Set<Expression> randomVariableDefinitions) {
-		// If the expression is a random function application, return true.
-		if (isRandomFunctionApplication(e)) {
-			return true;
-		}
-
-		// If it is a symbol representing a function that takes no arguments, return true.
-		if (e.getSyntacticFormType().equals(SYNTACTIC_FORM_TYPE_SYMBOL)) {
-			for (Expression randomVariableDefinition : randomVariableDefinitions) {				
-				if (randomVariableDefinition.get(0).equals(e) && randomVariableDefinition.get(1).intValue() == 0) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * Checks if the given expression is a random function application.  It will screen out
 	 * instances of built in functors, such as "and", "not", "there exists . : .", "if . then . else .",
 	 * etc.
@@ -1008,87 +759,37 @@ public class RuleConverter {
 		// Else, return true.
 		return true;
 	}
-
+	
 	/**
-	 * For the given function name and number of args, will create the additonal potential
-	 * expressions to add for function transformation.
+	 * Checks if the given expression is a random function application.  It will catches
+	 * cases of functions that take no arguments
 	 * 
 	 * Description of function:
 	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
 	 * 
 	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateFunctions
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeIsRandomVariableValue
 	 * 
-	 * @param functionName  The name of the function.
-	 * @param numArgs       The number of arguments of the function.
-	 * @param potentialExpressions  The list to add the new potential expressions to.
+	 * @param e                    The expression to check.
+	 * @param randomVariableDefinitions  A set of random variable definitions.
+	 * @return  True if the expression is a random function application or a function that takes no arguments.
 	 */
-	public void createTransformedFunctionConstraints (String functionName, int numArgs, List<Expression> potentialExpressions) {
-		StringBuilder rule = new StringBuilder();
-		int ii;
-		rule.append("if ");
-		rule.append(functionName);
-		rule.append('(');
-		for (ii = 0; ii < numArgs; ii++) {
-			rule.append('X');
-			rule.append(ii);
-			rule.append(',');
-		}
-		rule.append("Y) then not ");
-		rule.append(functionName);
-		rule.append('(');
-		for (ii = 0; ii < numArgs; ii++) {
-			rule.append('X');
-			rule.append(ii);
-			rule.append(',');
-		}
-		rule.append("Z);");
-
-		potentialExpressions.add(translateConditionalRule(ruleParser.parse(rule.toString())));
-
-		rule = new StringBuilder();
-		rule.append("there exists Y : " + functionName + "(");
-		for (ii = 0; ii < numArgs; ii++) {
-			rule.append('X');
-			rule.append(ii);
-			rule.append(',');
-		}
-		rule.append("Y);");
-
-		potentialExpressions.add(translateAtomicRule(ruleParser.parse(rule.toString())));
-	}
-
-	/**
-	 * Takes a high-level random variable declaration and returns a low-level random variable declaration.
-	 * @param randomVariableDecl  The high-level random variable declaration.
-	 * @return  A low-level representation of the random variable declaration.
-	 */
-	public Expression updateRandomVariableDeclaration (Expression randomVariableDecl) {
-		if (!randomVariableDecl.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
-			return null;
+	public boolean isRandomVariableValue (Expression e, Set<Expression> randomVariableDefinitions) {
+		// If the expression is a random function application, return true.
+		if (isRandomFunctionApplication(e)) {
+			return true;
 		}
 
-		// If the return type is Boolean, don't update the declaration.
-		List<Expression> oldArgs = randomVariableDecl.getArguments();
-		if (oldArgs.get(oldArgs.size()-1).equals(TYPE_BOOLEAN)) {
-			return randomVariableDecl;
-		}
-
-		// Transfer all the args, but change the arg defining how many args the 
-		// random variable has.
-		List<Expression> newArgs = new ArrayList<Expression>(oldArgs.size()+1);
-		for (int ii = 0; ii < oldArgs.size(); ii++) {
-			if (ii == 1) {
-				newArgs.add(DefaultSymbol.createSymbol(oldArgs.size() - 2));
-			}
-			else {
-				newArgs.add(oldArgs.get(ii));
+		// If it is a symbol representing a function that takes no arguments, return true.
+		if (e.getSyntacticFormType().equals(SYNTACTIC_FORM_TYPE_SYMBOL)) {
+			for (Expression randomVariableDefinition : randomVariableDefinitions) {				
+				if (randomVariableDefinition.get(0).equals(e) && randomVariableDefinition.get(1).intValue() == 0) {
+					return true;
+				}
 			}
 		}
 
-		// Change the return type to boolean.
-		newArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
-		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
+		return false;
 	}
 
 	/**
@@ -1256,7 +957,311 @@ public class RuleConverter {
 	
 		return result;
 	}
+	
+	/**
+	 * Converts a query expression into a query atom and a query rule.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingInferenceInputAndOutput
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeQueryRuleAndAtom
+	 * 
+	 * @param query  
+	 * 			The query expression
+	 * @return A pair with the query atom and query rule.
+	 */
+	public Pair<Expression, Expression> queryRuleAndAtom (Expression query) {
+		if (Model.getKnownRandomVariableNames(rewritingProcess).contains(query.getFunctorOrSymbol().toString())) {
+			return null;
+		}
 
+		Set<Expression> variables = Expressions.freeVariables(query, rewritingProcess);
+		Expression queryAtom;
+		if (variables.size() > 0) {
+			queryAtom = Expressions.make(QUERY_STRING, variables);
+		}
+		else {
+			queryAtom = DefaultSymbol.createSymbol(QUERY_STRING);
+		}
+		Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);
+		return new Pair<Expression, Expression>(queryAtom, queryRule);
+	}
+
+	/**
+	 * Translates a potential expression to a rule expression.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingInferenceInputAndOutput
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeQueryAnswerPotentialExpression2Rule
+	 * 
+	 * @param input     The potential expression to translate into a rule expression.
+	 * @return           A rule expression version of the potential expression.
+	 */
+	public Expression potentialExpressionToRule(Expression input) {
+		boolean isIfThenElse = IfThenElse.isIfThenElse(input);
+		
+		//we can only really simplify if then else expressions
+		if (isIfThenElse) {
+			Expression condition = IfThenElse.getCondition(input);
+			boolean isConstraint = LPIUtil.isConstraint(condition, rewritingProcess);
+			if (isConstraint) {
+				Expression translationOfE1 = potentialExpressionToRule(input.get(1));
+				Expression translationOfE2 = potentialExpressionToRule(input.get(2));
+				
+				//if both clauses are true, result is true
+				if (translationOfE1.equals(Expressions.TRUE) && translationOfE2.equals(Expressions.TRUE)) {
+					return Expressions.TRUE;
+				} 
+				//if the then clause is true, return the else clause
+				else if (translationOfE1.equals(Expressions.TRUE)) {
+					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE,
+							Not.make(condition),
+							translationOfE2);
+				} 
+				//if the else clause is true, return the if clause
+				else if (translationOfE2.equals(Expressions.TRUE)) {
+					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE,
+							condition,
+							translationOfE1);
+				}
+				//if neither is true, then return the simplified form
+				else {
+					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE, 
+							condition, 
+							translationOfE1, 
+							translationOfE2);
+				}
+			}
+			else {
+				//assume that the 'condition' is a random variable value
+				return Expressions.apply(FUNCTOR_ATOMIC_RULE, condition, input.get(1));
+			}
+		}
+		
+		//the statement must have a constant potential, so it adds nothing
+		//of value.  We simply return true here
+		return Expressions.TRUE;
+		
+	}
+	
+	//
+	// START - SUPPORTING ROUTINES
+	//
+	
+	/**
+	 * Translates a potential expression to a rule expression.  Will replace any 
+	 * instances of "query" in the expression with its equivalent.
+	 * @param result       The potential expression to translate into a rule expression.
+	 * @param queryAtom    The "query(...)" format.  If null, then this method will do the translation, but not substitution.
+	 * @param queryString  The original form of the query.  What "query(...)" is equivalent to.
+	 * @return             A rule expression with the instances of "query(...)" replaced.
+	 */
+	public Expression queryResultToRule (Expression result, Expression queryAtom, 
+			String queryString) {
+		return queryResultToRule(result, queryAtom, ruleParser.parseFormula(queryString));
+	}
+
+	/**
+	 * Translates a potential expression to a rule expression.  Will replace any 
+	 * instances of "query" in the expression with its equivalent.
+	 * @param result     The potential expression to translate into a rule expression.
+	 * @param queryAtom  The "query(...)" format.  If null, then this method will do the translation, but not substitution.
+	 * @param query      The original form of the query.  What "query(...)" is equivalent to.
+	 * @return           A rule expression with the instances of "query(...)" replaced.
+	 */
+	public Expression queryResultToRule (Expression result, Expression queryAtom, Expression query) {
+		// Translate the result to a rule.
+		Expression ruleExpression = potentialExpressionToRule(result);
+
+		// Perform the substitution of the query(...) with its equivalent.
+		if (queryAtom != null && query != null) {
+			List<Expression> queryAtomArgs = queryAtom.getArguments();
+			Set<Expression> queryVariables = Expressions.freeVariables(query, rewritingProcess);
+			if (queryVariables.containsAll(queryAtomArgs)) {
+				ruleExpression = ruleExpression.replaceAllOccurrences(new ReplaceQueryFunction(queryAtom, query), rewritingProcess);
+			}
+			
+		}
+		return ruleExpression;
+	}
+
+	/**
+	 * Generates a string in the rules format for the given expression.
+	 * @param expression  A rules expression.
+	 * @return            The string format for the rules expression.
+	 */
+	public String toRuleString (Expression expression) {
+		StringBuffer sb = new StringBuffer();
+		toRuleString(expression, sb, true);
+		return sb.toString();
+	}
+
+
+	/**
+	 * Creates a random variable declaration for the query atom.
+	 * @param queryAtom            The query atom expression in the form of "query(...)"
+	 * @param query                What the query atom is equivalent to.
+	 * @param randomVariableDefinitions The random variable definitions.
+	 * @return  A random variable declaration for the query.
+	 */
+	public Expression createQueryDeclaration (Expression queryAtom, Expression query, 
+			Set<Expression> randomVariableDefinitions) {
+		
+		Expression result = createNewRandomVariableDefinition(queryAtom, query, randomVariableDefinitions);
+
+		return result;
+	}
+	
+	public Expression createNewRandomVariableDefinition(Expression randomVariableValue, Expression randomVariableUsedIn, Set<Expression> randomVariableDefinitions) {
+		Expression result = null;
+		List<Expression> resultArgs = new ArrayList<Expression>();
+
+		resultArgs.add(randomVariableValue.getFunctorOrSymbol());
+		resultArgs.add(DefaultSymbol.createSymbol(randomVariableValue.numberOfArguments()));
+		
+		List<Expression> rvValueArgs = randomVariableValue.getArguments();
+		for (Expression rvArg : rvValueArgs) {
+			// For each free variable in the query, search through the query's equivalent
+			// for the same variable.  We need the name of the function the variable shows
+			// up in and the position of the variable in the function (or if it's equal to the
+			// return value of the function.)
+			SearchFunctionArgumentFunction searchFunction = 
+					new SearchFunctionArgumentFunction(rvArg, randomVariableDefinitions);
+			randomVariableUsedIn.replaceFirstOccurrence(searchFunction, rewritingProcess);
+			if (searchFunction.randomVariableName == null) {
+				break;
+			}
+			for (Expression randomVariableDefinition : randomVariableDefinitions) {
+				// Once we know the function name and the argument position, we can look
+				// up the declaration for that function and look up the type for the argument.
+				if (randomVariableDefinition.get(0).equals(searchFunction.randomVariableName)) {
+					resultArgs.add(randomVariableDefinition.get(searchFunction.argumentIndex + 2));
+					break;
+				}
+			}
+		}
+
+		resultArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
+		if (resultArgs.size() == rvValueArgs.size() + 3) {
+			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
+		}
+		
+		return result;
+	}
+
+	/**
+	 * Creates an instance of Model from the given components.
+	 * @param name             The name of the model.
+	 * @param description      Description of the model.
+	 * @param sorts            The sorts in the model.
+	 * @param randomVariables  The random variable declarations in the model.
+	 * @param parfactors       The parfactors in the model. 
+	 * @return                 A Model representation of the given model components.
+	 */
+	public Model createModel (String name, String description, 
+			Set<Expression> sorts, Set<Expression> randomVariables,
+			Set<Expression> parfactors) {
+		ArrayList<Expression> modelArgs = new ArrayList<Expression>();
+		modelArgs.add(DefaultSymbol.createSymbol(name));
+		modelArgs.add(DefaultSymbol.createSymbol(description));
+		for (Expression sort : sorts)
+			modelArgs.add(sort);
+
+		Set<String> randomVariableNames = new HashSet<String>();
+		for (Expression randomVariable : randomVariables) {
+			modelArgs.add(randomVariable);
+			randomVariableNames.add(randomVariable.get(0).toString());
+		}
+		modelArgs.add(Expressions.apply(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION, parfactors));
+		Expression modelExpression = Expressions.apply(Model.FUNCTOR_MODEL_DECLARATION, modelArgs);
+
+		return new Model(modelExpression, randomVariableNames);
+	}
+
+	/**
+	 * For the given function name and number of args, will create the additonal potential
+	 * expressions to add for function transformation.
+	 * 
+	 * Description of function:
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode: 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateFunctions
+	 * 
+	 * @param functionName  The name of the function.
+	 * @param numArgs       The number of arguments of the function.
+	 * @param potentialExpressions  The list to add the new potential expressions to.
+	 */
+	public void createTransformedFunctionConstraints (String functionName, int numArgs, List<Expression> potentialExpressions) {
+		StringBuilder rule = new StringBuilder();
+		int ii;
+		rule.append("if ");
+		rule.append(functionName);
+		rule.append('(');
+		for (ii = 0; ii < numArgs; ii++) {
+			rule.append('X');
+			rule.append(ii);
+			rule.append(',');
+		}
+		rule.append("Y) then not ");
+		rule.append(functionName);
+		rule.append('(');
+		for (ii = 0; ii < numArgs; ii++) {
+			rule.append('X');
+			rule.append(ii);
+			rule.append(',');
+		}
+		rule.append("Z);");
+
+		potentialExpressions.add(translateConditionalRule(ruleParser.parse(rule.toString())));
+
+		rule = new StringBuilder();
+		rule.append("there exists Y : " + functionName + "(");
+		for (ii = 0; ii < numArgs; ii++) {
+			rule.append('X');
+			rule.append(ii);
+			rule.append(',');
+		}
+		rule.append("Y);");
+
+		potentialExpressions.add(translateAtomicRule(ruleParser.parse(rule.toString())));
+	}
+
+	/**
+	 * Takes a high-level random variable declaration and returns a low-level random variable declaration.
+	 * @param randomVariableDecl  The high-level random variable declaration.
+	 * @return  A low-level representation of the random variable declaration.
+	 */
+	public Expression updateRandomVariableDeclaration (Expression randomVariableDecl) {
+		if (!randomVariableDecl.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
+			return null;
+		}
+
+		// If the return type is Boolean, don't update the declaration.
+		List<Expression> oldArgs = randomVariableDecl.getArguments();
+		if (oldArgs.get(oldArgs.size()-1).equals(TYPE_BOOLEAN)) {
+			return randomVariableDecl;
+		}
+
+		// Transfer all the args, but change the arg defining how many args the 
+		// random variable has.
+		List<Expression> newArgs = new ArrayList<Expression>(oldArgs.size()+1);
+		for (int ii = 0; ii < oldArgs.size(); ii++) {
+			if (ii == 1) {
+				newArgs.add(DefaultSymbol.createSymbol(oldArgs.size() - 2));
+			}
+			else {
+				newArgs.add(oldArgs.get(ii));
+			}
+		}
+
+		// Change the return type to boolean.
+		newArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
+		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
+	}
 
 	/*===================================================================================
 	 * PRIVATE METHODS

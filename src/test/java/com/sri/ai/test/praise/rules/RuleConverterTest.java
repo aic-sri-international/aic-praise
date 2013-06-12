@@ -881,20 +881,20 @@ public class RuleConverterTest {
 		// incorrectly.
 		List<Expression> inputRules = new ArrayList<Expression>();
 		inputRules.add(ruleParser.parse("entityOf(m1) = obama;"));
-		RuleConverter.LowLevelSyntax lowLevelSyntax = ruleConverter.convertToLowLevelSyntax(inputRules);
+		RuleConverter.LowLevelSyntax lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
 		
 		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ (on) [if entityOf(m1, obama) then 1 else 0] | true }}")));
 		
 		// Additional case with explicit assignment for just 1 of the terms
 		inputRules.clear();
 		inputRules.add(ruleParser.parse("entityOf(X0) = obama;"));
-		lowLevelSyntax = ruleConverter.convertToLowLevelSyntax(inputRules);
+		lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
 		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ (on X0) [if entityOf(X0, obama) then 1 else 0] | X0 != obama }}")));
 
 		// Additional case with explicit assignment for just 1 of the terms
 		inputRules.clear();
 		inputRules.add(ruleParser.parse("if entityOf(X, Y) and X may be same as Y and Y = obama then 1;"));
-		lowLevelSyntax = ruleConverter.convertToLowLevelSyntax(inputRules);
+		lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
 		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ ( on X ) ([ if entityOf(X, obama) then if 1 then true else 0 else 0.5 ]) | true }}")));
 	}
 	
@@ -1427,7 +1427,7 @@ public class RuleConverterTest {
 				"trait(john);";
 		queryString = "trait(mary)";
 		try {
-			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.translateQuery("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1446,7 +1446,7 @@ public class RuleConverterTest {
 				"firstLady = michelleObama 0.9;";
 		queryString = "president";
 		try {
-			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.translateQuery("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1460,7 +1460,7 @@ public class RuleConverterTest {
 		modelString = "there exists X : X = bestFriend(X) 0.9;";
 		queryString = "bestFriend(john)";
 		try {
-			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.translateQuery("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1505,7 +1505,7 @@ public class RuleConverterTest {
 				"fever(X) 0.001;\n";
 		queryString = "sick(X)";
 		try {
-			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.translateQuery("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1532,7 +1532,7 @@ public class RuleConverterTest {
 				"if sick(mother(X)) then sick(X) 0.5 else sick(X) 0.1;\n";
 		queryString = "sick(mother(X)) and happy(Y)";
 		try {
-			result = ruleConverter.convert("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.translateQuery("Test Model", "Description", modelString, queryString);
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();

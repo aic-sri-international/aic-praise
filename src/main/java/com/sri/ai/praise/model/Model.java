@@ -537,7 +537,7 @@ public class Model {
 	 *            the rewriting process to wire up known random variable names
 	 *            and a random predicate catalog to.
 	 */
-	public static void setRandomVariables(Set<Expression> randomVariableDefinitions, RewritingProcess process) {
+	public static void setKnownRandomVariables(Set<Expression> randomVariableDefinitions, RewritingProcess process) {
 		Set<RandomPredicate> randomPredicates = new LinkedHashSet<RandomPredicate>();
 		Set<String> knownVarNames = new LinkedHashSet<String>();
 		for (Expression rvd : randomVariableDefinitions) {

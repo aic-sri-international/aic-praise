@@ -325,14 +325,14 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 			
 							String currentQuery = app.queryPanel.getCurrentQuery();
 							
-							Pair<Expression, Model> convertResult = ruleConverter
-									.convert("'Name'", "'Description'",
+							Pair<Expression, Model> translateQueryResult = ruleConverter
+									.translateQuery("'Name'", "'Description'",
 											app.modelEditPanel.getText() + "\n"
 													+ app.evidenceEditPanel.getText(),
 											currentQuery);
 			
-							Expression queryAtom = convertResult.first;
-							Model      model     = convertResult.second;
+							Expression queryAtom = translateQueryResult.first;
+							Model      model     = translateQueryResult.second;
 							
 							String overridden = "";
 							if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
