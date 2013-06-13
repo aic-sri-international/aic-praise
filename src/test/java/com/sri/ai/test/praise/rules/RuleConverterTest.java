@@ -736,11 +736,11 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse(
 				"friends(X,Y) and (there exists Z : Z may be same as X and loves(X,Z));")));
 		expected.clear();
-		expected.add(ruleConverter.translateRule(ruleParser.parse("friends(X,Y) and 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
-		expected.add(ruleConverter.translateRule(ruleParser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)'(X);")));
+		expected.add(ruleConverter.translateRule(ruleParser.parse("friends(X,Y) and 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X);")));
+		expected.add(ruleConverter.translateRule(ruleParser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X);")));
 		assertEquals(expected, ruleConverter.translateQuantifiers(potentialExpressions, randomVariableDefinitions));
 		assertEquals(3, randomVariableDefinitions.size());		
-		Assert.assertTrue(randomVariableDefinitions.contains(lowParser.parse("randomVariable('there exists Z : \\\'may be same as\\\'(Z, X) and loves(X, Z)', 1, Person, Boolean)")));
+		Assert.assertTrue(randomVariableDefinitions.contains(lowParser.parse("randomVariable('there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)', 1, Person, Boolean)")));
 
 		// Test nested quantifiers.
 		randomVariableDefinitions.clear();
@@ -766,7 +766,7 @@ public class RuleConverterTest {
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(lowParser.parse(
-				"if friends(X,Y) and likes(X,Z) and 'may be same as'(X, Z) then if likes(Y,Z) then 0.8 else 0.2 else 0.5"));
+				"if friends(X,Y) and likes(X,Z) and '. may be same as .'(X, Z) then if likes(Y,Z) then 0.8 else 0.2 else 0.5"));
 		expected = new ArrayList<Pair<Expression, Expression>>();
 		expected.add(new Pair<Expression, Expression>(
 				lowParser.parse("if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.8 else 0.2 else 0.5"),
@@ -957,14 +957,26 @@ public class RuleConverterTest {
 		input = new DefaultCompoundSyntaxTree ("for all . : .", 1, 2, 3);
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
-		input = new DefaultCompoundSyntaxTree ("may be same as", "A", "B");
+		input = new DefaultCompoundSyntaxTree (". may be same as .", "A", "B");
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
 		input = new DefaultCompoundSyntaxTree("mother", 1, 2, 3, 4);
 		Assert.assertEquals(true, ruleConverter.isRandomFunctionApplication(input));
 
 		input = new DefaultCompoundSyntaxTree("+", 1, 2, 3, 4);
-		Assert.assertEquals(true, ruleConverter.isRandomFunctionApplication(input));
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+		
+		input = new DefaultCompoundSyntaxTree("-", 1, 2, 3, 4);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+		
+		input = new DefaultCompoundSyntaxTree("*", 1, 2, 3, 4);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+		
+		input = new DefaultCompoundSyntaxTree("/", 1, 2, 3, 4);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
+		
+		input = new DefaultCompoundSyntaxTree("^", 1, 2, 3, 4);
+		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
 		input = new DefaultCompoundSyntaxTree("=", 1, 2, 3, 4);
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));

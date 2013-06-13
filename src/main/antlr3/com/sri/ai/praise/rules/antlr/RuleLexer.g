@@ -27,6 +27,9 @@ public void recover(RecognitionException e) {
     Adding new grammar rules
     ------------------------
     Add any terminal symbols in the new grammar rules to the list below.
+    
+    Note: Ensure you update the corresponding list in RuleTerminalSymbols.java
+          with any changes made.
 */
 P              : 'P' ;
 IF             : 'if' ;

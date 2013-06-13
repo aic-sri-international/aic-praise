@@ -71,8 +71,10 @@ import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTy
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
+import com.sri.ai.grinder.parser.antlr.AntlrGrinderTerminalSymbols;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
+import com.sri.ai.praise.rules.antlr.RuleTerminalSymbols;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
@@ -107,16 +109,13 @@ public class RuleConverter {
 	public static final String FUNCTOR_PROLOG_RULE        = "prolog rule";
 	public static final String FUNCTOR_STANDARD_PROB_RULE = "standard probability rule";
 	public static final String FUNCTOR_CAUSAL_RULE        = "causal rule";
-
-	public static final String FUNCTOR_MAY_BE_SAME_AS     = "may be same as";
-	public static final String FUNCTOR_SORT               = "sort";
+	public static final String FUNCTOR_MAY_BE_SAME_AS     = ". may be same as .";
+	public static final String FUNCTOR_QUERY               = "query";
 
 	public static final String TYPE_BOOLEAN               = "Boolean";
 
 	public static final String SYNTACTIC_FORM_TYPE_SYMBOL = "Symbol";
 	public static final String SYNTACTIC_FORM_TYPE_FUNCTION_APPLICATION = "Function application";
-
-	public static final String QUERY_STRING               = "query";
 
 
 	private RuleParserWrapper  ruleParser        = null;
@@ -271,8 +270,8 @@ public class RuleConverter {
 			else if (rule.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
 				randomVariableDeclarations.add(this.updateRandomVariableDeclaration(rule));
 				String varName = rule.get(0).toString();
-				if (varName.equals(QUERY_STRING)) {
-					throw new ReservedWordException("'" + QUERY_STRING + 
+				if (varName.equals(FUNCTOR_QUERY)) {
+					throw new ReservedWordException("'" + FUNCTOR_QUERY + 
 							"' is a reserved word in the rules language.");
 				}
 			}
@@ -296,7 +295,7 @@ public class RuleConverter {
 
 		// Add declarations for the missing sorts.
 		for (String missingSort : missingSorts) {
-			sortDeclarations.add(Expressions.make(FUNCTOR_SORT, missingSort, SortDeclaration.UNKNOWN_SIZE, 
+			sortDeclarations.add(Expressions.make(SortDeclaration.FUNCTOR_SORT_DECLARATION, missingSort, SortDeclaration.UNKNOWN_SIZE, 
 					ExtensionalSet.makeEmptySetExpression()));
 			sortNames.add(missingSort);
 		}
@@ -747,14 +746,23 @@ public class RuleConverter {
 			return false;
 		}
 
-		// If the expression is one of the known operations, return false.
-		Expression functor = e.getFunctor();
-		if (functor.equals(FunctorConstants.EQUAL) || functor.equals(FunctorConstants.INEQUALITY) || 
-				functor.equals(FunctorConstants.AND) || functor.equals(FunctorConstants.OR) || 
-				functor.equals(FunctorConstants.NOT) || functor.equals(FunctorConstants.EQUIVALENCE) ||
-				functor.equals(FunctorConstants.IMPLICATION) || functor.equals(IfThenElse.FUNCTOR) ||
-				functor.equals(FunctorConstants.THERE_EXISTS) || functor.equals(FunctorConstants.FOR_ALL) ||
-				functor.equals(FUNCTOR_MAY_BE_SAME_AS)) {
+		// If the expression is one of the known functors or terminal symbols, return false.
+		String functor = e.getFunctor().getValue().toString();	
+	
+		if (FunctorConstants.BOOLEAN_FUNCTORS.contains(functor) ||
+			functor.equals(FunctorConstants.EQUAL) ||
+			functor.equals(FunctorConstants.INEQUALITY) ||
+			FunctorConstants.ARITHMETIC_FUNCTORS.contains(functor) ||
+			functor.equals(IfThenElse.FUNCTOR) ||
+			functor.equals(FUNCTOR_MAY_BE_SAME_AS) ||
+			functor.equals(FUNCTOR_ATOMIC_RULE) ||
+			functor.equals(FUNCTOR_CONDITIONAL_RULE) ||
+			functor.equals(FUNCTOR_PROLOG_RULE) ||
+			functor.equals(FUNCTOR_STANDARD_PROB_RULE) ||
+			functor.equals(FUNCTOR_CAUSAL_RULE) ||
+			functor.equals(FUNCTOR_QUERY) ||
+			RuleTerminalSymbols.isTerminalSymbol(functor) ||
+			AntlrGrinderTerminalSymbols.isTerminalSymbol(functor)) {
 			return false;
 		}
 
@@ -857,7 +865,7 @@ public class RuleConverter {
 		for (Expression potentialExpression : potentialExpressions) {
 			Set<Pair<Expression, Expression>> mayBeSameAsSet = new HashSet<Pair<Expression, Expression>>();
 
-			// Gather instances of "may be same as".
+			// Gather instances of ". may be same as .".
 			Expression toReplace = potentialExpression;
 			Expression replaced  = toReplace;
 
@@ -875,18 +883,18 @@ public class RuleConverter {
 			potentialExpression = rewritingProcess.rewrite(LBPRewriter.R_simplify, potentialExpression);
 
 			// Get free variables and create inequality constraints on all pairs except those
-			// pairs stated to be "may be same as".
+			// pairs stated to be ". may be same as .".
 			List<Expression> constraints = new ArrayList<Expression>();
 			Set<Expression> variables = Expressions.freeVariables(potentialExpression, rewritingProcess);
 			Expression[] variableArray = new Expression[variables.size()];
 			variables.toArray(variableArray);
 			for (int ii = 0; ii < variables.size() - 1; ii++) {
 				for (int jj = ii+1; jj < variables.size(); jj++) {
-					// Check if this pair is in the "may be same as" set.
+					// Check if this pair is in the ". may be same as ." set.
 					Expression arg1 = variableArray[ii];
 					Expression arg2 = variableArray[jj];
 					if (!mayBeSameAsSet.contains(new Pair<Expression, Expression>(arg1, arg2))) {
-						// If the pair is not in the "may be same as" set, then add it to the list of constraints.
+						// If the pair is not in the ". may be same as ." set, then add it to the list of constraints.
 						constraints.add(Disequality.make(arg1, arg2));
 					}
 				}
@@ -982,10 +990,10 @@ public class RuleConverter {
 		Set<Expression> variables = Expressions.freeVariables(query, rewritingProcess);
 		Expression queryAtom;
 		if (variables.size() > 0) {
-			queryAtom = Expressions.make(QUERY_STRING, variables);
+			queryAtom = Expressions.make(FUNCTOR_QUERY, variables);
 		}
 		else {
-			queryAtom = DefaultSymbol.createSymbol(QUERY_STRING);
+			queryAtom = DefaultSymbol.createSymbol(FUNCTOR_QUERY);
 		}
 		Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);
 		return new Pair<Expression, Expression>(queryAtom, queryRule);
@@ -1639,7 +1647,7 @@ public class RuleConverter {
 	}
 
 	/**
-	 * Replacement function for use by "may be same as" extractor.
+	 * Replacement function for use by ". may be same as ." extractor.
 	 * 
 	 * Description of function:
 	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
@@ -1659,9 +1667,9 @@ public class RuleConverter {
 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
-			if (expression.getArguments().size() > 0) {
-				// Check for instances of "may be same as".
-				if (expression.getFunctor().equals(RuleConverter.FUNCTOR_MAY_BE_SAME_AS)) {
+			if (expression.getFunctor() != null && expression.getArguments().size() == 2) {
+				// Check for instances of ". may be same as .".				
+				if (expression.getFunctor().getValue().equals(RuleConverter.FUNCTOR_MAY_BE_SAME_AS)) {
 					// Mark which variables may be the same as each other.  We'll add
 					// two versions of the pair, one with one variable in front and the other
 					// with the other variable in front.  Later, when we're creating != constraints
@@ -1674,7 +1682,7 @@ public class RuleConverter {
 							new Pair<Expression, Expression>(
 									expression.getArguments().get(1), expression.getArguments().get(0)));
 
-					// Replace the "may be same as" expression with True.
+					// Replace the ". may be same as ." expression with True.
 					return Expressions.TRUE;
 				}
 			}
@@ -1737,7 +1745,7 @@ public class RuleConverter {
 		public Expression apply(Expression expression, RewritingProcess process) {
 			// Look for instances of "query" in the query output and replace it with the equivalent
 			// expression.
-			if (expression.getFunctorOrSymbol().toString().equals(RuleConverter.QUERY_STRING)) {
+			if (expression.getFunctorOrSymbol().toString().equals(RuleConverter.FUNCTOR_QUERY)) {
 				Expression result = query;
 				
 				List<Expression> queryAtomArgs = queryAtom.getArguments();
