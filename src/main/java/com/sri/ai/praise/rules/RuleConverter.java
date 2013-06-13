@@ -200,21 +200,21 @@ public class RuleConverter {
 		// Run a conversion on the query before processing it with the other rules.
 		Expression queryAtom = null;
 		if (query != null) {
-			Pair<Expression, Expression> queryPair = queryRuleAndAtom(query);
 			queryAtom = query;
+			
+			Pair<Expression, Expression> queryPair = queryRuleAndAtom(query, lowLevelSyntax.getRandomVariableDeclarations());
 			if (queryPair != null) {
+				queryAtom = queryPair.first;
+				Expression queryPotentialExpression = translateRule(queryPair.second);
 				// Add random variable declaration for query(...).
 				Expression queryDeclaration = createQueryDeclaration(
-						queryAtom, query, lowLevelSyntax.getRandomVariableDeclarations());
+						queryAtom, queryPotentialExpression, lowLevelSyntax.getRandomVariableDeclarations());			
 				if (queryDeclaration != null) {
 					lowLevelSyntax.getRandomVariableDeclarations().add(queryDeclaration);
 				}
 				
-				Expression queryPotentialExpression = translateRule(queryPair.second);
-				
-				lowLevelSyntax.getParfactors().addAll(translateToParfactors(Arrays.asList(queryPotentialExpression), lowLevelSyntax.getRandomVariableDeclarations()));
-				
-				queryAtom = queryPair.first;
+				Set<Expression> queryParfactors = translateToParfactors(Arrays.asList(queryPotentialExpression), lowLevelSyntax.getRandomVariableDeclarations());				
+				lowLevelSyntax.getParfactors().addAll(queryParfactors);
 			}
 		}
 		
@@ -988,23 +988,34 @@ public class RuleConverter {
 	 * 
 	 * @param query  
 	 * 			The query expression
+	 * @param randomVariableDeclarations
+	 *          The current set of random variable declarations.
 	 * @return A pair with the query atom and query rule.
 	 */
-	public Pair<Expression, Expression> queryRuleAndAtom (Expression query) {
-		if (Model.getKnownRandomVariableNames(rewritingProcess).contains(query.getFunctorOrSymbol().toString())) {
-			return null;
+	public Pair<Expression, Expression> queryRuleAndAtom (Expression query, Set<Expression> randomVariableDeclarations) {
+		Pair<Expression, Expression> result = null;
+		boolean createQueryTerm = true;
+		for (Expression randomVariableDeclaration : randomVariableDeclarations) {
+			if (randomVariableDeclaration.get(0).equals(query.getFunctorOrSymbol()) && randomVariableDeclaration.get(1).intValue() == query.numberOfArguments()) {
+				createQueryTerm = false;
+				break;
+			}
 		}
 
-		Set<Expression> variables = Expressions.freeVariables(query, rewritingProcess);
-		Expression queryAtom;
-		if (variables.size() > 0) {
-			queryAtom = Expressions.make(FUNCTOR_QUERY, variables);
+		if (createQueryTerm) {
+			Set<Expression> variables = Expressions.freeVariables(query, rewritingProcess);
+			Expression queryAtom;
+			if (variables.size() > 0) {
+				queryAtom = Expressions.make(FUNCTOR_QUERY, variables);
+			}
+			else {
+				queryAtom = DefaultSymbol.createSymbol(FUNCTOR_QUERY);
+			}
+			Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);		
+			result = new Pair<Expression, Expression>(queryAtom, queryRule);
 		}
-		else {
-			queryAtom = DefaultSymbol.createSymbol(FUNCTOR_QUERY);
-		}
-		Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);
-		return new Pair<Expression, Expression>(queryAtom, queryRule);
+		
+		return result;
 	}
 
 	/**
