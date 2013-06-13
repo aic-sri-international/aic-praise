@@ -63,7 +63,9 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
+import com.sri.ai.grinder.library.boole.ForAll;
 import com.sri.ai.grinder.library.boole.Not;
+import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -806,33 +808,34 @@ public class RuleConverter {
 	 * @return  Quantifier free versions of the expressions.
 	 */
 	public List<Expression> translateQuantifiers (List<Expression> potentialExpressions, Set<Expression> randomVariableDeclarations) {
-		List<Expression> result = new ArrayList<Expression>();
-		List<Expression> expressionCopy = new ArrayList<Expression>(potentialExpressions);
+		List<Expression> newPotentialExpressions = new ArrayList<Expression>();
+		// Create a local copy as will be extending the collection during
+		// the following replacement logic in order to support nested
+		// quantifiers.
+		List<Expression> expandingPotentialExpressions = new ArrayList<Expression>(potentialExpressions);
+		
 		// Translate the quantifiers in each potential expression.
-		for (int ii = 0; ii < expressionCopy.size(); ii++) {
-			Expression toReplace = expressionCopy.get(ii);
-			Expression replaced  = toReplace;
+		// for each potentialExpression in potentialExpressions
+		for (int i = 0; i < expandingPotentialExpressions.size(); i++) {
+			Expression newPotentialExpression = expandingPotentialExpressions.get(i);
 
-			ReplaceQuantifierFunction replacementFunction = new ReplaceQuantifierFunction(expressionCopy);
+			// newPotentialExpression <- exhaustively (*) replace each expression E in potentialExpression
+			// with the following replacement function:
+			ReplaceQuantifierFunction replacementFunction = new ReplaceQuantifierFunction(expandingPotentialExpressions, randomVariableDeclarations);
+			Expression toReplace;
 			do {
 				// Replace the quantifiers until there are none left in the potential expression.
-			    toReplace = replaced;
-			    replaced = toReplace.replaceAllOccurrences(
+			    toReplace = newPotentialExpression;
+			    newPotentialExpression = toReplace.replaceAllOccurrences(
 			    		replacementFunction,
 			    		rewritingProcess);
-			} while (replaced != toReplace);
-			
-			for (Pair<Expression, Expression> newRandomVariableValueAndContext : replacementFunction.newQuantifierRandomVariablesAndContext) {
-				Expression newRandomVariableDeclaration = createNewRandomVariableDeclaration(newRandomVariableValueAndContext.first, newRandomVariableValueAndContext.second, randomVariableDeclarations);
-				if (newRandomVariableDeclaration != null) {
-					randomVariableDeclarations.add(newRandomVariableDeclaration);
-				}
-			}
+			} while (newPotentialExpression != toReplace);
 
-			// Save the result.
-			result.add(replaced);
+			// newPotentialExpressions <- add newPotentialExpression
+			newPotentialExpressions.add(newPotentialExpression);
 		}
-		return result;
+		
+		return newPotentialExpressions;
 	}
 
 	/**
@@ -1575,49 +1578,60 @@ public class RuleConverter {
 	 *
 	 */
 	private class ReplaceQuantifierFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
-		public List<Expression> result;
-		public List<Pair<Expression, Expression>> newQuantifierRandomVariablesAndContext = new ArrayList<Pair<Expression, Expression>>();
+		private List<Expression> expandingPotentialExpressions;
+		private Set<Expression> randomVariableDeclarations;
 
-		public ReplaceQuantifierFunction(List<Expression> result) {
-			this.result = result;
+		public ReplaceQuantifierFunction(List<Expression> expandingPotentialExpressions, Set<Expression> randomVariableDeclarations) {
+			this.expandingPotentialExpressions = expandingPotentialExpressions;
+			this.randomVariableDeclarations = randomVariableDeclarations;
 		}
 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
 			if (expression.getArguments().size() > 0) {
 				// Find all instances of the quantifiers: "for all" and "there exists".
-				if (expression.getFunctor().equals(FunctorConstants.FOR_ALL) || 
-						expression.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
+				if (ForAll.isForAll(expression) || ThereExists.isThereExists(expression)) {
 					// Create a new symbol based on the name of the quantifier expression.
 					// This will be used as the name of a new random variable.
-					Symbol newFunctor = DefaultSymbol.createSymbol(expression.toString());
+					// newSymbol <- string representation of E
+					Symbol newSymbol = DefaultSymbol.createSymbol(expression.toString());
 					
 					// Get all the free variables in the quantifier expression to create a
 					// call to our new random variable expression.
-					Set<Expression> variables = Expressions.freeVariables(expression, rewritingProcess);
-					Expression newExpression = Expressions.make(newFunctor, variables);
+					// F <- array of free variables in E
+					Set<Expression> freeVariablesF = Expressions.freeVariables(expression, rewritingProcess);
+					Expression newSymbolF = Expressions.make(newSymbol, freeVariablesF);
 
 					// Then create a new rule based on the new expression.
-					Expression newRule;
-					if (expression.getFunctor().equals(FunctorConstants.THERE_EXISTS)) {
-						newRule = translateConditionalRule(
+					Expression newPotentialExpression;
+					// if Quantifier is "there exists"
+					if (ThereExists.isThereExists(expression)) {
+						// newPotentialExpressions <- add rule2PotentialExpression("if Phi then newSymbol(F)")
+						// add "randomVariable("if Phi then newSymbol(F)", size(F), TypeF1, ..., TypeFn, Boolean) to declarations
+						newPotentialExpression = translateConditionalRule(
 								Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, expression.getArguments().get(0), 
-										Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newExpression, 1)));
+										Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, 1)));
 					}
 					else {
-						newRule = translateConditionalRule(
+						// Quantifier is "for all"
+						// newPotentialExpressions <- add rule2PotentialExpression("if not Phi then not newSymbol(F)")
+						// add "randomVariable("if not Phi then not newSymbol", size(F), TypeF1, ..., TypeFn, Boolean) to declarations
+						newPotentialExpression = translateConditionalRule(
 								Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
 										Not.make(expression.getArguments().get(0)), 
 										Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, 
-												Not.make(newExpression), 1)));
+												Not.make(newSymbolF), 1)));
 						
 					}
-					result.add(newRule);
-					
-					newQuantifierRandomVariablesAndContext.add(new Pair<Expression, Expression>(newExpression, newRule));
+					expandingPotentialExpressions.add(newPotentialExpression);
+					Expression newRandomVariableDeclaration = createNewRandomVariableDeclaration(newSymbolF, newPotentialExpression, randomVariableDeclarations);
+					if (newRandomVariableDeclaration != null) {
+						randomVariableDeclarations.add(newRandomVariableDeclaration);
+					}					
 
-					// Replace the quantifier expression with the new random variable expression.
-					return newExpression;
+					// Replace the quantifier expression with the newSymbol(F) expression
+					// return newSymbol( F )
+					return newSymbolF;
 				}
 			}
 			return expression;
