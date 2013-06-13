@@ -190,6 +190,13 @@ public class RuleConverter {
 
 		LowLevelSyntax lowLevelSyntax = translateToLowLevelSyntax(inputRules);
 		
+		// Ensure 'query' is not used as a random variable functor up front
+		for (Expression randomVariableDeclaration : lowLevelSyntax.getRandomVariableDeclarations()) {
+			if (randomVariableDeclaration.get(0).equals(FUNCTOR_QUERY)) {
+				throw new ReservedWordException("'" + FUNCTOR_QUERY + "' is a reserved word in the rules language.");
+			}
+		}
+		
 		// Run a conversion on the query before processing it with the other rules.
 		Expression queryAtom = null;
 		if (query != null) {
@@ -241,43 +248,26 @@ public class RuleConverter {
 	public LowLevelSyntax translateToLowLevelSyntax(List<Expression> inputRules) throws ReservedWordException {
 		LowLevelSyntax result = null;
 		
-		List<Expression> inputRulesCopy;
-		List<Expression> potentialExpressions           = new ArrayList<Expression>();
-		Set<Expression>  sortDeclarations               = new LinkedHashSet<Expression>();
-		Set<Expression>  randomVariableDeclarations     = new LinkedHashSet<Expression>();
-		Set<String> sortNames                           = new HashSet<String>();
+		List<Expression> potentialExpressions       = new ArrayList<Expression>();
+		Set<Expression>  sortDeclarations           = new LinkedHashSet<Expression>();
+		Set<Expression>  randomVariableDeclarations = new LinkedHashSet<Expression>();
+		Set<String> sortNames                       = new HashSet<String>();
 
 		// Convert the conjunctions of rules.
-		inputRulesCopy = this.translateConjunctions(inputRules);
+		List<Expression> inputRulesAndDeclarations = translateConjunctions(inputRules);
 
-		// Sort and convert the rules to their if-then-else forms.
-		for (Expression rule : inputRulesCopy) {
-			if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
-				potentialExpressions.add(translateAtomicRule(rule));
+		// Sort the declarations and rules and convert the rules to their if-then-else forms.
+		for (Expression ruleOrDeclaration : inputRulesAndDeclarations) {
+			if (ruleOrDeclaration.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
+				randomVariableDeclarations.add(ruleOrDeclaration);
 			}
-			else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
-				potentialExpressions.add(translatePrologRule(rule));
+			else if (ruleOrDeclaration.getFunctor().equals(SortDeclaration.FUNCTOR_SORT_DECLARATION)) {
+				sortDeclarations.add(ruleOrDeclaration);
+				sortNames.add(ruleOrDeclaration.get(0).toString());
 			}
-			else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE)) {
-				potentialExpressions.add(translateConditionalRule(rule));
-			}
-			else if (rule.getFunctor().equals(FUNCTOR_STANDARD_PROB_RULE)) {
-				potentialExpressions.add(translateStandardProbabilityRule(rule));
-			}
-			else if (rule.getFunctor().equals(FUNCTOR_CAUSAL_RULE)) {
-				potentialExpressions.add(translateCausalRule(rule));
-			}
-			else if (rule.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
-				randomVariableDeclarations.add(this.updateRandomVariableDeclaration(rule));
-				String varName = rule.get(0).toString();
-				if (varName.equals(FUNCTOR_QUERY)) {
-					throw new ReservedWordException("'" + FUNCTOR_QUERY + 
-							"' is a reserved word in the rules language.");
-				}
-			}
-			else if (rule.getFunctor().equals(SortDeclaration.FUNCTOR_SORT_DECLARATION)) {
-				sortNames.add(rule.get(0).toString());
-				sortDeclarations.add(rule);
+			else {
+				// Is not a declaration, therefore treat as a rule
+				potentialExpressions.add(translateRule(ruleOrDeclaration));
 			}
 		}
 		
@@ -719,6 +709,24 @@ public class RuleConverter {
 			Set<Integer> counts = functionsFound.get(functor);
 			for (Integer count : counts) {
 				createTransformedFunctionConstraints(functor, count, result);
+				
+				// if there is a random variable declaration "randomVariable(predicate, n, Type_1, ..., Type_n, return_type)"
+				Expression oldRandomVariableDeclaration = null;
+				Expression newRandomVariableDeclaration = null;
+				for (Expression randomVariableDeclaration : randomVariableDeclarations) {
+					if (randomVariableDeclaration.get(0).equals(functor) && randomVariableDeclaration.get(1).intValue() == count) {
+						oldRandomVariableDeclaration = randomVariableDeclaration;
+						newRandomVariableDeclaration = updateRandomVariableDeclaration(oldRandomVariableDeclaration);
+						break;
+					}
+				}
+				
+				// add "randomVariable(predicate, n + 1, Type1, ..., Type_n, return_type, Boolean)" to newDeclarations
+				// Here we will just replace.
+				if (oldRandomVariableDeclaration != null) {
+					randomVariableDeclarations.remove(oldRandomVariableDeclaration);
+					randomVariableDeclarations.add(newRandomVariableDeclaration);
+				}
 			}
 		}
 
@@ -1242,27 +1250,26 @@ public class RuleConverter {
 	}
 
 	/**
-	 * Takes a high-level random variable declaration and returns a low-level random variable declaration.
-	 * @param randomVariableDecl  The high-level random variable declaration.
-	 * @return  A low-level representation of the random variable declaration.
+	 * Takes a high-level random variable declaration for a function and returns
+	 * a low-level relational random variable declaration.
+	 * 
+	 * @param randomVariableDecl
+	 *            The high-level random variable declaration.
+	 * @return A low-level representation of the random variable declaration.
 	 */
-	public Expression updateRandomVariableDeclaration (Expression randomVariableDecl) {
+	public Expression updateRandomVariableDeclaration(Expression randomVariableDecl) {
 		if (!randomVariableDecl.getFunctor().equals(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
 			return null;
 		}
 
-		// If the return type is Boolean, don't update the declaration.
-		List<Expression> oldArgs = randomVariableDecl.getArguments();
-		if (oldArgs.get(oldArgs.size()-1).equals(TYPE_BOOLEAN)) {
-			return randomVariableDecl;
-		}
-
 		// Transfer all the args, but change the arg defining how many args the 
 		// random variable has.
+		List<Expression> oldArgs = randomVariableDecl.getArguments();
 		List<Expression> newArgs = new ArrayList<Expression>(oldArgs.size()+1);
 		for (int ii = 0; ii < oldArgs.size(); ii++) {
+			// i.e. 1 == the arity slot
 			if (ii == 1) {
-				newArgs.add(DefaultSymbol.createSymbol(oldArgs.size() - 2));
+				newArgs.add(DefaultSymbol.createSymbol(oldArgs.get(1).intValue() + 1));
 			}
 			else {
 				newArgs.add(oldArgs.get(ii));

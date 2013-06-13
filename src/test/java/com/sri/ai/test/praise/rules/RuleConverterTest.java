@@ -667,6 +667,11 @@ public class RuleConverterTest {
 		input = new DefaultCompoundSyntaxTree("sort", "sprinters", "bolt", "johnson");
 		result = ruleConverter.updateRandomVariableDeclaration(input);
 		assertEquals(null, result);
+		
+		// Note: ensure non-Boolean return_type is not used as a marker in the logic (had been).
+		input = new DefaultCompoundSyntaxTree("randomVariable", "gate", 1, "Boolean", "Boolean");
+		result = ruleConverter.updateRandomVariableDeclaration(input);
+		assertEquals(lowParser.parse("randomVariable(gate, 2, Boolean, Boolean, Boolean)"), result);
 	}
 	
 	@Test
@@ -802,8 +807,7 @@ public class RuleConverterTest {
 
 		ruleConverter.createModel("Gave Treasure To", 
 				"An example of how hard it is to model things without aggregate factors.", 
-				sorts, randomVariables, parfactors);
-// TODO test the created model is as expected.		
+				sorts, randomVariables, parfactors);	
 	}
 	
 	// Tests For:
@@ -1426,7 +1430,7 @@ public class RuleConverterTest {
 	@Test
 	public void testConvert() {
 		String modelString, queryString;
-// TODO - test result is what is expected.		
+		
 		@SuppressWarnings("unused")
 		Pair<Expression, Model> result;
 
@@ -1451,7 +1455,9 @@ public class RuleConverterTest {
 		}
 
 		// Missing sort declaration for People.
-		modelString = "random president: -> People;" +
+		modelString =
+				"sort People;" +
+				"random president: -> People;" +
 				"random firstLady: -> People;" +
 				"president = barrackObama <=> firstLady = michelleObama;" +
 				"president = billClinton <=> firstLady = hillaryClinton;" +
@@ -1472,7 +1478,7 @@ public class RuleConverterTest {
 		modelString = "there exists X : X = bestFriend(X) 0.9;";
 		queryString = "bestFriend(john)";
 		try {
-			result = ruleConverter.translateQuery("Test Model", "Description", modelString, queryString);
+			result = ruleConverter.translateQuery("Test Model", "Description", modelString, queryString);		
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
