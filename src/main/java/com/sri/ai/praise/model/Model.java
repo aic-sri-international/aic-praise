@@ -526,7 +526,7 @@ public class Model {
 	}
 	
 	/**
-	 * Set up the known random variables and random prediate catalog to be
+	 * Set up the known random variables and random predicate catalog to be
 	 * associated with the passed in rewriting process.
 	 * 
 	 * @param randomVariableDefinitions
