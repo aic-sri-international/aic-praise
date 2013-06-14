@@ -50,12 +50,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.Disequality;
@@ -81,6 +83,7 @@ import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.ParfactorsDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
 /**
@@ -117,12 +120,8 @@ public class RuleConverter {
 	public static final String SYNTACTIC_FORM_TYPE_SYMBOL = "Symbol";
 	public static final String SYNTACTIC_FORM_TYPE_FUNCTION_APPLICATION = "Function application";
 
-
 	private RuleParserWrapper  ruleParser        = null;
 	private RewritingProcess   rewritingProcess  = null;
-
-	private ReplaceConstraintWithConstant positiveEmbeddedConstraintReplacementFunction = new ReplaceConstraintWithConstant(Expressions.TRUE);
-	private ReplaceConstraintWithConstant negativeEmbeddedConstraintReplacementFunction = new ReplaceConstraintWithConstant(Expressions.FALSE);
 
 	public class LowLevelSyntax {
 		private Set<Expression> sortDeclarations = new LinkedHashSet<Expression>();
@@ -918,30 +917,18 @@ public class RuleConverter {
 
 			// Check if the potential expression has any more embedded constraints.
 			Pair<Expression, Expression> pair = setOfConstrainedPotentialExpressions.get(ii);
-			List<Expression> replacements = getPositiveAndNegativeConstraintReplacementsIfAny(pair.first, rewritingProcess);
-
-			// If the result is null, then were no more embedded constraints found.  If the
-			// result is non-null, then we add the true and false substituted versions of the
-			// potential expression to the end of the list of potential expressions to be process,
-			// so that we can check if there are more embedded constraints to extract.
-			if (replacements == null) {
-				// Add the complete parfactor to the completely-processed parfactor list.
-				result.add(pair);
+			Expression potentialExpression = pair.first;
+			Expression constraintC         = pair.second;
+			CollectAtomicConstraint collectAtomicConstraint = new CollectAtomicConstraint(rewritingProcess);
+			if (Util.thereExists(new SubExpressionsDepthFirstIterator(potentialExpression), collectAtomicConstraint)) {
+				// for Assumption in (Constraint, not Constraint)
+				Expression assumption = collectAtomicConstraint.constraint;
+				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraintC, assumption);
+				Expression notAssumption = Not.make(collectAtomicConstraint.constraint);
+				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraintC, notAssumption);
 			}
 			else {
-				// for Assumption in (Constraint, not Constraint)
-				
-				// Add the positive case to the list of potential expressions for further processing.
-				Expression constraints = pair.second;
-				Expression additionalConstraint = replacements.get(2);
-				Expression potentialExpression = replacements.get(0);
-				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraints, additionalConstraint);
-
-				// Add the negative case to the list of potential expressions for further processing.
-				constraints = pair.second;
-				additionalConstraint = Not.make(replacements.get(2));
-				potentialExpression = replacements.get(1);
-				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraints, additionalConstraint);
+				result.add(pair);
 			}
 		}
 		
@@ -1346,29 +1333,6 @@ public class RuleConverter {
 	}
 
 	/**
-	 * Looks for the first embedded constraint in a potential expression and returns two replacements; one 
-	 * with the embedded constraint replaced by True and one by False.
-	 * @param potentialExpression  The expression to search for embedded constraints.
-	 * @param process              The rewriting process.
-	 * @return  A list (Pt, Pf, Constraint) if potentialExpression (P, C) contains a constraint Constraint, 
-	 *          and Pt and Pf are P[Constraint/true] and P[Constraint/false] respectively.
-	 *          Null, if no constraint was found.
-	 */
-	private List<Expression> getPositiveAndNegativeConstraintReplacementsIfAny(Expression potentialExpression, RewritingProcess process) {
-		Expression pT = potentialExpression.replaceFirstOccurrence(positiveEmbeddedConstraintReplacementFunction, process);
-		if (pT == potentialExpression) {
-			return null;
-		}
-
-		Expression pF = potentialExpression.replaceFirstOccurrence(negativeEmbeddedConstraintReplacementFunction, process);
-		List<Expression> result = new ArrayList<Expression>();
-		result.add(pT);
-		result.add(pF);
-		result.add(negativeEmbeddedConstraintReplacementFunction.constraint);
-		return result;
-	}
-
-	/**
 	 * Generates a string in the rules format for the given expression and
 	 * appends it to the string buffer.
 	 * Call this to generate a raw rule string without the semicolon.
@@ -1707,43 +1671,6 @@ public class RuleConverter {
 			return expression;
 		}
 	}
-
-	/**
-	 * Replacement function for use by embedded constraint extractor.
-	 * 
-	 * Description of function:
-	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
-	 * 
-	 * Pseudocode: 
-	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeDisembedConstraints
-	 * 
-	 * @author etsai
-	 *
-	 */
-	private class ReplaceConstraintWithConstant extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
-		private Expression constant;
-
-		public Expression constraint;
-
-		public ReplaceConstraintWithConstant(Expression constant) {
-			this.constant = constant;
-		}
-
-		@Override
-		public Expression apply(Expression expression, RewritingProcess process) {
-			// If we find an atomic constraint (a constraint involving only
-			// equalities and disequalities), replace it with the given constant
-			// value (in usage, the constant will be either True or False.)
-			// Also, note the constraint so we can put it with other constraints
-			// on the potential expression.
-			if (LPIUtil.isConstraint(expression, process) &&
-				(Equality.isEquality(expression) || Disequality.isDisequality(expression))) {
-				constraint = expression;
-				return constant;
-			}
-			return expression;
-		}
-	}
 	
 	/**
 	 * Replacement function for use by the query result to rule translator.
@@ -1900,6 +1827,31 @@ public class RuleConverter {
 		}
 	}
 	
-
-
+	private class CollectAtomicConstraint implements Predicate<Expression> {
+		public Expression constraint = null;
+		//
+		private RewritingProcess process = null;
+		
+		public CollectAtomicConstraint(RewritingProcess process) {
+			this.process = process;
+		}
+		
+		@Override
+		public boolean apply(Expression expression) {
+			boolean result = false;
+			
+			// If we find an atomic constraint (a constraint involving only
+			// equalities and disequalities), replace it with the given constant
+			// value (in usage, the constant will be either True or False.)
+			// Also, note the constraint so we can put it with other constraints
+			// on the potential expression.
+			if (LPIUtil.isConstraint(expression, process) &&
+				(Equality.isEquality(expression) || Disequality.isDisequality(expression))) {
+				constraint = expression;
+				result = true;
+			}
+			
+			return result;
+		}
+	}
 }
