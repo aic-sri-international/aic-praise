@@ -45,6 +45,6 @@ public class Example4 extends Example {
 		super("Example 4");
 		setModel(getExampleFromResource("example4.model"));
 		setEvidence(getExampleFromResource("example4.es1"));
-		setQueryToRun("referenceOf(w7, X)");
+		setQueryToRun("referenceOf(w7) = X");
 	}
 }

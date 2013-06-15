@@ -97,12 +97,12 @@ public class ExportToPMTK3FactorGraph {
 		boolean outputLBPBeliefs = false;
 		Integer size             = 12;
 		
-		String modelDeclaration =  Model.getModelDeclarationFromResource("Example4Stage1.model");
+		String modelDeclaration =  Model.getModelDeclarationFromResource("Example4.model");
 
 		Map<Expression, Expression> globalObjects = new HashMap<Expression, Expression>();
-		globalObjects.put(parser.parse("| OBJ |"), DefaultSymbol.createSymbol(size)); 
+		globalObjects.put(parser.parse("| Object |"), DefaultSymbol.createSymbol(size)); 
 		// Ensure domain sizes match up.
-		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());
+		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());		
 		
 		Expression modelDefinition = parser.parse(modelDeclaration);
 	

@@ -11,8 +11,7 @@ function aicPRAiSE()
     %mkFactorGraphFunctionHandle = @mkExperimentLoopyPQFactorGraph;
     %mkFactorGraphFunctionHandle = @mkExperimentLoopyPQWithPriorsFactorGraph;
     %mkFactorGraphFunctionHandle = @mkExperimentLoopyParfactorsExampleFactorGraph;
-    %mkFactorGraphFunctionHandle = @mkExample4Stage1ModelFactorGraph;
-    %mkFactorGraphFunctionHandle = @mkExample4Stage2ModelFactorGraph;
+    %mkFactorGraphFunctionHandle = @mkExample4ModelFactorGraph;
 
     %
     % Inference Algorithms to run:

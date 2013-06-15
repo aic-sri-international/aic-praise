@@ -81,7 +81,7 @@ public class LBPStressIT extends AbstractLPITest {
 		perform(new TestData[] {
 				new LoopyBeliefTestData(Expressions.TRUE.toString(),
 						new Model(Model.getModelDeclarationFromResource("Example4.model")),
-						"belief([referenceOf(w7, X)])",
+						"belief([query(X)])",
 						false,
 						"TODO")});
 	}

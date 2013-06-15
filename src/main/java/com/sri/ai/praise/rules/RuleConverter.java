@@ -635,8 +635,7 @@ public class RuleConverter {
 	 * @return a set of parfactors generated from the give potential
 	 *         expressions.
 	 */
-	public Set<Expression> translateToParfactors(List<Expression> potentialExpressions, Set<Expression> randomVariableDeclarations) {
-		
+	public Set<Expression> translateToParfactors(List<Expression> potentialExpressions, Set<Expression> randomVariableDeclarations) {		
 		// Translate the functions.
 		potentialExpressions = translateFunctions(potentialExpressions, randomVariableDeclarations);
 
@@ -681,13 +680,13 @@ public class RuleConverter {
 		Map<String, Set<Integer>> functionsFound = new HashMap<String, Set<Integer>>();
 
 		// For each potential expression, translate the functions.
-		for (Expression potentialExpression : potentialExpressions) {
+		for (Expression potentialExpression : potentialExpressions) {			
 			Expression toReplace = potentialExpression;
 			Expression replaced  = potentialExpression;
 
 			// Replace the functions in the potential expression until there are no more.
-			ReplaceFunctionFunction replacementFunction = 
-					new ReplaceFunctionFunction(toReplace, randomVariableDeclarations, functionsFound);
+			ReplaceFunctionWithRelation replacementFunction = 
+					new ReplaceFunctionWithRelation(toReplace, randomVariableDeclarations, functionsFound);
 			do {
 			    toReplace = replaced;
 			    replaced = toReplace.replaceAllOccurrences(
@@ -747,7 +746,7 @@ public class RuleConverter {
 	 * @return  False if the expression is not a random function application or any of the built in
 	 *          expression types.
 	 */
-	public boolean isRandomFunctionApplication (Expression e) {
+	public boolean isRandomFunctionApplication (Expression e) {		
 		// If the expression is not a function application, return false.
 		if (!e.getSyntacticFormType().equals(SYNTACTIC_FORM_TYPE_FUNCTION_APPLICATION)) {
 			return false;
@@ -1468,13 +1467,13 @@ public class RuleConverter {
 	 * @author etsai
 	 *
 	 */
-	private class ReplaceFunctionFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
-		public Set<Expression>           randomVariableDeclarations;
-		public Map<String, Set<Integer>> functionsFound;
-		public Expression                currentExpression;
-		public int                       uniqueCount = 0;
+	private class ReplaceFunctionWithRelation extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
+		private Set<Expression>           randomVariableDeclarations;
+		private Map<String, Set<Integer>> functionsFound;
+		private Expression                currentExpression;
+		private int                       uniqueCount = 0;
 
-		public ReplaceFunctionFunction(Expression currentExpression,
+		public ReplaceFunctionWithRelation(Expression currentExpression,
 				Set<Expression> randomVariableDeclarations, 
 				Map<String, Set<Integer>> functionsFound) {
 			this.currentExpression = currentExpression;
@@ -1484,74 +1483,126 @@ public class RuleConverter {
 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
-			if (expression.getArguments().size() > 0) {
-				// Looking for cases of nested functions (e.g. "foo(bar(X))") or 
-				// functions nested in equality (e.g. "foo(X) = bar(Y)")
-				if (expression.getFunctor().equals(FunctorConstants.EQUAL) || 
-						expression.getFunctor().equals(FunctorConstants.INEQUALITY) ||
-						isRandomFunctionApplication(expression)) {
-					boolean isReplace = false;
-
-					// We will start compiling a duplicate list of arguments for this expression,
-					// in case it turns out to be one of the above cases.  If so, we will need
-					// to replace the location of the nested function with a new variable.
-					List<Expression> arguments = new ArrayList<Expression>(); 
-					List<Expression> andArgs   = new ArrayList<Expression>();
-					for (Expression argument : expression.getArguments()) {
-						if (isRandomVariableValue(argument, randomVariableDeclarations)) {
-							isReplace = true;
-
-							// We need to replace the function call with a new variable.
-							Expression unique = Expressions.makeUniqueVariable(
-									"X" + uniqueCount, currentExpression, 
-									rewritingProcess);
-							uniqueCount++;
-							arguments.add(unique);
-							
-							// Create a new version of the argument expression with the
-							// new variable added to the end of the argument list.
-							List<Expression> newArgumentArgs = new ArrayList<Expression>(argument.getArguments());
-							newArgumentArgs.add(unique);
-							String name;
-							if (argument.getArguments().size() == 0) {
-								name = argument.toString();
-							}
-							else {
-								name = argument.getFunctor().toString();
-							}
-							
-							// Put the new version of the child expression in a list to
-							// be "and"ed together with a new version of the parent expression.
-							andArgs.add(Expressions.make(name, newArgumentArgs));
-
-							// Note the function name and param count so can add additional rule enforcing functional
-							// relation after this replacement function is done running.
-							Set<Integer> paramCount;
-							paramCount = functionsFound.get(name);
-							if (paramCount == null) {
-								paramCount = new HashSet<Integer>();
-								functionsFound.put(name, paramCount);
-							}
-							paramCount.add(argument.getArguments().size());
-						}
-						else {
-							arguments.add(argument);
-						}
+			Expression result = expression;
+			
+			// This ensures all "=" function applications are binary.
+			if (Equality.isEquality(result) && result.numberOfArguments() > 2) {
+				// return E1 = E2 and ... and En-1 = En
+				List<Expression> conjuncts = new ArrayList<Expression>();
+				for (int i = 0; i < result.numberOfArguments()-1; i++) {
+					conjuncts.add(Equality.make(result.get(i), result.get(i+1)));
+				}
+				result = And.make(conjuncts);
+			}
+			else {
+				// if E is a function application with functor "=" or "!=" and arguments E1,...,Ek,
+				// having an argument Ei such that isRandomVariableValue(Ei, declarations)
+				int elementI = determineIfEqualityDisequalityWithEmbeddedRandomVariableValue(result, process);
+				if (elementI != -1) {
+					// (predicate, (T1,...,Tn) ) <- functorAndArguments(Ei)
+					// functions <- add (predicate, n) to functions
+					Expression functionApplicationI = result.get(elementI);
+					updateFunctionsFound(functionApplicationI);
+					//j is some index distinct from i
+					Expression expressionJ = result.get(0);
+					if (elementI == 0) {
+						expressionJ = result.get(1);
 					}
-					if(isReplace) {
-						// When done iterating through the parent expression's children,
-						// we need to create a new version of the parent expressions,
-						// with the function arguments replaced by new variable names,
-						// and "and"ed together with the new child function expressions.
-						// This will replace the original expression.
-						andArgs.add(Expressions.make(expression.getFunctor(), arguments));
-						Expression replacement = And.make(andArgs);
-						return replacement;
+					// if functor "="
+					if (Equality.isEquality(result)) {
+						// return predicate(T1, ..., Tn, Ej)
+						result = addArgToPredicate(functionApplicationI, expressionJ);
 					}
-
+					else { // else functor "!="
+						// return not(predicate(T1, ..., Tn, Ej))
+						result = Not.make(addArgToPredicate(functionApplicationI, expressionJ));
+					}
+				}
+	
+				// if isRandomFunctionApplication(E) of the form predicate1(E1,..., i,..., En)
+				// where isRandomVariableValue(Ei, declarations) is true
+				elementI = determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(result, process);
+				if (elementI != -1) {
+					// (predicate2, (T1,...,Tk) ) <- functorAndArguments(Ei)
+					// functions <- add (predicate2, n) to functions
+					Expression functionApplicationI = result.get(elementI);
+					updateFunctionsFound(functionApplicationI);
+					
+					// return predicate1(E1, ..., Ei-1, NewUniqueVariable, E{i+1},..., En) 
+					// ...... and 
+					// ...... predicate2(T1, ..., Tk, NewUniqueVariable)
+					Expression newUniqueVariable = Expressions.makeUniqueVariable("X" + (uniqueCount++), currentExpression, rewritingProcess);
+					List<Expression> predicate1Args = new ArrayList<Expression>(result.getArguments());
+					predicate1Args.set(elementI, newUniqueVariable);
+					Expression predicate1 = Expressions.make(result.getFunctor(), predicate1Args.toArray());
+					
+					List<Expression> predicate2Args = new ArrayList<Expression>(functionApplicationI.getArguments());
+					predicate2Args.add(newUniqueVariable);
+					Expression predicate2 = Expressions.make(functionApplicationI.getFunctor(), predicate2Args.toArray());
+					
+					result = And.make(predicate1, predicate2);
 				}
 			}
-			return expression;
+
+			return result;
+		}
+		
+		//
+		// PRIVATE
+		//
+		private int determineIfEqualityDisequalityWithEmbeddedRandomVariableValue(Expression expression, RewritingProcess process) {
+			int result = -1;
+			// if E is a function application with functor "=" or "!=" and arguments E1,...,Ek,
+			if (Equality.isEquality(expression) || Disequality.isDisequality(expression)) {
+				for (int i = 0; i < expression.numberOfArguments(); i++) {
+					// having an argument Ei such that isRandomVariableValue(Ei, declarations)
+					Expression expressionI = expression.get(i);
+					if (isRandomVariableValue(expressionI, randomVariableDeclarations)) {
+						result = i;
+						break;
+					}
+				}
+			}
+			return result;
+		}
+		
+		private int determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(Expression expression, RewritingProcess process) {
+			int result = -1;
+			// if isRandomFunctionApplication(E) of the form predicate1(E1,..., i,..., En)
+			if (isRandomFunctionApplication(expression)) {
+				for (int i = 0; i < expression.numberOfArguments(); i++) {
+					// where isRandomVariableValue(Ei, declarations) is true
+					Expression expressionI = expression.get(i);
+					if (isRandomVariableValue(expressionI, randomVariableDeclarations)) {
+						result = i;
+						break;
+					}
+				}
+			}
+			
+			return result;
+		}
+		
+		private void updateFunctionsFound(Expression functionApplication) {
+			String functorName = functionApplication.getFunctorOrSymbol().toString();
+			
+			Set<Integer> paramCount;
+			paramCount = functionsFound.get(functorName);
+			if (paramCount == null) {
+				paramCount = new LinkedHashSet<Integer>();
+				functionsFound.put(functorName, paramCount);
+			}
+			paramCount.add(functionApplication.getArguments().size());
+		}
+		
+		private Expression addArgToPredicate(Expression functionApplication, Expression additionalArgument) {
+			List<Expression> args = new ArrayList<Expression>();
+			args.addAll(functionApplication.getArguments());
+			args.add(additionalArgument);
+			
+			Expression result = Expressions.make(functionApplication.getFunctorOrSymbol(), args.toArray());
+			
+			return result;
 		}
 	}
 

@@ -526,7 +526,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob);")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = X1 then 1 else 0"));
+		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
@@ -535,7 +535,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = mother(bob) = jane;")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = X1 = jane then 1 else 0"));
+		expected.add(lowParser.parse("if and(and(mother(john, X0), mother(bob, X0)), mother(bob, jane)) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
@@ -544,7 +544,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = jane = mother(bob);")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and X0 = jane = X1 then 1 else 0"));
+		expected.add(lowParser.parse("if mother(john, jane) and mother(bob, jane) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
@@ -553,7 +553,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("jane = mother(john) = mother(bob);")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if mother(john, X0) and mother(bob, X1) and jane = X0 = X1 then 1 else 0"));
+		expected.add(lowParser.parse("if and(mother(john, jane), and(mother(john, X0), mother(bob, X0))) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
@@ -562,7 +562,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X));")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if mother(X, X0) and sick(X0) then 1 else 0"));
+		expected.add(lowParser.parse("if sick(X0) and mother(X, X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
@@ -571,7 +571,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X, Y, Z));")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if mother(X, Y, Z, X0) and sick(X0) then 1 else 0"));
+		expected.add(lowParser.parse("if sick(X0) and mother(X, Y, Z, X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, X1, X2, Y) then if not mother(X0, X1, X2, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, X1, X2, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
@@ -580,7 +580,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X), bob);")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if mother(X, X0) and sick(X0, bob) then 1 else 0"));
+		expected.add(lowParser.parse("if sick(X0, bob) and mother(X, X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
@@ -589,7 +589,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(X));")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if mother(X, X0) and sick(bob, X0) then 1 else 0"));
+		expected.add(lowParser.parse("if sick(bob, X0) and mother(X, X0) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
@@ -598,7 +598,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(X), father(X));")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if mother(X, X0) and father(X, X1) and sick(X0, X1) then 1 else 0"));
+		expected.add(lowParser.parse("if and(and(sick(X0, X1), father(X, X1)), mother(X, X0)) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.5"));
@@ -609,7 +609,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(mother(father(X)));")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if 'and'(father(X, X1), mother(X1, X0)) and sick(X0) then 1 else 0"));
+		expected.add(lowParser.parse("if and(sick(X0), and(mother(X1, X0), father(X, X1))) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if father(X0, Y) then if not father(X0, Z) then 1 else 0 else 0.5"));
@@ -620,7 +620,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("mother(john) = bestfriend(mother(bob));")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if and(mother(john, X0), and(mother(bob, X2), bestfriend(X2, X1)), (X0 = X1)) then 1 else 0"));
+		expected.add(lowParser.parse("if and(mother(john, X0), and(bestfriend(X1, X0), mother(bob, X1))) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.5"));
@@ -632,7 +632,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(bestfriend(X)));")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if and(and(bestfriend(X, X1), mother(X1, X0)), sick(bob, X0)) then 1 else 0"));
+		expected.add(lowParser.parse("if and(sick(bob, X0), and(mother(X1, X0), bestfriend(X, X1))) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.5"));
@@ -643,7 +643,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("sick(bob, mother(bestfriend(father(X))));")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if and(and(and(father(X, X2), bestfriend(X2, X1)), mother(X1, X0)), sick(bob, X0)) then 1 else 0"));
+		expected.add(lowParser.parse("if and(sick(bob, X0), and(mother(X1, X0), and(bestfriend(X2, X1), father(X, X2)))) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		expected.add(lowParser.parse("if bestfriend(X0, Y) then if not bestfriend(X0, Z) then 1 else 0 else 0.5"));
@@ -686,7 +686,7 @@ public class RuleConverterTest {
 		randomVariableDefinitions.clear();
 		randomVariableDefinitions.add(lowParser.parse("randomVariable(president, 0, Boolean)"));
 		expected.clear();
-		expected.add(lowParser.parse("if president(X0) and X0 = obama then if government(socialism) then 1 else 0 else (if government(freedom) then 1 else 0)"));
+		expected.add(lowParser.parse("if president(obama) then if government(socialism) then 1 else 0 else (if government(freedom) then 1 else 0)"));
 		expected.add(lowParser.parse("if president(Y) then if not president(Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : president(Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));	
@@ -894,13 +894,13 @@ public class RuleConverterTest {
 		inputRules.add(ruleParser.parse("entityOf(m1) = obama;"));
 		RuleConverter.LowLevelSyntax lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
 		
-		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ (on) [if entityOf(m1, obama) then 1 else 0] | true }}")));
+		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ (on) [if entityOf(m1, obama) then 1 else 0] }}")));
 		
 		// Additional case with explicit assignment for just 1 of the terms
 		inputRules.clear();
 		inputRules.add(ruleParser.parse("entityOf(X0) = obama;"));
 		lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
-		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ (on X0) [if entityOf(X0, obama) then 1 else 0] | X0 != obama }}")));
+		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ (on X0) [if entityOf(X0, obama) then 1 else 0] }}")));
 
 		// Additional case with explicit assignment for just 1 of the terms
 		inputRules.clear();
