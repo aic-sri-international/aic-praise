@@ -397,7 +397,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							
 							cleanupMemory();
 						} catch (ReservedWordException rwe) {
-							app.outputPanel.addProblem("ERROR: Reserved word 'query' is used in input Model or Evidence");
+							app.outputPanel.addProblem("ERROR: "+rwe.getMessage());
 							app.outputPanel.gotoProblemTab();
 						} catch (Model.ModelException me) {
 							app.outputPanel.addProblem(me.getMessage());

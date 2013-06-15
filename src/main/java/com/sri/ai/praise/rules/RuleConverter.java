@@ -157,8 +157,7 @@ public class RuleConverter {
 		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable() {
 			@Override
 			public Integer size(Expression logicalVariable, RewritingProcess process) {
-// TODO - should this be looked up based on what is being converted or is this sufficient for the calls to R_simplify that are made?				
-				return 100;
+				return 1000;
 			}
 		}, rewritingProcess);
 		ruleParser       = new RuleParserWrapper();
@@ -189,11 +188,15 @@ public class RuleConverter {
 
 		LowLevelSyntax lowLevelSyntax = translateToLowLevelSyntax(inputRules);
 		
-		// Ensure 'query' is not used as a random variable functor up front
+		// Ensure the names used for sorts are legal
+		for (Expression sortDeclaration: lowLevelSyntax.getSortDeclarations()) {
+			String token = sortDeclaration.get(0).getValue().toString();
+			checkLegalToken(token);
+		}
+		// Ensure the names used for random variables are legal
 		for (Expression randomVariableDeclaration : lowLevelSyntax.getRandomVariableDeclarations()) {
-			if (randomVariableDeclaration.get(0).equals(FUNCTOR_QUERY)) {
-				throw new ReservedWordException("'" + FUNCTOR_QUERY + "' is a reserved word in the rules language.");
-			}
+			String token = randomVariableDeclaration.get(0).getValue().toString();
+			checkLegalToken(token);
 		}
 		
 		// Run a conversion on the query before processing it with the other rules.
@@ -1449,7 +1452,13 @@ public class RuleConverter {
 		sb.append(expression.toString());
 	}
 
-
+	private void checkLegalToken(String token) throws ReservedWordException {
+		if (token.equals(FUNCTOR_QUERY) ||
+			RuleTerminalSymbols.isTerminalSymbol(token) ||
+			AntlrGrinderTerminalSymbols.isTerminalSymbol(token)) {
+				throw new ReservedWordException("'" + token + "' is a reserved word in the rules language.");
+		}
+	}
 
 	/*===================================================================================
 	 * PRIVATE CLASSES
