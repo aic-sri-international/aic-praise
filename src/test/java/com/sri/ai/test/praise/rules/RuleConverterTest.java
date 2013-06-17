@@ -553,7 +553,7 @@ public class RuleConverterTest {
 		potentialExpressions.add(this.ruleConverter.translateRule(this.ruleParser.parse("jane = mother(john) = mother(bob);")));
 		randomVariableDefinitions.clear();
 		expected.clear();
-		expected.add(lowParser.parse("if and(mother(john, jane), and(mother(john, X0), mother(bob, X0))) then 1 else 0"));
+		expected.add(lowParser.parse("if mother(john, jane) and mother(bob, jane) then 1 else 0"));
 		expected.add(lowParser.parse("if mother(X0, Y) then if not mother(X0, Z) then 1 else 0 else 0.5"));
 		expected.add(lowParser.parse("if there exists Y : mother(X0, Y) then 1 else 0"));
 		assertEquals(expected, ruleConverter.translateFunctions(potentialExpressions, randomVariableDefinitions));
@@ -901,6 +901,16 @@ public class RuleConverterTest {
 		inputRules.add(ruleParser.parse("entityOf(X0) = obama;"));
 		lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
 		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ (on X0) [if entityOf(X0, obama) then 1 else 0] }}")));
+		
+		inputRules.clear();
+		inputRules.add(ruleParser.parse("entityOf(X) = Y;"));
+		lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
+		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ ( on Y, X ) ([ if entityOf(X, Y) then 1 else 0 ]) | Y != X }}")));
+		
+		inputRules.clear();
+		inputRules.add(ruleParser.parse("entityOf(X) = Y and X may be same as Y;"));
+		lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
+		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ ( on Y, X ) ([ if entityOf(X, Y) then 1 else 0 ]) }}")));
 
 		// Additional case with explicit assignment for just 1 of the terms
 		inputRules.clear();

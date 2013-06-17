@@ -1494,63 +1494,60 @@ public class RuleConverter {
 		public Expression apply(Expression expression, RewritingProcess process) {
 			Expression result = expression;
 			
-			// This ensures all "=" function applications are binary.
-			if (Equality.isEquality(result) && result.numberOfArguments() > 2) {
-				// return E1 = E2 and ... and En-1 = En
-				List<Expression> conjuncts = new ArrayList<Expression>();
-				for (int i = 0; i < result.numberOfArguments()-1; i++) {
-					conjuncts.add(Equality.make(result.get(i), result.get(i+1)));
+			// if E is a function application with functor "=" or "!=" and arguments E1,...,Ek,
+			// having an argument Ei such that isRandomVariableValue(Ei, declarations)
+			int elementI = determineIfEqualityDisequalityWithEmbeddedRandomVariableValue(result, process);
+			if (elementI != -1) {
+				// (predicate, (T1,...,Tn) ) <- functorAndArguments(Ei)
+				// functions <- add (predicate, n) to functions
+				Expression functionApplicationI = result.get(elementI);
+				updateFunctionsFound(functionApplicationI);
+				// j is some index distinct from i
+				Expression expressionJ = null;
+				List<Expression> equalityArgs = new ArrayList<Expression>();
+				for (int i = 0; i < result.numberOfArguments(); i++) {
+					if (i == elementI) {
+						continue;
+					}
+					if (expressionJ == null) {
+						expressionJ = result.get(i);
+					}
+					equalityArgs.add(result.get(i));
 				}
-				result = And.make(conjuncts);
+				// if functor "="
+				if (Equality.isEquality(result)) {
+					// return predicate(T1, ..., Tn, Ej) and =(G1,...,G{k-1})
+					// where G1,...G{k-1} is E1,...,Ek excluding Ei
+					result = And.make(addArgToPredicate(functionApplicationI, expressionJ), Equality.make(equalityArgs.toArray()));
+				}
+				else { // else functor "!="
+					// return not(predicate(T1, ..., Tn, Ej))
+					result = Not.make(addArgToPredicate(functionApplicationI, expressionJ));
+				}
 			}
-			else {
-				// if E is a function application with functor "=" or "!=" and arguments E1,...,Ek,
-				// having an argument Ei such that isRandomVariableValue(Ei, declarations)
-				int elementI = determineIfEqualityDisequalityWithEmbeddedRandomVariableValue(result, process);
-				if (elementI != -1) {
-					// (predicate, (T1,...,Tn) ) <- functorAndArguments(Ei)
-					// functions <- add (predicate, n) to functions
-					Expression functionApplicationI = result.get(elementI);
-					updateFunctionsFound(functionApplicationI);
-					//j is some index distinct from i
-					Expression expressionJ = result.get(0);
-					if (elementI == 0) {
-						expressionJ = result.get(1);
-					}
-					// if functor "="
-					if (Equality.isEquality(result)) {
-						// return predicate(T1, ..., Tn, Ej)
-						result = addArgToPredicate(functionApplicationI, expressionJ);
-					}
-					else { // else functor "!="
-						// return not(predicate(T1, ..., Tn, Ej))
-						result = Not.make(addArgToPredicate(functionApplicationI, expressionJ));
-					}
-				}
-	
-				// if isRandomFunctionApplication(E) of the form predicate1(E1,..., i,..., En)
-				// where isRandomVariableValue(Ei, declarations) is true
-				elementI = determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(result, process);
-				if (elementI != -1) {
-					// (predicate2, (T1,...,Tk) ) <- functorAndArguments(Ei)
-					// functions <- add (predicate2, n) to functions
-					Expression functionApplicationI = result.get(elementI);
-					updateFunctionsFound(functionApplicationI);
-					
-					// return predicate1(E1, ..., Ei-1, NewUniqueVariable, E{i+1},..., En) 
-					// ...... and 
-					// ...... predicate2(T1, ..., Tk, NewUniqueVariable)
-					Expression newUniqueVariable = Expressions.makeUniqueVariable("X" + (uniqueCount++), currentExpression, rewritingProcess);
-					List<Expression> predicate1Args = new ArrayList<Expression>(result.getArguments());
-					predicate1Args.set(elementI, newUniqueVariable);
-					Expression predicate1 = Expressions.make(result.getFunctor(), predicate1Args.toArray());
-					
-					List<Expression> predicate2Args = new ArrayList<Expression>(functionApplicationI.getArguments());
-					predicate2Args.add(newUniqueVariable);
-					Expression predicate2 = Expressions.make(functionApplicationI.getFunctor(), predicate2Args.toArray());
-					
-					result = And.make(predicate1, predicate2);
-				}
+
+			// if isRandomFunctionApplication(E) of the form predicate1(E1,..., i,..., En)
+			// where isRandomVariableValue(Ei, declarations) is true
+			elementI = determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(result, process);
+			if (elementI != -1) {
+				// (predicate2, (T1,...,Tk) ) <- functorAndArguments(Ei)
+				// functions <- add (predicate2, n) to functions
+				Expression functionApplicationI = result.get(elementI);
+				updateFunctionsFound(functionApplicationI);
+				
+				// return predicate1(E1, ..., Ei-1, NewUniqueVariable, E{i+1},..., En) 
+				// ...... and 
+				// ...... predicate2(T1, ..., Tk, NewUniqueVariable)
+				Expression newUniqueVariable = Expressions.makeUniqueVariable("X" + (uniqueCount++), currentExpression, rewritingProcess);
+				List<Expression> predicate1Args = new ArrayList<Expression>(result.getArguments());
+				predicate1Args.set(elementI, newUniqueVariable);
+				Expression predicate1 = Expressions.make(result.getFunctor(), predicate1Args.toArray());
+				
+				List<Expression> predicate2Args = new ArrayList<Expression>(functionApplicationI.getArguments());
+				predicate2Args.add(newUniqueVariable);
+				Expression predicate2 = Expressions.make(functionApplicationI.getFunctor(), predicate2Args.toArray());
+				
+				result = And.make(predicate1, predicate2);
 			}
 
 			return result;
