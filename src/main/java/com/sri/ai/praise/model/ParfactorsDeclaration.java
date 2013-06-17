@@ -84,13 +84,35 @@ import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
  *    
  *     {{ (on X in People, Y) [if p(X) and q(X, Y) then 1 else 0] | X != a1}}
  *     
- *     The head of the intensional set expression must be a legal parfactor expression.
- *     If the domain type of the index is not specified (as in the index
- *     Y in the above e.g.) it must be possible to determine it uniquely
- *     from its usage within the parfactor expression in the head of the
- *     intensional set expression.
+ *     The head of the intensional set expression must be a legal parfactor 
+ *     expression. If the domain type of the index is not specified (as in 
+ *     the index Y in the above e.g.) it must be possible to determine it 
+ *     uniquely from its usage within the parfactor expression in the head 
+ *     of the intensional set expression.
  * 
  * </pre>
+ * 
+ * <b>Note:</b> It is legal to have free logical variables in a parfactor
+ * declaration, for example, one could use a free variable to represent an
+ * unknown entity:
+ * 
+ * <pre>
+ * {{ (on Person) 
+ *    [ if Person = Boss then if happy(Person) then 1 else 0 else if happy(Person) then 0 else 1 ] }}
+ * </pre>
+ * 
+ * and then a query:
+ * 
+ * <pre>
+ * happy(tom)
+ * </pre>
+ * 
+ * would provide an answer:
+ * 
+ * <pre>
+ * if tom = Boss then if happy(tom) then 1 else 0 else if happy(tom) then 0 else 1
+ * </pre>
+ * 
  * 
  * @author oreilly
  * 
@@ -214,8 +236,8 @@ public class ParfactorsDeclaration {
 	 * Ensures that the elements of extensionally defined sets are bracketed
 	 * expressions. Similarly for the head of an intensional set. If a rewriting
 	 * process is passed to this method (optional), it does check whether or not
-	 * the expression inside the brackets is legal (e.g. could be an random
-	 * variable and not a parfactor and that there are no free logical variables).
+	 * the expression inside the brackets is legal (e.g. could be a random
+	 * variable and not a parfactor).
 	 * 
 	 * @param expression
 	 *            an expression to be checked whether or not it is a legal
@@ -243,7 +265,6 @@ public class ParfactorsDeclaration {
 				} 
 				else if (process != null) { 
 					// If I have a process I can ensure its not a random variable
-					// and that there are no free logical variables.
 					if (BracketedExpressionSubExpressionsProvider.isRandomVariable(element, process)) {
 						isParfactor = false;
 						break;
@@ -258,7 +279,6 @@ public class ParfactorsDeclaration {
 			if (BracketedExpressionSubExpressionsProvider
 					.isBracketedExpression(head)) {
 				// If I have a process I can ensure its not a random variable
-				// and that there are no free logical variables
 				if (process != null) {
 					if (!BracketedExpressionSubExpressionsProvider
 							.isRandomVariable(head, process)) {
