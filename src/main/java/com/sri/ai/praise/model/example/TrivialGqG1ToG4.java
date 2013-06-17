@@ -54,7 +54,7 @@ import com.sri.ai.praise.model.Model;
  *       {{(on X in People) [if g2(X) and g3(X) then 0.3 else 0.7]}},
  *       {{(on X in People) [if g3(X) and g4(X) then 0.3 else 0.7]}})
  *       
- * random variable names=gq,g1,g2,g3,g4.
+ * random variable names=gq/0,g1/1,g2/1,g3/1,g4/1.
  * </pre>
  */
 @Beta
@@ -74,7 +74,7 @@ public class TrivialGqG1ToG4 extends Model {
 	 *       {{(on X in People) [if g2(X) and g3(X) then 0.3 else 0.7]}},
 	 *       {{(on X in People) [if g3(X) and g4(X) then 0.3 else 0.7]}})
 	 *       
-	 * random variable names=gq,g1,g2,g3,g4.
+	 * random variable names=gq/0,g1/1,g2/1,g3/1,g4/1.
 	 * </pre>
 	 */
 	public TrivialGqG1ToG4() {
@@ -85,6 +85,6 @@ public class TrivialGqG1ToG4 extends Model {
 						+ "{{(on X in People) [if g1(X) and g2(X) then 0.3 else 0.7]}}, "
 						+ "{{(on X in People) [if g2(X) and g3(X) then 0.3 else 0.7]}}, "
 						+ "{{(on X in People) [if g3(X) and g4(X) then 0.3 else 0.7]}})",
-				"gq", "g1", "g2", "g3", "g4");
+				"gq/0", "g1/1", "g2/1", "g3/1", "g4/1");
 	}
 }

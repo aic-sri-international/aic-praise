@@ -45,7 +45,7 @@ import com.sri.ai.praise.model.Model;
  * union(
  *       {{(on X in People) [if epidemic and sick(X) then 0.6 else 0.4] | X != bob}})
  *       
- * random variable names=epidemic,sick.
+ * random variable names=epidemic/0,sick/1.
  * </pre>
  */
 @Beta
@@ -56,13 +56,13 @@ public class TrivialEpidemicAndSickNotbob extends Model {
 	 * union(
 	 *       {{(on X in People) [if epidemic and sick(X) then 0.6 else 0.4] | X != bob}})
 	 *       
-	 * random variable names=epidemic,sick.
+	 * random variable names=epidemic/0,sick/1.
 	 * </pre>
 	 */
 	public TrivialEpidemicAndSickNotbob() {
 		super(
 				"union("
 						+ "{{(on X in People) [if epidemic and sick(X) then 0.6 else 0.4] | X != bob}})",
-				"epidemic", "sick");
+				"epidemic/0", "sick/1");
 	}
 }

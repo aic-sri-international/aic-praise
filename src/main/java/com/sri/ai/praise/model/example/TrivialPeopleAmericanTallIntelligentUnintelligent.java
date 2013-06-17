@@ -47,7 +47,7 @@ import com.sri.ai.praise.model.Model;
  *       {{(on X in People) [if tall(X) and american(X) then 7 else 1]}},
  *       {{(on X in People) [if tall(X) then 2 else 8]}})
  *       
- * random variable names=intelligent,unintelligent,tall,american.
+ * random variable names=intelligent/1,unintelligent/1,tall/1,american/1.
  * </pre>
  */
 @Beta
@@ -60,7 +60,7 @@ public class TrivialPeopleAmericanTallIntelligentUnintelligent extends Model {
 	 *       {{(on X in People) [if tall(X) and american(X) then 7 else 1]}},
 	 *       {{(on X in People) [if tall(X) then 2 else 8]}})
 	 *       
-	 * random variable names=intelligent,unintelligent,tall,american.
+	 * random variable names=intelligent/1,unintelligent/1,tall/1,american/1.
 	 * </pre>
 	 */
 	public TrivialPeopleAmericanTallIntelligentUnintelligent() {
@@ -69,6 +69,6 @@ public class TrivialPeopleAmericanTallIntelligentUnintelligent extends Model {
 						+ "{{(on X in People) [if intelligent(X) <=> not unintelligent(X) then 1 else 0] }}, "
 						+ "{{(on X in People) [if tall(X) and american(X) then 7 else 1]}}, "
 						+ "{{(on X in People) [if tall(X) then 2 else 8]}})",
-				"intelligent", "unintelligent", "tall", "american");
+				"intelligent/1", "unintelligent/1", "tall/1", "american/1");
 	}
 }

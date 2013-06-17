@@ -76,7 +76,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 			callGroundModel(new Model(
 					// Y is free in the intensional parfactor
 					"union( {{ (on X) [if p(X, Y) then 0.2 else 0.3] }}, {{ [if p(a, b) then 1 else 0] }} )",
-					"p"));
+					"p/2"));
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
 			Assert.assertEquals(1, gmex.getErrors().size());
@@ -88,7 +88,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 			callGroundModel(new Model(
 					// Y is free in the extensional parfactor
 					"union( {{ (on X, Y) [if p(X, Y) then 0.2 else 0.3] }}, {{ [if p(a, Y) then 1 else 0] }} )",
-					"p"));
+					"p/2"));
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
 			Assert.assertEquals(1, gmex.getErrors().size());
@@ -100,7 +100,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 			callGroundModel(new Model(
 					// Y is free in the intensional and extensional parfactor
 					"union( {{ (on X) [if p(X, Y) then 0.2 else 0.3] }}, {{ [if p(a, Y) then 1 else 0] }} )",
-					"p"));
+					"p/2"));
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
 			Assert.assertEquals(2, gmex.getErrors().size());
@@ -117,7 +117,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 			callGroundModel(new Model(
 					// The intensional set is on a Random Variable not a parfactor
 					"union( {{ (on X, Y) [p(X, Y)] }}, {{ [if p(a, b) then 1 else 0] }} )",
-					"p"));
+					"p/2"));
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
 			Assert.assertEquals(1, gmex.getErrors().size());
@@ -129,54 +129,12 @@ public class ModelGroundingTest extends AbstractLPITest {
 			callGroundModel(new Model(
 					// The extensional set is on a Random Variable not a parfactor
 					"union( {{ (on X, Y) [if p(X, Y) then 0.2 else 0.3] }}, {{ [p(a, b)] }} )",
-					"p"));
+					"p/2"));
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
 			Assert.assertEquals(1, gmex.getErrors().size());
 			Assert.assertEquals(ModelGroundingError.TYPE.NOT_A_PARFACTOR, gmex.getErrors().get(0).getErrorType());
 			Assert.assertEquals(parse("{{ [p(a, b)] }}"), gmex.getErrors().get(0).getInExpression());
-		}
-	}
-	
-	@Test
-	public void testModelInvalidDueToRandomVariablesHavingInconsistentArity() {
-		try {
-			callGroundModel(new Model(
-					"model("+
-					" sort(People,   Unknown, {ann, bob})," +
-					" sort(Treasure, Unknown, {gold, silver, diamonds})," +
-					" parfactors("+
-					// Two different arities used for the same named random variable (i.e. currently we don' support this)
-					"  {{ (on X in People, Y in People) [if gaveTreasureTo(X, Y) then 1 else 0] }}," +
-					"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
-					" )" +
-		            ")",
-					"gaveTreasureTo"));
-			Assert.fail("GroundModelException should have been thrown.");
-		} catch (java.lang.Error error) {
-			// The random predicate catalog currently throws this as we don't
-			// support mixed arities for the same named random variable
-		} catch (ModelGroundingException gmex) {
-			Assert.fail("java.lang.Error should have been thrown by RandomPredicateCatalog");
-		}
-		
-		try {
-			callGroundModel(new Model(
-					"model("+
-					" sort(People,   Unknown, {ann, bob})," +
-					" sort(Treasure, Unknown, {gold, silver, diamonds})," +
-					" randomVariable(gaveTreasureTo, 3, People, Treasure, People)," +
-					" parfactors("+
-					// Usage does not correspond to the explicit declaration
-					"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Y) then 1 else 0] }}" +
-					" )" +
-		            ")",
-					"gaveTreasureTo"));
-			Assert.fail("GroundModelException should have been thrown.");
-		} catch (ModelGroundingException gmex) {
-			Assert.assertEquals(1, gmex.getErrors().size());
-			Assert.assertEquals(ModelGroundingError.TYPE.RANDOM_VARIABLE_VALUE_EXPRESSION_HAS_INCONSISTENT_ARITY, gmex.getErrors().get(0).getErrorType());
-			Assert.assertEquals(parse("gaveTreasureTo(X, Y)"), gmex.getErrors().get(0).getInExpression());
 		}
 	}
 	
@@ -193,7 +151,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Y, Z) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"));
+					"gaveTreasureTo/3"));
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
 			Assert.assertEquals(1, gmex.getErrors().size());
@@ -214,7 +172,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People, Z in Treasure) [if rich(X) and gaveTreasureTo(X, Y, Z) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo", "rich"));
+					"gaveTreasureTo/3", "rich/1"));
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
 			Assert.assertEquals(1, gmex.getErrors().size());
@@ -237,7 +195,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People, Z) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"));
+					"gaveTreasureTo/3"));
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
 			Assert.assertEquals(1, gmex.getErrors().size());
@@ -259,7 +217,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"),
+					"gaveTreasureTo/3"),
 					// Here, I'm trying to specify it as a different value
 					Util.map(parse("|People|"), parse("3"), parse("|Treasure|"), parse("3")));
 			Assert.fail("GroundModelException should have been thrown.");
@@ -284,7 +242,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"),
+					"gaveTreasureTo/3"),
 					// Here, I'm trying to specify it as a different value
 					Util.map(parse("|People|"), parse("3")));
 			Assert.fail("GroundModelException should have been thrown.");
@@ -306,7 +264,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"),
+					"gaveTreasureTo/3"),
 					// Have forgotten to specify the cardinality of Treasure
 					Util.map(parse("|People|"), parse("2")));
 			Assert.fail("GroundModelException should have been thrown.");
@@ -328,7 +286,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"),
+					"gaveTreasureTo/3"),
 					// Can't instantiate the sort declaration as the
 					// cardinality is less than the number of constants
 					// assigned to it.
@@ -356,7 +314,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People) [if gaveTreasureTo(X, ann, Y) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"),
+					"gaveTreasureTo/3"),
 					Util.map(parse("|People|"),   parse("2"),
 							 parse("|Treasure|"), parse("2")));
 			Assert.fail("GroundModelException should have been thrown.");
@@ -403,7 +361,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {[if gaveTreasureTo(bob, silver, ann) then 1 else 0]} " +
 					" )" +
 		            ")",
-					"gaveTreasureTo"));
+					"gaveTreasureTo/3"));
 			
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
@@ -428,7 +386,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {[if gaveTreasureTo(bob, silver, ann) then 1 else 0]} " +
 					" )" +
 		            ")",
-					"gaveTreasureTo"));
+					"gaveTreasureTo/3"));
 		} catch (ModelGroundingException gmex) {
 			Assert.fail("GroundModelException should not have been thrown as 4 ground factors are allowed.");
 		}
@@ -445,7 +403,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"),
+					"gaveTreasureTo/3"),
 					Util.map(parse("|People|"),   parse("2"),
 							 parse("|Treasure|"), parse("2")));
 			Assert.fail("GroundModelException should have been thrown.");
@@ -467,7 +425,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"),
+					"gaveTreasureTo/3"),
 					Util.map(parse("|People|"),   parse("2"),
 							 parse("|Treasure|"), parse("2")));
 		} catch (ModelGroundingException gmex) {
@@ -492,7 +450,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 					"  {{ (on X in People, Z in Treasure, Y in People) [if gaveTreasureTo(X, Z, Y) then 1 else 0] | anUnknownPredicate(Z) }}" +
 					" )" +
 		            ")",
-					"gaveTreasureTo"));
+					"gaveTreasureTo/3"));
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
 			Assert.assertEquals(1, gmex.getErrors().size());
@@ -514,7 +472,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 				"  {{ (on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
 				" )" +
 	            ")",
-				"gaveTreasureTo"),
+				"gaveTreasureTo/3"),
 				Util.map(parse("|People|"),   parse("1"),
 						 parse("|Treasure|"), parse("2")));
 		
@@ -540,7 +498,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 				"  {{ (on X in People, Z in Treasure, Y in People) [if gaveTreasureTo(X, Z, Y) then 1 else 0] }}" +
 				" )" +
 	            ")",
-				"gaveTreasureTo"),
+				"gaveTreasureTo/3"),
 				Util.map(parse("|People|"),   parse("2"),
 						 parse("|Treasure|"), parse("2")));
 		
@@ -581,7 +539,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 				"  {{ (on Z in Treasure) [if gaveTreasureTo(treasure1, Z, treasure2') then 1 else 0] }}" +
 				" )" +
 	            ")",
-				"gaveTreasureTo"),
+				"gaveTreasureTo/3"),
 				Util.map(parse("|People|"),   parse("2"),
 						 parse("|Treasure|"), parse("2")));
 		
@@ -616,7 +574,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 				"  {{ (on X in People, Z in Treasure, Y in People) [if gaveTreasureTo(X, Z, Y) then 1 else 0] | Z != silver }}" +
 				" )" +
 	            ")",
-				"gaveTreasureTo"));
+				"gaveTreasureTo/3"));
 		
 		Assert.assertEquals(parse("model(" +
 		        " 'Name', " +

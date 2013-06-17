@@ -46,7 +46,7 @@ import com.sri.ai.praise.model.Model;
  *       {{(on X,Y) [if p(b) and q(X,Y) and r then 1 else 0] | X != a}}, 
  *       {{(on X,Y) [if p(X) or p(Y) then 1 else 0] | true }})
  *       
- * random variable names=p,q,r.
+ * random variable names=p/1,q/2,r/0.
  * </pre>
  */
 @Beta
@@ -58,7 +58,7 @@ public class TrivialPQR extends Model {
 	 *       {{(on X,Y) [if p(b) and q(X,Y) and r then 1 else 0] | X != a}}, 
 	 *       {{(on X,Y) [if p(X) or p(Y) then 1 else 0] | true }})
 	 *       
-	 * random variable names=p,q,r.
+	 * random variable names=p/1,q/2,r/0.
 	 * </pre>
 	 */
 	public TrivialPQR() {
@@ -66,6 +66,6 @@ public class TrivialPQR extends Model {
 				"union("
 						+ "{{(on X,Y) [if p(b) and q(X,Y) and r then 1 else 0] | X != a}}, "
 						+ "{{(on X,Y) [if p(X) or p(Y) then 1 else 0] | true }})",
-				"p", "q", "r");
+				"p/1", "q/2", "r/0");
 	}
 }

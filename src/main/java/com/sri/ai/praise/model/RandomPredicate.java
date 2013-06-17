@@ -40,43 +40,72 @@ package com.sri.ai.praise.model;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultSymbol;
 
 /**
+ * A definition of a random predicate, contains a name and corresponding arity.
  * 
  * @author braz
- *
+ * 
  */
 @Beta
 public class RandomPredicate {
-	
+
 	public Expression functorOrSymbol;
 	public int arity;
-	
+
+	/**
+	 * Constructor with a random predicate identified by a string of the form:
+	 * 
+	 * <pre>
+	 * name / arity
+	 * </pre>
+	 * 
+	 * e.g.
+	 * 
+	 * <pre>
+	 * p / 1
+	 * </pre>
+	 * 
+	 * @param nameAndArity
+	 */
+	public RandomPredicate(String nameAndArity) {
+		String[] parts = nameAndArity.split("/");
+		if (parts.length != 2) {
+			throw new IllegalArgumentException(
+					"Argument is not of the form name/arity :" + nameAndArity);
+		}
+		functorOrSymbol = DefaultSymbol.createSymbol(parts[0]);
+		arity = Integer.decode(parts[1]);
+	}
+
 	public RandomPredicate(Expression expression) {
 		this(expression.getFunctorOrSymbol(), expression.numberOfArguments());
 	}
-	
+
 	public RandomPredicate(Expression functorOrSymbol, int arity) {
 		this.functorOrSymbol = functorOrSymbol;
 		this.arity = arity;
 	}
-	
+
 	public boolean equals(Object another) {
 		if (another instanceof RandomPredicate) {
 			RandomPredicate anotherRandomPredicate = (RandomPredicate) another;
-			boolean result = functorOrSymbol.equals(anotherRandomPredicate.functorOrSymbol) && arity == anotherRandomPredicate.arity;
+			boolean result = functorOrSymbol
+					.equals(anotherRandomPredicate.functorOrSymbol)
+					&& arity == anotherRandomPredicate.arity;
 			return result;
 		}
 		return false;
 	}
-	
+
 	public int hashCode() {
 		if (functorOrSymbol == null) {
 			return System.identityHashCode(null) + arity;
 		}
 		return functorOrSymbol.hashCode() + arity;
 	}
-	
+
 	public String toString() {
 		return functorOrSymbol + "/" + arity;
 	}

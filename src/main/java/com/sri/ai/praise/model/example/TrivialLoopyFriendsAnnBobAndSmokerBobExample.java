@@ -47,7 +47,7 @@ import com.sri.ai.praise.model.Model;
  *       {{ ( on ) ([ if smoker(bob) then 1 else 0 ]) }},
  *       {{ ( on Y, X ) ([ if friends(X, Y) and smoker(X) then if smoker(Y) then 0.7 else 0.3 else 0.5 ]) | Y != X }})
  *       
- * random variable names=friends,smoker.
+ * random variable names=friends/2,smoker/1.
  * </pre>
  */
 @Beta
@@ -61,7 +61,7 @@ public class TrivialLoopyFriendsAnnBobAndSmokerBobExample extends Model {
 	 *       {{ ( on Y, X ) ([ if friends(X, Y) and smoker(X) then if smoker(Y) then 0.7 else 0.3 else 0.5 ]) | Y != X }}  
 	 *      )
 	 *       
-	 * random variable names=friends, smoker.
+	 * random variable names=friends/2, smoker/1.
 	 * </pre>
 	 */
 	public TrivialLoopyFriendsAnnBobAndSmokerBobExample() {
@@ -69,6 +69,6 @@ public class TrivialLoopyFriendsAnnBobAndSmokerBobExample extends Model {
 				+ "{{ ( on ) ([ if friends(ann, bob) then 1 else 0 ]) }}, " 
 				+ "{{ ( on ) ([ if smoker(bob) then 1 else 0 ]) }}, "
 				+ "{{ ( on Y, X ) ([ if friends(X, Y) and smoker(X) then if smoker(Y) then 0.7 else 0.3 else 0.5 ]) | Y != X }}  "
-				+ ")", "friends", "smoker");
+				+ ")", "friends/2", "smoker/1");
 	}
 }

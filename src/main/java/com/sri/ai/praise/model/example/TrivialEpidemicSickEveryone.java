@@ -47,7 +47,7 @@ import com.sri.ai.praise.model.Model;
  *       {{(on X in People) [if epidemic then if sick(X) then 0.7 else 0.3 else if sick(X) then 0.2 else 0.8]}},
  *       {{ (on X in People) [if sick(X) then 1 else 0] }})
  *       
- * random variable names=epidemic,sick.
+ * random variable names=epidemic/0,sick/1.
  * </pre>
  */
 @Beta
@@ -60,7 +60,7 @@ public class TrivialEpidemicSickEveryone extends Model {
 	 *       {{(on X in People) [if epidemic then if sick(X) then 0.7 else 0.3 else if sick(X) then 0.2 else 0.8]}},
 	 *       {{ (on X in People) [if sick(X) then 1 else 0] }})
 	 *       
-	 * random variable names=epidemic,sick.
+	 * random variable names=epidemic/0,sick/1.
 	 * </pre>
 	 */
 	public TrivialEpidemicSickEveryone() {
@@ -69,6 +69,6 @@ public class TrivialEpidemicSickEveryone extends Model {
 						+ "{ [if epidemic then 0.1 else 0.9] }, "
 						+ "{{(on X in People) [if epidemic then if sick(X) then 0.7 else 0.3 else if sick(X) then 0.2 else 0.8]}}, "
 						+ "{{ (on X in People) [if sick(X) then 1 else 0] }})",
-				"epidemic", "sick");
+				"epidemic/0", "sick/1");
 	}
 }

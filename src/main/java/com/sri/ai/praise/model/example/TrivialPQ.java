@@ -45,7 +45,7 @@ import com.sri.ai.praise.model.Model;
  * union(
  *       {{(on X,Y) [if p(X) and q(Y) then 1 else 0]}})
  *       
- * random variable names=p,q.
+ * random variable names=p/1,q/1.
  * </pre>
  */
 @Beta
@@ -56,11 +56,11 @@ public class TrivialPQ extends Model {
 	 * union(
 	 *       {{(on X,Y) [if p(X) and q(Y) then 1 else 0]}})
 	 *       
-	 * random variable names=p,q.
+	 * random variable names=p/1,q/1.
 	 * </pre>
 	 */
 	public TrivialPQ() {
 		super("union(" + "{{(on X,Y) [if p(X) and q(Y) then 1 else 0]}}" + ")",
-				"p", "q");
+				"p/1", "q/1");
 	}
 }

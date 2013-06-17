@@ -1094,7 +1094,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Set<Expression> rvValues             = SubExpressionSelection.getVariables(Tuple.get(head, 2), new Predicate<Expression>() {
 			@Override
 			public boolean apply(Expression arg) {
-				boolean result = LPIUtil.isRandomVariableValueExpressionCandidate(arg, process);
+				boolean result = LPIUtil.isRandomVariableValueExpression(arg, process);
 				return result;
 			}
 		});

@@ -61,6 +61,7 @@ import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 import com.sri.ai.util.Util;
 
 /**
@@ -136,7 +137,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 			List<Expression> newTotalScopingVariables = new LinkedList<Expression>(scopingVariables);
 			List<Expression> scopedVariablesInE = ScopedVariables.get(expressionE, process);
 			newTotalScopingVariables.addAll(scopedVariablesInE);
-			Util.removeElementsSatisfying(newTotalScopingVariables, new LPIUtil.IsRandomVariableValueExpressionCandidate(process));
+			Util.removeElementsSatisfying(newTotalScopingVariables, new IsRandomVariableValueExpression(process));
 			// the above is needed because we may have lambda expressions scoped by random variable values
 
 			Iterator<ExpressionAndContext> subExpressionAndContextsIterator = expressionE.getImmediateSubExpressionsAndContextsIterator(process);

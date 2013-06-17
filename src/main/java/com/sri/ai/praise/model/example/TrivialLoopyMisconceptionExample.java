@@ -55,7 +55,7 @@ import com.sri.ai.praise.model.Model;
  * {{(on C,D) [if gC(C) and gD(D) then (if m(C) then (if m(D) then 1   else 100) else (if m(D) then 100 else 1  )) else 1] | C != D}},
  * {{(on D,A) [if gD(D) and gA(A) then (if m(D) then (if m(A) then 100 else 1  ) else (if m(A) then 1   else 100)) else 1] | D != A}}
  * )
- * random variable names=m,gA,gB,gC,gD
+ * random variable names=m/1,gA/1,gB/1,gC/1,gD/1
  * 
  * Note: using short names to ease reading trace output when debugging -
  * m  = misconception
@@ -110,6 +110,6 @@ public class TrivialLoopyMisconceptionExample extends Model {
 				+ "{{(on C,D) [if gC(C) and gD(D) then (if m(C) then (if m(D) then 1   else 100) else (if m(D) then 100 else 1  )) else 1] | C != D}}, "
 				+ "{{(on D,A) [if gD(D) and gA(A) then (if m(D) then (if m(A) then 100 else 1  ) else (if m(A) then 1   else 100)) else 1] | D != A}}"
 				+ ")", 
-				"m", "gA", "gB", "gC", "gD");
+				"m/1", "gA/1", "gB/1", "gC/1", "gD/1");
 	}
 }

@@ -771,7 +771,7 @@ public class ConvexRewriterOnMessageBounds extends
 		boolean result = false;
 		if (IfThenElse.isIfThenElse(expression)) {
 			Expression condition = IfThenElse.getCondition(expression);
-			if (LPIUtil.isRandomVariableValueExpressionCandidate(condition, process)) {			
+			if (LPIUtil.isRandomVariableValueExpression(condition, process)) {			
 				result = true;
 			}
 		}

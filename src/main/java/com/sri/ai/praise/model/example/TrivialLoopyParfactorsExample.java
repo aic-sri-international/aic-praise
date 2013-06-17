@@ -46,7 +46,7 @@ import com.sri.ai.praise.model.Model;
  * union(
  *     {{(on A,B) [if g(A) and m(B) then 2 else 3] | true}}, 
  *     {{(on B,A) [if g(B) and m(A) then 4 else 5] | true}})
- * random variable names=g,m.
+ * random variable names=g/1,m/1.
  * </pre>
  * 
  * @author oreilly
@@ -69,6 +69,6 @@ public class TrivialLoopyParfactorsExample extends Model {
 				+ "{{(on A,B) [if g(A) and m(B) then 2 else 3] | true}}, "
 				+ "{{(on B,A) [if g(B) and m(A) then 4 else 5] | true}} "
 				+ ")", 
-				"g", "m");
+				"g/1", "m/1");
 	}
 }

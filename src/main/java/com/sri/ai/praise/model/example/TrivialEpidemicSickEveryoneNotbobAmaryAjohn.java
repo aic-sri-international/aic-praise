@@ -50,7 +50,7 @@ import com.sri.ai.praise.model.Model;
  *       // bob is not sick
  *       { [if sick(bob) then 0 else 1] })
  *       
- * random variable names=epidemic,sick.
+ * random variable names=epidemic/0,sick/1.
  * </pre>
  */
 @Beta
@@ -66,7 +66,7 @@ public class TrivialEpidemicSickEveryoneNotbobAmaryAjohn extends Model {
 	 *       // bob is not sick
 	 *       { [if sick(bob) then 0 else 1] })
 	 *       
-	 * random variable names=epidemic,sick.
+	 * random variable names=epidemic/0,sick/1.
 	 * </pre>
 	 */
 	public TrivialEpidemicSickEveryoneNotbobAmaryAjohn() {
@@ -77,7 +77,7 @@ public class TrivialEpidemicSickEveryoneNotbobAmaryAjohn extends Model {
 						// Everybody who is not bob or mary or john is sick.
 						+ "{{(on X in People) [if sick(X) then 1 else 0] | X != bob and X != mary and X != john}}, "
 						// bob is not sick
-						+ "{ [if sick(bob) then 0 else 1] })", "epidemic",
-				"sick");
+						+ "{ [if sick(bob) then 0 else 1] })", "epidemic/0",
+				"sick/1");
 	}
 }

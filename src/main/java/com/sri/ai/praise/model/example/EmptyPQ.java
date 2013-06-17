@@ -44,7 +44,7 @@ import com.sri.ai.praise.model.Model;
  * <pre>
  * union()
  *       
- * random variable names=p,q.
+ * random variable names=p/1,q/1.
  * </pre>
  */
 @Beta
@@ -58,6 +58,6 @@ public class EmptyPQ extends Model {
 	 * </pre>
 	 */
 	public EmptyPQ() {
-		super("union()", "p", "q");
+		super("union()", "p/1", "q/1");
 	}
 }

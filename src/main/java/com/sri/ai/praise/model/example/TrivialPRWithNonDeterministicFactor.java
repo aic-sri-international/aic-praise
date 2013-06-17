@@ -44,7 +44,7 @@ import com.sri.ai.praise.model.Model;
  * <pre>
  * union({{ (on X) [if r and (p(X) or not p(X)) then 0.2 else 0.3] | X = a or X = b }})
  *       
- * random variable names=p,r.
+ * random variable names=p/1,r/0.
  * </pre>
  */
 @Beta
@@ -54,12 +54,12 @@ public class TrivialPRWithNonDeterministicFactor extends Model {
 	 * <pre>
 	 * union({{ (on X) [if r and (p(X) or not p(X)) then 0.2 else 0.3] | X = a or X = b }})
 	 *       
-	 * random variable names=p,r.
+	 * random variable names=p/1,r/0.
 	 * </pre>
 	 */
 	public TrivialPRWithNonDeterministicFactor() {
 		super(
 				"union({{ (on X) [if r and (p(X) or not p(X)) then 0.2 else 0.3] | X = a or X = b }})",
-				"p", "r");
+				"p/1", "r/0");
 	}
 }

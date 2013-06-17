@@ -47,7 +47,7 @@ import com.sri.ai.praise.model.Model;
  *       {{(on X in People) [if smoker(X) then if sick(X) then 0.8 else 0.2 else 0.5]}},
  *       { [if sick(bob) then 1 else 0] })
  *       
- * random variable names=smoker,sick.
+ * random variable names=smoker/1,sick/1.
  * </pre>
  */
 @Beta
@@ -60,7 +60,7 @@ public class TrivialSickSmokerbob extends Model {
 	 *       {{(on X in People) [if smoker(X) then if sick(X) then 0.8 else 0.2 else 0.5]}},
 	 *       { [if sick(bob) then 1 else 0] })
 	 *       
-	 * random variable names=smoker,sick.
+	 * random variable names=smoker/1,sick/1.
 	 * </pre>
 	 */
 	public TrivialSickSmokerbob() {
@@ -68,6 +68,6 @@ public class TrivialSickSmokerbob extends Model {
 				"union("
 						+ "{{(on X in People) [if smoker(X) then 0.1 else 0.9]}}, "
 						+ "{{(on X in People) [if smoker(X) then if sick(X) then 0.8 else 0.2 else 0.5]}}, "
-						+ "{ [if sick(bob) then 1 else 0] })", "smoker", "sick");
+						+ "{ [if sick(bob) then 1 else 0] })", "smoker/1", "sick/1");
 	}
 }

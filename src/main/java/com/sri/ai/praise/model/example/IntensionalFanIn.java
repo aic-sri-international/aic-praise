@@ -48,7 +48,7 @@ import com.sri.ai.praise.model.Model;
  *       {{ [if q(a1) then 1 else 0] }},
  *       {{ [if q(a2) then 1 else 0] }})
  *       
- * random variable names=p,q.
+ * random variable names=p/0,q/1.
  * </pre>
  */
 @Beta
@@ -62,7 +62,7 @@ public class IntensionalFanIn extends Model {
 	 *       {{ [if q(a1) then 1 else 0] }},
 	 *       {{ [if q(a2) then 1 else 0] }})
 	 *       
-	 * random variable names=p,q.
+	 * random variable names=p/0,q/1.
 	 * </pre>
 	 */
 	public IntensionalFanIn() {
@@ -70,6 +70,6 @@ public class IntensionalFanIn extends Model {
 				+ "                       then if p then 1 else 0"
 				+ "                       else if p then 0 else 1] }}" + ","
 				+ "{{ [if q(a1) then 1 else 0] }}" + ","
-				+ "{{ [if q(a2) then 1 else 0] }}" + ")", "p", "q");
+				+ "{{ [if q(a2) then 1 else 0] }}" + ")", "p/0", "q/1");
 	}
 }

@@ -1280,6 +1280,10 @@ public class RuleConverter {
 		newArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
 		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
 	}
+	
+	public RewritingProcess getRewritingProcess() {
+		return rewritingProcess;
+	}
 
 	/*===================================================================================
 	 * PRIVATE METHODS

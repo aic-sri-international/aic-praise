@@ -47,7 +47,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
@@ -74,7 +73,7 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 import com.sri.ai.praise.model.RandomPredicate;
 import com.sri.ai.praise.model.RandomPredicateCatalog;
 import com.sri.ai.util.Util;
@@ -602,54 +601,6 @@ public class LPIUtil {
 		return BracketedExpressionSubExpressionsProvider.isRandomVariable(expression, process);
 	}	
 
-	/**
-	 * Indicates whether an expression is the value of a random variable <i>candidate</i>,
-	 * that is, it is a symbol, or function application with symbolic functor,
-	 * with name coinciding with known random variable names registered in the process
-	 * under a set of strings stored as a process' global object with key {@link Model#GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES},
-	 * but whether it is a true random variable value expression depends on whether the model uses it with the same arity.
-	 */
-	public static boolean isRandomVariableValueExpressionCandidate(
-			Expression expression, RewritingProcess process) {
-		Expression functorOrSymbol = expression.getFunctorOrSymbol();
-		if (Expressions.isSymbolOrFunctionApplication(functorOrSymbol)) {
-			if (Expressions.isFunctionApplicationWithArguments(functorOrSymbol)) { 
-				// the *functor* itself is a function application with arguments -- not allowed for now
-				return false;
-			}
-			Symbol predicateSymbol = (Symbol) functorOrSymbol;
-			if (predicateSymbol.getValue() instanceof String) {
-				Set<String> knownRandomVariableNames = Model.getKnownRandomVariableNames(process);
-				if (knownRandomVariableNames != null
-						&& knownRandomVariableNames.contains(predicateSymbol.toString())) {
-					return true;
-				}
-				return false;
-			} 
-			else {
-				return false; // it is a constant (boolean, numeric, etc)
-			}
-		}
-		return false;
-	}
-	
-	/** A unary predicate on {@link #isRandomVariableValueExpressionCandidate(Expression, RewritingProcess)}. */
-	public static class IsRandomVariableValueExpressionCandidate implements Predicate<Expression> {
-
-		private RewritingProcess process;
-
-		public IsRandomVariableValueExpressionCandidate(RewritingProcess process) {
-			super();
-			this.process = process;
-		}
-
-		@Override
-		public boolean apply(Expression expression) {
-			return isRandomVariableValueExpressionCandidate(expression, process);
-		}
-		
-	}
-
 	public static boolean isRandomVariableValueExpression(Expression expression, RewritingProcess process) {
 		RandomPredicateCatalog catalog = RandomPredicateCatalog.getFromBracketedModel(process);
 		if (catalog == null) {
@@ -664,7 +615,7 @@ public class LPIUtil {
 			Expression expression, RewritingProcess process) {
 		Iterator<Expression> subExpressionsIterator = new SubExpressionsDepthFirstIterator(
 				expression);
-		boolean result = Util.thereExists(subExpressionsIterator, new IsRandomVariableValueExpressionCandidate(process));
+		boolean result = Util.thereExists(subExpressionsIterator, new IsRandomVariableValueExpression(process));
 		return result;
 	}
 
@@ -750,7 +701,7 @@ public class LPIUtil {
 		
 		if (IfThenElse.isIfThenElse(expression)) {
 			Expression condition = IfThenElse.getCondition(expression);
-			if (LPIUtil.isRandomVariableValueExpressionCandidate(condition, process)) {		
+			if (LPIUtil.isRandomVariableValueExpression(condition, process)) {		
 				result = isMessageValue(IfThenElse.getThenBranch(expression), process)
 						 &&
 						 isMessageValue(IfThenElse.getElseBranch(expression), process);

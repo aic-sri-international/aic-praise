@@ -52,7 +52,7 @@ import com.sri.ai.praise.model.Model;
  *       {{(on X in People) [ if sunny and available(X) then (if canPlayWith(X) then 0.8 else 0.2) else (if canPlayWith(X) then 0 else 1) ] }},
  *       {{(on X in People) [ if available(X) then 0.3 else 0.7 ] }})
  *       
- * random variable names=sunny,available,canPlayWith.
+ * random variable names=sunny/0,available/1,canPlayWith/1.
  * </pre>
  */
 @Beta
@@ -70,7 +70,7 @@ public class TrivialSunnyAvailableCanPlayWith extends Model {
 	 *       {{(on X in People) [ if sunny and available(X) then (if canPlayWith(X) then 0.8 else 0.2) else (if canPlayWith(X) then 0 else 1) ] }},
 	 *       {{(on X in People) [ if available(X) then 0.3 else 0.7 ] }})
 	 *       
-	 * random variable names=sunny,available,canPlayWith.
+	 * random variable names=sunny/0,available/1,canPlayWith/1.
 	 * </pre>
 	 */
 	public TrivialSunnyAvailableCanPlayWith() {
@@ -79,6 +79,6 @@ public class TrivialSunnyAvailableCanPlayWith extends Model {
 						+ "{{ [if sunny then 0 else 1] }}, "
 						+ "{{(on X in People) [ if sunny and available(X) then (if canPlayWith(X) then 0.8 else 0.2) else (if canPlayWith(X) then 0 else 1) ] }}, "
 						+ "{{(on X in People) [ if available(X) then 0.3 else 0.7 ] }})",
-				"sunny", "available", "canPlayWith");
+				"sunny/0", "available/1", "canPlayWith/1");
 	}
 }

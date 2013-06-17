@@ -46,7 +46,7 @@ import com.sri.ai.praise.model.Model;
  *       {{(on X,Y) [if p(b) and q(X,Y) then 1 else 0] | X != a}}, 
  *       {{(on X,Y) [if p(X) or p(Y) then 1 else 0] | true }})
  *       
- * random variable names=p,q.
+ * random variable names=p/1,q/2.
  * </pre>
  */
 @Beta
@@ -58,13 +58,13 @@ public class TrivialLoopyPQandb extends Model {
 	 *       {{(on X,Y) [if p(b) and q(X,Y) then 1 else 0] | X != a}}, 
 	 *       {{(on X,Y) [if p(X) or p(Y) then 1 else 0] | true }})
 	 *       
-	 * random variable names=p,q.
+	 * random variable names=p/1,q/2.
 	 * </pre>
 	 */
 	public TrivialLoopyPQandb() {
 		super("union("
 				+ "{{(on X,Y) [if p(b) and q(X,Y) then 1 else 0] | X != a}}, "
-				+ "{{(on X,Y) [if p(X) or p(Y) then 1 else 0] | true }})", "p",
-				"q");
+				+ "{{(on X,Y) [if p(X) or p(Y) then 1 else 0] | true }})", "p/1",
+				"q/2");
 	}
 }

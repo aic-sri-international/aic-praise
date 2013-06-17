@@ -132,7 +132,7 @@ public class LBPTest extends AbstractLPITest {
 		
         model = new Model(
                 "union({{(on X in People) [if epidemic then if sick(X) then 0.4 else 0.6 else if sick(X) then 0.01 else 0.99]}})",
-                "epidemic", "sick"
+                "epidemic/0", "sick/1"
         );
         expression = parse("if sick(X) and sick(Y) then if Z != X then (if epidemic and sick(Z) then 1 else 0) else (if sick(Z) and sick(W) and sick(X) then 1 else 0) else 0");
 		randomVariableValue = parse("sick(X)");
@@ -180,36 +180,36 @@ public class LBPTest extends AbstractLPITest {
 				//
 				// Basic: Empty Difference
 				//
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{}", "{(on X) X | X = a or X = b}", 
 						false, 
 						"{ }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{}", "{{(on X) X | X = a or X = b}}", 
 						false, 
 						"{ }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{}}", "{(on X) X | X = a or X = b}", 
 						false, 
 						"{ }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{}}", "{{(on X) X | X = a or X = b}}", 
 						false, 
 						"{ }"),
 				//
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{a}", "{(on X) X | X = a }", 
 						false, 
 						"{ }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{a}", "{{(on X) X | X = a }}", 
 						false, 
 						"{ }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a}}", "{(on X) X | X = a }", 
 						false, 
 						"{ }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a}}", "{{(on X) X | X = a }}", 
 						false, 
 						"{ }"),
@@ -217,137 +217,137 @@ public class LBPTest extends AbstractLPITest {
 				// Basic: No Difference
 				//
 				//
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{a}", "{(on X) X | X != a }", 
 						false, 
 						"{a}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{a}", "{{(on X) X | X != a }}", 
 						false, 
 						"{a}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a}}", "{(on X) X | X != a }", 
 						false, 
 						"{{a}}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a}}", "{{(on X) X | X != a }}", 
 						false, 
 						"{{a}}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a, a}}", "{(on X) X | X != a }", 
 						false, 
 						"{{a, a}}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a, a}}", "{{(on X) X | X != a }}", 
 						false, 
 						"{{a, a}}"),
 				//
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{a, b}", "{(on X) X | X != a and X != b}", 
 						false, 
 						"{a, b}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{a, b}", "{{(on X) X | X != a and X != b}}", 
 						false, 
 						"{a, b}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a, b}}", "{(on X) X | X != a and X != b}", 
 						false, 
 						"{{a, b}}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a, b}}", "{{(on X) X | X != a and X != b}}", 
 						false, 
 						"{{a, b}}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a, b, b}}", "{(on X) X | X != a and X != b}", 
 						false,
 						"{{a, b, b}}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{a, b, b}}", "{{(on X) X | X != a and X != b}}", 
 						false,
 						"{{a, b, b}}"),
 				//
 				// Basic: Conditional
 				//
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{Y, c}", "{(on X) X | X = a or X = b}", 
 						false,
 						"if Y = a or Y = b then {c} else { Y, c }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{Y, c}", "{{(on X) X | X = a or X = b}}", 
 						false,
 						"if Y = a or Y = b then {c} else { Y, c }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{Y, c}}", "{(on X) X | X = a or X = b}", 
 						false,
 						"if Y = a or Y = b then {{c}} else {{Y,c}}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{Y, c}}", "{{(on X) X | X = a or X = b}}", 
 						false,
 						"if Y = a or Y = b then {{c}} else {{Y,c}}"),
 				//
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{Y, Y}", "{(on X) X | X = a or X = b}", 
 						false,
 						"if Y = a or Y = b then { } else { Y, Y }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{Y, Y}", "{{(on X) X | X = a or X = b}}", 
 						false,
 						"if Y = a or Y = b then { } else { Y, Y }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{Y, Y}}", "{(on X) X | X = a or X = b}", 
 						false,
 						"if Y = a or Y = b then { } else {{ Y, Y }}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{Y, Y}}", "{{(on X) X | X = a or X = b}}", 
 						false,
 						"if Y = a or Y = b then { } else {{ Y, Y }}"),
 				//
 				// Basic: Conditional - known true then known false
 				//
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{b, c}", "{(on X) X | X = b or X != c}", 
 						false,
 						"{c}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{b, c}", "{{(on X) X | X = b or X != c}}", 
 						false,
 						"{c}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{b, c}}", "{(on X) X | X = b or X != c}", 
 						false,
 						"{{c}}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{b, c}}", "{{(on X) X | X = b or X != c}}", 
 						false,
 						"{{c}}"),
 				//
 				// Basic: Standardize Apart
 				//
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{X, c}", "{(on X) X | X = a or X = b}", 
 						false,
 						"if X = a or X = b then {c} else { X, c }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{X, c}", "{{(on X) X | X = a or X = b}}", 
 						false,
 						"if X = a or X = b then {c} else { X, c }"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{X, c}}", "{(on X) X | X = a or X = b}", 
 						false,
 						"if X = a or X = b then {{c}} else {{X,c}}"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{X, c}}", "{{(on X) X | X = a or X = b}}", 
 						false,
 						"if X = a or X = b then {{c}} else {{X,c}}"),
 				//
 				// Basic: Illegal Argument Exceptions
 				//
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{{(on X) X | X = a or X = b}}", "{{(on Y) Y | Y = c or Y = d}}", 
 						true, 
 						"N/A"),
-				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), null,
+				new DifferenceOfExtensionalAndIntensionalSetTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 						"{a, b}", "{a}", 
 						true, 
 						"N/A"),
@@ -1583,7 +1583,7 @@ public class LBPTest extends AbstractLPITest {
 				new MsgToFFromVTestData(Expressions.TRUE.toString(), 
 						new Model(
 								"union( {{ (on X) [if p(X) then 0.2 else 0.3] }}, {{ [if p(a) then 1 else 0] }} )",
-								"p"
+								"p/1"
 						),
 						"message to [if p(a) then 1 else 0] from [p(a)]",
 						LPIUtil.createNewBeingComputedExpression().toString(),
@@ -1593,7 +1593,7 @@ public class LBPTest extends AbstractLPITest {
 				new MsgToFFromVTestData(Expressions.TRUE.toString(), 
 						new Model(
 								"union( {{ [if p(X) then 0.2 else 0.3] }}, {{ [if p(a) then 1 else 0] }} )",
-								"p"
+								"p/1"
 						),
 						"message to [if p(a) then 1 else 0] from [p(a)]",
 						LPIUtil.createNewBeingComputedExpression().toString(),
@@ -2097,7 +2097,7 @@ public class LBPTest extends AbstractLPITest {
 								"{{ (on X,Y) [if p(X) and q(X,Y) then 2 else 3] }}," +
 								"{{ (on Y)   [if q(a,Y) then 10 else 20] }}" +
 								")",
-								"p", "q"
+								"p/1", "q/2"
 						), 
 						"product({{ (on F in {{ (on Y) [if p(Z) and q(Z,Y) then 2 else 3] }} )  (message to [p(Z)] from F) }} )", 
 						LPIUtil.createNewBeingComputedExpression().toString(),
@@ -2122,7 +2122,7 @@ public class LBPTest extends AbstractLPITest {
 								"{{ (on X) [if p and q(X) then 2 else 3] }}," +
 								"{{ [if q(a) then 10 else 20] }}" +
 								")",
-								"p", "q"
+								"p/0", "q/1"
 						), 
 						"product({{ (on F in {{ (on X) [if p and q(X) then 2 else 3] }} )  (message to [p] from F) }} )", 
 						LPIUtil.createNewBeingComputedExpression().toString(),
@@ -2187,7 +2187,7 @@ public class LBPTest extends AbstractLPITest {
 						new Model(
 								"union(" +
 								"{{(on X) [if p(X) and q(X) then 0.2 else 0.3]}}" + ")",
-								"p", "q"
+								"p/1", "q/1"
 						),
 						"message to [p(X)] from [if p(X) and q(X) then 0.2 else 0.3]",
 						LPIUtil.createNewBeingComputedExpression().toString(),
@@ -2798,7 +2798,7 @@ public class LBPTest extends AbstractLPITest {
 										+ "{{(on X in People) [if sick(X) then 0.4 else 0.6]}}, "
 										+ "{{ [if sick(john) then 1 else 0] }}"
 										+ ")",
-								"sick"
+								"sick/1"
 						),
 						"belief([sick(X)])",
 						false,
@@ -2812,7 +2812,7 @@ public class LBPTest extends AbstractLPITest {
 										+ "{{ (on X in People) [if sick(X) then 1 else 0] | X  = person1 or  X  = person2 or  X  = person3 }},"
 										+ "{{ (on X in People) [if sick(X) then 0 else 1] | X != person1 and X != person2 and X != person3 }}"
 										+ ")",
-								"epidemic", "sick"
+								"epidemic/0", "sick/1"
 						),
 						"belief([epidemic])",
 						// Util.map(parse("|People|"), new DefaultSymbol(20)),
@@ -2829,7 +2829,7 @@ public class LBPTest extends AbstractLPITest {
 										+ "{{ (on X in People) [if sick(X) then 1 else 0] | X  = person1 or  X  = person2 or  X  = person3 }},"
 										+ "{{ (on X in People) [if sick(X) then 0 else 1] | X != person1 and X != person2 and X != person3 }}" +
 										")",
-								"epidemic", "sick"
+								"epidemic/0", "sick/1"
 						),
 						"belief([epidemic])",
 						Util.map(parse("| People |"), DefaultSymbol.createSymbol(20)),
@@ -3090,7 +3090,7 @@ public class LBPTest extends AbstractLPITest {
 								+ "{{(on X in People) [if smokes(X) then if cancer(X) then 0.9 else 0.1 else 1] }}, "
 								+ "{{ [if smokes(john) then 1 else 0] }}, "
 								+ "{{ (on X in People) [if smokes(X) then 0.7 else 0.3] }})",
-								"smokes", "cancer"
+								"smokes/1", "cancer/1"
 								/**
 								 * The point of this example is to test short-circuiting.
 								 * When we query cancer(john), messages about smokes(john) comes from two different parfactors.
@@ -3115,7 +3115,7 @@ public class LBPTest extends AbstractLPITest {
 								"{{ (on X) [if p(X) and q(X) then 2 else 3]   | X  = a }}," +
 								"{{ (on X) [if q(X) and p(X) then 10 else 20] | X != a }}" +
 								")",
-								"p", "q"
+								"p/1", "q/1"
 						), 
 						"belief([p(W)])", 
 						false, 
@@ -3178,7 +3178,7 @@ public class LBPTest extends AbstractLPITest {
 										+ "{{ (on X in People) [if sick(X) then 1 else 0] | X  = person1 or  X  = person2 or  X  = person3 }},"
 										+ "{{ (on X in People) [if sick(X) then 0 else 1] | X != person1 and X != person2 and X != person3 }}" +
 										")",
-								"epidemic", "sick"
+								"epidemic/0", "sick/1"
 						),
 						"belief([epidemic])",
 						false,

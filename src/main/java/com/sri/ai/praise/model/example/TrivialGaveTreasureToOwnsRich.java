@@ -53,7 +53,7 @@ import com.sri.ai.praise.model.Model;
  *       {{(on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X,Z,Y) then (if owns(Y,Z) then 1 else 0)  else 1] }},  
  *       {{(on X in People, Z in Treasure) [if owns(X,Z) then if rich(X) then 1 else 0 else 1] }})
  *       
- * random variable names=gaveTreasureTo,owns,rich.
+ * random variable names=gaveTreasureTo/3,owns/2,rich/1.
  * </pre>
  */
 @Beta
@@ -73,7 +73,7 @@ public class TrivialGaveTreasureToOwnsRich extends Model {
 	 *       {{(on X in People, Y in People, Z in Treasure) [if gaveTreasureTo(X,Z,Y) then (if owns(Y,Z) then 1 else 0)  else 1] }},  
 	 *       {{(on X in People, Z in Treasure) [if owns(X,Z) then if rich(X) then 1 else 0 else 1] }})
 	 *       
-	 * random variable names=gaveTreasureTo,owns,rich.
+	 * random variable names=gaveTreasureTo/3,owns/2,rich/1.
 	 * </pre>
 	 */
 	public TrivialGaveTreasureToOwnsRich() {

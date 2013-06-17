@@ -441,7 +441,7 @@ public class Model {
 
 	/**
 	 * Get the known Random Variable names associated with the rewriting
-	 * process's model.
+	 * process's model (in the form of name/arity).
 	 * 
 	 * @param process
 	 *            the process in which the rewriting is occurring.
@@ -515,7 +515,17 @@ public class Model {
 			knownVarNames.addAll(model.getKnownRandomVariableNames());
 		}
 		
+		// Ensure we have all the known random variable names
+		for (RandomVariableDeclaration rvd : model.getRandomVariableDeclarations()) {
+			knownVarNames.add(nameFromRandomVariableDeclaration(rvd));
+		}
+		// Now ensure we setup the random predicate catalog with all the known names
+		Set<RandomPredicate> randomPredicates = new LinkedHashSet<RandomPredicate>();
+		for (String randomVariableName : knownVarNames) {			
+			randomPredicates.add(new RandomPredicate(randomVariableName));
+		}
 		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES, knownVarNames);
+		process.putGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG, new RandomPredicateCatalog(randomPredicates));
 		
 		// Setup the sort names for easy access
 		List<Expression> sortNames = new ArrayList<Expression>();
@@ -529,20 +539,25 @@ public class Model {
 	 * Set up the known random variables and random predicate catalog to be
 	 * associated with the passed in rewriting process.
 	 * 
-	 * @param randomVariableDefinitions
-	 *            the random variable definitions from which to instantiate the
+	 * @param randomVariableDeclarations
+	 *            the random variable declarations from which to instantiate the
 	 *            known random variable names and catalog to be associated with
 	 *            the passed in rewriting process.
 	 * @param process
 	 *            the rewriting process to wire up known random variable names
 	 *            and a random predicate catalog to.
 	 */
-	public static void setKnownRandomVariables(Set<Expression> randomVariableDefinitions, RewritingProcess process) {
-		Set<RandomPredicate> randomPredicates = new LinkedHashSet<RandomPredicate>();
+	public static void setKnownRandomVariables(Set<Expression> randomVariableDeclarations, RewritingProcess process) {
+
 		Set<String> knownVarNames = new LinkedHashSet<String>();
-		for (Expression rvd : randomVariableDefinitions) {
-			randomPredicates.add(new RandomPredicate(rvd.get(0), rvd.get(1).intValue()));
-			knownVarNames.add(rvd.get(0).toString());
+		for (Expression rvd : randomVariableDeclarations) {
+			RandomVariableDeclaration declaration = RandomVariableDeclaration.makeRandomVariableDeclaration(rvd);
+			knownVarNames.add(nameFromRandomVariableDeclaration(declaration));
+		}
+		// Now ensure we setup the random predicate catalog with all the known names
+		Set<RandomPredicate> randomPredicates = new LinkedHashSet<RandomPredicate>();
+		for (String randomVariableName : knownVarNames) {			
+			randomPredicates.add(new RandomPredicate(randomVariableName));
 		}
 		
 		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES, knownVarNames);
@@ -800,8 +815,7 @@ public class Model {
 					randomVariableDeclarations.add(randomVariableDeclaration);
 					// As this is contains the name of a random variable ensure
 					// the set of known random variable names are updated
-					knownRandomVariableNames.add(randomVariableDeclaration
-							.getName().toString());
+					knownRandomVariableNames.add(nameFromRandomVariableDeclaration(randomVariableDeclaration));
 				}
 				// Parfactors declaration
 				else if (ParfactorsDeclaration
@@ -954,5 +968,10 @@ public class Model {
 			// Assign the default Universe of Discourse if nothing defined.
 			sortDeclarations.add(new SortDeclaration(SortDeclaration.UNIVERSE_OF_DISCOURSE));
 		}
+	}
+	
+	private static String nameFromRandomVariableDeclaration(RandomVariableDeclaration rvd) {
+		String result = rvd.getName().getValue().toString() + "/" + rvd.getArityValue();
+		return result;
 	}
 }

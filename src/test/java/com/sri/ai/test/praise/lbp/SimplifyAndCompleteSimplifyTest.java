@@ -389,13 +389,13 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 				//
 				// Collapse due to being deterministic
 				new SimplifyTestData(Expressions.TRUE.toString(), 
-						null,
+						new TrivialPQR(),
 						"if true then false else true", "false"),
 				new SimplifyTestData(Expressions.TRUE.toString(), 
-						null,
+						new TrivialPQR(),
 						"if false then false else true", "true"),
 				new SimplifyTestData(Expressions.TRUE.toString(), 
-						null,
+						new TrivialPQR(),
 						"if C = true then or(C, B) else or(C, B)", 
 						"C or B"),
 				//

@@ -45,7 +45,7 @@ import com.sri.ai.praise.model.Model;
  * union(
  *       { [if sick(bob) then 0.8 else 0.2] })
  *       
- * random variable names=sick.
+ * random variable names=sick/1.
  * </pre>
  */
 @Beta
@@ -56,10 +56,10 @@ public class TrivialSickbob extends Model {
 	 * union(
 	 *       { [if sick(bob) then 0.8 else 0.2] })
 	 *       
-	 * random variable names=sick.
+	 * random variable names=sick/1.
 	 * </pre>
 	 */
 	public TrivialSickbob() {
-		super("union(" + "{ [if sick(bob) then 0.8 else 0.2] })", "sick");
+		super("union(" + "{ [if sick(bob) then 0.8 else 0.2] })", "sick/1");
 	}
 }

@@ -48,7 +48,7 @@ import com.sri.ai.praise.model.Model;
  * {{ (on Z) [if q(Z) then 0.3 else 0.7] }}
  * )
  *       
- * random variable names=p,q.
+ * random variable names=p/1,q/1.
  * </pre>
  */
 @Beta
@@ -62,7 +62,7 @@ public class TrivialPQWithPriors extends Model {
 	 * {{ (on Z) [if q(Z) then 0.3 else 0.7] }}
 	 * )
 	 *       
-	 * random variable names=p,q.
+	 * random variable names=p/1,q/1.
 	 * </pre>
 	 */
 	public TrivialPQWithPriors() {

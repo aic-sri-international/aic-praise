@@ -44,7 +44,7 @@ import com.sri.ai.praise.model.Model;
  * <pre>
  * union()
  *       
- * random variable names=intelligent,unintelligent,tall,american.
+ * random variable names=intelligent/1,unintelligent/1,tall/1,american/1.
  * </pre>
  */
 @Beta
@@ -54,10 +54,10 @@ public class EmptyPeopleAmericanTallIntelligentUnintelligent extends Model {
 	 * <pre>
 	 * union()
 	 *       
-	 * random variable names=intelligent,unintelligent,tall,american.
+	 * random variable names=intelligent/1,unintelligent/1,tall/1,american/1.
 	 * </pre>
 	 */
 	public EmptyPeopleAmericanTallIntelligentUnintelligent() {
-		super("union()", "intelligent", "unintelligent", "tall", "american");
+		super("union()", "intelligent/1", "unintelligent/1", "tall/1", "american/1");
 	}
 }

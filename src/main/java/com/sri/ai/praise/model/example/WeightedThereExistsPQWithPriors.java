@@ -48,7 +48,7 @@ import com.sri.ai.praise.model.Model;
  * {{ (on Z) [if 'there exists Y : q(X0, Y)'(Z) then 0.3 else 0.7] }}
  * )
  *       
- * random variable names='there exists Y : p(X0, Y)', 'there exists Y : q(X0, Y)'.
+ * random variable names='there exists Y : p(X0, Y)'/1, 'there exists Y : q(X0, Y)'/1.
  * </pre>
  */
 @Beta
@@ -62,7 +62,7 @@ public class WeightedThereExistsPQWithPriors extends Model {
 	 * {{ (on Z) [if 'there exists Y : q(X0, Y)'(Z) then 0.3 else 0.7] }}
 	 * )
 	 *       
-	 * random variable names='there exists Y : p(X0, Y)', 'there exists Y : q(X0, Y)'.
+	 * random variable names='there exists Y : p(X0, Y)'/1, 'there exists Y : q(X0, Y)'/1.
 	 * </pre>
 	 */
 	public WeightedThereExistsPQWithPriors() {
@@ -70,7 +70,7 @@ public class WeightedThereExistsPQWithPriors extends Model {
 				+ "{{ (on X) [if 'there exists Y : p(X0, Y)'(X) and 'there exists Y : q(X0, Y)'(X) then 0.6 else 0.4]}}" + "," 
 				+ "{{ (on Y) [if 'there exists Y : p(X0, Y)'(Y) then 0.2 else 0.8] }}" + ","
 				+ "{{ (on Z) [if 'there exists Y : q(X0, Y)'(Z) then 0.3 else 0.7] }}" + ")", 
-				"'there exists Y : p(X0, Y)'", 
-				"'there exists Y : q(X0, Y)'");
+				"there exists Y : p(X0, Y)/1", 
+				"there exists Y : q(X0, Y)/1");
 	}
 }

@@ -45,7 +45,6 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.collect.FunctionIterator;
 import com.sri.ai.util.collect.PredicateIterator;
@@ -83,8 +82,7 @@ public class GetRandomVariables {
 	public static Iterator<Expression> getRandomVariableValueExpressionsIterator(
 			Expression expression,
 			RewritingProcess process) {
-		Predicate<Expression> isRandomVariableValueExpressionPredicate =
-			new IsRandomVariableValueExpressionCandidate(process);
+		Predicate<Expression> isRandomVariableValueExpressionPredicate = new IsRandomVariableValueExpression(process);
 		SubExpressionsDepthFirstIterator subExpressionsIterator = new SubExpressionsDepthFirstIterator(expression);
 		subExpressionsIterator.setPruneChildrenPredicate(isRandomVariableValueExpressionPredicate);
 
@@ -97,26 +95,6 @@ public class GetRandomVariables {
 		// If we didn't prune subexpressions, p would be identified as a random variable value expression as well, and we don't want that.
 		// At first, it may seem like rejecting symbols would solve this problem, but we DO want p in "p and q" to be taken as a random variable value expression.
 		return randomVariableValueExpressionIterator;
-	}
-
-	/**
-	 * Predicate indicating whether an expression
-	 * is a random variable value expression candidate,
-	 * per {@link LPIUtil#isRandomVariableValueExpressionCandidate(Expression, RewritingProcess)}.
-	 */
-	public static class IsRandomVariableValueExpressionCandidate implements Predicate<Expression> {
-
-		private final RewritingProcess process;
-
-		public IsRandomVariableValueExpressionCandidate(RewritingProcess process) {
-			super();
-			this.process = process;
-		}
-		
-		@Override
-		public boolean apply(Expression expression) {
-			return LPIUtil.isRandomVariableValueExpressionCandidate(expression, process);
-		}
 	}
 	
 	/**

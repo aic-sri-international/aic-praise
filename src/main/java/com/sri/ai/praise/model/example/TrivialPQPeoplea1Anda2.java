@@ -47,7 +47,7 @@ import com.sri.ai.praise.model.Model;
  *       {{ [if q(a1) then 1 else 0] }},
  *       {{ [if q(a2) then 1 else 0] }})
  *       
- * random variable names=p,q.
+ * random variable names=p/0,q/1.
  * </pre>
  */
 @Beta
@@ -60,7 +60,7 @@ public class TrivialPQPeoplea1Anda2 extends Model {
 	 *       {{ [if q(a1) then 1 else 0] }},
 	 *       {{ [if q(a2) then 1 else 0] }})
 	 *       
-	 * random variable names=p,q.
+	 * random variable names=p/0,q/1.
 	 * </pre>
 	 */
 	public TrivialPQPeoplea1Anda2() {
@@ -68,6 +68,6 @@ public class TrivialPQPeoplea1Anda2 extends Model {
 				"union("
 						+ "{{(on X in People) [if q(X) then if p then 1 else 0 else if p then 0 else 1] }}, "
 						+ "{{ [if q(a1) then 1 else 0] }}, "
-						+ "{{ [if q(a2) then 1 else 0] }})", "p", "q");
+						+ "{{ [if q(a2) then 1 else 0] }})", "p/0", "q/1");
 	}
 }

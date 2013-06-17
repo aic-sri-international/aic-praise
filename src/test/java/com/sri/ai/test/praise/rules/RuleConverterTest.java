@@ -40,6 +40,7 @@ package com.sri.ai.test.praise.rules;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -768,6 +769,14 @@ public class RuleConverterTest {
 	public void testDisembedConstraints () {
 		List<Expression> potentialExpressions;
 		List<Pair<Expression, Expression>> expected;
+		
+		// Required in advance of callling disembedConstraints.
+		Set<Expression> randomVariableDeclarations = new HashSet<Expression>();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(friends, 2, Universe, Universe, Boolean)"));
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(likes, 2, Universe, Universe, Boolean)"));
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(colleagues, 2, Universe, Universe, Boolean)"));
+		Model.setKnownRandomVariables(randomVariableDeclarations, ruleConverter.getRewritingProcess());
+		
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(lowParser.parse(

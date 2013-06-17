@@ -60,7 +60,12 @@ public class RandomPredicateCatalog extends HashMap<Expression, RandomPredicate>
 
 	public boolean contains(Object randomPredicate) {
 		if (randomPredicate instanceof RandomPredicate) {
-			return super.containsValue(randomPredicate);
+			boolean result = false;
+			RandomPredicate cataloguedPredicateValue = get(((RandomPredicate)randomPredicate).functorOrSymbol);
+			if (cataloguedPredicateValue != null) {
+				result = cataloguedPredicateValue.equals(randomPredicate);
+			}
+			return result;
 		}
 		throw new Error("RandomPredicatesCatalog.contains called on an object that is not a random predicate.");
 	}

@@ -654,7 +654,7 @@ public class BoundsTest extends AbstractLPITest {
 										+ "{{(on X in People) [if sick(X) then 0.4 else 0.6]}}, "
 										+ "{{ [if sick(john) then 1 else 0] }}"
 										+ ")",
-								"sick"
+								"sick/1"
 						),
 						"(belief([sick(X)]), 1)",
 						false,
@@ -667,7 +667,7 @@ public class BoundsTest extends AbstractLPITest {
 										+ "{{ (on X in People) [if sick(X) then 1 else 0] | X  = person1 or  X  = person2 or  X  = person3 }},"
 										+ "{{ (on X in People) [if sick(X) then 0 else 1] | X != person1 and X != person2 and X != person3 }}"
 										+ ")",
-								"epidemic", "sick"
+								"epidemic/0", "sick/1"
 						),
 						"(belief([epidemic]), 1)",
 						// Util.map(parse("|People|"), new DefaultSymbol(20)),
@@ -684,7 +684,7 @@ public class BoundsTest extends AbstractLPITest {
 										+ "{{ (on X in People) [if sick(X) then 1 else 0] | X  = person1 or  X  = person2 or  X  = person3 }},"
 										+ "{{ (on X in People) [if sick(X) then 0 else 1] | X != person1 and X != person2 and X != person3 }}" +
 										")",
-								"epidemic", "sick"
+								"epidemic/0", "sick/1"
 						),
 						"(belief([epidemic]), 1)",
 						Util.map(parse("| People |"), DefaultSymbol.createSymbol(20)),
@@ -914,7 +914,7 @@ public class BoundsTest extends AbstractLPITest {
 								+ "{{(on X in People) [if smokes(X) then if cancer(X) then 0.9 else 0.1 else 1] }}, "
 								+ "{{ [if smokes(john) then 1 else 0] }}, "
 								+ "{{ (on X in People) [if smokes(X) then 0.7 else 0.3] }})",
-								"smokes", "cancer"
+								"smokes/1", "cancer/1"
 								/**
 								 * The point of this example is to test short-circuiting.
 								 * When we query cancer(john), messages about smokes(john) comes from two different parfactors.
@@ -939,7 +939,7 @@ public class BoundsTest extends AbstractLPITest {
 								"{{ (on X) [if p(X) and q(X) then 2 else 3]   | X  = a }}," +
 								"{{ (on X) [if q(X) and p(X) then 10 else 20] | X != a }}" +
 								")",
-								"p", "q"
+								"p/1", "q/1"
 						), 
 						"(belief([p(W)]), 1)", 
 						false, 

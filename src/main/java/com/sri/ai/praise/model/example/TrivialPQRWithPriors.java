@@ -49,7 +49,7 @@ import com.sri.ai.praise.model.Model;
  * {{ (on T) [if r(T) then 0.2 else 0.8] }}
  * )
  *       
- * random variable names=p,q,r.
+ * random variable names=p/1,q/1,r/1.
  * </pre>
  */
 @Beta
@@ -64,7 +64,7 @@ public class TrivialPQRWithPriors extends Model {
 	 * {{ (on T) [if r(T) then 0.2 else 0.8] }}
 	 * )
 	 *       
-	 * random variable names=p,q,r.
+	 * random variable names=p/1,q/1,r/1.
 	 * </pre>
 	 */
 	public TrivialPQRWithPriors() {
@@ -72,7 +72,7 @@ public class TrivialPQRWithPriors extends Model {
 				+ "{{ (on X) [if p(X) and q(X) and r(X) then 0.6 else 0.4]}}"
 				+ "," + "{{ (on Y) [if p(Y) then 0.2 else 0.8] }}" + ","
 				+ "{{ (on Z) [if q(Z) then   0 else   1] }}" + ","
-				+ "{{ (on T) [if r(T) then 0.2 else 0.8] }}" + ")", "p", "q",
-				"r");
+				+ "{{ (on T) [if r(T) then 0.2 else 0.8] }}" + ")", 
+				"p/1", "q/1", "r/1");
 	}
 }

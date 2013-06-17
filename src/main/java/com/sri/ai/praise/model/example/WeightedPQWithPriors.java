@@ -48,7 +48,7 @@ import com.sri.ai.praise.model.Model;
  * {{ (on Z) [if q(Z) then 0.3 else 0.7] }}
  * )
  *       
- * random variable names=p,q.
+ * random variable names=p/1,q/1.
  * </pre>
  */
 @Beta
@@ -62,13 +62,14 @@ public class WeightedPQWithPriors extends Model {
 	 * {{ (on Z) [if q(Z) then 0.3 else 0.7] }}
 	 * )
 	 *       
-	 * random variable names=p,q.
+	 * random variable names=p/1,q/1.
 	 * </pre>
 	 */
 	public WeightedPQWithPriors() {
 		super("union(" 
 				+ "{{ (on X) [if p(X) and q(X) then 0.6 else 0.4]}}" + "," 
 				+ "{{ (on Y) [if p(Y) then 0.2 else 0.8] }}" + ","
-				+ "{{ (on Z) [if q(Z) then 0.3 else 0.7] }}" + ")", "p", "q");
+				+ "{{ (on Z) [if q(Z) then 0.3 else 0.7] }}" + ")", 
+				"p/1", "q/1");
 	}
 }

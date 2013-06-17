@@ -50,7 +50,7 @@ import com.sri.ai.praise.model.Model;
  * partition(
  *          {{(on X0 in People, X1 in People, X2 in People) [if q and g1(X0,X1,X2) then 0.3 else 0.7] | X0 != a and X0 != X1 and X0 != X2 and X1 != X2}})
  *       
- * random variable names=q,g1.
+ * random variable names=q/0,g1/3.
  * </pre>
  */
 @Beta
@@ -73,6 +73,6 @@ public class TrivialQG1 extends Model {
 		super(
 				"partition("
 						+ "{{(on X0 in People, X1 in People, X2 in People) [if q and g1(X0,X1,X2) then 0.3 else 0.7] | X0 != a and X0 != X1 and X0 != X2 and X1 != X2}}"
-						+ ")", "q", "g1");
+						+ ")", "q/0", "g1/3");
 	}
 }
