@@ -67,6 +67,7 @@ import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.lbp.LBPQueryEngine.QueryStep;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.example.EmptyPQ;
 import com.sri.ai.praise.model.example.IntensionalFanIn;
 import com.sri.ai.praise.model.example.TrivialEpidemicAndSickNotbob;
 import com.sri.ai.praise.model.example.TrivialEpidemicSickEveryone;
@@ -2189,6 +2190,13 @@ public class LBPTest extends AbstractLPITest {
 								"{{(on X) [if p(X) and q(X) then 0.2 else 0.3]}}" + ")",
 								"p/1", "q/1"
 						),
+						"message to [p(X)] from [if p(X) and q(X) then 0.2 else 0.3]",
+						LPIUtil.createNewBeingComputedExpression().toString(),
+						false, 
+						"if p(X) then 0.5 else 0.6"),
+				// Test for issue #4: http://code.google.com/p/aic-praise/issues/detail?id=4
+				new MsgToVFromFTestData(Expressions.TRUE.toString(), 
+						new EmptyPQ(),
 						"message to [p(X)] from [if p(X) and q(X) then 0.2 else 0.3]",
 						LPIUtil.createNewBeingComputedExpression().toString(),
 						false, 
