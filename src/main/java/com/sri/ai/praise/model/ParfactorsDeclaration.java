@@ -276,12 +276,10 @@ public class ParfactorsDeclaration {
 		else if (Sets.isIntensionalSet(expression)) {
 			// Ensure the head expression is a bracketed expression at minimum
 			Expression head = IntensionalSet.getHead(expression);
-			if (BracketedExpressionSubExpressionsProvider
-					.isBracketedExpression(head)) {
+			if (BracketedExpressionSubExpressionsProvider.isBracketedExpression(head)) {
 				// If I have a process I can ensure its not a random variable
 				if (process != null) {
-					if (!BracketedExpressionSubExpressionsProvider
-							.isRandomVariable(head, process)) {
+					if (!BracketedExpressionSubExpressionsProvider.isRandomVariable(head, process)) {
 						isParfactor = true;
 					}
 				} 
