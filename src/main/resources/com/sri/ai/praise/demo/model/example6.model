@@ -1,0 +1,9 @@
+sort People: 10, ann, bob, dave, rodrigo, ciaran;
+
+random sick: People -> Boolean;
+random mother: People -> People;
+
+if sick(Person) then sick(mother(Person));
+
+sick(bob);
+mother(bob) = ann; 
