@@ -229,8 +229,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		Justification.beginEqualityStep("complete simplification of unnormalized belief expansion");
 		Justification.log(beliefExpansion);
+		Trace.log("// belief_expansion = {}", beliefExpansion);
 		Trace.log("belief_expansion <- R_complete_simplify(belief_expansion)");
 		beliefExpansion = process.rewrite(R_complete_simplify, beliefExpansion);
+		Trace.log("// belief_expansion = {}", beliefExpansion);
 		if (Justification.isEnabled()) {
 			Justification.endEqualityStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
 		}
@@ -256,6 +258,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// a union of sets of pairs (N1, N2), with each pair representing an occurrence of 
 			// "previous message" on that pair occurring in belief_expansion.
 			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, Lambda.make(new LinkedList<Expression>(freeVariablesFromBeliefQuery), beliefExpansion)));		
+			Trace.log("// msg_sets = {}", Expressions.make("list", msgSets));
 		
 			Trace.log("msg_expansions <- get_msg_expansions(msg_sets)");
 			// a union of intensional sets containing tuples of the form:
@@ -264,6 +267,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// value in terms of messages from the previous loopy BP iteration.
 			PreviousMessageToMsgValueCache previousMessageToMsgValueCache = new PreviousMessageToMsgValueCache(); 
 			List<Expression> msgExpansions = getMessageExpansions(msgSets, previousMessageToMsgValueCache, freeVariablesFromBeliefQuery, process);
+			Trace.log("// msg_expansions = {}", Expressions.make("list", msgExpansions));
 			
 			Trace.log("msg_values <- copy of msg_expansions, with the values replaced by uniform messages");
 			// a union of sets of tuples (N1, N2, value) where (N1,N2) represents a message and value
@@ -298,6 +302,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			beliefValue = useValuesForPreviousMessages(beliefExpansion, msgValues, previousMessageToMsgValueCache, process);
 			notifyCollector(randomVariable, beliefValue, 1, process);
 			Justification.log("Initial belief value {}", beliefValue);
+			Trace.log("// initial belief_value = {}", beliefValue);
 			while (notFinal(beliefValue, priorBeliefValue, msgValues, priorMsgValues, iteration)) {
 				priorBeliefValue = beliefValue;
 				priorMsgValues   = msgValues;
@@ -309,6 +314,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				iteration++;			
 				notifyCollector(randomVariable, beliefValue, iteration, process);
 				Justification.endEqualityStep(beliefValue);
+				Trace.log("    // msg_values = {}", Expressions.make("list", msgValues));
+				Trace.log("    // belief_value = {}", beliefValue);
 			}
 			
 			Trace.log("return R_normalize(V, belief_value)");
@@ -316,6 +323,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Justification.log("Normalization of final unnormalized belief value {}", beliefValue);
 			Justification.beginEqualityStep("normalization");
 			Expression normalizedBeliefValue = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefValue));
+			Trace.log("// belief_value = {}", beliefValue);
 			Justification.endEqualityStep(normalizedBeliefValue);
 			
 			Justification.endEqualityStep(normalizedBeliefValue); // this endStep closes entire set of iterations

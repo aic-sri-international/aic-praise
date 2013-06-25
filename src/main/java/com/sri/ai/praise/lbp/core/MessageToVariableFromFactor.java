@@ -218,6 +218,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				Justification.beginEqualityStep("by set difference");
 				
 				Expression N = LPIUtil.callSetDiff(neighborsOfF, V, elseBranchProcess);
+				Trace.log("    // N = {}", N);
 				
 				if (Justification.isEnabled()) {
 					currentExpression = makeCurrentExpressionGivenExpressionForN(N, VPrime, E, msgToF_VPrime);
@@ -229,8 +230,8 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				Trace.log("    M <- R_sum(sum_N value(F) prod_{V' in N} m_F<-V', V, beingComputed)");
 				Expression productOfVariablesToFactor = LPIUtil.makeProductOfMessages(VPrime, N, msgToF_VPrime, Expressions.TRUE);
 				
-				Expression M = elseBranchProcess.rewrite(R_sum, 
-									LPIUtil.argForSumRewriteCall(N, E, productOfVariablesToFactor, V, beingComputed));
+				Expression M = elseBranchProcess.rewrite(R_sum, LPIUtil.argForSumRewriteCall(N, E, productOfVariablesToFactor, V, beingComputed));
+				Trace.log("    // M = {}", M);
 				
 				Justification.endEqualityStep(M);
 				

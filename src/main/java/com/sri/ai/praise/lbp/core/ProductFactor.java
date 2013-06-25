@@ -119,7 +119,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 
 			if (Sets.isExtensionalSet(domainS) && ExtensionalSet.isEmptySet(domainS)) {
 
-				Trace.log("prod_F in {} m_V<-F");
+				Trace.log("Case prod_F in {} m_V<-F:");
 				Trace.log("    return 1");
 
 				Justification.beginEqualityStep("no factors, so it is just a constant message");
@@ -129,7 +129,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 			} 
 			else if (Sets.isExtensionalSet(domainS) && ExtensionalSet.isSingleton(domainS)) {
 
-				Trace.log("prod_F in {F1} m_V<-F");
+				Trace.log("Case prod_F in {F1} m_V<-F:");
 				Trace.log("    return R_m_to_v_from_f(m_V<-F1)");
 
 				Justification.beginEqualityStep("product of a singleton set is just its own single element");
@@ -143,7 +143,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 
 			} 
 			else if (Sets.isIntensionalMultiSet(domainS)) {
-				Trace.log("prod_F in {{ F1 | C1 }}_I m_V<-F");
+				Trace.log("Case prod_F in {{ F1 | C1 }}_I m_V<-F:");
 				Trace.log("    C' <- R_formula_simplification(C1 and C)");
 				
 				Expression factor1            = IntensionalSet.getHead(domainS);
@@ -185,9 +185,9 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				// operator to a sequence of sets, or a single set.
 				// Intensional, {}, and { 1Element} sets are
 				// handled earlier in the if then else if... calls.
-				Trace.log("prod_F in {{F1,...,Fn}} m_V<-F");
+				Trace.log("Case prod_F in {{F1,...,Fn}} m_V<-F:");
 				Trace.log("    return R_prod_factor(prod_F in {F1} union {{F2,...,Fn}}  m_V<-F )");
-				Trace.log("prod_F in Set union Union m_V<-F");
+				Trace.log("Case prod_F in Set union Union m_V<-F:");
 				Trace.log("    return R_prod_m_and_prod_factor(R_prod_factor(prod_F in Set m_V<-F) * prod_F in Union m_V<-F)");
 				if ((isUnion(domainS) && domainS.numberOfArguments() > 1) ||
 					(Sets.isExtensionalMultiSet(domainS) && ExtensionalSet.cardinality(domainS) > 1)) {
