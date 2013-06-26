@@ -53,6 +53,7 @@ import com.sri.ai.praise.demo.model.Example3;
 import com.sri.ai.praise.demo.model.Example4;
 import com.sri.ai.praise.demo.model.Example5;
 import com.sri.ai.praise.demo.model.Example6;
+import com.sri.ai.praise.demo.model.Example7;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
@@ -422,6 +423,7 @@ public class PRAiSEDemoApp {
 		toolBar.exampleComboBox.addItem(new Example4());
 		toolBar.exampleComboBox.addItem(new Example5());
 		toolBar.exampleComboBox.addItem(new Example6());
+		toolBar.exampleComboBox.addItem(new Example7());
 		toolBar.exampleComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int selectedIndex = toolBar.exampleComboBox.getSelectedIndex();

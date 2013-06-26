@@ -104,9 +104,6 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression T                         = Tuple.get(expression, 3);
 		Expression beingComputed             = Tuple.get(expression, 4);
 		
-		
-		Expression result = null;
-
 		if ( ! IfThenElse.isIfThenElse(summationIndexN) && ! Sets.isExtensionalSet(summationIndexN)) {
 			throw new IllegalStateException("Sum.compute's summationIndexN must be a conditional extensional set of random variables, but was " + summationIndexN);
 		}
@@ -116,17 +113,25 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			throw new IllegalStateException("Sum.compute's productOfIncomingMessages must be a product on an intensional set or 1, but was " + productOfIncomingMessages);
 		}
 
-		/** The current expression being used for justifications. */
+		/** The current expression being used for justifications and trace. */
 		Expression currentExpression = null;
-		if (Justification.isEnabled()) {
+		if (Justification.isEnabled() || Trace.isEnabled()) {
 			currentExpression = Expressions.apply(
 		 	        FunctorConstants.SUM,
-			        IntensionalSet.makeMultiSetFromIndexExpressionsList(
-			        		ExtensionalSet.getElements(summationIndexN),
+			        IntensionalSet.makeMultiSet(
+			        		Expressions.apply("value of", summationIndexN),
 			        		Times.make(Arrays.asList(E, productOfIncomingMessages)),
 			        		Expressions.TRUE));
 			Justification.log(currentExpression);
 		}
+		if (Justification.isEnabled()) {
+			Justification.log(currentExpression);
+		}
+		if (Trace.isEnabled()) {
+			Trace.log("Computing message to {} from {}", T, currentExpression);
+		}
+
+		Expression result = null;
 
 		// Cases:
 		if (externalizeConditionalsOnE(E, process)) {
@@ -138,11 +143,15 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			result = rewriteExternalizeE(summationIndexN, E, productOfIncomingMessages, currentExpression, T, beingComputed, process);
 		} 
 		else {
+			Trace.log("// E = {}", E);
 			Trace.log("RV_in_E <- getRandomVariablesUsedIn(E)");
 			Expression rvInE = LPIUtil.getRandomVariablesUsedIn(E, process);
+			Trace.log("// RV_in_E = {}", rvInE);
 			
+			Trace.log("// N = {}", summationIndexN);
 			Trace.log("N <- N intersection RV_in_E");
 			summationIndexN = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(summationIndexN, rvInE));
+			Trace.log("// N = {}", summationIndexN);
 			
 			if (IfThenElse.isIfThenElse(summationIndexN)) {
 				
@@ -156,7 +165,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			else if (ExtensionalSet.isEmptySet(summationIndexN)) {
 				Trace.log("if N is the empty set");
 				Trace.log("    // then we know N' is also the empty set because N includes all elements in N'.");
-				Trace.log("    return E");
+				Trace.log("    return E // E = {}", E);
 
 				if (Justification.isEnabled()) {
 					Justification.beginEqualityStep("summation on no random variables evaluates to its summand; incoming messages, if any, can be discarded");
@@ -171,8 +180,11 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				Expression indexExpression     = IntensionalSet.getIndexExpressions(incomingMessagesSet).get(0);
 				Expression NPrime              = IntensionalSet.getDomain(indexExpression);
 				
+				Trace.log("// N' = {}", NPrime);
+				Trace.log("// RV_in_E = {}", rvInE);
 				Trace.log("N' <- N' intersection RV_in_E");
 				NPrime = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(NPrime, rvInE));
+				Trace.log("// N' = {}", NPrime);
 
 				if (IfThenElse.isIfThenElse(NPrime)) {
 					// Externalizes conditionals on N'
@@ -209,7 +221,8 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			Expression T,
 			Expression beingComputed,
 			RewritingProcess process) {
-		Trace.log("if E is if C' then E1 else E2");
+		Trace.log("// E = {}", E);
+		Trace.log("if E is 'if C' then E1 else E2'");
 		Trace.log("    return R_simplify(if C'");
 		Trace.log("                   then R_sum(sum_N E1 prod_{V in N'} m_F<-V, T, beingComputed)  under C'");
 		Trace.log("                   else R_sum(sum_N E2 prod_{V in N'} m_F<-V, T, beingComputed)) under not C'");
@@ -245,6 +258,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			Expression T,
 			Expression beingComputed,
 			RewritingProcess process) {
+		Trace.log("// N = {}", summationIndexN);
 		Trace.log("if N is of the form if C' then N1 else N2");
 		Trace.log("    return R_simplify(if C'");
 		Trace.log("           then R_sum(sum_{N1} E prod_{V in N'} m_F<-V, T, beingComputed)  under C'");
@@ -286,6 +300,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			Expression T,
 			Expression beingComputed,
 			RewritingProcess process) {
+		Trace.log("// N' = {}", NPrime);
 		Trace.log("if N' is of the form if C' then N1' else N2'");
 		Trace.log("    return R_simplify(if C'");
 		Trace.log("           then R_sum(sum_{N} E prod_{V in N1'} m_F<-V, T, beingComputed)  under C'");
@@ -384,6 +399,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			
 			Expression NPrimeMinusVPrime = LPIUtil.callSetDiff(NPrime, VPrime, process);
 			newProductOfIncomingMessages = LPIUtil.makeProductOfMessages(indexOfOfIncomingMessagesSet, NPrimeMinusVPrime, msgToF_V, incomingMessagesSetCondition);
+			Trace.log("    // products = {}", newProductOfIncomingMessages);
 			
 			if (Justification.isEnabled()) {
 				Expression newHead = Expressions.apply(FunctorConstants.TIMES, E, messageToFFromVPrime, newProductOfIncomingMessages);
@@ -407,13 +423,14 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				}
 			} 
 			else {
-				Trace.log("    else // relevantRange is not a singleton or heuristic turned off");
+				Trace.log("    if relevantRange is not a singleton or heuristic is turned off");
 				Trace.log("        M <- R_m_to_f_from_v(m_F<-V', beingComputed)");
 				if (Justification.isEnabled()) {
 					Justification.beginEqualityStep("computing incoming message from " + vPrimeValue);
 				}
 				
 				M = process.rewrite(R_m_to_f_from_v, LPIUtil.argForMessageToFactorFromVariableRewriteCall(messageToFFromVPrime, beingComputed));
+				Trace.log("        // M = {}", M);
 				
 				// For testing purposes.
 				int testMessageCounter = configuration.getSumRewriterTestMessageCounter() + 1;
@@ -425,9 +442,10 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 					M = new DefaultCompoundSyntaxTree(Lambda.make(vPrimeValue, M), vPrimeValue);
 				} 
 				else {
-					Trace.log("        else");
+					Trace.log("        if M is *not* previous message to F from V'");
 					Trace.log("            relevantRange = {v in relevantRange : R_basic(M[v'/v]) is not zero }");
 					relevantRange = getRelevantRange(vPrimeValue, M, process);
+					Trace.log("            // relevantRange = {}", relevantRange);
 					
 					if (relevantRange.isEmpty()) {
 						Trace.log("            if relevantRange is {}");
@@ -444,7 +462,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			}
 		} 
 		else {
-			Trace.log("else N' is the empty set");
+			Trace.log("else // N' is the empty set");
 			Trace.log("    products <- 1");
 			Trace.log("    M <- 1");
 			Justification.beginEqualityStep("no incoming messages");
@@ -475,6 +493,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			substitutions[i] = Substitute.replace(EByM, vPrimeValue, v, process);
 		}
 		Expression sumOfSubstitutions = Plus.make(Arrays.asList(substitutions));
+		Trace.log("       // new expression to go through summation will be simpification of {}", sumOfSubstitutions);
 
 		if (Justification.isEnabled()) {
 			for (int i = 0; i < substitutions.length; i++) {
@@ -496,6 +515,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			Justification.endEqualityStep(currentExpression);
 		}
 
+		Trace.log("       // This simpification is {}", sumOfSubstitutionsValue);
 		Justification.beginEqualityStep("recursively summing out the remaining random variables");
 		Expression result = process.rewrite(R_sum,
 								LPIUtil.argForSumRewriteCall(sumIndexWithoutVPrime, sumOfSubstitutionsValue, newProductOfIncomingMessages, T, beingComputed));
