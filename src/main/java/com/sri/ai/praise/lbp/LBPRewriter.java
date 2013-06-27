@@ -557,17 +557,15 @@ public interface LBPRewriter extends Rewriter {
 	 * depending on this computation.
 	 * Returns an equivalent conditional message on V
 	 * Externalizes conditionals
-	 * Let C be the contextual constraint
 	 * Cases for input:
 	 * prod_F in {} m_V<-F
 	 *        return 1
 	 * prod_F in {F1} m_V<-F
 	 *        return {@link #R_m_to_v_from_f}(m_V<-F1, beingComputed)
-	 * prod_F in {{ F1 | C1 }}_I m_V<-F 
-	 *        C'      <- R_formula_simplification(C1 and C)
-	 *        message <- {@link #R_m_to_v_from_f}(m_V<-F1, beingComputed) 
-	 *                under cont. constraint extended by C' and contextual variables extended by I
-	 *        return {@link #R_basic}(prod_{{ (on I) message | C' }})
+	 * prod_F in {{ F1 | C }}_I m_V<-F 
+	 *        message <- {@link #R_m_to_v_from_f}(m_V<-F1, C, I, beingComputed) 
+	 *                under cont. constraint extended by C and contextual variables extended by I
+	 *        return {@link #R_basic}(prod_{{ (on I) message | C }})
 	 * prod_F in {{F1,...,Fn}} m_V<-F
 	 *        return R_prod_factor(prod_F in {F1} union {{F2,...,Fn}} m_V<-F, beingComputed)
 	 * prod_F in Set union Union m_V<-F

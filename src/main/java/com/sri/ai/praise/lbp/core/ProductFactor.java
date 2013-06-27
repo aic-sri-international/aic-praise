@@ -143,36 +143,34 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 
 			} 
 			else if (Sets.isIntensionalMultiSet(domainS)) {
-				Trace.log("Case prod_F in {{ F1 | C1 }}_I m_V<-F:");
-				Trace.log("    C' <- R_formula_simplification(C1 and C)");
+				Trace.log("Case prod_F in {{ F1 | C }}_I m_V<-F:");
 				
 				Expression factor1            = IntensionalSet.getHead(domainS);
-				Expression condition1         = IntensionalSet.getCondition(domainS);
+				Expression condition          = IntensionalSet.getCondition(domainS);
 				Expression scopingExpressionI = IntensionalSet.getScopingExpression(domainS);
 				
-				Trace.log("    message <- R_m_to_v_from_f(m_V<-F1, C', I, beingComputed) // under cont. constraint extended by C' and contextual variables extended by I");
+				Trace.log("    message <- R_m_to_v_from_f(m_V<-F1, C, I, beingComputed) // under cont. constraint extended by C and contextual variables extended by I");
 				Expression       msgToV_F1        = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), factor1);
-				RewritingProcess cPrimeSubProcess = GrinderUtil.extendContextualVariablesAndConstraint(scopingExpressionI, condition1, process);
-				Expression       cPrime           = cPrimeSubProcess.getContextualConstraint();
-
+				RewritingProcess cPrimeSubProcess = GrinderUtil.extendContextualVariablesAndConstraint(scopingExpressionI, condition, process);
+				
 				if (Justification.isEnabled()) {
 					Justification.beginEqualityStep("re-indexing set of messages");
-					Expression newSetOfMessages  = IntensionalSet.makeMultiSet(scopingExpressionI, msgToV_F1, cPrime);
+					Expression newSetOfMessages  = IntensionalSet.makeMultiSet(scopingExpressionI, msgToV_F1, condition);
 					Expression currentExpression = Expressions.apply(FunctorConstants.PRODUCT, newSetOfMessages);
 					Justification.endEqualityStep(currentExpression);
 				}
 
 				Justification.beginEqualityStep("solve message to variable from factor");
 				Expression R_msgToV_F1 = cPrimeSubProcess.rewrite(R_m_to_v_from_f,
-											LPIUtil.argForMessageToVariableFromFactorRewriteCall(msgToV_F1, cPrime, scopingExpressionI, beingComputed));
+											LPIUtil.argForMessageToVariableFromFactorRewriteCall(msgToV_F1, condition, scopingExpressionI, beingComputed));
 
-				Expression messageSet        = IntensionalSet.makeMultiSet(scopingExpressionI, R_msgToV_F1, cPrime);
+				Expression messageSet        = IntensionalSet.makeMultiSet(scopingExpressionI, R_msgToV_F1, condition);
 				Expression productOfMessages = Expressions.apply(FunctorConstants.PRODUCT, messageSet);
 				if (Justification.isEnabled()) {
 					Justification.endEqualityStep(productOfMessages);
 				}
 				
-				Trace.log("    return R_basic(prod_{{ (on I) message | C' }})");
+				Trace.log("    return R_basic(prod_{{ (on I) message | C }})");
 
 				Justification.beginEqualityStep("simplify intensionally defined product");
 				result = process.rewrite(R_basic, productOfMessages);
