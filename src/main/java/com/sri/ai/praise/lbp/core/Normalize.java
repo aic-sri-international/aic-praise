@@ -83,10 +83,10 @@ public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRew
 		if (!Tuple.isTuple(expression) || Tuple.size(expression) != 2) {
 			throw new IllegalArgumentException("Invalid input argument expression:"+expression);
 		}
-		
+
 		Expression randomVariable = Tuple.get(expression, 0);
 		Expression expressionE    = Tuple.get(expression, 1);
-		
+
 		Expression result = null;
 
 		if (Justification.isEnabled()) {
@@ -98,8 +98,6 @@ public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRew
 			Expression thenBranch = IfThenElse.getThenBranch(expressionE);
 			Expression elseBranch = IfThenElse.getElseBranch(expressionE);
 
-			Trace.log("if E is 'if v then Alpha else Beta'");
-			
 			if (!LPIUtil.containsRandomVariableValueExpression(condition, process)) {
 				Trace.log("Externalizing conditional");
 
@@ -119,49 +117,52 @@ public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRew
 						R_check_branch_reachable, 
 						R_basic, process);
 			}
-			// must be a conditional on the random variable value
-			else if (thenBranch.equals(Expressions.ZERO)
-					&& elseBranch.equals(Expressions.ZERO)) {
-				Trace.log("    if Alpha = Beta = 0");
-				Trace.log("        error: 'Cannot normalize message with partition 0'");
-				throw new IllegalArgumentException(
-						"Asked to normalize message with partition 0: "
-								+ expressionE);
-			} 
-			else if (thenBranch.equals(Expressions.ZERO)) {
-				Trace.log("    if Alpha = 0");
-				Trace.log("        return if v then 0 else 1");
-				Justification.beginEqualityStep("deterministic message because of 0 in then branch");
-				result = IfThenElse.make(condition, Expressions.ZERO, Expressions.ONE);
-			} 
-			else if (elseBranch.equals(Expressions.ZERO)) {
-				Trace.log("    if Beta = 0");
-				Trace.log("        return if v then 1 else 0");
-				Justification.beginEqualityStep("deterministic message because of 0 in else branch");
-				result = IfThenElse.make(condition, Expressions.ONE, Expressions.ZERO);
-			} 
 			else {
-				Trace.log("    Z = R_basic(Alpha + Beta)");
-				Expression partitionZ = process.rewrite(R_basic, Expressions.apply(FunctorConstants.PLUS, thenBranch, elseBranch));
+				Trace.log("if E is 'if v then Alpha else Beta'");
 
-				Trace.log("    return if v then R_basic(Alpha/Z) else R_basic(Beta/Z)");
-				Justification.beginEqualityStep("apply partition function to each branch");
-				
-				BranchRewriteTask[] taskRewriters = new BranchRewriteTask[] {
-					new BranchRewriteTask(newPartition(), new Expression[] {thenBranch, partitionZ}),
-					new BranchRewriteTask(newPartition(), new Expression[] {elseBranch, partitionZ})
-				};
-				
-				List<Expression> taskResults    = GrinderUtil.branchAndMergeTasks(taskRewriters, process);
-				Expression normalizedThenBranch = taskResults.get(0);
-				Expression normalizedElseBranch = taskResults.get(1);
-				result = IfThenElse.make(condition, normalizedThenBranch, normalizedElseBranch);
+				// must be a conditional on the random variable value
+				if (thenBranch.equals(Expressions.ZERO) && elseBranch.equals(Expressions.ZERO)) {
+					Trace.log("    if Alpha = Beta = 0");
+					Trace.log("        error: 'Cannot normalize message with partition 0'");
+					throw new IllegalArgumentException(
+							"Asked to normalize message with partition 0: "
+									+ expressionE);
+				} 
+				else if (thenBranch.equals(Expressions.ZERO)) {
+					Trace.log("    if Alpha = 0");
+					Trace.log("        return if v then 0 else 1");
+					Justification.beginEqualityStep("deterministic message because of 0 in then branch");
+					result = IfThenElse.make(condition, Expressions.ZERO, Expressions.ONE);
+				} 
+				else if (elseBranch.equals(Expressions.ZERO)) {
+					Trace.log("    if Beta = 0");
+					Trace.log("        return if v then 1 else 0");
+					Justification.beginEqualityStep("deterministic message because of 0 in else branch");
+					result = IfThenElse.make(condition, Expressions.ONE, Expressions.ZERO);
+				} 
+				else {
+					Trace.log("    Z = R_basic(Alpha + Beta)");
+					Expression partitionZ = process.rewrite(R_basic, Expressions.apply(FunctorConstants.PLUS, thenBranch, elseBranch));
+
+					Trace.log("    return if v then R_basic(Alpha/Z) else R_basic(Beta/Z)");
+					Justification.beginEqualityStep("apply partition function to each branch");
+
+					BranchRewriteTask[] taskRewriters = new BranchRewriteTask[] {
+							new BranchRewriteTask(newPartition(), new Expression[] {thenBranch, partitionZ}),
+							new BranchRewriteTask(newPartition(), new Expression[] {elseBranch, partitionZ})
+					};
+
+					List<Expression> taskResults    = GrinderUtil.branchAndMergeTasks(taskRewriters, process);
+					Expression normalizedThenBranch = taskResults.get(0);
+					Expression normalizedElseBranch = taskResults.get(1);
+					result = IfThenElse.make(condition, normalizedThenBranch, normalizedElseBranch);
+				}
 			}
 		} 
 		else { 
 			// at this point, it is an unconditional arithmetic expression,
 			// that is, a constant.
-			Trace.log("otherewise // not a conditional on v");
+			Trace.log("otherwise // not a conditional on v");
 			Trace.log("    return 0.5");
 			Justification
 					.beginEqualityStep("normalization of a constant");

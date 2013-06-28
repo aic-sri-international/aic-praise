@@ -229,8 +229,11 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				
 				Trace.log("    M <- R_sum(sum_N value(F) prod_{V' in N} m_F<-V', V, beingComputed)");
 				Expression productOfVariablesToFactor = LPIUtil.makeProductOfMessages(VPrime, N, msgToF_VPrime, Expressions.TRUE);
-				
 				Expression M = elseBranchProcess.rewrite(R_sum, LPIUtil.argForSumRewriteCall(N, E, productOfVariablesToFactor, V, beingComputed));
+				Trace.log("    // M = {}", M);
+				
+				Trace.log("    M <- R_normalize_random_variable_condition(M)");
+				M = elseBranchProcess.rewrite(R_normalize_random_variable_condition, LPIUtil.argForNormalizeRandomVariableConditionRewriteCall(V, M));
 				Trace.log("    // M = {}", M);
 				
 				Justification.endEqualityStep(M);

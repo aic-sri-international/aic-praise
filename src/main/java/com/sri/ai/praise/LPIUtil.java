@@ -1047,6 +1047,24 @@ public class LPIUtil {
 	
 	/**
 	 * Convenience method for constructing a tuple argument of the form:<br> 
+	 * ([ v ], E)<br>
+	 * when calling:<br>
+	 * R_normalize_random_variable_condition([ v ], E).<br>
+	 * 
+	 * @param randomVariable
+	 *            a random variable of the form: [ v ].
+	 * @param expressionE
+	 *            a conditional arithmetic expression (E).
+	 * @return  a tuple argument of the form: ([ v ], E)
+	 */
+	public static Expression argForNormalizeRandomVariableConditionRewriteCall(Expression randomVariable, Expression expressionE) {
+		Expression result = Tuple.make(randomVariable, expressionE);
+
+		return result;
+	}
+	
+	/**
+	 * Convenience method for constructing a tuple argument of the form:<br> 
 	 * (prod_F in S m_V<-F, beingComputed)<br>
 	 * when calling:<br>
 	 * R_prod_factor(prod_F in S m_V<-F, beingComputed).<br>

@@ -206,6 +206,9 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 				Expression beingComputedUnionV_F = LPIUtil.extendBeingComputed(beingComputed, pairF_V, elseBranchProcess);
 				Expression result                = elseBranchProcess.rewrite(R_prod_factor,
 														LPIUtil.argForProductFactorRewriteCall(product, beingComputedUnionV_F));
+
+				result = elseBranchProcess.rewrite(R_normalize_random_variable_condition, LPIUtil.argForNormalizeRandomVariableConditionRewriteCall(pairF_V.get(1), result));
+				
 				Justification.endEqualityStep(result);
 			
 				return result;

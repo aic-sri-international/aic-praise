@@ -551,6 +551,34 @@ public interface LBPRewriter extends Rewriter {
 	
 	/**
 	 * <pre>
+	 * R_normalize_random_variable_condition([ v ], E)
+	 * Transforms a message into an equivalent expression of the form
+	 * if v then <basic expression> else <basic expression>.
+	 * This avoids messages represented as more complex (and sometimes redundant)
+ 	 * forms such as if nice(bob) then if not nice(bob)...
+ 	 * This is a poor man's solution to the problem. Ideally, this kind of
+ 	 * thing should be dealt with in the same manner constraint simplifications are,
+ 	 * but we don't have that yet.
+	 * [ v ] is a boolean random variable
+	 * E is a conditional arithmetic expression
+	 * E has logical variables conditions
+	 * on top of, and separated from, random variable conditions.
+	 * Random variables are always instances of the
+	 * random variable on which to normalize
+	 * (that is, other random variables are not supposed to be present).
+	 * Returns a conditional expression, the leaves of which are of the form
+	 * "if v then Alpha else Beta"
+	 * Note: not to be confused with R_normalize, which normalizes a message's values to the [0, 1] interval.
+	 * Externalizes conditionals
+	 * Et <- R_simplify(E[v/true]);
+	 * Ef <- R_simplify(E[v/false]);
+	 * return if v then Et else Ef
+	 * </pre>
+	 */
+	String R_normalize_random_variable_condition = LBP_NAMESPACE+"R_normalize_random_variable_condition";
+	
+	/**
+	 * <pre>
 	 * R_prod_factor(prod_F in S m_V<-F, beingComputed)
 	 * S is a conditional union of empty, singleton and multisets of factors,
 	 * beingComputed is a conditional union of sets of pairs of nodes, representing messages being computed and

@@ -74,6 +74,7 @@ import com.sri.ai.praise.lbp.core.NeighborsFactor;
 import com.sri.ai.praise.lbp.core.NeighborsOfRandomVariableInParfactor;
 import com.sri.ai.praise.lbp.core.NeighborsRandomVariable;
 import com.sri.ai.praise.lbp.core.Normalize;
+import com.sri.ai.praise.lbp.core.NormalizeRandomVariableCondition;
 import com.sri.ai.praise.lbp.core.ProductFactor;
 import com.sri.ai.praise.lbp.core.ProductMessageAndProductFactor;
 import com.sri.ai.praise.lbp.core.SetDifference;
@@ -262,6 +263,7 @@ public class LBPFactory {
 		lbpRewriterLookup.put(LBPRewriter.R_neigh_v, new NeighborsRandomVariable());
 		lbpRewriterLookup.put(LBPRewriter.R_neigh_v_parf, new NeighborsOfRandomVariableInParfactor());
 		lbpRewriterLookup.put(LBPRewriter.R_normalize, new Normalize());
+		lbpRewriterLookup.put(LBPRewriter.R_normalize_random_variable_condition, new NormalizeRandomVariableCondition());
 		lbpRewriterLookup.put(LBPRewriter.R_prod_factor, new ProductFactor());
 		lbpRewriterLookup.put(LBPRewriter.R_prod_m_and_prod_factor, new ProductMessageAndProductFactor());
 		lbpRewriterLookup.put(LBPRewriter.R_set_diff, new SetDifference());
