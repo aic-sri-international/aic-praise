@@ -422,14 +422,18 @@ public interface LBPRewriter extends Rewriter {
 	 *     In <- {@link #R_in}((V,F) in beingComputed)
 	 * else // synchronous
 	 *     In <- beingComputed is NOT empty
-	 *     
-	 * return
-	 * {@link #R_basic}(
-	 *       if In
-	 *       then pm_F<-V
-	 *       else // under the contextual constraint incremented by 'not In'
-	 *            {@link #R_prod_factor}(prod_F' in {@link #R_set_diff}({@link #R_neigh_v}(Neigh(V))\{F}) m_V<-F',
-	 *                             {@link #R_basic}(beingComputed union {{(F,V)}})))
+	 *
+	 * if asynchronous schedule
+	 *     In <- R_in((V,F) in beingComputed)
+	 * else // synchronous
+	 *     In <- beingComputed is NOT empty
+	 * 
+	 * under contextual constraint extended by 'not In'
+	 *     neighbors_minus_F <- {@link #R_set_diff}({@link #R_neigh_v}(Neigh(V))\{F})
+	 *     M <- {@link #R_prod_factor}(prod_F' in neighbors_minus_F m_V<-F', {@link #R_basic}(beingComputed union {{(F,V)}})))
+	 *     M <- {@link #R_normalize_random_variable_condition}(V, M)
+	 * 
+	 * return {@link #R_basic}(if In then pm_F<-V else M)
 	 * </pre>
 	 */
 	String R_m_to_f_from_v = LBP_NAMESPACE+"R_m_to_f_from_v";
@@ -467,6 +471,7 @@ public interface LBPRewriter extends Rewriter {
 	 * under contextual constraint incremented by 'not In'
 	 *     N  <- {@link #R_set_diff}({@link #neighborsFactor(Expression, RewritingProcess) R_neigh_f}(Neigh(F)) \ V)
 	 *     M  <- {@link #R_sum}(sum_N value(F) prod_{V' in N} m_F<-V', V, beingComputed)
+	 *     M  <- {@link #R_normalize_random_variable_condition}(V, M)
 	 * return {@link #R_basic}(if In then pm_V<-F else M)
 	 * // We here use a special notation sum_N, where N is a set of random variables.
 	 * // This means the sum is indexed by the random variables values.
@@ -570,8 +575,8 @@ public interface LBPRewriter extends Rewriter {
 	 * "if v then Alpha else Beta"
 	 * Note: not to be confused with R_normalize, which normalizes a message's values to the [0, 1] interval.
 	 * Externalizes conditionals
-	 * Et <- R_simplify(E[v/true]);
-	 * Ef <- R_simplify(E[v/false]);
+	 * Et <- {@link #R_simplify}(E[v/true]);
+	 * Ef <- {@link #R_simplify}(E[v/false]);
 	 * return if v then Et else Ef
 	 * </pre>
 	 */
