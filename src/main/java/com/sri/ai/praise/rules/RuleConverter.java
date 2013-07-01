@@ -1069,7 +1069,7 @@ public class RuleConverter {
 					}
 					potential = new Rational(1);
 				}
-				else if (condition.hasFunctor(FunctorConstants.NOT) && potential.compareTo(1.0) < 0) {
+				else if (potential.compareTo(1.0) < 0 && condition.hasFunctor(FunctorConstants.NOT)) {
 					// 'unlikely negations' are better understood as likely statements -- eliminating a sort of double negation
 					condition = condition.get(0);
 					potential = potential.subtract(1).negate(); // this is the same as potential = 1.0 - potential;
