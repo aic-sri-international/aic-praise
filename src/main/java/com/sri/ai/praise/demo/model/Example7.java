@@ -45,6 +45,6 @@ public class Example7 extends Example {
 		super("Friendship is a two-way street");
 		setModel(getExampleFromResource("example7.model"));
 		setEvidence(getExampleFromResource("example7.es1"));
-		setQueryToRun("friends(dave, bob)");
+		setQueryToRun("friends(dave, X)");
 	}
 }

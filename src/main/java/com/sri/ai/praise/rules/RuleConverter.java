@@ -85,6 +85,7 @@ import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.math.Rational;
 
 /**
  * This class contains methods for dealing with the rules syntax. It contains 
@@ -1056,7 +1057,26 @@ public class RuleConverter {
 			}
 			else {
 				//assume that the 'condition' is a random variable value
-				return Expressions.apply(FUNCTOR_ATOMIC_RULE, condition, input.get(1));
+				
+				Rational potential = ((Symbol)input.get(1)).rationalValue();
+				
+				if (potential.isZero()) { // things with 0 potential are negations; it's more intuitive to convert them to that.
+					if (condition.hasFunctor(FunctorConstants.NOT)) { // negate condition, avoiding double negations
+						condition = condition.get(0);
+					}
+					else {
+						condition = Not.make(condition);
+					}
+					potential = new Rational(1);
+				}
+				else if (condition.hasFunctor(FunctorConstants.NOT) && potential.compareTo(1.0) < 0) {
+					// 'unlikely negations' are better understood as likely statements -- eliminating a sort of double negation
+					condition = condition.get(0);
+					potential = potential.subtract(1).negate(); // this is the same as potential = 1.0 - potential;
+				}
+				
+				Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, condition, DefaultSymbol.createSymbol(potential));
+				return result;
 			}
 		}
 		
