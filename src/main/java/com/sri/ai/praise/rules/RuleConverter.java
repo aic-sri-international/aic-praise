@@ -1018,9 +1018,10 @@ public class RuleConverter {
 	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeQueryAnswerPotentialExpression2Rule
 	 * 
 	 * @param input     The potential expression to translate into a rule expression.
-	 * @return           A rule expression version of the potential expression.
+	 * @param query     The atom representing the query in the result potential expression.
+	 * @return          A rule expression version of the potential expression.
 	 */
-	public Expression potentialExpressionToRule(Expression input) {
+	public Expression potentialExpressionToRule(Expression input, Expression queryAtom) {
 		boolean isIfThenElse = IfThenElse.isIfThenElse(input);
 		
 		//we can only really simplify if then else expressions
@@ -1028,8 +1029,8 @@ public class RuleConverter {
 			Expression condition = IfThenElse.getCondition(input);
 			boolean isConstraint = LPIUtil.isConstraint(condition, rewritingProcess);
 			if (isConstraint) {
-				Expression translationOfE1 = potentialExpressionToRule(input.get(1));
-				Expression translationOfE2 = potentialExpressionToRule(input.get(2));
+				Expression translationOfE1 = potentialExpressionToRule(input.get(1), queryAtom);
+				Expression translationOfE2 = potentialExpressionToRule(input.get(2), queryAtom);
 				
 				//if both clauses are true, result is true
 				if (translationOfE1.equals(Expressions.TRUE) && translationOfE2.equals(Expressions.TRUE)) {
@@ -1080,9 +1081,8 @@ public class RuleConverter {
 			}
 		}
 		
-		//the statement must have a constant potential, so it adds nothing
-		//of value.  We simply return true here
-		return Expressions.TRUE;
+		// the statement must have a constant potential, so the result is a uniform message.
+		return Expressions.apply(FUNCTOR_ATOMIC_RULE, queryAtom, DefaultSymbol.createSymbol(0.5));
 		
 	}
 	
@@ -1113,7 +1113,7 @@ public class RuleConverter {
 	 */
 	public Expression queryResultToRule (Expression result, Expression queryAtom, Expression query) {
 		// Translate the result to a rule.
-		Expression ruleExpression = potentialExpressionToRule(result);
+		Expression ruleExpression = potentialExpressionToRule(result, queryAtom);
 
 		// Perform the substitution of the query(...) with its equivalent.
 		if (queryAtom != null && query != null) {

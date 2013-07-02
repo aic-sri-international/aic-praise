@@ -877,13 +877,18 @@ public class RuleConverterTest {
 		Expression input, result, expected;
 
 		input = lowParser.parse("if sick(bob) then 0.3 else 0.7");
-		result = ruleConverter.potentialExpressionToRule(input);
+		result = ruleConverter.potentialExpressionToRule(input, lowParser.parse("sick(bob)"));
 		expected = ruleParser.parse("sick(bob) 0.3;");
 		assertEquals(expected, result);
 
 		input = lowParser.parse("if X = bob then if sick(bob) then 0.7 else 0.3 else if sick(X) then 0.2 else 0.8");
-		result = ruleConverter.potentialExpressionToRule(input);
+		result = ruleConverter.potentialExpressionToRule(input, lowParser.parse("sick(bob)"));
 		expected = ruleParser.parse("if X = bob then sick(bob) 0.7 else sick(X) 0.2;");
+		assertEquals(expected, result);
+
+		input = lowParser.parse("0.8");
+		result = ruleConverter.potentialExpressionToRule(input, lowParser.parse("sick(bob)"));
+		expected = ruleParser.parse("sick(bob) 0.5;");
 		assertEquals(expected, result);
 	}
 	
