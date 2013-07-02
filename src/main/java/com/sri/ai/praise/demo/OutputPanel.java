@@ -132,15 +132,16 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		
 		if (options.chckbxTraceEnabled.isSelected()) {
 			StringBuilder consoleLine = new StringBuilder();
-			consoleLine.append(formattedMsg);
 			
 			if (profileInfo != null) {
-				consoleLine.append(" [");
+				consoleLine.append("[");
 				// Convert nanoseconds to milliseconds
 				consoleLine.append(profileInfo / 1000000);
-				consoleLine.append("ms.]");
+				consoleLine.append("ms]");
 			}
 			
+			consoleLine.append(formattedMsg);
+
 			if (options.chckbxTraceToConsole.isSelected()) {
 				StringBuilder tab = new StringBuilder();
 				for (int i = 0; i < traceLevel; i++) {
