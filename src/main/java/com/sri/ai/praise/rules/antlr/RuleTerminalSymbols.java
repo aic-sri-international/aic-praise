@@ -47,47 +47,53 @@ import com.google.common.annotations.Beta;
 public class RuleTerminalSymbols {
 	
 	// NOTE: ENSURE THIS LIST IS UPDATED WHENEVER THE SYMBOLS IN
-	// RuleLexer.g are updated.
+	// Rule.g4 are updated.
 	private static final Set<String> _terminalSymbols;
 	static {
 		Set<String> terminalSymbols = new HashSet<String>();		
-		terminalSymbols.add("P");
+		terminalSymbols.add("not");
+		terminalSymbols.add("and");
+		terminalSymbols.add("or");
+		terminalSymbols.add("for");
+		terminalSymbols.add("all");
+		terminalSymbols.add("there");
+		terminalSymbols.add("exists");
 		terminalSymbols.add("if");
 		terminalSymbols.add("then");
 		terminalSymbols.add("else");
 		terminalSymbols.add("sort");
+		terminalSymbols.add("Unknown");
 		terminalSymbols.add("random");
-		terminalSymbols.add("x");
-		terminalSymbols.add("there");
-		terminalSymbols.add("exists");
-		terminalSymbols.add("for");
-		terminalSymbols.add("all");
-		terminalSymbols.add("=>");
-		terminalSymbols.add("<=>");
-		terminalSymbols.add("->");
-		terminalSymbols.add("=");
-		terminalSymbols.add("!=");
-		terminalSymbols.add("and");
-		terminalSymbols.add("or");
-		terminalSymbols.add("not");
 		terminalSymbols.add("may");
 		terminalSymbols.add("be");
 		terminalSymbols.add("same");
 		terminalSymbols.add("as");
+		terminalSymbols.add("P");
+		terminalSymbols.add("x");
+		// Logic Operators
+		terminalSymbols.add("=>");
+		terminalSymbols.add("<=>");
+		// Arithmetic
+		terminalSymbols.add("^");
+		terminalSymbols.add("/");
+		terminalSymbols.add("*");
 		terminalSymbols.add("+");
 		terminalSymbols.add("-");
-		terminalSymbols.add("minus");
-		terminalSymbols.add("*");
-		terminalSymbols.add("/");
-		terminalSymbols.add("^");
+		// Comparison
+		terminalSymbols.add("=");
+		terminalSymbols.add("!=");
+		// Brackets
 		terminalSymbols.add("(");
 		terminalSymbols.add(")");
-		terminalSymbols.add(":-");
+		// Misc
 		terminalSymbols.add(":");
+		terminalSymbols.add(":-");
 		terminalSymbols.add(";");
-		terminalSymbols.add(".");
-		terminalSymbols.add(",");
+		terminalSymbols.add("->");
 		terminalSymbols.add("|");
+		terminalSymbols.add(",");
+		terminalSymbols.add("_");
+		terminalSymbols.add(".");
 		
 		_terminalSymbols = Collections.unmodifiableSet(terminalSymbols);
 	}

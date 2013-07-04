@@ -37,117 +37,154 @@
  */
 package com.sri.ai.praise.rules.antlr;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
-
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.rules.antlr.RuleAssociativeNodeWalker;
-import com.sri.ai.praise.rules.antlr.RuleLexer;
-import com.sri.ai.praise.rules.antlr.RuleOutputWalker;
-import com.sri.ai.praise.rules.antlr.RuleParser;
 
 /**
- * An implementation of the {@link Parser} interface that uses Antlr as the underlying implementation for rule based parsing.
+ * An implementation of the {@link Parser} interface that uses Antlr as the
+ * underlying implementation for rule based parsing.
  * 
  * @author tsai
- *
+ * 
  */
 @Beta
 public class RuleParserWrapper implements Parser {
 
+	@Override
+	public Expression parse(String string) {
+		List<Expression> result = parseAll(string);
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
+
 	public List<Expression> parseAll(String string) {
-    	try {
-//    		System.out.println("\nAttempting to parse: " + string);
-    		CharStream cs = new ANTLRStringStream(string);
-    		RuleLexer lexer = new RuleLexer(cs);
-    		CommonTokenStream tokens = new CommonTokenStream(lexer);
-    		RuleParser parser = new RuleParser(tokens);
-    		CommonTree t = (CommonTree)parser.start().getTree();
-//    		System.out.println("Original Tree: " + t.toStringTree());
+		List<Expression> result = parseAll(string, new ModelParseTreeRetriever());
 
-    		CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);//parser.start().getTree());
+		return result;
+	}
 
-//    		System.out.println("Attempting to flatten associative operations...");
-    		RuleAssociativeNodeWalker assoc = new RuleAssociativeNodeWalker(nodes);
-    		t = (CommonTree)assoc.downup(t);//.start().getTree();
-//    		System.out.println("New Tree: " + t.toStringTree());
-    		nodes = new CommonTreeNodeStream(t);
-
-    		RuleOutputWalker outputWalker = new RuleOutputWalker(nodes);
-    		List<Expression> ret = outputWalker.start();
-//    		System.out.println("Sucessful parse: " + ret);
-
-    		return ret;
-    	}
-    	catch (RecognitionException re) {
-    		System.out.println("**** Failed to parse: " + string);
-    		re.printStackTrace();
-    		return null;
-    	}
-    	catch (RuntimeException re) {
-    		System.out.println("**** Failed to parse: " + string);
-    		re.printStackTrace();
-    		return null;
-    	}
+	public Expression parseFormula(String string) {
+		List<Expression> result = parseAll(string, new AFormulaParseTreeRetriever());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
 	}
 
 	@Override
-    public Expression parse(String string) {
-		List<Expression> result = parseAll(string);
-		if (result == null || result.size() == 0)
-			return null;
-		return result.get(0);
-    }
-	
-	public Expression parseFormula (String string) {
-    	try {
-//    		System.out.println("\nAttempting to parse: " + string);
-    		CharStream cs = new ANTLRStringStream(string);
-    		RuleLexer lexer = new RuleLexer(cs);
-    		CommonTokenStream tokens = new CommonTokenStream(lexer);
-    		RuleParser parser = new RuleParser(tokens);
-    		CommonTree t = (CommonTree)parser.formula().getTree();
-//    		System.out.println("Original Tree: " + t.toStringTree());
-
-    		CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);//parser.start().getTree());
-
-//    		System.out.println("Attempting to flatten associative operations...");
-    		RuleAssociativeNodeWalker assoc = new RuleAssociativeNodeWalker(nodes);
-    		t = (CommonTree)assoc.downup(t);//.start().getTree();
-//    		System.out.println("New Tree: " + t.toStringTree());
-    		nodes = new CommonTreeNodeStream(t);
-
-    		RuleOutputWalker outputWalker = new RuleOutputWalker(nodes);
-    		List<Expression> ret = outputWalker.start();
-//    		System.out.println("Sucessful parse: " + ret);
-
-    		return ret.get(0);
-    	}
-    	catch (RecognitionException re) {
-    		System.out.println("**** Failed to parse: " + string);
-    		re.printStackTrace();
-    		return null;
-    	}
-    	catch (RuntimeException re) {
-    		System.out.println("**** Failed to parse: " + string);
-    		re.printStackTrace();
-    		return null;
-    	}
+	public void close() {
 	}
-    
-    @Override
-    public void close() {
-	// TODO Auto-generated method stub
-	
-    }
 
+	//
+	// PRIVATE
+	//
+	public List<Expression> parseAll(String string, ParseTreeRetriever parseTreeRetriever) {
+		List<Expression> result = new ArrayList<Expression>();
+		try {
+			ErrorListener lexerErrorListener = new ErrorListener("Lexer Error");
+			ErrorListener parseErrorListener = new ErrorListener("Parse Error");
+
+			ANTLRInputStream input = new ANTLRInputStream(string);
+			RuleLexer lexer = new RuleLexer(input);
+
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
+			RuleParser parser = new RuleParser(tokens);
+
+			lexer.removeErrorListeners();
+			parser.removeErrorListeners();
+			lexer.addErrorListener(lexerErrorListener);
+			parser.addErrorListener(parseErrorListener);
+
+			ParseTree tree = parseTreeRetriever.retrieve(parser);
+
+			boolean eof = parser.getInputStream().LA(1) == RuleParser.EOF;
+
+			if (!lexerErrorListener.errorsDetected
+					&& !parseErrorListener.errorsDetected) {
+				if (!eof) {
+					System.err
+							.println("Unable to parse the complete input model: "
+									+ input);
+				} else {
+					lexer.removeErrorListeners();
+					parser.removeErrorListeners();
+					ModelVisitor modelVisitor = new ModelVisitor();
+					Expression parseExpression = modelVisitor.visit(tree);
+					result = parseTreeRetriever.extractResults(parseExpression);
+				}
+			}
+		} catch (RecognitionException re) {
+			re.printStackTrace();
+		} catch (RuntimeException re) {
+			re.printStackTrace();
+		}
+
+		return result;
+	}
+	
+	private interface ParseTreeRetriever {
+		ParseTree retrieve(RuleParser ruleParser);
+		List<Expression> extractResults(Expression parseExpression);
+	}
+	
+	private class ModelParseTreeRetriever implements ParseTreeRetriever {
+		@Override
+		public ParseTree retrieve(RuleParser ruleParser) {
+			return ruleParser.model();
+		}
+		
+		@Override
+		public List<Expression> extractResults(Expression parseExpression) {
+			List<Expression> result = new ArrayList<Expression>();
+			for (Expression modelElement : parseExpression.getArguments()) {
+				result.add(modelElement);
+			}
+			return result;
+		}
+	}
+	
+	private class AFormulaParseTreeRetriever implements ParseTreeRetriever {
+		@Override
+		public ParseTree retrieve(RuleParser ruleParser) {
+			return ruleParser.aformula();
+		}
+		
+		@Override
+		public List<Expression> extractResults(Expression parseExpression) {
+			List<Expression> result = new ArrayList<Expression>();
+			result.add(parseExpression); // Should just be the formula
+			return result;
+		}
+	}
+
+	private class ErrorListener extends BaseErrorListener {
+		public boolean errorsDetected = false;
+		private String name;
+
+		public ErrorListener(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public void syntaxError(Recognizer<?, ?> recognizer,
+				Object offendingSymbol, int line, int charPositionInLine,
+				String msg, RecognitionException e) {
+			System.err.println(name + ": line " + line + ":"
+					+ charPositionInLine + " " + msg);
+			errorsDetected = true;
+		}
+	}
 }

@@ -1431,9 +1431,7 @@ public class RuleConverter {
 				toRuleString(args.get(2), sb);
 			}
 			sb.append('.');
-			if (isFirst) {
-				sb.append(" ;");
-			}
+			
 			return;
 		}
 

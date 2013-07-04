@@ -49,8 +49,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.Action;
 import javax.swing.JFileChooser;
@@ -59,13 +58,12 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.undo.CannotRedoException;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -93,9 +91,7 @@ import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
-import com.sri.ai.praise.rules.antlr.RuleAssociativeNodeWalker;
 import com.sri.ai.praise.rules.antlr.RuleLexer;
-import com.sri.ai.praise.rules.antlr.RuleOutputWalker;
 import com.sri.ai.praise.rules.antlr.RuleParser;
 import com.sri.ai.util.Configuration;
 import com.sri.ai.util.base.Pair;
@@ -699,19 +695,14 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	private boolean validateInput(boolean displayInfoOnSuccess) {
 		app.outputPanel.clearProblems();
 		boolean error = false;
-		int[] modelParseError = validateRuleParse(app.modelEditPanel.getText(), true);
-		if (modelParseError != null) {
-			app.modelEditPanel.indicateErrorAtPosition(modelParseError[0], modelParseError[1]);
-			app.outputPanel.addProblem("ERROR: Model is invalid.");
+
+		if (!validRuleParse("ERROR in MODEL: ", app.modelEditPanel, true)) {
 			error = true;
 		}
 		else {
 			app.modelEditPanel.removeExistingErrorHighlights();
 		}
-		int[] evidenceParseError = validateRuleParse(app.evidenceEditPanel.getText(), true);
-		if (evidenceParseError != null) {
-			app.evidenceEditPanel.indicateErrorAtPosition(evidenceParseError[0], evidenceParseError[1]);
-			app.outputPanel.addProblem("ERROR: Evidence is invalid.");
+		if (!validRuleParse("ERROR in Evidence: ", app.evidenceEditPanel, true)) {
 			error = true;
 		}
 		else {
@@ -732,57 +723,45 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		return !error;
 	}
 	
-	private int[] validateRuleParse(String string, boolean calculateErrorBeginIndex) {
-		int[] result = null;
+	private boolean validRuleParse(final String errorPrefix, final RuleEditor ruleEditor, boolean calculateErrorBeginIndex) {
+		final AtomicBoolean result = new AtomicBoolean(true);
 		// Ensure at least one token exists, i.e. could be all comments or whitespace.
-		if (containsRules(string)) {
-	    	try {
-	    		CharStream cs = new ANTLRStringStream(string);
-	    		RuleLexer lexer = new RuleLexer(cs);
-	    		CommonTokenStream tokens = new CommonTokenStream(lexer);
-	    		RuleParser parser = new RuleParser(tokens);
-	    		CommonTree t = (CommonTree)parser.start().getTree();
-	
-	    		CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-	    		
-	    		RuleAssociativeNodeWalker assoc = new RuleAssociativeNodeWalker(nodes);
-	    		t = (CommonTree)assoc.downup(t);//.start().getTree();
-	    		nodes = new CommonTreeNodeStream(t);
-	
-	    		RuleOutputWalker outputWalker = new RuleOutputWalker(nodes);
-	    		outputWalker.start();
-	
-	    		result = null; // All ok.
-	    	}
-	    	catch (RecognitionException re) {
-	    		result = new int[] {calculateErrorBeginIndex ? calculateErrorBeginIndex(re.index, string) : 0, calculateTokenOffset(re.index, string)};
-	    	}
-	    	catch (RuntimeException re) {
-	    		result = new int[] {0, string.length()-1}; // Don't know where the parse error is.
-	    	}
+		if (containsRules(ruleEditor.getText())) {		
+	    	
+    		ANTLRInputStream input = new ANTLRInputStream(ruleEditor.getText());
+    		RuleLexer lexer = new RuleLexer(input);
+    		CommonTokenStream tokens = new CommonTokenStream(lexer);
+    		RuleParser parser = new RuleParser(tokens);
+    		parser.removeErrorListeners();
+    		parser.addErrorListener(new BaseErrorListener() {
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer,
+						Object offendingSymbol, int line,
+						int charPositionInLine, String msg,
+						RecognitionException e) {
+					
+					// Highlight the first error found
+					if (result.get()) {
+						int[] startEnd = calculateLineOffsets(line, ruleEditor.getText());
+						int start = startEnd[0] + charPositionInLine;
+						int end   = startEnd[1];
+						ruleEditor.indicateErrorAtPosition(start, end);
+					}
+					app.outputPanel.addProblem(errorPrefix+msg);
+					
+					// Indicate a valid parse did not occur
+					result.set(false);
+				}
+    		});
+    		parser.model();
 		}
-    	return result;
+		
+		return result.get();
 	}
 	
 	private Expression lowLevelParse(String string) {
 		AntlrGrinderParserWrapper parser = new AntlrGrinderParserWrapper();
 		Expression result = parser.parse(string);
-		return result;
-	}
-	
-	private int calculateErrorBeginIndex(int errorAtTokenIdx, String string) {
-		int result = 0;
-		
-		int priorIndex = errorAtTokenIdx-1;
-		while (priorIndex >= 0) {
-			result = calculateTokenOffset(priorIndex, string);
-			int[] error = validateRuleParse(string.substring(0, result), false);
-			if (error == null) {
-				priorIndex = 0;
-			}
-			priorIndex--;
-		}
-		
 		return result;
 	}
 	
@@ -793,8 +772,9 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	 */
 	private boolean containsRules(String string) {
 		boolean result = true;
-		CharStream cs = new ANTLRStringStream(string.trim());
-		RuleLexer lexer = new RuleLexer(cs);
+		
+		ANTLRInputStream input = new ANTLRInputStream(string.trim());
+		RuleLexer lexer = new RuleLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		try {
 			Token token = tokens.LT(1);
@@ -809,51 +789,26 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		return result;
 	}
 	
-	private int calculateTokenOffset(int tokenIdx, String string) {
-		List<String> lines        = new ArrayList<String>();
-		List<Integer> lineOffsets = new ArrayList<Integer>();
+	private int[] calculateLineOffsets(int parseLine, String string) {	
 		BufferedReader reader = new BufferedReader(new StringReader(string));
 		String line;
-		int offset = 0;
-		try {				
+		int[] startEnd = new int[2];
+		try {	
+			int cnt = 0;
 			while ((line = reader.readLine()) != null) {
-				lines.add(line);
-				lineOffsets.add(offset);
-				
-				offset += line.length()+1; // i.e. include the newline.
+				cnt++;
+				if (cnt > parseLine) {
+					break;
+				}
+				startEnd[0] =  startEnd[1];
+				startEnd[1] += line.length()+1; // i.e. include the newline.
 			}
 			reader.close();
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-		CharStream cs = new ANTLRStringStream(string);
-		RuleLexer lexer = new RuleLexer(cs);
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		
-		Token token = null;
-		boolean lexerFailed = false;
-		int consumed = 1;
-		try {
-			token = tokens.LT(1);
-		} catch (RuntimeException ex) {
-			lexerFailed = true;
-		}
-		while (!lexerFailed && token.getType() != RuleLexer.EOF) {   			
-			offset = lineOffsets.get(token.getLine()-1) + token.getCharPositionInLine();
-			try {
-    			tokens.consume();
-    			consumed++;
-    			if (consumed >= tokenIdx) {
-    				break;
-    			}
-				token = tokens.LT(1);
-			} catch (RuntimeException ex) {
-				// ignore and exit.
-				lexerFailed = true;
-			}
-		}
-		
-		return offset;
+		return startEnd;
 	}
 	
 	private void manageTraceAndJustificationListening() {

@@ -270,12 +270,6 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("sick", "Y"), "0.8", "0.2"), 
 				new DefaultCompoundSyntaxTree("if . then . else .", 
 						new DefaultCompoundSyntaxTree("sick", "Y"), "0.3", "0.7")));
-		
-			// string = "if sick(X) and friends(X,Y) then 0.5 else sick(Y);";
-// TODO - this looks incorrect!!!! i.e.: if 0.5 then 1 else 0	
-// http://code.google.com/p/aic-praise/issues/detail?id=19
-			testTranslateRules(ruleParser.parse("if sick(X) and friends(X,Y) then 0.5 else sick(Y);"), 
-					lowParser.parse("if sick(X) and friends(X,Y) then if 0.5 then 1 else 0 else if sick(Y) then 1 else 0"));
 			
 			testTranslateRules(new DefaultCompoundSyntaxTree("conditional rule", 
 					new DefaultCompoundSyntaxTree("and", 
@@ -299,7 +293,7 @@ public class RuleConverterTest {
 // http://code.google.com/p/aic-praise/issues/detail?id=18
 		
 		// Prolog rule tests		
-		testTranslateRules(ruleParser.parse("sick(john).;"), 
+		testTranslateRules(ruleParser.parse("sick(john)."), 
 				lowParser.parse("if sick(john) then 1 else 0"));
 
 		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
@@ -308,7 +302,7 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("sick", "john"), "1", "0"));
 
 		// string = "sick(X).";
-		testTranslateRules(ruleParser.parse("sick(X).;"), 
+		testTranslateRules(ruleParser.parse("sick(X)."), 
 				lowParser.parse("if sick(X) then 1 else 0"));
 		
 		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
@@ -317,7 +311,7 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("sick", "X"), "1", "0"));
 
 		// string = "not sick(mary).";
-		testTranslateRules(ruleParser.parse("not sick(mary).;"), 
+		testTranslateRules(ruleParser.parse("not sick(mary)."), 
 				lowParser.parse("if not sick(mary) then 1 else 0"));
 		
 		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
@@ -328,7 +322,7 @@ public class RuleConverterTest {
 						new DefaultCompoundSyntaxTree("sick", "mary")), "1", "0"));
 
 		// string = "0.3 sick(X).";
-		testTranslateRules(ruleParser.parse("0.3 sick(X).;"), 
+		testTranslateRules(ruleParser.parse("0.3 sick(X)."), 
 				lowParser.parse("if sick(X) then 0.3 else 0.7"));
 		
 		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.3", 
@@ -337,7 +331,7 @@ public class RuleConverterTest {
 				new DefaultCompoundSyntaxTree("sick", "X"), "0.3", "0.7"));
 
 		// string = "round(X) :- circle(X).";
-		testTranslateRules(ruleParser.parse("round(X) :- circle(X).;"), 
+		testTranslateRules(ruleParser.parse("round(X) :- circle(X)."), 
 				lowParser.parse("if circle(X) then if round(X) then 1 else 0 else 0.5"));
 		
 		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "1", 
@@ -349,7 +343,7 @@ public class RuleConverterTest {
 					new DefaultCompoundSyntaxTree("round", "X"), "1", "0"), "0.5"));
 
 		// string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
-		testTranslateRules(ruleParser.parse("0.7 sick(X) :- epidemic and not vaccinated(X).;"), 
+		testTranslateRules(ruleParser.parse("0.7 sick(X) :- epidemic and not vaccinated(X)."), 
 				lowParser.parse("if epidemic and not vaccinated(X) then if sick(X) then 0.7 else 0.3 else 0.5"));
 		
 		testTranslateRules(new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
@@ -925,12 +919,6 @@ public class RuleConverterTest {
 		inputRules.add(ruleParser.parse("entityOf(X) = Y and X may be same as Y;"));
 		lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
 		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ ( on Y, X ) ([ if entityOf(X, Y) then 1 else 0 ]) }}")));
-
-		// Additional case with explicit assignment for just 1 of the terms
-		inputRules.clear();
-		inputRules.add(ruleParser.parse("if entityOf(X, Y) and X may be same as Y and Y = obama then 1;"));
-		lowLevelSyntax = ruleConverter.translateToLowLevelSyntax(inputRules);
-		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ ( on X ) ([ if entityOf(X, obama) then if 1 then true else 0 else 0.5 ]) | true }}")));
 	}
 	
 	//
@@ -1029,7 +1017,7 @@ public class RuleConverterTest {
 		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables);
 		expected = ruleParser.parse("random query: -> Boolean;");
 		assertEquals(expected, result);
-
+		
 		query = ruleParser.parseFormula("not sick(X)");
 		queryAtom = lowParser.parse("query(X)");
 		randomVariables.clear();
@@ -1205,14 +1193,6 @@ public class RuleConverterTest {
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "sick(X) 0.3 minus 0.1;";
-		inputExpression = ruleParser.parse(string);
-		result = ruleConverter.toRuleString(inputExpression);
-		outputExpression = ruleParser.parse(result);
-		expected = "sick(X) 0.3 minus 0.1;";
-		assertEquals(expected, result);
-		assertEquals(inputExpression, outputExpression);
-
 		string = "sick(X) 0.3 / 2;";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
@@ -1359,67 +1339,67 @@ public class RuleConverterTest {
 		assertEquals(inputExpression, outputExpression);
 
 		// Testing prolog rules.
-		string = "sick(john). ;";
+		string = "sick(john).";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(john). ;";
+		expected = "sick(john).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "1 sick(john). ;";
+		string = "1 sick(john).";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(john). ;";
+		expected = "sick(john).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "1.0 sick(john). ;";
+		string = "1.0 sick(john).";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(john). ;";
+		expected = "sick(john).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "sick(X). ;";
+		string = "sick(X).";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "sick(X). ;";
+		expected = "sick(X).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "not sick(mary). ;";
+		string = "not sick(mary).";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "not sick(mary). ;";
+		expected = "not sick(mary).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "0.3 sick(X). ;";
+		string = "0.3 sick(X).";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "0.3 sick(X). ;";
+		expected = "0.3 sick(X).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "round(X) :- circle(X). ;";
+		string = "round(X) :- circle(X).";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "round(X) :- circle(X). ;";
+		expected = "round(X) :- circle(X).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 
-		string = "0.7 sick(X) :- epidemic and not vaccinated(X). ;";
+		string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
 		inputExpression = ruleParser.parse(string);
 		result = ruleConverter.toRuleString(inputExpression);
 		outputExpression = ruleParser.parse(result);
-		expected = "0.7 sick(X) :- epidemic and not vaccinated(X). ;";
+		expected = "0.7 sick(X) :- epidemic and not vaccinated(X).";
 		assertEquals(expected, result);
 		assertEquals(inputExpression, outputExpression);
 		

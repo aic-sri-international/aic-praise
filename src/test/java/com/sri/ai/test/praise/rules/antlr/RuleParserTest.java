@@ -57,6 +57,54 @@ public class RuleParserTest extends AbstractParserTest {
 		parser = new RuleParserWrapper();
 	}
 	
+	@Test
+	public void testSortExpression () {
+		String string;
+		string = "sort People: 1000, bob, ann, mary;";
+		test(string, new DefaultCompoundSyntaxTree("sort", "People", "1000", 
+				new DefaultCompoundSyntaxTree("{ . }", 
+						new DefaultCompoundSyntaxTree("kleene list", "bob", "ann", "mary"))));
+
+		string = "sort Dogs: 1000;";
+		test(string, new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", 
+				new DefaultCompoundSyntaxTree("{ . }", 
+						new DefaultCompoundSyntaxTree("kleene list"))));
+
+		string = "sort Dogs: 1000, rover;";
+		test(string, new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", 
+				new DefaultCompoundSyntaxTree("{ . }", "rover")));
+
+		string = "sort Cats: Unknown;";
+		test(string, new DefaultCompoundSyntaxTree("sort", "Cats", "Unknown", 
+				new DefaultCompoundSyntaxTree("{ . }", 
+						new DefaultCompoundSyntaxTree("kleene list"))));
+
+		string = "sort Rats;";
+		test(string, new DefaultCompoundSyntaxTree("sort", "Rats", "Unknown", 
+				new DefaultCompoundSyntaxTree("{ . }", 
+						new DefaultCompoundSyntaxTree("kleene list"))));
+
+		System.out.println("test count = " + testCount);
+	}
+	
+	@Test
+	public void testRandomVariableExpression () {
+		String string;
+		string = "random grade: People x Class -> Number;";
+		test(string, new DefaultCompoundSyntaxTree("randomVariable", "grade", "2", "People", "Class", "Number"));
+
+		string = "random father: People -> People;";
+		test(string, new DefaultCompoundSyntaxTree("randomVariable", "father", "1", "People", "People"));
+
+		string = "random happy: People -> Boolean;";
+		test(string, new DefaultCompoundSyntaxTree("randomVariable", "happy", "1", "People", "Boolean"));
+
+		string = "random president: -> People;";
+		test(string, new DefaultCompoundSyntaxTree("randomVariable", "president", "0", "People"));
+
+		System.out.println("test count = " + testCount);
+	}
+	
 	@Test 
 	public void testComment () {
 		String string;
@@ -144,11 +192,6 @@ public class RuleParserTest extends AbstractParserTest {
 				new DefaultCompoundSyntaxTree("sick", "X"), 
 				new DefaultCompoundSyntaxTree("-", "0.3", "0.1")));
 
-		string = "sick(X) 0.3 minus 0.1;";
-		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
-				new DefaultCompoundSyntaxTree("sick", "X"), 
-				new DefaultCompoundSyntaxTree("minus", "0.3", "0.1")));
-
 		string = "sick(X) 0.3 / 2;";
 		test(string, new DefaultCompoundSyntaxTree("atomic rule", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
@@ -199,6 +242,7 @@ public class RuleParserTest extends AbstractParserTest {
 	@Test
 	public void testConditionalExpression () {
 		String string;
+		
 		string = "if circle(X) then round(X);";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("circle", "X"), 
@@ -216,7 +260,7 @@ public class RuleParserTest extends AbstractParserTest {
 						new DefaultCompoundSyntaxTree("and", 
 								new DefaultCompoundSyntaxTree("sick", "X"), 
 								new DefaultCompoundSyntaxTree("unhappy", "X")), "0.9")));
-
+		
 		string = "if chilly(P) and live(X, P) then sick(X) 0.6;";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("and", 
@@ -269,6 +313,31 @@ public class RuleParserTest extends AbstractParserTest {
 				new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
 						new DefaultCompoundSyntaxTree("sick", "X"))));
 		
+		string = "if X may be same as Y and Y = obama then entityOf(X, Y);";
+		test(string, new DefaultCompoundSyntaxTree("conditional rule", 
+				new DefaultCompoundSyntaxTree("and", 
+						new DefaultCompoundSyntaxTree(". may be same as .", "X", "Y"),
+						new DefaultCompoundSyntaxTree("=", "Y", "obama")), 
+				new DefaultCompoundSyntaxTree("atomic rule", 
+						new DefaultCompoundSyntaxTree("entityOf", "X", "Y"), "1")));
+
+		System.out.println("test count = " + testCount);
+	}
+	
+	@Test
+	public void testConditionalRuleWithConjunction() {
+		String string;
+		
+		string = "sick(X) 0.4 and if epidemic then sick(john) 0.3 and sick(mary) 0.4;";
+		test(string, new DefaultCompoundSyntaxTree("( . )",
+						new DefaultCompoundSyntaxTree("kleene list", 
+							new DefaultCompoundSyntaxTree("atomic rule", new DefaultCompoundSyntaxTree("sick", "X"), "0.4"),
+							new DefaultCompoundSyntaxTree("conditional rule", "epidemic",
+									new DefaultCompoundSyntaxTree("( . )",
+										new DefaultCompoundSyntaxTree("kleene list", 
+											new DefaultCompoundSyntaxTree("atomic rule", new DefaultCompoundSyntaxTree("sick", "john"), "0.3"),
+											new DefaultCompoundSyntaxTree("atomic rule", new DefaultCompoundSyntaxTree("sick", "mary"), "0.4")))))));
+		
 		string = "if epidemic then sick(X) 0.7 and (if panic then sick(X) 0.8 and flu(Y) 0.9) else sick(john) 0.2 and sick(mary) 0.3;";
 		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
 				new DefaultCompoundSyntaxTree("( . )", 
@@ -288,36 +357,58 @@ public class RuleParserTest extends AbstractParserTest {
 										new DefaultCompoundSyntaxTree("sick", "john"), "0.2"), 
 								new DefaultCompoundSyntaxTree("atomic rule", 
 										new DefaultCompoundSyntaxTree("sick", "mary"), "0.3")))));
+	
+		
+		string = "if epidemic then (if panic then sick(X) 0.8 and flu(Y) 0.9) else if panic then sick(john) 0.2 and sick(mary) 0.3;";
+		// 'conditional rule'(epidemic, 'conditional rule'(panic, ( 'atomic rule'(sick(X), 0.8), 'atomic rule'(flu(Y), 0.9) )), 'conditional rule'(panic, ( 'atomic rule'(sick(john), 0.2), 'atomic rule'(sick(mary), 0.3) )))
+		test(string, new DefaultCompoundSyntaxTree("conditional rule", "epidemic", 
+						new DefaultCompoundSyntaxTree("conditional rule", "panic",
+							new DefaultCompoundSyntaxTree("( . )",
+									new DefaultCompoundSyntaxTree("kleene list",
+											new DefaultCompoundSyntaxTree("atomic rule", new DefaultCompoundSyntaxTree("sick", "X"), "0.8"),
+											new DefaultCompoundSyntaxTree("atomic rule", new DefaultCompoundSyntaxTree("flu", "Y"), "0.9")))),
+						new DefaultCompoundSyntaxTree("conditional rule", "panic",
+								new DefaultCompoundSyntaxTree("( . )",
+										new DefaultCompoundSyntaxTree("kleene list",
+												new DefaultCompoundSyntaxTree("atomic rule", new DefaultCompoundSyntaxTree("sick", "john"), "0.2"),
+												new DefaultCompoundSyntaxTree("atomic rule", new DefaultCompoundSyntaxTree("sick", "mary"), "0.3")))) 
+				));
 
 		System.out.println("test count = " + testCount);
+	}
+	
+	//http://code.google.com/p/aic-praise/issues/detail?id=19
+	@Test
+	public void testIssue19() {
+		testFail("if sick(X) and friends(X,Y) then 0.5 else sick(Y);");
 	}
 
 	@Test
 	public void testPrologExpression () {
 		String string;
-		string = "sick(john). ;";
+		string = "sick(john).";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "1", 
 				new DefaultCompoundSyntaxTree("sick", "john")));
 
-		string = "sick(X). ;";
+		string = "sick(X).";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "1", 
 				new DefaultCompoundSyntaxTree("sick", "X")));
 
-		string = "not sick(mary). ;";
+		string = "not sick(mary).";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "1", 
 				new DefaultCompoundSyntaxTree("not", 
 				new DefaultCompoundSyntaxTree("sick", "mary"))));
 
-		string = "0.3 sick(X). ;";
+		string = "0.3 sick(X).";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "0.3", 
 				new DefaultCompoundSyntaxTree("sick", "X")));
 
-		string = "round(X) :- circle(X). ;";
+		string = "round(X) :- circle(X).";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "1", 
 				new DefaultCompoundSyntaxTree("round", "X"), 
 				new DefaultCompoundSyntaxTree("circle", "X")));
 
-		string = "0.7 sick(X) :- epidemic and not vaccinated(X). ;";
+		string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
 		test(string, new DefaultCompoundSyntaxTree("prolog rule", "0.7", 
 				new DefaultCompoundSyntaxTree("sick", "X"), 
 				new DefaultCompoundSyntaxTree("and", "epidemic", 
@@ -431,55 +522,6 @@ public class RuleParserTest extends AbstractParserTest {
 										new DefaultCompoundSyntaxTree("sick", "john"), "0.2"), 
 								new DefaultCompoundSyntaxTree("atomic rule", 
 										new DefaultCompoundSyntaxTree("sick", "mary"), "0.3")))));
-
-	}
-
-	@Test
-	public void testRandomVariableExpression () {
-		String string;
-		string = "random +: Number x Number -> Number;";
-		test(string, new DefaultCompoundSyntaxTree("randomVariable", "+", "2", "Number", "Number", "Number"));
-
-		string = "random father: People -> People;";
-		test(string, new DefaultCompoundSyntaxTree("randomVariable", "father", "1", "People", "People"));
-
-		string = "random happy: People -> Boolean;";
-		test(string, new DefaultCompoundSyntaxTree("randomVariable", "happy", "1", "People", "Boolean"));
-
-		string = "random president: -> People;";
-		test(string, new DefaultCompoundSyntaxTree("randomVariable", "president", "0", "People"));
-
-		System.out.println("test count = " + testCount);
-	}
-
-	@Test
-	public void testSortExpression () {
-		String string;
-		string = "sort People: 1000, bob, ann, mary;";
-		test(string, new DefaultCompoundSyntaxTree("sort", "People", "1000", 
-				new DefaultCompoundSyntaxTree("{ . }", 
-						new DefaultCompoundSyntaxTree("kleene list", "bob", "ann", "mary"))));
-
-		string = "sort Dogs: 1000;";
-		test(string, new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", 
-				new DefaultCompoundSyntaxTree("{ . }", 
-						new DefaultCompoundSyntaxTree("kleene list"))));
-
-		string = "sort Dogs: 1000, rover;";
-		test(string, new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", 
-				new DefaultCompoundSyntaxTree("{ . }", "rover")));
-
-		string = "sort Cats: Unknown;";
-		test(string, new DefaultCompoundSyntaxTree("sort", "Cats", "Unknown", 
-				new DefaultCompoundSyntaxTree("{ . }", 
-						new DefaultCompoundSyntaxTree("kleene list"))));
-
-		string = "sort Rats;";
-		test(string, new DefaultCompoundSyntaxTree("sort", "Rats", "Unknown", 
-				new DefaultCompoundSyntaxTree("{ . }", 
-						new DefaultCompoundSyntaxTree("kleene list"))));
-
-		System.out.println("test count = " + testCount);
 	}
 
 	@Test
@@ -505,7 +547,7 @@ public class RuleParserTest extends AbstractParserTest {
 		testAll(string, expected);
 		expected.clear();
 
-		string = "if circle(X) then round(X); sick(X); sort Dogs: 1000, rover; random +: Number x Number -> Number;";
+		string = "if circle(X) then round(X); sick(X); sort Dogs: 1000, rover; random grade: People x Class -> Number;";
 		expected.add(new DefaultCompoundSyntaxTree("conditional rule", 
 				new DefaultCompoundSyntaxTree("circle", "X"), 
 				new DefaultCompoundSyntaxTree("atomic rule", 
@@ -514,7 +556,7 @@ public class RuleParserTest extends AbstractParserTest {
 				new DefaultCompoundSyntaxTree("sick", "X"), "1"));
 		expected.add(new DefaultCompoundSyntaxTree("sort", "Dogs", "1000", 
 				new DefaultCompoundSyntaxTree("{ . }", "rover")));
-		expected.add(new DefaultCompoundSyntaxTree("randomVariable", "+", "2", "Number", "Number", "Number"));
+		expected.add(new DefaultCompoundSyntaxTree("randomVariable", "grade", "2", "People", "Class", "Number"));
 		testAll(string, expected);
 		expected.clear();
 
