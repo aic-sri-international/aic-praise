@@ -127,7 +127,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	//
 	// START LBPQueryEngine.TraceListener
 	@Override
-	public void traceEvent(String queryUUID, int traceLevel, Long profileInfo, Marker marker,
+	public void traceEvent(String queryUUID, int traceLevel, Long rootProfileInfo, Long profileInfo, Marker marker,
 			String formattedMsg, Object... args) {
 		
 		if (options.chckbxTraceEnabled.isSelected()) {
@@ -137,7 +137,15 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 				consoleLine.append("[");
 				// Convert nanoseconds to milliseconds
 				consoleLine.append(profileInfo / 1000000);
-				consoleLine.append("ms]");
+				consoleLine.append("ms");
+				if (rootProfileInfo != null) {
+					consoleLine.append(", ");
+					// Convert nanoseconds to milliseconds
+					consoleLine.append(rootProfileInfo / 1000000);
+					consoleLine.append("ms total");
+				}
+				
+				consoleLine.append("]");
 			}
 			
 			consoleLine.append(formattedMsg);

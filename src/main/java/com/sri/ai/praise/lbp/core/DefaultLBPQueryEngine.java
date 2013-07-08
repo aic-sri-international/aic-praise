@@ -472,13 +472,14 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 			traceAppender = new AppenderBase<ILoggingEvent>() {
 				@Override
 				protected void append(ILoggingEvent eventObject) {
-					int      level       = LogX.getTraceLevel(eventObject.getLoggerName());
-					Long     profileInfo = LogX.getProfileInfo(eventObject.getLoggerName());
-					Marker   marker      = eventObject.getMarker();
-					String   msg         = eventObject.getFormattedMessage();
-					Object[] args        = eventObject.getArgumentArray(); 
+					int      level           = LogX.getTraceLevel(eventObject.getLoggerName());
+					Long     rootProfileInfo = LogX.getRootProfileInfo(eventObject.getLoggerName());
+					Long     profileInfo     = LogX.getProfileInfo(eventObject.getLoggerName());
+					Marker   marker          = eventObject.getMarker();
+					String   msg             = eventObject.getFormattedMessage();
+					Object[] args            = eventObject.getArgumentArray(); 
 					for (TraceListener traceListener : traceListeners) {
-						traceListener.traceEvent(queryUUID, level, profileInfo, marker, msg, args);
+						traceListener.traceEvent(queryUUID, level, rootProfileInfo, profileInfo, marker, msg, args);
 					}
 					
 					if (RewriterLogging.REWRITER_PROFILE_INFO.equals(eventObject.getMarker())) {

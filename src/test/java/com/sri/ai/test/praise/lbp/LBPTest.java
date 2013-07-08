@@ -4071,7 +4071,7 @@ public class LBPTest extends AbstractLPITest {
 		LBPQueryEngine.TraceListener traceListener = new LBPQueryEngine.TraceListener() {
 			
 			@Override
-			public void traceEvent(String queryUUID, int traceLevel, Long profileInfo, Marker marker,
+			public void traceEvent(String queryUUID, int traceLevel, Long rootProfileInfo, Long profileInfo, Marker marker,
 					String formattedMsg, Object... args) {
 				StringBuilder sb = queryTraceOutput.get(queryUUID);
 				sb.append("|");

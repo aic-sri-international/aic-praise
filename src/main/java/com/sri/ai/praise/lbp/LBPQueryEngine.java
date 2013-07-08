@@ -291,6 +291,9 @@ public interface LBPQueryEngine {
 		 *            associated with.
 		 * @param traceLevel
 		 *            the current trace level.
+		 * @param rootProfileInfo
+		 *            an optional root profiler in nanoseconds associated with
+		 *            the current trace message.
 		 * @param profileInfo
 		 *            an optional profiler in nanoseconds associated with the
 		 *            current trace message.
@@ -303,7 +306,7 @@ public interface LBPQueryEngine {
 		 *            the arguments passed to the trace call to be included in
 		 *            the message to be formatted.
 		 */
-		void traceEvent(String queryUUID, int traceLevel, Long profileInfo, Marker marker,
+		void traceEvent(String queryUUID, int traceLevel, Long rootProfileInfo, Long profileInfo, Marker marker,
 				String formattedMsg, Object... args);
 	}
 	
