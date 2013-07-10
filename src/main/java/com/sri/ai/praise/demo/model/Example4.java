@@ -42,7 +42,7 @@ import com.google.common.annotations.Beta;
 @Beta
 public class Example4 extends Example {
 	public Example4() {
-		super("Example 4");
+		super("4: NLP Coreference problem - v1");
 		setModel(getExampleFromResource("example4.model"));
 		setEvidence(getExampleFromResource("example4.es1"));
 		setQueryToRun("referenceOf(w7) = X");

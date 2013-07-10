@@ -42,7 +42,7 @@ import com.google.common.annotations.Beta;
 @Beta
 public class Example6 extends Example {
 	public Example6() {
-		super("Example 6");
+		super("6: Sick Mother");
 		setModel(getExampleFromResource("example6.model"));
 		setEvidence(getExampleFromResource("example6.es1"));
 		setQueryToRun("sick(ann)");

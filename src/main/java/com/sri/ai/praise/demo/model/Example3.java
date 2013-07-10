@@ -42,7 +42,7 @@ import com.google.common.annotations.Beta;
 @Beta
 public class Example3 extends Example {
 	public Example3() {
-		super("Example 3");
+		super("3: Basic loopy model");
 		setModel(getExampleFromResource("example3.model"));
 		setEvidence(getExampleFromResource("example3.es1"));
 		setQueryToRun("smoker(ann)");

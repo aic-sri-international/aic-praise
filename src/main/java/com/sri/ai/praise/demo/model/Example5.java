@@ -42,7 +42,7 @@ import com.google.common.annotations.Beta;
 @Beta
 public class Example5 extends Example {
 	public Example5() {
-		super("Example 5");
+		super("5: NLP Coreference problem - v2");
 		setModel(getExampleFromResource("example5.model"));
 		setEvidence(getExampleFromResource("example5.es1"));
 		setQueryToRun("isSameReferent(c3, X) ");
