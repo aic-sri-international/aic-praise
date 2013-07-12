@@ -68,7 +68,6 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private ExpressionNode activeJustificationNode, rootJustificationNode = new ExpressionNode("", null);
 	private DefaultTreeModel treeJustificationModel = new DefaultTreeModel(rootJustificationNode);
 	private int traceCurrentIndentLevel = 0, justificationCurrentIndentLevel = 0;
-	private boolean traceFirstTime = true;
 	private ExpressionNode activeTraceNode, rootTraceNode = new ExpressionNode("", null);
 	private DefaultTreeModel treeTraceModel = new DefaultTreeModel(rootTraceNode);
 	private DefaultListModel problemListModel = new DefaultListModel();
@@ -161,14 +160,11 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 			
 			
 			if (options.chckbxTraceToTrace.isSelected()) {
-				while (traceLevel > traceCurrentIndentLevel) {
-					if (!traceFirstTime) {
-						addTrace(">>");
-					}
+				while (traceLevel > traceCurrentIndentLevel) {			
+					addTrace(">>");
 					startTraceLevel();
 					traceCurrentIndentLevel++;
 				}
-				traceFirstTime = false;
 				
 				while (traceLevel < traceCurrentIndentLevel) {
 					endTraceLevel();
@@ -327,7 +323,6 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		treeTraceModel = new DefaultTreeModel(rootTraceNode);
 		traceTree.setModel(treeTraceModel);
 		traceCurrentIndentLevel = 0;
-		traceFirstTime = true;
 	}
 	
 	private void startJustificationLevel() {
