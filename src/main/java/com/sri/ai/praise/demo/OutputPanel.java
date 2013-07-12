@@ -58,6 +58,7 @@ import com.sri.ai.grinder.ui.ExpressionNode;
 import com.sri.ai.grinder.ui.ExpressionTreeView;
 import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
+
 import javax.swing.JList;
 
 @Beta
@@ -160,19 +161,35 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 			
 			
 			if (options.chckbxTraceToTrace.isSelected()) {
-				while (traceLevel > traceCurrentIndentLevel) {			
-					addTrace(">>");
+				String outputMsg = null;
+				if (formattedMsg != null && !formattedMsg.equals("") && BaseTreeUtilAppender.outputFormattedMessage(formattedMsg, args)) {
+					outputMsg = consoleLine.toString();
+				}
+				
+				while (traceCurrentIndentLevel < traceLevel) {
+					if (traceCurrentIndentLevel == (traceLevel-1)) {
+						if (outputMsg != null) {
+							addTrace(outputMsg);
+							outputMsg = null; // indicates already output
+						}
+						else {
+							addTrace(">>");
+						}
+					}
+					else {
+						addTrace(">>");
+					}
 					startTraceLevel();
 					traceCurrentIndentLevel++;
 				}
 				
-				while (traceLevel < traceCurrentIndentLevel) {
+				while (traceCurrentIndentLevel > traceLevel) {
 					endTraceLevel();
 					traceCurrentIndentLevel--;
 				}
 				
-				if (formattedMsg != null && !formattedMsg.equals("") && BaseTreeUtilAppender.outputFormattedMessage(formattedMsg, args)) {
-					addTrace(consoleLine.toString());
+				if (outputMsg != null) {
+					addTrace(outputMsg);
 				}
 		
 				if (args != null) {
