@@ -94,7 +94,7 @@ import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.praise.rules.antlr.RuleLexer;
 import com.sri.ai.praise.rules.antlr.RuleParser;
 import com.sri.ai.util.Configuration;
-import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.base.Triple;
 
 /**
  * 
@@ -321,14 +321,14 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 			
 							String currentQuery = app.queryPanel.getCurrentQuery();
 							
-							Pair<Expression, Model> translateQueryResult = ruleConverter
-									.translateQuery("'Name'", "'Description'",
+							Triple<Model, Expression, Model> translateQueryResult = ruleConverter
+									.query(currentQuery,
 											app.modelEditPanel.getText() + "\n"
 													+ app.evidenceEditPanel.getText(),
-											currentQuery);
+											"'Name'", "'Description'");
 			
-							Expression queryAtom = translateQueryResult.first;
-							Model      model     = translateQueryResult.second;
+							Expression queryAtom = translateQueryResult.second;
+							Model      model     = translateQueryResult.third;
 							
 							String overridden = "";
 							if (app.optionsPanel.chckbxOverrideModel.isSelected()) {

@@ -48,6 +48,8 @@ import org.junit.Test;
 import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
+import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.test.praise.rules.AbstractParserTest;
 
@@ -375,6 +377,19 @@ public class RuleParserTest extends AbstractParserTest {
 				));
 
 		System.out.println("test count = " + testCount);
+	}
+	
+	@Test
+	public void testMayBeSameAs() {
+		String string;
+		
+		string = "there exists Y : mother(X,Y) and Y may be same as X;";
+		test(string, new DefaultCompoundSyntaxTree("atomic rule",  
+				ThereExists.make(DefaultSymbol.createSymbol("Y"), 
+						new DefaultCompoundSyntaxTree("and",
+								new DefaultCompoundSyntaxTree("mother", "X", "Y"),
+						        new DefaultCompoundSyntaxTree(". may be same as .", "Y", "X"))), 
+				"1"));
 	}
 	
 	//http://code.google.com/p/aic-praise/issues/detail?id=19
