@@ -353,7 +353,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("if young(X) and (for all Y : (friends(Y,X) => smokes(Y))) then smokes(X) 0.8;"));
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("if young(X) and 'for all Y : friends(Y, X) => smokes(Y)'(X) then smokes(X) 0.8;"));
-		expectedRules.add(ruleParser.parse("if not (friends(Y, X) => smokes(Y)) then not 'for all Y : friends(Y, X) => smokes(Y)'(X) else 'for all Y : friends(Y, X) => smokes(Y)'(X) 0.999999;"));
+		expectedRules.add(ruleParser.parse("if not (friends(Y, X) => smokes(Y)) then not 'for all Y : friends(Y, X) => smokes(Y)'(X) else 'for all Y : friends(Y, X) => smokes(Y)'(X) 0.999999999;"));
 		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions);
 		assertEquals(expectedRules, translateFunctionsResult.first);
 		assertEquals(4, translateFunctionsResult.second.size());
@@ -365,7 +365,7 @@ public class RuleConverterTest {
 		rules.add(ruleParser.parse("there exists X : president(X, Country);"));
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("'there exists X : president(X, Country)'(Country);"));
-		expectedRules.add(ruleParser.parse("if president(X, Country) then 'there exists X : president(X, Country)'(Country) else 'there exists X : president(X, Country)'(Country) 0.000001;"));
+		expectedRules.add(ruleParser.parse("if president(X, Country) then 'there exists X : president(X, Country)'(Country) else 'there exists X : president(X, Country)'(Country) 0.000000001;"));
 		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions);
 		assertEquals(expectedRules, translateFunctionsResult.first);
 		assertEquals(2, translateFunctionsResult.second.size());
@@ -377,7 +377,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("friends(X,Y) and (there exists Z : friends(X,Z));"));
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("friends(X,Y) and 'there exists Z : friends(X, Z)'(X);"));
-		expectedRules.add(ruleParser.parse("if friends(X,Z) then 'there exists Z : friends(X, Z)'(X) else 'there exists Z : friends(X, Z)'(X) 0.000001;"));
+		expectedRules.add(ruleParser.parse("if friends(X,Z) then 'there exists Z : friends(X, Z)'(X) else 'there exists Z : friends(X, Z)'(X) 0.000000001;"));
 		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions);
 		assertEquals(expectedRules, translateFunctionsResult.first);
 		assertEquals(2, translateFunctionsResult.second.size());
@@ -391,7 +391,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("friends(X,Y) and (there exists Z : Z may be same as X and loves(X,Z));"));
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("friends(X,Y) and 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X);"));
-		expectedRules.add(ruleParser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X) else 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X) 0.000001;"));
+		expectedRules.add(ruleParser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X) else 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X) 0.000000001;"));
 		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions);
 		assertEquals(expectedRules, translateFunctionsResult.first);
 		assertEquals(3, translateFunctionsResult.second.size());
@@ -405,8 +405,8 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("there exists Z : for all Y : loves(X, Y, Z);"));
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("'there exists Z : for all Y : loves(X, Y, Z)'(X);"));
-		expectedRules.add(ruleParser.parse("if 'for all Y : loves(X, Y, Z)'(X, Z) then 'there exists Z : for all Y : loves(X, Y, Z)'(X) else 'there exists Z : for all Y : loves(X, Y, Z)'(X) 0.000001;"));
-		expectedRules.add(ruleParser.parse("if not loves(X, Y, Z) then not 'for all Y : loves(X, Y, Z)'(X, Z) else 'for all Y : loves(X, Y, Z)'(X, Z) 0.999999;"));
+		expectedRules.add(ruleParser.parse("if 'for all Y : loves(X, Y, Z)'(X, Z) then 'there exists Z : for all Y : loves(X, Y, Z)'(X) else 'there exists Z : for all Y : loves(X, Y, Z)'(X) 0.000000001;"));
+		expectedRules.add(ruleParser.parse("if not loves(X, Y, Z) then not 'for all Y : loves(X, Y, Z)'(X, Z) else 'for all Y : loves(X, Y, Z)'(X, Z) 0.999999999;"));
 		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions);
 		assertEquals(expectedRules, translateFunctionsResult.first);
 		assertEquals(3, translateFunctionsResult.second.size());

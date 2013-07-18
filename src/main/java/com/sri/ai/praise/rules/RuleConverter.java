@@ -52,6 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
+import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
@@ -656,7 +657,7 @@ public class RuleConverter {
 			conditionAndFunctionFreeFormula = replaceRandomFunctionApplicationsByRelations(formula, randomVariableDeclarations,
 														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
 			condition = conditionAndFunctionFreeFormula.first;
-			// | .... if Condition is not True
+			// | .... if Condition is distinct from "true"
 			if (!condition.equals(Expressions.TRUE)) {
 				functionFreeFormula = conditionAndFunctionFreeFormula.second;
 
@@ -689,7 +690,7 @@ public class RuleConverter {
 			// | ...... <- translateFunctionsAsArgument(Rule1, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
 			Expression functionFreeRule1 = translateFunctionsAsArgument(rule1, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
 
-			// | .... if Condition is not True
+			// | .... if Condition is distinct from "true"
 			if (!condition.equals(Expressions.TRUE)) {
 					
 				// | ........ return translateFunctionsAsArgument("if Condition then (if functionFreeFormula then functionFreeRule1)", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
@@ -732,7 +733,7 @@ public class RuleConverter {
 			// | .... functionFreeRule2
 			// | ...... <- translateFunctionsAsArgument(Rule2, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
 			Expression functionFreeRule2 = translateFunctionsAsArgument(rule2, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
-			// | .... if Condition is not True
+			// | .... if Condition is distinct from "true"
 			if (!condition.equals(Expressions.TRUE)) {
 				// | ........ return translateFunctionsAsArgument("if Condition then (if functionFreeFormula then functionFreeRule1 else functionFreeRule2)", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
 				Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE,
@@ -875,7 +876,7 @@ public class RuleConverter {
 								// | ............ newUniqueVariablesCache <- add newUniqueVariable
 							} // | ........ else use cached newUniqueVariable
 							
-							// | ........ Condition <- Condition and (predicate2(T1, ..., Tk, newUniqueVariable)
+							// | ........ Condition <- Condition and predicate2(T1, ..., Tk, newUniqueVariable)
 							List<Expression> conjuncts = new ArrayList<Expression>();
 							if (And.isConjunction(condition[0])) {
 								conjuncts.addAll(And.getConjuncts(condition[0]));
@@ -2060,6 +2061,19 @@ public class RuleConverter {
 				throw new ReservedWordException("'" + token + "' is a reserved word in the rules language.");
 		}
 	}
+	
+	private String precisionedPotential(String precisionDigit, String finalDigit) {
+		StringBuilder sb = new StringBuilder("0.");
+		
+		int numericPrecision = ExpressoConfiguration.getDisplayNumericPrecisionForSymbols();
+		for (int i = 1; i < numericPrecision; i++) {
+			sb.append(precisionDigit);
+		}
+		
+		sb.append(finalDigit);
+		
+		return sb.toString();
+	}
 
 	/*===================================================================================
 	 * PRIVATE CLASSES
@@ -2236,14 +2250,14 @@ public class RuleConverter {
 						newRule = Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
 																ThereExists.getBody(expression), 
 																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, 1),
-																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, "0.000001"));
+																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("0", "1")));
 					}
 					else { // | ................ else // Quantifier is "for all"
 						// | .................... expandingRules <- add "if not Phi then not newSymbol(F) else newSymbol(F) 0.999999"
 						newRule = Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
 																Not.make(ForAll.getBody(expression)), 
 																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, Not.make(newSymbolF), 1),
-																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, "0.999999"));						
+																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("9", "9")));						
 					}
 					expandingRules.add(newRule);
 					

@@ -303,7 +303,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 			}
 		}
 		else {
-			final Thread currentThread = Thread.currentThread();
+			final Thread currentThread = Thread.currentThread();		
 			activeQueryUUID          = null;
 			intentionallyInterrupted = false;
 			if (validateInput(false)) {

@@ -59,11 +59,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.util.Util;
+
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
@@ -90,7 +92,8 @@ public class OptionsPanel extends JPanel {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				DefaultSymbol.setNumericDisplayPrecision((Integer)_precisionModel.getValue());				
+				DefaultSymbol.setNumericDisplayPrecision((Integer)_precisionModel.getValue());
+				ExpressoConfiguration.setProperty(ExpressoConfiguration.KEY_DISPLAY_NUMERIC_PRECISION_FOR_SYMBOLS, ""+_precisionModel.getValue());
 			}
 		});
 		_scientificGreaterOutputModel.addChangeListener(new ChangeListener() {
