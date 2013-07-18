@@ -104,7 +104,7 @@ public class RuleConverterTest {
 		randomVariableDefinitions.clear();
 		randomVariableDefinitions.add(ruleParser.parse("random mother: Person -> Person;"));
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not mother(bob, X0) or mother(john, X0);"));
+		expectedRules.add(ruleParser.parse("if mother(bob, X0) then mother(john, X0);"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		exprectedRandomVariables.clear();
@@ -123,7 +123,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("mother(john) = mother(bob) = jane;"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("(not mother(bob, X0) or mother(john, X0)) and mother(bob, jane);"));
+		expectedRules.add(ruleParser.parse("if mother(bob, X0) then mother(john, X0) and mother(bob, jane);"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
@@ -153,7 +153,17 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("sick(mother(X));"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not mother(X, X0) or sick(X0) and X0 may be same as X;"));
+		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(X0) and X0 may be same as X;"));
+		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
+		assertEquals(expectedRules, translateFunctionsResult.first);
+		
+		rules.clear();
+		rules.add(this.ruleParser.parse("sick(mother(X)) 0.8;"));
+		randomVariableDefinitions.clear();
+		expectedRules.clear();
+		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(X0) and X0 may be same as X 0.8;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
@@ -163,7 +173,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("sick(mother(X, Y));"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not mother(X, Y, X0) or sick(X0) and X0 may be same as X and X0 may be same as Y;"));
+		expectedRules.add(ruleParser.parse("if mother(X, Y, X0) then sick(X0) and X0 may be same as X and X0 may be same as Y;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, X1, Y) then not mother(X0, X1, Z) and Y may be same as X0 and Z may be same as X0 and Y may be same as X1 and Z may be same as X1;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, X1, Y) and Y may be same as X0 and Y may be same as X1;"));
 		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
@@ -173,7 +183,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("sick(mother(X), bob);"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not mother(X, X0) or sick(X0, bob) and X0 may be same as X;"));
+		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(X0, bob) and X0 may be same as X;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
@@ -183,7 +193,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("sick(bob, mother(X));"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not mother(X, X0) or sick(bob, X0) and X0 may be same as X;"));
+		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(bob, X0) and X0 may be same as X;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
@@ -193,7 +203,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("sick(mother(X), father(X));"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not mother(X, X0) or (not father(X, X1) or (sick(X0, X1) and X1 may be same as X) and X0 may be same as X and X0 may be same as X1);"));
+		expectedRules.add(ruleParser.parse("if mother(X, X0) and father(X, X1) then ((sick(X0, X1) and X1 may be same as X) and X0 may be same as X and X0 may be same as X1);"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if father(X0, Y) then not father(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
@@ -205,7 +215,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("sick(mother(father(X)));"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not (not father(X, X1) or mother(X1, X0) and X1 may be same as X) or sick(X0) and X0 may be same as X and X0 may be same as X1;"));
+		expectedRules.add(ruleParser.parse("if father(X, X1) then if mother(X1, X0) and X1 may be same as X then sick(X0) and X0 may be same as X and X0 may be same as X1;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if father(X0, Y) then not father(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
@@ -217,7 +227,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("mother(john) = bestfriend(mother(bob));"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not (not (mother(bob, X1) and X0 may be same as X1) or bestfriend(X1, X0)) or mother(john, X0);"));
+		expectedRules.add(ruleParser.parse("if mother(bob, X1) and X0 may be same as X1 then if bestfriend(X1, X0) then mother(john, X0);"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if bestfriend(X0, Y) then not bestfriend(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
@@ -230,7 +240,7 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("sick(bob, mother(bestfriend(X)));"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not (not bestfriend(X, X1) or mother(X1, X0) and X1 may be same as X) or sick(bob, X0) and X0 may be same as X and X0 may be same as X1;"));
+		expectedRules.add(ruleParser.parse("if bestfriend(X, X1) then if mother(X1, X0) and X1 may be same as X then sick(bob, X0) and X0 may be same as X and X0 may be same as X1;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if bestfriend(X0, Y) then not bestfriend(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
@@ -242,13 +252,87 @@ public class RuleConverterTest {
 		rules.add(this.ruleParser.parse("sick(bob, mother(bestfriend(father(X))));"));
 		randomVariableDefinitions.clear();
 		expectedRules.clear();
-		expectedRules.add(ruleParser.parse("not (not (not father(X, X2) or bestfriend(X2, X1) and X2 may be same as X) or mother(X1, X0) and X1 may be same as X and X1 may be same as X2) or sick(bob, X0) and X0 may be same as X and X0 may be same as X2 and X0 may be same as X1;"));
+		expectedRules.add(ruleParser.parse("if father(X, X2) then if bestfriend(X2, X1) and X2 may be same as X then if mother(X1, X0) and X1 may be same as X and X1 may be same as X2 then sick(bob, X0) and X0 may be same as X and X0 may be same as X2 and X0 may be same as X1;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if bestfriend(X0, Y) then not bestfriend(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : bestfriend(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if father(X0, Y) then not father(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : father(X0, Y) and Y may be same as X0;"));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
+		assertEquals(expectedRules, translateFunctionsResult.first);
+		
+		rules.clear();
+		rules.add(this.ruleParser.parse("if gender(Possessive) = gender(Entity) then referenceOf(Possessive, Entity) 0.7;"));
+		randomVariableDefinitions.clear();
+		expectedRules.clear();
+		expectedRules.add(ruleParser.parse("if gender(Entity, X0) and X0 may be same as Entity and X0 may be same as Possessive then if gender(Possessive, X0) then referenceOf(Possessive, Entity) 0.7;"));
+		expectedRules.add(ruleParser.parse("if gender(X0, Y) then not gender(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : gender(X0, Y) and Y may be same as X0;"));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
+		assertEquals(expectedRules, translateFunctionsResult.first);
+		
+		rules.clear();
+		rules.add(this.ruleParser.parse("if gender(Possessive) = gender(Entity) then referenceOf(Possessive, Entity) 0.7 else referenceOf(Possessive, Entity) 0.4;"));
+		randomVariableDefinitions.clear();
+		expectedRules.clear();
+		expectedRules.add(ruleParser.parse("if gender(Entity, X0) and X0 may be same as Entity and X0 may be same as Possessive then if gender(Possessive, X0) then referenceOf(Possessive, Entity) 0.7 else referenceOf(Possessive, Entity) 0.4;"));
+		expectedRules.add(ruleParser.parse("if gender(X0, Y) then not gender(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : gender(X0, Y) and Y may be same as X0;"));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
+		assertEquals(expectedRules, translateFunctionsResult.first);
+
+		rules.clear(); // From PRAiSEDemoApp Example #4.
+		rules.add(this.ruleParser.parse("if possessive(Possessive) and noun(AnotherWord) and gender(Possessive) = gender(entityOfWord(AnotherWord)) then referenceOf(Possessive) = entityOfWord(AnotherWord) 0.7;"));
+		randomVariableDefinitions.clear();
+		expectedRules.clear();
+		expectedRules.add(ruleParser.parse("if entityOfWord(AnotherWord, X1) then if gender(X1, X0) and X0 may be same as AnotherWord and X0 may be same as X1 and X0 may be same as Possessive then if possessive(Possessive) and noun(AnotherWord) and gender(Possessive, X0) then if entityOfWord(AnotherWord, X1) then referenceOf(Possessive, X1) and X1 may be same as AnotherWord and X1 may be same as Possessive 0.7;"));
+		expectedRules.add(ruleParser.parse("if entityOfWord(X0, Y) then not entityOfWord(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : entityOfWord(X0, Y) and Y may be same as X0;"));
+		expectedRules.add(ruleParser.parse("if gender(X0, Y) then not gender(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : gender(X0, Y) and Y may be same as X0;"));
+		expectedRules.add(ruleParser.parse("if referenceOf(X0, Y) then not referenceOf(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : referenceOf(X0, Y) and Y may be same as X0;"));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
+		assertEquals(expectedRules, translateFunctionsResult.first);
+		
+		rules.clear();
+		rules.add(this.ruleParser.parse("0.8 sick(mother(X))."));
+		randomVariableDefinitions.clear();
+		expectedRules.clear();
+		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(X0) and X0 may be same as X 0.8;"));
+		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
+		assertEquals(expectedRules, translateFunctionsResult.first);
+		
+		rules.clear();
+		rules.add(this.ruleParser.parse("0.8 sick(mother(X)) :- epidemic(Y)."));
+		randomVariableDefinitions.clear();
+		expectedRules.clear();
+		expectedRules.add(ruleParser.parse("if epidemic(Y) then if mother(X, X0) then sick(X0) and X0 may be same as Y and X0 may be same as X 0.8;"));
+		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
+		assertEquals(expectedRules, translateFunctionsResult.first);
+		
+		rules.clear();
+		rules.add(this.ruleParser.parse("P(sick(mother(X)) | epidemic(Y)) = 0.8;"));
+		randomVariableDefinitions.clear();
+		expectedRules.clear();
+		expectedRules.add(ruleParser.parse("if epidemic(Y) then if mother(X, X0) then sick(X0) and X0 may be same as Y and X0 may be same as X 0.8;"));
+		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
+		assertEquals(expectedRules, translateFunctionsResult.first);
+		
+		rules.clear();
+		rules.add(this.ruleParser.parse("epidemic(Y) -> sick(mother(X)) 0.8;"));
+		randomVariableDefinitions.clear();
+		expectedRules.clear();
+		expectedRules.add(ruleParser.parse("if epidemic(Y) then if mother(X, X0) then sick(X0) and X0 may be same as Y and X0 may be same as X 0.8;"));
+		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
+		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions);
 		assertEquals(expectedRules, translateFunctionsResult.first);
 	}
@@ -807,7 +891,7 @@ public class RuleConverterTest {
 		randomVariableDeclarations.add(lowParser.parse("randomVariable(colleagues, 2, Universe, Universe, Boolean)"));
 		Model.setKnownRandomVariables(randomVariableDeclarations, ruleConverter.getRewritingProcess());
 		
-
+ 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(lowParser.parse(
 				"if friends(X,Y) and likes(X,Z) and '. may be same as .'(X, Z) then if likes(Y,Z) then 0.8 else 0.2 else 0.5"));

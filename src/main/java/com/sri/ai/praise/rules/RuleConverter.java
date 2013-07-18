@@ -48,6 +48,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
@@ -67,7 +68,6 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
 import com.sri.ai.grinder.library.boole.ForAll;
 import com.sri.ai.grinder.library.boole.Not;
-import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
@@ -423,28 +423,28 @@ public class RuleConverter {
 		// | for each rule in rules
 		for (Expression rule : rules) {			
 			Expression toReplace = rule;
-			Expression newRule  = rule;
+			Expression newRule   = rule;
+
+			// |.... newRule <- exhaustively replace each expression E in rule
+			// |........ with the following replacement function:
+			ReplaceFunctionWithRelation replacementFunction = 
+					new ReplaceFunctionWithRelation(randomVariableDeclarations, functionsIdentified);
+			do {
+			    toReplace = newRule;
+			    newRule = toReplace.replaceAllOccurrences(
+			    		replacementFunction,
+			    		rewritingProcess);
+			} while (newRule != toReplace);
 			
 			// | .... NewUniqueVariables <- empty set of logical variables
 			// Note: the set is represented by the keys, while the values
 			// identify the predicate1 the newUniqueVariable originated from 
 			// (used later on when creating '. may be same as .'s)
 			Map<Expression, Expression> newUniqueVariables = new LinkedHashMap<Expression, Expression>();
-
-			// |.... newRule <- exhaustively replace each expression E in rule
-			// |........ with the following replacement function:
-			ReplaceFunctionWithRelation replacementFunction = 
-					new ReplaceFunctionWithRelation(toReplace, randomVariableDeclarations, functionsIdentified, newUniqueVariables);
-			do {
-			    toReplace = newRule;
-			    newRule = toReplace.replaceAllOccurrences(
-			    		replacementFunction,
-			    		rewritingProcess);
-			           
-			    // Update the reference for generating unique constant names.
-			    replacementFunction.currentExpression = newRule;
-			} while (newRule != toReplace);
-			
+			// | .... newRule <- translateFunctionsAsArgument(newRule, randomVariableDeclarations, functions, NewUniqueVariables, LogicalVariables, empty cache)
+			newRule = translateFunctionsAsArgument(newRule, randomVariableDeclarations, functionsIdentified, 
+							newUniqueVariables, new LinkedHashMap<Expression, Expression>(), 
+							new AtomicInteger(-1));
 			// | .... LogicalVariables <- collect logical variables in newRule
 			Set<Expression> logicalVariables = Expressions.getVariables(newRule, rewritingProcess);
 			// | .... for each NewUniqueVariable in NewUniqueVariables
@@ -600,6 +600,312 @@ public class RuleConverter {
 		}
 
 		return false;
+	}
+	
+	/**
+	 * Outputs newRule, a version of rule with random function applications used
+	 * as arguments replaced with equivalent relational representations, using
+	 * new unique variables.
+	 * 
+	 * Description of function:<br> 
+	 * http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
+	 * 
+	 * Pseudocode:<br> 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateFunctionsAsArgument
+	 * 
+	 * 
+	 * @param rule
+	 *            a rule possible containing random function applications as
+	 *            arguments.
+	 * @param randomVariableDeclarations
+	 *            current set of random variable declarations
+	 * @param functionsIdentified
+	 *            function applications that have been identified so far
+	 *            (key=functor name, value= list of arities).
+	 * @param newUniqueVariables
+	 *            new unique variables that have been created (key=new unique
+	 *            variable id, value=predicate1, functor was first encountered
+	 *            in).
+	 * @param newUniqueVariablesCache
+	 *            a cache for use by sub-routines (key=predicate2(args), i.e.
+	 *            functor unique variable created for, value=unique variable
+	 *            id).
+	 * @param uniqueCount
+	 *            used to help construct new unique variable names.
+	 * @return a version of rule with random function applications used as
+	 *         arguments replaced with equivalent relational representation.
+	 */
+	public Expression translateFunctionsAsArgument(Expression rule, Set<Expression> randomVariableDeclarations, 
+			Map<String, Set<Integer>> functionsIdentified, 
+			Map<Expression, Expression> newUniqueVariables,
+			Map<Expression, Expression> newUniqueVariablesCache,
+			AtomicInteger uniqueCount) {
+		
+		Expression result = null;
+		//
+		Pair<Expression, Expression> conditionAndFunctionFreeFormula = null;
+		Expression                   condition                       = null;
+		Expression                   functionFreeFormula             = null;
+		
+		// | if rule is an atomic rule of the form Formula Potential
+		if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
+			// | .... (Condition, functionFreeFormula)
+			// | ...... <- replaceRandomFunctionApplicationsByRelations(Formula, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)			
+			Expression formula   = rule.get(0);
+			Expression potential = rule.get(1);
+			conditionAndFunctionFreeFormula = replaceRandomFunctionApplicationsByRelations(formula, randomVariableDeclarations,
+														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			condition = conditionAndFunctionFreeFormula.first;
+			// | .... if Condition is not True
+			if (!condition.equals(Expressions.TRUE)) {
+				functionFreeFormula = conditionAndFunctionFreeFormula.second;
+
+				// | ........ return translateFunctionsAsArgument("if Condition then functionFreeFormula Potential", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
+				Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+														condition,
+														Expressions.make(FUNCTOR_ATOMIC_RULE,
+																functionFreeFormula, potential));
+				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
+														newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			}
+			else {
+				// | .... else
+				// | ........ return rule // i.e. no change
+				result = rule;
+			}
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE) && rule.numberOfArguments() == 2) {
+			// | if rule is a conditional rule of the form if Formula then Rule1
+			// | .... (Condition, functionFreeFormula)
+			// | ...... <- replaceRandomFunctionApplicationsByRelations(Formula, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
+			Expression formula = rule.get(0);
+			Expression rule1   = rule.get(1);
+			conditionAndFunctionFreeFormula = replaceRandomFunctionApplicationsByRelations(formula, randomVariableDeclarations,
+														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			condition           = conditionAndFunctionFreeFormula.first;
+			functionFreeFormula = conditionAndFunctionFreeFormula.second;	
+			
+			// | .... functionFreeRule1
+			// | ...... <- translateFunctionsAsArgument(Rule1, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
+			Expression functionFreeRule1 = translateFunctionsAsArgument(rule1, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+
+			// | .... if Condition is not True
+			if (!condition.equals(Expressions.TRUE)) {
+					
+				// | ........ return translateFunctionsAsArgument("if Condition then (if functionFreeFormula then functionFreeRule1)", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
+				Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+													condition,
+													Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+															functionFreeFormula, functionFreeRule1));
+			 
+				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,	
+												newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			}
+			else {
+				// | ........ if rule1 == functionFreeRule1
+				if (rule1 == functionFreeRule1) {
+					// | ............ return rule // i.e. no change
+					result = rule;
+				}
+				else {
+					// | ............ return if functionFreeFormula then functionFreeRule1
+					result = Expressions.make(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1);
+				}
+			}
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_CONDITIONAL_RULE) && rule.numberOfArguments() == 3) {
+			// | if rule is a conditional rule of the form if Formula then Rule1 else Rule2
+			// | .... (Condition, functionFreeFormula)
+			// | ...... <- replaceRandomFunctionApplicationsByRelations(Formula, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
+			Expression formula = rule.get(0);
+			Expression rule1   = rule.get(1);
+			Expression rule2   = rule.get(2);
+			conditionAndFunctionFreeFormula = replaceRandomFunctionApplicationsByRelations(formula, randomVariableDeclarations,
+														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			condition           = conditionAndFunctionFreeFormula.first;
+			functionFreeFormula = conditionAndFunctionFreeFormula.second;
+			
+			// | .... functionFreeRule1
+			// | ...... <- translateFunctionsAsArgument(Rule1, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
+			Expression functionFreeRule1 = translateFunctionsAsArgument(rule1, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			
+			// | .... functionFreeRule2
+			// | ...... <- translateFunctionsAsArgument(Rule2, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
+			Expression functionFreeRule2 = translateFunctionsAsArgument(rule2, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			// | .... if Condition is not True
+			if (!condition.equals(Expressions.TRUE)) {
+				// | ........ return translateFunctionsAsArgument("if Condition then (if functionFreeFormula then functionFreeRule1 else functionFreeRule2)", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
+				Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+													condition,
+													Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+															functionFreeFormula, functionFreeRule1, functionFreeRule2));
+				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
+														newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			}
+			else {
+				// | ........ if rule1 == functionFreeRule1 and rule2 == functionFreeRule2
+				if (rule1 == functionFreeRule1 && rule2 == functionFreeRule2) {
+					// | ............ return rule // i.e. no change
+					result = rule;
+				}
+				else {
+					// | ............ return if functionFreeFormula then functionFreeRule1 else functionFreeRule2
+					result = Expressions.make(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1, functionFreeRule2);
+				}
+			}
+		} 
+		else if (rule.getFunctor().equals(FUNCTOR_PROLOG_RULE)) {
+			// | if rule is a prolog rule
+			Expression intermediateRule = null;
+			if (rule.numberOfArguments() == 2) {
+				// | .... if rule is "Potential Formula1."
+				// | ........ intermediateRule <- Formula1 Potential // i.e. an equivalent atomic rule
+				intermediateRule = Expressions.make(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0));
+			}
+			else {
+				// | .... else rule is "Potential Formula1 :- Formula2."
+				// | ........ intermediateRule <- if Formula2 then Formula1 Potential // i.e. an equivalent conditional rule
+				intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE, rule.get(2), 
+											Expressions.make(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0)));
+			}
+			// | .... return translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
+			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
+													newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			if (result == intermediateRule) {
+				// i.e. no change
+				result = rule;
+			}
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_STANDARD_PROB_RULE)) {
+			Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE, rule.get(1), 
+					Expressions.make(FUNCTOR_ATOMIC_RULE, rule.get(0), rule.get(2)));
+			
+			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
+													newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			if (result == intermediateRule) {
+				// i.e. no change
+				result = rule;
+			}
+		}
+		else if (rule.getFunctor().equals(FUNCTOR_CAUSAL_RULE)) {
+			Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE, rule.get(0), rule.get(1));
+			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
+													newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			if (result == intermediateRule) {
+				// i.e. no change
+				result = rule;
+			}
+		}
+		
+		if (result == null) {
+			throw new UnsupportedOperationException("translateFunctionsAsArguments: does not know how to handle rule="+rule);
+		}
+		return result;
+	}
+	
+	/**
+	 * Pseudocode:<br> 
+	 * http://code.google.com/p/aic-praise/wiki/PseudoCodeTranslateFunctionsAsArgument
+	 * 
+	 * 
+	 * @param formula
+	 *            a formula possibly containing random function applications as
+	 *            arguments.
+	 * @param randomVariableDeclarations
+	 *            current set of random variable declarations
+	 * @param functionsIdentified
+	 *            function applications that have been identified so far
+	 *            (key=functor name, value= list of arities).
+	 * @param newUniqueVariables
+	 *            new unique variables that have been created (key=new unique
+	 *            variable id, value=predicate1, functor was first encountered
+	 *            in).
+	 * @param newUniqueVariablesCache
+	 *            a cache for use by sub-routines (key=predicate2(args), i.e.
+	 *            functor unique variable created for, value=unique variable
+	 *            id).
+	 * @param uniqueCount
+	 *            used to help construct new unique variable names.
+	 * @return (Condition, functionFreeFormula).
+	 */
+	public Pair<Expression, Expression> replaceRandomFunctionApplicationsByRelations(Expression formula, 
+			final Set<Expression> randomVariableDeclarations, 
+			final Map<String, Set<Integer>> functionsIdentified, 
+			final Map<Expression, Expression> newUniqueVariables,  
+			final Map<Expression, Expression> newUniqueVariablesCache,
+			final AtomicInteger uniqueCount) {
+		
+		// | Condition <- true
+		final Expression[] condition = new Expression[1];
+		condition[0] = Expressions.TRUE;
+		// 
+		Expression functionFreeFormula       = formula;
+		Expression toReplace                 = formula;
+		final Expression[] currentExpression = new Expression[1];
+		// |.... newRule <- exhaustively replace each expression E in rule
+		// |........ with the following replacement function:
+		do {
+			// | functionFreeFormula <- exhaustively replace each expression E in Formula with the following replacement function:
+		    toReplace            = functionFreeFormula;
+		    currentExpression[0] = toReplace;
+		    functionFreeFormula  = toReplace.replaceAllOccurrences(
+	    		new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {
+					@Override
+					public Expression apply(Expression expression, RewritingProcess process) {
+						Expression result = expression;
+						// | .... if isRandomFunctionApplication(E) of the form predicate1(E1,..., Ei,..., En)
+						// | ............ where isRandomVariableValue(Ei, declarations) is true
+						int elementEi = determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(expression, randomVariableDeclarations, rewritingProcess);
+						if (elementEi != -1) {
+							Expression predicate1 = expression;
+							// | ........ (predicate2, (T1,...,Tk) ) <- functorAndArguments(Ei)
+							Expression predicate2 = predicate1.get(elementEi);
+							// | ........ if newUniqueVariable not cached for (predicate2, (T1,...,Tk)) in newUniqueVariablesCache
+							Expression newUniqueVariable = newUniqueVariablesCache.get(predicate2);
+							if (newUniqueVariable == null) {
+								// | ............ functions <- add (predicate2, n) to functions
+								updateFunctionsIdentified(functionsIdentified, predicate2);
+								// | ............ newUniqueVariable <- make new unique variable;
+								newUniqueVariable = Expressions.makeUniqueVariable("X" + (uniqueCount.incrementAndGet()), currentExpression[0], rewritingProcess);
+								// | ............ newUniqueVariables <- add newUniqueVariable
+								// Note: also keep track of the predicate1 from which the newUniqueVariable originated from.
+								newUniqueVariables.put(newUniqueVariable, predicate1.getFunctor());
+								// | ............ newUniqueVariablesCache <- add newUniqueVariable
+								newUniqueVariablesCache.put(predicate2, newUniqueVariable);
+								// | ............ newUniqueVariablesCache <- add newUniqueVariable
+							} // | ........ else use cached newUniqueVariable
+							
+							// | ........ Condition <- Condition and (predicate2(T1, ..., Tk, newUniqueVariable)
+							List<Expression> conjuncts = new ArrayList<Expression>();
+							if (And.isConjunction(condition[0])) {
+								conjuncts.addAll(And.getConjuncts(condition[0]));
+							}
+							else {
+								conjuncts.add(condition[0]);
+							}
+							// Extend predicate2 from a function to a relation
+							List<Expression> predicate2Args = new ArrayList<Expression>(predicate2.getArguments());
+							predicate2Args.add(newUniqueVariable);
+							predicate2 = Expressions.make(predicate2.getFunctor(), predicate2Args.toArray());
+							conjuncts.add(predicate2);
+							condition[0] = And.make(conjuncts);
+								
+							// | ........ return predicate1(E1,..., Ei-1, newUniqueVariable, Ei+1, ..., En)
+							// Replace predicate1's function slot with the newUniqueVariable
+							List<Expression> predicate1Args = new ArrayList<Expression>(predicate1.getArguments());
+							predicate1Args.set(elementEi, newUniqueVariable);
+							predicate1 = Expressions.make(predicate1.getFunctor(), predicate1Args.toArray());
+							result = predicate1;
+						}
+						return result;
+					}
+	    		},
+	    		rewritingProcess);
+		} while (functionFreeFormula != toReplace);
+		
+		Pair<Expression, Expression> result = new Pair<Expression, Expression>(condition[0], functionFreeFormula);
+		
+		return result;
 	}
 
 	/**
@@ -1552,6 +1858,36 @@ public class RuleConverter {
 	/*===================================================================================
 	 * PRIVATE METHODS
 	 *=================================================================================*/
+	private int determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(Expression expression, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
+		int result = -1;
+		// | .... if isRandomFunctionApplication(E) of the form predicate1(E1,..., Ei,..., En)
+		if (isRandomFunctionApplication(expression)) {
+			for (int i = 0; i < expression.numberOfArguments(); i++) {
+				// | ............ where isRandomVariableValue(Ei, declarations) is true
+				Expression expressionI = expression.get(i);
+				if (isRandomVariableValue(expressionI, randomVariableDeclarations)) {
+					result = i;
+					break;
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	private void updateFunctionsIdentified(Map<String, Set<Integer>>   functionsIdentified, Expression functionApplication) {
+		String functorName = functionApplication.getFunctorOrSymbol().toString();
+		
+		Set<Integer> paramCount;
+		paramCount = functionsIdentified.get(functorName);
+		if (paramCount == null) {
+			paramCount = new LinkedHashSet<Integer>();
+			functionsIdentified.put(functorName, paramCount);
+		}
+		paramCount.add(functionApplication.getArguments().size());
+	}
+
+	
 	/**
 	 * Add a potential expression/constraint pair to a list of potential expression/constraint pairs.  
 	 * This method will simplify the potential expression and constraints and may eliminate the 
@@ -1743,18 +2079,11 @@ public class RuleConverter {
 	private class ReplaceFunctionWithRelation extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		private Set<Expression>             randomVariableDeclarations;
 		private Map<String, Set<Integer>>   functionsIdentified;
-		private Map<Expression, Expression> newUniqueVariables;
-		private Expression                  currentExpression;
-		private int                         uniqueCount = 0;
 
-		public ReplaceFunctionWithRelation(Expression currentExpression,
-				Set<Expression> randomVariableDeclarations, 
-				Map<String, Set<Integer>> functionsIdentified,
-				Map<Expression, Expression> newUniqueVariables) {
-			this.currentExpression          = currentExpression;
+		public ReplaceFunctionWithRelation(Set<Expression> randomVariableDeclarations, 
+				Map<String, Set<Integer>> functionsIdentified) {
 			this.randomVariableDeclarations = randomVariableDeclarations;
 			this.functionsIdentified        = functionsIdentified;
-			this.newUniqueVariables         = newUniqueVariables;
 		}
 
 		// |........ lambda E
@@ -1769,7 +2098,7 @@ public class RuleConverter {
 				// |................ (predicate, (T1,...,Tn) ) <- functorAndArguments(Ei)
 				Expression functionApplicationI = result.get(elementI);
 				// |................ functions <- add (predicate, n) to functions
-				updateFunctionsIdentified(functionApplicationI);
+				updateFunctionsIdentified(functionsIdentified, functionApplicationI);
 				// |................ j is some index distinct from i
 				Expression       expressionJ  = null;
 				List<Expression> equalityArgs = new ArrayList<Expression>();
@@ -1794,37 +2123,6 @@ public class RuleConverter {
 				}
 			}
 
-			// |............ if isRandomFunctionApplication(E) of the form predicate1(E1,..., i,..., En)
-			// |.................... where isRandomVariableValue(Ei, declarations) is true
-			elementI = determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(result, process);
-			if (elementI != -1) {
-				Expression predicate1 = result;
-				// |................ (predicate2, (T1,...,Tk) ) <- functorAndArguments(Ei)
-				Expression predicate2 = result.get(elementI);
-				// |................ functions <- add (predicate2, n) to functions
-				updateFunctionsIdentified(predicate2);
-
-				// | ................ NewUniqueVariable <- make new unique variable;
-				Expression newUniqueVariable = Expressions.makeUniqueVariable("X" + (uniqueCount++), currentExpression, rewritingProcess);
-				// Note: also keep track of the predicate1 from which the newUniqueVariable originated from.
-				this.newUniqueVariables.put(newUniqueVariable, predicate1.getFunctor());
-				
-				// Replace predicate1's function slot with the newUniqueVariable
-				List<Expression> predicate1Args = new ArrayList<Expression>(predicate1.getArguments());
-				predicate1Args.set(elementI, newUniqueVariable);
-				predicate1 = Expressions.make(predicate1.getFunctor(), predicate1Args.toArray());
-				
-				// Extend predicate2 from a function to a relation
-				List<Expression> predicate2Args = new ArrayList<Expression>(predicate2.getArguments());
-				predicate2Args.add(newUniqueVariable);
-				predicate2 = Expressions.make(predicate2.getFunctor(), predicate2Args.toArray());
-								
-				// |................ return (not(predicate2(T1, ..., Tk, NewUniqueVariable))
-				// |................................. or
-				// |............................. predicate1(E1, ..., Ei-1, NewUniqueVariable, E{i+1},..., En))
-				result = Or.make(Not.make(predicate2), predicate1);
-			}
-
 			return result;
 		}
 		
@@ -1846,36 +2144,7 @@ public class RuleConverter {
 			}
 			return result;
 		}
-		
-		private int determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(Expression expression, RewritingProcess process) {
-			int result = -1;
-			// if isRandomFunctionApplication(E) of the form predicate1(E1,..., i,..., En)
-			if (isRandomFunctionApplication(expression)) {
-				for (int i = 0; i < expression.numberOfArguments(); i++) {
-					// where isRandomVariableValue(Ei, declarations) is true
-					Expression expressionI = expression.get(i);
-					if (isRandomVariableValue(expressionI, randomVariableDeclarations)) {
-						result = i;
-						break;
-					}
-				}
-			}
-			
-			return result;
-		}
-		
-		private void updateFunctionsIdentified(Expression functionApplication) {
-			String functorName = functionApplication.getFunctorOrSymbol().toString();
-			
-			Set<Integer> paramCount;
-			paramCount = functionsIdentified.get(functorName);
-			if (paramCount == null) {
-				paramCount = new LinkedHashSet<Integer>();
-				functionsIdentified.put(functorName, paramCount);
-			}
-			paramCount.add(functionApplication.getArguments().size());
-		}
-		
+				
 		private Expression addArgToPredicate(Expression functionApplication, Expression additionalArgument) {
 			List<Expression> args = new ArrayList<Expression>();
 			args.addAll(functionApplication.getArguments());
