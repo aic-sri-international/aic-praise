@@ -41,6 +41,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
+import com.sri.ai.grinder.core.HasFunctor;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 
 /**
@@ -87,11 +88,14 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
  */
 @Beta
 public class MoveRandomVariableValueExpressionConditionDown extends AbstractRewriter {
+	
+	public MoveRandomVariableValueExpressionConditionDown() {
+		this.setReifiedTests(new HasFunctor(IfThenElse.FUNCTOR));
+	}
 
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-		if (IfThenElse.isIfThenElse(expression) &&
-				LPIUtil.containsRandomVariableValueExpression(IfThenElse.getCondition(expression), process)) {
+		if (LPIUtil.containsRandomVariableValueExpression(IfThenElse.getCondition(expression), process)) {
 			
 			Expression randomVariableCondition = IfThenElse.getCondition(expression);
 			

@@ -41,7 +41,9 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
+import com.sri.ai.grinder.core.HasFunctor;
 import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
 
 /**
  * A rewriter that externalizes conditionals containing logical variables, for
@@ -70,6 +72,10 @@ import com.sri.ai.grinder.helper.GrinderUtil;
 @Beta
 public class ExternalizeConditionalOnLogicalVariables extends AbstractRewriter {
 
+	public ExternalizeConditionalOnLogicalVariables() {
+		this.setReifiedTests(new HasFunctor(IfThenElse.FUNCTOR));
+	}
+	
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression,
 			RewritingProcess process) {

@@ -43,6 +43,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
+import com.sri.ai.grinder.core.HasFunctor;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 
@@ -56,6 +57,10 @@ import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 public class Type extends AbstractRewriter {
 
 	public final static String FUNCTOR_TYPE = "type";
+	
+	public Type() {
+		this.setReifiedTests(new HasFunctor(FUNCTOR_TYPE));
+	}
 
 	// the reason for a multiset here is that it does not trigger a
 	// normalization for eliminating repeated elements.
@@ -71,8 +76,7 @@ public class Type extends AbstractRewriter {
 		// "scoped variables"), which means its arguments are not accessible
 		// as rewriting of them is not considered possible.
 		// However, in this case we'd like to do differently.
-		if (expression.hasFunctor(FUNCTOR_TYPE)
-				&& expression.getSyntaxTree().numberOfImmediateSubTrees() == 1
+		if (expression.getSyntaxTree().numberOfImmediateSubTrees() == 1
 				&& IsRandomVariableValueExpression.apply(expression.getSyntaxTree().getImmediateSubTrees().get(0), process)
 			) {
 			return _booleanType;

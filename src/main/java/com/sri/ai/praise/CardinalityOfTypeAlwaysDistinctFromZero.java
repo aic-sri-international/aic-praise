@@ -42,6 +42,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
+import com.sri.ai.grinder.core.HasNumberOfArguments;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.model.Model;
 
@@ -62,6 +63,10 @@ import com.sri.ai.praise.model.Model;
 public class CardinalityOfTypeAlwaysDistinctFromZero extends AbstractRewriter {
 
 	public final static String FUNCTOR_TYPE = "type";
+	
+	public CardinalityOfTypeAlwaysDistinctFromZero() {
+		this.setReifiedTests(new HasNumberOfArguments(2));
+	}
 
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression,
@@ -69,35 +74,33 @@ public class CardinalityOfTypeAlwaysDistinctFromZero extends AbstractRewriter {
 
 		Expression result = expression;
 		if (Model.isCardinalityOfTypesAlwaysGreaterThanZero(process)) {
-			if (expression.numberOfArguments() == 2) {
-				if (expression.hasFunctor(FunctorConstants.EQUAL) || expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
-					Expression arg1 = expression.get(0);
-					Expression arg2 = expression.get(1);
-					if (arg1.hasFunctor(FunctorConstants.CARDINALITY)
-							&& arg1.numberOfArguments() == 1
-							&& arg1.get(0).hasFunctor(FUNCTOR_TYPE)
-							&& arg2.equals(Expressions.ZERO)) {
-						// | type(.) | = 0  -> false
-						if (expression.hasFunctor(FunctorConstants.EQUAL)) {
-							result = Expressions.FALSE;
-						} 
-						else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
-							// | type(.) | > 0  -> true
-							result = Expressions.TRUE;
-						}
+			if (expression.hasFunctor(FunctorConstants.EQUAL) || expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
+				Expression arg1 = expression.get(0);
+				Expression arg2 = expression.get(1);
+				if (arg1.hasFunctor(FunctorConstants.CARDINALITY)
+						&& arg1.numberOfArguments() == 1
+						&& arg1.get(0).hasFunctor(FUNCTOR_TYPE)
+						&& arg2.equals(Expressions.ZERO)) {
+					// | type(.) | = 0  -> false
+					if (expression.hasFunctor(FunctorConstants.EQUAL)) {
+						result = Expressions.FALSE;
 					} 
-					else if (arg2.hasFunctor(FunctorConstants.CARDINALITY)
-							&& arg2.numberOfArguments() == 1
-							&& arg2.get(0).hasFunctor(FUNCTOR_TYPE)
-							&& arg1.equals(Expressions.ZERO)) {
-						// 0 = | type(.) | = 0 
-						if (expression.hasFunctor(FunctorConstants.EQUAL)) {
-							result = Expressions.FALSE;
-						} 
-						else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
-							// 0 > | type(.) | -> false
-							result = Expressions.FALSE;
-						}
+					else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
+						// | type(.) | > 0  -> true
+						result = Expressions.TRUE;
+					}
+				} 
+				else if (arg2.hasFunctor(FunctorConstants.CARDINALITY)
+						&& arg2.numberOfArguments() == 1
+						&& arg2.get(0).hasFunctor(FUNCTOR_TYPE)
+						&& arg1.equals(Expressions.ZERO)) {
+					// 0 = | type(.) | = 0 
+					if (expression.hasFunctor(FunctorConstants.EQUAL)) {
+						result = Expressions.FALSE;
+					} 
+					else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
+						// 0 > | type(.) | -> false
+						result = Expressions.FALSE;
 					}
 				}
 			}
