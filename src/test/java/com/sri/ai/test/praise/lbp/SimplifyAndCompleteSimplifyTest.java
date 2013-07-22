@@ -475,6 +475,11 @@ public class SimplifyAndCompleteSimplifyTest extends AbstractLPITest {
 						3, 
 						// this is (if r then 2^1 else 3^1)*(3^2)
 						"if r then 18 else 27"),
+				new SimplifyTestData("not (X = b)",
+						new com.sri.ai.praise.model.example.TrivialLoopyPQandb(), 
+						"product({{ ( on X', Y ) (if p(X) then if X' != b then if Y = b then if true then 1 else 0 else (if true then 1 else 0) else (if true then 1 else 0) else 1) | ((X = X' or X = Y) and not (X' = Y)) and X' = X }})", 
+						100, 
+						"1")
 		};
 		
 		perform(tests);	
