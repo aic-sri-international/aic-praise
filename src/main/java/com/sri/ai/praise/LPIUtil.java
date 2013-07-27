@@ -1157,11 +1157,11 @@ public class LPIUtil {
 	 * Returns its singleton element if the given uniset is a singleton, or null otherwise.
 	 * R <- indices in I that Alpha depends on 
 	 * if R is empty, return Alpha.
-	 * let X be an index in R
-	 * let I' be I - X
-	 * value = pick_value(X, I, C)
+	 * let SomeIndex be an index in R
+	 * value = pick_value(SomeIndex, I, C)
 	 * if value is null, return null
-	 * return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })
+	 * let I' be I - {SomeIndex}
+	 * return pick_single_element({ (on I') Alpha[SomeIndex/value] | C[SomeIndex/value] })
 	 * </pre>
 	 * 
 	 * @param intensionalSet
@@ -1191,30 +1191,31 @@ public class LPIUtil {
 		
 		if (indicesR.size() == 0) {
 			Trace.log("if R is empty");
-			Trace.log("    return Alpha");
+			Trace.log("    return Alpha // Alpha = {}", alpha);
 			result = alpha;
 		} 
 		else {
-			Trace.log("let X be an index in R");
-			Expression variableX = indicesR.get(0); 
+			Trace.log("let SomeIndex be an index in R");
+			Expression someIndex = indicesR.get(0); 
+			Trace.log("// SomeIndex = {}", someIndex);
 			
-			Trace.log("let I' be I - X");
-			List<Expression> indexExpressionsIPrime = new ArrayList<Expression>(indicesI);
-			indexExpressionsIPrime.remove(variableX);
-			
-			Trace.log("value = pick_value(X, I, C)");
+			Trace.log("value = pick_value(SomeIndex, I, C)");
 			Expression variablesI = ExtensionalSet.makeUniSetExpression(indicesI);
 			Expression formulaC   = IntensionalSet.getCondition(intensionalSet);
-	
-			Expression value = pickValue(variableX, variablesI, formulaC, process);
+			Expression value = pickValue(someIndex, variablesI, formulaC, process);
+			Trace.log("// value = {}", value);
 			
 			if (value == null) {
 				Trace.log("if value is null, return null");
 			}
 			else {
+				Trace.log("let I' be I - {SomeIndex}");
+				List<Expression> indexExpressionsIPrime = new ArrayList<Expression>(indicesI);
+				indexExpressionsIPrime.remove(someIndex);
+				Trace.log("// I' = {}", indexExpressionsIPrime);
 				Trace.log("return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })");
-				Expression alphaSubX          = Substitute.replace(alpha, variableX, value, process);
-				Expression formulaCSubX       = Substitute.replace(formulaC, variableX, value, process);
+				Expression alphaSubX          = Substitute.replace(alpha, someIndex, value, process);
+				Expression formulaCSubX       = Substitute.replace(formulaC, someIndex, value, process);
 				Expression intensionalSetSubX = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressionsIPrime, alphaSubX, formulaCSubX);
 	
 				result = pickSingleElement(intensionalSetSubX, process);
@@ -1239,8 +1240,8 @@ public class LPIUtil {
 	 *      return value
 	 *      
 	 * // Need to use full satisfiability check to pick value
-	 * possible_values <- (constants of C) union ( (free variables of formula_on_X and context) \ {X}) // (1)
-	 * result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_values)
+	 * possible_determined_values <- (constants of C) union ( (free variables of formula_on_X and context) \ {X}) // (1)
+	 * result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_determined_values)
 	 * if result is null, return null
 	 * return R_complete_simplify(result)
 	 * 
@@ -1290,20 +1291,20 @@ public class LPIUtil {
 			else {
 				// Need to use full satisfiability check to pick value
 								
-				Trace.log("possible_values <- (constants of C) union ( (free variables of formula_on_X and context) \\ {X})");
+				Trace.log("possible_determined_values <- (constants of C) union ( (free variables of formula_on_X and context) \\ {X})");
 				
 				// (1) Preference is to check constants before free variables.
-				Set<Expression> possibleValues = new LinkedHashSet<Expression>();
+				Set<Expression> possibleDeterminedValues = new LinkedHashSet<Expression>();
 				// constants of C
-				possibleValues.addAll(FormulaUtil.getConstants(formulaC, process));
+				possibleDeterminedValues.addAll(FormulaUtil.getConstants(formulaC, process));
 				// union ( (free variables of formula_on_X and context) \\ {X})
 				Expression formulaOnXAndContext = CardinalityUtil.makeAnd(formulaOnX, process.getContextualConstraint());
-				possibleValues.addAll(Expressions.freeVariables(formulaOnXAndContext, process));
-				possibleValues.remove(variableX);
-				Trace.log("// possible_values = {}", possibleValues);
+				possibleDeterminedValues.addAll(Expressions.freeVariables(formulaOnXAndContext, process));
+				possibleDeterminedValues.remove(variableX);
+				Trace.log("// possible_determined_values = {}", possibleDeterminedValues);
 				
-				Trace.log("result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_values)");
-				result = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, possibleValues, process);
+				Trace.log("result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_determined_values)");
+				result = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, possibleDeterminedValues, process);
 				if (result == null) {
 					Trace.log("if result is null, return null");
 				}

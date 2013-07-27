@@ -216,7 +216,7 @@ public abstract class AbstractLPITest {
 							thrown.printStackTrace();
 							return errorMessage; // indicates that we need to break test loop
 				}
-				else if (!expectedExpression.equals(actual)) {
+				else if (actual == null || !expectedExpression.equals(actual)) {
 					String errorMessage = "ERROR tests[" + i + "] = " + topExpression 
 					+ "\nexpected: " + expectedExpression // better to show expectedExpression than expression, because parsing errors will be more clear
 					+ "\n but was: " + actual;
