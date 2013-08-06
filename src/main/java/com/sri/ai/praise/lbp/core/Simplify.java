@@ -187,7 +187,8 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 			    // prod_{}
 				// ->
 				// 1
-				new Pair<Class<?>, Rewriter>(MoveRandomVariableValueExpressionConditionDown.class,
+//						new Pair<Class<?>, Rewriter>(ExternalizeConditionalOnLogicalVariables.class,
+								new Pair<Class<?>, Rewriter>(MoveRandomVariableValueExpressionConditionDown.class,
 						new LiftProductOfFactorToVariable()),
 				new Pair<Class<?>, Rewriter>(LiftProductOfFactorToVariable.class,
 						new ProductOnExtensionalSet()),

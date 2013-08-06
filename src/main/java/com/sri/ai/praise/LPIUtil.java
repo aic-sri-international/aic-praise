@@ -56,7 +56,9 @@ import com.sri.ai.expresso.helper.Apply;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
+import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.core.TotalRewriter;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.Equality;
@@ -1561,6 +1563,19 @@ public class LPIUtil {
 			result = true; // is independent if intersection if empty
 		}
 		
+		return result;
+	}
+	
+	/**
+	 * Given a simplified conditional expression with conditions on equalities and RVs, with no conditions involving both,
+	 * returns an equivalent expression equality conditions are always above RV ones.
+	 * @param expression
+	 * @param process
+	 * @return
+	 */
+	public static Expression moveAllRandomVariableConditionsDown(Expression expression, RewritingProcess process) {
+		TotalRewriter totalRewriter = new TotalRewriter("Moving conditions on RVs down", Util.list( (Rewriter) new MoveRandomVariableValueExpressionConditionDown()));
+		Expression result = totalRewriter.rewrite(expression, process);
 		return result;
 	}
 }

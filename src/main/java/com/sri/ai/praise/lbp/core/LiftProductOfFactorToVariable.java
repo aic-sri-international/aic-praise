@@ -157,6 +157,10 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 			Expression alpha      = IntensionalSet.getHead(prodSet);
 			Expression conditionC = IntensionalSet.getCondition(prodSet);
 			
+			// the following logic depends on the head having all conditions on random variables lower than conditions on logical variables.
+			// This will ensure a single message value per logical variable context that can then be picked by pick_single_element.
+			alpha = LPIUtil.moveAllRandomVariableConditionsDown(alpha, process);
+			
 			if (isARepresentativeMessageFromAFactorToTheVariable(alpha, process)) {
 				// Alpha is if C' then Alpha_1 else Alpha_2
 				if (IfThenElse.isIfThenElse(alpha)) {
