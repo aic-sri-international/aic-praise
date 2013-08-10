@@ -59,6 +59,7 @@ import com.sri.ai.praise.LPIGrammar;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.util.Configuration;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.concurrent.BranchAndMerge;
 
 public abstract class AbstractLPITest {
@@ -216,10 +217,10 @@ public abstract class AbstractLPITest {
 							thrown.printStackTrace();
 							return errorMessage; // indicates that we need to break test loop
 				}
-				else if (actual == null || !expectedExpression.equals(actual)) {
+				else if ( ! Util.equals(actual, expectedExpression)) {
 					String errorMessage = "ERROR tests[" + i + "] = " + topExpression 
 					+ "\nexpected: " + expectedExpression // better to show expectedExpression than expression, because parsing errors will be more clear
-					+ "\n but was: " + actual;
+					+ "\nbut was: " + actual;
 					System.out.println(errorMessage);
 					return errorMessage; // indicates that we need to break test loop
 				}

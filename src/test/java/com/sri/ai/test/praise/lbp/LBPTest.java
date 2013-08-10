@@ -3800,12 +3800,12 @@ public class LBPTest extends AbstractLPITest {
 		                "if Z = a then c else d"
 		                ),
 // TODO - resolve why this fails but simplified versions below it do not.		                
-//                new PickSingleElementTestData("not (X = b)",
-//                		new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
-//		                "{ ( on X', Y ) (if p(X) then if X' != b then if Y = b then if true then 1 else 0 else (if true then 1 else 0) else (if true then 1 else 0) else 1) | ((X = X' or X = Y) and not (X' = Y)) and X' = X }",
-//		                false,
-//		                "FAILS"
-//		                ),
+                new PickSingleElementTestData("not (X = b)",
+                		new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
+		                "{ ( on X', Y ) (if p(X) then if X' != b then if Y = b then if true then 1 else 0 else (if true then 1 else 0) else (if true then 1 else 0) else 1) | ((X = X' or X = Y) and not (X' = Y)) and X' = X }",
+		                false,
+		                null
+		                ),
 		        // Simplified version of the above test
                 new PickSingleElementTestData("not (X = b)",
                 		new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
