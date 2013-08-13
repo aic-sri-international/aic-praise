@@ -175,7 +175,7 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				// ->
 				// 'if X = a then if p(X) then Alpha else Gamma else if p(X) then Beta else Gamma' 
 				new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
-						new ExternalizeConditionalOnLogicalVariables()),	
+						new ExternalizeConditionalOnLogicalVariables()),	 
 				new Pair<Class<?>, Rewriter>(ExternalizeConditionalOnLogicalVariables.class,
 						new MoveRandomVariableValueExpressionConditionDown()),
 				//
