@@ -66,6 +66,7 @@ import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.CardinalityOfTypeAlwaysDistinctFromZero;
 import com.sri.ai.praise.ExternalizeConditionalOnLogicalVariables;
 import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.MoveAllConditionsOnRandomVariablesDown;
 import com.sri.ai.praise.MoveRandomVariableValueExpressionConditionDown;
 import com.sri.ai.praise.Type;
 import com.sri.ai.praise.lbp.LBPRewriter;
@@ -174,10 +175,15 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				// 'if p(X) then if X = a then Alpha else Beta else Gamma' 
 				// ->
 				// 'if X = a then if p(X) then Alpha else Gamma else if p(X) then Beta else Gamma' 
-				new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
-						new ExternalizeConditionalOnLogicalVariables()),	 
+						
+//						new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
+//								new MoveAllConditionsOnRandomVariablesDown()),	 
+
+						new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
+								new ExternalizeConditionalOnLogicalVariables()),	 
 				new Pair<Class<?>, Rewriter>(ExternalizeConditionalOnLogicalVariables.class,
 						new MoveRandomVariableValueExpressionConditionDown()),
+						
 				//
 				// Support for: lifting products of factors
 			    // prod_{{(on I) Alpha | C}}
@@ -187,8 +193,10 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 			    // prod_{}
 				// ->
 				// 1
-//						new Pair<Class<?>, Rewriter>(ExternalizeConditionalOnLogicalVariables.class,
+
+//								new Pair<Class<?>, Rewriter>(MoveAllConditionsOnRandomVariablesDown.class,
 								new Pair<Class<?>, Rewriter>(MoveRandomVariableValueExpressionConditionDown.class,
+										
 						new LiftProductOfFactorToVariable()),
 				new Pair<Class<?>, Rewriter>(LiftProductOfFactorToVariable.class,
 						new ProductOnExtensionalSet()),

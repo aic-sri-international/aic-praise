@@ -50,20 +50,13 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
  * e.g:
  * 
  * <pre>
- * if X = a and p(X) then 1 else 2
+ * if X = a and p(X) then E1 else E2
  * </pre>
  * 
  * would have the expression with the logical variable moved to the top:
  * 
  * <pre>
  * if X = a then if p(X) then E1 else E2 else E2
- * </pre>
- * 
- * it assumes it is being used in conjunction with the
- * IfThenElseConstraintApplier so that the final expression would look like:
- * 
- * <pre>
- * if X = a then if p(a1) then E1 else E2 else E2
  * </pre>
  * 
  * @author oreilly
