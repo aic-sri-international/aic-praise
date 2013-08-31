@@ -602,7 +602,7 @@ public class LBPTest extends AbstractLPITest {
 			    		// Note: new R_simplify result also has unreachable branches (to be expected as known to be incomplete).
 			    		// Note: introduction of FromConditionalFormulaToFormula shortens the expression further
 			    		//       Used to be: if A = C then if B = C then if A = B then { } else if D = C then { } else { D } else if A = B then { B } else if D = C then { B } else { B, D } else if B = C then if A = B then { A } else if D = C then { A } else { A, D } else if A = B then { A, B } else if D = C then { A, B } else { A, B, D }
-			    		"if A = C then if B = C then { } else if A = B or A != B and D = C then { B } else { B, D } else if B = C then if A = B or A != B and D = C then { A } else { A, D } else if A = B or A != B and D = C then { A, B } else { A, B, D }"),
+			    		"if A = C then if B = C then { } else (if A = B or D = C then { B } else { B, D }) else (if B = C then if A = B or D = C then { A } else { A, D } else (if A = B or D = C then { A, B } else { A, B, D }))"),
 				//
 				// Basic: Illegal Argument Exceptions
 				//
