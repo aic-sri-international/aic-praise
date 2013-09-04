@@ -47,7 +47,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.Substitute;
+import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.Sets;
@@ -137,8 +137,8 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 			Expression beta   = (Expression) cPrimeAndiEqualsBeta[2];
 			Expression index  = IntensionalSet.getIndex(intSetIndexExpressions.get(i));
 
-			Expression substitutedAlpha  = Substitute.replace(intSetHead, index, beta, process);
-			Expression substitutedCPrime = Substitute.replace(cPrime, index, beta, process);
+			Expression substitutedAlpha  = SemanticSubstitute.replace(intSetHead, index, beta, process);
+			Expression substitutedCPrime = SemanticSubstitute.replace(cPrime, index, beta, process);
 			
 			intSetIndexExpressions.remove(i);
 

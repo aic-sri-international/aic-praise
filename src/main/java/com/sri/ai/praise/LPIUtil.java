@@ -63,7 +63,7 @@ import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.Substitute;
+import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.boole.ThereExists;
@@ -1216,8 +1216,8 @@ public class LPIUtil {
 				indexExpressionsIPrime.remove(someIndex);
 				Trace.log("// I' = {}", indexExpressionsIPrime);
 				Trace.log("return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })");
-				Expression alphaSubX          = Substitute.replace(alpha, someIndex, value, process);
-				Expression formulaCSubX       = Substitute.replace(formulaC, someIndex, value, process);
+				Expression alphaSubX          = SemanticSubstitute.replace(alpha, someIndex, value, process);
+				Expression formulaCSubX       = SemanticSubstitute.replace(formulaC, someIndex, value, process);
 				Expression intensionalSetSubX = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressionsIPrime, alphaSubX, formulaCSubX);
 	
 				result = pickSingleElement(intensionalSetSubX, process);

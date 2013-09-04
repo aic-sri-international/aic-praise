@@ -53,7 +53,7 @@ import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.library.Substitute;
+import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -270,8 +270,8 @@ public class ModelGrounding {
 							replacements.put(indexName, row.get(i));
 							i++;
 						}
-						Expression groundFactorValue = Substitute.replaceAll(parfactorInformation.intensionalFactorValueExpression, replacements, process);
-						Expression condition         = Substitute.replaceAll(parfactorInformation.intensionalCondition, replacements, process);
+						Expression groundFactorValue = SemanticSubstitute.replaceAll(parfactorInformation.intensionalFactorValueExpression, replacements, process);
+						Expression condition         = SemanticSubstitute.replaceAll(parfactorInformation.intensionalCondition, replacements, process);
 						Expression ifThenElse = IfThenElse.make(condition, Expressions.TRUE, Expressions.FALSE);
 						Expression conditionTest = simplify.rewrite(ifThenElse, process);
 						if (Expressions.TRUE.equals(conditionTest)) {

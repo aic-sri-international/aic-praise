@@ -51,7 +51,7 @@ import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.Substitute;
+import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.number.Plus;
@@ -490,7 +490,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression[] substitutions = new Expression[relevantRange.size()];
 		for (int i = 0; i < substitutions.length; i++) {
 			Expression v     = relevantRange.get(i);
-			substitutions[i] = Substitute.replace(EByM, vPrimeValue, v, process);
+			substitutions[i] = SemanticSubstitute.replace(EByM, vPrimeValue, v, process);
 		}
 		Expression sumOfSubstitutions = Plus.make(Arrays.asList(substitutions));
 		Trace.log("       // new expression to go through summation will be simpification of {}", sumOfSubstitutions);
@@ -551,7 +551,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		// relevantRange = {v in range(v') : R_basic(E[v'/v]) is not zero}
 		List<Expression> relevantRange = new ArrayList<Expression>();
 		for (Expression v : Model.range(vPrimeValue, process)) {
-			Expression subE = Substitute.replace(E, vPrimeValue, v, process);
+			Expression subE = SemanticSubstitute.replace(E, vPrimeValue, v, process);
 			Expression basicE = process.rewrite(R_basic, subE);
 			if (!basicE.equals(Expressions.ZERO)) {
 				relevantRange.add(v);

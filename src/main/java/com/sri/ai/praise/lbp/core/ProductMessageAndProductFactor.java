@@ -46,7 +46,7 @@ import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.Substitute;
+import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
@@ -276,7 +276,7 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 		int nonZeroCount = 0;
 
 		for (Expression vVal : Model.range(randomVariableValueExpression, process)) {
-			Expression subM   = Substitute.replace(conditionalMessage, randomVariableValueExpression, vVal, process);
+			Expression subM   = SemanticSubstitute.replace(conditionalMessage, randomVariableValueExpression, vVal, process);
 			Expression basicE = process.rewrite(R_basic, subM);
 
 			if (!Expressions.ZERO.equals(basicE)) {

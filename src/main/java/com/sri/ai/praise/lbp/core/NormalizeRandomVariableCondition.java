@@ -44,7 +44,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
-import com.sri.ai.grinder.library.Substitute;
+import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
@@ -106,8 +106,8 @@ public class NormalizeRandomVariableCondition extends AbstractLBPHierarchicalRew
 			Expression randomVariableValueExpression = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(randomVariable);
 			Trace.log("E ({}) is unconditional basic expression on {}", expressionE, randomVariableValueExpression);
 
-			Expression expressionEForRandomVariableTrue  = Substitute.replace(expressionE, randomVariableValueExpression, Expressions.TRUE,  process);
-			Expression expressionEForRandomVariableFalse = Substitute.replace(expressionE, randomVariableValueExpression, Expressions.FALSE, process);
+			Expression expressionEForRandomVariableTrue  = SemanticSubstitute.replace(expressionE, randomVariableValueExpression, Expressions.TRUE,  process);
+			Expression expressionEForRandomVariableFalse = SemanticSubstitute.replace(expressionE, randomVariableValueExpression, Expressions.FALSE, process);
 
 			expressionEForRandomVariableTrue  = process.rewrite(R_simplify, expressionEForRandomVariableTrue);
 			expressionEForRandomVariableFalse = process.rewrite(R_simplify, expressionEForRandomVariableFalse);

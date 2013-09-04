@@ -898,7 +898,8 @@ public class RuleConverterTest {
 		expected = new ArrayList<Pair<Expression, Expression>>();
 		expected.add(new Pair<Expression, Expression>(
 				lowParser.parse("if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.8 else 0.2 else 0.5"),
-				lowParser.parse("Y != Z and Y != X")));
+				lowParser.parse("Y != X and Y != Z")));
+        		// lowParser.parse("Y != Z and Y != X")));
 		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions));
 
 		potentialExpressions = new ArrayList<Expression>();
