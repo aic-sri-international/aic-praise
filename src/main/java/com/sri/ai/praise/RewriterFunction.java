@@ -38,31 +38,26 @@
 package com.sri.ai.praise;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.core.AbstractRewriter;
 
 /**
- * A rewriter that applies {@link BreakConditionsContainingBothLogicalAndRandomVariables} to all sub-expressions
- * of the given expression from the leaves up.
- * The rewritten expression is guaranteed to not contain conditions involving both logical and random variables.
- * IMPORTANT: It assumes that all random variable value expressions occur in the conditions of if then else expressions. 
+ * A function mapping an expression to its form rewritten by a given rewriter within a given rewriting process. 
  */
 @Beta
-public class BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical extends AbstractRewriter {
+public class RewriterFunction implements Function<Expression, Expression> {
+	private Rewriter rewriter;
+	private RewritingProcess process;
 
-	@Override
-	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-		Expression result = expression.replace(
-				new RewriterFunction(rewriter, process),
-				null, null, null,
-				false /* not onlyTheFirstOne */,
-				false /* not IgnoreTopExpression */,
-				true  /* replaceOnChildrenBeforeTopExpression */,
-				null, process);
-		return result;
+	public RewriterFunction(Rewriter rewriter, RewritingProcess process) {
+		super();
+		this.rewriter = rewriter;
+		this.process = process;
 	}
-	
-	private static Rewriter rewriter = new BreakConditionsContainingBothLogicalAndRandomVariables();
+
+	public Expression apply(Expression expression) {
+		return rewriter.rewrite(expression, process);
+	}
 }

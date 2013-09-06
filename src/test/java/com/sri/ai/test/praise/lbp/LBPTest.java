@@ -61,6 +61,7 @@ import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariables;
+import com.sri.ai.praise.IfThenElseExternalizationHierarchical;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
 import com.sri.ai.praise.PRAiSEConfiguration;
@@ -155,6 +156,42 @@ public class LBPTest extends AbstractLPITest {
 
 		expressionString = "if X = john and smart(ann) then if X = john and smart(beth) then 1 else 0 else if X = john and smart(carol) and Y != tom then 1 else 0";
 		expectedString = "if X = john then if smart(ann) then if X = john then if smart(beth) then 1 else 0 else 0 else (if X = john and Y != tom then if smart(carol) then 1 else 0 else 0) else (if X = john and Y != tom then if smart(carol) then 1 else 0 else 0)";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+	}
+	
+	@Test
+	public void testIfThenElseExternalizationHierarchical() {
+		String expressionString;
+		String expectedString;
+		Expression actual;
+		Rewriter rewriter = new IfThenElseExternalizationHierarchical();
+		RewritingProcess process =
+				LBPFactory.newLBPProcessWithHighLevelModel(
+						"sort Person : 10, ann, beth, carol, tom, john;" +
+						"random smart : Person -> Boolean;");
+
+		// simple case
+		expressionString = "(if X = tom then 1 else 2) + (if Y = beth then 3 else 4)";
+		expectedString = "if X = tom then if Y = beth then 1 + 3 else 1 + 4 else (if Y = beth then 2 + 3 else 2 + 4)";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+		
+		// more-than-one-level case
+		expressionString = "(if X = tom then 1 else 2) + (if Y = beth then if Z = carol then 3 else 4 else 5)";
+		expectedString = "if X = tom then if Y = beth then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5 else (if Y = beth then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5)";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+		
+		// more-than-one-level case, with conditionals at the bottom only
+		expressionString = "f(g((if X = tom then 1 else 2) + (if Y = beth then 3 else 4)))";
+		expectedString = "if X = tom then if Y = beth then f(g(1 + 3)) else f(g(1 + 4)) else (if Y = beth then f(g(2 + 3)) else f(g(2 + 4)))";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+		
+		// conditional condition case
+		expressionString = "(if X = tom then 1 else 2) + (if (if Y = beth then W = tom else W = john) then if Z = carol then 3 else 4 else 5)";
+		expectedString = "if X = tom then if Y = beth and W = tom or W = tom then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5 else (if Y = beth and W = tom or W = tom then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5)";
 		actual = rewriter.rewrite(parse(expressionString), process);
 		assertEquals(parse(expectedString), actual);
 	}
