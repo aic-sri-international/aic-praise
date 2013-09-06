@@ -79,7 +79,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
  *                  else Beta
  * </pre>
  * 
- * This rewriter has a function similar to {@link ExternalizeConditionalOnLogicalVariables}'s,
+ * This rewriter has a function similar to {@link BreakConditionsContainingBothLogicalAndRandomVariables}'s,
  * which separates conditions on random and logical variables that are present in the same condition.
  * For the appropriate normal form to be obtained, both rewriters must be used together.
  * 

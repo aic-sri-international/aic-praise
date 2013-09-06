@@ -17,7 +17,7 @@ public class BracketedExpressionSubExpressionsProviderTest extends AbstractLPITe
 		RewritingProcess process = newRewritingProcess(Expressions.TRUE);
 		Model model = new TrivialPQR();
 		Expression modelExpression = parse(model.getModelDeclaration());
-		Model.setRewritingProcessesModel(modelExpression, model.getKnownRandomVariableNames(), process);
+		Model.setRewritingProcessesModel(modelExpression, model.getKnownRandomVariableNameAndArities(), process);
 		
 		BracketedExpressionSubExpressionsProvider provider = new BracketedExpressionSubExpressionsProvider();
 		

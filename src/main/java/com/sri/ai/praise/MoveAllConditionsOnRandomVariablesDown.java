@@ -75,7 +75,7 @@ public class MoveAllConditionsOnRandomVariablesDown extends AbstractRewriter {
 			TotalRewriter externalizeAllConditionsOnLogicalVariables =
 					new TotalRewriter(
 							"Total rewriter externalizing conditions on logical variables",
-							Util.list((Rewriter) new ExternalizeConditionalOnLogicalVariables()));
+							Util.list((Rewriter) new BreakConditionsContainingBothLogicalAndRandomVariables()));
 
 			TotalRewriter moveAllRandomVariableConditionsDown =
 					new TotalRewriter(
@@ -117,7 +117,7 @@ public class MoveAllConditionsOnRandomVariablesDown extends AbstractRewriter {
 		return new ArrayList<Rewriter>(
 				Arrays.asList(new Rewriter[] {
 						new MoveRandomVariableValueExpressionConditionDown(),
-						new ExternalizeConditionalOnLogicalVariables()
+						new BreakConditionsContainingBothLogicalAndRandomVariables()
 				}));
 	}
 }

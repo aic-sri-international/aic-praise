@@ -81,6 +81,7 @@ import com.sri.ai.praise.lbp.core.SetDifference;
 import com.sri.ai.praise.lbp.core.Simplify;
 import com.sri.ai.praise.lbp.core.Sum;
 import com.sri.ai.praise.lbp.core.Union;
+import com.sri.ai.praise.model.Model;
 import com.sri.ai.util.functionalsequence.RefinerIterator;
 
 /**
@@ -115,6 +116,17 @@ public class LBPFactory {
 	
 	public static LBPConfiguration newLBPConfiguration() {
 		return new DefaultLBPConfiguration();
+	}
+	
+	public static RewritingProcess newLBPProcessWithHighLevelModel(String highLevelModel) {
+		RewritingProcess process = newLBPProcess(null);
+		Model model = Model.fromRules(highLevelModel);
+		model.setRewritingProcessesModel(process);
+		return process;
+	}
+	
+	public static RewritingProcess newLBPProcess() {
+		return newLBPProcess(null);
 	}
 	
 	public static RewritingProcess newLBPProcess(Expression rootExpression) {

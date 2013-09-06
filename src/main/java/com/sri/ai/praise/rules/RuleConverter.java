@@ -170,6 +170,18 @@ public class RuleConverter {
 	/*===================================================================================
 	 * PUBLIC METHODS
 	 *=================================================================================*/
+
+	/** A convenience method building a {@link Model} from a string. */
+	public static Model makeModel(String ruleAndDeclarationsListString) {
+		RuleConverter ruleConverter = new RuleConverter();
+		Model model;
+		try {
+			model = ruleConverter.makeModelDynamic(ruleAndDeclarationsListString);
+		} catch (ReservedWordException e) {
+			throw new Error(e);
+		}
+		return model;
+	}
 	
 	/**
 	 * Version of query String arguments that are automatically converted to HLL expressions.
@@ -212,6 +224,28 @@ public class RuleConverter {
 	 */
 	public Triple<Model, Expression, Model> query(Expression queryFormula, List<Expression> ruleAndDeclarationsList, String llmName, String llmDescription) throws ReservedWordException {
 
+		Model lowLevelModel = makeModel(ruleAndDeclarationsList, llmName, llmDescription);
+		
+		// | (low-level-query, low-level-model-extended-by-query) <- query(queryFormula, low-level-model)
+		Pair<Expression, Model> queryLowLevelModelExtendedByQuery = query(queryFormula, lowLevelModel);
+		
+		// | return (low-level-model, low-level-query, low-level-model-extended-by-query)
+		return new Triple<Model, Expression, Model>(lowLevelModel, queryLowLevelModelExtendedByQuery.first, queryLowLevelModelExtendedByQuery.second);
+	}
+
+	/**
+	 * Converts the rules model and generates a low-level model object.
+	 * 
+	 * @param ruleAndDeclarationsList
+	 *            The list of rule expressions of the model.
+	 * @param llmName
+	 *            The name for the low level model.
+	 * @param llmDescription
+	 *            The description to be used for the low level model.
+	 * @return A {@link Model} object.
+	 * @throws ReservedWordException
+	 */
+	public Model makeModel(List<Expression> ruleAndDeclarationsList, String llmName, String llmDescription) throws ReservedWordException {
 		// | (sortDeclarations, randomVariableDeclarations, parfactors) <- translate(ruleAndDeclarationsList)
 		LowLevelModelParts lowLevelSyntax = translate(ruleAndDeclarationsList);
 		
@@ -230,12 +264,31 @@ public class RuleConverter {
 		
 		// | low-level-model <- model(sortDeclarations, randomVariableDeclarations, parfactors)
 		Model lowLevelModel = createModel(llmName, llmDescription, lowLevelSyntax.getSortDeclarations(), lowLevelSyntax.getRandomVariableDeclarations(), lowLevelSyntax.getParfactors());
-		
-		// | (low-level-query, low-level-model-extended-by-query) <- query(queryFormula, low-level-model)
-		Pair<Expression, Model> queryLowLevelModelExtendedByQuery = query(queryFormula, lowLevelModel);
-		
-		// | return (low-level-model, low-level-query, low-level-model-extended-by-query)
-		return new Triple<Model, Expression, Model>(lowLevelModel, queryLowLevelModelExtendedByQuery.first, queryLowLevelModelExtendedByQuery.second);
+		return lowLevelModel;
+	}
+	
+	/**
+	 * Converts the rules model and generates a low-level model object.
+	 * 
+	 * @param ruleAndDeclarationsList
+	 *            The list of rule expressions of the model.
+	 * @return A {@link Model} object.
+	 * @throws ReservedWordException
+	 */
+	public Model makeModel(List<Expression> ruleAndDeclarationsList) throws ReservedWordException {
+		return makeModel(ruleAndDeclarationsList, "Model", "Model");
+	}
+	
+	/**
+	 * Converts the rules model and generates a low-level model object.
+	 * 
+	 * @param ruleAndDeclarationsList
+	 *            The list of rule expressions of the model.
+	 * @return A {@link Model} object.
+	 * @throws ReservedWordException
+	 */
+	private Model makeModelDynamic(String ruleAndDeclarationsListString) throws ReservedWordException {
+		return makeModel(ruleParser.parseAll(ruleAndDeclarationsListString), "Model", "Model");
 	}
 	
 	/**
@@ -1726,28 +1779,33 @@ public class RuleConverter {
 	 * @param name             The name of the model.
 	 * @param description      Description of the model.
 	 * @param sorts            The sorts in the model.
-	 * @param randomVariables  The random variable declarations in the model.
+	 * @param randomVariableDeclarations  The random variable declarations in the model.
 	 * @param parfactors       The parfactors in the model. 
 	 * @return                 A Model representation of the given model components.
 	 */
 	public Model createModel (String name, String description, 
-			Set<Expression> sorts, Set<Expression> randomVariables,
+			Set<Expression> sorts, Set<Expression> randomVariableDeclarations,
 			Set<Expression> parfactors) {
-		ArrayList<Expression> modelArgs = new ArrayList<Expression>();
-		modelArgs.add(DefaultSymbol.createSymbol(name));
-		modelArgs.add(DefaultSymbol.createSymbol(description));
+		ArrayList<Expression> modelArguments = new ArrayList<Expression>();
+		modelArguments.add(DefaultSymbol.createSymbol(name));
+		modelArguments.add(DefaultSymbol.createSymbol(description));
 		for (Expression sort : sorts)
-			modelArgs.add(sort);
+			modelArguments.add(sort);
 
-		Set<String> randomVariableNames = new HashSet<String>();
-		for (Expression randomVariable : randomVariables) {
-			modelArgs.add(randomVariable);
-			randomVariableNames.add(randomVariable.get(0).toString());
+		Set<String> randomVariableNameAndArities = new HashSet<String>();
+		for (Expression randomVariableDeclaration : randomVariableDeclarations) {
+			modelArguments.add(randomVariableDeclaration);
+			Expression randomVariableName = randomVariableDeclaration.get(0);
+			Expression randomVariableArity =
+					randomVariableDeclaration.numberOfArguments() > 1 ?
+							randomVariableDeclaration.get(1)
+							: Expressions.ZERO;
+			randomVariableNameAndArities.add(randomVariableName + "/" + randomVariableArity);
 		}
-		modelArgs.add(Expressions.apply(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION, parfactors));
-		Expression modelExpression = Expressions.apply(Model.FUNCTOR_MODEL_DECLARATION, modelArgs);
+		modelArguments.add(Expressions.apply(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION, parfactors));
+		Expression modelExpression = Expressions.apply(Model.FUNCTOR_MODEL_DECLARATION, modelArguments);
 
-		return new Model(modelExpression, randomVariableNames);
+		return new Model(modelExpression, randomVariableNameAndArities);
 	}
 
 	/**

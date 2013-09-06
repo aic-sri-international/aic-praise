@@ -597,7 +597,7 @@ public class ModelTest extends AbstractLPITest {
 				"p", "q");
 		
 		// Ensure declaration attributes are valid
-		Assert.assertEquals(Util.set("p", "q"), model.getKnownRandomVariableNames());
+		Assert.assertEquals(Util.set("p", "q"), model.getKnownRandomVariableNameAndArities());
 		
 		//
 		// The following calls should no longer throw exceptions as the model should auto-define.
@@ -788,7 +788,7 @@ public class ModelTest extends AbstractLPITest {
 								Util.set("epidemic", "sick"));
 		Assert.assertEquals(1, model.getSortDeclarations().size());
 		Assert.assertEquals(0, model.getRandomVariableDeclarations().size());
-		Assert.assertEquals(2, model.getKnownRandomVariableNames().size());
+		Assert.assertEquals(2, model.getKnownRandomVariableNameAndArities().size());
 		Assert.assertEquals(1, model.getParfactorsDeclaration().getParfactors().size());
 	}
 	

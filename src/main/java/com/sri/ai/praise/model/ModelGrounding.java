@@ -323,7 +323,7 @@ public class ModelGrounding {
 				groundModelDeclaration.preGroundModel.getSortDeclarations(), 
 				groundModelDeclaration.preGroundModel.getRandomVariableDeclarations(), 
 				groundParfactorsDeclaration, 
-				groundModelDeclaration.preGroundModel.getKnownRandomVariableNames()); 
+				groundModelDeclaration.preGroundModel.getKnownRandomVariableNameAndArities()); 
 				
 		GroundedModelResult groundedModelResult = new GroundedModelResult(groundedModel, groundModelDeclaration.groundedFrom, parfactorToGroundFactors);
 		
@@ -352,7 +352,7 @@ public class ModelGrounding {
 			} 
 			else {
 				groundedFrom = new Model(fromModelDefinition,
-						Model.getKnownRandomVariableNames(process));
+						Model.getKnownRandomVariableNameAndArities(process));
 
 				ensureNoFreeVariables(groundedFrom, process);
 
@@ -543,7 +543,7 @@ public class ModelGrounding {
 		
 		private void ensureCanGroundLegally(Model model, Expression name, Expression description) {
 			List<Expression> preGroundModelParts = new ArrayList<Expression>();
-			Set<String> knownRandomVariableNames = new LinkedHashSet<String>();
+			Set<String> knownRandomVariableNameAndArities = new LinkedHashSet<String>();
 			
 			if (name == null) {
 				// Default to the name given to the model being ground from
@@ -562,7 +562,7 @@ public class ModelGrounding {
 			
 			for (SortInformation sortInformation : sortMap.values()) {
 				preGroundModelParts.add(sortInformation.getGroundDeclaration().getSortDeclaration());
-				knownRandomVariableNames.add(sortInformation.name.toString());
+				knownRandomVariableNameAndArities.add(sortInformation.name.toString());
 			}
 			for (RandomVariableInformation randomVariableInformation : randomVariableMap.values()) {
 				preGroundModelParts.add(randomVariableInformation.getGroundDeclaration().getRandomVariableDeclaration());
@@ -574,7 +574,7 @@ public class ModelGrounding {
 			Expression preGroundModelDefinition = Expressions.make(Model.FUNCTOR_MODEL_DECLARATION, preGroundModelParts.toArray());
 			
 			try {
-				preGroundModel = new Model(preGroundModelDefinition, knownRandomVariableNames);
+				preGroundModel = new Model(preGroundModelDefinition, knownRandomVariableNameAndArities);
 			} catch (Model.ModelException mex) {
 				errors.add(new ModelGroundingError(mex.getErrors(), preGroundModelDefinition));
 			}

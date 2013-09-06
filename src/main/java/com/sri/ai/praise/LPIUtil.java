@@ -1575,7 +1575,7 @@ public class LPIUtil {
 				new TotalRewriter(
 						"Moving conditions on RVs down in LBPUtil",
 						Util.list( (Rewriter) new MoveRandomVariableValueExpressionConditionDown(),
-						           (Rewriter) new ExternalizeConditionalOnLogicalVariables())
+						           (Rewriter) new BreakConditionsContainingBothLogicalAndRandomVariables())
 						);
 		Expression result = totalRewriter.rewrite(expression, process);
 		return result;

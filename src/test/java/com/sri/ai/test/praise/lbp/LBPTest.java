@@ -56,10 +56,13 @@ import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
+import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariables;
 import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
 import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
@@ -121,6 +124,41 @@ public class LBPTest extends AbstractLPITest {
 		System.out.println(result);
 	}
 	
+	@Test
+	public void testNewLBPProcess2() {
+		Expression testExpression = parse("1 + 1");
+		RewritingProcess process = LBPFactory.newLBPProcess(testExpression);
+		Expression result = process.rewrite(LBPRewriter.R_basic, testExpression);
+		System.out.println(result);
+	}
+	
+	@Test
+	public void testBreakConditionsContainingBothLogicalAndRandomVariablesHierarchical() {
+		String expressionString;
+		String expectedString;
+		Expression actual;
+		Rewriter rewriter = new BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical();
+		RewritingProcess process =
+				LBPFactory.newLBPProcessWithHighLevelModel(
+						"sort Person : 10, ann, beth, carol, tom, john;" +
+						"random smart : Person -> Boolean;");
+		
+		expressionString = "if X = john and smart(X) then 1 else 0";
+		expectedString = "if X = john then if smart(X) then 1 else 0 else 0";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+		
+		expressionString = "if smart(X) and X = john and smart(X) then 1 else 0";
+		expectedString = "if X = john then if smart(X) and smart(X) then 1 else 0 else 0";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+
+		expressionString = "if X = john and smart(ann) then if X = john and smart(beth) then 1 else 0 else if X = john and smart(carol) and Y != tom then 1 else 0";
+		expectedString = "if X = john then if smart(ann) then if X = john then if smart(beth) then 1 else 0 else 0 else (if X = john and Y != tom then if smart(carol) then 1 else 0 else 0) else (if X = john and Y != tom then if smart(carol) then 1 else 0 else 0)";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+	}
+	
 	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void testFindRandomVariableValueExpressionsThatAreNotAGivenOne() {
@@ -144,7 +182,7 @@ public class LBPTest extends AbstractLPITest {
 				Util.pair(parse("sick(W)"), parse("not (Z != X)"))
 				);
         process = LBPFactory.newLBPProcess(expression);
-        Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNames(), process); 
+        Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNameAndArities(), process); 
         otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(expression, randomVariableValue, process);
         assertEquals(expected, otherRandomVariableValuesAndContexts);	
     }

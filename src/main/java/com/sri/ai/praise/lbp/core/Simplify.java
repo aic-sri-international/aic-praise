@@ -64,7 +64,7 @@ import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.CardinalityOfTypeAlwaysDistinctFromZero;
-import com.sri.ai.praise.ExternalizeConditionalOnLogicalVariables;
+import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariables;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.MoveAllConditionsOnRandomVariablesDown;
 import com.sri.ai.praise.MoveRandomVariableValueExpressionConditionDown;
@@ -180,8 +180,8 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 //								new MoveAllConditionsOnRandomVariablesDown()),	 
 
 						new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
-								new ExternalizeConditionalOnLogicalVariables()),	 
-				new Pair<Class<?>, Rewriter>(ExternalizeConditionalOnLogicalVariables.class,
+								new BreakConditionsContainingBothLogicalAndRandomVariables()),	 
+				new Pair<Class<?>, Rewriter>(BreakConditionsContainingBothLogicalAndRandomVariables.class,
 						new MoveRandomVariableValueExpressionConditionDown()),
 						
 				//

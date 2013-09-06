@@ -112,7 +112,7 @@ public class ExportToPMTK3FactorGraph {
 		RewritingProcess process = LBPFactory.newLBPProcess(modelDefinition);
 		process.getGlobalObjects().putAll(globalObjects);
 		
-		Model.setRewritingProcessesModel(modelDefinition, modelToExport.getKnownRandomVariableNames(), process);
+		Model.setRewritingProcessesModel(modelDefinition, modelToExport.getKnownRandomVariableNameAndArities(), process);
 		
 		GroundedModelResult groundedModelResult = null;
 		try {
@@ -560,7 +560,7 @@ public class ExportToPMTK3FactorGraph {
 		if (expressionE.getFunctor() != null) {		
 			Symbol predicateSymbol = (Symbol) expressionE.getFunctor();
 			if (predicateSymbol.getValue() instanceof String) {
-				if (groundedModel.getKnownRandomVariableNames().contains(predicateSymbol.toString())) {
+				if (groundedModel.getKnownRandomVariableNameAndArities().contains(predicateSymbol.toString())) {
 					result = true;
 				}
 			}

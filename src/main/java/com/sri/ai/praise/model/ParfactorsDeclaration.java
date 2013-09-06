@@ -39,6 +39,7 @@ package com.sri.ai.praise.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
@@ -50,6 +51,7 @@ import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
+import com.sri.ai.util.Util;
 
 /**
  * A collection of extensionally or intensionally defined sets of parameterized
@@ -343,15 +345,15 @@ public class ParfactorsDeclaration {
 	//
 	// PRIVATE METHODS
 	//
-	private static List<Expression> collectAndAssertParfactorsOk(
-			Expression expression) {
+	private static List<Expression> collectAndAssertParfactorsOk(Expression expression) {
 		List<Expression> collectedParfactors = new ArrayList<Expression>();
 		boolean illegal = true;
+		List<Expression> notParfactors = new LinkedList<Expression>();
 
 		Expression unionOrPartition = expression;
 		if (Expressions.hasFunctor(expression, FUNCTOR_PARFACTORS_DECLARATION)) {
 			// Can only have a single argument if defined via:
-			// parfactors('union | parition'());
+			// parfactors('union | partition'());
 			if (expression.numberOfArguments() == 1) {
 				if (Sets.isSet(expression.get(0))) {
 					// Is a set argument therefore treat as a single element
@@ -384,23 +386,31 @@ public class ParfactorsDeclaration {
 		}
 
 		if (Expressions.hasFunctor(unionOrPartition, FunctorConstants.UNION)
-				|| Expressions.hasFunctor(unionOrPartition,
-						FunctorConstants.PARTITION)) {
+				|| Expressions.hasFunctor(unionOrPartition, FunctorConstants.PARTITION)) {
 			// Assume ok at this point but check that each
 			// argument is a parfactor
 			illegal = false;
 			for (Expression parfactor : unionOrPartition.getArguments()) {
 				if (!isParfactor(parfactor)) {
 					illegal = true;
+					notParfactors.add(parfactor);
 					break;
 				}
-				collectedParfactors.add(parfactor);
+				else {
+					collectedParfactors.add(parfactor);
+				}
 			}
 		}
 
 		if (illegal) {
-			throw new IllegalArgumentException(
-					"Not a legal parfactors expression [" + expression + "]");
+			if (notParfactors.isEmpty()) {
+				throw new IllegalArgumentException(
+						"Not a parfactor set: " + expression);
+			}
+			else {
+				throw new IllegalArgumentException(
+						"Not parfactors: [" + Util.join(notParfactors) + "]");
+			}
 		}
 
 		return collectedParfactors;

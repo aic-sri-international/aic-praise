@@ -63,9 +63,9 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
  * 
  */
 @Beta
-public class ExternalizeConditionalOnLogicalVariables extends AbstractRewriter {
+public class BreakConditionsContainingBothLogicalAndRandomVariables extends AbstractRewriter {
 
-	public ExternalizeConditionalOnLogicalVariables() {
+	public BreakConditionsContainingBothLogicalAndRandomVariables() {
 		this.setReifiedTests(new HasFunctor(IfThenElse.FUNCTOR));
 	}
 	

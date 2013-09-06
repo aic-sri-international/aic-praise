@@ -60,6 +60,7 @@ import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTy
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.PRAiSEConfiguration;
+import com.sri.ai.praise.rules.RuleConverter;
 
 /**
  * A class for representing the definition of a declared model. The basic
@@ -173,7 +174,7 @@ public class Model {
 	public static final String FUNCTOR_MODEL_DECLARATION = "model";
 
 	// GLOBAL OBJECTS KEY
-	public static final String GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES = "known random variable names";
+	public static final String GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES = "known random variable name and arities";
 	public static final String GLOBAL_KEY_MODEL = "model";
 	public static final String GLOBAL_KEY_MODEL_PARFACTORS = "model parfactors";
 	public static final String GLOBAL_KEY_MODEL_SORT_NAMES = "model sort names";
@@ -195,7 +196,7 @@ public class Model {
 	//
 	// Declaration information
 	private String modelDeclaration = null;
-	private Set<String> knownRandomVariableNames = new HashSet<String>();
+	private Set<String> knownRandomVariableNameAndArities = new HashSet<String>();
 	// Definition information.
 	private Expression modelDefinition = null;
 	private Expression name = null;
@@ -204,21 +205,25 @@ public class Model {
 	private List<RandomVariableDeclaration> randomVariableDeclarations = new ArrayList<RandomVariableDeclaration>();
 	private ParfactorsDeclaration parfactorsDeclaration = null;
 
+	/** A convenience method doing the same as {@link RuleConverter#makeModel(String)}. */
+	public static Model fromRules(String ruleAndDeclarationsListString) {
+		return RuleConverter.makeModel(ruleAndDeclarationsListString);
+	}
+	
 	/**
 	 * Declare a model without defining it (useful for caching purposes).
 	 * 
 	 * @param modelDeclaration
 	 *            a string representation of the model's declaration.
-	 * @param knownRandomVariableNames
+	 * @param knownRandomVariableNameAndArities
 	 *            a list of the known random variables in the model.
 	 */
-	public Model(String modelDeclaration, String... knownRandomVariableNames) {
+	public Model(String modelDeclaration, String... knownRandomVariableNameAndArities) {
 		this.modelDeclaration = modelDeclaration;
-		for (String name : knownRandomVariableNames) {
-			this.knownRandomVariableNames.add(name);
+		for (String nameAndArity : knownRandomVariableNameAndArities) {
+			this.knownRandomVariableNameAndArities.add(nameAndArity);
 		}
-		this.knownRandomVariableNames = Collections
-				.unmodifiableSet(this.knownRandomVariableNames);
+		this.knownRandomVariableNameAndArities = Collections.unmodifiableSet(this.knownRandomVariableNameAndArities);
 		ensureDefined();
 	}
 
@@ -243,11 +248,10 @@ public class Model {
 	 *             ModelException if passed an illegal Model Definition
 	 *             expression.
 	 */
-	public Model(Expression modelDefinition,
-			Set<String> knownRandomVariableNames) {
+	public Model(Expression modelDefinition, Set<String> knownRandomVariableNameAndArities) {
 		this.modelDeclaration = modelDefinition.toString();
-		if (knownRandomVariableNames != null) {
-			this.knownRandomVariableNames.addAll(knownRandomVariableNames);
+		if (knownRandomVariableNameAndArities != null) {
+			this.knownRandomVariableNameAndArities.addAll(knownRandomVariableNameAndArities);
 		}
 		this.modelDefinition = modelDefinition;
 
@@ -264,7 +268,7 @@ public class Model {
 	 */
 	public Model(Model toCopy, boolean knownDomainSize, Integer size) {
 		List<Object> args = new ArrayList<Object>();
-		this.knownRandomVariableNames.addAll(toCopy.knownRandomVariableNames);
+		this.knownRandomVariableNameAndArities.addAll(toCopy.knownRandomVariableNameAndArities);
 		this.name = toCopy.name;
 		if (this.name != null) {
 			args.add(this.name);
@@ -324,10 +328,10 @@ public class Model {
 
 	/**
 	 * 
-	 * @return the known random variable names associated with the model.
+	 * @return the known random variable name and arity strings associated with the model.
 	 */
-	public Set<String> getKnownRandomVariableNames() {
-		return knownRandomVariableNames;
+	public Set<String> getKnownRandomVariableNameAndArities() {
+		return knownRandomVariableNameAndArities;
 	}
 
 	/**
@@ -385,7 +389,7 @@ public class Model {
 	 *            the process in which the rewriting is occurring.
 	 */
 	public void setRewritingProcessesModel(RewritingProcess process) {
-		setRewritingProcessesModel(modelDefinition, knownRandomVariableNames, process);
+		setRewritingProcessesModel(modelDefinition, knownRandomVariableNameAndArities, process);
 	}
 
 	//
@@ -448,14 +452,14 @@ public class Model {
 	 * @return the set of known random variable names associated with the
 	 *         rewriting process's model.
 	 */
-	public static Set<String> getKnownRandomVariableNames(RewritingProcess process) {
+	public static Set<String> getKnownRandomVariableNameAndArities(RewritingProcess process) {
 		@SuppressWarnings("unchecked")
-		Set<String> knownRandomVariableNames = (Set<String>) process
-				.getGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES);
-		if (null == knownRandomVariableNames) {
-			knownRandomVariableNames = Collections.emptySet();
+		Set<String> knownRandomVariableNameAndArities = (Set<String>) process
+				.getGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES);
+		if (null == knownRandomVariableNameAndArities) {
+			knownRandomVariableNameAndArities = Collections.emptySet();
 		}
-		return knownRandomVariableNames;
+		return knownRandomVariableNameAndArities;
 	}
 
 	/**
@@ -472,7 +476,7 @@ public class Model {
 
 		@SuppressWarnings("unchecked")
 		Set<String> knownVarNames = (Set<String>) process
-				.getGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES);
+				.getGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES);
 		if (knownVarNames == null) {
 			knownVarNames = new HashSet<String>();
 		}
@@ -485,52 +489,50 @@ public class Model {
 	 * @param modelDefinitionExpression
 	 *            an expression representing the model the rewriting process is
 	 *            working over.
-	 * @param knownRandomVariableNames
+	 * @param knownRandomVariableNameAndArities
 	 *            the set of known random variable names in a model.
 	 * @param process
 	 *            the process in which the rewriting is occurring.
 	 */
 	public static void setRewritingProcessesModel(
 			Expression modelDefinitionExpression,
-			Set<String> knownRandomVariableNames, RewritingProcess process) {
+			Set<String> knownRandomVariableNameAndArities, RewritingProcess process) {
 
-		Model model = new Model(modelDefinitionExpression, knownRandomVariableNames);
+		Model model = new Model(modelDefinitionExpression, knownRandomVariableNameAndArities);
 		
 		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(
 				new ModelLookupDomainSizeOfLogicalVariable(model), process);
 
 		process.putGlobalObject(GLOBAL_KEY_MODEL, model.getModelDefinition());
-		process.putGlobalObject(GLOBAL_KEY_MODEL_PARFACTORS, model
-				.getParfactorsDeclaration().getParfactors());
+		process.putGlobalObject(GLOBAL_KEY_MODEL_PARFACTORS, model.getParfactorsDeclaration().getParfactors());
 
 		// Handle case where names may have been setup globally
 		// outside of the model and process.
 		@SuppressWarnings("unchecked")
-		Set<String> knownVarNames = (Set<String>) process
-				.getGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES);
-		if (knownVarNames == null) {
-			knownVarNames = model.getKnownRandomVariableNames();
+		Set<String> allKnownRandomVariableNameAndArities = (Set<String>) process.getGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES);
+		if (allKnownRandomVariableNameAndArities == null) {
+			allKnownRandomVariableNameAndArities = model.getKnownRandomVariableNameAndArities();
 		} 
 		else {
-			knownVarNames.addAll(model.getKnownRandomVariableNames());
+			allKnownRandomVariableNameAndArities.addAll(model.getKnownRandomVariableNameAndArities());
 		}
 		
 		// Ensure we have all the known random variable names
-		for (RandomVariableDeclaration rvd : model.getRandomVariableDeclarations()) {
-			knownVarNames.add(nameFromRandomVariableDeclaration(rvd));
+		for (RandomVariableDeclaration randomVariableDeclaration : model.getRandomVariableDeclarations()) {
+			allKnownRandomVariableNameAndArities.add(nameAndArityFromRandomVariableDeclaration(randomVariableDeclaration));
 		}
 		// Now ensure we setup the random predicate catalog with all the known names
 		Set<RandomPredicate> randomPredicates = new LinkedHashSet<RandomPredicate>();
-		for (String randomVariableName : knownVarNames) {			
+		for (String randomVariableName : allKnownRandomVariableNameAndArities) {			
 			randomPredicates.add(new RandomPredicate(randomVariableName));
 		}
-		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES, knownVarNames);
+		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES, allKnownRandomVariableNameAndArities);
 		process.putGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG, new RandomPredicateCatalog(randomPredicates));
 		
 		// Setup the sort names for easy access
 		List<Expression> sortNames = new ArrayList<Expression>();
-		for (SortDeclaration sd : model.getSortDeclarations()) {
-			sortNames.add(sd.getName());
+		for (SortDeclaration sortDeclaration : model.getSortDeclarations()) {
+			sortNames.add(sortDeclaration.getName());
 		}
 		process.putGlobalObject(GLOBAL_KEY_MODEL_SORT_NAMES, sortNames);
 	}
@@ -552,7 +554,7 @@ public class Model {
 		Set<String> knownVarNames = new LinkedHashSet<String>();
 		for (Expression rvd : randomVariableDeclarations) {
 			RandomVariableDeclaration declaration = RandomVariableDeclaration.makeRandomVariableDeclaration(rvd);
-			knownVarNames.add(nameFromRandomVariableDeclaration(declaration));
+			knownVarNames.add(nameAndArityFromRandomVariableDeclaration(declaration));
 		}
 		// Now ensure we setup the random predicate catalog with all the known names
 		Set<RandomPredicate> randomPredicates = new LinkedHashSet<RandomPredicate>();
@@ -560,7 +562,7 @@ public class Model {
 			randomPredicates.add(new RandomPredicate(randomVariableName));
 		}
 		
-		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAMES, knownVarNames);
+		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES, knownVarNames);
 		process.putGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG, new RandomPredicateCatalog(randomPredicates));
 	}
 
@@ -702,14 +704,14 @@ public class Model {
 	 * @param sortDeclarations
 	 * @param randomVariableDeclarations
 	 * @param parfactorsDeclaration
-	 * @param knownRandomVariableNames
+	 * @param knownRandomVariableNameAndArities
 	 * @return a Model constructed from the provided parts.
 	 */
 	public static Model constructFromParts(Expression name,
 			Expression description, List<SortDeclaration> sortDeclarations,
 			List<RandomVariableDeclaration> randomVariableDeclarations,
 			ParfactorsDeclaration parfactorsDeclaration,
-			Set<String> knownRandomVariableNames) {
+			Set<String> knownRandomVariableNameAndArities) {
 		List<Expression> modelParts = new ArrayList<Expression>();
 
 		modelParts.add(name);
@@ -727,7 +729,7 @@ public class Model {
 		Expression modelDefinition = Expressions.make(
 				Model.FUNCTOR_MODEL_DECLARATION, modelParts);
 
-		Model model = new Model(modelDefinition, knownRandomVariableNames);
+		Model model = new Model(modelDefinition, knownRandomVariableNameAndArities);
 
 		return model;
 	}
@@ -815,7 +817,7 @@ public class Model {
 					randomVariableDeclarations.add(randomVariableDeclaration);
 					// As this is contains the name of a random variable ensure
 					// the set of known random variable names are updated
-					knownRandomVariableNames.add(nameFromRandomVariableDeclaration(randomVariableDeclaration));
+					knownRandomVariableNameAndArities.add(nameAndArityFromRandomVariableDeclaration(randomVariableDeclaration));
 				}
 				// Parfactors declaration
 				else if (ParfactorsDeclaration
@@ -970,7 +972,7 @@ public class Model {
 		}
 	}
 	
-	private static String nameFromRandomVariableDeclaration(RandomVariableDeclaration rvd) {
+	private static String nameAndArityFromRandomVariableDeclaration(RandomVariableDeclaration rvd) {
 		String result = rvd.getName().getValue().toString() + "/" + rvd.getArityValue();
 		return result;
 	}
