@@ -64,6 +64,7 @@ import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariables;
 import com.sri.ai.praise.IfThenElseExternalizationHierarchical;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
+import com.sri.ai.praise.MoveAllRandomVariableValueExpressionConditionsDownHierarchical;
 import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
@@ -192,6 +193,60 @@ public class LBPTest extends AbstractLPITest {
 		// conditional condition case
 		expressionString = "(if X = tom then 1 else 2) + (if (if Y = beth then W = tom else W = john) then if Z = carol then 3 else 4 else 5)";
 		expectedString = "if X = tom then if Y = beth and W = tom or W = tom then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5 else (if Y = beth and W = tom or W = tom then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5)";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+	}
+	
+	@Test
+	public void testMoveAllRandomVariableValueExpressionConditionsDownHierarchical() {
+		String expressionString;
+		String expectedString;
+		Expression actual;
+		Rewriter rewriter = new MoveAllRandomVariableValueExpressionConditionsDownHierarchical();
+		RewritingProcess process =
+				LBPFactory.newLBPProcessWithHighLevelModel(
+						"sort Person : 10, ann, beth, carol, tom, john;" +
+						"random smart : Person -> Boolean;");
+
+		// non-case
+		expressionString = "1 + 2";
+		expectedString = "1 + 2";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+
+		// non-RV case
+		expressionString = "if X = ann then 1 + 2 else 3";
+		expectedString = "if X = ann then 1 + 2 else 3";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+
+		// simple case
+		expressionString = "if smart(X) then if X = tom then 1 else 2 else 3";
+		expectedString = "if X = tom then if smart(X) then 1 else 3 else if smart(X) then 2 else 3";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+
+		// simple case, symmetric case around then/else
+		expressionString = "if smart(X) then 3 else if X = tom then 1 else 2";
+		expectedString = "if X = tom then if smart(X) then 3 else 1 else if smart(X) then 3 else 2";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+
+		// RVs on top and bottom
+		expressionString = "if smart(X) then if X = tom then if smart(ann) then 1 else 2 else 3 else 4";
+		expectedString = "if X = tom then if smart(X) then if smart(ann) then 1 else 2 else 4 else if smart(X) then 3 else 4";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+
+		// RVs on top, LV at bottom
+		expressionString = "if smart(X) then if X = tom then if Y = ann then 1 else 2 else 3 else 4";
+		expectedString = "if Y = ann then if X = tom then if smart(X) then 1 else 4 else (if smart(X) then 3 else 4) else (if X = tom then if smart(X) then 2 else 4 else (if smart(X) then 3 else 4))";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+
+		// RVs on top, LV at bottom, symmetric case around then/else
+		expressionString = "if smart(X) then 4 else if X = tom then 3 else if Y = ann then 1 else 2";
+		expectedString = "if Y = ann then if X = tom then if smart(X) then 4 else 3 else (if smart(X) then 4 else 1) else (if X = tom then if smart(X) then 4 else 3 else (if smart(X) then 4 else 2))";
 		actual = rewriter.rewrite(parse(expressionString), process);
 		assertEquals(parse(expectedString), actual);
 	}
