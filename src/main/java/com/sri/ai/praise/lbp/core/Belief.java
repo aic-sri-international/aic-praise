@@ -241,10 +241,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		if (!LPIUtil.containsPreviousMessageExpressions(beliefExpansion)) {
 			Justification.beginEqualityStep("normalize and return belief since it does not depend on previous iteration messages");
 			Trace.log("if belief_expansion does not contain 'previous message' expressions");
-			Trace.log("    return R_normalize(V, belief_expansion)");
+			Trace.log("    return R_normalize_message(V, belief_expansion)");
 			
 			Justification.beginEqualityStep("normalization");
-			Expression normalizedBeliefExpansion = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefExpansion));
+			Expression normalizedBeliefExpansion = process.rewrite(R_normalize_message, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefExpansion));
 			Justification.endEqualityStep(normalizedBeliefExpansion);
 			
 			Justification.endEqualityStep(normalizedBeliefExpansion);
@@ -318,11 +318,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Trace.log("    // belief_value = {}", beliefValue);
 			}
 			
-			Trace.log("return R_normalize(V, belief_value)");
+			Trace.log("return R_normalize_message(V, belief_value)");
 			
 			Justification.log("Normalization of final unnormalized belief value {}", beliefValue);
 			Justification.beginEqualityStep("normalization");
-			Expression normalizedBeliefValue = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefValue));
+			Expression normalizedBeliefValue = process.rewrite(R_normalize_message, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefValue));
 			Trace.log("// belief_value = {}", beliefValue);
 			Justification.endEqualityStep(normalizedBeliefValue);
 			
@@ -347,7 +347,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		LBPConfiguration.BeliefValueAtIterationCollector beliefValueAtIterationCollector = configuration.getBeliefValueAtIterationCollector();
 		if (beliefValueAtIterationCollector != null) {
 			if (beliefValueAtIterationCollector.isThisIterationWanted(iteration)) {
-				Expression normalizedBeliefValue = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefValue));
+				Expression normalizedBeliefValue = process.rewrite(R_normalize_message, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefValue));
 				beliefValueAtIterationCollector.setBeliefValueAtIteration(iteration, normalizedBeliefValue);
 			}
 		}
@@ -594,7 +594,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						else {
 							randomVariable = origin;
 						}
-						normalizedValue = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, value));
+						normalizedValue = process.rewrite(R_normalize_message, LPIUtil.argForNormalizeRewriteCall(randomVariable, value));
 						normalizedValue = limitPrecisionToNumberOfSignificantDecimalPlaces(normalizedValue, process);
 					}
 					

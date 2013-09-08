@@ -2841,7 +2841,7 @@ public class LBPTest extends AbstractLPITest {
 			
 			@Override
 			public Expression callRewrite(RewritingProcess process) {
-				return process.rewrite(LBPRewriter.R_normalize, LPIUtil.argForNormalizeRewriteCall(exprV, exprE));
+				return process.rewrite(LBPRewriter.R_normalize_message, LPIUtil.argForNormalizeRewriteCall(exprV, exprE));
 			}
 		};
 		

@@ -194,7 +194,7 @@ public interface LBPRewriter extends Rewriter {
 	 * belief_expansion <- R_prod_factor(prod_F in R_neigh_v(Neigh(V)) m_V<-F, beingComputed)
 	 * belief_expansion <- R_complete_simplify(belief_expansion)
 	 * if belief_expansion does not contain 'previous message' expressions
-	 *         return R_normalize(V, belief_expansion)
+	 *         return R_normalize_message(V, belief_expansion)
 	 *         
 	 * // At this point, belief_expansion is a basic expression containing 'previous message' expressions
 	 * 
@@ -226,7 +226,7 @@ public interface LBPRewriter extends Rewriter {
 	 * while belief_value <- use_values_for_previous_msgs(belief_expansion, msg_values) not final
 	 *     msg_values <- iterate_values_using_expansions(msg_values, msg_expansions)
 	 *         
-	 * return R_normalize(V, belief_value)
+	 * return R_normalize_message(V, belief_value)
 	 * </pre>
 	 */
 	String R_belief = LBP_NAMESPACE+"R_belief";
@@ -529,7 +529,7 @@ public interface LBPRewriter extends Rewriter {
 	
 	/**
 	 * <pre>
-	 * R_normalize([ v ], E)
+	 * R_normalize_message([ v ], E)
 	 * [ v ] is a boolean random variable
 	 * E is a conditional arithmetic expression
 	 * E has logical variables conditions
@@ -552,7 +552,7 @@ public interface LBPRewriter extends Rewriter {
 	 * 	   return 0.5
 	 * </pre>
 	 */
-	String R_normalize = LBP_NAMESPACE+"R_normalize";
+	String R_normalize_message = LBP_NAMESPACE+"R_normalize_message";
 	
 	/**
 	 * <pre>
@@ -573,7 +573,7 @@ public interface LBPRewriter extends Rewriter {
 	 * (that is, other random variables are not supposed to be present).
 	 * Returns a conditional expression, the leaves of which are of the form
 	 * "if v then Alpha else Beta"
-	 * Note: not to be confused with R_normalize, which normalizes a message's values to the [0, 1] interval.
+	 * Note: not to be confused with R_normalize_message, which normalizes a message's values to the [0, 1] interval.
 	 * Externalizes conditionals
 	 * Et <- {@link #R_simplify}(E[v/true]);
 	 * Ef <- {@link #R_simplify}(E[v/false]);

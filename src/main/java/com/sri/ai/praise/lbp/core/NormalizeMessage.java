@@ -56,24 +56,24 @@ import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
 
 /**
- * Default implementation of {@link LBPRewriter#R_normalize}.
+ * Default implementation of {@link LBPRewriter#R_normalize_message}.
  * 
  * @author oreilly
  * 
  */
 @Beta
-public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
+public class NormalizeMessage extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 	
-	public Normalize() {
+	public NormalizeMessage() {
 	}
 	
 	@Override
 	public String getName() {
-		return R_normalize;
+		return R_normalize_message;
 	}
 	
 	/**
-	 * @see LBPRewriter#R_normalize
+	 * @see LBPRewriter#R_normalize_message
 	 */
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
@@ -181,7 +181,7 @@ public class Normalize extends AbstractLBPHierarchicalRewriter implements LBPRew
 		return new RewriteOnBranch() {
 			@Override
 			public Expression rewrite(Expression[] expressions, RewritingProcess process) {
-				Expression result = process.rewrite(R_normalize,
+				Expression result = process.rewrite(R_normalize_message,
 										LPIUtil.argForNormalizeRewriteCall(expressions[0], expressions[1]));
 				return result;
 			}

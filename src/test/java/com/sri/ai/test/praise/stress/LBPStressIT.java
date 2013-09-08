@@ -56,7 +56,7 @@ public class LBPStressIT extends AbstractLPITest {
 						"belief([p(X)])", 
 						false, 
 						// TODO -  is this correct (> 2 iterations, doesn't matter as large
-						// # calculated gets reduced to 1 in R_normalize logic)?
+						// # calculated gets reduced to 1 in R_normalize_message logic)?
 						"if X = b then if p(b) then 1 else 0 else if p(X) then 1 else 0")});
 	}
 	

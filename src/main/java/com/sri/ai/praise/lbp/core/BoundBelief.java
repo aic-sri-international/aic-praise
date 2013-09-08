@@ -143,9 +143,9 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 			result = beliefExpansion;
 		}
 		else {
-			Trace.log("    return R_normalize(V, belief_expansion)");
+			Trace.log("    return R_normalize_message(V, belief_expansion)");
 			Justification.beginEqualityStep("normalization");
-			Expression normalizedBeliefExpansion = process.rewrite(R_normalize, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefExpansion));
+			Expression normalizedBeliefExpansion = process.rewrite(R_normalize_message, LPIUtil.argForNormalizeRewriteCall(randomVariable, beliefExpansion));
 			Justification.endEqualityStep(normalizedBeliefExpansion);
 			
 			result = normalizedBeliefExpansion;

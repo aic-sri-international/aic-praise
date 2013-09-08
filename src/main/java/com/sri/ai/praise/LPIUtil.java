@@ -1033,7 +1033,7 @@ public class LPIUtil {
 	 * Convenience method for constructing a tuple argument of the form:<br> 
 	 * ([ v ], E)<br>
 	 * when calling:<br>
-	 * R_normalize([ v ], E).<br>
+	 * R_normalize_message([ v ], E).<br>
 	 * 
 	 * @param randomVariable
 	 *            a random variable of the form: [ v ].
