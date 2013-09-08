@@ -244,7 +244,7 @@ public class AnytimeLBPTest extends AbstractLPITest {
 			new AnytimeBeliefTestData(Expressions.TRUE.toString(), new TrivialEpidemicAndSickNotbob(), 
 					"belief([ sick(X) ])", 
 					false, 
-					// Note: old R_formula_simplification result before R_simplify used instead
+					// Note: old R_formula_simplification result before R_normalize used instead
 					// Difference is because | People | -> 10 and new result is this expression calculated correctly with that.
 					// "if X != bob then if sick(X) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else 0.5"
 					"if X != bob then if sick(X) then 0.588166494 else 0.411833506 else 0.500000000"),

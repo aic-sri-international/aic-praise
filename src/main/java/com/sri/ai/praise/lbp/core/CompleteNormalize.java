@@ -44,23 +44,23 @@ import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.praise.lbp.LBPRewriter;
 
 /**
- * Default implementation of R_complete_simplify for use in LBP.
+ * Default implementation of R_complete_normalize for use in LBP.
  * 
- * @see LBPRewriter#R_complete_simplify
+ * @see LBPRewriter#R_complete_normalize
  * 
  * @author oreilly
  *
  */
 @Beta
-public class CompleteSimplify extends com.sri.ai.grinder.library.equality.cardinality.direct.core.CompleteSimplify implements LBPRewriter {
+public class CompleteNormalize extends com.sri.ai.grinder.library.equality.cardinality.direct.core.CompleteNormalize implements LBPRewriter {
 	
-	public CompleteSimplify() {
+	public CompleteNormalize() {
 		super();
 	}
 	
 	@Override
 	public String getName() {
-		return LBPRewriter.R_complete_simplify;
+		return LBPRewriter.R_complete_normalize;
 	}
 	 
 	//
@@ -71,7 +71,7 @@ public class CompleteSimplify extends com.sri.ai.grinder.library.equality.cardin
 	protected List<Rewriter> getAtomicRewriters() {
 		List<Rewriter> atomicRewriters = super.getAtomicRewriters();
 		
-		atomicRewriters = Simplify.extendAtomicRewriters(atomicRewriters);
+		atomicRewriters = Normalize.extendAtomicRewriters(atomicRewriters);
 	
 		return atomicRewriters;
 	}

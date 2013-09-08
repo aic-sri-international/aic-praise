@@ -230,8 +230,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Justification.beginEqualityStep("complete simplification of unnormalized belief expansion");
 		Justification.log(beliefExpansion);
 		Trace.log("// belief_expansion = {}", beliefExpansion);
-		Trace.log("belief_expansion <- R_complete_simplify(belief_expansion)");
-		beliefExpansion = process.rewrite(R_complete_simplify, beliefExpansion);
+		Trace.log("belief_expansion <- R_complete_normalize(belief_expansion)");
+		beliefExpansion = process.rewrite(R_complete_normalize, beliefExpansion);
 		Trace.log("// belief_expansion = {}", beliefExpansion);
 		if (Justification.isEnabled()) {
 			Justification.endEqualityStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
@@ -391,8 +391,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			
 			Trace.log("    msg_set <- R_set_diff(msg_set minus msgs_already_expanded)");
 			msgSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(msgSet, msgsAlreadyExpanded));
-			Trace.log("    msg_set <- R_complete_simplify(msg_set)");
-			msgSet = process.rewrite(R_complete_simplify, msgSet);
+			Trace.log("    msg_set <- R_complete_normalize(msg_set)");
+			msgSet = process.rewrite(R_complete_normalize, msgSet);
 			Justification.end("Remaining, non-expanded messages are {}", msgSet);
 			Trace.log("    // msg_set = {}", msgSet);
 			
@@ -429,11 +429,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Justification.end("Obtained unsimplified message expansion {}", expansion);
 				
 				Justification.begin("Going to simplify {}", expansion);
-				Trace.log("        expansion <- R_complete_simplify(expansion)");
-				// Note: use cSubProcess for R_complete_simplify call as this is the context
+				Trace.log("        expansion <- R_complete_normalize(expansion)");
+				// Note: use cSubProcess for R_complete_normalize call as this is the context
 				// under which the expansion was generated and we want to remove any
 				// invalid branches based on this.
-				expansion = cSubProcess.rewrite(R_complete_simplify, expansion);
+				expansion = cSubProcess.rewrite(R_complete_normalize, expansion);
 				Trace.log("        // expansion = {}", expansion);
 				Justification.end("Obtained simplified message expansion {}", expansion);
 				Justification.end("Obtained message expansion {}", expansion);
@@ -682,8 +682,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		} while (substituted != toSubstitute);
 			
 		Trace.log("// substituted = {}, constrained by {}", substituted, process.getContextualConstraint());
-		Trace.log("return R_complete_simplify(substituted)");
-		result = process.rewrite(R_complete_simplify, substituted);
+		Trace.log("return R_complete_normalize(substituted)");
+		result = process.rewrite(R_complete_normalize, substituted);
 		
 		Trace.out("-use_values_for_previous_msgs={}", result);
 		
@@ -748,7 +748,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
      * // Partition the value based on its intersection:
      * // Intersection is of the form { (on I) (Destination, Origin) | C' }
      * D <- there exists I : C'
-     * return R_simplify(if D then v else prev_message)
+     * return R_normalize(if D then v else prev_message)
 	 * </pre>
 	 */
 	private Expression findMsgValueMatchingPreviousMessage(Expression prevMessage, List<Expression> msgValues, 
@@ -861,9 +861,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Trace.log("D <- there exists I : C'");
 		Expression expressionD = ThereExists.make(new ArrayList<Expression>(IntensionalSet.getIndices(intersection)), 
 												  IntensionalSet.getCondition(intersection));
-		Trace.log("return R_simplify(if D then v else prev_message)"); 
+		Trace.log("return R_normalize(if D then v else prev_message)"); 
 		Expression conditionalD = IfThenElse.make(expressionD, v, prevMessage);
-		result = process.rewrite(R_simplify, conditionalD);
+		result = process.rewrite(R_normalize, conditionalD);
 
 		Trace.out("-findMsgValueMatchingPreviousMessage={}", result);
 		

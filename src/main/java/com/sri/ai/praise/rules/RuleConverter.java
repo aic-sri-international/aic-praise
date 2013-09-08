@@ -435,7 +435,7 @@ public class RuleConverter {
 		List<Expression> potentialExpressions = ruleList2PotentialExpressions(rules);
 		
 		// Note: This is required to ensure random variable information is available on
-		// the rewriting process when performing R_simplify and R_complete_simplify operations.
+		// the rewriting process when performing R_normalize and R_complete_normalize operations.
 		Model.setKnownRandomVariables(randomVariableDeclarations, rewritingProcess);
 		
 		// | constrainedPotentialExpressions <- disembedConstraints(potentialExpressions)
@@ -1416,8 +1416,8 @@ public class RuleConverter {
 			potentialExpression = replaced;
 
 			// Simplify the updated expression.
-			// | .... P <- R_simplify(P)
-			potentialExpression = rewritingProcess.rewrite(LBPRewriter.R_simplify, potentialExpression);
+			// | .... P <- R_normalize(P)
+			potentialExpression = rewritingProcess.rewrite(LBPRewriter.R_normalize, potentialExpression);
 
 			// Get free variables and create inequality constraints on all pairs except those
 			// pairs stated to be ". may be same as .".
@@ -1507,7 +1507,7 @@ public class RuleConverter {
 		Set<Expression> parfactors = new LinkedHashSet<Expression>();
 		// | for each (P, C) in constrainedPotentialExpressions
 		for (Pair<Expression, Expression> pair : constrainedPotentialExpressionsons) {
-			// |.... parfactors <- add R_simplify({{ (on <free variables in P and C>) [ P ] | C }})
+			// |.... parfactors <- add R_normalize({{ (on <free variables in P and C>) [ P ] | C }})
 			parfactors.add(createParfactor(pair.first, pair.second));
 		}
 		
@@ -1529,7 +1529,7 @@ public class RuleConverter {
 	 * @return A parfactor expression based on the potential expression on constraints.
 	 */
 	public Expression createParfactor(Expression potentialExpression, Expression constraintC) {
-		// |.... parfactors <- add R_simplify({{ (on <free variables in P and C>) [ P ] | C }})
+		// |.... parfactors <- add R_normalize({{ (on <free variables in P and C>) [ P ] | C }})
 		Set<Expression> freeVariablesInPandC = new LinkedHashSet<Expression>();
 		freeVariablesInPandC.addAll(Expressions.freeVariables(potentialExpression, rewritingProcess));
 		freeVariablesInPandC.addAll(Expressions.freeVariables(constraintC, rewritingProcess));
@@ -1539,7 +1539,7 @@ public class RuleConverter {
 				 			Expressions.make(FunctorConstants.LEFT_DOT_RIGHT, potentialExpression), 
 				 			constraintC);
 	
-		result = rewritingProcess.rewrite(LBPRewriter.R_simplify, result);
+		result = rewritingProcess.rewrite(LBPRewriter.R_normalize, result);
 	
 		return result;
 	}
@@ -1959,15 +1959,15 @@ public class RuleConverter {
 	private void addFurtherConstrainedPotentialExpression(
 			List<Pair<Expression, Expression>> listOfConstrainedPotentialExpressions, 
 			Expression potentialExpression, Expression constraintC, Expression assumption) {
-		// | ........ C' <- R_complete_simplify(C and Assumption)
+		// | ........ C' <- R_complete_normalize(C and Assumption)
 		Expression constraintCAndAssumption = And.make(constraintC, assumption);
-		Expression cPrime                   = rewritingProcess.rewrite(LBPRewriter.R_complete_simplify, constraintCAndAssumption);
+		Expression cPrime                   = rewritingProcess.rewrite(LBPRewriter.R_complete_normalize, constraintCAndAssumption);
 		
 		// | ........ if C' is not false
 		if (!cPrime.equals(Expressions.FALSE)) {
-			// | ............ P' <- R_complete_simplify(P) under C'
+			// | ............ P' <- R_complete_normalize(P) under C'
 			RewritingProcess processUnderCPrime  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
-			Expression       pPrime              = processUnderCPrime.rewrite(LBPRewriter.R_complete_simplify, potentialExpression);			
+			Expression       pPrime              = processUnderCPrime.rewrite(LBPRewriter.R_complete_normalize, potentialExpression);			
 			// | ............ if P' is not a numeric constant
 			if (!Expressions.isNumber(pPrime)) {
 				// | ................ setOfConstrainedPotentialExpressions <- add (P', C')

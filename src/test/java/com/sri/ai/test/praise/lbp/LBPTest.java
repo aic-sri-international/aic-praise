@@ -729,7 +729,7 @@ public class LBPTest extends AbstractLPITest {
 			    		false,
 			    		// Note: old R_basic result - has unreachable branches:
 			    		// "if A = C then if A = B then { } else if A = D then { B } else if B = D then { B } else { B, D } else if B = C then if A = B then { A } else if B = D then { A } else if A = D then { A } else { A, D } else if A = B then { A } else if C = D then { A, B } else if A = D then { A, B } else if B = D then { A, B } else { A, B, D }"
-			    		// Note: new R_simplify result also has unreachable branches (to be expected as known to be incomplete).
+			    		// Note: new R_normalize result also has unreachable branches (to be expected as known to be incomplete).
 			    		// Note: introduction of FromConditionalFormulaToFormula shortens the expression further
 			    		//       Used to be: if A = C then if B = C then if A = B then { } else if D = C then { } else { D } else if A = B then { B } else if D = C then { B } else { B, D } else if B = C then if A = B then { A } else if D = C then { A } else { A, D } else if A = B then { A, B } else if D = C then { A, B } else { A, B, D }
 			    		"if A = C then if B = C then { } else (if A = B or D = C then { B } else { B, D }) else (if B = C then if A = B or D = C then { A } else { A, D } else (if A = B or D = C then { A, B } else { A, B, D }))"),
@@ -1441,7 +1441,7 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						// Note: old R_basic result:
 						// "{ a } union { c }"
-// TODO - can we do better than this with the new R_simplify logic?
+// TODO - can we do better than this with the new R_normalize logic?
 // Doing better now, but conversion from { (on ) alpha | C } to if C then { alpha } else {} breaking BP tests at the moment, so it's disabled 						
 						"{ (on ) a | true } union { (on ) c | true }"),
 				//
@@ -1731,7 +1731,7 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						// Note: old R_basic result
 						// "if X = a then if p(a) then 0.2 else 0.3 else 1"
-						// Note: no constraint applier used in R_simplify so p(X) instead of p(a).
+						// Note: no constraint applier used in R_normalize so p(X) instead of p(a).
 						"if X = a then if p(a) then 0.20 else 0.30 else 1"
 				),
 				// From ALBPTest.testMessageToFactorFromVariable()
@@ -2237,7 +2237,7 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						// Note: old R_basic result:
 						// "if Z = a then if p(a) then 6400 else 8100 else if p(Z) then 25 else 36"
-						// Note: no constraint applier used in R_simplify so p(Z) instead of p(a).
+						// Note: no constraint applier used in R_normalize so p(Z) instead of p(a).
 						"if Z = a then if p(a) then 6400 else 8100 else if p(Z) then 25 else 36"
 						// This tests conditionals inside the message that do not depend on the indices of the product.
 						// for Z = a, message on q(a,Y) is if q(a,y) then 10 else 20.
@@ -3078,7 +3078,7 @@ public class LBPTest extends AbstractLPITest {
 				new BeliefTestData(Expressions.TRUE.toString(), new TrivialEpidemicAndSickNotbob(), 
 						"belief([ sick(X) ])", 
 						false, 
-						// Note: old R_formula_simplification result before R_simplify used instead
+						// Note: old R_formula_simplification result before R_normalize used instead
 						// Difference is because | People | -> 10 and new result is this expression calculated correctly with that.
 						// "if X != bob then if sick(X) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else 0.5"
 						"if X != bob then if sick(X) then 0.588166494 else 0.411833506 else 0.500000000"),
@@ -3341,7 +3341,7 @@ public class LBPTest extends AbstractLPITest {
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicAndSickNotbob(), 
 						"belief([ sick(X) ])", 
 						false, 
-						// Note: old R_formula_simplification result before R_simplify used instead
+						// Note: old R_formula_simplification result before R_normalize used instead
 						// Difference is because | People | -> 10 and new result is this expression calculated correctly with that.
 						// "if X != bob then if sick(X) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else 0.5"
 						// calculated | type(.) | = 10 :
@@ -3407,7 +3407,7 @@ public class LBPTest extends AbstractLPITest {
 						// "if epidemic then (0.03 * 0.7 ^ (| type(X) | - 3)) / (0.03 * 0.7 ^ (| type(X) | - 3) + 0.72 * 0.2 ^ (| type(X) | - 3)) else (0.72 * 0.2 ^ (| type(X) | - 3)) / (0.03 * 0.7 ^ (| type(X) | - 3) + 0.72 * 0.2 ^ (| type(X) | - 3))"
 						"if epidemic then (0.0300000000 * 0.700000000 ^ (| type(X) | - 3)) / (0.0300000000 * 0.700000000 ^ (| type(X) | - 3) + 0.720000000 * 0.200000000 ^ (| type(X) | - 3)) else (0.720000000 * 0.200000000 ^ (| type(X) | - 3)) / (0.0300000000 * 0.700000000 ^ (| type(X) | - 3) + 0.720000000 * 0.200000000 ^ (| type(X) | - 3))"),
 						//"if epidemic then (0.100000000 * 0.700000000 ^ (| type(X) | - 3) * 0.300000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3)))) / (0.100000000 * 0.700000000 ^ (| type(X) | - 3) * 0.300000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3))) + 0.900000000 * 0.200000000 ^ (| type(X) | - 3) * 0.800000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3)))) else (0.900000000 * 0.200000000 ^ (| type(X) | - 3) * 0.800000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3)))) / (0.100000000 * 0.700000000 ^ (| type(X) | - 3) * 0.300000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3))) + 0.900000000 * 0.200000000 ^ (| type(X) | - 3) * 0.800000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3))))"),
-// TODO-not supported when using R_complete_simplify on checking if a branch reachable or not.
+// TODO-not supported when using R_complete_normalize on checking if a branch reachable or not.
 //				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicSickEveryoneNotbobAmaryAjohn(), 
 //						"belief([ sick(X) ])", 
 //						false,

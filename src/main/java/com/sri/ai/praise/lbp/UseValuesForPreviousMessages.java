@@ -66,7 +66,7 @@ public interface UseValuesForPreviousMessages {
 	 *    
 	 *     return value
 	 * }
-	 * return R_complete_simplify(substituted)
+	 * return R_complete_normalize(substituted)
 	 * </pre>
 	 * 
 	 * @param expansion

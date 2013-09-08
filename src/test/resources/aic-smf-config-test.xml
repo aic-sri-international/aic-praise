@@ -42,7 +42,7 @@
     <map>
       <entry key="expresso.syntax.to.string.unary.function.class"          value="com.sri.ai.brewer.core.WriterToStringFunction"/>
       <entry key="brewer.default.grammar.class"                            value="com.sri.ai.praise.LPIGrammar"/>
-      <entry key="grinder.rewriting.filter.out.logging.by.rewriters.named" value="card.R_card:card.R_card_conjunction:card.R_card_conjunction_of_disequalities:card.R_card_disjunction:card.R_card_implication:card.R_card_equivalence:card.R_cardExtensionalSet:card.R_complete_simplify:card.R_equality_in_conjunction:card.R_move_not_in:card.R_quantifier_elimination:card.R_simplify:card.R_sum_over_one_variable:card.R_top_implied_certainty:card.R_top_quantifier_elimination:card.R_top_simplify:card.R_top_simplify_conjunction:card.R_top_simplify_disjunction" />
+      <entry key="grinder.rewriting.filter.out.logging.by.rewriters.named" value="card.R_card:card.R_card_conjunction:card.R_card_conjunction_of_disequalities:card.R_card_disjunction:card.R_card_implication:card.R_card_equivalence:card.R_cardExtensionalSet:card.R_complete_normalize:card.R_equality_in_conjunction:card.R_move_not_in:card.R_quantifier_elimination:card.R_normalize:card.R_sum_over_one_variable:card.R_top_implied_certainty:card.R_top_quantifier_elimination:card.R_top_simplify:card.R_top_simplify_conjunction:card.R_top_simplify_disjunction" />
     </map>
   </root>
 </preferences>

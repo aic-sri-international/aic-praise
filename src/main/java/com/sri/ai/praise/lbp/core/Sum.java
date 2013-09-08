@@ -137,7 +137,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		if (externalizeConditionalsOnE(E, process)) {
 			// Externalizes conditionals on E
 			// if E is 'if C' then E1 else E2'
-			// return R_simplify(if C'
+			// return R_normalize(if C'
 			// then R_sum(sum_N E1 prod_{V in N'} m_F<-V, T, beingComputed)  under C'
 			// else R_sum(sum_N E2 prod_{V in N'} m_F<-V, T, beingComputed)) under not C'
 			result = rewriteExternalizeE(summationIndexN, E, productOfIncomingMessages, currentExpression, T, beingComputed, process);
@@ -157,7 +157,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				
 				// Externalizes conditionals on N
 				// if N is 'if C' then N1 else N2'
-				// return R_simplify(if C'
+				// return R_normalize(if C'
 				// then R_sum(sum_{N1} E prod_{V in N'} m_F<-V, T, beingComputed)  under C'
 				// else R_sum(sum_{N2} E prod_{V in N'} m_F<-V, T, beingComputed)) under not C'
 				result = rewriteExternalizeN(summationIndexN, E, productOfIncomingMessages, currentExpression, T, beingComputed, process);
@@ -189,7 +189,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				if (IfThenElse.isIfThenElse(NPrime)) {
 					// Externalizes conditionals on N'
 					// if N' is 'if C' then N1' else N2''
-					// return R_simplify(if C'
+					// return R_normalize(if C'
 					// then R_sum(sum_{N} E prod_{V in N1'} m_F<-V, T, beingComputed)  under C'
 					// else R_sum(sum_{N} E prod_{V in N2'} m_F<-V, T, beingComputed)) under not C'
 					result = rewriteExternalizeNPrime(summationIndexN, E, productOfIncomingMessages, NPrime, currentExpression, T, beingComputed, process);
@@ -223,7 +223,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			RewritingProcess process) {
 		Trace.log("// E = {}", E);
 		Trace.log("if E is 'if C' then E1 else E2'");
-		Trace.log("    return R_simplify(if C'");
+		Trace.log("    return R_normalize(if C'");
 		Trace.log("                   then R_sum(sum_N E1 prod_{V in N'} m_F<-V, T, beingComputed)  under C'");
 		Trace.log("                   else R_sum(sum_N E2 prod_{V in N'} m_F<-V, T, beingComputed)) under not C'");
 
@@ -245,7 +245,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				newCallSumRewrite(), new Expression[] { summationIndexN, e1, productOfIncomingMessages, T, beingComputed },
 				newCallSumRewrite(), new Expression[] { summationIndexN, e2, productOfIncomingMessages, T, beingComputed },
 				R_check_branch_reachable, 
-				R_simplify, process);
+				R_normalize, process);
 		Justification.endEqualityStep(result);
 
 		return result;
@@ -260,7 +260,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			RewritingProcess process) {
 		Trace.log("// N = {}", summationIndexN);
 		Trace.log("if N is of the form if C' then N1 else N2");
-		Trace.log("    return R_simplify(if C'");
+		Trace.log("    return R_normalize(if C'");
 		Trace.log("           then R_sum(sum_{N1} E prod_{V in N'} m_F<-V, T, beingComputed)  under C'");
 		Trace.log("           else R_sum(sum_{N2} E prod_{V in N'} m_F<-V, T, beingComputed)) under not C'");
 
@@ -286,7 +286,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				newCallSumRewrite(), new Expression[] { n1, E, productOfIncomingMessages, T, beingComputed },
 				newCallSumRewrite(), new Expression[] { n2, E, productOfIncomingMessages, T, beingComputed },
 				R_check_branch_reachable,
-				R_simplify, process);
+				R_normalize, process);
 		Justification.endEqualityStep(result);
 
 		return result;
@@ -302,7 +302,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			RewritingProcess process) {
 		Trace.log("// N' = {}", NPrime);
 		Trace.log("if N' is of the form if C' then N1' else N2'");
-		Trace.log("    return R_simplify(if C'");
+		Trace.log("    return R_normalize(if C'");
 		Trace.log("           then R_sum(sum_{N} E prod_{V in N1'} m_F<-V, T, beingComputed)  under C'");
 		Trace.log("           else R_sum(sum_{N} E prod_{V in N2'} m_F<-V, T, beingComputed)) under not C'");
 
@@ -327,7 +327,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				newCallSumRewrite(), new Expression[] { summationIndexN, E, productOfIncomingMessagesN1, T, beingComputed },
 				newCallSumRewrite(), new Expression[] { summationIndexN, E, productOfIncomingMessagesN2, T, beingComputed },
 				R_check_branch_reachable,
-				R_simplify, process);
+				R_normalize, process);
 		Justification.endEqualityStep(result);
 
 		return result;

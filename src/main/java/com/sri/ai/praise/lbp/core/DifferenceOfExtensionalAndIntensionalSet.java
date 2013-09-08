@@ -138,7 +138,7 @@ public class DifferenceOfExtensionalAndIntensionalSet extends AbstractLBPHierarc
 
 			Trace.log("// condition={}, a_i={}", ifThenElseCondition, iThElementOfExtensionalSet);
 
-			Trace.log("R_simplify(");
+			Trace.log("R_normalize(");
 			Trace.log("    if condition");
 			Trace.log("        then R_DifferenceOfExtensionalAndIntensionalSet({a_1,...,a_i-1,a_i+1,...,a_n}, { Alpha' | C' }_I', i)");
 			Trace.log("        else R_DifferenceOfExtensionalAndIntensionalSet({a_1,...,a_n}, { Alpha' | C' }_I', i+1))");
@@ -168,7 +168,7 @@ public class DifferenceOfExtensionalAndIntensionalSet extends AbstractLBPHierarc
 							callDifferenceOfExtensionalAndIntensionalSetRewriteOnElseBranch,
 							new Expression[] { extensionalSet, saIntensionalSet },
 							R_check_branch_reachable,
-							R_simplify,
+							R_normalize,
 							process);
 		}
 

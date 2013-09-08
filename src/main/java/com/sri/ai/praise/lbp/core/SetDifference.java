@@ -745,7 +745,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			// theory/logic used in ConjunctsHoldTrueForEachOther). A more constrained context can
 			// help improve overall performance.
 			RewritingProcess processI = GrinderUtil.extendContextualVariablesAndConstraint(i, c, process);
-			forAllIPrime              = processI.rewrite(R_simplify, forAllIPrime);
+			forAllIPrime              = processI.rewrite(R_normalize, forAllIPrime);
 			cAndForAllPrimeI          = CardinalityUtil.makeAnd(c, forAllIPrime);
 			processI                  = GrinderUtil.extendContextualVariables(i, process);
 			Expression cPrimePrime    = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);

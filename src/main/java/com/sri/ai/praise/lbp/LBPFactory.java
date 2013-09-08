@@ -57,7 +57,7 @@ import com.sri.ai.praise.lbp.core.AnytimeRefiner;
 import com.sri.ai.praise.lbp.core.Basic;
 import com.sri.ai.praise.lbp.core.Belief;
 import com.sri.ai.praise.lbp.core.BoundBelief;
-import com.sri.ai.praise.lbp.core.CompleteSimplify;
+import com.sri.ai.praise.lbp.core.CompleteNormalize;
 import com.sri.ai.praise.lbp.core.ConvexRewriterOnMessageBounds;
 import com.sri.ai.praise.lbp.core.DefaultLBPConfiguration;
 import com.sri.ai.praise.lbp.core.DifferenceOfExtensionalAndExtensionalSet;
@@ -78,7 +78,7 @@ import com.sri.ai.praise.lbp.core.NormalizeRandomVariableCondition;
 import com.sri.ai.praise.lbp.core.ProductFactor;
 import com.sri.ai.praise.lbp.core.ProductMessageAndProductFactor;
 import com.sri.ai.praise.lbp.core.SetDifference;
-import com.sri.ai.praise.lbp.core.Simplify;
+import com.sri.ai.praise.lbp.core.Normalize;
 import com.sri.ai.praise.lbp.core.Sum;
 import com.sri.ai.praise.lbp.core.Union;
 import com.sri.ai.praise.model.Model;
@@ -99,17 +99,17 @@ public class LBPFactory {
 	}
 	
 	public static Rewriter getRootRewriter() {
-		return ((Simplify)newSimplify()).getRootRewriter();
+		return ((Normalize)newSimplify()).getRootRewriter();
 	}
 	
 	public static Rewriter newSimplify() {
-		Simplify simplify = new Simplify();
+		Normalize simplify = new Normalize();
 		
 		return simplify;
 	}
 	
 	public static Rewriter newCompleteSimplify() {
-		CompleteSimplify completeSimplify = new CompleteSimplify();
+		CompleteNormalize completeSimplify = new CompleteNormalize();
 		
 		return completeSimplify;
 	}
@@ -261,7 +261,7 @@ public class LBPFactory {
 		//
 		lbpRewriterLookup.put(LBPRewriter.R_basic,  new Basic());
 		lbpRewriterLookup.put(LBPRewriter.R_belief, new Belief(configuration));
-		lbpRewriterLookup.put(LBPRewriter.R_complete_simplify, new CompleteSimplify());
+		lbpRewriterLookup.put(LBPRewriter.R_complete_normalize, new CompleteNormalize());
 		lbpRewriterLookup.put(LBPRewriter.R_DifferenceOfExtensionalAndExtensionalSet, new DifferenceOfExtensionalAndExtensionalSet());
 		lbpRewriterLookup.put(LBPRewriter.R_DifferenceOfExtensionalAndIntensionalSet, new DifferenceOfExtensionalAndIntensionalSet());
 		lbpRewriterLookup.put(LBPRewriter.R_extract_previous_msg_sets, new ExtractPreviousMessageSets());
@@ -279,7 +279,7 @@ public class LBPFactory {
 		lbpRewriterLookup.put(LBPRewriter.R_prod_factor, new ProductFactor());
 		lbpRewriterLookup.put(LBPRewriter.R_prod_m_and_prod_factor, new ProductMessageAndProductFactor());
 		lbpRewriterLookup.put(LBPRewriter.R_set_diff, new SetDifference());
-		lbpRewriterLookup.put(LBPRewriter.R_simplify, new Simplify());
+		lbpRewriterLookup.put(LBPRewriter.R_normalize, new Normalize());
 		lbpRewriterLookup.put(LBPRewriter.R_sum, new Sum(configuration));
 		lbpRewriterLookup.put(LBPRewriter.R_union, new Union());
 		

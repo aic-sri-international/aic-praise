@@ -192,7 +192,7 @@ public interface LBPRewriter extends Rewriter {
 	 * 
 	 * beingComputed    <- empty set
 	 * belief_expansion <- R_prod_factor(prod_F in R_neigh_v(Neigh(V)) m_V<-F, beingComputed)
-	 * belief_expansion <- R_complete_simplify(belief_expansion)
+	 * belief_expansion <- R_complete_normalize(belief_expansion)
 	 * if belief_expansion does not contain 'previous message' expressions
 	 *         return R_normalize_message(V, belief_expansion)
 	 *         
@@ -242,12 +242,12 @@ public interface LBPRewriter extends Rewriter {
 	 * A rewriter to be used to check if a branch is reachable when calling
 	 * branch and merge logic.
 	 */
-	String R_check_branch_reachable = LBP_NAMESPACE+"R_complete_simplify";
+	String R_check_branch_reachable = LBP_NAMESPACE+"R_complete_normalize";
 	
 	/**
-	 * R_complete_simplify(E).
+	 * R_complete_normalize(E).
 	 */
-	String R_complete_simplify = LBP_NAMESPACE+"R_complete_simplify";
+	String R_complete_normalize = LBP_NAMESPACE+"R_complete_normalize";
 	
 	/**
 	 * <pre>
@@ -288,7 +288,7 @@ public interface LBPRewriter extends Rewriter {
 	 *     return {a_1,...,a_n}
 	 * { Alpha' | C' }_I' <- standardize { Alpha | C }_I apart from {a_1,...,a_n}
 	 * condition <- {@link #R_formula_simplification}(there exists I' : C' and a_i = Alpha')
-	 * return {@link #R_simplify}( 
+	 * return {@link #R_normalize}( 
 	 *          if condition
 	 *          then R_DifferenceOfExtensionalAndIntensionalSet({a_1,...,a_i-1,a_i+1,...,a_n}, { Alpha' | C' }_I', i)
 	 *          else R_DifferenceOfExtensionalAndIntensionalSet({a_1,...,a_n}, { Alpha' | C' }_I', i+1))
@@ -390,7 +390,7 @@ public interface LBPRewriter extends Rewriter {
 	 * Cases:
 	 * Set1 is { (on I1) Alpha1 | C1 } and Set2 is { (on I2) Alpha2 | C2 } (or multiset version) (1)
 	 *     standardize Set1 apart from (I2, Alpha2, C2)
-	 *     C <- R_complete_simplify(Alpha1 = Alpha2 and C1 and C2)
+	 *     C <- R_complete_normalize(Alpha1 = Alpha2 and C1 and C2)
 	 *     if C is "false"
 	 *         return {}
 	 *     I <- concatenation of I1 and I2
@@ -462,7 +462,7 @@ public interface LBPRewriter extends Rewriter {
 	 *     beingComputed <- {@link #R_basic}(beingComputed union {{(V,F)}} )
 	 * else if asynchronous group schedule
 	 *     In <- {@link #R_in}((V,F) in beingComputed)
-	 *     In <- {@link #R_complete_simplify}(In)
+	 *     In <- {@link #R_complete_normalize}(In)
 	 *     beingComputed <- beingComputed union {{(V,F) | C}}_I
 	 * else // synchronous
 	 *     In <- beingComputed is NOT empty
@@ -575,8 +575,8 @@ public interface LBPRewriter extends Rewriter {
 	 * "if v then Alpha else Beta"
 	 * Note: not to be confused with R_normalize_message, which normalizes a message's values to the [0, 1] interval.
 	 * Externalizes conditionals
-	 * Et <- {@link #R_simplify}(E[v/true]);
-	 * Ef <- {@link #R_simplify}(E[v/false]);
+	 * Et <- {@link #R_normalize}(E[v/true]);
+	 * Ef <- {@link #R_normalize}(E[v/false]);
 	 * return if v then Et else Ef
 	 * </pre>
 	 */
@@ -624,7 +624,7 @@ public interface LBPRewriter extends Rewriter {
 	 * m is deterministic
 	 *     return m
 	 * else
-	 *     return {@link #R_simplify}(m * {@link #R_prod_factor}(prod_F in S m_V<-F, beingComputed))
+	 *     return {@link #R_normalize}(m * {@link #R_prod_factor}(prod_F in S m_V<-F, beingComputed))
 	 * </pre>
 	 */
 	String R_prod_m_and_prod_factor = LBP_NAMESPACE+"R_prod_m_and_prod_factor";
@@ -719,9 +719,9 @@ public interface LBPRewriter extends Rewriter {
 	String R_set_diff = LBP_NAMESPACE+"R_set_diff";
 	
 	/**
-	 * R_simplify(E)
+	 * R_normalize(E)
 	 */
-	String R_simplify = LBP_NAMESPACE+"R_simplify";
+	String R_normalize = LBP_NAMESPACE+"R_normalize";
 	
 	/**
 	 * <pre>

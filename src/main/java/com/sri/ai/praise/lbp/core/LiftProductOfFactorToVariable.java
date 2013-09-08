@@ -66,7 +66,7 @@ import com.sri.ai.praise.lbp.LBPRewriter;
 /**
  * <pre>
  * R_lift_product_of_factor_to_variable(prod_{{(on I) Alpha | C}})
- * An atomic rewriter to be used within the context of R_simplify that rewrites/lifts expressions of the form:
+ * An atomic rewriter to be used within the context of R_normalize that rewrites/lifts expressions of the form:
  * product({{(on I) Alpha | C }})
  * Whereby Alpha is a representative message from a factor to the variable.
  * Rewriting only occurs if Alpha is a conditional numeric expression or if Alpha does not depend on the indices. 
@@ -76,7 +76,7 @@ import com.sri.ai.praise.lbp.LBPRewriter;
  * Cases:
  * Alpha is if C' then Alpha_1 else Alpha_2
  *     return R_lift_product_of_factor_to_variable(prod_{{(on I) Alpha_1 | C and C'}}) * R_lift_product_of_factor_to_variable(prod_{{(on I) Alpha_2 | C and not C'})
- * if R_complete_simplify({(on I) true | C}) is empty set
+ * if R_complete_normalize({(on I) true | C}) is empty set
  *     return 1
  * if Alpha <- pick_single_element({(on I) Alpha | C}) succeed
  *     return Alpha ^ {@link Cardinality R_card}(| C |_I)
@@ -187,8 +187,8 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 				
 				// Alpha isn't if C' then Alpha_1 else Alpha_2, where C' is a formula depending on I'
 				if (result == expression) { 
-					// if R_complete_simplify({(on I) true | C}) is empty set
-					Expression isEmptySet = process.rewrite(LBPRewriter.R_complete_simplify, IntensionalSet.makeUniSet(onI, Expressions.TRUE, conditionC));
+					// if R_complete_normalize({(on I) true | C}) is empty set
+					Expression isEmptySet = process.rewrite(LBPRewriter.R_complete_normalize, IntensionalSet.makeUniSet(onI, Expressions.TRUE, conditionC));
 					if (Sets.isEmptySet(isEmptySet)) {
 						// then return 1
 						result = Expressions.ONE;

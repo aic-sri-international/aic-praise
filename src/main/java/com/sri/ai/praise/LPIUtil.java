@@ -1245,7 +1245,7 @@ public class LPIUtil {
 	 * possible_determined_values <- (constants of C) union ( (free variables of formula_on_X and context) \ {X}) // (1)
 	 * result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_determined_values)
 	 * if result is null, return null
-	 * return R_complete_simplify(result)
+	 * return R_complete_normalize(result)
 	 * 
 	 * Implementation Notes:
 	 * (1) Preference is to check constants before free variables.
@@ -1311,8 +1311,8 @@ public class LPIUtil {
 					Trace.log("if result is null, return null");
 				}
 				else {
-					Trace.log("return R_complete_simplify(result)");
-					result = process.rewrite(LBPRewriter.R_complete_simplify, result);		
+					Trace.log("return R_complete_normalize(result)");
+					result = process.rewrite(LBPRewriter.R_complete_normalize, result);		
 				}
 			}
 			
@@ -1329,7 +1329,7 @@ public class LPIUtil {
 	 * 
 	 * if possible_values is empty, return null // X can be any value not forbidden by context, so it is not constrained to a single value
 	 * (first, remaining_possible_values) <- get_first_and_remaining(possible_values)
-	 * condition_for_first <- R_complete_simplify(formula_on_X[X/first])
+	 * condition_for_first <- R_complete_normalize(formula_on_X[X/first])
 	 * if condition_for_first is 'true'
 	 *     return first
 	 * among_remaining <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, remaining_possible_values) under context extended by not(condition_for_first)
@@ -1368,9 +1368,9 @@ public class LPIUtil {
 			Trace.log("// first                    : {}", first);
 			Trace.log("// remaining_possible_values: {}", remainingPossibleValues);
 			
-			Trace.log("condition_for_first <- R_complete_simplify(formula_on_X[X/first])");
+			Trace.log("condition_for_first <- R_complete_normalize(formula_on_X[X/first])");
 			Expression conditionForFirst = formulaOnX.replaceAllOccurrences(variableX, first, process);
-			conditionForFirst = process.rewrite(LBPRewriter.R_complete_simplify, conditionForFirst);
+			conditionForFirst = process.rewrite(LBPRewriter.R_complete_normalize, conditionForFirst);
 			Trace.log("// condition_for_first: {}, first: {}", conditionForFirst, first);
 			if (conditionForFirst.equals(Expressions.TRUE)) {
 				Trace.log("if condition_for_first is \"true\"");
@@ -1439,7 +1439,7 @@ public class LPIUtil {
 				if (LPIUtil.isRandomVariableValueExpression(subExpression, process) && ! subExpression.equals(randomVariableValue)) {
 					Expression randomVariable              = BracketedExpressionSubExpressionsProvider.make(randomVariableValue);
 					Expression subExpressionRandomVariable = BracketedExpressionSubExpressionsProvider.make(subExpression);
-					Expression comparison                  = process.rewrite(LBPRewriter.R_complete_simplify, Equality.make(subExpressionRandomVariable, randomVariable));
+					Expression comparison                  = process.rewrite(LBPRewriter.R_complete_normalize, Equality.make(subExpressionRandomVariable, randomVariable));
 					if ( ! comparison.equals(Expressions.TRUE)) { // that is, it is not guaranteed to be the same random variable value expression in this context
 						result.add(new Pair<Expression, Expression>(subExpression, process.getContextualConstraint()));
 					}

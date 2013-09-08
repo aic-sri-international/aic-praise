@@ -126,8 +126,8 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 			Trace.log("if asynchronous group schedule");
 			Trace.log("    In <- R_in((V,F) in beingComputed)");
 			in = process.rewrite(R_in, LPIUtil.argForInRewriteCall(pairV_F, beingComputed));
-			Trace.log("    In <- R_complete_simplify(In)");
-			in = process.rewrite(R_complete_simplify, in);
+			Trace.log("    In <- R_complete_normalize(In)");
+			in = process.rewrite(R_complete_normalize, in);
 			
 			Trace.log("    beingComputed <- beingComputed union {{(V,F) | C }}_I");
 			beingComputed = LPIUtil.extendBeingComputedWithIntensionalMultiSet(beingComputed, pairV_F, conditionC, scopingExpressionI, process);

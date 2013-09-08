@@ -170,7 +170,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 				// Externalize the extensional set.
 				// to get something like this instead:
 				// if X = a {[M1],...,[Mn-1]} else {[M2],...,[Mn]}
-				Expression conditionalExtensionalSetsOfMessages = process.rewrite(LBPRewriter.R_simplify, externalizedConditionalMessages);
+				Expression conditionalExtensionalSetsOfMessages = process.rewrite(LBPRewriter.R_normalize, externalizedConditionalMessages);
 				// Now place a 'convex hull' application around each conditioned
 				// extensional set of messages to get something like:
 				// if X = a 'convex hull'{[M1],...,[Mn-1]} else 'convex hull'{[M2],...,[Mn]}
@@ -204,7 +204,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 				process);
 				
 				// Ensure final simplification of the overall expression occurs
-				result = process.rewrite(LBPRewriter.R_simplify, result);
+				result = process.rewrite(LBPRewriter.R_normalize, result);
 			}
 			else {
 				result = unconditionalSimplification(expression, process);

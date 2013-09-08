@@ -133,7 +133,7 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 			} 
 			else {
 				Trace.log("else m is not deterministic");
-				Trace.log("    return R_simplify(m * R_prod_factor(prod_F in S m_V<-F, beingComputed, C))");
+				Trace.log("    return R_normalize(m * R_prod_factor(prod_F in S m_V<-F, beingComputed, C))");
 
 				Justification.beginEqualityStep("computing product of remaining messages");
 				Expression rewriteOfProductOfFactorsToVariable = process.rewrite(R_prod_factor,
@@ -145,7 +145,7 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 				}
 
 				Justification.beginEqualityStep("multiplying the two messages");
-				result = process.rewrite(R_simplify, productOfMessagesToSimplify);
+				result = process.rewrite(R_normalize, productOfMessagesToSimplify);
 				Justification.endEqualityStep(result);
 			}
 		}

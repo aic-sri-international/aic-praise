@@ -274,7 +274,7 @@ import com.sri.ai.util.base.Triple;
  *         new_message_values_set <- empty list
  *         for each message_value in message_values_set
  *             for each extremum value M of B
- *                 new_message_value <- R_simplify(message_value[P/M])
+ *                 new_message_value <- R_normalize(message_value[P/M])
  *                 add new_message_value to new_message_values_set
  *         return iterate_extrema(new_message_values_set, map_from_placeholder_to_bound)
  *         
@@ -638,10 +638,10 @@ public class ConvexRewriterOnMessageBounds extends
 					for (Expression extrenumValueM : getExtremumValues(expressionB, process)) {
 						Trace.log("        // message_value={}", messageValue);
 						Trace.log("        // M            ={}", extrenumValueM);
-						Trace.log("        new_message_value <- R_simplify(message_value[P/M])");
+						Trace.log("        new_message_value <- R_normalize(message_value[P/M])");
 						Expression messageValuePReplacedByM = messageValue.replaceAllOccurrences(placeholderP.getPlaceholderExpression(), extrenumValueM, process);
 						Trace.log("        // message_value[P/M]={}", messageValuePReplacedByM);
-						Expression newMessageValue          = process.rewrite(LBPRewriter.R_simplify, messageValuePReplacedByM);
+						Expression newMessageValue          = process.rewrite(LBPRewriter.R_normalize, messageValuePReplacedByM);
 						Trace.log("        // new_message_value={}", newMessageValue);
 						Trace.log("        add new_message_value to new_message_values_set");
 						newMessageValuesSet.add(newMessageValue);
@@ -688,7 +688,7 @@ public class ConvexRewriterOnMessageBounds extends
 					}, 
 					new Expression[] { IfThenElse.getElseBranch(messageValuesSet) }, 
 					LBPRewriter.R_check_branch_reachable, 
-					LBPRewriter.R_simplify, 
+					LBPRewriter.R_normalize, 
 					process);
 		}
 		else {

@@ -59,14 +59,14 @@ public interface MessageExpansions {
 	 * while msgs_to_be_expanded is not empty
 	 *     msg_set <- remove a union argument from msgs_to_be_expanded
 	 *     msg_set <- R_set_diff(msg_set minus msgs_already_expanded)
-	 *     msg_set <- R_complete_simplify(msg_set)
+	 *     msg_set <- R_complete_normalize(msg_set)
 	 *     if msg_set is not {}
 	 *         represent msg_set as { (on I) (Destination, Origin) | C }
 	 *         expansion <- compute message to Destination from Origin with
 	 *                              beingComputed = empty set and contextual constraint C
 	 *         // the above will use either R_m_to_v_from_f or R_m_to_f_from_v as needed
 	 *         
-	 *         expansion <- R_complete_simplify(expansion)
+	 *         expansion <- R_complete_normalize(expansion)
 	 *         
 	 *         index <- size of msg_expansions
 	 *         cache index as msg_value_index 

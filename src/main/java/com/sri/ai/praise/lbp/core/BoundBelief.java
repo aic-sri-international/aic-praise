@@ -134,8 +134,8 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 			Justification.endEqualityStep(Expressions.apply(LPIUtil.FUNCTOR_NORMALIZE, beliefExpansion));
 		}
 		
-		Trace.log("belief_expansion <- R_complete_simplify(belief_expansion)");
-		beliefExpansion = process.rewrite(R_complete_simplify, beliefExpansion);
+		Trace.log("belief_expansion <- R_complete_normalize(belief_expansion)");
+		beliefExpansion = process.rewrite(R_complete_normalize, beliefExpansion);
 		
 		Expression result = null;
 		if (LPIUtil.containsBoundExpressions(beliefExpansion)) {

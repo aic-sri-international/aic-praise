@@ -65,8 +65,8 @@ public class Basic extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 	 */
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-		// For now, just delegates to R_simplify.
-		Expression result = process.rewrite(R_simplify, expression);
+		// For now, just delegates to R_normalize.
+		Expression result = process.rewrite(R_normalize, expression);
 		
 		return result;
 	}

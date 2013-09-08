@@ -109,8 +109,8 @@ public class NormalizeRandomVariableCondition extends AbstractLBPHierarchicalRew
 			Expression expressionEForRandomVariableTrue  = SemanticSubstitute.replace(expressionE, randomVariableValueExpression, Expressions.TRUE,  process);
 			Expression expressionEForRandomVariableFalse = SemanticSubstitute.replace(expressionE, randomVariableValueExpression, Expressions.FALSE, process);
 
-			expressionEForRandomVariableTrue  = process.rewrite(R_simplify, expressionEForRandomVariableTrue);
-			expressionEForRandomVariableFalse = process.rewrite(R_simplify, expressionEForRandomVariableFalse);
+			expressionEForRandomVariableTrue  = process.rewrite(R_normalize, expressionEForRandomVariableTrue);
+			expressionEForRandomVariableFalse = process.rewrite(R_normalize, expressionEForRandomVariableFalse);
 
 			result = IfThenElse.make(randomVariableValueExpression, expressionEForRandomVariableTrue, expressionEForRandomVariableFalse);
 		} 

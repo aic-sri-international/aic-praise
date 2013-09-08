@@ -63,31 +63,30 @@ import com.sri.ai.grinder.library.set.extensional.UnionOnExtensionalSets;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
-import com.sri.ai.praise.CardinalityOfTypeAlwaysDistinctFromZero;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariables;
+import com.sri.ai.praise.CardinalityOfTypeAlwaysDistinctFromZero;
 import com.sri.ai.praise.LPIUtil;
-import com.sri.ai.praise.MoveAllConditionsOnRandomVariablesDown;
 import com.sri.ai.praise.MoveRandomVariableValueExpressionConditionDown;
 import com.sri.ai.praise.Type;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.util.base.Pair;
 
 /**
- * @see LBPRewriter#R_simplify
+ * @see LBPRewriter#R_normalize
  * 
  * @author oreilly
  *
  */
 @Beta
-public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.direct.core.Simplify implements LBPRewriter {
+public class Normalize extends com.sri.ai.grinder.library.equality.cardinality.direct.core.Normalize implements LBPRewriter {
 
-	public Simplify() {
+	public Normalize() {
 		super();
 	}
 	
 	@Override
 	public String getName() {
-		return LBPRewriter.R_simplify;
+		return LBPRewriter.R_normalize;
 	}
 	
 	//

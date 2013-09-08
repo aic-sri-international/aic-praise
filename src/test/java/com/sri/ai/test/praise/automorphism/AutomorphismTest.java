@@ -178,7 +178,7 @@ public class AutomorphismTest extends AbstractLPITest {
 			exprE = exhaustiveEqualityOfExtensionalUniSets.rewrite(exprE, process);
 			
 			// a more thorough simplification 
-			exprE = process.rewrite(LBPRewriter.R_complete_simplify, exprE);
+			exprE = process.rewrite(LBPRewriter.R_complete_normalize, exprE);
 
 			return exprE;
 		}
