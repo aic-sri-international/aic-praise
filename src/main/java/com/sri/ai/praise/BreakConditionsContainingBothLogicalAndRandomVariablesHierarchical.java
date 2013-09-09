@@ -42,6 +42,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
+import com.sri.ai.grinder.helper.RewriterFunction;
 
 /**
  * A rewriter that applies {@link BreakConditionsContainingBothLogicalAndRandomVariables} to all sub-expressions

@@ -43,6 +43,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.core.PruningPredicate;
+import com.sri.ai.grinder.helper.RewriterFunction;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 
 /**

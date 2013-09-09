@@ -81,7 +81,7 @@ import com.sri.ai.util.base.Pair;
 public class Normalize extends com.sri.ai.grinder.library.equality.cardinality.direct.core.Normalize implements LBPRewriter {
 
 	public Normalize() {
-		super();
+		super(true);
 	}
 	
 	@Override

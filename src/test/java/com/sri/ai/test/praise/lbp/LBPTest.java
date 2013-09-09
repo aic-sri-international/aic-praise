@@ -57,11 +57,11 @@ import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
+import com.sri.ai.grinder.library.controlflow.IfThenElseExternalizationHierarchical;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariables;
-import com.sri.ai.praise.IfThenElseExternalizationHierarchical;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
 import com.sri.ai.praise.MoveAllRandomVariableValueExpressionConditionsDownHierarchical;
@@ -192,7 +192,13 @@ public class LBPTest extends AbstractLPITest {
 		
 		// conditional condition case
 		expressionString = "(if X = tom then 1 else 2) + (if (if Y = beth then W = tom else W = john) then if Z = carol then 3 else 4 else 5)";
-		expectedString = "if X = tom then if Y = beth and W = tom or W = tom then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5 else (if Y = beth and W = tom or W = tom then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5)";
+		expectedString = "if X = tom then if Y = beth then if W = tom then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5 else (if W = john then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5) else (if Y = beth then if W = tom then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5 else (if W = john then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5))";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+		
+		// double conditional condition case
+		expressionString = "if (if X = tom then (if X = ann then X = john else X != john) else if X = beth then X = mark else X != mark) then 4 else 5";
+		expectedString = "if X = tom then if X = ann then if X = john then 4 else 5 else (if X != john then 4 else 5) else (if X = beth then if X = mark then 4 else 5 else (if X != mark then 4 else 5))";
 		actual = rewriter.rewrite(parse(expressionString), process);
 		assertEquals(parse(expectedString), actual);
 	}
