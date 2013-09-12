@@ -724,7 +724,14 @@ public interface LBPRewriter extends Rewriter {
 	String R_normalize = LBP_NAMESPACE+"R_normalize";
 	
 	/**
-	 * <pre>
+	 * R_simplify(E).<br>
+	 * Interface for R_simplify(E) functionality used by R_normalize.
+	 * It performs simplifications of expressions based on full or partial evaluation of known functions.
+	 */
+	String R_simplify = LBP_NAMESPACE+"R_simplify";
+
+	/**
+	 * <pre>	
 	 * R_sum(sum_N E * prod_{V in N'} m_F<-V, T, beingComputed)
 	 * N is a conditional extensionally defined set of random variables indexing the summation
 	 * // (see note at end of {@link #R_m_to_v_from_f}(m_V<-F) for details)

@@ -38,6 +38,7 @@
 package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -450,15 +451,17 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						Tuple.make(destination, origin, expansion), 
 						conditionC);
 				
-				if (isFreeVariablesIntroduced(msgExpansion, freeVariablesFromBeliefQuery, process)) {
+				Collection<Expression> introducedFreeVariables = getIntroducedFreeVariables(msgExpansion, freeVariablesFromBeliefQuery, process);
+				if ( ! introducedFreeVariables.isEmpty()) {
 					System.err.println("IllegalStateException: introduced additional free variables into msg_expansion.");
+					System.err.println("introduced    ="+Util.join(introducedFreeVariables));
 					System.err.println("msg_expansion ="+msgExpansion);
 					System.err.println("msg_set       ="+msgSet);
 					System.err.println("msg_expansions=");
 					for (Expression me : msgExpansions) {
 						System.err.println(me);
 					}
-					throw new IllegalStateException("IllegalStateException: introduced additional free variables into msg_expansion: "+msgExpansion);
+					throw new IllegalStateException("IllegalStateException: introduced additional free variables " + Util.join(introducedFreeVariables) + " into msg_expansion: "+msgExpansion);
 				}
 				
 				if (isAnswerDependentOnLogicalVariableMessageIsNot(msgExpansion, process)) {
@@ -606,10 +609,12 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 														tupleTriple, 
 														IntensionalSet.getCondition(msgExpansion));
 					
-					if (isFreeVariablesIntroduced(newMsgValue, freeVariablesFromBeliefQuery, process)) {
+					Collection<Expression> introducedFreeVariables = getIntroducedFreeVariables(newMsgValue, freeVariablesFromBeliefQuery, process);
+					if ( ! introducedFreeVariables.isEmpty()) {
 						System.err.println("IllegalStateException: introduced additional free variables into new_msg_value.");
 						System.err.println("sub.context      ="+subProcess.getContextualConstraint());
 						System.err.println("sub.context vars ="+subProcess.getContextualVariables());
+						System.err.println("introduced       ="+Util.join(introducedFreeVariables));
 						System.err.println("msg_expansion    ="+msgExpansion);
 						System.err.println("expansion        ="+expansion);
 						System.err.println("value            ="+value);
@@ -622,7 +627,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						for (Expression mv : msgValues) {
 							System.err.println(mv);
 						}
-						throw new IllegalStateException("IllegalStateException: introduced additional free variables into new_msg_value: "+newMsgValue);
+						throw new IllegalStateException("IllegalStateException: introduced additional free variables " + Util.join(introducedFreeVariables) + " into new_msg_value: "+newMsgValue);
 					}
 					
 					if (isAnswerDependentOnLogicalVariableMessageIsNot(newMsgValue, process)) {
@@ -1074,17 +1079,13 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return result;
 	}
 	
-	private boolean isFreeVariablesIntroduced(Expression msgExpansionOrValue, Set<Expression> freeVariablesFromBeliefQuery, RewritingProcess process) {
-		boolean result = false;
-		
+	private Collection<Expression> getIntroducedFreeVariables(Expression msgExpansionOrValue, Set<Expression> freeVariablesFromBeliefQuery, RewritingProcess process) {
 		Set<Expression> freeInMsg = Expressions.freeVariables(msgExpansionOrValue, process);
 		freeInMsg.removeAll(Model.getSortNames(process)); // Ensure sort names are not included in this list.
 		
-		if (!freeVariablesFromBeliefQuery.containsAll(freeInMsg)) {
-			result = true;
-		}
+		Collection<Expression> introducedFreeVariables = Util.setDifference(freeInMsg, freeVariablesFromBeliefQuery);
 		
-		return result;
+		return introducedFreeVariables;
 	}
 	
 	private boolean isAnswerDependentOnLogicalVariableMessageIsNot(Expression msgExpansionOrValue, final RewritingProcess process) {

@@ -332,7 +332,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 						"if X = a and p(X) then if Y = b then E1 else E2 else if Y = c then E3 else E4",
 						// Note: assigning variables to their contextual values is no longer part of simplification
 						// "if Y = b then if X = a then if p(a) then E1 else E4 else E4 else if Y = c then if X = a then if p(a) then E2 else E3 else E3 else if X = a then if p(a) then E2 else E4 else E4"
-						"if Y = b then if X = a then if p(a) then E1 else E4 else E4 else if Y = c then if X = a then if p(a) then E2 else E3 else E3 else if X = a then if p(a) then E2 else E4 else E4"),
+						"if X = a then if Y = b then if p(a) then E1 else E4 else (if Y = c then if p(a) then E2 else E3 else (if p(a) then E2 else E4)) else (if Y = c then E3 else E4)"),
 				new NormalizeTestData(Expressions.TRUE.toString(), 
 						new TrivialPQR(),
 						"if [ p(a1) ] = [ p(X) ] and q(X) then 2 ^ |People| else 3 ^ |People| ",

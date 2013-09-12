@@ -226,6 +226,12 @@ public class LBPTest extends AbstractLPITest {
 		actual = rewriter.rewrite(parse(expressionString), process);
 		assertEquals(parse(expectedString), actual);
 
+		// Already normalized case with nested LV conditions
+		expressionString = "if X = ann then if X = bob then 1 else 2 else if X = bob then 3 else 4";
+		expectedString   = "if X = ann then if X = bob then 1 else 2 else if X = bob then 3 else 4";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+
 		// simple case
 		expressionString = "if smart(X) then if X = tom then 1 else 2 else 3";
 		expectedString = "if X = tom then if smart(X) then 1 else 3 else if smart(X) then 2 else 3";
@@ -246,13 +252,19 @@ public class LBPTest extends AbstractLPITest {
 
 		// RVs on top, LV at bottom
 		expressionString = "if smart(X) then if X = tom then if Y = ann then 1 else 2 else 3 else 4";
-		expectedString = "if Y = ann then if X = tom then if smart(X) then 1 else 4 else (if smart(X) then 3 else 4) else (if X = tom then if smart(X) then 2 else 4 else (if smart(X) then 3 else 4))";
+		expectedString = "if X = tom then if Y = ann then if smart(X) then 1 else 4 else (if smart(X) then 2 else 4) else (if smart(X) then 3 else 4)";
 		actual = rewriter.rewrite(parse(expressionString), process);
 		assertEquals(parse(expectedString), actual);
 
 		// RVs on top, LV at bottom, symmetric case around then/else
 		expressionString = "if smart(X) then 4 else if X = tom then 3 else if Y = ann then 1 else 2";
-		expectedString = "if Y = ann then if X = tom then if smart(X) then 4 else 3 else (if smart(X) then 4 else 1) else (if X = tom then if smart(X) then 4 else 3 else (if smart(X) then 4 else 2))";
+		expectedString = "if X = tom then if smart(X) then 4 else 3 else (if Y = ann then if smart(X) then 4 else 1 else (if smart(X) then 4 else 2))";
+		actual = rewriter.rewrite(parse(expressionString), process);
+		assertEquals(parse(expectedString), actual);
+
+		// case with unregistered RV. Should still be fine because it detects LV conditions based on formula definition, which is equality logic.
+		expressionString = "if predicate(X) then if X = a then 1 else 2 else 3";
+		expectedString = "if X = a then if predicate(X) then 1 else 3 else if predicate(X) then 2 else 3";
 		actual = rewriter.rewrite(parse(expressionString), process);
 		assertEquals(parse(expectedString), actual);
 	}

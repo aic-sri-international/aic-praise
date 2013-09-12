@@ -37,7 +37,6 @@
  */
 package com.sri.ai.praise.lbp.core;
 
-
 import java.util.List;
 
 import com.google.common.annotations.Beta;
@@ -47,7 +46,6 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.ScopedVariables;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.controlflow.IfThenElseIrrelevantCondition;
 import com.sri.ai.grinder.library.controlflow.IfThenElseSubExpressionsAndImposedConditionsProvider;
 import com.sri.ai.grinder.library.equality.injective.DisequalityOnInjectiveSubExpressions;
 import com.sri.ai.grinder.library.equality.injective.DisequalityOnMutuallyExclusiveCoDomainExpressions;
@@ -64,60 +62,30 @@ import com.sri.ai.grinder.library.set.extensional.UnionOnExtensionalSets;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
-import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariables;
-import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
 import com.sri.ai.praise.CardinalityOfTypeAlwaysDistinctFromZero;
 import com.sri.ai.praise.LPIUtil;
-import com.sri.ai.praise.MoveAllRandomVariableValueExpressionConditionsDownHierarchical;
-import com.sri.ai.praise.MoveRandomVariableValueExpressionConditionDown;
 import com.sri.ai.praise.Type;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.util.base.Pair;
 
 /**
- * @see LBPRewriter#R_normalize
+ * @see LBPRewriter#R_simplify
  * 
  * @author oreilly
  *
  */
 @Beta
-public class Normalize extends com.sri.ai.grinder.library.equality.cardinality.direct.core.Normalize implements LBPRewriter {
+public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.direct.core.Simplify implements LBPRewriter {
 
-	private static boolean oldVersion = false;
-	
-	public Normalize() {
-		super(oldVersion);
+	public Simplify() {
+		super();
 	}
 	
 	@Override
 	public String getName() {
-		return LBPRewriter.R_normalize;
+		return LBPRewriter.R_simplify;
 	}
 	
-	private Rewriter breakConditionsContainingBothLogicalAndRandomVariablesHierarchical = new BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical();
-	private Rewriter moveAllRandomVariableValueExpressionConditionsDownHierarchical = new MoveAllRandomVariableValueExpressionConditionsDownHierarchical();
-	private Rewriter simplify = new Simplify();
-	
-	@Override
-	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-		if (oldVersion) {
-			return super.rewriteAfterBookkeeping(expression, process);
-		}
-		else {
-			// Note that the order used below is far from arbitrary.
-			// MoveAllRandomVariableValueExpressionConditionsDownHierarchical requires
-			// its input to have already all conditional expressions on top, which is enforced by
-			// IfThenElseExternalizationHierarchical.
-			expression = simplify.rewrite(expression, process); // this first pass rewrites prod({{ <message value> | C }}) into exponentiated message values through lifting, rending a basic expression
-			// it should be replaced by a normalizer with the single goal of lifting such expressions
-			expression = breakConditionsContainingBothLogicalAndRandomVariablesHierarchical.rewrite(expression, process);
-			expression = ifThenElseExternalizationHierarchical.rewrite(expression, process);
-			expression = moveAllRandomVariableValueExpressionConditionsDownHierarchical.rewrite(expression, process);
-			expression = simplify.rewrite(expression, process);
-			return expression;
-		}
-	}
-
 	//
 	// PROTECTED METHODS
 	// 
@@ -193,24 +161,24 @@ public class Normalize extends com.sri.ai.grinder.library.equality.cardinality.d
 				new Pair<Class<?>, Rewriter>(
 						Equality.class,
 						new UnionOnExtensionalSets()),
-				// 
-				// Support for: Splitting conditionals on random variables 
-				// e.g.:
-				// 'if X != a and p(X) then E1 else E2' 
-				// ->
-				// 'if X != a the if p(X) then E1 else E2 else E2'
-				//
-				// 'if p(X) then if X = a then Alpha else Beta else Gamma' 
-				// ->
-				// 'if X = a then if p(X) then Alpha else Gamma else if p(X) then Beta else Gamma' 
-						
+//				// 
+//				// Support for: Splitting conditionals on random variables 
+//				// e.g.:
+//				// 'if X != a and p(X) then E1 else E2' 
+//				// ->
+//				// 'if X != a the if p(X) then E1 else E2 else E2'
+//				//
+//				// 'if p(X) then if X = a then Alpha else Beta else Gamma' 
+//				// ->
+//				// 'if X = a then if p(X) then Alpha else Gamma else if p(X) then Beta else Gamma' 
+//						
+////						new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
+////								new MoveAllConditionsOnRandomVariablesDown()),	 
+//
 //						new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
-//								new MoveAllConditionsOnRandomVariablesDown()),	 
-
-						new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
-								new BreakConditionsContainingBothLogicalAndRandomVariables()),	 
-				new Pair<Class<?>, Rewriter>(BreakConditionsContainingBothLogicalAndRandomVariables.class,
-						new MoveRandomVariableValueExpressionConditionDown()),
+//								new BreakConditionsContainingBothLogicalAndRandomVariables()),	 
+//				new Pair<Class<?>, Rewriter>(BreakConditionsContainingBothLogicalAndRandomVariables.class,
+//						new MoveRandomVariableValueExpressionConditionDown()),
 						
 				//
 				// Support for: lifting products of factors
@@ -223,7 +191,8 @@ public class Normalize extends com.sri.ai.grinder.library.equality.cardinality.d
 				// 1
 
 //								new Pair<Class<?>, Rewriter>(MoveAllConditionsOnRandomVariablesDown.class,
-								new Pair<Class<?>, Rewriter>(MoveRandomVariableValueExpressionConditionDown.class,
+//								new Pair<Class<?>, Rewriter>(MoveRandomVariableValueExpressionConditionDown.class,
+								new Pair<Class<?>, Rewriter>(UnionOnExtensionalSets.class,
 										
 						new LiftProductOfFactorToVariable()),
 				new Pair<Class<?>, Rewriter>(LiftProductOfFactorToVariable.class,
