@@ -355,7 +355,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 						// "if X = a then if Y = b then if p(a) then if q(a, b) then E1 else E2 else E4 else if Y = c then if p(a) then E2 else if q(a, c) then E3 else E4 else if p(a) then E2 else E4 else if Y = c then if q(X, c) then E3 else E4 else E4"
 						"if X = a then if Y = b then if p(a) then if q(a, b) then E1 else E2 else E4 else if Y = c then if p(a) then E2 else if q(a, c) then E3 else E4 else if p(a) then E2 else E4 else if Y = c then if q(X, c) then E3 else E4 else E4"),
 				//
-				// Case where R_incomplete_linear_implied_certainty would apply itself to the lambda function argument and
+				// Case where R_incomplete_top_implied_certainty would apply itself to the lambda function argument and
 			    // flip it from true to false continuously
 				new NormalizeTestData(Expressions.TRUE.toString(), 
 						new TrivialLoopyPQandb(),
@@ -513,7 +513,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 	public void testIncompleteLinearImpliedCertainty() {
 		TestData[] tests = new TestData[] {
 			//
-		    // Basic: Ensure R_incomplete_linear_implied_certainty does not loop
+		    // Basic: Ensure R_incomplete_top_implied_certainty does not loop
 			new NormalizeTestData(Expressions.TRUE.toString(), new TrivialPRWithNonDeterministicFactor(), 
 					"if X = b then 1 else ({{ true | X = b }})", 
 			        "if X = b then 1 else ({ })"),
