@@ -222,7 +222,7 @@ public class ModelGrounding {
 		
 		//
 		// Now Ground the model declaration
-		Rewriter                                 simplify      = LBPFactory.newSimplify();
+		Rewriter                                 normalize      = LBPFactory.newNormalize();
 		Set<Expression>                          groundFactors = new LinkedHashSet<Expression>();
 		List<Pair<Expression, List<Expression>>> parfactorToGroundFactors = new ArrayList<Pair<Expression, List<Expression>>>();
 		for (ParfactorInformation parfactorInformation : groundModelDeclaration.parfactorMap.values()) {
@@ -238,7 +238,7 @@ public class ModelGrounding {
 					// still need to check the condition before
 					// including it in the grounded set.
 					Expression ifThenElse = IfThenElse.make(parfactorInformation.intensionalCondition, Expressions.TRUE, Expressions.FALSE);
-					Expression conditionTest = simplify.rewrite(ifThenElse, process);
+					Expression conditionTest = normalize.rewrite(ifThenElse, process);
 					if (Expressions.TRUE.equals(conditionTest)) {
 						Expression groundFactor = Expressions.apply(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL, 
 								parfactorInformation.intensionalFactorValueExpression);	
@@ -273,7 +273,7 @@ public class ModelGrounding {
 						Expression groundFactorValue = SemanticSubstitute.replaceAll(parfactorInformation.intensionalFactorValueExpression, replacements, process);
 						Expression condition         = SemanticSubstitute.replaceAll(parfactorInformation.intensionalCondition, replacements, process);
 						Expression ifThenElse = IfThenElse.make(condition, Expressions.TRUE, Expressions.FALSE);
-						Expression conditionTest = simplify.rewrite(ifThenElse, process);
+						Expression conditionTest = normalize.rewrite(ifThenElse, process);
 						if (Expressions.TRUE.equals(conditionTest)) {
 							Expression groundFactor = Expressions.apply(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL, 
 									groundFactorValue);	

@@ -245,11 +245,6 @@ public interface LBPRewriter extends Rewriter {
 	String R_check_branch_reachable = LBP_NAMESPACE+"R_complete_normalize";
 	
 	/**
-	 * R_complete_normalize(E).
-	 */
-	String R_complete_normalize = LBP_NAMESPACE+"R_complete_normalize";
-	
-	/**
 	 * <pre>
 	 * R_DifferenceOfExtensionalAndExtensionalSet({a_1,...,a_n}, {b_1,...,b_m}, i, j)
 	 * {a_1,...,a_n} and {b_1,...,b_m} are normalized sets.
@@ -724,11 +719,23 @@ public interface LBPRewriter extends Rewriter {
 	String R_normalize = LBP_NAMESPACE+"R_normalize";
 	
 	/**
+	 * R_complete_normalize(E).
+	 */
+	String R_complete_normalize = LBP_NAMESPACE+"R_complete_normalize";
+
+	/**
 	 * R_simplify(E).<br>
 	 * Interface for R_simplify(E) functionality used by R_normalize.
 	 * It performs simplifications of expressions based on full or partial evaluation of known functions.
 	 */
 	String R_simplify = LBP_NAMESPACE+"R_simplify";
+
+	/**
+	 * R_complete_simplify(E).<br>
+	 * Complete version of R_simplify(E), that is,
+	 * guaranteeing that tautologies and contradictions are replaced by true and false respectively.
+	 */
+	String R_complete_simplify = LBP_NAMESPACE+"R_complete_simplify";
 
 	/**
 	 * <pre>	

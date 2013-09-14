@@ -444,7 +444,7 @@ public class ExportToPMTK3FactorGraph {
 		public List<Integer>          domainSizes = new ArrayList<Integer>();
 		public List<Rational>         values      = new ArrayList<Rational>();
 		//
-		public Rewriter               rSimplify   = LBPFactory.newSimplify();
+		public Rewriter               rNormalize   = LBPFactory.newNormalize();
 		
 		
 		// Create a default tabular factor with potentials = 1
@@ -509,8 +509,8 @@ public class ExportToPMTK3FactorGraph {
 				
 				// With values substituted (i.e. {false,true}) for each random variable value expression
 				// this should simplify to a rational - if not something is wrong.
-				Expression simplifiedParfactorWithRangeValues = rSimplify.rewrite(parfactorWithRangeValues, process);
-				Rational   rationalValue = simplifiedParfactorWithRangeValues.rationalValue();
+				Expression normalizedParfactorWithRangeValues = rNormalize.rewrite(parfactorWithRangeValues, process);
+				Rational   rationalValue = normalizedParfactorWithRangeValues.rationalValue();
 				values.add(rationalValue);
 			}
 			

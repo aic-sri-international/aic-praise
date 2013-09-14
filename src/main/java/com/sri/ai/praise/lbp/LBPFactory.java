@@ -99,19 +99,17 @@ public class LBPFactory {
 	}
 	
 	public static Rewriter getRootRewriter() {
-		return ((Normalize)newSimplify()).getRootRewriter();
+		return ((Normalize)newNormalize()).getRootRewriter();
 	}
 	
-	public static Rewriter newSimplify() {
-		Normalize simplify = new Normalize();
-		
-		return simplify;
+	public static Rewriter newNormalize() {
+		Normalize normalize = new Normalize();
+		return normalize;
 	}
 	
-	public static Rewriter newCompleteSimplify() {
-		CompleteNormalize completeSimplify = new CompleteNormalize();
-		
-		return completeSimplify;
+	public static Rewriter newCompleteNormalize() {
+		CompleteNormalize completeNormalize = new CompleteNormalize();
+		return completeNormalize;
 	}
 	
 	public static LBPConfiguration newLBPConfiguration() {

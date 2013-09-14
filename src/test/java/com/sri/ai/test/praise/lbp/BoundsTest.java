@@ -549,7 +549,7 @@ public class BoundsTest extends AbstractLPITest {
 			@Override
 			public Expression callRewrite(RewritingProcess process) {
 				final DefaultRewriterLookup rewriterLookup = (DefaultRewriterLookup) ((DefaultRewritingProcess)process).getRewriterLookup();
-				Rewriter simplify = LBPFactory.newSimplify();
+				Rewriter normalize = LBPFactory.newNormalize();
 				Rewriter inner    = new AbstractRewriter() {
 					
 					@Override
@@ -582,7 +582,7 @@ public class BoundsTest extends AbstractLPITest {
 					}
 				};
 				
-				rewriterLookup.put("R_normalize", simplify);
+				rewriterLookup.put("R_normalize", normalize);
 				rewriterLookup.put("R_inner",    inner);				
 				Map<String, String> boundChildRewriters = new HashMap<String, String>();
 				boundChildRewriters.put("R_canned_response", "R_bound_canned_response");
@@ -1014,7 +1014,7 @@ public class BoundsTest extends AbstractLPITest {
 		
 		@Override
 		public Expression callRewrite(RewritingProcess process) {
-			Rewriter simplify                          = LBPFactory.newSimplify();
+			Rewriter normalize                         = LBPFactory.newNormalize();
 			final DefaultRewriterLookup rewriterLookup = (DefaultRewriterLookup) ((DefaultRewritingProcess)process).getRewriterLookup(); 
 			Rewriter inner                             = new AbstractRewriter() {
 				
@@ -1050,7 +1050,7 @@ public class BoundsTest extends AbstractLPITest {
 				}
 			};
 			
-			rewriterLookup.put("R_normalize", simplify);
+			rewriterLookup.put("R_normalize", normalize);
 			rewriterLookup.put("R_inner",    inner);				
 			
 			Map<String, String> boundChildRewriters = new HashMap<String, String>();
@@ -1100,8 +1100,8 @@ public class BoundsTest extends AbstractLPITest {
 		@Override
 		public Expression callRewrite(RewritingProcess process) {
 			final DefaultRewriterLookup rewriterLookup = (DefaultRewriterLookup) ((DefaultRewritingProcess)process).getRewriterLookup();
-			Rewriter simplify = LBPFactory.newSimplify();
-			Rewriter inner    = new AbstractRewriter() {
+			Rewriter normalize = LBPFactory.newNormalize();
+			Rewriter inner     = new AbstractRewriter() {
 				
 				@Override
 				public String getName() {
@@ -1142,7 +1142,7 @@ public class BoundsTest extends AbstractLPITest {
 				}
 			};
 			
-			rewriterLookup.put("R_normalize", simplify);
+			rewriterLookup.put("R_normalize", normalize);
 			rewriterLookup.put("R_inner",    inner);				
 			
 			Map<String, String> boundChildRewriters = new HashMap<String, String>();
