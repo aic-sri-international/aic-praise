@@ -83,12 +83,6 @@ import com.sri.ai.util.base.Pair;
 @Beta
 public class Normalize extends com.sri.ai.grinder.library.equality.cardinality.direct.core.Normalize implements LBPRewriter {
 
-	private static boolean oldVersion = false;
-	
-	public Normalize() {
-		super(oldVersion);
-	}
-	
 	@Override
 	public String getName() {
 		return LBPRewriter.R_normalize;
@@ -100,22 +94,17 @@ public class Normalize extends com.sri.ai.grinder.library.equality.cardinality.d
 	
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-		if (oldVersion) {
-			return super.rewriteAfterBookkeeping(expression, process);
-		}
-		else {
-			// Note that the order used below is far from arbitrary.
-			// MoveAllRandomVariableValueExpressionConditionsDownHierarchical requires
-			// its input to have already all conditional expressions on top, which is enforced by
-			// IfThenElseExternalizationHierarchical.
-			expression = simplify.rewrite(expression, process); // this first pass rewrites prod({{ <message value> | C }}) into exponentiated message values through lifting, rending a basic expression
-			// it should be replaced by a normalizer with the single goal of lifting such expressions
-			expression = breakConditionsContainingBothLogicalAndRandomVariablesHierarchical.rewrite(expression, process);
-			expression = ifThenElseExternalizationHierarchical.rewrite(expression, process);
-			expression = moveAllRandomVariableValueExpressionConditionsDownHierarchical.rewrite(expression, process);
-			expression = simplify.rewrite(expression, process);
-			return expression;
-		}
+		// Note that the order used below is far from arbitrary.
+		// MoveAllRandomVariableValueExpressionConditionsDownHierarchical requires
+		// its input to have already all conditional expressions on top, which is enforced by
+		// IfThenElseExternalizationHierarchical.
+		expression = simplify.rewrite(expression, process); // this first pass rewrites prod({{ <message value> | C }}) into exponentiated message values through lifting, rending a basic expression
+		// it should be replaced by a normalizer with the single goal of lifting such expressions
+		expression = breakConditionsContainingBothLogicalAndRandomVariablesHierarchical.rewrite(expression, process);
+		expression = ifThenElseExternalizationHierarchical.rewrite(expression, process);
+		expression = moveAllRandomVariableValueExpressionConditionsDownHierarchical.rewrite(expression, process);
+		expression = simplify.rewrite(expression, process);
+		return expression;
 	}
 
 	//
