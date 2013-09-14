@@ -52,7 +52,7 @@ import com.sri.ai.praise.lbp.LBPRewriter;
  *
  */
 @Beta
-public class CompleteNormalize extends com.sri.ai.grinder.library.equality.cardinality.direct.core.CompleteNormalize implements LBPRewriter {
+public class CompleteNormalize extends com.sri.ai.grinder.library.equality.cardinality.direct.core.OldCompleteNormalize implements LBPRewriter {
 	
 	public CompleteNormalize() {
 		super();
