@@ -77,10 +77,6 @@ import com.sri.ai.util.base.Pair;
 @Beta
 public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.direct.core.Simplify implements LBPRewriter {
 
-	public Simplify() {
-		super();
-	}
-	
 	@Override
 	public String getName() {
 		return LBPRewriter.R_simplify;

@@ -41,7 +41,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.core.AbstractRewriter;
+import com.sri.ai.grinder.core.AbstractHierarchicalRewriter;
 import com.sri.ai.grinder.helper.RewriterFunction;
 
 /**
@@ -51,7 +51,7 @@ import com.sri.ai.grinder.helper.RewriterFunction;
  * IMPORTANT: It assumes that all random variable value expressions occur in the conditions of if then else expressions. 
  */
 @Beta
-public class BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical extends AbstractRewriter {
+public class BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical extends AbstractHierarchicalRewriter {
 
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {

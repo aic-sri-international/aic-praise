@@ -79,6 +79,7 @@ import com.sri.ai.praise.lbp.core.ProductFactor;
 import com.sri.ai.praise.lbp.core.ProductMessageAndProductFactor;
 import com.sri.ai.praise.lbp.core.SetDifference;
 import com.sri.ai.praise.lbp.core.Normalize;
+import com.sri.ai.praise.lbp.core.Simplify;
 import com.sri.ai.praise.lbp.core.Sum;
 import com.sri.ai.praise.lbp.core.Union;
 import com.sri.ai.praise.model.Model;
@@ -99,7 +100,8 @@ public class LBPFactory {
 	}
 	
 	public static Rewriter getRootRewriter() {
-		return ((Normalize)newNormalize()).getRootRewriter();
+		return (new Simplify()).getRootRewriter();
+//		return ((Normalize)newNormalize()).getRootRewriter();
 	}
 	
 	public static Rewriter newNormalize() {

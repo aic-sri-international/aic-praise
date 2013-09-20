@@ -196,9 +196,9 @@ public class LBPTest extends AbstractLPITest {
 		actual = rewriter.rewrite(parse(expressionString), process);
 		assertEquals(parse(expectedString), actual);
 		
-		// double conditional condition case
+		// double conditional condition case, with simplifications
 		expressionString = "if (if X = tom then (if X = ann then X = john else X != john) else if X = beth then X = mark else X != mark) then 4 else 5";
-		expectedString = "if X = tom then if X = ann then if X = john then 4 else 5 else (if X != john then 4 else 5) else (if X = beth then if X = mark then 4 else 5 else (if X != mark then 4 else 5))";
+		expectedString = "if X = tom or X != beth and X != mark then 4 else 5";
 		actual = rewriter.rewrite(parse(expressionString), process);
 		assertEquals(parse(expectedString), actual);
 	}

@@ -266,7 +266,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 				result = IfThenElse.make(IfThenElse.getCondition(messageValue), thenBranch, elseBranch);
 			}
 			else {
-				throw new IllegalArgumentException("Not a recognized message ["+message+"]");
+				throw new IllegalArgumentException("Not a recognized message: "+message);
 			}
 		}
 		

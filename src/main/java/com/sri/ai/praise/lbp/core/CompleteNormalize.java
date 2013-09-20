@@ -37,10 +37,10 @@
  */
 package com.sri.ai.praise.lbp.core;
 
-import java.util.List;
-
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Rewriter;
+import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.praise.lbp.LBPRewriter;
 
 /**
@@ -48,31 +48,36 @@ import com.sri.ai.praise.lbp.LBPRewriter;
  * 
  * @see LBPRewriter#R_complete_normalize
  * 
- * @author oreilly
+ * @author braz
  *
  */
 @Beta
-public class CompleteNormalize extends com.sri.ai.grinder.library.equality.cardinality.direct.core.OldCompleteNormalize implements LBPRewriter {
+public class CompleteNormalize extends Normalize implements LBPRewriter {
 	
 	public CompleteNormalize() {
 		super();
+		simplify = new Simplify();
 	}
-	
+
 	@Override
 	public String getName() {
 		return LBPRewriter.R_complete_normalize;
 	}
-	 
-	//
-	// PROTECTED METHODS
-	// 
+	
+	private Rewriter completeSimplify = new CompleteSimplify();
 	
 	@Override
-	protected List<Rewriter> getAtomicRewriters() {
-		List<Rewriter> atomicRewriters = super.getAtomicRewriters();
-		
-		atomicRewriters = Normalize.extendAtomicRewriters(atomicRewriters);
-	
-		return atomicRewriters;
+	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
+		// Note that the order used below is far from arbitrary.
+		// MoveAllRandomVariableValueExpressionConditionsDownHierarchical requires
+		// its input to have already all conditional expressions on top, which is enforced by
+		// IfThenElseExternalizationHierarchical.
+		expression = simplify.rewrite(expression, process); // this first pass rewrites prod({{ <message value> | C }}) into exponentiated message values through lifting, rending a basic expression
+		// it should be replaced by a normalizer with the single goal of lifting such expressions
+		expression = breakConditionsContainingBothLogicalAndRandomVariablesHierarchical.rewrite(expression, process);
+		expression = ifThenElseExternalizationHierarchical.rewrite(expression, process);
+		expression = moveAllRandomVariableValueExpressionConditionsDownHierarchical.rewrite(expression, process);
+		expression = completeSimplify.rewrite(expression, process);
+		return expression;
 	}
 }

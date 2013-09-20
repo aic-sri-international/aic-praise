@@ -41,7 +41,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.core.AbstractRewriter;
+import com.sri.ai.grinder.core.AbstractHierarchicalRewriter;
 import com.sri.ai.grinder.core.PruningPredicate;
 import com.sri.ai.grinder.helper.RewriterFunction;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -54,7 +54,7 @@ import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
  * Returns an equivalent expression in which all random variable conditions appear under logical variable ones.
  */
 @Beta
-public class MoveAllRandomVariableValueExpressionConditionsDownHierarchical extends AbstractRewriter {
+public class MoveAllRandomVariableValueExpressionConditionsDownHierarchical extends AbstractHierarchicalRewriter {
 
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {

@@ -214,8 +214,7 @@ public abstract class AbstractLPITest {
 							+ "\nexpected: " + expectedExpression // better to show expectedExpression than expression, because parsing errors will be more clear
 							+ "\n but an unhandled throwable exception was thrown instead: " + (thrown.getMessage() == null? (thrown.getClass().getName() + "\n" + Util.join("\n", thrown.getStackTrace())) : thrown.getMessage());
 					System.out.println(errorMessage);
-					thrown.printStackTrace();
-					return errorMessage; // indicates that we need to break test loop
+					throw new Error(thrown);
 				}
 				else if ( ! Util.equals(actual, expectedExpression)) {
 					String errorMessage = "ERROR tests[" + i + "] = " + topExpression 
