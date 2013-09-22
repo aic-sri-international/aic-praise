@@ -569,7 +569,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 	        new CompleteNormalizeTestData("Word != constituency and Word != w7 and Word != Y",
 	        	new Model(Model.getModelDeclarationFromResource("Example4.model")),
         		"product({{ ( on AnotherWord ) (if AnotherWord != constituency and Y != w7 and Y != constituency then if referenceOf(Word, Y) then 0.571428571 else 0.428571429 else (if Y != w7 and (Y = constituency or AnotherWord = constituency) then if referenceOf(Word, Y) then 0.571428571 else 0.428571429 else (if referenceOf(Word, Y) then 0.571428571 else 0.428571429))) | Y != AnotherWord and Word != AnotherWord }}) * product({{ ( on X0, Y', Z ) (if Y != w7 and Y != constituency then if Y' = Y then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25) else (if Y = constituency then if Y' = constituency then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25) else (if Y' = Y then 0.5 else (if not referenceOf(X0, Z) then 0.75 else 0.25)))) | X0 != Y' and X0 != Z and Z != Y' and (Word = X0 and Y = Y' or Word = X0 and Y = Z) }})",
-                "if Y != w7 and Y != constituency then if referenceOf(Word, Y) then 4.78027049E-113 else 1.56077148E-78 else (if Y = w7 then if referenceOf(Word, w7) then 4.78027049E-113 else 1.56077148E-78 else (if referenceOf(Word, constituency) then 4.78027049E-113 else 1.56077148E-78))"
+                "if Y != w7 and Y != constituency then if referenceOf(Word, Y) then 4.78027049E-113 else 1.56077148E-78 else (if Y = constituency then if referenceOf(Word, constituency) then 4.78027049E-113 else 1.56077148E-78 else (if referenceOf(Word, w7) then 4.78027049E-113 else 1.56077148E-78))"
 	            ),
     			
 //		        // A simplified version of the above test.

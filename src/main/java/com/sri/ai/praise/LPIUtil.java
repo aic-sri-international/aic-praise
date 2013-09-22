@@ -1565,19 +1565,4 @@ public class LPIUtil {
 		
 		return result;
 	}
-	
-	/**
-	 * Given a simplified conditional expression with conditions on equalities and RVs, with no conditions involving both,
-	 * returns an equivalent expression equality conditions are always above RV ones.
-	 */
-	public static Expression moveAllRandomVariableConditionsDown(Expression expression, RewritingProcess process) {
-		TotalRewriter totalRewriter =
-				new TotalRewriter(
-						"Moving conditions on RVs down in LBPUtil",
-						Util.list( (Rewriter) new MoveRandomVariableValueExpressionConditionDown(),
-						           (Rewriter) new BreakConditionsContainingBothLogicalAndRandomVariables())
-						);
-		Expression result = totalRewriter.rewrite(expression, process);
-		return result;
-	}
 }

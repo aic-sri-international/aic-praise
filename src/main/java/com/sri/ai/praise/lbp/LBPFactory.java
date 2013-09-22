@@ -101,7 +101,6 @@ public class LBPFactory {
 	
 	public static Rewriter getRootRewriter() {
 		return (new Simplify()).getRootRewriter();
-//		return ((Normalize)newNormalize()).getRootRewriter();
 	}
 	
 	public static Rewriter newNormalize() {
@@ -261,6 +260,7 @@ public class LBPFactory {
 		//
 		lbpRewriterLookup.put(LBPRewriter.R_basic,  new Basic());
 		lbpRewriterLookup.put(LBPRewriter.R_belief, new Belief(configuration));
+		lbpRewriterLookup.put(LBPRewriter.R_normalize, new Normalize());
 		lbpRewriterLookup.put(LBPRewriter.R_complete_normalize, new CompleteNormalize());
 		lbpRewriterLookup.put(LBPRewriter.R_DifferenceOfExtensionalAndExtensionalSet, new DifferenceOfExtensionalAndExtensionalSet());
 		lbpRewriterLookup.put(LBPRewriter.R_DifferenceOfExtensionalAndIntensionalSet, new DifferenceOfExtensionalAndIntensionalSet());
@@ -279,7 +279,6 @@ public class LBPFactory {
 		lbpRewriterLookup.put(LBPRewriter.R_prod_factor, new ProductFactor());
 		lbpRewriterLookup.put(LBPRewriter.R_prod_m_and_prod_factor, new ProductMessageAndProductFactor());
 		lbpRewriterLookup.put(LBPRewriter.R_set_diff, new SetDifference());
-		lbpRewriterLookup.put(LBPRewriter.R_normalize, new Normalize());
 		lbpRewriterLookup.put(LBPRewriter.R_sum, new Sum(configuration));
 		lbpRewriterLookup.put(LBPRewriter.R_union, new Union());
 		
