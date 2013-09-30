@@ -43,6 +43,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.ScopedVariables;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -96,7 +97,7 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 		
 	@SuppressWarnings("unchecked")
 	protected static List<Rewriter> extendAtomicRewriters(List<Rewriter> atomicRewriters) {
-		atomicRewriters = addRewritersBefore(atomicRewriters,
+		atomicRewriters = GrinderUtil.addRewritersBefore(atomicRewriters,
 				//
 				// Support for: Bracketed Expressions
 				new Pair<Class<?>, Rewriter>(
