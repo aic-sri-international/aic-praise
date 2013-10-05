@@ -354,162 +354,189 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		}
 	}
 	
-	private List<Expression> getMessageExpansions(List<Expression> msgSets, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, Set<Expression> freeVariablesFromBeliefQuery, RewritingProcess process) {		
-		Trace.in("+get_msg_expansions({})", Tuple.make(msgSets));
+	private List<Expression> getMessageExpansions(List<Expression> messageSets, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, Set<Expression> freeVariablesFromBeliefQuery, RewritingProcess process) {		
+		Trace.in("+get_msg_expansions({})", Tuple.make(messageSets));
 		
-		Trace.log("msg_expansions         <- empty set");
-		Trace.log("msgs_alreaded_expanded <- empty set");
-		Trace.log("msgs_to_be_expanded    <- msg_set");
-		List<Expression> msgExpansions                = new ArrayList<Expression>();
-		List<Expression> msgsAlreadyExpandedUnionArgs = new ArrayList<Expression>();
-		List<Expression> msgsToBeExpanded             = new ArrayList<Expression>(msgSets);
+		Trace.log("msg_expansions         <- { }");
+		Trace.log("msgs_alreaded_expanded <- { }");
+		Trace.log("msgs_to_be_expanded    <- message_sets");
+		List<Expression> messageExpansions                     = new ArrayList<Expression>();
+		List<Expression> messagesAlreadyExpandedUnionArguments = new ArrayList<Expression>();
+		List<Expression> messagesToBeExpanded                  = new ArrayList<Expression>(messageSets);
 		
-		Justification.begin("Going to expand messages in {}", msgSets);
+		Justification.begin("Going to expand messages in {}", messageSets);
 		
 		Trace.log("while msgs_to_be_expanded is not empty");
-		while (msgsToBeExpanded.size() > 0) {
-			Trace.log("    msg_set <- remove a union argument from msgs_to_be_expanded");
-			Expression msgSet = msgsToBeExpanded.remove(0);
-			Trace.log("    // msg_set={}", msgSet);
-			// Ensure is a legal msg_set expression
-			assertIsLegalMsgSet(msgSet);
+		while (messagesToBeExpanded.size() > 0) {
+			Trace.log("    message_set <- remove a union argument from msgs_to_be_expanded");
+			Expression messageSet = messagesToBeExpanded.remove(0);
+			Trace.log("    // message_set = {}", messageSet);
+			// Ensure is a legal message_set expression
+			assertIsLegalMsgSet(messageSet);
 	
-			Justification.begin("Going to expand message set {}", msgSet);
-			Justification.begin("Going to subtract message instantiations that were already expanded");
-			
-			// Note: Minor Optimization, up front limit msgs_already_expanded to only those 
-			// that can possibly intersect.
-			List<Expression> possibleIntersectionUnionArgs = new ArrayList<Expression>();
-			Expression alpha = IntensionalSet.getHead(msgSet);
-			for (Expression maeua : msgsAlreadyExpandedUnionArgs) {				
-				Expression alphaPrime = IntensionalSet.getHead(maeua); 
-				// Perform a cheap disequality first
-				if (!CheapDisequalityModule.isACheapDisequality(alpha, alphaPrime, process)) {
-					possibleIntersectionUnionArgs.add(maeua);
-				}
-			}
-			Expression msgsAlreadyExpanded = createUnionFromArgs(possibleIntersectionUnionArgs);
-			
-			Trace.log("    msg_set <- R_set_diff(msg_set minus msgs_already_expanded)");
-			msgSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(msgSet, msgsAlreadyExpanded));
-			Trace.log("    msg_set <- R_complete_normalize(msg_set)");
-			msgSet = process.rewrite(R_complete_normalize, msgSet);
-			Justification.end("Remaining, non-expanded messages are {}", msgSet);
-			Trace.log("    // msg_set = {}", msgSet);
-			
-			if (!Sets.isEmptySet(msgSet)) {
-				
-				Justification.begin("Going to re-arrange as message expression");
-				Trace.log("    if msg_set is not empty");
-				// represent msg_set as { (on I) (Destination, Origin) | C }
-				Expression expressionI            = IntensionalSet.getScopingExpression(msgSet);
-				Expression tupleDestinationOrigin = IntensionalSet.getHead(msgSet);
-				Expression destination            = Tuple.get(tupleDestinationOrigin, 0);
-				Expression origin                 = Tuple.get(tupleDestinationOrigin, 1);
-				Expression conditionC             = IntensionalSet.getCondition(msgSet);
-				
-				Trace.log("        expansion <- compute message to Destination from Origin with");
-				Trace.log("                     beingComputed = empty set and contextual constraint C");
-				Expression       msgTo_From    = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, destination, origin);
-				// Set up the contextual constraint
-				RewritingProcess cSubProcess   = GrinderUtil.extendContextualVariablesAndConstraint(expressionI, conditionC, process);
-				Justification.end("Message expression is {}", msgTo_From);
-				
-				Justification.begin("Going to symbolically compute message expression");
-				Expression expansion = null;
-				Justification.begin("Going to symbolically compute unsimplified message expression");
-				// Determine which 'message to . from .' rewriter to call
-				if (BracketedExpressionSubExpressionsProvider.isRandomVariable(destination, process)) {
-					expansion = cSubProcess.rewrite(R_m_to_v_from_f,
-									LPIUtil.argForMessageToVariableFromFactorRewriteCall(msgTo_From, LPIUtil.createNewBeingComputedExpression()));
-				} 
-				else {
-					expansion = cSubProcess.rewrite(R_m_to_f_from_v,
-									LPIUtil.argForMessageToFactorFromVariableRewriteCall(msgTo_From, LPIUtil.createNewBeingComputedExpression()));
-				}
-				Justification.end("Obtained unsimplified message expansion {}", expansion);
-				
-				Justification.begin("Going to simplify {}", expansion);
-				Trace.log("        expansion <- R_complete_normalize(expansion)");
-				// Note: use cSubProcess for R_complete_normalize call as this is the context
-				// under which the expansion was generated and we want to remove any
-				// invalid branches based on this.
-				expansion = cSubProcess.rewrite(R_complete_normalize, expansion);
-				Trace.log("        // expansion = {}", expansion);
-				Justification.end("Obtained simplified message expansion {}", expansion);
-				Justification.end("Obtained message expansion {}", expansion);
-				
-				Trace.log("        index <- size of msg_expansions");
-				Trace.log("        cache index as msg_value_index corresponding to 'previous message to Destination from Origin' under constraining condition C");
-				previousMessageToMsgValueCache.addPreviousMessageToMsgValueIndex(
-						conditionC,
-						Expressions.make(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, destination, origin),
-						msgExpansions.size());
-				
-				Trace.log("        msg_expansion <- { (on I) (Destination, Origin, expansion) | C }");
-				Expression msgExpansion = IntensionalSet.makeUniSet(expressionI, 
-						Tuple.make(destination, origin, expansion), 
-						conditionC);
-				
-				Collection<Expression> introducedFreeVariables = getIntroducedFreeVariables(msgExpansion, freeVariablesFromBeliefQuery, process);
-				if ( ! introducedFreeVariables.isEmpty()) {
-					System.err.println("IllegalStateException: introduced additional free variables into msg_expansion.");
-					System.err.println("introduced    ="+Util.join(introducedFreeVariables));
-					System.err.println("msg_expansion ="+msgExpansion);
-					System.err.println("msg_set       ="+msgSet);
-					System.err.println("msg_expansions=");
-					for (Expression me : msgExpansions) {
-						System.err.println(me);
-					}
-					throw new IllegalStateException("IllegalStateException: introduced additional free variables " + Util.join(introducedFreeVariables) + " into msg_expansion: "+msgExpansion);
-				}
-				
-				if (isAnswerDependentOnLogicalVariableMessageIsNot(msgExpansion, process)) {
-					System.err.println("IllegalStateException: msg_expansion has answer dependent on logical variable that value is not.");
-					System.err.println("msg_expansion ="+msgExpansion);
-					System.err.println("msg_set       ="+msgSet);
-					System.err.println("msg_expansions=");
-					for (Expression me : msgExpansions) {
-						System.err.println(me);
-					}
-					throw new IllegalStateException("IllegalStateException: msg_expansion has answer dependent on logical variable that value is not: "+msgExpansion);
-				}
-				
-				Trace.log("        msg_expansions <- msg_expansions union msg_expansion");
-				msgExpansions.add(msgExpansion);
-				
-				Trace.log("        msgs_already_expanded <- msgs_already_expanded union { (on I) (Destination, Origin) | C }");
-				Expression alreadyExpanded = IntensionalSet.makeUniSet(expressionI, 
-						                     	Tuple.make(destination, origin),
-						                        conditionC);
-				
-				msgsAlreadyExpandedUnionArgs.add(alreadyExpanded);
-				Trace.log("        // msgs_already_expanded = {}", Expressions.apply(FunctorConstants.UNION, msgsAlreadyExpandedUnionArgs));
-				
-				Trace.log("        msgs_to_be_expanded <- msgs_to_be_expanded union R_extract_previous_msg_sets(msg_expansion)");
+			Justification.begin("Going to expand message set {}", messageSet);
+			Trace.in("Going to expand message set {}", messageSet);
 
-				Justification.begin("Going to identify messages inside expansion and schedule them for their own expansion");
-				Expression newMsgSetsToBeExpanded = process.rewrite(R_extract_previous_msg_sets, msgExpansion);
-				msgsToBeExpanded.addAll(getEntriesFromUnion(newMsgSetsToBeExpanded));
-				Justification.end("Messages inside expansion identified: {}", newMsgSetsToBeExpanded);
-				Trace.log("        // msgs_to_be_expanded = {}", Tuple.make(msgsToBeExpanded));
-
+			messageSet = removeAlreadyExpandedMessages(messageSet, messagesAlreadyExpandedUnionArguments, process);
+			
+			if (!Sets.isEmptySet(messageSet)) {
+				Trace.log("    if message_set is not empty");
+				expand(messageSet, freeVariablesFromBeliefQuery, messagesAlreadyExpandedUnionArguments, messagesToBeExpanded, messageExpansions, previousMessageToMsgValueCache, process);
 				Justification.end("Message set expanded. See inside for details.");
+				Trace.out("Message set expanded. See inside for details.");
 			}
 			else {
 				Justification.end("All messages in this set have already been expanded, so there is nothing to do.");
+				Trace.out("All messages in this set have already been expanded, so there is nothing to do.");
 			}
 		}
 		
 		Trace.log("return msg_expansions");
 		
-		Trace.out("-get_msg_expansions={}", Expressions.apply("list", msgExpansions));
+		Trace.out("-get_msg_expansions={}", Expressions.apply("list", messageExpansions));
 		
-		Justification.end("Messages expansions are {}", msgExpansions);
+		Justification.end("Messages expansions are {}", messageExpansions);
 
-		return msgExpansions;
+		return messageExpansions;
 	}
-	
+
+	private Expression removeAlreadyExpandedMessages(Expression messageSet, List<Expression> messagesAlreadyExpandedUnionArguments, RewritingProcess process) {
+		Trace.in("Going to remove messages from message_set that were already expanded");
+		Justification.begin("Going to subtract message instantiations that were already expanded");
+		
+		// Note: Minor Optimization, up front limit msgs_already_expanded to only those 
+		// that can possibly intersect.
+		List<Expression> possibleIntersectionUnionArgs = new ArrayList<Expression>();
+		Expression alpha = IntensionalSet.getHead(messageSet);
+		for (Expression messagesAlreadyExpandedUnionArgument : messagesAlreadyExpandedUnionArguments) {				
+			Expression alphaPrime = IntensionalSet.getHead(messagesAlreadyExpandedUnionArgument); 
+			// Perform a cheap disequality first
+			if (!CheapDisequalityModule.isACheapDisequality(alpha, alphaPrime, process)) {
+				possibleIntersectionUnionArgs.add(messagesAlreadyExpandedUnionArgument);
+			}
+		}
+		Expression msgsAlreadyExpanded = createUnionFromArgs(possibleIntersectionUnionArgs);
+		
+		Trace.log("    message_set <- R_set_diff(message_set minus msgs_already_expanded)");
+		messageSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(messageSet, msgsAlreadyExpanded));
+		Trace.log("    message_set <- R_complete_normalize(message_set)");
+		messageSet = process.rewrite(R_complete_normalize, messageSet);
+		Justification.end("Remaining, non-expanded messages are {}", messageSet);
+		Trace.out("Removed them, and remaining message_set is {}", messageSet);
+		return messageSet;
+	}
+
+	private void expand(Expression messageSet, Set<Expression> freeVariablesFromBeliefQuery, List<Expression> messagesAlreadyExpandedUnionArguments, List<Expression> messagesToBeExpanded, List<Expression> messageExpansions, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {
+		Expression expressionI            = IntensionalSet.getScopingExpression(messageSet);
+		Expression destination            = Tuple.get(IntensionalSet.getHead(messageSet), 0);
+		Expression origin                 = Tuple.get(IntensionalSet.getHead(messageSet), 1);
+		Expression conditionC             = IntensionalSet.getCondition(messageSet);
+		
+		Expression expansion = computeExpansionSymbolically(expressionI, destination, origin, conditionC, process);
+		
+		Trace.log("        msg_expansion <- { (on I) (Destination, Origin, expansion) | C }");
+		Expression msgExpansion = IntensionalSet.makeUniSet(expressionI, Tuple.make(destination, origin, expansion), conditionC);
+		
+		sanityChecksOnLogicalVariables(messageSet, freeVariablesFromBeliefQuery, messageExpansions, process, msgExpansion);
+		
+		storeMessageExpansion(msgExpansion, destination, origin, conditionC, messageExpansions, previousMessageToMsgValueCache);
+		
+		updateSetOfMessagesAlreadyExpanded(messagesAlreadyExpandedUnionArguments, expressionI, destination, origin, conditionC);
+		
+		identifyMessagesUsedByMessageExpansionAndScheduleThemForExpansionThemselves(msgExpansion, messagesToBeExpanded, process);
+	}
+
+	private Expression computeExpansionSymbolically(Expression expressionI, Expression destination, Expression origin, Expression conditionC, RewritingProcess process) {
+		Justification.begin("Going to re-arrange as message expression");
+		// represent message_set as { (on I) (Destination, Origin) | C }
+
+		Trace.log("        expansion <- compute message to Destination from Origin with");
+		Trace.log("                     beingComputed = empty set and contextual constraint C");
+		Expression       msgTo_From    = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, destination, origin);
+		Justification.end("Message expression is {}", msgTo_From);
+
+		
+		Justification.begin("Going to symbolically compute message expression");
+		Expression expansion = null;
+		Justification.begin("Going to symbolically compute unsimplified message expression");
+		// Set up the contextual constraint
+		RewritingProcess processExtendedByC   = GrinderUtil.extendContextualVariablesAndConstraint(expressionI, conditionC, process);
+		// Determine which 'message to . from .' rewriter to call
+		if (BracketedExpressionSubExpressionsProvider.isRandomVariable(destination, process)) {
+			expansion = processExtendedByC.rewrite(R_m_to_v_from_f,
+							LPIUtil.argForMessageToVariableFromFactorRewriteCall(msgTo_From, LPIUtil.createNewBeingComputedExpression()));
+		} 
+		else {
+			expansion = processExtendedByC.rewrite(R_m_to_f_from_v,
+							LPIUtil.argForMessageToFactorFromVariableRewriteCall(msgTo_From, LPIUtil.createNewBeingComputedExpression()));
+		}
+		Justification.end("Obtained unsimplified message expansion {}", expansion);
+		
+		Justification.begin("Going to simplify {}", expansion);
+		Trace.log("        expansion <- R_complete_normalize(expansion)");
+		// Note: use cSubProcess for R_complete_normalize call as this is the context
+		// under which the expansion was generated and we want to remove any
+		// invalid branches based on this.
+		expansion = processExtendedByC.rewrite(R_complete_normalize, expansion);
+		Trace.log("        // expansion = {}", expansion);
+		Justification.end("Obtained simplified message expansion {}", expansion);
+
+		Justification.end("Obtained message expansion {}", expansion);
+		return expansion;
+	}
+
+	private void sanityChecksOnLogicalVariables(Expression messageSet, Set<Expression> freeVariablesFromBeliefQuery, List<Expression> messageExpansions, RewritingProcess process, Expression msgExpansion) {
+		Collection<Expression> introducedFreeVariables = getIntroducedFreeVariables(msgExpansion, freeVariablesFromBeliefQuery, process);
+		if ( ! introducedFreeVariables.isEmpty()) {
+			System.err.println("IllegalStateException: introduced additional free variables into msg_expansion.");
+			System.err.println("introduced     = " + Util.join(introducedFreeVariables));
+			System.err.println("msg_expansion  = " + msgExpansion);
+			System.err.println("message_set    = " + messageSet);
+			System.err.println("msg_expansions =");
+			for (Expression me : messageExpansions) {
+				System.err.println(me);
+			}
+			throw new IllegalStateException("IllegalStateException: introduced additional free variables " + Util.join(introducedFreeVariables) + " into msg_expansion: "+msgExpansion);
+		}
+		if (expansionDependensOnLogicalVariableButMessageDoesNot(msgExpansion, process)) {
+			System.err.println("IllegalStateException: expansion depends on logical variable but message does not.");
+			System.err.println("msg_expansion  = " + msgExpansion);
+			System.err.println("message_set    = " + messageSet);
+			System.err.println("msg_expansions = ");
+			for (Expression me : messageExpansions) {
+				System.err.println(me);
+			}
+			throw new IllegalStateException("IllegalStateException: msg_expansion has answer dependent on logical variable that value is not: "+msgExpansion);
+		}
+	}
+
+	private void storeMessageExpansion(Expression msgExpansion, Expression destination, Expression origin, Expression conditionC, List<Expression> messageExpansions, PreviousMessageToMsgValueCache previousMessageToMsgValueCache) {
+		Trace.log("        index <- size of msg_expansions");
+		Trace.log("        cache index as msg_value_index corresponding to 'previous message to Destination from Origin' under constraining condition C");
+		previousMessageToMsgValueCache.addPreviousMessageToMsgValueIndex(
+				conditionC,
+				Expressions.make(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, destination, origin),
+				messageExpansions.size());
+		Trace.log("        msg_expansions <- msg_expansions union msg_expansion");
+		messageExpansions.add(msgExpansion);
+	}
+
+	private void updateSetOfMessagesAlreadyExpanded(List<Expression> messagesAlreadyExpandedUnionArguments, Expression expressionI, Expression destination, Expression origin, Expression conditionC) {
+		Trace.log("        msgs_already_expanded <- msgs_already_expanded union { (on I) (Destination, Origin) | C }");
+		Expression alreadyExpanded = IntensionalSet.makeUniSet(expressionI, Tuple.make(destination, origin), conditionC);
+		messagesAlreadyExpandedUnionArguments.add(alreadyExpanded);
+		Trace.log("        // msgs_already_expanded = {}", Expressions.apply(FunctorConstants.UNION, messagesAlreadyExpandedUnionArguments));
+	}
+
+	private void identifyMessagesUsedByMessageExpansionAndScheduleThemForExpansionThemselves(Expression msgExpansion, List<Expression> messagesToBeExpanded, RewritingProcess process) {
+		Trace.log("        msgs_to_be_expanded <- msgs_to_be_expanded union R_extract_previous_msg_sets(msg_expansion)");
+		Justification.begin("Going to identify messages inside expansion and schedule them for their own expansion");
+		Expression newMsgSetsToBeExpanded = process.rewrite(R_extract_previous_msg_sets, msgExpansion);
+		messagesToBeExpanded.addAll(getEntriesFromUnion(newMsgSetsToBeExpanded));
+		Justification.end("Messages inside expansion identified: {}", newMsgSetsToBeExpanded);
+		Trace.log("        // msgs_to_be_expanded = {}", Tuple.make(messagesToBeExpanded));
+	}
+
 	private List<Expression> iterateValuesUsingExpansions(final List<Expression> msgValues,
 			final List<Expression> msgExpansions, final PreviousMessageToMsgValueCache previousMessageToMsgValueCache, final Set<Expression> freeVariablesFromBeliefQuery,
 			RewritingProcess process) {
@@ -630,7 +657,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						throw new IllegalStateException("IllegalStateException: introduced additional free variables " + Util.join(introducedFreeVariables) + " into new_msg_value: "+newMsgValue);
 					}
 					
-					if (isAnswerDependentOnLogicalVariableMessageIsNot(newMsgValue, process)) {
+					if (expansionDependensOnLogicalVariableButMessageDoesNot(newMsgValue, process)) {
 						System.err.println("IllegalStateException: new_msg_value has answer dependent on logical variable that value is not.");
 						System.err.println("sub.context      ="+subProcess.getContextualConstraint());
 						System.err.println("sub.context vars ="+subProcess.getContextualVariables());
@@ -1041,7 +1068,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		}
 		
 		if (!legal) {
-			throw new IllegalArgumentException("msg_set is not an expression of the form { (on I) (Destination, Origin) | C }:"+msgSet);
+			throw new IllegalArgumentException("message_set is not an expression of the form { (on I) (Destination, Origin) | C }:"+msgSet);
 		}
 	}
 	
@@ -1088,7 +1115,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return introducedFreeVariables;
 	}
 	
-	private boolean isAnswerDependentOnLogicalVariableMessageIsNot(Expression msgExpansionOrValue, final RewritingProcess process) {
+	private boolean expansionDependensOnLogicalVariableButMessageDoesNot(Expression msgExpansionOrValue, final RewritingProcess process) {
 		boolean result = false;
 		
 		Expression head = IntensionalSet.getHead(msgExpansionOrValue);	

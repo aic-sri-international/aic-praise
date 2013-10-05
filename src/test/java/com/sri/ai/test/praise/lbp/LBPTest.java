@@ -4135,6 +4135,24 @@ public class LBPTest extends AbstractLPITest {
 				// Basic:
 				// 
 				
+//				// #0
+//				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+//					Model.fromRules("sort People: 10, ann, bob, dave, rodrigo, ciaran;" +
+//									"sort Pets: 20, astor, rover;" +
+//
+//									"random isPetOf: Pets x People -> Boolean;" +
+//									"random happy: People -> Boolean;" +
+//
+//									"if isPetOf(Pet, Person) then happy(Person) 0.6 else happy(Person) 0.5;" +
+//
+//									"if Pet != rover and Pet != astor then not isPetOf(Pet, bob) else isPetOf(Pet, bob);" +
+//
+//									"if isPetOf(Pet, Person1) then not isPetOf(Pet, Person2);"), 
+//					"belief([happy(bob)])", 
+//					false, 
+//					"if happy(bob) then 0.69 else 0.5"
+//					 ),
+//					
 				// #1
 				new LoopyBeliefTestData(Expressions.TRUE.toString(),
 					new TrivialLoopyPQ(), 
