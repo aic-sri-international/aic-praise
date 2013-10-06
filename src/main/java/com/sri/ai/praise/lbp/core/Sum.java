@@ -53,6 +53,7 @@ import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.number.Times;
@@ -178,7 +179,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				
 				Expression incomingMessagesSet = productOfIncomingMessages.get(0);
 				Expression indexExpression     = IntensionalSet.getIndexExpressions(incomingMessagesSet).get(0);
-				Expression NPrime              = IntensionalSet.getDomain(indexExpression);
+				Expression NPrime              = IndexExpressions.getDomain(indexExpression);
 				
 				Trace.log("// N' = {}", NPrime);
 				Trace.log("// RV_in_E = {}", rvInE);
@@ -314,7 +315,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 
 		Expression prodIntensionalSet   = productOfIncomingMessages.get(0);
 		Expression indexExpression      = IntensionalSet.getIndexExpressions( prodIntensionalSet).get(0);
-		Expression index                = IntensionalSet.getIndex(indexExpression);
+		Expression index                = IndexExpressions.getIndex(indexExpression);
 		Expression msgToF_V             = IntensionalSet.getHead(prodIntensionalSet);
 		Expression prodScopingCondition = IntensionalSet.getCondition(prodIntensionalSet);
 
@@ -353,7 +354,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 
 		Expression incomingMessagesSet          = productOfIncomingMessages.get(0);
 		Expression indexExpression              = IntensionalSet.getIndexExpressions(incomingMessagesSet).get(0);
-		Expression indexOfOfIncomingMessagesSet = IntensionalSet.getIndex(indexExpression);
+		Expression indexOfOfIncomingMessagesSet = IndexExpressions.getIndex(indexExpression);
 		Expression msgToF_V                     = IntensionalSet.getHead(incomingMessagesSet);
 		Expression F                            = msgToF_V.get(0);
 		Expression incomingMessagesSetCondition = IntensionalSet.getCondition(incomingMessagesSet);

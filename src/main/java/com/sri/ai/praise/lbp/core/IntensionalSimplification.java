@@ -50,6 +50,7 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -135,7 +136,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 			Expression cPrime = (Expression) cPrimeAndiEqualsBeta[0];
 			int        i      = (Integer)    cPrimeAndiEqualsBeta[1];
 			Expression beta   = (Expression) cPrimeAndiEqualsBeta[2];
-			Expression index  = IntensionalSet.getIndex(intSetIndexExpressions.get(i));
+			Expression index  = IndexExpressions.getIndex(intSetIndexExpressions.get(i));
 
 			Expression substitutedAlpha  = SemanticSubstitute.replace(intSetHead, index, beta, process);
 			Expression substitutedCPrime = SemanticSubstitute.replace(cPrime, index, beta, process);
@@ -174,7 +175,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 		// Get the indices on their own first
 		List<Expression> indices = new ArrayList<Expression>();
 		for (Expression indexExpression : intSetIndexExpressions) {
-			indices.add(IntensionalSet.getIndex(indexExpression));
+			indices.add(IndexExpressions.getIndex(indexExpression));
 		}
 		
 		List<Expression> conjuncts = new ArrayList<Expression>(And.getConjuncts(intSetCondition));

@@ -54,6 +54,7 @@ import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -114,8 +115,8 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 			Expression msgToV_F             = IntensionalSet.getHead(prodIntensionalSet);
 			Expression prodScopingCondition = IntensionalSet.getCondition(prodIntensionalSet);
 			Expression indexExpression      = IntensionalSet.getIndexExpressions(prodIntensionalSet).get(0);
-			Expression factorIndexF         = IntensionalSet.getIndex(indexExpression);
-			Expression domainS              = IntensionalSet.getDomain(indexExpression);
+			Expression factorIndexF         = IndexExpressions.getIndex(indexExpression);
+			Expression domainS              = IndexExpressions.getDomain(indexExpression);
 
 			if (Sets.isExtensionalSet(domainS) && ExtensionalSet.isEmptySet(domainS)) {
 
