@@ -114,7 +114,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression result = null;
 	
 		List<Expression> msgSetUnionArguments        = getEntriesFromUnion(msgSets);
-		List<Expression> msgExpansionsUnionArguments = getMessageExpansions(msgSetUnionArguments, new PreviousMessageToMsgValueCache(), Expressions.freeVariables(msgSets, process), process);
+		List<Expression> msgExpansionsUnionArguments = getMessageExpansions(msgSetUnionArguments, new PreviousMessageToMsgValueCache(), process);
 		
 		result = createUnionFromArgs(msgExpansionsUnionArguments);
 		
@@ -136,7 +136,6 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		List<Expression> nextMsgValuesUnionArguments = iterateValuesUsingExpansions(msgValuesUnionArguments, 
 															msgExpansionsUnionArguments, 
 															new PreviousMessageToMsgValueCache(),
-															Expressions.freeVariables(msgExpansions, process),
 															process);
 		
 		result = createUnionFromArgs(nextMsgValuesUnionArguments);
@@ -177,6 +176,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression randomVariable = belief.get(0);
 		
 		Set<Expression> freeVariablesFromBeliefQuery = Expressions.freeVariables(randomVariable, process);
+		
+		process = GrinderUtil.extendContextualVariables(randomVariable, process);
 		
 		Trace.log("beingComputed    <- empty set");
 		Expression beingComputed = LPIUtil.createNewBeingComputedExpression();
@@ -258,6 +259,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Trace.log("msg_sets <- R_extract_previous_msg_sets(belief_expansion)");
 			// a union of sets of pairs (N1, N2), with each pair representing an occurrence of 
 			// "previous message" on that pair occurring in belief_expansion.
+//			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, beliefExpansion));		
 			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, Lambda.make(new LinkedList<Expression>(freeVariablesFromBeliefQuery), beliefExpansion)));		
 			Trace.log("// msg_sets = {}", Expressions.make("list", msgSets));
 		
@@ -267,7 +269,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// possibly containing "previous message" expressions, representing their 
 			// value in terms of messages from the previous loopy BP iteration.
 			PreviousMessageToMsgValueCache previousMessageToMsgValueCache = new PreviousMessageToMsgValueCache(); 
-			List<Expression> msgExpansions = getMessageExpansions(msgSets, previousMessageToMsgValueCache, freeVariablesFromBeliefQuery, process);
+			List<Expression> msgExpansions = getMessageExpansions(msgSets, previousMessageToMsgValueCache, process);
 			Trace.log("// msg_expansions = {}", Expressions.make("list", msgExpansions));
 			
 			Trace.log("msg_values <- copy of msg_expansions, with the values replaced by uniform messages");
@@ -309,7 +311,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				priorMsgValues   = msgValues;
 				Justification.beginEqualityStep("iteration");
 				LiftProductOfFactorToVariable.setMustAlwaysLift(true, process);
-				msgValues        = iterateValuesUsingExpansions(msgValues, msgExpansions, previousMessageToMsgValueCache, freeVariablesFromBeliefQuery, process);
+				msgValues        = iterateValuesUsingExpansions(msgValues, msgExpansions, previousMessageToMsgValueCache, process);
 				beliefValue      = useValuesForPreviousMessages(beliefExpansion, msgValues, previousMessageToMsgValueCache, process);
 				LiftProductOfFactorToVariable.setMustAlwaysLift(false, process);
 				iteration++;			
@@ -354,7 +356,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		}
 	}
 	
-	private List<Expression> getMessageExpansions(List<Expression> messageSets, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, Set<Expression> freeVariablesFromBeliefQuery, RewritingProcess process) {		
+	private List<Expression> getMessageExpansions(List<Expression> messageSets, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {		
 		Trace.in("+get_msg_expansions({})", Tuple.make(messageSets));
 		
 		Trace.log("msg_expansions         <- { }");
@@ -381,7 +383,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			
 			if (!Sets.isEmptySet(messageSet)) {
 				Trace.log("    if message_set is not empty");
-				expand(messageSet, freeVariablesFromBeliefQuery, messagesAlreadyExpandedUnionArguments, messagesToBeExpanded, messageExpansions, previousMessageToMsgValueCache, process);
+				expand(messageSet, messagesAlreadyExpandedUnionArguments, messagesToBeExpanded, messageExpansions, previousMessageToMsgValueCache, process);
 				Justification.end("Message set expanded. See inside for details.");
 				Trace.out("Message set expanded. See inside for details.");
 			}
@@ -426,7 +428,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return messageSet;
 	}
 
-	private void expand(Expression messageSet, Set<Expression> freeVariablesFromBeliefQuery, List<Expression> messagesAlreadyExpandedUnionArguments, List<Expression> messagesToBeExpanded, List<Expression> messageExpansions, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {
+	private void expand(Expression messageSet, List<Expression> messagesAlreadyExpandedUnionArguments, List<Expression> messagesToBeExpanded, List<Expression> messageExpansions, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {
 		Expression expressionI            = IntensionalSet.getScopingExpression(messageSet);
 		Expression destination            = Tuple.get(IntensionalSet.getHead(messageSet), 0);
 		Expression origin                 = Tuple.get(IntensionalSet.getHead(messageSet), 1);
@@ -437,7 +439,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Trace.log("        msg_expansion <- { (on I) (Destination, Origin, expansion) | C }");
 		Expression msgExpansion = IntensionalSet.makeUniSet(expressionI, Tuple.make(destination, origin, expansion), conditionC);
 		
-		sanityChecksOnLogicalVariables(messageSet, freeVariablesFromBeliefQuery, messageExpansions, process, msgExpansion);
+		sanityChecksOnLogicalVariables(messageSet, messageExpansions, process, msgExpansion);
 		
 		storeMessageExpansion(msgExpansion, destination, origin, conditionC, messageExpansions, previousMessageToMsgValueCache);
 		
@@ -485,8 +487,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return expansion;
 	}
 
-	private void sanityChecksOnLogicalVariables(Expression messageSet, Set<Expression> freeVariablesFromBeliefQuery, List<Expression> messageExpansions, RewritingProcess process, Expression msgExpansion) {
-		Collection<Expression> introducedFreeVariables = getIntroducedFreeVariables(msgExpansion, freeVariablesFromBeliefQuery, process);
+	private void sanityChecksOnLogicalVariables(Expression messageSet, List<Expression> messageExpansions, RewritingProcess process, Expression msgExpansion) {
+		Collection<Expression> introducedFreeVariables = getIntroducedFreeVariables(msgExpansion, process);
 		if ( ! introducedFreeVariables.isEmpty()) {
 			System.err.println("IllegalStateException: introduced additional free variables into msg_expansion.");
 			System.err.println("introduced     = " + Util.join(introducedFreeVariables));
@@ -538,8 +540,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	}
 
 	private List<Expression> iterateValuesUsingExpansions(final List<Expression> msgValues,
-			final List<Expression> msgExpansions, final PreviousMessageToMsgValueCache previousMessageToMsgValueCache, final Set<Expression> freeVariablesFromBeliefQuery,
-			RewritingProcess process) {
+			final List<Expression> msgExpansions, final PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {
 		
 		Trace.in("+iterate_values_using_expansions({}, {})", msgValues, msgExpansions);
 		
@@ -636,7 +637,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 														tupleTriple, 
 														IntensionalSet.getCondition(msgExpansion));
 					
-					Collection<Expression> introducedFreeVariables = getIntroducedFreeVariables(newMsgValue, freeVariablesFromBeliefQuery, process);
+					Collection<Expression> introducedFreeVariables = getIntroducedFreeVariables(newMsgValue, process);
 					if ( ! introducedFreeVariables.isEmpty()) {
 						System.err.println("IllegalStateException: introduced additional free variables into new_msg_value.");
 						System.err.println("sub.context      ="+subProcess.getContextualConstraint());
@@ -1106,11 +1107,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return result;
 	}
 	
-	private Collection<Expression> getIntroducedFreeVariables(Expression msgExpansionOrValue, Set<Expression> freeVariablesFromBeliefQuery, RewritingProcess process) {
+	private Collection<Expression> getIntroducedFreeVariables(Expression msgExpansionOrValue, RewritingProcess process) {
 		Set<Expression> freeInMsg = Expressions.freeVariables(msgExpansionOrValue, process);
 		freeInMsg.removeAll(Model.getSortNames(process)); // Ensure sort names are not included in this list.
 		
-		Collection<Expression> introducedFreeVariables = Util.setDifference(freeInMsg, freeVariablesFromBeliefQuery);
+		Collection<Expression> introducedFreeVariables = Util.setDifference(freeInMsg, process.getContextualVariables());
 		
 		return introducedFreeVariables;
 	}
