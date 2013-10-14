@@ -374,8 +374,20 @@ public class Model {
 	}
 
 	/**
+	 * @return the random variable declaration associated with a name and arity, or <code>null</code> if there is none.
+	 */
+	public RandomVariableDeclaration getRandomVariableDeclaration(String name, int arity) {
+		for (RandomVariableDeclaration declaration : randomVariableDeclarations) {
+			if (declaration.getName().equals(name) && declaration.getArityValue() == arity) {
+				return declaration;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * 
-	 * @return the parfactors declartion associated with the model.
+	 * @return the parfactors declaration associated with the model.
 	 */
 	public ParfactorsDeclaration getParfactorsDeclaration() {
 		return parfactorsDeclaration;
