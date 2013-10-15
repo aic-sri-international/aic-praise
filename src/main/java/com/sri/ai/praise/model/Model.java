@@ -477,6 +477,15 @@ public class Model {
 	}
 
 	/**
+	 * Get the model associated with a rewriting process.
+	 */
+	public static Model getRewritingProcessesModel(RewritingProcess process) {
+		// It seems unnecessary to construct a new Model object. The rewriting process should store the entire Model object instead of its parts.
+		Model result = new Model(getModelDefinition(process), getKnownRandomVariableNameAndArities(process));
+		return result;
+	}
+
+	/**
 	 * Set the rewriting process's model and known random variable names for
 	 * this Example Model.
 	 * 

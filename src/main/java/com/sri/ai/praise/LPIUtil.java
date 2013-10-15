@@ -39,6 +39,7 @@ package com.sri.ai.praise;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -74,6 +75,7 @@ import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
+import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.RandomPredicate;
 import com.sri.ai.praise.model.RandomPredicateCatalog;
 import com.sri.ai.util.Util;
@@ -1561,6 +1563,31 @@ public class LPIUtil {
 			result = true; // is independent if intersection if empty
 		}
 		
+		return result;
+	}
+
+	/**
+	 * Extend the rewriting processes's contextual variables and constraints
+	 * with the indices and condition from an intensionally defined set,
+	 * using the usage of logical variables inside random variables
+	 * to infer their domains.
+	 * 
+	 * @param intensionalSet
+	 * @param process
+	 *            the process in which the rewriting is occurring and whose
+	 *            contextual constraint is to be updated.
+	 * @return a sub-rewriting process with its contextual variables and
+	 *         constraints extended by the indices and condition of the intensionally defined set passed in.
+	 */
+	public static
+	RewritingProcess
+	extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(
+			Expression intensionalSet, RewritingProcess process) {
+		Collection<Expression> quantifiedVariables  = IntensionalSet.getIndices(intensionalSet);
+		Expression             conditionOnExpansion = IntensionalSet.getCondition(intensionalSet);
+		//Model model = Model.getRewritingProcessesModel(process);
+		//Map<Expression, Expression> newFreeVariablesDomains = DetermineSortsOfLogicalVariables.getIndicesDomainMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(intensionalSet, model, process);
+		RewritingProcess result = GrinderUtil.extendContextualVariablesAndConstraint(quantifiedVariables, /*newFreeVariablesDomains, */conditionOnExpansion, process);
 		return result;
 	}
 }

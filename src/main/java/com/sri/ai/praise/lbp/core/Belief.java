@@ -562,7 +562,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					Trace.log("    // msgExpansion={}", msgExpansion);
 					Trace.log("    // expansion   ={}", expansion);
 					
-					RewritingProcess subProcess = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(msgExpansion, process);
+					RewritingProcess subProcess = LPIUtil.extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(msgExpansion, process);
 					
 					Trace.log("    value <- use_values_for_previous_msgs(Expansion, msg_values) under contextual constraint expanded by C");
 					Expression value = useValuesForPreviousMessages(expansion, msgValues, previousMessageToMsgValueCache, subProcess);
