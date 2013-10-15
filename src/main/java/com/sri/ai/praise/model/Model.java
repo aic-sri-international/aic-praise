@@ -386,22 +386,24 @@ public class Model {
 	}
 
 	/**
+	 * @return the random variable declaration associated with a random variable value expression,
+	 * or <code>null</code> if it is not such an expression, or there is none.
+	 */
+	public RandomVariableDeclaration getRandomVariableDeclaration(Expression randomVariableValueExpression) {
+		RandomVariableDeclaration result = null;
+		if (randomVariableValueExpression.getSyntacticFormType().equals("Function application")) {
+			result = getRandomVariableDeclaration(
+					randomVariableValueExpression.getFunctor().toString(), randomVariableValueExpression.numberOfArguments());
+		}
+		return result;
+	}
+
+	/**
 	 * 
 	 * @return the parfactors declaration associated with the model.
 	 */
 	public ParfactorsDeclaration getParfactorsDeclaration() {
 		return parfactorsDeclaration;
-	}
-
-	/**
-	 * Set the rewriting process's model and known random variable names for
-	 * this Example Model.
-	 * 
-	 * @param process
-	 *            the process in which the rewriting is occurring.
-	 */
-	public void setRewritingProcessesModel(RewritingProcess process) {
-		setRewritingProcessesModel(modelDefinition, knownRandomVariableNameAndArities, process);
 	}
 
 	//
@@ -475,16 +477,26 @@ public class Model {
 	}
 
 	/**
+	 * Set the rewriting process's model and known random variable names for
+	 * this Example Model.
+	 * 
+	 * @param process
+	 *            the process in which the rewriting is occurring.
+	 */
+	public void setRewritingProcessesModel(RewritingProcess process) {
+		setRewritingProcessesModel(modelDefinition, knownRandomVariableNameAndArities, process);
+	}
+
+	/**
 	 * Set the rewriting process's model.
 	 * 
-	 * @param modelExpression
+	 * @param modelDefinition
 	 *            an expression representing the model the rewriting process is
 	 *            working over.
 	 * @param process
 	 *            the process in which the rewriting is occurring.
 	 */
-	public static void setRewritingProcessesModel(Expression modelExpression,
-			RewritingProcess process) {
+	public static void setRewritingProcessesModel(Expression modelDefinition, RewritingProcess process) {
 
 		@SuppressWarnings("unchecked")
 		Set<String> knownVarNames = (Set<String>) process
@@ -492,7 +504,7 @@ public class Model {
 		if (knownVarNames == null) {
 			knownVarNames = new HashSet<String>();
 		}
-		setRewritingProcessesModel(modelExpression, knownVarNames, process);
+		setRewritingProcessesModel(modelDefinition, knownVarNames, process);
 	}
 
 	/**
