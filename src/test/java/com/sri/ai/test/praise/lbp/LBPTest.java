@@ -3398,7 +3398,7 @@ public class LBPTest extends AbstractLPITest {
 						// if gaveTreasureTo(X, Z, Y) then 0.499512195 else 0.500487805
 						// Note: CardinaliltyOfTypeAlwaysDistinctFromZero removes 
 						// the top conditional as its true in this context
-						"if gaveTreasureTo(X, Z, Y) then (2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1)) / (2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 1 + (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1)) else (1 + (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1)) / (2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 1 + (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1))"),
+						"if gaveTreasureTo(X, Z, Y) then (2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X) |) ^ (| type(Z') | - 1)) / (2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X) |) ^ (| type(Z') | - 1) + 1 + (1 + 2 ^ | type(X) |) ^ (| type(Z') | - 1) + 2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X) |) ^ (| type(Z') | - 1)) else (1 + (1 + 2 ^ | type(X) |) ^ (| type(Z') | - 1) + 2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X) |) ^ (| type(Z') | - 1)) / (2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X) |) ^ (| type(Z') | - 1) + 1 + (1 + 2 ^ | type(X) |) ^ (| type(Z') | - 1) + 2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X) |) ^ (| type(Z') | - 1))"),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialGaveTreasureToOwnsRich(), 
 						"belief([owns(X,Y)])", 
 						false,
