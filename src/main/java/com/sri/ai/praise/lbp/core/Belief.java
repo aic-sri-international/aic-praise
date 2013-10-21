@@ -434,7 +434,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression origin                 = Tuple.get(IntensionalSet.getHead(messageSet), 1);
 		Expression conditionC             = IntensionalSet.getCondition(messageSet);
 		
-		Expression expansion = computeExpansionSymbolically(expressionI, destination, origin, conditionC, process);
+		Expression expansion = computeExpansionSymbolically(messageSet, expressionI, destination, origin, conditionC, process);
 		
 		Trace.log("        msg_expansion <- { (on I) (Destination, Origin, expansion) | C }");
 		Expression msgExpansion = IntensionalSet.makeUniSet(expressionI, Tuple.make(destination, origin, expansion), conditionC);
@@ -448,7 +448,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		identifyMessagesUsedByMessageExpansionAndScheduleThemForExpansionThemselves(msgExpansion, messagesToBeExpanded, process);
 	}
 
-	private Expression computeExpansionSymbolically(Expression expressionI, Expression destination, Expression origin, Expression conditionC, RewritingProcess process) {
+	private Expression computeExpansionSymbolically(Expression messageSet, Expression expressionI, Expression destination, Expression origin, Expression conditionC, RewritingProcess process) {
 		Justification.begin("Going to re-arrange as message expression");
 		// represent message_set as { (on I) (Destination, Origin) | C }
 
@@ -462,7 +462,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression expansion = null;
 		Justification.begin("Going to symbolically compute unsimplified message expression");
 		// Set up the contextual constraint
-		RewritingProcess processExtendedByC   = GrinderUtil.extendContextualVariablesAndConstraint(expressionI, conditionC, process);
+		RewritingProcess processExtendedByC = LPIUtil.extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(messageSet, process);
 		// Determine which 'message to . from .' rewriter to call
 		if (BracketedExpressionSubExpressionsProvider.isRandomVariable(destination, process)) {
 			expansion = processExtendedByC.rewrite(R_m_to_v_from_f,

@@ -39,8 +39,6 @@ package com.sri.ai.praise;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -50,7 +48,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
@@ -78,10 +75,8 @@ import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
-import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.RandomPredicate;
 import com.sri.ai.praise.model.RandomPredicateCatalog;
-import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.PredicateIterator;
@@ -1571,10 +1566,21 @@ public class LPIUtil {
 	}
 
 	/**
+	 * Same as {@link #extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(Expression, RewritingProcess)},
+	 * but only for the indices (that is, it does not extend the contextual constraint with the intensional set's condition.
+	 */
+	public static RewritingProcess extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
+		Map<Expression, Expression> quantifiedVariablesAndDomains =
+				DetermineSortsOfLogicalVariables.getIndicesDomainMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(intensionalSet, process);
+		RewritingProcess result = GrinderUtil.extendContextualVariablesAndConstraint(quantifiedVariablesAndDomains, Expressions.TRUE, process);
+		return result;
+	}
+
+	/**
 	 * Extend the rewriting processes's contextual variables and constraints
 	 * with the indices and condition from an intensionally defined set,
 	 * using the usage of logical variables inside random variables
-	 * to infer their domains.
+	 * to complement the information on their domains (throwing an Error if there is conflicting information).
 	 * 
 	 * @param intensionalSet
 	 * @param process
@@ -1583,79 +1589,22 @@ public class LPIUtil {
 	 * @return a sub-rewriting process with its contextual variables and
 	 *         constraints extended by the indices and condition of the intensionally defined set passed in.
 	 */
-	public static
-	RewritingProcess
-	extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(
+	public static RewritingProcess extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(
 			Expression intensionalSet, RewritingProcess process) {
-		Collection<Expression> quantifiedVariables  = IntensionalSet.getIndices(intensionalSet);
-		Expression             conditionOnExpansion = IntensionalSet.getCondition(intensionalSet);
-		Model model = Model.getRewritingProcessesModel(process);
-		//Map<Expression, Expression> newFreeVariablesAndDomains = DetermineSortsOfLogicalVariables.getIndicesDomainMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(intensionalSet, model, process);
-		Map<Expression, Expression> quantifiedVariablesAndDomains = new HashMap<Expression, Expression>();
-		for (Expression quantifiedVariable : quantifiedVariables) {
-			quantifiedVariablesAndDomains.put(quantifiedVariable, null);
-		}
-		RewritingProcess result = GrinderUtil.extendContextualVariablesAndConstraint(/*quantifiedVariables,*/ quantifiedVariablesAndDomains, conditionOnExpansion, process);
+		Map<Expression, Expression> quantifiedVariablesAndDomains =
+				DetermineSortsOfLogicalVariables.getIndicesDomainMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(intensionalSet, process);
+		Expression conditionOnExpansion = IntensionalSet.getCondition(intensionalSet);
+		RewritingProcess result = GrinderUtil.extendContextualVariablesAndConstraint(quantifiedVariablesAndDomains, conditionOnExpansion, process);
 		return result;
 	}
 
 	/**
-	 * Identifies logical variables in a given expression that are contextual variables and returns process with them as contextual variables,
+	 * Identifies logical variables in a given expression that are free variables and returns process with them as contextual variables,
 	 * using their usage as random variable value expression arguments to infer their domain.
 	 */
 	public static RewritingProcess extendContextualVariablesInferringDomainsFromUsageInRandomVariables(Expression expression, RewritingProcess process) {
-		Map<Expression, Expression> freeVariablesAndDomains = getFreeVariablesAndDomainsFromUsageInRandomVariables(expression, process);
+		Map<Expression, Expression> freeVariablesAndDomains = DetermineSortsOfLogicalVariables.getFreeVariablesAndDomainsFromUsageInRandomVariables(expression, process);
 		RewritingProcess result = GrinderUtil.extendContextualVariables(freeVariablesAndDomains, process);
 		return result;
-	}
-
-	public static Map<Expression, Expression> getFreeVariablesAndDomainsFromUsageInRandomVariables(Expression expression, RewritingProcess process) {
-		final Map<Expression, Expression> result = new HashMap<Expression, Expression>();
-		Model model = Model.getRewritingProcessesModel(process);
-		expression.replaceAllOccurrences(new CollectFreeVariablesAndDomainsFromUsageInRandomVariables(result, model), process);
-		return result;
-	}
-	
-	public static class CollectFreeVariablesAndDomainsFromUsageInRandomVariables implements ReplacementFunctionWithContextuallyUpdatedProcess {
-		private Map<Expression, Expression> freeVariablesAndDomains;
-		private Model model;
-		
-		public CollectFreeVariablesAndDomainsFromUsageInRandomVariables(Map<Expression, Expression> freeVariablesAndDomains, Model model) {
-			super();
-			this.freeVariablesAndDomains = freeVariablesAndDomains;
-			this.model = model;
-		}
-
-		@Override
-		public Expression apply(Expression expression, RewritingProcess process) {
-			if (LPIUtil.isRandomVariableValueExpression(expression, process)) {
-				RandomVariableDeclaration declaration = model.getRandomVariableDeclaration(expression);
-				Map<Expression, Expression> sortsForThisSubExpression =
-						DetermineSortsOfLogicalVariables.getLogicalVariableArgumentsDomains(expression, declaration, process);
-				for (Map.Entry<Expression, Expression> entry : sortsForThisSubExpression.entrySet()) {
-					Expression previousDomainIfAny = freeVariablesAndDomains.get(entry.getKey());
-					if (previousDomainIfAny != null && ! previousDomainIfAny.equals(entry.getValue())) {
-						throw new Error(
-								"Conflicting type informaton. Logical variable " + entry.getKey() + " has been used as " + previousDomainIfAny +
-								" somewhere else, but used as " + entry.getValue() + " in expression " + expression);
-					}
-					previousDomainIfAny = process.getContextualVariableDomain(entry.getKey());
-					if (previousDomainIfAny != null && ! previousDomainIfAny.equals(entry.getValue())) {
-						throw new Error(
-								"Conflicting type informaton. Logical variable " + entry.getKey() + " is registered as " + previousDomainIfAny +
-								" in context, but used as " + entry.getValue() + " in expression " + expression);
-					}
-					else {
-						freeVariablesAndDomains.put(entry.getKey(), entry.getValue());
-					}
-				}
-			}
-			return expression; // not used as a replacement function, so it always returns the input
-		}
-
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("CollectFreeVariablesAndDomainsFromUsageInRandomVariables.evaluate(Expression) should not be invoked.");
-		}
 	}
 }

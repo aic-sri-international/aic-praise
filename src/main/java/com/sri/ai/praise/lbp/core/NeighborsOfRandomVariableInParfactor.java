@@ -44,7 +44,6 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -151,9 +150,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			Trace.log("    {{ [ Ef' ] | C' }}_I' <- standardize {{ [ Ef ] | C }}_I apart from [ Ev ]");
 
 			Justification.beginEqualityStep("standardizing apart");
-			Expression saParfactor = StandardizedApartFrom
-					.standardizedApartFrom(
-							parfactor, randomVariable, process);
+			Expression saParfactor = StandardizedApartFrom.standardizedApartFrom(parfactor, randomVariable, process);
 			if (Justification.isEnabled()) {
 				currentExpression = currentExpression.set(1, saParfactor);
 				Justification.endEqualityStep(currentExpression);
@@ -165,7 +162,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			Expression scopingExpressionPrime = IntensionalSet.getScopingExpression(saParfactor);
 			
 			Trace.log("    Extend contextual variables with I'");
-			RewritingProcess processIPrime = GrinderUtil.extendContextualVariables(scopingExpressionPrime, process);
+			RewritingProcess processIPrime = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saParfactor, process);
 			
 			Trace.log("    return R_intensional_simplification(");
 			Trace.log("                    {{ [ Ef' ] | R_formula_simplification(C' and rv_is_referenced_by([Ev], Ef')) }}_I')");

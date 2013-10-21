@@ -63,22 +63,21 @@ import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.RewriterLogging;
 import com.sri.ai.grinder.helper.RewriterLoggingNamedRewriterFilter;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
-import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
-import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.LBPQueryEngine.QueryError.TYPE;
+import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
-import com.sri.ai.praise.model.ParfactorsDeclaration;
 import com.sri.ai.praise.model.Model.ModelException;
+import com.sri.ai.praise.model.ParfactorsDeclaration;
 import com.sri.ai.util.log.LogX;
 
 /**
@@ -362,14 +361,14 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 				
 				// Step 1 get a query as expression
 				notifyListenersQueryStepStarting(queryUUID, STEP_1, stopWatch);
-				Expression queryExp = null;
-				queryExp = parser.parse(beliefQuery);
+				Expression queryExpression = null;
+				queryExpression = parser.parse(beliefQuery);
 				notifyListenersQueryStepComplete(queryUUID, STEP_1, stopWatch);
 				
 				// Step 2 create RewritingProcess
 				notifyListenersQueryStepStarting(queryUUID, STEP_2, stopWatch);
 				LBPConfiguration configuration = options.getLBPConfiguration();
-				process = LBPFactory.newLBPProcess(queryExp, configuration);
+				process = LBPFactory.newLBPProcess(queryExpression, configuration);
 				notifyListenersQueryStepComplete(queryUUID, STEP_2, stopWatch);
 				
 				// Step 3 get the model as Expression
@@ -393,7 +392,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 					try {
 						// Can only validate here after setting up the model
 						// and associating with the process.
-						LPIUtil.assertBeliefOk(queryExp, process);
+						LPIUtil.assertBeliefOk(queryExpression, process);
 					} catch (IllegalArgumentException iae) {
 						queryErrors.add(new QueryError(TYPE.INVALID_QUERY, iae.getMessage()));
 					}
@@ -439,8 +438,8 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 							// Step 6 create new Belief expression from 1 and 2
 							notifyListenersQueryStepStarting(queryUUID, STEP_6, stopWatch);
 							// Extend the process by any logical variables in the query.
-							process = GrinderUtil.extendContextualVariables(queryExp, process);
-							Expression belief = process.rewrite(LBPRewriter.R_belief, queryExp);
+							process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(queryExpression, process);
+							Expression belief = process.rewrite(LBPRewriter.R_belief, queryExpression);
 							notifyListenersQueryStepComplete(queryUUID, STEP_6, stopWatch, rewriterProfiledTimes);
 							
 							// Step 7 set precision on result of step 6

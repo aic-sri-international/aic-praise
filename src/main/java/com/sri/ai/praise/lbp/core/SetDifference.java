@@ -549,7 +549,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Trace.log("    C'' <- R_formula_simplification(C' and not Alpha' = b) with cont. variables extended by I'");
 			Justification.beginEqualityStep("simplifying condition");
 			
-			RewritingProcess processIPrime  = GrinderUtil.extendContextualVariables(iPrime, process);
+			RewritingProcess processIPrime  = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saS1, process);
 			Expression       cPrimePrime    = processIPrime.rewrite(R_formula_simplification, cPrimeAndNotAlphaPrimeEqualb);
 			
 			result = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
@@ -626,9 +626,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			
 			List<Expression> disjuncts = new ArrayList<Expression>();
 
-			Expression saS1 = StandardizedApartFrom
-					.standardizedApartFrom(
-							set1, set2, process);
+			Expression saS1 = StandardizedApartFrom.standardizedApartFrom(set1, set2, process);
 
 			Expression alphaPrime = IntensionalSet.getHead(saS1);
 			Expression cPrime     = IntensionalSet.getCondition(saS1);
@@ -642,7 +640,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Justification.beginEqualityStep("difference is intensional set constrained so that its elements are not equal any element in " + set2);
 			
 			Trace.log("    C'' <- R_formula_implification(C' and not (Disjunction_i Alpha' = b_i)) with cont. variables extended by I'");
-			RewritingProcess processIPrime = GrinderUtil.extendContextualVariables(iPrime, process);
+			RewritingProcess processIPrime = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saS1, process);
 			
 			BranchRewriteTask[] disjunctRewriters = new BranchRewriteTask[disjuncts.size()];
 			for (int i = 0; i < disjuncts.size(); i++) {
@@ -714,9 +712,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Trace.log("    { Alpha' | C' }_I' <- standardize { Alpha' | C' }_I' apart from (Alpha, C)");
 			
 			Expression tupleAlphaC = Tuple.make(alpha, c);
-			Expression saS2        = StandardizedApartFrom
-					.standardizedApartFrom(
-							set2, tupleAlphaC, process);
+			Expression saS2        = StandardizedApartFrom.standardizedApartFrom(set2, tupleAlphaC, process);
 			
 			alphaPrime              = IntensionalSet.getHead(saS2); 
 			Expression       cPrime = IntensionalSet.getCondition(saS2);
@@ -744,10 +740,10 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			// However, we do this simplification under the assumption 'c' is true (this is the same
 			// theory/logic used in ConjunctsHoldTrueForEachOther). A more constrained context can
 			// help improve overall performance.
-			RewritingProcess processI = GrinderUtil.extendContextualVariablesAndConstraint(i, c, process);
+			RewritingProcess processI = LPIUtil.extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(set1, process);
 			forAllIPrime              = processI.rewrite(R_normalize, forAllIPrime);
 			cAndForAllPrimeI          = CardinalityUtil.makeAnd(c, forAllIPrime);
-			processI                  = GrinderUtil.extendContextualVariables(i, process);
+			processI                  = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(set1, process);
 			Expression cPrimePrime    = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
 			
 			result = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cPrimePrime);

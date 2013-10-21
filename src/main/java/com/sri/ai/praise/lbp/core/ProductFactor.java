@@ -152,7 +152,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				
 				Trace.log("    message <- R_m_to_v_from_f(m_V<-F1, C, I, beingComputed) // under cont. constraint extended by C and contextual variables extended by I");
 				Expression       msgToV_F1        = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), factor1);
-				RewritingProcess cPrimeSubProcess = GrinderUtil.extendContextualVariablesAndConstraint(scopingExpressionI, condition, process);
+				RewritingProcess cPrimeSubProcess = LPIUtil.extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(domainS, process);
 				
 				if (Justification.isEnabled()) {
 					Justification.beginEqualityStep("re-indexing set of messages");
