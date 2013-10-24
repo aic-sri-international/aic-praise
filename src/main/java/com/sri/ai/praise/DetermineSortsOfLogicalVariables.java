@@ -51,12 +51,21 @@ public class DetermineSortsOfLogicalVariables {
 			this.freeVariablesAndDomains = freeVariablesAndDomains;
 			this.model = model;
 		}
-	
+
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
-			if (LPIUtil.isRandomVariableValueExpression(expression, process)) {
-				RandomVariableDeclaration declaration = model.getRandomVariableDeclaration(expression);
-				if (declaration != null) {
+			if (isLogicalVariable(expression, process) && ! process.getContextualVariables().contains(expression) && ! freeVariablesAndDomains.containsKey(expression)) {
+				// it may be that a logical variable is used without a random variable, or with a random variable without a declaration, so we need to include them without a domain.
+				freeVariablesAndDomains.put(expression, null);
+			}
+			else {
+				if (BracketedExpressionSubExpressionsProvider.isRandomVariable(expression, process)) {
+					// we must use the expression with the random variable value expressions
+					expression = BracketedExpressionSubExpressionsProvider.getRandomVariableValueExpression(expression);
+				}
+				
+				if (LPIUtil.isRandomVariableValueExpression(expression, process)) {
+					RandomVariableDeclaration declaration = model.getRandomVariableDeclaration(expression);
 					Map<Expression, Expression> sortsForThisSubExpression =
 							getLogicalVariableArgumentsDomains(expression, declaration, process);
 					for (Map.Entry<Expression, Expression> entry : sortsForThisSubExpression.entrySet()) {
@@ -92,11 +101,11 @@ public class DetermineSortsOfLogicalVariables {
 	public static Map<Expression, Expression>
 	getLogicalVariableArgumentsDomains(Expression expression, RandomVariableDeclaration declaration, RewritingProcess process) {
 		Map<Expression, Expression> result = new HashMap<Expression, Expression>();
-		List<Expression> sorts = declaration.getParameterSorts();
-		for (int i = 0; i != declaration.getArityValue(); i++) {
+		List<Expression> sorts = declaration != null? declaration.getParameterSorts() : null;
+		for (int i = 0; i != expression.numberOfArguments(); i++) {
 			Expression argument = expression.get(i);
 			if (isLogicalVariable(argument, process)) {
-				Expression sort = sorts.get(i);
+				Expression sort = sorts != null? sorts.get(i) : null;
 				result.put(argument, sort);
 			}
 		}

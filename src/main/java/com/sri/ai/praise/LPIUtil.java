@@ -452,10 +452,8 @@ public class LPIUtil {
 	 */
 	public static void assertFactorOk(Expression factor,
 			RewritingProcess process) {
-		if (!BracketedExpressionSubExpressionsProvider
-				.isBracketedExpression(factor)
-				|| BracketedExpressionSubExpressionsProvider.isRandomVariable(
-						factor, process)) {
+		if (!BracketedExpressionSubExpressionsProvider.isBracketedExpression(factor)
+				|| BracketedExpressionSubExpressionsProvider.isRandomVariable(factor, process)) {
 			throw new IllegalArgumentException(
 					"Factor is not a legal factor expression of the form [ f ]:="
 							+ factor);
