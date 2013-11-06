@@ -383,7 +383,7 @@ public class ModelGrounding {
 					// Ensure the free variables returned are not sort names
 					Set<Expression> sorts = new LinkedHashSet<Expression>();
 					if (Sets.isIntensionalSet(parfactor)) {
-						sorts.addAll(IntensionalSet.getIndexToDomainMapWithDefaultTypeOfIndex(parfactor).values());
+						sorts.addAll(IntensionalSet.getIndexToDomainMapWithDefaultNull(parfactor).values());
 					}
 					if (!sorts.containsAll(freeVariables)) {
 						errors.add(new ModelGroundingError(
@@ -728,13 +728,13 @@ public class ModelGrounding {
 			if (isIntensionalParfactor()) {
 				Expression intensionalFactor = IntensionalSet.getHead(parfactor);
 				intensionalCondition = IntensionalSet.getCondition(parfactor);
-				Map<Expression, Expression> indexToDomainMap = IntensionalSet.getIndexToDomainMapWithDefaultTypeOfIndex(parfactor);
+				Map<Expression, Expression> indexToDomainMap = IntensionalSet.getIndexToDomainMapWithDefaultNull(parfactor);
 				// Add domain names that correspond to sort names
 				for (Map.Entry<Expression, Expression> indexToDomain : indexToDomainMap.entrySet()) {
 					Expression possibleSortName = indexToDomain.getValue();
-					// Exclude 'type(<Logical Variable>)' domains as these do not
+					// Exclude 'null' and 'type(<Logical Variable>)' domains as these do not
 					// correspond to sort names.
-					if (!Expressions.hasFunctor(possibleSortName, Type.FUNCTOR_TYPE)) {
+					if (possibleSortName == null || !Expressions.hasFunctor(possibleSortName, Type.FUNCTOR_TYPE)) {
 						indexToSortNameMap.put(indexToDomain.getKey(), possibleSortName);
 					}
 				}

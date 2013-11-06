@@ -1199,9 +1199,10 @@ public class LPIUtil {
 			Trace.log("// SomeIndex = {}", someIndex);
 			
 			Trace.log("value = pick_value(SomeIndex, I, C)");
-			Expression variablesI = ExtensionalSet.makeUniSetExpression(indicesI);
+			Expression setOfIndices = ExtensionalSet.makeUniSetExpression(indicesI);
 			Expression formulaC   = IntensionalSet.getCondition(intensionalSet);
-			Expression value = pickValue(someIndex, variablesI, formulaC, process);
+			RewritingProcess subProcess = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
+			Expression value = pickValue(someIndex, setOfIndices, formulaC, subProcess);
 			Trace.log("// value = {}", value);
 			
 			if (value == null) {
@@ -1213,8 +1214,8 @@ public class LPIUtil {
 				indexExpressionsIPrime.remove(someIndex);
 				Trace.log("// I' = {}", indexExpressionsIPrime);
 				Trace.log("return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })");
-				Expression alphaSubX          = SemanticSubstitute.replace(alpha, someIndex, value, process);
-				Expression formulaCSubX       = SemanticSubstitute.replace(formulaC, someIndex, value, process);
+				Expression alphaSubX          = SemanticSubstitute.replace(alpha, someIndex, value, subProcess);
+				Expression formulaCSubX       = SemanticSubstitute.replace(formulaC, someIndex, value, subProcess);
 				Expression intensionalSetSubX = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressionsIPrime, alphaSubX, formulaCSubX);
 	
 				result = pickSingleElement(intensionalSetSubX, process);

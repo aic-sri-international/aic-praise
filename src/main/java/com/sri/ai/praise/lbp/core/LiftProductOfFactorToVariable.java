@@ -157,14 +157,16 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 			Expression alpha      = IntensionalSet.getHead(prodSet);
 			Expression conditionC = IntensionalSet.getCondition(prodSet);
 			
-			// the following logic depends on the head being normalized.
-			alpha = process.rewrite(LBPRewriter.R_normalize, alpha);
+			RewritingProcess processExtendedByProductSet = LPIUtil.extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(prodSet, process);
 			
-			if (isARepresentativeMessageFromAFactorToTheVariable(alpha, process)) {
+			// the following logic depends on the head being normalized.
+			alpha = processExtendedByProductSet.rewrite(LBPRewriter.R_normalize, alpha);
+			
+			if (isARepresentativeMessageFromAFactorToTheVariable(alpha, processExtendedByProductSet)) {
 				// Alpha is if C' then Alpha_1 else Alpha_2
 				if (IfThenElse.isIfThenElse(alpha)) {
 					Expression conditionCPrime = IfThenElse.getCondition(alpha);
-					if (FormulaUtil.isFormula(conditionCPrime, process)) {
+					if (FormulaUtil.isFormula(conditionCPrime, processExtendedByProductSet)) {
 						// return R_lift_product(prod_{{(on I) Alpha_1 | C and C'}}) * R_lift_product(prod_{{(on I) Alpha_2 | C and not C'})
 						Expression alpha1        = IfThenElse.getThenBranch(alpha);
 						Expression thenCondition = And.make(conditionC, conditionCPrime);

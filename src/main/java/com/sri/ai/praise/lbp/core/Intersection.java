@@ -115,14 +115,15 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 				Expression c2              = IntensionalSet.getCondition(set2);
 				Expression tupleI2Alpha2C2 = Tuple.make(i2, alpha2, c2);
 				
-				Expression saSet1          = StandardizedApartFrom
-						.standardizedApartFrom(
-								set1, tupleI2Alpha2C2, process);
+				Expression saSet1           = StandardizedApartFrom.standardizedApartFrom(set1, tupleI2Alpha2C2, process);
 				
+				RewritingProcess subProcess = GrinderUtil.extendContextualVariablesWithIntensionalSetIndices(set2, process);
+				subProcess                  = GrinderUtil.extendContextualVariablesWithIntensionalSetIndices(saSet1, subProcess);
+
 				Trace.log("    C <- R_complete_normalize(Alpha1 = Alpha2 and C1 and C2)");
 				Expression alpha1 = IntensionalSet.getHead(saSet1);
 				Expression c1     = IntensionalSet.getCondition(saSet1);
-				Expression c      = process.rewrite(R_complete_normalize, CardinalityUtil.makeAnd(Equality.make(alpha1, alpha2), CardinalityUtil.makeAnd(c1, c2)));
+				Expression c      = subProcess.rewrite(R_complete_normalize, CardinalityUtil.makeAnd(Equality.make(alpha1, alpha2), CardinalityUtil.makeAnd(c1, c2)));
 				if (c.equals(Expressions.FALSE)) {
 					Trace.log("    if C is \"false\"") ;
 					Trace.log("        return {}");

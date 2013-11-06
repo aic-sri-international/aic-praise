@@ -67,8 +67,11 @@ import org.antlr.v4.runtime.Token;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.GrinderConfiguration;
+import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.demo.action.ClearOutputAction;
 import com.sri.ai.praise.demo.action.ExecuteQueryAction;
@@ -104,6 +107,8 @@ import com.sri.ai.util.base.Triple;
 @Beta
 public class Controller {
 
+	private final static int DEFAULT_DOMAIN_SIZE = 1000;
+	
 	private LBPQueryEngine queryEngine              = LBPFactory.newLBPQueryEngine();
 	private String         activeQueryUUID          = null;
 	private boolean        intentionallyInterrupted = false;
@@ -318,14 +323,14 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							cleanupMemory();
 							
 							RuleConverter ruleConverter = new RuleConverter();
-			
+							RewritingProcess process = LBPFactory.newLBPProcess(Expressions.TRUE); 
 							String currentQuery = app.queryPanel.getCurrentQuery();
 							
 							Triple<Model, Expression, Model> translateQueryResult = ruleConverter
 									.query(currentQuery,
 											app.modelEditPanel.getText() + "\n"
 													+ app.evidenceEditPanel.getText(),
-											"'Name'", "'Description'");
+											"'Name'", "'Description'", process);
 			
 							Expression queryAtom = translateQueryResult.second;
 							Model      model     = translateQueryResult.third;
@@ -383,7 +388,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							printlnToConsole("BELIEF=\n" + belief);	
 							
 							Expression exprBelief = lowLevelParse(belief);
-							Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, currentQuery);
+							Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, currentQuery, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
 			
 							printlnToConsole("RULE BELIEF=\n"+ruleBelief.toString());
 							
@@ -853,5 +858,16 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	private void cleanupMemory() {
 		DefaultRewritingProcess.cleanUpGlobalRewritingProcessForKnowledgeBasedExpressions();
 		System.gc();
+	}
+	
+	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSize(final int n) {
+		RewritingProcess result = LBPFactory.newLBPProcess(Expressions.TRUE);
+		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable() {
+			@Override
+			public Integer size(Expression logicalVariable, RewritingProcess process) {
+				return n;
+			}
+		}, result);
+		return result;
 	}
 }

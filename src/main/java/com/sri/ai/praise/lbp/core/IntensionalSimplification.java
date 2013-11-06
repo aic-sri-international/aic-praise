@@ -54,6 +54,7 @@ import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
+import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
 
 /**
@@ -98,9 +99,11 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 		List<Expression> intSetIndexExpressions = new ArrayList<Expression>(IntensionalSet.getIndexExpressions(intensionalSet));
 		Object[]         cPrimeAndiEqualsBeta   = new Object[3];
 		
-		Expression simplifiedIntSetCondition = process.rewrite(R_formula_simplification, intSetCondition);
+		RewritingProcess subProcess = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
+		
+		Expression simplifiedIntSetCondition = subProcess.rewrite(R_formula_simplification, intSetCondition);
 
-		if (Expressions.FALSE.equals(simplifiedIntSetCondition)) {
+		if (simplifiedIntSetCondition.equals(Expressions.FALSE)) {
 			Trace.log("if C is false");
 			Trace.log("    return empty_set");
 			result = _emptySet;
@@ -138,8 +141,8 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 			Expression beta   = (Expression) cPrimeAndiEqualsBeta[2];
 			Expression index  = IndexExpressions.getIndex(intSetIndexExpressions.get(i));
 
-			Expression substitutedAlpha  = SemanticSubstitute.replace(intSetHead, index, beta, process);
-			Expression substitutedCPrime = SemanticSubstitute.replace(cPrime, index, beta, process);
+			Expression substitutedAlpha  = SemanticSubstitute.replace(intSetHead, index, beta, subProcess);
+			Expression substitutedCPrime = SemanticSubstitute.replace(cPrime, index, beta, subProcess);
 			
 			intSetIndexExpressions.remove(i);
 

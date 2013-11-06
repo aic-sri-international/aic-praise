@@ -7,6 +7,7 @@ import java.util.Map;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
@@ -27,7 +28,8 @@ public class DetermineSortsOfLogicalVariables {
 	 */
 	public static Map<Expression, Expression> getIndicesDomainMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
 		Map<Expression, Expression> result = new HashMap<Expression, Expression>(IntensionalSet.getIndexToDomainMapWithDefaultNull(intensionalSet));
-		result = extendFreeVariablesAndDomainsFromUsageInRandomVariables(result, IntensionalSet.getHead(intensionalSet), process);
+		RewritingProcess subProcess = GrinderUtil.extendContextualVariables(result, process);
+		result = extendFreeVariablesAndDomainsFromUsageInRandomVariables(result, IntensionalSet.getHead(intensionalSet), subProcess);
 		return result;
 	}
 
@@ -37,8 +39,13 @@ public class DetermineSortsOfLogicalVariables {
 	}
 
 	public static Map<Expression, Expression> extendFreeVariablesAndDomainsFromUsageInRandomVariables(Map<Expression, Expression> freeVariablesAndDomains, Expression expression, RewritingProcess process) {
-		Model model = Model.getRewritingProcessesModel(process);
-		expression.replaceAllOccurrences(new CollectFreeVariablesAndDomainsFromUsageInRandomVariables(freeVariablesAndDomains, model), process);
+		try {
+			Model model = Model.getRewritingProcessesModel(process);
+			expression.replaceAllOccurrences(new CollectFreeVariablesAndDomainsFromUsageInRandomVariables(freeVariablesAndDomains, model), process);
+		}
+		catch (Error e) {
+			// no model in process, do nothing.
+		}
 		return freeVariablesAndDomains;
 	}
 
@@ -66,21 +73,30 @@ public class DetermineSortsOfLogicalVariables {
 				
 				if (LPIUtil.isRandomVariableValueExpression(expression, process)) {
 					RandomVariableDeclaration declaration = model.getRandomVariableDeclaration(expression);
-					Map<Expression, Expression> sortsForThisSubExpression =
-							getLogicalVariableArgumentsDomains(expression, declaration, process);
+					Map<Expression, Expression> sortsForThisSubExpression = getLogicalVariableArgumentsDomains(expression, declaration, process);
 					for (Map.Entry<Expression, Expression> entry : sortsForThisSubExpression.entrySet()) {
 						Expression previousDomainIfAny = freeVariablesAndDomains.get(entry.getKey());
-						if (previousDomainIfAny != null && ! previousDomainIfAny.equals(entry.getValue())) {
-							throw new Error(
-									"Conflicting type informaton. Logical variable " + entry.getKey() + " has been used as " + previousDomainIfAny +
-									" somewhere else, but used as " + entry.getValue() + " in expression " + expression);
+						if (previousDomainIfAny != null) {
+							if (entry.getValue() == null) {
+								entry.setValue(previousDomainIfAny);
+							}
+							else if ( ! previousDomainIfAny.equals(entry.getValue())) {
+								throw new Error(
+										"Conflicting type informaton. Logical variable " + entry.getKey() + " has been used as " + previousDomainIfAny +
+										" somewhere else, but used as " + entry.getValue() + " in expression " + expression);
+							}
 						}
 						else {
 							previousDomainIfAny = process.getContextualVariableDomain(entry.getKey());
-							if (previousDomainIfAny != null && ! previousDomainIfAny.equals(entry.getValue())) {
-								throw new Error(
-										"Conflicting type informaton. Logical variable " + entry.getKey() + " is registered as " + previousDomainIfAny +
-										" in context, but used as " + entry.getValue() + " in expression " + expression);
+							if (previousDomainIfAny != null) {
+								if (entry.getValue() == null) {
+									entry.setValue(previousDomainIfAny);
+								}
+								else if ( ! previousDomainIfAny.equals(entry.getValue())) {
+									throw new Error(
+											"Conflicting type informaton. Logical variable " + entry.getKey() + " is registered as " + previousDomainIfAny +
+											" in context, but used as " + entry.getValue() + " in expression " + expression);
+								}
 							}
 							else {
 								freeVariablesAndDomains.put(entry.getKey(), entry.getValue());

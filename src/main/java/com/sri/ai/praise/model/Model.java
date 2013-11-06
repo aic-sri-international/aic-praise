@@ -481,7 +481,12 @@ public class Model {
 	 */
 	public static Model getRewritingProcessesModel(RewritingProcess process) {
 		// It seems unnecessary to construct a new Model object. The rewriting process should store the entire Model object instead of its parts.
-		Model result = new Model(getModelDefinition(process), getKnownRandomVariableNameAndArities(process));
+		Expression processModelDefinition = getModelDefinition(process);
+		Set<String> processKnownRandomVariableNameAndArities = getKnownRandomVariableNameAndArities(process);
+		if (processModelDefinition == null || processKnownRandomVariableNameAndArities == null) {
+			return null;
+		}
+		Model result = new Model(processModelDefinition, processKnownRandomVariableNameAndArities);
 		return result;
 	}
 

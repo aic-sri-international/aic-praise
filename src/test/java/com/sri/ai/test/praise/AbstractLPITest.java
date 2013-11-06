@@ -53,9 +53,11 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.Trace;
+import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.LPIGrammar;
+import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.util.Configuration;
@@ -150,7 +152,7 @@ public abstract class AbstractLPITest {
 	protected abstract class TestData  {
 		public boolean isIllegalArgumentTest;
 		public String expected;		
-		public String contextualConstraint;
+		public String contextualConstraintString;
 		public Model  model;
 		
 		public TestData(boolean isIllegalArgumentTest, String expected) {
@@ -158,9 +160,9 @@ public abstract class AbstractLPITest {
 			this.expected              = expected;
 		}
 		
-		public TestData(String contextualConstraint, Model model, boolean isIllegalArgumentTest, String expected) {
+		public TestData(String contextualConstraintString, Model model, boolean isIllegalArgumentTest, String expected) {
 			this(isIllegalArgumentTest, expected);
-			this.contextualConstraint = contextualConstraint;
+			this.contextualConstraintString = contextualConstraintString;
 			this.model                = model;
 		}
 		
@@ -173,15 +175,22 @@ public abstract class AbstractLPITest {
 			topExpression = getTopExpression();
 			process = newRewritingProcess(topExpression);
 			
-			Expression context = parse(contextualConstraint);
-			if ( ! context.equals(Expressions.TRUE)) {
-				process = GrinderUtil.extendContextualConstraint(context, process);
-			}
-			
 			if (null != model) {
 				model.setRewritingProcessesModel(process);
+				process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(model.getParfactors(process)), process);
+				// parfactors don't typically have free variables, but they might.
 			}
 
+			process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomain(topExpression, process);
+			// process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(topExpression, process);
+			
+			Expression contextualConstraint = parse(contextualConstraintString);
+			if ( ! contextualConstraint.equals(Expressions.TRUE)) {
+				process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomain(contextualConstraint, process);
+				// process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(contextualConstraint, process);
+				process = GrinderUtil.extendContextualConstraint(contextualConstraint, process);
+			}
+			
 			Expression expectedExpression = parse(expected);
 			if (isIllegalArgumentTest) {
 				try {

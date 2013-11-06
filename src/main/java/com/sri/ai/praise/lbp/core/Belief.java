@@ -178,6 +178,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Set<Expression> freeVariablesFromBeliefQuery = Expressions.freeVariables(randomVariable, process);
 		
 		process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, process);
+		process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getRewritingProcessesModel(process).getParfactorsDeclaration().getParfactors()), process);
 		
 		Trace.log("beingComputed    <- empty set");
 		Expression beingComputed = LPIUtil.createNewBeingComputedExpression();
@@ -616,17 +617,16 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					
 					// Normalize and manage precision
 					Expression normalizedValue = value;
-					if (Model.isAllDomainSizesKnown(process)) {
+					if (Model.isAllDomainSizesKnown(subProcess)) {
 						Expression randomVariable = null;
-						if (BracketedExpressionSubExpressionsProvider.isRandomVariable(
-								destination, process)) {
+						if (BracketedExpressionSubExpressionsProvider.isRandomVariable(destination, subProcess)) {
 							randomVariable = destination;
 						} 
 						else {
 							randomVariable = origin;
 						}
-						normalizedValue = process.rewrite(R_normalize_message, LPIUtil.argForNormalizeRewriteCall(randomVariable, value));
-						normalizedValue = limitPrecisionToNumberOfSignificantDecimalPlaces(normalizedValue, process);
+						normalizedValue = subProcess.rewrite(R_normalize_message, LPIUtil.argForNormalizeRewriteCall(randomVariable, value));
+						normalizedValue = limitPrecisionToNumberOfSignificantDecimalPlaces(normalizedValue, subProcess);
 					}
 					
 					Trace.log("    next_msg_values <- next_msg_values union { (on I) (Destination, Origin, value) | C }");

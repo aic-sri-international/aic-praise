@@ -55,6 +55,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElseExternalizationHierarchical;
@@ -171,38 +172,33 @@ public class LBPTest extends AbstractLPITest {
 				LBPFactory.newLBPProcessWithHighLevelModel(
 						"sort Person : 10, ann, beth, carol, tom, john;" +
 						"random smart : Person -> Boolean;");
-
+		
 		// simple case
 		expressionString = "(if X = tom then 1 else 2) + (if Y = beth then 3 else 4)";
 		expectedString = "if X = tom then if Y = beth then 1 + 3 else 1 + 4 else (if Y = beth then 2 + 3 else 2 + 4)";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 		
 		// more-than-one-level case
 		expressionString = "(if X = tom then 1 else 2) + (if Y = beth then if Z = carol then 3 else 4 else 5)";
 		expectedString = "if X = tom then if Y = beth then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5 else (if Y = beth then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5)";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 		
 		// more-than-one-level case, with conditionals at the bottom only
 		expressionString = "f(g((if X = tom then 1 else 2) + (if Y = beth then 3 else 4)))";
 		expectedString = "if X = tom then if Y = beth then f(g(1 + 3)) else f(g(1 + 4)) else (if Y = beth then f(g(2 + 3)) else f(g(2 + 4)))";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 		
 		// conditional condition case
 		expressionString = "(if X = tom then 1 else 2) + (if (if Y = beth then W = tom else W = john) then if Z = carol then 3 else 4 else 5)";
 		expectedString = "if X = tom then if Y = beth then if W = tom then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5 else (if W = john then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5) else (if Y = beth then if W = tom then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5 else (if W = john then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5))";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 		
 		// double conditional condition case, with simplifications
 		expressionString = "if (if X = tom then (if X = ann then X = john else X != john) else if X = beth then X = mark else X != mark) then 4 else 5";
 		expectedString = "if X = tom or X != beth and X != mark then 4 else 5";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 	}
-	
+
 	@Test
 	public void testMoveAllRandomVariableValueExpressionConditionsDownHierarchical() {
 		String expressionString;
@@ -217,58 +213,59 @@ public class LBPTest extends AbstractLPITest {
 		// non-case
 		expressionString = "1 + 2";
 		expectedString = "1 + 2";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 
 		// non-RV case
 		expressionString = "if X = ann then 1 + 2 else 3";
 		expectedString = "if X = ann then 1 + 2 else 3";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 
 		// Already normalized case with nested LV conditions
 		expressionString = "if X = ann then if X = bob then 1 else 2 else if X = bob then 3 else 4";
 		expectedString   = "if X = ann then if X = bob then 1 else 2 else if X = bob then 3 else 4";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 
 		// simple case
 		expressionString = "if smart(X) then if X = tom then 1 else 2 else 3";
 		expectedString = "if X = tom then if smart(X) then 1 else 3 else if smart(X) then 2 else 3";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 
 		// simple case, symmetric case around then/else
 		expressionString = "if smart(X) then 3 else if X = tom then 1 else 2";
 		expectedString = "if X = tom then if smart(X) then 3 else 1 else if smart(X) then 3 else 2";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 
 		// RVs on top and bottom
 		expressionString = "if smart(X) then if X = tom then if smart(ann) then 1 else 2 else 3 else 4";
 		expectedString = "if X = tom then if smart(X) then if smart(ann) then 1 else 2 else 4 else if smart(X) then 3 else 4";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 
 		// RVs on top, LV at bottom
 		expressionString = "if smart(X) then if X = tom then if Y = ann then 1 else 2 else 3 else 4";
 		expectedString = "if X = tom then if Y = ann then if smart(X) then 1 else 4 else (if smart(X) then 2 else 4) else (if smart(X) then 3 else 4)";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 
 		// RVs on top, LV at bottom, symmetric case around then/else
 		expressionString = "if smart(X) then 4 else if X = tom then 3 else if Y = ann then 1 else 2";
 		expectedString = "if X = tom then if smart(X) then 4 else 3 else (if Y = ann then if smart(X) then 4 else 1 else (if smart(X) then 4 else 2))";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 
 		// case with unregistered RV. Should still be fine because it detects LV conditions based on formula definition, which is equality logic.
 		expressionString = "if predicate(X) then if X = a then 1 else 2 else 3";
 		expectedString = "if X = a then if predicate(X) then 1 else 3 else if predicate(X) then 2 else 3";
-		actual = rewriter.rewrite(parse(expressionString), process);
-		assertEquals(parse(expectedString), actual);
+		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
 	}
 	
+	private void runTestAfterExtendingContextualVariables(String expressionString, String expectedString, Rewriter rewriter, RewritingProcess process) {
+		Expression expression;
+		Expression actual;
+		RewritingProcess testProcess;
+		expression = parse(expressionString);
+		testProcess = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomain(expression, process);
+		actual = rewriter.rewrite(expression, testProcess);
+		assertEquals(parse(expectedString), actual);
+	}
+
 	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void testFindRandomVariableValueExpressionsThatAreNotAGivenOne() {
@@ -292,7 +289,8 @@ public class LBPTest extends AbstractLPITest {
 				Util.pair(parse("sick(W)"), parse("not (Z != X)"))
 				);
         process = LBPFactory.newLBPProcess(expression);
-        Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNameAndArities(), process); 
+        Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNameAndArities(), process);
+        process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomain(Tuple.make(expression, randomVariableValue), process);
         otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(expression, randomVariableValue, process);
         assertEquals(expected, otherRandomVariableValuesAndContexts);	
     }
@@ -1751,6 +1749,8 @@ public class LBPTest extends AbstractLPITest {
 						// "if X = a then if p(a) then 0.2 else 0.3 else 1"
 						// Note: no constraint applier used in R_normalize so p(X) instead of p(a).
 						"if X = a then if p(a) then 0.20 else 0.30 else 1"
+						// Note that the above model uses a free variable inside a parfactor, an unusual feature
+						// This ended up helping to find a bug that causes free variables in parfactors not to extend the context.
 				),
 				// From ALBPTest.testMessageToFactorFromVariable()
 				new MsgToFFromVTestData(Expressions.TRUE.toString(), 

@@ -71,20 +71,19 @@ import com.sri.ai.grinder.library.boole.ForAll;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderTerminalSymbols;
 import com.sri.ai.praise.LPIUtil;
-import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
-import com.sri.ai.praise.rules.antlr.RuleTerminalSymbols;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.ParfactorsDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
+import com.sri.ai.praise.rules.antlr.RuleTerminalSymbols;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.base.Triple;
@@ -125,7 +124,6 @@ public class RuleConverter {
 	public static final String SYNTACTIC_FORM_TYPE_FUNCTION_APPLICATION = "Function application";
 
 	private RuleParserWrapper  ruleParser        = null;
-	private RewritingProcess   rewritingProcess  = null;
 
 	public class LowLevelModelParts {
 		private Set<Expression> sortDeclarations           = new LinkedHashSet<Expression>();
@@ -157,13 +155,6 @@ public class RuleConverter {
 	public RuleConverter() {
 		// Ensure these are instantiated straight away and not when first referenced.
 		// This helps ensure any global dependencies are setup correctly.
-		rewritingProcess = LBPFactory.newLBPProcess(Expressions.TRUE);
-		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable() {
-			@Override
-			public Integer size(Expression logicalVariable, RewritingProcess process) {
-				return 1000;
-			}
-		}, rewritingProcess);
 		ruleParser       = new RuleParserWrapper();
 	}
 
@@ -174,9 +165,10 @@ public class RuleConverter {
 	/** A convenience method building a {@link Model} from a string. */
 	public static Model makeModel(String ruleAndDeclarationsListString) {
 		RuleConverter ruleConverter = new RuleConverter();
+		RewritingProcess process = LBPFactory.newLBPProcess(Expressions.TRUE);
 		Model model;
 		try {
-			model = ruleConverter.makeModelDynamic(ruleAndDeclarationsListString);
+			model = ruleConverter.makeModelDynamic(ruleAndDeclarationsListString, process);
 		} catch (ReservedWordException e) {
 			throw new Error(e);
 		}
@@ -197,8 +189,8 @@ public class RuleConverter {
 	 * @return A triple consisting of (low-level-model, low-level-query, low-level-model-extended-by-query).
 	 * @throws ReservedWordException
 	 */
-	public Triple<Model, Expression, Model> query(String queryFormulaString, String ruleAndDeclarationsListString, String llmName, String llmDescription) throws ReservedWordException {
-		return query(queryFormulaString != null ? ruleParser.parseFormula(queryFormulaString) : null, ruleParser.parseAll(ruleAndDeclarationsListString), llmName, llmDescription);
+	public Triple<Model, Expression, Model> query(String queryFormulaString, String ruleAndDeclarationsListString, String llmName, String llmDescription, RewritingProcess process) throws ReservedWordException {
+		return query(queryFormulaString != null ? ruleParser.parseFormula(queryFormulaString) : null, ruleParser.parseAll(ruleAndDeclarationsListString), llmName, llmDescription, process);
 	}
 	
 	/**
@@ -222,12 +214,12 @@ public class RuleConverter {
 	 * @return A triple consisting of (low-level-model, low-level-query, low-level-model-extended-by-query).
 	 * @throws ReservedWordException
 	 */
-	public Triple<Model, Expression, Model> query(Expression queryFormula, List<Expression> ruleAndDeclarationsList, String llmName, String llmDescription) throws ReservedWordException {
+	public Triple<Model, Expression, Model> query(Expression queryFormula, List<Expression> ruleAndDeclarationsList, String llmName, String llmDescription, RewritingProcess process) throws ReservedWordException {
 
-		Model lowLevelModel = makeModel(ruleAndDeclarationsList, llmName, llmDescription);
+		Model lowLevelModel = makeModel(ruleAndDeclarationsList, llmName, llmDescription, process);
 		
 		// | (low-level-query, low-level-model-extended-by-query) <- query(queryFormula, low-level-model)
-		Pair<Expression, Model> queryLowLevelModelExtendedByQuery = query(queryFormula, lowLevelModel);
+		Pair<Expression, Model> queryLowLevelModelExtendedByQuery = query(queryFormula, lowLevelModel, process);
 		
 		// | return (low-level-model, low-level-query, low-level-model-extended-by-query)
 		return new Triple<Model, Expression, Model>(lowLevelModel, queryLowLevelModelExtendedByQuery.first, queryLowLevelModelExtendedByQuery.second);
@@ -245,9 +237,9 @@ public class RuleConverter {
 	 * @return A {@link Model} object.
 	 * @throws ReservedWordException
 	 */
-	public Model makeModel(List<Expression> ruleAndDeclarationsList, String llmName, String llmDescription) throws ReservedWordException {
+	public Model makeModel(List<Expression> ruleAndDeclarationsList, String llmName, String llmDescription, RewritingProcess process) throws ReservedWordException {
 		// | (sortDeclarations, randomVariableDeclarations, parfactors) <- translate(ruleAndDeclarationsList)
-		LowLevelModelParts lowLevelSyntax = translate(ruleAndDeclarationsList);
+		LowLevelModelParts lowLevelSyntax = translate(ruleAndDeclarationsList, process);
 		
 		//
 		// Some assertion testing before moving forward:
@@ -275,8 +267,8 @@ public class RuleConverter {
 	 * @return A {@link Model} object.
 	 * @throws ReservedWordException
 	 */
-	public Model makeModel(List<Expression> ruleAndDeclarationsList) throws ReservedWordException {
-		return makeModel(ruleAndDeclarationsList, "Model", "Model");
+	public Model makeModel(List<Expression> ruleAndDeclarationsList, RewritingProcess process) throws ReservedWordException {
+		return makeModel(ruleAndDeclarationsList, "Model", "Model", process);
 	}
 	
 	/**
@@ -287,8 +279,8 @@ public class RuleConverter {
 	 * @return A {@link Model} object.
 	 * @throws ReservedWordException
 	 */
-	private Model makeModelDynamic(String ruleAndDeclarationsListString) throws ReservedWordException {
-		return makeModel(ruleParser.parseAll(ruleAndDeclarationsListString), "Model", "Model");
+	private Model makeModelDynamic(String ruleAndDeclarationsListString, RewritingProcess process) throws ReservedWordException {
+		return makeModel(ruleParser.parseAll(ruleAndDeclarationsListString), "Model", "Model", process);
 	}
 	
 	/**
@@ -307,7 +299,7 @@ public class RuleConverter {
 	 *            A low level model against which the query is to be applied.
 	 * @return A triple consisting of (low-level-model, low-level-query, low-level-model-extended-by-query).
 	 */
-	public Pair<Expression, Model> query(Expression queryFormula, Model lowLevelModel) {
+	public Pair<Expression, Model> query(Expression queryFormula, Model lowLevelModel, RewritingProcess process) {
 		Expression      queryEquivalenceRule, queryAtom = null;
 		Model           lowLevelModelExtendedByQuery    = null;
 		Set<Expression> sorts                           = new LinkedHashSet<Expression>();
@@ -328,7 +320,7 @@ public class RuleConverter {
 			queryAtom = queryFormula;
 			
 			// | (queryEquivalencyRule, queryAtom) <- queryRuleAndAtom(queryFormula, low-level-model.randomVariableDeclarations)
-			Pair<Expression, Expression> queryRuleAndAtom = queryRuleAndAtom(queryFormula, randomVariables);
+			Pair<Expression, Expression> queryRuleAndAtom = queryRuleAndAtom(queryFormula, randomVariables, process);
 			// | if (queryEquivalencyRule, queryAtom) is null
 			if (queryRuleAndAtom == null) {
 				// | .... queryAtom <- queryFormula
@@ -342,12 +334,12 @@ public class RuleConverter {
 				rulesAndDeclarationsList.add(queryEquivalenceRule);
 				rulesAndDeclarationsList.addAll(sorts);
 				rulesAndDeclarationsList.addAll(randomVariables);
-				LowLevelModelParts llmParts = translate(rulesAndDeclarationsList);
+				LowLevelModelParts llmParts = translate(rulesAndDeclarationsList, process);
 				// | ................. to (sortDeclarations, randomVariableDeclarations, parfactors)
 				sorts.addAll(llmParts.getSortDeclarations());
 				randomVariables.addAll(llmParts.getRandomVariableDeclarations());
 				// | .... add new random variable declaration for queryAtom to randomVariableDeclarations
-				randomVariables.add(createQueryDeclaration(queryAtom, queryEquivalenceRule, randomVariables));
+				randomVariables.add(createQueryDeclaration(queryAtom, queryEquivalenceRule, randomVariables, process));
 				parfactors.addAll(llmParts.getParfactors());
 			}
 		}
@@ -374,7 +366,7 @@ public class RuleConverter {
 	 * @return an equivalent low level syntax representation of the input rules
 	 *         given.
 	 */
-	public LowLevelModelParts translate(List<Expression> rulesAndDeclarationsList) {		
+	public LowLevelModelParts translate(List<Expression> rulesAndDeclarationsList, RewritingProcess process) {		
 		LowLevelModelParts result = null;
 
 		// Convert the conjunctions of rules.
@@ -422,12 +414,12 @@ public class RuleConverter {
 				
 		Pair<List<Expression>, Set<Expression>> rulesAndRandomVariableDeclarations;
 		// | (rules, randomVariableDeclarations) <- translateFunctions(rules, randomVariableDeclarations)
-		rulesAndRandomVariableDeclarations = translateFunctions(rules, randomVariableDeclarations);
+		rulesAndRandomVariableDeclarations = translateFunctions(rules, randomVariableDeclarations, process);
 		rules                      = rulesAndRandomVariableDeclarations.first;
 		randomVariableDeclarations = rulesAndRandomVariableDeclarations.second;
 
 		// | (rules, randomVariableDeclarations) <- translateQuantifiers(rules, randomVariableDeclarations)
-		rulesAndRandomVariableDeclarations = translateQuantifiers(rules, randomVariableDeclarations);
+		rulesAndRandomVariableDeclarations = translateQuantifiers(rules, randomVariableDeclarations, process);
 		rules                      = rulesAndRandomVariableDeclarations.first;
 		randomVariableDeclarations = rulesAndRandomVariableDeclarations.second;
 		
@@ -436,13 +428,13 @@ public class RuleConverter {
 		
 		// Note: This is required to ensure random variable information is available on
 		// the rewriting process when performing R_normalize and R_complete_normalize operations.
-		Model.setKnownRandomVariables(randomVariableDeclarations, rewritingProcess);
+		Model.setKnownRandomVariables(randomVariableDeclarations, process);
 		
 		// | constrainedPotentialExpressions <- disembedConstraints(potentialExpressions)
-		List<Pair<Expression, Expression>> constrainedPotentialExpressions = disembedConstraints(potentialExpressions);
+		List<Pair<Expression, Expression>> constrainedPotentialExpressions = disembedConstraints(potentialExpressions, process);
 		
 		// | parfactors <- constraintedPotentialExpressions2Parfactors(constrainedPotentialExpressions)
-		Set<Expression> parfactors = constraintedPotentialExpressionsToParfactors(constrainedPotentialExpressions);
+		Set<Expression> parfactors = constraintedPotentialExpressionsToParfactors(constrainedPotentialExpressions, process);
 		
 		// | return (sortDeclarations, randomVariableDeclarations, parfactors)
 		result = new LowLevelModelParts(sortDeclarations, randomVariableDeclarations, parfactors);
@@ -466,7 +458,7 @@ public class RuleConverter {
 	 * @return  (rules, randomVariableDeclarations).
 	 */
 	public Pair<List<Expression>, Set<Expression>> translateFunctions(List<Expression> rules, 
-			Set<Expression> randomVariableDeclarations) {
+			Set<Expression> randomVariableDeclarations, RewritingProcess process) {
 		// | newRules <- empty list
 		List<Expression> newRules = new ArrayList<Expression>();
 		// | newRandomVariableDeclarations <- empty list
@@ -485,9 +477,7 @@ public class RuleConverter {
 					new ReplaceFunctionWithRelation(randomVariableDeclarations, functionsIdentified);
 			do {
 			    toReplace = newRule;
-			    newRule = toReplace.replaceAllOccurrences(
-			    		replacementFunction,
-			    		rewritingProcess);
+			    newRule = toReplace.replaceAllOccurrences(replacementFunction, process);
 			} while (newRule != toReplace);
 			
 			// | .... NewUniqueVariables <- empty set of logical variables
@@ -498,9 +488,9 @@ public class RuleConverter {
 			// | .... newRule <- translateFunctionsAsArgument(newRule, randomVariableDeclarations, functions, NewUniqueVariables, LogicalVariables, empty cache)
 			newRule = translateFunctionsAsArgument(newRule, randomVariableDeclarations, functionsIdentified, 
 							newUniqueVariables, new LinkedHashMap<Expression, Expression>(), 
-							new AtomicInteger(-1));
+							new AtomicInteger(-1), process);
 			// | .... LogicalVariables <- collect logical variables in newRule
-			Set<Expression> logicalVariables = Expressions.getVariables(newRule, rewritingProcess);
+			Set<Expression> logicalVariables = Expressions.getVariables(newRule, process);
 			// | .... for each NewUniqueVariable in NewUniqueVariables
 			for (Expression newUniqueVariable : newUniqueVariables.keySet()) {
 				Expression predicate1Functor = newUniqueVariables.get(newUniqueVariable);			
@@ -530,7 +520,7 @@ public class RuleConverter {
 				if (mayBeSameAsConjuncts.size() > 0) {
 					ExtendPredicate1WithMayBeSameAs extendPredicate1Function = 
 							new ExtendPredicate1WithMayBeSameAs(predicate1Functor, mayBeSameAsConjuncts);
-					newRule = newRule.replaceFirstOccurrence(extendPredicate1Function, rewritingProcess);
+					newRule = newRule.replaceFirstOccurrence(extendPredicate1Function, process);
 				}
 			}
 			
@@ -693,7 +683,8 @@ public class RuleConverter {
 			Map<String, Set<Integer>> functionsIdentified, 
 			Map<Expression, Expression> newUniqueVariables,
 			Map<Expression, Expression> newUniqueVariablesCache,
-			AtomicInteger uniqueCount) {
+			AtomicInteger uniqueCount,
+			RewritingProcess process) {
 		
 		Expression result = null;
 		//
@@ -708,7 +699,7 @@ public class RuleConverter {
 			Expression formula   = rule.get(0);
 			Expression potential = rule.get(1);
 			conditionAndFunctionFreeFormula = replaceRandomFunctionApplicationsByRelations(formula, randomVariableDeclarations,
-														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			condition = conditionAndFunctionFreeFormula.first;
 			// | .... if Condition is distinct from "true"
 			if (!condition.equals(Expressions.TRUE)) {
@@ -720,7 +711,7 @@ public class RuleConverter {
 														Expressions.make(FUNCTOR_ATOMIC_RULE,
 																functionFreeFormula, potential));
 				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
-														newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+														newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			}
 			else {
 				// | .... else
@@ -735,13 +726,13 @@ public class RuleConverter {
 			Expression formula = rule.get(0);
 			Expression rule1   = rule.get(1);
 			conditionAndFunctionFreeFormula = replaceRandomFunctionApplicationsByRelations(formula, randomVariableDeclarations,
-														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			condition           = conditionAndFunctionFreeFormula.first;
 			functionFreeFormula = conditionAndFunctionFreeFormula.second;	
 			
 			// | .... functionFreeRule1
 			// | ...... <- translateFunctionsAsArgument(Rule1, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
-			Expression functionFreeRule1 = translateFunctionsAsArgument(rule1, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			Expression functionFreeRule1 = translateFunctionsAsArgument(rule1, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 
 			// | .... if Condition is distinct from "true"
 			if (!condition.equals(Expressions.TRUE)) {
@@ -753,7 +744,7 @@ public class RuleConverter {
 															functionFreeFormula, functionFreeRule1));
 			 
 				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,	
-												newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+												newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			}
 			else {
 				// | ........ if rule1 == functionFreeRule1
@@ -775,17 +766,17 @@ public class RuleConverter {
 			Expression rule1   = rule.get(1);
 			Expression rule2   = rule.get(2);
 			conditionAndFunctionFreeFormula = replaceRandomFunctionApplicationsByRelations(formula, randomVariableDeclarations,
-														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+														functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			condition           = conditionAndFunctionFreeFormula.first;
 			functionFreeFormula = conditionAndFunctionFreeFormula.second;
 			
 			// | .... functionFreeRule1
 			// | ...... <- translateFunctionsAsArgument(Rule1, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
-			Expression functionFreeRule1 = translateFunctionsAsArgument(rule1, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			Expression functionFreeRule1 = translateFunctionsAsArgument(rule1, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			
 			// | .... functionFreeRule2
 			// | ...... <- translateFunctionsAsArgument(Rule2, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
-			Expression functionFreeRule2 = translateFunctionsAsArgument(rule2, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+			Expression functionFreeRule2 = translateFunctionsAsArgument(rule2, randomVariableDeclarations, functionsIdentified, newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			// | .... if Condition is distinct from "true"
 			if (!condition.equals(Expressions.TRUE)) {
 				// | ........ return translateFunctionsAsArgument("if Condition then (if functionFreeFormula then functionFreeRule1 else functionFreeRule2)", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
@@ -794,7 +785,7 @@ public class RuleConverter {
 													Expressions.make(FUNCTOR_CONDITIONAL_RULE,
 															functionFreeFormula, functionFreeRule1, functionFreeRule2));
 				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
-														newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+														newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			}
 			else {
 				// | ........ if rule1 == functionFreeRule1 and rule2 == functionFreeRule2
@@ -824,7 +815,7 @@ public class RuleConverter {
 			}
 			// | .... return translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
 			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
-													newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+													newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			if (result == intermediateRule) {
 				// i.e. no change
 				result = rule;
@@ -835,7 +826,7 @@ public class RuleConverter {
 					Expressions.make(FUNCTOR_ATOMIC_RULE, rule.get(0), rule.get(2)));
 			
 			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
-													newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+													newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			if (result == intermediateRule) {
 				// i.e. no change
 				result = rule;
@@ -844,7 +835,7 @@ public class RuleConverter {
 		else if (rule.getFunctor().equals(FUNCTOR_CAUSAL_RULE)) {
 			Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE, rule.get(0), rule.get(1));
 			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
-													newUniqueVariables, newUniqueVariablesCache, uniqueCount);
+													newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			if (result == intermediateRule) {
 				// i.e. no change
 				result = rule;
@@ -887,7 +878,8 @@ public class RuleConverter {
 			final Map<String, Set<Integer>> functionsIdentified, 
 			final Map<Expression, Expression> newUniqueVariables,  
 			final Map<Expression, Expression> newUniqueVariablesCache,
-			final AtomicInteger uniqueCount) {
+			final AtomicInteger uniqueCount,
+			final RewritingProcess process) {
 		
 		// | Condition <- true
 		final Expression[] condition = new Expression[1];
@@ -909,7 +901,7 @@ public class RuleConverter {
 						Expression result = expression;
 						// | .... if isRandomFunctionApplication(E) of the form predicate1(E1,..., Ei,..., En)
 						// | ............ where isRandomVariableValue(Ei, declarations) is true
-						int elementEi = determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(expression, randomVariableDeclarations, rewritingProcess);
+						int elementEi = determineIfRandomFunctionApplicationWithEmbeddedRandomVariableValue(expression, randomVariableDeclarations, process);
 						if (elementEi != -1) {
 							Expression predicate1 = expression;
 							// | ........ (predicate2, (T1,...,Tk) ) <- functorAndArguments(Ei)
@@ -920,7 +912,7 @@ public class RuleConverter {
 								// | ............ functions <- add (predicate2, n) to functions
 								updateFunctionsIdentified(functionsIdentified, predicate2);
 								// | ............ newUniqueVariable <- make new unique variable;
-								newUniqueVariable = Expressions.makeUniqueVariable("X" + (uniqueCount.incrementAndGet()), currentExpression[0], rewritingProcess);
+								newUniqueVariable = Expressions.makeUniqueVariable("X" + (uniqueCount.incrementAndGet()), currentExpression[0], process);
 								// | ............ newUniqueVariables <- add newUniqueVariable
 								// Note: also keep track of the predicate1 from which the newUniqueVariable originated from.
 								newUniqueVariables.put(newUniqueVariable, predicate1.getFunctor());
@@ -954,7 +946,7 @@ public class RuleConverter {
 						return result;
 					}
 	    		},
-	    		rewritingProcess);
+	    		process);
 		} while (functionFreeFormula != toReplace);
 		
 		Pair<Expression, Expression> result = new Pair<Expression, Expression>(condition[0], functionFreeFormula);
@@ -977,7 +969,7 @@ public class RuleConverter {
 	 *            A set of random variable declarations.
 	 * @return (rules, randomVariableDeclarations).
 	 */
-	public Pair<List<Expression>, Set<Expression>> translateQuantifiers(List<Expression> rules, Set<Expression> randomVariableDeclarations) {
+	public Pair<List<Expression>, Set<Expression>> translateQuantifiers(List<Expression> rules, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
 		// | newRules <- empty list
 		List<Expression> newRules = new ArrayList<Expression>();
 		// | newRandomVariableDeclarations <- randomVariableDeclarations
@@ -1000,7 +992,7 @@ public class RuleConverter {
 			do {
 				// Replace the quantifiers until there are none left in the potential expression.
 			    toReplace = newRule;
-			    newRule   = toReplace.replaceAllOccurrences(replacementFunction, rewritingProcess);
+			    newRule   = toReplace.replaceAllOccurrences(replacementFunction, process);
 			} while (newRule != toReplace);
 
 			// | .... newRules <- add newRule
@@ -1389,7 +1381,7 @@ public class RuleConverter {
 	 * @param potentialExpressions  The potential expressions to check for embedded constraints.
 	 * @return  A list of pairs of constraint-free potential expressions and the extracted constraints.
 	 */
-	public List<Pair<Expression, Expression>> disembedConstraints (List<Expression> potentialExpressions) {
+	public List<Pair<Expression, Expression>> disembedConstraints (List<Expression> potentialExpressions, RewritingProcess process) {
 		// | Let potentialExpressions be a list P1, ..., Pn of potential expressions
 		// | setOfConstrainedPotentialExpressions <- empty list
 		List<Pair<Expression, Expression>> setOfConstrainedPotentialExpressions = 
@@ -1397,6 +1389,9 @@ public class RuleConverter {
 		
 		// | for each P in P1,..., Pn
 		for (Expression potentialExpression : potentialExpressions) {
+			Set<Expression> variables = Expressions.freeVariables(potentialExpression, process);
+			RewritingProcess subProcess = GrinderUtil.extendContextualVariablesWithUnknownDomain(variables, process);
+
 			// | .... mayBeSameAsList <- empty list
 			Set<Pair<Expression, Expression>> mayBeSameAsSet = new HashSet<Pair<Expression, Expression>>();
 
@@ -1408,22 +1403,19 @@ public class RuleConverter {
 			ReplaceMayBeSameAsFunction replacementFunction = new ReplaceMayBeSameAsFunction(mayBeSameAsSet);
 			do {
 			    toReplace = replaced;
-			    replaced = toReplace.replaceAllOccurrences(
-			    		replacementFunction,
-			    		rewritingProcess);
+			    replaced = toReplace.replaceAllOccurrences(replacementFunction, subProcess);
 			} while (replaced != toReplace);
 
 			potentialExpression = replaced;
 
 			// Simplify the updated expression.
 			// | .... P <- R_normalize(P)
-			potentialExpression = rewritingProcess.rewrite(LBPRewriter.R_normalize, potentialExpression);
+			potentialExpression = subProcess.rewrite(LBPRewriter.R_normalize, potentialExpression);
 
 			// Get free variables and create inequality constraints on all pairs except those
 			// pairs stated to be ". may be same as .".
 			// | .... C <- true
 			List<Expression> constraints = new ArrayList<Expression>();
-			Set<Expression> variables = Expressions.freeVariables(potentialExpression, rewritingProcess);
 			Expression[] variableArray = new Expression[variables.size()];
 			variables.toArray(variableArray);
 			// | .... for every pair of distinct variables (Variable1, Variable2) in P not in mayBeSameAsList
@@ -1469,13 +1461,15 @@ public class RuleConverter {
 			Pair<Expression, Expression> pair = setOfConstrainedPotentialExpressions.get(ii);
 			Expression potentialExpression = pair.first;
 			Expression constraintC         = pair.second;
-			CollectAtomicConstraint collectAtomicConstraint = new CollectAtomicConstraint(rewritingProcess);
+			Set<Expression> variables = Expressions.freeVariables(Tuple.make(potentialExpression, constraintC), process);
+			RewritingProcess subProcess = GrinderUtil.extendContextualVariablesWithUnknownDomain(variables, process);
+			CollectAtomicConstraint collectAtomicConstraint = new CollectAtomicConstraint(subProcess);
 			if (Util.thereExists(new SubExpressionsDepthFirstIterator(potentialExpression), collectAtomicConstraint)) {
 				// // | .... for Assumption in (Constraint, not Constraint)
 				Expression assumption = collectAtomicConstraint.constraint;
-				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraintC, assumption);
+				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraintC, assumption, subProcess);
 				Expression notAssumption = Not.make(collectAtomicConstraint.constraint);
-				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraintC, notAssumption);
+				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraintC, notAssumption, subProcess);
 			}
 			else {
 				result.add(pair);
@@ -1500,7 +1494,7 @@ public class RuleConverter {
 	 * @return a set of parfactors generated from the give potential
 	 *         expressions.
 	 */
-	public Set<Expression> constraintedPotentialExpressionsToParfactors(List<Pair<Expression, Expression>> constrainedPotentialExpressionsons) {				
+	public Set<Expression> constraintedPotentialExpressionsToParfactors(List<Pair<Expression, Expression>> constrainedPotentialExpressionsons, RewritingProcess process) {				
 
 		// Translate the potential expression/constraint pair into a parfactor.
 		// | parfactors <- empty list
@@ -1508,7 +1502,7 @@ public class RuleConverter {
 		// | for each (P, C) in constrainedPotentialExpressions
 		for (Pair<Expression, Expression> pair : constrainedPotentialExpressionsons) {
 			// |.... parfactors <- add R_normalize({{ (on <free variables in P and C>) [ P ] | C }})
-			parfactors.add(createParfactor(pair.first, pair.second));
+			parfactors.add(createParfactor(pair.first, pair.second, process));
 		}
 		
 		// | return parfactors
@@ -1528,18 +1522,18 @@ public class RuleConverter {
 	 * @param constraintC          The constraint for the parfactor.
 	 * @return A parfactor expression based on the potential expression on constraints.
 	 */
-	public Expression createParfactor(Expression potentialExpression, Expression constraintC) {
+	public Expression createParfactor(Expression potentialExpression, Expression constraintC, RewritingProcess process) {
 		// |.... parfactors <- add R_normalize({{ (on <free variables in P and C>) [ P ] | C }})
 		Set<Expression> freeVariablesInPandC = new LinkedHashSet<Expression>();
-		freeVariablesInPandC.addAll(Expressions.freeVariables(potentialExpression, rewritingProcess));
-		freeVariablesInPandC.addAll(Expressions.freeVariables(constraintC, rewritingProcess));
+		freeVariablesInPandC.addAll(Expressions.freeVariables(potentialExpression, process));
+		freeVariablesInPandC.addAll(Expressions.freeVariables(constraintC, process));
 
 		Expression result = IntensionalSet.makeMultiSetFromIndexExpressionsList(
 				 			new ArrayList<Expression>(freeVariablesInPandC), 
 				 			Expressions.make(FunctorConstants.LEFT_DOT_RIGHT, potentialExpression), 
 				 			constraintC);
 	
-		result = rewritingProcess.rewrite(LBPRewriter.R_normalize, result);
+		result = process.rewrite(LBPRewriter.R_normalize, result);
 	
 		return result;
 	}
@@ -1559,7 +1553,7 @@ public class RuleConverter {
 	 *          The current collection of random variable declarations.
 	 * @return A pair with the query rule and query atom.
 	 */
-	public Pair<Expression, Expression> queryRuleAndAtom(Expression query, Set<Expression> randomVariableDeclarations) {
+	public Pair<Expression, Expression> queryRuleAndAtom(Expression query, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
 		Pair<Expression, Expression> result = null;
 		
 		// | if queryFormula is isRandomVariableValue(queryFormula, highLevelDeclarations)
@@ -1574,7 +1568,7 @@ public class RuleConverter {
 
 		if (createQueryTerm) {
 			// | F <- free variables of queryFormula
-			Set<Expression> variablesF = Expressions.freeVariables(query, rewritingProcess);
+			Set<Expression> variablesF = Expressions.freeVariables(query, process);
 			// | queryAtom <- predicate 'query' applied to F
 			Expression queryAtom;
 			if (variablesF.size() > 0) {
@@ -1605,16 +1599,16 @@ public class RuleConverter {
 	 * @param query     The atom representing the query in the result potential expression.
 	 * @return          A rule expression version of the potential expression.
 	 */
-	public Expression queryAnswerPotentialExpression2Rule(Expression input, Expression queryAtom) {
+	public Expression queryAnswerPotentialExpression2Rule(Expression input, Expression queryAtom, RewritingProcess process) {
 		boolean isIfThenElse = IfThenElse.isIfThenElse(input);
 		
-		//we can only really simplify if then else expressions
+		// we can only really simplify if then else expressions
 		if (isIfThenElse) {
 			Expression condition = IfThenElse.getCondition(input);
-			boolean isConstraint = LPIUtil.isConstraint(condition, rewritingProcess);
+			boolean isConstraint = LPIUtil.isConstraint(condition, process);
 			if (isConstraint) {
-				Expression translationOfE1 = queryAnswerPotentialExpression2Rule(input.get(1), queryAtom);
-				Expression translationOfE2 = queryAnswerPotentialExpression2Rule(input.get(2), queryAtom);
+				Expression translationOfE1 = queryAnswerPotentialExpression2Rule(input.get(1), queryAtom, GrinderUtil.extendContextualConstraint(condition, process));
+				Expression translationOfE2 = queryAnswerPotentialExpression2Rule(input.get(2), queryAtom, GrinderUtil.extendContextualConstraint(Not.make(condition), process));
 				
 				//if both clauses are true, result is true
 				if (translationOfE1.equals(Expressions.TRUE) && translationOfE2.equals(Expressions.TRUE)) {
@@ -1666,7 +1660,8 @@ public class RuleConverter {
 		}
 		
 		// the statement must have a constant potential, so the result is a uniform message.
-		return Expressions.apply(FUNCTOR_ATOMIC_RULE, queryAtom, DefaultSymbol.createSymbol(0.5));		
+		Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, queryAtom, DefaultSymbol.createSymbol(0.5));
+		return result;		
 	}
 	
 	//
@@ -1681,9 +1676,9 @@ public class RuleConverter {
 	 * @param queryString  The original form of the query.  What "query(...)" is equivalent to.
 	 * @return             A rule expression with the instances of "query(...)" replaced.
 	 */
-	public Expression queryResultToRule (Expression result, Expression queryAtom, 
-			String queryString) {
-		return queryResultToRule(result, queryAtom, ruleParser.parseFormula(queryString));
+	public Expression queryResultToRule (Expression result, Expression queryAtom, String queryString, RewritingProcess process) {
+		Expression methodResult = queryResultToRule(result, queryAtom, ruleParser.parseFormula(queryString), process);
+		return methodResult;
 	}
 
 	/**
@@ -1694,16 +1689,16 @@ public class RuleConverter {
 	 * @param query      The original form of the query.  What "query(...)" is equivalent to.
 	 * @return           A rule expression with the instances of "query(...)" replaced.
 	 */
-	public Expression queryResultToRule (Expression result, Expression queryAtom, Expression query) {
+	public Expression queryResultToRule (Expression result, Expression queryAtom, Expression query, RewritingProcess process) {
 		// Translate the result to a rule.
-		Expression ruleExpression = queryAnswerPotentialExpression2Rule(result, queryAtom);
+		Expression ruleExpression = queryAnswerPotentialExpression2Rule(result, queryAtom, process);
 
 		// Perform the substitution of the query(...) with its equivalent.
 		if (queryAtom != null && query != null) {
 			List<Expression> queryAtomArgs = queryAtom.getArguments();
-			Set<Expression> queryVariables = Expressions.freeVariables(query, rewritingProcess);
+			Set<Expression> queryVariables = Expressions.freeVariables(query, process);
 			if (queryVariables.containsAll(queryAtomArgs)) {
-				ruleExpression = ruleExpression.replaceAllOccurrences(new ReplaceQueryFunction(queryAtom, query), rewritingProcess);
+				ruleExpression = ruleExpression.replaceAllOccurrences(new ReplaceQueryFunction(queryAtom, query), process);
 			}
 			
 		}
@@ -1729,15 +1724,14 @@ public class RuleConverter {
 	 * @param randomVariableDeclarations The random variable declarations.
 	 * @return  A random variable declaration for the query.
 	 */
-	public Expression createQueryDeclaration (Expression queryAtom, Expression query, 
-			Set<Expression> randomVariableDeclarations) {
+	public Expression createQueryDeclaration (Expression queryAtom, Expression query, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
 		
-		Expression result = createNewRandomVariableDeclaration(queryAtom, query, randomVariableDeclarations);
+		Expression result = createNewRandomVariableDeclaration(queryAtom, query, randomVariableDeclarations, process);
 
 		return result;
 	}
 	
-	public Expression createNewRandomVariableDeclaration(Expression randomVariableValue, Expression randomVariableUsedIn, Set<Expression> randomVariableDeclarations) {
+	public Expression createNewRandomVariableDeclaration(Expression randomVariableValue, Expression randomVariableUsedIn, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
 		Expression result = null;
 		List<Expression> resultArgs = new ArrayList<Expression>();
 
@@ -1752,7 +1746,7 @@ public class RuleConverter {
 			// return value of the function.)
 			SearchFunctionArgumentFunction searchFunction = 
 					new SearchFunctionArgumentFunction(rvArg, randomVariableDeclarations);
-			randomVariableUsedIn.replaceFirstOccurrence(searchFunction, rewritingProcess);
+			randomVariableUsedIn.replaceFirstOccurrence(searchFunction, process);
 			if (searchFunction.randomVariableName == null) {
 				break;
 			}
@@ -1910,9 +1904,9 @@ public class RuleConverter {
 		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
 	}
 	
-	public RewritingProcess getRewritingProcess() {
-		return rewritingProcess;
-	}
+//	public RewritingProcess getRewritingProcess() {
+//		return rewritingProcess;
+//	}
 
 	/*===================================================================================
 	 * PRIVATE METHODS
@@ -1958,15 +1952,15 @@ public class RuleConverter {
 	 */
 	private void addFurtherConstrainedPotentialExpression(
 			List<Pair<Expression, Expression>> listOfConstrainedPotentialExpressions, 
-			Expression potentialExpression, Expression constraintC, Expression assumption) {
+			Expression potentialExpression, Expression constraintC, Expression assumption, RewritingProcess process) {
 		// | ........ C' <- R_complete_normalize(C and Assumption)
 		Expression constraintCAndAssumption = And.make(constraintC, assumption);
-		Expression cPrime                   = rewritingProcess.rewrite(LBPRewriter.R_complete_normalize, constraintCAndAssumption);
+		Expression cPrime                   = process.rewrite(LBPRewriter.R_complete_normalize, constraintCAndAssumption);
 		
 		// | ........ if C' is not false
 		if (!cPrime.equals(Expressions.FALSE)) {
 			// | ............ P' <- R_complete_normalize(P) under C'
-			RewritingProcess processUnderCPrime  = GrinderUtil.extendContextualConstraint(cPrime, rewritingProcess);
+			RewritingProcess processUnderCPrime  = GrinderUtil.extendContextualConstraint(cPrime, process);
 			Expression       pPrime              = processUnderCPrime.rewrite(LBPRewriter.R_complete_normalize, potentialExpression);			
 			// | ............ if P' is not a numeric constant
 			if (!Expressions.isNumber(pPrime)) {
@@ -2297,7 +2291,7 @@ public class RuleConverter {
 					// Get all the free variables in the quantifier expression to create a
 					// call to our new random variable expression.
 					// | ................ F <- array of free variables in E
-					Set<Expression> freeVariablesF = Expressions.freeVariables(expression, rewritingProcess);
+					Set<Expression> freeVariablesF = Expressions.freeVariables(expression, process);
 					Expression      newSymbolF     = Expressions.make(newSymbol, freeVariablesF);
 
 					// Then create a new rule based on the new expression.
@@ -2322,7 +2316,7 @@ public class RuleConverter {
 					// | ................ // create a corresponding random variable declaration
 					// | ................ add randomVariable(newSymbol, size(F), TypeF1, ..., TypeFn, Boolean)
 					// | ......................... to newRandomVariableDeclarations
-					Expression newRandomVariableDeclaration = createNewRandomVariableDeclaration(newSymbolF, newRule, randomVariableDeclarations);
+					Expression newRandomVariableDeclaration = createNewRandomVariableDeclaration(newSymbolF, newRule, randomVariableDeclarations, process);
 					if (newRandomVariableDeclaration != null) {
 						randomVariableDeclarations.add(newRandomVariableDeclaration);
 					}					
@@ -2422,7 +2416,7 @@ public class RuleConverter {
 						// If there are no duplicates in the args, then we can do a simple replacement.
 						for (int ii = 0; ii < queryAtomArgs.size(); ii++) {
 							result = result.replaceAllOccurrences(
-									queryAtomArgs.get(ii), expressionArgs.get(ii), rewritingProcess);
+									queryAtomArgs.get(ii), expressionArgs.get(ii), process);
 						}
 					}
 					else {
@@ -2435,19 +2429,15 @@ public class RuleConverter {
 						// First, replace the args in the query equivalent expression with a unique
 						// variable.
 						for (Expression queryAtomArg : queryAtomArgs) {
-							Expression unique = Expressions.makeUniqueVariable(
-									"Unique" + uniqueCount, result, 
-									rewritingProcess);
+							Expression unique = Expressions.makeUniqueVariable("Unique" + uniqueCount, result, process);
 							uniqueCount++;
 							uniques.add(unique);
-							result = result.replaceAllOccurrences(
-									queryAtomArg, unique, rewritingProcess);
+							result = result.replaceAllOccurrences(queryAtomArg, unique, process);
 						}
 
 						// Then replace the unique variables with the args from the query expression.
 						for (int ii = 0; ii < queryAtomArgs.size(); ii++) {
-							result = result.replaceAllOccurrences(
-									uniques.get(ii), expressionArgs.get(ii), rewritingProcess);
+							result = result.replaceAllOccurrences(uniques.get(ii), expressionArgs.get(ii), process);
 						}
 						
 					}

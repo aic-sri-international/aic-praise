@@ -84,6 +84,9 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 		
 		Expression randomVariable = belief.get(0);
 		
+		process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, process);
+		process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getRewritingProcessesModel(process).getParfactorsDeclaration().getParfactors()), process);
+
 		Trace.log("beingComputed    <- empty set");
 		Expression beingComputed = LPIUtil.createNewBeingComputedExpression();
 		Trace.log("belief_expansion <- R_bound_prod_factor(prod_F in R_neigh_v(Neigh(V)) m_V<-F, beingComputed)");
