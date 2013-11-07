@@ -191,26 +191,26 @@ public class LBPFactory {
 	}
 	
 	private static RewritingProcess makeLBPProcess(Expression rootExpression, DefaultRewriterLookup lbpRewriterLookup, LBPConfiguration configuration, RewritingProcess parentProcess) {
-		Map<Expression, Expression> contextualVariablesDomains = null;
-		Predicate<Expression> isConstantPredicate              = null;
-		Map<Object, Object>   globalObjects                    = null;
+		Map<Expression, Expression> contextualVariablesAndDomains = null;
+		Predicate<Expression> isConstantPredicate                 = null;
+		Map<Object, Object>   globalObjects                       = null;
 		
 		if (parentProcess != null) {
-			contextualVariablesDomains = parentProcess.getContextualVariablesDomains();
-			isConstantPredicate        = parentProcess.getIsConstantPredicate();
-			globalObjects              = parentProcess.getGlobalObjects();
+			contextualVariablesAndDomains = parentProcess.getContextualVariablesAndDomains();
+			isConstantPredicate           = parentProcess.getIsConstantPredicate();
+			globalObjects                 = parentProcess.getGlobalObjects();
 		}
 		else {
-			contextualVariablesDomains = new HashMap<Expression, Expression>();
-			isConstantPredicate        = new PrologConstantPredicate();
-			globalObjects              = new HashMap<Object, Object>();
+			contextualVariablesAndDomains = new HashMap<Expression, Expression>();
+			isConstantPredicate           = new PrologConstantPredicate();
+			globalObjects                 = new HashMap<Object, Object>();
 		}
 		
 		DefaultRewritingProcess lbpProcess = new DefaultRewritingProcess(
 				rootExpression,
 				getRootRewriter(),
 				lbpRewriterLookup,
-				contextualVariablesDomains,
+				contextualVariablesAndDomains,
 				isConstantPredicate,
 				globalObjects);
 
