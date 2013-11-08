@@ -177,8 +177,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		Set<Expression> freeVariablesFromBeliefQuery = Expressions.freeVariables(randomVariable, process);
 		
-		process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, process);
-		process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getRewritingProcessesModel(process).getParfactorsDeclaration().getParfactors()), process);
+		process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, process);
+		process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getRewritingProcessesModel(process).getParfactorsDeclaration().getParfactors()), process);
 		
 		Trace.log("beingComputed    <- empty set");
 		Expression beingComputed = LPIUtil.createNewBeingComputedExpression();

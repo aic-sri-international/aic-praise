@@ -41,7 +41,9 @@ public class DetermineSortsOfLogicalVariables {
 	public static Map<Expression, Expression> extendFreeVariablesAndDomainsFromUsageInRandomVariables(Map<Expression, Expression> freeVariablesAndDomains, Expression expression, RewritingProcess process) {
 		try {
 			Model model = Model.getRewritingProcessesModel(process);
+			process.putGlobalObject(GrinderUtil.DO_NOT_REQUIRE_ADDED_CONTEXTUAL_CONSTRAINT_FREE_VARIABLES_TO_BE_IN_CONTEXTUAL_VARIABLES, true);
 			expression.replaceAllOccurrences(new CollectFreeVariablesAndDomainsFromUsageInRandomVariables(freeVariablesAndDomains, model), process);
+			process.removeGlobalObject(GrinderUtil.DO_NOT_REQUIRE_ADDED_CONTEXTUAL_CONSTRAINT_FREE_VARIABLES_TO_BE_IN_CONTEXTUAL_VARIABLES);
 		}
 		catch (Error e) {
 			// no model in process, do nothing.
@@ -98,7 +100,7 @@ public class DetermineSortsOfLogicalVariables {
 											" in context, but used as " + entry.getValue() + " in expression " + expression);
 								}
 							}
-							else {
+							else if ( ! process.getContextualVariables().contains(entry.getKey())) { // if it is in the context, it is not a free variable.
 								freeVariablesAndDomains.put(entry.getKey(), entry.getValue());
 							}
 						}

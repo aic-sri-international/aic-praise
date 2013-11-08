@@ -438,7 +438,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 							// Step 6 create new Belief expression from 1 and 2
 							notifyListenersQueryStepStarting(queryUUID, STEP_6, stopWatch);
 							// Extend the process by any logical variables in the query.
-							process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(queryExpression, process);
+							process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(queryExpression, process);
 							Expression belief = process.rewrite(LBPRewriter.R_belief, queryExpression);
 							notifyListenersQueryStepComplete(queryUUID, STEP_6, stopWatch, rewriterProfiledTimes);
 							

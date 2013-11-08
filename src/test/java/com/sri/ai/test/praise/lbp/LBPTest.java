@@ -1532,13 +1532,13 @@ public class LBPTest extends AbstractLPITest {
 		
 		TestData[] tests = new TestData[] {
 			//
-			// Basic: Intersection to an empty set
+			// Basic: Intersection with an empty set
 			new IntersectionTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 					"{{ (on X) [ p(X) ] | X = a}}", "{{ (on Y) [ p(Y) ] | Y = b }}", 
 					false, 
 					"{}"),
 			//
-			// Basic: Intersection to a an intensional set
+			// Basic: Intersection with an intensional set
 			new IntersectionTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 					"{{ (on X) [ p(X) ] | X != a}}", "{{ (on Y) [ p(Y) ] | Y != a }}", 
 					false, 

@@ -1601,7 +1601,7 @@ public class LPIUtil {
 	 * Identifies logical variables in a given expression that are free variables and returns process with them as contextual variables,
 	 * using their usage as random variable value expression arguments to infer their domain.
 	 */
-	public static RewritingProcess extendContextualVariablesInferringDomainsFromUsageInRandomVariables(Expression expression, RewritingProcess process) {
+	public static RewritingProcess extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Expression expression, RewritingProcess process) {
 		Map<Expression, Expression> freeVariablesAndDomains = DetermineSortsOfLogicalVariables.getFreeVariablesAndDomainsFromUsageInRandomVariables(expression, process);
 		RewritingProcess result = GrinderUtil.extendContextualVariables(freeVariablesAndDomains, process);
 		return result;
