@@ -1,8 +1,11 @@
 package com.sri.ai.praise;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
@@ -29,20 +32,41 @@ public class DetermineSortsOfLogicalVariables {
 	public static Map<Expression, Expression> getIndicesDomainMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
 		Map<Expression, Expression> result = new HashMap<Expression, Expression>(IntensionalSet.getIndexToDomainMapWithDefaultNull(intensionalSet));
 		RewritingProcess subProcess = GrinderUtil.extendContextualVariables(result, process);
-		result = extendFreeVariablesAndDomainsFromUsageInRandomVariables(result, IntensionalSet.getHead(intensionalSet), subProcess);
+		result = extendFreeVariablesAndDomainsFromUsageInRandomVariables(result, IntensionalSet.getHead(intensionalSet), null, subProcess);
 		return result;
 	}
 
-	public static Map<Expression, Expression> getFreeVariablesAndDomainsFromUsageInRandomVariables(Expression expression, RewritingProcess process) {
-		Map<Expression, Expression> result = extendFreeVariablesAndDomainsFromUsageInRandomVariables(new HashMap<Expression, Expression>(), expression, process);
+	/**
+	 * gets a map with free variables and their domains in the given expression,
+	 * using their usage in the expression as arguments of random variables to determine type.
+	 * Uses the given random variable declarations (in expression form) for that purpose, or if this
+	 * is null, the random variable declarations present in the model.
+	 */
+	public static Map<Expression, Expression> getFreeVariablesAndDomainsFromUsageInRandomVariables(Expression expression, Set<Expression> randomVariableDeclarationExpressions, RewritingProcess process) {
+		Map<Expression, Expression> result = extendFreeVariablesAndDomainsFromUsageInRandomVariables(new HashMap<Expression, Expression>(), expression, randomVariableDeclarationExpressions, process);
 		return result;
 	}
 
-	public static Map<Expression, Expression> extendFreeVariablesAndDomainsFromUsageInRandomVariables(Map<Expression, Expression> freeVariablesAndDomains, Expression expression, RewritingProcess process) {
+	/**
+	 * Extends a given map with free variables and their domains in the given expression,
+	 * using their usage in the expression as arguments of random variables to determine type.
+	 * Uses the given random variable declarations (in expression form) for that purpose, or if this
+	 * is null, the random variable declarations present in the model.
+	 */
+	public static Map<Expression, Expression> extendFreeVariablesAndDomainsFromUsageInRandomVariables(Map<Expression, Expression> freeVariablesAndDomains, Expression expression, Set<Expression> randomVariableDeclarationExpressions, RewritingProcess process) {
 		try {
-			Model model = Model.getRewritingProcessesModel(process);
+			Collection<RandomVariableDeclaration> randomVariableDeclarations = null;
+			if (randomVariableDeclarationExpressions == null) {
+				Model model = Model.getRewritingProcessesModel(process);
+				if (model != null) {
+					randomVariableDeclarations = model.getRandomVariableDeclarations();
+				}
+			}
+			else {
+				randomVariableDeclarations = getRandomVariableDeclarationObjectsFromExpressions(randomVariableDeclarationExpressions);
+			}
 			process.putGlobalObject(GrinderUtil.DO_NOT_REQUIRE_ADDED_CONTEXTUAL_CONSTRAINT_FREE_VARIABLES_TO_BE_IN_CONTEXTUAL_VARIABLES, true);
-			expression.replaceAllOccurrences(new CollectFreeVariablesAndDomainsFromUsageInRandomVariables(freeVariablesAndDomains, model), process);
+			expression.replaceAllOccurrences(new CollectFreeVariablesAndDomainsFromUsageInRandomVariables(freeVariablesAndDomains, randomVariableDeclarations), process);
 			process.removeGlobalObject(GrinderUtil.DO_NOT_REQUIRE_ADDED_CONTEXTUAL_CONSTRAINT_FREE_VARIABLES_TO_BE_IN_CONTEXTUAL_VARIABLES);
 		}
 		catch (Error e) {
@@ -51,14 +75,25 @@ public class DetermineSortsOfLogicalVariables {
 		return freeVariablesAndDomains;
 	}
 
+	private static Collection<RandomVariableDeclaration> getRandomVariableDeclarationObjectsFromExpressions(Set<Expression> randomVariableDeclarationExpressions) {
+		Set<RandomVariableDeclaration> randomVariableDeclarations = new HashSet<RandomVariableDeclaration>();
+		for (Expression randomVariableDeclarationExpression : randomVariableDeclarationExpressions) {
+			RandomVariableDeclaration randomVariableDeclaration =
+					RandomVariableDeclaration
+					.makeRandomVariableDeclaration(randomVariableDeclarationExpression);
+			randomVariableDeclarations.add(randomVariableDeclaration);
+		}
+		return randomVariableDeclarations;
+	}
+
 	public static class CollectFreeVariablesAndDomainsFromUsageInRandomVariables implements ReplacementFunctionWithContextuallyUpdatedProcess {
 		private Map<Expression, Expression> freeVariablesAndDomains;
-		private Model model;
+		private Collection<RandomVariableDeclaration> randomVariableDeclarations;
 		
-		public CollectFreeVariablesAndDomainsFromUsageInRandomVariables(Map<Expression, Expression> freeVariablesAndDomains, Model model) {
+		public CollectFreeVariablesAndDomainsFromUsageInRandomVariables(Map<Expression, Expression> freeVariablesAndDomains, Collection<RandomVariableDeclaration> randomVariableDeclarations) {
 			super();
-			this.freeVariablesAndDomains = freeVariablesAndDomains;
-			this.model = model;
+			this.freeVariablesAndDomains    = freeVariablesAndDomains;
+			this.randomVariableDeclarations = randomVariableDeclarations;
 		}
 
 		@Override
@@ -74,7 +109,7 @@ public class DetermineSortsOfLogicalVariables {
 				}
 				
 				if (LPIUtil.isRandomVariableValueExpression(expression, process)) {
-					RandomVariableDeclaration declaration = model.getRandomVariableDeclaration(expression);
+					RandomVariableDeclaration declaration = LPIUtil.getRandomVariableDeclaration(expression, randomVariableDeclarations);
 					Map<Expression, Expression> sortsForThisSubExpression = getLogicalVariableArgumentsDomains(expression, declaration, process);
 					for (Map.Entry<Expression, Expression> entry : sortsForThisSubExpression.entrySet()) {
 						Expression previousDomainIfAny = freeVariablesAndDomains.get(entry.getKey());

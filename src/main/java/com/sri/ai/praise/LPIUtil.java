@@ -39,6 +39,7 @@ package com.sri.ai.praise;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -69,6 +70,7 @@ import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -77,6 +79,7 @@ import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 import com.sri.ai.praise.model.RandomPredicate;
 import com.sri.ai.praise.model.RandomPredicateCatalog;
+import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.PredicateIterator;
@@ -1576,34 +1579,46 @@ public class LPIUtil {
 	}
 
 	/**
-	 * Extend the rewriting processes's contextual variables and constraints
-	 * with the indices and condition from an intensionally defined set,
-	 * using the usage of logical variables inside random variables
-	 * to complement the information on their domains (throwing an Error if there is conflicting information).
-	 * 
-	 * @param intensionalSet
-	 * @param process
-	 *            the process in which the rewriting is occurring and whose
-	 *            contextual constraint is to be updated.
-	 * @return a sub-rewriting process with its contextual variables and
-	 *         constraints extended by the indices and condition of the intensionally defined set passed in.
-	 */
-	public static RewritingProcess extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(
-			Expression intensionalSet, RewritingProcess process) {
-		Map<Expression, Expression> quantifiedVariablesAndDomains =
-				DetermineSortsOfLogicalVariables.getIndicesDomainMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(intensionalSet, process);
-		Expression conditionOnExpansion = IntensionalSet.getCondition(intensionalSet);
-		RewritingProcess result = GrinderUtil.extendContextualVariablesAndConstraint(quantifiedVariablesAndDomains, conditionOnExpansion, process);
-		return result;
-	}
-
-	/**
 	 * Identifies logical variables in a given expression that are free variables and returns process with them as contextual variables,
 	 * using their usage as random variable value expression arguments to infer their domain.
 	 */
 	public static RewritingProcess extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Expression expression, RewritingProcess process) {
-		Map<Expression, Expression> freeVariablesAndDomains = DetermineSortsOfLogicalVariables.getFreeVariablesAndDomainsFromUsageInRandomVariables(expression, process);
+		Map<Expression, Expression> freeVariablesAndDomains = DetermineSortsOfLogicalVariables.getFreeVariablesAndDomainsFromUsageInRandomVariables(expression, null, process);
 		RewritingProcess result = GrinderUtil.extendContextualVariables(freeVariablesAndDomains, process);
 		return result;
+	}
+
+	/**
+	 * @return the random variable declaration associated with a name and arity, or <code>null</code> if there is none.
+	 */
+	public static RandomVariableDeclaration getRandomVariableDeclaration(String name, int arity, Collection<RandomVariableDeclaration> randomVariableDeclarations) {
+		for (RandomVariableDeclaration declaration : randomVariableDeclarations) {
+			if (declaration.getName().equals(name) && declaration.getArityValue() == arity) {
+				return declaration;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @return the random variable declaration associated with a random variable value expression,
+	 * or <code>null</code> if it is not such an expression, or there is none.
+	 */
+	public static RandomVariableDeclaration getRandomVariableDeclaration(Expression randomVariableValueExpression, Collection<RandomVariableDeclaration> randomVariableDeclarations) {
+		RandomVariableDeclaration result = null;
+		if (randomVariableValueExpression.getSyntacticFormType().equals("Function application")) {
+			result =
+					getRandomVariableDeclaration(
+							randomVariableValueExpression.getFunctor().toString(),
+							randomVariableValueExpression.numberOfArguments(),
+							randomVariableDeclarations);
+		}
+		return result;
+	}
+
+	public static List<Expression> getIndexExpressionsFromRandomVariableUsage(Expression expression, Set<Expression> randomVariableDeclarationsExpressions, RewritingProcess process) {
+		Map<Expression, Expression> freeVariablesAndDomains = DetermineSortsOfLogicalVariables.getFreeVariablesAndDomainsFromUsageInRandomVariables(expression, randomVariableDeclarationsExpressions, process);
+		List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromVariablesAndDomains(freeVariablesAndDomains);
+		return indexExpressions;
 	}
 }

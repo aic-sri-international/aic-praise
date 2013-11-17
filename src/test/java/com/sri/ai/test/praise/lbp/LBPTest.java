@@ -4147,12 +4147,12 @@ public class LBPTest extends AbstractLPITest {
 //
 //									"if Pet != rover and Pet != astor then not isPetOf(Pet, bob) else isPetOf(Pet, bob);" +
 //
-//									"if isPetOf(Pet, Person1) then not isPetOf(Pet, Person2);"), 
+//									"if isPetOf(Pet, Person1) then not isPetOf(Pet, Person2);"),
 //					"belief([happy(bob)])", 
 //					false, 
 //					"if happy(bob) then 0.69 else 0.5"
 //					 ),
-//					
+					
 				// #1
 				new LoopyBeliefTestData(Expressions.TRUE.toString(),
 					new TrivialLoopyPQ(), 

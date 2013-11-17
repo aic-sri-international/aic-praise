@@ -245,8 +245,7 @@ public class RandomVariableDeclaration {
 			Expression expression) {
 		RandomVariableDeclaration declaration = null;
 
-		if (Expressions.hasFunctor(expression,
-				FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
+		if (Expressions.hasFunctor(expression, FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
 			int numArgs = expression.numberOfArguments();
 			if (numArgs > 0) {
 

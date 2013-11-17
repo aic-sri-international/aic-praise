@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -59,6 +60,7 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
+import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.rules.RuleConverter;
 
@@ -377,12 +379,8 @@ public class Model {
 	 * @return the random variable declaration associated with a name and arity, or <code>null</code> if there is none.
 	 */
 	public RandomVariableDeclaration getRandomVariableDeclaration(String name, int arity) {
-		for (RandomVariableDeclaration declaration : randomVariableDeclarations) {
-			if (declaration.getName().equals(name) && declaration.getArityValue() == arity) {
-				return declaration;
-			}
-		}
-		return null;
+		RandomVariableDeclaration result = LPIUtil.getRandomVariableDeclaration(name, arity, randomVariableDeclarations);
+		return result;
 	}
 
 	/**
@@ -390,11 +388,7 @@ public class Model {
 	 * or <code>null</code> if it is not such an expression, or there is none.
 	 */
 	public RandomVariableDeclaration getRandomVariableDeclaration(Expression randomVariableValueExpression) {
-		RandomVariableDeclaration result = null;
-		if (randomVariableValueExpression.getSyntacticFormType().equals("Function application")) {
-			result = getRandomVariableDeclaration(
-					randomVariableValueExpression.getFunctor().toString(), randomVariableValueExpression.numberOfArguments());
-		}
+		RandomVariableDeclaration result = LPIUtil.getRandomVariableDeclaration(randomVariableValueExpression, randomVariableDeclarations);
 		return result;
 	}
 
@@ -848,8 +842,7 @@ public class Model {
 					sortDeclarations.add(sortDeclaration);
 				}
 				// Random variable declarations
-				else if (RandomVariableDeclaration
-						.isRandomVariableDeclaration(modelPart)) {
+				else if (RandomVariableDeclaration.isRandomVariableDeclaration(modelPart)) {
 					RandomVariableDeclaration randomVariableDeclaration = RandomVariableDeclaration
 							.makeRandomVariableDeclaration(modelPart);
 					randomVariableDeclarations.add(randomVariableDeclaration);

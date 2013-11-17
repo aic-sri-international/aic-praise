@@ -463,7 +463,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression expansion = null;
 		Justification.begin("Going to symbolically compute unsimplified message expression");
 		// Set up the contextual constraint
-		RewritingProcess processExtendedByC = LPIUtil.extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(messageSet, process);
+		RewritingProcess processExtendedByC = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(messageSet, process);
 		// Determine which 'message to . from .' rewriter to call
 		if (BracketedExpressionSubExpressionsProvider.isRandomVariable(destination, process)) {
 			expansion = processExtendedByC.rewrite(R_m_to_v_from_f,
@@ -563,7 +563,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					Trace.log("    // msgExpansion={}", msgExpansion);
 					Trace.log("    // expansion   ={}", expansion);
 					
-					RewritingProcess subProcess = LPIUtil.extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(msgExpansion, process);
+					RewritingProcess subProcess = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(msgExpansion, process);
 					
 					Trace.log("    value <- use_values_for_previous_msgs(Expansion, msg_values) under contextual constraint expanded by C");
 					Expression value = useValuesForPreviousMessages(expansion, msgValues, previousMessageToMsgValueCache, subProcess);

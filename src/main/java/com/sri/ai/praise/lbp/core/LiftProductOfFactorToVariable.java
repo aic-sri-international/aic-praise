@@ -48,6 +48,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.core.HasFunctor;
 import com.sri.ai.grinder.core.HasNumberOfArguments;
+import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -157,7 +158,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 			Expression alpha      = IntensionalSet.getHead(prodSet);
 			Expression conditionC = IntensionalSet.getCondition(prodSet);
 			
-			RewritingProcess processExtendedByProductSet = LPIUtil.extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(prodSet, process);
+			RewritingProcess processExtendedByProductSet = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(prodSet, process);
 			
 			// the following logic depends on the head being normalized.
 			alpha = processExtendedByProductSet.rewrite(LBPRewriter.R_normalize, alpha);

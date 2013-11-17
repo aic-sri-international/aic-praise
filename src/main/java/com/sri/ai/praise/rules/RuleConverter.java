@@ -75,6 +75,7 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderTerminalSymbols;
+import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPRewriter;
@@ -366,7 +367,9 @@ public class RuleConverter {
 	 * @return an equivalent low level syntax representation of the input rules
 	 *         given.
 	 */
-	public LowLevelModelParts translate(List<Expression> rulesAndDeclarationsList, RewritingProcess process) {		
+	public LowLevelModelParts translate(List<Expression> rulesAndDeclarationsList, RewritingProcess process) {
+		// it would be good to have this method return a Model, or an explanation as to why this is not possible.
+		
 		LowLevelModelParts result = null;
 
 		// Convert the conjunctions of rules.
@@ -434,7 +437,7 @@ public class RuleConverter {
 		List<Pair<Expression, Expression>> constrainedPotentialExpressions = disembedConstraints(potentialExpressions, process);
 		
 		// | parfactors <- constraintedPotentialExpressions2Parfactors(constrainedPotentialExpressions)
-		Set<Expression> parfactors = constraintedPotentialExpressionsToParfactors(constrainedPotentialExpressions, process);
+		Set<Expression> parfactors = constraintedPotentialExpressionsToParfactors(constrainedPotentialExpressions, randomVariableDeclarations, process);
 		
 		// | return (sortDeclarations, randomVariableDeclarations, parfactors)
 		result = new LowLevelModelParts(sortDeclarations, randomVariableDeclarations, parfactors);
@@ -1494,15 +1497,15 @@ public class RuleConverter {
 	 * @return a set of parfactors generated from the give potential
 	 *         expressions.
 	 */
-	public Set<Expression> constraintedPotentialExpressionsToParfactors(List<Pair<Expression, Expression>> constrainedPotentialExpressionsons, RewritingProcess process) {				
+	public Set<Expression> constraintedPotentialExpressionsToParfactors(List<Pair<Expression, Expression>> constrainedPotentialExpressions, Set<Expression> randomVariableDeclarations, RewritingProcess process) {				
 
 		// Translate the potential expression/constraint pair into a parfactor.
 		// | parfactors <- empty list
 		Set<Expression> parfactors = new LinkedHashSet<Expression>();
 		// | for each (P, C) in constrainedPotentialExpressions
-		for (Pair<Expression, Expression> pair : constrainedPotentialExpressionsons) {
+		for (Pair<Expression, Expression> pair : constrainedPotentialExpressions) {
 			// |.... parfactors <- add R_normalize({{ (on <free variables in P and C>) [ P ] | C }})
-			parfactors.add(createParfactor(pair.first, pair.second, process));
+			parfactors.add(createParfactor(pair.first, pair.second, randomVariableDeclarations, process));
 		}
 		
 		// | return parfactors
@@ -1522,15 +1525,18 @@ public class RuleConverter {
 	 * @param constraintC          The constraint for the parfactor.
 	 * @return A parfactor expression based on the potential expression on constraints.
 	 */
-	public Expression createParfactor(Expression potentialExpression, Expression constraintC, RewritingProcess process) {
+	public Expression createParfactor(Expression potentialExpression, Expression constraintC, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
 		// |.... parfactors <- add R_normalize({{ (on <free variables in P and C>) [ P ] | C }})
-		Set<Expression> freeVariablesInPandC = new LinkedHashSet<Expression>();
-		freeVariablesInPandC.addAll(Expressions.freeVariables(potentialExpression, process));
-		freeVariablesInPandC.addAll(Expressions.freeVariables(constraintC, process));
 
+		List<Expression> indexExpressions = null;
+
+		indexExpressions =
+				LPIUtil.getIndexExpressionsFromRandomVariableUsage(
+						Tuple.make(potentialExpression, constraintC), randomVariableDeclarations, process);
+		
 		Expression result = IntensionalSet.makeMultiSetFromIndexExpressionsList(
-				 			new ArrayList<Expression>(freeVariablesInPandC), 
-				 			Expressions.make(FunctorConstants.LEFT_DOT_RIGHT, potentialExpression), 
+				 			indexExpressions,
+				 			BracketedExpressionSubExpressionsProvider.make(potentialExpression),
 				 			constraintC);
 	
 		result = process.rewrite(LBPRewriter.R_normalize, result);
