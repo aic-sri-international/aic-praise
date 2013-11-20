@@ -3277,6 +3277,30 @@ public class LBPTest extends AbstractLPITest {
 						false, 
 						"if W = a then if p(a) then 0.454545455 else 0.545454545 else if p(W) then 0.428571429 else 0.571428571"),				
 				// 
+				// Test on model defined with high-level syntax
+				// 		
+						new BeliefTestData(Expressions.TRUE.toString(),
+						Model.fromRules(
+								"sort People: 10, bob, dave, rodrigo, ciaran;\n" + 
+								"// RANDOM VARIABLE DECLARATIONS:\n" + 
+								"random epidemic: -> Boolean;\n" + 
+								"random sick: People -> Boolean;\n" + 
+								"random fever: People -> Boolean;\n" + 
+								"random rash: People -> Boolean;\n" + 
+								"random notAtWork: People -> Boolean;\n" + 
+								"// RULES\n" + 
+								"epidemic 0.001;" +
+								"if epidemic then sick(X) 0.6 else sick(X) 0.05;\n" + 
+								"if sick(X) then fever(X) 0.7 else fever(X) 0.01;\n" + 
+								"if sick(X) then rash(X) 0.6 else rash(X) 0.07;\n" + 
+								"if sick(X) then notAtWork(X) 0.8 else notAtWork(X) 0.05;\n" +
+								"// EVIDENCE\n" +
+								"notAtWork(bob);"),
+						"belief([sick(X)])", 
+						false, 
+						"if X != bob then if sick(X) then 0.0531281103 else 0.94687189 else (if sick(X) then 0.460002844 else 0.539997156)"
+						 ),
+				// 
 				// Basic: Illegal Argument Exceptions
 				// 		
 		};
