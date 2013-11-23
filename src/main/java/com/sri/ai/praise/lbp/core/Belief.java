@@ -892,8 +892,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// Partition the value based on its intersection:
 		// Intersection is of the form { (on I) (Destination, Origin) | C' }
 		Trace.log("D <- there exists I : C'");
-		Expression expressionD = ThereExists.make(new ArrayList<Expression>(IntensionalSet.getIndices(intersection)), 
-												  IntensionalSet.getCondition(intersection));
+		Expression expressionD =
+				ThereExists.make(
+						IntensionalSet.getIndexExpressions(intersection), 
+						IntensionalSet.getCondition(intersection));
 		Trace.log("return R_normalize(if D then v else prev_message)"); 
 		Expression conditionalD = IfThenElse.make(expressionD, v, prevMessage);
 		result = process.rewrite(R_normalize, conditionalD);

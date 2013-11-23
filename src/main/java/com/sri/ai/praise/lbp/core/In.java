@@ -280,9 +280,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 			
 			Justification.beginEqualityStep("Set is intensional");
 	
-			Expression setPrime = StandardizedApartFrom
-					.standardizedApartFrom(
-							set, alpha, process);
+			Expression setPrime = StandardizedApartFrom.standardizedApartFrom(set, alpha, process);
 	
 			List<Expression> indexExpressionsPrime = IntensionalSet.getIndexExpressions(setPrime);
 			Expression       conditionPrime        = IntensionalSet.getCondition(setPrime);
