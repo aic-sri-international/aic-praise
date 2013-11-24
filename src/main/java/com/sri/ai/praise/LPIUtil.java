@@ -1283,7 +1283,10 @@ public class LPIUtil {
 					variablesIPrime.add(i);
 				}
 			}
-			Expression thereExists = ThereExists.make(variablesIPrime, formulaC);
+			
+			List<Expression> indexExpressions = GrinderUtil.makeIndexExpressionsForIndicesInListAndDomainsInContext(variablesIPrime, process);
+			
+			Expression thereExists = ThereExists.make(indexExpressions, formulaC);
 			Expression formulaOnX  = process.rewrite(LBPRewriter.R_formula_simplification, thereExists);
 			
 			result = extractValueForXFromFormula(variableX, ExtensionalSet.getElements(variablesI), formulaOnX, process);
