@@ -718,9 +718,9 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Expression       cPrime = IntensionalSet.getCondition(saS2);
 			List<Expression> iPrime = IntensionalSet.getIndexExpressions(saS2);
 	
-			Expression neq              = Disequality.make(alpha, alphaPrime);
-			Expression impl             = Implication.make(cPrime, neq);
-			Expression forAllIPrime     = ForAll.make(iPrime, impl);
+			Expression disequality      = Disequality.make(alpha, alphaPrime);
+			Expression implication      = Implication.make(cPrime, disequality);
+			Expression forAllIPrime     = ForAll.make(iPrime, implication);
 			Expression cAndForAllPrimeI = CardinalityUtil.makeAnd(c, forAllIPrime);
 	
 			if (Justification.isEnabled()) {
