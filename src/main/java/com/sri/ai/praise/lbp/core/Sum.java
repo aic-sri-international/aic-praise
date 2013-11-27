@@ -119,8 +119,8 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		if (Justification.isEnabled() || Trace.isEnabled()) {
 			currentExpression = Expressions.apply(
 		 	        FunctorConstants.SUM,
-			        IntensionalSet.makeMultiSet(
-			        		Expressions.apply("value of", summationIndexN),
+			        IntensionalSet.makeMultiSetFromIndexExpressionsList(
+			        		ExtensionalSet.getElements(summationIndexN),
 			        		Times.make(Arrays.asList(E, productOfIncomingMessages)),
 			        		Expressions.TRUE));
 			Justification.log(currentExpression);

@@ -814,22 +814,22 @@ public class LPIUtil {
 	 *            to be unioned with beingComputed.
 	 * @param conditionC
 	 *            the condition of the intensional set to be unioned with beingComputed.
-	 * @param scopingExpressionI
-	 *            the scoping expression of the intensional set to be unioned with
+	 * @param indexExpressions
+	 *            the index expressions of the intensional set to be unioned with
 	 *            beingComputed.
 	 * @param process
 	 *            the process in which the rewriting is occurring.
 	 * @return R_basic(beingComputed union {{ by | C }}_I)
 	 */
 	public static Expression extendBeingComputedWithIntensionalMultiSet(Expression beingComputed, Expression by, Expression conditionC, 
-			Expression scopingExpresisonI, RewritingProcess process) {
+			List<Expression> indexExpressions, RewritingProcess process) {
 		Expression result = beingComputed;
 		
 		if (!Tuple.isTuple(by) || Tuple.size(by) != 2) {
 			throw new IllegalArgumentException("by must be a tuple (to, from):"+by);
 		}
 		
-		Expression intensionalSetBy = IntensionalSet.makeMultiSet(scopingExpresisonI, by, conditionC);
+		Expression intensionalSetBy = IntensionalSet.makeMultiSetFromIndexExpressionsList(indexExpressions, by, conditionC);
 				
 		if (Sets.isEmptySet(beingComputed)) {
 			result = intensionalSetBy;
@@ -996,8 +996,8 @@ public class LPIUtil {
 	 * @param conditionC
 	 *            the constraint on the the intensional set from which the
 	 *            representative factor F was selected.
-	 * @param scopingExpressionI
-	 *            the scoping expression on the intensional set from which the
+	 * @param expressionI
+	 *            the index expressions on the intensional set from which the
 	 *            representative factor F was selected.
 	 * @param beingComputed
 	 *            is a conditional union of sets of pairs of nodes, representing
@@ -1005,8 +1005,8 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: (m_V<-F, C, I, beingComputed)
 	 */
 	public static Expression argForMessageToVariableFromFactorRewriteCall(Expression msgToV_F,
-			Expression conditionC, Expression scopingExpressionI, Expression beingComputed) {
-		Expression result = Tuple.make(msgToV_F, conditionC, scopingExpressionI, beingComputed);
+			Expression conditionC, List<Expression> expressionI, Expression beingComputed) {
+		Expression result = Tuple.make(msgToV_F, conditionC, Tuple.make(expressionI), beingComputed);
 		
 		return result;
 	}
@@ -1183,7 +1183,7 @@ public class LPIUtil {
 		Trace.in("+pick_single_element({}) constrained by {}", intensionalSet, process.getContextualConstraint());
 		
 		Expression       alpha       = IntensionalSet.getHead(intensionalSet);
-		Trace.log("R <- indices in {} that {} depends on", IntensionalSet.getScopingExpression(intensionalSet), alpha);
+		Trace.log("R <- indices in {} that {} depends on", IntensionalSet.getIndexExpressions(intensionalSet), alpha);
 		Set<Expression>  alphaVars   = Expressions.freeVariables(alpha, process);
 		List<Expression> indicesI    = new ArrayList<Expression>(IntensionalSet.getIndices(intensionalSet));
 		Set<Expression>  tempIndices = new LinkedHashSet<Expression>(indicesI);

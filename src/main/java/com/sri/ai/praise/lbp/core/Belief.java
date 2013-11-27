@@ -287,8 +287,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 													   Tuple.get(tupleExpansion, 1),
 													   Expressions.ONE);
 				// { (on I) (Destination, Origin, 1) | C }
-				Expression msgValue       = IntensionalSet.make(Sets.getLabel(msgExpansion), 
-																IntensionalSet.getScopingExpression(msgExpansion),
+				Expression msgValue       = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(msgExpansion), 
+																IntensionalSet.getIndexExpressions(msgExpansion),
 																tuple, 
 																IntensionalSet.getCondition(msgExpansion));
 				msgValues.add(msgValue);
@@ -430,15 +430,15 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	}
 
 	private void expand(Expression messageSet, List<Expression> messagesAlreadyExpandedUnionArguments, List<Expression> messagesToBeExpanded, List<Expression> messageExpansions, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {
-		Expression expressionI            = IntensionalSet.getScopingExpression(messageSet);
+		List<Expression> expressionI      = IntensionalSet.getIndexExpressions(messageSet);
 		Expression destination            = Tuple.get(IntensionalSet.getHead(messageSet), 0);
 		Expression origin                 = Tuple.get(IntensionalSet.getHead(messageSet), 1);
 		Expression conditionC             = IntensionalSet.getCondition(messageSet);
 		
-		Expression expansion = computeExpansionSymbolically(messageSet, expressionI, destination, origin, conditionC, process);
+		Expression expansion = computeExpansionSymbolically(messageSet, destination, origin, conditionC, process);
 		
 		Trace.log("        msg_expansion <- { (on I) (Destination, Origin, expansion) | C }");
-		Expression msgExpansion = IntensionalSet.makeUniSet(expressionI, Tuple.make(destination, origin, expansion), conditionC);
+		Expression msgExpansion = IntensionalSet.makeUniSetFromIndexExpressionsList(expressionI, Tuple.make(destination, origin, expansion), conditionC);
 		
 		sanityChecksOnLogicalVariables(messageSet, messageExpansions, process, msgExpansion);
 		
@@ -449,7 +449,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		identifyMessagesUsedByMessageExpansionAndScheduleThemForExpansionThemselves(msgExpansion, messagesToBeExpanded, process);
 	}
 
-	private Expression computeExpansionSymbolically(Expression messageSet, Expression expressionI, Expression destination, Expression origin, Expression conditionC, RewritingProcess process) {
+	private Expression computeExpansionSymbolically(Expression messageSet, Expression destination, Expression origin, Expression conditionC, RewritingProcess process) {
 		Justification.begin("Going to re-arrange as message expression");
 		// represent message_set as { (on I) (Destination, Origin) | C }
 
@@ -524,9 +524,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		messageExpansions.add(msgExpansion);
 	}
 
-	private void updateSetOfMessagesAlreadyExpanded(List<Expression> messagesAlreadyExpandedUnionArguments, Expression expressionI, Expression destination, Expression origin, Expression conditionC) {
+	private void updateSetOfMessagesAlreadyExpanded(List<Expression> messagesAlreadyExpandedUnionArguments, List<Expression> expressionI, Expression destination, Expression origin, Expression conditionC) {
 		Trace.log("        msgs_already_expanded <- msgs_already_expanded union { (on I) (Destination, Origin) | C }");
-		Expression alreadyExpanded = IntensionalSet.makeUniSet(expressionI, Tuple.make(destination, origin), conditionC);
+		Expression alreadyExpanded = IntensionalSet.makeUniSetFromIndexExpressionsList(expressionI, Tuple.make(destination, origin), conditionC);
 		messagesAlreadyExpandedUnionArguments.add(alreadyExpanded);
 		Trace.log("        // msgs_already_expanded = {}", Expressions.apply(FunctorConstants.UNION, messagesAlreadyExpandedUnionArguments));
 	}
@@ -817,8 +817,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Trace.log("Intersection calculated as {}", intersection);
 				// cache Intersection under prev_message’s contextual constraint
 				previousMessageToMsgValueCache.addCachedMsgValueIntersection(process, prevMessage, intersection);
-				Trace.log("Adding cache item for {}: intersection {}, scoping expression of msg value {}, condition {}",
-						prevMessage, intersection, IntensionalSet.getScopingExpression(msgValue), IntensionalSet.getCondition(msgValue));
+				Trace.log("Adding cache item for {}: intersection {}, index expressions of msg value {}, condition {}",
+						prevMessage, intersection, IntensionalSet.getIndexExpressions(msgValue), IntensionalSet.getCondition(msgValue));
 			}
 		} 
 		else {
@@ -842,8 +842,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					previousMessageToMsgValueCache.addPreviousMessageToMsgValueIndex(process.getContextualConstraint(), prevMessage, index);
 					// cache Intersection under prev_message’s contextual constraint
 					previousMessageToMsgValueCache.addCachedMsgValueIntersection(process, prevMessage, intersection);
-					Trace.log("Adding cache item for {}: intersection {}, scoping expression of msg value {}, condition {}",
-							prevMessage, intersection, IntensionalSet.getScopingExpression(msgValue), IntensionalSet.getCondition(msgValue));
+					Trace.log("Adding cache item for {}: intersection {}, index expressions of msg value {}, condition {}",
+							prevMessage, intersection, IntensionalSet.getIndexExpressions(msgValue), IntensionalSet.getCondition(msgValue));
 					// exit "for each" loop
 					break;
 				}
@@ -864,8 +864,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// msg_value is represented as { (on I) (Destination, Origin, value) | C }
 		// Intersection is represented as { (on I) (Destination', Origin') | C' }
 		// pickFrom = { (on I) value | C' }
-		Expression pickFrom = IntensionalSet.makeUniSet(
-				IntensionalSet.getScopingExpression(msgValue),
+		Expression pickFrom = IntensionalSet.makeUniSetFromIndexExpressionsList(
+				IntensionalSet.getIndexExpressions(msgValue),
 				Tuple.get(IntensionalSet.getHead(msgValue), 2), 
 				IntensionalSet.getCondition(intersection));
 
@@ -942,8 +942,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// Intersection <- R_intersection(
 		//     { (on I) (Destination, Origin) | C }
 		Expression msgValueTuple   = IntensionalSet.getHead(msgValue);
-		Expression msgValueNoValue = IntensionalSet.makeUniSet(
-				IntensionalSet.getScopingExpression(msgValue),
+		Expression msgValueNoValue = IntensionalSet.makeUniSetFromIndexExpressionsList(
+				IntensionalSet.getIndexExpressions(msgValue),
 				Tuple.make(
 						Tuple.get(msgValueTuple, 0),
 						Tuple.get(msgValueTuple, 1)), 

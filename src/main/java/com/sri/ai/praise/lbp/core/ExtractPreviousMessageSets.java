@@ -123,18 +123,17 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 	//
 	// PRIVATE METHODS
 	//
-	private void extractPreviousMessages(Set<Expression> extractedPreviousMessages, Expression expressionE, List<Expression> scopingVariables, Expression constrainingCondition, RewritingProcess process) {
+	private void extractPreviousMessages(Set<Expression> extractedPreviousMessages, Expression expressionE, List<Expression> indexExpressions, Expression constrainingCondition, RewritingProcess process) {
 		if (LPIUtil.isPreviousMessage(expressionE)) {
 			Expression tuplePair         = Tuple.make(expressionE.get(0), expressionE.get(1));
-			Expression scopingExpression = IntensionalSet.makeScopingExpression(scopingVariables);
-			Expression set = IntensionalSet.makeUniSet(scopingExpression, tuplePair, constrainingCondition);
+			Expression set = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressions, tuplePair, constrainingCondition);
 			// at some point I tried simplifying the set here, but because its condition is the contextual constraint in the process,
 			// this would cause the condition to be always simplified to true (since it implies itself).
 			// if we attempt simplification here, it needs to be with a process with contextual constraint equal to true.
 			extractedPreviousMessages.add(set);
 		} 
 		else {		
-			List<Expression> newTotalScopingVariables = new LinkedList<Expression>(scopingVariables);
+			List<Expression> newTotalScopingVariables = new LinkedList<Expression>(indexExpressions);
 			List<Expression> scopedVariablesInE = ScopedVariables.get(expressionE, process);
 			newTotalScopingVariables.addAll(scopedVariablesInE);
 			Util.removeElementsSatisfying(newTotalScopingVariables, new IsRandomVariableValueExpression(process));

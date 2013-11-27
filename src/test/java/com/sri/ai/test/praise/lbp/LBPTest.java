@@ -60,6 +60,7 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElseExternalizationHierarchical;
 import com.sri.ai.grinder.library.number.Times;
+import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariables;
@@ -1609,7 +1610,7 @@ public class LBPTest extends AbstractLPITest {
 				this.exprBeingComputed = parse(beingComputed);
 				
 				Expression ETimesPi = Times.make(Arrays.asList(exprE, exprPi));
-				Expression sumMultiset = IntensionalSet.makeMultiSet(exprN, ETimesPi, Expressions.TRUE);
+				Expression sumMultiset = IntensionalSet.makeMultiSetFromIndexExpressionsList(ExtensionalSet.getElements(exprN), ETimesPi, Expressions.TRUE);
 				return Expressions.apply(FunctorConstants.SUM, sumMultiset);
 			}
 			

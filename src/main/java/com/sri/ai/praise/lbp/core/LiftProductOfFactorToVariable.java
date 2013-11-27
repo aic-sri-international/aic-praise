@@ -154,7 +154,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 		Expression result = expression;
 		if (LPIUtil.isProductExpression(expression)) {
 			Expression prodSet    = expression.get(0);
-			Expression onI        = IntensionalSet.getScopingExpression(prodSet);
+			List<Expression> onI  = IntensionalSet.getIndexExpressions(prodSet);
 			Expression alpha      = IntensionalSet.getHead(prodSet);
 			Expression conditionC = IntensionalSet.getCondition(prodSet);
 			
@@ -190,14 +190,14 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 				// Alpha isn't if C' then Alpha_1 else Alpha_2, where C' is a formula depending on I'
 				if (result == expression) { 
 					// if R_complete_normalize({(on I) true | C}) is empty set
-					Expression isEmptySet = process.rewrite(LBPRewriter.R_complete_normalize, IntensionalSet.makeUniSet(onI, Expressions.TRUE, conditionC));
+					Expression isEmptySet = process.rewrite(LBPRewriter.R_complete_normalize, IntensionalSet.makeUniSetFromIndexExpressionsList(onI, Expressions.TRUE, conditionC));
 					if (Sets.isEmptySet(isEmptySet)) {
 						// then return 1
 						result = Expressions.ONE;
 					}
 					else {
 						// if Alpha <- pick_single_element({(on I) Alpha | C}) succeeds
-						Expression singletonIntensionalSet = IntensionalSet.makeUniSet(onI, alpha, conditionC);
+						Expression singletonIntensionalSet = IntensionalSet.makeUniSetFromIndexExpressionsList(onI, alpha, conditionC);
 						Expression singleAlpha             = LPIUtil.pickSingleElement(singletonIntensionalSet, process);				
 						if (singleAlpha != null) {
 							// return alpha ^ {@link Cardinality R_card}(| C |_I)

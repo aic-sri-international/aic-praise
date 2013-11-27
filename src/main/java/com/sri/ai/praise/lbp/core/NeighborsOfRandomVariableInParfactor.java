@@ -159,7 +159,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			Expression factorPrime            = IntensionalSet.getHead(saParfactor);
 			Expression factorValuePrime       = LPIUtil.getFactorValueExpression(factorPrime, process);
 			Expression conditionPrime         = IntensionalSet.getCondition(saParfactor);
-			Expression scopingExpressionPrime = IntensionalSet.getScopingExpression(saParfactor);
+			List<Expression> indexExpressionsPrime = IntensionalSet.getIndexExpressions(saParfactor);
 			
 			Trace.log("    Extend contextual variables with I'");
 			RewritingProcess processIPrime = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saParfactor, process);
@@ -169,9 +169,9 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			
 			if (Justification.isEnabled()) {
 				Justification.beginEqualityStep("set of neighbors is set of factors restricted to those in which the random variable occurs");
-				currentExpression = IntensionalSet.make(
+				currentExpression = IntensionalSet.makeSetFromIndexExpressionsList(
 						Sets.getLabel(parfactor),
-						scopingExpressionPrime,
+						indexExpressionsPrime,
 						factorPrime,
 						CardinalityUtil.makeAnd(
 								conditionPrime,
@@ -183,13 +183,13 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			Expression conditionForBeingReferencedBy = LPIUtil.randomVariableIsReferencedByExpression(randomVariable, factorValuePrime, processIPrime);
 			Expression finalUnsimplifiedCondition    = And.make(conditionPrime, conditionForBeingReferencedBy);
 			if (Justification.isEnabled()) {
-				currentExpression = IntensionalSet.make(Sets.getLabel(parfactor), scopingExpressionPrime, factorPrime, finalUnsimplifiedCondition);
+				currentExpression = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(parfactor), indexExpressionsPrime, factorPrime, finalUnsimplifiedCondition);
 			}
 			Justification.endEqualityStep(currentExpression);
 			
 			Justification.beginEqualityStep("by simplifying condition");
 			Expression simplified = processIPrime.rewrite(R_formula_simplification, finalUnsimplifiedCondition);
-			currentExpression     = IntensionalSet.make(Sets.getLabel(parfactor), scopingExpressionPrime, factorPrime, simplified);
+			currentExpression     = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(parfactor), indexExpressionsPrime, factorPrime, simplified);
 			// the above line is needed even without justifications because it is used below.
 			Justification.endEqualityStep(currentExpression);
 

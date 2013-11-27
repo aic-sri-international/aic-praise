@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.lbp.core;
 
+import java.util.List;
+
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
@@ -87,10 +89,10 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 			throw new IllegalArgumentException("Invalid input argument expression:"+expression);
 		}
 		
-		Expression msgToV_F           = Tuple.get(expression, 0);
-		Expression conditionC         = Tuple.get(expression, 1);
-		Expression scopingExpressionI = Tuple.get(expression, 2); 
-		Expression beingComputed      = Tuple.get(expression, 3);
+		Expression msgToV_F               = Tuple.get(expression, 0);
+		Expression conditionC             = Tuple.get(expression, 1);
+		List<Expression> indexExpressions = Tuple.getElements(Tuple.get(expression, 2)); 
+		Expression beingComputed          = Tuple.get(expression, 3);
 
 		if (!Expressions.hasFunctor(msgToV_F, LPIUtil.FUNCTOR_MSG_TO_FROM)
 				|| 2 != msgToV_F.numberOfArguments()
@@ -130,7 +132,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 			in = process.rewrite(R_complete_normalize, in);
 			
 			Trace.log("    beingComputed <- beingComputed union {{(V,F) | C }}_I");
-			beingComputed = LPIUtil.extendBeingComputedWithIntensionalMultiSet(beingComputed, pairV_F, conditionC, scopingExpressionI, process);
+			beingComputed = LPIUtil.extendBeingComputedWithIntensionalMultiSet(beingComputed, pairV_F, conditionC, indexExpressions, process);
 		} 
 		else if (beliefPropagationUpdateSchedule == LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS){
 			Trace.log("if synchronous schedule");
