@@ -1264,7 +1264,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		 */
 		public void addCachedMsgValueIntersection(RewritingProcess process, Expression previousMessage, Expression intersection) {
 			if (useCache) {
-				previousMessageToCachedMsgValueIntersection.put(Tuple.make(process.getContextualConstraint(), previousMessage, IntensionalSet.getScopingExpression(intersection)), 
+				previousMessageToCachedMsgValueIntersection.put(
+						Tuple.make(process.getContextualConstraint(), previousMessage, Tuple.make(IntensionalSet.getIndexExpressions(intersection))), 
 						intersection);
 			}
 		}
@@ -1287,7 +1288,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		 * @return the cached intersection if one exists, false otherwise.
 		 */
 		public Expression getCachedMsgValueIntersection(RewritingProcess process, Expression previousMessage, Expression msgValue) {
-			return previousMessageToCachedMsgValueIntersection.get(Tuple.make(process.getContextualConstraint(), previousMessage, IntensionalSet.getScopingExpression(msgValue)));
+			return previousMessageToCachedMsgValueIntersection.get(
+					Tuple.make(process.getContextualConstraint(), previousMessage, Tuple.make(IntensionalSet.getIndexExpressions(msgValue))));
 		}
 	}
 }

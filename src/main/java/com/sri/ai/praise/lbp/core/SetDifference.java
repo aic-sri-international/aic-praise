@@ -532,9 +532,9 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Trace.log("// {{ Alpha' | C' }}_I'={}", saS1);
 			
 	
-			Expression alphaPrime = IntensionalSet.getHead(saS1);
-			Expression cPrime     = IntensionalSet.getCondition(saS1);
-			Expression iPrime     = IntensionalSet.getScopingExpression(saS1);
+			Expression alphaPrime   = IntensionalSet.getHead(saS1);
+			Expression cPrime       = IntensionalSet.getCondition(saS1);
+			List<Expression> iPrime = IntensionalSet.getIndexExpressions(saS1);
 	
 			Expression alphaPrimeEqualb    = Equality.make(alphaPrime, b);
 			Expression notAlphaPrimeEqualb = Not.make(alphaPrimeEqualb);
@@ -542,7 +542,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Expression cPrimeAndNotAlphaPrimeEqualb = CardinalityUtil.makeAnd(cPrime, notAlphaPrimeEqualb);
 			
 			if (Justification.isEnabled()) {
-				Expression currentExpression = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimeAndNotAlphaPrimeEqualb);
+				Expression currentExpression = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimeAndNotAlphaPrimeEqualb);
 				Justification.endEqualityStep(currentExpression);
 			}
 			
@@ -552,7 +552,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			RewritingProcess processIPrime  = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saS1, process);
 			Expression       cPrimePrime    = processIPrime.rewrite(R_formula_simplification, cPrimeAndNotAlphaPrimeEqualb);
 			
-			result = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
+			result = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
 			
 			Justification.endEqualityStep(result);
 			
@@ -628,9 +628,9 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 
 			Expression saS1 = StandardizedApartFrom.standardizedApartFrom(set1, set2, process);
 
-			Expression alphaPrime = IntensionalSet.getHead(saS1);
-			Expression cPrime     = IntensionalSet.getCondition(saS1);
-			Expression iPrime     = IntensionalSet.getScopingExpression(saS1);
+			Expression alphaPrime   = IntensionalSet.getHead(saS1);
+			Expression cPrime       = IntensionalSet.getCondition(saS1);
+			List<Expression> iPrime = IntensionalSet.getIndexExpressions(saS1);
 
 			for (Expression b_i : ExtensionalSet.getElements(set2)) {
 				Expression equality = Equality.make(alphaPrime, b_i);
@@ -671,7 +671,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 				Justification.beginEqualityStep("simplifying set condition"); // * - closed at end
 				cPrimePrime = processIPrime.rewrite(R_formula_simplification, cPrimeAndNotDisjunction);
 			}
-			result = IntensionalSet.make(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
+			result = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
 		}
 
 		// * - this is closing three beginSteps above, marked with *
@@ -706,8 +706,8 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Justification.endEqualityStep(result);
 		}
 		else {			
-			Expression c = IntensionalSet.getCondition(set1);
-			Expression i = IntensionalSet.getScopingExpression(set1);
+			Expression       c = IntensionalSet.getCondition(set1);
+			List<Expression> i = IntensionalSet.getIndexExpressions(set1);
 
 			Trace.log("    { Alpha' | C' }_I' <- standardize { Alpha' | C' }_I' apart from (Alpha, C)");
 			
@@ -725,7 +725,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 	
 			if (Justification.isEnabled()) {
 				Justification.beginEqualityStep("difference set is an intensional set with the condition of the first and the negation of the condition of the second");
-				Expression currentExpression = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cAndForAllPrimeI);
+				Expression currentExpression = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(set1), i, alpha, cAndForAllPrimeI);
 				Justification.endEqualityStep(currentExpression);
 			}
 			
@@ -746,7 +746,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			processI                  = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(set1, process);
 			Expression cPrimePrime    = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
 			
-			result = IntensionalSet.make(Sets.getLabel(set1), i, alpha, cPrimePrime);
+			result = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(set1), i, alpha, cPrimePrime);
 			Justification.endEqualityStep(result);
 			
 			Trace.log("    return R_basic({ Alpha | C'' }_I)");

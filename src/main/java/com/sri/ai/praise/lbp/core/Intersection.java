@@ -110,10 +110,10 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 			}
 			else {
 				Trace.log("    standardize Set1 apart from (I2, Alpha2, C2)");
-				Expression i2              = IntensionalSet.getScopingExpression(set2);
+				List<Expression> i2        = IntensionalSet.getIndexExpressions(set2);
 				Expression alpha2          = IntensionalSet.getHead(set2);
 				Expression c2              = IntensionalSet.getCondition(set2);
-				Expression tupleI2Alpha2C2 = Tuple.make(i2, alpha2, c2);
+				Expression tupleI2Alpha2C2 = Tuple.make(Tuple.make(i2), alpha2, c2);
 				
 				Expression saSet1           = StandardizedApartFrom.standardizedApartFrom(set1, tupleI2Alpha2C2, process);
 				
