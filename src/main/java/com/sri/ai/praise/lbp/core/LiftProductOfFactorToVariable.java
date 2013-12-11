@@ -201,8 +201,8 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 						Expression singleAlpha             = LPIUtil.pickSingleElement(singletonIntensionalSet, process);				
 						if (singleAlpha != null) {
 							// return alpha ^ {@link Cardinality R_card}(| C |_I)
-							List<Expression> setIndices = new ArrayList<Expression>(IntensionalSet.getIndices(prodSet));
-							Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, setIndices.toArray(new Expression[setIndices.size()]));
+							List<Expression> indices = new ArrayList<Expression>(IntensionalSet.getIndices(prodSet));
+							Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, indices.toArray(new Expression[indices.size()]));
 							Justification.beginEqualityStep("cardinality of equality boolean formula");
 							Justification.log(cardinalityOfIndexedFormula);
 							Expression cardinality    = process.rewrite(CardinalityRewriter.R_card, cardinalityOfIndexedFormula);

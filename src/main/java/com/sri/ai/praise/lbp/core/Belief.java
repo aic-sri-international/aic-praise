@@ -46,7 +46,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
@@ -61,10 +60,10 @@ import com.sri.ai.grinder.helper.concurrent.BranchRewriteTask;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.StandardizedApartFrom;
-import com.sri.ai.grinder.library.SubExpressionSelection;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -501,7 +500,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			}
 			throw new IllegalStateException("IllegalStateException: introduced additional free variables " + Util.join(introducedFreeVariables) + " into msg_expansion: "+msgExpansion);
 		}
-		if (expansionDependensOnLogicalVariableButMessageDoesNot(msgExpansion, process)) {
+		if (expansionDependsOnLogicalVariableButMessageDoesNot(msgExpansion, process)) {
 			System.err.println("IllegalStateException: expansion depends on logical variable but message does not.");
 			System.err.println("msg_expansion  = " + msgExpansion);
 			System.err.println("message_set    = " + messageSet);
@@ -658,7 +657,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						throw new IllegalStateException("IllegalStateException: introduced additional free variables " + Util.join(introducedFreeVariables) + " into new_msg_value: "+newMsgValue);
 					}
 					
-					if (expansionDependensOnLogicalVariableButMessageDoesNot(newMsgValue, process)) {
+					if (expansionDependsOnLogicalVariableButMessageDoesNot(newMsgValue, process)) {
 						System.err.println("IllegalStateException: new_msg_value has answer dependent on logical variable that value is not.");
 						System.err.println("sub.context      ="+subProcess.getContextualConstraint());
 						System.err.println("sub.context vars ="+subProcess.getContextualVariables());
@@ -1118,51 +1117,46 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return introducedFreeVariables;
 	}
 	
-	private boolean expansionDependensOnLogicalVariableButMessageDoesNot(Expression msgExpansionOrValue, final RewritingProcess process) {
+	private boolean expansionDependsOnLogicalVariableButMessageDoesNot(Expression msgExpansionOrValue, final RewritingProcess process) {
 		boolean result = false;
 		
+		List<Expression> indices = IndexExpressions.getIndices(IntensionalSet.getIndexExpressions(msgExpansionOrValue));
 		Expression head = IntensionalSet.getHead(msgExpansionOrValue);	
-		Set<Expression> destinationVariables = Expressions.getVariables(Tuple.get(head, 0), process);
-		Set<Expression> originVariables      = Expressions.getVariables(Tuple.get(head, 1), process);
-		Set<Expression> destOriginSet        = new HashSet<Expression>();
-		destOriginSet.addAll(destinationVariables);
-		destOriginSet.addAll(originVariables);
-		destOriginSet.retainAll(IntensionalSet.getIndices(msgExpansionOrValue));
+		Set<Expression> destinationVariables          = Expressions.getVariables(Tuple.get(head, 0), process);
+		Set<Expression> originVariables               = Expressions.getVariables(Tuple.get(head, 1), process);
+		Set<Expression> originAndDestinationVariables = new HashSet<Expression>();
+		originAndDestinationVariables.addAll(destinationVariables);
+		originAndDestinationVariables.addAll(originVariables);
+		originAndDestinationVariables.retainAll(indices);
 		
-		Set<Expression> rvValueVariables     = new HashSet<Expression>();
-		Set<Expression> rvValues             = SubExpressionSelection.getVariables(Tuple.get(head, 2), new Predicate<Expression>() {
-			@Override
-			public boolean apply(Expression arg) {
-				boolean result = LPIUtil.isRandomVariableValueExpression(arg, process);
-				return result;
-			}
-		});
-		for (Expression rvv : rvValues) {
-			rvValueVariables.addAll(Expressions.getVariables(rvv, process));
+		Set<Expression> randomVariableValueVariables = new HashSet<Expression>();
+		Set<Expression> randomVariableValues         = LPIUtil.getRandomVariableValueExpressions(head, process);
+		for (Expression randomVariableValue : randomVariableValues) {
+			randomVariableValueVariables.addAll(Expressions.getVariables(randomVariableValue, process));
 		}
 		// Only keep random variable value logical variables that are not internally
 		// scoped (e.g. in a product message from an expansion).
-		rvValueVariables.retainAll(Expressions.freeVariables(Tuple.get(head, 2), process));
+		randomVariableValueVariables.retainAll(Expressions.freeVariables(Tuple.get(head, 2), process));
 		
 		Set<Expression> testSet = new HashSet<Expression>();
 		testSet.addAll(Expressions.freeVariables(Tuple.get(head, 2), process));
-		testSet.retainAll(IntensionalSet.getIndices(msgExpansionOrValue));
-		testSet.removeAll(destOriginSet);
-		testSet.removeAll(rvValueVariables);
+		testSet.retainAll(indices);
+		testSet.removeAll(originAndDestinationVariables);
+		testSet.removeAll(randomVariableValueVariables);
 				
 		if (testSet.size() > 0) {
 			System.err.println("expansion or value  ="+msgExpansionOrValue);
 			System.err.println("tesSet              ="+testSet);
-			System.err.println("destOriginSet       ="+destOriginSet);
+			System.err.println("destOriginSet       ="+originAndDestinationVariables);
 			System.err.println("destinationVariables="+destinationVariables);
 			System.err.println("originVariables     ="+originVariables);
-			System.err.println("rvValueVariables    ="+rvValueVariables);
+			System.err.println("rvValueVariables    ="+randomVariableValueVariables);
 			result = true;
 		}
 		
 		return result;
 	}
-	
+
 	private class PreviousMessageReplacementFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		
 		private List<Expression> msgValues;

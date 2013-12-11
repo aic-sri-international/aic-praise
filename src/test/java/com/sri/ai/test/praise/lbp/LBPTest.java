@@ -2948,7 +2948,32 @@ public class LBPTest extends AbstractLPITest {
 		};
 		
 		BeliefTestData[] tests = new BeliefTestData[] {
-	
+				// 
+				// Test on model defined with high-level syntax
+				// 		
+						new BeliefTestData(Expressions.TRUE.toString(),
+						Model.fromRules(
+								"sort People: 10, bob, dave, rodrigo, ciaran;\n" + 
+								"// RANDOM VARIABLE DECLARATIONS:\n" + 
+								"random epidemic: -> Boolean;\n" + 
+								"random sick: People -> Boolean;\n" + 
+								"random fever: People -> Boolean;\n" + 
+								"random rash: People -> Boolean;\n" + 
+								"random notAtWork: People -> Boolean;\n" + 
+								"// RULES\n" + 
+								"epidemic 0.001;" +
+								"if epidemic then sick(X) 0.6 else sick(X) 0.05;\n" + 
+								"if sick(X) then fever(X) 0.7 else fever(X) 0.01;\n" + 
+								"if sick(X) then rash(X) 0.6 else rash(X) 0.07;\n" + 
+								"if sick(X) then notAtWork(X) 0.8 else notAtWork(X) 0.05;\n" +
+								"// EVIDENCE\n" +
+								"notAtWork(bob);"),
+						"belief([sick(X)])", 
+						false, 
+						"if X != bob then if sick(X) then 0.0531281103 else 0.94687189 else (if sick(X) then 0.460002844 else 0.539997156)"
+						 ),
+
+				
 				new BeliefTestData(Expressions.TRUE.toString(), 
 						new Model(
 								"union("
@@ -4003,7 +4028,8 @@ public class LBPTest extends AbstractLPITest {
 	public void testPickValue() {
 		class PickValueTestData extends TestData {
 			private String     X, I, C;
-			private Expression exprX, exprI, exprC;
+			private Expression exprX, exprC;
+			Expression exprI;
 			
 			public PickValueTestData(String contextualConstraint, Model model, String X, String I, String C, boolean illegalArgumentTest, String expected) {
 				super(contextualConstraint, model, illegalArgumentTest, expected);
@@ -4025,7 +4051,7 @@ public class LBPTest extends AbstractLPITest {
 			
 			@Override
 			public Expression callRewrite(RewritingProcess process) {
-				Expression result = LPIUtil.pickValue(exprX, exprI, exprC, process);
+				Expression result = LPIUtil.pickValue(exprX, ExtensionalSet.getElements(exprI), exprC, process);
 				
 				return result;
 			}

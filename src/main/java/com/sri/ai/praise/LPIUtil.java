@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
@@ -1185,7 +1186,8 @@ public class LPIUtil {
 		Expression       alpha       = IntensionalSet.getHead(intensionalSet);
 		Trace.log("R <- indices in {} that {} depends on", IntensionalSet.getIndexExpressions(intensionalSet), alpha);
 		Set<Expression>  alphaVars   = Expressions.freeVariables(alpha, process);
-		List<Expression> indicesI    = new ArrayList<Expression>(IntensionalSet.getIndices(intensionalSet));
+		List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(intensionalSet);
+		List<Expression> indicesI    = new ArrayList<Expression>(IndexExpressions.getIndices(indexExpressions));
 		Set<Expression>  tempIndices = new LinkedHashSet<Expression>(indicesI);
 		tempIndices.retainAll(alphaVars);
 		List<Expression> indicesR  = new ArrayList<Expression>(tempIndices);
@@ -1202,10 +1204,9 @@ public class LPIUtil {
 			Trace.log("// SomeIndex = {}", someIndex);
 			
 			Trace.log("value = pick_value(SomeIndex, I, C)");
-			Expression setOfIndices = ExtensionalSet.makeUniSetExpression(indicesI);
 			Expression formulaC   = IntensionalSet.getCondition(intensionalSet);
 			RewritingProcess subProcess = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
-			Expression value = pickValue(someIndex, setOfIndices, formulaC, subProcess);
+			Expression value = pickValue(someIndex, indicesI, formulaC, subProcess);
 			Trace.log("// value = {}", value);
 			
 			if (value == null) {
@@ -1213,8 +1214,8 @@ public class LPIUtil {
 			}
 			else {
 				Trace.log("let I' be I - {SomeIndex}");
-				List<Expression> indexExpressionsIPrime = new ArrayList<Expression>(indicesI);
-				indexExpressionsIPrime.remove(someIndex);
+				List<Expression> indexExpressionsIPrime = new ArrayList<Expression>(indexExpressions);
+				Util.removeElementsSatisfying(indexExpressionsIPrime, new IndexExpressions.HasIndex(someIndex));
 				Trace.log("// I' = {}", indexExpressionsIPrime);
 				Trace.log("return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })");
 				Expression alphaSubX          = SemanticSubstitute.replace(alpha, someIndex, value, subProcess);
@@ -1255,7 +1256,7 @@ public class LPIUtil {
 	 * @param variableX
 	 *            a variable X
 	 * @param variablesI
-	 *            an extensional uni-set of indices variables I
+	 *            a list of index variables I
 	 * @param formulaC
 	 *            a formula C
 	 * @param process
@@ -1263,13 +1264,13 @@ public class LPIUtil {
 	 * @return a value v such that there exists I : C <=> X = v or null if not
 	 *         able to pick.
 	 */
-	public static Expression pickValue(Expression variableX, Expression variablesI, Expression formulaC, final RewritingProcess process) {
+	public static Expression pickValue(Expression variableX, List<Expression> variablesI, Expression formulaC, final RewritingProcess process) {
 		Expression result = null;
 		
 		Trace.in("+pick_value({}, {}, {})", variableX, variablesI, formulaC);
 		
 		// if C is a conjunction containing conjunct X = value, return value
-		result = extractValueForXFromConjunction(variableX, ExtensionalSet.getElements(variablesI), formulaC, process);
+		result = extractValueForXFromConjunction(variableX, variablesI, formulaC, process);
 		if (result != null) {
 			Trace.log("if C is a conjunction containing conjunct X = value");
 			Trace.log("    return value");
@@ -1277,7 +1278,7 @@ public class LPIUtil {
 		else {
 			Trace.log("formula_on_X = R_formula_simplification(there exists I' : C)"); 
 			List<Expression> variablesIPrime = new ArrayList<Expression>();
-			for (Expression i : ExtensionalSet.getElements(variablesI)) {
+			for (Expression i : variablesI) {
 				// where I' is I \ {X}
 				if (!variableX.equals(i)) {
 					variablesIPrime.add(i);
@@ -1289,7 +1290,7 @@ public class LPIUtil {
 			Expression thereExists = ThereExists.make(indexExpressions, formulaC);
 			Expression formulaOnX  = process.rewrite(LBPRewriter.R_formula_simplification, thereExists);
 			
-			result = extractValueForXFromFormula(variableX, ExtensionalSet.getElements(variablesI), formulaOnX, process);
+			result = extractValueForXFromFormula(variableX, variablesI, formulaOnX, process);
 			if (result != null) {
 				Trace.log("if X = value can be unambiguously extracted from formula_on_X");
 				Trace.log("    return value");
@@ -1623,5 +1624,15 @@ public class LPIUtil {
 		Map<Expression, Expression> freeVariablesAndDomains = DetermineSortsOfLogicalVariables.getFreeVariablesAndDomainsFromUsageInRandomVariables(expression, randomVariableDeclarationsExpressions, process);
 		List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromVariablesAndDomains(freeVariablesAndDomains);
 		return indexExpressions;
+	}
+
+	public static LinkedHashSet<Expression> getRandomVariableValueExpressions(Expression expression, final RewritingProcess process) {
+		return Expressions.getSubExpressionsSatisfying(Tuple.get(expression, 2), new Predicate<Expression>() {
+			@Override
+			public boolean apply(Expression arg) {
+				boolean result = isRandomVariableValueExpression(arg, process);
+				return result;
+			}
+		});
 	}
 }
