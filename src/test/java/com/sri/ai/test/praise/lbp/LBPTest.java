@@ -3388,110 +3388,87 @@ public class LBPTest extends AbstractLPITest {
 						),
 						"belief([epidemic])",
 						false,
-						// Note: old R_basic result:
-						// "if epidemic then (0.0064 * 0.6 ^ (| People | - 3)) / (0.0064 * 0.6 ^ (| People | - 3) + 9E-7 * 0.99 ^ (| People | - 3)) else (9E-7 * 0.99 ^ (| People | - 3)) / (0.0064 * 0.6 ^ (| People | - 3) + 9E-7 * 0.99 ^ (| People | - 3))"
+						"if epidemic then (0.0064 * 0.6 ^ (| People | - 3)) / (0.0064 * 0.6 ^ (| People | - 3) + 9E-7 * 0.99 ^ (| People | - 3)) else (9E-7 * 0.99 ^ (| People | - 3)) / (0.0064 * 0.6 ^ (| People | - 3) + 9E-7 * 0.99 ^ (| People | - 3))"
 						// calculated | type(X) | = 10 :
 						// if epidemic then 0.995339619 else 0.00466038114
-						// Note: 
-						// (| type(X) | - | type(X) | - 3) = 3
-						// i.e. right associative:
-						// | type(X) | - ( |type(X) | - 3)
-						"if epidemic then (0.00640000000 * 0.600000000 ^ (| type(X) | - 3)) / (0.00640000000 * 0.600000000 ^ (| type(X) | - 3) + 0.000000900000000 * 0.990000000 ^ (| type(X) | - 3)) else (0.000000900000000 * 0.990000000 ^ (| type(X) | - 3)) / (0.00640000000 * 0.600000000 ^ (| type(X) | - 3) + 0.000000900000000 * 0.990000000 ^ (| type(X) | - 3))"),
-						//"if epidemic then (0.1 * 0.4 ^ (| type(X) | - (| type(X) | - 3)) * 0.6 ^ (| type(X) | - 3)) / (0.1 * 0.4 ^ (| type(X) | - (| type(X) | - 3)) * 0.6 ^ (| type(X) | - 3) + 0.9 * 0.01 ^ (| type(X) | - (| type(X) | - 3)) * 0.99 ^ (| type(X) | - 3)) else (0.9 * 0.01 ^ (| type(X) | - (| type(X) | - 3)) * 0.99 ^ (| type(X) | - 3)) / (0.1 * 0.4 ^ (| type(X) | - (| type(X) | - 3)) * 0.6 ^ (| type(X) | - 3) + 0.9 * 0.01 ^ (| type(X) | - (| type(X) | - 3)) * 0.99 ^ (| type(X) | - 3))"),
+						),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicAndSickNotbob(), 
 						"belief([ epidemic ])", 
 						false, 
-						// Note: old R_basic result:
-						// "if epidemic then 1 / (1 + 0.8 ^ (|People| - 1)) else 0.8 ^ (|People| - 1) / (1 + 0.8 ^ (|People| - 1))"
+						"if epidemic then 1 / (1 + 0.8 ^ (|People| - 1)) else 0.8 ^ (|People| - 1) / (1 + 0.8 ^ (|People| - 1))"
 						// calculated | type(X) | = 10 :
 						// if epidemic then 0.881664935 else 0.118335065
-						"if epidemic then 1 / (1 + 0.8 ^ (| type(X) | - 1)) else 0.8 ^ (| type(X) | - 1) / (1 + 0.8 ^ (| type(X) | - 1))"),
+						),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicAndSickNotbob(), 
 						"belief([ sick(X) ])", 
 						false, 
-						// Note: old R_formula_simplification result before R_normalize used instead
-						// Difference is because | People | -> 10 and new result is this expression calculated correctly with that.
-						// "if X != bob then if sick(X) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else 0.5"
+						"if X != bob then if sick(X) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else 0.5"
 						// calculated | type(.) | = 10 :
 						// if X != bob then if sick(X) then 0.588166494 else 0.411833506 else 0.500000000
-						"if X != bob then if sick(X) then (0.4 * 0.8 ^ (| type(X') | - 2) + 0.6) / (0.4 * 0.8 ^ (| type(X') | - 2) + 1 + 0.4 * 0.8 ^ (| type(X') | - 2)) else (0.4 * 0.8 ^ (| type(X') | - 2) + 0.4) / (0.4 * 0.8 ^ (| type(X') | - 2) + 1 + 0.4 * 0.8 ^ (| type(X') | - 2)) else 0.5"),
+						),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicAndSickNotbob(), 
 						"belief([ sick(ann) ])", 
 						false, 
-						// Note: old R_basic result:
-						// "if sick(ann) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2))"
+						"if sick(ann) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2))"
 						// calculated | type(.) | = 10 :
 						// if sick(ann) then 0.588166494 else 0.411833506
-						"if sick(ann) then (0.4 * 0.8 ^ (| type(X) | - 2) + 0.6) / (0.4 * 0.8 ^ (| type(X) | - 2) + 1 + 0.4 * 0.8 ^ (| type(X) | - 2)) else (0.4 * 0.8 ^ (| type(X) | - 2) + 0.4) / (0.4 * 0.8 ^ (| type(X) | - 2) + 1 + 0.4 * 0.8 ^ (| type(X) | - 2))"),						
+						),						
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialGaveTreasureToOwnsRich() , 
 						"belief([rich(bob)])", 
 						false,
-						// Note: old R_basic result:
-						// "if rich(bob) then (1 + 2 ^ |People|) ^ |Treasure| / ((1 + 2 ^ |People|) ^ |Treasure| + 1) else 1 / ((1 + 2 ^ |People|) ^ |Treasure| + 1)"
+						"if rich(bob) then (1 + 2 ^ |People|) ^ |Treasure| / ((1 + 2 ^ |People|) ^ |Treasure| + 1) else 1 / ((1 + 2 ^ |People|) ^ |Treasure| + 1)"
 						// calculated | type(.) | = 10 :
 						// if rich(bob) then 1 else 0.000000000000000000000000000000781198402
-						"if rich(bob) then (1 + 2 ^ | type(X) |) ^ | type(Z) | / ((1 + 2 ^ | type(X) |) ^ | type(Z) | + 1) else 1 / ((1 + 2 ^ | type(X) |) ^ | type(Z) | + 1)"),
+						),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialGaveTreasureToOwnsRich(), 
 						"belief([rich(X)])", 
 						false,
-						// Note: old R_basic result
-						// "if rich(X) then (1 + 2 ^ |People|) ^ |Treasure| / ((1 + 2 ^ |People|) ^ |Treasure| + 1) else 1 / ((1 + 2 ^ |People|) ^ |Treasure| + 1)"
+						"if rich(X) then (1 + 2 ^ |People|) ^ |Treasure| / ((1 + 2 ^ |People|) ^ |Treasure| + 1) else 1 / ((1 + 2 ^ |People|) ^ |Treasure| + 1)"
 						// calculated | type(.) | = 10 :
 						// if rich(X) then 1 else 0.000000000000000000000000000000781198402
-						"if rich(X) then (1 + 2 ^ | type(X') |) ^ | type(Z) | / ((1 + 2 ^ | type(X') |) ^ | type(Z) | + 1) else 1 / ((1 + 2 ^ | type(X') |) ^ | type(Z) | + 1)"),
+						),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialGaveTreasureToOwnsRich(), 
 						"belief([gaveTreasureTo(X,Z,Y)])", 
 						false, 
-						// Note: old R_basic and R_formula_simlification result:
-						// "if |People| > 0 then if gaveTreasureTo(X, Z, Y) then (2 ^ (|People| - 1) * (1 + 2 ^ |People|) ^ (|Treasure| - 1)) / (2 ^ (|People| - 1) * (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 2 ^ (|People| - 1) * (1 + 2 ^ |People|) ^ (|Treasure| - 1)) else (1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 2 ^ (|People| - 1) * (1 + 2 ^ |People|) ^ (|Treasure| - 1)) / (2 ^ (|People| - 1) * (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 2 ^ (|People| - 1) * (1 + 2 ^ |People|) ^ (|Treasure| - 1)) else if gaveTreasureTo(X, Z, Y) then (2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1)) / (2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1)) else (1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1)) / (2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1))"
+						"if gaveTreasureTo(X, Z, Y) then (2 ^ (| People | - 1) * (1 + 2 ^ | People |) ^ (| Treasure | - 1)) / (2 ^ (| People | - 1) * (1 + 2 ^ | People |) ^ (| Treasure | - 1) + 1 + (1 + 2 ^ | People |) ^ (| Treasure | - 1) + 2 ^ (| People | - 1) * (1 + 2 ^ | People |) ^ (| Treasure | - 1)) else (1 + (1 + 2 ^ | People |) ^ (| Treasure | - 1) + 2 ^ (| People | - 1) * (1 + 2 ^ | People |) ^ (| Treasure | - 1)) / (2 ^ (| People | - 1) * (1 + 2 ^ | People |) ^ (| Treasure | - 1) + 1 + (1 + 2 ^ | People |) ^ (| Treasure | - 1) + 2 ^ (| People | - 1) * (1 + 2 ^ | People |) ^ (| Treasure | - 1))"
 						// calculated | type(.) | = 10 :
 						// if gaveTreasureTo(X, Z, Y) then 0.499512195 else 0.500487805
-						// Note: CardinaliltyOfTypeAlwaysDistinctFromZero removes 
-						// the top conditional as its true in this context
-						"if gaveTreasureTo(X, Z, Y) then (2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1)) / (2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 1 + (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1)) else (1 + (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1)) / (2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 1 + (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1) + 2 ^ (| type(X') | - 1) * (1 + 2 ^ | type(X') |) ^ (| type(Z') | - 1))"),
+						),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialGaveTreasureToOwnsRich(), 
 						"belief([owns(X,Y)])", 
 						false,
-						// Note: old R_basic and R_formula_simlification result:
-						//"if owns(X, Y) then (2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1)) / (2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1)) else (1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1)) / (2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1))"
+						"if owns(X, Y) then (2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1)) / (2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1)) else (1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1)) / (2 ^ |People| * (1 + 2 ^ |People|) ^ (|Treasure| - 1) + 1 + (1 + 2 ^ |People|) ^ (|Treasure| - 1))"
 						// calculated | type(.) | = 10 :
 						// if owns(X, Y) then 0.999024390 else 0.000975609756
-						"if owns(X, Y) then (2 ^ | type(X') | * (1 + 2 ^ | type(X') |) ^ (| type(Z) | - 1)) / (2 ^ | type(X') | * (1 + 2 ^ | type(X') |) ^ (| type(Z) | - 1) + 1 + (1 + 2 ^ | type(X') |) ^ (| type(Z) | - 1)) else (1 + (1 + 2 ^ | type(X') |) ^ (| type(Z) | - 1)) / (2 ^ | type(X') | * (1 + 2 ^ | type(X') |) ^ (| type(Z) | - 1) + 1 + (1 + 2 ^ | type(X') |) ^ (| type(Z) | - 1))"),
+						),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicSickEveryone(), 
 						"belief([ epidemic ])", 
 						false, 
-						// Note: old R_basic result:
-						// "if epidemic then (0.1 * 0.7 ^ |People|) / (0.1 * 0.7 ^ |People| + 0.9 * 0.2 ^ |People|) else (0.9 * 0.2 ^ |People|) / (0.1 * 0.7 ^ |People| + 0.9 * 0.2 ^ |People|)"
+						"if epidemic then (0.1 * 0.7 ^ |People|) / (0.1 * 0.7 ^ |People| + 0.9 * 0.2 ^ |People|) else (0.9 * 0.2 ^ |People|) / (0.1 * 0.7 ^ |People| + 0.9 * 0.2 ^ |People|)"
 						// calculated | type(.) | = 10 :
 						// if epidemic then 0.999967375 else 0.0000326248029
-						"if epidemic then (0.1 * 0.7 ^ | type(X) |) / (0.1 * 0.7 ^ | type(X) | + 0.9 * 0.2 ^ | type(X) |) else (0.9 * 0.2 ^ | type(X) |) / (0.1 * 0.7 ^ | type(X) | + 0.9 * 0.2 ^ | type(X) |)"),
+						),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicSickEveryoneNotbobAmaryAjohn(), 
 						"belief([ epidemic ])", 
 						false,
-						// Note: old R_basic result:
-						// "if epidemic then (0.03 * 0.7 ^ (|People| - 3)) / (0.03 * 0.7 ^ (|People| - 3) + 0.72 * 0.2 ^ (|People| - 3)) else (0.72 * 0.2 ^ (|People| - 3)) / (0.03 * 0.7 ^ (|People| - 3) + 0.72 * 0.2 ^ (|People| - 3))"
-						// if epidemic then 0.996283639 else 0.00371636130
+						 "if epidemic then (0.03 * 0.7 ^ (|People| - 3)) / (0.03 * 0.7 ^ (|People| - 3) + 0.72 * 0.2 ^ (|People| - 3)) else (0.72 * 0.2 ^ (|People| - 3)) / (0.03 * 0.7 ^ (|People| - 3) + 0.72 * 0.2 ^ (|People| - 3))"
 						// calculated | type(.) | = 10 :
-						// "if epidemic then (0.03 * 0.7 ^ (| type(X) | - 3)) / (0.03 * 0.7 ^ (| type(X) | - 3) + 0.72 * 0.2 ^ (| type(X) | - 3)) else (0.72 * 0.2 ^ (| type(X) | - 3)) / (0.03 * 0.7 ^ (| type(X) | - 3) + 0.72 * 0.2 ^ (| type(X) | - 3))"
-						"if epidemic then (0.0300000000 * 0.700000000 ^ (| type(X) | - 3)) / (0.0300000000 * 0.700000000 ^ (| type(X) | - 3) + 0.720000000 * 0.200000000 ^ (| type(X) | - 3)) else (0.720000000 * 0.200000000 ^ (| type(X) | - 3)) / (0.0300000000 * 0.700000000 ^ (| type(X) | - 3) + 0.720000000 * 0.200000000 ^ (| type(X) | - 3))"),
-						//"if epidemic then (0.100000000 * 0.700000000 ^ (| type(X) | - 3) * 0.300000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3)))) / (0.100000000 * 0.700000000 ^ (| type(X) | - 3) * 0.300000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3))) + 0.900000000 * 0.200000000 ^ (| type(X) | - 3) * 0.800000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3)))) else (0.900000000 * 0.200000000 ^ (| type(X) | - 3) * 0.800000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3)))) / (0.100000000 * 0.700000000 ^ (| type(X) | - 3) * 0.300000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3))) + 0.900000000 * 0.200000000 ^ (| type(X) | - 3) * 0.800000000 ^ (| type(X) | - ((| type(X) | - 1 + | type(X) | - 3) - (| type(X) | - 3))))"),
-// TODO-not supported when using R_complete_normalize on checking if a branch reachable or not.
-//				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicSickEveryoneNotbobAmaryAjohn(), 
-//						"belief([ sick(X) ])", 
-//						false,
-//						// Note: old R_basic result:
-//						// "if X != bob and X != mary and X != john then if sick(X) then 1 else 0 else if X = bob then if sick(bob) then 0 else 1 else if sick(X) then (0.14 * 0.20 ^ (| People | - 3) + 0.021 * 0.70 ^ (| People | - 3)) / (0.14 * 0.20 ^ (| People | - 3) + 0.021 * 0.70 ^ (| People | - 3) + 0.58 * 0.20 ^ (| People | - 3) + 0.0090 * 0.70 ^ (| People | - 3)) else (0.58 * 0.20 ^ (| People | - 3) + 0.0090 * 0.70 ^ (| People | - 3)) / (0.14 * 0.20 ^ (| People | - 3) + 0.021 * 0.70 ^ (| People | - 3) + 0.58 * 0.20 ^ (| People | - 3) + 0.0090 * 0.70 ^ (| People | - 3))"
-//						// calculated | type(.) | = 10 :
-//						// if X != bob and X != mary and X != john then if sick(X) then 1 else 0 else if X = bob then if sick(X) then 0 else 1 else if X = mary or X = john then if sick(X) then 0.698141819 else 0.301858181 else if sick(X) then 0.693556236 else 0.306443764
-//						"if X != bob and X != mary and X != john then if sick(X) then 1 else 0 else if X = bob then if sick(X) then 0 else 1 else if X = mary or X = john then if sick(X) then (0.144 * 0.2 ^ (| type(X') | - 3) + 0.021 * 0.7 ^ (| type(X') | - 3)) / (0.144 * 0.2 ^ (| type(X') | - 3) + 0.021 * 0.7 ^ (| type(X') | - 3) + 0.576 * 0.2 ^ (| type(X') | - 3) + 0.009 * 0.7 ^ (| type(X') | - 3)) else (0.576 * 0.2 ^ (| type(X') | - 3) + 0.009 * 0.7 ^ (| type(X') | - 3)) / (0.144 * 0.2 ^ (| type(X') | - 3) + 0.021 * 0.7 ^ (| type(X') | - 3) + 0.576 * 0.2 ^ (| type(X') | - 3) + 0.009 * 0.7 ^ (| type(X') | - 3)) else if sick(X) then (0.144 * 0.2 ^ (| type(X') | - 4) + 0.021 * 0.7 ^ (| type(X') | - 4)) / (0.144 * 0.2 ^ (| type(X') | - 4) + 0.021 * 0.7 ^ (| type(X') | - 4) + 0.576 * 0.2 ^ (| type(X') | - 4) + 0.009 * 0.7 ^ (| type(X') | - 4)) else (0.576 * 0.2 ^ (| type(X') | - 4) + 0.009 * 0.7 ^ (| type(X') | - 4)) / (0.144 * 0.2 ^ (| type(X') | - 4) + 0.021 * 0.7 ^ (| type(X') | - 4) + 0.576 * 0.2 ^ (| type(X') | - 4) + 0.009 * 0.7 ^ (| type(X') | - 4))"),
+						// if epidemic then 0.996283639 else 0.00371636130
+						),
+				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicSickEveryoneNotbobAmaryAjohn(), 
+						"belief([ sick(X) ])", 
+						false,
+						"if X != bob and X != mary and X != john then if sick(X) then 1 else 0 else (if X = bob then if sick(bob) then 0 else 1 else (if sick(X) then (0.144 * 0.2 ^ (| People | - 3) + 0.021 * 0.7 ^ (| People | - 3)) / (0.144 * 0.2 ^ (| People | - 3) + 0.021 * 0.7 ^ (| People | - 3) + 0.576 * 0.2 ^ (| People | - 3) + 0.009 * 0.7 ^ (| People | - 3)) else (0.576 * 0.2 ^ (| People | - 3) + 0.009 * 0.7 ^ (| People | - 3)) / (0.144 * 0.2 ^ (| People | - 3) + 0.021 * 0.7 ^ (| People | - 3) + 0.576 * 0.2 ^ (| People | - 3) + 0.009 * 0.7 ^ (| People | - 3))))"
+						// calculated | type(.) | = 10 :
+						// if X != bob and X != mary and X != john then if sick(X) then 1 else 0 else if X = bob then if sick(X) then 0 else 1 else if X = mary or X = john then if sick(X) then 0.698141819 else 0.301858181 else if sick(X) then 0.693556236 else 0.306443764
+						),
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicSickEveryoneNotbobAmaryAjohn(), 
 						"belief([ sick(mary) ])", 
 						false,
-						// Note: old R_basic result:
-						// "if sick(mary) then (0.14 * 0.2 ^ (| People | - 3) + 0.021 * 0.7 ^ (| People | - 3)) / (0.14 * 0.2 ^ (| People | - 3) + 0.021 * 0.7 ^ (| People | - 3) + 0.58 * 0.2 ^ (| People | - 3) + 0.009 * 0.7 ^ (| People | - 3)) else (0.58 * 0.2 ^ (| People | - 3) + 0.009 * 0.7 ^ (| People | - 3)) / (0.14 * 0.2 ^ (| People | - 3) + 0.021 * 0.7 ^ (| People | - 3) + 0.58 * 0.2 ^ (| People | - 3) + 0.009 * 0.7 ^ (| People | - 3))"
+						"if sick(mary) then (0.144 * 0.2 ^ (| People | - 3) + 0.021 * 0.7 ^ (| People | - 3)) / (0.144 * 0.2 ^ (| People | - 3) + 0.021 * 0.7 ^ (| People | - 3) + 0.576 * 0.2 ^ (| People | - 3) + 0.009 * 0.7 ^ (| People | - 3)) else (0.576 * 0.2 ^ (| People | - 3) + 0.009 * 0.7 ^ (| People | - 3)) / (0.144 * 0.2 ^ (| People | - 3) + 0.021 * 0.7 ^ (| People | - 3) + 0.576 * 0.2 ^ (| People | - 3) + 0.009 * 0.7 ^ (| People | - 3))"
 						// calculated | type(.) | = 10 :
 						// if sick(mary) then 0.698141819 else 0.301858181
-						"if sick(mary) then (0.144 * 0.2 ^ (| type(X) | - 3) + 0.021 * 0.7 ^ (| type(X) | - 3)) / (0.144 * 0.2 ^ (| type(X) | - 3) + 0.021 * 0.7 ^ (| type(X) | - 3) + 0.576 * 0.2 ^ (| type(X) | - 3) + 0.009 * 0.7 ^ (| type(X) | - 3)) else (0.576 * 0.2 ^ (| type(X) | - 3) + 0.009 * 0.7 ^ (| type(X) | - 3)) / (0.144 * 0.2 ^ (| type(X) | - 3) + 0.021 * 0.7 ^ (| type(X) | - 3) + 0.576 * 0.2 ^ (| type(X) | - 3) + 0.009 * 0.7 ^ (| type(X) | - 3))"),
+						),
 		};
 		
 		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_ALL_TYPE_SIZES_KNOWN, "false");	
@@ -4410,8 +4387,8 @@ public class LBPTest extends AbstractLPITest {
 		// Assert.assertEquals("if rich(X) then (1 + 2 ^ | People |) ^ | Treasure | / ((1 + 2 ^ | People |) ^ | Treasure | + 1) else 1 / ((1 + 2 ^ | People |) ^ | Treasure | + 1)", results.get(queryUUID1));
 		Assert.assertEquals("if rich(X) then 1 else 0.000000000000000000000000000000781198", results.get(queryUUID1));
 		// Note: old R_basic result
-		// Assert.assertEquals("if rich(bob) then (1 + 2 ^ | People |) ^ | Treasure | / ((1 + 2 ^ | People |) ^ | Treasure | + 1) else 1 / ((1 + 2 ^ | People |) ^ | Treasure | + 1)", results.get(queryUUID2));
-		Assert.assertEquals("if rich(bob) then (1 + 2 ^ | type(X) |) ^ | type(Z) | / ((1 + 2 ^ | type(X) |) ^ | type(Z) | + 1) else 1 / ((1 + 2 ^ | type(X) |) ^ | type(Z) | + 1)", results.get(queryUUID2));
+		Assert.assertEquals("if rich(bob) then (1 + 2 ^ | People |) ^ | Treasure | / ((1 + 2 ^ | People |) ^ | Treasure | + 1) else 1 / ((1 + 2 ^ | People |) ^ | Treasure | + 1)", results.get(queryUUID2));
+		// Assert.assertEquals("if rich(bob) then (1 + 2 ^ | type(X) |) ^ | type(Z) | / ((1 + 2 ^ | type(X) |) ^ | type(Z) | + 1) else 1 / ((1 + 2 ^ | type(X) |) ^ | type(Z) | + 1)", results.get(queryUUID2));
 		// Note: This is essentially the evidence reflected back.
 		Assert.assertEquals("if rich(bob) then 1 else 0", results.get(queryUUID3));
 	}

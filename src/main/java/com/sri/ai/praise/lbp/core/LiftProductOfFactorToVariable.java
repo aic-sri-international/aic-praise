@@ -37,7 +37,6 @@
  */
 package com.sri.ai.praise.lbp.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,6 +56,7 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.equality.cardinality.direct.CardinalityRewriter;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.Cardinality;
 import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.Sets;
@@ -201,13 +201,13 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 						Expression singleAlpha             = LPIUtil.pickSingleElement(singletonIntensionalSet, process);				
 						if (singleAlpha != null) {
 							// return alpha ^ {@link Cardinality R_card}(| C |_I)
-							List<Expression> indices = new ArrayList<Expression>(IntensionalSet.getIndices(prodSet));
-							Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, indices.toArray(new Expression[indices.size()]));
+							List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(prodSet);
+							Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, indexExpressions.toArray(new Expression[indexExpressions.size()]));
 							Justification.beginEqualityStep("cardinality of equality boolean formula");
 							Justification.log(cardinalityOfIndexedFormula);
-							Expression cardinality    = process.rewrite(CardinalityRewriter.R_card, cardinalityOfIndexedFormula);
-							Justification.endEqualityStep(cardinality);
-							Expression exponentiation = Expressions.apply(FunctorConstants.EXPONENTIATION, singleAlpha, cardinality);
+							Expression cardinalityResult = process.rewrite(CardinalityRewriter.R_card, cardinalityOfIndexedFormula);
+							Justification.endEqualityStep(cardinalityResult);
+							Expression exponentiation = Expressions.apply(FunctorConstants.EXPONENTIATION, singleAlpha, cardinalityResult);
 							result = exponentiation;
 						}
 						else if (isMustAlwaysLift(process)) {
