@@ -1635,4 +1635,11 @@ public class LPIUtil {
 			}
 		});
 	}
+
+	/** Convenience method creating an expression of the type "belief([query])" given an expression 'query'. */
+	public static Expression makeBelief(Expression query) {
+		Expression randomVariable = BracketedExpressionSubExpressionsProvider.make(query);
+		Expression result = Expressions.make(LPIUtil.FUNCTOR_BELIEF, randomVariable);
+		return result;
+	}
 }

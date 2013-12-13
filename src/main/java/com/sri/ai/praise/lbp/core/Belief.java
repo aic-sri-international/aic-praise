@@ -94,6 +94,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	private LBPConfiguration configuration = null;
 	private Rational decimalPrecision = null;
 	private Rational nonZeroMin = null;
+	
+	public Belief() {
+		this(new DefaultLBPConfiguration());
+	}
 
 	public Belief(LBPConfiguration configuration) {
 		this.configuration     = configuration;
@@ -1285,5 +1289,17 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			return previousMessageToCachedMsgValueIntersection.get(
 					Tuple.make(process.getContextualConstraint(), previousMessage, Tuple.make(IntensionalSet.getIndexExpressions(msgValue))));
 		}
+	}
+
+	/**
+	 * A convenience method for computing the belief of a query given a model, using a DefaultLBPConfiguration.
+	 */
+	public static Expression compute(Expression query, Model model) {
+		Expression       belief         = LPIUtil.makeBelief(query);
+		LBPConfiguration configuration  = new DefaultLBPConfiguration();
+		RewritingProcess process        = model.makeRewritingProcess(belief, configuration);
+		Belief           beliefRewriter = new Belief();
+		Expression       result         = beliefRewriter.rewrite(belief, process);
+		return result;
 	}
 }

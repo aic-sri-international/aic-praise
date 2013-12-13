@@ -73,6 +73,7 @@ import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.lbp.LBPQueryEngine.QueryStep;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.lbp.core.Belief;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.example.EmptyPQ;
 import com.sri.ai.praise.model.example.IntensionalFanIn;
@@ -4250,6 +4251,28 @@ public class LBPTest extends AbstractLPITest {
 		};
 
 		perform(tests);
+	}
+	
+	// TODO: debug
+	// @Test
+	public void testDistinctTypeComparisons() {
+		Model model = Model.fromRules(
+				"sort People: 10;"
+						+ "sort Dogs: 10;"
+						+ "random happy: People -> Boolean;"
+						+ "random fluffy: Dogs -> Boolean;"
+						+ "random absurd: -> Boolean;"
+						+ ""
+						+ "happy(X); // every person is happy"
+						+ "fluffy(Y); // every dog is fluffy"
+						+ "happy(X) and fluffy(Y) and (X = Y <=> absurd); // X is person and Y is dog, can't be the same");
+		
+		// The test here is that if our inference engine knows that two variables of different types are necessarily distinct, then the probability of absurd will be 1, else 0.
+		// The reason we need the happy and fluffy predicates is that variable types are inferred from the predicates they are used in.
+		
+		Expression probabilityOfAbsurd = Belief.compute(parse("absurd"), model);
+		System.out.println("Result: " + probabilityOfAbsurd);	
+		assertEquals(parse("0"), probabilityOfAbsurd);
 	}
 	
 	@Test

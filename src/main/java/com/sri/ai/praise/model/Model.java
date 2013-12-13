@@ -42,7 +42,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -62,6 +61,8 @@ import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.PRAiSEConfiguration;
+import com.sri.ai.praise.lbp.LBPConfiguration;
+import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.rules.RuleConverter;
 
 /**
@@ -1006,5 +1007,12 @@ public class Model {
 	private static String nameAndArityFromRandomVariableDeclaration(RandomVariableDeclaration rvd) {
 		String result = rvd.getName().getValue().toString() + "/" + rvd.getArityValue();
 		return result;
+	}
+
+	/** Convenience method for creating an LPI rewriting process based on this Model with given root expression and LBPConfiguration. */
+	public RewritingProcess makeRewritingProcess(Expression rootExpression, LBPConfiguration lbpConfiguration) {
+		RewritingProcess process = LBPFactory.newLBPProcess(rootExpression, lbpConfiguration);
+		setRewritingProcessesModel(process);
+		return process;
 	}
 }
