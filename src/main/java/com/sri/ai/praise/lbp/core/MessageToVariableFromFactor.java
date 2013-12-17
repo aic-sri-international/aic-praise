@@ -245,6 +245,13 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 		};
 	}
 
+	/**
+	 * Method creating current expression for justification purposes.
+	 * It abuses notation as N might be a function to be evaluated into a set of indices,
+	 * which is not supported by the current language (it used to be supported by the use of a meta-operator 'value of', but
+	 * that is not supported anymore).
+	 * As a result, this method should be used for presentation purposes only.
+	 */
 	private static Expression makeCurrentExpressionGivenExpressionForN(
 			Expression N, Expression VPrime, Expression E, Expression msgToF_VPrime) {
 		Expression currentExpression;
@@ -255,9 +262,6 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 			Expressions.apply(
 					FunctorConstants.SUM,
 					IntensionalSet.makeMultiSetWithASingleIndexExpression(
-							// strictly speaking, this should be a 'value of' construction since we are not iterating 
-							// over the interpretations of '-', but we abuse the notation for didactic purposes here. 
-							// Just remember that we could not actually use this expression during processing.
 							N, 
 							head,
 							Expressions.TRUE));
