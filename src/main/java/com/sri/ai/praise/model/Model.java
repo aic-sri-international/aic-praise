@@ -1015,4 +1015,8 @@ public class Model {
 		setRewritingProcessesModel(process);
 		return process;
 	}
+	
+	public String toString() {
+		return this.getModelDefinition().toString();
+	}
 }

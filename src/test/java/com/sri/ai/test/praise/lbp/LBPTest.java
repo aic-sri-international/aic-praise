@@ -2906,48 +2906,48 @@ public class LBPTest extends AbstractLPITest {
 		perform(tests);
 	}
 	
-	@Test
-	public void testBeliefForNonLoopyModels() {
-		class BeliefTestData extends TestData {
-			private String belief; 
-			private Expression exprBelief;
-			private Map<Object, Object> globalObjects;
-			private LBPConfiguration.BeliefPropagationUpdateSchedule schedule;
-			
-			public BeliefTestData(String contextualConstraint, Model model, String belief, boolean illegalArgumentTest, String expected) {
-				this(contextualConstraint, model, belief, null, illegalArgumentTest, expected);
-			};
-			
-			public BeliefTestData(String contextualConstraint, Model model, String belief, Map<Object, Object> globalObjects, boolean illegalArgumentTest, String expected) {
-				super(contextualConstraint, model, illegalArgumentTest, expected);
-				this.belief = belief;
-				this.globalObjects = globalObjects;
-			};
-			
-			public void setUpdateSchedule(LBPConfiguration.BeliefPropagationUpdateSchedule schedule) {
-				this.schedule = schedule;
-			}
-			
-			@Override
-			public Expression getTopExpression() {
-				this.exprBelief = parse(belief);
-				return this.exprBelief;
-			}
-			
-			@Override
-			public Expression callRewrite(RewritingProcess process) {
-				if (globalObjects != null) {
-					process.getGlobalObjects().putAll(globalObjects);
-				}
-				LBPConfiguration configuration = LBPFactory.newLBPConfiguration();
-				configuration.setBeliefPropagationUpdateSchedule(schedule);
-				RewritingProcess lbpProcess = LBPFactory.newLBPProcess(process.getRootExpression(), configuration, process);
-				Expression belief = lbpProcess.rewrite(LBPRewriter.R_belief, exprBelief);
-				Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
-				return roundedBelief;
-			}
+	private class BeliefTestData extends TestData {
+		private String belief; 
+		private Expression exprBelief;
+		private Map<Object, Object> globalObjects;
+		private LBPConfiguration.BeliefPropagationUpdateSchedule schedule = LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS;
+		
+		public BeliefTestData(String contextualConstraint, Model model, String belief, boolean illegalArgumentTest, String expected) {
+			this(contextualConstraint, model, belief, null, illegalArgumentTest, expected);
 		};
 		
+		public BeliefTestData(String contextualConstraint, Model model, String belief, Map<Object, Object> globalObjects, boolean illegalArgumentTest, String expected) {
+			super(contextualConstraint, model, illegalArgumentTest, expected);
+			this.belief = belief;
+			this.globalObjects = globalObjects;
+		};
+		
+		public void setUpdateSchedule(LBPConfiguration.BeliefPropagationUpdateSchedule schedule) {
+			this.schedule = schedule;
+		}
+		
+		@Override
+		public Expression getTopExpression() {
+			this.exprBelief = parse(belief);
+			return this.exprBelief;
+		}
+		
+		@Override
+		public Expression callRewrite(RewritingProcess process) {
+			if (globalObjects != null) {
+				process.getGlobalObjects().putAll(globalObjects);
+			}
+			LBPConfiguration configuration = LBPFactory.newLBPConfiguration();
+			configuration.setBeliefPropagationUpdateSchedule(schedule);
+			RewritingProcess lbpProcess = LBPFactory.newLBPProcess(process.getRootExpression(), configuration, process);
+			Expression belief = lbpProcess.rewrite(LBPRewriter.R_belief, exprBelief);
+			Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
+			return roundedBelief;
+		}
+	}
+	
+	@Test
+	public void testBeliefForNonLoopyModels() {
 		BeliefTestData[] tests = new BeliefTestData[] {
 				// 
 				// Test on model defined with high-level syntax
@@ -4254,25 +4254,49 @@ public class LBPTest extends AbstractLPITest {
 	}
 	
 	// TODO: debug
-	// @Test
+	@Test
 	public void testDistinctTypeComparisons() {
-		Model model = Model.fromRules(
-				"sort People: 10;"
-						+ "sort Dogs: 10;"
-						+ "random happy: People -> Boolean;"
-						+ "random fluffy: Dogs -> Boolean;"
-						+ "random absurd: -> Boolean;"
-						+ ""
-						+ "happy(X); // every person is happy"
-						+ "fluffy(Y); // every dog is fluffy"
-						+ "happy(X) and fluffy(Y) and (X = Y <=> absurd); // X is person and Y is dog, can't be the same");
+		BeliefTestData[] tests = new BeliefTestData[] {
+				new BeliefTestData(Expressions.TRUE.toString(),
+						new Model("model(sort(People, 10), sort(Dogs, 10), randomVariable(equalityOccurred, 0, Boolean),"
+								+ "parfactors("
+								+ "{{(on X in People, Y in Dogs) [if equalityOccurred then 1 else 0] | X = Y }}" // should have no effect
+								+ ") )"),
+								"belief([equalityOccurred])", 
+								false, 
+								"0.5" // parfactor has no effect
+						),
+				new BeliefTestData(Expressions.TRUE.toString(),
+						new Model("model(sort(People, 10), sort(Dogs, 10), randomVariable(equalityOccurred, 0, Boolean),"
+								+ "parfactors("
+								+ "{{(on X in People, Y in People) [if equalityOccurred then 1 else 0] | X = Y }}" // should have an effect since X = Y for some values
+								+ ") )"),
+								"belief([equalityOccurred])", 
+								false, 
+								"if equalityOccurred then 1 else 0" // parfactor has effect
+						),
+		};
+
+		perform(tests);
 		
-		// The test here is that if our inference engine knows that two variables of different types are necessarily distinct, then the probability of absurd will be 1, else 0.
-		// The reason we need the happy and fluffy predicates is that variable types are inferred from the predicates they are used in.
-		
-		Expression probabilityOfAbsurd = Belief.compute(parse("absurd"), model);
-		System.out.println("Result: " + probabilityOfAbsurd);	
-		assertEquals(parse("0"), probabilityOfAbsurd);
+		// Below: rule converter not properly converting this model, but it should be tested once that's fixed.
+//		Model model = Model.fromRules(
+//				"sort People: 10;"
+//						+ "sort Dogs: 10;"
+//						+ "random happy: People -> Boolean;"
+//						+ "random fluffy: Dogs -> Boolean;"
+//						+ "random absurd: -> Boolean;"
+//						+ ""
+//						+ "happy(X); // every person is happy"
+//						+ "fluffy(Y); // every dog is fluffy"
+//						+ "happy(X) and fluffy(Y) and (X = Y <=> absurd); // X is person and Y is dog, so they can't be the same");
+//		
+//		// The test here is that if our inference engine knows that two variables of different types are necessarily distinct, then the probability of absurd will be 1, else 0.
+//		// The reason we need the happy and fluffy predicates is that variable types are inferred from the predicates they are used in.
+//		
+//		Expression probabilityOfAbsurd = Belief.compute(parse("absurd"), model);
+//		System.out.println("Result: " + probabilityOfAbsurd);	
+//		assertEquals(parse("if absurd then 0 else 1"), probabilityOfAbsurd);
 	}
 	
 	@Test

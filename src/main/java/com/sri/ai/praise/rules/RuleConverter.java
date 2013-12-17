@@ -62,6 +62,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -165,6 +166,7 @@ public class RuleConverter {
 
 	/** A convenience method building a {@link Model} from a string. */
 	public static Model makeModel(String ruleAndDeclarationsListString) {
+		Trace.in("Making model out of " + ruleAndDeclarationsListString);
 		RuleConverter ruleConverter = new RuleConverter();
 		RewritingProcess process = LBPFactory.newLBPProcess(Expressions.TRUE);
 		Model model;
@@ -173,6 +175,7 @@ public class RuleConverter {
 		} catch (ReservedWordException e) {
 			throw new Error(e);
 		}
+		Trace.out("Model is " + model);
 		return model;
 	}
 	
