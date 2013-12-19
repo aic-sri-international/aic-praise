@@ -1395,8 +1395,7 @@ public class RuleConverter {
 		
 		// | for each P in P1,..., Pn
 		for (Expression potentialExpression : potentialExpressions) {
-			Set<Expression> variables = Expressions.freeVariables(potentialExpression, process);
-			RewritingProcess subProcess = GrinderUtil.extendContextualVariablesWithUnknownDomain(variables, process);
+			RewritingProcess subProcess = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(potentialExpression, process);
 
 			// | .... mayBeSameAsList <- empty list
 			Set<Pair<Expression, Expression>> mayBeSameAsSet = new HashSet<Pair<Expression, Expression>>();
@@ -1421,6 +1420,7 @@ public class RuleConverter {
 			// Get free variables and create inequality constraints on all pairs except those
 			// pairs stated to be ". may be same as .".
 			// | .... C <- true
+			Set<Expression> variables = Expressions.freeVariables(potentialExpression, process);
 			List<Expression> constraints = new ArrayList<Expression>();
 			Expression[] variableArray = new Expression[variables.size()];
 			variables.toArray(variableArray);
@@ -1467,8 +1467,7 @@ public class RuleConverter {
 			Pair<Expression, Expression> pair = setOfConstrainedPotentialExpressions.get(ii);
 			Expression potentialExpression = pair.first;
 			Expression constraintC         = pair.second;
-			Set<Expression> variables = Expressions.freeVariables(Tuple.make(potentialExpression, constraintC), process);
-			RewritingProcess subProcess = GrinderUtil.extendContextualVariablesWithUnknownDomain(variables, process);
+			RewritingProcess subProcess = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(Tuple.make(potentialExpression, constraintC), process);
 			CollectAtomicConstraint collectAtomicConstraint = new CollectAtomicConstraint(subProcess);
 			if (Util.thereExists(new SubExpressionsDepthFirstIterator(potentialExpression), collectAtomicConstraint)) {
 				// // | .... for Assumption in (Constraint, not Constraint)

@@ -185,8 +185,7 @@ public abstract class AbstractLPITest {
 			
 			Expression contextualConstraint = parse(contextualConstraintString);
 			if ( ! contextualConstraint.equals(Expressions.TRUE)) {
-				process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomain(contextualConstraint, process);
-				// process = LPIUtil.extendContextualVariablesInferringDomainsFromUsageInRandomVariables(contextualConstraint, process);
+				process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(contextualConstraint, process);
 				process = GrinderUtil.extendContextualConstraint(contextualConstraint, process);
 			}
 			

@@ -412,9 +412,17 @@ public class RuleConverterTest {
 		rules.clear();
 		rules.add(this.ruleParser.parse("there exists Z : for all Y : loves(X, Y, Z);"));
 		expectedRules.clear();
+
+		// TODO: the results of this test flip between the two following alternatives (the difference is in the parentheses around the for all Y), so parentheses generation is not deterministic and this needs to be fixed.
+
+//		expectedRules.add(ruleParser.parse("'there exists Z : (for all Y : loves(X, Y, Z))'(X);"));
+//		expectedRules.add(ruleParser.parse("if 'for all Y : loves(X, Y, Z)'(X, Z) then 'there exists Z : (for all Y : loves(X, Y, Z))'(X) else 'there exists Z : (for all Y : loves(X, Y, Z))'(X) 0.000000001;"));
+//		expectedRules.add(ruleParser.parse("if not loves(X, Y, Z) then not 'for all Y : loves(X, Y, Z)'(X, Z) else 'for all Y : loves(X, Y, Z)'(X, Z) 0.999999999;"));
+
 		expectedRules.add(ruleParser.parse("'there exists Z : for all Y : loves(X, Y, Z)'(X);"));
 		expectedRules.add(ruleParser.parse("if 'for all Y : loves(X, Y, Z)'(X, Z) then 'there exists Z : for all Y : loves(X, Y, Z)'(X) else 'there exists Z : for all Y : loves(X, Y, Z)'(X) 0.000000001;"));
 		expectedRules.add(ruleParser.parse("if not loves(X, Y, Z) then not 'for all Y : loves(X, Y, Z)'(X, Z) else 'for all Y : loves(X, Y, Z)'(X, Z) 0.999999999;"));
+
 		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, translateFunctionsResult.first);
 		assertEquals(3, translateFunctionsResult.second.size());
@@ -1762,8 +1770,7 @@ public class RuleConverterTest {
 				return n;
 			}
 		}, result);
-		Set<Expression> freeVariables = Expressions.freeVariables(expression, result);
-		result = GrinderUtil.extendContextualVariablesWithUnknownDomain(freeVariables, result);
+		result = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(expression, result);
 		return result;
 	}
 }

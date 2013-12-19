@@ -263,7 +263,7 @@ public class LBPTest extends AbstractLPITest {
 		Expression actual;
 		RewritingProcess testProcess;
 		expression = parse(expressionString);
-		testProcess = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomain(expression, process);
+		testProcess = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(expression, process);
 		actual = rewriter.rewrite(expression, testProcess);
 		assertEquals(parse(expectedString), actual);
 	}
@@ -292,7 +292,7 @@ public class LBPTest extends AbstractLPITest {
 				);
         process = LBPFactory.newLBPProcess(expression);
         Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNameAndArities(), process);
-        process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomain(Tuple.make(expression, randomVariableValue), process);
+        process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(Tuple.make(expression, randomVariableValue), process);
         otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(expression, randomVariableValue, process);
         assertEquals(expected, otherRandomVariableValuesAndContexts);	
     }
