@@ -350,7 +350,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 					// allowed. As this algorithm is recursive
 					// these will be checked on a nested call.
 					Predicates.not(new IsApplicationOf(FunctorConstants.UNION)),
-					Predicates.not(new IsApplicationOf(IfThenElse.FUNCTOR)));
+					Predicates.not(new IsApplicationOf(FunctorConstants.IF_THEN_ELSE)));
 				
 		if (Util.thereExists(unionDomain.getArguments(), isLegalPredicate)) {
 			// the reason for this check is that we are not

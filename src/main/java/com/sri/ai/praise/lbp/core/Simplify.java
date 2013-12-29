@@ -114,10 +114,20 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				// | type(.) | > 0 -> true
 				// | type(.) | = 0 -> false
 				// if flag set.
-				new Pair<Class<?>, Rewriter>(
-						Type.class, 
-						new CardinalityOfTypeAlwaysDistinctFromZero()),
-				//
+//				new Pair<Class<?>, Rewriter>(
+//						Type.class, 
+//						new CardinalityOfTypeAlwaysDistinctFromZero()),
+//				// Support for:
+//				// (previous) message to [ p(X) ] from [ if p(X) then 0.2 else 0.8 ] -> if p(X) then 0.2 else 0.8		
+//				// (previous) message to [ if p(X) then 1 else 0 ] from [ p(X) ] -> if p(X) then 1 else 0		
+//				new Pair<Class<?>, Rewriter>(
+//						CardinalityOfTypeAlwaysDistinctFromZero.class, 
+//						new SimpleMessageDefinitionRewritesToItsValue()),
+//				// Support for:
+//				// if RVV then Alpha else 0 -> if RVV then 1 else 0 (as well as flipped case)		
+//				new Pair<Class<?>, Rewriter>(
+//						SimpleMessageDefinitionRewritesToItsValue.class, 
+//						new MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic()),
 				// Support for: Injective functions
 				// e.g.:
 				// [p(a)] = [p(b)] -> a = b -> false 

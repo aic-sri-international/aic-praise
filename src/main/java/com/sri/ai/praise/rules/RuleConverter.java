@@ -603,7 +603,7 @@ public class RuleConverter {
 			functor.equals(FunctorConstants.EQUAL) ||
 			functor.equals(FunctorConstants.INEQUALITY) ||
 			FunctorConstants.ARITHMETIC_FUNCTORS.contains(functor) ||
-			functor.equals(IfThenElse.FUNCTOR) ||
+			functor.equals(FunctorConstants.IF_THEN_ELSE) ||
 			functor.equals(FUNCTOR_MAY_BE_SAME_AS) ||
 			functor.equals(FUNCTOR_ATOMIC_RULE) ||
 			functor.equals(FUNCTOR_CONDITIONAL_RULE) ||
@@ -1095,7 +1095,7 @@ public class RuleConverter {
 		}
 		// | if rule is "Formula Potential" // implementation note: tested with hasFunctor("atomic rule")
 		// |.... return "if Formula then Potential else <1 - Potential>"
-		return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
+		return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(0), 
 				args.get(1), oneMinusPotential(args.get(1)));
 	}
 	
@@ -1116,13 +1116,13 @@ public class RuleConverter {
 		// | if rule is "if Formula then Rule"
 		if (args.size() == 2) {
 			// | .... return "if Formula then rule2PotentialExpression(Rule) else 0.5"
-			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
+			return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(0), 
 					this.rule2PotentialExpression(args.get(1)),
 					0.5);
 		} // | if rule is "if Formula then Rule1 else Rule2" 
 		else if (args.size() == 3) {
 			// | .... return "if Formula then rule2PotentialExpression(Rule1) else rule2PotentialExpression(Rule)"
-			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(0), 
+			return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(0), 
 					this.rule2PotentialExpression(args.get(1)),
 					this.rule2PotentialExpression(args.get(2)));
 		}
@@ -1147,13 +1147,13 @@ public class RuleConverter {
 		// | if rule is "Potential Formula1." // tested with hasFunctor("prolog rule")
 		if (args.size() == 2) {
 			// |.... return "if Formula1 then Potential else <1 - Potential>"
-			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(1), 
+			return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(1), 
 					args.get(0), oneMinusPotential(args.get(0)));
 		} // | if rule is "Potential Formula1 :- Formula2." // tested with hasFunctor("prolog rule")
 		else if (args.size() == 3){
 			// |.... return "if Formula2 then if Formula1 then Potential else <1 - Potential> else 0.5"
-			return new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(2), 
-					new DefaultCompoundSyntaxTree(IfThenElse.FUNCTOR, args.get(1), 
+			return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(2), 
+					new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(1), 
 							args.get(0), oneMinusPotential(args.get(0))),
 					0.5);
 		}

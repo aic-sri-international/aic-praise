@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-praise nor the names of its
+ * Neither the name of the aic-expresso nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,49 +35,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp.core;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.core.HasFunctor;
-import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.grinder.core.DefaultRewriterTest;
+import com.sri.ai.grinder.core.KindAttribute;
 
 /**
- * A rewriter that externalizes conditionals containing logical variables, for
- * e.g:
+ * Tests whether an expression is a message definition, that is,
+ * an expression of the type <message to Alpha from Beta> or <previous message to Alpha from Beta>.
+ * NEEDS TO BE FINISHED; Just equivalent at HasFunctor at this point.
  * 
- * <pre>
- * if X = a and p(X) then E1 else E2
- * </pre>
- * 
- * would have the expression with the logical variable moved to the top:
- * 
- * <pre>
- * if X = a then if p(X) then E1 else E2 else E2
- * </pre>
- * 
- * @author oreilly
- * 
+ * @author braz
  */
 @Beta
-public class BreakConditionsContainingBothLogicalAndRandomVariables extends AbstractRewriter {
+public class IsMessageDefinition extends DefaultRewriterTest {
 
-	public BreakConditionsContainingBothLogicalAndRandomVariables() {
-		this.setReifiedTests(new HasFunctor(FunctorConstants.IF_THEN_ELSE));
-	}
-	
-	@Override
-	public Expression rewriteAfterBookkeeping(Expression expression,
-			RewritingProcess process) {
-
-		// Delegate to this general purpose routine
-		Expression result = GrinderUtil
-				.makeSureConditionsOnLogicalVariablesAreSeparatedAndOnTop(
-						expression, process);
-
-		return result;
+	/**
+	 * Constructor. Create a RewriterTest with
+	 * (attribute=kind,value=aGivenFunctor).
+	 * 
+	 * @param functorValue
+	 */
+	public IsMessageDefinition(Object functorValue) {
+		// Note: for safety ensure we always compare expressions.
+		super(KindAttribute.INSTANCE,
+				functorValue instanceof Expression ? functorValue
+						: DefaultSymbol.createSymbol(functorValue));
 	}
 }

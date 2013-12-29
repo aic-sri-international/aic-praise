@@ -35,76 +35,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp.core;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.core.HasNumberOfArguments;
-import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.LPIUtil;
 
 /**
- * A rewriter for evaluating all cardinality expressions on types of the form:
+ * Rewrites message definitions by their values when they are simple, that is,
+ * when their (up to normalization) value does not depend on any other messages.
  * 
- * <pre>
- * | type(.) | = 0  -> false
- * 0 = | type(.) |  -> false
- * | type(.) | > 0  -> true
- * 0 > | type(.) |  -> false
- * </pre>
+ * @see LPIUtil#valueOfSimpleMessageOrSelfIfNotSimpleMessage(Expression message, RewritingProcess process) 
  * 
- * @author oreilly
+ * @author braz
  * 
  */
 @Beta
-public class CardinalityOfTypeAlwaysDistinctFromZero extends AbstractRewriter {
+public class SimpleMessageDefinitionRewritesToItsValue extends AbstractRewriter {
 
-	public final static String FUNCTOR_TYPE = "type";
-	
-	public CardinalityOfTypeAlwaysDistinctFromZero() {
-		this.setReifiedTests(new HasNumberOfArguments(2));
-	}
+	// TODO: use a new kind of reified test, IsMessageDefinition
+//	public SimpleMessageDefinitionRewritesToItsValue() {
+//		this.setReifiedTests(new HasFunctor(FunctorConstants.TIMES));
+//	}
 
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-
-		Expression result = expression;
-		if (Model.isCardinalityOfTypesAlwaysGreaterThanZero(process)) {
-			if (expression.hasFunctor(FunctorConstants.EQUAL) || expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
-				Expression arg1 = expression.get(0);
-				Expression arg2 = expression.get(1);
-				if (arg1.hasFunctor(FunctorConstants.CARDINALITY)
-						&& arg1.numberOfArguments() == 1
-						&& arg1.get(0).hasFunctor(FUNCTOR_TYPE)
-						&& arg2.equals(Expressions.ZERO)) {
-					// | type(.) | = 0  -> false
-					if (expression.hasFunctor(FunctorConstants.EQUAL)) {
-						result = Expressions.FALSE;
-					} 
-					else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
-						// | type(.) | > 0  -> true
-						result = Expressions.TRUE;
-					}
-				} 
-				else if (arg2.hasFunctor(FunctorConstants.CARDINALITY)
-						&& arg2.numberOfArguments() == 1
-						&& arg2.get(0).hasFunctor(FUNCTOR_TYPE)
-						&& arg1.equals(Expressions.ZERO)) {
-					// 0 = | type(.) | = 0 
-					if (expression.hasFunctor(FunctorConstants.EQUAL)) {
-						result = Expressions.FALSE;
-					} 
-					else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
-						// 0 > | type(.) | -> false
-						result = Expressions.FALSE;
-					}
-				}
-			}
+		if (LPIUtil.isMessageDefinition(expression)) { // TODO: remove when this test is reified
+			expression = LPIUtil.valueOfSimpleMessageOrSelfIfNotSimpleMessage(expression, process);
 		}
-
-		return result;
+		return expression;
 	}
 }

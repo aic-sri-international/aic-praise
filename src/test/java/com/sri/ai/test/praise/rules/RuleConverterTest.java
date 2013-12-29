@@ -905,7 +905,6 @@ public class RuleConverterTest {
 		randomVariableDeclarations.add(lowParser.parse("randomVariable(friends, 2, Universe, Universe, Boolean)"));
 		randomVariableDeclarations.add(lowParser.parse("randomVariable(likes, 2, Universe, Universe, Boolean)"));
 		randomVariableDeclarations.add(lowParser.parse("randomVariable(colleagues, 2, Universe, Universe, Boolean)"));
-		Model.setKnownRandomVariables(randomVariableDeclarations, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
  
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(lowParser.parse(
@@ -915,7 +914,7 @@ public class RuleConverterTest {
 				lowParser.parse("if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.8 else 0.2 else 0.5"),
 				lowParser.parse("Y != X and Y != Z")));
         		// lowParser.parse("Y != Z and Y != X")));
-		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE)));
+		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions, getNewRewritingProcessWithDefaultDomainSizeAndRandomVariableDeclarations(DEFAULT_DOMAIN_SIZE, randomVariableDeclarations)));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(lowParser.parse(
@@ -924,7 +923,7 @@ public class RuleConverterTest {
 		expected.add(new Pair<Expression, Expression>(
 				lowParser.parse("if colleagues(X, Y) then if likes(X, Y) then 0.8 else 0.2 else 0.5"),
 				lowParser.parse("Y != X and Y != bob")));
-		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE)));
+		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions, getNewRewritingProcessWithDefaultDomainSizeAndRandomVariableDeclarations(DEFAULT_DOMAIN_SIZE, randomVariableDeclarations)));
 	}
 	
 	@Test
@@ -1760,6 +1759,12 @@ public class RuleConverterTest {
 			}
 		}, result);
 		return result;
+	}
+	
+	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSizeAndRandomVariableDeclarations(final int n, Set<Expression> randomVariableDeclarations) {
+		RewritingProcess process = getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE);
+		Model.setKnownRandomVariables(randomVariableDeclarations, process);
+		return process;
 	}
 	
 	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSizeAndContextualVariablesEqualToFreeVariablesInGivenExpression(final int n, Expression expression) {

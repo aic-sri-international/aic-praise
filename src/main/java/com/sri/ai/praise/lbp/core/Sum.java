@@ -343,7 +343,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			Expression beingComputed,
 			RewritingProcess process) {
 
-		Trace.log("else // we have sum_N E * prod_{V in N'} m_F<-V,   E, N, and N' unconditional");
+		Trace.log("We now have sum_N E * prod_{V in N'} m_F<-V,   E, N, and N' unconditional");
 
 		Trace.log("// N  = {}", summationIndexN);
 		Trace.log("// E  = {}", E);
@@ -366,7 +366,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			toBeSummedOut = NPrime;
 		}
 		else {
-			Trace.log("else N' is the empty set");
+			Trace.log("if N' is the empty set");
 			Trace.log("    toBeSummedOut <- N");
 			toBeSummedOut = summationIndexN;
 		}
@@ -378,7 +378,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Trace.log("// v' = {}", vPrimeValue);
 		Trace.log("relevantRange = {v in range(v') : R_basic(E[v'/v]) is not zero}");
 		List<Expression> relevantRange = getRelevantRange(vPrimeValue, E, process);
-		Trace.log("// relevantRange = {}", relevantRange);
+		Trace.log("// relevantRange of {} is {}", vPrimeValue, relevantRange);
 
 		if (relevantRange.size() == 0) {
 			Trace.log("if relevantRange is {}");

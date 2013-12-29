@@ -2949,6 +2949,13 @@ public class LBPTest extends AbstractLPITest {
 	@Test
 	public void testBeliefForNonLoopyModels() {
 		BeliefTestData[] tests = new BeliefTestData[] {
+				// REPEAT OF CASE #53 FOR DEBUGGING ONLY:
+				// From ALBPTest.testCSI()
+				new BeliefTestData(Expressions.TRUE.toString(), new TrivialSunnyAvailableCanPlayWith(), 
+						"belief([canPlayWith(X)])", 
+						false,
+						"if canPlayWith(X) then 0 else 1"),
+				
 				// 
 				// Test on model defined with high-level syntax
 				// 		
@@ -3334,8 +3341,8 @@ public class LBPTest extends AbstractLPITest {
 		
 		// Run non-loopy tests for each kind of schedule currently supported
 		LBPConfiguration.BeliefPropagationUpdateSchedule[] schedules = new LBPConfiguration.BeliefPropagationUpdateSchedule[] {
+				LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS,
 				LBPConfiguration.BeliefPropagationUpdateSchedule.ASYNCHRONOUS_INDIVIDUAL_BASED_CYCLE_DETECTION,
-				LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS
 		};
 		
 		for (LBPConfiguration.BeliefPropagationUpdateSchedule schedule : schedules) {
@@ -4164,23 +4171,22 @@ public class LBPTest extends AbstractLPITest {
 				// Basic:
 				// 
 				
-//				// #0
-//				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-//					Model.fromRules("sort People: 10, ann, bob, dave, rodrigo, ciaran;" +
-//									"sort Pets: 20, astor, rover;" +
-//
-//									"random isPetOf: Pets x People -> Boolean;" +
-//									"random happy: People -> Boolean;" +
-//
-//									"if isPetOf(Pet, Person) then happy(Person) 0.6 else happy(Person) 0.5;" +
-//
-//									"if Pet != rover and Pet != astor then not isPetOf(Pet, bob) else isPetOf(Pet, bob);" +
-//
-//									"if isPetOf(Pet, Person1) then not isPetOf(Pet, Person2);"),
-//					"belief([happy(bob)])", 
-//					false, 
-//					"if happy(bob) then 0.69 else 0.5"
-//					 ),
+				// #0
+				new LoopyBeliefTestData(Expressions.TRUE.toString(),
+					Model.fromRules("sort People: 10, ann, bob, dave, rodrigo, ciaran;" +
+									"sort Pets: 20, astor, rover;" +
+
+									"random isPetOf: Pets x People -> Boolean;" +
+									"random happy: People -> Boolean;" +
+
+									"if isPetOf(Pet, Person) then happy(Person) 0.6 else happy(Person) 0.5;" +
+
+									"if Pet != rover and Pet != astor then not isPetOf(Pet, bob) else isPetOf(Pet, bob);" +
+
+									"if isPetOf(Pet, Person1) then not isPetOf(Pet, Person2);"),
+					"belief([happy(bob)])", 
+					false, 
+					"if happy(bob) then 0.692307692 else 0.307692308"), // two pets exactly, so 0.6*0.6*0.5^18/(0.6*0.6*0.5^18 + 0.4*0.4*0.5^18)
 					
 				// #1
 				new LoopyBeliefTestData(Expressions.TRUE.toString(),

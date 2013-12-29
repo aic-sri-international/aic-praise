@@ -95,22 +95,24 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 		Expression beingComputed          = Tuple.get(expression, 3);
 
 		if (!Expressions.hasFunctor(msgToV_F, LPIUtil.FUNCTOR_MSG_TO_FROM)
-				|| 2 != msgToV_F.numberOfArguments()
+				|| msgToV_F.numberOfArguments() != 2 
 				|| !BracketedExpressionSubExpressionsProvider
 						.isBracketedExpression(msgToV_F.get(0))
 				|| !BracketedExpressionSubExpressionsProvider
-						.isBracketedExpression(msgToV_F.get(1))
+				.isBracketedExpression(msgToV_F.get(1))
 				|| !BracketedExpressionSubExpressionsProvider.isRandomVariable(
 						msgToV_F.get(0), process)) {
 			throw new IllegalArgumentException(
 					"msgToV_F is not a message to a variable from a factor:msgToV_F="
 							+ msgToV_F);
 		}
-		
+
 		Justification.log(msgToV_F);
 
 		Expression randomVariable = msgToV_F.get(0);
 		Expression factor         = msgToV_F.get(1);
+
+		Expression result;
 
 		Trace.log("In <- R_in(m_V<-F in beingComputed)");
 		Expression pairV_F = Tuple.make(randomVariable, factor);
@@ -120,7 +122,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 			Trace.log("if asynchronous individual schedule");
 			Trace.log("    In <- R_in((V,F) in beingComputed)");
 			in = process.rewrite(R_in, LPIUtil.argForInRewriteCall(pairV_F, beingComputed));
-			
+
 			Trace.log("    beingComputed <- R_basic(beingComputed union {{(V,F)}})");
 			beingComputed = LPIUtil.extendBeingComputed(beingComputed, pairV_F, process);
 		} 
@@ -130,7 +132,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 			in = process.rewrite(R_in, LPIUtil.argForInRewriteCall(pairV_F, beingComputed));
 			Trace.log("    In <- R_complete_normalize(In)");
 			in = process.rewrite(R_complete_normalize, in);
-			
+
 			Trace.log("    beingComputed <- beingComputed union {{(V,F) | C }}_I");
 			beingComputed = LPIUtil.extendBeingComputedWithIntensionalMultiSet(beingComputed, pairV_F, conditionC, indexExpressions, process);
 		} 
@@ -152,7 +154,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 			throw new UnsupportedOperationException("Belief propagation update schedule "+beliefPropagationUpdateSchedule+ " is not supported.");
 		}
 
-		Expression result  = GrinderUtil.branchAndMergeOnACondition(
+		result  = GrinderUtil.branchAndMergeOnACondition(
 				in,
 				// pm_V<-F
 				newThenBranchPreviousMessage(), new Expression[] { randomVariable, factor},
@@ -160,7 +162,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				newElseBranchMessage(), new Expression[] { randomVariable, factor, beingComputed},
 				R_check_branch_reachable, 
 				R_basic, process);
-			
+
 		return result;
 	}
 	

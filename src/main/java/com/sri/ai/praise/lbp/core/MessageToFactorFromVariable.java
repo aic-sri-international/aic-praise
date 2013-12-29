@@ -99,6 +99,8 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 		LPIUtil.assertFactorOk(factor, process);
 		LPIUtil.assertRandomVariableOk(randomVariable, process);
 		
+		Expression result;
+		
 		Expression pairF_V = Tuple.make(factor, randomVariable);
 		Expression in      = null;
 		LBPConfiguration.BeliefPropagationUpdateSchedule beliefPropagationUpdateSchedule = configuration.getBeliefPropagationUpdateSchedule();
@@ -120,10 +122,10 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 		else {
 			throw new UnsupportedOperationException("Belief propagation update schedule "+beliefPropagationUpdateSchedule+ " is not supported.");
 		}
-		
+
 		Trace.log("return R_basic(if In then pm_F<-V else R_prod_factor(prod_F' in R_set_diff(R_neigh_v(Neigh(V))\\{F}) m_V<-F', R_basic(beingComputed union {{(F,V)}})))");
-		
-		Expression result  = GrinderUtil.branchAndMergeOnACondition(
+
+		result = GrinderUtil.branchAndMergeOnACondition(
 				in,
 				// pm_F<-V
 				newThenBranchPreviousMessage(), new Expression[] { factor, randomVariable},
@@ -134,8 +136,8 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 
 		return result;
 	}
-	
-	
+
+
 	//
 	// PRIVATE METHODS
 	//

@@ -35,76 +35,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp.core;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.core.HasNumberOfArguments;
+import com.sri.ai.grinder.core.HasFunctor;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.LPIUtil;
 
 /**
- * A rewriter for evaluating all cardinality expressions on types of the form:
+ * Rewrites message values of the form <if RVV then Alpha else 0> as <if RVV then 1 else 0> (as well as the flipped case).
+ * As usual with using deterministic messages, this assumes the probability distribution involved is consistent.
  * 
- * <pre>
- * | type(.) | = 0  -> false
- * 0 = | type(.) |  -> false
- * | type(.) | > 0  -> true
- * 0 > | type(.) |  -> false
- * </pre>
- * 
- * @author oreilly
+ * @author braz
  * 
  */
 @Beta
-public class CardinalityOfTypeAlwaysDistinctFromZero extends AbstractRewriter {
+public class MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic extends AbstractRewriter {
 
-	public final static String FUNCTOR_TYPE = "type";
-	
-	public CardinalityOfTypeAlwaysDistinctFromZero() {
-		this.setReifiedTests(new HasNumberOfArguments(2));
+	public MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic() {
+		this.setReifiedTests(new HasFunctor(FunctorConstants.IF_THEN_ELSE));
 	}
 
 	@Override
-	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-
-		Expression result = expression;
-		if (Model.isCardinalityOfTypesAlwaysGreaterThanZero(process)) {
-			if (expression.hasFunctor(FunctorConstants.EQUAL) || expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
-				Expression arg1 = expression.get(0);
-				Expression arg2 = expression.get(1);
-				if (arg1.hasFunctor(FunctorConstants.CARDINALITY)
-						&& arg1.numberOfArguments() == 1
-						&& arg1.get(0).hasFunctor(FUNCTOR_TYPE)
-						&& arg2.equals(Expressions.ZERO)) {
-					// | type(.) | = 0  -> false
-					if (expression.hasFunctor(FunctorConstants.EQUAL)) {
-						result = Expressions.FALSE;
-					} 
-					else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
-						// | type(.) | > 0  -> true
-						result = Expressions.TRUE;
-					}
-				} 
-				else if (arg2.hasFunctor(FunctorConstants.CARDINALITY)
-						&& arg2.numberOfArguments() == 1
-						&& arg2.get(0).hasFunctor(FUNCTOR_TYPE)
-						&& arg1.equals(Expressions.ZERO)) {
-					// 0 = | type(.) | = 0 
-					if (expression.hasFunctor(FunctorConstants.EQUAL)) {
-						result = Expressions.FALSE;
-					} 
-					else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
-						// 0 > | type(.) | -> false
-						result = Expressions.FALSE;
-					}
-				}
-			}
+	public Expression rewriteAfterBookkeeping(Expression ifThenElse, RewritingProcess process) {
+		ifThenElse = IfThenElse.equivalentWithNonNegatedCondition(ifThenElse);
+		Expression condition = IfThenElse.getCondition(ifThenElse);
+		if (LPIUtil.isRandomVariableValueExpression(condition, process)
+				&& IfThenElse.getThenBranch(ifThenElse).equals(Expressions.ZERO)) {
+			ifThenElse = IfThenElse.make(condition, Expressions.ZERO, Expressions.ONE);
 		}
-
-		return result;
+		else if (LPIUtil.isRandomVariableValueExpression(condition, process)
+				&& IfThenElse.getElseBranch(ifThenElse).equals(Expressions.ZERO)) {
+			ifThenElse = IfThenElse.make(condition, Expressions.ONE, Expressions.ZERO);
+		}
+		return ifThenElse;
 	}
 }

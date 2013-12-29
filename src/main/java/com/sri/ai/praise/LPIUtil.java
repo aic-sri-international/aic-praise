@@ -77,6 +77,7 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.lbp.core.IsDeterministicBooleanMessageValue;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 import com.sri.ai.praise.model.RandomPredicate;
 import com.sri.ai.praise.model.RandomPredicateCatalog;
@@ -736,6 +737,14 @@ public class LPIUtil {
 		return result;
 	}
 	
+	/**
+	 * Indicates whether an expression is a message definition ("message to Alpha from Beta" or "previous message to Alpha from Beta").
+	 */
+	public static boolean isMessageDefinition(Expression expression) {
+		boolean result = expression.hasFunctor(FUNCTOR_PREVIOUS_MSG_TO_FROM) || expression.hasFunctor(FUNCTOR_MSG_TO_FROM); 
+		return result;
+	}
+
 	/**
 	 * Make a trivial bound expression for the specified random variable value, i.e:<br>
 	 * <pre>
@@ -1642,4 +1651,80 @@ public class LPIUtil {
 		Expression result = Expressions.make(LPIUtil.FUNCTOR_BELIEF, randomVariable);
 		return result;
 	}
+
+	
+	// BEGINNING OF SIMPLE MESSAGES TREATMENT
+	
+	/**
+	 * Receives a message and returns its value in terms of the random variable value,
+	 * if the message is simple, and the original message definition otherwise;
+	 * a message is simple if its (up to normalization) value can be determined from the message definition alone, without involving other messages;
+	 * this is possible when the message is from a factor [ if RV then V1 else V2 ] to a random variable [RV],
+	 * or from a random variable [RV] to a <i>deterministic</i> factor [ if RV then V1 else V2 ] (V1 or V2 is equal to 0),
+	 * assuming that the probabilistic model being used is consistent (that is, it will not lend total mass to another value of the same random variable).
+	 */
+	public static Expression valueOfSimpleMessageOrSelfIfNotSimpleMessage(Expression message, RewritingProcess process) {
+		Expression result = message;
+		if (LPIUtil.isRandomVariable(message.get(0), process)) {
+			Expression randomVariable      = message.get(0);
+			Expression factor              = message.get(1);
+			Expression factorValue         = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(factor);
+			if (factorValueIsSimpleWithRespectToRandomVariable(factorValue, randomVariable, process)) {
+				result = factorValue;
+			}
+		}
+		else {
+			Expression factor         = message.get(0);
+			Expression factorValue    = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(factor);
+			if (IsDeterministicBooleanMessageValue.isDeterministicMessageValue(factorValue, process)) {
+				result = factorValue;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Indicates that a factor is simple with respect to a random variable, that is,
+	 * an expression of the form <if RVV then V1 else V2> for RVV the random variable value.
+	 */
+	public static boolean factorValueIsSimpleWithRespectToRandomVariable(Expression factorValue, Expression randomVariable, RewritingProcess process) {
+		Expression randomVariableValue = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(randomVariable);
+		boolean result = factorValueIsSimpleWithRespectToRandomVariable(factorValue, randomVariable, randomVariableValue, process);
+		return result;
+	}
+	
+	/**
+	 * Slightly more efficient version of {@link #factorValueIsSimpleWithRespectToRandomVariable(Expression, Expression, RewritingProcess)}.
+	 */
+	private static boolean factorValueIsSimpleWithRespectToRandomVariable(Expression factorValue, Expression randomVariable, Expression randomVariableValue, RewritingProcess process) {
+		boolean result = false;
+		
+		if (IfThenElse.isIfThenElse(factorValue)) {
+			factorValue = IfThenElse.equivalentWithNonNegatedCondition(factorValue);
+			Expression condition = IfThenElse.getCondition(factorValue);
+			
+			boolean conditionEqualsRandomVariableValue = false;
+			if (condition.equals(randomVariableValue)) {
+				conditionEqualsRandomVariableValue = true;
+			}
+			else {
+				Expression randomVariableConditionInFactor = BracketedExpressionSubExpressionsProvider.make(condition);
+				conditionEqualsRandomVariableValue =
+						process.rewrite(LBPRewriter.R_complete_normalize, Equality.make(randomVariableConditionInFactor, randomVariable)).equals(Expressions.TRUE);
+			}
+			
+			result =
+					conditionEqualsRandomVariableValue
+					&& factorValueIsSimpleWithRespectToRandomVariable(IfThenElse.getThenBranch(factorValue), randomVariable, randomVariableValue, process)
+					&& factorValueIsSimpleWithRespectToRandomVariable(IfThenElse.getElseBranch(factorValue), randomVariable, randomVariableValue, process);
+		}
+		else if (Expressions.isNumber(factorValue) || ! LPIUtil.containsRandomVariableValueExpression(factorValue, process)) {
+			result = true;
+		}
+		
+		return result;
+	}
+
+	// END OF SIMPLE MESSAGES TREATMENT
+
 }
