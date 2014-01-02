@@ -376,12 +376,12 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression vPrimeValue = LPIUtil.getRandomVariableValueExpression(VPrime, process);
 		Trace.log("// V' = {}", VPrime);
 		Trace.log("// v' = {}", vPrimeValue);
-		Trace.log("relevantRange = {v in range(v') : R_basic(E[v'/v]) is not zero}");
-		List<Expression> relevantRange = getRelevantRange(vPrimeValue, E, process);
-		Trace.log("// relevantRange of {} is {}", vPrimeValue, relevantRange);
+		Trace.log("relevantRangeSoFar = {v in range(v') : R_basic(E[v'/v]) is not zero}");
+		List<Expression> relevantRangeSoFar = getRelevantRange(vPrimeValue, E, process);
+		Trace.log("// relevantRangeSoFar of {} is {}", vPrimeValue, relevantRangeSoFar);
 
-		if (relevantRange.size() == 0) {
-			Trace.log("if relevantRange is {}");
+		if (relevantRangeSoFar.size() == 0) {
+			Trace.log("if relevantRangeSoFar is {}");
 			Trace.log("    throw exception: model does not validate any values for " + VPrime);
 			throw new IllegalStateException("Model does not validate any values for " + VPrime);
 		}
@@ -408,11 +408,11 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				Justification.endEqualityStep(currentExpression);
 			}
 
-			if (configuration.isSumRewriterUsingSingletonRelevantRangeHeuristic() && relevantRange.size() == 1) {
-				Trace.log("    if relevantRange is singleton { v }");
+			if (configuration.isSumRewriterUsingSingletonRelevantRangeHeuristic() && relevantRangeSoFar.size() == 1) {
+				Trace.log("    if relevantRangeSoFar is singleton { v }");
 				Trace.log("        M <- 1");
 				if (Justification.isEnabled()) {
-					Justification.beginEqualityStep("only possible value for " + vPrimeValue + " is " + relevantRange.get(0) + "; we assume the incoming message will be consistent with that and just drop it");
+					Justification.beginEqualityStep("only possible value for " + vPrimeValue + " is " + relevantRangeSoFar.get(0) + "; we assume the incoming message will be consistent with that and just drop it");
 				}
 				
 				M = Expressions.ONE;
@@ -424,7 +424,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				}
 			} 
 			else {
-				Trace.log("    if relevantRange is not a singleton or heuristic is turned off");
+				Trace.log("    if relevantRangeSoFar is not a singleton or heuristic is turned off");
 				Trace.log("        M <- R_m_to_f_from_v(m_F<-V', beingComputed)");
 				if (Justification.isEnabled()) {
 					Justification.beginEqualityStep("computing incoming message from " + vPrimeValue);
@@ -444,12 +444,12 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				} 
 				else {
 					Trace.log("        if M is *not* previous message to F from V'");
-					Trace.log("            relevantRange = {v in relevantRange : R_basic(M[v'/v]) is not zero }");
-					relevantRange = getRelevantRange(vPrimeValue, M, process);
-					Trace.log("            // relevantRange = {}", relevantRange);
+					Trace.log("            relevantRangeSoFar = {v in relevantRangeSoFar : R_basic(M[v'/v]) is not zero }");
+					relevantRangeSoFar = getRelevantRange(vPrimeValue, M, process);
+					Trace.log("            // relevantRangeSoFar = {}", relevantRangeSoFar);
 					
-					if (relevantRange.isEmpty()) {
-						Trace.log("            if relevantRange is {}");
+					if (relevantRangeSoFar.isEmpty()) {
+						Trace.log("            if relevantRangeSoFar is {}");
 						Trace.log("                throw exception: model does not validate any values for " + VPrime);
 						throw new IllegalStateException("Model does not validate any values for " + VPrime);
 					}
@@ -481,16 +481,16 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 
 		Expression sumIndexWithoutVPrime = LPIUtil.callSetDiff(summationIndexN, VPrime, process);
 		Expression EByM                  = Times.make(Arrays.asList(new Expression[] { E, M }));
-		Trace.log("    // relevantRange = {}", relevantRange);
+		Trace.log("    // relevantRangeSoFar = {}", relevantRangeSoFar);
 		Trace.log("    // M = {}", M);
 		Trace.log("    // products = {}", newProductOfIncomingMessages);
 		Trace.log("    // E*M = {}", EByM);
 		Trace.log("return R_sum(sum_{R_set_diff(N\\{V'})} R_basic((E*M)[v'/v1] + ... + (E*M)[v'/vn]) * products, T, beingComputed)");
-		Trace.log("       for relevantRange in the form {v1,...,vn}");
+		Trace.log("       for relevantRangeSoFar in the form {v1,...,vn}");
 		
-		Expression[] substitutions = new Expression[relevantRange.size()];
+		Expression[] substitutions = new Expression[relevantRangeSoFar.size()];
 		for (int i = 0; i < substitutions.length; i++) {
-			Expression v     = relevantRange.get(i);
+			Expression v     = relevantRangeSoFar.get(i);
 			substitutions[i] = SemanticSubstitute.replace(EByM, vPrimeValue, v, process);
 		}
 		Expression sumOfSubstitutions = Plus.make(Arrays.asList(substitutions));
@@ -549,16 +549,16 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 	}
 
 	private List<Expression> getRelevantRange(Expression vPrimeValue, Expression E, RewritingProcess process) {
-		// relevantRange = {v in range(v') : R_basic(E[v'/v]) is not zero}
-		List<Expression> relevantRange = new ArrayList<Expression>();
+		// relevantRangeSoFar = {v in range(v') : R_basic(E[v'/v]) is not zero}
+		List<Expression> relevantRangeSoFar = new ArrayList<Expression>();
 		for (Expression v : Model.range(vPrimeValue, process)) {
 			Expression subE = SemanticSubstitute.replace(E, vPrimeValue, v, process);
 			Expression basicE = process.rewrite(R_basic, subE);
 			if (!basicE.equals(Expressions.ZERO)) {
-				relevantRange.add(v);
+				relevantRangeSoFar.add(v);
 			}
 		}
-		return relevantRange;
+		return relevantRangeSoFar;
 	}
 	
 	//

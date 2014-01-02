@@ -110,24 +110,28 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				new Pair<Class<?>, Rewriter>(
 						Plus.class, 
 						new Type()),
+
 				// Support for:
 				// | type(.) | > 0 -> true
 				// | type(.) | = 0 -> false
 				// if flag set.
-//				new Pair<Class<?>, Rewriter>(
-//						Type.class, 
-//						new CardinalityOfTypeAlwaysDistinctFromZero()),
-//				// Support for:
-//				// (previous) message to [ p(X) ] from [ if p(X) then 0.2 else 0.8 ] -> if p(X) then 0.2 else 0.8		
-//				// (previous) message to [ if p(X) then 1 else 0 ] from [ p(X) ] -> if p(X) then 1 else 0		
-//				new Pair<Class<?>, Rewriter>(
-//						CardinalityOfTypeAlwaysDistinctFromZero.class, 
-//						new SimpleMessageDefinitionRewritesToItsValue()),
-//				// Support for:
-//				// if RVV then Alpha else 0 -> if RVV then 1 else 0 (as well as flipped case)		
-//				new Pair<Class<?>, Rewriter>(
-//						SimpleMessageDefinitionRewritesToItsValue.class, 
-//						new MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic()),
+				new Pair<Class<?>, Rewriter>(
+						Type.class, 
+						new CardinalityOfTypeAlwaysDistinctFromZero()),
+						
+				// Support for:
+				// (previous) message to [ p(X) ] from [ if p(X) then 0.2 else 0.8 ] -> if p(X) then 0.2 else 0.8		
+				// (previous) message to [ if p(X) then 1 else 0 ] from [ p(X) ] -> if p(X) then 1 else 0		
+				new Pair<Class<?>, Rewriter>(
+						CardinalityOfTypeAlwaysDistinctFromZero.class, 
+						new SimpleMessageDefinitionRewritesToItsValue()),
+						
+				// Support for:
+				// if RVV then Alpha else 0 -> if RVV then 1 else 0 (as well as flipped case)		
+				new Pair<Class<?>, Rewriter>(
+						SimpleMessageDefinitionRewritesToItsValue.class, 
+						new MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic()),
+						
 				// Support for: Injective functions
 				// e.g.:
 				// [p(a)] = [p(b)] -> a = b -> false 
@@ -142,7 +146,7 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				new Pair<Class<?>, Rewriter>(
 						IfThenElseSubExpressionsAndImposedConditionsProvider.class,
 						new InjectiveModule()),
-				//
+				
 				// Support for: Mutually exclusive Co-domains
 				// e.g.:
 				// [ p(a, X) ] = [ q(Y, b) ] -> false 
@@ -156,7 +160,7 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				new Pair<Class<?>, Rewriter>(
 						IfThenElseSubExpressionsAndImposedConditionsProvider.class,
 						new MutuallyExclusiveCoDomainsModule()),
-				//
+				
 				// Support for: Tuples (injective and mutually exclusive co-domains).
 				new Pair<Class<?>, Rewriter>(
 						IfThenElseSubExpressionsAndImposedConditionsProvider.class,
@@ -168,24 +172,6 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				new Pair<Class<?>, Rewriter>(
 						Equality.class,
 						new UnionOnExtensionalSets()),
-//				// 
-//				// Support for: Splitting conditionals on random variables 
-//				// e.g.:
-//				// 'if X != a and p(X) then E1 else E2' 
-//				// ->
-//				// 'if X != a the if p(X) then E1 else E2 else E2'
-//				//
-//				// 'if p(X) then if X = a then Alpha else Beta else Gamma' 
-//				// ->
-//				// 'if X = a then if p(X) then Alpha else Gamma else if p(X) then Beta else Gamma' 
-//						
-////						new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
-////								new MoveAllConditionsOnRandomVariablesDown()),	 
-//
-//						new Pair<Class<?>, Rewriter>(IfThenElseIrrelevantCondition.class,
-//								new BreakConditionsContainingBothLogicalAndRandomVariables()),	 
-//				new Pair<Class<?>, Rewriter>(BreakConditionsContainingBothLogicalAndRandomVariables.class,
-//						new MoveRandomVariableValueExpressionConditionDown()),
 						
 				//
 				// Support for: lifting products of factors
@@ -196,15 +182,12 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 			    // prod_{}
 				// ->
 				// 1
-
-//								new Pair<Class<?>, Rewriter>(MoveAllConditionsOnRandomVariablesDown.class,
-//								new Pair<Class<?>, Rewriter>(MoveRandomVariableValueExpressionConditionDown.class,
-								new Pair<Class<?>, Rewriter>(UnionOnExtensionalSets.class,
+				new Pair<Class<?>, Rewriter>(UnionOnExtensionalSets.class,
 										
 						new LiftProductOfFactorToVariable()),
 				new Pair<Class<?>, Rewriter>(LiftProductOfFactorToVariable.class,
 						new ProductOnExtensionalSet()),
-				//
+
 				// Support for: lambda applications on messages
 				// 	
 				// (lambda q(Y) : if q(Y) then 1 else 0)(false) 

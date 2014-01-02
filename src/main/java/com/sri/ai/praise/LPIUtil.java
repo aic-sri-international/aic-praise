@@ -1727,4 +1727,38 @@ public class LPIUtil {
 
 	// END OF SIMPLE MESSAGES TREATMENT
 
+	/**
+	 * Key for RewritingProcess global object indicating which random variable is being normalized at a certain point.
+	 * At the time of this writing, this is used by rewriter {@link MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic}.
+	 * @see #setRandomVariableBeingNormalizedAndReturnPreviousOne(Expression, RewritingProcess)
+	 * @see #restorePreviousRandomVariableBeingNormalized(Expression, RewritingProcess)
+	 */
+	public static final String RANDOM_VARIABLE_BEING_NORMALIZED = "random variable being normalized";
+
+	/**
+	 * Key for RewritingProcess global object indicating which random variable is being normalized at a certain point.
+	 * At the time of this writing, this is used by rewriter {@link MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic}.
+	 * @see #RANDOM_VARIABLE_BEING_NORMALIZED
+	 * @see #restorePreviousRandomVariableBeingNormalized(Expression, RewritingProcess)
+	 */
+	public static Expression setRandomVariableBeingNormalizedAndReturnPreviousOne(Expression randomVariable, RewritingProcess process) {
+		Expression previousRandomVariableBeingNormalized = (Expression) process.getGlobalObject(RANDOM_VARIABLE_BEING_NORMALIZED);
+		process.putGlobalObject(RANDOM_VARIABLE_BEING_NORMALIZED, randomVariable);
+		return previousRandomVariableBeingNormalized;
+	}
+
+	/**
+	 * Key for RewritingProcess global object indicating which random variable is being normalized at a certain point.
+	 * At the time of this writing, this is used by rewriter {@link MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic}.
+	 * @see #RANDOM_VARIABLE_BEING_NORMALIZED
+	 * @see #setRandomVariableBeingNormalizedAndReturnPreviousOne(Expression, RewritingProcess)
+	 */
+	public static void restorePreviousRandomVariableBeingNormalized(Expression previousRandomVariableBeingNormalized, RewritingProcess process) {
+		if (previousRandomVariableBeingNormalized == null) { // this check is needed in case the global objects map being used is of a type that does not store null values.
+			process.getGlobalObjects().remove(RANDOM_VARIABLE_BEING_NORMALIZED);
+		}
+		else {
+			process.putGlobalObject(RANDOM_VARIABLE_BEING_NORMALIZED, previousRandomVariableBeingNormalized);
+		}
+	}
 }

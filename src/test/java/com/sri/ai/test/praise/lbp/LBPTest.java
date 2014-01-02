@@ -2949,12 +2949,6 @@ public class LBPTest extends AbstractLPITest {
 	@Test
 	public void testBeliefForNonLoopyModels() {
 		BeliefTestData[] tests = new BeliefTestData[] {
-				// REPEAT OF CASE #53 FOR DEBUGGING ONLY:
-				// From ALBPTest.testCSI()
-				new BeliefTestData(Expressions.TRUE.toString(), new TrivialSunnyAvailableCanPlayWith(), 
-						"belief([canPlayWith(X)])", 
-						false,
-						"if canPlayWith(X) then 0 else 1"),
 				
 				// 
 				// Test on model defined with high-level syntax
@@ -3341,8 +3335,8 @@ public class LBPTest extends AbstractLPITest {
 		
 		// Run non-loopy tests for each kind of schedule currently supported
 		LBPConfiguration.BeliefPropagationUpdateSchedule[] schedules = new LBPConfiguration.BeliefPropagationUpdateSchedule[] {
-				LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS,
 				LBPConfiguration.BeliefPropagationUpdateSchedule.ASYNCHRONOUS_INDIVIDUAL_BASED_CYCLE_DETECTION,
+				LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS,
 		};
 		
 		for (LBPConfiguration.BeliefPropagationUpdateSchedule schedule : schedules) {
@@ -4228,7 +4222,8 @@ public class LBPTest extends AbstractLPITest {
 					//     p(obj1) 0.996017 0.003983
 					//     q(obj1) 0.997635 0.002365
 					//     ...
-					"if p(X) then 0.996016637 else 0.00398336255"
+					//"if p(X) then 0.996016637 else 0.00398336255" // value obtained before inclusion of simple and deterministic messages treatment -- the difference is a little odd given that the model does not have determinism, but perhaps this changes the order of computations and numerical differences occur.
+					"if p(X) then 0.996016485 else 0.00398351518"
 					),				
 					
 				// #3

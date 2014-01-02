@@ -154,6 +154,8 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 			throw new UnsupportedOperationException("Belief propagation update schedule "+beliefPropagationUpdateSchedule+ " is not supported.");
 		}
 
+		Expression previousRandomVariableBeingNormalized = LPIUtil.setRandomVariableBeingNormalizedAndReturnPreviousOne(randomVariable, process);
+
 		result  = GrinderUtil.branchAndMergeOnACondition(
 				in,
 				// pm_V<-F
@@ -162,6 +164,8 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				newElseBranchMessage(), new Expression[] { randomVariable, factor, beingComputed},
 				R_check_branch_reachable, 
 				R_basic, process);
+
+		LPIUtil.restorePreviousRandomVariableBeingNormalized(previousRandomVariableBeingNormalized, process);
 
 		return result;
 	}

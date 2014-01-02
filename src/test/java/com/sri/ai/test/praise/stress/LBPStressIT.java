@@ -72,8 +72,8 @@ public class LBPStressIT extends AbstractLPITest {
 						false,
 						// Was -
 						//"if smoker(ann) then 0.995514833 else 0.00448516689"
-						// Now -
-						"if smoker(ann) then 0.995514917 else 0.0044850832")});
+						//"if smoker(ann) then 0.995514917 else 0.0044850832"
+						"if smoker(ann) then 0.995515062 else 0.00448493764")});
 	}
 	
 	// Note: This is based on PRAiSE Demo App Example 4.

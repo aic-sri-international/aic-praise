@@ -178,6 +178,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		Expression randomVariable = belief.get(0);
 		
+		Expression previousRandomVariableBeingNormalized = LPIUtil.setRandomVariableBeingNormalizedAndReturnPreviousOne(randomVariable, process);
+		
 		Set<Expression> freeVariablesFromBeliefQuery = Expressions.freeVariables(randomVariable, process);
 		
 		process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, process);
@@ -336,6 +338,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Justification.endEqualityStep(normalizedBeliefValue); // this endStep closes entire set of iterations
 			result = normalizedBeliefValue;
 		}
+		
+		LPIUtil.restorePreviousRandomVariableBeingNormalized(previousRandomVariableBeingNormalized, process);
 		
 		Justification.endEqualityStep(result);
 		
@@ -628,8 +632,13 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						else {
 							randomVariable = origin;
 						}
+						
+						Expression previousRandomVariableBeingNormalized = LPIUtil.setRandomVariableBeingNormalizedAndReturnPreviousOne(randomVariable, process);
+
 						normalizedValue = subProcess.rewrite(R_normalize_message, LPIUtil.argForNormalizeRewriteCall(randomVariable, value));
 						normalizedValue = limitPrecisionToNumberOfSignificantDecimalPlaces(normalizedValue, subProcess);
+						
+						LPIUtil.restorePreviousRandomVariableBeingNormalized(previousRandomVariableBeingNormalized, process);
 					}
 					
 					Trace.log("    next_msg_values <- next_msg_values union { (on I) (Destination, Origin, value) | C }");

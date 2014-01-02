@@ -45,34 +45,60 @@ import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.core.HasFunctor;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.LPIUtil;
 
 /**
- * Rewrites message values of the form <if RVV then Alpha else 0> as <if RVV then 1 else 0> (as well as the flipped case).
+ * Rewrites, for a specific random variable [ V ] present in the RewritingProcess as a global object under
+ * the key {@link LPIUtil#RANDOM_VARIABLE_BEING_NORMALIZED},
+ * message values of the form <if V then Alpha else 0> as <if V then 1 else 0> (as well as the flipped case).
  * As usual with using deterministic messages, this assumes the probability distribution involved is consistent.
+ * The reason the rewriter requires to know which random variable to operate on is that this operation is only valid
+ * for the random variable on which a normalization will be later applied.
+ * Actually, even that is not a guarantee of correctness because we are also assuming that this message is
+ * part of a product of messages on the same random variable.
+ * If it were, say, is a summation of them, it would not be correct.
  * 
+ * @see LPIUtil#setRandomVariableBeingNormalizedAndReturnPreviousOne(Expression, RewritingProcess)
+ * @see LPIUtil#restorePreviousRandomVariableBeingNormalized(Expression, RewritingProcess)
+
  * @author braz
  * 
  */
 @Beta
 public class MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic extends AbstractRewriter {
 
+	
 	public MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic() {
 		this.setReifiedTests(new HasFunctor(FunctorConstants.IF_THEN_ELSE));
 	}
 
 	@Override
-	public Expression rewriteAfterBookkeeping(Expression ifThenElse, RewritingProcess process) {
-		ifThenElse = IfThenElse.equivalentWithNonNegatedCondition(ifThenElse);
-		Expression condition = IfThenElse.getCondition(ifThenElse);
-		if (LPIUtil.isRandomVariableValueExpression(condition, process)
-				&& IfThenElse.getThenBranch(ifThenElse).equals(Expressions.ZERO)) {
-			ifThenElse = IfThenElse.make(condition, Expressions.ZERO, Expressions.ONE);
+	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
+		expression = IfThenElse.equivalentWithNonNegatedCondition(expression);
+		// this may result is an expression that is no longer an if then else
+
+		if (IfThenElse.isIfThenElse(expression)) {
+			Expression condition = IfThenElse.getCondition(expression);
+
+			Expression randomVariableBeingNormalized =
+					(Expression) process.getGlobalObject(LPIUtil.RANDOM_VARIABLE_BEING_NORMALIZED);
+
+			if (randomVariableBeingNormalized != null) {
+				Expression randomVariableBeingNormalizedValue =
+						BracketedExpressionSubExpressionsProvider.getRandomVariableValueExpression(
+								randomVariableBeingNormalized);
+				if (condition.equals(randomVariableBeingNormalizedValue)) {
+					if (IfThenElse.getThenBranch(expression).equals(Expressions.ZERO)) {
+						expression = IfThenElse.make(condition, Expressions.ZERO, Expressions.ONE);
+					}
+					else if (IfThenElse.getElseBranch(expression).equals(Expressions.ZERO)) {
+						expression = IfThenElse.make(condition, Expressions.ONE, Expressions.ZERO);
+					}
+				}
+			}
 		}
-		else if (LPIUtil.isRandomVariableValueExpression(condition, process)
-				&& IfThenElse.getElseBranch(ifThenElse).equals(Expressions.ZERO)) {
-			ifThenElse = IfThenElse.make(condition, Expressions.ONE, Expressions.ZERO);
-		}
-		return ifThenElse;
+
+		return expression;
 	}
 }

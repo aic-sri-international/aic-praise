@@ -84,6 +84,8 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 		
 		Expression randomVariable = belief.get(0);
 		
+		Expression previousRandomVariableBeingNormalized = LPIUtil.setRandomVariableBeingNormalizedAndReturnPreviousOne(randomVariable, process);
+		
 		process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, process);
 		process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getRewritingProcessesModel(process).getParfactorsDeclaration().getParfactors()), process);
 
@@ -154,6 +156,8 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 			result = normalizedBeliefExpansion;
 		}	
 		
+		LPIUtil.restorePreviousRandomVariableBeingNormalized(previousRandomVariableBeingNormalized, process);
+
 		Justification.endEqualityStep(result);
 		
 		return result;

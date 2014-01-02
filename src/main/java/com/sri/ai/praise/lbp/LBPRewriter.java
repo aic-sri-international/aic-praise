@@ -766,13 +766,14 @@ public interface LBPRewriter extends Rewriter {
 	 *     toBeSummedOut <- N
 	 * pick V' in toBeSummedOut(V' has the form [v'])
 	 *     
-	 * relevantRange = {v in range(v') : {@link #R_basic}(E[v'/v]) is not zero}
-	 * if relevantRange is {}
+	 * relevantRangeSoFar = {v in range(v') : {@link #R_basic}(E[v'/v]) is not zero}
+	 * if relevantRangeSoFar is {}
 	 *     throw exception: model does not validate any values for V'
 	 *         
+	 * // We now compute M (the value of the message from V'), products (the new product of incoming messages excluding the one from V') and refine relevantRangeSoFar         
 	 * if N' is not the empty set
 	 *     products <- prod_{V in {@link #R_set_diff}(N'\{V'})} m_F<-V
-	 *     if relevantRange is singleton {v}
+	 *     if relevantRangeSoFar is singleton {v}
 	 *         M <- 1 // message is irrelevant as value of v' will be v anyway
 	 *                // this assumes the message would be consistent with E
 	 *                // and put all weight on v as well,
@@ -782,8 +783,8 @@ public interface LBPRewriter extends Rewriter {
 	 *         if M contains previous message to F from V'
 	 *              M <- (lambda v' : previous message to F from V')(v')
 	 *         else
-	 *              relevantRange = {v in relevantRange : R_basic(M[v'/v]) is not zero }
-	 *              if relevantRange is {}
+	 *              relevantRangeSoFar = {v in relevantRangeSoFar : R_basic(M[v'/v]) is not zero }
+	 *              if relevantRangeSoFar is {}
 	 *                   throw exception: model does not validate any values for V'
 	 * else
 	 *     products <- 1
@@ -793,7 +794,7 @@ public interface LBPRewriter extends Rewriter {
 	 *              {@link #R_basic}((E*M)[v'/v1] + ... + (E*M)[v'/vn])
 	 *              * products,
 	 *              T, beingComputed)
-	 *        for relevantRange in the form {v1,...,vn}
+	 *        for relevantRangeSoFar in the form {v1,...,vn}
 	 * </pre>
 	 */
 	String R_sum = LBP_NAMESPACE+"R_sum";

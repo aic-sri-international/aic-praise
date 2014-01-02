@@ -125,6 +125,8 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 
 		Trace.log("return R_basic(if In then pm_F<-V else R_prod_factor(prod_F' in R_set_diff(R_neigh_v(Neigh(V))\\{F}) m_V<-F', R_basic(beingComputed union {{(F,V)}})))");
 
+		Expression previousRandomVariableBeingNormalized = LPIUtil.setRandomVariableBeingNormalizedAndReturnPreviousOne(randomVariable, process);
+		
 		result = GrinderUtil.branchAndMergeOnACondition(
 				in,
 				// pm_F<-V
@@ -134,9 +136,10 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 				R_check_branch_reachable, 
 				R_basic, process);
 
+		LPIUtil.restorePreviousRandomVariableBeingNormalized(previousRandomVariableBeingNormalized, process);
+
 		return result;
 	}
-
 
 	//
 	// PRIVATE METHODS
