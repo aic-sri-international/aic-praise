@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
+import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -86,7 +87,7 @@ public class DetermineSortsOfLogicalVariables {
 		return randomVariableDeclarations;
 	}
 
-	public static class CollectFreeVariablesAndDomainsFromUsageInRandomVariables implements ReplacementFunctionWithContextuallyUpdatedProcess {
+	public static class CollectFreeVariablesAndDomainsFromUsageInRandomVariables extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
 		private Map<Expression, Expression> freeVariablesAndDomains;
 		private Collection<RandomVariableDeclaration> randomVariableDeclarations;
 		
@@ -143,11 +144,6 @@ public class DetermineSortsOfLogicalVariables {
 				}
 			}
 			return expression; // not used as a replacement function, so it always returns the input
-		}
-	
-		@Override
-		public Expression apply(Expression expression) {
-			throw new UnsupportedOperationException("CollectFreeVariablesAndDomainsFromUsageInRandomVariables.evaluate(Expression) should not be invoked.");
 		}
 	}
 

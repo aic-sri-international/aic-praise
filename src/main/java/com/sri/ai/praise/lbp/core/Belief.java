@@ -47,7 +47,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.DefaultSymbol;
@@ -1087,12 +1086,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	}
 	
 	private Expression limitPrecisionToNumberOfSignificantDecimalPlaces(Expression normalizedValue, RewritingProcess process) {
-		Expression result = normalizedValue.replaceAllOccurrences(new ReplacementFunctionWithContextuallyUpdatedProcess() {
-					@Override
-					public Expression apply(Expression expression) {
-						throw new UnsupportedOperationException("evaluate(Object expression) should not be called.");
-					}
-					
+		Expression result = normalizedValue.replaceAllOccurrences(new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {
 					@Override
 					public Expression apply(Expression expressionE, RewritingProcess process) {
 						Expression result = expressionE;
