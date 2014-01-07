@@ -27,7 +27,10 @@ public class IsDeterministicBooleanMessageValue implements Predicate<Expression>
 	}
 
 	public static boolean isDeterministicMessageValue(Expression messageValue, RewritingProcess process) {
+		messageValue = IfThenElse.equivalentWithNonNegatedCondition(messageValue);
 		boolean result =
+				IfThenElse.isIfThenElse(messageValue)
+				&&
 				LPIUtil.isRandomVariableValueExpression(IfThenElse.getCondition(messageValue), process)
 				&&
 				(IfThenElse.getThenBranch(messageValue).equals(0) || IfThenElse.getElseBranch(messageValue).equals(0));

@@ -57,7 +57,7 @@ import com.sri.ai.praise.LPIUtil;
  * for the random variable on which a normalization will be later applied.
  * Actually, even that is not a guarantee of correctness because we are also assuming that this message is
  * part of a product of messages on the same random variable.
- * If it were, say, is a summation of them, it would not be correct.
+ * If it were, say, a summation of them, it would not be correct.
  * 
  * @see LPIUtil#setRandomVariableBeingNormalizedAndReturnPreviousOne(Expression, RewritingProcess)
  * @see LPIUtil#restorePreviousRandomVariableBeingNormalized(Expression, RewritingProcess)
