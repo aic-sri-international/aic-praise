@@ -150,8 +150,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	 * 
 	 * @see UseValuesForPreviousMessages#useValuesForPreviousMessages(Expression, Expression, RewritingProcess)
 	 */
-	public Expression useValuesForPreviousMessages(Expression expansion,
-			Expression msgValues, RewritingProcess process) {
+	public Expression useValuesForPreviousMessages(Expression expansion, Expression msgValues, RewritingProcess process) {
 		Expression result = null;
 		
 		List<Expression> msgValuesUnionArguments = getEntriesFromUnion(msgValues);
