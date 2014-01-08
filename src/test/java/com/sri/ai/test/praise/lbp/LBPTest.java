@@ -2906,48 +2906,48 @@ public class LBPTest extends AbstractLPITest {
 		perform(tests);
 	}
 	
-	private class BeliefTestData extends TestData {
-		private String belief; 
-		private Expression exprBelief;
-		private Map<Object, Object> globalObjects;
-		private LBPConfiguration.BeliefPropagationUpdateSchedule schedule = LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS;
-		
-		public BeliefTestData(String contextualConstraint, Model model, String belief, boolean illegalArgumentTest, String expected) {
-			this(contextualConstraint, model, belief, null, illegalArgumentTest, expected);
-		};
-		
-		public BeliefTestData(String contextualConstraint, Model model, String belief, Map<Object, Object> globalObjects, boolean illegalArgumentTest, String expected) {
-			super(contextualConstraint, model, illegalArgumentTest, expected);
-			this.belief = belief;
-			this.globalObjects = globalObjects;
-		};
-		
-		public void setUpdateSchedule(LBPConfiguration.BeliefPropagationUpdateSchedule schedule) {
-			this.schedule = schedule;
-		}
-		
-		@Override
-		public Expression getTopExpression() {
-			this.exprBelief = parse(belief);
-			return this.exprBelief;
-		}
-		
-		@Override
-		public Expression callRewrite(RewritingProcess process) {
-			if (globalObjects != null) {
-				process.getGlobalObjects().putAll(globalObjects);
-			}
-			LBPConfiguration configuration = LBPFactory.newLBPConfiguration();
-			configuration.setBeliefPropagationUpdateSchedule(schedule);
-			RewritingProcess lbpProcess = LBPFactory.newLBPProcess(process.getRootExpression(), configuration, process);
-			Expression belief = lbpProcess.rewrite(LBPRewriter.R_belief, exprBelief);
-			Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
-			return roundedBelief;
-		}
-	}
-	
 	@Test
 	public void testBeliefForNonLoopyModels() {
+		class BeliefTestData extends TestData {
+			private String belief; 
+			private Expression exprBelief;
+			private Map<Object, Object> globalObjects;
+			private LBPConfiguration.BeliefPropagationUpdateSchedule schedule = LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS;
+			
+			public BeliefTestData(String contextualConstraint, Model model, String belief, boolean illegalArgumentTest, String expected) {
+				this(contextualConstraint, model, belief, null, illegalArgumentTest, expected);
+			};
+			
+			public BeliefTestData(String contextualConstraint, Model model, String belief, Map<Object, Object> globalObjects, boolean illegalArgumentTest, String expected) {
+				super(contextualConstraint, model, illegalArgumentTest, expected);
+				this.belief = belief;
+				this.globalObjects = globalObjects;
+			};
+			
+			public void setUpdateSchedule(LBPConfiguration.BeliefPropagationUpdateSchedule schedule) {
+				this.schedule = schedule;
+			}
+			
+			@Override
+			public Expression getTopExpression() {
+				this.exprBelief = parse(belief);
+				return this.exprBelief;
+			}
+			
+			@Override
+			public Expression callRewrite(RewritingProcess process) {
+				if (globalObjects != null) {
+					process.getGlobalObjects().putAll(globalObjects);
+				}
+				LBPConfiguration configuration = LBPFactory.newLBPConfiguration();
+				configuration.setBeliefPropagationUpdateSchedule(schedule);
+				RewritingProcess lbpProcess = LBPFactory.newLBPProcess(process.getRootExpression(), configuration, process);
+				Expression belief = lbpProcess.rewrite(LBPRewriter.R_belief, exprBelief);
+				Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
+				return roundedBelief;
+			}
+		}
+		
 		BeliefTestData[] tests = new BeliefTestData[] {
 				
 				// 
@@ -4257,28 +4257,25 @@ public class LBPTest extends AbstractLPITest {
 	// TODO: debug
 	@Test
 	public void testDistinctTypeComparisons() {
-		BeliefTestData[] tests = new BeliefTestData[] {
-				new BeliefTestData(Expressions.TRUE.toString(),
-						new Model("model(sort(People, 10), sort(Dogs, 10), randomVariable(equalityOccurred, 0, Boolean),"
-								+ "parfactors("
-								+ "{{(on X in People, Y in Dogs) [if equalityOccurred then 1 else 0] | X = Y }}" // should have no effect
-								+ ") )"),
-								"belief([equalityOccurred])", 
-								false, 
-								"0.5" // parfactor has no effect
-						),
-				new BeliefTestData(Expressions.TRUE.toString(),
-						new Model("model(sort(People, 10), sort(Dogs, 10), randomVariable(equalityOccurred, 0, Boolean),"
-								+ "parfactors("
-								+ "{{(on X in People, Y in People) [if equalityOccurred then 1 else 0] | X = Y }}" // should have an effect since X = Y for some values
-								+ ") )"),
-								"belief([equalityOccurred])", 
-								false, 
-								"if equalityOccurred then 1 else 0" // parfactor has effect
-						),
-		};
-
-		perform(tests);
+		Model model;
+		Expression queryAnswer;
+		
+		model = new Model("model(sort(People, 10), sort(Dogs, 10), randomVariable(equalityOccurred, 0, Boolean),"
+				+ "parfactors("
+				+ "{{(on X in People, Y in Dogs) [if equalityOccurred then 1 else 0] | X = Y }}" // should have no effect
+				+ ") )");
+		
+		queryAnswer = Belief.compute(parse("equalityOccurred"), model);
+		assertEquals(parse("0.5"), queryAnswer);
+		
+		model = new Model("model(sort(People, 10), sort(Dogs, 10), randomVariable(equalityOccurred, 0, Boolean),"
+				+ "parfactors("
+				+ "{{(on X in People, Y in People) [if equalityOccurred then 1 else 0] | X = Y }}" // should have an effect since X = Y for some values
+				+ ") )");
+		queryAnswer = Belief.compute(parse("equalityOccurred"), model);
+		assertEquals(parse("if equalityOccurred then 1 else 0"), queryAnswer);
+		
+		doTreeUtilWaitUnilClosed();
 		
 		// Below: rule converter not properly converting this model, but it should be tested once that's fixed.
 //		Model model = Model.fromRules(
