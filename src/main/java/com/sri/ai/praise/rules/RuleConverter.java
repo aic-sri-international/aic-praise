@@ -166,7 +166,7 @@ public class RuleConverter {
 
 	/** A convenience method building a {@link Model} from a string. */
 	public static Model makeModel(String ruleAndDeclarationsListString) {
-		Trace.in("Making model out of " + ruleAndDeclarationsListString);
+		Trace.in("Making model out of {}", ruleAndDeclarationsListString);
 		RuleConverter ruleConverter = new RuleConverter();
 		RewritingProcess process = LBPFactory.newLBPProcess(Expressions.TRUE);
 		Model model;
@@ -175,7 +175,7 @@ public class RuleConverter {
 		} catch (ReservedWordException e) {
 			throw new Error(e);
 		}
-		Trace.out("Model is " + model);
+		Trace.out("Model is {}", model.getModelDefinition());
 		return model;
 	}
 	
