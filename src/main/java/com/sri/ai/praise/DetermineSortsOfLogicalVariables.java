@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
