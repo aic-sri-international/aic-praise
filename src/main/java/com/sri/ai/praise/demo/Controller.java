@@ -72,7 +72,9 @@ import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
+import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
+import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.demo.action.ClearOutputAction;
 import com.sri.ai.praise.demo.action.ExecuteQueryAction;
 import com.sri.ai.praise.demo.action.ExitAction;
@@ -388,8 +390,8 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							printlnToConsole("BELIEF=\n" + belief);	
 							
 							Expression exprBelief = lowLevelParse(belief);
-							Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, currentQuery, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
-			
+							Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, currentQuery, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE, model, queryAtom));				
+							
 							printlnToConsole("RULE BELIEF=\n"+ruleBelief.toString());
 							
 							String translatedRule = ruleConverter.toRuleString(ruleBelief);
@@ -424,6 +426,10 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 								error("Error processing inputs:\n"+re.getMessage());
 								re.printStackTrace();
 							}
+						}
+						catch (Throwable t) {
+							error("Error processing inputs, unexpected throwable:\n"+t.getMessage());
+							t.printStackTrace();
 						}
 						finally {
 							executeQueryAction.setRunQueryState();
@@ -860,8 +866,12 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		System.gc();
 	}
 	
-	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSize(final int n) {
+	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSize(final int n, Model model, Expression queryAtom) {
 		RewritingProcess result = LBPFactory.newLBPProcess(Expressions.TRUE);
+		
+		result = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(queryAtom, result);
+		result = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(model.getParfactorsDeclaration().getParfactors()), result);
+
 		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable() {
 			@Override
 			public Integer size(Expression logicalVariable, RewritingProcess process) {
