@@ -178,7 +178,8 @@ public class Model {
 
 	// GLOBAL OBJECTS KEY
 	public static final String GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES = "known random variable name and arities";
-	public static final String GLOBAL_KEY_MODEL = "model";
+	public static final String GLOBAL_KEY_MODEL_INSTANCE   = "model instance";
+	public static final String GLOBAL_KEY_MODEL_DEFINITION = "model definition";
 	public static final String GLOBAL_KEY_MODEL_PARFACTORS = "model parfactors";
 	public static final String GLOBAL_KEY_MODEL_SORT_NAMES = "model sort names";
 	public static final String GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG = "model random predicate catalog";
@@ -536,7 +537,8 @@ public class Model {
 		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(
 				new ModelLookupDomainSizeOfLogicalVariable(model), process);
 
-		process.putGlobalObject(GLOBAL_KEY_MODEL, model.getModelDefinition());
+		process.putGlobalObject(GLOBAL_KEY_MODEL_INSTANCE,   model);
+		process.putGlobalObject(GLOBAL_KEY_MODEL_DEFINITION, model.getModelDefinition());
 		process.putGlobalObject(GLOBAL_KEY_MODEL_PARFACTORS, model.getParfactorsDeclaration().getParfactors());
 
 		// Handle case where names may have been setup globally
@@ -598,6 +600,18 @@ public class Model {
 		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES, knownVarNames);
 		process.putGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG, new RandomPredicateCatalog(randomPredicates));
 	}
+	
+	/**
+	 * Get the Model instance associated with the process.
+	 * 
+	 * @param process
+	 *            the process in which the rewriting is occurring.
+	 * @return the model instance associated with the rewriting process.
+	 */
+	public static Model getModelInstance(RewritingProcess process) {
+		Model model = (Model) process.getGlobalObject(GLOBAL_KEY_MODEL_INSTANCE);
+		return model;
+	}
 
 	/**
 	 * Get the expression representing the model definition associated with the
@@ -608,7 +622,7 @@ public class Model {
 	 * @return the model definition expression.
 	 */
 	public static Expression getModelDefinition(RewritingProcess process) {
-		Expression model = (Expression) process.getGlobalObject(GLOBAL_KEY_MODEL);
+		Expression model = (Expression) process.getGlobalObject(GLOBAL_KEY_MODEL_DEFINITION);
 		return model;
 	}
 	
@@ -630,7 +644,7 @@ public class Model {
 				process.putGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG, catalog);
 			}
 			else {
-				throw new Error("Random predicate catalog requested but rewriting process does not contain a global object named '" + GLOBAL_KEY_MODEL + "'");
+				throw new Error("Random predicate catalog requested but rewriting process does not contain a global object named '" + GLOBAL_KEY_MODEL_DEFINITION + "'");
 			}
 		}
 		
