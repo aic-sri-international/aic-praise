@@ -209,9 +209,9 @@ public class Model {
 	private List<RandomVariableDeclaration> randomVariableDeclarations = new ArrayList<RandomVariableDeclaration>();
 	private ParfactorsDeclaration parfactorsDeclaration = null;
 
-	/** A convenience method doing the same as {@link RuleConverter#makeModel(String)}. */
-	public static Model fromRules(String ruleAndDeclarationsListString) {
-		return RuleConverter.makeModel(ruleAndDeclarationsListString);
+	/** A convenience method doing the same as {@link RuleConverter#makeModel(String, String, String)}. */
+	public static Model fromRules(String modelName, String modelDescription, String ruleAndDeclarationsListString) {
+		return RuleConverter.makeModel(modelName, modelDescription, ruleAndDeclarationsListString);
 	}
 	
 	/**

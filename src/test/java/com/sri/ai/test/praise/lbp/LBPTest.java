@@ -2955,6 +2955,8 @@ public class LBPTest extends AbstractLPITest {
 				// 		
 						new BeliefTestData(Expressions.TRUE.toString(),
 						Model.fromRules(
+								"Model Name: Epidemic Sick",
+								"Model Description: Epidemic Sick Example.",
 								"sort People: 10, bob, dave, rodrigo, ciaran;\n" + 
 								"// RANDOM VARIABLE DECLARATIONS:\n" + 
 								"random epidemic: -> Boolean;\n" + 
@@ -3309,6 +3311,8 @@ public class LBPTest extends AbstractLPITest {
 				// 		
 						new BeliefTestData(Expressions.TRUE.toString(),
 						Model.fromRules(
+								"Model Name: Epidemic Sick",
+								"Model Description: Epidemic Sick Example.",
 								"sort People: 10, bob, dave, rodrigo, ciaran;\n" + 
 								"// RANDOM VARIABLE DECLARATIONS:\n" + 
 								"random epidemic: -> Boolean;\n" + 
@@ -4167,7 +4171,9 @@ public class LBPTest extends AbstractLPITest {
 				
 				// #0
 				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-					Model.fromRules("sort People: 10, ann, bob, dave, rodrigo, ciaran;" +
+					Model.fromRules("Model Name: Happy Pet",
+									"Model Description: Happy Pet Example.",
+							        "sort People: 10, ann, bob, dave, rodrigo, ciaran;" +
 									"sort Pets: 20, astor, rover;" +
 
 									"random isPetOf: Pets x People -> Boolean;" +

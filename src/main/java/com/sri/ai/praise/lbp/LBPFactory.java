@@ -118,8 +118,12 @@ public class LBPFactory {
 	}
 	
 	public static RewritingProcess newLBPProcessWithHighLevelModel(String highLevelModel) {
+		return newLBPProcessWithHighLevelModel("Model Name: not provided.", "Model Description: not provided.", highLevelModel);
+	}
+	
+	public static RewritingProcess newLBPProcessWithHighLevelModel(String modelName, String modelDescription, String highLevelModel) {
 		RewritingProcess process = newLBPProcess(null);
-		Model model = Model.fromRules(highLevelModel);
+		Model model = Model.fromRules(modelName, modelDescription, highLevelModel);
 		model.setRewritingProcessesModel(process);
 		return process;
 	}

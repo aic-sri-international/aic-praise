@@ -165,13 +165,13 @@ public class RuleConverter {
 	 *=================================================================================*/
 
 	/** A convenience method building a {@link Model} from a string. */
-	public static Model makeModel(String ruleAndDeclarationsListString) {
+	public static Model makeModel(String modelName, String modelDescription, String ruleAndDeclarationsListString) {
 		Trace.in("Making model out of {}", ruleAndDeclarationsListString);
 		RuleConverter ruleConverter = new RuleConverter();
 		RewritingProcess process = LBPFactory.newLBPProcess(Expressions.TRUE);
 		Model model;
 		try {
-			model = ruleConverter.makeModelDynamic(ruleAndDeclarationsListString, process);
+			model = ruleConverter.makeModelDynamic(modelName, modelDescription, ruleAndDeclarationsListString, process);
 		} catch (ReservedWordException e) {
 			throw new Error(e);
 		}
@@ -271,20 +271,8 @@ public class RuleConverter {
 	 * @return A {@link Model} object.
 	 * @throws ReservedWordException
 	 */
-	public Model makeModel(List<Expression> ruleAndDeclarationsList, RewritingProcess process) throws ReservedWordException {
-		return makeModel(ruleAndDeclarationsList, "Model", "Model", process);
-	}
-	
-	/**
-	 * Converts the rules model and generates a low-level model object.
-	 * 
-	 * @param ruleAndDeclarationsList
-	 *            The list of rule expressions of the model.
-	 * @return A {@link Model} object.
-	 * @throws ReservedWordException
-	 */
-	private Model makeModelDynamic(String ruleAndDeclarationsListString, RewritingProcess process) throws ReservedWordException {
-		return makeModel(ruleParser.parseAll(ruleAndDeclarationsListString), "Model", "Model", process);
+	private Model makeModelDynamic(String modelName, String modelDescription, String ruleAndDeclarationsListString, RewritingProcess process) throws ReservedWordException {
+		return makeModel(ruleParser.parseAll(ruleAndDeclarationsListString), modelName, modelDescription, process);
 	}
 	
 	/**
