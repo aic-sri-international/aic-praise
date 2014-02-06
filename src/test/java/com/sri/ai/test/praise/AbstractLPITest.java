@@ -181,13 +181,12 @@ public abstract class AbstractLPITest {
 				// parfactors don't typically have free variables, but they might.
 			}
 
-			process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(topExpression, process);
-			
 			Expression contextualConstraint = parse(contextualConstraintString);
-			if ( ! contextualConstraint.equals(Expressions.TRUE)) {
-				process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(contextualConstraint, process);
-				process = GrinderUtil.extendContextualConstraint(contextualConstraint, process);
-			}
+			Expression topExpressionAndContextualConstraint = Tuple.make(topExpression, contextualConstraint);
+			process =
+					GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(
+							topExpressionAndContextualConstraint, process);
+			process = GrinderUtil.extendContextualConstraint(contextualConstraint, process);
 			
 			Expression expectedExpression = parse(expected);
 			if (isIllegalArgumentTest) {

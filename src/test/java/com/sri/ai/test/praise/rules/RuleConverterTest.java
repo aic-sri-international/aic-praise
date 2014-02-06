@@ -1767,6 +1767,7 @@ public class RuleConverterTest {
 		return process;
 	}
 	
+	/** Prepares rewriting process with type cardinalities contextual variables, assuming contextual constraint equal to "true" */
 	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSizeAndContextualVariablesEqualToFreeVariablesInGivenExpression(final int n, Expression expression) {
 		RewritingProcess result = LBPFactory.newLBPProcess(Expressions.TRUE);
 		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable() {
@@ -1776,6 +1777,7 @@ public class RuleConverterTest {
 			}
 		}, result);
 		result = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(expression, result);
+		// the above would have to include the contextual constraint (say, in a Tuple with expression), if it were not known to be "true".
 		return result;
 	}
 }
