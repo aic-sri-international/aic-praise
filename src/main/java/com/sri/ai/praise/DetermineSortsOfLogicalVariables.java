@@ -1,8 +1,8 @@
 package com.sri.ai.praise;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class DetermineSortsOfLogicalVariables {
 	 * Throws an error if domains as defined by the index expressions or contextual variable domains (from the process) conflict with random variable value expression argument usage. 
 	 */
 	public static Map<Expression, Expression> getIndicesDomainMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
-		Map<Expression, Expression> result = new HashMap<Expression, Expression>(IntensionalSet.getIndexToDomainMapWithDefaultNull(intensionalSet));
+		Map<Expression, Expression> result = new LinkedHashMap<Expression, Expression>(IntensionalSet.getIndexToDomainMapWithDefaultNull(intensionalSet));
 		RewritingProcess subProcess = GrinderUtil.extendContextualVariables(result, process);
 		result = extendFreeVariablesAndDomainsFromUsageInRandomVariables(result, IntensionalSet.getHead(intensionalSet), null, subProcess);
 		return result;
@@ -43,7 +43,7 @@ public class DetermineSortsOfLogicalVariables {
 	 * is null, the random variable declarations present in the model.
 	 */
 	public static Map<Expression, Expression> getFreeVariablesAndDomainsFromUsageInRandomVariables(Expression expression, Set<Expression> randomVariableDeclarationExpressions, RewritingProcess process) {
-		Map<Expression, Expression> result = extendFreeVariablesAndDomainsFromUsageInRandomVariables(new HashMap<Expression, Expression>(), expression, randomVariableDeclarationExpressions, process);
+		Map<Expression, Expression> result = extendFreeVariablesAndDomainsFromUsageInRandomVariables(new LinkedHashMap<Expression, Expression>(), expression, randomVariableDeclarationExpressions, process);
 		return result;
 	}
 
@@ -148,7 +148,7 @@ public class DetermineSortsOfLogicalVariables {
 
 	public static Map<Expression, Expression>
 	getLogicalVariableArgumentsDomains(Expression expression, RandomVariableDeclaration declaration, RewritingProcess process) {
-		Map<Expression, Expression> result = new HashMap<Expression, Expression>();
+		Map<Expression, Expression> result = new LinkedHashMap<Expression, Expression>();
 		List<Expression> sorts = declaration != null? declaration.getParameterSorts() : null;
 		for (int i = 0; i != expression.numberOfArguments(); i++) {
 			Expression argument = expression.get(i);

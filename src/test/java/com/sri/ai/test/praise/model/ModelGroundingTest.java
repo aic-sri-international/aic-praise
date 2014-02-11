@@ -37,7 +37,7 @@
  */
 package com.sri.ai.test.praise.model;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -593,7 +593,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 	}
 	
 	private GroundedModelResult callGroundModel(Model modelDeclaration) throws ModelGroundingException {
-		return callGroundModel(modelDeclaration, new HashMap<Object, Object>());
+		return callGroundModel(modelDeclaration, new LinkedHashMap<Object, Object>());
 	}
 
 	private GroundedModelResult callGroundModel(Model modelDeclaration, Map<Object, Object> globalObjects) throws ModelGroundingException {

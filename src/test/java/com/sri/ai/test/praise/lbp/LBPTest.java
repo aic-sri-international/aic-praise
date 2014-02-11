@@ -40,12 +40,11 @@ package com.sri.ai.test.praise.lbp;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Marker;
 
@@ -57,13 +56,11 @@ import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElseExternalizationHierarchical;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariables;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
 import com.sri.ai.praise.MoveAllRandomVariableValueExpressionConditionsDownHierarchical;
@@ -3561,7 +3558,7 @@ public class LBPTest extends AbstractLPITest {
 						"else (if Y != c then (previous message to [q(X, Y)] from [ Beta1 ])  else product({ (on Y) (previous message to [q(X, Y)] from [ Beta2 ]) } ) )",
 						false,
 						// subtle test, as the last-occurring Y is not the same as the free Y and needs to be properly shadowed
-						"{ ( on Y, X ) ( ([ q(X, Y) ]), ([ Alpha1 ]) ) | X != a and Y != b } union { ( on Y, X ) ( ([ q(X, Y) ]), ([ Beta1 ]) ) | not (X != a) and Y != c } union { ( on 'Shadowed Y', Y, X ) ( ([ q(X, Y) ]), ([ Beta2 ]) ) | not (X != a) and not ('Shadowed Y' != c) }"),		
+						"{ ( on Y, X ) ( ([ q(X, Y) ]), ([ Alpha1 ]) ) | X != a and Y != b } union { ( on Y, X ) ( ([ q(X, Y) ]), ([ Beta1 ]) ) | not (X != a) and Y != c } union { ( on Y, X, 'Shadowed Y' ) ( ([ q(X, Y) ]), ([ Beta2 ]) ) | not (X != a) and not ('Shadowed Y' != c) }"),		
 				// Embedded as a term in an arithmetic expression
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
@@ -3579,7 +3576,7 @@ public class LBPTest extends AbstractLPITest {
 						new TrivialPQ(), 
 						"product({ (on A, D) if A != a then 1 else (previous message to [p(a)] from [ Beta ]) | A != D and (X = A or X = D) and A = X })",
 						false,
-						"{ ( on D, A, X ) ( ([ p(a) ]), ([ Beta ]) ) | A != D and (X = A or X = D) and A = X and not (A != a) }"),	
+						"{ ( on A, D, X ) ( ([ p(a) ]), ([ Beta ]) ) | A != D and (X = A or X = D) and A = X and not (A != a) }"),	
 				//
 				// Basic: Contextual Constraint Tests
 				//
@@ -4316,11 +4313,11 @@ public class LBPTest extends AbstractLPITest {
 		final String queryUUID2 = queryEngine.newQueryUUID(new LBPQueryEngine.QueryOptions(false, true, true));
 		final String queryUUID3 = queryEngine.newQueryUUID();
 		
-		final Map<String, StringBuilder> queryTraceOutput = new HashMap<String, StringBuilder>();
+		final Map<String, StringBuilder> queryTraceOutput = new LinkedHashMap<String, StringBuilder>();
 		queryTraceOutput.put(queryUUID1, new StringBuilder()); 
 		queryTraceOutput.put(queryUUID2, new StringBuilder()); 
 		queryTraceOutput.put(queryUUID3, new StringBuilder());
-		final Map<String, StringBuilder> queryJustificationOutput = new HashMap<String, StringBuilder>();
+		final Map<String, StringBuilder> queryJustificationOutput = new LinkedHashMap<String, StringBuilder>();
 		queryJustificationOutput.put(queryUUID1, new StringBuilder()); 
 		queryJustificationOutput.put(queryUUID2, new StringBuilder());
 		queryJustificationOutput.put(queryUUID3, new StringBuilder()); 
@@ -4368,7 +4365,7 @@ public class LBPTest extends AbstractLPITest {
 		};
 		queryEngine.addJustificationListener(justificationListener);
 		
-		final Map<String, String> results = new HashMap<String, String>();
+		final Map<String, String> results = new LinkedHashMap<String, String>();
 		
 		Runnable callQuery1 = new Runnable() {
 			@Override

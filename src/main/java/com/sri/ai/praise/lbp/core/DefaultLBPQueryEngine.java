@@ -38,7 +38,6 @@
 package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,8 +122,8 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 	private List<QueryStepListener>     queryStepListeners     = new ArrayList<QueryStepListener>();
 	private List<TraceListener>         traceListeners         = new ArrayList<TraceListener>();
 	private List<JustificationListener> justificationListeners = new ArrayList<JustificationListener>();
-	private Map<String, QueryOptions>   openQueryUUIDs         = new HashMap<String, QueryOptions>(); 
-	private Map<String, RunLBPQuery>    activeQueries          = new HashMap<String, RunLBPQuery>();
+	private Map<String, QueryOptions>   openQueryUUIDs         = new LinkedHashMap<String, QueryOptions>(); 
+	private Map<String, RunLBPQuery>    activeQueries          = new LinkedHashMap<String, RunLBPQuery>();
 
 	public DefaultLBPQueryEngine() {
 	}

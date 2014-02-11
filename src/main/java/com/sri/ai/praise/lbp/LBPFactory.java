@@ -37,8 +37,8 @@
  */
 package com.sri.ai.praise.lbp;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
@@ -205,9 +205,9 @@ public class LBPFactory {
 			globalObjects                 = parentProcess.getGlobalObjects();
 		}
 		else {
-			contextualVariablesAndDomains = new HashMap<Expression, Expression>();
+			contextualVariablesAndDomains = new LinkedHashMap<Expression, Expression>();
 			isConstantPredicate           = new PrologConstantPredicate();
-			globalObjects                 = new HashMap<Object, Object>();
+			globalObjects                 = new LinkedHashMap<Object, Object>();
 		}
 		
 		DefaultRewritingProcess lbpProcess = new DefaultRewritingProcess(
@@ -230,32 +230,32 @@ public class LBPFactory {
 		// Add in the bound rewriters
 		boundLBPRewriterLookup.put(LBPRewriter.R_bound_belief, new BoundBelief());
 		//
-		Map<String, String> messageToFactorFromVariableChildRedirectMap = new HashMap<String, String>();
+		Map<String, String> messageToFactorFromVariableChildRedirectMap = new LinkedHashMap<String, String>();
 		messageToFactorFromVariableChildRedirectMap.put(LBPRewriter.R_prod_factor,   LBPRewriter.R_bound_prod_factor);
 		ConvexRewriterOnMessageBounds rBoundMessageToFactorFromVariable = new ConvexRewriterOnMessageBounds(LBPRewriter.R_bound_m_to_f_from_v,
 				LBPRewriter.R_m_to_f_from_v, randomVariableFromInnerRewriterCall, messageToFactorFromVariableChildRedirectMap);
 		boundLBPRewriterLookup.put(LBPRewriter.R_bound_m_to_f_from_v, rBoundMessageToFactorFromVariable);
 		//
-		Map<String, String> messageToVariableFromFactorChildRedirectMap = new HashMap<String, String>();
+		Map<String, String> messageToVariableFromFactorChildRedirectMap = new LinkedHashMap<String, String>();
 		messageToVariableFromFactorChildRedirectMap.put(LBPRewriter.R_sum,           LBPRewriter.R_bound_sum);
 		ConvexRewriterOnMessageBounds rBoundMessageToVariableFromFactor = new ConvexRewriterOnMessageBounds(LBPRewriter.R_bound_m_to_v_from_f,
 				LBPRewriter.R_m_to_v_from_f, randomVariableFromInnerRewriterCall, messageToVariableFromFactorChildRedirectMap);
 		boundLBPRewriterLookup.put(LBPRewriter.R_bound_m_to_v_from_f, rBoundMessageToVariableFromFactor);
 		//
-		Map<String, String> productFactorChildRedirectMap = new HashMap<String, String>();
+		Map<String, String> productFactorChildRedirectMap = new LinkedHashMap<String, String>();
 		productFactorChildRedirectMap.put(LBPRewriter.R_m_to_v_from_f,          LBPRewriter.R_bound_m_to_v_from_f);
 		productFactorChildRedirectMap.put(LBPRewriter.R_prod_m_and_prod_factor, LBPRewriter.R_bound_prod_m_and_prod_factor);
 		ConvexRewriterOnMessageBounds rBoundProductFactor = new ConvexRewriterOnMessageBounds(LBPRewriter.R_bound_prod_factor,
 				LBPRewriter.R_prod_factor, randomVariableFromInnerRewriterCall, productFactorChildRedirectMap);
 		boundLBPRewriterLookup.put(LBPRewriter.R_bound_prod_factor, rBoundProductFactor);
 		//
-		Map<String, String> productMessageAndProductFactorChildRedirectMap = new HashMap<String, String>();
+		Map<String, String> productMessageAndProductFactorChildRedirectMap = new LinkedHashMap<String, String>();
 		productMessageAndProductFactorChildRedirectMap.put(LBPRewriter.R_prod_factor, LBPRewriter.R_bound_prod_factor);
 		ConvexRewriterOnMessageBounds rBoundProductMessageAndProductFactor = new ConvexRewriterOnMessageBounds(LBPRewriter.R_bound_prod_m_and_prod_factor,
 				LBPRewriter.R_prod_m_and_prod_factor, randomVariableFromInnerRewriterCall, productMessageAndProductFactorChildRedirectMap);
 		boundLBPRewriterLookup.put(LBPRewriter.R_bound_prod_m_and_prod_factor, rBoundProductMessageAndProductFactor);
 		//
-		Map<String, String> sumChildRedirectMap = new HashMap<String, String>();
+		Map<String, String> sumChildRedirectMap = new LinkedHashMap<String, String>();
 		sumChildRedirectMap.put(LBPRewriter.R_m_to_f_from_v, LBPRewriter.R_bound_m_to_f_from_v);
 		ConvexRewriterOnMessageBounds rBoundSum = new ConvexRewriterOnMessageBounds(LBPRewriter.R_bound_sum,
 				LBPRewriter.R_sum, randomVariableFromInnerRewriterCall, sumChildRedirectMap);

@@ -41,7 +41,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -458,7 +457,7 @@ public class RuleConverter {
 		// | newRandomVariableDeclarations <- empty list
 		Set<Expression>  newRandomVariableDeclarations = new LinkedHashSet<Expression>();
 		// | functions <- empty set of pairs of expressions and arities
-  		Map<String, Set<Integer>> functionsIdentified = new HashMap<String, Set<Integer>>();
+  		Map<String, Set<Integer>> functionsIdentified = new LinkedHashMap<String, Set<Integer>>();
 
 		// | for each rule in rules
 		for (Expression rule : rules) {			

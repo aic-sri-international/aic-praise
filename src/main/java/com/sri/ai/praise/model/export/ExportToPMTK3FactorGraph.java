@@ -43,7 +43,6 @@ import java.io.Writer;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -99,7 +98,7 @@ public class ExportToPMTK3FactorGraph {
 		
 		String modelDeclaration =  Model.getModelDeclarationFromResource("Example4.model");
 
-		Map<Expression, Expression> globalObjects = new HashMap<Expression, Expression>();
+		Map<Expression, Expression> globalObjects = new LinkedHashMap<Expression, Expression>();
 		globalObjects.put(parser.parse("| Object |"), DefaultSymbol.createSymbol(size)); 
 		// Ensure domain sizes match up.
 		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());		

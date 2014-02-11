@@ -38,7 +38,7 @@
 package com.sri.ai.test.praise.lbp;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -584,7 +584,7 @@ public class BoundsTest extends AbstractLPITest {
 				
 				rewriterLookup.put("R_normalize", normalize);
 				rewriterLookup.put("R_inner",    inner);				
-				Map<String, String> boundChildRewriters = new HashMap<String, String>();
+				Map<String, String> boundChildRewriters = new LinkedHashMap<String, String>();
 				boundChildRewriters.put("R_canned_response", "R_bound_canned_response");
 				ConvexRewriterOnMessageBounds boundsWrapper = new ConvexRewriterOnMessageBounds("R_message_bounds",
 						"R_inner", new MockRandomVariableFromMessageRewriterCall(parse("[p(X)]")), boundChildRewriters);
@@ -1053,7 +1053,7 @@ public class BoundsTest extends AbstractLPITest {
 			rewriterLookup.put("R_normalize", normalize);
 			rewriterLookup.put("R_inner",    inner);				
 			
-			Map<String, String> boundChildRewriters = new HashMap<String, String>();
+			Map<String, String> boundChildRewriters = new LinkedHashMap<String, String>();
 			boundChildRewriters.put("R_canned_response", "R_bound_canned_response");
 			ConvexRewriterOnMessageBounds boundsWrapper = new ConvexRewriterOnMessageBounds("R_message_bounds",
 					"R_inner", new MockRandomVariableFromMessageRewriterCall(randomVariableExpr), boundChildRewriters);
@@ -1145,7 +1145,7 @@ public class BoundsTest extends AbstractLPITest {
 			rewriterLookup.put("R_normalize", normalize);
 			rewriterLookup.put("R_inner",    inner);				
 			
-			Map<String, String> boundChildRewriters = new HashMap<String, String>();
+			Map<String, String> boundChildRewriters = new LinkedHashMap<String, String>();
 			boundChildRewriters.put("R_canned_response", "R_bound_canned_response");
 			ConvexRewriterOnMessageBounds boundsWrapper = new ConvexRewriterOnMessageBounds("R_message_bounds",
 					"R_inner", new MockRandomVariableFromMessageRewriterCall(randomVariableExpr), boundChildRewriters);
