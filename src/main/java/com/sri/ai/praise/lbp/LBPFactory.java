@@ -58,6 +58,7 @@ import com.sri.ai.praise.lbp.core.Basic;
 import com.sri.ai.praise.lbp.core.Belief;
 import com.sri.ai.praise.lbp.core.BoundBelief;
 import com.sri.ai.praise.lbp.core.CompleteNormalize;
+import com.sri.ai.praise.lbp.core.CompleteSimplify;
 import com.sri.ai.praise.lbp.core.ConvexRewriterOnMessageBounds;
 import com.sri.ai.praise.lbp.core.DefaultLBPConfiguration;
 import com.sri.ai.praise.lbp.core.DifferenceOfExtensionalAndExtensionalSet;
@@ -272,6 +273,8 @@ public class LBPFactory {
 		lbpRewriterLookup.put(LBPRewriter.R_belief, new Belief(configuration));
 		lbpRewriterLookup.put(LBPRewriter.R_normalize, new Normalize());
 		lbpRewriterLookup.put(LBPRewriter.R_complete_normalize, new CompleteNormalize());
+		lbpRewriterLookup.put(LBPRewriter.R_simplify, new Simplify());
+		lbpRewriterLookup.put(LBPRewriter.R_complete_simplify, new CompleteSimplify());
 		lbpRewriterLookup.put(LBPRewriter.R_DifferenceOfExtensionalAndExtensionalSet, new DifferenceOfExtensionalAndExtensionalSet());
 		lbpRewriterLookup.put(LBPRewriter.R_DifferenceOfExtensionalAndIntensionalSet, new DifferenceOfExtensionalAndIntensionalSet());
 		lbpRewriterLookup.put(LBPRewriter.R_extract_previous_msg_sets, new ExtractPreviousMessageSets());

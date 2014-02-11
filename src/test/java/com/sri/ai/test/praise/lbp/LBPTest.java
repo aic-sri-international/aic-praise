@@ -3514,7 +3514,7 @@ public class LBPTest extends AbstractLPITest {
 						new TrivialPQ(), 
 						"previous message to [p(a)] from [ Beta ]",
 						false,
-						"{ (on X) ([p(a)], [Beta]) | X = a }"),
+						"{ (on ) ([p(a)], [Beta]) | true }"),
 				// An intensional set without indices should be returned
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
@@ -3538,7 +3538,7 @@ public class LBPTest extends AbstractLPITest {
 						new TrivialPQ(), 
 						"if X != a then (previous message to [p(X)] from [ Alpha ]) else (previous message to [p(a)] from [ Beta ])",
 						false,
-						"{ (on X) ([p(X)], [Alpha]) | X != a} union { (on X) ([p(a)], [Beta]) | not(X != a) }"),
+						"{ (on X) ([p(X)], [Alpha]) | X != a} union { (on ) ([p(a)], [Beta]) | true }"),
 				// Variants of example from pseudo-code
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
@@ -3549,7 +3549,7 @@ public class LBPTest extends AbstractLPITest {
 						new TrivialPQ(), 
 						"if X != a then 1 else (previous message to [p(a)] from [ Beta ])",
 						false,
-						"{ (on X) ([p(a)], [Beta]) | not (X != a) }"),
+						"{ (on ) ([p(a)], [Beta]) | true }"),
 				// More than 1 level of nesting
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQR(), 
@@ -3558,25 +3558,25 @@ public class LBPTest extends AbstractLPITest {
 						"else (if Y != c then (previous message to [q(X, Y)] from [ Beta1 ])  else product({ (on Y) (previous message to [q(X, Y)] from [ Beta2 ]) } ) )",
 						false,
 						// subtle test, as the last-occurring Y is not the same as the free Y and needs to be properly shadowed
-						"{ ( on X, Y ) ( ([ q(X, Y) ]), ([ Alpha1 ]) ) | X != a and Y != b } union { ( on X, Y ) ( ([ q(X, Y) ]), ([ Beta1 ]) ) | not (X != a) and Y != c } union { ( on Y, X, 'Shadowed Y' ) ( ([ q(X, Y) ]), ([ Beta2 ]) ) | not (X != a) and not ('Shadowed Y' != c) }"),		
+						"{ ( on X, Y ) ( ([ q(X, Y) ]), ([ Alpha1 ]) ) | X != a and Y != b } union { ( on Y ) ( ([ q(a, Y) ]), ([ Beta1 ]) ) | Y != c } union { ( on Y ) ( ([ q(a, Y) ]), ([ Beta2 ]) ) | true }"),		
 				// Embedded as a term in an arithmetic expression
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"if X != a then 1 else (1 + (previous message to [p(a)] from [ Beta ]))",
 						false,
-						"{ ( on X) ( ([ p(a) ]), ([ Beta ]) ) | not (X != a) }"),	
+						"{ ( on ) ( ([ p(a) ]), ([ Beta ]) ) | true }"),	
 				// Embedded as a term in an exponentiation expression
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"if X != a then 1 else (previous message to [p(a)] from [ Beta ])^2",
 						false,
-						"{ ( on X) ( ([ p(a) ]), ([ Beta ]) ) | not (X != a) }"),	
+						"{ ( on ) ( ([ p(a) ]), ([ Beta ]) ) | true }"),	
 			    // Embedded a term in a product expression and sub conditional expression
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"product({ (on A, D) if A != a then 1 else (previous message to [p(a)] from [ Beta ]) | A != D and (X = A or X = D) and A = X })",
 						false,
-						"{ ( on A, D, X ) ( ([ p(a) ]), ([ Beta ]) ) | A != D and (X = A or X = D) and A = X and not (A != a) }"),	
+						"{ ( on ) ( ([ p(a) ]), ([ Beta ]) ) | true }"),	
 				//
 				// Basic: Contextual Constraint Tests
 				//

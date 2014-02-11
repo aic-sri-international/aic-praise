@@ -46,6 +46,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.library.CommutativeAssociative;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -90,7 +91,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 		// or E alone
 		// We may want to enforce the two-argument form down the line.
 		if (Tuple.isTuple(expression) && Tuple.size(expression) == 2) {
-			expressionE      = Tuple.get(expression, 0);
+			expressionE = Tuple.get(expression, 0);
 		}
 		else {
 			expressionE = expression;
@@ -126,9 +127,13 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 				Expression tuplePair = Tuple.make(expression.get(0), expression.get(1));
 				List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromVariablesAndDomains(process.getContextualVariablesAndDomains());
 				Expression set = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressions, tuplePair, process.getContextualConstraint());
-				// at some point I tried simplifying the set here, but because its condition is the contextual constraint in the process,
+
+				// Now we try to simplify the set, but because its condition is the contextual constraint in the original process,
 				// this would cause the condition to be always simplified to true (since it implies itself).
-				// if we attempt simplification here, it needs to be with a process with contextual constraint equal to true.
+				// Therefore we use an unconstrained copy process for simplifying.
+				RewritingProcess processWithNoContext = DefaultRewritingProcess.copyRewritingProcessWithCleanContextAndCaches(process);
+				set = processWithNoContext.rewrite(R_simplify, set);
+				
 				extractedPreviousMessages.add(set);
 			} 
 			
