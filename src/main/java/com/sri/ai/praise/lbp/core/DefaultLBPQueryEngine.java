@@ -38,8 +38,8 @@
 package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -377,7 +377,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 				try {
 					modelDefinition = parser.parse(modelDeclaration);
 					
-					model           = new Model(modelDefinition, new HashSet<String>());
+					model           = new Model(modelDefinition, new LinkedHashSet<String>());
 				} catch (ModelException mex) {
 					queryErrors.add(new QueryError(TYPE.INVALID_MODEL_DECLARATION, mex.getMessage()));
 				}

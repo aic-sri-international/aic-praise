@@ -40,7 +40,6 @@ package com.sri.ai.test.praise.rules;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -901,7 +900,7 @@ public class RuleConverterTest {
 		List<Pair<Expression, Expression>> expected;
 		
 		// Required in advance of callling disembedConstraints.
-		Set<Expression> randomVariableDeclarations = new HashSet<Expression>();
+		Set<Expression> randomVariableDeclarations = new LinkedHashSet<Expression>();
 		randomVariableDeclarations.add(lowParser.parse("randomVariable(friends, 2, Universe, Universe, Boolean)"));
 		randomVariableDeclarations.add(lowParser.parse("randomVariable(likes, 2, Universe, Universe, Boolean)"));
 		randomVariableDeclarations.add(lowParser.parse("randomVariable(colleagues, 2, Universe, Universe, Boolean)"));
@@ -912,8 +911,7 @@ public class RuleConverterTest {
 		expected = new ArrayList<Pair<Expression, Expression>>();
 		expected.add(new Pair<Expression, Expression>(
 				lowParser.parse("if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.8 else 0.2 else 0.5"),
-				lowParser.parse("Y != X and Y != Z")));
-        		// lowParser.parse("Y != Z and Y != X")));
+				lowParser.parse("X != Y and Y != Z")));
 		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions, getNewRewritingProcessWithDefaultDomainSizeAndRandomVariableDeclarations(DEFAULT_DOMAIN_SIZE, randomVariableDeclarations)));
 
 		potentialExpressions = new ArrayList<Expression>();
@@ -989,8 +987,8 @@ public class RuleConverterTest {
 		string = "conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z)";
 		randomVariableDeclarations.clear();
 		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
-		expected = new Pair<Expression, Expression>(ruleParser.parse("query(C, Y, X, Z) <=> conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z);"),
-				                                    ruleParser.parseFormula("query(C, Y, X, Z)"));
+		expected = new Pair<Expression, Expression>(ruleParser.parse("query(C, X, Y, Z) <=> conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z);"),
+				                                    ruleParser.parseFormula("query(C, X, Y, Z)"));
 		assertEquals(expected, result);
 
 		string = "mother(X) = lucy";
@@ -1053,7 +1051,7 @@ public class RuleConverterTest {
 		inputRules.clear();
 		inputRules.add(ruleParser.parse("entityOf(X) = Y;"));
 		lowLevelSyntax = ruleConverter.translate(inputRules, LBPFactory.newLBPProcess(Expressions.TRUE));
-		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ ( on X, Y ) ([ if entityOf(X, Y) then 1 else 0 ]) | Y != X }}")));
+		Assert.assertTrue(lowLevelSyntax.getParfactors().contains(lowParser.parse("{{ ( on X, Y ) ([ if entityOf(X, Y) then 1 else 0 ]) | X != Y }}")));
 		
 		inputRules.clear();
 		inputRules.add(ruleParser.parse("entityOf(X) = Y and X may be same as Y;"));

@@ -61,8 +61,8 @@ import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
+import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.MoveAllRandomVariableValueExpressionConditionsDownHierarchical;
 import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
@@ -3532,7 +3532,7 @@ public class LBPTest extends AbstractLPITest {
 						new TrivialPQ(), 
 						"previous message to [p(X)] from [ if p(Y) then 1 else 0 ]",
 						false,
-						"{ (on Y, X) ([p(X)], [if p(Y) then 1 else 0]) }"),
+						"{ (on X, Y) ([p(X)], [if p(Y) then 1 else 0]) }"),
 				// Example from pseudo-code
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
@@ -3558,7 +3558,7 @@ public class LBPTest extends AbstractLPITest {
 						"else (if Y != c then (previous message to [q(X, Y)] from [ Beta1 ])  else product({ (on Y) (previous message to [q(X, Y)] from [ Beta2 ]) } ) )",
 						false,
 						// subtle test, as the last-occurring Y is not the same as the free Y and needs to be properly shadowed
-						"{ ( on Y, X ) ( ([ q(X, Y) ]), ([ Alpha1 ]) ) | X != a and Y != b } union { ( on Y, X ) ( ([ q(X, Y) ]), ([ Beta1 ]) ) | not (X != a) and Y != c } union { ( on Y, X, 'Shadowed Y' ) ( ([ q(X, Y) ]), ([ Beta2 ]) ) | not (X != a) and not ('Shadowed Y' != c) }"),		
+						"{ ( on X, Y ) ( ([ q(X, Y) ]), ([ Alpha1 ]) ) | X != a and Y != b } union { ( on X, Y ) ( ([ q(X, Y) ]), ([ Beta1 ]) ) | not (X != a) and Y != c } union { ( on Y, X, 'Shadowed Y' ) ( ([ q(X, Y) ]), ([ Beta2 ]) ) | not (X != a) and not ('Shadowed Y' != c) }"),		
 				// Embedded as a term in an arithmetic expression
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
@@ -3938,7 +3938,7 @@ public class LBPTest extends AbstractLPITest {
 						// Note: Was -
 						// "if w7 = w7 then 0.5 else (if not r(w7, w7) then 0.75 else 0.25)"
 						// Now -
-						"if X1 = X1 then 0.5 else (if not r(X1, X1) then 0.75 else 0.25)"
+						"if X = X then 0.5 else (if not r(X, X) then 0.75 else 0.25)"
 						),
 				//
 				// Complex Case 2: from running R_belief with partitioning on intersection logic
@@ -3950,7 +3950,7 @@ public class LBPTest extends AbstractLPITest {
 				        // Note: Was -
 				        // "if b = b then if p(b) or p(b) then 1 else 0 else (if b = b then if p(b) then 0.666666667 else 0.333333333 else (if p(b) then 0.666666667 else 0.333333333))"
 				        // Now -
-				        "if Y' = Y' then if p(Y') or p(Y') then 1 else 0 else (if Y' = Y' then if p(Y') then 0.666666667 else 0.333333333 else (if p(Y') then 0.666666667 else 0.333333333))"
+				        "if X = X then if p(X) or p(X) then 1 else 0 else (if X = X then if p(X) then 0.666666667 else 0.333333333 else (if p(X) then 0.666666667 else 0.333333333))"
 				        ), 		
 				//
 				// Complex Case 3: from running R_belief with partitioning on intersection logic
@@ -3971,7 +3971,7 @@ public class LBPTest extends AbstractLPITest {
 		        		new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
 		                "{ ( on X3 ) (if Z' != X then 1 else (if X != X3 then 1 else 1)) | Z' != X3 and X3 != w7 }",
 		                false,
-		                "if Z' != X then 1 else (if X != (if Z' != X then X else Z) then 1 else 1)"
+		                "if Z' != X then 1 else (if X != Z then 1 else 1)"
 		                ),
 		        //
 		        // Complex Case 5: conditional single value example

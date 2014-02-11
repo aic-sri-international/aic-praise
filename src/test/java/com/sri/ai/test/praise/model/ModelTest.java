@@ -37,7 +37,7 @@
  */
 package com.sri.ai.test.praise.model;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -46,11 +46,11 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.Model.ModelError;
+import com.sri.ai.praise.model.Model.ModelException;
 import com.sri.ai.praise.model.ParfactorsDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
-import com.sri.ai.praise.model.Model.ModelError;
-import com.sri.ai.praise.model.Model.ModelException;
 import com.sri.ai.test.praise.AbstractLPITest;
 import com.sri.ai.util.Util;
 
@@ -619,7 +619,7 @@ public class ModelTest extends AbstractLPITest {
 						    " 'Extra Model String Argument'," +
 					        " parfactors()" +
 		                    ")"), 
-		                    new HashSet<String>());
+		                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -635,7 +635,7 @@ public class ModelTest extends AbstractLPITest {
 					        " parfactors({{ (on X) [if p(X) then 0.2 else 0.3] }})," +
 					        " parfactors({{ [if p(a) then 1 else 0] }})" +
 		                    ")"), 
-		                    new HashSet<String>());
+		                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -651,7 +651,7 @@ public class ModelTest extends AbstractLPITest {
 					        " parfactors({{ (on X) [if p(X) then 0.2 else 0.3] }})," +
 					        " notAModelPart()" +
 		                    ")"), 
-		                    new HashSet<String>());
+		                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -666,7 +666,7 @@ public class ModelTest extends AbstractLPITest {
 					        " 'Model Description'," +
 						    " sort(BadSort, NotANumber, 2)" +
 		                    ")"), 
-		                    new HashSet<String>());
+		                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -681,7 +681,7 @@ public class ModelTest extends AbstractLPITest {
 					        " 'Model Description'," +
 						    " randomVariable(p, 2)" +
 		                    ")"), 
-		                    new HashSet<String>());
+		                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -692,7 +692,7 @@ public class ModelTest extends AbstractLPITest {
 		try {
 			// UNRECOGNIZED_MODEL_DEFINITION
 			new Model(parse("imAModelNot()"), 
-		                    new HashSet<String>());
+		                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -708,7 +708,7 @@ public class ModelTest extends AbstractLPITest {
 				    " sort(ASort, Unknown, {AConstant})," +
 			        " sort(AConstant)" +
                     ")"),
-                    new HashSet<String>());
+                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -724,7 +724,7 @@ public class ModelTest extends AbstractLPITest {
 				    " sort(ASort1, Unknown, {AConstant})," +
 			        " sort(ASort2, Unknown, {ASort1})" +
                     ")"),
-                    new HashSet<String>());
+                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -740,7 +740,7 @@ public class ModelTest extends AbstractLPITest {
 				    " sort(ASort1, Unknown, {AConstant})," +
 			        " randomVariable(AConstant)" +
                     ")"),
-                    new HashSet<String>());
+                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -757,7 +757,7 @@ public class ModelTest extends AbstractLPITest {
 				    " sort(ASort1, Unknown, {AConstant})," +
 			        " randomVariable(p, 1, ASort2)" +
                     ")"),
-                    new HashSet<String>());
+                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -773,7 +773,7 @@ public class ModelTest extends AbstractLPITest {
 				    " sort(ASort1, Unknown, {AConstant})," +
 				    " sort(ASort2, Unknown, {AConstant})" +
                     ")"),
-                    new HashSet<String>());
+                    new LinkedHashSet<String>());
 			Assert.fail("ModelException should have been thrown");
 		} catch (ModelException mex) {
 			Assert.assertEquals(1, mex.getErrors().size());
@@ -807,7 +807,7 @@ public class ModelTest extends AbstractLPITest {
 				"  {{(on X in People, Z in Treasure) [if owns(X,Z) then if rich(X) then 1 else 0 else 1] }}" +
 				" )" +
 				")"),
-				new HashSet<String>());
+				new LinkedHashSet<String>());
 		
 		Assert.assertEquals(parse("'Gave Treasure To'"), model.getName());
 		Assert.assertEquals(parse("'An example of how hard it is to model things without aggregate factors.'"), model.getDescription());
@@ -834,7 +834,7 @@ public class ModelTest extends AbstractLPITest {
 						+ "{{ (on X) [if sick(X) then 1 else 0] | X  = person1 or  X  = person2 or  X  = person3 }},"
 						+ "{{ (on X) [if sick(X) then 0 else 1] | X != person1 and X != person2 and X != person3 }}" +
 						")"
-				), new HashSet<String>());
+				), new LinkedHashSet<String>());
 			
 			Assert.assertEquals(parse("'No name given.'"), model.getName());
 			Assert.assertEquals(parse("'No description given.'"), model.getDescription());
@@ -853,7 +853,7 @@ public class ModelTest extends AbstractLPITest {
 					+ "{{ (on X in People) [if sick(X) then 1 else 0] | X  = person1 or  X  = person2 or  X  = person3 }},"
 					+ "{{ (on X in People) [if sick(X) then 0 else 1] | X != person1 and X != person2 and X != person3 }}" +
 					")"
-			), new HashSet<String>());
+			), new LinkedHashSet<String>());
 		
 		Assert.assertEquals(parse("'No name given.'"), model.getName());
 		Assert.assertEquals(parse("'No description given.'"), model.getDescription());

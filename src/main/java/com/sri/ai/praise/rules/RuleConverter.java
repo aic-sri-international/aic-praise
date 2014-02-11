@@ -369,7 +369,7 @@ public class RuleConverter {
 		Set<Expression>  sortDeclarations           = new LinkedHashSet<Expression>();
 		Set<Expression>  randomVariableDeclarations = new LinkedHashSet<Expression>();
 		List<Expression> rules                      = new ArrayList<Expression>();
-		Set<String>      sortNames                  = new HashSet<String>();
+		Set<String>      sortNames                  = new LinkedHashSet<String>();
 
 		// Sort the declarations and rules
 		for (Expression ruleOrDeclaration : extendedRulesAndDeclarationsList) {
@@ -387,7 +387,7 @@ public class RuleConverter {
 		}
 		
 		// Look for missing sort declarations in the random variable declarations.
-		Set<String> missingSorts = new HashSet<String>();
+		Set<String> missingSorts = new LinkedHashSet<String>();
 		for (Expression randomVariableDeclaration : randomVariableDeclarations) {
 			List<Expression> args = randomVariableDeclaration.getArguments();
 			for (int ii = 2; ii < args.size() - 1; ii++) {
@@ -521,7 +521,7 @@ public class RuleConverter {
 	        newRules.add(newRule);
 		}
 
-		Set<Expression> identifiedFunctionalRandomVariableDeclarations = new HashSet<Expression>();
+		Set<Expression> identifiedFunctionalRandomVariableDeclarations = new LinkedHashSet<Expression>();
 		// | // Add additional rules enforcing the functional relationship:
 		// | for each (predicate, n) in functions
 		for (String functor : functionsIdentified.keySet()) {
@@ -1385,7 +1385,7 @@ public class RuleConverter {
 			RewritingProcess subProcess = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(potentialExpression, process);
 
 			// | .... mayBeSameAsList <- empty list
-			Set<Pair<Expression, Expression>> mayBeSameAsSet = new HashSet<Pair<Expression, Expression>>();
+			Set<Pair<Expression, Expression>> mayBeSameAsSet = new LinkedHashSet<Pair<Expression, Expression>>();
 
 			// Gather instances of ". may be same as .".
 			Expression toReplace = potentialExpression;
@@ -1781,7 +1781,7 @@ public class RuleConverter {
 		for (Expression sort : sorts)
 			modelArguments.add(sort);
 
-		Set<String> randomVariableNameAndArities = new HashSet<String>();
+		Set<String> randomVariableNameAndArities = new LinkedHashSet<String>();
 		for (Expression randomVariableDeclaration : randomVariableDeclarations) {
 			modelArguments.add(randomVariableDeclaration);
 			Expression randomVariableName = randomVariableDeclaration.get(0);

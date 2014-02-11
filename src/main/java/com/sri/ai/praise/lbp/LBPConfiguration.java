@@ -38,8 +38,8 @@
 package com.sri.ai.praise.lbp;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,7 +86,7 @@ public interface LBPConfiguration extends Serializable {
 	}
 	
 	class BeliefValueAtIterationCollector {
-		private Set<Integer>             collectAtIterations     = new HashSet<Integer>();
+		private Set<Integer>             collectAtIterations     = new LinkedHashSet<Integer>();
 		private Map<Integer, Expression> beliefValuesAtIteration = new LinkedHashMap<Integer, Expression>();
 		
 		/**

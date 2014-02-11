@@ -38,7 +38,7 @@
 package com.sri.ai.praise.model;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -428,7 +428,7 @@ public class SortDeclaration {
 
 		if (Sets.isExtensionalUniSet(constants)) {
 			boolean argsOk = true;
-			Set<Expression> seen = new HashSet<Expression>();
+			Set<Expression> seen = new LinkedHashSet<Expression>();
 			for (Expression arg : ExtensionalSet.getElements(constants)) {
 				// Each constant must be a symbol.
 				if (!(arg instanceof Symbol)) {

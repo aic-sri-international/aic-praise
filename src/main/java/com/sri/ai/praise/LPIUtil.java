@@ -40,7 +40,6 @@ package com.sri.ai.praise;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -78,6 +77,7 @@ import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.core.IsDeterministicBooleanMessageValue;
+import com.sri.ai.praise.lbp.core.MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 import com.sri.ai.praise.model.RandomPredicate;
 import com.sri.ai.praise.model.RandomPredicateCatalog;
@@ -1563,8 +1563,8 @@ public class LPIUtil {
 	private static boolean isIndependentOf(Expression alpha, List<Expression> indicesI, RewritingProcess process) {
 		boolean result = false;
 		
-		Set<Expression> alphaFreeVariables            = new HashSet<Expression>();
-		Set<Expression> indexExpressionsFreeVariables = new HashSet<Expression>();
+		Set<Expression> alphaFreeVariables            = new LinkedHashSet<Expression>();
+		Set<Expression> indexExpressionsFreeVariables = new LinkedHashSet<Expression>();
 		
 		// Collect the free variables
 		alphaFreeVariables.addAll(Expressions.freeVariables(alpha, process));

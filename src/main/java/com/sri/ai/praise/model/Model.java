@@ -43,7 +43,6 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -200,7 +199,7 @@ public class Model {
 	//
 	// Declaration information
 	private String modelDeclaration = null;
-	private Set<String> knownRandomVariableNameAndArities = new HashSet<String>();
+	private Set<String> knownRandomVariableNameAndArities = new LinkedHashSet<String>();
 	// Definition information.
 	private Expression modelDefinition = null;
 	private Expression name = null;
@@ -512,7 +511,7 @@ public class Model {
 		Set<String> knownVarNames = (Set<String>) process
 				.getGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES);
 		if (knownVarNames == null) {
-			knownVarNames = new HashSet<String>();
+			knownVarNames = new LinkedHashSet<String>();
 		}
 		setRewritingProcessesModel(modelDefinition, knownVarNames, process);
 	}
@@ -910,9 +909,9 @@ public class Model {
 
 		//
 		// Validate there are not overlaps in the use of symbols in the model.
-		Set<Expression> uniqueNames = new HashSet<Expression>();
-		Set<Expression> sortNames = new HashSet<Expression>();
-		Set<Expression> constantsAlreadyAssignedToSorts = new HashSet<Expression>();
+		Set<Expression> uniqueNames = new LinkedHashSet<Expression>();
+		Set<Expression> sortNames = new LinkedHashSet<Expression>();
+		Set<Expression> constantsAlreadyAssignedToSorts = new LinkedHashSet<Expression>();
 
 		for (SortDeclaration sortDeclaration : sortDeclarations) {
 			// SORT_NAME_NOT_UNIQUE
@@ -996,7 +995,7 @@ public class Model {
 	}
 	
 	private void deriveSortDeclarations(List<SortDeclaration> sortDeclarations, ParfactorsDeclaration parfactorsDeclaration) {
-		Set<Expression> sortNamesKnown = new HashSet<Expression>();
+		Set<Expression> sortNamesKnown = new LinkedHashSet<Expression>();
 		for (SortDeclaration sd : sortDeclarations) {
 			sortNamesKnown.add(sd.getName());
 		}

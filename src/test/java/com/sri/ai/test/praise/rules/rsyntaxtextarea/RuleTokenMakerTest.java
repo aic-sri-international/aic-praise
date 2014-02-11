@@ -1,10 +1,15 @@
 package com.sri.ai.test.praise.rules.rsyntaxtextarea;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
 
-import org.fife.ui.rtextarea.*;
-import org.fife.ui.rsyntaxtextarea.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 /**
  * A simple example showing how to use RSyntaxTextArea to add Java syntax

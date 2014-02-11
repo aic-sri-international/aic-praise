@@ -38,7 +38,7 @@
 package com.sri.ai.praise.rules.antlr;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
@@ -50,7 +50,7 @@ public class RuleTerminalSymbols {
 	// Rule.g4 are updated.
 	private static final Set<String> _terminalSymbols;
 	static {
-		Set<String> terminalSymbols = new HashSet<String>();		
+		Set<String> terminalSymbols = new LinkedHashSet<String>();		
 		terminalSymbols.add("not");
 		terminalSymbols.add("and");
 		terminalSymbols.add("or");

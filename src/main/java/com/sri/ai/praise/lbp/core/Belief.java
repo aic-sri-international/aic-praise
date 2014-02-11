@@ -39,7 +39,7 @@ package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1125,12 +1125,12 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression head = IntensionalSet.getHead(msgExpansionOrValue);	
 		Set<Expression> destinationVariables          = Expressions.getVariables(Tuple.get(head, 0), process);
 		Set<Expression> originVariables               = Expressions.getVariables(Tuple.get(head, 1), process);
-		Set<Expression> originAndDestinationVariables = new HashSet<Expression>();
+		Set<Expression> originAndDestinationVariables = new LinkedHashSet<Expression>();
 		originAndDestinationVariables.addAll(destinationVariables);
 		originAndDestinationVariables.addAll(originVariables);
 		originAndDestinationVariables.retainAll(indices);
 		
-		Set<Expression> randomVariableValueVariables = new HashSet<Expression>();
+		Set<Expression> randomVariableValueVariables = new LinkedHashSet<Expression>();
 		Set<Expression> randomVariableValues         = LPIUtil.getRandomVariableValueExpressions(head, process);
 		for (Expression randomVariableValue : randomVariableValues) {
 			randomVariableValueVariables.addAll(Expressions.getVariables(randomVariableValue, process));
@@ -1139,7 +1139,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// scoped (e.g. in a product message from an expansion).
 		randomVariableValueVariables.retainAll(Expressions.freeVariables(Tuple.get(head, 2), process));
 		
-		Set<Expression> testSet = new HashSet<Expression>();
+		Set<Expression> testSet = new LinkedHashSet<Expression>();
 		testSet.addAll(Expressions.freeVariables(Tuple.get(head, 2), process));
 		testSet.retainAll(indices);
 		testSet.removeAll(originAndDestinationVariables);

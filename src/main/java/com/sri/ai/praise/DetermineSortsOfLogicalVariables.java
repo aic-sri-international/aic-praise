@@ -1,8 +1,8 @@
 package com.sri.ai.praise;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +76,7 @@ public class DetermineSortsOfLogicalVariables {
 	}
 
 	private static Collection<RandomVariableDeclaration> getRandomVariableDeclarationObjectsFromExpressions(Set<Expression> randomVariableDeclarationExpressions) {
-		Set<RandomVariableDeclaration> randomVariableDeclarations = new HashSet<RandomVariableDeclaration>();
+		Set<RandomVariableDeclaration> randomVariableDeclarations = new LinkedHashSet<RandomVariableDeclaration>();
 		for (Expression randomVariableDeclarationExpression : randomVariableDeclarationExpressions) {
 			RandomVariableDeclaration randomVariableDeclaration =
 					RandomVariableDeclaration
