@@ -738,14 +738,6 @@ public class LPIUtil {
 	}
 	
 	/**
-	 * Indicates whether an expression is a message definition ("message to Alpha from Beta" or "previous message to Alpha from Beta").
-	 */
-	public static boolean isMessageDefinition(Expression expression) {
-		boolean result = expression.hasFunctor(FUNCTOR_PREVIOUS_MSG_TO_FROM) || expression.hasFunctor(FUNCTOR_MSG_TO_FROM); 
-		return result;
-	}
-
-	/**
 	 * Make a trivial bound expression for the specified random variable value, i.e:<br>
 	 * <pre>
 	 * 'convex hull'({[if randomVariableValue then 1 else 0],
@@ -858,7 +850,15 @@ public class LPIUtil {
 		return result;
 	}
 
-	public static boolean isPreviousMessage(Expression expression) {
+	/**
+	 * Indicates whether an expression is a message definition ("message to Alpha from Beta" or "previous message to Alpha from Beta").
+	 */
+	public static boolean isMessageDefinition(Expression expression) {
+		boolean result = expression.hasFunctor(FUNCTOR_PREVIOUS_MSG_TO_FROM) || expression.hasFunctor(FUNCTOR_MSG_TO_FROM); 
+		return result;
+	}
+
+	public static boolean isPreviousMessageDefinition(Expression expression) {
 		if (Expressions.hasFunctor(expression, FUNCTOR_PREVIOUS_MSG_TO_FROM)) {
 			return true;
 		}

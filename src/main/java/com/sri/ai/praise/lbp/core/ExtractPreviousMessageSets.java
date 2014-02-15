@@ -123,7 +123,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 		
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
-			if (LPIUtil.isPreviousMessage(expression)) {
+			if (LPIUtil.isPreviousMessageDefinition(expression)) {
 				Expression tuplePair = Tuple.make(expression.get(0), expression.get(1));
 				List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromVariablesAndDomains(process.getContextualVariablesAndDomains());
 				Expression set = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressions, tuplePair, process.getContextualConstraint());

@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-praise nor the names of its
+ * Neither the name of the aic-expresso nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -38,31 +38,26 @@
 package com.sri.ai.praise.lbp.core;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.praise.LPIUtil;
-import com.sri.ai.praise.lbp.core.HasIsMessageDefinition;
+import com.sri.ai.grinder.core.DefaultRewriterTest;
+import com.sri.ai.praise.IsMessageDefinitionAttribute;
 
 /**
- * Rewrites message definitions by their values when they are simple, that is,
- * when their (up to normalization) value does not depend on any other messages.
- * 
- * @see LPIUtil#valueOfSimpleMessageOrSelfIfNotSimpleMessage(Expression message, RewritingProcess process) 
+ * Tests whether an expression is a message definition, that is,
+ * an expression of the type <message to Alpha from Beta> or <previous message to Alpha from Beta>.
  * 
  * @author braz
- * 
  */
 @Beta
-public class SimpleMessageDefinitionRewritesToItsValue extends AbstractRewriter {
+public class HasIsMessageDefinition extends DefaultRewriterTest {
 
-	public SimpleMessageDefinitionRewritesToItsValue() {
-		this.setReifiedTests(new HasIsMessageDefinition(true));
-	}
-
-	@Override
-	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-		expression = LPIUtil.valueOfSimpleMessageOrSelfIfNotSimpleMessage(expression, process);
-		return expression;
+	/**
+	 * Constructor. Create a RewriterTest with
+	 * (attribute=is message definition,value=true or false).
+	 * 
+	 * @param isMessageDefinitionValue
+	 */
+	public HasIsMessageDefinition(Object isMessageDefinitionValue) {
+		// Note: for safety ensure we always compare expressions.
+		super(IsMessageDefinitionAttribute.INSTANCE, new Boolean(true));
 	}
 }

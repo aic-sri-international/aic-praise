@@ -1174,7 +1174,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		public Expression apply(Expression expressionE, RewritingProcess process) {
 			Expression result = null;
 			
-			if ( ! LPIUtil.isPreviousMessage(expressionE)) {
+			if ( ! LPIUtil.isPreviousMessageDefinition(expressionE)) {
 				// if E is not of the form "previous message to Destination' from Origin'
 				//     return E
 				result = expressionE;

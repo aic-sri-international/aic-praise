@@ -35,34 +35,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.lbp.core;
+package com.sri.ai.praise;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
-import com.sri.ai.grinder.core.DefaultRewriterTest;
-import com.sri.ai.grinder.core.KindAttribute;
+import com.sri.ai.grinder.api.RewriterTestAttribute;
+import com.sri.ai.grinder.api.RewritingProcess;
 
 /**
- * Tests whether an expression is a message definition, that is,
- * an expression of the type <message to Alpha from Beta> or <previous message to Alpha from Beta>.
- * NEEDS TO BE FINISHED; Just equivalent at HasFunctor at this point.
+ * A RewriterTestAttribute indicating whether an expression is a message definition (either regular or previous).
  * 
  * @author braz
+ *
  */
 @Beta
-public class IsMessageDefinition extends DefaultRewriterTest {
+public class IsMessageDefinitionAttribute implements RewriterTestAttribute {
 
+	public static final IsMessageDefinitionAttribute INSTANCE = new IsMessageDefinitionAttribute();
+	
+	//
+	// START-RewriterTestAttribute
+	@Override
+	public Object getValue(Expression expression, RewritingProcess process) {
+		Boolean result = LPIUtil.isMessageDefinition(expression);
+		return result;
+	}
+	// END-ReriterTestAttribute
+	//
+	
+	@Override
+	public String toString() {
+		return "message";
+	}
+	
+	//
+	// PRIVATE
+	//
 	/**
-	 * Constructor. Create a RewriterTest with
-	 * (attribute=kind,value=aGivenFunctor).
-	 * 
-	 * @param functorValue
+	 * Private constructor so that only a singleton may be created.
 	 */
-	public IsMessageDefinition(Object functorValue) {
-		// Note: for safety ensure we always compare expressions.
-		super(KindAttribute.INSTANCE,
-				functorValue instanceof Expression ? functorValue
-						: DefaultSymbol.createSymbol(functorValue));
+	private IsMessageDefinitionAttribute() {
+		
 	}
 }
