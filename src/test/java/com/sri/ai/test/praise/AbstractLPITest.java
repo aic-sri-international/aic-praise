@@ -128,17 +128,18 @@ public abstract class AbstractLPITest {
 			assertEquals("Ensure you run all the tests", tests.length, run);
 		}
 		
-		doTreeUtilWaitUnilClosed();
+		GrinderUtil.doTreeUtilWaitUntilClosed();
 		
 		if (assertFailed != null) {
 			fail(assertFailed);
 		}
 	}
 	
-	protected void doTreeUtilWaitUnilClosed() {
-		if (GrinderConfiguration.isWaitUntilUIClosedEnabled()) {
-			TreeUtil.waitUntilUIClosed();
-		}
+	/**
+	 * @deprecated Use {@link LPIUtil#doTreeUtilWaitUntilClosed()} instead
+	 */
+	public static void doTreeUtilWaitUnilClosed() {
+		GrinderUtil.doTreeUtilWaitUntilClosed();
 	}
 	
 	protected Expression parse(String expressionString) {

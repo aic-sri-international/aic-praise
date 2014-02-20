@@ -4124,12 +4124,37 @@ public class LBPTest extends AbstractLPITest {
 		
 		perform(tests);
 	}
+
+	@Test
+	public void testFriendshipModel() {
+		Expression query;
+		Model      model;
+		Expression actual;
+		Expression expected;
+		
+		query = parse("friends(dave, X)");
+		model = Model.fromRules(
+				"sort People: 10, ann, bob, dave, rodrigo, ciaran;" + 
+				"" + 
+				"random friends: People x People -> Boolean;" + 
+				"" + 
+				"friends(X,Y) <=> friends(Y,X);" + 
+				"not friends(X,X);" + 
+				"" + 
+				"friends(bob, dave);" + 
+				"");
+		expected = parse("if X = dave then if friends(dave, dave) then 0 else 1 else (if X = bob then if friends(dave, bob) then 1 else 0 else 0.5)");
+		actual = Belief.computeSynchronous(query, model);
+		Assert.assertEquals(expected, actual);
+
+		GrinderUtil.doTreeUtilWaitUntilClosed();
+}
 	
 	@Test
 	public void testBeliefForLoopyModels() {
 		class LoopyBeliefTestData extends TestData {
 			private String belief; 
-			private Expression exprBelief;
+			private Expression beliefDefinition;
 			private Map<Object, Object> globalObjects;
 			
 			public LoopyBeliefTestData(String contextualConstraint, Model model, String belief, boolean illegalArgumentTest, String expected) {
@@ -4144,8 +4169,8 @@ public class LBPTest extends AbstractLPITest {
 			
 			@Override
 			public Expression getTopExpression() {
-				this.exprBelief = parse(belief);
-				return this.exprBelief;
+				this.beliefDefinition = parse(belief);
+				return this.beliefDefinition;
 			}
 			
 			@Override
@@ -4159,7 +4184,7 @@ public class LBPTest extends AbstractLPITest {
 				RewritingProcess lbpProcess = LBPFactory.newLBPProcess(process.getRootExpression(), configuration, process);
 				
 				
-				Expression belief = lbpProcess.rewrite(LBPRewriter.R_belief, exprBelief);
+				Expression belief = lbpProcess.rewrite(LBPRewriter.R_belief, beliefDefinition);
 				Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
 				return roundedBelief;
 			}
@@ -4282,7 +4307,7 @@ public class LBPTest extends AbstractLPITest {
 		queryAnswer = Belief.compute(parse("equalityOccurred"), model);
 		assertEquals(parse("if equalityOccurred then 1 else 0"), queryAnswer);
 		
-		doTreeUtilWaitUnilClosed();
+		GrinderUtil.doTreeUtilWaitUntilClosed();
 		
 		// Below: rule converter not properly converting this model, but it should be tested once that's fixed.
 //		Model model = Model.fromRules(

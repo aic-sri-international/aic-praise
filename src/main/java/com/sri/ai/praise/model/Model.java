@@ -213,6 +213,11 @@ public class Model {
 		return RuleConverter.makeModel(modelName, modelDescription, ruleAndDeclarationsListString);
 	}
 	
+	/** A convenience method doing the same as {@link RuleConverter#makeModel(String, String, String)} with no name or description. */
+	public static Model fromRules(String ruleAndDeclarationsListString) {
+		return RuleConverter.makeModel("", "", ruleAndDeclarationsListString);
+	}
+	
 	/**
 	 * Declare a model without defining it (useful for caching purposes).
 	 * 

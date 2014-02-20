@@ -439,7 +439,7 @@ public class LPIUtil {
 				|| !BracketedExpressionSubExpressionsProvider.isRandomVariable(
 						randomVariable, process)) {
 			throw new IllegalArgumentException(
-					"Random Variable is not a random variable expression of the form [Ev]:="
+					"Random Variable is not a random variable expression of the form [Ev]: "
 							+ randomVariable);
 		}
 	}
