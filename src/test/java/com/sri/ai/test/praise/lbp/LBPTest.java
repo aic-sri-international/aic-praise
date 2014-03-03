@@ -127,14 +127,6 @@ public class LBPTest extends AbstractLPITest {
 	}
 	
 	@Test
-	public void testNewLBPProcess2() {
-		Expression testExpression = parse("1 + 1");
-		RewritingProcess process = LBPFactory.newLBPProcess(testExpression);
-		Expression result = process.rewrite(LBPRewriter.R_basic, testExpression);
-		System.out.println(result);
-	}
-	
-	@Test
 	public void testBreakConditionsContainingBothLogicalAndRandomVariablesHierarchical() {
 		String expressionString;
 		String expectedString;
@@ -4127,6 +4119,10 @@ public class LBPTest extends AbstractLPITest {
 
 	@Test
 	public void testFriendshipModel() {
+		newRewritingProcess(null);
+		// create new process so that all newly constructed expressions are interpreted according to this process's modules,
+		// particularly order normalization, which is cached upon the first use of the equals method.
+
 		Expression query;
 		Model      model;
 		Expression actual;
@@ -4148,7 +4144,7 @@ public class LBPTest extends AbstractLPITest {
 		Assert.assertEquals(expected, actual);
 
 		GrinderUtil.doTreeUtilWaitUntilClosed();
-}
+	}
 	
 	@Test
 	public void testBeliefForLoopyModels() {
@@ -4289,6 +4285,10 @@ public class LBPTest extends AbstractLPITest {
 	// TODO: debug
 	@Test
 	public void testDistinctTypeComparisons() {
+		newRewritingProcess(null);
+		// create new process so that all newly constructed expressions are interpreted according to this process's modules,
+		// particularly order normalization, which is cached upon the first use of the equals method.
+
 		Model model;
 		Expression queryAnswer;
 		
