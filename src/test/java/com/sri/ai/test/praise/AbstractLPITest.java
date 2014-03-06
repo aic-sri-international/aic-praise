@@ -74,6 +74,10 @@ public abstract class AbstractLPITest {
 
 	@Before
 	public void setUp() {
+		newRewritingProcess(null);
+		// create new process so that all newly constructed expressions are interpreted according to this process's modules,
+		// particularly order normalization.
+
 		TreeUtil.flushData();
 		Configuration.clear();
 		DefaultSymbol.flushGlobalSymbolTable();
@@ -82,7 +86,7 @@ public abstract class AbstractLPITest {
 		grammar = makeGrammar();
 		// Ensure the grammar class passed in is used where necessary.
 		BrewerConfiguration.setProperty(BrewerConfiguration.KEY_DEFAULT_GRAMMAR_CLASS, grammar.getClass().getName());
-		
+
 		parser = makeParser();
 	}
 	
