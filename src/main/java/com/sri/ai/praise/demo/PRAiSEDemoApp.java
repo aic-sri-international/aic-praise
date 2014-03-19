@@ -424,12 +424,12 @@ public class PRAiSEDemoApp {
 		
 		//
 		// Setup the examples
-		toolBar.exampleComboBox.addItem(new Example1());
+//		toolBar.exampleComboBox.addItem(new Example1());
 		toolBar.exampleComboBox.addItem(new Example2());
 		toolBar.exampleComboBox.addItem(new Example3());
-		toolBar.exampleComboBox.addItem(new Example4());
-		toolBar.exampleComboBox.addItem(new Example5());
-		toolBar.exampleComboBox.addItem(new Example6());
+//		toolBar.exampleComboBox.addItem(new Example4());
+//		toolBar.exampleComboBox.addItem(new Example5());
+//		toolBar.exampleComboBox.addItem(new Example6());
 		toolBar.exampleComboBox.addItem(new Example7());
 		toolBar.exampleComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

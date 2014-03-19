@@ -45,8 +45,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.slf4j.Marker;
+import org.junit.runners.MethodSorters;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultSymbol;
@@ -116,6 +118,7 @@ import com.sri.ai.util.base.Pair;
  * 
  */
 @SuppressWarnings("unused")
+//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LBPTest extends AbstractLPITest {
 	
 	@Test

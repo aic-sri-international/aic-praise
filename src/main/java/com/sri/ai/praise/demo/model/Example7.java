@@ -42,7 +42,7 @@ import com.google.common.annotations.Beta;
 @Beta
 public class Example7 extends Example {
 	public Example7() {
-		super("7: Friendship is a two-way street");
+		super("Friendship is a two-way street");
 		setModel(getExampleFromResource("example7.model"));
 		setEvidence(getExampleFromResource("example7.es1"));
 		setQueryToRun("friends(dave, X)");
