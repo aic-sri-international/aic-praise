@@ -855,7 +855,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			}
 		}
 		
-		if (intersection == null) {
+		if (intersection == null || Sets.isEmptySet(intersection)) {
 			System.err.println("IllegalStateException: unable to find intersection.");
 			System.err.println("context      ="+process.getContextualConstraint());
 			System.err.println("prev_message ="+prevMessage);
