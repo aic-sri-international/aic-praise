@@ -157,32 +157,11 @@ MutuallyExclusiveCoDomainsModule.Provider {
 
 	@Override
 	public void rewritingProcessInitiated(RewritingProcess process) {
-		ScopedVariables scopedVariables =
-			(ScopedVariables) process.findModule(ScopedVariables.class);
-		if (scopedVariables != null) {
-			scopedVariables.register(this);
-		}
-		
-		ExpressionKnowledgeModule knowledgeBasedExpressionModule =
-			(ExpressionKnowledgeModule) process.findModule(ExpressionKnowledgeModule.class);
-		if (knowledgeBasedExpressionModule != null) {
-			knowledgeBasedExpressionModule.register(this);
-		}
-		
-		CheapDisequalityModule cheapDisequalityModule = (CheapDisequalityModule) process.findModule(CheapDisequalityModule.class);
-		if (cheapDisequalityModule != null) {
-			cheapDisequalityModule.register(this);
-		}
-
-		InjectiveModule injectiveModuleModule = (InjectiveModule) process.findModule(InjectiveModule.class);
-		if (injectiveModuleModule != null) {
-			injectiveModuleModule.register(this);
-		}
-
-		MutuallyExclusiveCoDomainsModule mutuallyExclusiveCoDomainsModule = (MutuallyExclusiveCoDomainsModule) process.findModule(MutuallyExclusiveCoDomainsModule.class);
-		if (mutuallyExclusiveCoDomainsModule != null) {
-			mutuallyExclusiveCoDomainsModule.register(this);
-		}
+		ScopedVariables.register(this, process);
+		ExpressionKnowledgeModule.register(this, process);
+		CheapDisequalityModule.register(this, process);
+		InjectiveModule.register(this, process);
+		MutuallyExclusiveCoDomainsModule.register(this, process);
 	}
 
 	@Override
