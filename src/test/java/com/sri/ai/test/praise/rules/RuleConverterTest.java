@@ -52,11 +52,11 @@ import com.sri.ai.brewer.BrewerConfiguration;
 import com.sri.ai.brewer.api.Grammar;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.grinder.ui.TreeUtil;
@@ -100,7 +100,7 @@ public class RuleConverterTest {
 	public void testTranslateFunctions() {
 		List<Expression> rules                     = new ArrayList<Expression>();
 		Set<Expression>  randomVariableDefinitions = new LinkedHashSet<Expression>();
-		Set<Expression> expectedRules              = new LinkedHashSet<Expression>();
+		Set<Expression>  expectedRules             = new LinkedHashSet<Expression>();
 		Set<Expression>  exprectedRandomVariables  = new LinkedHashSet<Expression>();
 		
 		Pair<List<Expression>, Set<Expression>> translateFunctionsResult;
@@ -1089,10 +1089,10 @@ public class RuleConverterTest {
 	@Test
 	public void testIsRandomFunctionApplication () {
 		Expression input;
-		input = new DefaultCompoundSyntaxTree ("if . then . else .", 1, 2, 3);
+		input = IfThenElse.make(Expressions.ONE, Expressions.TWO, Expressions.THREEE);
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
-		input = DefaultSymbol.createSymbol("foo");
+		input = Expressions.makeSymbolExpression("foo");
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
 		input = new DefaultCompoundSyntaxTree ("and", 1, 2, 3);
