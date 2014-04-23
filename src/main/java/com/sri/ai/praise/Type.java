@@ -40,7 +40,7 @@ package com.sri.ai.praise;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Lists;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.core.HasFunctor;
@@ -65,11 +65,10 @@ public class Type extends AbstractRewriter {
 	// the reason for a multiset here is that it does not trigger a
 	// normalization for eliminating repeated elements.
 	private static final Expression _booleanType = ExtensionalSet
-			.makeMultiSet(Lists.newArrayList((Expression) DefaultSymbol.createSymbol("false"), DefaultSymbol.createSymbol("true")));
+			.makeMultiSet(Lists.newArrayList((Expression) Expressions.createSymbol("false"), Expressions.createSymbol("true")));
 
 	@Override
-	public Expression rewriteAfterBookkeeping(Expression expression,
-			RewritingProcess process) {
+	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
 
 		// Note: type(...) expressions are usually marked as being
 		// SyntacticFunctionsSubExpressionsProvider("type",
@@ -77,7 +76,7 @@ public class Type extends AbstractRewriter {
 		// as rewriting of them is not considered possible.
 		// However, in this case we'd like to do differently.
 		if (expression.getSyntaxTree().numberOfImmediateSubTrees() == 1
-				&& IsRandomVariableValueExpression.apply(expression.getSyntaxTree().getImmediateSubTrees().get(0), process)
+				&& IsRandomVariableValueExpression.apply(Expressions.make(expression.getSyntaxTree().getImmediateSubTrees().get(0)), process)
 			) {
 			return _booleanType;
 		}

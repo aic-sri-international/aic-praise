@@ -1089,7 +1089,7 @@ public class RuleConverterTest {
 	@Test
 	public void testIsRandomFunctionApplication () {
 		Expression input;
-		input = IfThenElse.make(Expressions.ONE, Expressions.TWO, Expressions.THREEE);
+		input = IfThenElse.make(Expressions.ONE, Expressions.TWO, Expressions.THREE);
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
 		input = Expressions.createSymbol("foo");
