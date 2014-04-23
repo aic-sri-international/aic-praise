@@ -51,7 +51,6 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -735,11 +734,10 @@ public class Model {
 
 		Expression sortCardinality = Expressions.make(
 				FunctorConstants.CARDINALITY, sortName);
-		Object cardinality = process.getGlobalObject(sortCardinality);
-		if (cardinality instanceof Symbol) {
-			Symbol sCard = (Symbol) cardinality;
-			if (sCard.getValue() instanceof Number) {
-				result = sCard.intValue();
+		Expression cardinality = (Expression) process.getGlobalObject(sortCardinality);
+		if (cardinality != null) {
+			if (cardinality.getValue() instanceof Number) {
+				result = cardinality.intValue();
 			}
 		}
 
@@ -898,10 +896,10 @@ public class Model {
 
 		// Some defaults if not specified in model
 		if (name == null) {
-			name = DefaultSymbol.createSymbol("No name given.");
+			name = Expressions.createSymbol("No name given.");
 		}
 		if (description == null) {
-			description = DefaultSymbol.createSymbol("No description given.");
+			description = Expressions.createSymbol("No description given.");
 		}
 		if (null == parfactorsDeclaration) {
 			// Default to an empty union.

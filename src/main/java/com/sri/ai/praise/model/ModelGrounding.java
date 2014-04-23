@@ -48,8 +48,6 @@ import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -309,7 +307,7 @@ public class ModelGrounding {
 				throw new ModelGroundingException("Ground model size so far of "+groundFactors.size()+" exceeds maximum allowed size of " + PRAiSEConfiguration.getMaxAllowedSizeForGroundedModel(),
 						Arrays.asList(new ModelGroundingError(
 								ModelGroundingError.TYPE.GROUND_MODEL_EXCEEDS_MAX_ALLOWED_SIZE, 
-								DefaultSymbol.createSymbol(PRAiSEConfiguration.getMaxAllowedSizeForGroundedModel()))));
+								Expressions.createSymbol(PRAiSEConfiguration.getMaxAllowedSizeForGroundedModel()))));
 			}
 		}
 		
@@ -496,7 +494,7 @@ public class ModelGrounding {
 			
 			// Check if we are using upper or lower case convention
 			// for logical variables.
-			Symbol upperCaseSymbol = DefaultSymbol.createSymbol("X");
+			Expression upperCaseSymbol = Expressions.createSymbol("X");
 			boolean isUpperCaseVariable = process.isVariable(upperCaseSymbol);
 			
 			for (SortInformation sortInformation : sortMap.values()) {
@@ -527,10 +525,9 @@ public class ModelGrounding {
 					}
 					// Now fill out the constants for this sort
 					while (sortInformation.constants.size() < sortInformation.size) {
-						Symbol newGroundSortConstant = DefaultSymbol.createSymbol(constantPrefix+(sortInformation.constants.size()+1));
+						Expression newGroundSortConstant = Expressions.createSymbol(constantPrefix+(sortInformation.constants.size()+1));
 						while (knownConstants.contains(newGroundSortConstant)) {
-							newGroundSortConstant = DefaultSymbol
-									.createSymbol(newGroundSortConstant.toString()+"'"); // Prime it.
+							newGroundSortConstant = Expressions.createSymbol(newGroundSortConstant.toString()+"'"); // Prime it.
 						}
 						knownConstants.add(newGroundSortConstant);
 						sortInformation.constants.add(newGroundSortConstant);
@@ -615,7 +612,7 @@ public class ModelGrounding {
 		public void instantiateGroundDeclaration(List<ModelGroundingError> errors) {
 			try {
 				groundDeclaration = new SortDeclaration(name, 
-						DefaultSymbol.createSymbol(size), 
+						Expressions.createSymbol(size), 
 						ExtensionalSet.makeUniSetExpression(new ArrayList<Expression>(constants)));
 			} catch (IllegalArgumentException iae) {
 				errors.add(new ModelGroundingError(ModelGroundingError.TYPE.UNABLE_TO_INSTANTIATE_A_VALID_SORT_DECLARATION_FOR_GROUNDING, name));
@@ -651,7 +648,7 @@ public class ModelGrounding {
 					groundDeclaration = new RandomVariableDeclaration(name);
 				} 
 				else {
-					groundDeclaration = new RandomVariableDeclaration(name, DefaultSymbol.createSymbol(arity), parameterSorts);
+					groundDeclaration = new RandomVariableDeclaration(name, Expressions.createSymbol(arity), parameterSorts);
 				}
 			}
 			return groundDeclaration;

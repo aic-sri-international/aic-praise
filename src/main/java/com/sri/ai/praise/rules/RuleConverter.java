@@ -1775,8 +1775,8 @@ public class RuleConverter {
 			Set<Expression> sorts, Set<Expression> randomVariableDeclarations,
 			Set<Expression> parfactors) {
 		ArrayList<Expression> modelArguments = new ArrayList<Expression>();
-		modelArguments.add(DefaultSymbol.createSymbol(name));
-		modelArguments.add(DefaultSymbol.createSymbol(description));
+		modelArguments.add(Expressions.createSymbol(name));
+		modelArguments.add(Expressions.createSymbol(description));
 		for (Expression sort : sorts)
 			modelArguments.add(sort);
 

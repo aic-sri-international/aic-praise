@@ -1092,7 +1092,7 @@ public class RuleConverterTest {
 		input = IfThenElse.make(Expressions.ONE, Expressions.TWO, Expressions.THREEE);
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
-		input = Expressions.makeSymbolExpression("foo");
+		input = Expressions.createSymbol("foo");
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
 		input = new DefaultCompoundSyntaxTree ("and", 1, 2, 3);

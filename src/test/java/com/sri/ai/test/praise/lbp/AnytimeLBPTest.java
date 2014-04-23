@@ -104,7 +104,7 @@ public class AnytimeLBPTest extends AbstractLPITest {
 					System.out.println("Current belief at iteration "+iteration+"="+belief);
 				}
 				
-				Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
+				Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9, process);
 				
 				return roundedBelief;
 			}

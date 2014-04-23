@@ -2938,7 +2938,7 @@ public class LBPTest extends AbstractLPITest {
 				configuration.setBeliefPropagationUpdateSchedule(schedule);
 				RewritingProcess lbpProcess = LBPFactory.newLBPProcess(process.getRootExpression(), configuration, process);
 				Expression belief = lbpProcess.rewrite(LBPRewriter.R_belief, exprBelief);
-				Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
+				Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9, process);
 				return roundedBelief;
 			}
 		}
@@ -3369,7 +3369,7 @@ public class LBPTest extends AbstractLPITest {
 				Expression roundedBelief = null;
 				
 				Expression belief = process.rewrite(LBPRewriter.R_belief, exprBelief);
-				roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
+				roundedBelief = Expressions.roundToAGivenPrecision(belief, 9, process);
 					
 				return roundedBelief;
 			}
@@ -4184,7 +4184,7 @@ public class LBPTest extends AbstractLPITest {
 				
 				
 				Expression belief = lbpProcess.rewrite(LBPRewriter.R_belief, beliefDefinition);
-				Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
+				Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9, process);
 				return roundedBelief;
 			}
 		};

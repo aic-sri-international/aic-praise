@@ -131,7 +131,7 @@ public class LBPStressIT extends AbstractLPITest {
 			
 			
 			Expression belief = lbpProcess.rewrite(LBPRewriter.R_belief, exprBelief);
-			Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9);
+			Expression roundedBelief = Expressions.roundToAGivenPrecision(belief, 9, process);
 			return roundedBelief;
 		}
 	};

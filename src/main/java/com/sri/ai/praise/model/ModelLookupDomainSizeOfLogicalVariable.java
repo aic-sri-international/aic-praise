@@ -80,7 +80,7 @@ public class ModelLookupDomainSizeOfLogicalVariable implements
 			
 			// Now determine what sort the logical variable belongs to.
 			// Start with the Universe of discourse initially.
-			Symbol sortNameForLogicalVariable = SortDeclaration.UNIVERSE_OF_DISCOURSE;
+			Expression sortNameForLogicalVariable = SortDeclaration.UNIVERSE_OF_DISCOURSE;
 
 			// TODO - add support for when there is more than 1 sort defined in the model, i.e:
 			// ALBP-199 Retrieve domain information associated with logical variables from models 

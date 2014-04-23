@@ -444,7 +444,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 							// Step 7 set precision on result of step 6
 							notifyListenersQueryStepStarting(queryUUID, STEP_7, stopWatch);
 							resultAsExpression = Expressions.roundToAGivenPrecision(belief, 
-									PRAiSEConfiguration.getLBPQueryEngineRoundResultTo());
+									PRAiSEConfiguration.getLBPQueryEngineRoundResultTo(), process);
 							resultAsString = resultAsExpression.toString();
 							notifyListenersQueryStepComplete(queryUUID, STEP_7, stopWatch);
 						}

@@ -669,7 +669,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 		protected Expression simplify(Expression expression, RewritingProcess process) {
 			Expression result = process.rewrite(LBPRewriter.R_normalize, expression);
 			
-			result = Expressions.roundToAGivenPrecision(result, 9);
+			result = Expressions.roundToAGivenPrecision(result, 9, process);
 			
 			return result;
 		}
@@ -688,7 +688,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 		protected Expression simplify(Expression expression, RewritingProcess process) {
 			Expression result = process.rewrite(LBPRewriter.R_complete_normalize, expression);
 			
-			result = Expressions.roundToAGivenPrecision(result, 9);
+			result = Expressions.roundToAGivenPrecision(result, 9, process);
 			
 			return result;
 		}
