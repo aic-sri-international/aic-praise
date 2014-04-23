@@ -54,7 +54,6 @@ import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -99,7 +98,7 @@ public class ExportToPMTK3FactorGraph {
 		String modelDeclaration =  Model.getModelDeclarationFromResource("Example4.model");
 
 		Map<Expression, Expression> globalObjects = new LinkedHashMap<Expression, Expression>();
-		globalObjects.put(parser.parse("| Object |"), DefaultSymbol.createSymbol(size)); 
+		globalObjects.put(parser.parse("| Object |"), Expressions.createSymbol(size)); 
 		// Ensure domain sizes match up.
 		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());		
 		
@@ -324,7 +323,7 @@ public class ExportToPMTK3FactorGraph {
 			
 			List<Expression> queryVars = new ArrayList<Expression>();
 			for (int i = 0; i < rvd.getArityValue(); i++) {
-				queryVars.add(DefaultSymbol.createSymbol("X"+i));
+				queryVars.add(Expressions.createSymbol("X"+i));
 			}
 			Expression randomVariable = Expressions.make(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL,
 					Expressions.make(rvd.getName(), queryVars));

@@ -1228,7 +1228,7 @@ public class RuleConverter {
 				// Add the first argument.
 				if (ii >= size1) {
 					// If we're beyond the range for argument 2, insert default value.
-					rule1 = DefaultSymbol.createSymbol(0.5);
+					rule1 = Expressions.createSymbol(0.5);
 				}
 				else {
 					// If we're still in range for argument 1, get the value.
@@ -1247,7 +1247,7 @@ public class RuleConverter {
 				if (!(size2 == 0)) {
 					if (ii >= size2) {
 						// If we're beyond the range for argument 2, insert default value.
-						rule2 = DefaultSymbol.createSymbol(0.5);
+						rule2 = Expressions.createSymbol(0.5);
 					}
 					else {
 						// If we're still in range for argument 2, get the value.
@@ -1569,7 +1569,7 @@ public class RuleConverter {
 				queryAtom = Expressions.make(FUNCTOR_QUERY, variablesF);
 			}
 			else {
-				queryAtom = DefaultSymbol.createSymbol(FUNCTOR_QUERY);
+				queryAtom = Expressions.createSymbol(FUNCTOR_QUERY);
 			}
 			// | rule <- queryAtom <=> queryFormula
 			Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);
@@ -1631,7 +1631,7 @@ public class RuleConverter {
 			else {
 				//assume that the 'condition' is a random variable value
 				
-				Rational potential = ((Symbol)input.get(1)).rationalValue();
+				Rational potential = input.get(1).rationalValue();
 				
 				if (potential.isZero()) { // things with 0 potential are negations; it's more intuitive to convert them to that.
 					if (condition.hasFunctor(FunctorConstants.NOT)) { // negate condition, avoiding double negations
@@ -1648,13 +1648,13 @@ public class RuleConverter {
 					potential = potential.subtract(1).negate(); // this is the same as potential = 1.0 - potential;
 				}
 				
-				Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, condition, DefaultSymbol.createSymbol(potential));
+				Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, condition, Expressions.createSymbol(potential));
 				return result;
 			}
 		}
 		
 		// the statement must have a constant potential, so the result is a uniform message.
-		Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, queryAtom, DefaultSymbol.createSymbol(0.5));
+		Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, queryAtom, Expressions.createSymbol(0.5));
 		return result;		
 	}
 	
@@ -1727,10 +1727,10 @@ public class RuleConverter {
 	
 	public Expression createNewRandomVariableDeclaration(Expression randomVariableValue, Expression randomVariableUsedIn, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
 		Expression result = null;
-		List<Expression> resultArgs = new ArrayList<Expression>();
+		List<Expression> resultArguments = new ArrayList<Expression>();
 
-		resultArgs.add(randomVariableValue.getFunctorOrSymbol());
-		resultArgs.add(DefaultSymbol.createSymbol(randomVariableValue.numberOfArguments()));
+		resultArguments.add(randomVariableValue.getFunctorOrSymbol());
+		resultArguments.add(Expressions.createSymbol(randomVariableValue.numberOfArguments()));
 		
 		List<Expression> rvValueArgs = randomVariableValue.getArguments();
 		for (Expression rvArg : rvValueArgs) {
@@ -1748,15 +1748,15 @@ public class RuleConverter {
 				// Once we know the function name and the argument position, we can look
 				// up the declaration for that function and look up the type for the argument.
 				if (randomVariableDeclaration.get(0).equals(searchFunction.randomVariableName)) {
-					resultArgs.add(randomVariableDeclaration.get(searchFunction.argumentIndex + 2));
+					resultArguments.add(randomVariableDeclaration.get(searchFunction.argumentIndex + 2));
 					break;
 				}
 			}
 		}
 
-		resultArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
-		if (resultArgs.size() == rvValueArgs.size() + 3) {
-			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArgs);
+		resultArguments.add(Expressions.createSymbol(TYPE_BOOLEAN));
+		if (resultArguments.size() == rvValueArgs.size() + 3) {
+			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArguments);
 		}
 		
 		return result;
@@ -1882,20 +1882,20 @@ public class RuleConverter {
 		// Transfer all the args, but change the arg defining how many args the 
 		// random variable has.
 		List<Expression> oldArgs = randomVariableDecl.getArguments();
-		List<Expression> newArgs = new ArrayList<Expression>(oldArgs.size()+1);
+		List<Expression> newArguments = new ArrayList<Expression>(oldArgs.size()+1);
 		for (int ii = 0; ii < oldArgs.size(); ii++) {
 			// i.e. 1 == the arity slot
 			if (ii == 1) {
-				newArgs.add(DefaultSymbol.createSymbol(oldArgs.get(1).intValue() + 1));
+				newArguments.add(Expressions.createSymbol(oldArgs.get(1).intValue() + 1));
 			}
 			else {
-				newArgs.add(oldArgs.get(ii));
+				newArguments.add(oldArgs.get(ii));
 			}
 		}
 
 		// Change the return type to boolean.
-		newArgs.add(DefaultSymbol.createSymbol(TYPE_BOOLEAN));
-		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArgs);
+		newArguments.add(Expressions.createSymbol(TYPE_BOOLEAN));
+		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArguments);
 	}
 	
 //	public RewritingProcess getRewritingProcess() {
@@ -1975,7 +1975,7 @@ public class RuleConverter {
 			try {
 				NumberFormat format = NumberFormat.getNumberInstance();
 				Number number = format.parse(potential.toString());
-				return DefaultSymbol.createSymbol(1 - number.doubleValue());
+				return Expressions.createSymbol(1 - number.doubleValue());
 			}
 			catch(ParseException e) {
 				
