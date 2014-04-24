@@ -41,7 +41,6 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -166,7 +165,7 @@ public class NormalizeMessage extends AbstractLBPHierarchicalRewriter implements
 			Trace.log("    return 0.5");
 			Justification
 					.beginEqualityStep("normalization of a constant");
-			result = DefaultSymbol.createSymbol(0.5);
+			result = Expressions.createSymbol(0.5);
 		}
 
 		Justification.endEqualityStep(result);

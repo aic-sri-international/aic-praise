@@ -51,7 +51,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ExpressionAndContext;
 import com.sri.ai.expresso.api.SyntaxTree;
 import com.sri.ai.expresso.core.DefaultExpressionAndContext;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.ExpressionKnowledgeModule;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SubSyntaxTreeAndPathWhoseParentsSatisfyAGivenPredicateIterator;
@@ -101,12 +100,12 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	}
 
 	public static Expression getRandomVariableValueExpression(Expression bracketedRandomVariable) {
-		Expression result = bracketedRandomVariable.getSyntaxTree().getSubTree(0); // does need to be the syntax tree here, not just expression
+		Expression result = Expressions.make(bracketedRandomVariable.getSyntaxTree().getSubTree(0)); // does need to be the syntax tree here, not just expression
 		return result;
 	}
 
 	public static Expression getExpressionInBrackets(Expression bracketedExpression) {
-		Expression result = bracketedExpression.getSyntaxTree().getSubTree(0); // does need to be the syntax tree here, not just expression
+		Expression result = Expressions.make(bracketedExpression.getSyntaxTree().getSubTree(0)); // does need to be the syntax tree here, not just expression
 		return result;
 	}
 
@@ -239,7 +238,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 					// clash between the normalized parameter names to be used (i.e. X1 to Xn) 
 					// and the existing parameters, as each instance of an existing parameter (even if repeated)
 					// is replaced with a new unique normalized parameter.
-					Expression parameter = DefaultSymbol.createSymbol("X"+i++);
+					Expression parameter = Expressions.createSymbol("X"+i++);
 					parameters.add(parameter);
 					lambdaBody = Expressions.replaceAtPath(lambdaBody, subExpressionAndContext.getPath(), parameter);
 				}

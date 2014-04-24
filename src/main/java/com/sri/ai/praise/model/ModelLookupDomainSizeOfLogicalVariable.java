@@ -39,7 +39,6 @@ package com.sri.ai.praise.model;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -87,7 +86,7 @@ public class ModelLookupDomainSizeOfLogicalVariable implements
 			// with multiple domains
 			if (model.getSortDeclarations().size() == 1) {
 				SortDeclaration sortDeclaration = model.getSortDeclarations().get(0);
-				sortNameForLogicalVariable = (Symbol) sortDeclaration.getName();
+				sortNameForLogicalVariable = sortDeclaration.getName();
 				
 				size = possiblyUpdateSize(size, sortDeclaration.getSize());
 			}

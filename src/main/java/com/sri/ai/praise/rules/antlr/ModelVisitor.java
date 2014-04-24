@@ -10,7 +10,6 @@ import org.antlr.v4.runtime.Token;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
@@ -76,8 +75,8 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 
 		Expression name = newSymbol(ctx.name.getText());
 		List<Expression> parameters = expressionsList(ctx.parameters);
-		Expression arity = DefaultSymbol.createSymbol(parameters.size());
-		Expression range = DefaultSymbol.createSymbol("Boolean");
+		Expression arity = Expressions.createSymbol(parameters.size());
+		Expression range = Expressions.createSymbol("Boolean");
 		if (ctx.range != null) {
 			range = newSymbol(ctx.range.getText());
 		}
@@ -485,7 +484,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 
 		text = new String(text);
 
-		Expression result = DefaultSymbol.createSymbol(text);
+		Expression result = Expressions.createSymbol(text);
 		return result;
 	}
 
