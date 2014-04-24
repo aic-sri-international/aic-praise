@@ -40,7 +40,7 @@ package com.sri.ai.praise.model;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.expresso.helper.Expressions;
 
 /**
  * A definition of a random predicate, contains a name and corresponding arity.
@@ -75,7 +75,7 @@ public class RandomPredicate {
 			throw new IllegalArgumentException(
 					"Argument is not of the form name/arity :" + nameAndArity);
 		}
-		functorOrSymbol = DefaultSymbol.createSymbol(parts[0]);
+		functorOrSymbol = Expressions.createSymbol(parts[0]);
 		arity = Integer.decode(parts[1]);
 	}
 
