@@ -44,7 +44,6 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -358,8 +357,8 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 		}
 		else {
 			result  = IfThenElse.make(IfThenElse.getCondition(messageValue), 
-				DefaultSymbol.createSymbol(trueValue.divide(partition)), 
-				DefaultSymbol.createSymbol(falseValue.divide(partition)));
+					Expressions.createSymbol(trueValue.divide(partition)), 
+					Expressions.createSymbol(falseValue.divide(partition)));
 		}
 		
 		return result;
@@ -369,12 +368,12 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 		Rational result = null;
 		
 		if (messageValue instanceof Symbol) {
-			result = ((Symbol)messageValue).rationalValue();
+			result = messageValue.rationalValue();
 		}
 		else {
 			Expression thenValue = IfThenElse.getThenBranch(messageValue);
 			if (thenValue instanceof Symbol) {
-				result = ((Symbol) thenValue).rationalValue();
+				result = thenValue.rationalValue();
 			}
 			else {
 				throw new IllegalArgumentException("Random Variable for message cannot be determined ["+messageValue+"]");
@@ -388,12 +387,12 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 		Rational result = null;
 		
 		if (messageValue instanceof Symbol) {
-			result = ((Symbol)messageValue).rationalValue();
+			result = messageValue.rationalValue();
 		}
 		else {
 			Expression elseValue = IfThenElse.getElseBranch(messageValue);
 			if (elseValue instanceof Symbol) {
-				result = ((Symbol) elseValue).rationalValue();
+				result = elseValue.rationalValue();
 			}
 			else {
 				throw new IllegalArgumentException("Random Variable for message cannot be determined ["+messageValue+"]");
