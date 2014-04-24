@@ -50,7 +50,6 @@ import com.google.common.cache.CacheBuilder;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ExpressionAndContext;
 import com.sri.ai.expresso.api.SyntaxTree;
-import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultExpressionAndContext;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.ExpressionKnowledgeModule;
@@ -114,7 +113,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	@Override
 	public Expression getScopedVariablesAsExpression(Expression syntaxTree, RewritingProcess process) {
 		if (isBracketedExpression(syntaxTree)) {
-			return DefaultCompoundSyntaxTree.make("list", _emptyExpressionList);
+			return Expressions.make("list", _emptyExpressionList);
 		}
 		return null;
 	}
