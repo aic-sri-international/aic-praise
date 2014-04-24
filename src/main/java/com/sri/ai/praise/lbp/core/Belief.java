@@ -46,9 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -1085,10 +1083,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					@Override
 					public Expression apply(Expression expressionE, RewritingProcess process) {
 						Expression result = expressionE;
-						if (expressionE instanceof Symbol) {
-							Symbol symbolE = (Symbol) expressionE;
-							if (symbolE.getValue() instanceof Number) {
-								Rational n = symbolE.rationalValue();
+						if (expressionE.getSyntacticFormType().equals("Symbol")) {
+							if (expressionE.getValue() instanceof Number) {
+								Rational n = expressionE.rationalValue();
 								// Handle the precision of non zero values
 								if (!n.isZero()) {
 									n = n.multiply(decimalPrecision).round(Rational.ROUND_HALF_UP).divide(decimalPrecision);
@@ -1096,7 +1093,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 										// ensure we don't underflow and introduce zeros
 										n = nonZeroMin;
 									}
-									result = DefaultSymbol.createSymbol(n);
+									result = Expressions.createSymbol(n);
 								}
 							}
 						}
