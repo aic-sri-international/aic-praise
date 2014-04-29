@@ -134,7 +134,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				Trace.log("    return R_m_to_v_from_f(m_V<-F1)");
 
 				Justification.beginEqualityStep("product of a singleton set is just its own single element");
-				Expression msgToV_F1 = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), domainS.get(0));
+				Expression msgToV_F1 = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), domainS.get(0));
 				Justification.endEqualityStep(msgToV_F1);
 
 				Justification.beginEqualityStep("by solving message to variable from factor");
@@ -151,7 +151,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(domainS);
 				
 				Trace.log("    message <- R_m_to_v_from_f(m_V<-F1, C, I, beingComputed) // under cont. constraint extended by C and contextual variables extended by I");
-				Expression       msgToV_F1        = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), factor1);
+				Expression       msgToV_F1        = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), factor1);
 				RewritingProcess cPrimeSubProcess = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(domainS, process);
 				
 				if (Justification.isEnabled()) {
@@ -214,7 +214,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 					}
 					Expression union = null;
 					if (unionArgs.size() > 1) {
-						union = Expressions.make(FunctorConstants.UNION, unionArgs.toArray());
+						union = Expressions.makeFunctionApplication(FunctorConstants.UNION, unionArgs.toArray());
 					} 
 					else {
 						union = unionArgs.get(0);
@@ -234,7 +234,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 					
 					if (Justification.isEnabled()) {
 						Justification.endEqualityStep(
-								Expressions.make(FunctorConstants.TIMES, message, productOfFactorsInUnionToVariable));
+								Expressions.makeFunctionApplication(FunctorConstants.TIMES, message, productOfFactorsInUnionToVariable));
 					}
 
 					Justification.beginEqualityStep("by multiplying this message to the product of remaining messages");

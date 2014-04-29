@@ -122,7 +122,7 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 				// union(...) > 1 args
 				Expression       first     = union.get(0);
 				List<Expression> rest      = Util.getRest(union.getArguments());
-				Expression       unionRest = Expressions.make(FunctorConstants.UNION, rest.toArray());
+				Expression       unionRest = Expressions.makeFunctionApplication(FunctorConstants.UNION, rest.toArray());
 
 				if (isUnion(first)) {
 					// This should not happen as it should be flattened but
@@ -231,7 +231,7 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 			flattenedUnion = combinedUnionArgs.get(0);
 		} 
 		else {
-			flattenedUnion = Expressions.make(FunctorConstants.UNION, combinedUnionArgs);
+			flattenedUnion = Expressions.makeFunctionApplication(FunctorConstants.UNION, combinedUnionArgs);
 		}
 
 		Expression result = process.rewrite(R_basic, flattenedUnion);

@@ -120,10 +120,10 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 		// R_neigh_v(Neigh(V))
 		Justification.beginEqualityStep("neighbors of random variable");
 
-		Expression neighV          = Expressions.make(LPIUtil.FUNCTOR_NEIGHBOR, randomVariable);
+		Expression neighV          = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_NEIGHBOR, randomVariable);
 		Expression rewriteOfNeighV = process.rewrite(R_neigh_v, neighV);
 
-		Expression msgToV_F = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, randomVariable, factorIndex);
+		Expression msgToV_F = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_MSG_TO_FROM, randomVariable, factorIndex);
 		Expression product = LPIUtil.makeProductOfMessages(factorIndex, rewriteOfNeighV, msgToV_F, Expressions.TRUE);
 
 		if (Justification.isEnabled()) {

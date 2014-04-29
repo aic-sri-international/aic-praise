@@ -76,7 +76,7 @@ public class Type extends AbstractRewriter {
 		// as rewriting of them is not considered possible.
 		// However, in this case we'd like to do differently.
 		if (expression.getSyntaxTree().numberOfImmediateSubTrees() == 1
-				&& IsRandomVariableValueExpression.apply(Expressions.make(expression.getSyntaxTree().getImmediateSubTrees().get(0)), process)
+				&& IsRandomVariableValueExpression.apply(Expressions.makeFromSyntaxTree(expression.getSyntaxTree().getImmediateSubTrees().get(0)), process)
 			) {
 			return _booleanType;
 		}

@@ -148,7 +148,7 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 		return new RewriteOnBranch() {
 			@Override
 			public Expression rewrite(Expression[] expressions, RewritingProcess process) {					
-				Expression result = Expressions.make(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, expressions[0], expressions[1]);
+				Expression result = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, expressions[0], expressions[1]);
 				
 				return result;
 			}
@@ -168,7 +168,7 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 				Expression pairF_V          = expressions[2];
 				Expression beingComputed    = expressions[3];
 				Expression factorIndexPrime = Expressions.makeUniqueVariable("F'", randomVariable, elseBranchProcess);
-				Expression msgToV_FPrime    = Expressions.make(LPIUtil.FUNCTOR_MSG_TO_FROM, randomVariable, factorIndexPrime);
+				Expression msgToV_FPrime    = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_MSG_TO_FROM, randomVariable, factorIndexPrime);
 				Expression neighV           = Expressions.apply(LPIUtil.FUNCTOR_NEIGHBOR, randomVariable);
 				
 				Expression currentExpression = null;

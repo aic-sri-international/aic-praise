@@ -566,9 +566,9 @@ public class ModelGrounding {
 			}
 			
 			// None: will be specified initially as empty
-			preGroundModelParts.add(Expressions.make(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION));
+			preGroundModelParts.add(Expressions.makeFunctionApplication(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION));
 			
-			Expression preGroundModelDefinition = Expressions.make(Model.FUNCTOR_MODEL_DECLARATION, preGroundModelParts.toArray());
+			Expression preGroundModelDefinition = Expressions.makeFunctionApplication(Model.FUNCTOR_MODEL_DECLARATION, preGroundModelParts.toArray());
 			
 			try {
 				preGroundModel = new Model(preGroundModelDefinition, knownRandomVariableNameAndArities);

@@ -96,23 +96,23 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	}
 	
 	public static Expression make(Expression valueExpression) {
-		return Expressions.make(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL, valueExpression);
+		return Expressions.makeFunctionApplication(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL, valueExpression);
 	}
 
 	public static Expression getRandomVariableValueExpression(Expression bracketedRandomVariable) {
-		Expression result = Expressions.make(bracketedRandomVariable.getSyntaxTree().getSubTree(0)); // does need to be the syntax tree here, not just expression
+		Expression result = Expressions.makeFromSyntaxTree(bracketedRandomVariable.getSyntaxTree().getSubTree(0)); // does need to be the syntax tree here, not just expression
 		return result;
 	}
 
 	public static Expression getExpressionInBrackets(Expression bracketedExpression) {
-		Expression result = Expressions.make(bracketedExpression.getSyntaxTree().getSubTree(0)); // does need to be the syntax tree here, not just expression
+		Expression result = Expressions.makeFromSyntaxTree(bracketedExpression.getSyntaxTree().getSubTree(0)); // does need to be the syntax tree here, not just expression
 		return result;
 	}
 
 	@Override
 	public Expression getScopedVariablesAsExpression(Expression syntaxTree, RewritingProcess process) {
 		if (isBracketedExpression(syntaxTree)) {
-			return Expressions.make("list", _emptyExpressionList);
+			return Expressions.makeFunctionApplication("list", _emptyExpressionList);
 		}
 		return null;
 	}

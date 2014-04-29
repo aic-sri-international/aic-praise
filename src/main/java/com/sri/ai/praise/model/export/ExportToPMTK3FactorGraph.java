@@ -325,9 +325,9 @@ public class ExportToPMTK3FactorGraph {
 			for (int i = 0; i < rvd.getArityValue(); i++) {
 				queryVars.add(Expressions.createSymbol("X"+i));
 			}
-			Expression randomVariable = Expressions.make(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL,
-					Expressions.make(rvd.getName(), queryVars));
-			Expression query = Expressions.make(LPIUtil.FUNCTOR_BELIEF, randomVariable);
+			Expression randomVariable = Expressions.makeFunctionApplication(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL,
+					Expressions.makeFunctionApplication(rvd.getName(), queryVars));
+			Expression query = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_BELIEF, randomVariable);
 			
 			Expression belief = process.rewrite(LBPRewriter.R_belief, query);
 			

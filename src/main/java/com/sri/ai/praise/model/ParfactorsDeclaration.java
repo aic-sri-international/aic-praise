@@ -332,7 +332,7 @@ public class ParfactorsDeclaration {
 			}
 		}
 
-		Expression parfactorsDefinition = Expressions.make(
+		Expression parfactorsDefinition = Expressions.makeFunctionApplication(
 				ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION,
 				(Object[]) parfactors);
 
@@ -358,7 +358,7 @@ public class ParfactorsDeclaration {
 				if (Sets.isSet(expression.get(0))) {
 					// Is a set argument therefore treat as a single element
 					// union for processing purposes.
-					unionOrPartition = Expressions.make(FunctorConstants.UNION,
+					unionOrPartition = Expressions.makeFunctionApplication(FunctorConstants.UNION,
 							expression.getArguments().toArray());
 				} 
 				else {
@@ -367,12 +367,12 @@ public class ParfactorsDeclaration {
 			}
 			// if no arguments default to an empty union
 			else if (expression.numberOfArguments() == 0) {
-				unionOrPartition = Expressions.make(FunctorConstants.UNION);
+				unionOrPartition = Expressions.makeFunctionApplication(FunctorConstants.UNION);
 			}
 			// more than 1 argument assume are all parfactors
 			// and add to a union
 			else {
-				unionOrPartition = Expressions.make(FunctorConstants.UNION,
+				unionOrPartition = Expressions.makeFunctionApplication(FunctorConstants.UNION,
 						expression.getArguments().toArray());
 			}
 		} 
@@ -381,7 +381,7 @@ public class ParfactorsDeclaration {
 			if (Sets.isSet(unionOrPartition)) {
 				// Is a set argument therefore treat as a single element
 				// union for processing purposes.
-				unionOrPartition = Expressions.make(FunctorConstants.UNION, unionOrPartition);
+				unionOrPartition = Expressions.makeFunctionApplication(FunctorConstants.UNION, unionOrPartition);
 			}
 		}
 

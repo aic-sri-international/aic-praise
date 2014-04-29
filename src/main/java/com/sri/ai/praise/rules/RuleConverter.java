@@ -399,7 +399,7 @@ public class RuleConverter {
 
 		// Add declarations for the missing sorts.
 		for (String missingSort : missingSorts) {
-			sortDeclarations.add(Expressions.make(SortDeclaration.FUNCTOR_SORT_DECLARATION, missingSort, SortDeclaration.UNKNOWN_SIZE, 
+			sortDeclarations.add(Expressions.makeFunctionApplication(SortDeclaration.FUNCTOR_SORT_DECLARATION, missingSort, SortDeclaration.UNKNOWN_SIZE, 
 					ExtensionalSet.makeEmptySetExpression()));
 			sortNames.add(missingSort);
 		}
@@ -503,7 +503,7 @@ public class RuleConverter {
 					}
 					
 					if (makeMayBeSameAs) {
-						mayBeSameAsConjuncts.add(Expressions.make(FUNCTOR_MAY_BE_SAME_AS, newUniqueVariable, lv));
+						mayBeSameAsConjuncts.add(Expressions.makeFunctionApplication(FUNCTOR_MAY_BE_SAME_AS, newUniqueVariable, lv));
 					}
 				}
 				
@@ -698,9 +698,9 @@ public class RuleConverter {
 				functionFreeFormula = conditionAndFunctionFreeFormula.second;
 
 				// | ........ return translateFunctionsAsArgument("if Condition then functionFreeFormula Potential", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
-				Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+				Expression intermediateRule = Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE,
 														condition,
-														Expressions.make(FUNCTOR_ATOMIC_RULE,
+														Expressions.makeFunctionApplication(FUNCTOR_ATOMIC_RULE,
 																functionFreeFormula, potential));
 				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
 														newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
@@ -730,9 +730,9 @@ public class RuleConverter {
 			if (!condition.equals(Expressions.TRUE)) {
 					
 				// | ........ return translateFunctionsAsArgument("if Condition then (if functionFreeFormula then functionFreeRule1)", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
-				Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+				Expression intermediateRule = Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE,
 													condition,
-													Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+													Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE,
 															functionFreeFormula, functionFreeRule1));
 			 
 				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,	
@@ -746,7 +746,7 @@ public class RuleConverter {
 				}
 				else {
 					// | ............ return if functionFreeFormula then functionFreeRule1
-					result = Expressions.make(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1);
+					result = Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1);
 				}
 			}
 		}
@@ -772,9 +772,9 @@ public class RuleConverter {
 			// | .... if Condition is distinct from "true"
 			if (!condition.equals(Expressions.TRUE)) {
 				// | ........ return translateFunctionsAsArgument("if Condition then (if functionFreeFormula then functionFreeRule1 else functionFreeRule2)", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
-				Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+				Expression intermediateRule = Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE,
 													condition,
-													Expressions.make(FUNCTOR_CONDITIONAL_RULE,
+													Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE,
 															functionFreeFormula, functionFreeRule1, functionFreeRule2));
 				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
 														newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
@@ -787,7 +787,7 @@ public class RuleConverter {
 				}
 				else {
 					// | ............ return if functionFreeFormula then functionFreeRule1 else functionFreeRule2
-					result = Expressions.make(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1, functionFreeRule2);
+					result = Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1, functionFreeRule2);
 				}
 			}
 		} 
@@ -797,13 +797,13 @@ public class RuleConverter {
 			if (rule.numberOfArguments() == 2) {
 				// | .... if rule is "Potential Formula1."
 				// | ........ intermediateRule <- Formula1 Potential // i.e. an equivalent atomic rule
-				intermediateRule = Expressions.make(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0));
+				intermediateRule = Expressions.makeFunctionApplication(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0));
 			}
 			else {
 				// | .... else rule is "Potential Formula1 :- Formula2."
 				// | ........ intermediateRule <- if Formula2 then Formula1 Potential // i.e. an equivalent conditional rule
-				intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE, rule.get(2), 
-											Expressions.make(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0)));
+				intermediateRule = Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE, rule.get(2), 
+											Expressions.makeFunctionApplication(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0)));
 			}
 			// | .... return translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
 			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
@@ -814,8 +814,8 @@ public class RuleConverter {
 			}
 		}
 		else if (rule.getFunctor().equals(FUNCTOR_STANDARD_PROB_RULE)) {
-			Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE, rule.get(1), 
-					Expressions.make(FUNCTOR_ATOMIC_RULE, rule.get(0), rule.get(2)));
+			Expression intermediateRule = Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE, rule.get(1), 
+					Expressions.makeFunctionApplication(FUNCTOR_ATOMIC_RULE, rule.get(0), rule.get(2)));
 			
 			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
 													newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
@@ -825,7 +825,7 @@ public class RuleConverter {
 			}
 		}
 		else if (rule.getFunctor().equals(FUNCTOR_CAUSAL_RULE)) {
-			Expression intermediateRule = Expressions.make(FUNCTOR_CONDITIONAL_RULE, rule.get(0), rule.get(1));
+			Expression intermediateRule = Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE, rule.get(0), rule.get(1));
 			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
 													newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			if (result == intermediateRule) {
@@ -924,7 +924,7 @@ public class RuleConverter {
 							// Extend predicate2 from a function to a relation
 							List<Expression> predicate2Args = new ArrayList<Expression>(predicate2.getArguments());
 							predicate2Args.add(newUniqueVariable);
-							predicate2 = Expressions.make(predicate2.getFunctor(), predicate2Args.toArray());
+							predicate2 = Expressions.makeFunctionApplication(predicate2.getFunctor(), predicate2Args.toArray());
 							conjuncts.add(predicate2);
 							condition[0] = And.make(conjuncts);
 								
@@ -932,7 +932,7 @@ public class RuleConverter {
 							// Replace predicate1's function slot with the newUniqueVariable
 							List<Expression> predicate1Args = new ArrayList<Expression>(predicate1.getArguments());
 							predicate1Args.set(elementEi, newUniqueVariable);
-							predicate1 = Expressions.make(predicate1.getFunctor(), predicate1Args.toArray());
+							predicate1 = Expressions.makeFunctionApplication(predicate1.getFunctor(), predicate1Args.toArray());
 							result = predicate1;
 						}
 						return result;
@@ -1277,7 +1277,7 @@ public class RuleConverter {
 					// If there is only one rule argument, create new rules for the list of rules (or single rule) for
 					// them.
 					for (Expression arg1 : arg1List) {
-						result.add(Expressions.make(rule.getFunctor(), formula, arg1));
+						result.add(Expressions.makeFunctionApplication(rule.getFunctor(), formula, arg1));
 					}
 				}
 				else {
@@ -1290,14 +1290,14 @@ public class RuleConverter {
 					else if (arg1List.size() > 1) {
 						// If argument one has conjunctions in it, create new rules for those.
 						for (Expression arg1 : arg1List) {
-							result.add(Expressions.make(rule.getFunctor(), formula, arg1, arg2List.get(0)));
+							result.add(Expressions.makeFunctionApplication(rule.getFunctor(), formula, arg1, arg2List.get(0)));
 						}
 					}
 					else {
 						// If argument two has conjunctions in it, create new rules for those.  This also
 						// handles cases where neither argument one or two had conjunctions.
 						for (Expression arg2 : arg2List) {
-							result.add(Expressions.make(rule.getFunctor(), formula, arg1List.get(0), arg2));
+							result.add(Expressions.makeFunctionApplication(rule.getFunctor(), formula, arg1List.get(0), arg2));
 						}
 					}
 				}
@@ -1313,7 +1313,7 @@ public class RuleConverter {
 					// Check for more conjunctions in the conjunction element.
 					List<Expression> translatedList = this.translateConditionalConjunctions(conjunctionElement);
 					for (Expression translatedElement: translatedList) {
-						result.add(Expressions.make(rule.getFunctor(), formula, translatedElement));
+						result.add(Expressions.makeFunctionApplication(rule.getFunctor(), formula, translatedElement));
 					}
 				}
 			}
@@ -1338,8 +1338,8 @@ public class RuleConverter {
 	public Expression translateStandardProbabilityRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
 		if (args.size() == 3) {
-			return this.translateConditionalRule(Expressions.make(FUNCTOR_CONDITIONAL_RULE, args.get(1), 
-					Expressions.make(FUNCTOR_ATOMIC_RULE, args.get(0), args.get(2))));
+			return this.translateConditionalRule(Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE, args.get(1), 
+					Expressions.makeFunctionApplication(FUNCTOR_ATOMIC_RULE, args.get(0), args.get(2))));
 		}
 		return null;
 	}
@@ -1354,7 +1354,7 @@ public class RuleConverter {
 	public Expression translateCausalRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
 		if (args.size() == 2) {
-			return this.translateConditionalRule(Expressions.make(FUNCTOR_CONDITIONAL_RULE, args.get(0), 
+			return this.translateConditionalRule(Expressions.makeFunctionApplication(FUNCTOR_CONDITIONAL_RULE, args.get(0), 
 					args.get(1)));
 		}
 		return null;
@@ -1566,13 +1566,13 @@ public class RuleConverter {
 			// | queryAtom <- predicate 'query' applied to F
 			Expression queryAtom;
 			if (variablesF.size() > 0) {
-				queryAtom = Expressions.make(FUNCTOR_QUERY, variablesF);
+				queryAtom = Expressions.makeFunctionApplication(FUNCTOR_QUERY, variablesF);
 			}
 			else {
 				queryAtom = Expressions.createSymbol(FUNCTOR_QUERY);
 			}
 			// | rule <- queryAtom <=> queryFormula
-			Expression queryRule = Expressions.make(FUNCTOR_ATOMIC_RULE, Expressions.make(Equivalence.FUNCTOR, queryAtom, query), 1);
+			Expression queryRule = Expressions.makeFunctionApplication(FUNCTOR_ATOMIC_RULE, Expressions.makeFunctionApplication(Equivalence.FUNCTOR, queryAtom, query), 1);
 			// | return (rule, queryAtom)
 			result = new Pair<Expression, Expression>(queryRule, queryAtom);
 		}
@@ -1756,7 +1756,7 @@ public class RuleConverter {
 
 		resultArguments.add(Expressions.createSymbol(TYPE_BOOLEAN));
 		if (resultArguments.size() == rvValueArgs.size() + 3) {
-			result = Expressions.make(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArguments);
+			result = Expressions.makeFunctionApplication(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArguments);
 		}
 		
 		return result;
@@ -1971,7 +1971,7 @@ public class RuleConverter {
 	 */
 	private Expression oneMinusPotential (Expression potential) {
 
-		if (potential instanceof DefaultSymbol) {
+		if (potential instanceof Symbol) {
 			try {
 				NumberFormat format = NumberFormat.getNumberInstance();
 				Number number = format.parse(potential.toString());
@@ -2010,7 +2010,7 @@ public class RuleConverter {
 		}
 
 		Expression functor = expression.getFunctor();
-		String functorString = ((DefaultSymbol)functor).getValue().toString();
+		String functorString = ((Symbol)functor).getValue().toString();
 
 		// Handle atomic rules
 		if (functorString.equals(FUNCTOR_ATOMIC_RULE)) {
@@ -2210,7 +2210,7 @@ public class RuleConverter {
 			args.addAll(functionApplication.getArguments());
 			args.add(additionalArgument);
 			
-			Expression result = Expressions.make(functionApplication.getFunctorOrSymbol(), args.toArray());
+			Expression result = Expressions.makeFunctionApplication(functionApplication.getFunctorOrSymbol(), args.toArray());
 			
 			return result;
 		}
@@ -2280,30 +2280,30 @@ public class RuleConverter {
 					// Create a new symbol based on the name of the quantifier expression.
 					// This will be used as the name of a new random variable.
 					// | ................ newSymbol <- string representation of E
-					Symbol newSymbol = DefaultSymbol.createSymbol(expression.toString());
+					Expression newSymbol = DefaultSymbol.createSymbol(expression.toString());
 					
 					// Get all the free variables in the quantifier expression to create a
 					// call to our new random variable expression.
 					// | ................ F <- array of free variables in E
 					Set<Expression> freeVariablesF = Expressions.freeVariables(expression, process);
-					Expression      newSymbolF     = Expressions.make(newSymbol, freeVariablesF);
+					Expression      newSymbolF     = Expressions.makeFunctionApplication(newSymbol, freeVariablesF);
 
 					// Then create a new rule based on the new expression.
 					Expression newRule;
 					// | ................ if Quantifier is "there exists"
 					if (ThereExists.isThereExists(expression)) {						
 						// | .................... expandingRules <- add "if Phi then newSymbol(F) else newSymbol(F) 0.000001"
-						newRule = Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
+						newRule = Expressions.makeFunctionApplication(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
 																ThereExists.getBody(expression), 
-																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, 1),
-																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("0", "1")));
+																Expressions.makeFunctionApplication(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, 1),
+																Expressions.makeFunctionApplication(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("0", "1")));
 					}
 					else { // | ................ else // Quantifier is "for all"
 						// | .................... expandingRules <- add "if not Phi then not newSymbol(F) else newSymbol(F) 0.999999"
-						newRule = Expressions.make(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
+						newRule = Expressions.makeFunctionApplication(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
 																Not.make(ForAll.getBody(expression)), 
-																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, Not.make(newSymbolF), 1),
-																Expressions.make(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("9", "9")));						
+																Expressions.makeFunctionApplication(RuleConverter.FUNCTOR_ATOMIC_RULE, Not.make(newSymbolF), 1),
+																Expressions.makeFunctionApplication(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("9", "9")));						
 					}
 					expandingRules.add(newRule);
 					

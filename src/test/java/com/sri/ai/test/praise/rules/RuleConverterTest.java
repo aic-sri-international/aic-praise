@@ -438,10 +438,11 @@ public class RuleConverterTest {
 		testRule2PotentialExpression(ruleParser.parse("sick(X);"), 
 				lowParser.parse("if sick(X) then 1 else 0"));
 		
-		testRule2PotentialExpression(new DefaultCompoundSyntaxTree("atomic rule", 
-				new DefaultCompoundSyntaxTree("sick", "X"), "1"), 
-			new DefaultCompoundSyntaxTree("if . then . else .", 
-				new DefaultCompoundSyntaxTree("sick", "X"), "1", "0"));
+		testRule2PotentialExpression(
+				new DefaultCompoundSyntaxTree("atomic rule", 
+						new DefaultCompoundSyntaxTree("sick", "X"), "1"), 
+						new DefaultCompoundSyntaxTree("if . then . else .", 
+								new DefaultCompoundSyntaxTree("sick", "X"), "1", "0"));
 
 		// string = "sick(X) 0.3;";
 		testRule2PotentialExpression(ruleParser.parse("sick(X) 0.3;"), 

@@ -1871,7 +1871,7 @@ public class LBPTest extends AbstractLPITest {
 			public Expression getTopExpression() {
 				this.exprEv = parse(Ev);
 				this.exprPF = parse(PF);
-				return Expressions.make("in", exprEv, exprPF);
+				return Expressions.makeFunctionApplication("in", exprEv, exprPF);
 			}
 			
 			@Override
@@ -2397,7 +2397,7 @@ public class LBPTest extends AbstractLPITest {
 				this.exprV = parse(V);
 				this.exprE = parse(E);
 			
-				topE = Expressions.make(LPIUtil.FUNCTOR_NEIGHBORS_OF_FROM, exprV, exprE);
+				topE = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_NEIGHBORS_OF_FROM, exprV, exprE);
 				
 				return topE;
 			}

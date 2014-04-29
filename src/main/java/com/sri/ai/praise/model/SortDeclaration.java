@@ -223,7 +223,7 @@ public class SortDeclaration {
 	public Expression getSortDeclaration() {
 		// Lazy initialize this attribute
 		if (sortDeclaration == null) {
-			sortDeclaration = Expressions.make(FUNCTOR_SORT_DECLARATION, name,
+			sortDeclaration = Expressions.makeFunctionApplication(FUNCTOR_SORT_DECLARATION, name,
 					size, constants);
 		}
 
