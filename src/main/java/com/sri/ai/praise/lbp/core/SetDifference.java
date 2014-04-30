@@ -376,7 +376,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("// R_set_diff(S11 \\ S2)={}", d1);
 		Expression d2 = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1rest, set2));
 		Trace.log("// R_set_diff(S1rest \\ S2)={}", d2);
-		Expression result = Expressions.makeFunctionApplication(FunctorConstants.UNION, d1, d2);
+		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, d1, d2);
 		Justification.endEqualityStep(result);
 
 		return result;
@@ -465,7 +465,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			public Expression rewrite(Expression[] expressions, RewritingProcess process) {
 				// then R_set_diff(S11 \ S2) union S1rest
 				Expression set11DiffS2 = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(expressions[0], expressions[1]));
-				Expression result = Expressions.makeFunctionApplication(FunctorConstants.UNION, set11DiffS2, set1Rest);
+				Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, set11DiffS2, set1Rest);
 				return result;
 			}
 		};
@@ -476,7 +476,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			public Expression rewrite(Expression[] expressions, RewritingProcess process) {
 				// else S11 union R_set_diff(S1rest \ S2)
 				Expression set1restDiffS2 = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(expressions[0], expressions[1]));
-				Expression result = Expressions.makeFunctionApplication(FunctorConstants.UNION, set11, set1restDiffS2);
+				Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, set11, set1restDiffS2);
 				return result;
 			}
 		};
@@ -591,7 +591,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Expression s21             = set2.get(0);
 		Expression s1DiffS21Result = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(set1, s21));
 		List<Expression> rest      = Util.rest(set2.getArguments());
-		Expression s22UnionS2m     = Expressions.makeFunctionApplication(FunctorConstants.UNION, rest);
+		Expression s22UnionS2m     = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, rest);
 		Expression result          = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(s1DiffS21Result, s22UnionS2m));
 		
 		Justification.endEqualityStep(result);
@@ -810,7 +810,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			result = union.get(1);
 			break;
 		default:
-			result = Expressions.makeFunctionApplication(FunctorConstants.UNION, rest.toArray());
+			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, rest.toArray());
 			break;
 		}
 

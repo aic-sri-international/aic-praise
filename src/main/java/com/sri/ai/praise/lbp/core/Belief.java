@@ -208,10 +208,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// R_neigh_v(Neigh(V))
 		Justification.beginEqualityStep("neighbors of random variable");
 
-		Expression neighV          = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_NEIGHBOR, randomVariable);
+		Expression neighV          = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_NEIGHBOR, randomVariable);
 		Expression rewriteOfNeighV = process.rewrite(R_neigh_v, neighV);
 
-		Expression msgToV_F = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_MSG_TO_FROM, randomVariable, factorIndex);
+		Expression msgToV_F = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_MSG_TO_FROM, randomVariable, factorIndex);
 		Expression product = LPIUtil.makeProductOfMessages(factorIndex, rewriteOfNeighV, msgToV_F, Expressions.TRUE);
 
 		if (Justification.isEnabled()) {
@@ -258,7 +258,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// a union of sets of pairs (N1, N2), with each pair representing an occurrence of 
 			// "previous message" on that pair occurring in belief_expansion.
 			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, beliefExpansion));		
-			Trace.log("// msg_sets = {}", Expressions.makeFunctionApplication("list", msgSets));
+			Trace.log("// msg_sets = {}", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("list", msgSets));
 		
 			Trace.log("msg_expansions <- get_msg_expansions(msg_sets)");
 			// a union of intensional sets containing tuples of the form:
@@ -267,7 +267,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// value in terms of messages from the previous loopy BP iteration.
 			PreviousMessageToMsgValueCache previousMessageToMsgValueCache = new PreviousMessageToMsgValueCache(); 
 			List<Expression> msgExpansions = getMessageExpansions(msgSets, previousMessageToMsgValueCache, process);
-			Trace.log("// msg_expansions = {}", Expressions.makeFunctionApplication("list", msgExpansions));
+			Trace.log("// msg_expansions = {}", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("list", msgExpansions));
 			
 			Trace.log("msg_values <- copy of msg_expansions, with the values replaced by uniform messages");
 			// a union of sets of tuples (N1, N2, value) where (N1,N2) represents a message and value
@@ -314,7 +314,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				iteration++;			
 				notifyCollector(randomVariable, beliefValue, iteration, process);
 				Justification.endEqualityStep(beliefValue);
-				Trace.log("    // msg_values = {}", Expressions.makeFunctionApplication("list", msgValues));
+				Trace.log("    // msg_values = {}", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("list", msgValues));
 				Trace.log("    // belief_value = {}", beliefValue);
 			}
 			
@@ -453,7 +453,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 
 		Trace.log("        expansion <- compute message to Destination from Origin with");
 		Trace.log("                     beingComputed = empty set and contextual constraint C");
-		Expression       msgTo_From    = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_MSG_TO_FROM, destination, origin);
+		Expression       msgTo_From    = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_MSG_TO_FROM, destination, origin);
 		Justification.end("Message expression is {}", msgTo_From);
 
 		
@@ -516,7 +516,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Trace.log("        cache index as msg_value_index corresponding to 'previous message to Destination from Origin' under constraining condition C");
 		previousMessageToMsgValueCache.addPreviousMessageToMsgValueIndex(
 				conditionC,
-				Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, destination, origin),
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, destination, origin),
 				messageExpansions.size());
 		Trace.log("        msg_expansions <- msg_expansions union msg_expansion");
 		messageExpansions.add(msgExpansion);
@@ -1034,7 +1034,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			result = unionArgs.get(0);
 		} 
 		else {
-			result = Expressions.makeFunctionApplication(FunctorConstants.UNION, unionArgs);
+			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, unionArgs);
 		}
 		
 		return result;

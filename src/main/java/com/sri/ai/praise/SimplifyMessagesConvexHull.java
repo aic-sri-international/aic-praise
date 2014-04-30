@@ -194,7 +194,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 							// i.e. have: {[M1],..., [Mn]}
 							// and want : 'convex hull'({[M1],..., [Mn]})
 							// unconditionally simplified.
-							result = unconditionalSimplification(Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_CONVEX_HULL, input), process);
+							result = unconditionalSimplification(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_CONVEX_HULL, input), process);
 						}
 						
 						return result;
@@ -332,7 +332,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 								BracketedExpressionSubExpressionsProvider.make(normalizedMessageValues.get(firstElement)), 
 								BracketedExpressionSubExpressionsProvider.make(normalizedMessageValues.get(secondElement))
 								);
-				result = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_CONVEX_HULL, extensionalSet);
+				result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_CONVEX_HULL, extensionalSet);
 				if (result.equals(expression)) {
 					// i.e. no actual simplification occurred
 					result = expression;

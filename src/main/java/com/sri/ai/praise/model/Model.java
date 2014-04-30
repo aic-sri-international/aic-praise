@@ -298,7 +298,7 @@ public class Model {
 			args.add(copySD);
 		}
 		this.modelDeclaration = null;
-		this.modelDefinition = Expressions.makeFunctionApplication(FUNCTOR_MODEL_DECLARATION, args);
+		this.modelDefinition = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_MODEL_DECLARATION, args);
 	}
 
 	/**
@@ -732,7 +732,7 @@ public class Model {
 			Expression sortName) {
 		Integer result = null;
 
-		Expression sortCardinality = Expressions.makeFunctionApplication(
+		Expression sortCardinality = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(
 				FunctorConstants.CARDINALITY, sortName);
 		Expression cardinality = (Expression) process.getGlobalObject(sortCardinality);
 		if (cardinality != null) {
@@ -775,7 +775,7 @@ public class Model {
 
 		modelParts.add(parfactorsDeclaration.getDefinition());
 
-		Expression modelDefinition = Expressions.makeFunctionApplication(
+		Expression modelDefinition = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(
 				Model.FUNCTOR_MODEL_DECLARATION, modelParts);
 
 		Model model = new Model(modelDefinition, knownRandomVariableNameAndArities);
@@ -905,7 +905,7 @@ public class Model {
 			// Default to an empty union.
 			parfactorsDeclaration = new ParfactorsDeclaration(
 					Expressions
-							.makeFunctionApplication(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION));
+							.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION));
 		}
 		
 		deriveSortDeclarations(sortDeclarations, parfactorsDeclaration);

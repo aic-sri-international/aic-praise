@@ -177,7 +177,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 		return new RewriteOnBranch() {
 			@Override
 			public Expression rewrite(Expression[] expressions, RewritingProcess process) {
-				Expression result = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, expressions[0], expressions[1]);
+				Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_PREVIOUS_MSG_TO_FROM, expressions[0], expressions[1]);
 				
 				return result;
 			}
@@ -197,8 +197,8 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 				Expression beingComputed = expressions[2];
 				Expression E             = LPIUtil.getFactorValueExpression(F, elseBranchProcess);
 				Expression VPrime        = Expressions.makeUniqueVariable("V'", F, elseBranchProcess);
-				Expression msgToF_VPrime = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_MSG_TO_FROM, F, VPrime);
-				Expression neighF        = Expressions.makeFunctionApplication(LPIUtil.FUNCTOR_NEIGHBOR, F);
+				Expression msgToF_VPrime = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_MSG_TO_FROM, F, VPrime);
+				Expression neighF        = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_NEIGHBOR, F);
 				
 				Trace.log("under contextual constraint incremented by 'not In'");
 		

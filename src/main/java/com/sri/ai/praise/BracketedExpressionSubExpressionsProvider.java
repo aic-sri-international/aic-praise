@@ -96,7 +96,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	}
 	
 	public static Expression make(Expression valueExpression) {
-		return Expressions.makeFunctionApplication(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL, valueExpression);
+		return Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL, valueExpression);
 	}
 
 	public static Expression getRandomVariableValueExpression(Expression bracketedRandomVariable) {
@@ -112,7 +112,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	@Override
 	public Expression getScopedVariablesAsExpression(Expression syntaxTree, RewritingProcess process) {
 		if (isBracketedExpression(syntaxTree)) {
-			return Expressions.makeFunctionApplication("list", _emptyExpressionList);
+			return Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("list", _emptyExpressionList);
 		}
 		return null;
 	}

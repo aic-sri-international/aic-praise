@@ -197,7 +197,7 @@ public class RandomVariableDeclaration {
 			declarationArgs.addAll(parameters);
 			declarationArgs.add(range);
 
-			randomVariableDeclaration = Expressions.makeFunctionApplication(
+			randomVariableDeclaration = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(
 					FUNCTOR_RANDOM_VARIABLE_DECLARATION,
 					declarationArgs.toArray());
 		}
