@@ -47,7 +47,7 @@ The associative node walker identifies chains of identical associative
 nodes and consolidates them into a single node with all of the children.  
 
 And the output walker takes the AST in ANTLR's native CommonTree type and 
-converts it into the expected DefaultCompoundSyntaxTree and DefaultSymbol 
+converts it into the expected CompoundSyntaxTree and Symbol 
 node AST.
 
 

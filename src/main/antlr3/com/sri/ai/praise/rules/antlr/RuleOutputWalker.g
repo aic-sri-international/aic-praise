@@ -28,15 +28,14 @@ options {
     import java.util.Vector;
 
     import com.sri.ai.expresso.api.Expression;
-    import com.sri.ai.expresso.core.DefaultSymbol;
-    import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
+    import com.sri.ai.expresso.helper.SyntaxTrees;
 }
 
 
 /*
     The ANTLR output tree walker is the final step in parsing the LPI grammar.
     The walker converts the AST from ANTLR's native CommonTree node type to
-    the expected DefaultCompoundSyntaxTree/DefaultSymbol output.  It walks
+    the expected CompoundSyntaxTree/Symbol output.  It walks
     the CommonTree AST and at every node, generates the appropriate output
     node object.
 
@@ -58,49 +57,49 @@ expr returns [Expression value]
     Vector<Expression> varargs = new Vector<Expression>();
 }
     : 
-      ^(POTENTIALEXPRESSION1 a=expr)                        { $value = new DefaultCompoundSyntaxTree("atomic rule", a, 1); }
-    | ^(POTENTIALEXPRESSION2 a=expr b=expr)                 { $value = new DefaultCompoundSyntaxTree("atomic rule", a, b); }
+      ^(POTENTIALEXPRESSION1 a=expr)                        { $value = SyntaxTrees.makeCompoundSyntaxTree("atomic rule", a, 1); }
+    | ^(POTENTIALEXPRESSION2 a=expr b=expr)                 { $value = SyntaxTrees.makeCompoundSyntaxTree("atomic rule", a, b); }
 
-    | ^(CONDITIONALEXPRESSION1 a=expr b=expr)               { $value = new DefaultCompoundSyntaxTree("conditional rule", a, b); }
-    | ^(CONDITIONALEXPRESSION2 a=expr b=expr c=expr)        { $value = new DefaultCompoundSyntaxTree("conditional rule", a, b, c); }
+    | ^(CONDITIONALEXPRESSION1 a=expr b=expr)               { $value = SyntaxTrees.makeCompoundSyntaxTree("conditional rule", a, b); }
+    | ^(CONDITIONALEXPRESSION2 a=expr b=expr c=expr)        { $value = SyntaxTrees.makeCompoundSyntaxTree("conditional rule", a, b, c); }
 
-    | ^(PROLOGEXPRESSION4 a=expr b=expr c=expr)             { $value = new DefaultCompoundSyntaxTree("prolog rule", a, b, c); }
-    | ^(PROLOGEXPRESSION3 a=expr b=expr)                    { $value = new DefaultCompoundSyntaxTree("prolog rule", a, b); }
-    | ^(PROLOGEXPRESSION2 a=expr b=expr)                    { $value = new DefaultCompoundSyntaxTree("prolog rule", 1, a, b); }
-    | ^(PROLOGEXPRESSION1 a=expr)                           { $value = new DefaultCompoundSyntaxTree("prolog rule", 1, a); }
+    | ^(PROLOGEXPRESSION4 a=expr b=expr c=expr)             { $value = SyntaxTrees.makeCompoundSyntaxTree("prolog rule", a, b, c); }
+    | ^(PROLOGEXPRESSION3 a=expr b=expr)                    { $value = SyntaxTrees.makeCompoundSyntaxTree("prolog rule", a, b); }
+    | ^(PROLOGEXPRESSION2 a=expr b=expr)                    { $value = SyntaxTrees.makeCompoundSyntaxTree("prolog rule", 1, a, b); }
+    | ^(PROLOGEXPRESSION1 a=expr)                           { $value = SyntaxTrees.makeCompoundSyntaxTree("prolog rule", 1, a); }
 
-    | ^(STANDARDPROBABILITYEXPRESSION a=expr b=expr c=expr) { $value = new DefaultCompoundSyntaxTree("standard probability rule", a, b, c); }
-    | ^(CAUSALEXPRESSION a=expr b=expr)                     { $value = new DefaultCompoundSyntaxTree("causal rule", a, b); }
+    | ^(STANDARDPROBABILITYEXPRESSION a=expr b=expr c=expr) { $value = SyntaxTrees.makeCompoundSyntaxTree("standard probability rule", a, b, c); }
+    | ^(CAUSALEXPRESSION a=expr b=expr)                     { $value = SyntaxTrees.makeCompoundSyntaxTree("causal rule", a, b); }
 
     // For conjunctions, we package it as a tuple.
-    | ^(CONJUNCTION (a=expr {varargs.add(a); })*)           { $value = new DefaultCompoundSyntaxTree("( . )", 
-                                                                  new DefaultCompoundSyntaxTree("kleene list", varargs)); }
+    | ^(CONJUNCTION (a=expr {varargs.add(a); })*)           { $value = SyntaxTrees.makeCompoundSyntaxTree("( . )", 
+                                                                  SyntaxTrees.makeCompoundSyntaxTree("kleene list", varargs)); }
 
-    | ^(RANDOM (a=expr {varargs.add(a); })+)                { varargs.insertElementAt(DefaultSymbol.createSymbol(varargs.size()-2), 1);
-                                                              $value = new DefaultCompoundSyntaxTree("randomVariable", varargs); }
-    | ^(SORT a=expr b=expr c=expr)                          { $value = new DefaultCompoundSyntaxTree("sort", a, b, c); }
+    | ^(RANDOM (a=expr {varargs.add(a); })+)                { varargs.insertElementAt(SyntaxTrees.makeSymbol(varargs.size()-2), 1);
+                                                              $value = SyntaxTrees.makeCompoundSyntaxTree("randomVariable", varargs); }
+    | ^(SORT a=expr b=expr c=expr)                          { $value = SyntaxTrees.makeCompoundSyntaxTree("sort", a, b, c); }
 
-    | ^(FORALL a=expr b=expr)                               { $value = new DefaultCompoundSyntaxTree("for all . : .", a, b); }
-    | ^(THEREEXISTS a=expr b=expr)                          { $value = new DefaultCompoundSyntaxTree("there exists . : .", a, b); }
-    | ^(ARROW (a=expr {varargs.add(a); })*)                 { $value = new DefaultCompoundSyntaxTree("=>", varargs); }
-    | ^(DOUBLE_ARROW (a=expr {varargs.add(a); })*)          { $value = new DefaultCompoundSyntaxTree("<=>", varargs); }
-    | ^(OR (a=expr {varargs.add(a); })*)                    { $value = new DefaultCompoundSyntaxTree("or", varargs); }
-    | ^(AND (a=expr {varargs.add(a); })*)                   { $value = new DefaultCompoundSyntaxTree("and", varargs); }
-    | ^(EQUAL (a=expr {varargs.add(a); })*)                 { $value = new DefaultCompoundSyntaxTree("=", varargs); }
-    | ^(NOT_EQUAL (a=expr {varargs.add(a); })*)             { $value = new DefaultCompoundSyntaxTree("!=", varargs); }
-    | ^(PLUS (a=expr {varargs.add(a); })*)                  { $value = new DefaultCompoundSyntaxTree("+", varargs); }
-    | ^(DASH (a=expr {varargs.add(a); })*)                  { $value = new DefaultCompoundSyntaxTree("-", varargs); }
-    | ^(MINUS (a=expr {varargs.add(a); })*)                 { $value = new DefaultCompoundSyntaxTree("minus", varargs); }
-    | ^(TIMES (a=expr {varargs.add(a); })*)                 { $value = new DefaultCompoundSyntaxTree("*", varargs); }
-    | ^(DIVIDE (a=expr {varargs.add(a); })*)                { $value = new DefaultCompoundSyntaxTree("/", varargs); }
-    | ^(CARAT (a=expr {varargs.add(a); })*)                 { $value = new DefaultCompoundSyntaxTree("^", varargs); }
-    | ^(NOT (a=expr {varargs.add(a); })*)                   { $value = new DefaultCompoundSyntaxTree("not", varargs); }
-    | ^(SET a=expr)                                         { $value = new DefaultCompoundSyntaxTree("{ . }", a); }
-    | ^(MAYBESAMEAS (a=expr {varargs.add(a); })*)           { $value = new DefaultCompoundSyntaxTree(". may be same as .", varargs); }
-    | ^(FUNCTION a=expr (b=expr {varargs.add(b); })*)       { $value = new DefaultCompoundSyntaxTree(a, varargs); }
-    | ^(SYMBOL ID)                                          { $value = DefaultSymbol.createSymbol($ID.text); }
-    | ^(SET a=expr)                                         { $value = new DefaultCompoundSyntaxTree("{ . }", a); }
-    | ^(KLEENE (a=expr { varargs.add(a); })*)               { $value = new DefaultCompoundSyntaxTree("kleene list", varargs); }
+    | ^(FORALL a=expr b=expr)                               { $value = SyntaxTrees.makeCompoundSyntaxTree("for all . : .", a, b); }
+    | ^(THEREEXISTS a=expr b=expr)                          { $value = SyntaxTrees.makeCompoundSyntaxTree("there exists . : .", a, b); }
+    | ^(ARROW (a=expr {varargs.add(a); })*)                 { $value = SyntaxTrees.makeCompoundSyntaxTree("=>", varargs); }
+    | ^(DOUBLE_ARROW (a=expr {varargs.add(a); })*)          { $value = SyntaxTrees.makeCompoundSyntaxTree("<=>", varargs); }
+    | ^(OR (a=expr {varargs.add(a); })*)                    { $value = SyntaxTrees.makeCompoundSyntaxTree("or", varargs); }
+    | ^(AND (a=expr {varargs.add(a); })*)                   { $value = SyntaxTrees.makeCompoundSyntaxTree("and", varargs); }
+    | ^(EQUAL (a=expr {varargs.add(a); })*)                 { $value = SyntaxTrees.makeCompoundSyntaxTree("=", varargs); }
+    | ^(NOT_EQUAL (a=expr {varargs.add(a); })*)             { $value = SyntaxTrees.makeCompoundSyntaxTree("!=", varargs); }
+    | ^(PLUS (a=expr {varargs.add(a); })*)                  { $value = SyntaxTrees.makeCompoundSyntaxTree("+", varargs); }
+    | ^(DASH (a=expr {varargs.add(a); })*)                  { $value = SyntaxTrees.makeCompoundSyntaxTree("-", varargs); }
+    | ^(MINUS (a=expr {varargs.add(a); })*)                 { $value = SyntaxTrees.makeCompoundSyntaxTree("minus", varargs); }
+    | ^(TIMES (a=expr {varargs.add(a); })*)                 { $value = SyntaxTrees.makeCompoundSyntaxTree("*", varargs); }
+    | ^(DIVIDE (a=expr {varargs.add(a); })*)                { $value = SyntaxTrees.makeCompoundSyntaxTree("/", varargs); }
+    | ^(CARAT (a=expr {varargs.add(a); })*)                 { $value = SyntaxTrees.makeCompoundSyntaxTree("^", varargs); }
+    | ^(NOT (a=expr {varargs.add(a); })*)                   { $value = SyntaxTrees.makeCompoundSyntaxTree("not", varargs); }
+    | ^(SET a=expr)                                         { $value = SyntaxTrees.makeCompoundSyntaxTree("{ . }", a); }
+    | ^(MAYBESAMEAS (a=expr {varargs.add(a); })*)           { $value = SyntaxTrees.makeCompoundSyntaxTree(". may be same as .", varargs); }
+    | ^(FUNCTION a=expr (b=expr {varargs.add(b); })*)       { $value = SyntaxTrees.makeCompoundSyntaxTree(a, varargs); }
+    | ^(SYMBOL ID)                                          { $value = SyntaxTrees.makeSymbol($ID.text); }
+    | ^(SET a=expr)                                         { $value = SyntaxTrees.makeCompoundSyntaxTree("{ . }", a); }
+    | ^(KLEENE (a=expr { varargs.add(a); })*)               { $value = SyntaxTrees.makeCompoundSyntaxTree("kleene list", varargs); }
     ;
 
 
