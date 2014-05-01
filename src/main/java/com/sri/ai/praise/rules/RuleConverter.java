@@ -54,7 +54,6 @@ import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
-import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
@@ -1075,14 +1074,13 @@ public class RuleConverter {
 	 * @return  The equivalent "if . then . else ." form of the atomic rule.
 	 */
 	public Expression translateAtomicRule (Expression rule) {
-		List<Expression> args = rule.getArguments();
-		if (args.size() != 2) {
+		List<Expression> arguments = rule.getArguments();
+		if (arguments.size() != 2) {
 			return null;
 		}
 		// | if rule is "Formula Potential" // implementation note: tested with hasFunctor("atomic rule")
 		// |.... return "if Formula then Potential else <1 - Potential>"
-		return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(0), 
-				args.get(1), oneMinusPotential(args.get(1)));
+		return IfThenElse.make(arguments.get(0), arguments.get(1), oneMinusPotential(arguments.get(1)));
 	}
 	
 	/**
@@ -1102,15 +1100,19 @@ public class RuleConverter {
 		// | if rule is "if Formula then Rule"
 		if (args.size() == 2) {
 			// | .... return "if Formula then rule2PotentialExpression(Rule) else 0.5"
-			return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(0), 
-					this.rule2PotentialExpression(args.get(1)),
-					0.5);
+			Expression result =
+					IfThenElse.make(
+							args.get(0), this.rule2PotentialExpression(args.get(1)), Expressions.createSymbol(0.5));
+			return result;
 		} // | if rule is "if Formula then Rule1 else Rule2" 
 		else if (args.size() == 3) {
 			// | .... return "if Formula then rule2PotentialExpression(Rule1) else rule2PotentialExpression(Rule)"
-			return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(0), 
-					this.rule2PotentialExpression(args.get(1)),
-					this.rule2PotentialExpression(args.get(2)));
+			Expression result =
+					IfThenElse.make(
+							args.get(0),
+							this.rule2PotentialExpression(args.get(1)),
+							this.rule2PotentialExpression(args.get(2)));
+			return result;
 		}
 		return null;
 	}
@@ -1133,15 +1135,15 @@ public class RuleConverter {
 		// | if rule is "Potential Formula1." // tested with hasFunctor("prolog rule")
 		if (args.size() == 2) {
 			// |.... return "if Formula1 then Potential else <1 - Potential>"
-			return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(1), 
-					args.get(0), oneMinusPotential(args.get(0)));
+			return IfThenElse.make(args.get(1), args.get(0), oneMinusPotential(args.get(0)));
 		} // | if rule is "Potential Formula1 :- Formula2." // tested with hasFunctor("prolog rule")
 		else if (args.size() == 3){
 			// |.... return "if Formula2 then if Formula1 then Potential else <1 - Potential> else 0.5"
-			return new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(2), 
-					new DefaultCompoundSyntaxTree(FunctorConstants.IF_THEN_ELSE, args.get(1), 
-							args.get(0), oneMinusPotential(args.get(0))),
-					0.5);
+			Expression result =
+					IfThenElse.make(args.get(2), 
+							IfThenElse.make(args.get(1), args.get(0), oneMinusPotential(args.get(0))),
+							Expressions.createSymbol(0.5));
+			return result;
 		}
 
 		return null;
@@ -1610,19 +1612,22 @@ public class RuleConverter {
 				} 
 				//if the then clause is true, return the else clause
 				else if (translationOfE1.equals(Expressions.TRUE)) {
-					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE,
+					return Expressions.apply(
+							FUNCTOR_CONDITIONAL_RULE,
 							Not.make(condition),
 							translationOfE2);
 				} 
 				//if the else clause is true, return the if clause
 				else if (translationOfE2.equals(Expressions.TRUE)) {
-					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE,
+					return Expressions.apply(
+							FUNCTOR_CONDITIONAL_RULE,
 							condition,
 							translationOfE1);
 				}
 				//if neither is true, then return the simplified form
 				else {
-					return new DefaultCompoundSyntaxTree(FUNCTOR_CONDITIONAL_RULE, 
+					return Expressions.apply(
+							FUNCTOR_CONDITIONAL_RULE, 
 							condition, 
 							translationOfE1, 
 							translationOfE2);
@@ -1895,7 +1900,7 @@ public class RuleConverter {
 
 		// Change the return type to boolean.
 		newArguments.add(Expressions.createSymbol(TYPE_BOOLEAN));
-		return new DefaultCompoundSyntaxTree(randomVariableDecl.getFunctor(), newArguments);
+		return Expressions.apply(randomVariableDecl.getFunctor(), newArguments);
 	}
 	
 //	public RewritingProcess getRewritingProcess() {
@@ -1981,7 +1986,7 @@ public class RuleConverter {
 				
 			}
 		}
-		return new DefaultCompoundSyntaxTree(FunctorConstants.MINUS, 1, potential);
+		return Expressions.apply(FunctorConstants.MINUS, 1, potential);
 	}
 
 	/**

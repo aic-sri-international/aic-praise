@@ -43,7 +43,6 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultCompoundSyntaxTree;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -440,7 +439,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				if (LPIUtil.containsPreviousMessageExpressions(M)) {
 					Trace.log("        if M is previous message to F from V'");
 					Trace.log("            M <- (lambda v' : previous message to F from V')(v')");
-					M = new DefaultCompoundSyntaxTree(Lambda.make(vPrimeValue, M), vPrimeValue);
+					M = Expressions.apply(Lambda.make(vPrimeValue, M), vPrimeValue);
 				} 
 				else {
 					Trace.log("        if M is *not* previous message to F from V'");
