@@ -48,7 +48,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;

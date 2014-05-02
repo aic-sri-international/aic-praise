@@ -53,7 +53,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Apply;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
