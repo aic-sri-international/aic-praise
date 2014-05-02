@@ -54,7 +54,6 @@ import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -2285,7 +2284,7 @@ public class RuleConverter {
 					// Create a new symbol based on the name of the quantifier expression.
 					// This will be used as the name of a new random variable.
 					// | ................ newSymbol <- string representation of E
-					Expression newSymbol = DefaultSymbol.createSymbol(expression.toString());
+					Expression newSymbol = Expressions.createSymbol(expression.toString());
 					
 					// Get all the free variables in the quantifier expression to create a
 					// call to our new random variable expression.

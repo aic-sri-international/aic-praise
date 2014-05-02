@@ -890,6 +890,7 @@ public class LPIUtil {
 			Expression extensionalSetA, Expression extensionalSetB, int i, int j) {
 		
 		Expression setDiff = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.SET_DIFFERENCE, extensionalSetA, extensionalSetB);
+		// REMOVE DEFAULTSYMBOL IF POSSIBLE
 		Expression result  = Tuple.make(setDiff, DefaultSymbol.createSymbol(i), DefaultSymbol.createSymbol(j));
 
 		return result;
@@ -912,6 +913,7 @@ public class LPIUtil {
 	public static Expression argForDifferenceOfExtensionalAndIntensionalSetRewriteCall(
 			Expression extensionalSet, Expression intensionalSet, int i) {
 		Expression setDiff = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.SET_DIFFERENCE, extensionalSet, intensionalSet);
+		// REMOVE DEFAULTSYMBOL IF POSSIBLE
 		Expression result  = Tuple.make(setDiff, DefaultSymbol.createSymbol(i));
 		
 		return result;

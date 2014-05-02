@@ -54,20 +54,19 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
-import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.util.Util;
-
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 
 /**
  * 
@@ -87,27 +86,29 @@ public class OptionsPanel extends JPanel {
 	private static SpinnerNumberModel _scientificAfterOutputModel   = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_SCIENTIFIC_AFTER, 2, 80, 1);
 	private static SpinnerNumberModel _deadEndsCacheSizeModel       = new SpinnerNumberModel(PRAiSEDemoApp.DEAD_ENDS_CACHE_SIZE, -1, 10000, 1);
 	private static SpinnerNumberModel _rewriterCacheSizeModel       = new SpinnerNumberModel(PRAiSEDemoApp.REWRITER_CACHE_SIZE, -1, 10000, 1);
+
 	{
 		_precisionModel.addChangeListener(new ChangeListener() {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				DefaultSymbol.setNumericDisplayPrecision((Integer)_precisionModel.getValue());
+				SyntaxTrees.setNumericDisplayPrecision((Integer)_precisionModel.getValue());
 				ExpressoConfiguration.setProperty(ExpressoConfiguration.KEY_DISPLAY_NUMERIC_PRECISION_FOR_SYMBOLS, ""+_precisionModel.getValue());
 			}
+
 		});
 		_scientificGreaterOutputModel.addChangeListener(new ChangeListener() {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				DefaultSymbol.setDisplayScientificGreaterNIntegerPlaces((Integer)_scientificGreaterOutputModel.getValue());	
+				SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces((Integer)_scientificGreaterOutputModel.getValue());	
 			}
 		});
 		_scientificAfterOutputModel.addChangeListener(new ChangeListener() {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				DefaultSymbol.setDisplayScientificAfterNDecimalPlaces((Integer)_scientificAfterOutputModel.getValue());	
+				SyntaxTrees.setDisplayScientificAfterNDecimalPlaces((Integer)_scientificAfterOutputModel.getValue());	
 			}
 		});	
 		_deadEndsCacheSizeModel.addChangeListener(new ChangeListener() {

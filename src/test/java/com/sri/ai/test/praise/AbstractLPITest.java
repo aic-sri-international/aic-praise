@@ -46,7 +46,7 @@ import com.sri.ai.brewer.BrewerConfiguration;
 import com.sri.ai.brewer.api.Grammar;
 import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -80,7 +80,7 @@ public abstract class AbstractLPITest {
 
 		TreeUtil.flushData();
 		Configuration.clear();
-		DefaultSymbol.flushGlobalSymbolTable();
+		Expressions.flushGlobalSymbolTable();
 		BranchAndMerge.reset();
 		
 		grammar = makeGrammar();

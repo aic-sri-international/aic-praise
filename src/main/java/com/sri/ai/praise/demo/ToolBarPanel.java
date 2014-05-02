@@ -37,17 +37,16 @@
  */
 package com.sri.ai.praise.demo;
 
-import javax.swing.JPanel;
-import javax.swing.JToolBar;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JToolBar;
 
 import com.google.common.annotations.Beta;
-
-import java.awt.Dimension;
 
 /**
  * 

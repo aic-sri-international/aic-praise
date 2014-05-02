@@ -61,7 +61,7 @@ import javax.swing.event.ChangeListener;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
-import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.demo.model.Example2;
@@ -126,9 +126,9 @@ public class PRAiSEDemoApp {
 		GrinderConfiguration.disableJustification();
 		
 		// Assign display defaults for numerics
-		DefaultSymbol.setNumericDisplayPrecision(DISPLAY_PRECISION);
-		DefaultSymbol.setDisplayScientificGreaterNIntegerPlaces(DISPLAY_SCIENTIFIC_GREATER);
-		DefaultSymbol.setDisplayScientificAfterNDecimalPlaces(DISPLAY_SCIENTIFIC_AFTER);
+		SyntaxTrees.setNumericDisplayPrecision(DISPLAY_PRECISION);
+		SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces(DISPLAY_SCIENTIFIC_GREATER);
+		SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(DISPLAY_SCIENTIFIC_AFTER);
 		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {

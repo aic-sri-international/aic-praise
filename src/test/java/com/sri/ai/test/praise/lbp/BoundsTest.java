@@ -47,7 +47,6 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -694,7 +693,7 @@ public class BoundsTest extends AbstractLPITest {
 								"epidemic/0", "sick/1"
 						),
 						"(belief([epidemic]), 1)",
-						// Util.map(parse("|People|"), new DefaultSymbol(20)),
+						// Util.map(parse("|People|"), Expressions.createSymbol(20)),
 						false,
 						// Note: old R_basic result:
 						// "if epidemic then (0.0064 * 0.6 ^ (| People | - 3)) / (0.0064 * 0.6 ^ (| People | - 3) + 9E-7 * 0.99 ^ (| People | - 3)) else (9E-7 * 0.99 ^ (| People | - 3)) / (0.0064 * 0.6 ^ (| People | - 3) + 9E-7 * 0.99 ^ (| People | - 3))"
@@ -711,7 +710,7 @@ public class BoundsTest extends AbstractLPITest {
 								"epidemic/0", "sick/1"
 						),
 						"(belief([epidemic]), 1)",
-						Util.map(parse("| People |"), DefaultSymbol.createSymbol(20)),
+						Util.map(parse("| People |"), Expressions.createSymbol(20)),
 						false, 
 						"if epidemic then 0.588128460 else 0.411871540"),
 				new BoundBeliefTestData(Expressions.TRUE.toString(), new TrivialPQWithPriors(), 

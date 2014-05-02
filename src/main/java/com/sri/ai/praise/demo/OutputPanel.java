@@ -42,6 +42,7 @@ import java.awt.EventQueue;
 import java.awt.Font;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -58,8 +59,6 @@ import com.sri.ai.grinder.ui.ExpressionNode;
 import com.sri.ai.grinder.ui.ExpressionTreeView;
 import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
-
-import javax.swing.JList;
 
 @Beta
 public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener, LBPQueryEngine.JustificationListener {

@@ -47,7 +47,7 @@ import org.junit.Test;
 
 import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
@@ -385,10 +385,10 @@ public class RuleParserTest extends AbstractParserTest {
 		
 		string = "there exists Y : mother(X,Y) and Y may be same as X;";
 		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule",  
-				ThereExists.make(DefaultSymbol.createSymbol("Y"), 
-						SyntaxTrees.makeCompoundSyntaxTree("and",
-								SyntaxTrees.makeCompoundSyntaxTree("mother", "X", "Y"),
-						        SyntaxTrees.makeCompoundSyntaxTree(". may be same as .", "Y", "X"))), 
+				ThereExists.make(Expressions.createSymbol("Y"), 
+						Expressions.apply("and",
+								Expressions.apply("mother", "X", "Y"),
+								Expressions.apply(". may be same as .", "Y", "X"))), 
 				"1"));
 	}
 	

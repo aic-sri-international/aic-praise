@@ -45,6 +45,7 @@ import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -58,7 +59,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.rules.rsyntaxtextarea.RuleTokenMaker;
-import javax.swing.ScrollPaneConstants;
 
 @Beta
 public class RuleEditor extends JPanel {

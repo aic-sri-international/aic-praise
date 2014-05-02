@@ -12,7 +12,8 @@
  */
 package com.sri.ai.praise.rules.rsyntaxtextarea;
 
-import java.io.*;
+import java.io.IOException;
+
 import javax.swing.text.Segment;
 
 import org.fife.ui.rsyntaxtextarea.AbstractJFlexTokenMaker;

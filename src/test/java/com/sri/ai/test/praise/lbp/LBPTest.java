@@ -45,13 +45,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.slf4j.Marker;
-import org.junit.runners.MethodSorters;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.Rewriter;
@@ -2996,7 +2993,7 @@ public class LBPTest extends AbstractLPITest {
 								"epidemic/0", "sick/1"
 						),
 						"belief([epidemic])",
-						// Util.map(parse("|People|"), new DefaultSymbol(20)),
+						// Util.map(parse("|People|"), Expressions.createSymbol(20)),
 						false,
 						// Note: old R_basic result:
 						// "if epidemic then (0.0064 * 0.6 ^ (| People | - 3)) / (0.0064 * 0.6 ^ (| People | - 3) + 9E-7 * 0.99 ^ (| People | - 3)) else (9E-7 * 0.99 ^ (| People | - 3)) / (0.0064 * 0.6 ^ (| People | - 3) + 9E-7 * 0.99 ^ (| People | - 3))"
@@ -3013,7 +3010,7 @@ public class LBPTest extends AbstractLPITest {
 								"epidemic/0", "sick/1"
 						),
 						"belief([epidemic])",
-						Util.map(parse("| People |"), DefaultSymbol.createSymbol(20)),
+						Util.map(parse("| People |"), Expressions.createSymbol(20)),
 						false, 
 						"if epidemic then 0.588128460 else 0.411871540"),
 	
