@@ -810,8 +810,7 @@ public class ConvexRewriterOnMessageBounds extends
 			this.boundRewriterName = boundRewriterName;
 			this.expression        = expression;
 			this.process           = process;
-			// REMOVE DEFAULTSYMBOL IF POSSIBLE
-			placeholderExpression  = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONVEX_HULL_CHILD_PLACEHOLDER, DefaultSymbol.createSymbol(id));
+			placeholderExpression  = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONVEX_HULL_CHILD_PLACEHOLDER, id);
 			
 			Expression expressionRV       = randomVariableFromInnerRewriterCall.getRandomVariableFor(innerRewriterName, expression);
 			randomVariableValueExpression = LPIUtil.getRandomVariableValueExpression(expressionRV, process);
