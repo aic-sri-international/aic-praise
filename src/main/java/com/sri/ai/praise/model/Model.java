@@ -50,7 +50,6 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -988,10 +987,8 @@ public class Model {
 	private boolean isStringValuedSymbol(Expression expression) {
 		
 		boolean result = false;
-		if (expression instanceof Symbol
-			&& ((Symbol) expression).getValue() instanceof String
-			) {
-				
+		if (expression.getSyntacticFormType().equals("Symbol")
+			&& expression.getValue() instanceof String) {
 			result = true;
 		}
 		return result;

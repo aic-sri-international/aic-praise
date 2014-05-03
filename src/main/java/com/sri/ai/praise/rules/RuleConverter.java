@@ -1975,7 +1975,7 @@ public class RuleConverter {
 	 */
 	private Expression oneMinusPotential (Expression potential) {
 
-		if (potential instanceof Symbol) {
+		if (potential.getSyntacticFormType().equals("Symbol")) {
 			try {
 				NumberFormat format = NumberFormat.getNumberInstance();
 				Number number = format.parse(potential.toString());

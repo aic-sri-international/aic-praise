@@ -44,7 +44,6 @@ import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -375,8 +374,8 @@ public class SortDeclaration {
 
 	private static void assertNameOk(Expression name) {
 		boolean illegal = true;
-		if (name instanceof Symbol
-			&& ((Symbol) name).getValue() instanceof String
+		if (name.getSyntacticFormType().equals("Symbol")
+			&& name.getValue() instanceof String
 			// Ensure is not an in-built sort
 			&& !isNameOfInBuilt(name)
 			) {
@@ -396,7 +395,7 @@ public class SortDeclaration {
 		if (size.equals(UNKNOWN_SIZE)) {
 			illegal = false;
 		} 
-		else if (size instanceof Symbol) {
+		else if (size.getSyntacticFormType().equals("Symbol")) {
 			int ivalue = 0;
 			try {
 				ivalue = size.intValueExact();
@@ -430,7 +429,7 @@ public class SortDeclaration {
 			Set<Expression> seen = new LinkedHashSet<Expression>();
 			for (Expression arg : ExtensionalSet.getElements(constants)) {
 				// Each constant must be a symbol.
-				if (!(arg instanceof Symbol)) {
+				if (!(arg.getSyntacticFormType().equals("Symbol"))) {
 					argsOk = false;
 				}
 				// Constants should be declared unique within the set expression

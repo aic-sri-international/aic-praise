@@ -51,7 +51,6 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
-import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.helper.Apply;
 import com.sri.ai.expresso.helper.Expressions;
@@ -710,8 +709,8 @@ public class LPIUtil {
 						 isMessageValue(IfThenElse.getElseBranch(expression), process);
 			}
 		} 
-		else if (expression instanceof Symbol) {
-			if (((Symbol)expression).getValue() instanceof Number) {
+		else if (expression.getSyntacticFormType().equals("Symbol")) {
+			if (expression.getValue() instanceof Number) {
 				result = true;
 			}
 		}

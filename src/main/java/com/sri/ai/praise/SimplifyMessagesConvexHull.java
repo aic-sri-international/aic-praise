@@ -43,7 +43,6 @@ import java.util.List;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -352,7 +351,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 		if (partition.isZero()) {
 			result = Expressions.ZERO;
 		}
-		else if (messageValue instanceof Symbol) {
+		else if (messageValue.getSyntacticFormType().equals("Symbol")) {
 			result = Expressions.ZERO_POINT_FIVE;
 		}
 		else {
@@ -367,12 +366,12 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 	private Rational getTrueValue(Expression messageValue) {
 		Rational result = null;
 		
-		if (messageValue instanceof Symbol) {
+		if (messageValue.getSyntacticFormType().equals("Symbol")) {
 			result = messageValue.rationalValue();
 		}
 		else {
 			Expression thenValue = IfThenElse.getThenBranch(messageValue);
-			if (thenValue instanceof Symbol) {
+			if (thenValue.getSyntacticFormType().equals("Symbol")) {
 				result = thenValue.rationalValue();
 			}
 			else {
@@ -386,12 +385,12 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 	private Rational getFalseValue(Expression messageValue) {
 		Rational result = null;
 		
-		if (messageValue instanceof Symbol) {
+		if (messageValue.getSyntacticFormType().equals("Symbol")) {
 			result = messageValue.rationalValue();
 		}
 		else {
 			Expression elseValue = IfThenElse.getElseBranch(messageValue);
-			if (elseValue instanceof Symbol) {
+			if (elseValue.getSyntacticFormType().equals("Symbol")) {
 				result = elseValue.rationalValue();
 			}
 			else {

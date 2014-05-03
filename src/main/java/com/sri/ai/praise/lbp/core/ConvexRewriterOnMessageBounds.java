@@ -47,7 +47,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
@@ -698,7 +697,7 @@ public class ConvexRewriterOnMessageBounds extends
 			boolean stillContainsChildPlaceholders = false;
 			for (Expression messageValue : ExtensionalSet.getElements(messageValuesSet)) {
 				Expression message = null;
-				if (messageValue instanceof Symbol) {
+				if (messageValue.getSyntacticFormType().equals("Symbol")) {
 					Trace.log("        if message_value_is a numeric constant");
 					Trace.log("            message <- [if V then message_value else message_value]");
 					message = BracketedExpressionSubExpressionsProvider.make(IfThenElse.make(expressionV, messageValue, messageValue));

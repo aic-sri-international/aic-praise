@@ -284,9 +284,8 @@ public class RandomVariableDeclaration {
 	//
 	private static void assertNameOk(Expression name) {
 		boolean illegal = true;
-		if (name instanceof Symbol
-			&& ((Symbol) name).getValue() instanceof String) {
-			
+		if (name.getSyntacticFormType().equals("Symbol")
+			&& name.getValue() instanceof String) {
 			illegal = false;
 		}
 		if (illegal) {
@@ -300,8 +299,8 @@ public class RandomVariableDeclaration {
 	private static void assertArityOk(Expression arity) {
 		boolean illegal = true;
 
-		if (arity instanceof Symbol) {
-			Object value = ((Symbol) arity).getValue();
+		if (arity.getSyntacticFormType().equals("Symbol")) {
+			Object value = arity.getValue();
 			if (value instanceof Number) {
 				int ivalue = ((Number) value).intValue();
 				if (ivalue >= 0) {
