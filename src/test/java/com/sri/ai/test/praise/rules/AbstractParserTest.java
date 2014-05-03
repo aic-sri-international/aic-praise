@@ -78,7 +78,7 @@ public abstract class AbstractParserTest {
 			}
 			else {
 				if(result != null)
-					System.out.println("generated string for \"" + input + "\": " + Brewer.generateBuildString(result) + "\n\n");
+					System.out.println("generated string for \"" + input + "\": " + Brewer.generateBuildString(result.getSyntaxTree()) + "\n\n");
 				Assert.assertNotNull(result);
 			}
 		}
