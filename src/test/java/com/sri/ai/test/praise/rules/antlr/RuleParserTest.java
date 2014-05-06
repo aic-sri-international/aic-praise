@@ -48,7 +48,6 @@ import org.junit.Test;
 import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
 import com.sri.ai.test.praise.rules.AbstractParserTest;
@@ -63,28 +62,28 @@ public class RuleParserTest extends AbstractParserTest {
 	public void testSortExpression () {
 		String string;
 		string = "sort People: 1000, bob, ann, mary;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("sort", "People", "1000", 
-				SyntaxTrees.makeCompoundSyntaxTree("{ . }", 
-						SyntaxTrees.makeCompoundSyntaxTree("kleene list", "bob", "ann", "mary"))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sort", "People", "1000", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", "bob", "ann", "mary"))));
 
 		string = "sort Dogs: 1000;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("sort", "Dogs", "1000", 
-				SyntaxTrees.makeCompoundSyntaxTree("{ . }", 
-						SyntaxTrees.makeCompoundSyntaxTree("kleene list"))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sort", "Dogs", "1000", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list"))));
 
 		string = "sort Dogs: 1000, rover;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("sort", "Dogs", "1000", 
-				SyntaxTrees.makeCompoundSyntaxTree("{ . }", "rover")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sort", "Dogs", "1000", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("{ . }", "rover")));
 
 		string = "sort Cats: Unknown;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("sort", "Cats", "Unknown", 
-				SyntaxTrees.makeCompoundSyntaxTree("{ . }", 
-						SyntaxTrees.makeCompoundSyntaxTree("kleene list"))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sort", "Cats", "Unknown", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list"))));
 
 		string = "sort Rats;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("sort", "Rats", "Unknown", 
-				SyntaxTrees.makeCompoundSyntaxTree("{ . }", 
-						SyntaxTrees.makeCompoundSyntaxTree("kleene list"))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sort", "Rats", "Unknown", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list"))));
 
 		System.out.println("test count = " + testCount);
 	}
@@ -93,16 +92,16 @@ public class RuleParserTest extends AbstractParserTest {
 	public void testRandomVariableExpression () {
 		String string;
 		string = "random grade: People x Class -> Number;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("randomVariable", "grade", "2", "People", "Class", "Number"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "grade", "2", "People", "Class", "Number"));
 
 		string = "random father: People -> People;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("randomVariable", "father", "1", "People", "People"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "father", "1", "People", "People"));
 
 		string = "random happy: People -> Boolean;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("randomVariable", "happy", "1", "People", "Boolean"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "People", "Boolean"));
 
 		string = "random president: -> People;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("randomVariable", "president", "0", "People"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "president", "0", "People"));
 
 		System.out.println("test count = " + testCount);
 	}
@@ -111,44 +110,44 @@ public class RuleParserTest extends AbstractParserTest {
 	public void testComment () {
 		String string;
 		string = "sick(X); // This is a test.\n";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "// This is a test.\n sick(X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "sick(X); // This is a test.";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "sick // This is a test.\n (X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "// Test\n sick( // This is a test.\n X); // Test";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "sick(X); /* This is a test. */";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "/* This is a test. */ sick(X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "sick /* This is a test. */ (X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "sick( /* This is a test. */ X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "sick(X /* This is a test. */ );";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 
 	}
@@ -157,86 +156,86 @@ public class RuleParserTest extends AbstractParserTest {
 	public void testPotentialExpression () {
 		String string;
 		string = "sick(X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 
 		string = "sick(X) 0.3;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.3"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.3"));
 
 		string = "sick(X) 0.3 + 0.1;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("+", "0.3", "0.1")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("+", "0.3", "0.1")));
 
 		string = "sick(X) 0.3+0.1;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("+", "0.3", "0.1")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("+", "0.3", "0.1")));
 
 		string = "sick(X) 0.3 * 0.1;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("*", "0.3", "0.1")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("*", "0.3", "0.1")));
 
 		string = "sick(X) 0.3*0.1;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("*", "0.3", "0.1")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("*", "0.3", "0.1")));
 
 		string = "sick(X) 0.3 - 0.1;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("-", "0.3", "0.1")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("-", "0.3", "0.1")));
 
 		string = "sick(X) 0.3-0.1;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("-", "0.3", "0.1")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("-", "0.3", "0.1")));
 
 		string = "sick(X) 0.3 / 2;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("/", "0.3", "2")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("/", "0.3", "2")));
 
 		string = "sick(X) 0.3/2;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("/", "0.3", "2")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("/", "0.3", "2")));
 
 		string = "sick(X) 0.3 ^ 2;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("^", "0.3", "2")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("^", "0.3", "2")));
 
 		string = "sick(X) 0.3^2;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("^", "0.3", "2")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("^", "0.3", "2")));
 
 		string = "sick(X) and happy(X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("and", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-						SyntaxTrees.makeCompoundSyntaxTree("happy", "X")), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("happy", "X")), "1"));
 
 		string = "sick(X) and happy(X) 0.1;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("and", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-						SyntaxTrees.makeCompoundSyntaxTree("happy", "X")), "0.1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("happy", "X")), "0.1"));
 
 		string = "sick(john) = sick(bob);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("=", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "john"), 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "bob")), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("=", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "bob")), "1"));
 
 		string = "sick(john) != sick(bob);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("!=", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "john"), 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "bob")), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("!=", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "bob")), "1"));
 
 		System.out.println("test count = " + testCount);
 	}
@@ -246,82 +245,82 @@ public class RuleParserTest extends AbstractParserTest {
 		String string;
 		
 		string = "if circle(X) then round(X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("circle", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("round", "X"), "1")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("circle", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("round", "X"), "1")));
 
 		string = "if epidemic then sick(X) 0.7;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic", 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.7")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.7")));
 
 		string = "if epidemic then sick(X) and unhappy(X) 0.9;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic", 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("and", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-								SyntaxTrees.makeCompoundSyntaxTree("unhappy", "X")), "0.9")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("unhappy", "X")), "0.9")));
 		
 		string = "if chilly(P) and live(X, P) then sick(X) 0.6;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("and", 
-						SyntaxTrees.makeCompoundSyntaxTree("chilly", "P"), 
-						SyntaxTrees.makeCompoundSyntaxTree("live", "X", "P")), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.6")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("chilly", "P"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("live", "X", "P")), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.6")));
 
 		string = "if colleagues(X,Y) then likes(X,Y) 0.8;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("colleagues", "X", "Y"), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("likes", "X", "Y"), "0.8")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("colleagues", "X", "Y"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("likes", "X", "Y"), "0.8")));
 
 		string = "if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic", 
-				SyntaxTrees.makeCompoundSyntaxTree("conditional rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("and", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-								SyntaxTrees.makeCompoundSyntaxTree("friends", "X", "Y")), 
-						SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "Y"), "0.8"))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.8"))));
 
 		string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("and", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-						SyntaxTrees.makeCompoundSyntaxTree("friends", "X", "Y")), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "Y"), "0.8"), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "Y"), 1)));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.8"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), 1)));
 
 		string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y) 0.3;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("and", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-						SyntaxTrees.makeCompoundSyntaxTree("friends", "X", "Y")), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "Y"), "0.8"), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "Y"), "0.3")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.8"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.3")));
 
 		string = "if epidemic then 0.7 sick(X) :- not vaccinated(X). else 0.7 sick(X).;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic", 
-				SyntaxTrees.makeCompoundSyntaxTree("prolog rule", "0.7", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-						SyntaxTrees.makeCompoundSyntaxTree("not", 
-								SyntaxTrees.makeCompoundSyntaxTree("vaccinated", "X"))), 
-				SyntaxTrees.makeCompoundSyntaxTree("prolog rule", "0.7", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "0.7", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("not", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("vaccinated", "X"))), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "0.7", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"))));
 		
 		string = "if X may be same as Y and Y = obama then entityOf(X, Y);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("and", 
-						SyntaxTrees.makeCompoundSyntaxTree(". may be same as .", "X", "Y"),
-						SyntaxTrees.makeCompoundSyntaxTree("=", "Y", "obama")), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("entityOf", "X", "Y"), "1")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(". may be same as .", "X", "Y"),
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("=", "Y", "obama")), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("entityOf", "X", "Y"), "1")));
 
 		System.out.println("test count = " + testCount);
 	}
@@ -331,49 +330,49 @@ public class RuleParserTest extends AbstractParserTest {
 		String string;
 		
 		string = "sick(X) 0.4 and if epidemic then sick(john) 0.3 and sick(mary) 0.4;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("( . )",
-						SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-							SyntaxTrees.makeCompoundSyntaxTree("atomic rule", SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.4"),
-							SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic",
-									SyntaxTrees.makeCompoundSyntaxTree("( . )",
-										SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-											SyntaxTrees.makeCompoundSyntaxTree("atomic rule", SyntaxTrees.makeCompoundSyntaxTree("sick", "john"), "0.3"),
-											SyntaxTrees.makeCompoundSyntaxTree("atomic rule", SyntaxTrees.makeCompoundSyntaxTree("sick", "mary"), "0.4")))))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )",
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+							Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.4"),
+							Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic",
+									Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )",
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+											Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), "0.3"),
+											Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "mary"), "0.4")))))));
 		
 		string = "if epidemic then sick(X) 0.7 and (if panic then sick(X) 0.8 and flu(Y) 0.9) else sick(john) 0.2 and sick(mary) 0.3;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic", 
-				SyntaxTrees.makeCompoundSyntaxTree("( . )", 
-						SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-								SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-										SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.7"), 
-								SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "panic", 
-										SyntaxTrees.makeCompoundSyntaxTree("( . )", 
-												SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-														SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-																SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.8"), 
-														SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-																SyntaxTrees.makeCompoundSyntaxTree("flu", "Y"), "0.9")))))), 
-				SyntaxTrees.makeCompoundSyntaxTree("( . )", 
-						SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-								SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-										SyntaxTrees.makeCompoundSyntaxTree("sick", "john"), "0.2"), 
-								SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-										SyntaxTrees.makeCompoundSyntaxTree("sick", "mary"), "0.3")))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.7"), 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "panic", 
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )", 
+												Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+														Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+																Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.8"), 
+														Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+																Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("flu", "Y"), "0.9")))))), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), "0.2"), 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "mary"), "0.3")))));
 	
 		
 		string = "if epidemic then (if panic then sick(X) 0.8 and flu(Y) 0.9) else if panic then sick(john) 0.2 and sick(mary) 0.3;";
 		// 'conditional rule'(epidemic, 'conditional rule'(panic, ( 'atomic rule'(sick(X), 0.8), 'atomic rule'(flu(Y), 0.9) )), 'conditional rule'(panic, ( 'atomic rule'(sick(john), 0.2), 'atomic rule'(sick(mary), 0.3) )))
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic", 
-						SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "panic",
-							SyntaxTrees.makeCompoundSyntaxTree("( . )",
-									SyntaxTrees.makeCompoundSyntaxTree("kleene list",
-											SyntaxTrees.makeCompoundSyntaxTree("atomic rule", SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.8"),
-											SyntaxTrees.makeCompoundSyntaxTree("atomic rule", SyntaxTrees.makeCompoundSyntaxTree("flu", "Y"), "0.9")))),
-						SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "panic",
-								SyntaxTrees.makeCompoundSyntaxTree("( . )",
-										SyntaxTrees.makeCompoundSyntaxTree("kleene list",
-												SyntaxTrees.makeCompoundSyntaxTree("atomic rule", SyntaxTrees.makeCompoundSyntaxTree("sick", "john"), "0.2"),
-												SyntaxTrees.makeCompoundSyntaxTree("atomic rule", SyntaxTrees.makeCompoundSyntaxTree("sick", "mary"), "0.3")))) 
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "panic",
+							Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )",
+									Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list",
+											Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.8"),
+											Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("flu", "Y"), "0.9")))),
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "panic",
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )",
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list",
+												Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), "0.2"),
+												Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "mary"), "0.3")))) 
 				));
 
 		System.out.println("test count = " + testCount);
@@ -384,7 +383,7 @@ public class RuleParserTest extends AbstractParserTest {
 		String string;
 		
 		string = "there exists Y : mother(X,Y) and Y may be same as X;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule",  
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule",  
 				ThereExists.make(Expressions.createSymbol("Y"), 
 						Expressions.apply("and",
 								Expressions.apply("mother", "X", "Y"),
@@ -402,33 +401,33 @@ public class RuleParserTest extends AbstractParserTest {
 	public void testPrologExpression () {
 		String string;
 		string = "sick(john).";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("prolog rule", "1", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "john")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "1", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john")));
 
 		string = "sick(X).";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("prolog rule", "1", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "1", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X")));
 
 		string = "not sick(mary).";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("prolog rule", "1", 
-				SyntaxTrees.makeCompoundSyntaxTree("not", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "mary"))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "1", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("not", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "mary"))));
 
 		string = "0.3 sick(X).";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("prolog rule", "0.3", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "0.3", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X")));
 
 		string = "round(X) :- circle(X).";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("prolog rule", "1", 
-				SyntaxTrees.makeCompoundSyntaxTree("round", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("circle", "X")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "1", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("round", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("circle", "X")));
 
 		string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("prolog rule", "0.7", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("and", "epidemic", 
-						SyntaxTrees.makeCompoundSyntaxTree("not", 
-								SyntaxTrees.makeCompoundSyntaxTree("vaccinated", "X")))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "0.7", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", "epidemic", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("not", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("vaccinated", "X")))));
 
 		System.out.println("test count = " + testCount);
 	}
@@ -437,15 +436,15 @@ public class RuleParserTest extends AbstractParserTest {
 	public void testStandardProbabilityExpression () {
 		String string;
 		string = "P(sick(X) | epidemic) = 0.8;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("standard probability rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "epidemic", "0.8"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("standard probability rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "epidemic", "0.8"));
 
 		string = "P(sick(X) and happy(Y) | mother(Z)) = 0.4;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("standard probability rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("and", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-						SyntaxTrees.makeCompoundSyntaxTree("happy", "Y")), 
-				SyntaxTrees.makeCompoundSyntaxTree("mother", "Z"), "0.4"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("standard probability rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("happy", "Y")), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("mother", "Z"), "0.4"));
 
 		string = "P(sick(X) | epidemic);";
 		testFail(string);
@@ -456,18 +455,18 @@ public class RuleParserTest extends AbstractParserTest {
 	public void testCausalExpression () {
 		String string;
 		string = "sick(X) -> fever(X) 0.6;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("causal rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("fever", "X"), "0.6")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("causal rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("fever", "X"), "0.6")));
 		
 		string = "sick(X) and happy(Y) -> fever(X) 0.6;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("causal rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("and", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-						SyntaxTrees.makeCompoundSyntaxTree("happy", "Y")), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("fever", "X"), "0.6")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("causal rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("happy", "Y")), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("fever", "X"), "0.6")));
 
 	}
 
@@ -475,68 +474,68 @@ public class RuleParserTest extends AbstractParserTest {
 	public void testConjunctions () {
 		String string;
 		string = "sick(X) 0.8 and sick(john) 0.3;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("( . )", 
-				SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-						SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.8"), 
-						SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "john"), "0.3"))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.8"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), "0.3"))));
 
 		// Testing associativity.
 		string = "sick(X) 0.8 and sick(john) 0.3 and sick(mary) 0.5 and sick(peter);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("( . )", 
-				SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-						SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.8"), 
-						SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "john"), "0.3"),
-						SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "mary"), "0.5"),
-						SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "peter"), 1))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.8"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), "0.3"),
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "mary"), "0.5"),
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "peter"), 1))));
 
 		string = "sick(X) 0.8 and happy(X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("( . )", 
-				SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-						SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-								SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.8"), 
-						SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-								SyntaxTrees.makeCompoundSyntaxTree("happy", "X"), "1"))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.8"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("happy", "X"), "1"))));
 
 		// This is not a conjunction.
 		string = "sick(X) and happy(X);";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("and", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), 
-						SyntaxTrees.makeCompoundSyntaxTree("happy", "X")), "1"));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("and", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("happy", "X")), "1"));
 
 		// Test parsing of conjunctions in conditional rules.
 		string = "if epidemic then sick(john) 0.3 and sick(mary) 0.4;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic", 
-				SyntaxTrees.makeCompoundSyntaxTree("( . )", 
-						SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-								SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-										SyntaxTrees.makeCompoundSyntaxTree("sick", "john"), "0.3"), 
-								SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-										SyntaxTrees.makeCompoundSyntaxTree("sick", "mary"), "0.4")))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), "0.3"), 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "mary"), "0.4")))));
 
 		string = "if epidemic then sick(X) 0.7 else sick(X) 0.4;";  // Not a conjunction.
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic", 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.7"), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.4")));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.7"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.4")));
 
 		string = "if epidemic then sick(X) 0.7 else sick(john) 0.2 and sick(mary) 0.3;";
-		test(string, SyntaxTrees.makeCompoundSyntaxTree("conditional rule", "epidemic", 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "0.7"), 
-				SyntaxTrees.makeCompoundSyntaxTree("( . )", 
-						SyntaxTrees.makeCompoundSyntaxTree("kleene list", 
-								SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-										SyntaxTrees.makeCompoundSyntaxTree("sick", "john"), "0.2"), 
-								SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-										SyntaxTrees.makeCompoundSyntaxTree("sick", "mary"), "0.3")))));
+		test(string, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.7"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("( . )", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("kleene list", 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), "0.2"), 
+								Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+										Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "mary"), "0.3")))));
 	}
 
 	@Test
@@ -545,33 +544,34 @@ public class RuleParserTest extends AbstractParserTest {
 		ArrayList<Expression> expected = new ArrayList<Expression>();
 
 		string = "sick(X);sick(Y);";
-		expected.add(SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-					SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
-		expected.add(SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "Y"), "1"));
+		expected.add(
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
+		expected.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "1"));
 		testAll(string, expected);
 		expected.clear();
 
 		string = "if circle(X) then round(X); sick(X);";
-		expected.add(SyntaxTrees.makeCompoundSyntaxTree("conditional rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("circle", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("round", "X"), "1")));
-		expected.add(SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
+		expected.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("circle", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("round", "X"), "1")));
+		expected.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
 		testAll(string, expected);
 		expected.clear();
 
 		string = "if circle(X) then round(X); sick(X); sort Dogs: 1000, rover; random grade: People x Class -> Number;";
-		expected.add(SyntaxTrees.makeCompoundSyntaxTree("conditional rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("circle", "X"), 
-				SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-						SyntaxTrees.makeCompoundSyntaxTree("round", "X"), "1")));
-		expected.add(SyntaxTrees.makeCompoundSyntaxTree("atomic rule", 
-				SyntaxTrees.makeCompoundSyntaxTree("sick", "X"), "1"));
-		expected.add(SyntaxTrees.makeCompoundSyntaxTree("sort", "Dogs", "1000", 
-				SyntaxTrees.makeCompoundSyntaxTree("{ . }", "rover")));
-		expected.add(SyntaxTrees.makeCompoundSyntaxTree("randomVariable", "grade", "2", "People", "Class", "Number"));
+		expected.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("circle", "X"), 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("round", "X"), "1")));
+		expected.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"));
+		expected.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("sort", "Dogs", "1000", 
+				Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("{ . }", "rover")));
+		expected.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "grade", "2", "People", "Class", "Number"));
 		testAll(string, expected);
 		expected.clear();
 

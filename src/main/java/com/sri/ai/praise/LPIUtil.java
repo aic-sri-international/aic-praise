@@ -987,7 +987,7 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: (m_V<-F, true, (on ), beingComputed)
 	 */
 	public static Expression argForMessageToVariableFromFactorRewriteCall(Expression msgToV_F, Expression beingComputed) {
-		Expression result = Tuple.make(msgToV_F, Expressions.TRUE, IntensionalSet.EMPTY_SCOPING_EXPRESSION, beingComputed);
+		Expression result = Tuple.make(msgToV_F, Expressions.TRUE, IntensionalSet.EMPTY_SCOPING_SYNTAX_TREE, beingComputed);
 		
 		return result;
 	}
