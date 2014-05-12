@@ -35,46 +35,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise;
+package com.sri.ai.praise.model;
 
 import com.google.common.annotations.Beta;
-import com.google.common.collect.Lists;
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
+import com.google.common.base.Predicate;
+import com.sri.ai.expresso.api.ExpressionAndContext;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.core.HasFunctor;
-import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.praise.model.IsRandomVariableValueExpression;
+import com.sri.ai.praise.LPIUtil;
 
 /**
- * A rewriter for evaluating all "type" applications to random variable value
- * expressions (e.g. type(tall(X)) in ALBP to <code>{{false, true}}</code>.
+ * Indicates whether an expression in an ExpressionAndContext is the value of a random variable.
  * 
- * @author oreilly
+ * @author braz
  */
 @Beta
-public class Type extends AbstractRewriter {
+public class IsRandomVariableValueExpressionAndContext implements Predicate<ExpressionAndContext> {
+	private final RewritingProcess process;
 
-	public final static String FUNCTOR_TYPE = "type";
-	
-	public Type() {
-		this.setReifiedTests(new HasFunctor(FUNCTOR_TYPE));
+	public IsRandomVariableValueExpressionAndContext(RewritingProcess process) {
+		this.process = process;
 	}
 
-	// the reason for a multiset here is that it does not trigger a
-	// normalization for eliminating repeated elements.
-	private static final Expression _booleanType = ExtensionalSet
-			.makeMultiSet(Lists.newArrayList((Expression) Expressions.createSymbol("false"), Expressions.createSymbol("true")));
+	public boolean apply(ExpressionAndContext expressionAndContext) {
+		return apply(expressionAndContext, process);
+	}
 
-	@Override
-	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-		if (expression.getSyntaxTree().numberOfImmediateSubTrees() == 1
-				&& IsRandomVariableValueExpression.apply(Expressions.makeFromSyntaxTree(expression.getSyntaxTree().getImmediateSubTrees().get(0)), process)
-			) {
-			return _booleanType;
-		}
-
-		return expression;
+	public static boolean apply(ExpressionAndContext expressionAndContext, RewritingProcess process) {
+		return LPIUtil.isRandomVariableValueExpression(expressionAndContext.getExpression(), process);
 	}
 }

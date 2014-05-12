@@ -142,7 +142,6 @@ MutuallyExclusiveCoDomainsModule.Provider {
 			Iterator<Pair<Expression, List<Integer>>> subExpressionOfRandomVariableValueAndPathPairsMinusFunctorIterator =
 				new PredicateIterator<Pair<Expression, List<Integer>>>(subExpressionOfRandomVariableValueExpressionAndPathPairsIterator, REJECT_FUNCTOR);
 
-			
 			Iterator<ExpressionAndContext> result =
 				new FunctionIterator<Pair<Expression, List<Integer>>, ExpressionAndContext>(
 						subExpressionOfRandomVariableValueAndPathPairsMinusFunctorIterator,
@@ -152,6 +151,55 @@ MutuallyExclusiveCoDomainsModule.Provider {
 		}
 		return null;
 	}
+
+//	@Override
+//	public Iterator<ExpressionAndContext> getImmediateSubExpressionsAndContextsIterator(Expression expression, final RewritingProcess process) {
+//		if (isBracketedExpression(expression)) {
+//			
+//			Expression innerExpression = Expressions.makeFromSyntaxTree(expression.getSyntaxTree().getSubTree(0));
+//			
+//			// need an iterator of sub *expressions* and contexts, the same expressions deep within expressions.
+//			
+//			Iterator<ExpressionAndContext> subExpressionAndContexts = new ExpressionAndContextDepthFirstIterator(innerExpression, process);
+//			
+//			// then I filter out the ones that are not random variable values
+//			
+//			Iterator<ExpressionAndContext> randomVariableValueExpressionAndContexts = 
+//					new PredicateIterator<ExpressionAndContext>(subExpressionAndContexts, new IsRandomVariableValueExpressionAndContext(process));
+//			
+//			// then each of those produce an iterator over their immediate subExpressions and Contexts, excluding the functor
+//			
+//			Iterator<Iterator<ExpressionAndContext>> randomVariableValueArgumentsExpressionAndContexts = 
+//					new FunctionIterator<ExpressionAndContext, Iterator<ExpressionAndContext>>(
+//							randomVariableValueExpressionAndContexts,
+//							Expressions.getImmediateSubExpressionsAndContextsIterator);
+//			
+//			// then use an iterator that iterates over those iterators
+//			
+//			// The sub-expressions (and contexts) of a bracketed expression are made from
+//			// those expression-path pairs whose parents
+//			// are random variable value expressions, excepting the functors of those expressions.
+//			// For example, p(X,a) is the parent of p, X and a. We reject the functor p and
+//			// take X and a to be sub-expressions (with their respective contexts).
+//
+//			Iterator<Pair<Expression, List<Integer>>> subExpressionOfRandomVariableValueExpressionAndPathPairsIterator =
+//				new SubSyntaxTreeAndPathWhoseParentsSatisfyAGivenPredicateIterator(
+//						expression,
+//						new ExpressionInExpressionPathPairIsValueOfRandomVariable(process));
+//			
+//			Iterator<Pair<Expression, List<Integer>>> subExpressionOfRandomVariableValueAndPathPairsMinusFunctorIterator =
+//				new PredicateIterator<Pair<Expression, List<Integer>>>(subExpressionOfRandomVariableValueExpressionAndPathPairsIterator, REJECT_FUNCTOR);
+//
+//			
+//			Iterator<ExpressionAndContext> result =
+//				new FunctionIterator<Pair<Expression, List<Integer>>, ExpressionAndContext>(
+//						subExpressionOfRandomVariableValueAndPathPairsMinusFunctorIterator,
+//						new DefaultExpressionAndContext.MakerFromExpressionAndPathPair(_emptyExpressionList));
+//
+//			return result;
+//		}
+//		return null;
+//	}
 
 	@Override
 	public void rewritingProcessInitiated(RewritingProcess process) {

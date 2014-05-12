@@ -52,7 +52,6 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
@@ -2014,7 +2013,7 @@ public class RuleConverter {
 		}
 
 		Expression functor = expression.getFunctor();
-		String functorString = ((Symbol)functor).getValue().toString();
+		String functorString = functor.getValue().toString();
 
 		// Handle atomic rules
 		if (functorString.equals(FUNCTOR_ATOMIC_RULE)) {

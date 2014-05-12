@@ -143,7 +143,7 @@ public class ModelLookupDomainSizeOfLogicalVariable implements
 		Integer result = currentSize;
 				
 		Object value;
-		if ((value = process.getGlobalObject(globalObjectsKey.getSyntaxTree())) != null) {
+		if ((value = process.getGlobalObject(globalObjectsKey)) != null) {
 			result = possiblyUpdateSize(currentSize, Expressions.wrap(value));
 		}
 		
