@@ -1002,7 +1002,7 @@ public class Model {
 		for (Expression parfactor : parfactorsDeclaration.getParfactors()) {
 			if (IntensionalSet.isIntensionalSet(parfactor)) {
 				for (Expression domain : IntensionalSet.getIndexDomains(parfactor)) {
-					if (!domain.hasFunctor(CardinalityTypeOfLogicalVariable.FUNCTOR_TYPE) &&
+					if (!domain.hasFunctor(CardinalityTypeOfLogicalVariable.TYPE_LABEL) &&
 					    !sortNamesKnown.contains(domain)) {
 						sortDeclarations.add(new SortDeclaration(domain));
 						sortNamesKnown.add(domain);

@@ -103,7 +103,7 @@ public class ModelLookupDomainSizeOfLogicalVariable implements
 			// in the process.
 			size = lookupAndPossiblyUpdateSize(size, 
 					Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.CARDINALITY, 
-							Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(CardinalityTypeOfLogicalVariable.FUNCTOR_TYPE, logicalVariable)),
+							Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(CardinalityTypeOfLogicalVariable.TYPE_LABEL, logicalVariable)),
 					process); 
 			
 			// Note: < 0 implies its infinity and therefore unknown
