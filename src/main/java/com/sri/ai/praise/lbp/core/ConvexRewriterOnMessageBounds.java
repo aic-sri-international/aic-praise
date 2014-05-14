@@ -713,7 +713,7 @@ public class ConvexRewriterOnMessageBounds extends
 				Trace.log("        add message to messages_set");
 				messagesSet.add(message);
 			}
-			Expression convexHullOfMessages = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_CONVEX_HULL, ExtensionalSet.makeUniSet(messagesSet));
+			Expression convexHullOfMessages = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_CONVEX_HULL, ExtensionalSet.makeUniSet(messagesSet));
 			
 			if (stillContainsChildPlaceholders) {
 				Trace.log("    if messages_set still contains any placeholders");
@@ -808,7 +808,7 @@ public class ConvexRewriterOnMessageBounds extends
 			this.boundRewriterName = boundRewriterName;
 			this.expression        = expression;
 			this.process           = process;
-			placeholderExpression  = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONVEX_HULL_CHILD_PLACEHOLDER, id);
+			placeholderExpression  = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONVEX_HULL_CHILD_PLACEHOLDER, id);
 			
 			Expression expressionRV       = randomVariableFromInnerRewriterCall.getRandomVariableFor(innerRewriterName, expression);
 			randomVariableValueExpression = LPIUtil.getRandomVariableValueExpression(expressionRV, process);

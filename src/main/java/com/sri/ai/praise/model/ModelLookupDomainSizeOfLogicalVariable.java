@@ -94,7 +94,7 @@ public class ModelLookupDomainSizeOfLogicalVariable implements
 			// Now see if the user has explicitly overridden the size of the sort 
 			// via the process, i.e.: | <sortName> | = some value.			
 			size = lookupAndPossiblyUpdateSize(size, 
-					Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.CARDINALITY, sortNameForLogicalVariable),
+					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.CARDINALITY, sortNameForLogicalVariable),
 					process);
 			
 			
@@ -102,8 +102,8 @@ public class ModelLookupDomainSizeOfLogicalVariable implements
 			// with the logical variable by declaring: | type(<logicalVariable>) | = some value
 			// in the process.
 			size = lookupAndPossiblyUpdateSize(size, 
-					Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.CARDINALITY, 
-							Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(CardinalityTypeOfLogicalVariable.TYPE_LABEL, logicalVariable)),
+					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.CARDINALITY, 
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(CardinalityTypeOfLogicalVariable.TYPE_LABEL, logicalVariable)),
 					process); 
 			
 			// Note: < 0 implies its infinity and therefore unknown

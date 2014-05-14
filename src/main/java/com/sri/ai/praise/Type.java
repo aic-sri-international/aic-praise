@@ -65,7 +65,7 @@ public class Type extends AbstractRewriter {
 	// the reason for a multiset here is that it does not trigger a
 	// normalization for eliminating repeated elements.
 	private static final Expression _booleanType = ExtensionalSet
-			.makeMultiSet(Lists.newArrayList((Expression) Expressions.createSymbol("false"), Expressions.createSymbol("true")));
+			.makeMultiSet(Lists.newArrayList((Expression) Expressions.makeSymbol("false"), Expressions.makeSymbol("true")));
 
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {

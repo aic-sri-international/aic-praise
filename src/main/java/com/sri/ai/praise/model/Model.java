@@ -297,7 +297,7 @@ public class Model {
 			args.add(copySD);
 		}
 		this.modelDeclaration = null;
-		this.modelDefinition = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_MODEL_DECLARATION, args);
+		this.modelDefinition = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_MODEL_DECLARATION, args);
 	}
 
 	/**
@@ -731,7 +731,7 @@ public class Model {
 			Expression sortName) {
 		Integer result = null;
 
-		Expression sortCardinality = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(
+		Expression sortCardinality = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
 				FunctorConstants.CARDINALITY, sortName);
 		Expression cardinality = (Expression) process.getGlobalObject(sortCardinality);
 		if (cardinality != null) {
@@ -774,7 +774,7 @@ public class Model {
 
 		modelParts.add(parfactorsDeclaration.getDefinition());
 
-		Expression modelDefinition = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(
+		Expression modelDefinition = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
 				Model.FUNCTOR_MODEL_DECLARATION, modelParts);
 
 		Model model = new Model(modelDefinition, knownRandomVariableNameAndArities);
@@ -895,16 +895,16 @@ public class Model {
 
 		// Some defaults if not specified in model
 		if (name == null) {
-			name = Expressions.createSymbol("No name given.");
+			name = Expressions.makeSymbol("No name given.");
 		}
 		if (description == null) {
-			description = Expressions.createSymbol("No description given.");
+			description = Expressions.makeSymbol("No description given.");
 		}
 		if (null == parfactorsDeclaration) {
 			// Default to an empty union.
 			parfactorsDeclaration = new ParfactorsDeclaration(
 					Expressions
-							.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION));
+							.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION));
 		}
 		
 		deriveSortDeclarations(sortDeclarations, parfactorsDeclaration);

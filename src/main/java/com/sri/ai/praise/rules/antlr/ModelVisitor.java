@@ -35,7 +35,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 		// "elements"
 		// are the syntax trees of the declarations and rules found.
 		Expression result = Expressions
-				.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("model", expressions(ctx.elements));
+				.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("model", expressions(ctx.elements));
 		return result;
 	}
 	
@@ -61,7 +61,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 			constants.add(newSymbol(constant.getText()));
 		}
 
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
 				SortDeclaration.FUNCTOR_SORT_DECLARATION, name, size,
 				ExtensionalSet.makeUniSet(constants));
 		return result;
@@ -75,8 +75,8 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 
 		Expression name = newSymbol(ctx.name.getText());
 		List<Expression> parameters = expressionsList(ctx.parameters);
-		Expression arity = Expressions.createSymbol(parameters.size());
-		Expression range = Expressions.createSymbol("Boolean");
+		Expression arity = Expressions.makeSymbol(parameters.size());
+		Expression range = Expressions.makeSymbol("Boolean");
 		if (ctx.range != null) {
 			range = newSymbol(ctx.range.getText());
 		}
@@ -87,7 +87,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 		declarationArgs.addAll(parameters);
 		declarationArgs.add(range);
 
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
 				RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,
 				declarationArgs.toArray());
 
@@ -111,7 +111,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 			potential = visit(ctx.p);
 		}
 
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE,
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE,
 				formula, potential);
 
 		return result;
@@ -132,10 +132,10 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 		
 		Expression result = null;
 		if (rhs != null) {
-			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_PROLOG_RULE, potential, head, rhs);
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_PROLOG_RULE, potential, head, rhs);
 		}
 		else {
-			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_PROLOG_RULE, potential, head);
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_PROLOG_RULE, potential, head);
 		}
 		return result;
 	}
@@ -156,7 +156,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 		Expression formula2  = visit(ctx.formula2);
 		Expression potential = visit(ctx.p);
 		
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_STANDARD_PROB_RULE, formula1, formula2, potential);
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_STANDARD_PROB_RULE, formula1, formula2, potential);
 		return result;
 	}
 
@@ -175,7 +175,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 		Expression cause  = visit(ctx.cause);
 		Expression effect = visit(ctx.effect);
 		
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CAUSAL_RULE, cause, effect);
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CAUSAL_RULE, cause, effect);
 		return result;
 	}
 	
@@ -200,10 +200,10 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 		
 		Expression result = null;
 		if (elseRule != null) {
-			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, condition, thenRule, elseRule);
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, condition, thenRule, elseRule);
 		}
 		else {
-			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, condition, thenRule);
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, condition, thenRule);
 		}
 		
 		return result;
@@ -255,7 +255,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 		Expression formula   = visit(ctx.a);
 		Expression potential = visit(ctx.p);
 
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, formula, potential);
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, formula, potential);
 
 		return result;
 	}
@@ -281,7 +281,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitFormulaFunctionApplication(
 			RuleParser.FormulaFunctionApplicationContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(visit(ctx.functor), expressions(ctx.args));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(visit(ctx.functor), expressions(ctx.args));
 		
 		return result;
 	}
@@ -290,7 +290,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
     // NOT formula #formulaNot
 	@Override
 	public Expression visitFormulaNot(RuleParser.FormulaNotContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(Not.FUNCTOR, visit(ctx.formula()));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(Not.FUNCTOR, visit(ctx.formula()));
 		return result;
 	}
 
@@ -299,7 +299,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitFormulaMayBeSameAs(
 			RuleParser.FormulaMayBeSameAsContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_MAY_BE_SAME_AS, visit(ctx.leftop), visit(ctx.rightop));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_MAY_BE_SAME_AS, visit(ctx.leftop), visit(ctx.rightop));
 		return result;
 	}
 
@@ -308,7 +308,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitFormulaExponentiation(
 			RuleParser.FormulaExponentiationContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.EXPONENTIATION, visit(ctx.base), visit(ctx.exponent));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.EXPONENTIATION, visit(ctx.base), visit(ctx.exponent));
 		return result;
 	}
 
@@ -317,7 +317,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitFormulaMultiplicationOrDivision(
 			RuleParser.FormulaMultiplicationOrDivisionContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
 		result = possiblyFlatten(result);
 		return result;
 	}
@@ -327,7 +327,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitFormulaAdditionOrSubtraction(
 			RuleParser.FormulaAdditionOrSubtractionContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
 		result = possiblyFlatten(result);
 		return result;
 	}
@@ -337,7 +337,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitFormulaComparison(
 			RuleParser.FormulaComparisonContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
 		result = possiblyFlatten(result);
 		return result;
 	}
@@ -346,7 +346,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
     // leftconj=formula AND rightconj=formula #formulaAnd
 	@Override
 	public Expression visitFormulaAnd(RuleParser.FormulaAndContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(And.FUNCTOR, visit(ctx.leftconj), visit(ctx.rightconj));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(And.FUNCTOR, visit(ctx.leftconj), visit(ctx.rightconj));
 		result = possiblyFlatten(result);
 		return result;
 	}
@@ -355,7 +355,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
     // leftdisj=formula OR rightdisj=formula #formulaOr
 	@Override
 	public Expression visitFormulaOr(RuleParser.FormulaOrContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(Or.FUNCTOR, visit(ctx.leftdisj), visit(ctx.rightdisj));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(Or.FUNCTOR, visit(ctx.leftdisj), visit(ctx.rightdisj));
 		result = possiblyFlatten(result);
 		return result;
 	}
@@ -365,7 +365,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitFormulaImplication(
 			RuleParser.FormulaImplicationContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IMPLICATION, visit(ctx.antecedent), visit(ctx.consequent));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IMPLICATION, visit(ctx.antecedent), visit(ctx.consequent));
 		return result;
 	}
 
@@ -374,7 +374,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitFormulaBiconditional(
 			RuleParser.FormulaBiconditionalContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.EQUIVALENCE, visit(ctx.leftop), visit(ctx.rightop));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.EQUIVALENCE, visit(ctx.leftop), visit(ctx.rightop));
 		return result;
 	}
 
@@ -423,7 +423,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitPotentialExponentiation(
 			RuleParser.PotentialExponentiationContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.EXPONENTIATION, visit(ctx.base), visit(ctx.exponent));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.EXPONENTIATION, visit(ctx.base), visit(ctx.exponent));
 		return result;
 	}
 
@@ -432,7 +432,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitPotentialMultiplicationOrDivision(
 			RuleParser.PotentialMultiplicationOrDivisionContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
 		result = possiblyFlatten(result);
 		return result;
 	}
@@ -442,7 +442,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	@Override
 	public Expression visitPotentialAdditionOrSubtraction(
 			RuleParser.PotentialAdditionOrSubtractionContext ctx) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
 		result = possiblyFlatten(result);
 		return result;
 	}
@@ -484,7 +484,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 
 		text = new String(text);
 
-		Expression result = Expressions.createSymbol(text);
+		Expression result = Expressions.makeSymbol(text);
 		return result;
 	}
 
@@ -531,7 +531,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 						args.add(arg);
 					}
 				}
-				result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(functor, args.toArray());
+				result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(functor, args.toArray());
 			}
 		}
 		

@@ -75,7 +75,7 @@ public class RandomPredicate {
 			throw new IllegalArgumentException(
 					"Argument is not of the form name/arity :" + nameAndArity);
 		}
-		functorOrSymbol = Expressions.createSymbol(parts[0]);
+		functorOrSymbol = Expressions.makeSymbol(parts[0]);
 		arity = Integer.decode(parts[1]);
 	}
 

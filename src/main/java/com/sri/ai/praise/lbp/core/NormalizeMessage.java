@@ -165,7 +165,7 @@ public class NormalizeMessage extends AbstractLBPHierarchicalRewriter implements
 			Trace.log("    return 0.5");
 			Justification
 					.beginEqualityStep("normalization of a constant");
-			result = Expressions.createSymbol(0.5);
+			result = Expressions.makeSymbol(0.5);
 		}
 
 		Justification.endEqualityStep(result);

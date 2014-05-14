@@ -96,7 +96,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	}
 	
 	public static Expression make(Expression valueExpression) {
-		return Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL, valueExpression);
+		return Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL, valueExpression);
 	}
 
 	public static Expression getRandomVariableValueExpression(Expression bracketedRandomVariable) {
@@ -112,7 +112,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	@Override
 	public Expression getScopedVariablesAsExpression(Expression syntaxTree, RewritingProcess process) {
 		if (isBracketedExpression(syntaxTree)) {
-			return Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("list", _emptyExpressionList);
+			return Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("list", _emptyExpressionList);
 		}
 		return null;
 	}
@@ -286,7 +286,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 					// clash between the normalized parameter names to be used (i.e. X1 to Xn) 
 					// and the existing parameters, as each instance of an existing parameter (even if repeated)
 					// is replaced with a new unique normalized parameter.
-					Expression parameter = Expressions.createSymbol("X"+i++);
+					Expression parameter = Expressions.makeSymbol("X"+i++);
 					parameters.add(parameter);
 					lambdaBody = Expressions.replaceAtPath(lambdaBody, subExpressionAndContext.getPath(), parameter);
 				}

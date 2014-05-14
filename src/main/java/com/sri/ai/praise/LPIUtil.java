@@ -216,7 +216,7 @@ public class LPIUtil {
 		Expression prodIntensionalSet = IntensionalSet
 				.makeMultiSetWithASingleIndexExpression(index, indexDomain,
 						message, condition);
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.PRODUCT,
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.PRODUCT,
 				prodIntensionalSet);
 
 		return result;
@@ -752,7 +752,7 @@ public class LPIUtil {
 		elements.add(BracketedExpressionSubExpressionsProvider.make(IfThenElse.make(randomVariableValue, Expressions.ONE, Expressions.ZERO)));
 		elements.add(BracketedExpressionSubExpressionsProvider.make(IfThenElse.make(randomVariableValue, Expressions.ZERO, Expressions.ONE)));
 		
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_CONVEX_HULL, ExtensionalSet.makeUniSet(elements));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_CONVEX_HULL, ExtensionalSet.makeUniSet(elements));
 		
 		return result;
 	}
@@ -790,12 +790,12 @@ public class LPIUtil {
 		else if (Expressions.hasFunctor(beingComputed, FunctorConstants.UNION)) {
 			List<Expression> elements = new ArrayList<Expression>(beingComputed.getArguments());
 			elements.add(by);
-			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, elements.toArray());
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, elements.toArray());
 		} 
 		else {
 			// We are assuming beingComputed is a set or a conditional, 
 			// so we create a top level union with the set/conditional and by
-			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, beingComputed, by);
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, beingComputed, by);
 		}
 		
 		result = process.rewrite(LBPRewriter.R_basic, result);
@@ -837,12 +837,12 @@ public class LPIUtil {
 		else if (Expressions.hasFunctor(beingComputed, FunctorConstants.UNION)) {
 			List<Expression> elements = new ArrayList<Expression>(beingComputed.getArguments());
 			elements.add(intensionalSetBy);
-			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, elements.toArray());
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, elements.toArray());
 		} 
 		else {
 			// We are assuming beingComputed is a set or a conditional, 
 			// so we create a top level union with the set/conditional and by intensional set
-			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, beingComputed, intensionalSetBy);
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.UNION, beingComputed, intensionalSetBy);
 		}
 		
 		return result;
@@ -887,7 +887,7 @@ public class LPIUtil {
 	public static Expression argForDifferenceOfExtensionalAndExtensionalSetRewriteCall(
 			Expression extensionalSetA, Expression extensionalSetB, int i, int j) {
 		
-		Expression setDiff = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.SET_DIFFERENCE, extensionalSetA, extensionalSetB);
+		Expression setDiff = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.SET_DIFFERENCE, extensionalSetA, extensionalSetB);
 		Expression result  = Tuple.make(setDiff, i, j);
 
 		return result;
@@ -909,7 +909,7 @@ public class LPIUtil {
 	 */
 	public static Expression argForDifferenceOfExtensionalAndIntensionalSetRewriteCall(
 			Expression extensionalSet, Expression intensionalSet, int i) {
-		Expression setDiff = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.SET_DIFFERENCE, extensionalSet, intensionalSet);
+		Expression setDiff = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.SET_DIFFERENCE, extensionalSet, intensionalSet);
 		Expression result  = Tuple.make(setDiff, i);
 		
 		return result;
@@ -928,7 +928,7 @@ public class LPIUtil {
 	 * @return an argument expression of the form: Alpha in Set.
 	 */
 	public static Expression argForInRewriteCall(Expression alpha, Expression set) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_IN, Arrays.asList(alpha, set));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_IN, Arrays.asList(alpha, set));
 		return result;
 	}
 	
@@ -1109,7 +1109,7 @@ public class LPIUtil {
 	 */
 	public static Expression argForProductMessageAndProductFactorRewriteCall(
 			Expression conditionalMessage, Expression productOfFactorsToVariable, Expression beingComputed) {
-		Expression times  = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.TIMES, Arrays.asList(conditionalMessage, productOfFactorsToVariable));
+		Expression times  = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.TIMES, Arrays.asList(conditionalMessage, productOfFactorsToVariable));
 		Expression result = Tuple.make(times, beingComputed);
 		
 		return result;
@@ -1128,7 +1128,7 @@ public class LPIUtil {
 	 * @return an expression of the form: S1 \ S2.
 	 */
 	public static Expression argForSetDifferenceRewriteCall(Expression set1, Expression set2) {
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.SET_DIFFERENCE, set1, set2);
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.SET_DIFFERENCE, set1, set2);
 		
 		return result;
 	}
@@ -1646,7 +1646,7 @@ public class LPIUtil {
 	/** Convenience method creating an expression of the type "belief([query])" given an expression 'query'. */
 	public static Expression makeBelief(Expression query) {
 		Expression randomVariable = BracketedExpressionSubExpressionsProvider.make(query);
-		Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_BELIEF, randomVariable);
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_BELIEF, randomVariable);
 		return result;
 	}
 

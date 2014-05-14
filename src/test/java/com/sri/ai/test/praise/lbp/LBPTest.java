@@ -1868,7 +1868,7 @@ public class LBPTest extends AbstractLPITest {
 			public Expression getTopExpression() {
 				this.exprEv = parse(Ev);
 				this.exprPF = parse(PF);
-				return Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees("in", exprEv, exprPF);
+				return Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("in", exprEv, exprPF);
 			}
 			
 			@Override
@@ -2394,7 +2394,7 @@ public class LBPTest extends AbstractLPITest {
 				this.exprV = parse(V);
 				this.exprE = parse(E);
 			
-				topE = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_NEIGHBORS_OF_FROM, exprV, exprE);
+				topE = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_NEIGHBORS_OF_FROM, exprV, exprE);
 				
 				return topE;
 			}
@@ -3010,7 +3010,7 @@ public class LBPTest extends AbstractLPITest {
 								"epidemic/0", "sick/1"
 						),
 						"belief([epidemic])",
-						Util.map(parse("| People |"), Expressions.createSymbol(20)),
+						Util.map(parse("| People |"), Expressions.makeSymbol(20)),
 						false, 
 						"if epidemic then 0.588128460 else 0.411871540"),
 	

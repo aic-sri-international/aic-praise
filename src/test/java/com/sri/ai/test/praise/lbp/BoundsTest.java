@@ -710,7 +710,7 @@ public class BoundsTest extends AbstractLPITest {
 								"epidemic/0", "sick/1"
 						),
 						"(belief([epidemic]), 1)",
-						Util.map(parse("| People |"), Expressions.createSymbol(20)),
+						Util.map(parse("| People |"), Expressions.makeSymbol(20)),
 						false, 
 						"if epidemic then 0.588128460 else 0.411871540"),
 				new BoundBeliefTestData(Expressions.TRUE.toString(), new TrivialPQWithPriors(), 

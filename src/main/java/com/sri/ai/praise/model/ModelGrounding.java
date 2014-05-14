@@ -307,7 +307,7 @@ public class ModelGrounding {
 				throw new ModelGroundingException("Ground model size so far of "+groundFactors.size()+" exceeds maximum allowed size of " + PRAiSEConfiguration.getMaxAllowedSizeForGroundedModel(),
 						Arrays.asList(new ModelGroundingError(
 								ModelGroundingError.TYPE.GROUND_MODEL_EXCEEDS_MAX_ALLOWED_SIZE, 
-								Expressions.createSymbol(PRAiSEConfiguration.getMaxAllowedSizeForGroundedModel()))));
+								Expressions.makeSymbol(PRAiSEConfiguration.getMaxAllowedSizeForGroundedModel()))));
 			}
 		}
 		
@@ -494,7 +494,7 @@ public class ModelGrounding {
 			
 			// Check if we are using upper or lower case convention
 			// for logical variables.
-			Expression upperCaseSymbol = Expressions.createSymbol("X");
+			Expression upperCaseSymbol = Expressions.makeSymbol("X");
 			boolean isUpperCaseVariable = process.isVariable(upperCaseSymbol);
 			
 			for (SortInformation sortInformation : sortMap.values()) {
@@ -525,9 +525,9 @@ public class ModelGrounding {
 					}
 					// Now fill out the constants for this sort
 					while (sortInformation.constants.size() < sortInformation.size) {
-						Expression newGroundSortConstant = Expressions.createSymbol(constantPrefix+(sortInformation.constants.size()+1));
+						Expression newGroundSortConstant = Expressions.makeSymbol(constantPrefix+(sortInformation.constants.size()+1));
 						while (knownConstants.contains(newGroundSortConstant)) {
-							newGroundSortConstant = Expressions.createSymbol(newGroundSortConstant.toString()+"'"); // Prime it.
+							newGroundSortConstant = Expressions.makeSymbol(newGroundSortConstant.toString()+"'"); // Prime it.
 						}
 						knownConstants.add(newGroundSortConstant);
 						sortInformation.constants.add(newGroundSortConstant);
@@ -566,9 +566,9 @@ public class ModelGrounding {
 			}
 			
 			// None: will be specified initially as empty
-			preGroundModelParts.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION));
+			preGroundModelParts.add(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ParfactorsDeclaration.FUNCTOR_PARFACTORS_DECLARATION));
 			
-			Expression preGroundModelDefinition = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(Model.FUNCTOR_MODEL_DECLARATION, preGroundModelParts.toArray());
+			Expression preGroundModelDefinition = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(Model.FUNCTOR_MODEL_DECLARATION, preGroundModelParts.toArray());
 			
 			try {
 				preGroundModel = new Model(preGroundModelDefinition, knownRandomVariableNameAndArities);
@@ -612,7 +612,7 @@ public class ModelGrounding {
 		public void instantiateGroundDeclaration(List<ModelGroundingError> errors) {
 			try {
 				groundDeclaration = new SortDeclaration(name, 
-						Expressions.createSymbol(size), 
+						Expressions.makeSymbol(size), 
 						ExtensionalSet.makeUniSetExpression(new ArrayList<Expression>(constants)));
 			} catch (IllegalArgumentException iae) {
 				errors.add(new ModelGroundingError(ModelGroundingError.TYPE.UNABLE_TO_INSTANTIATE_A_VALID_SORT_DECLARATION_FOR_GROUNDING, name));
@@ -648,7 +648,7 @@ public class ModelGrounding {
 					groundDeclaration = new RandomVariableDeclaration(name);
 				} 
 				else {
-					groundDeclaration = new RandomVariableDeclaration(name, Expressions.createSymbol(arity), parameterSorts);
+					groundDeclaration = new RandomVariableDeclaration(name, Expressions.makeSymbol(arity), parameterSorts);
 				}
 			}
 			return groundDeclaration;

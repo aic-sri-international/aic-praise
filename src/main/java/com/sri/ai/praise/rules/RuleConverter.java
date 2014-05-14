@@ -396,7 +396,7 @@ public class RuleConverter {
 
 		// Add declarations for the missing sorts.
 		for (String missingSort : missingSorts) {
-			sortDeclarations.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(SortDeclaration.FUNCTOR_SORT_DECLARATION, missingSort, SortDeclaration.UNKNOWN_SIZE, 
+			sortDeclarations.add(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(SortDeclaration.FUNCTOR_SORT_DECLARATION, missingSort, SortDeclaration.UNKNOWN_SIZE, 
 					ExtensionalSet.makeEmptySetExpression()));
 			sortNames.add(missingSort);
 		}
@@ -500,7 +500,7 @@ public class RuleConverter {
 					}
 					
 					if (makeMayBeSameAs) {
-						mayBeSameAsConjuncts.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_MAY_BE_SAME_AS, newUniqueVariable, lv));
+						mayBeSameAsConjuncts.add(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_MAY_BE_SAME_AS, newUniqueVariable, lv));
 					}
 				}
 				
@@ -695,9 +695,9 @@ public class RuleConverter {
 				functionFreeFormula = conditionAndFunctionFreeFormula.second;
 
 				// | ........ return translateFunctionsAsArgument("if Condition then functionFreeFormula Potential", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
-				Expression intermediateRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
+				Expression intermediateRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
 														condition,
-														Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE,
+														Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE,
 																functionFreeFormula, potential));
 				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
 														newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
@@ -727,9 +727,9 @@ public class RuleConverter {
 			if (!condition.equals(Expressions.TRUE)) {
 					
 				// | ........ return translateFunctionsAsArgument("if Condition then (if functionFreeFormula then functionFreeRule1)", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
-				Expression intermediateRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
+				Expression intermediateRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
 													condition,
-													Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
+													Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
 															functionFreeFormula, functionFreeRule1));
 			 
 				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,	
@@ -743,7 +743,7 @@ public class RuleConverter {
 				}
 				else {
 					// | ............ return if functionFreeFormula then functionFreeRule1
-					result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1);
+					result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1);
 				}
 			}
 		}
@@ -769,9 +769,9 @@ public class RuleConverter {
 			// | .... if Condition is distinct from "true"
 			if (!condition.equals(Expressions.TRUE)) {
 				// | ........ return translateFunctionsAsArgument("if Condition then (if functionFreeFormula then functionFreeRule1 else functionFreeRule2)", randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
-				Expression intermediateRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
+				Expression intermediateRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
 													condition,
-													Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
+													Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE,
 															functionFreeFormula, functionFreeRule1, functionFreeRule2));
 				result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
 														newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
@@ -784,7 +784,7 @@ public class RuleConverter {
 				}
 				else {
 					// | ............ return if functionFreeFormula then functionFreeRule1 else functionFreeRule2
-					result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1, functionFreeRule2);
+					result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, functionFreeFormula, functionFreeRule1, functionFreeRule2);
 				}
 			}
 		} 
@@ -794,13 +794,13 @@ public class RuleConverter {
 			if (rule.numberOfArguments() == 2) {
 				// | .... if rule is "Potential Formula1."
 				// | ........ intermediateRule <- Formula1 Potential // i.e. an equivalent atomic rule
-				intermediateRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0));
+				intermediateRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0));
 			}
 			else {
 				// | .... else rule is "Potential Formula1 :- Formula2."
 				// | ........ intermediateRule <- if Formula2 then Formula1 Potential // i.e. an equivalent conditional rule
-				intermediateRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, rule.get(2), 
-											Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0)));
+				intermediateRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, rule.get(2), 
+											Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, rule.get(1), rule.get(0)));
 			}
 			// | .... return translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)
 			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
@@ -811,8 +811,8 @@ public class RuleConverter {
 			}
 		}
 		else if (rule.getFunctor().equals(FUNCTOR_STANDARD_PROB_RULE)) {
-			Expression intermediateRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, rule.get(1), 
-					Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, rule.get(0), rule.get(2)));
+			Expression intermediateRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, rule.get(1), 
+					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, rule.get(0), rule.get(2)));
 			
 			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
 													newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
@@ -822,7 +822,7 @@ public class RuleConverter {
 			}
 		}
 		else if (rule.getFunctor().equals(FUNCTOR_CAUSAL_RULE)) {
-			Expression intermediateRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, rule.get(0), rule.get(1));
+			Expression intermediateRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, rule.get(0), rule.get(1));
 			result = translateFunctionsAsArgument(intermediateRule, randomVariableDeclarations, functionsIdentified,
 													newUniqueVariables, newUniqueVariablesCache, uniqueCount, process);
 			if (result == intermediateRule) {
@@ -921,7 +921,7 @@ public class RuleConverter {
 							// Extend predicate2 from a function to a relation
 							List<Expression> predicate2Args = new ArrayList<Expression>(predicate2.getArguments());
 							predicate2Args.add(newUniqueVariable);
-							predicate2 = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(predicate2.getFunctor(), predicate2Args.toArray());
+							predicate2 = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(predicate2.getFunctor(), predicate2Args.toArray());
 							conjuncts.add(predicate2);
 							condition[0] = And.make(conjuncts);
 								
@@ -929,7 +929,7 @@ public class RuleConverter {
 							// Replace predicate1's function slot with the newUniqueVariable
 							List<Expression> predicate1Args = new ArrayList<Expression>(predicate1.getArguments());
 							predicate1Args.set(elementEi, newUniqueVariable);
-							predicate1 = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(predicate1.getFunctor(), predicate1Args.toArray());
+							predicate1 = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(predicate1.getFunctor(), predicate1Args.toArray());
 							result = predicate1;
 						}
 						return result;
@@ -1100,7 +1100,7 @@ public class RuleConverter {
 			// | .... return "if Formula then rule2PotentialExpression(Rule) else 0.5"
 			Expression result =
 					IfThenElse.make(
-							args.get(0), this.rule2PotentialExpression(args.get(1)), Expressions.createSymbol(0.5));
+							args.get(0), this.rule2PotentialExpression(args.get(1)), Expressions.makeSymbol(0.5));
 			return result;
 		} // | if rule is "if Formula then Rule1 else Rule2" 
 		else if (args.size() == 3) {
@@ -1140,7 +1140,7 @@ public class RuleConverter {
 			Expression result =
 					IfThenElse.make(args.get(2), 
 							IfThenElse.make(args.get(1), args.get(0), oneMinusPotential(args.get(0))),
-							Expressions.createSymbol(0.5));
+							Expressions.makeSymbol(0.5));
 			return result;
 		}
 
@@ -1228,7 +1228,7 @@ public class RuleConverter {
 				// Add the first argument.
 				if (ii >= size1) {
 					// If we're beyond the range for argument 2, insert default value.
-					rule1 = Expressions.createSymbol(0.5);
+					rule1 = Expressions.makeSymbol(0.5);
 				}
 				else {
 					// If we're still in range for argument 1, get the value.
@@ -1247,7 +1247,7 @@ public class RuleConverter {
 				if (!(size2 == 0)) {
 					if (ii >= size2) {
 						// If we're beyond the range for argument 2, insert default value.
-						rule2 = Expressions.createSymbol(0.5);
+						rule2 = Expressions.makeSymbol(0.5);
 					}
 					else {
 						// If we're still in range for argument 2, get the value.
@@ -1277,7 +1277,7 @@ public class RuleConverter {
 					// If there is only one rule argument, create new rules for the list of rules (or single rule) for
 					// them.
 					for (Expression arg1 : arg1List) {
-						result.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(rule.getFunctor(), formula, arg1));
+						result.add(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(rule.getFunctor(), formula, arg1));
 					}
 				}
 				else {
@@ -1290,14 +1290,14 @@ public class RuleConverter {
 					else if (arg1List.size() > 1) {
 						// If argument one has conjunctions in it, create new rules for those.
 						for (Expression arg1 : arg1List) {
-							result.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(rule.getFunctor(), formula, arg1, arg2List.get(0)));
+							result.add(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(rule.getFunctor(), formula, arg1, arg2List.get(0)));
 						}
 					}
 					else {
 						// If argument two has conjunctions in it, create new rules for those.  This also
 						// handles cases where neither argument one or two had conjunctions.
 						for (Expression arg2 : arg2List) {
-							result.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(rule.getFunctor(), formula, arg1List.get(0), arg2));
+							result.add(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(rule.getFunctor(), formula, arg1List.get(0), arg2));
 						}
 					}
 				}
@@ -1313,7 +1313,7 @@ public class RuleConverter {
 					// Check for more conjunctions in the conjunction element.
 					List<Expression> translatedList = this.translateConditionalConjunctions(conjunctionElement);
 					for (Expression translatedElement: translatedList) {
-						result.add(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(rule.getFunctor(), formula, translatedElement));
+						result.add(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(rule.getFunctor(), formula, translatedElement));
 					}
 				}
 			}
@@ -1338,8 +1338,8 @@ public class RuleConverter {
 	public Expression translateStandardProbabilityRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
 		if (args.size() == 3) {
-			return this.translateConditionalRule(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, args.get(1), 
-					Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, args.get(0), args.get(2))));
+			return this.translateConditionalRule(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, args.get(1), 
+					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, args.get(0), args.get(2))));
 		}
 		return null;
 	}
@@ -1354,7 +1354,7 @@ public class RuleConverter {
 	public Expression translateCausalRule (Expression rule) {
 		List<Expression> args = rule.getArguments();
 		if (args.size() == 2) {
-			return this.translateConditionalRule(Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, args.get(0), 
+			return this.translateConditionalRule(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_CONDITIONAL_RULE, args.get(0), 
 					args.get(1)));
 		}
 		return null;
@@ -1566,13 +1566,13 @@ public class RuleConverter {
 			// | queryAtom <- predicate 'query' applied to F
 			Expression queryAtom;
 			if (variablesF.size() > 0) {
-				queryAtom = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_QUERY, variablesF);
+				queryAtom = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_QUERY, variablesF);
 			}
 			else {
-				queryAtom = Expressions.createSymbol(FUNCTOR_QUERY);
+				queryAtom = Expressions.makeSymbol(FUNCTOR_QUERY);
 			}
 			// | rule <- queryAtom <=> queryFormula
-			Expression queryRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(Equivalence.FUNCTOR, queryAtom, query), 1);
+			Expression queryRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_ATOMIC_RULE, Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(Equivalence.FUNCTOR, queryAtom, query), 1);
 			// | return (rule, queryAtom)
 			result = new Pair<Expression, Expression>(queryRule, queryAtom);
 		}
@@ -1651,13 +1651,13 @@ public class RuleConverter {
 					potential = potential.subtract(1).negate(); // this is the same as potential = 1.0 - potential;
 				}
 				
-				Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, condition, Expressions.createSymbol(potential));
+				Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, condition, Expressions.makeSymbol(potential));
 				return result;
 			}
 		}
 		
 		// the statement must have a constant potential, so the result is a uniform message.
-		Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, queryAtom, Expressions.createSymbol(0.5));
+		Expression result = Expressions.apply(FUNCTOR_ATOMIC_RULE, queryAtom, Expressions.makeSymbol(0.5));
 		return result;		
 	}
 	
@@ -1733,7 +1733,7 @@ public class RuleConverter {
 		List<Expression> resultArguments = new ArrayList<Expression>();
 
 		resultArguments.add(randomVariableValue.getFunctorOrSymbol());
-		resultArguments.add(Expressions.createSymbol(randomVariableValue.numberOfArguments()));
+		resultArguments.add(Expressions.makeSymbol(randomVariableValue.numberOfArguments()));
 		
 		List<Expression> rvValueArgs = randomVariableValue.getArguments();
 		for (Expression rvArg : rvValueArgs) {
@@ -1757,9 +1757,9 @@ public class RuleConverter {
 			}
 		}
 
-		resultArguments.add(Expressions.createSymbol(TYPE_BOOLEAN));
+		resultArguments.add(Expressions.makeSymbol(TYPE_BOOLEAN));
 		if (resultArguments.size() == rvValueArgs.size() + 3) {
-			result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArguments);
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,  resultArguments);
 		}
 		
 		return result;
@@ -1778,8 +1778,8 @@ public class RuleConverter {
 			Set<Expression> sorts, Set<Expression> randomVariableDeclarations,
 			Set<Expression> parfactors) {
 		ArrayList<Expression> modelArguments = new ArrayList<Expression>();
-		modelArguments.add(Expressions.createSymbol(name));
-		modelArguments.add(Expressions.createSymbol(description));
+		modelArguments.add(Expressions.makeSymbol(name));
+		modelArguments.add(Expressions.makeSymbol(description));
 		for (Expression sort : sorts)
 			modelArguments.add(sort);
 
@@ -1889,7 +1889,7 @@ public class RuleConverter {
 		for (int ii = 0; ii < oldArgs.size(); ii++) {
 			// i.e. 1 == the arity slot
 			if (ii == 1) {
-				newArguments.add(Expressions.createSymbol(oldArgs.get(1).intValue() + 1));
+				newArguments.add(Expressions.makeSymbol(oldArgs.get(1).intValue() + 1));
 			}
 			else {
 				newArguments.add(oldArgs.get(ii));
@@ -1897,7 +1897,7 @@ public class RuleConverter {
 		}
 
 		// Change the return type to boolean.
-		newArguments.add(Expressions.createSymbol(TYPE_BOOLEAN));
+		newArguments.add(Expressions.makeSymbol(TYPE_BOOLEAN));
 		return Expressions.apply(randomVariableDecl.getFunctor(), newArguments);
 	}
 	
@@ -1978,7 +1978,7 @@ public class RuleConverter {
 			try {
 				NumberFormat format = NumberFormat.getNumberInstance();
 				Number number = format.parse(potential.toString());
-				return Expressions.createSymbol(1 - number.doubleValue());
+				return Expressions.makeSymbol(1 - number.doubleValue());
 			}
 			catch(ParseException e) {
 				
@@ -2213,7 +2213,7 @@ public class RuleConverter {
 			args.addAll(functionApplication.getArguments());
 			args.add(additionalArgument);
 			
-			Expression result = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(functionApplication.getFunctorOrSymbol(), args.toArray());
+			Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(functionApplication.getFunctorOrSymbol(), args.toArray());
 			
 			return result;
 		}
@@ -2283,30 +2283,30 @@ public class RuleConverter {
 					// Create a new symbol based on the name of the quantifier expression.
 					// This will be used as the name of a new random variable.
 					// | ................ newSymbol <- string representation of E
-					Expression newSymbol = Expressions.createSymbol(expression.toString());
+					Expression newSymbol = Expressions.makeSymbol(expression.toString());
 					
 					// Get all the free variables in the quantifier expression to create a
 					// call to our new random variable expression.
 					// | ................ F <- array of free variables in E
 					Set<Expression> freeVariablesF = Expressions.freeVariables(expression, process);
-					Expression      newSymbolF     = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(newSymbol, freeVariablesF);
+					Expression      newSymbolF     = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(newSymbol, freeVariablesF);
 
 					// Then create a new rule based on the new expression.
 					Expression newRule;
 					// | ................ if Quantifier is "there exists"
 					if (ThereExists.isThereExists(expression)) {						
 						// | .................... expandingRules <- add "if Phi then newSymbol(F) else newSymbol(F) 0.000001"
-						newRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
+						newRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
 																ThereExists.getBody(expression), 
-																Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, 1),
-																Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("0", "1")));
+																Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, 1),
+																Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("0", "1")));
 					}
 					else { // | ................ else // Quantifier is "for all"
 						// | .................... expandingRules <- add "if not Phi then not newSymbol(F) else newSymbol(F) 0.999999"
-						newRule = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
+						newRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
 																Not.make(ForAll.getBody(expression)), 
-																Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, Not.make(newSymbolF), 1),
-																Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("9", "9")));						
+																Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, Not.make(newSymbolF), 1),
+																Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("9", "9")));						
 					}
 					expandingRules.add(newRule);
 					

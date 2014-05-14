@@ -96,19 +96,19 @@ public class SortDeclaration {
 	/**
 	 * Symbol used to indicate that the size of a sort is Unknown.
 	 */
-	public static final Expression UNKNOWN_SIZE = Expressions.createSymbol("Unknown");
+	public static final Expression UNKNOWN_SIZE = Expressions.makeSymbol("Unknown");
 
 	/**
 	 * Constant that can be used to name all sorts in a model if partitioning of
 	 * the model is not desired.
 	 */
-	public static final Expression UNIVERSE_OF_DISCOURSE = Expressions.createSymbol("Universe");
+	public static final Expression UNIVERSE_OF_DISCOURSE = Expressions.makeSymbol("Universe");
 
 	/**
 	 * An in-built sort representing Booleans {false, true}.
 	 */
 	public static final SortDeclaration IN_BUILT_BOOLEAN = new SortDeclaration(
-			false, Expressions.createSymbol("Boolean"), Expressions.createSymbol(2),
+			false, Expressions.makeSymbol("Boolean"), Expressions.makeSymbol(2),
 			ExtensionalSet.makeUniSetExpression(Arrays.asList(new Expression[] {
 					Expressions.FALSE, Expressions.TRUE })));
 	public static final SortDeclaration[] IN_BUILT_SORTS = new SortDeclaration[] { IN_BUILT_BOOLEAN, };
@@ -174,7 +174,7 @@ public class SortDeclaration {
 	 * @param size
 	 */
 	public SortDeclaration(SortDeclaration toCopy, boolean knownDomainSize, Integer size) {
-		this(false, toCopy.name, knownDomainSize ? Expressions.createSymbol(size) : UNKNOWN_SIZE, toCopy.constants);		
+		this(false, toCopy.name, knownDomainSize ? Expressions.makeSymbol(size) : UNKNOWN_SIZE, toCopy.constants);		
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class SortDeclaration {
 	public Expression getSortDeclaration() {
 		// Lazy initialize this attribute
 		if (sortDeclaration == null) {
-			sortDeclaration = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_SORT_DECLARATION, name,
+			sortDeclaration = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FUNCTOR_SORT_DECLARATION, name,
 					size, constants);
 		}
 

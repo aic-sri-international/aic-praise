@@ -98,7 +98,7 @@ public class ExportToPMTK3FactorGraph {
 		String modelDeclaration =  Model.getModelDeclarationFromResource("Example4.model");
 
 		Map<Expression, Expression> globalObjects = new LinkedHashMap<Expression, Expression>();
-		globalObjects.put(parser.parse("| Object |"), Expressions.createSymbol(size)); 
+		globalObjects.put(parser.parse("| Object |"), Expressions.makeSymbol(size)); 
 		// Ensure domain sizes match up.
 		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());		
 		
@@ -323,11 +323,11 @@ public class ExportToPMTK3FactorGraph {
 			
 			List<Expression> queryVars = new ArrayList<Expression>();
 			for (int i = 0; i < rvd.getArityValue(); i++) {
-				queryVars.add(Expressions.createSymbol("X"+i));
+				queryVars.add(Expressions.makeSymbol("X"+i));
 			}
-			Expression randomVariable = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL,
-					Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(rvd.getName(), queryVars));
-			Expression query = Expressions.makeExpressionBasedOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_BELIEF, randomVariable);
+			Expression randomVariable = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL,
+					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(rvd.getName(), queryVars));
+			Expression query = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_BELIEF, randomVariable);
 			
 			Expression belief = process.rewrite(LBPRewriter.R_belief, query);
 			
