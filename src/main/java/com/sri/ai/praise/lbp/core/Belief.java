@@ -936,7 +936,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	 * return Intersection
 	 * <pre>
 	 */
-	private Expression calculateIntersection(Expression prevMessage, Expression msgValue, RewritingProcess process) {		
+	private Expression calculateIntersection(Expression prevMessage, Expression msgValueSet, RewritingProcess process) {		
 		// We want to find out if this previous message is covered by
 		// { (on I) (Destination, Origin, value) | C }
 		// This can be done by computing the intersection below,
@@ -944,13 +944,17 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// for the previous message by excluding them:
 		// Intersection <- R_intersection(
 		//     { (on I) (Destination, Origin) | C }
-		Expression msgValueTuple   = IntensionalSet.getHead(msgValue);
-		Expression msgValueNoValue = IntensionalSet.makeUniSetFromIndexExpressionsList(
-				IntensionalSet.getIndexExpressions(msgValue),
-				Tuple.make(
-						Tuple.get(msgValueTuple, 0),
-						Tuple.get(msgValueTuple, 1)), 
-				IntensionalSet.getCondition(msgValue));
+		List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(msgValueSet);
+
+		Expression msgValueSetTupleWithDestinationOriginAndValue = IntensionalSet.getHead(msgValueSet);
+		Expression destination = Tuple.get(msgValueSetTupleWithDestinationOriginAndValue, 0);
+		Expression origin      = Tuple.get(msgValueSetTupleWithDestinationOriginAndValue, 1);
+		Expression destinationOriginTuple = Tuple.make(destination, origin);
+		
+		Expression condition = IntensionalSet.getCondition(msgValueSet);
+		
+		Expression msgSetDestinationAndOriginOnly = IntensionalSet.makeUniSetFromIndexExpressionsList(
+				indexExpressions, destinationOriginTuple, condition);
 		//	   intersection
 		//     { (Destination', Origin') })
 		Expression destinationPrime = prevMessage.get(0);
@@ -959,11 +963,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression previousMsgSet   = IntensionalSet.makeUniSetFromIndexExpressionsList(new ArrayList<Expression>(), previousMsgTuple, Expressions.TRUE);
 		
 		Trace.log("    Intersection <- R_intersection(");
-		Trace.log("    {}", msgValueNoValue);
+		Trace.log("    {}", msgSetDestinationAndOriginOnly);
 		Trace.log("    intersection");
 		Trace.log("    {} }} )", previousMsgSet);
 		
-		Expression intersection = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(msgValueNoValue, previousMsgSet));
+		Expression intersection = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(msgSetDestinationAndOriginOnly, previousMsgSet));
 		// return Intersection
 		return intersection;
 	}
