@@ -3838,6 +3838,18 @@ public class LBPTest extends AbstractLPITest {
 				//
 				// Basic:
 				//
+//				new PickSingleElementTestData("Y = a", // the unrelated variable in the context is important, for it provides a candidate value for X that should not be picked 
+//						new TrivialPQ(),
+//						"{ (on X) X | true }",
+//						false,
+//						null
+//						),
+//				new PickSingleElementTestData(Expressions.TRUE.toString(), 
+//						new TrivialPQ(),
+//						"{ (on X) X | true }",
+//						false,
+//						null
+//						),
 				new PickSingleElementTestData(Expressions.TRUE.toString(), 
 						new TrivialPQ(),
 						"{ ([p(a)], [if p(a) then 1 else 0], 1) | true }",
@@ -4037,6 +4049,22 @@ public class LBPTest extends AbstractLPITest {
 				//
 				// Basic:
 				//
+//				new PickValueTestData("Y != a", 
+//						new TrivialPQ(),
+//						"X",
+//						"{X}",
+//						"true",
+//						false,
+//						null
+//						),
+//				new PickValueTestData(Expressions.TRUE.toString(), 
+//						new TrivialPQ(),
+//						"X",
+//						"{X}",
+//						"true",
+//						false,
+//						null
+//						),
 				new PickValueTestData(Expressions.TRUE.toString(), 
 						new TrivialPQ(),
 						"X",

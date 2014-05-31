@@ -1440,7 +1440,6 @@ public class LPIUtil {
 	 * This method can be used to test message values against the occurrence of random variable values other than
 	 * the one they are supposed to use (destination random variable value, if this is a message to an RV, or
 	 * origin random variable value, if this is a message *from* an RV).
-	 * STILL BEING TESTED.
 	 */
 	public static List<Pair<Expression,Expression>> findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(Expression expression, final Expression randomVariableValue, RewritingProcess process) {
 

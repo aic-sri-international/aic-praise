@@ -596,19 +596,20 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 						System.err.println("Destination: " + destination);
 						System.err.println("Origin: "      + origin);
 						System.err.println("Message value should be a function of: " + destinationOrOriginRandomVariableValue);
-						System.err.println("value            ="+value);
-						System.err.println("Other random variable values and contexts in which they appear:\n" + Util.join(otherRandomVariables, "\n"));
-						System.err.println("sub.context      ="+subProcess.getContextualConstraint());
-						System.err.println("sub.context vars ="+subProcess.getContextualVariables());
-						System.err.println("msg_expansion    ="+msgExpansion);
-						System.err.println("expansion        ="+expansion);
-						System.err.println("msg_expansions   =");
+						System.err.println("value            = " + value);
+						System.err.println("Other random variable values appearing in message value that may not unify with " + destinationOrOriginRandomVariableValue +
+								           ", paired with the contexts in which they appear:\n" + Util.join(otherRandomVariables, "\n"));
+						System.err.println("sub.context      = " + subProcess.getContextualConstraint());
+						System.err.println("sub.context vars = " + subProcess.getContextualVariables());
+						System.err.println("msg_expansion    = " + msgExpansion);
+						System.err.println("expansion        = " + expansion);
+						System.err.println("msg_expansions   = ");
 						for (Expression me : msgExpansions) {
 							System.err.println(me);
 						}
-						System.err.println("msg_values       =");
+						System.err.println("msg_values       = ");
 						for (Expression m : msgValues) {
-							System.err.println(""+m);
+							System.err.println(m);
 						}
 						throw new IllegalStateException("value depends on random variable value other than its own destination/origin random variable: " + value);
 					}
