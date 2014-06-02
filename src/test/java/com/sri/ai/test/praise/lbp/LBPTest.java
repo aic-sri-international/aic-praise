@@ -37,6 +37,7 @@
  */
 package com.sri.ai.test.praise.lbp;
 
+import static com.sri.ai.expresso.helper.Expressions.parse;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -54,8 +55,10 @@ import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.library.DirectCardinalityComputationFactory;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElseExternalizationHierarchical;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.FormulaSimplify;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -1461,7 +1464,8 @@ public class LBPTest extends AbstractLPITest {
 						"{ ( on A, A', B ) ( ([ m(A) ]), ([ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else (if m(B) then 5 else 30) else 1 ]) ) | A != X and A' != B and (A = A' or A = B) and (A' != A or B != X) }",
 						"{ ( on B, A, B' ) ( ([ m(B) ]), ([ if gA(A) and gB(B') then if m(A) then if m(B') then 10 else 1 else (if m(B') then 5 else 30) else 1 ]) ) | X != B and A != B' and (B = A or B = B') and (A != X or B' != B) }",
 						false,
-						"{ ( on A) ( ([ m(A) ]), ([ if gA(X) and gB(A) then if m(X) then if m(A) then 10 else 1 else (if m(A) then 5 else 30) else 1 ]) ) | X != A }"),
+					"{ ( on A, A', B ) ( ([ m(A) ]), ([ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else (if m(B) then 5 else 30) else 1 ]) ) | A != X and A' != B and (A = A' or A = B) and (A' != A or B != X) and (B != A or A' = A or A' = X) and (A' != A or B = A) }"),
+//					"{ ( on A) ( ([ m(A) ]), ([ if gA(X) and gB(A) then if m(X) then if m(A) then 10 else 1 else (if m(A) then 5 else 30) else 1 ]) ) | X != A }"),
 				//
 				// Basic: Illegal Argument Exceptions
 				//

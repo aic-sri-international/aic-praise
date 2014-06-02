@@ -1413,7 +1413,7 @@ public class LPIUtil {
 	
 	/**
 	 * Returns the set of random variables used in an expression assumed to have the same
-	 * se of logical variables everywhere, that is, an expression that does not quantify over logical variables.
+	 * set of logical variables everywhere, that is, an expression that does not quantify over logical variables.
 	 */
 	public static Expression getRandomVariablesUsedIn(Expression expression, RewritingProcess process) {
 		SubExpressionsDepthFirstIterator subExpressionsDepthFirstIterator =
