@@ -3843,12 +3843,6 @@ public class LBPTest extends AbstractLPITest {
 				//
 				// Basic:
 				//
-//				new PickSingleElementTestData("Y = a", // This tests was here to check that the incorrect solution X = a would NOT be found. However the example itself is invalid because the function assumes the given formula does imply a single value for X, and this is not true here 
-//						new TrivialPQ(),
-//						"{ (on X) X | true }",
-//						false,
-//						null
-//						),
 				new PickSingleElementTestData(Expressions.TRUE.toString(), 
 						new TrivialPQ(),
 						"{ ([p(a)], [if p(a) then 1 else 0], 1) | true }",
@@ -3882,12 +3876,13 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						"if sick(X) then 1 else 0"
 						),
-				// Ensure constants take precedence over variables.
+				// Ensure variables take precedence over constants.
 				new PickSingleElementTestData(Expressions.TRUE.toString(),
 						new TrivialSickbob(),
 						"{ ( on X' in People ) (if sick(X') then 1 else 0) | X = X' = person1 }",
 						false,
-						"if sick(person1) then 1 else 0"
+						"if sick(X) then 1 else 0"
+						// "if sick(person1) then 1 else 0"
 						),
 				// Ensure the free variable X is selected from the common set of disjuncts
 				new PickSingleElementTestData(Expressions.TRUE.toString(),

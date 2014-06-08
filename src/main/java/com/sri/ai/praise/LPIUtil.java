@@ -56,7 +56,9 @@ import com.sri.ai.expresso.helper.Apply;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
+import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.core.ExhaustiveRewriter;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.Equality;
@@ -73,6 +75,7 @@ import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
+import com.sri.ai.grinder.library.set.intensional.IntensionalSetWithBoundIndex;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.core.IsDeterministicBooleanMessageValue;
@@ -1169,10 +1172,10 @@ public class LPIUtil {
 	 * R <- indices in I that Alpha depends on 
 	 * if R is empty, return Alpha.
 	 * let SomeIndex be an index in R
-	 * value = pick_value(SomeIndex, I, C)
+	 * let R' be R - {SomeIndex}
+	 * value = pick_value(SomeIndex, R', C)
 	 * if value is null, return null
-	 * let I' be I - {SomeIndex}
-	 * return pick_single_element({ (on I') Alpha[SomeIndex/value] | C[SomeIndex/value] })
+	 * return pick_single_element({ (on R') Alpha[SomeIndex/value] | C[SomeIndex/value] })
 	 * </pre>
 	 * 
 	 * @param intensionalSet
@@ -1190,6 +1193,8 @@ public class LPIUtil {
 		}
 		
 		Trace.in("+pick_single_element({}) constrained by {}", intensionalSet, process.getContextualConstraint());
+		
+		intensionalSet = process.rewrite(eliminatesBoundIndices, intensionalSet);
 		
 		Expression       alpha       = IntensionalSet.getHead(intensionalSet);
 		Trace.log("R <- indices in {} that {} depends on", IntensionalSet.getIndexExpressions(intensionalSet), alpha);
@@ -1210,25 +1215,25 @@ public class LPIUtil {
 			Trace.log("let SomeIndex be an index in R");
 			Expression someIndex = indicesR.get(0); 
 			Trace.log("// SomeIndex = {}", someIndex);
+			Trace.log("let R' be R - {SomeIndex}");
+			List<Expression> indexExpressionsRPrime = new ArrayList<Expression>(indexExpressions);
+			Util.removeElementsSatisfying(indexExpressionsRPrime, new IndexExpressions.HasIndex(someIndex));
+			Trace.log("// R' = {}", indexExpressionsRPrime);
 			
-			Trace.log("value = pick_value(SomeIndex, I, C)");
+			Trace.log("value = pick_value(SomeIndex, R', C)");
 			Expression formulaC   = IntensionalSet.getCondition(intensionalSet);
 			RewritingProcess subProcess = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
-			Expression value = pickValue(someIndex, indicesI, formulaC, subProcess);
+			Expression value = pickValue(someIndex, indexExpressionsRPrime, formulaC, subProcess);
 			Trace.log("// value = {}", value);
 			
 			if (value == null) {
 				Trace.log("if value is null, return null");
 			}
 			else {
-				Trace.log("let I' be I - {SomeIndex}");
-				List<Expression> indexExpressionsIPrime = new ArrayList<Expression>(indexExpressions);
-				Util.removeElementsSatisfying(indexExpressionsIPrime, new IndexExpressions.HasIndex(someIndex));
-				Trace.log("// I' = {}", indexExpressionsIPrime);
-				Trace.log("return pick_single_element({ (on I') Alpha[X/value] | C[X/value] })");
+				Trace.log("return pick_single_element({ (on R') Alpha[X/value] | C[X/value] })");
 				Expression alphaSubX          = SemanticSubstitute.replace(alpha, someIndex, value, subProcess);
 				Expression formulaCSubX       = SemanticSubstitute.replace(formulaC, someIndex, value, subProcess);
-				Expression intensionalSetSubX = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressionsIPrime, alphaSubX, formulaCSubX);
+				Expression intensionalSetSubX = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressionsRPrime, alphaSubX, formulaCSubX);
 	
 				result = pickSingleElement(intensionalSetSubX, process);
 			}
@@ -1238,18 +1243,25 @@ public class LPIUtil {
 		
 		return result;
 	}
-	
+
+	final private static Rewriter eliminatesBoundIndices = new ExhaustiveRewriter(new IntensionalSetWithBoundIndex());
+
 	/**
 	 * <pre>
 	 * pick_value(X, I, C)
-	 * Takes a variable X, a set of variables I (which C is dependent/scoped by), and a formula C
-	 * Assumes that there is a single assignment to X and I satisfying C
+	 * Takes a variable X, a set of variables I (not containing X), and a formula C.
+	 * Note that C may contain other variables not in I.
+	 * Assumes that there is a single assignment to X and I satisfying C.
+	 * Assumes that C is not a conjunction with conjunct X = v.
 	 * Returns a value v such that there exists I : C <=> X = v or null if it cannot be determined.
-	 * if C is a conjunction containing conjunct X = value
-	 * 	    return value
+	 * Example:
+	 * if Y = d then X = a else X = b
+	 * implies that X is equal to the conditional value
+	 * if Y = d then a else b
+	 * 
 	 * formula_on_X = R_formula_simplification(there exists I’ : C) // where I' is I \ {X}
 	 * if X = value can be unambiguously extracted from formula_on_X
-	 *      return value
+	 *     return value
 	 *      
 	 * // Need to use full satisfiability check to pick value
 	 * possible_determined_values <- (constants of C) union ( (free variables of formula_on_X and context) \ {X}) // (1)
@@ -1278,58 +1290,51 @@ public class LPIUtil {
 		Expression result = null;
 		
 		Trace.in("+pick_value({}, {}, {})", variableX, variablesI, formulaC);
-		
-		// if C is a conjunction containing conjunct X = value, return value
-		result = extractValueForXFromConjunction(variableX, variablesI, formulaC, process);
+
+		Trace.log("formula_on_X = R_formula_simplification(there exists I : C)"); 
+		List<Expression> variablesIPrime = new ArrayList<Expression>();
+		for (Expression i : variablesI) {
+			// where I' is I \ {X}
+			if (!variableX.equals(i)) {
+				variablesIPrime.add(i);
+			}
+		}
+
+		List<Expression> indexExpressions = GrinderUtil.makeIndexExpressionsForIndicesInListAndDomainsInContext(variablesIPrime, process);
+
+		Expression thereExists = ThereExists.make(indexExpressions, formulaC);
+		Expression formulaOnX  = process.rewrite(LBPRewriter.R_formula_simplification, thereExists);
+
+		result = extractValueForXFromFormula(variableX, variablesI, formulaOnX, process);
 		if (result != null) {
-			Trace.log("if C is a conjunction containing conjunct X = value");
+			Trace.log("if X = value can be unambiguously extracted from formula_on_X");
 			Trace.log("    return value");
-		} 
+		}
 		else {
-			Trace.log("formula_on_X = R_formula_simplification(there exists I' : C)"); 
-			List<Expression> variablesIPrime = new ArrayList<Expression>();
-			for (Expression i : variablesI) {
-				// where I' is I \ {X}
-				if (!variableX.equals(i)) {
-					variablesIPrime.add(i);
-				}
-			}
-			
-			List<Expression> indexExpressions = GrinderUtil.makeIndexExpressionsForIndicesInListAndDomainsInContext(variablesIPrime, process);
-			
-			Expression thereExists = ThereExists.make(indexExpressions, formulaC);
-			Expression formulaOnX  = process.rewrite(LBPRewriter.R_formula_simplification, thereExists);
-			
-			result = extractValueForXFromFormula(variableX, variablesI, formulaOnX, process);
-			if (result != null) {
-				Trace.log("if X = value can be unambiguously extracted from formula_on_X");
-				Trace.log("    return value");
-			}
-			else {
-				// Need to use full satisfiability check to pick value
-								
-				Trace.log("possible_determined_values <- (free variables of formula_on_X and context) union ( (constants of formula_on_X and context) \\ {X})");
-				
-				// (1) Preference is to check free variables before constants.
-				Set<Expression> possibleDeterminedValues = new LinkedHashSet<Expression>();
-				Expression formulaOnXAndContext = CardinalityUtil.makeAnd(formulaOnX, process.getContextualConstraint());
-				possibleDeterminedValues.addAll(Expressions.freeVariables(formulaOnXAndContext, process));
-				possibleDeterminedValues.addAll(FormulaUtil.getConstants(formulaOnXAndContext, process));
-				possibleDeterminedValues.remove(variableX);
-				Trace.log("// possible_determined_values = {}", possibleDeterminedValues);
-				
-				Trace.log("result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_determined_values)");
-				result = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, possibleDeterminedValues, process);
-				// Unnecessary since getConditionalSingleValueOrNullIfNotDefinedInAllContexts already returns it completely normalized.
-//				if (result == null) {
-//					Trace.log("if result is null, return null");
-//				}
-//				else {
-//					Trace.log("return R_complete_normalize(result)");
-//					result = process.rewrite(LBPRewriter.R_complete_normalize, result);		
-//				}
-			}
-		} 
+			// Need to use full satisfiability check to pick value
+
+			Trace.log("possible_determined_values <- (free variables of formula_on_X and context) union ( (constants of formula_on_X and context) \\ {X})");
+
+			// (1) Preference is to check free variables before constants.
+			Set<Expression> possibleDeterminedValues = new LinkedHashSet<Expression>();
+			Expression formulaOnXAndContext = CardinalityUtil.makeAnd(formulaOnX, process.getContextualConstraint());
+			possibleDeterminedValues.addAll(Expressions.freeVariables(formulaOnXAndContext, process));
+			possibleDeterminedValues.addAll(FormulaUtil.getConstants(formulaOnXAndContext, process));
+			possibleDeterminedValues.remove(variableX);
+			Trace.log("// possible_determined_values = {}", possibleDeterminedValues);
+
+			Trace.log("result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_determined_values)");
+			result = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, possibleDeterminedValues, process);
+			// Unnecessary since getConditionalSingleValueOrNullIfNotDefinedInAllContexts already returns it completely normalized.
+			//				if (result == null) {
+			//					Trace.log("if result is null, return null");
+			//				}
+			//				else {
+			//					Trace.log("return R_complete_normalize(result)");
+			//					result = process.rewrite(LBPRewriter.R_complete_normalize, result);		
+			//				}
+
+		}
 
 		Trace.log("return result: {}", result);
 		Trace.out("-pick_value={}", result);
@@ -1518,6 +1523,7 @@ public class LPIUtil {
 	//
 	// PRIVATE
 	//
+	@SuppressWarnings("unused")
 	private static Expression extractValueForXFromConjunction(Expression variableX, List<Expression> variablesI, Expression expression, RewritingProcess process) {
 		Expression result = null;
 		
