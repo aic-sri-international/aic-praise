@@ -38,7 +38,7 @@
 package com.sri.ai.test.praise.lbp;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -3843,13 +3843,7 @@ public class LBPTest extends AbstractLPITest {
 				//
 				// Basic:
 				//
-//				new PickSingleElementTestData("Y = a", // the unrelated variable in the context is important, for it provides a candidate value for X that should not be picked 
-//						new TrivialPQ(),
-//						"{ (on X) X | true }",
-//						false,
-//						null
-//						),
-//				new PickSingleElementTestData(Expressions.TRUE.toString(), 
+//				new PickSingleElementTestData("Y = a", // This tests was here to check that the incorrect solution X = a would NOT be found. However the example itself is invalid because the function assumes the given formula does imply a single value for X, and this is not true here 
 //						new TrivialPQ(),
 //						"{ (on X) X | true }",
 //						false,
@@ -4054,22 +4048,6 @@ public class LBPTest extends AbstractLPITest {
 				//
 				// Basic:
 				//
-//				new PickValueTestData("Y != a", 
-//						new TrivialPQ(),
-//						"X",
-//						"{X}",
-//						"true",
-//						false,
-//						null
-//						),
-//				new PickValueTestData(Expressions.TRUE.toString(), 
-//						new TrivialPQ(),
-//						"X",
-//						"{X}",
-//						"true",
-//						false,
-//						null
-//						),
 				new PickValueTestData(Expressions.TRUE.toString(), 
 						new TrivialPQ(),
 						"X",
@@ -4150,6 +4128,47 @@ public class LBPTest extends AbstractLPITest {
 		perform(tests);
 	}
 
+	@Test
+	public void testGetConditionalSingleValue() {
+		Expression formula;
+		Expression variable;
+		Expression expected;
+
+		variable = parse("X");
+		
+		formula = parse("X = a and X != a");
+		expected = null;
+		runGetConditionalSingleValueTest(formula, variable, expected);
+		
+		formula = parse("X = a");
+		expected = parse("a");
+		runGetConditionalSingleValueTest(formula, variable, expected);
+		
+		formula = parse("Y = a and X = a and Z = b");
+		expected = parse("a");
+		runGetConditionalSingleValueTest(formula, variable, expected);
+		
+		formula = parse("Y = a and X = a and Z = b  or  X = b");
+		expected = parse("if Y = a and Z = b then a else b");
+		runGetConditionalSingleValueTest(formula, variable, expected);
+		
+		formula = parse("(Y = a and X = b) or (Y = c and X = d)");
+		expected = parse("if Y = a then b else d"); // no need to test Y = c since it is implied by the formula and Y != a
+		runGetConditionalSingleValueTest(formula, variable, expected);
+	}
+
+	public void runGetConditionalSingleValueTest(Expression formula, Expression variable, Expression expected) {
+		Expression actual;
+		RewritingProcess process;
+		process = LBPFactory.newBoundLBPProcess(formula);
+		process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(formula, process); 
+		actual = LPIUtil.getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variable, formula, process);
+		System.out.println("Formula : " + formula);	
+		System.out.println("Expected: " + expected);	
+		System.out.println("Actual  : " + actual);	
+		assertTrue(Util.equals(expected, actual));
+	}
+	
 	@Test
 	public void testFriendshipModel() {
 		newRewritingProcess(null);

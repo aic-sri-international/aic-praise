@@ -63,6 +63,7 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.boole.And;
+import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -1334,23 +1335,60 @@ public class LPIUtil {
 		
 		return result;
 	}
+
+	private static Set<Expression> getPossibleValuesForVariableInFormulaAndContext(Expression variable, Expression formula, RewritingProcess process) {
+		Set<Expression> result = new LinkedHashSet<Expression>();
+		Expression formulaAndContext = CardinalityUtil.makeAnd(formula, process.getContextualConstraint());
+		result.addAll(FormulaUtil.getConstants(formulaAndContext, process));
+		result.addAll(Expressions.freeVariables(formulaAndContext, process));
+		result.remove(variable);
+		return result;
+	}
+	
+	/**
+	 * Same as {@link #getConditionalSingleValueOrNullIfNotDefinedInAllContexts(Expression, Expression, Set, RewritingProcess)},
+	 * but computing the possible values from the formula.
+	 */
+	public static Expression getConditionalSingleValueOrNullIfNotDefinedInAllContexts(Expression variableX, Expression formulaOnX, RewritingProcess process) {
+		Set<Expression> possibleValues = getPossibleValuesForVariableInFormulaAndContext(variableX, formulaOnX, process);
+		Expression result = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, possibleValues, process);
+		return result;
+	}
 	
 	/**
 	 * <pre>
 	 * get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_values)
 	 * 
-	 * if possible_values is empty, return null // X can be any value not forbidden by context, so it is not constrained to a single value
-	 * (first, remaining_possible_values) <- get_first_and_remaining(possible_values)
+	 * inputs: Takes a variable X, a formula involving X, and a set of possible determined values for X
+ 	 * (by "determined values", we mean values identified by a constant or free variable).
+ 	 * The formula is assumed to have the following property:
+ 	 * For each assignment to all variables but X, there is at most one value for X (among the given possibilities)
+ 	 * that satisfies the formula.
+ 	 * Returns: a (conditional) value for X guaranteed to be the only value satisfying the formula under its context
+ 	 * or null if, for some context, there is not a single determined value satisfying the formula.
+ 	 * More technically, it returns a conditional value V such that formula_on_X => X = V.
+ 	 * For example, (Y = a and X = b) or (Y = c and X = d) implies X = (if Y = a then b else d).
+ 	 * Note that the case Y = c does not need to be tested if Y != a,
+ 	 * because the original formula makes that true.  
+ 	 * Note also that the algorithm does not detect the case in which the
+ 	 * assumption is violated by some context accepting multiple values of X.
+ 	 * If the assumption is violated in this way, the returned value is undefined.
+	 *  
+	 * if possible_determined_values is empty
+	 *     return null
+	 * (first, remaining_possible_values) <- get_first_and_remaining(possible_determined_values)
 	 * condition_for_first <- R_complete_normalize(formula_on_X[X/first])
-	 * if condition_for_first is 'true'
-	 *     return first
-	 * among_remaining <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, remaining_possible_values) under context extended by not(condition_for_first)
+	 * remaining_space <- R_complete_normalize(formula_on_X and not condition_for_first)
+	 * if remaining_space is 'false'
+	 *     if condition_for_first is 'false'
+	 *         return null
+	 *     else
+	 *         return first
+	 * among_remaining <-
+	 *     get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, remaining_space, remaining_possible_values)
 	 * if among_remaining is null
 	 *     return null
-	 * return if condition_for_first then first else among_remaining 
-	 * 
-	 * Implementation Notes:
-	 * (1) Preference is to check constants before free variables.
+	 * return if condition_for_first then first else among_remaining
 	 * </pre>
 	 * 
 	 * @param variableX
@@ -1364,36 +1402,48 @@ public class LPIUtil {
 	 * @return a conditional single value for X or null if not defined in all contexts.
 	 */
 	public static Expression getConditionalSingleValueOrNullIfNotDefinedInAllContexts(Expression variableX, Expression formulaOnX, Set<Expression> possibleValues, RewritingProcess process) {
+		Expression result = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, possibleValues.iterator(), process);
+		return result;
+	}
+	
+	public static Expression getConditionalSingleValueOrNullIfNotDefinedInAllContexts(Expression variableX, Expression formulaOnX, Iterator<Expression> possibleValues, RewritingProcess process) {
 		Expression result = null;
 		
 		Trace.in("+get_conditional_single_value_or_null_if_not_defined_in_all_contexts({}, {}, {}) under: {}", variableX, formulaOnX, possibleValues, process.getContextualConstraint());
 		
-		if (possibleValues.size() == 0) {
+		if ( ! possibleValues.hasNext()) {
 			Trace.log("if possible_values is empty, return null // X can be any value not forbidden by context, so it is not constrained to a single value");
 			result = null;
 		}
 		else {
 			Trace.log("(first, remaining_possible_values) <- get_first_and_remaining(possible_values)");
-			Expression first = possibleValues.iterator().next();
-			Set<Expression> remainingPossibleValues = new LinkedHashSet<Expression>(possibleValues);
-			remainingPossibleValues.remove(first);
+			Expression first = possibleValues.next();
 			Trace.log("// first                    : {}", first);
-			Trace.log("// remaining_possible_values: {}", remainingPossibleValues);
 			
 			Trace.log("condition_for_first <- R_complete_normalize(formula_on_X[X/first])");
 			Expression conditionForFirst = formulaOnX.replaceAllOccurrences(variableX, first, process);
 			conditionForFirst = process.rewrite(LBPRewriter.R_complete_normalize, conditionForFirst);
 			Trace.log("// condition_for_first: {}, first: {}", conditionForFirst, first);
-			if (conditionForFirst.equals(Expressions.TRUE)) {
-				Trace.log("if condition_for_first is \"true\"");
-				Trace.log("    return first");
-				result = first;
+			Trace.log("remaining_space <- R_complete_normalize(formula_on_X and not condition_for_first)");
+			Expression remainingSpace = And.make(formulaOnX, Not.make(conditionForFirst));
+			remainingSpace = process.rewrite(LBPRewriter.R_complete_normalize, remainingSpace);
+			Trace.log("// remaining_space: {}:", remainingSpace, first);
+			if (remainingSpace.equals(Expressions.FALSE)) {
+				Trace.log("if remaining_space is \"false\"");
+				Trace.log("    if condition_for_first is \"false\"");
+				Trace.log("        return null");
+				Trace.log("    else");
+				Trace.log("        return first");
+				if (conditionForFirst.equals(Expressions.FALSE)) {
+					result = null;
+				}
+				else {
+					result = first;
+				}
 			}
 			else {
-				Trace.log("among_remaining <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, remaining_possible_values) under context extended by not(condition_for_first)");
-				//  under context extended by not(condition_for_first)
-				RewritingProcess underNotConditionForFirst = GrinderUtil.extendContextualConstraint(CardinalityUtil.makeNot(conditionForFirst), process);
-				Expression amongRemaining = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, remainingPossibleValues, underNotConditionForFirst);
+				Trace.log("among_remaining <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, remaining_space, remaining_possible_values) under context extended by not(condition_for_first)");
+				Expression amongRemaining = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, remainingSpace, possibleValues, process);
 				if (amongRemaining == null) {
 					Trace.log("if among_remaining is null");
 					Trace.log("    return null");
