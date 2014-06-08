@@ -1254,12 +1254,14 @@ public class LPIUtil {
 	 * // Need to use full satisfiability check to pick value
 	 * possible_determined_values <- (constants of C) union ( (free variables of formula_on_X and context) \ {X}) // (1)
 	 * result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_determined_values)
-	 * if result is null, return null
-	 * return R_complete_normalize(result)
+	 * return result
 	 * 
 	 * Implementation Notes:
-	 * (1) Preference is to check constants before free variables.
-	 * </pre>
+	 * (1) Preference is to check free variables before constants as it may yield more general answers.
+	 * For example, (if Z = d then X = a and X = Y else X = b and X = Y) implies both
+	 * X = if Z = d then a else b
+	 * and X = Y
+	 * and the latter is computationally more efficient. </pre>
 	 * 
 	 * @param variableX
 	 *            a variable X
@@ -1306,31 +1308,30 @@ public class LPIUtil {
 			else {
 				// Need to use full satisfiability check to pick value
 								
-				Trace.log("possible_determined_values <- (constants of C) union ( (free variables of formula_on_X and context) \\ {X})");
+				Trace.log("possible_determined_values <- (free variables of formula_on_X and context) union ( (constants of formula_on_X and context) \\ {X})");
 				
-				// (1) Preference is to check constants before free variables.
+				// (1) Preference is to check free variables before constants.
 				Set<Expression> possibleDeterminedValues = new LinkedHashSet<Expression>();
-				// constants of C
-				possibleDeterminedValues.addAll(FormulaUtil.getConstants(formulaC, process));
-				// union ( (free variables of formula_on_X and context) \\ {X})
 				Expression formulaOnXAndContext = CardinalityUtil.makeAnd(formulaOnX, process.getContextualConstraint());
 				possibleDeterminedValues.addAll(Expressions.freeVariables(formulaOnXAndContext, process));
+				possibleDeterminedValues.addAll(FormulaUtil.getConstants(formulaOnXAndContext, process));
 				possibleDeterminedValues.remove(variableX);
 				Trace.log("// possible_determined_values = {}", possibleDeterminedValues);
 				
 				Trace.log("result <- get_conditional_single_value_or_null_if_not_defined_in_all_contexts(X, formula_on_X, possible_determined_values)");
 				result = getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variableX, formulaOnX, possibleDeterminedValues, process);
-				if (result == null) {
-					Trace.log("if result is null, return null");
-				}
-				else {
-					Trace.log("return R_complete_normalize(result)");
-					result = process.rewrite(LBPRewriter.R_complete_normalize, result);		
-				}
+				// Unnecessary since getConditionalSingleValueOrNullIfNotDefinedInAllContexts already returns it completely normalized.
+//				if (result == null) {
+//					Trace.log("if result is null, return null");
+//				}
+//				else {
+//					Trace.log("return R_complete_normalize(result)");
+//					result = process.rewrite(LBPRewriter.R_complete_normalize, result);		
+//				}
 			}
-			
 		} 
-		
+
+		Trace.log("return result: {}", result);
 		Trace.out("-pick_value={}", result);
 		
 		return result;

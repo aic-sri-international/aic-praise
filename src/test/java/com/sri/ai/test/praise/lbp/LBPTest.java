@@ -3901,7 +3901,8 @@ public class LBPTest extends AbstractLPITest {
 						new TrivialSickbob(),
 						"{ ( on W in People, X' in People ) (if sick(X') then 1 else 0) | W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3 }",
 						false,
-						"if sick(if X = person1 then person1 else (if X = person2 then person2 else person3)) then 1 else 0"
+						"if sick(X) then 1 else 0"
+						// "if sick(if X = person1 then person1 else (if X = person2 then person2 else person3)) then 1 else 0"
 						),	
 				// Ensure the free Variable X is selected and not the scoped W variable
 				new PickSingleElementTestData(Expressions.TRUE.toString(),
@@ -3982,14 +3983,15 @@ public class LBPTest extends AbstractLPITest {
 		        		new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
 		                "{ (on X) X | (Z = a => X = c) and (Z != a => X = d) }",
 		                false,
-		                "if Z = a then c else d"
+		                "if Z = d then Z else if Z = a then c else d"
+//		                "if Z = a then c else d"
 		                ),
-// TODO - resolve why this fails but simplified versions below it do not.		                
                 new PickSingleElementTestData("not (X = b)",
                 		new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
 		                "{ ( on X', Y ) (if p(X) then if X' != b then if Y = b then if true then 1 else 0 else (if true then 1 else 0) else (if true then 1 else 0) else 1) | ((X = X' or X = Y) and not (X' = Y)) and X' = X }",
 		                false,
-		                null
+		                "if p(X) then if X != b then if b = b then if true then 1 else 0 else (if true then 1 else 0) else (if true then 1 else 0) else 1"
+		                // null
 		                ),
 		        // Simplified version of the above test
                 new PickSingleElementTestData("not (X = b)",
@@ -4066,6 +4068,14 @@ public class LBPTest extends AbstractLPITest {
 						),
 				new PickValueTestData(Expressions.TRUE.toString(), 
 						new TrivialPQ(),
+						"X",
+						"{X}",
+						"not X != a and X = Y",
+						false,
+						"Y" // this tests the preference for variables, as 'X = a' is also correct
+						),
+				new PickValueTestData(Expressions.TRUE.toString(), 
+						new TrivialPQ(),
 						"Y",
 						"{X, Y}",
 						"X = a and Y = b",
@@ -4102,7 +4112,8 @@ public class LBPTest extends AbstractLPITest {
 						"{X', W}",
 						"W = X = X' = person1 or W = X = X' = person2 or W = X = X' = person3",
 						false,
-						"if X = person1 then person1 else (if X = person2 then person2 else person3)"
+						"X"
+						// "if X = person1 then person1 else (if X = person2 then person2 else person3)" // Used to be this before moving preference for variables
 						),
 				new PickValueTestData(Expressions.TRUE.toString(), 
 						new TrivialPQ(),
