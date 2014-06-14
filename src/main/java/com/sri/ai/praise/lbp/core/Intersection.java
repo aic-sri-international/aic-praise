@@ -137,7 +137,7 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 					i.addAll(IntensionalSet.getIndexExpressions(set2));
 					
 					Expression unsimplifiedResult = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(set1), i, alpha1, c);
-					result = unsimplifiedResult; // process.rewrite(R_simplify, unsimplifiedResult);
+					result = process.rewrite(R_simplify, unsimplifiedResult);
 //					System.out.println("Unsimplified: " + unsimplifiedResult);	
 //					System.out.println("Simplified  : " + result + "\n");	
 //					System.out.println("Context: " + process.getContextualConstraint());	

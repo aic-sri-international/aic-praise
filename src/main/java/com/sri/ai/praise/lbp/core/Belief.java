@@ -51,12 +51,12 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Justification;
+import com.sri.ai.grinder.helper.SymbolicMap;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.BranchRewriteTask;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.StandardizedApartFrom;
-import com.sri.ai.grinder.library.boole.ThereExists;
+import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
@@ -84,6 +84,7 @@ import com.sri.ai.util.math.Rational;
  */
 @Beta
 public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewriter, MessageExpansions, IterateValuesUsingExpansions, UseValuesForPreviousMessages {
+	private static final String SYMBOLIC_MAP_FOR_MESSAGE_VALUES_SETS_GLOBAL_OBJECTS_KEY = "Symbolic map for message values sets";
 	private static Expression _emptySet = ExtensionalSet.makeEmptySetExpression();
 	//
 	private LBPConfiguration configuration = null;
@@ -265,7 +266,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// (Destination, Origin, Expansion), where Expansion is a basic expression
 			// possibly containing "previous message" expressions, representing their 
 			// value in terms of messages from the previous loopy BP iteration.
-			PreviousMessageToMsgValueCache previousMessageToMsgValueCache = new PreviousMessageToMsgValueCache(); 
+			PreviousMessageToMsgValueCache previousMessageToMsgValueCache = new PreviousMessageToMsgValueCache();
+			process.putGlobalObject(SYMBOLIC_MAP_FOR_MESSAGE_VALUES_SETS_GLOBAL_OBJECTS_KEY, new SymbolicMap());
 			List<Expression> msgExpansions = getMessageExpansions(msgSets, previousMessageToMsgValueCache, process);
 			Trace.log("// msg_expansions = {}", Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("list", msgExpansions));
 			
@@ -279,9 +281,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				// i.e. (Destination, Origin, Expansion)
 				Expression tupleExpansion = IntensionalSet.getHead(msgExpansion);
 				// (Destination, Origin, 1)
-				Expression tuple          = Tuple.make(Tuple.get(tupleExpansion, 0),
-													   Tuple.get(tupleExpansion, 1),
-													   Expressions.ONE);
+				Expression destination = getDestinationFromMessageValueTuple(tupleExpansion);
+				Expression origin      = getOriginFromMessageValueTuple(tupleExpansion);
+				Expression value       = Expressions.ONE;
+				Expression tuple       = makeMessageValueTuple(destination, origin, value);
 				// { (on I) (Destination, Origin, 1) | C }
 				Expression msgValue       = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(msgExpansion), 
 																IntensionalSet.getIndexExpressions(msgExpansion),
@@ -328,6 +331,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			
 			Justification.endEqualityStep(normalizedBeliefValue); // this endStep closes entire set of iterations
 			result = normalizedBeliefValue;
+			process.removeGlobalObject(SYMBOLIC_MAP_FOR_MESSAGE_VALUES_SETS_GLOBAL_OBJECTS_KEY);
 		}
 		
 		LPIUtil.restorePreviousRandomVariableBeingNormalized(previousRandomVariableBeingNormalized, process);
@@ -336,7 +340,52 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		return result;
 	}
+
+	public static Expression makeMessageValueTuple(Expression destination, Expression origin, Expression value) {
+		Expression result = Tuple.make(destination, origin, value);
+		return result;
+	}
 	
+	public static Expression getDestinationOriginTuple(Expression messageValueTuple) {
+		return Tuple.make(messageValueTuple.get(0), messageValueTuple.get(1));
+	}
+
+	public static Expression getDestinationFromMessageValueTuple(Expression tuple) {
+		return Tuple.get(tuple, 0);
+	}
+
+	public static Expression getOriginFromMessageValueTuple(Expression tuple) {
+		return Tuple.get(tuple, 1);
+	}
+
+	public static Expression getValueFromMessageValueTuple(Expression tuple) {
+		return Tuple.get(tuple, 2);
+	}
+
+	
+//	public static Expression makeMessageValueTuple(Expression destination, Expression origin, Expression value) {
+//		Expression result = Tuple.make(Tuple.make(destination, origin), value);
+//		return result;
+//	}
+//	
+//	public static Expression getDestinationOriginTuple(Expression messageValueTuple) {
+//		return messageValueTuple.get(0);
+//	}
+//
+//	public static Expression getDestinationFromMessageValueTuple(Expression tuple) {
+//		Expression destinationOriginTuple = Tuple.get(tuple, 0);
+//		return Tuple.get(destinationOriginTuple, 0);
+//	}
+//
+//	public static Expression getOriginFromMessageValueTuple(Expression tuple) {
+//		Expression destinationOriginTuple = Tuple.get(tuple, 0);
+//		return Tuple.get(destinationOriginTuple, 1);
+//	}
+//
+//	public static Expression getValueFromMessageValueTuple(Expression tuple) {
+//		return Tuple.get(tuple, 1);
+//	}
+
 	//
 	// PRIVATE METHODS
 	//
@@ -428,15 +477,16 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	}
 
 	private void expand(Expression messageSet, List<Expression> messagesAlreadyExpandedUnionArguments, List<Expression> messagesToBeExpanded, List<Expression> messageExpansions, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {
-		List<Expression> expressionI      = IntensionalSet.getIndexExpressions(messageSet);
-		Expression destination            = Tuple.get(IntensionalSet.getHead(messageSet), 0);
-		Expression origin                 = Tuple.get(IntensionalSet.getHead(messageSet), 1);
+		List<Expression> expressionI = IntensionalSet.getIndexExpressions(messageSet);
+		Expression destinationOriginTuple = IntensionalSet.getHead(messageSet);
+		Expression destination            = Tuple.get(destinationOriginTuple, 0);
+		Expression origin                 = Tuple.get(destinationOriginTuple, 1);
 		Expression conditionC             = IntensionalSet.getCondition(messageSet);
 		
 		Expression expansion = computeExpansionSymbolically(messageSet, destination, origin, conditionC, process);
 		
 		Trace.log("        msg_expansion <- { (on I) (Destination, Origin, expansion) | C }");
-		Expression msgExpansion = IntensionalSet.makeUniSetFromIndexExpressionsList(expressionI, Tuple.make(destination, origin, expansion), conditionC);
+		Expression msgExpansion = IntensionalSet.makeUniSetFromIndexExpressionsList(expressionI, makeMessageValueTuple(destination, origin, expansion), conditionC);
 		
 		sanityChecksOnLogicalVariables(messageSet, messageExpansions, process, msgExpansion);
 		
@@ -555,9 +605,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				public Expression rewrite(Expression[] expressions, RewritingProcess process) {
 					Expression msgExpansion      = expressions[0];
 					Expression msgExpansionTuple = IntensionalSet.getHead(msgExpansion);
-					Expression destination       = Tuple.get(msgExpansionTuple, 0);
-					Expression origin            = Tuple.get(msgExpansionTuple, 1);
-					Expression expansion         = Tuple.get(msgExpansionTuple, 2);
+					Expression destination       = getDestinationFromMessageValueTuple(msgExpansionTuple);
+					Expression origin            = getOriginFromMessageValueTuple(msgExpansionTuple);
+					Expression expansion         = getValueFromMessageValueTuple(msgExpansionTuple);
 					Trace.log("    // msgExpansion={}", msgExpansion);
 					Trace.log("    // expansion   ={}", expansion);
 					
@@ -634,7 +684,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					}
 					
 					Trace.log("    next_msg_values <- next_msg_values union { (on I) (Destination, Origin, value) | C }");
-					Expression tupleTriple = Tuple.make(destination, origin, normalizedValue);
+					Expression tupleTriple = makeMessageValueTuple(destination, origin, normalizedValue);
 					Expression newMsgValue = IntensionalSet
 												.makeUniSetFromIndexExpressionsList(
 														IntensionalSet.getIndexExpressions(msgExpansion), 
@@ -732,7 +782,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
      * find_msg_value_matching_previous_message(prev_message, msg_values)
      *  inputs: prev_message is of the form: 
      *         previous message to Destination' from Origin'
-     *         msg_values, with entris of the form: 
+     *         msg_values, with entries of the form: 
      *         { (on I) (Destination, Origin, value) | C }
      * output: intuitively, we interpret each entry in msg_values as storing the
      *         parameterized value of a message from Origin to Destination, valid for
@@ -790,189 +840,116 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	 */
 	private Expression findMsgValueMatchingPreviousMessage(Expression prevMessage, List<Expression> msgValues, 
 			PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {
-		Expression result = null;
 		Trace.in("+findMsgValueMatchingPreviousMessage({},{})", prevMessage, Expressions.apply("list", msgValues));
+
+		Pair<SymbolicMap.UnificationToIntensionalSetResult, Expression> intersectionAndMsgValue =
+				getIntersectionAndCurrentMessageValueInTermsOfTheMessageValueSet(prevMessage, msgValues, previousMessageToMsgValueCache, process);
+		
+		Expression result = getPreviousMessageValueFromIntersectionAndCurrentMessageValue(intersectionAndMsgValue.first, intersectionAndMsgValue.second, prevMessage, msgValues, process);
+		
+		Trace.out("-findMsgValueMatchingPreviousMessage={}", result);
+
+		return result;
+	}
+
+	private Pair<SymbolicMap.UnificationToIntensionalSetResult, Expression> getIntersectionAndCurrentMessageValueInTermsOfTheMessageValueSet(Expression prevMessage, List<Expression> msgValues, PreviousMessageToMsgValueCache previousMessageToMsgValueCache, RewritingProcess process) {
+
+		SymbolicMap.UnificationToIntensionalSetResult lookUpResult = null;
+		
 		//
 		// Intersection <- null
 		// msg_value    <- null
-		Expression intersection = null;
-		Expression msgValue     = null;
-		Integer    cachedIndex  = previousMessageToMsgValueCache.getCachedMessageValueIndex(process, prevMessage);
+		Expression msgValueSet     = null;
+		
+		Integer    cachedIndex  = previousMessageToMsgValueCache.getCachedMessageValueIndex(prevMessage, process);
 		// if previous_message msg_value_index cached
 		if (cachedIndex != null) {
 			// index <- index from cache
 			int index = cachedIndex;
 			Trace.log("Set of msg values set cached for {} under contextual constraint {}: {}", prevMessage, process.getContextualConstraint(), msgValues.get(index));
-			// msg_value <- standardize msg_values[index] apart from prev_message
-			msgValue = StandardizedApartFrom.standardizedApartFrom(msgValues.get(index), prevMessage, process);
-			Trace.log("When standardized apart, it is {}", msgValue);
-			// Note: msg_value is passed through to the cache so that we can guarantee that the current msg_value
-			// and the cached intersection are scoped by the same indices.
-			intersection = previousMessageToMsgValueCache.getCachedMsgValueIntersection(process, prevMessage, msgValue);
-			// if Intersection cached for previous_message
-			if (intersection != null) {
-				// Intersection <- cache
-				Trace.log("Cached intersection for {}: {}", prevMessage, intersection);
-			} 
-			else {
-				Trace.log("No intersection cached for {} and {}", prevMessage, msgValue);
-				// Intersection <- calculate_intersection(prev_message, msg_value)
-				intersection = calculateIntersection(prevMessage, msgValue, process);
-				Trace.log("Intersection calculated as {}", intersection);
-				// cache Intersection under prev_message’s contextual constraint
-				previousMessageToMsgValueCache.addCachedMsgValueIntersection(process, prevMessage, intersection);
-				Trace.log("Adding cache item for {}: intersection {}, index expressions of msg value {}, condition {}",
-						prevMessage, intersection, IntensionalSet.getIndexExpressions(msgValue), IntensionalSet.getCondition(msgValue));
-			}
+			msgValueSet = msgValues.get(index);
+			// Intersection <- calculate_intersection(prev_message, msg_value)
+			lookUpResult = unifyPreviousMessageAndMessageValueSet(prevMessage, msgValueSet, process);
+			// no need to check for successful unification; the fact that the index was cached implies that.
 		} 
 		else {
 			Trace.log("No cached msg values set for {}", prevMessage);
 			// for each i in 1..length(msg_values)
 			for (int i = 0; i < msgValues.size(); i++) {
-				// msg_value    <- standardize msg_values[i] apart from prev_message
 				Trace.log("Examining candidate {}", msgValues.get(i));
-				msgValue = StandardizedApartFrom.standardizedApartFrom(msgValues.get(i), prevMessage, process);
-				Trace.log("When standardized apart, it is {}", msgValue);
-				// Intersection <- calculate_intersection(prev_message, msg_value)
-				intersection = calculateIntersection(prevMessage, msgValue, process);
-				Trace.log("Intersection calculated as {}", intersection);
+				msgValueSet = msgValues.get(i);
+				lookUpResult = unifyPreviousMessageAndMessageValueSet(prevMessage, msgValueSet, process);
 				// if Intersection not empty
-				if (!Sets.isEmptySet(intersection)) {
-					Trace.log("Intersection is not empty, so using msg values set {}", msgValue);
+				if (lookUpResult.isSuccessful()) {
+					Trace.log("Intersection is not empty, so using msg values set {}", msgValueSet);
 					// have found msg_value for prev_message
 					// index <- i
 					int index = i;
 					// cache index
 					previousMessageToMsgValueCache.addPreviousMessageToMsgValueIndex(process.getContextualConstraint(), prevMessage, index);
-					// cache Intersection under prev_message’s contextual constraint
-					previousMessageToMsgValueCache.addCachedMsgValueIntersection(process, prevMessage, intersection);
-					Trace.log("Adding cache item for {}: intersection {}, index expressions of msg value {}, condition {}",
-							prevMessage, intersection, IntensionalSet.getIndexExpressions(msgValue), IntensionalSet.getCondition(msgValue));
 					// exit "for each" loop
 					break;
 				}
 			}
 		}
 		
-		if (intersection == null || Sets.isEmptySet(intersection)) {
-			System.err.println("IllegalStateException: unable to find intersection.");
-			System.err.println("context      ="+process.getContextualConstraint());
-			System.err.println("prev_message ="+prevMessage);
-			System.err.println("msg_values   =");
-			for (Expression m : msgValues) {
-				System.err.println(""+m);
-			}
-			throw new IllegalStateException("Unable to find intersection: "+prevMessage+" under: "+process.getContextualConstraint());
-		}
+		Expression messageValueTuple = IntensionalSet.getHead(msgValueSet);
+		Expression messageValue = getValueFromMessageValueTuple(messageValueTuple);
 		
-		// msg_value is represented as { (on I) (Destination, Origin, value) | C }
-		// Intersection is represented as { (on I) (Destination', Origin') | C' }
-		// pickFrom = { (on I) value | C' }
-		Expression pickFrom = IntensionalSet.makeUniSetFromIndexExpressionsList(
-				IntensionalSet.getIndexExpressions(msgValue),
-				Tuple.get(IntensionalSet.getHead(msgValue), 2), 
-				IntensionalSet.getCondition(intersection));
-
-		Trace.log("We now pick the msg value for the current previous message by picking the single element in: {}", pickFrom);
-		// v <- pick_single_element(pickFrom)
-		Trace.log("v <- pick_single_element({})", pickFrom); 
-		Expression v = LPIUtil.pickSingleElement(pickFrom, process);
-		if (v == null) {
-			// Output some useful information before throwing the exception
-			System.err.println("IllegalStateException: failed to pick single element.");
-			System.err.println("context     ="+process.getContextualConstraint());
-			System.err.println("context vars="+process.getContextualVariables());
-			System.err.println("prev_msg    ="+prevMessage);
-			System.err.println("msg_value   ="+msgValue);
-			System.err.println("intersection="+intersection);
-			System.err.println("pickFrom    ="+pickFrom);
-			System.err.println("msg_values  =");
-			for (Expression m : msgValues) {
-				System.err.println(""+m);
-			}
-			throw new IllegalStateException("Failed to pick single element: "+pickFrom + " under: "+process.getContextualConstraint());
-		}
-		
-		// Partition the value based on its intersection:
-		// Intersection is of the form { (on I) (Destination, Origin) | C' }
-		Trace.log("D <- there exists I : C'");
-		Expression expressionD =
-				ThereExists.make(
-						IntensionalSet.getIndexExpressions(intersection), 
-						IntensionalSet.getCondition(intersection));
-		Trace.log("return R_normalize(if D then v else prev_message)"); 
-		Expression conditionalD = IfThenElse.make(expressionD, v, prevMessage);
-		result = process.rewrite(R_normalize, conditionalD);
-
-		Trace.out("-findMsgValueMatchingPreviousMessage={}", result);
+		Pair<SymbolicMap.UnificationToIntensionalSetResult, Expression> result = Pair.make(lookUpResult, messageValue);
 		
 		return result;
 	}
-	
-	/**
-	 * <pre>
-	 * calculate_intersection(prev_message, msg_value)
- 	 * inputs: prev_message, which is of the form: 
- 	 *         previous message to Destination' from Origin'
- 	 *         msg_value is of the form: 
- 	 *         { (on I) (Destination, Origin, value) | C }
-  	 * output: the intersection of { (Destination', Origin') } and { (on I) (Destination, Origin) | C },
- 	 *         which is going to be either an intensional set expression involving the variables
- 	 *         in Destination' and Origin' as free variables, or the empty set {}.
- 	 *         The output is guaranteed to be {} if the set is indeed empty,
- 	 *         that is, it will not be an intensional set expression with an unsatisfiable condition.
-	 * 
-	 * // We want to find out if this previous message is covered by
-	 * // { (on I) (Destination, Origin, value) | C }
-	 * // This can be done by computing the intersection below,
-	 * // where we range over all possible values
-	 * // for the previous message by excluding them:
-	 * Intersection <- R_intersection(
-	 *                 { (on I) (Destination, Origin) | C }
-	 *                 intersection
-	 *                 { (Destination', Origin') })
-	 * // Above rewriter guarantees representations of set is {}
-	 * // if it is empty, instead of { (on I) (Destination, Origin) | UnsatisfiableConstraint }
-	 * 
-	 * return Intersection
-	 * <pre>
-	 */
-	private Expression calculateIntersection(Expression prevMessage, Expression msgValueSet, RewritingProcess process) {		
-		// We want to find out if this previous message is covered by
-		// { (on I) (Destination, Origin, value) | C }
-		// This can be done by computing the intersection below,
-		// where we assume that we range over all possible values
-		// for the previous message by excluding them:
-		// Intersection <- R_intersection(
-		//     { (on I) (Destination, Origin) | C }
-		List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(msgValueSet);
 
-		Expression msgValueSetTupleWithDestinationOriginAndValue = IntensionalSet.getHead(msgValueSet);
-		Expression destination = Tuple.get(msgValueSetTupleWithDestinationOriginAndValue, 0);
-		Expression origin      = Tuple.get(msgValueSetTupleWithDestinationOriginAndValue, 1);
-		Expression destinationOriginTuple = Tuple.make(destination, origin);
+	private static SymbolicMap.UnificationToIntensionalSetResult unifyPreviousMessageAndMessageValueSet(Expression previousMessage, Expression messageValueSet, RewritingProcess process) {
+		// We want to unify the (Destination, Origin) tuples of previous message and message value set (without the value)
+		// The mapping from the intensional sets to terms in the previous message will later be used to translate the value inside the message value set
+		// to an expression that can be used outside the set.
+		// For example, given
+		// <code>previous message to [ if p(X) then 1 else 0 ] from [ p(X) ]</code>
+		// and
+		// <code>{{ (on Y) ( [ if p(Y) then 1 else 0 ], [ p(Y) ], if p(Y) then 0.6 else 0.4 ) | Y != a }}<code>
+		// we proceed to the unification of tuples
+		// <code>( [ if p(X) then 1 else 0 ], [ p(X) ] )</code>
+		// and
+		// <code>( [ if p(Y) then 1 else 0 ], [ p(Y) ] )</code>
+		// which generates the mapping <code>Y -> X</code>.
+		// This will later allow us to derive the value <code>if p(X) then 0.6 else 0.4</code> for the previous message.
 		
-		Expression condition = IntensionalSet.getCondition(msgValueSet);
-		
-		Expression msgSetDestinationAndOriginOnly = IntensionalSet.makeUniSetFromIndexExpressionsList(
-				indexExpressions, destinationOriginTuple, condition);
-		//	   intersection
-		//     { (Destination', Origin') })
-		Expression destinationPrime = prevMessage.get(0);
-		Expression originPrime      = prevMessage.get(1);
-		Expression previousMsgTuple = Tuple.make(destinationPrime, originPrime);			
-		Expression previousMsgSet   = IntensionalSet.makeUniSetFromIndexExpressionsList(new ArrayList<Expression>(), previousMsgTuple, Expressions.TRUE);
-		
-		Trace.log("    Intersection <- R_intersection(");
-		Trace.log("    {}", msgSetDestinationAndOriginOnly);
-		Trace.log("    intersection");
-		Trace.log("    {} }} )", previousMsgSet);
-		
-		Expression intersection = process.rewrite(R_intersection, LPIUtil.argForIntersectionRewriteCall(msgSetDestinationAndOriginOnly, previousMsgSet));
-		// return Intersection
-		return intersection;
+		Expression previousMessageDestinationAndOriginTuple = Tuple.make(previousMessage.get(0), previousMessage.get(1));
+		Expression messageValueTuple = IntensionalSet.getHead(messageValueSet);
+		Expression messageValueSetDestinationAndOriginTuple = getDestinationOriginTuple(messageValueTuple);
+		Expression messageSet = IntensionalSet.copyWithNewHead(messageValueSet, messageValueSetDestinationAndOriginTuple);
+		SymbolicMap messageValuesSymbolicMap = getMessageValueSetsSymbolicMap(process);
+		SymbolicMap.UnificationToIntensionalSetResult result =
+				messageValuesSymbolicMap.unifyToIntensionalSetAssumingInjectiveExpressions(
+						previousMessageDestinationAndOriginTuple,
+						messageSet,
+						LBPRewriter.R_complete_normalize, process);
+		return result;
 	}
-	
+
+	public static SymbolicMap getMessageValueSetsSymbolicMap(RewritingProcess process) {
+		SymbolicMap result = (SymbolicMap) Util.getValuePossiblyCreatingIt(process.getGlobalObjects(), SYMBOLIC_MAP_FOR_MESSAGE_VALUES_SETS_GLOBAL_OBJECTS_KEY, SymbolicMap.class);
+		return result;
+	}
+
+	private Expression getPreviousMessageValueFromIntersectionAndCurrentMessageValue(SymbolicMap.UnificationToIntensionalSetResult intersectionInformation, Expression messageValue, Expression previousMessage, List<Expression> msgValues, RewritingProcess process) {
+
+		Expression result;
+		if (intersectionInformation.conditionOnExpressionVariables.equals(Expressions.FALSE)) {
+			result = previousMessage;
+		}
+		else {
+			Expression valueInTermsOfMessageValueSetIndices = messageValue;
+			Expression valueForPreviousMessage = SyntacticSubstitute.replaceAll(valueInTermsOfMessageValueSetIndices, intersectionInformation.mapOfUnifiedVariables, process);
+			result = IfThenElse.make(intersectionInformation.conditionOnExpressionVariables, valueForPreviousMessage, previousMessage);
+			result = process.rewrite(R_normalize, result);
+		}
+
+		return result;
+	}
+
 	private boolean notFinal(Expression beliefValue, Expression priorBeliefValue, List<Expression> msgValues, List<Expression> priorMsgValues, int iteration) {
 		boolean notFinal = true;
 		
@@ -1056,7 +1033,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				legal = false;
 			} 
 			else {
-				tuple = msgSet.get(0);
+				tuple = ExtensionalSet.getElements(msgSet).get(0);
 			}
 		} 
 		else if (Sets.isIntensionalUniSet(msgSet)) {
@@ -1124,25 +1101,28 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		boolean result = false;
 		
 		List<Expression> indices = IndexExpressions.getIndices(IntensionalSet.getIndexExpressions(msgExpansionOrValue));
-		Expression head = IntensionalSet.getHead(msgExpansionOrValue);	
-		Set<Expression> destinationVariables          = Expressions.getVariables(Tuple.get(head, 0), process);
-		Set<Expression> originVariables               = Expressions.getVariables(Tuple.get(head, 1), process);
+		Expression messageValueTuple = IntensionalSet.getHead(msgExpansionOrValue);	
+		Expression destination = getDestinationFromMessageValueTuple(messageValueTuple);
+		Expression origin      = getOriginFromMessageValueTuple(messageValueTuple);
+		Set<Expression> destinationVariables          = Expressions.getVariables(destination, process);
+		Set<Expression> originVariables               = Expressions.getVariables(origin, process);
 		Set<Expression> originAndDestinationVariables = new LinkedHashSet<Expression>();
 		originAndDestinationVariables.addAll(destinationVariables);
 		originAndDestinationVariables.addAll(originVariables);
 		originAndDestinationVariables.retainAll(indices);
 		
 		Set<Expression> randomVariableValueVariables = new LinkedHashSet<Expression>();
-		Set<Expression> randomVariableValues         = LPIUtil.getRandomVariableValueExpressions(head, process);
+		Set<Expression> randomVariableValues         = LPIUtil.getRandomVariableValueExpressions(getValueFromMessageValueTuple(messageValueTuple), process);
 		for (Expression randomVariableValue : randomVariableValues) {
 			randomVariableValueVariables.addAll(Expressions.getVariables(randomVariableValue, process));
 		}
 		// Only keep random variable value logical variables that are not internally
 		// scoped (e.g. in a product message from an expansion).
-		randomVariableValueVariables.retainAll(Expressions.freeVariables(Tuple.get(head, 2), process));
+		Expression value = getValueFromMessageValueTuple(messageValueTuple);
+		randomVariableValueVariables.retainAll(Expressions.freeVariables(value, process));
 		
 		Set<Expression> testSet = new LinkedHashSet<Expression>();
-		testSet.addAll(Expressions.freeVariables(Tuple.get(head, 2), process));
+		testSet.addAll(Expressions.freeVariables(value, process));
 		testSet.retainAll(indices);
 		testSet.removeAll(originAndDestinationVariables);
 		testSet.removeAll(randomVariableValueVariables);
@@ -1198,9 +1178,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	
 	private class PreviousMessageToMsgValueCache {
 		// key= (context, prev_message), value = msg_value_index to use.
-		ConcurrentHashMap<Expression, Integer>    previousMessageToMsgValueIndex              = new ConcurrentHashMap<Expression, Integer>();
+		ConcurrentHashMap<Expression, Integer>    previousMessageToMsgValueIndex = new ConcurrentHashMap<Expression, Integer>();
 		// key= (context, prev_message, scoping expression for intersection), value=intersection
-		ConcurrentHashMap<Expression, Expression> previousMessageToCachedMsgValueIntersection = new ConcurrentHashMap<Expression, Expression>();
 		boolean useCache = true;
 		
 		public PreviousMessageToMsgValueCache() {
@@ -1214,79 +1193,31 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		 *            the context prev_message is under.
 		 * @param previousMessage
 		 *            the prev_message to be mapped to a msg_value index.
-		 * @param msgValueIndex
+		 * @param messageValueSetIndex
 		 *            the index of the msg_value the prev_message under the
 		 *            given context is represented by.
 		 */
-		public void addPreviousMessageToMsgValueIndex(Expression contextualConstraint, Expression previousMessage, int msgValueIndex) {
+		public void addPreviousMessageToMsgValueIndex(Expression contextualConstraint, Expression previousMessage, int messageValueSetIndex) {
 			if (useCache) {
-				previousMessageToMsgValueIndex.put(Tuple.make(contextualConstraint, previousMessage), msgValueIndex);
+				previousMessageToMsgValueIndex.put(Tuple.make(contextualConstraint, previousMessage), messageValueSetIndex);
 			}
 		}
 		
 		/**
 		 * Get the msg_value_index associated with the given prev_message under
 		 * the current context.
-		 * 
-		 * @param process
-		 *            the rewriting process containing the current context for
-		 *            prev_message.
 		 * @param previousMessage
 		 *            the prev_messages whose msg_value_index is to be looked up
 		 *            in the cache.
+		 * @param process
+		 *            the rewriting process containing the current context for
+		 *            prev_message.
+		 * 
 		 * @return the msg_value_index associated with the prev_message under
 		 *         the given context if in the cache, null otherwise.
 		 */
-		public Integer getCachedMessageValueIndex(RewritingProcess process, Expression previousMessage) {
+		public Integer getCachedMessageValueIndex(Expression previousMessage, RewritingProcess process) {
 			return previousMessageToMsgValueIndex.get(Tuple.make(process.getContextualConstraint(), previousMessage));
-		}
-		
-		/**
-		 * Will store an entry in the cache where intersection is represented
-		 * as: { (on I) (Destination', Origin') | C' }<br>
-		 * 
-		 * <pre>
-		 * key   = (context, prev_message, (on I)), 
-		 * value = intersection
-		 * </pre>
-		 * 
-		 * @param process
-		 *            the rewriting process containing the current context for
-		 *            prev_message.
-		 * @param previousMessage
-		 *            the prev_messages whose intersection with a msg_value is
-		 *            to be added to the cache.
-		 * @param intersection
-		 *            the intersection to be added.
-		 */
-		public void addCachedMsgValueIntersection(RewritingProcess process, Expression previousMessage, Expression intersection) {
-			if (useCache) {
-				previousMessageToCachedMsgValueIntersection.put(
-						Tuple.make(process.getContextualConstraint(), previousMessage, Tuple.make(IntensionalSet.getIndexExpressions(intersection))), 
-						intersection);
-			}
-		}
-		
-		/**
-		 * Get the cached intersection for a prev_message and msg_value under
-		 * the current context for prev_message.
-		 * 
-		 * @param process
-		 *            the rewriting process containing the current context for
-		 *            prev_message.
-		 * @param previousMessage
-		 *            the prev_messages whose intersection with a msg_value is
-		 *            to be looked up in the cache.
-		 * @param msgValue
-		 *            the msg_value that prev_message is meant to intersect
-		 *            with. Will use the scoping expression from the msg_value
-		 *            to ensure the msg_value and cached intersection are always
-		 *            scoped by the same indices.
-		 * @return the cached intersection if one exists, false otherwise.
-		 */
-		public Expression getCachedMsgValueIntersection(RewritingProcess process, Expression previousMessage, Expression msgValue) {
-			return previousMessageToCachedMsgValueIntersection.get(
-					Tuple.make(process.getContextualConstraint(), previousMessage, Tuple.make(IntensionalSet.getIndexExpressions(msgValue))));
 		}
 	}
 

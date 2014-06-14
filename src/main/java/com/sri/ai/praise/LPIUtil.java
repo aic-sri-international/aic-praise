@@ -64,6 +64,7 @@ import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.SemanticSubstitute;
+import com.sri.ai.grinder.library.StandardizedApartFrom;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.boole.Or;
@@ -1197,9 +1198,9 @@ public class LPIUtil {
 		intensionalSet = process.rewrite(eliminatesBoundIndices, intensionalSet);
 		
 		Expression       alpha       = IntensionalSet.getHead(intensionalSet);
-		Trace.log("R <- indices in {} that {} depends on", IntensionalSet.getIndexExpressions(intensionalSet), alpha);
-		Set<Expression>  alphaVars   = Expressions.freeVariables(alpha, process);
 		List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(intensionalSet);
+		Trace.log("R <- indices in {} that {} depends on", indexExpressions, alpha);
+		Set<Expression>  alphaVars   = Expressions.freeVariables(alpha, process);
 		List<Expression> indicesI    = new ArrayList<Expression>(IndexExpressions.getIndices(indexExpressions));
 		Set<Expression>  tempIndices = new LinkedHashSet<Expression>(indicesI);
 		tempIndices.retainAll(alphaVars);
@@ -1690,7 +1691,7 @@ public class LPIUtil {
 	}
 
 	public static LinkedHashSet<Expression> getRandomVariableValueExpressions(Expression expression, final RewritingProcess process) {
-		return Expressions.getSubExpressionsSatisfying(Tuple.get(expression, 2), new Predicate<Expression>() {
+		return Expressions.getSubExpressionsSatisfying(expression, new Predicate<Expression>() {
 			@Override
 			public boolean apply(Expression arg) {
 				boolean result = isRandomVariableValueExpression(arg, process);
@@ -1814,5 +1815,50 @@ public class LPIUtil {
 		else {
 			process.putGlobalObject(RANDOM_VARIABLE_BEING_NORMALIZED, previousRandomVariableBeingNormalized);
 		}
+	}
+	
+	/**
+	 * Given an intensional set <code>M = {(on I) (key, value) | C }</code> of 2-tuples,
+	 * where <code>key</code> and <code>value</code> are arbitrary expressions
+	 * and such that, for every <code>key</code> there is a single <code>value</code> such that <code>(key,value) in M</code>,
+	 * and an expression <code>key'</code>,
+	 * returns the simplification of the (either singleton or empty) set <code>{(on I) value | C and key = key'}</code>
+	 * (if M is a multi-set, then this is either a multiset with multiple copies of a single value, or an empty multi-set).
+	 * Note that, due to the uniqueness of <code>value</code> given <code>key</code>,
+	 * the simplified set will have no indices (they will be equated to the corresponding values in <code>key'</code>
+	 * and eliminated by the simplification).
+	 * <p>
+	 * The effect is to look at the intensional set as an intensional representation of a map and
+	 * retrieve a (possibly conditional) singleton set containing the value of a given key
+	 * (which can contain free variables itself).
+	 * For example, looking up <code>Y</code> in <code>{ (on X) (X, X + 1) | X != a }</code>
+	 * returns <code>{ (on ) Y + 1 | Y != a }</code>.
+	 * This will be the singleton set <code>{Y + 1}</code> if <code>Y != a</code>,
+	 * and the empty set otherwise.
+	 * <p>
+	 * The resulting set may have a condition, but it will be either a tautology or a contradiction,
+	 * although it may not have been simplified to <code>true</code> or <code>false</code>
+	 * because the method uses non-complete simplification for efficiency's sake
+	 * (the invoking code can always perform the complete simplification itself if needed).
+	 * <p>
+	 * Note also that the result may be a <i>conditional</i> set depending on the simplification rules employed.
+	 * For example, <code>{ (on ) Y + 1 | Y != a }</code> may be simplified to
+	 * <code>if Y != a then { Y + 1 } else { }</code> (again, depending on the simplification rules used).
+	 * <p>
+	 */
+	public static Expression symbolicLookUp(Expression set, Expression keyPrime, RewritingProcess process) {
+		
+		set = StandardizedApartFrom.standardizedApartFrom(set, keyPrime, process);
+		
+		Expression       head      = IntensionalSet.getHead(set);
+		Expression       key       = Tuple.get(head, 0);
+		Expression       value     = Tuple.get(head, 1);
+		Expression       condition = IntensionalSet.getCondition(set);
+		
+		Expression newCondition = And.make(condition, Equality.make(key, keyPrime));
+		Expression result       = IntensionalSet.copyWithNewHeadAndCondition(set, value, newCondition);
+		           result       = process.rewrite(LBPRewriter.R_simplify, result);
+		
+		return result;
 	}
 }

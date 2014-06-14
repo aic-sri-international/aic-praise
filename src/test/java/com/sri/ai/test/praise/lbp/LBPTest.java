@@ -1541,13 +1541,15 @@ public class LBPTest extends AbstractLPITest {
 			new IntersectionTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 					"{{ (on X) [ p(X) ] | X != a}}", "{{ (on Y) [ p(Y) ] | Y != a }}", 
 					false, 
-					"{{ (on X, Y) [ p(X) ] | X = Y and X != a and Y != a}}"),
+					"{{ (on Y) [ p(Y) ] | Y != a}}"),
+				    // "{{ (on X, Y) [ p(X) ] | X = Y and X != a and Y != a}}"),
 			//
 			// Basic: standardize apart necessary
 			new IntersectionTestData(Expressions.TRUE.toString(), new TrivialPQ(),
 					"{{ (on X) [ p(X) ] | X != a}}", "{{ (on X) [ p(X) ] | X != a }}", 
 					false, 
-					"{{ (on X', X) [ p(X') ] | X' = X and X' != a and X != a}}"),
+					"{{ ( on X ) ([ p(X) ]) | X != a }}"),
+					// "{{ (on X', X) [ p(X') ] | X' = X and X' != a and X != a}}"),
 			//
 			// Basic: Extensional Set
 			new IntersectionTestData(Expressions.TRUE.toString(), new TrivialPQ(),
