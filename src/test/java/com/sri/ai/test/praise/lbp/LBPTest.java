@@ -3802,7 +3802,8 @@ public class LBPTest extends AbstractLPITest {
 						" union " +
 						"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c and Z != a}",
 						false,
-						"if Y != d then if Y = a then if p(b, a) then 1 else 0 else (if p(b, Y) then 1 else 0) else 0"),
+						"if Y != d then if p(b, Y) then 1 else 0 else 0"),
+						//"if Y != d then if Y = a then if p(b, a) then 1 else 0 else (if p(b, Y) then 1 else 0) else 0"),
 				// Example 2:
 				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
 						new TrivialPQWithPArity2AndQArity1(),
