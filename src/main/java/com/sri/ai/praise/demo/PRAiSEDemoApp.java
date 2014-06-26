@@ -63,10 +63,12 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.GrinderConfiguration;
+import com.sri.ai.praise.demo.model.EarthquakeBurglaryAlarm;
+import com.sri.ai.praise.demo.model.EpidemicAndSickDemo;
 import com.sri.ai.praise.demo.model.Example;
-import com.sri.ai.praise.demo.model.Example2;
 import com.sri.ai.praise.demo.model.Example3;
 import com.sri.ai.praise.demo.model.Example7;
+import com.sri.ai.praise.demo.model.RelationalEarthquakeBurglaryAlarm;
 
 /**
  * 
@@ -415,8 +417,11 @@ public class PRAiSEDemoApp {
 		//
 		// Setup the examples
 //		toolBar.exampleComboBox.addItem(new Example1());
-		toolBar.exampleComboBox.addItem(new Example2());
-		toolBar.exampleComboBox.addItem(new Example3());
+//		toolBar.exampleComboBox.addItem(new Example2());
+		toolBar.exampleComboBox.addItem(new EarthquakeBurglaryAlarm());
+		toolBar.exampleComboBox.addItem(new RelationalEarthquakeBurglaryAlarm());
+		toolBar.exampleComboBox.addItem(new EpidemicAndSickDemo());
+//		toolBar.exampleComboBox.addItem(new Example3());
 //		toolBar.exampleComboBox.addItem(new Example4());
 //		toolBar.exampleComboBox.addItem(new Example5());
 //		toolBar.exampleComboBox.addItem(new Example6());

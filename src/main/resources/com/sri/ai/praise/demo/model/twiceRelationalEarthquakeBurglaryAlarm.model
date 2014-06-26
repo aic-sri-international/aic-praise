@@ -1,0 +1,37 @@
+/**
+ * Relational earthquake, burglary and alarm network with explaining away effect;
+ * Not added to demo because it is slow and results are not making sense.
+ * For example, querying earthquake(sf) does not result in the prior, as it should.
+ */
+//
+// SORT DECLARATIONS:
+sort Homes: 10000;
+sort Towns: 100;
+
+//
+// RANDOM VARIABLE DECLARATIONS:
+random earthquake: Towns -> Boolean;
+random burglary: Homes -> Boolean;
+random alarm: Homes -> Boolean;
+random location: Homes -> Towns;
+
+//
+// RULES
+earthquake(Town) 0.01;
+burglary(Home) 0.1;
+
+if earthquake(Town) and location(Home) = Town
+   then if burglary(Home)
+      then alarm(Home) 0.95
+      else alarm(Home) 0.6
+   else if burglary(Home)
+      then alarm(Home) 0.9
+      else alarm(Home) 0.01;
+
+// try these scenarios and query 'earthquake(Town)' and 'burglary(Home)' at each of them
+
+// not alarm(myHome);
+
+// alarm(myHome);
+
+// alarm(myHome) and not burglary(myHome);

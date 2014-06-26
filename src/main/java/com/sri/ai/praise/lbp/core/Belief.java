@@ -57,8 +57,6 @@ import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.BranchRewriteTask;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.SyntacticSubstitute;
-import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
@@ -268,7 +266,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// possibly containing "previous message" expressions, representing their 
 			// value in terms of messages from the previous loopy BP iteration.
 			PreviousMessageToMsgValueCache previousMessageToMsgValueCache = new PreviousMessageToMsgValueCache();
-			process.putGlobalObject(SYMBOLIC_MAP_FOR_MESSAGE_VALUES_SETS_GLOBAL_OBJECTS_KEY, new SymbolicMap());
+			getMessageValueSetsSymbolicMap(process); // creates symbolic map for message value sets
 			List<Expression> msgExpansions = getMessageExpansions(msgSets, previousMessageToMsgValueCache, process);
 			Trace.log("// msg_expansions = {}", Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("list", msgExpansions));
 			
@@ -886,13 +884,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	}
 
 	public Expression lookUp(Expression prevMessage, Expression msgValueSet, RewritingProcess process) {
-		SymbolicMap symbolicMap = getMessageValueSetsSymbolicMap(process);
-		Expression result = symbolicMap.lookUpInjectiveExpressions(
-				prevMessage,
-				msgValueSet,
-				getDestinationAndOriginFromPreviousMessage, getDestinationAndOriginFromMessageValueTuple, getValueFromMessageValueTuple,
-				LBPRewriter.R_complete_normalize,
-				process);
+		SymbolicMap symbolicMapForMessageValueSets = getMessageValueSetsSymbolicMap(process);
+		Expression result = symbolicMapForMessageValueSets.lookUpInjectiveExpression(prevMessage, msgValueSet, process);
 		return result;
 	}
 
@@ -918,9 +911,17 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	};
 	
 	public static SymbolicMap getMessageValueSetsSymbolicMap(RewritingProcess process) {
-		SymbolicMap result = (SymbolicMap) Util.getValuePossiblyCreatingIt(process.getGlobalObjects(), SYMBOLIC_MAP_FOR_MESSAGE_VALUES_SETS_GLOBAL_OBJECTS_KEY, SymbolicMap.class);
+		SymbolicMap result = (SymbolicMap) Util.getValuePossiblyCreatingIt(process.getGlobalObjects(), SYMBOLIC_MAP_FOR_MESSAGE_VALUES_SETS_GLOBAL_OBJECTS_KEY, symbolicMapMaker);
 		return result;
 	}
+	
+	private static final Function<Object, Object> symbolicMapMaker = new Function<Object, Object>() {
+		@Override
+		public SymbolicMap apply(Object input) {
+			SymbolicMap result = new SymbolicMap(getDestinationAndOriginFromPreviousMessage, getDestinationAndOriginFromMessageValueTuple, getValueFromMessageValueTuple, LBPRewriter.R_complete_normalize, true);
+			return result;
+		}
+	};
 
 	private boolean notFinal(Expression beliefValue, Expression priorBeliefValue, List<Expression> msgValues, List<Expression> priorMsgValues, int iteration) {
 		boolean notFinal = true;
