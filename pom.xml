@@ -109,7 +109,18 @@
 
 	<build>
 		<plugins>
-			<plugin>
+		
+  			<plugin>
+        		<!-- As suggested by http://stackoverflow.com/questions/18956606/eclipse-maven-jar-plugin-not-signing-because-of-duplicate-entries-pom-xml-and-p -->
+	 			<artifactId>maven-jar-plugin</artifactId>
+	 			<configuration>
+		 			<archive>
+			 			<addMavenDescriptor>false</addMavenDescriptor>
+		 			</archive>
+	 			</configuration>
+ 			</plugin>
+ 			
+ 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
 				<version>${antlr.version}</version>
