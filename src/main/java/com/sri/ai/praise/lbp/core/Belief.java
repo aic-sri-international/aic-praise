@@ -56,7 +56,6 @@ import com.sri.ai.grinder.helper.ListOfDisjointIntensionalSetsForSymbolicInjecti
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.BranchRewriteTask;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
-import com.sri.ai.grinder.library.CommutativeAssociative;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
@@ -111,10 +110,10 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	public Expression getMessageExpansions(Expression msgSets, RewritingProcess process) {		
 		Expression result = null;
 	
-		List<Expression> msgSetUnionArguments        = getEntriesFromUnion(msgSets);
+		List<Expression> msgSetUnionArguments        = Union.getEntriesFromUnionOrSet(msgSets);
 		List<Expression> msgExpansionsUnionArguments = getMessageExpansions(msgSetUnionArguments, process);
 		
-		result = makeUnion(msgExpansionsUnionArguments);
+		result = Union.make(msgExpansionsUnionArguments);
 		
 		return result;
 	}
@@ -127,14 +126,14 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		Expression result = null;
 		
-		List<Expression> msgValuesUnionArguments     = getEntriesFromUnion(msgValues);
-		List<Expression> msgExpansionsUnionArguments = getEntriesFromUnion(msgExpansions);
+		List<Expression> msgValuesUnionArguments     = Union.getEntriesFromUnionOrSet(msgValues);
+		List<Expression> msgExpansionsUnionArguments = Union.getEntriesFromUnionOrSet(msgExpansions);
 		
-		ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp messageValuesMap = new ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp(msgValuesUnionArguments, makeSymbolicLookUpForPreviousMessages(), configuration.isBeliefUseCache());
-		ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp newMessageValueSetsMap = iterateValuesUsingExpansions(messageValuesMap, msgExpansionsUnionArguments, process);
-		List<Expression> nextMsgValuesUnionArguments = newMessageValueSetsMap.getIntensionalSets();
+		ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp messageValueSets = new ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp(msgValuesUnionArguments, makeSymbolicLookUpForPreviousMessages(), configuration.isBeliefUseCache());
+		messageValueSets = iterateValuesUsingExpansions(messageValueSets, msgExpansionsUnionArguments, process);
+		List<Expression> nextMsgValuesUnionArguments = messageValueSets.getIntensionalSets();
 		
-		result = makeUnion(nextMsgValuesUnionArguments);
+		result = Union.make(nextMsgValuesUnionArguments);
 		
 		return result;
 	}
@@ -146,7 +145,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	public Expression useValuesForPreviousMessages(Expression expansion, Expression msgValues, RewritingProcess process) {
 		Expression result = null;
 		
-		List<Expression> msgValuesUnionArguments = getEntriesFromUnion(msgValues);
+		List<Expression> msgValuesUnionArguments = Union.getEntriesFromUnionOrSet(msgValues);
 
 		ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp msgValuesMap = new ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp(msgValuesUnionArguments, makeSymbolicLookUpForPreviousMessages(), configuration.isBeliefUseCache());
 		result = useValuesForPreviousMessages(expansion, msgValuesMap, process);
@@ -253,7 +252,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Trace.log("msg_sets <- R_extract_previous_msg_sets(belief_expansion)");
 			// a union of sets of pairs (N1, N2), with each pair representing an occurrence of 
 			// "previous message" on that pair occurring in belief_expansion.
-			List<Expression> msgSets = getEntriesFromUnion(process.rewrite(R_extract_previous_msg_sets, beliefExpansion));		
+			List<Expression> msgSets = Union.getEntriesFromUnionOrSet(process.rewrite(R_extract_previous_msg_sets, beliefExpansion));		
 			Trace.log("// msg_sets = {}", Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("list", msgSets));
 		
 			Trace.log("msg_expansions <- get_msg_expansions(msg_sets)");
@@ -269,7 +268,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// is a basic expression representing its value at the current loopy BP iteration
 			// (this expression is therefore free of previous message expressions).
 			// { (on I) (Destination, Origin, 1) | C } union ...
-			ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp msgValues = new ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp(new ArrayList<Expression>(), makeSymbolicLookUpForPreviousMessages(), configuration.isBeliefUseCache());
+			ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp messageValueSets = new ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp(new ArrayList<Expression>(), makeSymbolicLookUpForPreviousMessages(), configuration.isBeliefUseCache());
 			for (Expression msgExpansion : msgExpansions) {
 				// i.e. (Destination, Origin, Expansion)
 				Expression tupleExpansion = IntensionalSet.getHead(msgExpansion);
@@ -283,7 +282,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 																IntensionalSet.getIndexExpressions(msgExpansion),
 																tuple, 
 																IntensionalSet.getCondition(msgExpansion));
-				msgValues.putIntensionalSetWithKeyKnownToBeDisjointFromOthers(msgValue, process);
+				messageValueSets.putIntensionalSetWithKeyKnownToBeDisjointFromOthers(msgValue, process);
 			}
 			
 			// We now use the expansions to get the values of message pairs in successive loopy BP iterations
@@ -295,22 +294,22 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Expression priorBeliefValue     = beliefExpansion;
 			ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp priorMsgValues = null;
 			int iteration = 1;
-			beliefValue = useValuesForPreviousMessages(beliefExpansion, msgValues, process);
+			beliefValue = useValuesForPreviousMessages(beliefExpansion, messageValueSets, process);
 			notifyCollector(randomVariable, beliefValue, 1, process);
 			Justification.log("Initial belief value {}", beliefValue);
 			Trace.log("// initial belief_value = {}", beliefValue);
-			while (notFinal(beliefValue, priorBeliefValue, msgValues, priorMsgValues, iteration)) {
+			while (notFinal(beliefValue, priorBeliefValue, messageValueSets, priorMsgValues, iteration)) {
 				priorBeliefValue = beliefValue;
-				priorMsgValues = msgValues;
+				priorMsgValues = messageValueSets;
 				Justification.beginEqualityStep("iteration");
 				LiftProductOfFactorToVariable.setMustAlwaysLift(true, process);
-				msgValues = iterateValuesUsingExpansions(msgValues, msgExpansions, process);
-				beliefValue      = useValuesForPreviousMessages(beliefExpansion, msgValues, process);
+				messageValueSets = iterateValuesUsingExpansions(messageValueSets, msgExpansions, process);
+				beliefValue      = useValuesForPreviousMessages(beliefExpansion, messageValueSets, process);
 				LiftProductOfFactorToVariable.setMustAlwaysLift(false, process);
 				iteration++;			
 				notifyCollector(randomVariable, beliefValue, iteration, process);
 				Justification.endEqualityStep(beliefValue);
-				Trace.log("    // msg_values = {}", Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("list", msgValues));
+				Trace.log("    // msg_values = {}", Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("list", messageValueSets));
 				Trace.log("    // belief_value = {}", beliefValue);
 			}
 			
@@ -334,54 +333,57 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return result;
 	}
 
-	public static Expression makeMessageValueTuple(Expression destination, Expression origin, Expression value) {
+	//
+	// PRIVATE METHODS
+	//
+
+	// The following methods determine how (Destination, Origin, Value) are stored in intensional sets.
+	
+	private static Expression makeMessageValueTuple(Expression destination, Expression origin, Expression value) {
 		Expression result = Tuple.make(destination, origin, value);
 		return result;
 	}
 	
-	public static Expression getDestinationOriginTuple(Expression messageValueTuple) {
+	private static Expression getDestinationOriginTuple(Expression messageValueTuple) {
 		return Tuple.make(messageValueTuple.get(0), messageValueTuple.get(1));
 	}
 
-	public static Expression getDestinationFromMessageValueTuple(Expression tuple) {
+	private static Expression getDestinationFromMessageValueTuple(Expression tuple) {
 		return Tuple.get(tuple, 0);
 	}
 
-	public static Expression getOriginFromMessageValueTuple(Expression tuple) {
+	private static Expression getOriginFromMessageValueTuple(Expression tuple) {
 		return Tuple.get(tuple, 1);
 	}
 
-	public static Expression getValueFromMessageValueTuple(Expression tuple) {
+	private static Expression getValueFromMessageValueTuple(Expression tuple) {
 		return Tuple.get(tuple, 2);
 	}
 
-	
-//	public static Expression makeMessageValueTuple(Expression destination, Expression origin, Expression value) {
-//		Expression result = Tuple.make(Tuple.make(destination, origin), value);
-//		return result;
-//	}
-//	
-//	public static Expression getDestinationOriginTuple(Expression messageValueTuple) {
-//		return messageValueTuple.get(0);
-//	}
-//
-//	public static Expression getDestinationFromMessageValueTuple(Expression tuple) {
-//		Expression destinationOriginTuple = Tuple.get(tuple, 0);
-//		return Tuple.get(destinationOriginTuple, 0);
-//	}
-//
-//	public static Expression getOriginFromMessageValueTuple(Expression tuple) {
-//		Expression destinationOriginTuple = Tuple.get(tuple, 0);
-//		return Tuple.get(destinationOriginTuple, 1);
-//	}
-//
-//	public static Expression getValueFromMessageValueTuple(Expression tuple) {
-//		return Tuple.get(tuple, 1);
-//	}
+	private static Function<Expression, Expression> getDestinationAndOriginFromPreviousMessage = new Function<Expression, Expression> () {
+		@Override
+		public Expression apply(Expression previousMessageExpression) {
+			return Tuple.make(previousMessageExpression.get(0), previousMessageExpression.get(1));
+		}
+	};
+	private static Function<Expression, Expression> getDestinationAndOriginFromMessageValueTuple = new Function<Expression, Expression> () {
+		@Override
+		public Expression apply(Expression messageValueTuple) {
+			return getDestinationOriginTuple(messageValueTuple);
+		}
+	};
+	private static Function<Expression, Expression> getValueFromMessageValueTuple = new Function<Expression, Expression> () {
+		@Override
+		public Expression apply(Expression messageValueTuple) {
+			return getValueFromMessageValueTuple(messageValueTuple);
+		}
+	};
 
-	//
-	// PRIVATE METHODS
-	//
+	private static SymbolicInjectiveLookUp makeSymbolicLookUpForPreviousMessages() {
+		SymbolicInjectiveLookUp result = new SymbolicInjectiveLookUp(getDestinationAndOriginFromPreviousMessage, getDestinationAndOriginFromMessageValueTuple, getValueFromMessageValueTuple, LBPRewriter.R_complete_normalize, true);
+		return result;
+	}
+
 	private void setLimitPrecisionToNumberOfSignificantDecimals(int precision) {
 		this.decimalPrecision = new Rational(10).pow(precision);
 		this.nonZeroMin       = new Rational(1).divide(this.decimalPrecision);
@@ -415,7 +417,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			Expression messageSet = messagesToBeExpanded.remove(0);
 			Trace.log("    // message_set = {}", messageSet);
 			// Ensure is a legal message_set expression
-			assertIsLegalMsgSet(messageSet);
+			checkForLegalMsgSet(messageSet);
 	
 			Justification.begin("Going to expand message set {}", messageSet);
 			Trace.in("Going to expand message set {}", messageSet);
@@ -458,7 +460,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				possibleIntersectionUnionArgs.add(messagesAlreadyExpandedUnionArgument);
 			}
 		}
-		Expression msgsAlreadyExpanded = makeUnion(possibleIntersectionUnionArgs);
+		Expression msgsAlreadyExpanded = Union.make(possibleIntersectionUnionArgs);
 		
 		Trace.log("    message_set <- R_set_diff(message_set minus msgs_already_expanded)");
 		messageSet = process.rewrite(R_set_diff, LPIUtil.argForSetDifferenceRewriteCall(messageSet, msgsAlreadyExpanded));
@@ -545,7 +547,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			}
 			throw new IllegalStateException("IllegalStateException: introduced additional free variables " + Util.join(introducedFreeVariables) + " into msg_expansion: "+msgExpansion);
 		}
-		if (expansionDependsOnLogicalVariableButMessageDoesNot(msgExpansion, process)) {
+		if (checkIfExpansionDependsOnLogicalVariableButMessageDoesNot(msgExpansion, process)) {
 			System.err.println("IllegalStateException: expansion depends on logical variable but message does not.");
 			System.err.println("msg_expansion  = " + msgExpansion);
 			System.err.println("message_set    = " + messageSet);
@@ -568,7 +570,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Trace.log("        msgs_to_be_expanded <- msgs_to_be_expanded union R_extract_previous_msg_sets(msg_expansion)");
 		Justification.begin("Going to identify messages inside expansion and schedule them for their own expansion");
 		Expression newMsgSetsToBeExpanded = process.rewrite(R_extract_previous_msg_sets, msgExpansion);
-		messagesToBeExpanded.addAll(getEntriesFromUnion(newMsgSetsToBeExpanded));
+		messagesToBeExpanded.addAll(Union.getEntriesFromUnionOrSet(newMsgSetsToBeExpanded));
 		Justification.end("Messages inside expansion identified: {}", newMsgSetsToBeExpanded);
 		Trace.log("        // msgs_to_be_expanded = {}", Tuple.make(messagesToBeExpanded));
 	}
@@ -631,11 +633,11 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					}
 					
 					Trace.log("    next_msg_values <- next_msg_values union { (on I) (Destination, Origin, value) | C }");
-					Expression tupleTriple = makeMessageValueTuple(destination, origin, normalizedValue);
+					Expression messageValueTuple = makeMessageValueTuple(destination, origin, normalizedValue);
 					Expression newMsgValue = IntensionalSet
 												.makeUniSetFromIndexExpressionsList(
 														IntensionalSet.getIndexExpressions(msgExpansion), 
-														tupleTriple, 
+														messageValueTuple, 
 														IntensionalSet.getCondition(msgExpansion));
 					
 					checkForIntroducedVariables(value, msgValues, msgExpansions, process, msgExpansion, expansion, newMsgValue, subProcess);
@@ -689,32 +691,6 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return result;
 	}
 	
-	private static Function<Expression, Expression> getDestinationAndOriginFromPreviousMessage = new Function<Expression, Expression> () {
-		@Override
-		public Expression apply(Expression previousMessageExpression) {
-			return Tuple.make(previousMessageExpression.get(0), previousMessageExpression.get(1));
-		}
-	};
-	
-	private static Function<Expression, Expression> getDestinationAndOriginFromMessageValueTuple = new Function<Expression, Expression> () {
-		@Override
-		public Expression apply(Expression messageValueTuple) {
-			return getDestinationOriginTuple(messageValueTuple);
-		}
-	};
-	
-	private static Function<Expression, Expression> getValueFromMessageValueTuple = new Function<Expression, Expression> () {
-		@Override
-		public Expression apply(Expression messageValueTuple) {
-			return getValueFromMessageValueTuple(messageValueTuple);
-		}
-	};
-	
-	private static SymbolicInjectiveLookUp makeSymbolicLookUpForPreviousMessages() {
-		SymbolicInjectiveLookUp result = new SymbolicInjectiveLookUp(getDestinationAndOriginFromPreviousMessage, getDestinationAndOriginFromMessageValueTuple, getValueFromMessageValueTuple, LBPRewriter.R_complete_normalize, true);
-		return result;
-	}
-
 	private boolean notFinal(Expression beliefValue, Expression priorBeliefValue, ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp msgValues, ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp priorMsgValues, int iteration) {
 		boolean notFinal = true;
 		
@@ -738,72 +714,6 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		}
 		
 		return notFinal;
-	}
-	
-	private static boolean isUnion(Expression expression) {
-		if (Expressions.hasFunctor(expression, FunctorConstants.UNION)) {
-			return true;
-		}
-
-		return false;
-	}
-	
-	private static List<Expression> getEntriesFromUnion(Expression union) {
-		List<Expression> entries = new ArrayList<Expression>();
-		
-		if (isUnion(union)) {
-			entries.addAll(union.getArguments());
-		} 
-		else {
-			if (!Sets.isEmptySet(union)) {
-				entries.add(union);
-			}
-		}
-		
-		return entries;
-	}
-	
-	private static Expression makeUnion(List<Expression> arguments) {
-		Expression result = CommutativeAssociative.make(FunctorConstants.UNION, arguments, Sets.EMPTY_SET);
-		return result;
-	}
-	
-	private static void assertIsLegalMsgSet(Expression msgSet) {
-		boolean    legal = true;
-		Expression tuple = null;
-		if (!Sets.isUniSet(msgSet)) {
-			legal = false;
-		} 
-		else if (Sets.isExtensionalUniSet(msgSet)) {
-			if (!Sets.isSingletonExtensionalSet(msgSet)) {
-				legal = false;
-			} 
-			else {
-				tuple = ExtensionalSet.getElements(msgSet).get(0);
-			}
-		} 
-		else if (Sets.isIntensionalUniSet(msgSet)) {
-			tuple = IntensionalSet.getHead(msgSet);
-		}
-		
-		if (legal) {
-			// Ensure is a tuple with two arguments
-			if (!Tuple.isTuple(tuple) || tuple.numberOfArguments() != 2) {
-				legal = false;
-			} 
-			else {
-				// Ensure these arguments are
-				List<Expression> tupleElements = Tuple.getElements(tuple);
-				if (!BracketedExpressionSubExpressionsProvider.isBracketedExpression(tupleElements.get(0)) ||
-					!BracketedExpressionSubExpressionsProvider.isBracketedExpression(tupleElements.get(1))   ) {
-					legal = false;
-				}
-			}
-		}
-		
-		if (!legal) {
-			throw new IllegalArgumentException("message_set is not an expression of the form { (on I) (Destination, Origin) | C }:"+msgSet);
-		}
 	}
 	
 	private Expression limitPrecisionToNumberOfSignificantDecimalPlaces(Expression normalizedValue, RewritingProcess process) {
@@ -843,7 +753,67 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return introducedFreeVariables;
 	}
 	
-	private boolean expansionDependsOnLogicalVariableButMessageDoesNot(Expression msgExpansionOrValue, final RewritingProcess process) {
+	private class PreviousMessageReplacementFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
+		
+		private ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp msgValues;
+		
+		public PreviousMessageReplacementFunction(ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp msgValues) {
+			this.msgValues = msgValues;
+		}
+		
+		//
+		// START-ReplacementFunctionWithContextuallyUpdatedProcess
+		@Override
+		public Expression apply(Expression expressionE, RewritingProcess process) {
+			Expression result = null;
+			
+			if ( ! LPIUtil.isPreviousMessageDefinition(expressionE)) {
+				// if E is not of the form "previous message to Destination' from Origin'
+				//     return E
+				result = expressionE;
+			} 
+			else {
+				Trace.log("    value <- look up value for {} in msg_values", expressionE);
+				Expression value = msgValues.lookUp(expressionE, process);
+				
+				Trace.log("    return value");
+				Trace.log("    // (replacing {} by {})", expressionE, value);
+				result = value;
+			}
+			
+			return result;
+		}
+		// END-ReplacementFunctionWithContextuallyUpdatedProcess
+		//
+	}
+	
+	/**
+	 * A convenience method for computing the belief of a query given a model, using a DefaultLBPConfiguration.
+	 */
+	public static Expression compute(Expression queryRandomVariableApplication, Model model) {
+		Expression       belief         = LPIUtil.makeBelief(queryRandomVariableApplication);
+		LBPConfiguration configuration  = new DefaultLBPConfiguration();
+		RewritingProcess process        = model.makeRewritingProcess(belief, configuration);
+		Belief           beliefRewriter = new Belief();
+		Expression       result         = beliefRewriter.rewrite(belief, process);
+		return result;
+	}
+
+
+	/**
+	 * A convenience method for computing the belief of a query given a model, using a DefaultLBPConfiguration with a synchronous schedule.
+	 */
+	public static Expression computeSynchronous(Expression queryRandomVariableApplication, Model model) {
+		Expression       belief         = LPIUtil.makeBelief(queryRandomVariableApplication);
+		LBPConfiguration configuration  = new DefaultLBPConfiguration();
+		configuration.setBeliefPropagationUpdateSchedule(LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS);
+		RewritingProcess process        = model.makeRewritingProcess(belief, configuration);
+		Belief           beliefRewriter = new Belief();
+		Expression       result         = beliefRewriter.rewrite(belief, process);
+		return result;
+	}
+
+	private boolean checkIfExpansionDependsOnLogicalVariableButMessageDoesNot(Expression msgExpansionOrValue, final RewritingProcess process) {
 		boolean result = false;
 		
 		List<Expression> indices = IndexExpressions.getIndices(IntensionalSet.getIndexExpressions(msgExpansionOrValue));
@@ -886,68 +856,46 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		return result;
 	}
 
-	private class PreviousMessageReplacementFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
-		
-		private ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp msgValues;
-		
-		public PreviousMessageReplacementFunction(ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp msgValues) {
-			this.msgValues = msgValues;
-		}
-		
-		//
-		// START-ReplacementFunctionWithContextuallyUpdatedProcess
-		@Override
-		public Expression apply(Expression expressionE, RewritingProcess process) {
-			Expression result = null;
-			
-			if ( ! LPIUtil.isPreviousMessageDefinition(expressionE)) {
-				// if E is not of the form "previous message to Destination' from Origin'
-				//     return E
-				result = expressionE;
+	private static void checkForLegalMsgSet(Expression msgSet) {
+		boolean    legal = true;
+		Expression tuple = null;
+		if (!Sets.isUniSet(msgSet)) {
+			legal = false;
+		} 
+		else if (Sets.isExtensionalUniSet(msgSet)) {
+			if (!Sets.isSingletonExtensionalSet(msgSet)) {
+				legal = false;
 			} 
 			else {
-				Trace.log("    value <- find_msg_value_matching_previous_message({}, msg_values)", expressionE);
-				Expression value = msgValues.lookUp(expressionE, process);
-				
-				Trace.log("    return value");
-				Trace.log("    // (replacing {} by {})", expressionE, value);
-				result = value;
+				tuple = ExtensionalSet.getElements(msgSet).get(0);
 			}
-			
-			return result;
+		} 
+		else if (Sets.isIntensionalUniSet(msgSet)) {
+			tuple = IntensionalSet.getHead(msgSet);
 		}
-		// END-ReplacementFunctionWithContextuallyUpdatedProcess
-		//
-	}
-	
-	/**
-	 * A convenience method for computing the belief of a query given a model, using a DefaultLBPConfiguration.
-	 */
-	public static Expression compute(Expression queryRandomVariableApplication, Model model) {
-		Expression       belief         = LPIUtil.makeBelief(queryRandomVariableApplication);
-		LBPConfiguration configuration  = new DefaultLBPConfiguration();
-		RewritingProcess process        = model.makeRewritingProcess(belief, configuration);
-		Belief           beliefRewriter = new Belief();
-		Expression       result         = beliefRewriter.rewrite(belief, process);
-		return result;
-	}
-
-
-	/**
-	 * A convenience method for computing the belief of a query given a model, using a DefaultLBPConfiguration with a synchronous schedule.
-	 */
-	public static Expression computeSynchronous(Expression queryRandomVariableApplication, Model model) {
-		Expression       belief         = LPIUtil.makeBelief(queryRandomVariableApplication);
-		LBPConfiguration configuration  = new DefaultLBPConfiguration();
-		configuration.setBeliefPropagationUpdateSchedule(LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS);
-		RewritingProcess process        = model.makeRewritingProcess(belief, configuration);
-		Belief           beliefRewriter = new Belief();
-		Expression       result         = beliefRewriter.rewrite(belief, process);
-		return result;
+		
+		if (legal) {
+			// Ensure is a tuple with two arguments
+			if (!Tuple.isTuple(tuple) || tuple.numberOfArguments() != 2) {
+				legal = false;
+			} 
+			else {
+				// Ensure these arguments are
+				List<Expression> tupleElements = Tuple.getElements(tuple);
+				if (!BracketedExpressionSubExpressionsProvider.isBracketedExpression(tupleElements.get(0)) ||
+					!BracketedExpressionSubExpressionsProvider.isBracketedExpression(tupleElements.get(1))   ) {
+					legal = false;
+				}
+			}
+		}
+		
+		if (!legal) {
+			throw new IllegalArgumentException("message_set is not an expression of the form { (on I) (Destination, Origin) | C }:"+msgSet);
+		}
 	}
 
 	private void checkIfExpansionDependsOnLogicalVariableButMessageDoesNot(Expression value, final ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp msgValues, final List<Expression> msgExpansions, RewritingProcess process, Expression msgExpansion, Expression expansion, Expression newMsgValue, RewritingProcess subProcess) {
-		if (expansionDependsOnLogicalVariableButMessageDoesNot(newMsgValue, process)) {
+		if (checkIfExpansionDependsOnLogicalVariableButMessageDoesNot(newMsgValue, process)) {
 			System.err.println("IllegalStateException: new_msg_value has answer dependent on logical variable that value is not.");
 			System.err.println("sub.context      ="+subProcess.getContextualConstraint());
 			System.err.println("sub.context vars ="+subProcess.getContextualVariables());

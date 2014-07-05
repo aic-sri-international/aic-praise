@@ -47,6 +47,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
+import com.sri.ai.grinder.library.CommutativeAssociative;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.Sets;
@@ -183,10 +184,12 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 		return result;
 	}
 
-	//
-	// PRIVATE METHODS
-	//
-	private static boolean isUnion(Expression expression) {
+	public static Expression make(List<Expression> arguments) {
+		Expression result = CommutativeAssociative.make(FunctorConstants.UNION, arguments, Sets.EMPTY_SET);
+		return result;
+	}
+
+	public static boolean isUnion(Expression expression) {
 		if (Expressions.hasFunctor(expression, FunctorConstants.UNION)) {
 			return true;
 		}
@@ -194,6 +197,9 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 		return false;
 	}
 
+	//
+	// PRIVATE METHODS
+	//
 	private Expression flattenUnion(Expression expression1, Expression expression2, RewritingProcess process) {
 		// Ensure the union of the expressions is flattened and that
 		// empty sets are removed where appropriate.
@@ -260,5 +266,21 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 				return result;
 			}
 		};
+	}
+
+	public static List<Expression> getEntriesFromUnionOrSet(Expression union) {
+		List<Expression> entries;
+		
+		if (isUnion(union)) {
+			entries = union.getArguments();
+		} 
+		else if ( ! Sets.isEmptySet(union)) {
+			entries = Util.list(union);
+		}
+		else {
+			entries = Util.list();
+		}
+		
+		return entries;
 	}
 }
