@@ -49,6 +49,7 @@ import com.sri.ai.grinder.core.HasFunctor;
 import com.sri.ai.grinder.core.HasNumberOfArguments;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Justification;
+import com.sri.ai.grinder.helper.PickSingleElement;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
@@ -198,7 +199,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 					else {
 						// if Alpha <- pick_single_element({(on I) Alpha | C}) succeeds
 						Expression singletonIntensionalSet = IntensionalSet.makeUniSetFromIndexExpressionsList(onI, alpha, conditionC);
-						Expression singleAlpha             = LPIUtil.pickSingleElement(singletonIntensionalSet, process);				
+						Expression singleAlpha             = PickSingleElement.pickSingleElement(singletonIntensionalSet, process);				
 						if (singleAlpha != null) {
 							// return alpha ^ {@link Cardinality R_card}(| C |_I)
 							List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(prodSet);

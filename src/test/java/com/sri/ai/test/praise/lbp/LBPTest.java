@@ -55,6 +55,7 @@ import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.helper.PickSingleElement;
 import com.sri.ai.grinder.library.DirectCardinalityComputationFactory;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElseExternalizationHierarchical;
@@ -3836,7 +3837,7 @@ public class LBPTest extends AbstractLPITest {
 			
 			@Override
 			public Expression callRewrite(RewritingProcess process) {
-				Expression result = LPIUtil.pickSingleElement(intensionalSet, process);
+				Expression result = PickSingleElement.pickSingleElement(intensionalSet, process);
 				
 				return result;
 			}
@@ -4038,7 +4039,7 @@ public class LBPTest extends AbstractLPITest {
 			
 			@Override
 			public Expression callRewrite(RewritingProcess process) {
-				Expression result = LPIUtil.pickValue(exprX, ExtensionalSet.getElements(exprI), exprC, process);
+				Expression result = PickSingleElement.pickValue(exprX, ExtensionalSet.getElements(exprI), exprC, process);
 				
 				return result;
 			}
@@ -4171,7 +4172,7 @@ public class LBPTest extends AbstractLPITest {
 		RewritingProcess process;
 		process = LBPFactory.newBoundLBPProcess(formula);
 		process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(formula, process); 
-		actual = LPIUtil.getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variable, formula, process);
+		actual = PickSingleElement.getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variable, formula, process);
 		System.out.println("Formula : " + formula);	
 		System.out.println("Expected: " + expected);	
 		System.out.println("Actual  : " + actual);	
