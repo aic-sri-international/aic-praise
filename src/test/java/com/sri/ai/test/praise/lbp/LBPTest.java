@@ -68,11 +68,13 @@ import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesH
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.MoveAllRandomVariableValueExpressionConditionsDownHierarchical;
 import com.sri.ai.praise.PRAiSEConfiguration;
+import com.sri.ai.praise.Solver;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.lbp.LBPQueryEngine.QueryStep;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.lbp.LiftedBeliefPropagationSolver;
 import com.sri.ai.praise.lbp.core.Belief;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.example.EmptyPQ;
@@ -4202,7 +4204,8 @@ public class LBPTest extends AbstractLPITest {
 				"friends(bob, dave);" + 
 				"");
 		expected = parse("if X = dave then if friends(dave, dave) then 0 else 1 else (if X = bob then if friends(dave, bob) then 1 else 0 else 0.5)");
-		actual = Belief.computeSynchronous(query, model);
+		Solver solver = new LiftedBeliefPropagationSolver(true);
+		actual = solver.marginal(query, model);
 		Assert.assertEquals(expected, actual);
 
 		GrinderUtil.doTreeUtilWaitUntilClosed();
@@ -4359,14 +4362,16 @@ public class LBPTest extends AbstractLPITest {
 				+ "{{(on X in People, Y in Dogs) [if equalityOccurred then 1 else 0] | X = Y }}" // should have no effect
 				+ ") )");
 		
-		queryAnswer = Belief.compute(parse("equalityOccurred"), model);
+		Solver solver = new LiftedBeliefPropagationSolver();
+		
+		queryAnswer = solver.marginal(parse("equalityOccurred"), model);
 		assertEquals(parse("0.5"), queryAnswer);
 		
 		model = new Model("model(sort(People, 10), sort(Dogs, 10), randomVariable(equalityOccurred, 0, Boolean),"
 				+ "parfactors("
 				+ "{{(on X in People, Y in People) [if equalityOccurred then 1 else 0] | X = Y }}" // should have an effect since X = Y for some values
 				+ ") )");
-		queryAnswer = Belief.compute(parse("equalityOccurred"), model);
+		queryAnswer = solver.marginal(parse("equalityOccurred"), model);
 		assertEquals(parse("if equalityOccurred then 1 else 0"), queryAnswer);
 		
 		GrinderUtil.doTreeUtilWaitUntilClosed();

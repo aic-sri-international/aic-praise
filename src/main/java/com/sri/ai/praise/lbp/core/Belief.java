@@ -787,32 +787,6 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		//
 	}
 	
-	/**
-	 * A convenience method for computing the belief of a query given a model, using a DefaultLBPConfiguration.
-	 */
-	public static Expression compute(Expression queryRandomVariableApplication, Model model) {
-		Expression       belief         = LPIUtil.makeBelief(queryRandomVariableApplication);
-		LBPConfiguration configuration  = new DefaultLBPConfiguration();
-		RewritingProcess process        = model.makeRewritingProcess(belief, configuration);
-		Belief           beliefRewriter = new Belief();
-		Expression       result         = beliefRewriter.rewrite(belief, process);
-		return result;
-	}
-
-
-	/**
-	 * A convenience method for computing the belief of a query given a model, using a DefaultLBPConfiguration with a synchronous schedule.
-	 */
-	public static Expression computeSynchronous(Expression queryRandomVariableApplication, Model model) {
-		Expression       belief         = LPIUtil.makeBelief(queryRandomVariableApplication);
-		LBPConfiguration configuration  = new DefaultLBPConfiguration();
-		configuration.setBeliefPropagationUpdateSchedule(LBPConfiguration.BeliefPropagationUpdateSchedule.SYNCHRONOUS);
-		RewritingProcess process        = model.makeRewritingProcess(belief, configuration);
-		Belief           beliefRewriter = new Belief();
-		Expression       result         = beliefRewriter.rewrite(belief, process);
-		return result;
-	}
-
 	private boolean checkIfExpansionDependsOnLogicalVariableButMessageDoesNot(Expression msgExpansionOrValue, final RewritingProcess process) {
 		boolean result = false;
 		
