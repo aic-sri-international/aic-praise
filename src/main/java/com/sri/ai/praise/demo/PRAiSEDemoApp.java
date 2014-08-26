@@ -66,7 +66,6 @@ import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.praise.demo.model.EarthquakeBurglaryAlarm;
 import com.sri.ai.praise.demo.model.EpidemicAndSickDemo;
 import com.sri.ai.praise.demo.model.Example;
-import com.sri.ai.praise.demo.model.Example3;
 import com.sri.ai.praise.demo.model.Example7;
 import com.sri.ai.praise.demo.model.RelationalEarthquakeBurglaryAlarm;
 

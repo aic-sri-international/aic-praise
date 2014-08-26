@@ -126,7 +126,7 @@ formula
        // X may be same as Y
      | leftop=symbol MAY BE SAME AS rightop=symbol #formulaMayBeSameAs
        // exponentiation, e.g. 2^3^4 -> 2^(3^4)
-     | base=formula '^'<assoc=right> exponent=formula #formulaExponentiation
+     |<assoc=right> base=formula '^' exponent=formula #formulaExponentiation
        // multiplication or division, e.g.: 2*3/2 -> 2*(3/2)
      | leftop=formula op=('*' | '/') rightop=formula #formulaMultiplicationOrDivision
        // addition or subtraction, e.g.: 1-2+3 -> (1-2)+3
@@ -138,9 +138,9 @@ formula
        // disjunction, e.g.: A => B or C -> A => (B or C)
      | leftdisj=formula OR rightdisj=formula #formulaOr
        // implication, e.g.: A = B => C = D
-     | antecedent=formula IMPLICATION<assoc=right> consequent=formula #formulaImplication
+     |<assoc=right> antecedent=formula IMPLICATION consequent=formula #formulaImplication
        // biconditional, e.g.: A = B <=> C = D
-     | leftop=formula BICONDITIONAL<assoc=right> rightop=formula #formulaBiconditional
+     |<assoc=right> leftop=formula BICONDITIONAL rightop=formula #formulaBiconditional
        // universal quantification, e.g.: for all X : X != a
      | FOR ALL index=formula ':' body=formula #formulaForAll
        // existential quantification, e.g.: there exists X : X = a
@@ -153,7 +153,7 @@ potential
     :  // parenthesis, e.g.:(1+2)
      '(' potential ')' #potentialWithParentheses
        // exponentiation, e.g. 2^3^4 -> 2^(3^4)
-     | base=potential '^'<assoc=right> exponent=potential #potentialExponentiation
+     |<assoc=right> base=potential '^' exponent=potential #potentialExponentiation
        // multiplication or division, e.g.: 2*3/2 -> 2*(3/2)
      | leftop=potential op=('*' | '/') rightop=potential #potentialMultiplicationOrDivision
        // addition or subtraction, e.g.: 1-2+3 -> (1-2)+3
