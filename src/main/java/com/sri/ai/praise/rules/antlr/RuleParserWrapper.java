@@ -88,9 +88,6 @@ public class RuleParserWrapper implements Parser {
 	public void close() {
 	}
 
-	//
-	// PRIVATE
-	//
 	public List<Expression> parseAll(String string, ParseTreeRetriever parseTreeRetriever) {
 		List<Expression> result = new ArrayList<Expression>();
 		try {
@@ -134,6 +131,11 @@ public class RuleParserWrapper implements Parser {
 
 		return result;
 	}
+	
+
+	//
+	// PRIVATE
+	//
 	
 	private interface ParseTreeRetriever {
 		ParseTree retrieve(RuleParser ruleParser);
