@@ -37,9 +37,14 @@
  */
 package com.sri.ai.praise.model.imports.church;
 
+import org.antlr.v4.runtime.misc.NotNull;
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.imports.church.antlr.ChurchBaseVisitor;
+import com.sri.ai.praise.imports.church.antlr.ChurchParser;
 
 /**
  * Utility class for converting a parsed Church Program to a HOGMs model.
@@ -49,5 +54,87 @@ import com.sri.ai.praise.imports.church.antlr.ChurchBaseVisitor;
  */
 @Beta
 public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
+	public static final String CHURCH_TRUE  = "ctrue";
+	public static final String CHURCH_FALSE = "cfalse";
 // TODO
+	
+
+	
+	
+	@Override 
+	public Expression visitSelfEvaluating(@NotNull ChurchParser.SelfEvaluatingContext ctx) { 
+		Expression result = null;
+		if (ctx.CHARACTER() != null || ctx.STRING() != null) {
+			result = newSymbol(ctx.getText());
+		}
+		else {
+			result = visitChildren(ctx);
+		}
+		return result; 
+	}
+	
+	@Override 
+	public Expression visitSimpleDatum(@NotNull ChurchParser.SimpleDatumContext ctx) {
+		Expression result = null;
+		if (ctx.CHARACTER() != null || ctx.STRING() != null) {
+			result = newSymbol(ctx.getText());
+		}
+		else {
+			result = visitChildren(ctx);
+		}
+		return result;
+	}
+	
+	@Override 
+	public Expression visitIdentifier(@NotNull ChurchParser.IdentifierContext ctx) { 
+		Expression result = newSymbol(ctx.getText());
+		return result;
+	}
+	
+	@Override 
+	public Expression visitList(@NotNull ChurchParser.ListContext ctx) { 
+		throw new UnsupportedOperationException("Church List to HOGM currently not supported"); 
+	}
+	
+	@Override 
+	public Expression visitVector(@NotNull ChurchParser.VectorContext ctx) { 
+		throw new UnsupportedOperationException("Church Vector to HOGM currently not supported");
+	}
+	
+	@Override 
+	public Expression visitNumber(@NotNull ChurchParser.NumberContext ctx) {
+		Expression result = null;
+		if (ctx.NUM_10() != null) {
+			result = newSymbol(ctx.getText());
+		}
+		else {
+			throw new UnsupportedOperationException("Currently do not support numbers like: "+ctx.getText());
+		}	
+		return result; 
+	}
+	
+	@Override 
+	public Expression visitBool(@NotNull ChurchParser.BoolContext ctx) {
+		Expression result = ctx.TRUE() != null ? Expressions.makeSymbol(CHURCH_TRUE) : Expressions.makeSymbol(CHURCH_FALSE);	
+		return result;
+	}
+	
+	//
+	// PROTECTED
+	//
+	protected Expression newSymbol(String text) {
+		// Remove quotes from around quoted strings
+		if ((text.startsWith("'") && text.endsWith("'"))
+				|| (text.startsWith("\"") && text.endsWith("\""))) {
+			text = text.substring(1, text.length() - 1);
+		}
+
+		// Ensure escapes are applied.
+		text = StringEscapeUtils.unescapeJava(text);
+
+		text = new String(text);
+
+		Expression result = Expressions.makeSymbol(text);
+		return result;
+	}
 }
