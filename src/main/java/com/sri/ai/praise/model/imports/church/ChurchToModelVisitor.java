@@ -37,14 +37,22 @@
  */
 package com.sri.ai.praise.model.imports.church;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.antlr.v4.runtime.misc.NotNull;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.imports.church.antlr.ChurchBaseVisitor;
 import com.sri.ai.praise.imports.church.antlr.ChurchParser;
+import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.rules.RuleConverter;
 
 /**
  * Utility class for converting a parsed Church Program to a HOGMs model.
@@ -54,12 +62,77 @@ import com.sri.ai.praise.imports.church.antlr.ChurchParser;
  */
 @Beta
 public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
-	public static final String CHURCH_TRUE  = "ctrue";
-	public static final String CHURCH_FALSE = "cfalse";
-// TODO
-	
 
+	// deterministicChurch2HOGM - converts prefix notation Church expression into the corresponding infix HOGM expression.
+	// Must replace Church tests by HOGM tests on 'ctrue' and 'cfalse', e.g.:
+	// (if var good bad)
+	// becomes:
+	// if var = ctrue then good else bad	
+	public static final Expression CHURCH_TRUE  = Expressions.makeSymbol("ctrue");
+	public static final Expression CHURCH_FALSE = Expressions.makeSymbol("cfalse");
+	// Because Church is untyped, we use a single HOGM sort called values.
+	public static final String CHURCH_SORT_VALUES = "sort Values: Unknown, ctrue, cfalse;";
+	//
+	private List<String> randoms  = new ArrayList<String>();
+	private List<String> rules    = new ArrayList<String>();
+	private List<String> queries  = new ArrayList<String>();
+
+	@Override 
+	public Expression visitParse(@NotNull ChurchParser.ParseContext ctx) {		
+
+		randoms.clear();
+		rules.clear();
+		queries.clear();
+		
+		visitChildren(ctx);
+		
+		StringBuilder hlm = new StringBuilder();
+		hlm.append("\n");
+		hlm.append(CHURCH_SORT_VALUES+"\n");
+		for (String rv : randoms) {
+			hlm.append(rv+";\n");
+		}
+		hlm.append("\n");
+		for (String r : rules) {		
+			hlm.append(r+";\n");
+		}		
+// TODO - handle queries correctly
+		List<Expression> qExpressions = new ArrayList<Expression>();
+		
+		Model m = RuleConverter.makeModel("Church to HOGM", hlm.toString(), hlm.toString());
+		
+		Expression result = Tuple.make(
+								m.getModelDefinition(),
+								Expressions.apply(Tuple.TUPLE_LABEL, qExpressions));
+		
+		return result;
+	}
 	
+	@Override 
+	public Expression visitDefinition(@NotNull ChurchParser.DefinitionContext ctx) {
+		Expression result = visitChildren(ctx);		
+		return result;
+	}
+	
+	@Override 
+	public Expression visitCommand(@NotNull ChurchParser.CommandContext ctx) {
+		Expression result = visitChildren(ctx);
+		queries.add(result.toString());
+		return result;
+	}
+	
+	@Override 
+	public Expression visitDefineBinding(@NotNull ChurchParser.DefineBindingContext ctx) { 
+		Expression name = visit(ctx.name);
+		Expression body = visit(ctx.binding);
+						
+		Expression result = IfThenElse.make(Equality.make(name, body), Expressions.ONE, Expressions.ZERO);
+		
+		randoms.add("random "+name+": -> Values");
+		rules.add(""+IfThenElse.getCondition(result)+" "+IfThenElse.getThenBranch(result));
+		
+		return result;
+	}
 	
 	@Override 
 	public Expression visitSelfEvaluating(@NotNull ChurchParser.SelfEvaluatingContext ctx) { 
@@ -92,6 +165,18 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	}
 	
 	@Override 
+	public Expression visitVariable(@NotNull ChurchParser.VariableContext ctx) { 
+		Expression result = null;
+		if (ctx.VARIABLE() != null) {
+			result = newSymbol(ctx.VARIABLE().getText());
+		}
+		else {
+			throw new UnsupportedOperationException("Church Variable Ellipsis not supported");
+		}
+		return result;
+	}
+	
+	@Override 
 	public Expression visitList(@NotNull ChurchParser.ListContext ctx) { 
 		throw new UnsupportedOperationException("Church List to HOGM currently not supported"); 
 	}
@@ -115,7 +200,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	
 	@Override 
 	public Expression visitBool(@NotNull ChurchParser.BoolContext ctx) {
-		Expression result = ctx.TRUE() != null ? Expressions.makeSymbol(CHURCH_TRUE) : Expressions.makeSymbol(CHURCH_FALSE);	
+		Expression result = ctx.TRUE() != null ? CHURCH_TRUE : CHURCH_FALSE;	
 		return result;
 	}
 	
