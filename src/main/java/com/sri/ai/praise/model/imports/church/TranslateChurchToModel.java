@@ -68,15 +68,15 @@ import com.sri.ai.util.base.Pair;
 @Beta
 public class TranslateChurchToModel {
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) {		
 		TranslateChurchToModel translator = new TranslateChurchToModel();
 		
-		callTranslate(translator, "" 
+		callTranslate(translator, "Example 1", "" 
 				+ "(define sunny #t)\n"
 				);
 	}
 
-	public Pair<Model, List<Expression>> translate(String churchProgram) {
+	public Pair<Model, List<Expression>> translate(String churchProgramName, String churchProgram) {
 		Pair<Model, List<Expression>> result = null;
 		try {
 			ErrorListener lexerErrorListener = new ErrorListener("Lexer Error");
@@ -107,6 +107,7 @@ public class TranslateChurchToModel {
 					lexer.removeErrorListeners();
 					parser.removeErrorListeners();
 					ChurchToModelVisitor churchToModelVisitor = new ChurchToModelVisitor();
+					churchToModelVisitor.setChurchProgramInformation(churchProgramName, churchProgram);
 					Expression modelAndQueriesTuple = churchToModelVisitor.visit(tree);
 					
 					result = new Pair<Model, List<Expression>>(
@@ -151,18 +152,15 @@ public class TranslateChurchToModel {
 		}
 	}
 	
-	private static void callTranslate(TranslateChurchToModel translator, String churchProgram) {
-		System.out.println("CHURCH PROGRAM");
-		System.out.println("==============");
-		System.out.println(churchProgram);
-		Pair<Model, List<Expression>> translation = translator.translate(churchProgram);
-		System.out.println("--- TRANSLATES TO HOGM --->");
+	private static void callTranslate(TranslateChurchToModel translator, String churchProgramName, String churchProgram) {
+		Pair<Model, List<Expression>> translation = translator.translate(churchProgramName, churchProgram);
+		
 		Model model = translation.first;
-		System.out.println("Name:"+model.getName());
-		System.out.println("----");
-		System.out.println("Description:");
+		System.out.println("-- NAME:");
+		System.out.println(model.getName());
+		System.out.println("-- DESCRIPTION (CHURCH to HOGM RULES):");
 		System.out.println(model.getDescription());
-		System.out.println("----");
+		System.out.println("-- HOGM RULES to LOW LEVEL MODEL:");
 		for (SortDeclaration sort : model.getSortDeclarations()) {
 			System.out.println(sort.getSortDeclaration());
 		}
@@ -172,7 +170,7 @@ public class TranslateChurchToModel {
 		for (Expression parfactor : model.getParfactorsDeclaration().getParfactors()) {
 			System.out.println(parfactor);
 		}
-		System.out.println("--- WITH QUERIES --->");
+		System.out.println("-- WITH QUERIES:");
 		for (Expression query : translation.second) {
 			System.out.println(query);
 		}

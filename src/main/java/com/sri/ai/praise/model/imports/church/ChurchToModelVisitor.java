@@ -38,7 +38,10 @@
 package com.sri.ai.praise.model.imports.church;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -73,37 +76,51 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	// Because Church is untyped, we use a single HOGM sort called values.
 	public static final String CHURCH_SORT_VALUES = "sort Values: Unknown, ctrue, cfalse;";
 	//
-	private List<String> randoms  = new ArrayList<String>();
-	private List<String> rules    = new ArrayList<String>();
-	private List<String> queries  = new ArrayList<String>();
+	private String                      churchProgramName = null;
+	private String                      churchProgram     = null;
+	private List<String>                randoms           = new ArrayList<String>();
+	private List<String>                rules             = new ArrayList<String>();
+	private List<String>                queries           = new ArrayList<String>();
+	private Map<Expression, Expression> flipIdToValue     = new LinkedHashMap<Expression, Expression>();
+	
+	public void setChurchProgramInformation(String name, String program) {
+		churchProgramName = name;
+		churchProgram     = program;
+	}
 
 	@Override 
-	public Expression visitParse(@NotNull ChurchParser.ParseContext ctx) {		
-
+	public synchronized Expression visitParse(@NotNull ChurchParser.ParseContext ctx) {		
+		Expression result = null;
+		
+		// Clear down the working variables
 		randoms.clear();
 		rules.clear();
 		queries.clear();
+		flipIdToValue.clear();
 		
 		visitChildren(ctx);
 		
-		StringBuilder hlm = new StringBuilder();
-		hlm.append("\n");
-		hlm.append(CHURCH_SORT_VALUES+"\n");
+		// Construct the HOGM
+		StringBuilder hogm = new StringBuilder();
+		hogm.append("\n");
+		hogm.append(CHURCH_SORT_VALUES+"\n");
 		for (String rv : randoms) {
-			hlm.append(rv+";\n");
+			hogm.append(rv+";\n");
 		}
-		hlm.append("\n");
+		hogm.append("\n");
 		for (String r : rules) {		
-			hlm.append(r+";\n");
+			hogm.append(r+";\n");
 		}		
-// TODO - handle queries correctly
+
+// TODO - handle queries correctly.
 		List<Expression> qExpressions = new ArrayList<Expression>();
-		
-		Model m = RuleConverter.makeModel("Church to HOGM", hlm.toString(), hlm.toString());
-		
-		Expression result = Tuple.make(
-								m.getModelDefinition(),
-								Expressions.apply(Tuple.TUPLE_LABEL, qExpressions));
+
+// TODO - can we get the church model and name in here somewhere			
+		Model m = RuleConverter.makeModel(churchProgramName, "\n"+churchProgram+"\n--->\n"+hogm.toString(), hogm.toString());
+	
+		result = Tuple.make(
+							m.getModelDefinition(),
+							Expressions.apply(Tuple.TUPLE_LABEL, qExpressions));
 		
 		return result;
 	}
@@ -126,10 +143,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		Expression name = visit(ctx.name);
 		Expression body = visit(ctx.binding);
 						
-		Expression result = IfThenElse.make(Equality.make(name, body), Expressions.ONE, Expressions.ZERO);
-		
-		randoms.add("random "+name+": -> Values");
-		rules.add(""+IfThenElse.getCondition(result)+" "+IfThenElse.getThenBranch(result));
+		Expression result = defineInHOGM(name, Collections.<Expression>emptyList(), body);
 		
 		return result;
 	}
@@ -207,6 +221,22 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	//
 	// PROTECTED
 	//
+	protected Expression defineInHOGM(Expression name, List<Expression> params, Expression body) {
+		Expression result = null;
+		
+		if (flipIdToValue.size() == 0) {
+			result = IfThenElse.make(Equality.make(name, body), Expressions.ONE, Expressions.ZERO);		
+			rules.add(""+IfThenElse.getCondition(result)+" "+IfThenElse.getThenBranch(result));
+		}
+		else {
+// TODO
+		}
+// TODO - handle params		
+		randoms.add("random "+name+": -> Values");
+		
+		return result;
+	}
+	
 	protected Expression newSymbol(String text) {
 		// Remove quotes from around quoted strings
 		if ((text.startsWith("'") && text.endsWith("'"))
