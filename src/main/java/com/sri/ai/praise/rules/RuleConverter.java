@@ -681,8 +681,12 @@ public class RuleConverter {
 		Expression                   condition                       = null;
 		Expression                   functionFreeFormula             = null;
 		
-		// | if rule is an atomic rule of the form Formula Potential
-		if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
+		// | if rule is a potential (i.e. a number or arithmetic expression that derives a number).
+		if (isPotentialExpression(rule)) {
+			// |.... return rule
+			result = rule;				
+		} // | if rule is an atomic rule of the form Formula Potential 
+		else if (rule.getFunctor().equals(FUNCTOR_ATOMIC_RULE)) {
 			// | .... (Condition, functionFreeFormula)
 			// | ...... <- replaceRandomFunctionApplicationsByRelations(Formula, randomVariableDeclarations, functions, newUniqueVariables, newUniqueVariablesCache)			
 			Expression formula   = rule.get(0);
@@ -1899,6 +1903,11 @@ public class RuleConverter {
 		// Change the return type to boolean.
 		newArguments.add(Expressions.makeSymbol(TYPE_BOOLEAN));
 		return Expressions.apply(randomVariableDecl.getFunctor(), newArguments);
+	}
+	
+	public boolean isPotentialExpression(Expression expression) {
+		boolean result = Expressions.isNumber(expression) || FunctorConstants.ARITHMETIC_FUNCTORS.contains(expression.getFunctor());
+		return result;
 	}
 	
 //	public RewritingProcess getRewritingProcess() {

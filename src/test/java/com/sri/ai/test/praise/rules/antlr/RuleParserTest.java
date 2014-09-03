@@ -321,6 +321,31 @@ public class RuleParserTest extends AbstractParserTest {
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("=", "Y", "obama")), 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("entityOf", "X", "Y"), "1")));
+		
+		//
+		// Conditional Rules with potential expressions (i.e. arithmetic expressions) on the branches are now allowed
+		string = "if a then 0.3;";
+		test(string, Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "a", "0.3")); 
+
+		string = "if a then 0.4 else 0;";
+		test(string, Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "a", "0.4", "0")); 
+		
+		string = "if a then 0.2 else if b then 0.3 else if c then 0.5 else 0;";
+		test(string, Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+						"a", "0.2",
+						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule",
+								"b", "0.3",
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule",
+										"c", "0.5", "0")))); 
+		
+		string = "if a then 0.2 else (if b then 0.3 else (if c then 0.5 else 0));";
+		test(string, Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+						"a", "0.2",
+						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule",
+								"b", "0.3",
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule",
+										"c", "0.5", "0")))); 
+
 
 		System.out.println("test count = " + testCount);
 	}
@@ -394,7 +419,19 @@ public class RuleParserTest extends AbstractParserTest {
 	//http://code.google.com/p/aic-praise/issues/detail?id=19
 	@Test
 	public void testIssue19() {
-		testFail("if sick(X) and friends(X,Y) then 0.5 else sick(Y);");
+		// NOTE: having arithmetic expressions as leafs on a conditional rule has
+		// been made legal since issue 19 was closed.
+		//testFail("if sick(X) and friends(X,Y) then 0.5 else sick(Y);");
+		test("if sick(X) and friends(X,Y) then 0.5 else sick(Y);", 
+				// 'conditional rule'(sick(X) and friends(X, Y), 0.5, 'atomic rule'(sick(Y), 1))
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule",
+						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"),
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")),
+						"0.5", 
+						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"),
+								"1")));		
 	}
 
 	@Test

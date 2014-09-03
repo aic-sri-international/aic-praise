@@ -60,7 +60,12 @@ root_conditional_rule
     ;
 
 conditional_rule
-    : IF condition=formula THEN thenrule=sub_rule (ELSE elserule=sub_rule)?
+    : IF condition=formula THEN thenrule=conditional_branch (ELSE elserule=conditional_branch)?
+    ;
+
+conditional_branch
+    : sub_rule
+    | potential
     ;
 
 root_conjunction_of_rules

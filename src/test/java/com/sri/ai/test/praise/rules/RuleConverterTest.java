@@ -626,7 +626,18 @@ public class RuleConverterTest {
 							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
 					"0.5", 
 					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
-							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "1", "0")));		
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "1", "0")));	
+			
+			//
+			// Conditional Rules with potential expressions (i.e. arithmetic expressions) on the branches are now allowed
+			testRule2PotentialExpression(ruleParser.parse("if a then 0.3;"), 
+					lowParser.parse("if a then 0.3 else 0.5"));
+			
+			testRule2PotentialExpression(ruleParser.parse("if a then 0.4 else 0;"), 
+					lowParser.parse("if a then 0.4 else 0"));
+			
+			testRule2PotentialExpression(ruleParser.parse("if a then 0.2 else if b then 0.3 else if c then 0.5 else 0;"), 
+					lowParser.parse("if a then 0.2 else if b then 0.3 else if c then 0.5 else 0"));
 	}
 	
 	@Test
