@@ -249,6 +249,17 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	}
 	
 	@Override 
+	public Expression visitBody(@NotNull ChurchParser.BodyContext ctx) {
+// TODO - body is defined as:
+// body:  (definition)* sequence;
+// we need a way to handle the optional definitions and more that 1 expression in the sequence.
+
+		Expression result = visitChildren(ctx);
+		
+		return result;
+	}
+	
+	@Override 
 	public Expression visitSelfEvaluating(@NotNull ChurchParser.SelfEvaluatingContext ctx) { 
 		Expression result = null;
 		if (ctx.CHARACTER() != null || ctx.STRING() != null) {
@@ -437,11 +448,11 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	
 	protected Expression createPotentialRule(Expression randomVariable, Expression caseH, Expression alpha, Expression beta) {
 		Expression result    = null;
+// TODO - add an atomic rewriter for this translation to R_normalize.			
 		// Translate:
 		// if RV = Formula then Alpha else Beta
 		// --->
-		// if Formula then if RV then Alpha else Beta else if RV then Beta else Alpha
-		
+		// if Formula then if RV then Alpha else Beta else if RV then Beta else Alpha	
 		result = IfThenElse.make(caseH, 
 					IfThenElse.make(randomVariable, alpha, beta), 
 					IfThenElse.make(randomVariable, beta, alpha));		
