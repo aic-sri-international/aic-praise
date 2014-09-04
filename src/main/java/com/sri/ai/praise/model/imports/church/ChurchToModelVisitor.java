@@ -53,7 +53,6 @@ import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdat
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
@@ -74,7 +73,8 @@ import com.sri.ai.util.math.Rational;
 @Beta
 public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	//
-	private static final String FLIP_ID_PREFIX = "flip";
+	private static final String FLIP_ID_PREFIX     = "flip";
+	private static final String CHURCH_VALUES_SORT = "Values";
 	//
 	private String                   churchProgramName = null;
 	private String                   churchProgram     = null;
@@ -82,6 +82,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	private List<String>             rules             = new ArrayList<String>();
 	private List<String>             queries           = new ArrayList<String>();
 	private Map<Integer, Rational>   flipIdToValue     = new LinkedHashMap<Integer, Rational>();
+	private List<Expression>         lambdaParams      = new ArrayList<Expression>();
 	private Rewriter                 rNormalize        = LBPFactory.newNormalize();
 	
 	public void setChurchProgramInformation(String name, String program) {
@@ -101,9 +102,10 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		
 		visitChildren(ctx);
 		
-		// Construct the HOGM
+		// Construct the HOGM		
 		StringBuilder hogm = new StringBuilder();
 		hogm.append("\n");
+		hogm.append("sort "+CHURCH_VALUES_SORT+";\n\n");
 		for (String rv : randoms) {
 			hogm.append(rv+";\n");
 		}
@@ -114,8 +116,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 
 // TODO - handle queries correctly.
 		List<Expression> qExpressions = new ArrayList<Expression>();
-
-// TODO - can we get the church model and name in here somewhere			
+		
 		Model m = RuleConverter.makeModel(churchProgramName, "\n"+churchProgram+"\n--->\n"+hogm.toString(), hogm.toString());
 	
 		result = Tuple.make(
@@ -139,6 +140,16 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	}
 	
 	@Override 
+	public Expression visitDefineChurchMemoization(@NotNull ChurchParser.DefineChurchMemoizationContext ctx) {
+		Expression name = visit(ctx.name);
+		Expression body = visit(ctx.procedure);
+		
+		Expression result = defineInHOGM(name, lambdaParams, body);
+		
+		return result; 
+	}
+	
+	@Override 
 	public Expression visitDefineBinding(@NotNull ChurchParser.DefineBindingContext ctx) { 
 		Expression name = visit(ctx.name);
 		Expression body = visit(ctx.binding);
@@ -146,6 +157,48 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		Expression result = defineInHOGM(name, Collections.<Expression>emptyList(), body);
 		
 		return result;
+	}
+	
+	@Override 
+	public Expression visitLambdaExpression(@NotNull ChurchParser.LambdaExpressionContext ctx) {		
+		if (ctx.formals() != null) {
+			visit(ctx.formals());
+		}	
+		Expression result = visit(ctx.body());
+	
+		return result;
+	}
+	
+	@Override 
+	public Expression visitConditional(@NotNull ChurchParser.ConditionalContext ctx) { 
+		Expression test       = visit(ctx.test());
+		Expression consequent = visit(ctx.consequent());		
+		Expression alternate  = visit(ctx.alternate());
+		
+		Expression result;
+		if (alternate == null) {
+// TODO - correct way to handle no alternate?			
+			result = IfThenElse.make(test, consequent, Expressions.FALSE);
+		}
+		else {
+			result = IfThenElse.make(test, consequent, alternate);
+		}
+				
+		return result;
+	}
+	
+	@Override 
+	public Expression visitFormals(@NotNull ChurchParser.FormalsContext ctx) {
+// TODO - add a stack mechanism, as this won't support nested lambda expressions.
+//        Though, how should we handle lamba's outside of a (mem ...) - i.e. what
+//        would we name it? Likely need to create an anonymous/unique random variable?
+		lambdaParams.clear();
+		if (ctx.variable() != null && ctx.variable().size() > 0) {
+			for (int i = 0; i < ctx.variable().size(); i++) {
+				lambdaParams.add(visit(ctx.variable(i)));
+			}
+		}
+		return Expressions.TRUE;
 	}
 	
 	@Override 
@@ -178,6 +231,21 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		flipIdToValue.put(flipId, value.rationalValue());
 		
 		Expression result = newSymbol(FLIP_ID_PREFIX+flipId);
+		
+		return result; 
+	}
+	
+	public Expression visitProcedureCall(@NotNull ChurchParser.ProcedureCallContext ctx) { 
+		Expression       operator = visit(ctx.operator());
+		List<Expression> operands = new ArrayList<Expression>();
+		
+		if (ctx.operand() != null && ctx.operand().size() > 0) {
+			for (int i = 0; i < ctx.operand().size(); i++) {
+				operands.add(visit(ctx.operand(i)));
+			}
+		}
+		
+		Expression result = Expressions.apply(operator, operands);
 		
 		return result; 
 	}
@@ -258,8 +326,39 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	protected Expression defineInHOGM(Expression name, List<Expression> params, Expression body) {
 		Expression result = null;
 		
+		// Determine the correct argument names for any of the
+		StringBuilder                     rArgs         = new StringBuilder();
+		final Map<Expression, Expression> paramVarNames = new HashMap<Expression, Expression>();
+		boolean firstArg = true;
+		int cnt = 0;
+		Expression randomVariable = name;
+		List<Expression> rvArgs = new ArrayList<Expression>();
+		for (Expression arg : params) {
+			if (firstArg) {
+				firstArg = false;
+				rArgs.append(" ");
+			}
+			else {
+				rArgs.append(" X ");			
+			}
+			// Ensure name is upper cased
+			String sArg = arg.toString();
+			if (!sArg.substring(0, 1).toUpperCase().equals(sArg.substring(0, 1))) {
+				sArg = sArg.substring(0, 1).toUpperCase() + (sArg.length() > 1 ? sArg.substring(1) : "");
+			}
+			rvArgs.add(newSymbol(sArg));
+			params.set(cnt, newSymbol(sArg));
+			paramVarNames.put(arg, params.get(cnt));
+// TODO - anything better?			
+			rArgs.append(CHURCH_VALUES_SORT);
+			cnt++;
+		}
+		if (rvArgs.size() > 0) {
+			randomVariable = Expressions.apply(randomVariable, rvArgs);
+		}
+		
 		if (flipIdToValue.size() == 0) {
-			result = createPotentialRule(name, params, deterministicChurch2HOGM(body), Expressions.ONE, Expressions.ZERO);
+			result = createPotentialRule(randomVariable, deterministicChurch2HOGM(body, paramVarNames), Expressions.ONE, Expressions.ZERO);
 		}
 		else {
 			final List<List<Boolean>>       flipValues      = new ArrayList<List<Boolean>>();
@@ -280,8 +379,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 				final List<Boolean> values = cpe.nextElement();
 				
 				// caseC <- subsitute FlipsValues for Flips in body
-				RewritingProcess process = LBPFactory.newLBPProcess();
-				Expression       caseC   = body.replaceAllOccurrences(new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {					
+				Expression caseC = body.replaceAllOccurrences(new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {					
 					@Override
 					public Expression apply(Expression expression, RewritingProcess process) {
 						Expression result = expression;
@@ -293,9 +391,9 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 						}
 						return result;
 					}
-				}, process);
+				}, LBPFactory.newLBPProcess());
 				// caseH <- deterministicChurch2HOGM(caseC)
-				Expression caseH = deterministicChurch2HOGM(caseC);				
+				Expression caseH = deterministicChurch2HOGM(caseC, paramVarNames);				
 				
 				// Calculate q
 				Rational q = Rational.ONE;
@@ -308,22 +406,9 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 					q  = q.multiply(pi);
 				}
 											
-				h.add(createPotentialRule(name, params, caseH, Expressions.makeSymbol(q), Expressions.ZERO));				
+				h.add(createPotentialRule(randomVariable, caseH, Expressions.makeSymbol(q), Expressions.ZERO));				
 			}
 			result = rNormalize.rewrite(Plus.make(h));
-		}
-		
-		StringBuilder rArgs = new StringBuilder();
-		boolean firstArg = true;
-		for (Expression arg : params) {
-			if (firstArg) {
-				firstArg = false;
-				rArgs.append(" ");
-			}
-			else {
-				rArgs.append(" X ");			
-			}
-			rArgs.append(arg);
 		}
 		
 		rules.add(result.toString());
@@ -332,31 +417,36 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		return result;
 	}
 	
-	protected Expression deterministicChurch2HOGM(Expression expr) {		
-		Expression result = rNormalize.rewrite(expr);
+	protected Expression deterministicChurch2HOGM(Expression expr, final Map<Expression, Expression> paramVarNames) {	
+		expr = expr.replaceAllOccurrences(new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {					
+			@Override
+			public Expression apply(Expression expression, RewritingProcess process) {
+				Expression result = expression;
+				if (Expressions.isSymbol(expression)) {
+					Expression varName = paramVarNames.get(expression);
+					if (varName != null) {
+						result = varName;
+					}
+				}
+				return result;
+			}
+		}, LBPFactory.newLBPProcess());
 		
-		if (!Expressions.TRUE.equals(result) && !Expressions.FALSE.equals(result)) {
-			throw new UnsupportedOperationException("Cannot determine boolean value for translated deterministic church fragment: "+expr);
-		}
+		Expression result = rNormalize.rewrite(expr);
 		
 		return result;
 	}
 	
-	protected Expression createPotentialRule(Expression name, List<Expression> params, Expression caseH, Expression thenPotential, Expression elsePotential) {
+	protected Expression createPotentialRule(Expression randomVariable, Expression caseH, Expression alpha, Expression beta) {
 		Expression result    = null;
-		Expression condition = null;
-		Expression condValue = params.size() == 0 ? name : Expressions.apply(name, params);
-		if (Expressions.TRUE.equals(caseH)) {
-			condition = condValue;
-		}
-		else if (Expressions.FALSE.equals(caseH)) {
-			condition = Not.make(condValue);
-		}
-		else {
-			throw new IllegalArgumentException("caseH must be True or False.");
-		}
+		// Translate:
+		// if RV = Formula then Alpha else Beta
+		// --->
+		// if Formula then if RV then Alpha else Beta else if RV then Beta else Alpha
 		
-		result = IfThenElse.make(condition, thenPotential, elsePotential);		
+		result = IfThenElse.make(caseH, 
+					IfThenElse.make(randomVariable, alpha, beta), 
+					IfThenElse.make(randomVariable, beta, alpha));		
 		
 		return result;
 	}

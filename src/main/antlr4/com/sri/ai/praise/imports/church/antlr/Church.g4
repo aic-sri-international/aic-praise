@@ -107,9 +107,6 @@ expression
   |  literal
   |  lambdaExpression
   |  conditional
-  |  conjunction
-  |  disjunction
-  |  negation
   |  flip
   |  procedureCall
   ;
@@ -160,20 +157,9 @@ alternate
   :  expression
   ;
 
-conjunction
-  :  '(' AND operand* ')'
-  ;
-
-disjunction
-  :  '(' OR operand* ')'
-  ;
-
-negation
-  :  '(' NOT operand ')'
-  ;
-
 flip
   :  '(' FLIP number? ')'
+  | FLIP number?
   ;
 
 procedureCall

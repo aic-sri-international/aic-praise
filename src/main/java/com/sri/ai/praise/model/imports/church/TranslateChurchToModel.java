@@ -78,6 +78,10 @@ public class TranslateChurchToModel {
 		callTranslate(translator, "Example 2", "" 
 				+ "(define sunny (flip 0.3))\n"
 				);
+		
+		callTranslate(translator, "Example 3", "" 
+				+ "(define goOut (mem (lambda (day) (if (= day friday) (flip 0.8) (flip 0.3)))))\n"
+				);
 	}
 
 	public Pair<Model, List<Expression>> translate(String churchProgramName, String churchProgram) {
@@ -178,5 +182,6 @@ public class TranslateChurchToModel {
 		for (Expression query : translation.second) {
 			System.out.println(query);
 		}
+		System.out.println("\n");
 	}
 }
