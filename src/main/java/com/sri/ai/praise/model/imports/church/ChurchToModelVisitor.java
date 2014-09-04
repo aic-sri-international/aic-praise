@@ -39,6 +39,7 @@ package com.sri.ai.praise.model.imports.church;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,16 +49,21 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
+import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.imports.church.antlr.ChurchBaseVisitor;
 import com.sri.ai.praise.imports.church.antlr.ChurchParser;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.rules.RuleConverter;
+import com.sri.ai.util.collect.CartesianProductEnumeration;
+import com.sri.ai.util.math.Rational;
 
 /**
  * Utility class for converting a parsed Church Program to a HOGMs model.
@@ -68,13 +74,15 @@ import com.sri.ai.praise.rules.RuleConverter;
 @Beta
 public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	//
-	private String                      churchProgramName = null;
-	private String                      churchProgram     = null;
-	private List<String>                randoms           = new ArrayList<String>();
-	private List<String>                rules             = new ArrayList<String>();
-	private List<String>                queries           = new ArrayList<String>();
-	private Map<Expression, Expression> flipIdToValue     = new LinkedHashMap<Expression, Expression>();
-	private Rewriter                    rNormalize        = LBPFactory.newNormalize();
+	private static final String FLIP_ID_PREFIX = "flip";
+	//
+	private String                   churchProgramName = null;
+	private String                   churchProgram     = null;
+	private List<String>             randoms           = new ArrayList<String>();
+	private List<String>             rules             = new ArrayList<String>();
+	private List<String>             queries           = new ArrayList<String>();
+	private Map<Integer, Rational>   flipIdToValue     = new LinkedHashMap<Integer, Rational>();
+	private Rewriter                 rNormalize        = LBPFactory.newNormalize();
 	
 	public void setChurchProgramInformation(String name, String program) {
 		churchProgramName = name;
@@ -138,6 +146,40 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		Expression result = defineInHOGM(name, Collections.<Expression>emptyList(), body);
 		
 		return result;
+	}
+	
+	@Override 
+	public Expression visitFlip(@NotNull ChurchParser.FlipContext ctx) {
+		
+		Expression value = Expressions.ZERO_POINT_FIVE;
+		if (ctx.number() != null) {
+			value = visit(ctx.number());
+		}
+		
+		// Must be a number and in the interval [0, 1]
+		boolean badNumber = false;		
+		if (Expressions.isNumber(value)) {
+			if (value.rationalValue().compareTo(Rational.ZERO) < 0 
+					|| 
+				value.rationalValue().compareTo(Rational.ONE) > 0) {
+				
+				badNumber = true;		
+			}
+		}
+		else {
+			badNumber = true;
+		}
+		
+		if (badNumber) {
+			throw new IllegalArgumentException("flip value must be in interval [0, 1]: "+value);
+		}
+
+		Integer flipId = this.flipIdToValue.size();
+		flipIdToValue.put(flipId, value.rationalValue());
+		
+		Expression result = newSymbol(FLIP_ID_PREFIX+flipId);
+		
+		return result; 
 	}
 	
 	@Override 
@@ -220,9 +262,57 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			result = createPotentialRule(name, params, deterministicChurch2HOGM(body), Expressions.ONE, Expressions.ZERO);
 		}
 		else {
-// TODO
+			final List<List<Boolean>>       flipValues      = new ArrayList<List<Boolean>>();
+			final List<Boolean>             trueFalseValues = new ArrayList<Boolean>();
+			final Map<Expression, Integer>  flipMarkerToIdx = new HashMap<Expression, Integer>();
+			// Flips <- array of flip applications in bodu
+			trueFalseValues.add(Boolean.FALSE);
+			trueFalseValues.add(Boolean.TRUE);
+			for (Integer flipId : flipIdToValue.keySet()) {
+				flipValues.add(trueFalseValues);
+				flipMarkerToIdx.put(newSymbol(FLIP_ID_PREFIX+flipId), flipId);
+			}
+			// H <- empty list
+			List<Expression> h = new ArrayList<Expression>();
+			// for all assignments of FlipsValues to Flips do
+			CartesianProductEnumeration<Boolean> cpe = new CartesianProductEnumeration<Boolean>(flipValues);
+			while (cpe.hasMoreElements()) {
+				final List<Boolean> values = cpe.nextElement();
+				
+				// caseC <- subsitute FlipsValues for Flips in body
+				RewritingProcess process = LBPFactory.newLBPProcess();
+				Expression       caseC   = body.replaceAllOccurrences(new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {					
+					@Override
+					public Expression apply(Expression expression, RewritingProcess process) {
+						Expression result = expression;
+						if (Expressions.isSymbol(expression)) {
+							Integer idx = flipMarkerToIdx.get(expression);
+							if (idx != null) {
+								result = values.get(idx) ? Expressions.TRUE : Expressions.FALSE;
+							}
+						}
+						return result;
+					}
+				}, process);
+				// caseH <- deterministicChurch2HOGM(caseC)
+				Expression caseH = deterministicChurch2HOGM(caseC);				
+				
+				// Calculate q
+				Rational q = Rational.ONE;
+				for (Map.Entry<Integer, Rational> flipEntry : flipIdToValue.entrySet()) {
+					Rational pi = flipEntry.getValue();
+					if (!values.get(flipEntry.getKey())) {
+						pi = Rational.ONE.subtract(pi);
+					}
+					
+					q  = q.multiply(pi);
+				}
+											
+				h.add(createPotentialRule(name, params, caseH, Expressions.makeSymbol(q), Expressions.ZERO));				
+			}
+			result = rNormalize.rewrite(Plus.make(h));
 		}
-// TODO - handle params		
+		
 		StringBuilder rArgs = new StringBuilder();
 		boolean firstArg = true;
 		for (Expression arg : params) {
@@ -235,12 +325,14 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			}
 			rArgs.append(arg);
 		}
+		
+		rules.add(result.toString());
 		randoms.add("random "+name+":"+rArgs+" -> Boolean");
 		
 		return result;
 	}
 	
-	protected Expression deterministicChurch2HOGM(Expression expr) {
+	protected Expression deterministicChurch2HOGM(Expression expr) {		
 		Expression result = rNormalize.rewrite(expr);
 		
 		if (!Expressions.TRUE.equals(result) && !Expressions.FALSE.equals(result)) {
@@ -264,10 +356,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			throw new IllegalArgumentException("caseH must be True or False.");
 		}
 		
-		result = IfThenElse.make(condition, thenPotential, elsePotential);
-		
-		rules.add(result.toString());
-
+		result = IfThenElse.make(condition, thenPotential, elsePotential);		
 		
 		return result;
 	}
