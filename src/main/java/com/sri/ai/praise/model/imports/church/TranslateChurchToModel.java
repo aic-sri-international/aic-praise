@@ -49,6 +49,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.imports.church.antlr.ChurchLexer;
 import com.sri.ai.praise.imports.church.antlr.ChurchParser;
@@ -57,7 +58,7 @@ import com.sri.ai.praise.model.Model.ModelError;
 import com.sri.ai.praise.model.Model.ModelException;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
-import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.base.Triple;
 
 /**
  * Utility class for parsing a Church Program and translating it to a HOGMs model.
@@ -81,11 +82,13 @@ public class TranslateChurchToModel {
 		
 		callTranslate(translator, "Example 3", "" 
 				+ "(define goOut (mem (lambda (day) (if (= day friday) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut friday)\n"
+				+ "(goOut monday)\n"
 				);
 	}
 
-	public Pair<Model, List<Expression>> translate(String churchProgramName, String churchProgram) {
-		Pair<Model, List<Expression>> result = null;
+	public Triple<String, Model, List<Expression>> translate(String churchProgramName, String churchProgram) {
+		Triple<String, Model, List<Expression>> result = null;
 		try {
 			ErrorListener lexerErrorListener = new ErrorListener("Lexer Error");
 			ErrorListener parseErrorListener = new ErrorListener("Parse Error");
@@ -116,12 +119,12 @@ public class TranslateChurchToModel {
 					parser.removeErrorListeners();
 					ChurchToModelVisitor churchToModelVisitor = new ChurchToModelVisitor();
 					churchToModelVisitor.setChurchProgramInformation(churchProgramName, churchProgram);
-					Expression modelAndQueriesTuple = churchToModelVisitor.visit(tree);
+					Expression hogmAndModelAndQueriesTuple = churchToModelVisitor.visit(tree);
 					
-					result = new Pair<Model, List<Expression>>(
-								new Model(Tuple.get(modelAndQueriesTuple, 0), Collections.<String>emptySet()),
-// TODO - get queries								
-								Collections.<Expression>emptyList());
+					result = new Triple<String, Model, List<Expression>>(
+								Tuple.get(hogmAndModelAndQueriesTuple, 0).getValue().toString(),
+								new Model(Tuple.get(hogmAndModelAndQueriesTuple, 1), Collections.<String>emptySet()),								
+								ExtensionalSet.getElements(Tuple.get(hogmAndModelAndQueriesTuple, 2)));
 				}
 			}
 		} catch (RecognitionException re) {
@@ -161,10 +164,12 @@ public class TranslateChurchToModel {
 	}
 	
 	private static void callTranslate(TranslateChurchToModel translator, String churchProgramName, String churchProgram) {
-		Pair<Model, List<Expression>> translation = translator.translate(churchProgramName, churchProgram);
+		Triple<String, Model, List<Expression>> translation = translator.translate(churchProgramName, churchProgram);
 		
-		Model model = translation.first;
-		System.out.println("-- NAME:");
+		Model model = translation.second;
+		System.out.println("-- HOGM:");
+		System.out.println(translation.first);
+		System.out.println("-- MODEL NAME:");
 		System.out.println(model.getName());
 		System.out.println("-- DESCRIPTION (CHURCH to HOGM RULES):");
 		System.out.println(model.getDescription());
@@ -179,7 +184,7 @@ public class TranslateChurchToModel {
 			System.out.println(parfactor);
 		}
 		System.out.println("-- WITH QUERIES:");
-		for (Expression query : translation.second) {
+		for (Expression query : translation.third) {
 			System.out.println(query);
 		}
 		System.out.println("\n");

@@ -55,6 +55,7 @@ import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Plus;
+import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.imports.church.antlr.ChurchBaseVisitor;
 import com.sri.ai.praise.imports.church.antlr.ChurchParser;
@@ -80,7 +81,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	private String                   churchProgram     = null;
 	private List<String>             randoms           = new ArrayList<String>();
 	private List<String>             rules             = new ArrayList<String>();
-	private List<String>             queries           = new ArrayList<String>();
+	private List<Expression>         queries           = new ArrayList<Expression>();
 	private Map<Integer, Rational>   flipIdToValue     = new LinkedHashMap<Integer, Rational>();
 	private List<Expression>         lambdaParams      = new ArrayList<Expression>();
 	private Rewriter                 rNormalize        = LBPFactory.newNormalize();
@@ -112,16 +113,13 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		hogm.append("\n");
 		for (String r : rules) {		
 			hogm.append(r+";\n");
-		}		
-
-// TODO - handle queries correctly.
-		List<Expression> qExpressions = new ArrayList<Expression>();
+		}
 		
 		Model m = RuleConverter.makeModel(churchProgramName, "\n"+churchProgram+"\n--->\n"+hogm.toString(), hogm.toString());
 	
-		result = Tuple.make(
+		result = Tuple.make(newSymbol(hogm.toString()),
 							m.getModelDefinition(),
-							Expressions.apply(Tuple.TUPLE_LABEL, qExpressions));
+							ExtensionalSet.makeUniSet(queries));
 		
 		return result;
 	}
@@ -135,7 +133,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	@Override 
 	public Expression visitCommand(@NotNull ChurchParser.CommandContext ctx) {
 		Expression result = visitChildren(ctx);
-		queries.add(result.toString());
+		queries.add(result);
 		return result;
 	}
 	
@@ -241,7 +239,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		
 		if (ctx.operand() != null && ctx.operand().size() > 0) {
 			for (int i = 0; i < ctx.operand().size(); i++) {
-				operands.add(visit(ctx.operand(i)));
+				operands.add(visit(ctx.operand(i)));			
 			}
 		}
 		
