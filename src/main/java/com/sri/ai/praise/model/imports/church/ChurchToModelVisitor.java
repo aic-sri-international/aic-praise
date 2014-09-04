@@ -49,11 +49,13 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.api.Rewriter;
+import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.imports.church.antlr.ChurchBaseVisitor;
 import com.sri.ai.praise.imports.church.antlr.ChurchParser;
+import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.rules.RuleConverter;
 
@@ -65,16 +67,6 @@ import com.sri.ai.praise.rules.RuleConverter;
  */
 @Beta
 public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
-
-	// deterministicChurch2HOGM - converts prefix notation Church expression into the corresponding infix HOGM expression.
-	// Must replace Church tests by HOGM tests on 'ctrue' and 'cfalse', e.g.:
-	// (if var good bad)
-	// becomes:
-	// if var = ctrue then good else bad	
-	public static final Expression CHURCH_TRUE  = Expressions.makeSymbol("ctrue");
-	public static final Expression CHURCH_FALSE = Expressions.makeSymbol("cfalse");
-	// Because Church is untyped, we use a single HOGM sort called values.
-	public static final String CHURCH_SORT_VALUES = "sort Values: Unknown, ctrue, cfalse;";
 	//
 	private String                      churchProgramName = null;
 	private String                      churchProgram     = null;
@@ -82,6 +74,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	private List<String>                rules             = new ArrayList<String>();
 	private List<String>                queries           = new ArrayList<String>();
 	private Map<Expression, Expression> flipIdToValue     = new LinkedHashMap<Expression, Expression>();
+	private Rewriter                    rNormalize        = LBPFactory.newNormalize();
 	
 	public void setChurchProgramInformation(String name, String program) {
 		churchProgramName = name;
@@ -103,7 +96,6 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		// Construct the HOGM
 		StringBuilder hogm = new StringBuilder();
 		hogm.append("\n");
-		hogm.append(CHURCH_SORT_VALUES+"\n");
 		for (String rv : randoms) {
 			hogm.append(rv+";\n");
 		}
@@ -214,7 +206,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	
 	@Override 
 	public Expression visitBool(@NotNull ChurchParser.BoolContext ctx) {
-		Expression result = ctx.TRUE() != null ? CHURCH_TRUE : CHURCH_FALSE;	
+		Expression result = ctx.TRUE() != null ? Expressions.TRUE : Expressions.FALSE;	
 		return result;
 	}
 	
@@ -225,14 +217,57 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		Expression result = null;
 		
 		if (flipIdToValue.size() == 0) {
-			result = IfThenElse.make(Equality.make(name, body), Expressions.ONE, Expressions.ZERO);		
-			rules.add(""+IfThenElse.getCondition(result)+" "+IfThenElse.getThenBranch(result));
+			result = createPotentialRule(name, params, deterministicChurch2HOGM(body), Expressions.ONE, Expressions.ZERO);
 		}
 		else {
 // TODO
 		}
 // TODO - handle params		
-		randoms.add("random "+name+": -> Values");
+		StringBuilder rArgs = new StringBuilder();
+		boolean firstArg = true;
+		for (Expression arg : params) {
+			if (firstArg) {
+				firstArg = false;
+				rArgs.append(" ");
+			}
+			else {
+				rArgs.append(" X ");			
+			}
+			rArgs.append(arg);
+		}
+		randoms.add("random "+name+":"+rArgs+" -> Boolean");
+		
+		return result;
+	}
+	
+	protected Expression deterministicChurch2HOGM(Expression expr) {
+		Expression result = rNormalize.rewrite(expr);
+		
+		if (!Expressions.TRUE.equals(result) && !Expressions.FALSE.equals(result)) {
+			throw new UnsupportedOperationException("Cannot determine boolean value for translated deterministic church fragment: "+expr);
+		}
+		
+		return result;
+	}
+	
+	protected Expression createPotentialRule(Expression name, List<Expression> params, Expression caseH, Expression thenPotential, Expression elsePotential) {
+		Expression result    = null;
+		Expression condition = null;
+		Expression condValue = params.size() == 0 ? name : Expressions.apply(name, params);
+		if (Expressions.TRUE.equals(caseH)) {
+			condition = condValue;
+		}
+		else if (Expressions.FALSE.equals(caseH)) {
+			condition = Not.make(condValue);
+		}
+		else {
+			throw new IllegalArgumentException("caseH must be True or False.");
+		}
+		
+		result = IfThenElse.make(condition, thenPotential, elsePotential);
+		
+		rules.add(result.toString());
+
 		
 		return result;
 	}
