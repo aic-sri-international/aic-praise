@@ -178,7 +178,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				
 				Expression incomingMessagesSet = productOfIncomingMessages.get(0);
 				Expression indexExpression     = IntensionalSet.getIndexExpressions(incomingMessagesSet).get(0);
-				Expression NPrime              = IndexExpressions.getDomain(indexExpression);
+				Expression NPrime              = IndexExpressions.getType(indexExpression);
 				
 				Trace.log("// N' = {}", NPrime);
 				Trace.log("// RV_in_E = {}", rvInE);

@@ -161,8 +161,8 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			Expression conditionPrime         = IntensionalSet.getCondition(saParfactor);
 			List<Expression> indexExpressionsPrime = IntensionalSet.getIndexExpressions(saParfactor);
 			
-			Trace.log("    Extend contextual variables with I'");
-			RewritingProcess processIPrime = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saParfactor, process);
+			Trace.log("    Extend contextual symbols with I'");
+			RewritingProcess processIPrime = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saParfactor, process);
 			
 			Trace.log("    return R_intensional_simplification(");
 			Trace.log("                    {{ [ Ef' ] | R_formula_simplification(C' and rv_is_referenced_by([Ev], Ef')) }}_I')");

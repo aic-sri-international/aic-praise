@@ -350,7 +350,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		@Override 
 		public void run() {			
 			// Setup the options for this query.
-			PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_ALL_TYPE_SIZES_KNOWN, ""+options.isKnownDomainSizes());
+			PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_ALL_TYPE_SIZES_KNOWN, ""+options.isKnownTypeSizes());
 			setupLogging();
 						
 			try {
@@ -437,7 +437,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 							// Step 6 create new Belief expression from 1 and 2
 							notifyListenersQueryStepStarting(queryUUID, STEP_6, stopWatch);
 							// Extend the process by any logical variables in the query.
-							process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(queryExpression, process);
+							process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(queryExpression, process);
 							Expression belief = process.rewrite(LBPRewriter.R_belief, queryExpression);
 							notifyListenersQueryStepComplete(queryUUID, STEP_6, stopWatch, rewriterProfiledTimes);
 							

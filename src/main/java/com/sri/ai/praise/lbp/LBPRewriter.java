@@ -500,7 +500,7 @@ public interface LBPRewriter extends Rewriter {
 	 *     return {@link #R_basic}(F1 union ... union F_n)
 	 * if PF is an intensionally defined set {{ [ Ef ] | C }}_I) (where [ Ef ] is a factor expression)
 	 *     {{ [ Ef' ] | C' }}_I' <- standardize {{ [ Ef ] | C }}_I apart from [ Ev ]
-	 *     Extend contextual variables with I'
+	 *     Extend contextual symbols with I'
 	 *     return {@link #R_intensional_simplification}(
 	 *                     {{ [ Ef' ] | {@link #R_formula_simplification}(C' and {@link ALBPRewriterUtil#randomVariableIsReferencedByExpression rv_is_referenced_by}([Ev], Ef')) }}_I')
 	 * </pre>
@@ -592,7 +592,7 @@ public interface LBPRewriter extends Rewriter {
 	 *        return {@link #R_m_to_v_from_f}(m_V<-F1, beingComputed)
 	 * prod_F in {{ F1 | C }}_I m_V<-F 
 	 *        message <- {@link #R_m_to_v_from_f}(m_V<-F1, C, I, beingComputed) 
-	 *                under cont. constraint extended by C and contextual variables extended by I
+	 *                under cont. constraint extended by C and contextual symbols extended by I
 	 *        return {@link #R_basic}(prod_{{ (on I) message | C }})
 	 * prod_F in {{F1,...,Fn}} m_V<-F
 	 *        return R_prod_factor(prod_F in {F1} union {{F2,...,Fn}} m_V<-F, beingComputed)

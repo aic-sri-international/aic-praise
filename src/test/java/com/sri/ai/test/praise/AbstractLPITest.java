@@ -181,14 +181,14 @@ public abstract class AbstractLPITest {
 			
 			if (null != model) {
 				model.setRewritingProcessesModel(process);
-				process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getParfactors(process)), process);
+				process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getParfactors(process)), process);
 				// parfactors don't typically have free variables, but they might.
 			}
 
 			Expression contextualConstraint = parse(contextualConstraintString);
 			Expression topExpressionAndContextualConstraint = Tuple.make(topExpression, contextualConstraint);
 			process =
-					GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(
+					GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(
 							topExpressionAndContextualConstraint, process);
 			process = GrinderUtil.extendContextualConstraint(contextualConstraint, process);
 			

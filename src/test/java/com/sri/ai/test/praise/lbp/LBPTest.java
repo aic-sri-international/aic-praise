@@ -173,27 +173,27 @@ public class LBPTest extends AbstractLPITest {
 		// simple case
 		expressionString = "(if X = tom then 1 else 2) + (if Y = beth then 3 else 4)";
 		expectedString = "if X = tom then if Y = beth then 1 + 3 else 1 + 4 else (if Y = beth then 2 + 3 else 2 + 4)";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 		
 		// more-than-one-level case
 		expressionString = "(if X = tom then 1 else 2) + (if Y = beth then if Z = carol then 3 else 4 else 5)";
 		expectedString = "if X = tom then if Y = beth then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5 else (if Y = beth then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5)";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 		
 		// more-than-one-level case, with conditionals at the bottom only
 		expressionString = "f(g((if X = tom then 1 else 2) + (if Y = beth then 3 else 4)))";
 		expectedString = "if X = tom then if Y = beth then f(g(1 + 3)) else f(g(1 + 4)) else (if Y = beth then f(g(2 + 3)) else f(g(2 + 4)))";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 		
 		// conditional condition case
 		expressionString = "(if X = tom then 1 else 2) + (if (if Y = beth then W = tom else W = john) then if Z = carol then 3 else 4 else 5)";
 		expectedString = "if X = tom then if Y = beth then if W = tom then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5 else (if W = john then if Z = carol then 1 + 3 else 1 + 4 else 1 + 5) else (if Y = beth then if W = tom then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5 else (if W = john then if Z = carol then 2 + 3 else 2 + 4 else 2 + 5))";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 		
 		// double conditional condition case, with simplifications
 		expressionString = "if (if X = tom then (if X = ann then X = john else X != john) else if X = beth then X = mark else X != mark) then 4 else 5";
 		expectedString = "if X = tom or X != beth and X != mark then 4 else 5";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 	}
 
 	@Test
@@ -210,56 +210,56 @@ public class LBPTest extends AbstractLPITest {
 		// non-case
 		expressionString = "1 + 2";
 		expectedString = "1 + 2";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 
 		// non-RV case
 		expressionString = "if X = ann then 1 + 2 else 3";
 		expectedString = "if X = ann then 1 + 2 else 3";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 
 		// Already normalized case with nested LV conditions
 		expressionString = "if X = ann then if X = bob then 1 else 2 else if X = bob then 3 else 4";
 		expectedString   = "if X = ann then if X = bob then 1 else 2 else if X = bob then 3 else 4";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 
 		// simple case
 		expressionString = "if smart(X) then if X = tom then 1 else 2 else 3";
 		expectedString = "if X = tom then if smart(X) then 1 else 3 else if smart(X) then 2 else 3";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 
 		// simple case, symmetric case around then/else
 		expressionString = "if smart(X) then 3 else if X = tom then 1 else 2";
 		expectedString = "if X = tom then if smart(X) then 3 else 1 else if smart(X) then 3 else 2";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 
 		// RVs on top and bottom
 		expressionString = "if smart(X) then if X = tom then if smart(ann) then 1 else 2 else 3 else 4";
 		expectedString = "if X = tom then if smart(X) then if smart(ann) then 1 else 2 else 4 else if smart(X) then 3 else 4";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 
 		// RVs on top, LV at bottom
 		expressionString = "if smart(X) then if X = tom then if Y = ann then 1 else 2 else 3 else 4";
 		expectedString = "if X = tom then if Y = ann then if smart(X) then 1 else 4 else (if smart(X) then 2 else 4) else (if smart(X) then 3 else 4)";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 
 		// RVs on top, LV at bottom, symmetric case around then/else
 		expressionString = "if smart(X) then 4 else if X = tom then 3 else if Y = ann then 1 else 2";
 		expectedString = "if X = tom then if smart(X) then 4 else 3 else (if Y = ann then if smart(X) then 4 else 1 else (if smart(X) then 4 else 2))";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 
 		// case with unregistered RV. Should still be fine because it detects LV conditions based on formula definition, which is equality logic.
 		expressionString = "if predicate(X) then if X = a then 1 else 2 else 3";
 		expectedString = "if X = a then if predicate(X) then 1 else 3 else if predicate(X) then 2 else 3";
-		runTestAfterExtendingContextualVariables(expressionString, expectedString, rewriter, process);
+		runTestAfterExtendingContextualSymbols(expressionString, expectedString, rewriter, process);
 	}
 	
 	/** Runs test assuming contextual constraint equal to "true" */
-	private void runTestAfterExtendingContextualVariables(String expressionString, String expectedString, Rewriter rewriter, RewritingProcess process) {
+	private void runTestAfterExtendingContextualSymbols(String expressionString, String expectedString, Rewriter rewriter, RewritingProcess process) {
 		Expression expression;
 		Expression actual;
 		RewritingProcess testProcess;
 		expression = parse(expressionString);
-		testProcess = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(expression, process);
+		testProcess = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(expression, process);
 		// the above would have to include the contextual constraint (say, in a Tuple with expression), if it were not known to be "true".
 		actual = rewriter.rewrite(expression, testProcess);
 		assertEquals(parse(expectedString), actual);
@@ -289,7 +289,7 @@ public class LBPTest extends AbstractLPITest {
 				);
         process = LBPFactory.newLBPProcess(expression);
         Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNameAndArities(), process);
-        process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(Tuple.make(expression, randomVariableValue), process);
+        process = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(Tuple.make(expression, randomVariableValue), process);
         // the above would have to include the contextual constraint (say, in a Tuple with expression), if it were not known to be "true".
         otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(expression, randomVariableValue, process);
         assertEquals(expected, otherRandomVariableValuesAndContexts);	
@@ -1251,7 +1251,7 @@ public class LBPTest extends AbstractLPITest {
 						"{{(on X) X | X != a }}", "{b}", 
 						false,
 						"{{(on X) X | X != a and X != b}}"),
-				// Note: In truth the result should be a multisets of all 'a' elements the size of the domain of X - 1.
+				// Note: In truth the result should be a multisets of all 'a' elements the size of the type of X - 1.
 				// However, not currently considered a problem as the multisets 
 				// passed to this rewriter are suppose to guarantee to have unique elements. 
 				// Keeping this test to highlight the limitation.
@@ -3355,7 +3355,7 @@ public class LBPTest extends AbstractLPITest {
 	}
 
 	@Test
-	public void testBeliefForNonLoopyModelsWithUnknownDomainSizes() {
+	public void testBeliefForNonLoopyModelswithUnknownTypeSizes() {
 		class BeliefUnknownSizeTestData extends TestData {
 			private String belief; 
 			private Expression exprBelief;
@@ -4173,7 +4173,7 @@ public class LBPTest extends AbstractLPITest {
 		Expression actual;
 		RewritingProcess process;
 		process = LBPFactory.newBoundLBPProcess(formula);
-		process = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(formula, process); 
+		process = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(formula, process); 
 		actual = PickSingleElement.getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variable, formula, process);
 		System.out.println("Formula : " + formula);	
 		System.out.println("Expected: " + expected);	
@@ -4282,7 +4282,7 @@ public class LBPTest extends AbstractLPITest {
 					false, 
 					// Note: (LBP 10 iterations) - these values oscillate
 					// and this can be seen in grounded versions of
-					// this model (domain size 10).
+					// this model (type size 10).
 					// --------------------
 					// MRF - varelim
 					// --------------------
@@ -4307,7 +4307,7 @@ public class LBPTest extends AbstractLPITest {
 					false, 
 					// Note: (LBP 10 iterations) - these values are equivalent
 					// to the values returned from running variable eliminations (i.e. exact)
-					// on a grounded version of this model (domain size 10).
+					// on a grounded version of this model (type size 10).
 					// --------------------
 					// MRF - varelim
 					// --------------------
@@ -4401,7 +4401,7 @@ public class LBPTest extends AbstractLPITest {
 		final LBPQueryEngine queryEngine = LBPFactory.newLBPQueryEngine();
 		final String queryUUID1 = queryEngine.newQueryUUID();
 		// Note: for the second query I'm changing the query options so that the
-		// domain size is not known so should get a formula back with this query.
+		// type size is not known so should get a formula back with this query.
 		final String queryUUID2 = queryEngine.newQueryUUID(new LBPQueryEngine.QueryOptions(false, true, true));
 		final String queryUUID3 = queryEngine.newQueryUUID();
 		

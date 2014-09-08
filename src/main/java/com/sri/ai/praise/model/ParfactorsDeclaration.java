@@ -87,7 +87,7 @@ import com.sri.ai.util.Util;
  *     {{ (on X in People, Y) [if p(X) and q(X, Y) then 1 else 0] | X != a1}}
  *     
  *     The head of the intensional set expression must be a legal parfactor 
- *     expression. If the domain type of the index is not specified (as in 
+ *     expression. If the type of the index is not specified (as in 
  *     the index Y in the above e.g.) it must be possible to determine it 
  *     uniquely from its usage within the parfactor expression in the head 
  *     of the intensional set expression.

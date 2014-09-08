@@ -169,8 +169,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		
 		Expression previousRandomVariableBeingNormalized = LPIUtil.setRandomVariableBeingNormalizedAndReturnPreviousOne(randomVariable, process);
 		
-		process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, process);
-		process = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getRewritingProcessesModel(process).getParfactorsDeclaration().getParfactors()), process);
+		process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, process);
+		process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getRewritingProcessesModel(process).getParfactorsDeclaration().getParfactors()), process);
 		
 		Trace.log("beingComputed    <- empty set");
 		Expression beingComputed = LPIUtil.createNewBeingComputedExpression();
@@ -509,7 +509,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression expansion = null;
 		Justification.begin("Going to symbolically compute unsimplified message expression");
 		// Set up the contextual constraint
-		RewritingProcess processExtendedByC = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(messageSet, process);
+		RewritingProcess processExtendedByC = GrinderUtil.extendContextualSymbolsAndConstraintWithIntensionalSet(messageSet, process);
 		// Determine which 'message to . from .' rewriter to call
 		if (BracketedExpressionSubExpressionsProvider.isRandomVariable(destination, process)) {
 			expansion = processExtendedByC.rewrite(R_m_to_v_from_f,
@@ -600,7 +600,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					Trace.log("    // msgExpansion={}", msgExpansion);
 					Trace.log("    // expansion   ={}", expansion);
 					
-					RewritingProcess subProcess = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(msgExpansion, process);
+					RewritingProcess subProcess = GrinderUtil.extendContextualSymbolsAndConstraintWithIntensionalSet(msgExpansion, process);
 					
 					Trace.log("    value <- use_values_for_previous_msgs(Expansion, msg_values) under contextual constraint expanded by C");
 					Expression value = useValuesForPreviousMessages(expansion, msgValues, subProcess);
@@ -615,7 +615,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					
 					// Normalize and manage precision
 					Expression normalizedValue = value;
-					if (Model.isAllDomainSizesKnown(subProcess)) {
+					if (Model.isAllTypeSizesKnown(subProcess)) {
 						Expression randomVariable = null;
 						if (BracketedExpressionSubExpressionsProvider.isRandomVariable(destination, subProcess)) {
 							randomVariable = destination;
@@ -748,7 +748,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Set<Expression> freeInMsg = Expressions.freeVariables(msgExpansionOrValue, process);
 		freeInMsg.removeAll(Model.getSortNames(process)); // Ensure sort names are not included in this list.
 		
-		Collection<Expression> introducedFreeVariables = Util.setDifference(freeInMsg, process.getContextualVariables());
+		Collection<Expression> introducedFreeVariables = Util.setDifference(freeInMsg, process.getContextualSymbols());
 		
 		return introducedFreeVariables;
 	}
@@ -872,7 +872,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		if (checkIfExpansionDependsOnLogicalVariableButMessageDoesNot(newMsgValue, process)) {
 			System.err.println("IllegalStateException: new_msg_value has answer dependent on logical variable that value is not.");
 			System.err.println("sub.context      ="+subProcess.getContextualConstraint());
-			System.err.println("sub.context vars ="+subProcess.getContextualVariables());
+			System.err.println("sub.context vars ="+subProcess.getContextualSymbols());
 			System.err.println("msg_expansion    ="+msgExpansion);
 			System.err.println("expansion        ="+expansion);
 			System.err.println("value            ="+value);
@@ -894,7 +894,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		if ( ! introducedFreeVariables.isEmpty()) {
 			System.err.println("IllegalStateException: introduced additional free variables into new_msg_value.");
 			System.err.println("sub.context      ="+subProcess.getContextualConstraint());
-			System.err.println("sub.context vars ="+subProcess.getContextualVariables());
+			System.err.println("sub.context vars ="+subProcess.getContextualSymbols());
 			System.err.println("introduced       ="+Util.join(introducedFreeVariables));
 			System.err.println("msg_expansion    ="+msgExpansion);
 			System.err.println("expansion        ="+expansion);
@@ -925,7 +925,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			System.err.println("Other random variable values appearing in message value that may not unify with " + destinationOrOriginRandomVariableValue +
 					           ", paired with the contexts in which they appear:\n" + Util.join(otherRandomVariables, "\n"));
 			System.err.println("sub.context      = " + subProcess.getContextualConstraint());
-			System.err.println("sub.context vars = " + subProcess.getContextualVariables());
+			System.err.println("sub.context vars = " + subProcess.getContextualSymbols());
 			System.err.println("msg_expansion    = " + msgExpansion);
 			System.err.println("expansion        = " + expansion);
 			System.err.println("msg_expansions   = ");
@@ -945,7 +945,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			// Output some useful information before throwing the exception
 			System.err.println("IllegalStateException: invalid message value.");
 			System.err.println("sub.context      ="+subProcess.getContextualConstraint());
-			System.err.println("sub.context vars ="+subProcess.getContextualVariables());
+			System.err.println("sub.context vars ="+subProcess.getContextualSymbols());
 			System.err.println("msg_expansion    ="+msgExpansion);
 			System.err.println("expansion        ="+expansion);
 			System.err.println("value            ="+value);

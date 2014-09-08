@@ -56,7 +56,7 @@ if rash(X) then itch(X) 0.9 else itch(X) 0.01;
 // if X = dave or X = bob then sick(X) else not sick(X);
 // query: epidemic
 // Note how message from sick(X) is generic for all X not in {bob, dave} and is computed only once;
-// That is then exponentiated to the domain size - 2 (everybody but bob and dave)
+// That is then exponentiated to the type size - 2 (everybody but bob and dave)
 // Change population size to be that answer changes but is computed in the same time.
 
 // if X = dave then itch(X) else not itch(X);

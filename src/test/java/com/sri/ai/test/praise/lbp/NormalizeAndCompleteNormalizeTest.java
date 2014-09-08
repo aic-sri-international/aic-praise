@@ -178,8 +178,8 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 						"X != a"),
 				// Tests for resolved ALBP-72.
 				// Note: semantics are that a and b belong to
-			    // the domain X is part of if in an equality
-				// therefore domain is at least size 2.
+			    // the type X is part of if in an equality
+				// therefore type is at least size 2.
 				new NormalizeTestData(Expressions.TRUE.toString(),
 						new TrivialPQR(), 
 						"there exists X: (X = a) => (X = b)", 
@@ -257,14 +257,14 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 						new TrivialPQR(),
 						"if [ p(a1) ] = [ p(X) ] then 2 ^ |People| else 3 ^ |People| ",
 						// Note: old result before CardinalityTypeOfLogicalVariable added support for looking up logical variables
-						// representing the size of a domain.
+						// representing the size of a type.
 						//"if X = a1 then 2 ^ |People| else 3 ^ |People|",
 						"if X = a1 then 1267650600228229401496703205376 else 515377520732011331036461129765621272702107522001"),
 			    new NormalizeTestData(Expressions.TRUE.toString(), 
 			    		new TrivialPQR(),
 			    		"(if [ p(a1) ] = [ p(X) ] then 2 else 3) ^ |People|",
 						// Note: old result before CardinalityTypeOfLogicalVariable added support for looking up logical variables
-						// representing the size of a domain.
+						// representing the size of a type.
 			    		//"if X = a1 then 2 ^ |People| else 3 ^ |People|".
 			    		"if X = a1 then 1267650600228229401496703205376 else 515377520732011331036461129765621272702107522001"),
 				//
@@ -339,7 +339,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 						// Note: assigning variables to their contextual values is no longer part of simplification
 						// "if X = a1 then if q(a1) then 2 ^ |People| else 3 ^ |People| else 3 ^ |People|"
 						// Note: old result before CardinalityTypeOfLogicalVariable added support for looking up logical variables
-						// representing the size of a domain.
+						// representing the size of a type.
 						//"if X = a1 then if q(X) then 2 ^ |People| else 3 ^ |People| else 3 ^ |People|"
 						"if X = a1 then if q(a1) then 1267650600228229401496703205376 else 515377520732011331036461129765621272702107522001 else 515377520732011331036461129765621272702107522001"),
 				new NormalizeTestData(Expressions.TRUE.toString(), 
@@ -615,7 +615,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 	//
 	// PRIVATE METHODS
 	//
-	class NormalizeTestData extends TestData implements CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable {
+	class NormalizeTestData extends TestData implements CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable {
 		private String E; 
 		private Expression exprE;
 		private int cardinality;
@@ -637,12 +637,12 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 		}
 		
 		//
-		// START-DomainSizeOfLogicalVariable
+		// START-TypeSizeOfLogicalVariable
 		@Override
 		public Integer size(Expression logicalVariable, RewritingProcess process) {
 			return cardinality;
 		}
-		// END-DomainSizeOfLogicalVariable
+		// END-TypeSizeOfLogicalVariable
 		//
 		
 		@Override
@@ -658,8 +658,8 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 				process.getGlobalObjects().putAll(globalObjects);
 			}
 			
-			// Ensure explicit counts added for all variable domains.
-			CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(this, process);
+			// Ensure explicit counts added for all variable types.
+			CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(this, process);
 			
 			return simplify(exprE, process);
 		}

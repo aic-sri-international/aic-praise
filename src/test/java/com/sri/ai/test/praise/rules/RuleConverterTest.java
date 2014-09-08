@@ -115,12 +115,12 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		exprectedRandomVariables.clear();
 		exprectedRandomVariables.add(ruleParser.parse("random mother: Person x Person -> Boolean;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		assertEquals(exprectedRandomVariables, translateFunctionsResult.second);
 		// Now see if can just get the rules
 		randomVariableDefinitions.clear();
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		exprectedRandomVariables.clear();
 		assertEquals(exprectedRandomVariables, translateFunctionsResult.second);
@@ -132,7 +132,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if mother(bob, X0) then mother(john, X0) and mother(bob, jane);"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -142,7 +142,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("mother(john, jane) and mother(bob, jane);"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -152,7 +152,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("mother(john, jane) and mother(bob, jane);"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -162,7 +162,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(X0) and X0 may be same as X;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -172,7 +172,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(X0) and X0 may be same as X 0.8;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -182,7 +182,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if mother(X, Y, X0) then sick(X0) and X0 may be same as X and X0 may be same as Y;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, X1, Y) then not mother(X0, X1, Z) and Y may be same as X0 and Z may be same as X0 and Y may be same as X1 and Z may be same as X1;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, X1, Y) and Y may be same as X0 and Y may be same as X1;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -192,7 +192,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(X0, bob) and X0 may be same as X;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -202,7 +202,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(bob, X0) and X0 may be same as X;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -214,7 +214,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if father(X0, Y) then not father(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : father(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -226,7 +226,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if father(X0, Y) then not father(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : father(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -238,7 +238,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if bestfriend(X0, Y) then not bestfriend(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : bestfriend(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		// Test multiple tiered functions.
@@ -251,7 +251,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if bestfriend(X0, Y) then not bestfriend(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : bestfriend(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -265,7 +265,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("there exists Y : bestfriend(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if father(X0, Y) then not father(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : father(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -275,7 +275,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if gender(Entity, X0) and X0 may be same as Entity and X0 may be same as Possessive then if gender(Possessive, X0) then referenceOf(Possessive, Entity) 0.7;"));
 		expectedRules.add(ruleParser.parse("if gender(X0, Y) then not gender(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : gender(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -285,7 +285,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if gender(Entity, X0) and X0 may be same as Entity and X0 may be same as Possessive then if gender(Possessive, X0) then referenceOf(Possessive, Entity) 0.7 else referenceOf(Possessive, Entity) 0.4;"));
 		expectedRules.add(ruleParser.parse("if gender(X0, Y) then not gender(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : gender(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 
 		rules.clear(); // From PRAiSEDemoApp Example #4.
@@ -299,7 +299,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("there exists Y : gender(X0, Y) and Y may be same as X0;"));
 		expectedRules.add(ruleParser.parse("if referenceOf(X0, Y) then not referenceOf(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : referenceOf(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -309,7 +309,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if mother(X, X0) then sick(X0) and X0 may be same as X 0.8;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -319,7 +319,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if epidemic(Y) then if mother(X, X0) then sick(X0) and X0 may be same as Y and X0 may be same as X 0.8;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -329,7 +329,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if epidemic(Y) then if mother(X, X0) then sick(X0) and X0 may be same as Y and X0 may be same as X 0.8;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		
 		rules.clear();
@@ -339,7 +339,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if epidemic(Y) then if mother(X, X0) then sick(X0) and X0 may be same as Y and X0 may be same as X 0.8;"));
 		expectedRules.add(ruleParser.parse("if mother(X0, Y) then not mother(X0, Z) and Y may be same as X0 and Z may be same as X0;"));
 		expectedRules.add(ruleParser.parse("there exists Y : mother(X0, Y) and Y may be same as X0;"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 	}
 	
@@ -360,7 +360,7 @@ public class RuleConverterTest {
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("if young(X) and 'for all Y : friends(Y, X) => smokes(Y)'(X) then smokes(X) 0.8;"));
 		expectedRules.add(ruleParser.parse("if not (friends(Y, X) => smokes(Y)) then not 'for all Y : friends(Y, X) => smokes(Y)'(X) else 'for all Y : friends(Y, X) => smokes(Y)'(X) 0.999999999;"));
-		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		assertEquals(4, translateFunctionsResult.second.size());
 		Assert.assertTrue(translateFunctionsResult.second.contains(lowParser.parse("randomVariable('for all Y : friends(Y, X) => smokes(Y)', 1, Person, Boolean)")));
@@ -372,7 +372,7 @@ public class RuleConverterTest {
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("'there exists X : president(X, Country)'(Country);"));
 		expectedRules.add(ruleParser.parse("if president(X, Country) then 'there exists X : president(X, Country)'(Country) else 'there exists X : president(X, Country)'(Country) 0.000000001;"));
-		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		assertEquals(2, translateFunctionsResult.second.size());
 		Assert.assertTrue(translateFunctionsResult.second.contains(lowParser.parse("randomVariable('there exists X : president(X, Country)', 1, Nation, Boolean)")));
@@ -384,7 +384,7 @@ public class RuleConverterTest {
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("friends(X,Y) and 'there exists Z : friends(X, Z)'(X);"));
 		expectedRules.add(ruleParser.parse("if friends(X,Z) then 'there exists Z : friends(X, Z)'(X) else 'there exists Z : friends(X, Z)'(X) 0.000000001;"));
-		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		assertEquals(2, translateFunctionsResult.second.size());
 		Assert.assertTrue(translateFunctionsResult.second.contains(lowParser.parse("randomVariable('there exists Z : friends(X, Z)', 1, Person, Boolean)")));
@@ -398,7 +398,7 @@ public class RuleConverterTest {
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("friends(X,Y) and 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X);"));
 		expectedRules.add(ruleParser.parse("if Z may be same as X and loves(X,Z) then 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X) else 'there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)'(X) 0.000000001;"));
-		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		assertEquals(3, translateFunctionsResult.second.size());
 		Assert.assertTrue(translateFunctionsResult.second.contains(lowParser.parse("randomVariable('there exists Z : \\\'. may be same as .\\\'(Z, X) and loves(X, Z)', 1, Person, Boolean)")));
@@ -421,7 +421,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if 'for all Y : loves(X, Y, Z)'(X, Z) then 'there exists Z : for all Y : loves(X, Y, Z)'(X) else 'there exists Z : for all Y : loves(X, Y, Z)'(X) 0.000000001;"));
 		expectedRules.add(ruleParser.parse("if not loves(X, Y, Z) then not 'for all Y : loves(X, Y, Z)'(X, Z) else 'for all Y : loves(X, Y, Z)'(X, Z) 0.999999999;"));
 
-		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateQuantifiers(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 		assertEquals(3, translateFunctionsResult.second.size());
 		Assert.assertTrue(translateFunctionsResult.second.contains(lowParser.parse("randomVariable('for all Y : loves(X, Y, Z)', 2, Person, Object, Boolean)")));
@@ -901,7 +901,7 @@ public class RuleConverterTest {
 		expectedRules.add(ruleParser.parse("if president(obama) then government(socialism) else government(freedom);"));
 		expectedRules.add(ruleParser.parse("if president(Y) then not president(Z);"));
 		expectedRules.add(ruleParser.parse("there exists Y : president(Y);"));
-		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		translateFunctionsResult = ruleConverter.translateFunctions(rules, randomVariableDefinitions, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 	}
 	
@@ -923,7 +923,7 @@ public class RuleConverterTest {
 		expected.add(new Pair<Expression, Expression>(
 				lowParser.parse("if friends(X, Y) and likes(X, Z) then if likes(Y, Z) then 0.8 else 0.2 else 0.5"),
 				lowParser.parse("X != Y and Y != Z")));
-		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions, getNewRewritingProcessWithDefaultDomainSizeAndRandomVariableDeclarations(DEFAULT_DOMAIN_SIZE, randomVariableDeclarations)));
+		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions, getNewRewritingProcessWithDefaultTypeSizeAndRandomVariableDeclarations(DEFAULT_DOMAIN_SIZE, randomVariableDeclarations)));
 
 		potentialExpressions = new ArrayList<Expression>();
 		potentialExpressions.add(lowParser.parse(
@@ -932,7 +932,7 @@ public class RuleConverterTest {
 		expected.add(new Pair<Expression, Expression>(
 				lowParser.parse("if colleagues(X, Y) then if likes(X, Y) then 0.8 else 0.2 else 0.5"),
 				lowParser.parse("Y != X and Y != bob")));
-		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions, getNewRewritingProcessWithDefaultDomainSizeAndRandomVariableDeclarations(DEFAULT_DOMAIN_SIZE, randomVariableDeclarations)));
+		assertEquals(expected, ruleConverter.disembedConstraints(potentialExpressions, getNewRewritingProcessWithDefaultTypeSizeAndRandomVariableDeclarations(DEFAULT_DOMAIN_SIZE, randomVariableDeclarations)));
 	}
 	
 	@Test
@@ -969,42 +969,42 @@ public class RuleConverterTest {
 		
 		string = "sick(X)";
 		randomVariableDeclarations.clear();
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query(X) <=> sick(X);"),
 				                                    ruleParser.parseFormula("query(X)"));
 		assertEquals(expected, result);
 		
 		string = "sick(john) and sick(mary)";
 		randomVariableDeclarations.clear();
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query <=> sick(john) and sick(mary);"),
 				                                    ruleParser.parseFormula("query"));
 		assertEquals(expected, result);
 
 		string = "not sick(X)";
 		randomVariableDeclarations.clear();
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query(X) <=> not sick(X);"),
 				                                    ruleParser.parseFormula("query(X)"));
 		assertEquals(expected, result);
 
 		string = "there exists X : friends(X,Y)";
 		randomVariableDeclarations.clear();
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query(Y) <=> there exists X : friends(X,Y);"),
 				                                    ruleParser.parseFormula("query(Y)"));
 		assertEquals(expected, result);
 
 		string = "conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z)";
 		randomVariableDeclarations.clear();
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query(C, X, Y, Z) <=> conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z);"),
 				                                    ruleParser.parseFormula("query(C, X, Y, Z)"));
 		assertEquals(expected, result);
 
 		string = "mother(X) = lucy";
 		randomVariableDeclarations.clear();
-		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query(X) <=> (mother(X) = lucy);"),
 				                                    ruleParser.parseFormula("query(X)"));
 		assertEquals(expected, result);
@@ -1017,21 +1017,21 @@ public class RuleConverterTest {
 		input = lowParser.parse("if sick(bob) then 0.3 else 0.7");
 		result = ruleConverter.queryAnswerPotentialExpression2Rule(
 				input, lowParser.parse("sick(bob)"),
-				getNewRewritingProcessWithDefaultDomainSizeAndContextualVariablesEqualToFreeVariablesInGivenExpression(DEFAULT_DOMAIN_SIZE, input));
+				getNewRewritingProcessWithDefaultTypeSizeAndContextualSymbolsEqualToFreeVariablesInGivenExpression(DEFAULT_DOMAIN_SIZE, input));
 		expected = ruleParser.parse("sick(bob) 0.3;");
 		assertEquals(expected, result);
 
 		input = lowParser.parse("if X = bob then if sick(bob) then 0.7 else 0.3 else if sick(X) then 0.2 else 0.8");
 		result = ruleConverter.queryAnswerPotentialExpression2Rule(
 				input, lowParser.parse("sick(bob)"),
-				getNewRewritingProcessWithDefaultDomainSizeAndContextualVariablesEqualToFreeVariablesInGivenExpression(DEFAULT_DOMAIN_SIZE, input));
+				getNewRewritingProcessWithDefaultTypeSizeAndContextualSymbolsEqualToFreeVariablesInGivenExpression(DEFAULT_DOMAIN_SIZE, input));
 		expected = ruleParser.parse("if X = bob then sick(bob) 0.7 else sick(X) 0.2;");
 		assertEquals(expected, result);
 
 		input = lowParser.parse("0.8");
 		result = ruleConverter.queryAnswerPotentialExpression2Rule(
 				input, lowParser.parse("sick(bob)"), 
-				getNewRewritingProcessWithDefaultDomainSizeAndContextualVariablesEqualToFreeVariablesInGivenExpression(DEFAULT_DOMAIN_SIZE, input));
+				getNewRewritingProcessWithDefaultTypeSizeAndContextualSymbolsEqualToFreeVariablesInGivenExpression(DEFAULT_DOMAIN_SIZE, input));
 		expected = ruleParser.parse("sick(bob) 0.5;");
 		assertEquals(expected, result);
 	}
@@ -1161,7 +1161,7 @@ public class RuleConverterTest {
 		query = ruleParser.parseFormula("sick(john) and sick(mary)");
 		queryAtom = lowParser.parse("query");
 		randomVariables.clear();
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("random query: -> Boolean;");
 		assertEquals(expected, result);
 		
@@ -1169,7 +1169,7 @@ public class RuleConverterTest {
 		queryAtom = lowParser.parse("query(X)");
 		randomVariables.clear();
 		randomVariables.addAll(ruleParser.parseAll("random sick: People -> Boolean;"));
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("random query: People -> Boolean;");
 		assertEquals(expected, result);
 
@@ -1177,7 +1177,7 @@ public class RuleConverterTest {
 		queryAtom = lowParser.parse("query(Y)");
 		randomVariables.clear();
 		randomVariables.addAll(ruleParser.parseAll("random friends: People x People -> Boolean;"));
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("random query: People -> Boolean;");
 		assertEquals(expected, result);
 
@@ -1187,7 +1187,7 @@ public class RuleConverterTest {
 		randomVariables.addAll(ruleParser.parseAll("random conspiracy: Concept -> Boolean;" +
 				"random leader: Concept x People -> Boolean;" +
 				"random member: Concept x People -> Boolean;"));
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("random query: Concept x People x People x People -> Boolean;");
 		assertEquals(expected, result);
 
@@ -1197,7 +1197,7 @@ public class RuleConverterTest {
 		randomVariables.addAll(ruleParser.parseAll("random conspiracy: Concept -> Boolean;" +
 				"random leader: People -> Boolean;" +
 				"random member: Concept x People -> Boolean;"));
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("random query: Concept x People x People x People -> Boolean;");
 		assertEquals(expected, result);
 
@@ -1205,7 +1205,7 @@ public class RuleConverterTest {
 		queryAtom = lowParser.parse("query(X)");
 		randomVariables.clear();
 		randomVariables.addAll(ruleParser.parseAll("random mother: People x People -> Boolean;"));
-		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("random query: People -> Boolean;");
 		assertEquals(expected, result);
 		
@@ -1218,28 +1218,28 @@ public class RuleConverterTest {
 		input = lowParser.parse("if query then 0.3 else 0.7");
 		queryAtom = lowParser.parse("query");
 		query = lowParser.parse("sick(bob)");
-		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("sick(bob) 0.3;");
 		assertEquals(expected, result);
 
 		input = lowParser.parse("if query(bob) then 0.3 else 0.7");
 		queryAtom = lowParser.parse("query(X)");
 		query = lowParser.parse("sick(X)");
-		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("sick(bob) 0.3;");
 		assertEquals(expected, result);
 
 		input = lowParser.parse("if query(bob, mary) then 0.3 else 0.7");
 		queryAtom = lowParser.parse("query(X, Y)");
 		query = lowParser.parse("sick(X) = cold(Y)");
-		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("sick(bob) = cold(mary) 0.3;");
 		assertEquals(expected, result);
 
 		input = lowParser.parse("if query(X = bob, Z) then 0.3 else 0.7");
 		queryAtom = lowParser.parse("query(X, Y)");
 		query = lowParser.parse("sick(X) = cold(Y)");
-		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("sick(X = bob) = cold(Z) 0.3;");
 		assertEquals(expected, result);
 
@@ -1248,7 +1248,7 @@ public class RuleConverterTest {
 		input = lowParser.parse("if query(Y, X) then 0.3 else 0.7");
 		queryAtom = lowParser.parse("query(X, Y)");
 		query = lowParser.parse("sick(X) = cold(Y)");
-		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE));
+		result = ruleConverter.queryResultToRule(input, queryAtom, query, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = ruleParser.parse("sick(Y) = cold(X) 0.3;");
 		assertEquals(expected, result);
 
@@ -1759,9 +1759,9 @@ public class RuleConverterTest {
         }
     } 
 	
-	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSize(final int n) {
+	private static RewritingProcess getNewRewritingProcessWithDefaultTypeSize(final int n) {
 		RewritingProcess result = LBPFactory.newLBPProcess(Expressions.TRUE);
-		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable() {
+		CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable() {
 			@Override
 			public Integer size(Expression logicalVariable, RewritingProcess process) {
 				return n;
@@ -1770,22 +1770,22 @@ public class RuleConverterTest {
 		return result;
 	}
 	
-	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSizeAndRandomVariableDeclarations(final int n, Set<Expression> randomVariableDeclarations) {
-		RewritingProcess process = getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE);
+	private static RewritingProcess getNewRewritingProcessWithDefaultTypeSizeAndRandomVariableDeclarations(final int n, Set<Expression> randomVariableDeclarations) {
+		RewritingProcess process = getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE);
 		Model.setKnownRandomVariables(randomVariableDeclarations, process);
 		return process;
 	}
 	
-	/** Prepares rewriting process with type cardinalities contextual variables, assuming contextual constraint equal to "true" */
-	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSizeAndContextualVariablesEqualToFreeVariablesInGivenExpression(final int n, Expression expression) {
+	/** Prepares rewriting process with type cardinalities contextual symbols, assuming contextual constraint equal to "true" */
+	private static RewritingProcess getNewRewritingProcessWithDefaultTypeSizeAndContextualSymbolsEqualToFreeVariablesInGivenExpression(final int n, Expression expression) {
 		RewritingProcess result = LBPFactory.newLBPProcess(Expressions.TRUE);
-		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable() {
+		CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable() {
 			@Override
 			public Integer size(Expression logicalVariable, RewritingProcess process) {
 				return n;
 			}
 		}, result);
-		result = GrinderUtil.extendContextualVariablesWithFreeVariablesInExpressionWithUnknownDomainForSetUpPurposesOnly(expression, result);
+		result = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(expression, result);
 		// the above would have to include the contextual constraint (say, in a Tuple with expression), if it were not known to be "true".
 		return result;
 	}

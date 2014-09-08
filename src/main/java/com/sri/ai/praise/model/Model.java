@@ -269,10 +269,10 @@ public class Model {
 	 * with the model's sort declarations.
 	 * 
 	 * @param toCopy
-	 * @param knownDomainSize
+	 * @param knownTypeSize
 	 * @param size
 	 */
-	public Model(Model toCopy, boolean knownDomainSize, Integer size) {
+	public Model(Model toCopy, boolean knownTypeSize, Integer size) {
 		List<Object> args = new ArrayList<Object>();
 		this.knownRandomVariableNameAndArities.addAll(toCopy.knownRandomVariableNameAndArities);
 		this.name = toCopy.name;
@@ -292,7 +292,7 @@ public class Model {
 		
 		// Change the sort declarations
 		for (SortDeclaration toCopySortDeclaration : toCopy.sortDeclarations) {
-			SortDeclaration copySD = new SortDeclaration(toCopySortDeclaration, knownDomainSize, size);
+			SortDeclaration copySD = new SortDeclaration(toCopySortDeclaration, knownTypeSize, size);
 			this.sortDeclarations.add(copySD);
 			args.add(copySD);
 		}
@@ -536,8 +536,8 @@ public class Model {
 
 		Model model = new Model(modelDefinitionExpression, knownRandomVariableNameAndArities);
 		
-		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(
-				new ModelLookupDomainSizeOfLogicalVariable(model), process);
+		CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(
+				new ModelLookupTypeSizeOfLogicalVariable(model), process);
 
 		process.putGlobalObject(GLOBAL_KEY_MODEL_INSTANCE,   model);
 		process.putGlobalObject(GLOBAL_KEY_MODEL_DEFINITION, model.getModelDefinition());
@@ -628,7 +628,7 @@ public class Model {
 		return model;
 	}
 	
-	public static boolean isAllDomainSizesKnown(RewritingProcess process) {
+	public static boolean isAllTypeSizesKnown(RewritingProcess process) {
 		return PRAiSEConfiguration.isAllTypeSizesKnownInModel();
 	}
 	
@@ -1001,11 +1001,11 @@ public class Model {
 		}
 		for (Expression parfactor : parfactorsDeclaration.getParfactors()) {
 			if (IntensionalSet.isIntensionalSet(parfactor)) {
-				for (Expression domain : IntensionalSet.getIndexDomains(parfactor)) {
-					if (!domain.hasFunctor(CardinalityTypeOfLogicalVariable.TYPE_LABEL) &&
-					    !sortNamesKnown.contains(domain)) {
-						sortDeclarations.add(new SortDeclaration(domain));
-						sortNamesKnown.add(domain);
+				for (Expression type : IntensionalSet.getIndexDomains(parfactor)) {
+					if (!type.hasFunctor(CardinalityTypeOfLogicalVariable.TYPE_LABEL) &&
+					    !sortNamesKnown.contains(type)) {
+						sortDeclarations.add(new SortDeclaration(type));
+						sortNamesKnown.add(type);
 					}
 				}
 			}

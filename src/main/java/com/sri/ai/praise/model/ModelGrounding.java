@@ -174,7 +174,7 @@ public class ModelGrounding {
 
 	/**
 	 * Ground the model contained in the provided rewriting process, which
-	 * should indicate the cardinality of all of the sorts/domains used in the
+	 * should indicate the cardinality of all of the sorts/types used in the
 	 * model.
 	 * 
 	 * @param process
@@ -191,7 +191,7 @@ public class ModelGrounding {
 
 	/**
 	 * Ground the model contained in the provided rewriting process, which
-	 * should indicate the cardinality of all of the sorts/domains used in the
+	 * should indicate the cardinality of all of the sorts/types used in the
 	 * model.
 	 * 
 	 * @param name
@@ -381,7 +381,7 @@ public class ModelGrounding {
 					// Ensure the free variables returned are not sort names
 					Set<Expression> sorts = new LinkedHashSet<Expression>();
 					if (Sets.isIntensionalSet(parfactor)) {
-						sorts.addAll(IntensionalSet.getIndexToDomainMapWithDefaultNull(parfactor).values());
+						sorts.addAll(IntensionalSet.getIndexToTypeMapWithDefaultNull(parfactor).values());
 					}
 					if (!sorts.containsAll(freeVariables)) {
 						errors.add(new ModelGroundingError(
@@ -725,11 +725,11 @@ public class ModelGrounding {
 			if (isIntensionalParfactor()) {
 				Expression intensionalFactor = IntensionalSet.getHead(parfactor);
 				intensionalCondition = IntensionalSet.getCondition(parfactor);
-				Map<Expression, Expression> indexToDomainMap = IntensionalSet.getIndexToDomainMapWithDefaultNull(parfactor);
-				// Add domain names that correspond to sort names
-				for (Map.Entry<Expression, Expression> indexToDomain : indexToDomainMap.entrySet()) {
+				Map<Expression, Expression> indexToTypeMap = IntensionalSet.getIndexToTypeMapWithDefaultNull(parfactor);
+				// Add type names that correspond to sort names
+				for (Map.Entry<Expression, Expression> indexToDomain : indexToTypeMap.entrySet()) {
 					Expression possibleSortName = indexToDomain.getValue();
-					// Exclude 'null' and 'type(<Logical Variable>)' domains as these do not
+					// Exclude 'null' and 'type(<Logical Variable>)' types as these do not
 					// correspond to sort names.
 					if (possibleSortName == null || !Expressions.hasFunctor(possibleSortName, Type.FUNCTOR_TYPE)) {
 						indexToSortNameMap.put(indexToDomain.getKey(), possibleSortName);

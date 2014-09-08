@@ -129,7 +129,7 @@ public class OptionsPanel extends JPanel {
 		
 	}
 	//
-	JFormattedTextField domainSizeTextField = null;
+	JFormattedTextField typeSizeTextField = null;
 	JComboBox scheduleComboBox;
 	JCheckBox chckbxJustificationToConsole;
 	JCheckBox chckbxJustificationToJustTab;
@@ -138,7 +138,7 @@ public class OptionsPanel extends JPanel {
 	JCheckBox chckbxJustificationEnabled;
 	JCheckBox chckbxTraceEnabled;
 	JCheckBox chckbxOverrideModel;
-	JCheckBox chckbxKnownDomainSize;
+	JCheckBox chckbxKnownTypeSize;
 	JCheckBox chckbxAssumeDomainsAlwaysLarge;
 	JCheckBox chckbxUseBeliefCache;
 	JSpinner lbpPrecisionSpinner;
@@ -216,13 +216,13 @@ public class OptionsPanel extends JPanel {
 		chckbxOverrideModel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxOverrideModel.isSelected()) {
-					chckbxKnownDomainSize.setEnabled(true);
-					domainSizeTextField.setEnabled(true);
+					chckbxKnownTypeSize.setEnabled(true);
+					typeSizeTextField.setEnabled(true);
 					chckbxAssumeDomainsAlwaysLarge.setEnabled(true);
 				}
 				else {
-					chckbxKnownDomainSize.setEnabled(false);
-					domainSizeTextField.setEnabled(false);
+					chckbxKnownTypeSize.setEnabled(false);
+					typeSizeTextField.setEnabled(false);
 					chckbxAssumeDomainsAlwaysLarge.setEnabled(false);
 				}
 			}
@@ -245,31 +245,31 @@ public class OptionsPanel extends JPanel {
 		JLabel lblNewLabel = new JLabel("      ");
 		knownSizePanel.add(lblNewLabel);
 		
-		chckbxKnownDomainSize = new JCheckBox("Known Domain Size");
-		chckbxKnownDomainSize.setSelected(true);
-		chckbxKnownDomainSize.setEnabled(false);
-		knownSizePanel.add(chckbxKnownDomainSize);
+		chckbxKnownTypeSize = new JCheckBox("Known Domain Size");
+		chckbxKnownTypeSize.setSelected(true);
+		chckbxKnownTypeSize.setEnabled(false);
+		knownSizePanel.add(chckbxKnownTypeSize);
 		
-		domainSizeTextField = new JFormattedTextField();
-		domainSizeTextField.setEnabled(false);
-		domainSizeTextField.addFocusListener(new FocusAdapter() {
+		typeSizeTextField = new JFormattedTextField();
+		typeSizeTextField.setEnabled(false);
+		typeSizeTextField.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
 				Integer size = new Integer(10);
 				try {
-					size = new Integer(domainSizeTextField.getText());
+					size = new Integer(typeSizeTextField.getText());
 					if (size < 1) {
 						size = 1;
-						domainSizeTextField.setValue(size);
+						typeSizeTextField.setValue(size);
 					}
 				} catch (NumberFormatException nfe) {
-					domainSizeTextField.setValue(size);
+					typeSizeTextField.setValue(size);
 				}
 			}
 		});
-		domainSizeTextField.setPreferredSize(new Dimension(80, 25));
-		domainSizeTextField.setValue(new Integer(10));
-		knownSizePanel.add(domainSizeTextField);
+		typeSizeTextField.setPreferredSize(new Dimension(80, 25));
+		typeSizeTextField.setValue(new Integer(10));
+		knownSizePanel.add(typeSizeTextField);
 		
 		JPanel assumePanel = new JPanel();
 		assumePanel.setAlignmentX(Component.LEFT_ALIGNMENT);

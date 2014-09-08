@@ -339,8 +339,8 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							
 							String overridden = "";
 							if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
-								model = new Model(model, app.optionsPanel.chckbxKnownDomainSize.isSelected(), 
-												        new Integer(app.optionsPanel.domainSizeTextField.getText()));
+								model = new Model(model, app.optionsPanel.chckbxKnownTypeSize.isSelected(), 
+												        new Integer(app.optionsPanel.typeSizeTextField.getText()));
 								overridden = " (Sort Sizes Overridden with Specified Options)";
 							}
 							
@@ -372,9 +372,9 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							
 							queryOptions.setJustificationsOn(app.optionsPanel.chckbxJustificationEnabled.isSelected());
 							queryOptions.setTraceOn(app.optionsPanel.chckbxTraceEnabled.isSelected());
-							queryOptions.setKnownDomainSizes(true); // By default.
+							queryOptions.setKnownTypeSizes(true); // By default.
 							if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
-								queryOptions.setKnownDomainSizes(app.optionsPanel.chckbxKnownDomainSize.isSelected());
+								queryOptions.setKnownTypeSizes(app.optionsPanel.chckbxKnownTypeSize.isSelected());
 								GrinderConfiguration.setProperty(GrinderConfiguration.KEY_ASSUME_DOMAIN_ALWAYS_LARGE, ""+app.optionsPanel.chckbxAssumeDomainsAlwaysLarge.isSelected());
 							}					
 							activeQueryUUID = queryEngine.newQueryUUID(queryOptions);
@@ -390,7 +390,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							printlnToConsole("BELIEF=\n" + belief);	
 							
 							Expression exprBelief = lowLevelParse(belief);
-							Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, currentQuery, getNewRewritingProcessWithDefaultDomainSize(DEFAULT_DOMAIN_SIZE, model, queryAtom));				
+							Expression ruleBelief = ruleConverter.queryResultToRule(exprBelief, queryAtom, currentQuery, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE, model, queryAtom));				
 							
 							printlnToConsole("RULE BELIEF=\n"+ruleBelief.toString());
 							
@@ -866,13 +866,13 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		System.gc();
 	}
 	
-	private static RewritingProcess getNewRewritingProcessWithDefaultDomainSize(final int n, Model model, Expression queryAtom) {
+	private static RewritingProcess getNewRewritingProcessWithDefaultTypeSize(final int n, Model model, Expression queryAtom) {
 		RewritingProcess result = LBPFactory.newLBPProcess(Expressions.TRUE);
 		
-		result = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(queryAtom, result);
-		result = LPIUtil.extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(model.getParfactorsDeclaration().getParfactors()), result);
+		result = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(queryAtom, result);
+		result = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(model.getParfactorsDeclaration().getParfactors()), result);
 
-		CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable() {
+		CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable() {
 			@Override
 			public Integer size(Expression logicalVariable, RewritingProcess process) {
 				return n;

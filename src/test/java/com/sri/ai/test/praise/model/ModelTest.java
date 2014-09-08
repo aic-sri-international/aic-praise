@@ -844,7 +844,7 @@ public class ModelTest extends AbstractLPITest {
 			Assert.assertEquals(4, model.getParfactorsDeclaration().getParfactors().size());
 			
 		
-		// Note: Will add a sort declaration 'People' based on being used as a domain
+		// Note: Will add a sort declaration 'People' based on being used as a type
 	    // in the intensionally defined parfactors.
 		model = new Model(parse(
 			"union("

@@ -125,7 +125,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 		public Expression apply(Expression expression, RewritingProcess process) {
 			if (LPIUtil.isPreviousMessageDefinition(expression)) {
 				Expression tuplePair = Tuple.make(expression.get(0), expression.get(1));
-				List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromVariablesAndDomains(process.getContextualVariablesAndDomains());
+				List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromSymbolsAndTypes(process.getContextualSymbolsAndTypes());
 				Expression set = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressions, tuplePair, process.getContextualConstraint());
 
 				// Now we try to simplify the set, but because its condition is the contextual constraint in the original process,

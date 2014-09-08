@@ -99,7 +99,7 @@ public class ExportToPMTK3FactorGraph {
 
 		Map<Expression, Expression> globalObjects = new LinkedHashMap<Expression, Expression>();
 		globalObjects.put(parser.parse("| Object |"), Expressions.makeSymbol(size)); 
-		// Ensure domain sizes match up.
+		// Ensure type sizes match up.
 		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());		
 		
 		Expression modelDefinition = parser.parse(modelDeclaration);
@@ -142,10 +142,10 @@ public class ExportToPMTK3FactorGraph {
 		// to a pmtk3 factor graph format.
 		outputHeader(originalModel, output);
 		
-		// As pmtk3 does not support multiple factors on the same domains, want to merge 
-		// factors (by multiplying their potentials together) over the same domains.
+		// As pmtk3 does not support multiple factors on the same types, want to merge 
+		// factors (by multiplying their potentials together) over the same types.
 		// First we collect up all of the tabular factors.
-		Map<List<Integer>, List<TabularFactor>> repeatedDomainFactors = new LinkedHashMap<List<Integer>, List<TabularFactor>>();
+		Map<List<Integer>, List<TabularFactor>> repeatedTypeFactors = new LinkedHashMap<List<Integer>, List<TabularFactor>>();
 		// Now construct the tabular factors for the grounded model
 		for (Pair<Expression, List<Expression>> parfactorToGroundFactors : groundedModelResult.getParfactorToGroundFactors()) {
 			List<Expression> factors   = parfactorToGroundFactors.second;
@@ -155,10 +155,10 @@ public class ExportToPMTK3FactorGraph {
 			for (int i = 0; i < factors.size(); i++) {
 				Expression factorValue = LPIUtil.getFactorValueExpression(factors.get(i), process);
 				TabularFactor tabularFactor = new TabularFactor(groundedModel, factorValue, randomVariableToPmtk3Id, pmtk3IdToRandomVariable, process);
-				List<TabularFactor> factorsOnSameDomains = repeatedDomainFactors.get(tabularFactor.domains);
+				List<TabularFactor> factorsOnSameDomains = repeatedTypeFactors.get(tabularFactor.types);
 				if (factorsOnSameDomains == null) {
 					factorsOnSameDomains = new ArrayList<TabularFactor>();
-					repeatedDomainFactors.put(tabularFactor.domains, factorsOnSameDomains);
+					repeatedTypeFactors.put(tabularFactor.types, factorsOnSameDomains);
 				}
 				factorsOnSameDomains.add(tabularFactor);
 			}
@@ -171,7 +171,7 @@ public class ExportToPMTK3FactorGraph {
 		if (outputLBPBeliefs) {
 			outputLBPBeliefs(originalModel, output, process);
 		}
-		// for convenience output all the domain id to random variable ids
+		// for convenience output all the type id to random variable ids
 		output.write("%\n");
 		for (Map.Entry<Integer, Expression> rvEntry : pmtk3IdToRandomVariable.entrySet()) {
 			output.write("% ");
@@ -184,25 +184,25 @@ public class ExportToPMTK3FactorGraph {
 		// output the main mk...() function for the Matlab file
 		outputMainFunction(groundedModel, randomVariableToPmtk3Id, output);
 		
-		// Now we want to create default node potentials (i.e. just 1 domain in the tabular factor)
+		// Now we want to create default node potentials (i.e. just 1 type in the tabular factor)
 		// when translating to the pmtk3 format (otherwise if not specified these get defaulted
 		// to 0 potentials, which is not what is wanted).
 		Set<Integer> nodePotentials = new LinkedHashSet<Integer>(randomVariableToPmtk3Id.values());
-		for (List<Integer> domains : repeatedDomainFactors.keySet()) {
-			if (domains.size() == 1) {
+		for (List<Integer> types : repeatedTypeFactors.keySet()) {
+			if (types.size() == 1) {
 				// I've already got a node potential for this
-				nodePotentials.remove(domains.get(0));
+				nodePotentials.remove(types.get(0));
 			}
 		}
 		// At this point I have nodes without an explicit node potential
-		for (Integer domainId : nodePotentials) {
-			TabularFactor tabularFactor = new TabularFactor(pmtk3IdToRandomVariable.get(domainId), domainId, process);
+		for (Integer typeId : nodePotentials) {
+			TabularFactor tabularFactor = new TabularFactor(pmtk3IdToRandomVariable.get(typeId), typeId, process);
 			List<TabularFactor>  factorsOnSameDomains = new ArrayList<TabularFactor>();
-			repeatedDomainFactors.put(tabularFactor.domains, factorsOnSameDomains);
+			repeatedTypeFactors.put(tabularFactor.types, factorsOnSameDomains);
 			factorsOnSameDomains.add(tabularFactor);
 		}
 		
-		int numberPmtk3Factors = repeatedDomainFactors.size();
+		int numberPmtk3Factors = repeatedTypeFactors.size();
 		output.write("\n");
 		output.write("function [cliques nstates] = mk");
 		output.write(groundedModel.getName().toString());
@@ -211,30 +211,30 @@ public class ExportToPMTK3FactorGraph {
 		output.write("cliques = cell("+numberPmtk3Factors+", 1);\n");
 		
 		int cidx = 1;
-		for (Map.Entry<List<Integer>, List<TabularFactor>> domainToFactors : repeatedDomainFactors.entrySet()) {
-			TabularFactor pmtk3TabularFactor = new TabularFactor(domainToFactors.getValue());
+		for (Map.Entry<List<Integer>, List<TabularFactor>> typeToFactors : repeatedTypeFactors.entrySet()) {
+			TabularFactor pmtk3TabularFactor = new TabularFactor(typeToFactors.getValue());
 			
 			output.write("\n");
-			int noMerged = domainToFactors.getValue().size();
+			int noMerged = typeToFactors.getValue().size();
 			if (noMerged > 1) {
 				output.write(_indent);
 				output.write("% Merged "+noMerged+" ground factors:");
 				output.write("\n");
 			}
 			// output the ground factors merged into this factor
-			for (TabularFactor factor : domainToFactors.getValue()) {
+			for (TabularFactor factor : typeToFactors.getValue()) {
 				output.write(_indent);
 				output.write("% ");
 				output.write(factor.factorValue.toString());
 				output.write("\n");
 			}
-			// output the random variable to domain id map for this factor
-			for (Integer domainId : domainToFactors.getKey()) {
+			// output the random variable to type id map for this factor
+			for (Integer typeId : typeToFactors.getKey()) {
 				output.write(_indent);
 				output.write("% ");
-				output.write(domainId.toString());
+				output.write(typeId.toString());
 				output.write(" = ");
-				output.write(pmtk3IdToRandomVariable.get(domainId).toString());
+				output.write(pmtk3IdToRandomVariable.get(typeId).toString());
 				output.write("\n");
 			}
 			// output the pmtk3 merged tabular factor
@@ -245,9 +245,9 @@ public class ExportToPMTK3FactorGraph {
 			output.write("cliques{"+(cidx)+"} = tabularFactorCreate(");
 			output.write(tfId);
 			output.write(", [");
-			for (int idx = 0; idx < pmtk3TabularFactor.domains.size(); idx++) {
-				output.write(""+pmtk3TabularFactor.domains.get(idx));
-				if (idx < (pmtk3TabularFactor.domains.size()-1)) {
+			for (int idx = 0; idx < pmtk3TabularFactor.types.size(); idx++) {
+				output.write(""+pmtk3TabularFactor.types.get(idx));
+				if (idx < (pmtk3TabularFactor.types.size()-1)) {
 					output.write(" ");
 				}
 			}
@@ -379,20 +379,20 @@ public class ExportToPMTK3FactorGraph {
 		// e.g. T = reshape([41 45 43 47 42 46 44 48], 2, 2, 2);
 		tout.append(_indent);
 		tout.append(tfId);
-		if (tabularFactor.domainSizes.size() > 1) {
+		if (tabularFactor.typeSizes.size() > 1) {
 			tout.append(" = reshape(zeros(1, ");
 			tout.append(tabularFactor.values.size());
 			tout.append("), ");
-			for (int i = 0; i < tabularFactor.domainSizes.size(); i++) {
-				int domainSize = tabularFactor.domainSizes.get(i);
-				tout.append(domainSize);
-				if (i < (tabularFactor.domainSizes.size()-1)) {
+			for (int i = 0; i < tabularFactor.typeSizes.size(); i++) {
+				int typeSize = tabularFactor.typeSizes.get(i);
+				tout.append(typeSize);
+				if (i < (tabularFactor.typeSizes.size()-1)) {
 					tout.append(", ");
 				}
 			}
 		} 
 		else {
-			tout.append(" = zeros("+tabularFactor.domainSizes.get(0)+", 1");
+			tout.append(" = zeros("+tabularFactor.typeSizes.get(0)+", 1");
 		}
 
 		tout.append(");\n");
@@ -438,34 +438,34 @@ public class ExportToPMTK3FactorGraph {
 	static class TabularFactor {
 		public Expression             factorValue = null;
 		public List<List<Expression>> ranges      = new ArrayList<List<Expression>>();
-		public List<Integer>          domains     = new ArrayList<Integer>();
-		public List<Integer>          domainSizes = new ArrayList<Integer>();
+		public List<Integer>          types       = new ArrayList<Integer>();
+		public List<Integer>          typeSizes   = new ArrayList<Integer>();
 		public List<Rational>         values      = new ArrayList<Rational>();
 		//
 		public Rewriter               rNormalize   = LBPFactory.newNormalize();
 		
 		
 		// Create a default tabular factor with potentials = 1
-		public TabularFactor(Expression randomVariableValueExpression, Integer domainId, RewritingProcess process) {
+		public TabularFactor(Expression randomVariableValueExpression, Integer typeId, RewritingProcess process) {
 			factorValue = randomVariableValueExpression;
 			List<Expression> range = Model.range(randomVariableValueExpression, process);
 			ranges.add(range);
-			domains.add(domainId);
-			domainSizes.add(range.size());
+			types.add(typeId);
+			typeSizes.add(range.size());
 			int numDefaultValues = ranges.get(0).size();
 			for (int i = 0; i < numDefaultValues; i++) {
 				values.add(Rational.ONE);
 			}
 		}
 		
-		// Merge several tabular factors for the same domains into one pmtk3 targeted factor
+		// Merge several tabular factors for the same types into one pmtk3 targeted factor
 		public TabularFactor(List<TabularFactor> tabularFactors) {
 			// Default everything to the first tabular factor initially
 			TabularFactor firstFactor = tabularFactors.get(0);
 			factorValue = firstFactor.factorValue;
 			ranges.addAll(firstFactor.ranges);
-			domains.addAll(firstFactor.domains);
-			domainSizes.addAll(firstFactor.domainSizes);
+			types.addAll(firstFactor.types);
+			typeSizes.addAll(firstFactor.typeSizes);
 			values.addAll(firstFactor.values);
 			// Now merge in the remaining factor values
 			for (int i = 1; i < tabularFactors.size(); i++) {
@@ -491,8 +491,8 @@ public class ExportToPMTK3FactorGraph {
 			for (Expression randomVariableValueExpression : randomVariableValueExpressions) {
 				List<Expression> range = Model.range(randomVariableValueExpression, process);
 				ranges.add(range);
-				domains.add(getPmtk3RandomVariableId(randomVariableValueExpression, randomVariableToPmtk3Id, pmtk3IdToRandomVariable));
-				domainSizes.add(range.size());
+				types.add(getPmtk3RandomVariableId(randomVariableValueExpression, randomVariableToPmtk3Id, pmtk3IdToRandomVariable));
+				typeSizes.add(range.size());
 			}
 			
 			// Now calculate the values for each entry in the tabular factor
@@ -512,30 +512,30 @@ public class ExportToPMTK3FactorGraph {
 				values.add(rationalValue);
 			}
 			
-			// Now ensure the domain ids are sorted in order
+			// Now ensure the type ids are sorted in order
 			List<List<Expression>> sortedRanges      = new ArrayList<List<Expression>>(ranges);
-			List<Integer>          sortedDomains     = new ArrayList<Integer>(domains);
-			List<Integer>          sortedDomainSizes = new ArrayList<Integer>(domainSizes);
+			List<Integer>          sortedDomains     = new ArrayList<Integer>(types);
+			List<Integer>          sortedTypeSizes = new ArrayList<Integer>(typeSizes);
 			List<Rational>         sortedValues      = new ArrayList<Rational>(values); 
 			Collections.sort(sortedDomains);
 			int[] radices     = new int[sortedDomains.size()];
 			int[] radixValues = new int[sortedDomains.size()];
 			for (int i = 0; i < radices.length; i++) {
-				int unsortedIndex = domains.indexOf(sortedDomains.get(i));
+				int unsortedIndex = types.indexOf(sortedDomains.get(i));
 				radices[i] = ranges.get(unsortedIndex).size();
 				sortedRanges.set(i, ranges.get(unsortedIndex));
-				sortedDomainSizes.set(i, domainSizes.get(unsortedIndex));
+				sortedTypeSizes.set(i, typeSizes.get(unsortedIndex));
 			}
 			MixedRadixNumber sortedIndexer = new MixedRadixNumber(BigInteger.ZERO, radices);
 			
-			if (!sortedDomains.equals(domains)) {
+			if (!sortedDomains.equals(types)) {
 				int idx = 0;
 				rangesCartesianProductEnumeration = new CartesianProductEnumeration<Expression>(ranges, true);
 				while (rangesCartesianProductEnumeration.hasMoreElements()) {
 					List<Expression> rangeValues = rangesCartesianProductEnumeration.nextElement();
 					
 					for (int i = 0; i < radixValues.length; i++) {
-						int unsortedIndex = domains.indexOf(sortedDomains.get(i));
+						int unsortedIndex = types.indexOf(sortedDomains.get(i));
 						radixValues[unsortedIndex] = ranges.get(i).indexOf(rangeValues.get(i));
 					}
 					
@@ -546,8 +546,8 @@ public class ExportToPMTK3FactorGraph {
 			}
 			
 			ranges      = sortedRanges;
-			domains     = sortedDomains;
-			domainSizes = sortedDomainSizes;
+			types     = sortedDomains;
+			typeSizes = sortedTypeSizes;
 			values      = sortedValues;
 		}
 	}

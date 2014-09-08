@@ -119,7 +119,7 @@ public class AutomorphismTest extends AbstractLPITest {
 	//
 	// PRIVATE METHODS
 	//
-	class AutomorphismData extends TestData implements CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable {
+	class AutomorphismData extends TestData implements CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable {
 		private String E; 
 		private Expression exprE;
 		private int cardinality;
@@ -141,12 +141,12 @@ public class AutomorphismTest extends AbstractLPITest {
 		}
 		
 		//
-		// START-DomainSizeOfLogicalVariable
+		// START-TypeSizeOfLogicalVariable
 		@Override
 		public Integer size(Expression logicalVariable, RewritingProcess process) {
 			return cardinality;
 		}
-		// END-DomainSizeOfLogicalVariable
+		// END-TypeSizeOfLogicalVariable
 		//
 		
 		@Override
@@ -162,8 +162,8 @@ public class AutomorphismTest extends AbstractLPITest {
 				process.getGlobalObjects().putAll(globalObjects);
 			}
 			
-			// Ensure explicit counts added for all variable domains.
-			CardinalityTypeOfLogicalVariable.registerDomainSizeOfLogicalVariableWithProcess(this, process);
+			// Ensure explicit counts added for all variable types.
+			CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(this, process);
 			
 			// get rid of equalities of intensional sets first
 			Rewriter exhaustiveEqualityOfIntensionalUniSets =

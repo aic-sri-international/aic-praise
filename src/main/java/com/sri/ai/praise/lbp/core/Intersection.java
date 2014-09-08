@@ -117,8 +117,8 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 				
 				Expression saSet1           = StandardizedApartFrom.standardizedApartFrom(set1, tupleI2Alpha2C2, process);
 				
-				RewritingProcess subProcess = GrinderUtil.extendContextualVariablesWithIntensionalSetIndices(set2, process);
-				subProcess                  = GrinderUtil.extendContextualVariablesWithIntensionalSetIndices(saSet1, subProcess);
+				RewritingProcess subProcess = GrinderUtil.extendContextualSymbolsWithIntensionalSetIndices(set2, process);
+				subProcess                  = GrinderUtil.extendContextualSymbolsWithIntensionalSetIndices(saSet1, subProcess);
 
 				Trace.log("    C <- R_complete_normalize(Alpha1 = Alpha2 and C1 and C2)");
 				Expression alpha1 = IntensionalSet.getHead(saSet1);

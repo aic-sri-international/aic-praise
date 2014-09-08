@@ -116,9 +116,9 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 			Expression prodScopingCondition = IntensionalSet.getCondition(prodIntensionalSet);
 			Expression indexExpression      = IntensionalSet.getIndexExpressions(prodIntensionalSet).get(0);
 			Expression factorIndexF         = IndexExpressions.getIndex(indexExpression);
-			Expression domainS              = IndexExpressions.getDomain(indexExpression);
+			Expression typeS                = IndexExpressions.getType(indexExpression);
 
-			if (Sets.isExtensionalSet(domainS) && ExtensionalSet.isEmptySet(domainS)) {
+			if (Sets.isExtensionalSet(typeS) && ExtensionalSet.isEmptySet(typeS)) {
 
 				Trace.log("Case prod_F in {} m_V<-F:");
 				Trace.log("    return 1");
@@ -128,13 +128,13 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				Justification.endEqualityStep(result);
 				
 			} 
-			else if (Sets.isExtensionalSet(domainS) && ExtensionalSet.isSingleton(domainS)) {
+			else if (Sets.isExtensionalSet(typeS) && ExtensionalSet.isSingleton(typeS)) {
 
 				Trace.log("Case prod_F in {F1} m_V<-F:");
 				Trace.log("    return R_m_to_v_from_f(m_V<-F1)");
 
 				Justification.beginEqualityStep("product of a singleton set is just its own single element");
-				Expression msgToV_F1 = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), domainS.get(0));
+				Expression msgToV_F1 = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), typeS.get(0));
 				Justification.endEqualityStep(msgToV_F1);
 
 				Justification.beginEqualityStep("by solving message to variable from factor");
@@ -143,16 +143,16 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				Justification.endEqualityStep(result);
 
 			} 
-			else if (Sets.isIntensionalMultiSet(domainS)) {
+			else if (Sets.isIntensionalMultiSet(typeS)) {
 				Trace.log("Case prod_F in {{ F1 | C }}_I m_V<-F:");
 				
-				Expression factor1                = IntensionalSet.getHead(domainS);
-				Expression condition              = IntensionalSet.getCondition(domainS);
-				List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(domainS);
+				Expression factor1                = IntensionalSet.getHead(typeS);
+				Expression condition              = IntensionalSet.getCondition(typeS);
+				List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(typeS);
 				
-				Trace.log("    message <- R_m_to_v_from_f(m_V<-F1, C, I, beingComputed) // under cont. constraint extended by C and contextual variables extended by I");
+				Trace.log("    message <- R_m_to_v_from_f(m_V<-F1, C, I, beingComputed) // under cont. constraint extended by C and contextual symbols extended by I");
 				Expression       msgToV_F1        = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), factor1);
-				RewritingProcess cPrimeSubProcess = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(domainS, process);
+				RewritingProcess cPrimeSubProcess = GrinderUtil.extendContextualSymbolsAndConstraintWithIntensionalSet(typeS, process);
 				
 				if (Justification.isEnabled()) {
 					Justification.beginEqualityStep("re-indexing set of messages");
@@ -179,7 +179,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 
 				// Note: restriction to extensional multi-sets is required (see assertIsLegalUnionDomain() for details).
 			} 
-			else if (isUnion(domainS) || Sets.isExtensionalMultiSet(domainS)) { 
+			else if (isUnion(typeS) || Sets.isExtensionalMultiSet(typeS)) { 
 				// union of sets, it is either an application of the union
 				// operator to a sequence of sets, or a single set.
 				// Intensional, {}, and { 1Element} sets are
@@ -188,27 +188,27 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				Trace.log("    return R_prod_factor(prod_F in {F1} union {{F2,...,Fn}}  m_V<-F )");
 				Trace.log("Case prod_F in Set union Union m_V<-F:");
 				Trace.log("    return R_prod_m_and_prod_factor(R_prod_factor(prod_F in Set m_V<-F) * prod_F in Union m_V<-F)");
-				if ((isUnion(domainS) && domainS.numberOfArguments() > 1) ||
-					(Sets.isExtensionalMultiSet(domainS) && ExtensionalSet.cardinality(domainS) > 1)) {
+				if ((isUnion(typeS) && typeS.numberOfArguments() > 1) ||
+					(Sets.isExtensionalMultiSet(typeS) && ExtensionalSet.cardinality(typeS) > 1)) {
 					Expression set = null;
 					List<Expression> unionArgs = null;
 
-					if (isUnion(domainS)) {
-						assertIsLegalUnionDomain(domainS);
-						set = domainS.get(0);
-						unionArgs = Util.rest(domainS.getArguments());
+					if (isUnion(typeS)) {
+						assertIsLegalUnionDomain(typeS);
+						set = typeS.get(0);
+						unionArgs = Util.rest(typeS.getArguments());
 					} 
 					else {
 						// Is an extensional set, construct the union arguments
-						List<Expression> domainSElements = ExtensionalSet.getElements(domainS);
-						set = ExtensionalSet.make(Sets.getLabel(domainS), Arrays.asList(domainSElements.get(0)));
+						List<Expression> typeSElements = ExtensionalSet.getElements(typeS);
+						set = ExtensionalSet.make(Sets.getLabel(typeS), Arrays.asList(typeSElements.get(0)));
 						unionArgs = new ArrayList<Expression>();
-						int size = domainSElements.size();
+						int size = typeSElements.size();
 						for (int i = 1; i < size; i++) {
 							Expression union =
 								ExtensionalSet.make(
-									Sets.getLabel(domainS),
-									Arrays.asList(domainSElements.get(i)));
+									Sets.getLabel(typeS),
+									Arrays.asList(typeSElements.get(i)));
 							unionArgs.add(union);
 						}
 					}
@@ -244,17 +244,17 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 
 				} 
 				else {
-					throw new IllegalArgumentException("S is not a valid Union: S = " + domainS);
+					throw new IllegalArgumentException("S is not a valid Union: S = " + typeS);
 				}
 			} 
-			else if (IfThenElse.isIfThenElse(domainS)) {
+			else if (IfThenElse.isIfThenElse(typeS)) {
 
 				// Externalizes Conditionals
-				result = rewriteExternalizeS(factorIndexF, domainS, msgToV_F, prodScopingCondition, beingComputed, process);
+				result = rewriteExternalizeS(factorIndexF, typeS, msgToV_F, prodScopingCondition, beingComputed, process);
 
 			} 
 			else {
-				throw new IllegalArgumentException("S is not in a legal form: S = " + domainS);
+				throw new IllegalArgumentException("S is not in a legal form: S = " + typeS);
 			}
 		}
 
@@ -303,7 +303,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 	}
 
 	private Expression rewriteExternalizeS(Expression factorIndexF,
-			Expression domainS, Expression msgToV_F,
+			Expression typeS, Expression msgToV_F,
 			Expression prodScopingCondition, 
 			Expression beingComputed, 
 			RewritingProcess process) {
@@ -312,9 +312,9 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("                   then R_prod_factor(prod_F in S1 m_V<-F, beingComputed)");
 		Trace.log("                   else R_prod_factor(prod_F in S2 m_V<-F, beingComputed))");
 
-		Expression condition = IfThenElse.getCondition(domainS);
-		Expression s1 = IfThenElse.getThenBranch(domainS);
-		Expression s2 = IfThenElse.getElseBranch(domainS);
+		Expression condition = IfThenElse.getCondition(typeS);
+		Expression s1 = IfThenElse.getThenBranch(typeS);
+		Expression s2 = IfThenElse.getElseBranch(typeS);
 
 		Expression productThen = LPIUtil.makeProductOfMessages(
 				factorIndexF, s1, msgToV_F, prodScopingCondition);
@@ -322,7 +322,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				factorIndexF, s2, msgToV_F, prodScopingCondition);
 		
 		if (Justification.isEnabled()) {
-			Justification.beginEqualityStep("by externalizing conditional set " + domainS);
+			Justification.beginEqualityStep("by externalizing conditional set " + typeS);
 			Justification.endEqualityStep(IfThenElse.make(condition, productThen, productElse));
 		}
 

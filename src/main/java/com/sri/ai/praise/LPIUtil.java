@@ -201,8 +201,8 @@ public class LPIUtil {
 	 * 
 	 * @param index
 	 *            the index expression 'A'.
-	 * @param indexDomain
-	 *            the domain 'S'.
+	 * @param indexType
+	 *            the type 'S'.
 	 * @param message
 	 *            the message of the form m_B<-A.
 	 * @param condition
@@ -210,10 +210,10 @@ public class LPIUtil {
 	 * @return a product of message of the form: product({{ (on A in S) m_B<-A | C }}).
 	 */
 	public static Expression makeProductOfMessages(Expression index,
-			Expression indexDomain, Expression message, Expression condition) {
+			Expression indexType, Expression message, Expression condition) {
 
 		Expression prodIntensionalSet = IntensionalSet
-				.makeMultiSetWithASingleIndexExpression(index, indexDomain,
+				.makeMultiSetWithASingleIndexExpression(index, indexType,
 						message, condition);
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.PRODUCT,
 				prodIntensionalSet);
@@ -688,7 +688,7 @@ public class LPIUtil {
 	 * &ltan arithmetic expression (+, -, *, /, ^), containing message value terms&gt<br>
 	 * <br>
 	 * <b>Note:</b> arithmetic and cardinality expressions need to be handled in cases where
-	 * the domain size is not known.
+	 * the type size is not known.
 	 * 
 	 * @param expression
 	 *            the expression to be tested whether or not it is a message
@@ -1228,23 +1228,23 @@ public class LPIUtil {
 	}
 	
 	/**
-	 * Same as {@link #extendContextualVariablesAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(Expression, RewritingProcess)},
+	 * Same as {@link #extendContextualSymbolsAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(Expression, RewritingProcess)},
 	 * but only for the indices (that is, it does not extend the contextual constraint with the intensional set's condition.
 	 */
-	public static RewritingProcess extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
-		Map<Expression, Expression> quantifiedVariablesAndDomains =
-				DetermineSortsOfLogicalVariables.getIndicesDomainMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(intensionalSet, process);
-		RewritingProcess result = GrinderUtil.extendContextualVariablesAndConstraint(quantifiedVariablesAndDomains, Expressions.TRUE, process);
+	public static RewritingProcess extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
+		Map<Expression, Expression> quantifiedSymbolsAndTypes =
+				DetermineSortsOfLogicalVariables.getIndicesTypeMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(intensionalSet, process);
+		RewritingProcess result = GrinderUtil.extendContextualSymbolsAndConstraint(quantifiedSymbolsAndTypes, Expressions.TRUE, process);
 		return result;
 	}
 
 	/**
-	 * Identifies logical variables in a given expression that are free variables and returns process with them as contextual variables,
-	 * using their usage as random variable value expression arguments to infer their domain.
+	 * Identifies logical variables in a given expression that are free variables and returns process with them as contextual symbols,
+	 * using their usage as random variable value expression arguments to infer their type.
 	 */
-	public static RewritingProcess extendContextualVariablesWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Expression expression, RewritingProcess process) {
-		Map<Expression, Expression> freeVariablesAndDomains = DetermineSortsOfLogicalVariables.getFreeVariablesAndDomainsFromUsageInRandomVariables(expression, null, process);
-		RewritingProcess result = GrinderUtil.extendContextualVariables(freeVariablesAndDomains, process);
+	public static RewritingProcess extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Expression expression, RewritingProcess process) {
+		Map<Expression, Expression> freeSymbolsAndTypes = DetermineSortsOfLogicalVariables.getFreeSymbolsAndTypesFromUsageInRandomVariables(expression, null, process);
+		RewritingProcess result = GrinderUtil.extendContextualSymbols(freeSymbolsAndTypes, process);
 		return result;
 	}
 
@@ -1277,8 +1277,8 @@ public class LPIUtil {
 	}
 
 	public static List<Expression> getIndexExpressionsFromRandomVariableUsage(Expression expression, Set<Expression> randomVariableDeclarationsExpressions, RewritingProcess process) {
-		Map<Expression, Expression> freeVariablesAndDomains = DetermineSortsOfLogicalVariables.getFreeVariablesAndDomainsFromUsageInRandomVariables(expression, randomVariableDeclarationsExpressions, process);
-		List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromVariablesAndDomains(freeVariablesAndDomains);
+		Map<Expression, Expression> freeSymbolsAndTypes = DetermineSortsOfLogicalVariables.getFreeSymbolsAndTypesFromUsageInRandomVariables(expression, randomVariableDeclarationsExpressions, process);
+		List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromSymbolsAndTypes(freeSymbolsAndTypes);
 		return indexExpressions;
 	}
 

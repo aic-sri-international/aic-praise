@@ -47,26 +47,26 @@ import com.sri.ai.praise.PRAiSEConfiguration;
 
 /**
  * Implementation of
- * CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable that looks up
- * the model in order to determine the domain size of a logical variable.
+ * CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable that looks up
+ * the model in order to determine the type size of a logical variable.
  * 
  * @author oreilly
  * 
  */
 @Beta
-public class ModelLookupDomainSizeOfLogicalVariable implements
-		CardinalityTypeOfLogicalVariable.DomainSizeOfLogicalVariable {
+public class ModelLookupTypeSizeOfLogicalVariable implements
+		CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable {
 
 	private boolean lookupSizes = PRAiSEConfiguration.isAllTypeSizesKnownInModel();
 	private Model   model       = null;
 	private Integer defaultSize = null;
 	
-	public ModelLookupDomainSizeOfLogicalVariable(Model model) {
+	public ModelLookupTypeSizeOfLogicalVariable(Model model) {
 		this.model = model;
 	}
 	
 	//
-	// START-DomainSizeOfLogicalVariable
+	// START-TypeSizeOfLogicalVariable
 	@Override
 	public Integer size(Expression logicalVariable, RewritingProcess process) {
 		Integer result = null;
@@ -82,8 +82,8 @@ public class ModelLookupDomainSizeOfLogicalVariable implements
 			Expression sortNameForLogicalVariable = SortDeclaration.UNIVERSE_OF_DISCOURSE;
 
 			// TODO - add support for when there is more than 1 sort defined in the model, i.e:
-			// ALBP-199 Retrieve domain information associated with logical variables from models 
-			// with multiple domains
+			// ALBP-199 Retrieve type information associated with logical variables from models 
+			// with multiple types
 			if (model.getSortDeclarations().size() == 1) {
 				SortDeclaration sortDeclaration = model.getSortDeclarations().get(0);
 				sortNameForLogicalVariable = sortDeclaration.getName();
@@ -113,7 +113,7 @@ public class ModelLookupDomainSizeOfLogicalVariable implements
 		}
 		return result;
 	}
-	// END-DomainSizeOfLogicalVariable
+	// END-TypeSizeOfLogicalVariable
 	//
 	
 	public Model getModel() {

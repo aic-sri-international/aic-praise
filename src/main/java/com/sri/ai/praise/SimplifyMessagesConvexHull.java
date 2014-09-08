@@ -116,7 +116,7 @@ import com.sri.ai.util.math.Rational;
  * </pre>
  * 
  * <b>Note</b>: This logic currently only works with random variables whose
- * domain is {false, true}.<br>
+ * type is {false, true}.<br>
  * <br>
  * <b>Note</b>: All messages are currently normalized internally in order to
  * ensure the logic can work correctly without the need to rely on the messages

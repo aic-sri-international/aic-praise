@@ -65,7 +65,7 @@ public interface LBPQueryEngine {
 		//
 		private static final long serialVersionUID = 1L;
 		//
-		private boolean knownDomainSizes = true;
+		private boolean knownTypeSizes = true;
 		private boolean traceOn          = true;
 		private boolean justificationsOn = true;
 		//
@@ -75,18 +75,18 @@ public interface LBPQueryEngine {
 			
 		}
 
-		public QueryOptions(boolean knownDomainSizes, boolean traceOn, boolean justificationsOn) {
-			setKnownDomainSizes(knownDomainSizes);
+		public QueryOptions(boolean knownTypeSizes, boolean traceOn, boolean justificationsOn) {
+			setKnownTypeSizes(knownTypeSizes);
 			setTraceOn(traceOn);
 			setJustificationsOn(justificationsOn);
 		}
 		
-		public boolean isKnownDomainSizes() {
-			return knownDomainSizes;
+		public boolean isKnownTypeSizes() {
+			return knownTypeSizes;
 		}
 
-		public void setKnownDomainSizes(boolean knownDomainSizes) {
-			this.knownDomainSizes = knownDomainSizes;
+		public void setKnownTypeSizes(boolean knownTypeSizes) {
+			this.knownTypeSizes = knownTypeSizes;
 		}
 
 		public boolean isTraceOn() {

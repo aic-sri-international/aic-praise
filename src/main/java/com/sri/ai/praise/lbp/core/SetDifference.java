@@ -549,7 +549,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Trace.log("    C'' <- R_formula_simplification(C' and not Alpha' = b) with cont. variables extended by I'");
 			Justification.beginEqualityStep("simplifying condition");
 			
-			RewritingProcess processIPrime  = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saS1, process);
+			RewritingProcess processIPrime  = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saS1, process);
 			Expression       cPrimePrime    = processIPrime.rewrite(R_formula_simplification, cPrimeAndNotAlphaPrimeEqualb);
 			
 			result = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(saS1), iPrime, alphaPrime, cPrimePrime);
@@ -640,7 +640,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Justification.beginEqualityStep("difference is intensional set constrained so that its elements are not equal any element in " + set2);
 			
 			Trace.log("    C'' <- R_formula_implification(C' and not (Disjunction_i Alpha' = b_i)) with cont. variables extended by I'");
-			RewritingProcess processIPrime = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saS1, process);
+			RewritingProcess processIPrime = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saS1, process);
 			
 			BranchRewriteTask[] disjunctRewriters = new BranchRewriteTask[disjuncts.size()];
 			for (int i = 0; i < disjuncts.size(); i++) {
@@ -734,16 +734,16 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			
 			// Note: As an optimization, instead of simplifying the overall conjunct as described in the
 			// pseudo-code in a single shot, i.e:
-			//    RewritingProcess processI = GrinderUtil.extendContextualVariables(i, process);
+			//    RewritingProcess processI = GrinderUtil.extendContextualSymbols(i, process);
 			//    Expression    cPrimePrime = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
 			// We will break it apart so that the more expensive quantified formula is resolved first.
 			// However, we do this simplification under the assumption 'c' is true (this is the same
 			// theory/logic used in ConjunctsHoldTrueForEachOther). A more constrained context can
 			// help improve overall performance.
-			RewritingProcess processI = GrinderUtil.extendContextualVariablesAndConstraintWithIntensionalSet(set1, process);
+			RewritingProcess processI = GrinderUtil.extendContextualSymbolsAndConstraintWithIntensionalSet(set1, process);
 			forAllIPrime              = processI.rewrite(R_normalize, forAllIPrime);
 			cAndForAllPrimeI          = CardinalityUtil.makeAnd(c, forAllIPrime);
-			processI                  = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(set1, process);
+			processI                  = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(set1, process);
 			Expression cPrimePrime    = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
 			
 			result = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(set1), i, alpha, cPrimePrime);

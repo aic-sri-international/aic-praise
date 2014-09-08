@@ -99,7 +99,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 		List<Expression> intSetIndexExpressions = new ArrayList<Expression>(IntensionalSet.getIndexExpressions(intensionalSet));
 		Object[]         cPrimeAndiEqualsBeta   = new Object[3];
 		
-		RewritingProcess subProcess = LPIUtil.extendContextualVariablesWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
+		RewritingProcess subProcess = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
 		
 		Expression simplifiedIntSetCondition = subProcess.rewrite(R_formula_simplification, intSetCondition);
 

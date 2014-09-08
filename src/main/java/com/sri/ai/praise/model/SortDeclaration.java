@@ -60,7 +60,7 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
  * 
  * name: 
  * . mandatory: must be a unique string valued symbol within the model
- *   (e.g. cannot overlap with an individual constant in the domain or
+ *   (e.g. cannot overlap with an individual constant in the type of
  *    a random variable).
  * 
  * size:
@@ -170,11 +170,11 @@ public class SortDeclaration {
 	 * Copy constructor, so that size information can be overridden.
 	 * 
 	 * @param toCopy
-	 * @param knownDomainSize
+	 * @param knownTypeSize
 	 * @param size
 	 */
-	public SortDeclaration(SortDeclaration toCopy, boolean knownDomainSize, Integer size) {
-		this(false, toCopy.name, knownDomainSize ? Expressions.makeSymbol(size) : UNKNOWN_SIZE, toCopy.constants);		
+	public SortDeclaration(SortDeclaration toCopy, boolean knownTypeSize, Integer size) {
+		this(false, toCopy.name, knownTypeSize ? Expressions.makeSymbol(size) : UNKNOWN_SIZE, toCopy.constants);		
 	}
 
 	/**
