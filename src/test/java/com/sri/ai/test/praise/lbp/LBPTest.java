@@ -259,7 +259,7 @@ public class LBPTest extends AbstractLPITest {
 		Expression actual;
 		RewritingProcess testProcess;
 		expression = parse(expressionString);
-		testProcess = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(expression, process);
+		testProcess = GrinderUtil.extendContextualSymbolsWithFreeSymbolsInExpressionwithUnknownTypeForSetUpPurposesOnly(expression, process);
 		// the above would have to include the contextual constraint (say, in a Tuple with expression), if it were not known to be "true".
 		actual = rewriter.rewrite(expression, testProcess);
 		assertEquals(parse(expectedString), actual);
@@ -289,7 +289,7 @@ public class LBPTest extends AbstractLPITest {
 				);
         process = LBPFactory.newLBPProcess(expression);
         Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNameAndArities(), process);
-        process = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(Tuple.make(expression, randomVariableValue), process);
+        process = GrinderUtil.extendContextualSymbolsWithFreeSymbolsInExpressionwithUnknownTypeForSetUpPurposesOnly(Tuple.make(expression, randomVariableValue), process);
         // the above would have to include the contextual constraint (say, in a Tuple with expression), if it were not known to be "true".
         otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(expression, randomVariableValue, process);
         assertEquals(expected, otherRandomVariableValuesAndContexts);	
@@ -4173,7 +4173,7 @@ public class LBPTest extends AbstractLPITest {
 		Expression actual;
 		RewritingProcess process;
 		process = LBPFactory.newBoundLBPProcess(formula);
-		process = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(formula, process); 
+		process = GrinderUtil.extendContextualSymbolsWithFreeSymbolsInExpressionwithUnknownTypeForSetUpPurposesOnly(formula, process); 
 		actual = PickSingleElement.getConditionalSingleValueOrNullIfNotDefinedInAllContexts(variable, formula, process);
 		System.out.println("Formula : " + formula);	
 		System.out.println("Expected: " + expected);	

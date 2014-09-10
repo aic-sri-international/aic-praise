@@ -1785,7 +1785,7 @@ public class RuleConverterTest {
 				return n;
 			}
 		}, result);
-		result = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(expression, result);
+		result = GrinderUtil.extendContextualSymbolsWithFreeSymbolsInExpressionwithUnknownTypeForSetUpPurposesOnly(expression, result);
 		// the above would have to include the contextual constraint (say, in a Tuple with expression), if it were not known to be "true".
 		return result;
 	}

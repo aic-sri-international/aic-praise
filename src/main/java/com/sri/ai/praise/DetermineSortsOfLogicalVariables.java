@@ -65,9 +65,9 @@ public class DetermineSortsOfLogicalVariables {
 			else {
 				randomVariableDeclarations = getRandomVariableDeclarationObjectsFromExpressions(randomVariableDeclarationExpressions);
 			}
-			process.putGlobalObject(GrinderUtil.DO_NOT_REQUIRE_ADDED_CONTEXTUAL_CONSTRAINT_FREE_VARIABLES_TO_BE_IN_CONTEXTUAL_VARIABLES, true);
+			process.putGlobalObject(GrinderUtil.DO_NOT_REQUIRE_ADDED_CONTEXTUAL_CONSTRAINT_FREE_SYMBOLS_TO_BE_IN_CONTEXTUAL_VARIABLES, true);
 			expression.replaceAllOccurrences(new CollectFreeSymbolsAndTypesFromUsageInRandomVariables(freeSymbolsAndTypes, randomVariableDeclarations), process);
-			process.removeGlobalObject(GrinderUtil.DO_NOT_REQUIRE_ADDED_CONTEXTUAL_CONSTRAINT_FREE_VARIABLES_TO_BE_IN_CONTEXTUAL_VARIABLES);
+			process.removeGlobalObject(GrinderUtil.DO_NOT_REQUIRE_ADDED_CONTEXTUAL_CONSTRAINT_FREE_SYMBOLS_TO_BE_IN_CONTEXTUAL_VARIABLES);
 		}
 		catch (Error e) {
 			// no model in process, do nothing.

@@ -188,7 +188,7 @@ public abstract class AbstractLPITest {
 			Expression contextualConstraint = parse(contextualConstraintString);
 			Expression topExpressionAndContextualConstraint = Tuple.make(topExpression, contextualConstraint);
 			process =
-					GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(
+					GrinderUtil.extendContextualSymbolsWithFreeSymbolsInExpressionwithUnknownTypeForSetUpPurposesOnly(
 							topExpressionAndContextualConstraint, process);
 			process = GrinderUtil.extendContextualConstraint(contextualConstraint, process);
 			

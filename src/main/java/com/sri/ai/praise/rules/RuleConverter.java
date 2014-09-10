@@ -1385,7 +1385,7 @@ public class RuleConverter {
 		
 		// | for each P in P1,..., Pn
 		for (Expression potentialExpression : potentialExpressions) {
-			RewritingProcess subProcess = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(potentialExpression, process);
+			RewritingProcess subProcess = GrinderUtil.extendContextualSymbolsWithFreeSymbolsInExpressionwithUnknownTypeForSetUpPurposesOnly(potentialExpression, process);
 
 			// | .... mayBeSameAsList <- empty list
 			Set<Pair<Expression, Expression>> mayBeSameAsSet = new LinkedHashSet<Pair<Expression, Expression>>();
@@ -1457,7 +1457,7 @@ public class RuleConverter {
 			Pair<Expression, Expression> pair = setOfConstrainedPotentialExpressions.get(ii);
 			Expression potentialExpression = pair.first;
 			Expression constraintC         = pair.second;
-			RewritingProcess subProcess = GrinderUtil.extendContextualSymbolsWithFreeVariablesInExpressionwithUnknownTypeForSetUpPurposesOnly(Tuple.make(potentialExpression, constraintC), process);
+			RewritingProcess subProcess = GrinderUtil.extendContextualSymbolsWithFreeSymbolsInExpressionwithUnknownTypeForSetUpPurposesOnly(Tuple.make(potentialExpression, constraintC), process);
 			CollectAtomicConstraint collectAtomicConstraint = new CollectAtomicConstraint(subProcess);
 			if (Util.thereExists(new SubExpressionsDepthFirstIterator(potentialExpression), collectAtomicConstraint)) {
 				// // | .... for Assumption in (Constraint, not Constraint)
