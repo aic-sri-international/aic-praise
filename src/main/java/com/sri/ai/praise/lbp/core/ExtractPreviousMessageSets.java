@@ -40,13 +40,16 @@ package com.sri.ai.praise.lbp.core;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
+import com.sri.ai.grinder.helper.GetType;
 import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.library.CommutativeAssociative;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -56,6 +59,7 @@ import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.util.Util;
 
 /**
  * Default implementation of {@link LBPRewriter#R_extract_previous_msg_sets}.
@@ -124,8 +128,16 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
 			if (LPIUtil.isPreviousMessageDefinition(expression)) {
+				
+				// We want to form a set representing all possible instantiations of the previous message "tuple" (that is, the Destination and Origin pair).
+				// This requires us to index this set with the logical variables that parameterize is, as well as the logical variables that appear in the contextual constraint
+				// that may influence which instantiations are possible.
+				// These correspond to the variables appearing free in a type of the previous message and contextual constraint:
+				Set<Expression> indices = Expressions.freeVariables(Tuple.make(expression, process.getContextualConstraint()), process);
+				Map<Expression, Expression> indexToTypeMap = Util.getFunctionMapForGivenKeys(indices, new GetType(process));
+				List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromSymbolsAndTypes(indexToTypeMap);
+				
 				Expression tuplePair = Tuple.make(expression.get(0), expression.get(1));
-				List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromSymbolsAndTypes(process.getContextualSymbolsAndTypes());
 				Expression set = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressions, tuplePair, process.getContextualConstraint());
 
 				// Now we try to simplify the set, but because its condition is the contextual constraint in the original process,

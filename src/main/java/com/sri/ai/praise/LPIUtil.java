@@ -1232,9 +1232,9 @@ public class LPIUtil {
 	 * but only for the indices (that is, it does not extend the contextual constraint with the intensional set's condition.
 	 */
 	public static RewritingProcess extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
-		Map<Expression, Expression> quantifiedSymbolsAndTypes =
+		Map<Expression, Expression> indexToTypeMap =
 				DetermineSortsOfLogicalVariables.getIndicesTypeMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(intensionalSet, process);
-		RewritingProcess result = GrinderUtil.extendContextualSymbolsAndConstraint(quantifiedSymbolsAndTypes, Expressions.TRUE, process);
+		RewritingProcess result = GrinderUtil.extendContextualSymbolsAndConstraint(indexToTypeMap, Expressions.TRUE, process);
 		return result;
 	}
 
