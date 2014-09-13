@@ -299,10 +299,10 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 						new TrivialPQR(),
 						"if X = a then E1 else E2",
 						"if X = a then E1 else E2"),	
-				new NormalizeTestData(Expressions.TRUE.toString(),  // No change expected as the condition comprises only of a logical inequality
+				new NormalizeTestData(Expressions.TRUE.toString(), // Expected as we want equalities in the condition by default
 						new TrivialPQR(),
 						"if X != a then E1 else E2",
-						"if X != a then E1 else E2"),
+						"if X = a then E2 else E1"),
 				new NormalizeTestData(Expressions.TRUE.toString(),  // No change expected as the condition comprises only of two logical inequalities
 						new TrivialPQR(),
 						"if X != a and X != b then E1 else E2",
@@ -316,7 +316,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 				new NormalizeTestData(Expressions.TRUE.toString(), 
 						new TrivialPQR(),
 						"if X != a and p(X) then E1 else E2",
-						"if X != a then if p(X) then E1 else E2 else E2"),
+						"if X = a then E2 else (if p(X) then E1 else E2)"),
 				new NormalizeTestData(Expressions.TRUE.toString(), 
 						new TrivialPQR(),
 						"if X = a and Y = b and q(X, Y) then E1 else E2",

@@ -95,7 +95,7 @@ public class LBPStressIT extends AbstractLPITest {
 						new Model(Model.getModelDeclarationFromResource("Example4DefectIteration2.model")),
 						"belief([r(w7, X)])",
 						false,
-						"if X != w7 then if r(w7, X) then 1 else 9.53674316E-207 else 0.5")});
+						"if X = w7 then 0.5 else (if r(w7, X) then 1 else 9.53674316E-207)")});
 	}
 	
 	private class LoopyBeliefTestData extends TestData {

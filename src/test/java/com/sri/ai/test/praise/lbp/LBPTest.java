@@ -2976,7 +2976,7 @@ public class LBPTest extends AbstractLPITest {
 								"notAtWork(bob);"),
 						"belief([sick(X)])", 
 						false, 
-						"if X != bob then if sick(X) then 0.0531281103 else 0.94687189 else (if sick(X) then 0.460002844 else 0.539997156)"
+						"if X = bob then (if sick(bob) then 0.460002844 else 0.539997156) else (if sick(X) then 0.0531281103 else 0.94687189)"
 						 ),
 
 				
@@ -3131,7 +3131,7 @@ public class LBPTest extends AbstractLPITest {
 						// Note: old R_formula_simplification result before R_normalize used instead
 						// Difference is because | People | -> 10 and new result is this expression calculated correctly with that.
 						// "if X != bob then if sick(X) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else 0.5"
-						"if X != bob then if sick(X) then 0.588166494 else 0.411833506 else 0.500000000"),
+						"if X = bob then 0.500000000 else (if sick(X) then 0.588166494 else 0.411833506)"),
 				new BeliefTestData(Expressions.TRUE.toString(), new TrivialEpidemicAndSickNotbob(), 
 						"belief([ sick(ann) ])", 
 						false, 
@@ -3332,7 +3332,7 @@ public class LBPTest extends AbstractLPITest {
 								"notAtWork(bob);"),
 						"belief([sick(X)])", 
 						false, 
-						"if X != bob then if sick(X) then 0.0531281103 else 0.94687189 else (if sick(X) then 0.460002844 else 0.539997156)"
+						"if X = bob then (if sick(bob) then 0.460002844 else 0.539997156) else (if sick(X) then 0.0531281103 else 0.94687189 )"
 						 ),
 				// 
 				// Basic: Illegal Argument Exceptions
@@ -3410,7 +3410,7 @@ public class LBPTest extends AbstractLPITest {
 				new BeliefUnknownSizeTestData(Expressions.TRUE.toString(), new TrivialEpidemicAndSickNotbob(), 
 						"belief([ sick(X) ])", 
 						false, 
-						"if X != bob then if sick(X) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else 0.5"
+						"if X = bob then 0.5 else if sick(X) then (0.4 * 0.8 ^ (|People| - 2) + 0.6) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2)) else (0.4 * 0.8 ^ (|People| - 2) + 0.4) / (0.4 * 0.8 ^ (|People| - 2) + 1 + 0.4 * 0.8 ^ (|People| - 2))"
 						// calculated | type(.) | = 10 :
 						// if X != bob then if sick(X) then 0.588166494 else 0.411833506 else 0.500000000
 						),
@@ -3756,7 +3756,7 @@ public class LBPTest extends AbstractLPITest {
 					// msg expansions
 					"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if Z != d then (previous message to [p(X,Z)] from [if p(X,Z) and q(Z) then 1 else 0]) else 0 ) ) | X != c }",
 					false,
-					"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if Z != d then if p(X,Z) then 1 else 0 else 0.5 ) ) | X != c }"),
+					"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if Z = d then 0.5 else (if p(X,Z) then 1 else 0) ) ) | X != c }"),
 		};
 		
 		perform(tests);
@@ -3805,7 +3805,7 @@ public class LBPTest extends AbstractLPITest {
 						" union " +
 						"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c and Z != a}",
 						false,
-						"if Y != d then if p(b, Y) then 1 else 0 else 0"),
+						"if Y = d then 0 else (if p(b, Y) then 1 else 0)"),
 						//"if Y != d then if Y = a then if p(b, a) then 1 else 0 else (if p(b, Y) then 1 else 0) else 0"),
 				// Example 2:
 				new UseValuesForPreviousMessagesTestData(Expressions.TRUE.toString(),
@@ -3813,7 +3813,7 @@ public class LBPTest extends AbstractLPITest {
 						"if Y != d then (previous message to [p(b,Y)] from [if p(b,Y) and q(Y) then 1 else 0]) else 0",
 						"{ (on X, Z) ( [p(X,Z)], [if p(X,Z) and q(Z) then 1 else 0], ( if p(X,Z) then 1 else 0 ) ) | X != c }",
 						false,
-						"if Y != d then if p(b,Y) then 1 else 0 else 0"),
+						"if Y = d then 0 else (if p(b,Y) then 1 else 0)"),
 		};
 		
 		perform(tests);
