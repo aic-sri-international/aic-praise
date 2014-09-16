@@ -38,7 +38,7 @@
 	</parent>
 
 	<packaging>jar</packaging>
-	<description>SRI International's AIC PRAiSE (Probabilistic Reasoning As Symbolic Evaluation) Library (for Java 1.6+)</description>
+	<description>SRI International's AIC PRAiSE (Probabilistic Reasoning As Symbolic Evaluation) Library (for Java 1.8+)</description>
 	<url>http://code.google.com/p/aic-praise/</url>
 	<licenses>
 		<license>
@@ -66,8 +66,8 @@
 	</developers>
 
 	<properties>
-		<target.jdk.version>1.6</target.jdk.version>
-		<targetJdk>1.6</targetJdk>
+		<target.jdk.version>1.8</target.jdk.version>
+		<targetJdk>1.8</targetJdk>
 		<aic.expresso.version>1.0.2-SNAPSHOT</aic.expresso.version>
 		<antlr.version>4.3</antlr.version>
 		<rsyntaxtextarea.version>2.0.6</rsyntaxtextarea.version>
@@ -191,6 +191,16 @@
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+      			<groupId>org.apache.maven.plugins</groupId>
+      			<artifactId>maven-javadoc-plugin</artifactId>
+      			<version>2.9.1</version>
+      			<configuration>
+      				<failOnError>false</failOnError>
+        			<additionalparam>-Xdoclint:none</additionalparam>
+      			</configuration>
+    		</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
