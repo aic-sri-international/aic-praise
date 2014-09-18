@@ -288,7 +288,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 					// is replaced with a new unique normalized parameter.
 					Expression parameter = Expressions.makeSymbol("X"+i++);
 					parameters.add(parameter);
-					lambdaBody = Expressions.replaceAtPath(lambdaBody, subExpressionAndContext.getPath(), parameter);
+					lambdaBody = Expressions.replaceAtPath(lambdaBody, subExpressionAndContext.getAddress(), parameter);
 				}
 				
 				// Create the token
