@@ -52,7 +52,7 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
+import com.sri.ai.expresso.api.SyntaxLeaf;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
@@ -556,7 +556,7 @@ public class ExportToPMTK3FactorGraph {
 		boolean result = false;
 		
 		if (expressionE.getFunctor() != null) {		
-			Symbol predicateSymbol = (Symbol) expressionE.getFunctor();
+			SyntaxLeaf predicateSymbol = (SyntaxLeaf) expressionE.getFunctor();
 			if (predicateSymbol.getValue() instanceof String) {
 				if (groundedModel.getKnownRandomVariableNameAndArities().contains(predicateSymbol.toString())) {
 					result = true;
