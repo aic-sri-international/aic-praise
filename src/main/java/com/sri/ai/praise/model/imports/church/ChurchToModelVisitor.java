@@ -53,10 +53,12 @@ import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdat
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
+import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.imports.church.antlr.ChurchBaseVisitor;
 import com.sri.ai.praise.imports.church.antlr.ChurchParser;
 import com.sri.ai.praise.lbp.LBPFactory;
@@ -114,9 +116,9 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		for (String r : rules) {		
 			hogm.append(r+";\n");
 		}
-		
+
 		Model m = RuleConverter.makeModel(churchProgramName, "\n"+churchProgram+"\n--->\n"+hogm.toString(), hogm.toString());
-	
+		
 		result = Tuple.make(newSymbol(hogm.toString()),
 							m.getModelDefinition(),
 							ExtensionalSet.makeUniSet(queries));
@@ -362,18 +364,22 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			rArgs.append(CHURCH_VALUES_SORT);
 			cnt++;
 		}
+		randoms.add("random "+name+":"+rArgs+" -> Boolean");
+		RewritingProcess processForRV = LBPFactory.newLBPProcessWithHighLevelModel("random "+name+":"+rArgs+" -> Boolean;");		
 		if (rvArgs.size() > 0) {
+			processForRV = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(rvArgs), processForRV);
 			randomVariable = Expressions.apply(randomVariable, rvArgs);
 		}
-		
+				
 		if (flipIdToValue.size() == 0) {
-			result = createPotentialRule(randomVariable, deterministicChurch2HOGM(body, paramVarNames), Expressions.ONE, Expressions.ZERO);
+			Expression potentialRule = createPotentialRule(randomVariable, deterministicChurch2HOGM(body, paramVarNames, processForRV), Expressions.ONE, Expressions.ZERO);
+			result = rNormalize.rewrite(potentialRule, processForRV);
 		}
 		else {
 			final List<List<Boolean>>       flipValues      = new ArrayList<List<Boolean>>();
 			final List<Boolean>             trueFalseValues = new ArrayList<Boolean>();
 			final Map<Expression, Integer>  flipMarkerToIdx = new HashMap<Expression, Integer>();
-			// Flips <- array of flip applications in bodu
+			// Flips <- array of flip applications in body
 			trueFalseValues.add(Boolean.FALSE);
 			trueFalseValues.add(Boolean.TRUE);
 			for (Integer flipId : flipIdToValue.keySet()) {
@@ -402,7 +408,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 					}
 				}, LBPFactory.newLBPProcess());
 				// caseH <- deterministicChurch2HOGM(caseC)
-				Expression caseH = deterministicChurch2HOGM(caseC, paramVarNames);				
+				Expression caseH = deterministicChurch2HOGM(caseC, paramVarNames, processForRV);				
 				
 				// Calculate q
 				Rational q = Rational.ONE;
@@ -416,17 +422,16 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 				}
 											
 				h.add(createPotentialRule(randomVariable, caseH, Expressions.makeSymbol(q), Expressions.ZERO));				
-			}
-			result = rNormalize.rewrite(Plus.make(h));
+			}		
+			result = rNormalize.rewrite(Plus.make(h), processForRV);
 		}
 		
-		rules.add(result.toString());
-		randoms.add("random "+name+":"+rArgs+" -> Boolean");
+		rules.add(result.toString());		
 		
 		return result;
 	}
 	
-	protected Expression deterministicChurch2HOGM(Expression expr, final Map<Expression, Expression> paramVarNames) {	
+	protected Expression deterministicChurch2HOGM(Expression expr, final Map<Expression, Expression> paramVarNames, RewritingProcess processForRV) {	
 		expr = expr.replaceAllOccurrences(new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {					
 			@Override
 			public Expression apply(Expression expression, RewritingProcess process) {
@@ -441,22 +446,15 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			}
 		}, LBPFactory.newLBPProcess());
 		
-		Expression result = rNormalize.rewrite(expr);
+		Expression result = rNormalize.rewrite(expr, processForRV);
 		
 		return result;
 	}
 	
-	protected Expression createPotentialRule(Expression randomVariable, Expression caseH, Expression alpha, Expression beta) {
-		Expression result    = null;
-// TODO - add an atomic rewriter for this translation to R_normalize.			
-		// Translate:
-		// if RV = Formula then Alpha else Beta
-		// --->
-		// if Formula then if RV then Alpha else Beta else if RV then Beta else Alpha	
-		result = IfThenElse.make(caseH, 
-					IfThenElse.make(randomVariable, alpha, beta), 
-					IfThenElse.make(randomVariable, beta, alpha));		
-		
+	protected Expression createPotentialRule(Expression randomVariable, Expression caseH, Expression alpha, Expression beta) {		
+		Expression condition = Equality.make(randomVariable, caseH);
+		Expression result    = IfThenElse.make(condition, alpha, beta);
+
 		return result;
 	}
 	

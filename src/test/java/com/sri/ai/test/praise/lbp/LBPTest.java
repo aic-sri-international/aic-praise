@@ -311,7 +311,7 @@ public class LBPTest extends AbstractLPITest {
 			@Override
 			public Expression getTopExpression() {
 				this.exprA = parse(extA);
-				this.exprB= parse(intB);
+				this.exprB = parse(intB);
 				
 				return Expressions.apply("-", exprA, exprB);
 			}

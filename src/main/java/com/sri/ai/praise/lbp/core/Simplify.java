@@ -46,6 +46,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.ScopedVariables;
+import com.sri.ai.grinder.library.controlflow.DisequalityToEqualityInIfThenElseCondition;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.controlflow.IfThenElseSubExpressionsAndImposedConditionsProvider;
 import com.sri.ai.grinder.library.equality.injective.DisequalityOnInjectiveSubExpressions;
@@ -204,7 +205,15 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 										         !ConvexRewriterOnMessageBounds.containsPlaceholderExpression(lambdaBody);
 								return result;
 							}
-						}))
+						})),
+					
+				// Support for:
+				// if RandomVaribleValue = Formula then Alpha else Beta
+				// --->
+				// if Formula then if RandomVariableValue then Alpha else Beta else if RandomVariableValue then Beta else Alpha
+				new Pair<Class<?>, Rewriter>(
+						DisequalityToEqualityInIfThenElseCondition.class,
+						new EqualityOnRandomVariableAndFormulaInIfThenElseConditionToFormulaOnTop())
 				);
 		
 		return atomicRewriters;

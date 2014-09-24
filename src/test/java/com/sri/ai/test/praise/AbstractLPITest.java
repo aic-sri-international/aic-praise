@@ -167,7 +167,7 @@ public abstract class AbstractLPITest {
 		public TestData(String contextualConstraintString, Model model, boolean isIllegalArgumentTest, String expected) {
 			this(isIllegalArgumentTest, expected);
 			this.contextualConstraintString = contextualConstraintString;
-			this.model                = model;
+			this.model                      = model;
 		}
 		
 		/** Performs i-th test of a batch, indicating an error message in case of failure, or null. */

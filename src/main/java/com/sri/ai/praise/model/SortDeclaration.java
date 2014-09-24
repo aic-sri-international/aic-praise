@@ -386,7 +386,7 @@ public class SortDeclaration {
 			throw new IllegalArgumentException(
 					"name ["
 							+ name
-							+ "] is not of the correc type. must be a string valued symbol.");
+							+ "] is not of the correct type. must be a string valued symbol.");
 		}
 	}
 
