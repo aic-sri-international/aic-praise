@@ -47,6 +47,7 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.demo.model.Example;
 
 /**
  * 
@@ -57,7 +58,7 @@ import com.google.common.annotations.Beta;
 public class ToolBarPanel extends JPanel {
 	private static final long serialVersionUID = 1L;	
 	//
-	public JComboBox exampleComboBox;
+	public JComboBox<Example> exampleComboBox;
 	public JButton btnNew;
 	public JButton btnOpen;
 	public JButton btnSave;
@@ -116,7 +117,7 @@ public class ToolBarPanel extends JPanel {
 		JLabel lblExample = new JLabel("Example: ");
 		toolBar.add(lblExample);
 		
-		exampleComboBox = new JComboBox();
+		exampleComboBox = new JComboBox<>();
 		exampleComboBox.setPreferredSize(new Dimension(200, 25));
 		toolBar.add(exampleComboBox);
 		

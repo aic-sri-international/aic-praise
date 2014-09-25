@@ -69,9 +69,9 @@ public class QueryPanel extends JPanel {
 	JButton btnExecuteQuery;
 	JProgressBar progressBar;
 	//
-	private MutableComboBoxModel queryModel = new DefaultComboBoxModel();
+	private MutableComboBoxModel<String> queryModel = new DefaultComboBoxModel<String>();
 	//
-	private JComboBox queryComboBox;
+	private JComboBox<String> queryComboBox;
 
 	/**
 	 * Create the panel.
@@ -146,7 +146,7 @@ public class QueryPanel extends JPanel {
 		queryPanel.add(panel);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		
-		queryComboBox = new JComboBox(queryModel);
+		queryComboBox = new JComboBox<>(queryModel);
 		queryComboBox.setFont(new Font("Dialog", Font.PLAIN, 14));
 		panel.add(queryComboBox);
 		queryComboBox.setPreferredSize(new Dimension(250, 25));

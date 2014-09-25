@@ -130,7 +130,7 @@ public class OptionsPanel extends JPanel {
 	}
 	//
 	JFormattedTextField typeSizeTextField = null;
-	JComboBox scheduleComboBox;
+	JComboBox<String> scheduleComboBox;
 	JCheckBox chckbxJustificationToConsole;
 	JCheckBox chckbxJustificationToJustTab;
 	JCheckBox chckbxTraceToConsole;
@@ -208,7 +208,7 @@ public class OptionsPanel extends JPanel {
 		JLabel lblSchedule = new JLabel("Schedule:");
 		schedulePanel.add(lblSchedule);
 		
-		scheduleComboBox = new JComboBox();
+		scheduleComboBox = new JComboBox<>();
 		scheduleComboBox.setPreferredSize(new Dimension(100, 25));
 		schedulePanel.add(scheduleComboBox);
 		

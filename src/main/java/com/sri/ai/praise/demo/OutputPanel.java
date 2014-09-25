@@ -70,7 +70,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private int traceCurrentIndentLevel = 0, justificationCurrentIndentLevel = 0;
 	private ExpressionNode activeTraceNode, rootTraceNode = new ExpressionNode("", null);
 	private DefaultTreeModel treeTraceModel = new DefaultTreeModel(rootTraceNode);
-	private DefaultListModel problemListModel = new DefaultListModel();
+	private DefaultListModel<String> problemListModel = new DefaultListModel<>();
 	//
 	private OptionsPanel options = null;
 	//
@@ -78,7 +78,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private ExpressionTreeView justificationTree;
 	private ExpressionTreeView traceTree;
 	private RuleEditor resultEditor;
-	private JList problemsList;
+	private JList<String> problemsList;
 	private JTabbedPane outputTabbedPane;
 
 	/**
@@ -115,7 +115,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		problemListModel.removeAllElements();
 	}
 	
-	public void addProblem(Object problem) {
+	public void addProblem(String problem) {
 		problemListModel.addElement(problem);
 	}
 	
@@ -266,7 +266,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 		JScrollPane problemsScrollPane = new JScrollPane();
 		problemsPanel.add(problemsScrollPane, BorderLayout.CENTER);
 		
-		problemsList = new JList(problemListModel);
+		problemsList = new JList<>(problemListModel);
 		problemsScrollPane.setViewportView(problemsList);
 		
 		JPanel consolePanel = new JPanel();
