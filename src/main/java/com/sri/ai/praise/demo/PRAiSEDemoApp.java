@@ -40,12 +40,8 @@ package com.sri.ai.praise.demo;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -56,8 +52,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
@@ -210,18 +204,17 @@ public class PRAiSEDemoApp {
 		editorPanel.setLayout(new BorderLayout(0, 0));
 		
 		editorsTabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		editorsTabbedPane.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				if (controller != null) {
-					if (editorsTabbedPane.getSelectedIndex() == 0) {
-						controller.setActiveEditor(modelEditPanel);
-					}
-					else {
-						controller.setActiveEditor(evidenceEditPanel);
-					}
+		editorsTabbedPane.addChangeListener(e -> {
+			if (controller != null) {
+				if (editorsTabbedPane.getSelectedIndex() == 0) {
+					controller.setActiveEditor(modelEditPanel);
+				}
+				else {
+					controller.setActiveEditor(evidenceEditPanel);
 				}
 			}
 		});
+		
 		editorPanel.add(editorsTabbedPane);
 		
 		modelEditPanel = new RuleEditor();
@@ -388,19 +381,15 @@ public class PRAiSEDemoApp {
 		mntmExecuteQuery.setAction(controller.getExecuteQueryAction());
 		toolBar.btnExecuteQuery.setAction(controller.getExecuteQueryAction());
 		queryPanel.btnExecuteQuery.setAction(controller.getExecuteQueryAction());
-		controller.getExecuteQueryAction().addPropertyChangeListener(new PropertyChangeListener() {
-			
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if (controller.getExecuteQueryAction().isRunQueryState()) {
-					queryPanel.progressBar.setEnabled(false);
-					queryPanel.progressBar.setIndeterminate(false);
-				}
-				else {
-					queryPanel.progressBar.setEnabled(true);
-					queryPanel.progressBar.setIndeterminate(true);
-				}	
+		controller.getExecuteQueryAction().addPropertyChangeListener(evt -> {
+			if (controller.getExecuteQueryAction().isRunQueryState()) {
+				queryPanel.progressBar.setEnabled(false);
+				queryPanel.progressBar.setIndeterminate(false);
 			}
+			else {
+				queryPanel.progressBar.setEnabled(true);
+				queryPanel.progressBar.setIndeterminate(true);
+			}	
 		});
 		
 		// Clear Output
@@ -425,12 +414,10 @@ public class PRAiSEDemoApp {
 //		toolBar.exampleComboBox.addItem(new Example5());
 //		toolBar.exampleComboBox.addItem(new Example6());
 		toolBar.exampleComboBox.addItem(new Example7());
-		toolBar.exampleComboBox.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int selectedIndex = toolBar.exampleComboBox.getSelectedIndex();
-				if (selectedIndex >= 0) {
-					controller.setExample((Example)toolBar.exampleComboBox.getItemAt(selectedIndex));
-				}
+		toolBar.exampleComboBox.addActionListener(e -> {
+			int selectedIndex = toolBar.exampleComboBox.getSelectedIndex();
+			if (selectedIndex >= 0) {
+				controller.setExample((Example)toolBar.exampleComboBox.getItemAt(selectedIndex));
 			}
 		});
 		toolBar.exampleComboBox.setSelectedIndex(0);

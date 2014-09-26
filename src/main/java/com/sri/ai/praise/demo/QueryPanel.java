@@ -139,7 +139,7 @@ public class QueryPanel extends JPanel {
 		queryPanel.setLayout(new BoxLayout(queryPanel, BoxLayout.X_AXIS));
 		
 		JLabel lblQuery = new JLabel("Query: ");
-		lblQuery.setFont(new Font("SansSerif", Font.BOLD, 12));
+		lblQuery.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		queryPanel.add(lblQuery);
 		
 		JPanel panel = new JPanel();

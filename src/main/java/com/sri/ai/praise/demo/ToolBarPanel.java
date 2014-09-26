@@ -118,7 +118,7 @@ public class ToolBarPanel extends JPanel {
 		toolBar.add(lblExample);
 		
 		exampleComboBox = new JComboBox<>();
-		exampleComboBox.setPreferredSize(new Dimension(200, 25));
+		exampleComboBox.setPreferredSize(new Dimension(240, 25));
 		toolBar.add(exampleComboBox);
 		
 		toolBar.addSeparator();
