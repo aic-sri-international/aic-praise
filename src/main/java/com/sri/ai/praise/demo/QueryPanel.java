@@ -39,7 +39,6 @@ package com.sri.ai.praise.demo;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -47,6 +46,7 @@ import java.awt.event.FocusListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -77,7 +77,7 @@ public class QueryPanel extends JPanel {
 	 * Create the panel.
 	 */
 	public QueryPanel() {
-		setBorder(new EmptyBorder(0, 5, 0, 0));
+		setBorder(new EmptyBorder(0, 0, 0, 0));
 		initialize();
 		postGUIInitialization();
 	}
@@ -138,8 +138,7 @@ public class QueryPanel extends JPanel {
 		queryPanel.setBorder(null);
 		queryPanel.setLayout(new BoxLayout(queryPanel, BoxLayout.X_AXIS));
 		
-		JLabel lblQuery = new JLabel("Query: ");
-		lblQuery.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		JLabel lblQuery = new JLabel("Query ");
 		queryPanel.add(lblQuery);
 		
 		JPanel panel = new JPanel();
@@ -147,20 +146,32 @@ public class QueryPanel extends JPanel {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		
 		queryComboBox = new JComboBox<>(queryModel);
-		queryComboBox.setFont(new Font("Dialog", Font.PLAIN, 14));
 		panel.add(queryComboBox);
-		queryComboBox.setPreferredSize(new Dimension(250, 25));
 		queryComboBox.setEditable(true);
+		queryComboBox.setToolTipText("You can press enter to execute the current query");
 		
-		btnExecuteQuery = new JButton("");
+		btnExecuteQuery = new JButton(ImageLookup.EXECUTE_QUERY_SMALL) {
+			private static final long serialVersionUID = 1L;
+			// NOTE: Overriding this so that we use the small icons by default
+			// as these match in size better with the query combo box.
+			@Override
+			public void setIcon(Icon defaultIcon) {				
+				if (defaultIcon == ImageLookup.EXECUTE_QUERY_LARGE) {
+					defaultIcon = ImageLookup.EXECUTE_QUERY_SMALL;
+				}
+				else if (defaultIcon == ImageLookup.STOP_QUERY_LARGE) {
+					defaultIcon = ImageLookup.STOP_QUERY_SMALL;
+				}
+				super.setIcon(defaultIcon);
+		    }
+		};
 		panel.add(btnExecuteQuery);
-		btnExecuteQuery.setPreferredSize(new Dimension(40, 40));
+		btnExecuteQuery.setPreferredSize(new Dimension(28, 28));
 		btnExecuteQuery.setHideActionText(true);
 		btnExecuteQuery.setIcon(ImageLookup.EXECUTE_QUERY_LARGE);
 		btnExecuteQuery.setToolTipText("Execute Query");
 		
 		progressBar = new JProgressBar();
-		progressBar.setPreferredSize(new Dimension(146, 32));
 		progressBar.setEnabled(false);
 		queryPanel.add(progressBar);
 		queryComboBox.getEditor().addActionListener(new ActionListener() {
