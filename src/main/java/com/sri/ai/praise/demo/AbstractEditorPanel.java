@@ -37,11 +37,93 @@
  */
 package com.sri.ai.praise.demo;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.Action;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.demo.model.Example;
 
 @Beta
 public abstract class AbstractEditorPanel extends JPanel {
+	
+	public interface ActiveEditorListener {
+		void activated();
+	}
+	
 	private static final long serialVersionUID = 1L;
+	//
+	protected List<ActiveEditorListener> activeEditorListeners = new ArrayList<>();
+	//
+	protected JFileChooser fileChooser       = null;
+	protected JComponent   fileChooserParent = null;
+	
+	public void addActiveEditorListener(ActiveEditorListener l) {
+		if (!activeEditorListeners.contains(l)) {
+			activeEditorListeners.add(l);
+		}
+	}
+	
+	public void setFileChooser(JFileChooser fileChooser, JComponent fileChooserParent) {
+		this.fileChooser       = fileChooser;
+		this.fileChooserParent = fileChooserParent;
+	}
+		
+	public abstract void setExample(Example example);
+	public abstract String getContextTitle();
+	public abstract String getContents();
+	public abstract void setContents(String contents, File fromFile) throws IOException;
+	public abstract boolean isASaveRequired();
+	public abstract void saveIfRequired() throws IOException;
+	public abstract void saveAll() throws IOException;
+	public abstract void saveAs() throws IOException;
+	public abstract boolean canUndo();
+	public abstract void undo();
+	public abstract void redo();
+	public abstract void discardAllEdits();
+	public abstract void copyState(AbstractEditorPanel otherEditorPanel);
+	public abstract List<String> validateContents();
+	
+	public Action getCutAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION);
+	}
+	
+	public Action getCopyAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION);
+	}
+	
+	public Action getPasteAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION);
+	}
+	
+	public Action getDeleteAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION);
+	}
+	
+	public Action getSelectAllAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.SELECT_ALL_ACTION);
+	}
+	
+	public Action getUndoAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION);
+	}
+	
+	public Action getRedoAction() {
+		return RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION);
+	}
+	
+	//
+	// PROTECTED
+	//
+	protected void notifyActiveEditorListeners() {
+		activeEditorListeners.forEach(l -> l.activated());
+	}
 }

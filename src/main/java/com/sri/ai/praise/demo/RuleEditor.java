@@ -39,6 +39,7 @@ package com.sri.ai.praise.demo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.FocusListener;
 import java.io.IOException;
 
 import javax.swing.Action;
@@ -170,32 +171,8 @@ public class RuleEditor extends JPanel {
 		}
 	}
 	
-	public Action getCutAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION);
-	}
-	
-	public Action getCopyAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION);
-	}
-	
-	public Action getPasteAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION);
-	}
-	
-	public Action getDeleteAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION);
-	}
-	
-	public Action getSelectAllAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.SELECT_ALL_ACTION);
-	}
-	
-	public Action getUndoAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION);
-	}
-	
-	public Action getRedoAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION);
+	public void addTextAreaFocusListener(FocusListener l) {
+		textArea.addFocusListener(l);
 	}
 	
 	//

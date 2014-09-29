@@ -49,7 +49,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
@@ -78,9 +77,8 @@ public class PRAiSEDemoApp {
 
 	JFrame frame;
 	ToolBarPanel toolBar = new ToolBarPanel();
-	JTabbedPane editorsTabbedPane;
-	RuleEditor modelEditPanel;
-	RuleEditor evidenceEditPanel;
+	JPanel editorPlacementPanel;
+	AbstractEditorPanel activeEditorPanel;
 	OptionsPanel optionsPanel;
 	QueryPanel queryPanel;
 	OutputPanel outputPanel;
@@ -92,6 +90,7 @@ public class PRAiSEDemoApp {
 	private JMenuItem mntmSave;
 	private JMenuItem mntmSaveAs;
 	private JMenuItem mntmSaveAll;
+	private JMenuItem mntmImport;
 	private JMenuItem mntmExport;
 	private JMenuItem mntmExit;
 	private JMenuItem mntmUndo;
@@ -159,8 +158,12 @@ public class PRAiSEDemoApp {
 	 * Create the application.
 	 */
 	public PRAiSEDemoApp() {
+		this(new HOGMPanel()); // i.e. the default editor.
+	}
+	
+	public PRAiSEDemoApp(AbstractEditorPanel activeEditorPanel) {
 		initialize();
-		postGUIInitialization();
+		postGUIInitialization(activeEditorPanel);
 	}
 
 	/**
@@ -198,33 +201,12 @@ public class PRAiSEDemoApp {
 		inputSplitPane.setOneTouchExpandable(true);
 		inputPanel.add(inputSplitPane, BorderLayout.CENTER);
 		
-		JPanel editorPanel = new JPanel();
-		editorPanel.setPreferredSize(new Dimension(400, 370));
-		inputSplitPane.setLeftComponent(editorPanel);
-		editorPanel.setLayout(new BorderLayout(0, 0));
-		
-		editorsTabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		editorsTabbedPane.addChangeListener(e -> {
-			if (controller != null) {
-				if (editorsTabbedPane.getSelectedIndex() == 0) {
-					controller.setActiveEditor(modelEditPanel);
-				}
-				else {
-					controller.setActiveEditor(evidenceEditPanel);
-				}
-			}
-		});
-		
-		editorPanel.add(editorsTabbedPane);
-		
-		modelEditPanel = new RuleEditor();
-		editorsTabbedPane.addTab("Model", null, modelEditPanel, null);
-		
-		evidenceEditPanel = new RuleEditor();
-		editorsTabbedPane.addTab("Evidence", null, evidenceEditPanel, null);
+		editorPlacementPanel = new JPanel();
+		editorPlacementPanel.setLayout(new BorderLayout(0, 0));
+		inputSplitPane.setLeftComponent(editorPlacementPanel);
 		
 		queryPanel = new QueryPanel();
-		editorPanel.add(queryPanel, BorderLayout.SOUTH);
+		editorPlacementPanel.add(queryPanel, BorderLayout.SOUTH);
 		
 		optionsPanel = new OptionsPanel();
 		optionsPanel.setPreferredSize(new Dimension(200, 370));
@@ -264,6 +246,9 @@ public class PRAiSEDemoApp {
 		mnFile.add(mntmSaveAll);
 		
 		mnFile.addSeparator();
+		
+		mntmImport = new JMenuItem("Import...");
+		mnFile.add(mntmImport);
 		
 		mntmExport = new JMenuItem("Export...");
 		mnFile.add(mntmExport);
@@ -327,11 +312,12 @@ public class PRAiSEDemoApp {
 	}
 	
 	
-	private void postGUIInitialization() {		
+	private void postGUIInitialization(AbstractEditorPanel activeEditorPanel) {
+		this.activeEditorPanel = activeEditorPanel;
+		this.editorPlacementPanel.add(this.activeEditorPanel, BorderLayout.CENTER);
+		
 		// Wire up the Controller
 		controller = new Controller(this);
-		
-		controller.setActiveEditor(modelEditPanel);
 		
 		outputPanel.setOptions(optionsPanel);
 		
@@ -353,27 +339,29 @@ public class PRAiSEDemoApp {
 		mntmSaveAs.setAction(controller.getSaveAsAction());
 		// Save All
 		mntmSaveAll.setAction(controller.getSaveAllAction());
-		toolBar.btnSaveAll.setAction(controller.getSaveAllAction());		
+		toolBar.btnSaveAll.setAction(controller.getSaveAllAction());
+		// Import...
+		mntmImport.setAction(controller.getImportAction());
 		// Export...
 		mntmExport.setAction(controller.getExportAction());
 		// Exit
 		mntmExit.setAction(controller.getExitAction());
 		// Undo
-		mntmUndo.setAction(modelEditPanel.getUndoAction());
-		toolBar.btnUndo.setAction(modelEditPanel.getUndoAction());
+		mntmUndo.setAction(activeEditorPanel.getUndoAction());
+		toolBar.btnUndo.setAction(activeEditorPanel.getUndoAction());
 		// Redo
-		mntmRedo.setAction(modelEditPanel.getRedoAction());
-		toolBar.btnRedo.setAction(modelEditPanel.getRedoAction());
+		mntmRedo.setAction(activeEditorPanel.getRedoAction());
+		toolBar.btnRedo.setAction(activeEditorPanel.getRedoAction());
 		// Cut
-		mntmCut.setAction(modelEditPanel.getCutAction());
+		mntmCut.setAction(activeEditorPanel.getCutAction());
 		// Copy
-		mntmCopy.setAction(modelEditPanel.getCopyAction());
+		mntmCopy.setAction(activeEditorPanel.getCopyAction());
 		// Paste
-		mntmPaste.setAction(modelEditPanel.getPasteAction());
+		mntmPaste.setAction(activeEditorPanel.getPasteAction());
 		// Delete
-		mntmDelete.setAction(modelEditPanel.getDeleteAction());
+		mntmDelete.setAction(activeEditorPanel.getDeleteAction());
 		// Select All
-		mntmSelectAll.setAction(modelEditPanel.getSelectAllAction());
+		mntmSelectAll.setAction(activeEditorPanel.getSelectAllAction());
 		// Validate
 		mntmValidate.setAction(controller.getValidateAction());
 		toolBar.btnValidate.setAction(controller.getValidateAction());

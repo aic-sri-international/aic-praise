@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, SRI International
+ * Copyright (c) 2013, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-praise nor the names of its
+ * Neither the name of the aic-expresso nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,101 +35,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.demo;
+package com.sri.ai.praise.demo.action;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.demo.model.Example;
+import com.sri.ai.praise.demo.Controller;
 
+/**
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
-public class ChurchPanel extends AbstractEditorPanel {
-	private static final long serialVersionUID = 1L;	
-	//
+public class ImportAction extends AbstractAction {
+	private static final long serialVersionUID = 1L;
 
-	public ChurchPanel() {
-		initialize();
+	private Controller controller = null;
+	
+	public ImportAction(Controller controller) {
+		this.controller = controller;
+		putValue(Action.NAME, "Import...");
+		putValue(Action.SHORT_DESCRIPTION, "Import...");
+		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_I);
 	}
 	
 	@Override
-	public void setExample(Example example) {
-// TODO		
-	}
-	
-	@Override
-	public String getContextTitle() {
-		return null; // TODO
-	}
-	
-	@Override
-	public String getContents() {
-		return null; // TODO
-	}
-		
-	@Override
-	public void setContents(String contents, File fromFile) throws IOException {
-// TODO		
-	}
-	
-	@Override
-	public boolean isASaveRequired() {
-		return false; // TODO
-	}
-	
-	@Override
-	public void saveIfRequired() throws IOException {
-// TODO		
-	}
-
-	@Override
-	public void saveAll() throws IOException {
-// TODO		
-	}
-	
-	@Override
-	public void saveAs() throws IOException {
-// TODO		
-	}
-	
-	@Override
-	public boolean canUndo() {
-		return false; // TODO	
-	}
-	
-	@Override
-	public void undo() {
-// TODO		
-	}
-	
-	@Override
-	public void redo() {
-// TODO		
-	}
-	
-	@Override
-	public void discardAllEdits() {
-// TODO		
-	}
-	
-	@Override
-	public void copyState(AbstractEditorPanel otherEditorPanel) {
-// TODO		
-	}
-	
-	@Override
-	public List<String> validateContents() {
-		List<String> problems = new ArrayList<>();
-// TODO		
-		return problems;
-	}
-	
-	//
-	// PRIVATE
-	//
-	private void initialize() {
-		
+	public void actionPerformed(ActionEvent ae) {
+		controller.importAction();
 	}
 }

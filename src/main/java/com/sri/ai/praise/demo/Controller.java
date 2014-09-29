@@ -45,25 +45,14 @@ import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.StringReader;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
-import javax.swing.undo.CannotRedoException;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.Token;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -80,6 +69,7 @@ import com.sri.ai.praise.demo.action.ExecuteQueryAction;
 import com.sri.ai.praise.demo.action.ExitAction;
 import com.sri.ai.praise.demo.action.ExportAction;
 import com.sri.ai.praise.demo.action.HideToolBarAction;
+import com.sri.ai.praise.demo.action.ImportAction;
 import com.sri.ai.praise.demo.action.NewAction;
 import com.sri.ai.praise.demo.action.NewWindowAction;
 import com.sri.ai.praise.demo.action.OpenFileAction;
@@ -96,8 +86,6 @@ import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
-import com.sri.ai.praise.rules.antlr.RuleLexer;
-import com.sri.ai.praise.rules.antlr.RuleParser;
 import com.sri.ai.util.Configuration;
 import com.sri.ai.util.base.Triple;
 
@@ -116,15 +104,13 @@ public class Controller {
 	private boolean        intentionallyInterrupted = false;
 	//
 	private PRAiSEDemoApp app = null;
-	private RuleEditor activeEditor;
-	private File currentModelFile = null;
-	private File currentEvidenceFile = null;
 	//
 	private NewAction newAction = null;
 	private OpenFileAction openFileAction = null;
 	private SaveAction saveAction = null;
 	private SaveAsAction saveAsAction = null;
 	private SaveAllAction saveAllAction = null;
+	private ImportAction importAction = null;
 	private ExportAction exportAction = null;
 	private ExitAction exitAction = null;
 	private ValidateAction validateAction = null;
@@ -137,6 +123,9 @@ public class Controller {
 
 	public Controller(PRAiSEDemoApp app) {
 		this.app = app;
+		
+		this.app.activeEditorPanel.setFileChooser(fileChooser, app.toolBar.btnSave);
+		this.app.activeEditorPanel.addActiveEditorListener(() -> handleUndoRedo());
 		
 		app.optionsPanel.chckbxJustificationEnabled.addActionListener(new ActionListener() {
 			@Override
@@ -162,18 +151,13 @@ public class Controller {
 			}
 		};
 		
-		app.modelEditPanel.getUndoAction().addPropertyChangeListener(pl);
+		app.activeEditorPanel.getUndoAction().addPropertyChangeListener(pl);
 		
 		updateAppTitle();
 	}
 	
-	public void setActiveEditor(RuleEditor ae) {
-		this.activeEditor = ae;
-		handleUndoRedo();
-	}
-	
 	public void setExample(Example example) {
-		if (isASaveRequired()) {
+		if (app.activeEditorPanel.isASaveRequired()) {
 			
 			int option = JOptionPane.showConfirmDialog(
 				    app.frame,
@@ -186,11 +170,7 @@ public class Controller {
 			}
 		}
 		
-		currentModelFile = null;
-		currentEvidenceFile = null;
-		
-		app.modelEditPanel.setText(example.getModel());
-		app.evidenceEditPanel.setText(example.getEvidence());
+		app.activeEditorPanel.setExample(example);		
 		app.queryPanel.setCurrentQuery(example.getQueryToRun());
 		
 		discardAllEdits();
@@ -201,12 +181,7 @@ public class Controller {
 	}
 	
 	public void newActiveEditorContent() {
-		saveIfRequired(activeEditor);
-		
-		activeEditor.setText("");
-		discardActiveEdits();
-		
-		setOutputFile(activeEditor, null);
+		setEditorContents("", null);
 	}
 	
 	public void openFile() {
@@ -215,22 +190,18 @@ public class Controller {
 			File toOpen = fileChooser.getSelectedFile();
 			if (toOpen.exists()) {
 				
-				saveIfRequired(activeEditor);
-				
 				try {
-					LineNumberReader reader = new LineNumberReader(new FileReader(toOpen));
+					app.activeEditorPanel.saveIfRequired();
+				}
+				catch (IOException ioe) {
+					error("ERROR " + ioe.getMessage());
+				}
+				
+				try (BufferedReader reader = new BufferedReader(new FileReader(toOpen))) {
 					StringBuilder sb = new StringBuilder();
-					String line = null;
-					while ( (line = reader.readLine()) != null) {
-						sb.append(line);
-						sb.append("\n");
-					}
-					reader.close();
+					reader.lines().forEach(line -> sb.append(line+"\n"));			
 					
-					activeEditor.setText(sb.toString());
-					discardActiveEdits();
-					
-					setOutputFile(activeEditor, toOpen);
+					setEditorContents(sb.toString(), toOpen);
 				} catch (IOException ioe) {
 					error("Unable to open file: "+toOpen.getAbsolutePath());
 				}
@@ -242,16 +213,38 @@ public class Controller {
 	}
 	
 	public void save() {
-		saveIfRequired(activeEditor);
+		try {
+			app.activeEditorPanel.saveIfRequired();
+			updateAppTitle();
+		}
+		catch (IOException ioe) {
+			error("ERROR " + ioe.getMessage());
+		}
 	}
 	
 	public void saveAs() {
-		saveAs(activeEditor);
+		try {
+			app.activeEditorPanel.saveAs();
+			updateAppTitle();
+		}
+		catch (IOException ioe) {
+			error("ERROR " + ioe.getMessage());
+		}
 	}
 	
 	public void saveAll() {
-		saveIfRequired(app.modelEditPanel);
-		saveIfRequired(app.evidenceEditPanel);
+		try {
+			app.activeEditorPanel.saveAll();
+			updateAppTitle();
+		}
+		catch (IOException ioe) {
+			error("ERROR " + ioe.getMessage());
+		}
+	}
+	
+	public void importAction() {
+// TODO
+information("TODO implementation");
 	}
 	
 	public void export() {
@@ -260,7 +253,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	public void exit() {
-		if (isASaveRequired()) {
+		if (app.activeEditorPanel.isASaveRequired()) {
 			
 			int option = JOptionPane.showConfirmDialog(
 				    app.frame,
@@ -275,24 +268,12 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	public void undo() {		
-		if (activeEditor.canUndo()) {
-			try {
-				activeEditor.undo();						
-			} catch (CannotRedoException cue) {
-				// ignore
-			}
-		}
+		app.activeEditorPanel.undo();
 		handleUndoRedo();
 	}
 	
 	public void redo() {	
-		if (activeEditor.canRedo()) {
-			try {
-				activeEditor.redo();
-			} catch (CannotRedoException cue) {
-				// ignore
-			}
-		}
+		app.activeEditorPanel.redo();
 		handleUndoRedo();
 	}
 	
@@ -330,8 +311,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							
 							Triple<Model, Expression, Model> translateQueryResult = ruleConverter
 									.query(currentQuery,
-											app.modelEditPanel.getText() + "\n"
-													+ app.evidenceEditPanel.getText(),
+											app.activeEditorPanel.getContents(),
 											"'Name'", "'Description'", process);
 			
 							Expression queryAtom = translateQueryResult.second;
@@ -459,7 +439,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 				int y = app.frame.getBounds().y + 15;
 				newWindow.frame.setBounds(x, y, app.frame.getBounds().width, app.frame.getBounds().height);
 				newWindow.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-				newWindow.controller.setState(Controller.this);
+				newWindow.controller.copyState(Controller.this);
 				newWindow.frame.setVisible(true);
 			}
 		});
@@ -506,6 +486,13 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 			saveAllAction = new SaveAllAction(this);
 		}
 		return saveAllAction;
+	}
+
+	public Action getImportAction() {
+		if (null == importAction) {
+			importAction = new ImportAction(this);
+		}
+		return importAction;
 	}
 	
 	public Action getExportAction() {
@@ -561,46 +548,24 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	// PRIVATE
 	//
 	private void updateAppTitle() {
-		String title = "PRAiSE - Model[";
-		if (currentModelFile == null) {
-			title += "*";
-		}
-		else {
-			title += currentModelFile.getAbsolutePath(); 
-		}
-		
-		title += "]::Evidence[";
-		if (currentEvidenceFile == null) {
-			title += "*";
-		}
-		else {
-			title += currentEvidenceFile.getAbsolutePath();
-		}
-		title += "]";
+		String title = "PRAiSE - "+app.activeEditorPanel.getContextTitle();
 		
 		app.frame.setTitle(title);
 	}
 	
-	public void setOutputFile(RuleEditor editor, File outFile) {
-		if (editor == app.modelEditPanel) {
-			currentModelFile = outFile;
+	private void setEditorContents(String contents, File fromFile) {
+		try {
+			app.activeEditorPanel.setContents(contents, fromFile);
+			updateAppTitle();
+			handleUndoRedo();
 		}
-		else {
-			currentEvidenceFile = outFile;
+		catch (IOException ioe) {
+			error("ERROR " + ioe.getMessage());
 		}
-		updateAppTitle();
-	}
-	
-	public File getOutputFile(RuleEditor ruleEditor) {
-		File outFile = currentModelFile;
-		if (ruleEditor == app.evidenceEditPanel) {
-			outFile = currentEvidenceFile;
-		}
-		return outFile;
 	}
 	
 	private void handleUndoRedo() {
-		if (activeEditor.canUndo()) {
+		if (app.activeEditorPanel.canUndo()) {
 			getSaveAction().setEnabled(true);
 			getSaveAsAction().setEnabled(true);
 		}
@@ -609,7 +574,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 			getSaveAsAction().setEnabled(false);
 		}
 		
-		if (isASaveRequired()) {
+		if (app.activeEditorPanel.isASaveRequired()) {
 			getSaveAllAction().setEnabled(true);
 		}
 		else {
@@ -617,66 +582,9 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		}
 	}
 	
-	private boolean isASaveRequired() {
-		return app.modelEditPanel.canUndo() || app.evidenceEditPanel.canUndo();
-	}
-	
 	private void discardAllEdits() {
-		discardEdits(app.modelEditPanel);
-		discardEdits(app.evidenceEditPanel);
-	}
-	
-	private void discardActiveEdits() {
-		discardEdits(activeEditor);
-	}
-	
-	private void discardEdits(RuleEditor editor) {
-		editor.discardAllEdits();
+		app.activeEditorPanel.discardAllEdits();
 		handleUndoRedo();
-	}
-	
-	private void saveIfRequired(RuleEditor editor) {
-		if (editor.canUndo()) {
-			File outFile = getOutputFile(editor);
-			if (outFile == null) {
-				saveAs(editor);
-			}
-			else {
-				saveToFile(editor.getText(), outFile, editor);
-			}
-		}
-	}
-	
-	private void saveAs(RuleEditor editor) {
-		if (editor.canUndo()) {
-			File outFile = getOutputFile(editor);
-			if (outFile != null) {
-				fileChooser.setSelectedFile(outFile);
-			}
-			int returnVal = fileChooser.showSaveDialog(app.toolBar.btnSave);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				outFile = fileChooser.getSelectedFile();
-				saveToFile(editor.getText(), outFile, editor);
-			}
-		}
-	}
-	
-	private void saveToFile(String text, File file, RuleEditor editor) {
-		
-		try {
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			
-			FileWriter fileWriter = new FileWriter(file);
-			fileWriter.write(text);
-			fileWriter.close();
-			
-			discardEdits(editor);
-			setOutputFile(editor, file);
-		} catch (IOException ioe) {
-			error("ERROR saving file:\n"+file.getAbsolutePath());
-		}
 	}
 	
 	private void printlnToConsole(String msg) {
@@ -695,9 +603,8 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		JOptionPane.showMessageDialog(app.frame, message, "Information", JOptionPane.INFORMATION_MESSAGE, null);
 	}
 	
-	private void setState(Controller otherController) {
-		app.modelEditPanel.setText(otherController.app.modelEditPanel.getText());
-		app.evidenceEditPanel.setText(otherController.app.evidenceEditPanel.getText());
+	private void copyState(Controller otherController) {
+		app.activeEditorPanel.copyState(otherController.app.activeEditorPanel);
 		app.queryPanel.setState(otherController.app.queryPanel);
 		
 		discardAllEdits();
@@ -706,19 +613,13 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	private boolean validateInput(boolean displayInfoOnSuccess) {
 		app.outputPanel.clearProblems();
 		boolean error = false;
-
-		if (!validRuleParse("ERROR in MODEL: ", app.modelEditPanel, true)) {
+		
+		List<String> editorProblems = app.activeEditorPanel.validateContents();
+		if (editorProblems.size() > 0) {
 			error = true;
+			editorProblems.forEach(problem -> app.outputPanel.addProblem(problem));
 		}
-		else {
-			app.modelEditPanel.removeExistingErrorHighlights();
-		}
-		if (!validRuleParse("ERROR in Evidence: ", app.evidenceEditPanel, true)) {
-			error = true;
-		}
-		else {
-			app.evidenceEditPanel.removeExistingErrorHighlights();
-		}
+		
 		Expression queryParse = lowLevelParse(app.queryPanel.getCurrentQuery());
 		if (queryParse == null) {
 			app.outputPanel.addProblem("ERROR: Query is invalid.");
@@ -734,94 +635,12 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		return !error;
 	}
 	
-	private boolean validRuleParse(final String errorPrefix, final RuleEditor ruleEditor, boolean calculateErrorBeginIndex) {
-		final AtomicBoolean result = new AtomicBoolean(true);
-		// Ensure at least one token exists, i.e. could be all comments or whitespace.
-		if (containsRules(ruleEditor.getText())) {		
-	    	
-    		ANTLRInputStream input = new ANTLRInputStream(ruleEditor.getText());
-    		RuleLexer lexer = new RuleLexer(input);
-    		CommonTokenStream tokens = new CommonTokenStream(lexer);
-    		RuleParser parser = new RuleParser(tokens);
-    		parser.removeErrorListeners();
-    		parser.addErrorListener(new BaseErrorListener() {
-				@Override
-				public void syntaxError(Recognizer<?, ?> recognizer,
-						Object offendingSymbol, int line,
-						int charPositionInLine, String msg,
-						RecognitionException e) {
-					
-					// Highlight the first error found
-					if (result.get()) {
-						int[] startEnd = calculateLineOffsets(line, ruleEditor.getText());
-						int start = startEnd[0] + charPositionInLine;
-						int end   = startEnd[1];
-						ruleEditor.indicateErrorAtPosition(start, end);
-					}
-					app.outputPanel.addProblem(errorPrefix+msg);
-					
-					// Indicate a valid parse did not occur
-					result.set(false);
-				}
-    		});
-    		parser.model();
-		}
-		
-		return result.get();
-	}
-	
 	private Expression lowLevelParse(String string) {
 		AntlrGrinderParserWrapper parser = new AntlrGrinderParserWrapper();
 		Expression result = parser.parse(string);
 		return result;
 	}
-	
-	/**
-	 * Checks to ensure the passed in string is not whitespace or comments only.
-	 * @param string
-	 * @return
-	 */
-	private boolean containsRules(String string) {
-		boolean result = true;
 		
-		ANTLRInputStream input = new ANTLRInputStream(string.trim());
-		RuleLexer lexer = new RuleLexer(input);
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		try {
-			Token token = tokens.LT(1);
-			if (token.getType() == RuleLexer.EOF) {
-				result = false;
-			}
-		} catch (RuntimeException ex) {
-			// This is another problem, i.e. invalid token, so will let follow
-			// on logic handle this when it tries to parse.
-		}
-		
-		return result;
-	}
-	
-	private int[] calculateLineOffsets(int parseLine, String string) {	
-		BufferedReader reader = new BufferedReader(new StringReader(string));
-		String line;
-		int[] startEnd = new int[2];
-		try {	
-			int cnt = 0;
-			while ((line = reader.readLine()) != null) {
-				cnt++;
-				if (cnt > parseLine) {
-					break;
-				}
-				startEnd[0] =  startEnd[1];
-				startEnd[1] += line.length()+1; // i.e. include the newline.
-			}
-			reader.close();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-		
-		return startEnd;
-	}
-	
 	private void manageTraceAndJustificationListening() {
 	
 		if (app.optionsPanel.chckbxTraceEnabled.isSelected()) {
