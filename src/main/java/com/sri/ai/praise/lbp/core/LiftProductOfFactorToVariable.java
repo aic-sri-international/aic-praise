@@ -45,7 +45,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.core.HasFunctor;
+import com.sri.ai.grinder.core.HasKind;
 import com.sri.ai.grinder.core.HasNumberOfArguments;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Justification;
@@ -102,7 +102,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 	public static final String GLOBAL_KEY_LIFT_PRODUCT_OF_FACTOR_TO_VARIABLE_MUST_ALWAYS_LIFT = "LiftProductOfFactorToVariable must always lift";
 
 	public LiftProductOfFactorToVariable() {
-		this.setReifiedTests(new HasFunctor(FunctorConstants.PRODUCT),
+		this.setReifiedTests(new HasKind(FunctorConstants.PRODUCT),
 	             new HasNumberOfArguments(1));
 	}
 	

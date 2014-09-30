@@ -43,7 +43,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.core.HasFunctor;
+import com.sri.ai.grinder.core.HasKind;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 
@@ -59,7 +59,7 @@ public class Type extends AbstractRewriter {
 	public final static String FUNCTOR_TYPE = "type";
 	
 	public Type() {
-		this.setReifiedTests(new HasFunctor(FUNCTOR_TYPE));
+		this.setReifiedTests(new HasKind(FUNCTOR_TYPE));
 	}
 
 	// the reason for a multiset here is that it does not trigger a

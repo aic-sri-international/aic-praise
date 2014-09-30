@@ -44,6 +44,7 @@ import java.util.Map;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewriterLookup;
@@ -51,6 +52,7 @@ import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.core.PrologConstantPredicate;
 import com.sri.ai.grinder.library.DirectCardinalityComputationFactory;
 import com.sri.ai.grinder.rewriterrefiner.RewriterRefiner;
+import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.core.AnyimeRandomVariableFromMessageRewriterCall;
 import com.sri.ai.praise.lbp.core.AnytimeRefiner;
@@ -296,5 +298,19 @@ public class LBPFactory {
 		lbpRewriterLookup.put(LBPRewriter.R_union, new Union());
 		
 		return lbpRewriterLookup;
+	}
+	
+	// An example
+	public static void main(String[] args) {
+		RewritingProcess process = LBPFactory.newLBPProcess();
+		Model model = Model.fromRules(
+				"sort People: 10, ann, bob, dave, rodrigo, ciaran;" +
+				"random friends: People x People -> Boolean;");
+		model.setRewritingProcessesModel(process);
+		
+		Expression expression = Expressions.parse("[friends(X,b)] = [friends(a,Y)]");
+		process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(expression, process);
+		Expression simplification = process.rewrite(LBPRewriter.R_normalize, expression);
+		System.out.println("simplification: " + simplification);	
 	}
 }
