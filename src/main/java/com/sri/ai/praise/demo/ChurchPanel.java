@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.demo;
 
+import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,11 +45,16 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.demo.model.Example;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.JLabel;
 
 @Beta
 public class ChurchPanel extends AbstractEditorPanel {
 	private static final long serialVersionUID = 1L;	
 	//
+	ChurchEditor churchEditor;
+	RuleEditor   hogmEditor;
 
 	public ChurchPanel() {
 		initialize();
@@ -130,6 +136,40 @@ public class ChurchPanel extends AbstractEditorPanel {
 	// PRIVATE
 	//
 	private void initialize() {
+		setLayout(new BorderLayout(0, 0));
 		
+		JPanel rootPanel = new JPanel();
+		add(rootPanel, BorderLayout.CENTER);
+		rootPanel.setLayout(new BorderLayout(0, 0));
+		
+		JSplitPane splitPane = new JSplitPane();
+		splitPane.setContinuousLayout(true);
+		splitPane.setResizeWeight(0.5);
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		rootPanel.add(splitPane, BorderLayout.CENTER);
+		
+		JPanel churchPanel = new JPanel();
+		churchPanel.setLayout(new BorderLayout(0, 0));
+		
+		JLabel lblNewLabel = new JLabel("Church Program");
+		churchPanel.add(lblNewLabel, BorderLayout.NORTH);
+		
+		churchEditor = new ChurchEditor();
+		churchPanel.add(churchEditor, BorderLayout.CENTER);
+		
+		splitPane.setLeftComponent(churchPanel);
+		
+		JPanel hogmPanel = new JPanel();
+		hogmPanel.setLayout(new BorderLayout(0, 0));
+		
+		JLabel lblNewLabel_1 = new JLabel("Generated Model (Read Only)");
+		hogmPanel.add(lblNewLabel_1, BorderLayout.NORTH);
+		
+		hogmEditor = new RuleEditor();
+		hogmEditor.setEditable(false);
+		hogmPanel.add(hogmEditor, BorderLayout.CENTER);
+		
+		splitPane.setRightComponent(hogmPanel);
 	}
 }
