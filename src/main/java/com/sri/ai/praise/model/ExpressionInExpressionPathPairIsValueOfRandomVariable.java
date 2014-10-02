@@ -59,6 +59,7 @@ public class ExpressionInExpressionPathPairIsValueOfRandomVariable implements Pr
 		this.process = process;
 	}
 
+	@Override
 	public boolean apply(Pair<Expression, List<Integer>> expressionAndPath) {
 		Expression expression = expressionAndPath.first;
 		if ( ! Expressions.isSymbolOrFunctionApplication(expression)) {

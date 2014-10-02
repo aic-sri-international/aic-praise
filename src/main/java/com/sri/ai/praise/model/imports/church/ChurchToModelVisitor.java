@@ -235,6 +235,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		return result; 
 	}
 	
+	@Override
 	public Expression visitProcedureCall(@NotNull ChurchParser.ProcedureCallContext ctx) { 
 		Expression       operator = visit(ctx.operator());
 		List<Expression> operands = new ArrayList<Expression>();

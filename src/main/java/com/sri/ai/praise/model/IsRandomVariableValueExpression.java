@@ -59,6 +59,7 @@ public class IsRandomVariableValueExpression implements Predicate<Expression> {
 		this.process = process;
 	}
 
+	@Override
 	public boolean apply(Expression expression) {
 		return apply(expression, process);
 	}

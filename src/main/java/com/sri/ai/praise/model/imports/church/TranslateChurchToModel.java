@@ -106,7 +106,7 @@ public class TranslateChurchToModel {
 
 			ParseTree tree = parser.parse();
 			
-			boolean eof = parser.getInputStream().LA(1) == ChurchParser.EOF;
+			boolean eof = parser.getInputStream().LA(1) == Recognizer.EOF;
 			
 			if (!lexerErrorListener.errorsDetected
 					&& !parseErrorListener.errorsDetected) {

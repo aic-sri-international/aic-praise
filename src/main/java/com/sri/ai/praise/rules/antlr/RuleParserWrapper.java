@@ -107,7 +107,7 @@ public class RuleParserWrapper implements Parser {
 
 			ParseTree tree = parseTreeRetriever.retrieve(parser);
 
-			boolean eof = parser.getInputStream().LA(1) == RuleParser.EOF;
+			boolean eof = parser.getInputStream().LA(1) == Recognizer.EOF;
 
 			if (!lexerErrorListener.errorsDetected
 					&& !parseErrorListener.errorsDetected) {

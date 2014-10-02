@@ -77,6 +77,7 @@ import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.Model.ModelException;
 import com.sri.ai.praise.model.ParfactorsDeclaration;
+import com.sri.ai.util.Configuration;
 import com.sri.ai.util.log.LogX;
 
 /**
@@ -254,7 +255,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		activeQueries.put(queryUUID, query);
 		try {
 			Thread queryThread = new Thread(query);
-			PRAiSEConfiguration.inheritConfiguration(Thread.currentThread(), queryThread);
+			Configuration.inheritConfiguration(Thread.currentThread(), queryThread);
 			// Start and then wait for the query to complete
 			// this ensure all trace and justification output
 			// can be associated with a specific query.
@@ -350,7 +351,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 		@Override 
 		public void run() {			
 			// Setup the options for this query.
-			PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_ALL_TYPE_SIZES_KNOWN, ""+options.isKnownTypeSizes());
+			Configuration.setProperty(PRAiSEConfiguration.KEY_MODEL_ALL_TYPE_SIZES_KNOWN, ""+options.isKnownTypeSizes());
 			setupLogging();
 						
 			try {

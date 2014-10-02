@@ -56,6 +56,7 @@ public class IsRandomVariableValueExpressionAndContext implements Predicate<Expr
 		this.process = process;
 	}
 
+	@Override
 	public boolean apply(ExpressionAndContext expressionAndContext) {
 		return apply(expressionAndContext, process);
 	}

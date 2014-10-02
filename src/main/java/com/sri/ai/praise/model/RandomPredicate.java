@@ -88,6 +88,7 @@ public class RandomPredicate {
 		this.arity = arity;
 	}
 
+	@Override
 	public boolean equals(Object another) {
 		if (another instanceof RandomPredicate) {
 			RandomPredicate anotherRandomPredicate = (RandomPredicate) another;
@@ -99,6 +100,7 @@ public class RandomPredicate {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		if (functorOrSymbol == null) {
 			return System.identityHashCode(null) + arity;
@@ -106,6 +108,7 @@ public class RandomPredicate {
 		return functorOrSymbol.hashCode() + arity;
 	}
 
+	@Override
 	public String toString() {
 		return functorOrSymbol + "/" + arity;
 	}

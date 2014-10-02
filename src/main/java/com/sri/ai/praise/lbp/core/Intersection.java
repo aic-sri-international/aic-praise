@@ -74,6 +74,7 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 	public Intersection() {
 	}
 	
+	@Override
 	public String getName() {
 		return R_intersection;
 	}

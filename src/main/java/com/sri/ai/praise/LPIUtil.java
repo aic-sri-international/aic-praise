@@ -1195,6 +1195,7 @@ public class LPIUtil {
 		final List<Pair<Expression,Expression>> result = new LinkedList<Pair<Expression,Expression>>();
 		
 		ReplacementFunctionWithContextuallyUpdatedProcess searchFunction = new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {
+			@Override
 			public Expression apply(Expression subExpression, RewritingProcess process) {
 				if (LPIUtil.isRandomVariableValueExpression(subExpression, process) && ! subExpression.equals(randomVariableValue)) {
 					Expression randomVariable              = BracketedExpressionSubExpressionsProvider.make(randomVariableValue);

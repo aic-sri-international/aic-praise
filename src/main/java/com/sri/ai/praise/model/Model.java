@@ -149,6 +149,7 @@ public class Model {
 			this.inExpression = inExpression;
 		}
 		
+		@Override
 		public String toString() {
 			String inExpressionString = inExpression.toString();
 			String typeString = errorType.name();
@@ -1029,6 +1030,7 @@ public class Model {
 		return process;
 	}
 	
+	@Override
 	public String toString() {
 		return this.getModelDefinition().toString();
 	}

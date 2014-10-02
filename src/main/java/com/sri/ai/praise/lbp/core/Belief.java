@@ -107,6 +107,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	 * 
 	 * @see MessageExpansions#getMessageExpansions(Expression, RewritingProcess)
 	 */
+	@Override
 	public Expression getMessageExpansions(Expression msgSets, RewritingProcess process) {		
 		Expression result = null;
 	
@@ -122,6 +123,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	 * 
 	 * @see IterateValuesUsingExpansions#iterateValuesUsingExpansions(Expression, Expression, RewritingProcess)
 	 */
+	@Override
 	public Expression iterateValuesUsingExpansions(Expression msgValues, Expression msgExpansions, RewritingProcess process) {
 		
 		Expression result = null;
@@ -142,6 +144,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	 * 
 	 * @see UseValuesForPreviousMessages#useValuesForPreviousMessages(Expression, Expression, RewritingProcess)
 	 */
+	@Override
 	public Expression useValuesForPreviousMessages(Expression expansion, Expression msgValues, RewritingProcess process) {
 		Expression result = null;
 		

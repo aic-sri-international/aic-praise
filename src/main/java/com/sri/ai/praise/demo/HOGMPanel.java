@@ -368,7 +368,7 @@ public class HOGMPanel extends AbstractEditorPanel {
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		try {
 			Token token = tokens.LT(1);
-			if (token.getType() == RuleLexer.EOF) {
+			if (token.getType() == Recognizer.EOF) {
 				result = false;
 			}
 		} catch (RuntimeException ex) {

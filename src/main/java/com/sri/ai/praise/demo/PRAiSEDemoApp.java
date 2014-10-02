@@ -51,6 +51,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.WindowConstants;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
@@ -61,6 +62,7 @@ import com.sri.ai.praise.demo.model.EpidemicAndSickDemo;
 import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.demo.model.Example7;
 import com.sri.ai.praise.demo.model.RelationalEarthquakeBurglaryAlarm;
+import com.sri.ai.util.Configuration;
 
 /**
  * 
@@ -125,12 +127,13 @@ public class PRAiSEDemoApp {
 		SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(DISPLAY_SCIENTIFIC_AFTER);
 		
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
-					ExpressoConfiguration.setProperty(ExpressoConfiguration.KEY_DISPLAY_NUMERIC_PRECISION_FOR_SYMBOLS, ""+DISPLAY_PRECISION);
+					Configuration.setProperty(ExpressoConfiguration.KEY_DISPLAY_NUMERIC_PRECISION_FOR_SYMBOLS, ""+DISPLAY_PRECISION);
 					
-					GrinderConfiguration.setProperty(GrinderConfiguration.KEY_REWRITE_DEAD_ENDS_CACHE_MAXIMUM_SIZE, ""+DEAD_ENDS_CACHE_SIZE);
-					GrinderConfiguration.setProperty(GrinderConfiguration.KEY_REWRITING_PROCESS_CACHE_MAXIMUM_SIZE, ""+REWRITER_CACHE_SIZE);
+					Configuration.setProperty(GrinderConfiguration.KEY_REWRITE_DEAD_ENDS_CACHE_MAXIMUM_SIZE, ""+DEAD_ENDS_CACHE_SIZE);
+					Configuration.setProperty(GrinderConfiguration.KEY_REWRITING_PROCESS_CACHE_MAXIMUM_SIZE, ""+REWRITER_CACHE_SIZE);
 					
 					
 					String configuredLookAndFeel = GrinderConfiguration.getDemoAppDefaultLookAndFeel();
@@ -179,7 +182,7 @@ public class PRAiSEDemoApp {
 		});
 		frame.setBounds(100, 100, 1000, 720);
 		frame.setTitle("PRAiSE");
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		JPanel backgroundPanel = new JPanel();
 		frame.getContentPane().add(backgroundPanel, BorderLayout.CENTER);
@@ -405,7 +408,7 @@ public class PRAiSEDemoApp {
 		toolBar.exampleComboBox.addActionListener(e -> {
 			int selectedIndex = toolBar.exampleComboBox.getSelectedIndex();
 			if (selectedIndex >= 0) {
-				controller.setExample((Example)toolBar.exampleComboBox.getItemAt(selectedIndex));
+				controller.setExample(toolBar.exampleComboBox.getItemAt(selectedIndex));
 			}
 		});
 		toolBar.exampleComboBox.setSelectedIndex(0);

@@ -66,6 +66,7 @@ import com.sri.ai.praise.model.Model.ModelException;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
+import com.sri.ai.util.Configuration;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.base.Triple;
@@ -82,7 +83,7 @@ public class RuleConverterTest {
 	public void setUp () {
 		Grammar grammar = new LPIGrammar();
 		// Ensure the grammar class passed in is used where necessary.
-		BrewerConfiguration.setProperty(BrewerConfiguration.KEY_DEFAULT_GRAMMAR_CLASS, grammar.getClass().getName());
+		Configuration.setProperty(BrewerConfiguration.KEY_DEFAULT_GRAMMAR_CLASS, grammar.getClass().getName());
 		
 		ruleParser = new RuleParserWrapper();
 		ruleConverter = new RuleConverter();

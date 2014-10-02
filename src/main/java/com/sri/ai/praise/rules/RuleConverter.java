@@ -1784,8 +1784,9 @@ public class RuleConverter {
 		ArrayList<Expression> modelArguments = new ArrayList<Expression>();
 		modelArguments.add(Expressions.makeSymbol(name));
 		modelArguments.add(Expressions.makeSymbol(description));
-		for (Expression sort : sorts)
+		for (Expression sort : sorts) {
 			modelArguments.add(sort);
+		}
 
 		Set<String> randomVariableNameAndArities = new LinkedHashSet<String>();
 		for (Expression randomVariableDeclaration : randomVariableDeclarations) {

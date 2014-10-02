@@ -644,8 +644,9 @@ public class RuleParserTest extends AbstractParserTest {
 			else {
 				if(result != null) {
 					System.out.println("generated string for \"" + input + "\": ");
-					for(Expression expression : result)
+					for(Expression expression : result) {
 						System.out.println(Brewer.generateBuildString(expression.getSyntaxTree()));
+					}
 					System.out.println("\n\n");
 				}
 				Assert.assertNotNull(result);

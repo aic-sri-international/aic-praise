@@ -70,6 +70,7 @@ import com.sri.ai.praise.model.ModelGrounding;
 import com.sri.ai.praise.model.ModelGrounding.GroundedModelResult;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.util.Configuration;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 import com.sri.ai.util.math.MixedRadixNumber;
@@ -100,7 +101,7 @@ public class ExportToPMTK3FactorGraph {
 		Map<Expression, Expression> globalObjects = new LinkedHashMap<Expression, Expression>();
 		globalObjects.put(parser.parse("| Object |"), Expressions.makeSymbol(size)); 
 		// Ensure type sizes match up.
-		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());		
+		Configuration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());		
 		
 		Expression modelDefinition = parser.parse(modelDeclaration);
 	

@@ -37,7 +37,6 @@
  */
 package com.sri.ai.test.praise.lbp;
 
-import static com.sri.ai.expresso.helper.Expressions.parse;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
@@ -56,10 +55,8 @@ import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.PickSingleElement;
-import com.sri.ai.grinder.library.DirectCardinalityComputationFactory;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElseExternalizationHierarchical;
-import com.sri.ai.grinder.library.equality.cardinality.direct.core.FormulaSimplify;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -75,7 +72,6 @@ import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.lbp.LBPQueryEngine.QueryStep;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.LiftedBeliefPropagationSolver;
-import com.sri.ai.praise.lbp.core.Belief;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.example.EmptyPQ;
 import com.sri.ai.praise.model.example.IntensionalFanIn;
@@ -105,6 +101,7 @@ import com.sri.ai.praise.model.example.TrivialThereExistsPQWithPriors;
 import com.sri.ai.praise.model.example.WeightedPQWithPriors;
 import com.sri.ai.praise.model.example.WeightedThereExistsPQWithPriors;
 import com.sri.ai.test.praise.AbstractLPITest;
+import com.sri.ai.util.Configuration;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
@@ -3479,7 +3476,7 @@ public class LBPTest extends AbstractLPITest {
 						),
 		};
 		
-		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MODEL_ALL_TYPE_SIZES_KNOWN, "false");	
+		Configuration.setProperty(PRAiSEConfiguration.KEY_MODEL_ALL_TYPE_SIZES_KNOWN, "false");	
 		perform(tests);
 	}
 	
@@ -4493,10 +4490,10 @@ public class LBPTest extends AbstractLPITest {
 		Thread callQuery3Thread = new Thread(callQuery3);
 		
 		// Note: The tree util UI is not multi-threaded so want to ensure is turned off
-		GrinderConfiguration.setProperty(GrinderConfiguration.KEY_DISPLAY_TREE_UTIL_UI, "false");
-		GrinderConfiguration.inheritConfiguration(Thread.currentThread(), callQuery1Thread);
-		GrinderConfiguration.inheritConfiguration(Thread.currentThread(), callQuery2Thread);
-		GrinderConfiguration.inheritConfiguration(Thread.currentThread(), callQuery3Thread);
+		Configuration.setProperty(GrinderConfiguration.KEY_DISPLAY_TREE_UTIL_UI, "false");
+		Configuration.inheritConfiguration(Thread.currentThread(), callQuery1Thread);
+		Configuration.inheritConfiguration(Thread.currentThread(), callQuery2Thread);
+		Configuration.inheritConfiguration(Thread.currentThread(), callQuery3Thread);
 		try {
 			callQuery1Thread.start();
 			callQuery2Thread.start();

@@ -56,7 +56,7 @@ import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.util.Util;
 
 /**
- * Default implementation of {LBPRewriter#R_union}.
+ * Default implementation of {@link LBPRewriter#R_union}.
  * 
  * @author oreilly
  * 
@@ -113,7 +113,7 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 
 				result = ExtensionalSet.makeEmptySetExpression();
 			} 
-			else if (1 == union.numberOfArguments()) {
+			else if (union.numberOfArguments() == 1) {
 				Trace.log("if U is union(Arg1)");
 				Trace.log("     return R_union(Arg1)");
 
@@ -230,10 +230,10 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 		}
 		Expression flattenedUnion = null;
 
-		if (0 == combinedUnionArgs.size()) {
+		if (combinedUnionArgs.size() == 0) {
 			flattenedUnion = ExtensionalSet.makeEmptySetExpression();
 		} 
-		else if (1 == combinedUnionArgs.size()) {
+		else if (combinedUnionArgs.size() == 1) {
 			flattenedUnion = combinedUnionArgs.get(0);
 		} 
 		else {

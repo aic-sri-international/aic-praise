@@ -815,4 +815,15 @@ public interface LBPRewriter extends Rewriter {
 	 * </pre>
 	 */
 	String R_union = LBP_NAMESPACE+"R_union";
+	
+	/**
+	 * <pre>
+	 * R_union_of_intensional_sets_with_unifiable_heads({ (on I1) H1 | C1 }  union { (on I2) H2 | C2 } )
+	 * U is a union of two intensional sets with unifiable heads
+	 * Returns an intensional set equivalent to the union.
+	 *     { (on I3) H3 | C3 } <- standardize { (on I2) H2 | C2 } apart from { (on I1) H1 | C1 }
+	 *     return R_basic( { (on I1, I3) H1 | H1 = H3 and (C1 or C3) } )  
+	 * </pre>
+	 */
+	String R_union_of_intensional_sets_with_unifiable_heads = LBP_NAMESPACE+"R_union_of_intensional_sets_with_unifiable_heads";
 }

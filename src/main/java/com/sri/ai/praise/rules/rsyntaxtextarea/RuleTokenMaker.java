@@ -20,6 +20,7 @@ import org.fife.ui.rsyntaxtextarea.AbstractJFlexTokenMaker;
 import org.fife.ui.rsyntaxtextarea.DefaultToken;
 import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMaker;
+import org.fife.ui.rsyntaxtextarea.TokenTypes;
 
 
 /**
@@ -98,7 +99,9 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
     while (i < l) {
       int count = packed.charAt(i++);
       int value = packed.charAt(i++);
-      do result[j++] = value; while (--count > 0);
+      do {
+		result[j++] = value;
+	} while (--count > 0);
     }
     return j;
   }
@@ -274,7 +277,9 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
       int count = packed.charAt(i++);
       int value = packed.charAt(i++);
       value--;
-      do result[j++] = value; while (--count > 0);
+      do {
+		result[j++] = value;
+	} while (--count > 0);
     }
     return j;
   }
@@ -318,7 +323,9 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
     while (i < l) {
       int count = packed.charAt(i++);
       int value = packed.charAt(i++);
-      do result[j++] = value; while (--count > 0);
+      do {
+		result[j++] = value;
+	} while (--count > 0);
     }
     return j;
   }
@@ -407,6 +414,7 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
 	 * @param startOffset The offset in the document at which this token
 	 *                    occurs.
 	 */
+	@Override
 	public void addToken(char[] array, int start, int end, int tokenType, int startOffset) {
 		super.addToken(array, start,end, tokenType, startOffset);
 		zzStartRead = zzMarkedPos;
@@ -420,6 +428,7 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
 	 * @return The start and end strings to add to a line to "comment"
 	 *         it out.
 	 */
+	@Override
 	public String[] getLineCommentStartAndEnd() {
 		return new String[] { "#", null };
 	}
@@ -437,6 +446,7 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
 	 * @return The first <code>Token</code> in a linked list representing
 	 *         the syntax highlighted text.
 	 */
+	@Override
 	public Token getTokenList(Segment text, int initialTokenType, int startOffset) {
 
 
@@ -444,20 +454,20 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
 		this.offsetShift = -text.offset + startOffset;
 
 		// Start off in the proper state.
-		int state = Token.NULL;
+		int state = TokenTypes.NULL;
 		switch (initialTokenType) {
-			case Token.COMMENT_MULTILINE:
+			case TokenTypes.COMMENT_MULTILINE:
 				state = MLC;
 				start = text.offset;
 				break;
-			case Token.LITERAL_STRING_DOUBLE_QUOTE:
+			case TokenTypes.LITERAL_STRING_DOUBLE_QUOTE:
 				state = LONG_STRING_2;
 				break;
-			case Token.LITERAL_CHAR:
+			case TokenTypes.LITERAL_CHAR:
 				state = LONG_STRING_1;
 				break;
 			default:
-				state = Token.NULL;
+				state = TokenTypes.NULL;
 		}
 
 		s = text;
@@ -553,7 +563,9 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
     while (i < 160) {
       int  count = packed.charAt(i++);
       char value = packed.charAt(i++);
-      do map[j++] = value; while (--count > 0);
+      do {
+		map[j++] = value;
+	} while (--count > 0);
     }
     return map;
   }
@@ -566,8 +578,9 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
     zzAtEOF = true;            /* indicate end of file */
     zzEndRead = zzStartRead;  /* invalidate buffer    */
 
-    if (zzReader != null)
-      zzReader.close();
+    if (zzReader != null) {
+		zzReader.close();
+	}
   }
 
 
@@ -584,7 +597,8 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
    *
    * @param newState the new lexical state
    */
-  public final void yybegin(int newState) {
+  @Override
+public final void yybegin(int newState) {
     zzLexicalState = newState;
   }
 
@@ -657,8 +671,9 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
    *                This number must not be greater than yylength()!
    */
   public void yypushback(int number)  {
-    if ( number > yylength() )
-      zzScanError(ZZ_PUSHBACK_2BIG);
+    if ( number > yylength() ) {
+		zzScanError(ZZ_PUSHBACK_2BIG);
+	}
 
     zzMarkedPos -= number;
   }
@@ -699,9 +714,10 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
       zzForAction: {
         while (true) {
     
-          if (zzCurrentPosL < zzEndReadL)
-            zzInput = zzBufferL[zzCurrentPosL++];
-          else if (zzAtEOF) {
+          if (zzCurrentPosL < zzEndReadL) {
+			zzInput = zzBufferL[zzCurrentPosL++];
+		}
+		else if (zzAtEOF) {
             zzInput = YYEOF;
             break zzForAction;
           }
@@ -724,14 +740,18 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
             }
           }
           int zzNext = zzTransL[ zzRowMapL[zzState] + zzCMapL[zzInput] ];
-          if (zzNext == -1) break zzForAction;
+          if (zzNext == -1) {
+			break zzForAction;
+		}
           zzState = zzNext;
 
           int zzAttributes = zzAttrL[zzState];
           if ( (zzAttributes & 1) == 1 ) {
             zzAction = zzState;
             zzMarkedPosL = zzCurrentPosL;
-            if ( (zzAttributes & 8) == 8 ) break zzForAction;
+            if ( (zzAttributes & 8) == 8 ) {
+				break zzForAction;
+			}
           }
 
         }
@@ -742,7 +762,7 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
 
       switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
         case 24: 
-          { int temp=zzStartRead; addToken(start, zzStartRead-1, Token.COMMENT_MULTILINE); addHyperlinkToken(temp,zzMarkedPos-1, Token.COMMENT_MULTILINE); start = zzMarkedPos;
+          { int temp=zzStartRead; addToken(start, zzStartRead-1, TokenTypes.COMMENT_MULTILINE); addHyperlinkToken(temp,zzMarkedPos-1, TokenTypes.COMMENT_MULTILINE); start = zzMarkedPos;
           }
         case 26: break;
         case 6: 
@@ -750,11 +770,11 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
           }
         case 27: break;
         case 11: 
-          { addToken(Token.LITERAL_CHAR);
+          { addToken(TokenTypes.LITERAL_CHAR);
           }
         case 28: break;
         case 23: 
-          { addToken(Token.COMMENT_MULTILINE);
+          { addToken(TokenTypes.COMMENT_MULTILINE);
           }
         case 29: break;
         case 21: 
@@ -762,39 +782,39 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
           }
         case 30: break;
         case 8: 
-          { addToken(Token.WHITESPACE);
+          { addToken(TokenTypes.WHITESPACE);
           }
         case 31: break;
         case 19: 
-          { addToken(Token.LITERAL_NUMBER_FLOAT);
+          { addToken(TokenTypes.LITERAL_NUMBER_FLOAT);
           }
         case 32: break;
         case 9: 
-          { addToken(Token.RESERVED_WORD);
+          { addToken(TokenTypes.RESERVED_WORD);
           }
         case 33: break;
         case 10: 
-          { addToken(Token.SEPARATOR);
+          { addToken(TokenTypes.SEPARATOR);
           }
         case 34: break;
         case 4: 
-          { yybegin(LONG_STRING_1); addToken(Token.LITERAL_CHAR);
+          { yybegin(LONG_STRING_1); addToken(TokenTypes.LITERAL_CHAR);
           }
         case 35: break;
         case 22: 
-          { yybegin(YYINITIAL); addToken(start, zzStartRead+1, Token.COMMENT_MULTILINE);
+          { yybegin(YYINITIAL); addToken(start, zzStartRead+1, TokenTypes.COMMENT_MULTILINE);
           }
         case 36: break;
         case 2: 
-          { addToken(Token.IDENTIFIER);
+          { addToken(TokenTypes.IDENTIFIER);
           }
         case 37: break;
         case 17: 
-          { addToken(start,zzStartRead-1, Token.COMMENT_EOL); addNullToken(); return firstToken;
+          { addToken(start,zzStartRead-1, TokenTypes.COMMENT_EOL); addNullToken(); return firstToken;
           }
         case 38: break;
         case 16: 
-          { addToken(start, zzStartRead-1, Token.COMMENT_MULTILINE); return firstToken;
+          { addToken(start, zzStartRead-1, TokenTypes.COMMENT_MULTILINE); return firstToken;
           }
         case 39: break;
         case 20: 
@@ -802,39 +822,39 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
           }
         case 40: break;
         case 1: 
-          { addToken(Token.ERROR_IDENTIFIER);
+          { addToken(TokenTypes.ERROR_IDENTIFIER);
           }
         case 41: break;
         case 13: 
-          { addToken(Token.LITERAL_STRING_DOUBLE_QUOTE);
+          { addToken(TokenTypes.LITERAL_STRING_DOUBLE_QUOTE);
           }
         case 42: break;
         case 25: 
-          { int temp=zzStartRead; addToken(start,zzStartRead-1, Token.COMMENT_EOL); addHyperlinkToken(temp,zzMarkedPos-1, Token.COMMENT_EOL); start = zzMarkedPos;
+          { int temp=zzStartRead; addToken(start,zzStartRead-1, TokenTypes.COMMENT_EOL); addHyperlinkToken(temp,zzMarkedPos-1, TokenTypes.COMMENT_EOL); start = zzMarkedPos;
           }
         case 43: break;
         case 18: 
-          { addToken(Token.ERROR_NUMBER_FORMAT);
+          { addToken(TokenTypes.ERROR_NUMBER_FORMAT);
           }
         case 44: break;
         case 3: 
-          { addToken(Token.LITERAL_NUMBER_DECIMAL_INT);
+          { addToken(TokenTypes.LITERAL_NUMBER_DECIMAL_INT);
           }
         case 45: break;
         case 7: 
-          { addToken(Token.OPERATOR);
+          { addToken(TokenTypes.OPERATOR);
           }
         case 46: break;
         case 14: 
-          { yybegin(YYINITIAL); addToken(Token.LITERAL_STRING_DOUBLE_QUOTE);
+          { yybegin(YYINITIAL); addToken(TokenTypes.LITERAL_STRING_DOUBLE_QUOTE);
           }
         case 47: break;
         case 5: 
-          { yybegin(LONG_STRING_2); addToken(Token.LITERAL_STRING_DOUBLE_QUOTE);
+          { yybegin(LONG_STRING_2); addToken(TokenTypes.LITERAL_STRING_DOUBLE_QUOTE);
           }
         case 48: break;
         case 12: 
-          { yybegin(YYINITIAL); addToken(Token.LITERAL_CHAR);
+          { yybegin(YYINITIAL); addToken(TokenTypes.LITERAL_CHAR);
           }
         case 49: break;
         case 15: 
@@ -846,7 +866,7 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
             zzAtEOF = true;
             switch (zzLexicalState) {
             case EOL_COMMENT: {
-              addToken(start,zzStartRead-1, Token.COMMENT_EOL); addNullToken(); return firstToken;
+              addToken(start,zzStartRead-1, TokenTypes.COMMENT_EOL); addNullToken(); return firstToken;
             }
             case 113: break;
             case YYINITIAL: {
@@ -854,19 +874,19 @@ public class RuleTokenMaker extends AbstractJFlexTokenMaker implements TokenMake
             }
             case 114: break;
             case MLC: {
-              addToken(start, zzStartRead-1, Token.COMMENT_MULTILINE); return firstToken;
+              addToken(start, zzStartRead-1, TokenTypes.COMMENT_MULTILINE); return firstToken;
             }
             case 115: break;
             case LONG_STRING_2: {
               if (firstToken==null) {
-										addToken(Token.LITERAL_STRING_DOUBLE_QUOTE); 
+										addToken(TokenTypes.LITERAL_STRING_DOUBLE_QUOTE); 
 									}
 									return firstToken;
             }
             case 116: break;
             case LONG_STRING_1: {
               if (firstToken==null) {
-										addToken(Token.LITERAL_CHAR); 
+										addToken(TokenTypes.LITERAL_CHAR); 
 									}
 									return firstToken;
             }

@@ -47,6 +47,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -246,7 +247,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	//
 	private void initialize() {
 		setLayout(new BorderLayout(0, 0));
-		outputTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		outputTabbedPane = new JTabbedPane(SwingConstants.TOP);
 		add(outputTabbedPane);
 		
 		JPanel resultPanel = new JPanel();
@@ -378,6 +379,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private void addTrace(Object obj) {
 		activeTraceNode.add(obj);
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				treeTraceModel.reload();
 				traceTree.restoreExpandedPaths();
@@ -388,6 +390,7 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	private void addJustification(Object obj) {
 		activeJustificationNode.add(obj);
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				treeJustificationModel.reload();
 				justificationTree.restoreExpandedPaths();

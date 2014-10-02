@@ -48,6 +48,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rtextarea.RTextArea;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.demo.model.Example;
@@ -93,31 +94,31 @@ public abstract class AbstractEditorPanel extends JPanel {
 	public abstract List<String> validateContents();
 	
 	public Action getCutAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION);
+		return RTextArea.getAction(RTextArea.CUT_ACTION);
 	}
 	
 	public Action getCopyAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION);
+		return RTextArea.getAction(RTextArea.COPY_ACTION);
 	}
 	
 	public Action getPasteAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION);
+		return RTextArea.getAction(RTextArea.PASTE_ACTION);
 	}
 	
 	public Action getDeleteAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION);
+		return RTextArea.getAction(RTextArea.DELETE_ACTION);
 	}
 	
 	public Action getSelectAllAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.SELECT_ALL_ACTION);
+		return RTextArea.getAction(RTextArea.SELECT_ALL_ACTION);
 	}
 	
 	public Action getUndoAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION);
+		return RTextArea.getAction(RTextArea.UNDO_ACTION);
 	}
 	
 	public Action getRedoAction() {
-		return RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION);
+		return RTextArea.getAction(RTextArea.REDO_ACTION);
 	}
 	
 	//

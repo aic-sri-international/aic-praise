@@ -51,6 +51,10 @@ import com.sri.ai.grinder.core.DefaultRewriterLookup;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.core.PrologConstantPredicate;
 import com.sri.ai.grinder.library.DirectCardinalityComputationFactory;
+import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.boole.And;
+import com.sri.ai.grinder.library.boole.Not;
+import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.rewriterrefiner.RewriterRefiner;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.PRAiSEConfiguration;
@@ -85,7 +89,9 @@ import com.sri.ai.praise.lbp.core.SetDifference;
 import com.sri.ai.praise.lbp.core.Simplify;
 import com.sri.ai.praise.lbp.core.Sum;
 import com.sri.ai.praise.lbp.core.Union;
+import com.sri.ai.praise.lbp.core.UnionOfIntensionalUniSetsWithUnifiableHeads;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.util.Configuration;
 import com.sri.ai.util.functionalsequence.RefinerIterator;
 
 /**
@@ -98,7 +104,7 @@ import com.sri.ai.util.functionalsequence.RefinerIterator;
 public class LBPFactory {
 	
 	public static LBPQueryEngine newLBPQueryEngine() {
-		LBPQueryEngine result = PRAiSEConfiguration.newConfiguredInstance(PRAiSEConfiguration.getLBPQueryEngineClass());
+		LBPQueryEngine result = Configuration.newConfiguredInstance(PRAiSEConfiguration.getLBPQueryEngineClass());
 		return result;
 	}
 	
@@ -296,21 +302,96 @@ public class LBPFactory {
 		lbpRewriterLookup.put(LBPRewriter.R_set_diff, new SetDifference());
 		lbpRewriterLookup.put(LBPRewriter.R_sum, new Sum(configuration));
 		lbpRewriterLookup.put(LBPRewriter.R_union, new Union());
+		lbpRewriterLookup.put(LBPRewriter.R_union_of_intensional_sets_with_unifiable_heads, new UnionOfIntensionalUniSetsWithUnifiableHeads());
 		
 		return lbpRewriterLookup;
 	}
 	
 	// An example
 	public static void main(String[] args) {
-		RewritingProcess process = LBPFactory.newLBPProcess();
-		Model model = Model.fromRules(
-				"sort People: 10, ann, bob, dave, rodrigo, ciaran;" +
-				"random friends: People x People -> Boolean;");
-		model.setRewritingProcessesModel(process);
-		
-		Expression expression = Expressions.parse("[friends(X,b)] = [friends(a,Y)]");
-		process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(expression, process);
-		Expression simplification = process.rewrite(LBPRewriter.R_normalize, expression);
-		System.out.println("simplification: " + simplification);	
+        RewritingProcess process = LBPFactory.newLBPProcess();
+        Model model = Model.fromRules(
+                "sort People: 10, ann, bob, dave, rodrigo, ciaran;" +
+                "random friends: People x People -> Boolean;");
+        model.setRewritingProcessesModel(process);
+        Expression expression = Expressions.parse("[friends(X,b)] = [friends(a,Y)]");
+        process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(expression, process);
+        Expression simplification = process.rewrite(LBPRewriter.R_complete_normalize, expression);
+        System.out.println("simplification: " + simplification);
+        
+        process = LBPFactory.newLBPProcess();
+        Expression knownToBeTrueGroup  = Expressions.parse("X = a or X = b or X = c");
+        Expression knownToBeFalseGroup = Expressions.parse("false");
+        Expression knownGroup          = Or.make(knownToBeTrueGroup, knownToBeFalseGroup);
+        Expression unknownGroup        = Not.make(knownGroup);
+        process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(unknownGroup, process);
+        Expression unknownSimplified   = process.rewrite(LBPRewriter.R_complete_normalize, unknownGroup);
+        System.out.println("unknown: " + unknownSimplified);
+        // does not deduce X = d because type declaration is not used as knowledge.
+
+        // We use the fact that there are only 4 constants for this type below:
+        process = LBPFactory.newLBPProcess();
+        Expression backgroundKnowledge            = Expressions.parse("X = a or X = b or X = c or X = d");
+        Expression unknownPlusBackgroundKnowledge = And.make(unknownGroup, backgroundKnowledge);
+        process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(unknownPlusBackgroundKnowledge, process);
+        Expression unknownPlusBackgroundKnowledgeSimplified = process.rewrite(LBPRewriter.R_complete_normalize, unknownPlusBackgroundKnowledge);
+        System.out.println("unknown under background knowledge: " + unknownPlusBackgroundKnowledgeSimplified);
+        
+        // Now we do it with sets, which takes care of standardizing apart.
+        // Set format is: { (on <Indices> <Head> | <Condition> }
+        // A value is in this set if and only if it is equal to <Head>[<Indices>/sigma] for some sigma a value to <Indices> satisfying <Condition>.
+        // For example { (on X, Y) [p(X,Y)] | X != c and Y = b } is { [p(a, b)], [p(b, b)], [p(d, b)], [p(e, b)], ..., [p(z, b)] }
+        // and is equivalent to { (on X) [p(X,b)] | X != c }
+        process = LBPFactory.newLBPProcess();
+        model = Model.fromRules(
+                "sort People: 10, a, b, c, d;" +
+                "random p: People -> Boolean;");
+        model.setRewritingProcessesModel(process);
+        Expression everything         = Expressions.parse("{ (on X) [p(X)] | true }");
+        Expression domain             = Expressions.parse("{ (on X) [p(X)] | X = a or X = b or X = c or X = d }");
+        Expression knownToBeTrueSet   = Expressions.parse("{ (on X) [p(X)] | X = a or X = b or X = c }");
+        Expression knownToBeFalseSet  = Expressions.parse("{ (on X) [p(X)] | false }"); // same as empty set
+        Expression knownSetDefinition = Expressions.apply(FunctorConstants.UNION, knownToBeTrueSet, knownToBeFalseSet);
+        process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(knownSetDefinition, process);
+		Expression knownSet             = process.rewrite(LBPRewriter.R_union_of_intensional_sets_with_unifiable_heads, knownSetDefinition);
+        Expression unknownSetDefinition = Expressions.apply(FunctorConstants.SET_DIFFERENCE, everything, knownSet);
+        process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(unknownSetDefinition, process);
+        Expression unknownSet           = process.rewrite(LBPRewriter.R_set_diff, unknownSetDefinition);
+        System.out.println("unknown: " + unknownSet);
+
+        Expression unknownSetDefinitionConsideringDomain = Expressions.apply(FunctorConstants.SET_DIFFERENCE, domain, knownSet);
+        process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(unknownSetDefinitionConsideringDomain, process);
+        Expression unknownSetConsideringDomain           = process.rewrite(LBPRewriter.R_set_diff, unknownSetDefinitionConsideringDomain);
+        System.out.println("unknown considering domain: " + unknownSetConsideringDomain);
+        
+        withUnification();
+	}
+	
+	private static void withUnification() { // same thing with predicate with more arguments, but in a method so variables can have the same names
+        RewritingProcess process = LBPFactory.newLBPProcess();
+        Model model = Model.fromRules(
+                "sort People: 10, a, b, c, d;" +
+                "random friends: People x People -> Boolean;");
+        model.setRewritingProcessesModel(process);
+        Expression everything         = Expressions.parse("{ (on X, Y) [friends(X, Y)] | true }");
+        // Note how, in the next set, Y is being used as the first argument, while all other sets use X as first argument.
+        // That is fine because these variables are locally scoped/quantified.
+        // Things are standardized apart internally.
+        Expression domain             = Expressions.parse("{ (on X, Y) [friends(Y, X)] | Y = a or Y = b or Y = c or Y = d }");
+        Expression knownToBeTrueSet   = Expressions.parse("{ (on X, Y) [friends(X, Y)] | X = a or X = b or X = c }");
+        Expression knownToBeFalseSet  = Expressions.parse("{ (on X, Y) [friends(X, Y)] | false }"); // same as empty set
+        Expression knownSetDefinition = Expressions.apply(FunctorConstants.UNION, knownToBeTrueSet, knownToBeFalseSet);
+        process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(knownSetDefinition, process);
+		Expression knownSet             = process.rewrite(LBPRewriter.R_union_of_intensional_sets_with_unifiable_heads, knownSetDefinition);
+        Expression unknownSetDefinition = Expressions.apply(FunctorConstants.SET_DIFFERENCE, everything, knownSet);
+        process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(unknownSetDefinition, process);
+        Expression unknownSet           = process.rewrite(LBPRewriter.R_set_diff, unknownSetDefinition);
+        System.out.println("unknown: " + unknownSet);
+
+        // Now let's do it considering that first argument needs to be in a, b, c, d
+        Expression unknownSetDefinitionConsideringDomain = Expressions.apply(FunctorConstants.SET_DIFFERENCE, domain, knownSet);
+        process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(unknownSetDefinitionConsideringDomain, process);
+        Expression unknownSetConsideringDomain           = process.rewrite(LBPRewriter.R_set_diff, unknownSetDefinitionConsideringDomain);
+        System.out.println("unknown considering domain: " + unknownSetConsideringDomain);
 	}
 }

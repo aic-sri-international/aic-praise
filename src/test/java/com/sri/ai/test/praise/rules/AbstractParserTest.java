@@ -77,8 +77,9 @@ public abstract class AbstractParserTest {
 				Assert.assertEquals(expectedResult, result);
 			}
 			else {
-				if(result != null)
+				if(result != null) {
 					System.out.println("generated string for \"" + input + "\": " + Brewer.generateBuildString(result.getSyntaxTree()) + "\n\n");
+				}
 				Assert.assertNotNull(result);
 			}
 		}

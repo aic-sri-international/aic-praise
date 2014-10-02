@@ -217,6 +217,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	}
 
 	private static final Predicate<Pair<Expression, List<Integer>>> REJECT_FUNCTOR = new Predicate<Pair<Expression, List<Integer>>>() {
+		@Override
 		public boolean apply(Pair<Expression, List<Integer>> pair) {
 			boolean result = ! Util.getLast(pair.second).equals(FunctionApplicationProvider.INDEX_OF_FUNCTOR_IN_FUNCTION_APPLICATIONS);
 			return result;

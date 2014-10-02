@@ -54,6 +54,7 @@ import com.sri.ai.praise.model.ModelGrounding.GroundedModelResult;
 import com.sri.ai.praise.model.ModelGrounding.ModelGroundingError;
 import com.sri.ai.praise.model.ModelGrounding.ModelGroundingException;
 import com.sri.ai.test.praise.AbstractLPITest;
+import com.sri.ai.util.Configuration;
 import com.sri.ai.util.Util;
 
 public class ModelGroundingTest extends AbstractLPITest {
@@ -344,9 +345,9 @@ public class ModelGroundingTest extends AbstractLPITest {
 	
 	@Test
 	public void testGroundModelDoesNotExceedAllowedSize() {		
-		PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_PERFORM_MAX_ALLOWED_SIZE_CHECK_FOR_GROUNDED_MODEL, Boolean.TRUE.toString());
+		Configuration.setProperty(PRAiSEConfiguration.KEY_PERFORM_MAX_ALLOWED_SIZE_CHECK_FOR_GROUNDED_MODEL, Boolean.TRUE.toString());
 		try {
-			PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, "3");
+			Configuration.setProperty(PRAiSEConfiguration.KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, "3");
 			callGroundModel(new Model(
 					"model("+
 			        " 'Name', " +
@@ -371,7 +372,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 		}
 		
 		try {
-			PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, "4");
+			Configuration.setProperty(PRAiSEConfiguration.KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, "4");
 			callGroundModel(new Model(
 					"model("+
 			        " 'Name', " +
@@ -392,7 +393,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 		}
 		
 		try {
-			PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, "7");
+			Configuration.setProperty(PRAiSEConfiguration.KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, "7");
 			callGroundModel(new Model(
 					"model("+
 			        " 'Name', " +
@@ -414,7 +415,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 		}
 		
 		try {
-			PRAiSEConfiguration.setProperty(PRAiSEConfiguration.KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, "8");
+			Configuration.setProperty(PRAiSEConfiguration.KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, "8");
 			callGroundModel(new Model(
 					"model("+
 			        " 'Name', " +

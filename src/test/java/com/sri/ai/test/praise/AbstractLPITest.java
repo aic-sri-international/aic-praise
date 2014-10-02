@@ -85,7 +85,7 @@ public abstract class AbstractLPITest {
 		
 		grammar = makeGrammar();
 		// Ensure the grammar class passed in is used where necessary.
-		BrewerConfiguration.setProperty(BrewerConfiguration.KEY_DEFAULT_GRAMMAR_CLASS, grammar.getClass().getName());
+		Configuration.setProperty(BrewerConfiguration.KEY_DEFAULT_GRAMMAR_CLASS, grammar.getClass().getName());
 
 		parser = makeParser();
 	}
@@ -142,6 +142,7 @@ public abstract class AbstractLPITest {
 	/**
 	 * @deprecated Use {@link LPIUtil#doTreeUtilWaitUntilClosed()} instead
 	 */
+	@Deprecated
 	public static void doTreeUtilWaitUnilClosed() {
 		GrinderUtil.doTreeUtilWaitUntilClosed();
 	}

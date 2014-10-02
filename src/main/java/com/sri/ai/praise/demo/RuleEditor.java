@@ -56,6 +56,7 @@ import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.google.common.annotations.Beta;
@@ -222,17 +223,17 @@ public class RuleEditor extends JPanel {
 		public RuleRSyntaxTextArea(int rows, int cols) {
 			super(rows, cols);
 			
-			RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_CUT_SMALL);
-			RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_COPY_SMALL);
-			RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_PASTE_SMALL);
-			RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_DELETE_SMALL);
-			RSyntaxTextArea.getAction(RSyntaxTextArea.SELECT_ALL_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_SELECT_ALL_SMALL);
+			RTextArea.getAction(RTextArea.CUT_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_CUT_SMALL);
+			RTextArea.getAction(RTextArea.COPY_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_COPY_SMALL);
+			RTextArea.getAction(RTextArea.PASTE_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_PASTE_SMALL);
+			RTextArea.getAction(RTextArea.DELETE_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_DELETE_SMALL);
+			RTextArea.getAction(RTextArea.SELECT_ALL_ACTION).putValue(Action.SMALL_ICON, ImageLookup.EDIT_SELECT_ALL_SMALL);
 			
-			RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION).putValue(Action.SMALL_ICON, ImageLookup.UNDO_SMALL);
-			RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION).putValue(Action.LARGE_ICON_KEY, ImageLookup.UNDO_LARGE);
+			RTextArea.getAction(RTextArea.UNDO_ACTION).putValue(Action.SMALL_ICON, ImageLookup.UNDO_SMALL);
+			RTextArea.getAction(RTextArea.UNDO_ACTION).putValue(Action.LARGE_ICON_KEY, ImageLookup.UNDO_LARGE);
 			
-			RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION).putValue(Action.SMALL_ICON, ImageLookup.REDO_SMALL);
-			RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION).putValue(Action.LARGE_ICON_KEY, ImageLookup.REDO_LARGE);
+			RTextArea.getAction(RTextArea.REDO_ACTION).putValue(Action.SMALL_ICON, ImageLookup.REDO_SMALL);
+			RTextArea.getAction(RTextArea.REDO_ACTION).putValue(Action.LARGE_ICON_KEY, ImageLookup.REDO_LARGE);
 		}
 		
 		@Override
@@ -248,25 +249,25 @@ public class RuleEditor extends JPanel {
 			if (redoMenuItem != null) {
 				redoMenuItem.setEnabled(canRedo() && canType);
 			}
-			cutMenuItem.setEnabled(RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION).isEnabled() && canType);
-			copyMenuItem.setEnabled(RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION).isEnabled());
-			pasteMenuItem.setEnabled(RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION).isEnabled() && canType);
-			deleteMenuItem.setEnabled(RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION).isEnabled() && canType);			
+			cutMenuItem.setEnabled(RTextArea.getAction(RTextArea.CUT_ACTION).isEnabled() && canType);
+			copyMenuItem.setEnabled(RTextArea.getAction(RTextArea.COPY_ACTION).isEnabled());
+			pasteMenuItem.setEnabled(RTextArea.getAction(RTextArea.PASTE_ACTION).isEnabled() && canType);
+			deleteMenuItem.setEnabled(RTextArea.getAction(RTextArea.DELETE_ACTION).isEnabled() && canType);			
 		}
 		
 		@Override
 		protected JPopupMenu createPopupMenu() {			
 			JPopupMenu menu = new JPopupMenu();
 			
-			menu.add(undoMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.UNDO_ACTION)));
-			menu.add(redoMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.REDO_ACTION)));
+			menu.add(undoMenuItem = createPopupMenuItem(RTextArea.getAction(RTextArea.UNDO_ACTION)));
+			menu.add(redoMenuItem = createPopupMenuItem(RTextArea.getAction(RTextArea.REDO_ACTION)));
 			menu.addSeparator();
-			menu.add(cutMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.CUT_ACTION)));
-			menu.add(copyMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.COPY_ACTION)));
-			menu.add(pasteMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.PASTE_ACTION)));
+			menu.add(cutMenuItem = createPopupMenuItem(RTextArea.getAction(RTextArea.CUT_ACTION)));
+			menu.add(copyMenuItem = createPopupMenuItem(RTextArea.getAction(RTextArea.COPY_ACTION)));
+			menu.add(pasteMenuItem = createPopupMenuItem(RTextArea.getAction(RTextArea.PASTE_ACTION)));
 			menu.addSeparator();
-			menu.add(deleteMenuItem = createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.DELETE_ACTION)));
-			menu.add(createPopupMenuItem(RSyntaxTextArea.getAction(RSyntaxTextArea.SELECT_ALL_ACTION)));			
+			menu.add(deleteMenuItem = createPopupMenuItem(RTextArea.getAction(RTextArea.DELETE_ACTION)));
+			menu.add(createPopupMenuItem(RTextArea.getAction(RTextArea.SELECT_ALL_ACTION)));			
 			
 			return menu;
 		}
@@ -279,10 +280,12 @@ public class RuleEditor extends JPanel {
 		 * @return The menu item.
 		 * @see #createPopupMenu()
 		 */
+		@Override
 		protected JMenuItem createPopupMenuItem(Action a) {
 			JMenuItem item = new JMenuItem(a) {
 				private static final long serialVersionUID = 1L;
 
+				@Override
 				public void setToolTipText(String text) {
 					// Ignore!  Actions (e.g. undo/redo) set this when changing
 					// their text due to changing enabled state.

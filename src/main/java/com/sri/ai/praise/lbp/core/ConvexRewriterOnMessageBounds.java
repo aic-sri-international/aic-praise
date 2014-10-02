@@ -544,6 +544,7 @@ public class ConvexRewriterOnMessageBounds extends
 					}, 
 					new Expression[] {IfThenElse.getThenBranch(messageValueWithPlaceholders)}, 
 					new RewriteOnBranch() {
+						@Override
 						public Expression rewrite(Expression[] expressions, RewritingProcess process) {
 							Expression result = expandMessageValuesWithPlaceholders(expressions[0], mapFromPlaceholderToBound, process);
 							return result;
@@ -616,6 +617,7 @@ public class ConvexRewriterOnMessageBounds extends
 						}, 
 						new Expression[] { messageValuesSet }, 
 						new RewriteOnBranch() {
+							@Override
 							public Expression rewrite(Expression[] expressions, RewritingProcess process) {
 								Expression result = iterateExtrema(expressions[0], elseMap, process);
 								return result;
@@ -678,6 +680,7 @@ public class ConvexRewriterOnMessageBounds extends
 					}, 
 					new Expression[] { IfThenElse.getThenBranch(messageValuesSet) }, 
 					new RewriteOnBranch() {
+						@Override
 						public Expression rewrite(Expression[] expressions, RewritingProcess process) {
 							Expression result = makeSimplifiedConvexHull(expressionRV, expressions[0], process);
 							return result;

@@ -66,6 +66,7 @@ import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
+import com.sri.ai.util.Configuration;
 import com.sri.ai.util.Util;
 
 /**
@@ -93,7 +94,7 @@ public class OptionsPanel extends JPanel {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				SyntaxTrees.setNumericDisplayPrecision((Integer)_precisionModel.getValue());
-				ExpressoConfiguration.setProperty(ExpressoConfiguration.KEY_DISPLAY_NUMERIC_PRECISION_FOR_SYMBOLS, ""+_precisionModel.getValue());
+				Configuration.setProperty(ExpressoConfiguration.KEY_DISPLAY_NUMERIC_PRECISION_FOR_SYMBOLS, ""+_precisionModel.getValue());
 			}
 
 		});
@@ -115,7 +116,7 @@ public class OptionsPanel extends JPanel {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				GrinderConfiguration.setProperty(GrinderConfiguration.KEY_REWRITE_DEAD_ENDS_CACHE_MAXIMUM_SIZE, ""+_deadEndsCacheSizeModel.getValue());
+				Configuration.setProperty(GrinderConfiguration.KEY_REWRITE_DEAD_ENDS_CACHE_MAXIMUM_SIZE, ""+_deadEndsCacheSizeModel.getValue());
 				
 			}
 		});
@@ -123,7 +124,7 @@ public class OptionsPanel extends JPanel {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {		
-				GrinderConfiguration.setProperty(GrinderConfiguration.KEY_REWRITING_PROCESS_CACHE_MAXIMUM_SIZE, ""+_rewriterCacheSizeModel.getValue());
+				Configuration.setProperty(GrinderConfiguration.KEY_REWRITING_PROCESS_CACHE_MAXIMUM_SIZE, ""+_rewriterCacheSizeModel.getValue());
 			}
 		});
 		
@@ -214,6 +215,7 @@ public class OptionsPanel extends JPanel {
 		
 		chckbxOverrideModel = new JCheckBox("Override Model's Domain Sizes (i.e. sort sizes)");
 		chckbxOverrideModel.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxOverrideModel.isSelected()) {
 					chckbxKnownTypeSize.setEnabled(true);
@@ -316,6 +318,7 @@ public class OptionsPanel extends JPanel {
 		chckbxJustificationEnabled = new JCheckBox("Justification Enabled");
 		chckbxJustificationEnabled.setSelected(true);
 		chckbxJustificationEnabled.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxJustificationEnabled.isSelected()) {
 					chckbxJustificationToConsole.setEnabled(true);
@@ -367,6 +370,7 @@ public class OptionsPanel extends JPanel {
 		chckbxTraceEnabled = new JCheckBox("Trace Enabled");
 		chckbxTraceEnabled.setSelected(true);
 		chckbxTraceEnabled.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (chckbxTraceEnabled.isSelected()) {
 					chckbxTraceToConsole.setEnabled(true);

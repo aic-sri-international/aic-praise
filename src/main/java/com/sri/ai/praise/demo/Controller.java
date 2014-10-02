@@ -53,6 +53,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+import javax.swing.WindowConstants;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -355,7 +356,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							queryOptions.setKnownTypeSizes(true); // By default.
 							if (app.optionsPanel.chckbxOverrideModel.isSelected()) {
 								queryOptions.setKnownTypeSizes(app.optionsPanel.chckbxKnownTypeSize.isSelected());
-								GrinderConfiguration.setProperty(GrinderConfiguration.KEY_ASSUME_DOMAIN_ALWAYS_LARGE, ""+app.optionsPanel.chckbxAssumeDomainsAlwaysLarge.isSelected());
+								Configuration.setProperty(GrinderConfiguration.KEY_ASSUME_DOMAIN_ALWAYS_LARGE, ""+app.optionsPanel.chckbxAssumeDomainsAlwaysLarge.isSelected());
 							}					
 							activeQueryUUID = queryEngine.newQueryUUID(queryOptions);
 			
@@ -433,12 +434,13 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	
 	public void newWindow() {
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				PRAiSEDemoApp newWindow = new PRAiSEDemoApp();
 				int x = app.frame.getBounds().x + 15;
 				int y = app.frame.getBounds().y + 15;
 				newWindow.frame.setBounds(x, y, app.frame.getBounds().width, app.frame.getBounds().height);
-				newWindow.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				newWindow.frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 				newWindow.controller.copyState(Controller.this);
 				newWindow.frame.setVisible(true);
 			}

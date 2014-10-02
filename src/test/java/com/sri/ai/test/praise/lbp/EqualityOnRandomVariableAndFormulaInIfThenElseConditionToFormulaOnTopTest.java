@@ -66,11 +66,13 @@ public class EqualityOnRandomVariableAndFormulaInIfThenElseConditionToFormulaOnT
 			this.input = input;
 		}
 		
+		@Override
 		public Expression getTopExpression() {
 			exprInput = parse(input);
 			return exprInput;
 		}
 		
+		@Override
 		public Expression callRewrite(RewritingProcess process) {
 			Expression result = rewriter.rewrite(exprInput, process);
 			return result;

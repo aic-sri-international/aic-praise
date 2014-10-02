@@ -19,6 +19,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	
 	private TranslateChurchToModel translator;
 	
+	@Override
 	@Before
 	public void setUp() {
 		super.setUp();

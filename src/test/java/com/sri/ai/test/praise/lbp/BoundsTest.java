@@ -580,6 +580,7 @@ public class BoundsTest extends AbstractLPITest {
 						return "R_inner";
 					}
 					
+					@Override
 					public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
 						Expression lastChildResult = null;
 						for (int i = 0; i < argResponseExpr.length; i++) {
@@ -600,6 +601,7 @@ public class BoundsTest extends AbstractLPITest {
 						return result;
 					}
 					
+					@Override
 					protected boolean isTraceInAndOutOfRewriter() {
 						return true;
 					}
@@ -1046,6 +1048,7 @@ public class BoundsTest extends AbstractLPITest {
 					return "R_inner";
 				}
 				
+				@Override
 				public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {						
 					List<Expression> timesArgs = new ArrayList<Expression>();
 					for (int i = 0; i < argResponseExpr.length; i++) {
@@ -1068,6 +1071,7 @@ public class BoundsTest extends AbstractLPITest {
 					return result;
 				}
 				
+				@Override
 				protected boolean isTraceInAndOutOfRewriter() {
 					return true;
 				}
@@ -1131,6 +1135,7 @@ public class BoundsTest extends AbstractLPITest {
 					return "R_inner";
 				}
 				
+				@Override
 				public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
 					List<Expression> timesEvenArgs = new ArrayList<Expression>();
 					List<Expression> timesOddArgs  = new ArrayList<Expression>();
@@ -1160,6 +1165,7 @@ public class BoundsTest extends AbstractLPITest {
 					return result;
 				}
 				
+				@Override
 				protected boolean isTraceInAndOutOfRewriter() {
 					return true;
 				}
@@ -1189,15 +1195,18 @@ public class BoundsTest extends AbstractLPITest {
 			this.cannedResponse = cannedResponse;
 		}
 		
+		@Override
 		public String getName() {
 			return "R_canned_response";
 		}
 		
+		@Override
 		public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
 			Expression result = cannedResponse;
 			return result;
 		}
 		
+		@Override
 		protected boolean isTraceInAndOutOfRewriter() {
 			return true;
 		}
