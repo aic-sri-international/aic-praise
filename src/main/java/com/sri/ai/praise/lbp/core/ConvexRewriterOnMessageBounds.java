@@ -788,7 +788,7 @@ public class ConvexRewriterOnMessageBounds extends
 		while (subExpressionsIterator.hasNext()) {
 			Expression subExpression = subExpressionsIterator.next();
 			// Note: Skip lambda expression, as we put placeholders in lambda expressions.
-			if (!Lambda.isLambdaExpression(subExpression) && ScopedVariables.get(subExpression, process).size() > 0) {
+			if (!Lambda.isLambdaExpression(subExpression) && subExpression.getScopedExpressions(process).size() > 0) {
 				if (Util.thereExists(new SubExpressionsDepthFirstIterator(subExpression), new Equals<Expression>(placeholder))) {
 					result = true;				
 					break;
