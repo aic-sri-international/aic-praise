@@ -53,6 +53,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.SyntacticFunctionsSubExpressionsProvider;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
@@ -1003,7 +1004,7 @@ public class Model {
 		for (Expression parfactor : parfactorsDeclaration.getParfactors()) {
 			if (IntensionalSet.isIntensionalSet(parfactor)) {
 				for (Expression type : IntensionalSet.getIndexDomains(parfactor)) {
-					if (!type.hasFunctor(CardinalityTypeOfLogicalVariable.TYPE_LABEL) &&
+					if (!CardinalityTypeOfLogicalVariable.isTypeSyntacticFunctionApplication(type) &&
 					    !sortNamesKnown.contains(type)) {
 						sortDeclarations.add(new SortDeclaration(type));
 						sortNamesKnown.add(type);

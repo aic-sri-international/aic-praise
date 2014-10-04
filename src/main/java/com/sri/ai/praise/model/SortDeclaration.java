@@ -384,9 +384,9 @@ public class SortDeclaration {
 		}
 		if (illegal) {
 			throw new IllegalArgumentException(
-					"name ["
+					"Model sort name '"
 							+ name
-							+ "] is not of the correct type. must be a string valued symbol.");
+							+ "' is not of the correct type. It must be a string-valued symbol.");
 		}
 	}
 

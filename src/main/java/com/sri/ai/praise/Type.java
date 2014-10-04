@@ -44,11 +44,14 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.core.HasKind;
+import com.sri.ai.grinder.core.KindAttribute;
+import com.sri.ai.grinder.library.SyntacticFunctionsSubExpressionsProvider;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 
 /**
- * A rewriter for evaluating all "type" applications to random variable value
+ * A rewriter for evaluating all "type" syntax function applications to random variable value
  * expressions (e.g. type(tall(X)) in ALBP to <code>{{false, true}}</code>.
  * 
  * @author oreilly
@@ -56,10 +59,8 @@ import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 @Beta
 public class Type extends AbstractRewriter {
 
-	public final static String FUNCTOR_TYPE = "type";
-	
 	public Type() {
-		this.setReifiedTests(new HasKind(FUNCTOR_TYPE));
+		this.setReifiedTests(new HasKind(KindAttribute.VALUE_TYPE_SYNTACTIC_FUNCTION));
 	}
 
 	// the reason for a multiset here is that it does not trigger a

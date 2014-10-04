@@ -731,7 +731,7 @@ public class ModelGrounding {
 					Expression possibleSortName = indexToDomain.getValue();
 					// Exclude 'null' and 'type(<Logical Variable>)' types as these do not
 					// correspond to sort names.
-					if (possibleSortName == null || !Expressions.hasFunctor(possibleSortName, Type.FUNCTOR_TYPE)) {
+					if (possibleSortName == null || ! possibleSortName.getSyntacticFormType().equals("Syntactic function")) {
 						indexToSortNameMap.put(indexToDomain.getKey(), possibleSortName);
 					}
 				}
