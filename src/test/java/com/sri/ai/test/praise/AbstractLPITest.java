@@ -177,8 +177,11 @@ public abstract class AbstractLPITest {
 			RewritingProcess process;
 			Expression actual = null;
 
-			topExpression = getTopExpression();
-			process = newRewritingProcess(topExpression);
+//			topExpression = getTopExpression();  // moved to *after* model is introduced to process, because new non-syntax-based expression implementations era eager
+			// with analyzing sub-expressions, and bracketed expressions need the model to do so.
+//			process = newRewritingProcess(topExpression);
+			
+			process = newRewritingProcess(null);
 			
 			if (null != model) {
 				model.setRewritingProcessesModel(process);
@@ -186,6 +189,9 @@ public abstract class AbstractLPITest {
 				// parfactors don't typically have free variables, but they might.
 			}
 
+			topExpression = getTopExpression();
+			process.setRootExpression(topExpression);
+			
 			Expression contextualConstraint = parse(contextualConstraintString);
 			Expression topExpressionAndContextualConstraint = Tuple.make(topExpression, contextualConstraint);
 			process =

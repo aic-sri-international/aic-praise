@@ -53,7 +53,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.SyntacticFunctionsSubExpressionsProvider;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
@@ -635,8 +634,7 @@ public class Model {
 	}
 	
 	public static RandomPredicateCatalog getRandomPredicateCatalog(RewritingProcess process) {
-		RandomPredicateCatalog catalog = (RandomPredicateCatalog) process
-				.getGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG);
+		RandomPredicateCatalog catalog = (RandomPredicateCatalog) process.getGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG);
 		
 		if (catalog == null) {
 			Expression model = Model.getModelDefinition(process);
@@ -667,8 +665,7 @@ public class Model {
 	public static List<Expression> getParfactors(RewritingProcess process) {
 		List<Expression> parfactors = new ArrayList<Expression>();
 
-		Object modelParfactors = process
-				.getGlobalObject(GLOBAL_KEY_MODEL_PARFACTORS);
+		Object modelParfactors = process.getGlobalObject(GLOBAL_KEY_MODEL_PARFACTORS);
 
 		if (modelParfactors == null) {
 			// This to be backward compatible with code that creates
