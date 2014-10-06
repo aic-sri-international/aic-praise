@@ -2287,51 +2287,49 @@ public class RuleConverter {
 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
-			if (expression.getArguments().size() > 0) {
-				// | ............ if E is Quantifier X : Phi
-				if (ForAll.isForAll(expression) || ThereExists.isThereExists(expression)) {
-					// Create a new symbol based on the name of the quantifier expression.
-					// This will be used as the name of a new random variable.
-					// | ................ newSymbol <- string representation of E
-					Expression newSymbol = Expressions.makeSymbol(expression.toString());
-					
-					// Get all the free variables in the quantifier expression to create a
-					// call to our new random variable expression.
-					// | ................ F <- array of free variables in E
-					Set<Expression> freeVariablesF = Expressions.freeVariables(expression, process);
-					Expression      newSymbolF     = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(newSymbol, freeVariablesF);
+			// | ............ if E is Quantifier X : Phi
+			if (ForAll.isForAll(expression) || ThereExists.isThereExists(expression)) {
+				// Create a new symbol based on the name of the quantifier expression.
+				// This will be used as the name of a new random variable.
+				// | ................ newSymbol <- string representation of E
+				Expression newSymbol = Expressions.makeSymbol(expression.toString());
 
-					// Then create a new rule based on the new expression.
-					Expression newRule;
-					// | ................ if Quantifier is "there exists"
-					if (ThereExists.isThereExists(expression)) {						
-						// | .................... expandingRules <- add "if Phi then newSymbol(F) else newSymbol(F) 0.000001"
-						newRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
-																ThereExists.getBody(expression), 
-																Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, 1),
-																Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("0", "1")));
-					}
-					else { // | ................ else // Quantifier is "for all"
-						// | .................... expandingRules <- add "if not Phi then not newSymbol(F) else newSymbol(F) 0.999999"
-						newRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
-																Not.make(ForAll.getBody(expression)), 
-																Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, Not.make(newSymbolF), 1),
-																Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("9", "9")));						
-					}
-					expandingRules.add(newRule);
-					
-					// | ................ // create a corresponding random variable declaration
-					// | ................ add randomVariable(newSymbol, size(F), TypeF1, ..., TypeFn, Boolean)
-					// | ......................... to newRandomVariableDeclarations
-					Expression newRandomVariableDeclaration = createNewRandomVariableDeclaration(newSymbolF, newRule, randomVariableDeclarations, process);
-					if (newRandomVariableDeclaration != null) {
-						randomVariableDeclarations.add(newRandomVariableDeclaration);
-					}					
+				// Get all the free variables in the quantifier expression to create a
+				// call to our new random variable expression.
+				// | ................ F <- array of free variables in E
+				Set<Expression> freeVariablesF = Expressions.freeVariables(expression, process);
+				Expression      newSymbolF     = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(newSymbol, freeVariablesF);
 
-					// Replace the quantifier expression with the newSymbol(F) expression
-					// | ................ return newSymbol( F )
-					return newSymbolF;
+				// Then create a new rule based on the new expression.
+				Expression newRule;
+				// | ................ if Quantifier is "there exists"
+				if (ThereExists.isThereExists(expression)) {						
+					// | .................... expandingRules <- add "if Phi then newSymbol(F) else newSymbol(F) 0.000001"
+					newRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
+							ThereExists.getBody(expression), 
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, 1),
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("0", "1")));
 				}
+				else { // | ................ else // Quantifier is "for all"
+					// | .................... expandingRules <- add "if not Phi then not newSymbol(F) else newSymbol(F) 0.999999"
+					newRule = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_CONDITIONAL_RULE, 
+							Not.make(ForAll.getBody(expression)), 
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, Not.make(newSymbolF), 1),
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(RuleConverter.FUNCTOR_ATOMIC_RULE, newSymbolF, precisionedPotential("9", "9")));						
+				}
+				expandingRules.add(newRule);
+
+				// | ................ // create a corresponding random variable declaration
+				// | ................ add randomVariable(newSymbol, size(F), TypeF1, ..., TypeFn, Boolean)
+				// | ......................... to newRandomVariableDeclarations
+				Expression newRandomVariableDeclaration = createNewRandomVariableDeclaration(newSymbolF, newRule, randomVariableDeclarations, process);
+				if (newRandomVariableDeclaration != null) {
+					randomVariableDeclarations.add(newRandomVariableDeclaration);
+				}					
+
+				// Replace the quantifier expression with the newSymbol(F) expression
+				// | ................ return newSymbol( F )
+				return newSymbolF;
 			}
 			return expression;
 		}

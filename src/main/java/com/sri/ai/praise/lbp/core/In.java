@@ -234,11 +234,14 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Justification.beginEqualityStep("Set is extensional");
 		
 		// Disjunction here is a meta, preferably short-circuited, operation.
-		BranchRewriteTask[] disjunctRewriters = new BranchRewriteTask[set.numberOfArguments()];
+		BranchRewriteTask[] disjunctRewriters = new BranchRewriteTask[ExtensionalSet.getElements(set).size()];
 		List<Expression> elements = ExtensionalSet.getElements(set);
 		for (int i = 0; i < elements.size(); i++) {
 			Expression a_i = elements.get(i);
 			Expression eq  = Equality.make(alpha, a_i);
+			if (i >= disjunctRewriters.length) {
+				throw new Error("Out of bounds index");
+			}
 			disjunctRewriters[i] = new BranchRewriteTask(
 					new RewriteOnBranch() {
 						
