@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -52,6 +53,7 @@ import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
@@ -61,6 +63,7 @@ import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.rules.RuleConverter;
+import com.sri.ai.util.Util;
 
 /**
  * A class for representing the definition of a declared model. The basic
@@ -199,6 +202,7 @@ public class Model {
 	// Declaration information
 	private String modelDeclaration = null;
 	private Set<String> knownRandomVariableNameAndArities = new LinkedHashSet<String>();
+	Collection<FunctionSignature> knownRandomPredicatesSignatures;
 	// Definition information.
 	private Expression modelDefinition = null;
 	private Expression name = null;
@@ -495,9 +499,11 @@ public class Model {
 	 * 
 	 * @param process
 	 *            the process in which the rewriting is occurring.
+	 * @return 
 	 */
-	public void setRewritingProcessesModel(RewritingProcess process) {
-		setRewritingProcessesModel(modelDefinition, knownRandomVariableNameAndArities, process);
+	public RewritingProcess setRewritingProcessesModel(RewritingProcess process) {
+		process = setRewritingProcessesModel(modelDefinition, knownRandomVariableNameAndArities, process);
+		return process;
 	}
 
 	/**
@@ -508,8 +514,9 @@ public class Model {
 	 *            working over.
 	 * @param process
 	 *            the process in which the rewriting is occurring.
+	 * @return 
 	 */
-	public static void setRewritingProcessesModel(Expression modelDefinition, RewritingProcess process) {
+	public static RewritingProcess setRewritingProcessesModel(Expression modelDefinition, RewritingProcess process) {
 
 		@SuppressWarnings("unchecked")
 		Set<String> knownVarNames = (Set<String>) process
@@ -517,11 +524,13 @@ public class Model {
 		if (knownVarNames == null) {
 			knownVarNames = new LinkedHashSet<String>();
 		}
-		setRewritingProcessesModel(modelDefinition, knownVarNames, process);
+		process = setRewritingProcessesModel(modelDefinition, knownVarNames, process);
+		return process;
 	}
 
 	/**
-	 * Set the rewriting process's model and known random variable names.
+	 * Returns a new rewriting process based on given one,
+	 * extended with model and known random variable names.
 	 * 
 	 * @param modelDefinitionExpression
 	 *            an expression representing the model the rewriting process is
@@ -531,7 +540,7 @@ public class Model {
 	 * @param process
 	 *            the process in which the rewriting is occurring.
 	 */
-	public static void setRewritingProcessesModel(
+	public static RewritingProcess setRewritingProcessesModel(
 			Expression modelDefinitionExpression,
 			Set<String> knownRandomVariableNameAndArities, RewritingProcess process) {
 
@@ -560,9 +569,9 @@ public class Model {
 			allKnownRandomVariableNameAndArities.add(nameAndArityFromRandomVariableDeclaration(randomVariableDeclaration));
 		}
 		// Now ensure we setup the random predicate catalog with all the known names
-		Set<RandomPredicate> randomPredicates = new LinkedHashSet<RandomPredicate>();
+		Set<FunctionSignature> randomPredicates = new LinkedHashSet<FunctionSignature>();
 		for (String randomVariableName : allKnownRandomVariableNameAndArities) {			
-			randomPredicates.add(new RandomPredicate(randomVariableName));
+			randomPredicates.add(new FunctionSignature(randomVariableName));
 		}
 		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES, allKnownRandomVariableNameAndArities);
 		process.putGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG, new RandomPredicateCatalog(randomPredicates));
@@ -573,6 +582,12 @@ public class Model {
 			sortNames.add(sortDeclaration.getName());
 		}
 		process.putGlobalObject(GLOBAL_KEY_MODEL_SORT_NAMES, sortNames);
+		
+		for (Expression parfactor : model.getParfactorsDeclaration().getParfactors()) {
+			process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(parfactor, process);
+		}
+		
+		return process;
 	}
 	
 	/**
@@ -595,9 +610,9 @@ public class Model {
 			knownVarNames.add(nameAndArityFromRandomVariableDeclaration(declaration));
 		}
 		// Now ensure we setup the random predicate catalog with all the known names
-		Set<RandomPredicate> randomPredicates = new LinkedHashSet<RandomPredicate>();
+		Set<FunctionSignature> randomPredicates = new LinkedHashSet<FunctionSignature>();
 		for (String randomVariableName : knownVarNames) {			
-			randomPredicates.add(new RandomPredicate(randomVariableName));
+			randomPredicates.add(new FunctionSignature(randomVariableName));
 		}
 		
 		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES, knownVarNames);
@@ -674,7 +689,7 @@ public class Model {
 			// These calls will ensure everything gets setup
 			// as expected from this point onwards.
 			Expression modelExpression = getModelDefinition(process);
-			setRewritingProcessesModel(modelExpression, process);
+			process = setRewritingProcessesModel(modelExpression, process);
 			modelParfactors = process
 					.getGlobalObject(GLOBAL_KEY_MODEL_PARFACTORS);
 		}
@@ -703,7 +718,7 @@ public class Model {
 			// These calls will ensure everything gets setup
 			// as expected from this point onwards.
 			Expression modelExpression = getModelDefinition(process);
-			setRewritingProcessesModel(modelExpression, process);
+			process = setRewritingProcessesModel(modelExpression, process);
 			modelSortNames = process.getGlobalObject(GLOBAL_KEY_MODEL_SORT_NAMES);
 		}
 
@@ -817,9 +832,17 @@ public class Model {
 	 */
 	private void ensureDefined() {
 		if (modelDefinition == null) {
-			Parser parser = new AntlrGrinderParserWrapper();
+			getRandomPredicatesSignatures();
+			Parser parser = new AntlrGrinderParserWrapper(getRandomPredicatesSignatures());
 			modelDefinition = parser.parse(modelDeclaration);
 		}
+	}
+	
+	public Collection<FunctionSignature> getRandomPredicatesSignatures() {
+		if (knownRandomPredicatesSignatures == null) {
+			knownRandomPredicatesSignatures = Util.mapIntoList(knownRandomVariableNameAndArities, FunctionSignature::new);
+		}
+		return knownRandomPredicatesSignatures;
 	}
 
 	private void collectAndValidateModelParts() {
@@ -1024,7 +1047,7 @@ public class Model {
 	/** Convenience method for creating an LPI rewriting process based on this Model with given root expression and LBPConfiguration. */
 	public RewritingProcess makeRewritingProcess(Expression rootExpression, LBPConfiguration lbpConfiguration) {
 		RewritingProcess process = LBPFactory.newLBPProcess(rootExpression, lbpConfiguration);
-		setRewritingProcessesModel(process);
+		process = setRewritingProcessesModel(process);
 		return process;
 	}
 	

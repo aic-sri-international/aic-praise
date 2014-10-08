@@ -111,7 +111,7 @@ public class ExportToPMTK3FactorGraph {
 		RewritingProcess process = LBPFactory.newLBPProcess(modelDefinition);
 		process.getGlobalObjects().putAll(globalObjects);
 		
-		Model.setRewritingProcessesModel(modelDefinition, modelToExport.getKnownRandomVariableNameAndArities(), process);
+		process = Model.setRewritingProcessesModel(modelDefinition, modelToExport.getKnownRandomVariableNameAndArities(), process);
 		
 		GroundedModelResult groundedModelResult = null;
 		try {

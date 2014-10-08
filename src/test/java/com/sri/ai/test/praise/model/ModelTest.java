@@ -557,7 +557,7 @@ public class ModelTest extends AbstractLPITest {
 		// before evidence parfactors can be instantiated (as need to be able
 		// to ensure are factor and not random variable declarations).
 		Expression modelExpression = parse("union({{(on X,Y) [if p(X) and q(Y) then 1 else 0]}})");
-		Model.setRewritingProcessesModel(modelExpression, process);
+		process = Model.setRewritingProcessesModel(modelExpression, process);
 		
 
 		parfactor = parse("{[if q(a1) then 1 else 0]}");
@@ -594,10 +594,10 @@ public class ModelTest extends AbstractLPITest {
 		
 		// Declare but don't define the model
 		Model model = new Model("union({{(on X,Y) [if p(X) and q(Y) then 1 else 0]}})",
-				"p", "q");
+				"p/1", "q/1");
 		
 		// Ensure declaration attributes are valid
-		Assert.assertEquals(Util.set("p", "q"), model.getKnownRandomVariableNameAndArities());
+		Assert.assertEquals(Util.set("p/1", "q/1"), model.getKnownRandomVariableNameAndArities());
 		
 		//
 		// The following calls should no longer throw exceptions as the model should auto-define.

@@ -45,6 +45,7 @@ import java.util.List;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
@@ -55,13 +56,13 @@ import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
  *
  */
 @Beta
-public class RandomPredicateCatalog extends HashMap<Expression, RandomPredicate> {
+public class RandomPredicateCatalog extends HashMap<Expression, FunctionSignature> {
 	private static final long serialVersionUID = 1L;
 
 	public boolean contains(Object randomPredicate) {
-		if (randomPredicate instanceof RandomPredicate) {
+		if (randomPredicate instanceof FunctionSignature) {
 			boolean result = false;
-			RandomPredicate cataloguedPredicateValue = get(((RandomPredicate)randomPredicate).functorOrSymbol);
+			FunctionSignature cataloguedPredicateValue = get(((FunctionSignature)randomPredicate).functorOrSymbol);
 			if (cataloguedPredicateValue != null) {
 				result = cataloguedPredicateValue.equals(randomPredicate);
 			}
@@ -81,8 +82,8 @@ public class RandomPredicateCatalog extends HashMap<Expression, RandomPredicate>
 
 	//
 	// PACKAGE PROTECTED - so can be constructed from within Model while not being available for general use
-	RandomPredicateCatalog(Collection<RandomPredicate> randomPredicates) {
-		for (RandomPredicate rp : randomPredicates) {
+	RandomPredicateCatalog(Collection<FunctionSignature> randomPredicates) {
+		for (FunctionSignature rp : randomPredicates) {
 			put(rp.functorOrSymbol, rp);
 		}
 	}
@@ -105,16 +106,16 @@ public class RandomPredicateCatalog extends HashMap<Expression, RandomPredicate>
 	}
 
 	private void addPredicates(Expression expression, RewritingProcess process) {
-		Iterator<RandomPredicate> randomPredicatesIterator =
+		Iterator<FunctionSignature> randomPredicatesIterator =
 			GetRandomVariables.determineRandomPredicates(expression, process);
 		while (randomPredicatesIterator.hasNext()) {
-			RandomPredicate randomPredicate = randomPredicatesIterator.next();
+			FunctionSignature randomPredicate = randomPredicatesIterator.next();
 			add(randomPredicate);
 		}
 	}
 
-	private void add(RandomPredicate randomPredicate) {
-		RandomPredicate anotherRandomPredicate = get(randomPredicate.functorOrSymbol);
+	private void add(FunctionSignature randomPredicate) {
+		FunctionSignature anotherRandomPredicate = get(randomPredicate.functorOrSymbol);
 		if (anotherRandomPredicate != null && anotherRandomPredicate.arity != randomPredicate.arity) {
 			throw new Error("Trying to add " + randomPredicate + " to random predicate catalog, but random predicate " + anotherRandomPredicate + " with same functor and different arity is already catalogued.");
 		}

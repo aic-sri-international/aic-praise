@@ -388,7 +388,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 					
 					// Step 4 set RewritingProcessModel
 					notifyListenersQueryStepStarting(queryUUID, STEP_4, stopWatch);
-					Model.setRewritingProcessesModel(model.getModelDefinition(), model.getKnownRandomVariableNameAndArities(), process);
+					process = Model.setRewritingProcessesModel(model.getModelDefinition(), model.getKnownRandomVariableNameAndArities(), process);
 					try {
 						// Can only validate here after setting up the model
 						// and associating with the process.
@@ -421,7 +421,7 @@ public class DefaultLBPQueryEngine implements LBPQueryEngine {
 											extendedParfactorsDeclaration, 
 											model.getKnownRandomVariableNameAndArities());
 									// Update the model associated to the process to be the extended version.
-									Model.setRewritingProcessesModel(model.getModelDefinition(), model.getKnownRandomVariableNameAndArities(), process);
+									process = Model.setRewritingProcessesModel(model.getModelDefinition(), model.getKnownRandomVariableNameAndArities(), process);
 								} 
 								else {
 									queryErrors.add(new QueryError(TYPE.INVALID_EVIDENCE_DECLARATION,"Evidence Declaration does not contain only extensionally defined factors."));

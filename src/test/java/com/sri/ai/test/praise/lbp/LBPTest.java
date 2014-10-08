@@ -285,7 +285,7 @@ public class LBPTest extends AbstractLPITest {
 				Util.pair(parse("sick(W)"), parse("not (Z != X)"))
 				);
         process = LBPFactory.newLBPProcess(expression);
-        Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNameAndArities(), process);
+        process = Model.setRewritingProcessesModel(parse(model.getModelDeclaration()), model.getKnownRandomVariableNameAndArities(), process);
         process = GrinderUtil.extendContextualSymbolsWithFreeSymbolsInExpressionwithUnknownTypeForSetUpPurposesOnly(Tuple.make(expression, randomVariableValue), process);
         // the above would have to include the contextual constraint (say, in a Tuple with expression), if it were not known to be "true".
         otherRandomVariableValuesAndContexts = LPIUtil.findRandomVariableValueExpressionsThatAreNotNecessarilyTheSameAsAGivenOne(expression, randomVariableValue, process);

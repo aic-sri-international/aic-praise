@@ -133,7 +133,7 @@ public class LBPFactory {
 	public static RewritingProcess newLBPProcessWithHighLevelModel(String modelName, String modelDescription, String highLevelModel) {
 		RewritingProcess process = newLBPProcess(null);
 		Model model = Model.fromRules(modelName, modelDescription, highLevelModel);
-		model.setRewritingProcessesModel(process);
+		process = model.setRewritingProcessesModel(process);
 		return process;
 	}
 	
@@ -313,7 +313,7 @@ public class LBPFactory {
         Model model = Model.fromRules(
                 "sort People: 10, ann, bob, dave, rodrigo, ciaran;" +
                 "random friends: People x People -> Boolean;");
-        model.setRewritingProcessesModel(process);
+        process = model.setRewritingProcessesModel(process);
         Expression expression = Expressions.parse("[friends(X,b)] = [friends(a,Y)]");
         process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(expression, process);
         Expression simplification = process.rewrite(LBPRewriter.R_complete_normalize, expression);
@@ -346,7 +346,7 @@ public class LBPFactory {
         model = Model.fromRules(
                 "sort People: 10, a, b, c, d;" +
                 "random p: People -> Boolean;");
-        model.setRewritingProcessesModel(process);
+        process = model.setRewritingProcessesModel(process);
         Expression everything         = Expressions.parse("{ (on X) [p(X)] | true }");
         Expression domain             = Expressions.parse("{ (on X) [p(X)] | X = a or X = b or X = c or X = d }");
         Expression knownToBeTrueSet   = Expressions.parse("{ (on X) [p(X)] | X = a or X = b or X = c }");
@@ -372,7 +372,7 @@ public class LBPFactory {
         Model model = Model.fromRules(
                 "sort People: 10, a, b, c, d;" +
                 "random friends: People x People -> Boolean;");
-        model.setRewritingProcessesModel(process);
+        process = model.setRewritingProcessesModel(process);
         Expression everything         = Expressions.parse("{ (on X, Y) [friends(X, Y)] | true }");
         // Note how, in the next set, Y is being used as the first argument, while all other sets use X as first argument.
         // That is fine because these variables are locally scoped/quantified.

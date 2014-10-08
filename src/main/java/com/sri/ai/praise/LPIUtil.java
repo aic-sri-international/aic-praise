@@ -57,6 +57,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.PickSingleElement;
 import com.sri.ai.grinder.helper.Trace;
@@ -76,7 +77,6 @@ import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.core.IsDeterministicBooleanMessageValue;
 import com.sri.ai.praise.lbp.core.MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
-import com.sri.ai.praise.model.RandomPredicate;
 import com.sri.ai.praise.model.RandomPredicateCatalog;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.util.Util;
@@ -117,7 +117,7 @@ public class LPIUtil {
 		
 		while (subExpressionIterator.hasNext()) {
 			Expression subExpression = subExpressionIterator.next();
-			if (catalog.contains(new RandomPredicate(subExpression))
+			if (catalog.contains(new FunctionSignature(subExpression))
 					&& randomVariableValueExpressionsMatch(randomVariableValueExpression, subExpression)) {
 				
 				Expression result = Equality
@@ -607,7 +607,7 @@ public class LPIUtil {
 		if (catalog == null) {
 			throw new IllegalArgumentException("Trying to decide if an expression is a random variable value without a random predicate catalog available in process");
 		}
-		RandomPredicate randomPredicate = new RandomPredicate(expression);
+		FunctionSignature randomPredicate = new FunctionSignature(expression);
 		boolean result = catalog.contains(randomPredicate);
 		return result;
 	}

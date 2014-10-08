@@ -603,7 +603,7 @@ public class ModelGroundingTest extends AbstractLPITest {
 		RewritingProcess process = newRewritingProcess(Expressions.ZERO);
 		process.getGlobalObjects().putAll(globalObjects);
 		
-		Model.setRewritingProcessesModel(modelDefinition, modelDeclaration.getKnownRandomVariableNameAndArities(), process);
+		process = Model.setRewritingProcessesModel(modelDefinition, modelDeclaration.getKnownRandomVariableNameAndArities(), process);
 		
 		GroundedModelResult groundedModelResult = ModelGrounding.groundModel(process);
 		

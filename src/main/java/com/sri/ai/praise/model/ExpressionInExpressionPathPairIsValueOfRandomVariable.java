@@ -44,6 +44,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.util.base.Pair;
 
 /**
@@ -66,7 +67,7 @@ public class ExpressionInExpressionPathPairIsValueOfRandomVariable implements Pr
 			return false;
 		}
 		RandomPredicateCatalog catalog = RandomPredicateCatalog.getFromBracketedModel(process);
-		RandomPredicate randomPredicate = new RandomPredicate(expression);
+		FunctionSignature randomPredicate = new FunctionSignature(expression);
 		boolean isInCatalog = catalog.contains(randomPredicate);
 		return isInCatalog;
 	}

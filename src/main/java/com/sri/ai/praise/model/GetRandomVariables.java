@@ -45,6 +45,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.collect.FunctionIterator;
 import com.sri.ai.util.collect.PredicateIterator;
@@ -68,14 +69,14 @@ public class GetRandomVariables {
 	/**
 	 * Obtains an iterator ranging over the random variable value expressions involved in a given expression.
 	 */
-	public static Iterator<RandomPredicate> determineRandomPredicates(
+	public static Iterator<FunctionSignature> determineRandomPredicates(
 			Expression expression,
 			RewritingProcess process) {
 		
 		Iterator<Expression> randomVariableValueExpressionIterator = getRandomVariableValueExpressionsIterator(
 				expression, process);
-		Iterator<RandomPredicate> result =
-			new FunctionIterator<Expression, RandomPredicate>(randomVariableValueExpressionIterator, RandomPredicate.MAKER_FROM_EXPRESSION);
+		Iterator<FunctionSignature> result =
+			new FunctionIterator<Expression, FunctionSignature>(randomVariableValueExpressionIterator, FunctionSignature.MAKER_FROM_EXPRESSION);
 		return result;
 	}
 

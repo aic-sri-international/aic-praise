@@ -171,6 +171,11 @@ public abstract class AbstractLPITest {
 			this.model                      = model;
 		}
 		
+		protected Expression parse(String expressionString) {
+			AntlrGrinderParserWrapper parser = model == null? new AntlrGrinderParserWrapper() : new AntlrGrinderParserWrapper(model.getRandomPredicatesSignatures());
+			return parser.parse(expressionString);
+		}
+
 		/** Performs i-th test of a batch, indicating an error message in case of failure, or null. */
 		public String perform(int i) {
 			Expression topExpression;
@@ -183,8 +188,8 @@ public abstract class AbstractLPITest {
 			
 			process = newRewritingProcess(null);
 			
-			if (null != model) {
-				model.setRewritingProcessesModel(process);
+			if (model != null) {
+				process = model.setRewritingProcessesModel(process);
 				process = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(Model.getParfactors(process)), process);
 				// parfactors don't typically have free variables, but they might.
 			}
