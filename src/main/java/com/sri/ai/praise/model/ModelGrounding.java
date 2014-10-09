@@ -58,7 +58,6 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.PRAiSEConfiguration;
-import com.sri.ai.praise.Type;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductEnumeration;

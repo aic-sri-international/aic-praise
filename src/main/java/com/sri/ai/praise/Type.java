@@ -45,8 +45,6 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.core.HasKind;
 import com.sri.ai.grinder.core.KindAttribute;
-import com.sri.ai.grinder.library.SyntacticFunctionsSubExpressionsProvider;
-import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 

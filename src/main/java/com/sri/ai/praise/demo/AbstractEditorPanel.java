@@ -47,7 +47,6 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextArea;
 
 import com.google.common.annotations.Beta;

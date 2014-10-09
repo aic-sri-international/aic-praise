@@ -56,7 +56,6 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
-import com.sri.ai.grinder.library.ScopedVariables;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
