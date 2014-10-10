@@ -41,43 +41,87 @@ import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.demo.model.ChurchEg1;
+import com.sri.ai.praise.demo.model.ChurchEg2;
+import com.sri.ai.praise.demo.model.ChurchEg3;
 import com.sri.ai.praise.demo.model.Example;
+import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.imports.church.TranslateChurchToModel;
+import com.sri.ai.util.base.Triple;
+
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JLabel;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 @Beta
 public class ChurchPanel extends AbstractEditorPanel {
 	private static final long serialVersionUID = 1L;	
 	//
-	ChurchEditor churchEditor;
-	RuleEditor   hogmEditor;
+	private ChurchEditor churchEditor;
+	private RuleEditor   hogmEditor;
+	private File         currentChurchFile;
+	// 
+	private TranslateChurchToModel translator = new TranslateChurchToModel();
 
 	public ChurchPanel() {
 		initialize();
 	}
 	
 	@Override
+	public List<Example> getExamples() {
+		return Arrays.asList((Example)
+				new ChurchEg1(),
+				new ChurchEg2(),
+				new ChurchEg3()
+				);
+	}
+	
+	@Override
 	public void setExample(Example example) {
-// TODO		
+		try {
+			setContents(example.getModel(), null);
+		}
+		catch (IOException ioe) {
+			// Should not occur but output to screen just in case.
+			ioe.printStackTrace();
+		}
 	}
 	
 	@Override
 	public String getContextTitle() {
-		return null; // TODO
+		String title = "Church Program[";
+		if (currentChurchFile == null) {
+			title += "*";
+		}
+		else {
+			title += currentChurchFile.getAbsolutePath(); 
+		}
+		title += "]";
+		
+		return title;
 	}
 	
 	@Override
-	public String getContents() {
-		return null; // TODO
+	public String getModel() {
+		// Ensure we give back the latest model that can be generated.
+		generateModel();
+		return hogmEditor.getText();
 	}
 		
 	@Override
-	public void setContents(String contents, File fromFile) throws IOException {
-// TODO		
+	public void setContents(String contents, File fromFile) throws IOException {		
+		churchEditor.setText(contents);
+		churchEditor.discardAllEdits();
+		currentChurchFile = fromFile;
+		
+		generateModel();		
 	}
 	
 	@Override
@@ -171,5 +215,17 @@ public class ChurchPanel extends AbstractEditorPanel {
 		hogmPanel.add(hogmEditor, BorderLayout.CENTER);
 		
 		splitPane.setRightComponent(hogmPanel);
+	}
+	
+	private void generateModel() {
+		try {
+			Triple<String, Model, List<Expression>> translation = translator.translate("Church Program", ""
+				+ churchEditor.getText()
+				);
+			hogmEditor.setText(translation.first);
+// TODO - want to assign the queries as well.
+		} catch (Throwable t) {
+			hogmEditor.setText("/* ERROR in Translation:\n"+ExceptionUtils.getStackTrace(t)+"\n*/");
+		}
 	}
 }

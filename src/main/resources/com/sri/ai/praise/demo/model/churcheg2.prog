@@ -1,0 +1,7 @@
+#|
+     Church Example 2
+|#
+; Program
+(define sunny (flip 0.3))
+; Queries
+(sunny)

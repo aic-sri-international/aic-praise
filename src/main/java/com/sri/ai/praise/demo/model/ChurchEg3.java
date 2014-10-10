@@ -35,37 +35,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.demo.action;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
+package com.sri.ai.praise.demo.model;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.demo.Controller;
 
-/**
- * 
- * @author oreilly
- *
- */
 @Beta
-public class ImportAction extends AbstractAction {
-	private static final long serialVersionUID = 1L;
-
-	private Controller controller = null;
-	
-	public ImportAction(Controller controller) {
-		this.controller = controller;
-		putValue(Action.NAME, "Import...");
-		putValue(Action.SHORT_DESCRIPTION, "Import...");
-		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_I);
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent ae) {
-		controller.importAction();
+public class ChurchEg3 extends Example {
+	public ChurchEg3() {
+		super("Church Example 3 Program");
+		setModel(getExampleFromResource("churcheg3.prog"));
+		setEvidence(getExampleFromResource("empty.es"));
+		setQueryToRun("goOut(friday)");
 	}
 }

@@ -77,9 +77,10 @@ public abstract class AbstractEditorPanel extends JPanel {
 		this.fileChooserParent = fileChooserParent;
 	}
 		
+	public abstract List<Example> getExamples();
 	public abstract void setExample(Example example);
 	public abstract String getContextTitle();
-	public abstract String getContents();
+	public abstract String getModel();
 	public abstract void setContents(String contents, File fromFile) throws IOException;
 	public abstract boolean isASaveRequired();
 	public abstract void saveIfRequired() throws IOException;

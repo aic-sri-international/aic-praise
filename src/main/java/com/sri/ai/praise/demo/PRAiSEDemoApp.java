@@ -57,10 +57,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.GrinderConfiguration;
-import com.sri.ai.praise.demo.model.EarthquakeBurglaryAlarm;
-import com.sri.ai.praise.demo.model.EpidemicAndSickDemo;
-import com.sri.ai.praise.demo.model.Example7;
-import com.sri.ai.praise.demo.model.RelationalEarthquakeBurglaryAlarm;
+import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.util.Configuration;
 
 /**
@@ -91,7 +88,6 @@ public class PRAiSEDemoApp {
 	private JMenuItem mntmSave;
 	private JMenuItem mntmSaveAs;
 	private JMenuItem mntmSaveAll;
-	private JMenuItem mntmImport;
 	private JMenuItem mntmExport;
 	private JMenuItem mntmExit;
 	private JMenuItem mntmUndo;
@@ -249,9 +245,6 @@ public class PRAiSEDemoApp {
 		
 		mnFile.addSeparator();
 		
-		mntmImport = new JMenuItem("Import...");
-		mnFile.add(mntmImport);
-		
 		mntmExport = new JMenuItem("Export...");
 		mnFile.add(mntmExport);
 		
@@ -342,8 +335,6 @@ public class PRAiSEDemoApp {
 		// Save All
 		mntmSaveAll.setAction(controller.getSaveAllAction());
 		toolBar.btnSaveAll.setAction(controller.getSaveAllAction());
-		// Import...
-		mntmImport.setAction(controller.getImportAction());
 		// Export...
 		mntmExport.setAction(controller.getExportAction());
 		// Exit
@@ -394,16 +385,10 @@ public class PRAiSEDemoApp {
 		
 		//
 		// Setup the examples
-//		toolBar.exampleComboBox.addItem(new Example1());
-//		toolBar.exampleComboBox.addItem(new Example2());
-		toolBar.exampleComboBox.addItem(new EarthquakeBurglaryAlarm());
-		toolBar.exampleComboBox.addItem(new RelationalEarthquakeBurglaryAlarm());
-		toolBar.exampleComboBox.addItem(new EpidemicAndSickDemo());
-//		toolBar.exampleComboBox.addItem(new Example3());
-//		toolBar.exampleComboBox.addItem(new Example4());
-//		toolBar.exampleComboBox.addItem(new Example5());
-//		toolBar.exampleComboBox.addItem(new Example6());
-		toolBar.exampleComboBox.addItem(new Example7());
+		toolBar.exampleComboBox.removeAllItems();
+		for (Example e : activeEditorPanel.getExamples()) {
+			toolBar.exampleComboBox.addItem(e);
+		}
 		toolBar.exampleComboBox.addActionListener(e -> {
 			int selectedIndex = toolBar.exampleComboBox.getSelectedIndex();
 			if (selectedIndex >= 0) {

@@ -70,7 +70,6 @@ import com.sri.ai.praise.demo.action.ExecuteQueryAction;
 import com.sri.ai.praise.demo.action.ExitAction;
 import com.sri.ai.praise.demo.action.ExportAction;
 import com.sri.ai.praise.demo.action.HideToolBarAction;
-import com.sri.ai.praise.demo.action.ImportAction;
 import com.sri.ai.praise.demo.action.NewAction;
 import com.sri.ai.praise.demo.action.NewWindowAction;
 import com.sri.ai.praise.demo.action.OpenFileAction;
@@ -111,7 +110,6 @@ public class Controller {
 	private SaveAction saveAction = null;
 	private SaveAsAction saveAsAction = null;
 	private SaveAllAction saveAllAction = null;
-	private ImportAction importAction = null;
 	private ExportAction exportAction = null;
 	private ExitAction exitAction = null;
 	private ValidateAction validateAction = null;
@@ -243,11 +241,6 @@ public class Controller {
 		}
 	}
 	
-	public void importAction() {
-// TODO
-information("TODO implementation");
-	}
-	
 	public void export() {
 // TODO		
 information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-praise/wiki/ExportingModels for more information.");
@@ -312,7 +305,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							
 							Triple<Model, Expression, Model> translateQueryResult = ruleConverter
 									.query(currentQuery,
-											app.activeEditorPanel.getContents(),
+											app.activeEditorPanel.getModel(),
 											"'Name'", "'Description'", process);
 			
 							Expression queryAtom = translateQueryResult.second;
@@ -488,13 +481,6 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 			saveAllAction = new SaveAllAction(this);
 		}
 		return saveAllAction;
-	}
-
-	public Action getImportAction() {
-		if (null == importAction) {
-			importAction = new ImportAction(this);
-		}
-		return importAction;
 	}
 	
 	public Action getExportAction() {

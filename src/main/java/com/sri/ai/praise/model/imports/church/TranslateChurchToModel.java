@@ -39,6 +39,7 @@ package com.sri.ai.praise.model.imports.church;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -127,16 +128,27 @@ public class TranslateChurchToModel {
 								ExtensionalSet.getElements(Tuple.get(hogmAndModelAndQueriesTuple, 2)));
 				}
 			}
+			else {
+				if (lexerErrorListener.errorsDetected) {
+					throw new RuntimeException(lexerErrorListener.name+":\n"+lexerErrorListener.errorMsgs.toString());
+				}
+				if (parseErrorListener.errorsDetected) {
+					throw new RuntimeException(parseErrorListener.name+":\n"+parseErrorListener.errorMsgs.toString());
+				}
+			}
 		} catch (RecognitionException re) {
 			re.printStackTrace();
+			throw re;
 		} catch (ModelException me) {
 			System.err.println("Model Errors");
 			for (ModelError error: me.getErrors()) {
 				System.err.println(error);				
 			}
 			me.printStackTrace();
+			throw me;
 		} catch (RuntimeException re) {
 			re.printStackTrace();
+			throw re;
 		}
 				
 		return result;
@@ -148,6 +160,7 @@ public class TranslateChurchToModel {
 	private class ErrorListener extends BaseErrorListener {
 		public boolean errorsDetected = false;
 		private String name;
+		private StringJoiner errorMsgs = new StringJoiner("\n");
 
 		public ErrorListener(String name) {
 			this.name = name;
@@ -157,8 +170,9 @@ public class TranslateChurchToModel {
 		public void syntaxError(Recognizer<?, ?> recognizer,
 				Object offendingSymbol, int line, int charPositionInLine,
 				String msg, RecognitionException e) {
-			System.err.println(name + ": line " + line + ":"
-					+ charPositionInLine + " " + msg);
+			String error = name + ": line " + line + ":" + charPositionInLine + " " + msg;
+			errorMsgs.add(error);
+			System.err.println(error);
 			errorsDetected = true;
 		}
 	}

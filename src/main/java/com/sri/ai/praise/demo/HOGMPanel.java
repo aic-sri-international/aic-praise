@@ -48,6 +48,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -64,7 +65,11 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.demo.model.EarthquakeBurglaryAlarm;
+import com.sri.ai.praise.demo.model.EpidemicAndSickDemo;
 import com.sri.ai.praise.demo.model.Example;
+import com.sri.ai.praise.demo.model.Example7;
+import com.sri.ai.praise.demo.model.RelationalEarthquakeBurglaryAlarm;
 import com.sri.ai.praise.rules.antlr.RuleLexer;
 import com.sri.ai.praise.rules.antlr.RuleParser;
 
@@ -89,6 +94,15 @@ public class HOGMPanel extends AbstractEditorPanel {
 		initialize();
 		
 		postGUIInitialization();
+	}
+	
+	@Override
+	public List<Example> getExamples() {
+		return Arrays.asList((Example) 
+				new EarthquakeBurglaryAlarm(), 
+				new RelationalEarthquakeBurglaryAlarm(), 
+				new EpidemicAndSickDemo(),
+				new Example7());
 	}
 	
 	@Override
@@ -123,7 +137,7 @@ public class HOGMPanel extends AbstractEditorPanel {
 	}
 	
 	@Override
-	public String getContents() {
+	public String getModel() {
 		return modelEditPanel.getText() + "\n" + evidenceEditPanel.getText();
 	}
 	

@@ -29,4 +29,35 @@ public class ChurchEditor extends JPanel {
 		editorScrollPane.setFoldIndicatorEnabled(false);
 		add(editorScrollPane, BorderLayout.CENTER);
 	}
+	
+	public String getText() {
+		String result = textArea.getText();
+		
+		return result;
+	}
+	
+	public void setText(String text) {
+		textArea.setText(text);
+		textArea.setCaretPosition(0);
+	}
+	
+	public boolean canUndo() {
+		return textArea.canUndo();
+	}
+	
+	public void undo() {
+		textArea.undoLastAction();
+	}
+	
+	public boolean canRedo() {
+		return textArea.canRedo();
+	}
+	
+	public void redo() {
+		textArea.redoLastAction();
+	}
+	
+	public void discardAllEdits() {
+		textArea.discardAllEdits();
+	}
 }

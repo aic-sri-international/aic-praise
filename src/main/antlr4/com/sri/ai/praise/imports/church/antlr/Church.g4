@@ -274,7 +274,10 @@ FALSE : '#' ('f' | 'F');
 
 // to ignore
 SPACE   : (' ' | '\t' | '\r' | '\n') -> channel(HIDDEN);
-COMMENT : ';' ~('\r' | '\n')* -> channel(HIDDEN);
+COMMENT
+    :   '#|' .*? '|#'    -> channel(HIDDEN) // match anything between #| and |#
+    ;
+LINE_COMMENT : ';' ~('\r' | '\n')* -> channel(HIDDEN);
 
 // fragments  
 fragment INITIAL : LETTER | SPECIAL_INITIAL;
