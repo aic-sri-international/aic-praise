@@ -40,8 +40,6 @@ package com.sri.ai.praise.demo;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -99,6 +97,7 @@ public class Controller {
 
 	private final static int DEFAULT_DOMAIN_SIZE = 1000;
 	
+	//
 	private LBPQueryEngine queryEngine              = LBPFactory.newLBPQueryEngine();
 	private String         activeQueryUUID          = null;
 	private boolean        intentionallyInterrupted = false;
@@ -117,14 +116,9 @@ public class Controller {
 	private ClearOutputAction clearOutputAction = null;
 	private NewWindowAction newWindowAction = null;
 	private HideToolBarAction hideToolBarAction = null;
-	//
-	private JFileChooser fileChooser = new JFileChooser();
 
 	public Controller(PRAiSEDemoApp app) {
 		this.app = app;
-		
-		this.app.activeEditorPanel.setFileChooser(fileChooser, app.toolBar.btnSave);
-		this.app.activeEditorPanel.addActiveEditorListener(() -> handleUndoRedo());
 		
 		app.optionsPanel.chckbxJustificationEnabled.addActionListener(new ActionListener() {
 			@Override
@@ -141,16 +135,6 @@ public class Controller {
 		});
 		
 		manageTraceAndJustificationListening();
-		
-		PropertyChangeListener pl = new PropertyChangeListener() {
-			
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				handleUndoRedo();				
-			}
-		};
-		
-		app.activeEditorPanel.getUndoAction().addPropertyChangeListener(pl);
 		
 		updateAppTitle();
 	}
@@ -184,9 +168,9 @@ public class Controller {
 	}
 	
 	public void openFile() {
-		int returnVal = fileChooser.showOpenDialog(app.toolBar.btnOpen);
+		int returnVal = app.fileChooser.showOpenDialog(app.toolBar.btnOpen);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File toOpen = fileChooser.getSelectedFile();
+			File toOpen = app.fileChooser.getSelectedFile();
 			if (toOpen.exists()) {
 				
 				try {
@@ -429,7 +413,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				PRAiSEDemoApp newWindow = new PRAiSEDemoApp();
+				PRAiSEDemoApp newWindow = new PRAiSEDemoApp(app.getCurrentPerspective());
 				int x = app.frame.getBounds().x + 15;
 				int y = app.frame.getBounds().y + 15;
 				newWindow.frame.setBounds(x, y, app.frame.getBounds().width, app.frame.getBounds().height);
@@ -533,6 +517,27 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	//
+	// PACKAGE PROTECTED
+	//
+	void handleUndoRedo() {
+		if (app.activeEditorPanel.canUndo()) {
+			getSaveAction().setEnabled(true);
+			getSaveAsAction().setEnabled(true);
+		}
+		else {
+			getSaveAction().setEnabled(false);
+			getSaveAsAction().setEnabled(false);
+		}
+		
+		if (app.activeEditorPanel.isASaveRequired()) {
+			getSaveAllAction().setEnabled(true);
+		}
+		else {
+			getSaveAllAction().setEnabled(false);
+		}
+	}
+	
+	//
 	// PRIVATE
 	//
 	private void updateAppTitle() {
@@ -549,24 +554,6 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		}
 		catch (IOException ioe) {
 			error("ERROR " + ioe.getMessage());
-		}
-	}
-	
-	private void handleUndoRedo() {
-		if (app.activeEditorPanel.canUndo()) {
-			getSaveAction().setEnabled(true);
-			getSaveAsAction().setEnabled(true);
-		}
-		else {
-			getSaveAction().setEnabled(false);
-			getSaveAsAction().setEnabled(false);
-		}
-		
-		if (app.activeEditorPanel.isASaveRequired()) {
-			getSaveAllAction().setEnabled(true);
-		}
-		else {
-			getSaveAllAction().setEnabled(false);
 		}
 	}
 	

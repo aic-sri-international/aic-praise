@@ -39,6 +39,7 @@ package com.sri.ai.praise.demo;
 
 import java.awt.BorderLayout;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,9 +55,11 @@ import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.imports.church.TranslateChurchToModel;
 import com.sri.ai.util.base.Triple;
 
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JLabel;
+import javax.swing.undo.CannotRedoException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -126,53 +129,81 @@ public class ChurchPanel extends AbstractEditorPanel {
 	
 	@Override
 	public boolean isASaveRequired() {
-		return false; // TODO
+		return churchEditor.canUndo();
 	}
 	
 	@Override
 	public void saveIfRequired() throws IOException {
-// TODO		
+		if (churchEditor.canUndo()) {
+			if (currentChurchFile == null) {
+				saveAs();
+			}
+			else {
+				saveToFile();
+			}
+		}
 	}
 
 	@Override
 	public void saveAll() throws IOException {
-// TODO		
+		saveIfRequired();
 	}
 	
 	@Override
 	public void saveAs() throws IOException {
-// TODO		
+		if (churchEditor.canUndo()) {
+			if (currentChurchFile != null) {
+				fileChooser.setSelectedFile(currentChurchFile);
+			}
+			int returnVal = fileChooser.showSaveDialog(fileChooserParent);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				currentChurchFile = fileChooser.getSelectedFile();
+				saveToFile();
+			}
+		}
 	}
 	
 	@Override
 	public boolean canUndo() {
-		return false; // TODO	
+		return churchEditor.canUndo();	
 	}
 	
 	@Override
 	public void undo() {
-// TODO		
+		if (churchEditor.canUndo()) {
+			try {
+				churchEditor.undo();						
+			} catch (CannotRedoException cue) {
+				// ignore
+			}
+		}	
 	}
 	
 	@Override
 	public void redo() {
-// TODO		
+		if (churchEditor.canRedo()) {
+			try {
+				churchEditor.redo();
+			} catch (CannotRedoException cue) {
+				// ignore
+			}
+		}	
 	}
 	
 	@Override
 	public void discardAllEdits() {
-// TODO		
+		churchEditor.discardAllEdits();
 	}
 	
 	@Override
 	public void copyState(AbstractEditorPanel otherEditorPanel) {
-// TODO		
+		churchEditor.setText(((ChurchPanel)otherEditorPanel).churchEditor.getText());
 	}
 	
 	@Override
 	public List<String> validateContents() {
-		List<String> problems = new ArrayList<>();
-// TODO		
+		List<String> problems = generateModel();
+		
 		return problems;
 	}
 	
@@ -217,7 +248,8 @@ public class ChurchPanel extends AbstractEditorPanel {
 		splitPane.setRightComponent(hogmPanel);
 	}
 	
-	private void generateModel() {
+	private List<String> generateModel() {
+		List<String> problems = new ArrayList<>();
 		try {
 			Triple<String, Model, List<Expression>> translation = translator.translate("Church Program", ""
 				+ churchEditor.getText()
@@ -225,7 +257,22 @@ public class ChurchPanel extends AbstractEditorPanel {
 			hogmEditor.setText(translation.first);
 // TODO - want to assign the queries as well.
 		} catch (Throwable t) {
-			hogmEditor.setText("/* ERROR in Translation:\n"+ExceptionUtils.getStackTrace(t)+"\n*/");
+			String problem = "/* ERROR in Translation:\n"+ExceptionUtils.getStackTrace(t)+"\n*/";
+			problems.add(problem);
+			hogmEditor.setText(problem);
 		}
+		return problems;
+	}
+	
+	private void saveToFile() throws IOException {	
+		if (!currentChurchFile.exists()) {
+			currentChurchFile.createNewFile();
+		}
+		
+		FileWriter fileWriter = new FileWriter(currentChurchFile);
+		fileWriter.write(churchEditor.getText());
+		fileWriter.close();
+		
+		churchEditor.discardAllEdits();
 	}
 }

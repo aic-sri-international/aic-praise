@@ -42,12 +42,18 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
 
+import javax.swing.ButtonGroup;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -67,6 +73,9 @@ import com.sri.ai.util.Configuration;
  */
 @Beta
 public class PRAiSEDemoApp {
+	public enum Perspective {
+		HOGM, CHURCH
+	}
 	public static final int DISPLAY_PRECISION          = 2;
 	public static final int DISPLAY_SCIENTIFIC_GREATER = 6;
 	public static final int DISPLAY_SCIENTIFIC_AFTER   = 4; 
@@ -81,6 +90,8 @@ public class PRAiSEDemoApp {
 	QueryPanel queryPanel;
 	OutputPanel outputPanel;
 	//
+	//
+	JFileChooser fileChooser = new JFileChooser();
 	Controller controller = null;
 	//
 	private JMenuItem mntmNew;
@@ -95,6 +106,9 @@ public class PRAiSEDemoApp {
 	private JMenuItem mntmValidate;
 	private JMenuItem mntmExecuteQuery;
 	private JMenuItem mntmClearOutput;
+	private JMenu mnPerspective;
+	private JRadioButtonMenuItem hogmPerspective;
+	private JRadioButtonMenuItem churchPerspective;
 	private JMenuItem mntmNewWindow;
 	private JMenuItem mntmHideToolBar;
 	private JSplitPane inputSplitPane;
@@ -103,6 +117,9 @@ public class PRAiSEDemoApp {
 	private JMenuItem mntmPaste;
 	private JMenuItem mntmDelete;
 	private JMenuItem mntmSelectAll;
+	//
+	private ButtonGroup perspective        = new ButtonGroup();
+	private Perspective currentPerspective = null;
 
 	/**
 	 * Launch the application.
@@ -143,7 +160,7 @@ public class PRAiSEDemoApp {
 				}
 				
 				try {
-					PRAiSEDemoApp window = new PRAiSEDemoApp();
+					PRAiSEDemoApp window = new PRAiSEDemoApp(Perspective.HOGM);
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -155,13 +172,67 @@ public class PRAiSEDemoApp {
 	/**
 	 * Create the application.
 	 */
-	public PRAiSEDemoApp() {
-		this(new HOGMPanel()); // i.e. the default editor.
+	public PRAiSEDemoApp(Perspective perspective) {
+		initialize();
+		setPerspective(perspective);
 	}
 	
-	public PRAiSEDemoApp(AbstractEditorPanel activeEditorPanel) {
-		initialize();
-		postGUIInitialization(activeEditorPanel);
+	public Perspective getCurrentPerspective() {
+		return currentPerspective;
+	}
+	
+	private void setPerspective(PRAiSEDemoApp.Perspective perspective) {
+		if (this.activeEditorPanel != null) {
+			try {
+				this.activeEditorPanel.saveAll();
+			}
+			catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+			this.editorPlacementPanel.remove(this.activeEditorPanel);
+		}
+		currentPerspective = perspective;
+		switch (perspective) {
+		case HOGM:
+			this.activeEditorPanel = new HOGMPanel();
+			hogmPerspective.setSelected(true);
+			break;
+		case CHURCH:
+			this.activeEditorPanel = new ChurchPanel();
+			churchPerspective.setSelected(true);
+			break;
+		default:
+			throw new IllegalArgumentException("Perspective no supported:"+perspective);
+		}
+		this.activeEditorPanel.setFileChooser(fileChooser, toolBar.btnSave);
+		// If no controller yet, we need to do post gui initialization first.
+		if (this.controller == null) {
+			postGUIInitialization();
+		}
+		this.activeEditorPanel.addActiveEditorListener(() -> controller.handleUndoRedo());
+		PropertyChangeListener pl = new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				controller.handleUndoRedo();				
+			}
+		};		
+		activeEditorPanel.getUndoAction().addPropertyChangeListener(pl);
+		this.editorPlacementPanel.add(this.activeEditorPanel, BorderLayout.CENTER);
+
+		//
+		// Setup the examples corresponding to the perspective
+		toolBar.exampleComboBox.removeAllItems();
+		for (Example e : activeEditorPanel.getExamples()) {
+			toolBar.exampleComboBox.addItem(e);
+		}
+		toolBar.exampleComboBox.addActionListener(e -> {
+			int selectedIndex = toolBar.exampleComboBox.getSelectedIndex();
+			if (selectedIndex >= 0) {
+				controller.setExample(toolBar.exampleComboBox.getItemAt(selectedIndex));
+			}
+		});
+		toolBar.exampleComboBox.setSelectedIndex(0);
 	}
 
 	/**
@@ -299,6 +370,26 @@ public class PRAiSEDemoApp {
 		mnWindow.setMnemonic('W');
 		menuBar.add(mnWindow);
 		
+		mnPerspective = new JMenu("Open Perspective");
+		mnPerspective.setMnemonic('O');
+		hogmPerspective = new JRadioButtonMenuItem("HOGM");
+		hogmPerspective.addActionListener(a -> {
+			if (currentPerspective != Perspective.HOGM) {
+				setPerspective(Perspective.HOGM);
+			}
+		});
+		mnPerspective.add(hogmPerspective);
+		churchPerspective = new JRadioButtonMenuItem("Church");
+		churchPerspective.addActionListener(a -> {
+			if (currentPerspective != Perspective.CHURCH) {
+				setPerspective(Perspective.CHURCH);
+			}
+		});
+		mnPerspective.add(churchPerspective);
+		perspective.add(hogmPerspective);
+		perspective.add(churchPerspective);	
+		mnWindow.add(mnPerspective);
+		
 		mntmNewWindow = new JMenuItem("New Window");
 		mnWindow.add(mntmNewWindow);
 		
@@ -307,10 +398,7 @@ public class PRAiSEDemoApp {
 	}
 	
 	
-	private void postGUIInitialization(AbstractEditorPanel activeEditorPanel) {
-		this.activeEditorPanel = activeEditorPanel;
-		this.editorPlacementPanel.add(this.activeEditorPanel, BorderLayout.CENTER);
-		
+	private void postGUIInitialization() {		
 		// Wire up the Controller
 		controller = new Controller(this);
 		
@@ -381,21 +469,5 @@ public class PRAiSEDemoApp {
 		toolBar.btnNewWindow.setAction(controller.getNewWindowAction());
 		// Hide/Show Tool Bar
 		mntmHideToolBar.setAction(controller.getHideToolBarAction());
-		
-		
-		//
-		// Setup the examples
-		toolBar.exampleComboBox.removeAllItems();
-		for (Example e : activeEditorPanel.getExamples()) {
-			toolBar.exampleComboBox.addItem(e);
-		}
-		toolBar.exampleComboBox.addActionListener(e -> {
-			int selectedIndex = toolBar.exampleComboBox.getSelectedIndex();
-			if (selectedIndex >= 0) {
-				controller.setExample(toolBar.exampleComboBox.getItemAt(selectedIndex));
-			}
-		});
-		toolBar.exampleComboBox.setSelectedIndex(0);
 	}
-
 }
