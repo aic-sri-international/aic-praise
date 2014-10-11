@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.model;
 
+import static com.sri.ai.util.Util.mapIntoList;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,6 +53,7 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultBracketedExpression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.FunctionSignature;
@@ -263,10 +266,16 @@ public class Model {
 		this.modelDeclaration = modelDefinition.toString();
 		if (knownRandomVariableNameAndArities != null) {
 			this.knownRandomVariableNameAndArities.addAll(knownRandomVariableNameAndArities);
+			this.knownRandomPredicatesSignatures = mapIntoList(this.knownRandomVariableNameAndArities, FunctionSignature::new);
 		}
 		this.modelDefinition = modelDefinition;
 
+		Collection<FunctionSignature> oldDefaultPredicatesSignatures = DefaultBracketedExpression.defaultPredicateSignatures;
+		DefaultBracketedExpression.defaultPredicateSignatures = this.knownRandomPredicatesSignatures;
+		
 		collectAndValidateModelParts();
+		
+		DefaultBracketedExpression.defaultPredicateSignatures = oldDefaultPredicatesSignatures;
 	}
 	
 	/**

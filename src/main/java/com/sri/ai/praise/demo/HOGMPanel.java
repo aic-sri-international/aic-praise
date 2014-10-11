@@ -98,8 +98,7 @@ public class HOGMPanel extends AbstractEditorPanel {
 	
 	@Override
 	public List<Example> getExamples() {
-		return Arrays.asList((Example) 
-				new EarthquakeBurglaryAlarm(), 
+		return Arrays.asList(new EarthquakeBurglaryAlarm(), 
 				new RelationalEarthquakeBurglaryAlarm(), 
 				new EpidemicAndSickDemo(),
 				new Example7());

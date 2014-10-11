@@ -37,13 +37,17 @@
  */
 package com.sri.ai.test.praise.model;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultBracketedExpression;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.Model.ModelError;
@@ -784,14 +788,21 @@ public class ModelTest extends AbstractLPITest {
 	
 	@Test
 	public void testLegalTrivialModelDefinition() {
+		Set<String> namesAndAritiesStrings = Util.set("epidemic/0", "sick/1");
+
+		Collection<FunctionSignature> oldDefaultPredicatesSignatures = DefaultBracketedExpression.defaultPredicateSignatures;
+		DefaultBracketedExpression.defaultPredicateSignatures = Util.mapIntoList(namesAndAritiesStrings, FunctionSignature::new);
+
 		Model model = new Model(parse("{{(on X in People) [if epidemic then if sick(X) then 0.4 else 0.6 else if sick(X) then 0.01 else 0.99]}}"),
-								Util.set("epidemic", "sick"));
+								namesAndAritiesStrings);
 		Assert.assertEquals(1, model.getSortDeclarations().size());
 		Assert.assertEquals(0, model.getRandomVariableDeclarations().size());
 		Assert.assertEquals(2, model.getKnownRandomVariableNameAndArities().size());
 		Assert.assertEquals(1, model.getParfactorsDeclaration().getParfactors().size());
-	}
-	
+
+		DefaultBracketedExpression.defaultPredicateSignatures = oldDefaultPredicatesSignatures;
+}
+
 	@Test
 	public void testLegalModelDefinition() {
 		Model model = new Model(parse("model(" +

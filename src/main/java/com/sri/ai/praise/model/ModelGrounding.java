@@ -558,8 +558,8 @@ public class ModelGrounding {
 			
 			for (SortInformation sortInformation : sortMap.values()) {
 				preGroundModelParts.add(sortInformation.getGroundDeclaration().getSortDeclaration());
-				knownRandomVariableNameAndArities.add(sortInformation.name.toString());
 			}
+
 			for (RandomVariableInformation randomVariableInformation : randomVariableMap.values()) {
 				preGroundModelParts.add(randomVariableInformation.getGroundDeclaration().getRandomVariableDeclaration());
 			}

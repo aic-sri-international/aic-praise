@@ -44,7 +44,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.helper.FunctionSignature;
+import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.util.base.Pair;
 
 /**
@@ -66,9 +66,15 @@ public class ExpressionInExpressionPathPairIsValueOfRandomVariable implements Pr
 		if ( ! Expressions.isSymbolOrFunctionApplication(expression)) {
 			return false;
 		}
-		RandomPredicateCatalog catalog = RandomPredicateCatalog.getFromBracketedModel(process);
-		FunctionSignature randomPredicate = new FunctionSignature(expression);
-		boolean isInCatalog = catalog.contains(randomPredicate);
-		return isInCatalog;
+		
+		
+		if (FormulaUtil.functorIsAnEqualityLogicalConnectiveIncludingConditionals(expression)) {
+			return false;
+		}
+		return true;
+//		RandomPredicateCatalog catalog = RandomPredicateCatalog.getFromBracketedModel(process);
+//		FunctionSignature randomPredicate = new FunctionSignature(expression);
+//		boolean isInCatalog = catalog.contains(randomPredicate);
+//		return isInCatalog;
 	}
 }

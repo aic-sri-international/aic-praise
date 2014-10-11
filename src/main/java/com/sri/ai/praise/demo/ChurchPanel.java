@@ -79,8 +79,7 @@ public class ChurchPanel extends AbstractEditorPanel {
 	
 	@Override
 	public List<Example> getExamples() {
-		return Arrays.asList((Example)
-				new ChurchEg1(),
+		return Arrays.asList(new ChurchEg1(),
 				new ChurchEg2(),
 				new ChurchEg3()
 				);
