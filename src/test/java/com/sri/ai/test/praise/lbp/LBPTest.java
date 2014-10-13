@@ -37,7 +37,8 @@
  */
 package com.sri.ai.test.praise.lbp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -60,7 +61,6 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElseExternalizationHierarchical;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
 import com.sri.ai.praise.LPIUtil;

@@ -51,7 +51,6 @@ import com.sri.ai.grinder.library.StandardizedApartFrom;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.set.Sets;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 
 /**
  * Rewriter solving unions of intensional unisets with unifiable heads.

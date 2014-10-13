@@ -44,7 +44,6 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.sri.ai.expresso.api.Expression;
@@ -54,14 +53,11 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.NoOpRewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.library.ScopedVariables;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.function.InjectiveModule;
 import com.sri.ai.grinder.library.function.MutuallyExclusiveCoDomainsModule;
 import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
-import com.sri.ai.util.Util;
-import com.sri.ai.util.base.Pair;
 
 /**
  * 
@@ -72,7 +68,6 @@ import com.sri.ai.util.base.Pair;
 public class BracketedExpressionSubExpressionsProvider extends AbstractRewriter
 implements
 NoOpRewriter,
-ScopedVariables.Provider,
 CheapDisequalityModule.Provider,
 InjectiveModule.Provider,
 MutuallyExclusiveCoDomainsModule.Provider {
@@ -102,16 +97,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	}
 
 	@Override
-	public Expression getScopedVariablesAsExpression(Expression syntaxTree, RewritingProcess process) {
-		if (isBracketedExpression(syntaxTree)) {
-			return Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("list", _emptyExpressionList);
-		}
-		return null;
-	}
-
-	@Override
 	public void rewritingProcessInitiated(RewritingProcess process) {
-		ScopedVariables.register(this, process);
 		CheapDisequalityModule.register(this, process);
 		InjectiveModule.register(this, process);
 		MutuallyExclusiveCoDomainsModule.register(this, process);

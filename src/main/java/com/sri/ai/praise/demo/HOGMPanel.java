@@ -37,8 +37,6 @@
  */
 package com.sri.ai.praise.demo;
 
-import javax.swing.JPanel;
-
 import java.awt.BorderLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -53,8 +51,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JFileChooser;
-import javax.swing.JSplitPane;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.undo.CannotRedoException;
 
 import org.antlr.v4.runtime.ANTLRInputStream;

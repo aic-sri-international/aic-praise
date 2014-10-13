@@ -53,7 +53,6 @@ import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;

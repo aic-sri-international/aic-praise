@@ -45,6 +45,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.undo.CannotRedoException;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.demo.model.ChurchEg1;
@@ -54,14 +62,6 @@ import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.imports.church.TranslateChurchToModel;
 import com.sri.ai.util.base.Triple;
-
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JLabel;
-import javax.swing.undo.CannotRedoException;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 @Beta
 public class ChurchPanel extends AbstractEditorPanel {

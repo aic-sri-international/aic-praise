@@ -40,7 +40,6 @@ package com.sri.ai.praise.lbp.core;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IntensionalSetInterface;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.RandomVariableFromMessageRewriterCall;

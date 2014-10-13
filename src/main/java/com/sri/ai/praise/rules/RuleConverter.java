@@ -69,7 +69,6 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderTerminalSymbols;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;

@@ -45,7 +45,6 @@ import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.Equality;
-import com.sri.ai.grinder.library.ScopedVariables;
 import com.sri.ai.grinder.library.controlflow.DisequalityToEqualityInIfThenElseCondition;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.controlflow.IfThenElseSubExpressionsAndImposedConditionsProvider;
@@ -153,10 +152,10 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				// [ p(a, X) ] = [ q(Y, b) ] -> false 
 				// (X, Y) = (1, 2, 3)        -> false 
 				new Pair<Class<?>, Rewriter>(
-						ScopedVariables.class,
+						IfThenElseSubExpressionsAndImposedConditionsProvider.class,
 						new EqualityOnMutuallyExclusiveCoDomainExpressions()),
 				new Pair<Class<?>, Rewriter>(
-						ScopedVariables.class,
+						IfThenElseSubExpressionsAndImposedConditionsProvider.class,
 						new DisequalityOnMutuallyExclusiveCoDomainExpressions()),
 				new Pair<Class<?>, Rewriter>(
 						IfThenElseSubExpressionsAndImposedConditionsProvider.class,
