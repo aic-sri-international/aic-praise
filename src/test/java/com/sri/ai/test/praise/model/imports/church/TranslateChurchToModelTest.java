@@ -91,7 +91,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"",
 				"random goOut: Values -> Boolean;",
 				"",
-				"if Day = friday then if goOut(friday) then 0.8 else 0.2 else (if goOut(Day) then 0.3 else 0.7);"
+				"if Day = friday then if goOut(friday) then 0.8 else 0.2 else if goOut(Day) then 0.3 else 0.7;"
 		);
 	}
 	
