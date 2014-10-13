@@ -50,24 +50,18 @@ import com.google.common.cache.CacheBuilder;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ExpressionAndContext;
 import com.sri.ai.expresso.api.SyntaxTree;
-import com.sri.ai.expresso.core.DefaultExpressionAndContext;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.expresso.helper.SubSyntaxTreeAndPathWhoseParentsSatisfyAGivenPredicateIterator;
 import com.sri.ai.grinder.api.NoOpRewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.core.FunctionApplicationProvider;
 import com.sri.ai.grinder.library.ScopedVariables;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.function.InjectiveModule;
 import com.sri.ai.grinder.library.function.MutuallyExclusiveCoDomainsModule;
 import com.sri.ai.grinder.library.lambda.Lambda;
-import com.sri.ai.praise.model.ExpressionInExpressionPathPairIsValueOfRandomVariable;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
-import com.sri.ai.util.collect.FunctionIterator;
-import com.sri.ai.util.collect.PredicateIterator;
 
 /**
  * 
@@ -128,14 +122,6 @@ MutuallyExclusiveCoDomainsModule.Provider {
 		// Note: is a NoOpRewriter
 		return expression; // will be removed eventually, not a real rewriter, just a module.
 	}
-
-	private static final Predicate<Pair<Expression, List<Integer>>> REJECT_FUNCTOR = new Predicate<Pair<Expression, List<Integer>>>() {
-		@Override
-		public boolean apply(Pair<Expression, List<Integer>> pair) {
-			boolean result = ! Util.getLast(pair.second).equals(FunctionApplicationProvider.INDEX_OF_FUNCTOR_IN_FUNCTION_APPLICATIONS);
-			return result;
-		}
-	};
 
 	@Override
 	public boolean haveMutuallyExclusiveCoDomains(Expression expression1,
