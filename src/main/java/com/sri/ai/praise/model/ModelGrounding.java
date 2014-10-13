@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.helper.Expressions;
@@ -735,7 +736,7 @@ public class ModelGrounding {
 						indexToSortNameMap.put(indexToDomain.getKey(), possibleSortName);
 					}
 				}
-				intensionalFactorValueExpression = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(intensionalFactor);
+				intensionalFactorValueExpression = ((BracketedExpression) intensionalFactor).getInnerExpression();
 				Iterator<Expression> randomVariableValueIterator = GetRandomVariables.getRandomVariableValueExpressionsIterator(intensionalFactorValueExpression, process);
 				while (randomVariableValueIterator.hasNext()) {
 					randomVariableValueExpressions.add(randomVariableValueIterator.next());

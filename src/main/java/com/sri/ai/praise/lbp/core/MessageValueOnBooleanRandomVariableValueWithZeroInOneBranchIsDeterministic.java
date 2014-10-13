@@ -38,6 +38,7 @@
 package com.sri.ai.praise.lbp.core;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -86,8 +87,7 @@ public class MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterm
 
 			if (randomVariableBeingNormalized != null) {
 				Expression randomVariableBeingNormalizedValue =
-						BracketedExpressionSubExpressionsProvider.getRandomVariableValueExpression(
-								randomVariableBeingNormalized);
+						((BracketedExpression) randomVariableBeingNormalized).getInnerExpression();
 				if (condition.equals(randomVariableBeingNormalizedValue)) {
 					if (IfThenElse.getThenBranch(expression).equals(Expressions.ZERO)) {
 						expression = IfThenElse.make(condition, Expressions.ZERO, Expressions.ONE);

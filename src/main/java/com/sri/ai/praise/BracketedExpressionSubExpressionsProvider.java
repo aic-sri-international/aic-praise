@@ -38,7 +38,6 @@
 package com.sri.ai.praise;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,6 +45,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ExpressionAndContext;
 import com.sri.ai.expresso.api.SyntaxTree;
@@ -72,8 +72,6 @@ CheapDisequalityModule.Provider,
 InjectiveModule.Provider,
 MutuallyExclusiveCoDomainsModule.Provider {
 
-	private static List<Expression> _emptyExpressionList = Collections.emptyList();
-	//
 	public static final String SYNTAX_TREE_LABEL = "[ . ]";
 	//
 	private Cache<Expression, Expression> injectiveFunctionTokenCache = CacheBuilder.newBuilder().maximumSize(100).build();
@@ -84,16 +82,6 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	
 	public static Expression make(Expression valueExpression) {
 		return Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(BracketedExpressionSubExpressionsProvider.SYNTAX_TREE_LABEL, valueExpression);
-	}
-
-	public static Expression getRandomVariableValueExpression(Expression bracketedRandomVariable) {
-		Expression result = Expressions.makeFromSyntaxTree(bracketedRandomVariable.getSyntaxTree().getSubTree(0)); // does need to be the syntax tree here, not just expression
-		return result;
-	}
-
-	public static Expression getExpressionInBrackets(Expression bracketedExpression) {
-		Expression result = Expressions.makeFromSyntaxTree(bracketedExpression.getSyntaxTree().getSubTree(0)); // does need to be the syntax tree here, not just expression
-		return result;
 	}
 
 	@Override
@@ -124,7 +112,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 	}
 
 	public static boolean isRandomVariable(Expression expression, RewritingProcess process) {
-		return isBracketedExpression(expression) && IsRandomVariableValueExpression.apply(getExpressionInBrackets(expression), process);
+		return isBracketedExpression(expression) && IsRandomVariableValueExpression.apply(((BracketedExpression) expression).getInnerExpression(), process);
 	}
 	
 	@Override

@@ -45,6 +45,7 @@ import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
+import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
@@ -614,7 +615,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					checkForPreviousMessageSubExpressionsOrProductExpressions(value, msgExpansion, expansion, msgValues, msgExpansions, subProcess);
 					
 					Expression destinationOrOriginRandomVariable = LPIUtil.isRandomVariable(destination, subProcess)? destination : origin;
-					Expression destinationOrOriginRandomVariableValue = BracketedExpressionSubExpressionsProvider.getRandomVariableValueExpression(destinationOrOriginRandomVariable);
+					Expression destinationOrOriginRandomVariableValue = ((BracketedExpression) destinationOrOriginRandomVariable).getInnerExpression();
 					
 					checkForOtherRandomVariableValueExpressions(value, msgValues, msgExpansions, msgExpansion, destination, origin, expansion, destinationOrOriginRandomVariableValue, subProcess);
 					

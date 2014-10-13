@@ -38,6 +38,7 @@
 package com.sri.ai.praise.lbp.core;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -103,7 +104,7 @@ public class NormalizeRandomVariableCondition extends AbstractLBPHierarchicalRew
 					R_basic, process);
 		}
 		else {
-			Expression randomVariableValueExpression = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(randomVariable);
+			Expression randomVariableValueExpression = ((BracketedExpression) randomVariable).getInnerExpression();
 			Trace.log("E ({}) is unconditional basic expression on {}", expressionE, randomVariableValueExpression);
 
 			Expression expressionEForRandomVariableTrue  = SemanticSubstitute.replace(expressionE, randomVariableValueExpression, Expressions.TRUE,  process);

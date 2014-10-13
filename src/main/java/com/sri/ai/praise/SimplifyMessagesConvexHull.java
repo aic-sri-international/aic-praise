@@ -42,6 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
+import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -182,7 +183,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 							for (Expression element : ExtensionalSet.getElements(input)) {
 								if (!(BracketedExpressionSubExpressionsProvider.isBracketedExpression(element)
 									  &&
-									  LPIUtil.isMessageValue(BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(element), process))) {
+									  LPIUtil.isMessageValue(((BracketedExpression) element).getInnerExpression(), process))) {
 									isExtensionalSetOfMessages = false;
 									break;
 								}
@@ -242,7 +243,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 			}
 			
 			if (BracketedExpressionSubExpressionsProvider.isBracketedExpression(element)) {
-				if (!LPIUtil.isMessageValue(BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(element), process)) {
+				if (!LPIUtil.isMessageValue(((BracketedExpression) element).getInnerExpression(), process)) {
 					// implies it is a conditional message that needs to be externalized
 					result = true;
 					break;
@@ -256,7 +257,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 	private Expression externalizeMessage(Expression message, RewritingProcess process) {
 		Expression result = message;
 		
-		Expression messageValue = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(message);
+		Expression messageValue = ((BracketedExpression) message).getInnerExpression();
 		if (!LPIUtil.isMessageValue(messageValue, process)) {
 			if (IfThenElse.isIfThenElse(messageValue)) {
 				Expression thenBranch = externalizeMessage(BracketedExpressionSubExpressionsProvider.make(IfThenElse.getThenBranch(messageValue)), process);

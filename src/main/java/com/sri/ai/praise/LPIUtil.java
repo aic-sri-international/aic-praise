@@ -52,6 +52,7 @@ import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
+import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
@@ -114,7 +115,7 @@ public class LPIUtil {
 			Expression randomVariable, Expression expression,
 			RewritingProcess process) {
 		
-		Expression randomVariableValueExpression = BracketedExpressionSubExpressionsProvider.getRandomVariableValueExpression(randomVariable);
+		Expression randomVariableValueExpression = ((BracketedExpression) randomVariable).getInnerExpression();
 		//
 		RandomPredicateCatalog           catalog               = RandomPredicateCatalog.getFromBracketedModel(process);
 		List<Expression>                 occurrenceConditions  = new LinkedList<Expression>();
@@ -242,8 +243,7 @@ public class LPIUtil {
 		// Extract v from [ v ]
 		if (BracketedExpressionSubExpressionsProvider.isRandomVariable(
 				randomVariable, process)) {
-			result = BracketedExpressionSubExpressionsProvider
-					.getRandomVariableValueExpression(randomVariable);
+			result = ((BracketedExpression) randomVariable).getInnerExpression();
 		} 
 		else {
 			throw new IllegalArgumentException(
@@ -271,8 +271,7 @@ public class LPIUtil {
 		assertFactorOk(factor, process);
 
 		// Extract f from [ f ]
-		result = BracketedExpressionSubExpressionsProvider
-				.getExpressionInBrackets(factor);
+		result = ((BracketedExpression) factor).getInnerExpression();
 
 		return result;
 	}
@@ -666,7 +665,7 @@ public class LPIUtil {
 				if (BracketedExpressionSubExpressionsProvider.isBracketedExpression(element) &&
 					!BracketedExpressionSubExpressionsProvider.isRandomVariable(element, process)) {
 					// I know I'm a bracketed expression and not a random variable
-					Expression bracketedValue = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(element);
+					Expression bracketedValue = ((BracketedExpression) element).getInnerExpression();
 					result.add(bracketedValue);	
 					legalMessage = true;
 				}
@@ -1319,14 +1318,14 @@ public class LPIUtil {
 		if (LPIUtil.isRandomVariable(message.get(0), process)) {
 			Expression randomVariable      = message.get(0);
 			Expression factor              = message.get(1);
-			Expression factorValue         = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(factor);
+			Expression factorValue         = ((BracketedExpression) factor).getInnerExpression();
 			if (factorValueIsSimpleWithRespectToRandomVariable(factorValue, randomVariable, process)) {
 				result = factorValue;
 			}
 		}
 		else {
 			Expression factor         = message.get(0);
-			Expression factorValue    = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(factor);
+			Expression factorValue    = ((BracketedExpression) factor).getInnerExpression();
 			if (IsDeterministicBooleanMessageValue.isDeterministicMessageValue(factorValue, process)) {
 				result = factorValue;
 			}
@@ -1339,7 +1338,7 @@ public class LPIUtil {
 	 * an expression of the form <if RVV then V1 else V2> for RVV the random variable value.
 	 */
 	public static boolean factorValueIsSimpleWithRespectToRandomVariable(Expression factorValue, Expression randomVariable, RewritingProcess process) {
-		Expression randomVariableValue = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(randomVariable);
+		Expression randomVariableValue = ((BracketedExpression) randomVariable).getInnerExpression();
 		boolean result = factorValueIsSimpleWithRespectToRandomVariable(factorValue, randomVariable, randomVariableValue, process);
 		return result;
 	}

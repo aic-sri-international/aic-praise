@@ -43,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -94,12 +95,12 @@ public class RandomPredicateCatalog extends HashMap<Expression, FunctionSignatur
 
 			if (Sets.isIntensionalSet(setOfFactors)) {
 				Expression factor = ((IntensionalSetInterface) setOfFactors).getHead();
-				Expression factorValue = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(factor);
+				Expression factorValue = ((BracketedExpression) factor).getInnerExpression();
 				addPredicates(factorValue, process);
 			}
 			else {
 				for (Expression factor : ExtensionalSet.getElements(setOfFactors)) {
-					Expression factorValue = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(factor);
+					Expression factorValue = ((BracketedExpression) factor).getInnerExpression();
 					addPredicates(factorValue, process);
 				}
 			}

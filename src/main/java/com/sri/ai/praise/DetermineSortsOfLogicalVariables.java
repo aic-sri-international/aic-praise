@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
@@ -106,7 +107,7 @@ public class DetermineSortsOfLogicalVariables {
 			else {
 				if (BracketedExpressionSubExpressionsProvider.isRandomVariable(expression, process)) {
 					// we must use the expression with the random variable value expressions
-					expression = BracketedExpressionSubExpressionsProvider.getRandomVariableValueExpression(expression);
+					expression = ((BracketedExpression) expression).getInnerExpression();
 				}
 				
 				if (LPIUtil.isRandomVariableValueExpression(expression, process)) {
