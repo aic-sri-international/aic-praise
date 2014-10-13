@@ -50,7 +50,6 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 
 /**
  * 
