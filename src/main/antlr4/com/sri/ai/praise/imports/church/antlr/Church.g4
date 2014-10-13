@@ -108,6 +108,7 @@ expression
   |  lambdaExpression
   |  conditional
   |  flip
+  |  logicalOperatorExpression
   |  procedureCall
   ;
 
@@ -160,6 +161,12 @@ alternate
 flip
   :  '(' FLIP number? ')'
   | FLIP number?
+  ;
+
+logicalOperatorExpression
+  : '(' AND test* ')'
+  | '(' OR test* ')'
+  | '(' NOT test ')'
   ;
 
 procedureCall

@@ -54,6 +54,9 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.boole.And;
+import com.sri.ai.grinder.library.boole.Not;
+import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -173,10 +176,14 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	public Expression visitConditional(@NotNull ChurchParser.ConditionalContext ctx) { 
 		Expression test       = visit(ctx.test());
 		Expression consequent = visit(ctx.consequent());		
-		Expression alternate  = visit(ctx.alternate());
+		Expression alternate  = null;
+		
+		if (ctx.alternate() != null) {
+			alternate = visit(ctx.alternate());
+		}
 		
 		Expression result;
-		if (alternate == null) {
+		if (alternate == null) {			
 // TODO - correct way to handle no alternate?			
 			result = IfThenElse.make(test, consequent, Expressions.FALSE);
 		}
@@ -232,6 +239,30 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		
 		Expression result = newSymbol(FLIP_ID_PREFIX+flipId);
 		
+		return result; 
+	}
+	
+	@Override
+	public Expression visitLogicalOperatorExpression(@NotNull ChurchParser.LogicalOperatorExpressionContext ctx) { 		
+		List<Expression> arguments = new ArrayList<Expression>();
+		
+		if (ctx.test() != null && ctx.test().size() > 0) {
+			for (int i = 0; i < ctx.test().size(); i++) {
+				arguments.add(visit(ctx.test(i)));			
+			}
+		}
+		
+		Expression result = null;
+		
+		if (ctx.AND() != null) {
+			result = And.make(arguments);
+		}
+		else if (ctx.OR() != null) {	
+			result = Or.make(arguments);		
+		}
+		else if (ctx.NOT() != null) {
+			result = Not.make(arguments.get(0));
+		}	
 		return result; 
 	}
 	
@@ -351,7 +382,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 				rArgs.append(" ");
 			}
 			else {
-				rArgs.append(" X ");			
+				rArgs.append(" x ");			
 			}
 			// Ensure name is upper cased
 			String sArg = arg.toString();
@@ -453,8 +484,17 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	}
 	
 	protected Expression createPotentialRule(Expression randomVariable, Expression caseH, Expression alpha, Expression beta) {		
-		Expression condition = Equality.make(randomVariable, caseH);
-		Expression result    = IfThenElse.make(condition, alpha, beta);
+		Expression condition = null;
+		if (Expressions.TRUE.equals(caseH)) {
+			condition = randomVariable;
+		}
+		else if (Expressions.FALSE.equals(caseH)) {
+			condition = Not.make(randomVariable);
+		}
+		else {
+			condition = Equality.make(randomVariable, caseH);
+		}
+		Expression result = IfThenElse.make(condition, alpha, beta);
 
 		return result;
 	}

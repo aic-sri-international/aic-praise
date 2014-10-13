@@ -6,6 +6,7 @@ import java.util.StringJoiner;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
@@ -95,6 +96,186 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		);
 	}
 	
+	@Test
+	public void testLogicalNotOnVariable() {
+		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Not on Variable", ""
+				+ "(define goOut (mem (lambda (day) (if (not (= day friday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut friday)\n"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(define goOut (mem (lambda (day) (if (not (= day friday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut friday)",			
+				"",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random goOut: Values -> Boolean;",
+				"",
+				"if Day = friday then if goOut(friday) then 0.3 else 0.7 else if goOut(Day) then 0.8 else 0.2;"
+		);
+	}
+	
+	@Test
+	public void testLogicalOrOnVariable() {
+		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Or on Variable", ""
+				+ "(define goOut (mem (lambda (day) (if (or (= day friday) (= day saturday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut friday)\n"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(define goOut (mem (lambda (day) (if (or (= day friday) (= day saturday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut friday)",			
+				"",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random goOut: Values -> Boolean;",
+				"",
+				"if (Day = friday) or (Day = saturday) then if goOut(Day) then 0.8 else 0.2 else if goOut(Day) then 0.3 else 0.7;"
+		);
+	}
+	
+	@Test
+	public void testLogicalAndOnVariables() {
+		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Or on Variable", ""
+				+ "(define goOut (mem (lambda (day1 day2) (if (and (= day1 friday) (= day2 saturday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut friday saturday)\n"
+				);
+		
+		print(translation);
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(define goOut (mem (lambda (day1 day2) (if (and (= day1 friday) (= day2 saturday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut friday saturday)",			
+				"",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random goOut: Values x Values -> Boolean;",
+				"",
+				"if (Day1 = friday) and (Day2 = saturday) then if goOut(friday, saturday) then 0.8 else 0.2 else if goOut(Day1, Day2) then 0.3 else 0.7;"
+		);
+	}
+	
+	@Ignore("TODO - needs more work in translation logic")
+	@Test
+	public void testReferToOtherVariableInDefinition() {					
+		Triple<String, Model, List<Expression>> translation = translator.translate("Refer to other variable in definition", ""
+				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "(define goOut (mem (lambda (day) (if (sunny day) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut friday)\n"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(define sunny (mem (lambda (day) (flip 0.3))))",
+				"(define goOut (mem (lambda (day) (if (sunny day) (flip 0.8) (flip 0.3)))))",
+				"(goOut friday)",				
+				"",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random sunny: Values -> Boolean;",
+				"random goOut: Values -> Boolean;",
+				"",
+				"if sunny(Day) then 0.3 else 0.7;",				
+				"TODO"
+		);
+	}
+	
+	@Ignore("TODO - needs more work in translation logic")
+	@Test
+	public void testReferringLogicalNot() {					
+		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical Not", ""
+				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "(define goOut (mem (lambda (day) (if (not (sunny day)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut friday)\n"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(define sunny (mem (lambda (day) (flip 0.3))))",
+				"(define goOut (mem (lambda (day) (if (not (sunny day)) (flip 0.8) (flip 0.3)))))",
+				"(goOut friday)",				
+				"",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random sunny: Values -> Boolean;",
+				"random goOut: Values -> Boolean;",
+				"",
+				"if sunny(Day) then 0.3 else 0.7;",				
+				"TODO"
+		);
+	}
+	
+	@Ignore("TODO - needs more work in translation logic")
+	@Test
+	public void testReferringLogicalAnd() {					
+		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical And", ""
+				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "(define goOut (mem (lambda (day) (if (and (sunny day) (= day friday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut friday)\n"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(define sunny (mem (lambda (day) (flip 0.3))))",
+				"(define goOut (mem (lambda (day) (if (and (sunny day) (= day friday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut friday)",				
+				"",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random sunny: Values -> Boolean;",
+				"random goOut: Values -> Boolean;",
+				"",
+				"if sunny(Day) then 0.3 else 0.7;",				
+				"TODO"
+		);
+	}
+	
+	@Ignore("TODO - needs more work in translation logic")
+	@Test
+	public void testReferringLogicalOr() {					
+		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical Or", ""
+				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "(define goOut (mem (lambda (day) (if (or (sunny day) (= day friday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut friday)\n"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(define sunny (mem (lambda (day) (flip 0.3))))",
+				"(define goOut (mem (lambda (day) (if (or (sunny day) (= day friday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut friday)",				
+				"",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random sunny: Values -> Boolean;",
+				"random goOut: Values -> Boolean;",
+				"",
+				"if sunny(Day) then 0.3 else 0.7;",				
+				"TODO"
+		);
+	}
+	
 	//
 	// PRIVATE
 	//		
@@ -127,6 +308,6 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	private void assertDescriptionEquals(Expression description, String... descLines) {
 		StringJoiner sj = new StringJoiner("\n", "'\n", "\n'");
 		Arrays.stream(descLines).forEach(line -> sj.add(line));
-		Assert.assertEquals(description.toString(), sj.toString());
+		Assert.assertEquals(sj.toString(), description.toString());
 	}
 }
