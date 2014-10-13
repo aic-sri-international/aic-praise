@@ -50,8 +50,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.api.SyntaxLeaf;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.helper.Expressions;

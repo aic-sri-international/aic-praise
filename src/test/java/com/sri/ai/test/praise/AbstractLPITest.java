@@ -42,8 +42,8 @@ import static org.junit.Assert.fail;
 
 import org.junit.Before;
 
-import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.RewritingProcess;

@@ -58,8 +58,8 @@ import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Justification;

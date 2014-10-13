@@ -39,8 +39,8 @@ package com.sri.ai.test.praise.rules;
 
 import org.junit.Assert;
 
-import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Parser;
 
 public abstract class AbstractParserTest {
 

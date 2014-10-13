@@ -51,8 +51,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.core.DefaultBracketedExpression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
