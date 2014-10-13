@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.lbp.core;
 
+import static com.sri.ai.util.Util.arrayList;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -47,6 +49,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.LambdaExpression;
+import com.sri.ai.expresso.core.DefaultLambdaExpression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
@@ -57,7 +61,6 @@ import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
@@ -509,7 +512,7 @@ public class ConvexRewriterOnMessageBounds extends
 				Trace.log("    [v'] <- get_random_variable_for(child_rewriter, E')");
 				Trace.log("    // v'={}", placeholder.getRandomVariableValueExpression());
 				Trace.log("    return (lambda v' : placeholder)(v')");
-				Expression lambdaPlaceholder = Expressions.apply(Lambda.make(placeholder.getRandomVariableValueExpression(), placeholder.getPlaceholderExpression()), placeholder.getRandomVariableValueExpression());
+				Expression lambdaPlaceholder = Expressions.apply(new DefaultLambdaExpression(arrayList(placeholder.getRandomVariableValueExpression()), placeholder.getPlaceholderExpression()), placeholder.getRandomVariableValueExpression());
 				result = lambdaPlaceholder;
 			}
 			else {
@@ -787,7 +790,7 @@ public class ConvexRewriterOnMessageBounds extends
 		while (subExpressionsIterator.hasNext()) {
 			Expression subExpression = subExpressionsIterator.next();
 			// Note: Skip lambda expression, as we put placeholders in lambda expressions.
-			if (!Lambda.isLambdaExpression(subExpression) && subExpression.getScopedExpressions(process).size() > 0) {
+			if (!(subExpression instanceof LambdaExpression) && subExpression.getScopedExpressions(process).size() > 0) {
 				if (Util.thereExists(new SubExpressionsDepthFirstIterator(subExpression), new Equals<Expression>(placeholder))) {
 					result = true;				
 					break;

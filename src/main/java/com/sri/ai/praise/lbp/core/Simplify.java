@@ -41,6 +41,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.LambdaExpression;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -54,13 +55,11 @@ import com.sri.ai.grinder.library.equality.injective.EqualityOnInjectiveSubExpre
 import com.sri.ai.grinder.library.equality.injective.EqualityOnMutuallyExclusiveCoDomainExpressions;
 import com.sri.ai.grinder.library.function.InjectiveModule;
 import com.sri.ai.grinder.library.function.MutuallyExclusiveCoDomainsModule;
-import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.lambda.LambdaApplication;
 import com.sri.ai.grinder.library.lambda.LambdaApplication.PerformApplication;
 import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.set.extensional.ProductOnExtensionalSet;
 import com.sri.ai.grinder.library.set.extensional.UnionOnExtensionalSets;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.CardinalityOfTypeAlwaysDistinctFromZero;
@@ -193,13 +192,11 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 				// (lambda q(Y) : if q(Y) then 1 else 0)(false) 
 				// ->
 				// if false then 1 else 0 
-				new Pair<Class<?>, Rewriter>(IntensionalSet.class,
-						new Lambda()), // Note: is a quantifier sub-expression and scoped variable provider
 				new Pair<Class<?>, Rewriter>(LiftProductOfFactorToVariable.class,
 						new LambdaApplication(new PerformApplication() {
 							@Override
 							public boolean isApplicationToBePerformed(Expression lambdaExpression, RewritingProcess process) {
-								Expression lambdaBody = Lambda.getBody(lambdaExpression);
+								Expression lambdaBody = ((LambdaExpression) lambdaExpression).getBody();
 								boolean result = !LPIUtil.containsPreviousMessageExpressions(lambdaBody) &&
 										         !ConvexRewriterOnMessageBounds.containsPlaceholderExpression(lambdaBody);
 								return result;

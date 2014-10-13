@@ -49,6 +49,7 @@ import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.ExpressionAndContext;
 import com.sri.ai.expresso.api.SyntaxTree;
+import com.sri.ai.expresso.core.DefaultLambdaExpression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.NoOpRewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -56,7 +57,6 @@ import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.function.InjectiveModule;
 import com.sri.ai.grinder.library.function.MutuallyExclusiveCoDomainsModule;
-import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.praise.model.IsRandomVariableValueExpression;
 
 /**
@@ -167,7 +167,7 @@ MutuallyExclusiveCoDomainsModule.Provider {
 				}
 				
 				// Create the token
-				result = Lambda.make(parameters, lambdaBody);
+				result = new DefaultLambdaExpression(parameters, lambdaBody);
 				
 				injectiveFunctionTokenCache.put(expression, result);
 			}

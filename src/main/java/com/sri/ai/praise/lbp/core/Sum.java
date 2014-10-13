@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.lbp.core;
 
+import static com.sri.ai.util.Util.arrayList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +47,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.expresso.core.DefaultLambdaExpression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -55,7 +58,6 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
-import com.sri.ai.grinder.library.lambda.Lambda;
 import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.Sets;
@@ -437,7 +439,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 				if (LPIUtil.containsPreviousMessageExpressions(M)) {
 					Trace.log("        if M is previous message to F from V'");
 					Trace.log("            M <- (lambda v' : previous message to F from V')(v')");
-					M = Expressions.apply(Lambda.make(vPrimeValue, M), vPrimeValue);
+					M = Expressions.apply(new DefaultLambdaExpression(arrayList(vPrimeValue), M), vPrimeValue);
 				} 
 				else {
 					Trace.log("        if M is *not* previous message to F from V'");
