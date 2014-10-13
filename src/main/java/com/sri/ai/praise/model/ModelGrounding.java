@@ -48,6 +48,7 @@ import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -722,8 +723,8 @@ public class ModelGrounding {
 			// Extract relevant information to aid grounding
 			// from the parfactor.
 			if (isIntensionalParfactor()) {
-				Expression intensionalFactor = IntensionalSet.getHead(parfactor);
-				intensionalCondition = IntensionalSet.getCondition(parfactor);
+				Expression intensionalFactor = ((IntensionalSetInterface) parfactor).getHead();
+				intensionalCondition = ((IntensionalSetInterface) parfactor).getCondition();
 				Map<Expression, Expression> indexToTypeMap = IntensionalSet.getIndexToTypeMapWithDefaultNull(parfactor);
 				// Add type names that correspond to sort names
 				for (Map.Entry<Expression, Expression> indexToDomain : indexToTypeMap.entrySet()) {

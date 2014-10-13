@@ -46,7 +46,9 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
+import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -274,7 +276,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp messageValueSets = new ListOfDisjointIntensionalSetsForSymbolicInjectiveLookUp(new ArrayList<Expression>(), makeSymbolicLookUpForPreviousMessages(), configuration.isBeliefUseCache());
 			for (Expression msgExpansion : msgExpansions) {
 				// i.e. (Destination, Origin, Expansion)
-				Expression tupleExpansion = IntensionalSet.getHead(msgExpansion);
+				Expression tupleExpansion = ((IntensionalSetInterface) msgExpansion).getHead();
 				// (Destination, Origin, 1)
 				Expression destination = getDestinationFromMessageValueTuple(tupleExpansion);
 				Expression origin      = getOriginFromMessageValueTuple(tupleExpansion);
@@ -282,9 +284,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				Expression tuple       = makeMessageValueTuple(destination, origin, value);
 				// { (on I) (Destination, Origin, 1) | C }
 				Expression msgValue       = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(msgExpansion), 
-																IntensionalSet.getIndexExpressions(msgExpansion),
+																((IntensionalSetInterface) msgExpansion).getIndexExpressions(),
 																tuple, 
-																IntensionalSet.getCondition(msgExpansion));
+																((IntensionalSetInterface) msgExpansion).getCondition());
 				messageValueSets.putIntensionalSetWithKeyKnownToBeDisjointFromOthers(msgValue, process);
 			}
 			
@@ -455,9 +457,9 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		// Note: Minor Optimization, up front limit msgs_already_expanded to only those 
 		// that can possibly intersect.
 		List<Expression> possibleIntersectionUnionArgs = new ArrayList<Expression>();
-		Expression alpha = IntensionalSet.getHead(messageSet);
+		Expression alpha = ((IntensionalSetInterface) messageSet).getHead();
 		for (Expression messagesAlreadyExpandedUnionArgument : messagesAlreadyExpandedUnionArguments) {				
-			Expression alphaPrime = IntensionalSet.getHead(messagesAlreadyExpandedUnionArgument); 
+			Expression alphaPrime = ((IntensionalSetInterface) messagesAlreadyExpandedUnionArgument).getHead(); 
 			// Perform a cheap disequality first
 			if (!CheapDisequalityModule.isACheapDisequality(alpha, alphaPrime, process)) {
 				possibleIntersectionUnionArgs.add(messagesAlreadyExpandedUnionArgument);
@@ -475,16 +477,16 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	}
 
 	private void expand(Expression messageSet, List<Expression> messagesAlreadyExpandedUnionArguments, List<Expression> messagesToBeExpanded, List<Expression> messageExpansions, RewritingProcess process) {
-		List<Expression> expressionI = IntensionalSet.getIndexExpressions(messageSet);
-		Expression destinationOriginTuple = IntensionalSet.getHead(messageSet);
+		List<Expression> expressionI = ((IntensionalSetInterface) messageSet).getIndexExpressions();
+		Expression destinationOriginTuple = ((IntensionalSetInterface) messageSet).getHead();
 		Expression destination            = Tuple.get(destinationOriginTuple, 0);
 		Expression origin                 = Tuple.get(destinationOriginTuple, 1);
-		Expression conditionC             = IntensionalSet.getCondition(messageSet);
+		Expression conditionC             = ((IntensionalSetInterface) messageSet).getCondition();
 		
 		Expression expansion = computeExpansionSymbolically(messageSet, destination, origin, conditionC, process);
 		
 		Trace.log("        msg_expansion <- { (on I) (Destination, Origin, expansion) | C }");
-		Expression msgExpansion = IntensionalSet.makeUniSetFromIndexExpressionsList(expressionI, makeMessageValueTuple(destination, origin, expansion), conditionC);
+		Expression msgExpansion = new DefaultIntensionalUniSet(expressionI, makeMessageValueTuple(destination, origin, expansion), conditionC);
 		
 		sanityChecksOnLogicalVariables(messageSet, messageExpansions, process, msgExpansion);
 		
@@ -564,7 +566,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 
 	private void updateSetOfMessagesAlreadyExpanded(List<Expression> messagesAlreadyExpandedUnionArguments, List<Expression> expressionI, Expression destination, Expression origin, Expression conditionC) {
 		Trace.log("        msgs_already_expanded <- msgs_already_expanded union { (on I) (Destination, Origin) | C }");
-		Expression alreadyExpanded = IntensionalSet.makeUniSetFromIndexExpressionsList(expressionI, Tuple.make(destination, origin), conditionC);
+		Expression alreadyExpanded = new DefaultIntensionalUniSet(expressionI, Tuple.make(destination, origin), conditionC);
 		messagesAlreadyExpandedUnionArguments.add(alreadyExpanded);
 		Trace.log("        // msgs_already_expanded = {}", Expressions.apply(FunctorConstants.UNION, messagesAlreadyExpandedUnionArguments));
 	}
@@ -596,7 +598,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 				@Override
 				public Expression rewrite(Expression[] expressions, RewritingProcess process) {
 					Expression msgExpansion      = expressions[0];
-					Expression msgExpansionTuple = IntensionalSet.getHead(msgExpansion);
+					Expression msgExpansionTuple = ((IntensionalSetInterface) msgExpansion).getHead();
 					Expression destination       = getDestinationFromMessageValueTuple(msgExpansionTuple);
 					Expression origin            = getOriginFromMessageValueTuple(msgExpansionTuple);
 					Expression expansion         = getValueFromMessageValueTuple(msgExpansionTuple);
@@ -637,11 +639,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 					
 					Trace.log("    next_msg_values <- next_msg_values union { (on I) (Destination, Origin, value) | C }");
 					Expression messageValueTuple = makeMessageValueTuple(destination, origin, normalizedValue);
-					Expression newMsgValue = IntensionalSet
-												.makeUniSetFromIndexExpressionsList(
-														IntensionalSet.getIndexExpressions(msgExpansion), 
-														messageValueTuple, 
-														IntensionalSet.getCondition(msgExpansion));
+					Expression newMsgValue = new DefaultIntensionalUniSet(((IntensionalSetInterface) msgExpansion).getIndexExpressions(), messageValueTuple, ((IntensionalSetInterface) msgExpansion).getCondition());
 					
 					checkForIntroducedVariables(value, msgValues, msgExpansions, process, msgExpansion, expansion, newMsgValue, subProcess);
 					
@@ -793,8 +791,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	private boolean checkIfExpansionDependsOnLogicalVariableButMessageDoesNot(Expression msgExpansionOrValue, final RewritingProcess process) {
 		boolean result = false;
 		
-		List<Expression> indices = IndexExpressions.getIndices(IntensionalSet.getIndexExpressions(msgExpansionOrValue));
-		Expression messageValueTuple = IntensionalSet.getHead(msgExpansionOrValue);	
+		List<Expression> indices = IndexExpressions.getIndices(((IntensionalSetInterface) msgExpansionOrValue).getIndexExpressions());
+		Expression messageValueTuple = ((IntensionalSetInterface) msgExpansionOrValue).getHead();	
 		Expression destination = getDestinationFromMessageValueTuple(messageValueTuple);
 		Expression origin      = getOriginFromMessageValueTuple(messageValueTuple);
 		Set<Expression> destinationVariables          = Expressions.getVariables(destination, process);
@@ -848,7 +846,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 			}
 		} 
 		else if (Sets.isIntensionalUniSet(msgSet)) {
-			tuple = IntensionalSet.getHead(msgSet);
+			tuple = ((IntensionalSetInterface) msgSet).getHead();
 		}
 		
 		if (legal) {

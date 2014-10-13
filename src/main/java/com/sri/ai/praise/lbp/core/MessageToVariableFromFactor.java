@@ -37,10 +37,13 @@
  */
 package com.sri.ai.praise.lbp.core;
 
+import static com.sri.ai.util.Util.list;
+
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -267,10 +270,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 		currentExpression =
 			Expressions.apply(
 					FunctorConstants.SUM,
-					IntensionalSet.makeMultiSetWithASingleIndexExpression(
-							N, 
-							head,
-							Expressions.TRUE));
+					new DefaultIntensionalMultiSet(list(N), head, Expressions.TRUE));
 		return currentExpression;
 	}
 }

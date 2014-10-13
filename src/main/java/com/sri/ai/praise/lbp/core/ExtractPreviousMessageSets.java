@@ -46,6 +46,7 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
+import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
@@ -138,7 +139,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 				List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromSymbolsAndTypes(indexToTypeMap);
 				
 				Expression tuplePair = Tuple.make(expression.get(0), expression.get(1));
-				Expression set = IntensionalSet.makeUniSetFromIndexExpressionsList(indexExpressions, tuplePair, process.getContextualConstraint());
+				Expression set = new DefaultIntensionalUniSet(indexExpressions, tuplePair, process.getContextualConstraint());
 
 				// Now we try to simplify the set, but because its condition is the contextual constraint in the original process,
 				// this would cause the condition to be always simplified to true (since it implies itself).

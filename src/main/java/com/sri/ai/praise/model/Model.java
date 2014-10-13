@@ -59,6 +59,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
+import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.LPIUtil;
@@ -1031,7 +1032,7 @@ public class Model {
 			sortNamesKnown.add(sd.getName());
 		}
 		for (Expression parfactor : parfactorsDeclaration.getParfactors()) {
-			if (IntensionalSet.isIntensionalSet(parfactor)) {
+			if (Sets.isIntensionalSet(parfactor)) {
 				for (Expression type : IntensionalSet.getIndexDomains(parfactor)) {
 					if (!CardinalityTypeOfLogicalVariable.isTypeSyntacticFunctionApplication(type) &&
 					    !sortNamesKnown.contains(type)) {

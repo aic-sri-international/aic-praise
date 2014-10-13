@@ -53,6 +53,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -1526,10 +1527,7 @@ public class RuleConverter {
 				LPIUtil.getIndexExpressionsFromRandomVariableUsage(
 						Tuple.make(potentialExpression, constraintC), randomVariableDeclarations, process);
 		
-		Expression result = IntensionalSet.makeMultiSetFromIndexExpressionsList(
-				 			indexExpressions,
-				 			BracketedExpressionSubExpressionsProvider.make(potentialExpression),
-				 			constraintC);
+		Expression result = new DefaultIntensionalMultiSet(indexExpressions, BracketedExpressionSubExpressionsProvider.make(potentialExpression), constraintC);
 	
 		result = process.rewrite(LBPRewriter.R_normalize, result);
 	

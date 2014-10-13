@@ -44,8 +44,10 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.FunctionSignature;
+import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
@@ -91,8 +93,8 @@ public class RandomPredicateCatalog extends HashMap<Expression, FunctionSignatur
 	RandomPredicateCatalog(List<Expression> setsOfFactors, RewritingProcess process) {
 		for (Expression setOfFactors : setsOfFactors) {
 
-			if (IntensionalSet.isIntensionalSet(setOfFactors)) {
-				Expression factor = IntensionalSet.getHead(setOfFactors);
+			if (Sets.isIntensionalSet(setOfFactors)) {
+				Expression factor = ((IntensionalSetInterface) setOfFactors).getHead();
 				Expression factorValue = BracketedExpressionSubExpressionsProvider.getExpressionInBrackets(factor);
 				addPredicates(factorValue, process);
 			}

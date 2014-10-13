@@ -37,6 +37,9 @@
  */
 package com.sri.ai.praise;
 
+import static com.sri.ai.expresso.helper.Expressions.apply;
+import static com.sri.ai.util.Util.list;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,8 +53,10 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Apply;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
@@ -212,9 +217,7 @@ public class LPIUtil {
 	public static Expression makeProductOfMessages(Expression index,
 			Expression indexType, Expression message, Expression condition) {
 
-		Expression prodIntensionalSet = IntensionalSet
-				.makeMultiSetWithASingleIndexExpression(index, indexType,
-						message, condition);
+		Expression prodIntensionalSet = new DefaultIntensionalMultiSet(list(apply("in", index, indexType)), message, condition);
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.PRODUCT,
 				prodIntensionalSet);
 
@@ -528,7 +531,7 @@ public class LPIUtil {
 	public static boolean isProductExpression(Expression expression) {
 		boolean result = false;
 		if (expression.hasFunctor(FunctorConstants.PRODUCT)    &&
-			IntensionalSet.isIntensionalSet(expression.get(0)) &&
+			Sets.isIntensionalSet(expression.get(0)) &&
 			Sets.isMultiSet(expression.get(0))                   ) {
 			result = true;
 		}
@@ -828,7 +831,7 @@ public class LPIUtil {
 			throw new IllegalArgumentException("by must be a tuple (to, from):"+by);
 		}
 		
-		Expression intensionalSetBy = IntensionalSet.makeMultiSetFromIndexExpressionsList(indexExpressions, by, conditionC);
+		Expression intensionalSetBy = new DefaultIntensionalMultiSet(indexExpressions, by, conditionC);
 				
 		if (Sets.isEmptySet(beingComputed)) {
 			result = intensionalSetBy;
@@ -1443,10 +1446,10 @@ public class LPIUtil {
 		
 		set = StandardizedApartFrom.standardizedApartFrom(set, keyPrime, process);
 		
-		Expression       head      = IntensionalSet.getHead(set);
+		Expression       head      = ((IntensionalSetInterface) set).getHead();
 		Expression       key       = Tuple.get(head, 0);
 		Expression       value     = Tuple.get(head, 1);
-		Expression       condition = IntensionalSet.getCondition(set);
+		Expression       condition = ((IntensionalSetInterface) set).getCondition();
 		
 		Expression newCondition = And.make(condition, Equality.make(key, keyPrime));
 		Expression result       = IntensionalSet.copyWithNewHeadAndCondition(set, value, newCondition);

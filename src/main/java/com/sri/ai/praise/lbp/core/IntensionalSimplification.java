@@ -43,6 +43,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Trace;
@@ -93,10 +94,10 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 		// Assume no simplification occurs by default.
 		Expression result = intensionalSet; 
 
-		Expression intSetHead      = IntensionalSet.getHead(intensionalSet);
-		Expression intSetCondition = IntensionalSet.getCondition(intensionalSet);
+		Expression intSetHead      = ((IntensionalSetInterface) intensionalSet).getHead();
+		Expression intSetCondition = ((IntensionalSetInterface) intensionalSet).getCondition();
 		
-		List<Expression> intSetIndexExpressions = new ArrayList<Expression>(IntensionalSet.getIndexExpressions(intensionalSet));
+		List<Expression> intSetIndexExpressions = new ArrayList<Expression>(((IntensionalSetInterface) intensionalSet).getIndexExpressions());
 		Object[]         cPrimeAndiEqualsBeta   = new Object[3];
 		
 		RewritingProcess subProcess = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
@@ -154,7 +155,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 
 			// Ensure not simplified to an extensional or 
 			// conditional on creation
-			if (IntensionalSet.isIntensionalSet(substitutedIntensionalSet)) {
+			if (Sets.isIntensionalSet(substitutedIntensionalSet)) {
 				result = process.rewrite(R_intensional_simplification, substitutedIntensionalSet);
 			} 
 			else {

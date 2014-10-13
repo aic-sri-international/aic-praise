@@ -41,6 +41,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -55,6 +56,7 @@ import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
+import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.LPIUtil;
@@ -115,7 +117,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 			// return R_formula_simplification(Disjunction_i Alpha = ai)
 			result = rewriteSetIsExtensional(alpha, set, process);
 		} 
-		else if (IntensionalSet.isIntensionalSet(set)) {
+		else if (Sets.isIntensionalSet(set)) {
 			// if Set is { Beta | C }_I or {{ Beta | C }}_I
 			// { Beta' | C' }_I' <- standardize { Beta | C }_I apart from Alpha
 			// return R_basic(R_formula_simplification(there exists I' : C' and Alpha = Beta'))
@@ -269,7 +271,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Expression result = null;
 		Trace.log("if Set is { Beta | C }_I or {{ Beta | C }}_I");
 		
-		Expression beta = IntensionalSet.getHead(set);
+		Expression beta = ((IntensionalSetInterface) set).getHead();
 		
 		if (CheapDisequalityModule.isACheapDisequality(alpha, beta, process)) {
 			Trace.log("    is guaranteed Alpha != Beta");
@@ -285,9 +287,9 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 	
 			Expression setPrime = StandardizedApartFrom.standardizedApartFrom(set, alpha, process);
 	
-			List<Expression> indexExpressionsPrime = IntensionalSet.getIndexExpressions(setPrime);
-			Expression       conditionPrime        = IntensionalSet.getCondition(setPrime);
-			Expression       headBetaPrime         = IntensionalSet.getHead(setPrime);
+			List<Expression> indexExpressionsPrime = ((IntensionalSetInterface) setPrime).getIndexExpressions();
+			Expression       conditionPrime        = ((IntensionalSetInterface) setPrime).getCondition();
+			Expression       headBetaPrime         = ((IntensionalSetInterface) setPrime).getHead();
 	
 			Expression alphaEqBetaPrime = Equality.make(alpha, headBetaPrime);
 			Expression and              = CardinalityUtil.makeAnd(conditionPrime, alphaEqBetaPrime);

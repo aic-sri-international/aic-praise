@@ -42,6 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -512,7 +513,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 
 		Expression b = ExtensionalSet.getElements(set2).get(0);
 		
-		if (CheapDisequalityModule.isACheapDisequality(IntensionalSet.getHead(set1), b, process)) {
+		if (CheapDisequalityModule.isACheapDisequality(((IntensionalSetInterface) set1).getHead(), b, process)) {
 			Justification.beginEqualityStep("is guaranteed Alpha != b'");
 			
 			Trace.log("    is guaranteed Alpha != b'");
@@ -532,9 +533,9 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Trace.log("// {{ Alpha' | C' }}_I'={}", saS1);
 			
 	
-			Expression alphaPrime   = IntensionalSet.getHead(saS1);
-			Expression cPrime       = IntensionalSet.getCondition(saS1);
-			List<Expression> iPrime = IntensionalSet.getIndexExpressions(saS1);
+			Expression alphaPrime   = ((IntensionalSetInterface) saS1).getHead();
+			Expression cPrime       = ((IntensionalSetInterface) saS1).getCondition();
+			List<Expression> iPrime = ((IntensionalSetInterface) saS1).getIndexExpressions();
 	
 			Expression alphaPrimeEqualb    = Equality.make(alphaPrime, b);
 			Expression notAlphaPrimeEqualb = Not.make(alphaPrimeEqualb);
@@ -628,9 +629,9 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 
 			Expression saS1 = StandardizedApartFrom.standardizedApartFrom(set1, set2, process);
 
-			Expression alphaPrime   = IntensionalSet.getHead(saS1);
-			Expression cPrime       = IntensionalSet.getCondition(saS1);
-			List<Expression> iPrime = IntensionalSet.getIndexExpressions(saS1);
+			Expression alphaPrime   = ((IntensionalSetInterface) saS1).getHead();
+			Expression cPrime       = ((IntensionalSetInterface) saS1).getCondition();
+			List<Expression> iPrime = ((IntensionalSetInterface) saS1).getIndexExpressions();
 
 			for (Expression b_i : ExtensionalSet.getElements(set2)) {
 				Expression equality = Equality.make(alphaPrime, b_i);
@@ -691,8 +692,8 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		
 		Trace.log("if S1 is { Alpha | C }_I and S2 is { Alpha' | C' }_I'");
 		
-		Expression alpha      = IntensionalSet.getHead(set1);
-		Expression alphaPrime = IntensionalSet.getHead(set2); 
+		Expression alpha      = ((IntensionalSetInterface) set1).getHead();
+		Expression alphaPrime = ((IntensionalSetInterface) set2).getHead(); 
 		
 		// Perform a cheap disequality first
 		if (CheapDisequalityModule.isACheapDisequality(alpha, alphaPrime, process)) {
@@ -706,17 +707,17 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Justification.endEqualityStep(result);
 		}
 		else {			
-			Expression       c = IntensionalSet.getCondition(set1);
-			List<Expression> i = IntensionalSet.getIndexExpressions(set1);
+			Expression       c = ((IntensionalSetInterface) set1).getCondition();
+			List<Expression> i = ((IntensionalSetInterface) set1).getIndexExpressions();
 
 			Trace.log("    { Alpha' | C' }_I' <- standardize { Alpha' | C' }_I' apart from (Alpha, C)");
 			
 			Expression tupleAlphaC = Tuple.make(alpha, c);
 			Expression saS2        = StandardizedApartFrom.standardizedApartFrom(set2, tupleAlphaC, process);
 			
-			alphaPrime              = IntensionalSet.getHead(saS2); 
-			Expression       cPrime = IntensionalSet.getCondition(saS2);
-			List<Expression> iPrime = IntensionalSet.getIndexExpressions(saS2);
+			alphaPrime              = ((IntensionalSetInterface) saS2).getHead(); 
+			Expression       cPrime = ((IntensionalSetInterface) saS2).getCondition();
+			List<Expression> iPrime = ((IntensionalSetInterface) saS2).getIndexExpressions();
 	
 			Expression disequality      = Disequality.make(alpha, alphaPrime);
 			Expression implication      = Implication.make(cPrime, disequality);

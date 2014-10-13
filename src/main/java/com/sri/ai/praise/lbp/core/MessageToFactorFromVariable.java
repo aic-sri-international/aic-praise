@@ -37,8 +37,11 @@
  */
 package com.sri.ai.praise.lbp.core;
 
+import static com.sri.ai.util.Util.list;
+
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -181,10 +184,7 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 					currentExpression =
 						Expressions.apply(
 								FunctorConstants.PRODUCT,
-								IntensionalSet.makeMultiSetWithASingleIndexExpression(
-										indexExpression,
-										msgToV_FPrime,
-										Expressions.TRUE));
+								new DefaultIntensionalMultiSet(list(indexExpression), msgToV_FPrime, Expressions.TRUE));
 					
 					Justification.endEqualityStep(currentExpression);
 				}
@@ -197,10 +197,7 @@ public class MessageToFactorFromVariable extends AbstractLBPHierarchicalRewriter
 					currentExpression =
 						Expressions.apply(
 								FunctorConstants.PRODUCT,
-								IntensionalSet.makeMultiSetWithASingleIndexExpression(
-										Expressions.apply(LPIUtil.FUNCTOR_IN, factorIndexPrime, neighborsOfVMinusF),
-										msgToV_FPrime,
-										Expressions.TRUE));
+								new DefaultIntensionalMultiSet(list(Expressions.apply(LPIUtil.FUNCTOR_IN, factorIndexPrime, neighborsOfVMinusF)), msgToV_FPrime, Expressions.TRUE));
 					
 					Justification.endEqualityStep(currentExpression);
 				}

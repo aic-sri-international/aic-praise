@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -32,7 +33,7 @@ public class DetermineSortsOfLogicalVariables {
 	public static Map<Expression, Expression> getIndicesTypeMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
 		Map<Expression, Expression> result = new LinkedHashMap<Expression, Expression>(IntensionalSet.getIndexToTypeMapWithDefaultNull(intensionalSet));
 		RewritingProcess subProcess = GrinderUtil.extendContextualSymbols(result, process);
-		result = extendFreeSymbolsAndTypesFromUsageInRandomVariables(result, IntensionalSet.getHead(intensionalSet), null, subProcess);
+		result = extendFreeSymbolsAndTypesFromUsageInRandomVariables(result, ((IntensionalSetInterface) intensionalSet).getHead(), null, subProcess);
 		return result;
 	}
 

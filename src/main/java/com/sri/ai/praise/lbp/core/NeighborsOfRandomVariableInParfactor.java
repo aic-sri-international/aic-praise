@@ -42,6 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Justification;
@@ -145,7 +146,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			Justification.endEqualityStep(result);
 
 		} 
-		else if (IntensionalSet.isIntensionalSet(parfactor)) {
+		else if (Sets.isIntensionalSet(parfactor)) {
 			Trace.log("if PF is an intensionally defined set {{ [ Ef ] | C }}_I) (where [ Ef ] is a factor expression)");
 			Trace.log("    {{ [ Ef' ] | C' }}_I' <- standardize {{ [ Ef ] | C }}_I apart from [ Ev ]");
 
@@ -156,10 +157,10 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 				Justification.endEqualityStep(currentExpression);
 			}
 			
-			Expression factorPrime            = IntensionalSet.getHead(saParfactor);
+			Expression factorPrime            = ((IntensionalSetInterface) saParfactor).getHead();
 			Expression factorValuePrime       = LPIUtil.getFactorValueExpression(factorPrime, process);
-			Expression conditionPrime         = IntensionalSet.getCondition(saParfactor);
-			List<Expression> indexExpressionsPrime = IntensionalSet.getIndexExpressions(saParfactor);
+			Expression conditionPrime         = ((IntensionalSetInterface) saParfactor).getCondition();
+			List<Expression> indexExpressionsPrime = ((IntensionalSetInterface) saParfactor).getIndexExpressions();
 			
 			Trace.log("    Extend contextual symbols with I'");
 			RewritingProcess processIPrime = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saParfactor, process);
@@ -195,7 +196,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 
 			Justification.beginEqualityStep("by simplifying intensional set");
 			// Ensure is not simplified to an extensional or conditional on creation.
-			if (IntensionalSet.isIntensionalSet(currentExpression)) {
+			if (Sets.isIntensionalSet(currentExpression)) {
 				result = processIPrime.rewrite(R_intensional_simplification, currentExpression);
 			} 
 			else {

@@ -49,6 +49,7 @@ import org.junit.Test;
 import org.slf4j.Marker;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.Rewriter;
@@ -1610,7 +1611,7 @@ public class LBPTest extends AbstractLPITest {
 				this.exprBeingComputed = parse(beingComputed);
 				
 				Expression ETimesPi = Times.make(Arrays.asList(exprE, exprPi));
-				Expression sumMultiset = IntensionalSet.makeMultiSetFromIndexExpressionsList(ExtensionalSet.getElements(exprN), ETimesPi, Expressions.TRUE);
+				Expression sumMultiset = new DefaultIntensionalMultiSet(ExtensionalSet.getElements(exprN), ETimesPi, Expressions.TRUE);
 				return Expressions.apply(FunctorConstants.SUM, sumMultiset);
 			}
 			

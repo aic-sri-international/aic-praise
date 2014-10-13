@@ -41,6 +41,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.Trace;
@@ -126,12 +127,12 @@ public class DifferenceOfExtensionalAndIntensionalSet extends AbstractLBPHierarc
 			
 			Trace.log("condition <- R_formula_simplification(there exists I' : C' and a_i = Alpha')");
 			
-			Expression intensionalSetCondition    = IntensionalSet.getCondition(saIntensionalSet);
+			Expression intensionalSetCondition    = ((IntensionalSetInterface) saIntensionalSet).getCondition();
 			Expression iThElementOfExtensionalSet = ExtensionalSet.getElements(extensionalSet).get(i);
-			Expression intensionalSetHead         = IntensionalSet.getHead(saIntensionalSet);
+			Expression intensionalSetHead         = ((IntensionalSetInterface) saIntensionalSet).getHead();
 			Expression comparison                 = Equality.make(iThElementOfExtensionalSet, intensionalSetHead);
 			
-			List<Expression> intensionalSetIndexExpressions = IntensionalSet.getIndexExpressions(saIntensionalSet);
+			List<Expression> intensionalSetIndexExpressions = ((IntensionalSetInterface) saIntensionalSet).getIndexExpressions();
 			
 			Expression unificationCondition = ThereExists.make(intensionalSetIndexExpressions, CardinalityUtil.makeAnd(intensionalSetCondition, comparison));
 			Expression ifThenElseCondition  = process.rewrite(R_formula_simplification, unificationCondition);

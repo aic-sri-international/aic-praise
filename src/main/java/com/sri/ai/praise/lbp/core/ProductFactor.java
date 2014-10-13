@@ -45,6 +45,8 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -112,9 +114,9 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 			LPIUtil.assertProductOk(productOfFactorsToVariable);
 
 			Expression prodIntensionalSet   = productOfFactorsToVariable.get(0);
-			Expression msgToV_F             = IntensionalSet.getHead(prodIntensionalSet);
-			Expression prodScopingCondition = IntensionalSet.getCondition(prodIntensionalSet);
-			Expression indexExpression      = IntensionalSet.getIndexExpressions(prodIntensionalSet).get(0);
+			Expression msgToV_F             = ((IntensionalSetInterface) prodIntensionalSet).getHead();
+			Expression prodScopingCondition = ((IntensionalSetInterface) prodIntensionalSet).getCondition();
+			Expression indexExpression      = ((IntensionalSetInterface) prodIntensionalSet).getIndexExpressions().get(0);
 			Expression factorIndexF         = IndexExpressions.getIndex(indexExpression);
 			Expression typeS                = IndexExpressions.getType(indexExpression);
 
@@ -146,9 +148,9 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 			else if (Sets.isIntensionalMultiSet(typeS)) {
 				Trace.log("Case prod_F in {{ F1 | C }}_I m_V<-F:");
 				
-				Expression factor1                = IntensionalSet.getHead(typeS);
-				Expression condition              = IntensionalSet.getCondition(typeS);
-				List<Expression> indexExpressions = IntensionalSet.getIndexExpressions(typeS);
+				Expression factor1                = ((IntensionalSetInterface) typeS).getHead();
+				Expression condition              = ((IntensionalSetInterface) typeS).getCondition();
+				List<Expression> indexExpressions = ((IntensionalSetInterface) typeS).getIndexExpressions();
 				
 				Trace.log("    message <- R_m_to_v_from_f(m_V<-F1, C, I, beingComputed) // under cont. constraint extended by C and contextual symbols extended by I");
 				Expression       msgToV_F1        = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), factor1);
@@ -156,7 +158,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				
 				if (Justification.isEnabled()) {
 					Justification.beginEqualityStep("re-indexing set of messages");
-					Expression newSetOfMessages  = IntensionalSet.makeMultiSetFromIndexExpressionsList(indexExpressions, msgToV_F1, condition);
+					Expression newSetOfMessages  = new DefaultIntensionalMultiSet(indexExpressions, msgToV_F1, condition);
 					Expression currentExpression = Expressions.apply(FunctorConstants.PRODUCT, newSetOfMessages);
 					Justification.endEqualityStep(currentExpression);
 				}
@@ -165,7 +167,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				Expression R_msgToV_F1 = cPrimeSubProcess.rewrite(R_m_to_v_from_f,
 											LPIUtil.argForMessageToVariableFromFactorRewriteCall(msgToV_F1, condition, indexExpressions, beingComputed));
 
-				Expression messageSet        = IntensionalSet.makeMultiSetFromIndexExpressionsList(indexExpressions, R_msgToV_F1, condition);
+				Expression messageSet        = new DefaultIntensionalMultiSet(indexExpressions, R_msgToV_F1, condition);
 				Expression productOfMessages = Expressions.apply(FunctorConstants.PRODUCT, messageSet);
 				if (Justification.isEnabled()) {
 					Justification.endEqualityStep(productOfMessages);
