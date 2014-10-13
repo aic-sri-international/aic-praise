@@ -45,7 +45,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.boole.ThereExists;
@@ -642,13 +641,6 @@ public class RuleParserTest extends AbstractParserTest {
 				assertEquals(expectedResult, result);
 			}
 			else {
-				if(result != null) {
-					System.out.println("generated string for \"" + input + "\": ");
-					for(Expression expression : result) {
-						System.out.println(Brewer.generateBuildString(expression.getSyntaxTree()));
-					}
-					System.out.println("\n\n");
-				}
 				Assert.assertNotNull(result);
 			}
 		}

@@ -42,8 +42,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Before;
 
-import com.sri.ai.brewer.BrewerConfiguration;
-import com.sri.ai.brewer.api.Grammar;
 import com.sri.ai.brewer.api.Parser;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.SyntaxTrees;
@@ -55,7 +53,6 @@ import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.grinder.ui.TreeUtil;
-import com.sri.ai.praise.LPIGrammar;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
@@ -65,7 +62,6 @@ import com.sri.ai.util.concurrent.BranchAndMerge;
 
 public abstract class AbstractLPITest {
 	
-	private Grammar grammar;
 	private Parser parser;
 	
 	public AbstractLPITest() {
@@ -83,20 +79,12 @@ public abstract class AbstractLPITest {
 		SyntaxTrees.flushGlobalSymbolTable();
 		BranchAndMerge.reset();
 		
-		grammar = makeGrammar();
-		// Ensure the grammar class passed in is used where necessary.
-		Configuration.setProperty(BrewerConfiguration.KEY_DEFAULT_GRAMMAR_CLASS, grammar.getClass().getName());
-
 		parser = makeParser();
 	}
 	
 	public void tearDown() {
 		parser.close();
 		Configuration.clear();
-	}
-	
-	public Grammar makeGrammar() {
-		return new LPIGrammar();
 	}
 	
 	public Parser makeParser() {

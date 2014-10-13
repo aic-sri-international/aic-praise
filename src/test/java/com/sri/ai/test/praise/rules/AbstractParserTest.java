@@ -40,7 +40,6 @@ package com.sri.ai.test.praise.rules;
 import org.junit.Assert;
 
 import com.sri.ai.brewer.api.Parser;
-import com.sri.ai.brewer.core.Brewer;
 import com.sri.ai.expresso.api.Expression;
 
 public abstract class AbstractParserTest {
@@ -77,9 +76,6 @@ public abstract class AbstractParserTest {
 				Assert.assertEquals(expectedResult, result);
 			}
 			else {
-				if(result != null) {
-					System.out.println("generated string for \"" + input + "\": " + Brewer.generateBuildString(result.getSyntaxTree()) + "\n\n");
-				}
 				Assert.assertNotNull(result);
 			}
 		}

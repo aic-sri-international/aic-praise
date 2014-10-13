@@ -38,7 +38,6 @@
 package com.sri.ai.praise;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.brewer.api.Grammar;
 import com.sri.ai.grinder.api.Library;
 import com.sri.ai.grinder.library.CommonLibrary;
 
@@ -51,10 +50,8 @@ import com.sri.ai.grinder.library.CommonLibrary;
 @Beta
 public class Shell {
 	public static void main(String[] args) {
-		Grammar grammar = new LPIGrammar();
-		
 		Library library = new CommonLibrary();
 		
-		com.sri.ai.grinder.shell.Shell.run(grammar, library);
+		com.sri.ai.grinder.shell.Shell.run(library);
 	}
 }
