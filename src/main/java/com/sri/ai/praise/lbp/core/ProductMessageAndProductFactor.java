@@ -39,7 +39,7 @@ package com.sri.ai.praise.lbp.core;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -110,7 +110,7 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 			// prod_F in S m_V<-F
 			LPIUtil.assertProductOk(productOfFactorsToVariable);
 			Expression prodIntensionalSet = productOfFactorsToVariable.get(0);
-			Expression msgToV_F           = ((IntensionalSetInterface) prodIntensionalSet).getHead();
+			Expression msgToV_F           = ((IntensionalSet) prodIntensionalSet).getHead();
 			LPIUtil.assertMessageToFromOk(msgToV_F, process);
 
 			Expression randomVariable                = msgToV_F.get(0);

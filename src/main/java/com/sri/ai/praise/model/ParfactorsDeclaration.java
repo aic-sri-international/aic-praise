@@ -44,7 +44,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -277,7 +277,7 @@ public class ParfactorsDeclaration {
 		// Handle the intensional case
 		else if (Sets.isIntensionalSet(expression)) {
 			// Ensure the head expression is a bracketed expression at minimum
-			Expression head = ((IntensionalSetInterface) expression).getHead();
+			Expression head = ((IntensionalSet) expression).getHead();
 			if (BracketedExpressionSubExpressionsProvider.isBracketedExpression(head)) {
 				// If I have a process I can ensure its not a random variable
 				if (process != null) {

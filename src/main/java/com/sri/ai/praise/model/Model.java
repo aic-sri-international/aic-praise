@@ -59,8 +59,8 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.PRAiSEConfiguration;
@@ -1033,7 +1033,7 @@ public class Model {
 		}
 		for (Expression parfactor : parfactorsDeclaration.getParfactors()) {
 			if (Sets.isIntensionalSet(parfactor)) {
-				for (Expression type : IntensionalSet.getIndexDomains(parfactor)) {
+				for (Expression type : IndexExpressions.getIndexDomains(parfactor)) {
 					if (!CardinalityTypeOfLogicalVariable.isTypeSyntacticFunctionApplication(type) &&
 					    !sortNamesKnown.contains(type)) {
 						sortDeclarations.add(new SortDeclaration(type));

@@ -41,7 +41,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -270,7 +270,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Expression result = null;
 		Trace.log("if Set is { Beta | C }_I or {{ Beta | C }}_I");
 		
-		Expression beta = ((IntensionalSetInterface) set).getHead();
+		Expression beta = ((IntensionalSet) set).getHead();
 		
 		if (CheapDisequalityModule.isACheapDisequality(alpha, beta, process)) {
 			Trace.log("    is guaranteed Alpha != Beta");
@@ -286,9 +286,9 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 	
 			Expression setPrime = StandardizedApartFrom.standardizedApartFrom(set, alpha, process);
 	
-			List<Expression> indexExpressionsPrime = ((IntensionalSetInterface) setPrime).getIndexExpressions();
-			Expression       conditionPrime        = ((IntensionalSetInterface) setPrime).getCondition();
-			Expression       headBetaPrime         = ((IntensionalSetInterface) setPrime).getHead();
+			List<Expression> indexExpressionsPrime = ((IntensionalSet) setPrime).getIndexExpressions();
+			Expression       conditionPrime        = ((IntensionalSet) setPrime).getCondition();
+			Expression       headBetaPrime         = ((IntensionalSet) setPrime).getHead();
 	
 			Expression alphaEqBetaPrime = Equality.make(alpha, headBetaPrime);
 			Expression and              = CardinalityUtil.makeAnd(conditionPrime, alphaEqBetaPrime);

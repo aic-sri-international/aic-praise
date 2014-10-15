@@ -43,7 +43,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Trace;
@@ -54,7 +54,6 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
 
@@ -94,10 +93,10 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 		// Assume no simplification occurs by default.
 		Expression result = intensionalSet; 
 
-		Expression intSetHead      = ((IntensionalSetInterface) intensionalSet).getHead();
-		Expression intSetCondition = ((IntensionalSetInterface) intensionalSet).getCondition();
+		Expression intSetHead      = ((IntensionalSet) intensionalSet).getHead();
+		Expression intSetCondition = ((IntensionalSet) intensionalSet).getCondition();
 		
-		List<Expression> intSetIndexExpressions = new ArrayList<Expression>(((IntensionalSetInterface) intensionalSet).getIndexExpressions());
+		List<Expression> intSetIndexExpressions = new ArrayList<Expression>(((IntensionalSet) intensionalSet).getIndexExpressions());
 		Object[]         cPrimeAndiEqualsBeta   = new Object[3];
 		
 		RewritingProcess subProcess = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
@@ -148,7 +147,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 			intSetIndexExpressions.remove(i);
 
 			Expression substitutedIntensionalSet = IntensionalSet
-					.makeSetFromIndexExpressionsList(
+					.make(
 							Sets.getLabel(intensionalSet),
 							intSetIndexExpressions, substitutedAlpha,
 							substitutedCPrime);

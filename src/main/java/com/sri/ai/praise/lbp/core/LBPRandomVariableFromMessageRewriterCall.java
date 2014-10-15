@@ -39,7 +39,7 @@ package com.sri.ai.praise.lbp.core;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.RandomVariableFromMessageRewriterCall;
@@ -74,11 +74,11 @@ public class LBPRandomVariableFromMessageRewriterCall implements
 		}
 		else if (rewriterName.equals(LBPRewriter.R_prod_factor)) {
 			// R_prod_factor(prod_F in S m_V<-F, beingComputed)
-			result = ((IntensionalSetInterface) Tuple.get(expression, 0).get(0)).getHead().get(0);
+			result = ((IntensionalSet) Tuple.get(expression, 0).get(0)).getHead().get(0);
 		} 
 		else if (rewriterName.equals(LBPRewriter.R_prod_m_and_prod_factor)) {
 			// R_prod_m_and_prod_factor(m * prod_F in S m_V<-F, beingComputed)
-			result = ((IntensionalSetInterface) Tuple.get(expression, 0).get(1).get(0)).getHead().get(0);
+			result = ((IntensionalSet) Tuple.get(expression, 0).get(1).get(0)).getHead().get(0);
 		}
 		else if (rewriterName.equals(LBPRewriter.R_sum)) {
 			// R_sum(sum_N E * prod_{V in N'} m_F<-V, T, beingComputed)

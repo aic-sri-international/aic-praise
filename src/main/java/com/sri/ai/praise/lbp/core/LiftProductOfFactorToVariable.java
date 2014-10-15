@@ -42,7 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -63,7 +63,7 @@ import com.sri.ai.grinder.library.equality.cardinality.direct.core.Cardinality;
 import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.Sets;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
+import com.sri.ai.grinder.library.set.intensional.IntensionalSetWithFalseConditionIsEmptySet;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
 
@@ -157,9 +157,9 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 		Expression result = expression;
 		if (LPIUtil.isProductExpression(expression)) {
 			Expression prodSet    = expression.get(0);
-			List<Expression> onI  = ((IntensionalSetInterface) prodSet).getIndexExpressions();
-			Expression alpha      = ((IntensionalSetInterface) prodSet).getHead();
-			Expression conditionC = ((IntensionalSetInterface) prodSet).getCondition();
+			List<Expression> onI  = ((IntensionalSet) prodSet).getIndexExpressions();
+			Expression alpha      = ((IntensionalSet) prodSet).getHead();
+			Expression conditionC = ((IntensionalSet) prodSet).getCondition();
 			
 			RewritingProcess processExtendedByProductSet = GrinderUtil.extendContextualSymbolsAndConstraintWithIntensionalSet(prodSet, process);
 			
@@ -174,12 +174,12 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 						// return R_lift_product(prod_{{(on I) Alpha_1 | C and C'}}) * R_lift_product(prod_{{(on I) Alpha_2 | C and not C'})
 						Expression alpha1        = IfThenElse.getThenBranch(alpha);
 						Expression thenCondition = And.make(conditionC, conditionCPrime);
-						Expression thenSet       = IntensionalSet.copyWithNewHeadAndCondition(prodSet, alpha1, thenCondition);
+						Expression thenSet       = ((IntensionalSet)prodSet).setHeadAndCondition(alpha1, thenCondition);
 						Expression thenProduct   = Expressions.apply(FunctorConstants.PRODUCT, thenSet);
 		
 						Expression alpha2        = IfThenElse.getElseBranch(alpha);
 						Expression elseCondition = And.make(conditionC, Not.make(conditionCPrime));
-						Expression elseSet       = IntensionalSet.copyWithNewHeadAndCondition(prodSet, alpha2, elseCondition);
+						Expression elseSet       = ((IntensionalSet)prodSet).setHeadAndCondition(alpha2, elseCondition);
 						Expression elseProduct   = Expressions.apply(FunctorConstants.PRODUCT, elseSet);
 						
 						Expression thenResult = rewrite(thenProduct, process);
@@ -204,7 +204,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 						Expression singleAlpha             = PickSingleElement.pickSingleElement(singletonIntensionalSet, process);				
 						if (singleAlpha != null) {
 							// return alpha ^ {@link Cardinality R_card}(| C |_I)
-							List<Expression> indexExpressions = ((IntensionalSetInterface) prodSet).getIndexExpressions();
+							List<Expression> indexExpressions = ((IntensionalSet) prodSet).getIndexExpressions();
 							Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, indexExpressions.toArray(new Expression[indexExpressions.size()]));
 							Justification.beginEqualityStep("cardinality of equality boolean formula");
 							Justification.log(cardinalityOfIndexedFormula);

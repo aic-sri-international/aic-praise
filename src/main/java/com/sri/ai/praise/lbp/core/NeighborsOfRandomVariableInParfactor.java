@@ -42,7 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Justification;
@@ -54,7 +54,6 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
@@ -157,10 +156,10 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 				Justification.endEqualityStep(currentExpression);
 			}
 			
-			Expression factorPrime            = ((IntensionalSetInterface) saParfactor).getHead();
+			Expression factorPrime            = ((IntensionalSet) saParfactor).getHead();
 			Expression factorValuePrime       = LPIUtil.getFactorValueExpression(factorPrime, process);
-			Expression conditionPrime         = ((IntensionalSetInterface) saParfactor).getCondition();
-			List<Expression> indexExpressionsPrime = ((IntensionalSetInterface) saParfactor).getIndexExpressions();
+			Expression conditionPrime         = ((IntensionalSet) saParfactor).getCondition();
+			List<Expression> indexExpressionsPrime = ((IntensionalSet) saParfactor).getIndexExpressions();
 			
 			Trace.log("    Extend contextual symbols with I'");
 			RewritingProcess processIPrime = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saParfactor, process);
@@ -170,7 +169,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			
 			if (Justification.isEnabled()) {
 				Justification.beginEqualityStep("set of neighbors is set of factors restricted to those in which the random variable occurs");
-				currentExpression = IntensionalSet.makeSetFromIndexExpressionsList(
+				currentExpression = IntensionalSet.make(
 						Sets.getLabel(parfactor),
 						indexExpressionsPrime,
 						factorPrime,
@@ -184,13 +183,13 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			Expression conditionForBeingReferencedBy = LPIUtil.randomVariableIsReferencedByExpression(randomVariable, factorValuePrime, processIPrime);
 			Expression finalUnsimplifiedCondition    = And.make(conditionPrime, conditionForBeingReferencedBy);
 			if (Justification.isEnabled()) {
-				currentExpression = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(parfactor), indexExpressionsPrime, factorPrime, finalUnsimplifiedCondition);
+				currentExpression = IntensionalSet.make(Sets.getLabel(parfactor), indexExpressionsPrime, factorPrime, finalUnsimplifiedCondition);
 			}
 			Justification.endEqualityStep(currentExpression);
 			
 			Justification.beginEqualityStep("by simplifying condition");
 			Expression simplified = processIPrime.rewrite(R_formula_simplification, finalUnsimplifiedCondition);
-			currentExpression     = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(parfactor), indexExpressionsPrime, factorPrime, simplified);
+			currentExpression     = IntensionalSet.make(Sets.getLabel(parfactor), indexExpressionsPrime, factorPrime, simplified);
 			// the above line is needed even without justifications because it is used below.
 			Justification.endEqualityStep(currentExpression);
 

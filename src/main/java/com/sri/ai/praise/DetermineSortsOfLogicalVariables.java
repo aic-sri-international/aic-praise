@@ -9,11 +9,11 @@ import java.util.Set;
 
 import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 
@@ -32,9 +32,9 @@ public class DetermineSortsOfLogicalVariables {
 	 * Throws an error if types as defined by the index expressions or contextual symbol types (from the process) conflict with random variable value expression argument usage. 
 	 */
 	public static Map<Expression, Expression> getIndicesTypeMapFromIntensionalSetIndexExpressionsAndUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
-		Map<Expression, Expression> result = new LinkedHashMap<Expression, Expression>(IntensionalSet.getIndexToTypeMapWithDefaultNull(intensionalSet));
+		Map<Expression, Expression> result = new LinkedHashMap<Expression, Expression>(IndexExpressions.getIndexToTypeMapWithDefaultNull(intensionalSet));
 		RewritingProcess subProcess = GrinderUtil.extendContextualSymbols(result, process);
-		result = extendFreeSymbolsAndTypesFromUsageInRandomVariables(result, ((IntensionalSetInterface) intensionalSet).getHead(), null, subProcess);
+		result = extendFreeSymbolsAndTypesFromUsageInRandomVariables(result, ((IntensionalSet) intensionalSet).getHead(), null, subProcess);
 		return result;
 	}
 

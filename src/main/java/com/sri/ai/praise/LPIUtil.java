@@ -54,14 +54,16 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
+import com.sri.ai.expresso.api.SyntaxTree;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Apply;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
+import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -77,7 +79,6 @@ import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.core.IsDeterministicBooleanMessageValue;
@@ -988,11 +989,18 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: (m_V<-F, true, (on ), beingComputed)
 	 */
 	public static Expression argForMessageToVariableFromFactorRewriteCall(Expression msgToV_F, Expression beingComputed) {
-		Expression result = Tuple.make(msgToV_F, Expressions.TRUE, IntensionalSet.EMPTY_SCOPING_SYNTAX_TREE, beingComputed);
-		
+		Expression result = Tuple.make(msgToV_F, Expressions.TRUE, makeScopingSyntaxTree(new ArrayList<Expression>()), beingComputed);
 		return result;
 	}
 	
+	/** Makes a scoping expression out of a list of scoping variables. */
+	private static SyntaxTree makeScopingSyntaxTree(List<Expression> indexExpressions) {
+		Expression kleeneListExpression = Expressions.makeKleeneListIfNeeded(indexExpressions);
+		SyntaxTree kleeneListSyntaxTree = kleeneListExpression.getSyntaxTree();
+		SyntaxTree result = SyntaxTrees.makeCompoundSyntaxTree(IntensionalSet.SCOPED_VARIABLES_LABEL, kleeneListSyntaxTree);
+		return result;
+	}
+
 	/**
 	 * Convenience method for constructing a tuple argument of the form:<br> 
 	 * (m_V<-F, C, I, beingComputed)<br>
@@ -1445,13 +1453,13 @@ public class LPIUtil {
 		
 		set = StandardizedApartFrom.standardizedApartFrom(set, keyPrime, process);
 		
-		Expression       head      = ((IntensionalSetInterface) set).getHead();
+		Expression       head      = ((IntensionalSet) set).getHead();
 		Expression       key       = Tuple.get(head, 0);
 		Expression       value     = Tuple.get(head, 1);
-		Expression       condition = ((IntensionalSetInterface) set).getCondition();
+		Expression       condition = ((IntensionalSet) set).getCondition();
 		
 		Expression newCondition = And.make(condition, Equality.make(key, keyPrime));
-		Expression result       = IntensionalSet.copyWithNewHeadAndCondition(set, value, newCondition);
+		Expression result       = ((IntensionalSet)set).setHeadAndCondition(value, newCondition);
 		           result       = process.rewrite(LBPRewriter.R_simplify, result);
 		
 		return result;

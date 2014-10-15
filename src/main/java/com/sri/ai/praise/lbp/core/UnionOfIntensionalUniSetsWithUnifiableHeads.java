@@ -42,7 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.Equality;
@@ -82,11 +82,11 @@ public class UnionOfIntensionalUniSetsWithUnifiableHeads extends AbstractLBPHier
 			Expression set2 = expression.get(1);
 			set2 = StandardizedApartFrom.standardizedApartFrom(set2, set1, process);
 			
-			Expression head1 = ((IntensionalSetInterface) set1).getHead();
-			Expression head2 = ((IntensionalSetInterface) set2).getHead();
+			Expression head1 = ((IntensionalSet) set1).getHead();
+			Expression head2 = ((IntensionalSet) set2).getHead();
 			
-			Expression condition1 = ((IntensionalSetInterface) set1).getCondition();
-			Expression condition2 = ((IntensionalSetInterface) set2).getCondition();
+			Expression condition1 = ((IntensionalSet) set1).getCondition();
+			Expression condition2 = ((IntensionalSet) set2).getCondition();
 			
 			Expression newCondition =
 					And.make(
@@ -94,8 +94,8 @@ public class UnionOfIntensionalUniSetsWithUnifiableHeads extends AbstractLBPHier
 							Or.make(condition1, condition2)
 							);
 			
-			List<Expression> indexExpressions1 = ((IntensionalSetInterface) set1).getIndexExpressions();
-			List<Expression> indexExpressions2 = ((IntensionalSetInterface) set2).getIndexExpressions();
+			List<Expression> indexExpressions1 = ((IntensionalSet) set1).getIndexExpressions();
+			List<Expression> indexExpressions2 = ((IntensionalSet) set2).getIndexExpressions();
 			List<Expression> newIndexExpressions = new ArrayList<Expression>(indexExpressions1);
 			newIndexExpressions.addAll(indexExpressions2);
 			

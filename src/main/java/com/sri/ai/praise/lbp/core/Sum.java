@@ -45,7 +45,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.core.DefaultLambdaExpression;
 import com.sri.ai.expresso.helper.Expressions;
@@ -177,7 +177,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			else {
 				
 				Expression incomingMessagesSet = productOfIncomingMessages.get(0);
-				Expression indexExpression     = ((IntensionalSetInterface) incomingMessagesSet).getIndexExpressions().get(0);
+				Expression indexExpression     = ((IntensionalSet) incomingMessagesSet).getIndexExpressions().get(0);
 				Expression NPrime              = IndexExpressions.getType(indexExpression);
 				
 				Trace.log("// N' = {}", NPrime);
@@ -274,8 +274,8 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			Justification.beginEqualityStep("externalizing conditional on neighbors");
 			List<Expression> ln1 = Util.list(n1);
 			List<Expression> ln2 = Util.list(n2);
- 			Expression subSummation1 = Expressions.apply(FunctorConstants.SUM, ((IntensionalSetInterface) currentExpression.get(0)).setIndexExpressions(ln1));
-			Expression subSummation2 = Expressions.apply(FunctorConstants.SUM, ((IntensionalSetInterface) currentExpression.get(0)).setIndexExpressions(ln2));
+ 			Expression subSummation1 = Expressions.apply(FunctorConstants.SUM, ((IntensionalSet) currentExpression.get(0)).setIndexExpressions(ln1));
+			Expression subSummation2 = Expressions.apply(FunctorConstants.SUM, ((IntensionalSet) currentExpression.get(0)).setIndexExpressions(ln2));
 			Expression ifThenElse = IfThenElse.make(condition, subSummation1, subSummation2);
 			Justification.endEqualityStep(ifThenElse);
 		}
@@ -313,10 +313,10 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression n2        = IfThenElse.getElseBranch(NPrime);
 
 		Expression prodIntensionalSet   = productOfIncomingMessages.get(0);
-		Expression indexExpression      = ((IntensionalSetInterface) prodIntensionalSet).getIndexExpressions().get(0);
+		Expression indexExpression      = ((IntensionalSet) prodIntensionalSet).getIndexExpressions().get(0);
 		Expression index                = IndexExpressions.getIndex(indexExpression);
-		Expression msgToF_V             = ((IntensionalSetInterface) prodIntensionalSet).getHead();
-		Expression prodScopingCondition = ((IntensionalSetInterface) prodIntensionalSet).getCondition();
+		Expression msgToF_V             = ((IntensionalSet) prodIntensionalSet).getHead();
+		Expression prodScopingCondition = ((IntensionalSet) prodIntensionalSet).getCondition();
 
 		Expression productOfIncomingMessagesN1 = LPIUtil.makeProductOfMessages(index, n1, msgToF_V, prodScopingCondition);
 		Expression productOfIncomingMessagesN2 = LPIUtil.makeProductOfMessages(index, n2, msgToF_V, prodScopingCondition);
@@ -352,11 +352,11 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		LPIUtil.assertProductOk(productOfIncomingMessages);
 
 		Expression incomingMessagesSet          = productOfIncomingMessages.get(0);
-		Expression indexExpression              = ((IntensionalSetInterface) incomingMessagesSet).getIndexExpressions().get(0);
+		Expression indexExpression              = ((IntensionalSet) incomingMessagesSet).getIndexExpressions().get(0);
 		Expression indexOfOfIncomingMessagesSet = IndexExpressions.getIndex(indexExpression);
-		Expression msgToF_V                     = ((IntensionalSetInterface) incomingMessagesSet).getHead();
+		Expression msgToF_V                     = ((IntensionalSet) incomingMessagesSet).getHead();
 		Expression F                            = msgToF_V.get(0);
-		Expression incomingMessagesSetCondition = ((IntensionalSetInterface) incomingMessagesSet).getCondition();
+		Expression incomingMessagesSetCondition = ((IntensionalSet) incomingMessagesSet).getCondition();
 
 		Expression toBeSummedOut = null;
 		if (!ExtensionalSet.isEmptySet(NPrime)) {
@@ -528,14 +528,14 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression result = 
 			Expressions.apply(
 					FunctorConstants.SUM,
-					((IntensionalSetInterface) currentExpression.get(0)).setIndexExpressions(ExtensionalSet.getElements(newN)));
+					((IntensionalSet) currentExpression.get(0)).setIndexExpressions(ExtensionalSet.getElements(newN)));
 		return result;
 	}
 
 	public static Expression replaceHead(Expression currentExpression, Expression newHead) {
 		Expression newSet = null;
 		if (Sets.isIntensionalSet(currentExpression.get(0))) {
-			newSet = ((IntensionalSetInterface) currentExpression.get(0)).setHead(newHead);
+			newSet = ((IntensionalSet) currentExpression.get(0)).setHead(newHead);
 		} 
 		else {
 			// must be a singleton

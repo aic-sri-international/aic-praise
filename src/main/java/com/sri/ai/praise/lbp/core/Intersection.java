@@ -42,7 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -57,7 +57,6 @@ import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.equality.cardinality.CardinalityUtil;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
@@ -104,7 +103,7 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 				||
 				(Sets.isIntensionalUniSet(set1) && Sets.isIntensionalUniSet(set2))) {
 			Trace.log("Set1 is { (on I1) Alpha1 | C1 } and Set2 is { (on I2) Alpha2 | C2 } (or multiset version)");
-			if (CheapDisequalityModule.isACheapDisequality(((IntensionalSetInterface) set1).getHead(), ((IntensionalSetInterface) set2).getHead(), process)) {
+			if (CheapDisequalityModule.isACheapDisequality(((IntensionalSet) set1).getHead(), ((IntensionalSet) set2).getHead(), process)) {
 				Trace.log("    is guaranteed Alpha1 != Alpha2");
 				Trace.log("    return {}"); 
 				
@@ -112,9 +111,9 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 			}
 			else {
 				Trace.log("    standardize Set1 apart from (I2, Alpha2, C2)");
-				List<Expression> i2        = ((IntensionalSetInterface) set2).getIndexExpressions();
-				Expression alpha2          = ((IntensionalSetInterface) set2).getHead();
-				Expression c2              = ((IntensionalSetInterface) set2).getCondition();
+				List<Expression> i2        = ((IntensionalSet) set2).getIndexExpressions();
+				Expression alpha2          = ((IntensionalSet) set2).getHead();
+				Expression c2              = ((IntensionalSet) set2).getCondition();
 				Expression tupleI2Alpha2C2 = Tuple.make(Tuple.make(i2), alpha2, c2);
 				
 				Expression saSet1           = StandardizedApartFrom.standardizedApartFrom(set1, tupleI2Alpha2C2, process);
@@ -123,8 +122,8 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 				subProcess                  = GrinderUtil.extendContextualSymbolsWithIntensionalSetIndices(saSet1, subProcess);
 
 				Trace.log("    C <- R_complete_normalize(Alpha1 = Alpha2 and C1 and C2)");
-				Expression alpha1 = ((IntensionalSetInterface) saSet1).getHead();
-				Expression c1     = ((IntensionalSetInterface) saSet1).getCondition();
+				Expression alpha1 = ((IntensionalSet) saSet1).getHead();
+				Expression c1     = ((IntensionalSet) saSet1).getCondition();
 				Expression c      = subProcess.rewrite(R_complete_normalize, CardinalityUtil.makeAnd(Equality.make(alpha1, alpha2), CardinalityUtil.makeAnd(c1, c2)));
 				if (c.equals(Expressions.FALSE)) {
 					Trace.log("    if C is \"false\"") ;
@@ -135,10 +134,10 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 					Trace.log("    I <- concatenation of I1 and I2");
 					Trace.log("    return { (on I) Alpha1 | C } (or multiset version)");
 					List<Expression> i = new ArrayList<Expression>();
-					i.addAll(((IntensionalSetInterface) saSet1).getIndexExpressions());
-					i.addAll(((IntensionalSetInterface) set2).getIndexExpressions());
+					i.addAll(((IntensionalSet) saSet1).getIndexExpressions());
+					i.addAll(((IntensionalSet) set2).getIndexExpressions());
 					
-					Expression unsimplifiedResult = IntensionalSet.makeSetFromIndexExpressionsList(Sets.getLabel(set1), i, alpha1, c);
+					Expression unsimplifiedResult = IntensionalSet.make(Sets.getLabel(set1), i, alpha1, c);
 					result = process.rewrite(R_simplify, unsimplifiedResult);
 //					System.out.println("Unsimplified: " + unsimplifiedResult);	
 //					System.out.println("Simplified  : " + result + "\n");	

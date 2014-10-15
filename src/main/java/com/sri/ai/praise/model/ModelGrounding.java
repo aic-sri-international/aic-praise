@@ -49,15 +49,15 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IntensionalSetInterface;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSet;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
@@ -382,7 +382,7 @@ public class ModelGrounding {
 					// Ensure the free variables returned are not sort names
 					Set<Expression> sorts = new LinkedHashSet<Expression>();
 					if (Sets.isIntensionalSet(parfactor)) {
-						sorts.addAll(IntensionalSet.getIndexToTypeMapWithDefaultNull(parfactor).values());
+						sorts.addAll(IndexExpressions.getIndexToTypeMapWithDefaultNull(parfactor).values());
 					}
 					if (!sorts.containsAll(freeVariables)) {
 						errors.add(new ModelGroundingError(
@@ -724,9 +724,9 @@ public class ModelGrounding {
 			// Extract relevant information to aid grounding
 			// from the parfactor.
 			if (isIntensionalParfactor()) {
-				Expression intensionalFactor = ((IntensionalSetInterface) parfactor).getHead();
-				intensionalCondition = ((IntensionalSetInterface) parfactor).getCondition();
-				Map<Expression, Expression> indexToTypeMap = IntensionalSet.getIndexToTypeMapWithDefaultNull(parfactor);
+				Expression intensionalFactor = ((IntensionalSet) parfactor).getHead();
+				intensionalCondition = ((IntensionalSet) parfactor).getCondition();
+				Map<Expression, Expression> indexToTypeMap = IndexExpressions.getIndexToTypeMapWithDefaultNull(parfactor);
 				// Add type names that correspond to sort names
 				for (Map.Entry<Expression, Expression> indexToDomain : indexToTypeMap.entrySet()) {
 					Expression possibleSortName = indexToDomain.getValue();
