@@ -58,7 +58,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOfType;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.praise.LPIUtil;
@@ -664,9 +664,9 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		result = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(queryAtom, result);
 		result = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(model.getParfactorsDeclaration().getParfactors()), result);
 
-		CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable() {
+		CardinalityOfType.registerTypeSizeOfSymbolOrTypeWithProcess(new CardinalityOfType.TypeSizeOfSymbolOrType() {
 			@Override
-			public Integer size(Expression logicalVariable, RewritingProcess process) {
+			public Integer getSize(Expression logicalVariable, RewritingProcess process) {
 				return n;
 			}
 		}, result);

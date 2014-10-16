@@ -58,7 +58,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOfType;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
@@ -556,7 +556,7 @@ public class Model {
 
 		Model model = new Model(modelDefinitionExpression, knownRandomVariableNameAndArities);
 		
-		CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(
+		CardinalityOfType.registerTypeSizeOfSymbolOrTypeWithProcess(
 				new ModelLookupTypeSizeOfLogicalVariable(model), process);
 
 		process.putGlobalObject(GLOBAL_KEY_MODEL_INSTANCE,   model);
@@ -1034,7 +1034,7 @@ public class Model {
 		for (Expression parfactor : parfactorsDeclaration.getParfactors()) {
 			if (Sets.isIntensionalSet(parfactor)) {
 				for (Expression type : IndexExpressions.getIndexDomains(parfactor)) {
-					if (!CardinalityTypeOfLogicalVariable.isTypeSyntacticFunctionApplication(type) &&
+					if (!CardinalityOfType.isTypeSyntacticFunctionApplication(type) &&
 					    !sortNamesKnown.contains(type)) {
 						sortDeclarations.add(new SortDeclaration(type));
 						sortNamesKnown.add(type);

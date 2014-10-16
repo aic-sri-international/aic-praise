@@ -46,7 +46,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.TotalRewriter;
-import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOfType;
 import com.sri.ai.grinder.library.set.extensional.EqualityOfExtensionalUniSets;
 import com.sri.ai.grinder.library.set.intensional.EqualityOfIntensionalUniSets;
 import com.sri.ai.praise.lbp.LBPRewriter;
@@ -119,7 +119,7 @@ public class AutomorphismTest extends AbstractLPITest {
 	//
 	// PRIVATE METHODS
 	//
-	class AutomorphismData extends TestData implements CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable {
+	class AutomorphismData extends TestData implements CardinalityOfType.TypeSizeOfSymbolOrType {
 		private String E; 
 		private Expression exprE;
 		private int cardinality;
@@ -143,7 +143,7 @@ public class AutomorphismTest extends AbstractLPITest {
 		//
 		// START-TypeSizeOfLogicalVariable
 		@Override
-		public Integer size(Expression logicalVariable, RewritingProcess process) {
+		public Integer getSize(Expression logicalVariable, RewritingProcess process) {
 			return cardinality;
 		}
 		// END-TypeSizeOfLogicalVariable
@@ -163,7 +163,7 @@ public class AutomorphismTest extends AbstractLPITest {
 			}
 			
 			// Ensure explicit counts added for all variable types.
-			CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(this, process);
+			CardinalityOfType.registerTypeSizeOfSymbolOrTypeWithProcess(this, process);
 			
 			// get rid of equalities of intensional sets first
 			Rewriter exhaustiveEqualityOfIntensionalUniSets =

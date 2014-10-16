@@ -54,7 +54,7 @@ import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOfType;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.lbp.LBPFactory;
@@ -1755,9 +1755,9 @@ public class RuleConverterTest {
 	
 	private static RewritingProcess getNewRewritingProcessWithDefaultTypeSize(final int n) {
 		RewritingProcess result = LBPFactory.newLBPProcess(Expressions.TRUE);
-		CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable() {
+		CardinalityOfType.registerTypeSizeOfSymbolOrTypeWithProcess(new CardinalityOfType.TypeSizeOfSymbolOrType() {
 			@Override
-			public Integer size(Expression logicalVariable, RewritingProcess process) {
+			public Integer getSize(Expression logicalVariable, RewritingProcess process) {
 				return n;
 			}
 		}, result);
@@ -1773,9 +1773,9 @@ public class RuleConverterTest {
 	/** Prepares rewriting process with type cardinalities contextual symbols, assuming contextual constraint equal to "true" */
 	private static RewritingProcess getNewRewritingProcessWithDefaultTypeSizeAndContextualSymbolsEqualToFreeVariablesInGivenExpression(final int n, Expression expression) {
 		RewritingProcess result = LBPFactory.newLBPProcess(Expressions.TRUE);
-		CardinalityTypeOfLogicalVariable.registerTypeSizeOfLogicalVariableWithProcess(new CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable() {
+		CardinalityOfType.registerTypeSizeOfSymbolOrTypeWithProcess(new CardinalityOfType.TypeSizeOfSymbolOrType() {
 			@Override
-			public Integer size(Expression logicalVariable, RewritingProcess process) {
+			public Integer getSize(Expression logicalVariable, RewritingProcess process) {
 				return n;
 			}
 		}, result);

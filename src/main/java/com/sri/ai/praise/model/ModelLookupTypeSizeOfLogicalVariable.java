@@ -42,7 +42,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityTypeOfLogicalVariable;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOfType;
 import com.sri.ai.praise.PRAiSEConfiguration;
 
 /**
@@ -55,7 +55,7 @@ import com.sri.ai.praise.PRAiSEConfiguration;
  */
 @Beta
 public class ModelLookupTypeSizeOfLogicalVariable implements
-		CardinalityTypeOfLogicalVariable.TypeSizeOfLogicalVariable {
+		CardinalityOfType.TypeSizeOfSymbolOrType {
 
 	private boolean lookupSizes = PRAiSEConfiguration.isAllTypeSizesKnownInModel();
 	private Model   model       = null;
@@ -68,7 +68,7 @@ public class ModelLookupTypeSizeOfLogicalVariable implements
 	//
 	// START-TypeSizeOfLogicalVariable
 	@Override
-	public Integer size(Expression logicalVariable, RewritingProcess process) {
+	public Integer getSize(Expression logicalVariable, RewritingProcess process) {
 		Integer result = null;
 		if (lookupSizes) {
 			if (defaultSize == null) {
@@ -103,7 +103,7 @@ public class ModelLookupTypeSizeOfLogicalVariable implements
 			// in the process.
 			size = lookupAndPossiblyUpdateSize(size, 
 					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.CARDINALITY, 
-							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(CardinalityTypeOfLogicalVariable.TYPE_LABEL, logicalVariable)),
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(CardinalityOfType.TYPE_LABEL, logicalVariable)),
 					process); 
 			
 			// Note: < 0 implies its infinity and therefore unknown
