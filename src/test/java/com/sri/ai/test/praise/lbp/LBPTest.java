@@ -1465,7 +1465,8 @@ public class LBPTest extends AbstractLPITest {
 						"{ ( on A, A', B ) ( ([ m(A) ]), ([ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else (if m(B) then 5 else 30) else 1 ]) ) | A != X and A' != B and (A = A' or A = B) and (A' != A or B != X) }",
 						"{ ( on B, A, B' ) ( ([ m(B) ]), ([ if gA(A) and gB(B') then if m(A) then if m(B') then 10 else 1 else (if m(B') then 5 else 30) else 1 ]) ) | X != B and A != B' and (B = A or B = B') and (A != X or B' != B) }",
 						false,
-					"{ ( on A, A', B ) ( ([ m(A) ]), ([ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else (if m(B) then 5 else 30) else 1 ]) ) | A != X and A' != B and (A = A' or A = B) and (A' != A or B != X) and not (B = A and A' != A and A' != X or A' = A and B != A) }"),
+						"{ ( on A, A', B ) (  [ m(A) ],   [ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else if m(B) then 5 else 30 else 1 ]) | (A != X) and (A' != B) and ((A' != A) or (B != X)) and not ((A' != X) or (B != A)) }"),
+//					"{ ( on A, A', B ) ( ([ m(A) ]), ([ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else (if m(B) then 5 else 30) else 1 ]) ) | A != X and A' != B and (A = A' or A = B) and (A' != A or B != X) and not (B = A and A' != A and A' != X or A' = A and B != A) }"),
 //					"{ ( on A, A', B ) ( ([ m(A) ]), ([ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else (if m(B) then 5 else 30) else 1 ]) ) | A != X and A' != B and (A = A' or A = B) and (A' != A or B != X) and (B != A or A' = A or A' = X) and (A' != A or B = A) }"),
 //					"{ ( on A) ( ([ m(A) ]), ([ if gA(X) and gB(A) then if m(X) then if m(A) then 10 else 1 else (if m(A) then 5 else 30) else 1 ]) ) | X != A }"),
 				//
