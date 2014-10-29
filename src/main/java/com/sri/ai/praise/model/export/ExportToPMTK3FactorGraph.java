@@ -52,7 +52,6 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Parser;
-import com.sri.ai.expresso.api.SyntaxLeaf;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
@@ -101,7 +100,9 @@ public class ExportToPMTK3FactorGraph {
 		Map<Expression, Expression> globalObjects = new LinkedHashMap<Expression, Expression>();
 		globalObjects.put(parser.parse("| Object |"), Expressions.makeSymbol(size)); 
 		// Ensure type sizes match up.
-		Configuration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());		
+		Configuration.setProperty(PRAiSEConfiguration.KEY_MODEL_DEFAULT_SIZE_OF_ALL_TYPES, size.toString());
+		// Increase past the default of 10,000
+		Configuration.setProperty(PRAiSEConfiguration.KEY_MAX_ALLOWED_SIZE_FOR_GROUNDED_MODEL, new Integer(50000).toString());
 		
 		Expression modelDefinition = parser.parse(modelDeclaration);
 	
@@ -486,7 +487,7 @@ public class ExportToPMTK3FactorGraph {
 			// Note: this just collects the random variable value expressions and doesn't replace them
 			// however, need to use the replaceAllOccurrences() method in order to ensure traversal
 			// order is consistent.
-			factorValue.replaceAllOccurrences(new CollectRandomVariableValueExpressions(groundedModel, randomVariableValueExpressions), 
+			factorValue.replaceAllOccurrences(new CollectRandomVariableValueExpressions(randomVariableValueExpressions), 
 											process);
 			
 			for (Expression randomVariableValueExpression : randomVariableValueExpressions) {
@@ -504,7 +505,7 @@ public class ExportToPMTK3FactorGraph {
 			while (rangesCartesianProductEnumeration.hasMoreElements()) {
 				List<Expression> rangeValues = rangesCartesianProductEnumeration.nextElement();
 				
-				Expression parfactorWithRangeValues = factorValue.replaceAllOccurrences(new ValueReplacementFunction(groundedModel, randomVariableValueExpressions, rangeValues), process);
+				Expression parfactorWithRangeValues = factorValue.replaceAllOccurrences(new ValueReplacementFunction(randomVariableValueExpressions, rangeValues), process);
 				
 				// With values substituted (i.e. {false,true}) for each random variable value expression
 				// this should simplify to a rational - if not something is wrong.
@@ -553,28 +554,11 @@ public class ExportToPMTK3FactorGraph {
 		}
 	}
 	
-	private static boolean isRandomVariableValueExpression(Model groundedModel, Expression expressionE) {
-		boolean result = false;
-		
-		if (expressionE.getFunctor() != null) {		
-			SyntaxLeaf predicateSymbol = (SyntaxLeaf) expressionE.getFunctor();
-			if (predicateSymbol.getValue() instanceof String) {
-				if (groundedModel.getKnownRandomVariableNameAndArities().contains(predicateSymbol.toString())) {
-					result = true;
-				}
-			}
-		}
-		
-		return result;
-	}
-	
 	private static class CollectRandomVariableValueExpressions extends AbstractReplacementFunctionWithContextuallyUpdatedProcess { 
-		private Model            groundedModel                  = null;
 		private List<Expression> randomVariableValueExpressions = null;
 		
 		
-		public CollectRandomVariableValueExpressions(Model groundedModel, List<Expression> randomVariableValueExpressions) {
-			this.groundedModel                  = groundedModel;
+		public CollectRandomVariableValueExpressions(List<Expression> randomVariableValueExpressions) {
 			this.randomVariableValueExpressions = randomVariableValueExpressions;
 		}
 		
@@ -584,7 +568,7 @@ public class ExportToPMTK3FactorGraph {
 		public Expression apply(Expression expressionE, RewritingProcess process) {
 			
 			// if a random variable value expression and we've not seen already.
-			if (isRandomVariableValueExpression(groundedModel, expressionE) &&
+			if (LPIUtil.isRandomVariableValueExpression(expressionE, process) &&
 				!randomVariableValueExpressions.contains(expressionE)) {
 				randomVariableValueExpressions.add(expressionE);
 			}
@@ -597,12 +581,10 @@ public class ExportToPMTK3FactorGraph {
 	}
 	
 	private static class ValueReplacementFunction extends AbstractReplacementFunctionWithContextuallyUpdatedProcess {
-		private Model            groundedModel                  = null;
 		private List<Expression> randomVariableValueExpressions = null;
 		private List<Expression> rangeValues                    = null;
 		
-		public ValueReplacementFunction(Model groundedModel, List<Expression> randomVariableValueExpressions, List<Expression> rangeValues) {
-			this.groundedModel                  = groundedModel;
+		public ValueReplacementFunction(List<Expression> randomVariableValueExpressions, List<Expression> rangeValues) {
 			this.randomVariableValueExpressions = randomVariableValueExpressions;
 			this.rangeValues                    = rangeValues;
 		}
@@ -613,7 +595,7 @@ public class ExportToPMTK3FactorGraph {
 		public Expression apply(Expression expressionE, RewritingProcess process) {
 			Expression result = expressionE;
 			
-			if (isRandomVariableValueExpression(groundedModel, expressionE)) {
+			if (LPIUtil.isRandomVariableValueExpression(expressionE, process)) {
 				result = rangeValues.get(randomVariableValueExpressions.indexOf(expressionE));
 			}
 			

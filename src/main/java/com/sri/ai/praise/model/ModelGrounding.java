@@ -55,6 +55,7 @@ import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.SemanticSubstitute;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOfType;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -732,7 +733,7 @@ public class ModelGrounding {
 					Expression possibleSortName = indexToDomain.getValue();
 					// Exclude 'null' and 'type(<Logical Variable>)' types as these do not
 					// correspond to sort names.
-					if (possibleSortName == null || ! possibleSortName.getSyntacticFormType().equals("Syntactic function")) {
+					if (possibleSortName != null && !CardinalityOfType.isTypeSyntacticFunctionApplication(possibleSortName)) {
 						indexToSortNameMap.put(indexToDomain.getKey(), possibleSortName);
 					}
 				}
