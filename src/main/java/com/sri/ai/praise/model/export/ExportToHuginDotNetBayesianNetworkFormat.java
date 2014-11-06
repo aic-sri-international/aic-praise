@@ -97,11 +97,7 @@ public class ExportToHuginDotNetBayesianNetworkFormat {
 			Set<Expression> randomVariableValues = collectDistinctGroundedRandomVariables(factorValue, process);
 			factorToRandomVariables.put(factorValue, new ArrayList<>(randomVariableValues));
 			for (Expression rvv : randomVariableValues) {
-				List<Expression> rvvFactors = randomVariableToFactors.get(rvv);
-				if (rvvFactors == null) {
-					rvvFactors = new ArrayList<>();
-					randomVariableToFactors.put(rvv, rvvFactors);
-				}
+				List<Expression> rvvFactors = Util.getValuePossiblyCreatingIt(randomVariableToFactors, rvv, ArrayList.class);			
 				rvvFactors.add(factorValue);
 			}			
 		}
