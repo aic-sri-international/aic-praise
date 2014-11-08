@@ -39,6 +39,7 @@ package com.sri.ai.praise.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -82,6 +83,7 @@ public class ModelGrounding {
 		private Model groundedModel = null;
 		private Model groundedFrom  = null;
 		private List<Pair<Expression, List<Expression>>> parfactorToGroundFactors =  null;
+		private RewritingProcess process = null;
 		
 		public Model getGroundedModel() {
 			return groundedModel;
@@ -95,10 +97,15 @@ public class ModelGrounding {
 			return parfactorToGroundFactors;
 		}
 		
-		private GroundedModelResult(Model groundModel, Model groundedFrom, List<Pair<Expression, List<Expression>>> parfactorToGroundFactors) {
+		public RewritingProcess getRewritingProcess() {
+			return process;
+		}
+		
+		private GroundedModelResult(Model groundModel, Model groundedFrom, List<Pair<Expression, List<Expression>>> parfactorToGroundFactors, RewritingProcess process) {
 			this.groundedModel            = groundModel;
 			this.groundedFrom             = groundedFrom;
 			this.parfactorToGroundFactors = parfactorToGroundFactors;
+			this.process                  = process;
 		}
 	}
 
@@ -173,6 +180,44 @@ public class ModelGrounding {
 			this.errors.addAll(errors);
 		}
 	}
+	
+	/**
+	 * Ground the model specified by the given declaration, the cardinality of
+	 * all of the sorts/types used in the model should be explicitly set in the
+	 * model or passed in as arguments to this call (i.e. if the model does not
+	 * define a cardinality for some or all of the sorts in its declaration).
+	 * 
+	 * @param modelDeclaration
+	 *            the declaration of the model to be grounded.
+	 * @param explicitSortSizes
+	 *            a list of pairs comprising of (sort name, sort size).
+	 * @return a GroundedModelResult
+	 * @throws ModelGroundingException
+	 *             thrown if errors are encountered when attempting to create
+	 *             the grounded model.
+	 */
+	public static GroundedModelResult groundModel(String modelDeclaration, Pair... explicitSortSizes) 
+			throws ModelGroundingException {
+		// Can be called with explicitly assigned sizes to the sorts associated with the model
+		Map<Expression, Expression> globalObjects = new LinkedHashMap<Expression, Expression>();
+		if (explicitSortSizes != null) {
+			for (Pair sortSize : explicitSortSizes) {
+				globalObjects.put(Expressions.parse("| "+sortSize.first+" |"), Expressions.makeSymbol(sortSize.second));
+			}
+		}
+		
+		Expression modelDefinition = Expressions.parse(modelDeclaration);
+		Model      modelToExport   = new Model(modelDefinition, Collections.emptySet());
+		
+		RewritingProcess process = LBPFactory.newLBPProcess(modelDefinition);
+		process.getGlobalObjects().putAll(globalObjects);
+		
+		process = Model.setRewritingProcessesModel(modelDefinition, modelToExport.getKnownRandomVariableNameAndArities(), process);
+
+		GroundedModelResult result = ModelGrounding.groundModel(process);
+		
+		return result;
+	}
 
 	/**
 	 * Ground the model contained in the provided rewriting process, which
@@ -188,7 +233,8 @@ public class ModelGrounding {
 	 */
 	public static GroundedModelResult groundModel(RewritingProcess process)
 			throws ModelGroundingException {
-		return groundModel(null, null, process);
+		return groundModel(Model.getModelInstance(process).getName(), 
+						   Model.getModelInstance(process).getDescription(), process);
 	}
 
 	/**
@@ -318,14 +364,14 @@ public class ModelGrounding {
 		Expression groundParfactor = ExtensionalSet.makeUniSetExpression(new ArrayList<Expression>(groundFactors));
 		ParfactorsDeclaration groundParfactorsDeclaration = ParfactorsDeclaration.makeParfactorsDeclaration(groundParfactor);
 		
-		Model groundedModel = Model.constructFromParts(groundModelDeclaration.preGroundModel.getName(), 
-				groundModelDeclaration.preGroundModel.getDescription(), 
+		Model groundedModel = Model.constructFromParts(name, 
+				description, 
 				groundModelDeclaration.preGroundModel.getSortDeclarations(), 
 				groundModelDeclaration.preGroundModel.getRandomVariableDeclarations(), 
 				groundParfactorsDeclaration, 
 				groundModelDeclaration.preGroundModel.getKnownRandomVariableNameAndArities()); 
 				
-		GroundedModelResult groundedModelResult = new GroundedModelResult(groundedModel, groundModelDeclaration.groundedFrom, parfactorToGroundFactors);
+		GroundedModelResult groundedModelResult = new GroundedModelResult(groundedModel, groundModelDeclaration.groundedFrom, parfactorToGroundFactors, process);
 		
 		return groundedModelResult;
 	}

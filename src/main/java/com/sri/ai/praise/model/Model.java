@@ -264,7 +264,6 @@ public class Model {
 	 *             expression.
 	 */
 	public Model(Expression modelDefinition, Set<String> knownRandomVariableNameAndArities) {
-		this.modelDeclaration = modelDefinition.toString();
 		if (knownRandomVariableNameAndArities != null) {
 			this.knownRandomVariableNameAndArities.addAll(knownRandomVariableNameAndArities);
 			this.knownRandomPredicatesSignatures = mapIntoList(this.knownRandomVariableNameAndArities, FunctionSignature::new);
@@ -323,11 +322,11 @@ public class Model {
 		if (modelDeclaration == null) {
 			StringBuilder md = new StringBuilder();
 			md.append(FUNCTOR_MODEL_DECLARATION);
-			md.append("(");
-			if (this.name != null) {
+			md.append("(");			
+			if (this.name != null && !this.name.toString().equals("")) {
 				md.append(this.name.toString()+",\n");
 			}
-			if (this.description != null) {
+			if (this.description != null && !this.description.toString().equals("")) {
 				md.append(this.description.toString()+",\n");
 			}
 			for (RandomVariableDeclaration rvd : this.randomVariableDeclarations) {
