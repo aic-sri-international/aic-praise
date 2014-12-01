@@ -147,7 +147,7 @@ public class LBPTest extends AbstractLPITest {
 		assertEquals(parse(expectedString), actual);
 		
 		expressionString = "if smart(X) and X = john and smart(X) then 1 else 0";
-		expectedString = "if X = john then if smart(X) and smart(X) then 1 else 0 else 0";
+		expectedString = "if X = john then if smart(X) then 1 else 0 else 0";
 		actual = rewriter.rewrite(parse(expressionString), process);
 		assertEquals(parse(expectedString), actual);
 

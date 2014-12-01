@@ -107,7 +107,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 			
 		extractedPreviousMessages = extractPreviousMessages(expressionE, process);
 
-		result = CommutativeAssociative.make(FunctorConstants.UNION, new ArrayList<Expression>(extractedPreviousMessages), Sets.EMPTY_SET);
+		result = CommutativeAssociative.make(FunctorConstants.UNION, new ArrayList<Expression>(extractedPreviousMessages), Sets.EMPTY_SET, false);
 		
 		Justification.end("Embedded messages are {}", result);
 		return result;

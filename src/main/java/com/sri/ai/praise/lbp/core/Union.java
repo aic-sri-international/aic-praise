@@ -185,7 +185,7 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 	}
 
 	public static Expression make(List<Expression> arguments) {
-		Expression result = CommutativeAssociative.make(FunctorConstants.UNION, arguments, Sets.EMPTY_SET);
+		Expression result = CommutativeAssociative.make(FunctorConstants.UNION, arguments, Sets.EMPTY_SET, false);
 		return result;
 	}
 
