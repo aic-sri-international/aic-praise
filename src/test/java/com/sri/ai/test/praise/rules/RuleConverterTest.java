@@ -1714,8 +1714,18 @@ public class RuleConverterTest {
 		}
 	}
 	
-
-
+	@Test
+	public void testRVequalRVTranslateException() {
+		String modelString = "// RANDOM VARIABLE DECLARATIONS:\n" +
+				"random earthquake: -> Boolean;\n" +
+				"random burglary: -> Boolean;\n" +
+				"earthquake 0.5;\n" +
+				"burglary 0.5;\n" +
+				"if earthquake = burglary then 1 else 0;";
+		
+		RuleConverter.makeModel("Test Model", "Description", modelString);
+	}
+	
 	/*===================================================================================
 	 * PRIVATE METHODS
 	 *=================================================================================*/		

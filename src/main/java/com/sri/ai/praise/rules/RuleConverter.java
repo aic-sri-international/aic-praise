@@ -387,9 +387,12 @@ public class RuleConverter {
 		for (Expression randomVariableDeclaration : randomVariableDeclarations) {
 			List<Expression> args = randomVariableDeclaration.getArguments();
 			for (int ii = 2; ii < args.size() - 1; ii++) {
-				String argName = args.get(ii).toString();
+				Expression argName = args.get(ii);
 				if (!sortNames.contains(argName)) {
-					missingSorts.add(argName);
+					// Ensure we don't identify an in-built sort as being missing.
+					if (!SortDeclaration.isNameOfInBuilt(argName)) {
+						missingSorts.add(argName.toString());
+					}
 				}
 			}
 		}
@@ -925,7 +928,7 @@ public class RuleConverter {
 							// Extend predicate2 from a function to a relation
 							List<Expression> predicate2Args = new ArrayList<Expression>(predicate2.getArguments());
 							predicate2Args.add(newUniqueVariable);
-							predicate2 = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(predicate2.getFunctor(), predicate2Args.toArray());
+							predicate2 = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(predicate2.getFunctorOrSymbol(), predicate2Args.toArray());
 							conjuncts.add(predicate2);
 							condition[0] = And.make(conjuncts);
 								

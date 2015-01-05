@@ -1027,6 +1027,10 @@ public class Model {
 	
 	private void deriveSortDeclarations(List<SortDeclaration> sortDeclarations, ParfactorsDeclaration parfactorsDeclaration) {
 		Set<Expression> sortNamesKnown = new LinkedHashSet<Expression>();
+		// Ensure In-Built sort names are excluded when attempting to derive.
+		for (SortDeclaration sd : SortDeclaration.IN_BUILT_SORTS) {
+			sortNamesKnown.add(sd.getName());
+		}
 		for (SortDeclaration sd : sortDeclarations) {
 			sortNamesKnown.add(sd.getName());
 		}
