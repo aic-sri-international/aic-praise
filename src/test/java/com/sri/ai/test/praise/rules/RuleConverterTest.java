@@ -1776,7 +1776,7 @@ public class RuleConverterTest {
 	
 	private static RewritingProcess getNewRewritingProcessWithDefaultTypeSizeAndRandomVariableDeclarations(final int n, Set<Expression> randomVariableDeclarations) {
 		RewritingProcess process = getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE);
-		Model.setKnownRandomVariables(randomVariableDeclarations, process);
+		process = Model.setKnownRandomVariables(randomVariableDeclarations, process);
 		return process;
 	}
 	

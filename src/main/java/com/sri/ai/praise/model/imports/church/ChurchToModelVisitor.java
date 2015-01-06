@@ -402,8 +402,8 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		randoms.forEach(r -> knownRandomVariablesHLM.add(r));
 		RewritingProcess processForRV = LBPFactory.newLBPProcessWithHighLevelModel(knownRandomVariablesHLM.toString());		
 		if (rvArgs.size() > 0) {
-			processForRV = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(rvArgs), processForRV);
 			randomVariable = Expressions.apply(randomVariable, rvArgs);
+			processForRV   = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, processForRV);
 		}
 				
 		if (flipIdToValue.size() == 0) {
@@ -459,6 +459,9 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 				h.add(createPotentialRule(randomVariable, caseH, Expressions.makeSymbol(q), Expressions.ZERO));				
 			}		
 			result = rNormalize.rewrite(Plus.make(h), processForRV);
+// TODO - simplify using this alternative mechanism.			
+			//result = SimplifyWithRelationsAtBottom.simplify(Plus.make(h), name, processForRV);
+			//result = rNormalize.rewrite(result, processForRV);
 		}
 		
 		rules.add(result.toString());		
