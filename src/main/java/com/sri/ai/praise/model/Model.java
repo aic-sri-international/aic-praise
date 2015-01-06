@@ -1086,7 +1086,7 @@ public class Model {
 		randomVariableDeclarations.forEach(declaration -> {
 			List<Expression> args = new ArrayList<>(declaration.getParameterSorts());
 			args.add(declaration.getRangeSort());
-			typeMap.put(declaration.getName(), Expressions.apply(Expressions.makeSymbol("->"), args));
+			typeMap.put(declaration.getName(), Expressions.apply(Expressions.makeSymbol(FunctorConstants.FUNCTION_TYPE), args));
 		});
 		
 		RewritingProcess result = GrinderUtil.extendContextualSymbols(typeMap, process);
