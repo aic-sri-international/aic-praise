@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -397,7 +398,9 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			cnt++;
 		}
 		randoms.add("random "+name+":"+rArgs+" -> Boolean");
-		RewritingProcess processForRV = LBPFactory.newLBPProcessWithHighLevelModel("random "+name+":"+rArgs+" -> Boolean;");		
+		StringJoiner knownRandomVariablesHLM = new StringJoiner(";\n", "", ";");
+		randoms.forEach(r -> knownRandomVariablesHLM.add(r));
+		RewritingProcess processForRV = LBPFactory.newLBPProcessWithHighLevelModel(knownRandomVariablesHLM.toString());		
 		if (rvArgs.size() > 0) {
 			processForRV = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(Tuple.make(rvArgs), processForRV);
 			randomVariable = Expressions.apply(randomVariable, rvArgs);
