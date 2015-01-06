@@ -519,6 +519,11 @@ public class RuleConverter {
 			// |.... newRules <- add newRule
 	        newRules.add(newRule);
 		}
+		
+		// TODO - remove this check once we add back in proper support for translating rules functions in them.
+		if (functionsIdentified.size() > 0) {
+			throw new UnsupportedOperationException("Translating rules with functions (i.e. "+functionsIdentified.keySet()+") to those without is currently not properly supported.");
+		}
 
 		Set<Expression> identifiedFunctionalRandomVariableDeclarations = new LinkedHashSet<Expression>();
 		// | // Add additional rules enforcing the functional relationship:

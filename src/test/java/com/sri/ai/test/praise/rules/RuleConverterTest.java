@@ -89,7 +89,8 @@ public class RuleConverterTest {
 	// http://code.google.com/p/aic-praise/wiki/TranslatingFromHighToLowLevelModelSyntax
 	//
 	
-	@Test
+    // NOTE: Currently expected as we have disabled support for rules with functions.
+	@Test(expected=UnsupportedOperationException.class)
 	public void testTranslateFunctions() {
 		List<Expression> rules                     = new ArrayList<Expression>();
 		Set<Expression>  randomVariableDefinitions = new LinkedHashSet<Expression>();
@@ -878,7 +879,8 @@ public class RuleConverterTest {
 		assertEquals(lowParser.parse("randomVariable(gate, 2, Boolean, Boolean, Boolean)"), result);
 	}
 	
-	@Test
+	// NOTE: Currently expected as we have disabled support for rules with functions.
+	@Test(expected=UnsupportedOperationException.class)
 	public void testDifferentiatingNullaryRandomFunctionsAndConstants() {
 		List<Expression> rules                     = new ArrayList<Expression>();
 		Set<Expression>  randomVariableDefinitions = new LinkedHashSet<Expression>();
@@ -1033,7 +1035,8 @@ public class RuleConverterTest {
 	//
 	// Tests for additional issues that have been encountered
 	//
-	@Test
+	// NOTE: Currently expected as we have disabled support for rules with functions.
+	@Test(expected=UnsupportedOperationException.class)
 	public void testIssue6() throws ReservedWordException {
 		// Test for issue #6
 		// http://code.google.com/p/aic-praise/issues/detail?id=6
@@ -1597,6 +1600,9 @@ public class RuleConverterTest {
 		try {
 			result = ruleConverter.query(queryString, modelString, "Test Model", "Description", LBPFactory.newLBPProcess(Expressions.TRUE));
 		}
+		catch (UnsupportedOperationException e) {
+			// Currently expected as we have disabled support for rules with functions.
+		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
 			Assert.fail("Unexpected reserved word exception thrown");
@@ -1618,6 +1624,9 @@ public class RuleConverterTest {
 		try {
 			result = ruleConverter.query(queryString, modelString, "Test Model", "Description", LBPFactory.newLBPProcess(Expressions.TRUE));
 		}
+		catch (UnsupportedOperationException e) {
+			// Currently expected as we have disabled support for rules with functions.
+		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
 			Assert.fail("Unexpected reserved word exception thrown");
@@ -1631,6 +1640,9 @@ public class RuleConverterTest {
 		queryString = "bestFriend(john)";
 		try {
 			result = ruleConverter.query(queryString, modelString, "Test Model", "Description", LBPFactory.newLBPProcess(Expressions.TRUE));		
+		}
+		catch (UnsupportedOperationException e) {
+			// Currently expected as we have disabled support for rules with functions.
 		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
@@ -1704,6 +1716,9 @@ public class RuleConverterTest {
 		try {
 			result = ruleConverter.query(queryString, modelString, "Test Model", "Description", LBPFactory.newLBPProcess(Expressions.TRUE));
 		}
+		catch (UnsupportedOperationException e) {
+			// Currently expected as we have disabled support for rules with functions.
+		}
 		catch (ReservedWordException e) {
 			e.printStackTrace();
 			Assert.fail("Unexpected reserved word exception thrown");
@@ -1714,7 +1729,8 @@ public class RuleConverterTest {
 		}
 	}
 	
-	@Test
+	// NOTE: Currently expected as we have disabled support for rules with functions.
+	@Test(expected=UnsupportedOperationException.class)
 	public void testRVequalRVTranslateException() {
 		String modelString = "// RANDOM VARIABLE DECLARATIONS:\n" +
 				"random earthquake: -> Boolean;\n" +
