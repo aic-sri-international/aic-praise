@@ -338,7 +338,8 @@ public class RuleConverterTest {
 		assertEquals(expectedRules, new LinkedHashSet<Expression>(translateFunctionsResult.first));
 	}
 	
-	@Test
+	// NOTE: Currently expected as we have disabled support for rules with quantifiers.
+	@Test(expected=UnsupportedOperationException.class)
 	public void testTranslateQuantifiers() {
 		List<Expression> rules                     = new ArrayList<Expression>();
 		Set<Expression>  randomVariableDefinitions = new LinkedHashSet<Expression>();

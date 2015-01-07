@@ -2292,6 +2292,12 @@ public class RuleConverter {
 
 		@Override
 		public Expression apply(Expression expression, RewritingProcess process) {
+			
+			// TODO - remove this check once we add back in proper support for translating quantified rules into quantifier free rules
+			if (ForAll.isForAll(expression) || ThereExists.isThereExists(expression)) {
+				throw new UnsupportedOperationException("Translating quantified rules (i.e. "+expression+") to quantifier free rules is not properly supported.");
+			}
+			
 			// | ............ if E is Quantifier X : Phi
 			if (ForAll.isForAll(expression) || ThereExists.isThereExists(expression)) {
 				// Create a new symbol based on the name of the quantifier expression.
