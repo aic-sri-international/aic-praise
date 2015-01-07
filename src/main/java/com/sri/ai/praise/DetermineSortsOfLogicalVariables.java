@@ -163,7 +163,7 @@ public class DetermineSortsOfLogicalVariables {
 	}
 
 	private static boolean isLogicalVariable(Expression expression, RewritingProcess process) {
-		boolean result = expression.getSyntacticFormType().equals("Symbol") && ! process.isConstant(expression);
+		boolean result = expression.getSyntacticFormType().equals("Symbol") && ! process.isUniquelyNamedConstant(expression);
 		return result;
 	}
 }

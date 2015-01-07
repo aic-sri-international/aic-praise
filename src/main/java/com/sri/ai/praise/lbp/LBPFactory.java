@@ -205,17 +205,17 @@ public class LBPFactory {
 	
 	private static RewritingProcess makeLBPProcess(Expression rootExpression, DefaultRewriterLookup lbpRewriterLookup, LBPConfiguration configuration, RewritingProcess parentProcess) {
 		Map<Expression, Expression> contextualSymbolsAndTypes = null;
-		Predicate<Expression> isConstantPredicate                 = null;
+		Predicate<Expression> isUniquelyNamedConstantPredicate                 = null;
 		Map<Object, Object>   globalObjects                       = null;
 		
 		if (parentProcess != null) {
 			contextualSymbolsAndTypes = parentProcess.getContextualSymbolsAndTypes();
-			isConstantPredicate           = parentProcess.getIsConstantPredicate();
+			isUniquelyNamedConstantPredicate           = parentProcess.getIsUniquelyNamedConstantPredicate();
 			globalObjects                 = parentProcess.getGlobalObjects();
 		}
 		else {
 			contextualSymbolsAndTypes = new LinkedHashMap<Expression, Expression>();
-			isConstantPredicate           = new PrologConstantPredicate();
+			isUniquelyNamedConstantPredicate           = new PrologConstantPredicate();
 			globalObjects                 = new LinkedHashMap<Object, Object>();
 		}
 		
@@ -224,7 +224,7 @@ public class LBPFactory {
 				getRootRewriter(),
 				lbpRewriterLookup,
 				contextualSymbolsAndTypes,
-				isConstantPredicate,
+				isUniquelyNamedConstantPredicate,
 				globalObjects);
 
 		return lbpProcess;

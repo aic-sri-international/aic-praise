@@ -93,8 +93,8 @@ public class SimplifyWithRelationsAtBottom {
 	 */
 	
 	public static Expression simplify(Expression expression, Expression targetPredicate, RewritingProcess process) {
-		Predicate<Expression> prologConstantPredicate = process.getIsConstantPredicate();
-		process.setIsConstantPredicate(
+		Predicate<Expression> prologConstantPredicate = process.getIsUniquelyNamedConstantPredicate();
+		process.setIsUniquelyNamedConstantPredicate(
 				e ->
 				prologConstantPredicate.apply(e) &&
 				! LPIUtil.isRandomVariableValueExpression(e, process));
