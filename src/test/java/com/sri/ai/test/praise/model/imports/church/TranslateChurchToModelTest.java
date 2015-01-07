@@ -188,7 +188,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random goOut: Values -> Boolean;",
 				"",
 				"if sunny(Day) then 0.3 else 0.7;",				
-				"TODO"
+				"if sunny(Day) then if goOut(Day) then 0.8 else 0.2 else if goOut(Day) then 0.3 else 0.7;"
 		);
 	}
 	
@@ -216,7 +216,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random goOut: Values -> Boolean;",
 				"",
 				"if sunny(Day) then 0.3 else 0.7;",				
-				"TODO"
+				"if sunny(Day) then if goOut(Day) then 0.3 else 0.7 else if goOut(Day) then 0.8 else 0.2;"
 		);
 	}
 	
@@ -244,7 +244,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random goOut: Values -> Boolean;",
 				"",
 				"if sunny(Day) then 0.3 else 0.7;",				
-				"TODO"
+				"if Day = friday then if sunny(friday) then if goOut(friday) then 0.8 else 0.2 else if goOut(friday) then 0.3 else 0.7 else if goOut(Day) then 0.3 else 0.7;"
 		);
 	}
 	
@@ -272,7 +272,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random goOut: Values -> Boolean;",
 				"",
 				"if sunny(Day) then 0.3 else 0.7;",				
-				"TODO"
+				"if Day = friday then if goOut(friday) then 0.8 else 0.2 else if sunny(Day) then if goOut(Day) then 0.8 else 0.2 else if goOut(Day) then 0.3 else 0.7;"
 		);
 	}
 	
