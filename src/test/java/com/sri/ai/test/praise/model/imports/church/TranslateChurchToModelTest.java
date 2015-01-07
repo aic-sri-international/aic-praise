@@ -6,7 +6,6 @@ import java.util.StringJoiner;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
@@ -138,7 +137,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"",
 				"random goOut: Values -> Boolean;",
 				"",
-				"if (Day = friday) or (Day = saturday) then if goOut(Day) then 0.8 else 0.2 else if goOut(Day) then 0.3 else 0.7;"
+				"if Day = friday then if goOut(friday) then 0.8 else 0.2 else if Day = saturday then if goOut(saturday) then 0.8 else 0.2 else if goOut(Day) then 0.3 else 0.7;"
 		);
 	}
 	
@@ -160,11 +159,10 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"",
 				"random goOut: Values x Values -> Boolean;",
 				"",
-				"if (Day1 = friday) and (Day2 = saturday) then if goOut(friday, saturday) then 0.8 else 0.2 else if goOut(Day1, Day2) then 0.3 else 0.7;"
+				"if Day1 = friday then if Day2 = saturday then if goOut(friday, saturday) then 0.8 else 0.2 else if goOut(friday, Day2) then 0.3 else 0.7 else if goOut(Day1, Day2) then 0.3 else 0.7;"
 		);
 	}
 	
-	@Ignore("TODO - needs more work in translation logic")
 	@Test
 	public void testReferToOtherVariableInDefinition() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Refer to other variable in definition", ""
@@ -192,7 +190,6 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		);
 	}
 	
-	@Ignore("TODO - needs more work in translation logic")
 	@Test
 	public void testReferringLogicalNot() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical Not", ""
@@ -220,7 +217,6 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		);
 	}
 	
-	@Ignore("TODO - needs more work in translation logic")
 	@Test
 	public void testReferringLogicalAnd() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical And", ""
@@ -248,7 +244,6 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		);
 	}
 	
-	@Ignore("TODO - needs more work in translation logic")
 	@Test
 	public void testReferringLogicalOr() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical Or", ""

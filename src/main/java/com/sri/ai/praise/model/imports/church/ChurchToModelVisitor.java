@@ -458,10 +458,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 											
 				h.add(createPotentialRule(randomVariable, caseH, Expressions.makeSymbol(q), Expressions.ZERO));				
 			}		
-			result = rNormalize.rewrite(Plus.make(h), processForRV);
-// TODO - simplify using this alternative mechanism.			
-			//result = SimplifyWithRelationsAtBottom.simplify(Plus.make(h), name, processForRV);
-			//result = rNormalize.rewrite(result, processForRV);
+			result = SimplifyWithRelationsAtBottom.simplify(Plus.make(h), name, processForRV);
 		}
 		
 		rules.add(result.toString());		

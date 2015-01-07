@@ -1084,9 +1084,15 @@ public class Model {
 	private static RewritingProcess extendContextualSymbolsOnProcessWithRandomVariableTypeInformation(Collection<RandomVariableDeclaration> randomVariableDeclarations, RewritingProcess process) {
 		final Map<Expression, Expression> typeMap = new LinkedHashMap<>();
 		randomVariableDeclarations.forEach(declaration -> {
-			List<Expression> args = new ArrayList<>(declaration.getParameterSorts());
+			List<Expression> args = new ArrayList<>();
+			if (declaration.getParameterSorts().size() > 1) {
+				args.add(Expressions.apply(FunctorConstants.CARTESIAN_PRODUCT, declaration.getParameterSorts()));
+			}
+			else {
+				args.addAll(declaration.getParameterSorts());
+			}
 			args.add(declaration.getRangeSort());
-			typeMap.put(declaration.getName(), Expressions.apply(Expressions.makeSymbol(FunctorConstants.FUNCTION_TYPE), args));
+			typeMap.put(declaration.getName(), Expressions.apply(FunctorConstants.FUNCTION_TYPE, args));
 		});
 		
 		RewritingProcess result = GrinderUtil.extendContextualSymbols(typeMap, process);
