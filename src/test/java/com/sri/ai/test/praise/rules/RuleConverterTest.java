@@ -61,6 +61,7 @@ import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.Model.ModelException;
+import com.sri.ai.praise.rules.QueryContainsUnknownRandomVariablesException;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
@@ -960,20 +961,20 @@ public class RuleConverterTest {
 	//
 
 	@Test
-	public void testEncodingQueries() {
+	public void testEncodingQueries() throws QueryContainsUnknownRandomVariablesException {
 		String string;
 		Set<Expression> randomVariableDeclarations = new LinkedHashSet<Expression>(); 
 		Pair<Expression, Expression> result, expected;
 		
 		string = "sick(X)";
 		randomVariableDeclarations.clear();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(sick, 1, Boolean, Boolean)"));
 		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
-		expected = new Pair<Expression, Expression>(ruleParser.parse("query(X) <=> sick(X);"),
-				                                    ruleParser.parseFormula("query(X)"));
-		assertEquals(expected, result);
+		Assert.assertNull(result);
 		
 		string = "sick(john) and sick(mary)";
 		randomVariableDeclarations.clear();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(sick, 1, Boolean, Boolean)"));
 		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query <=> sick(john) and sick(mary);"),
 				                                    ruleParser.parseFormula("query"));
@@ -981,6 +982,7 @@ public class RuleConverterTest {
 
 		string = "not sick(X)";
 		randomVariableDeclarations.clear();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(sick, 1, Boolean, Boolean)"));
 		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query(X) <=> not sick(X);"),
 				                                    ruleParser.parseFormula("query(X)"));
@@ -988,6 +990,7 @@ public class RuleConverterTest {
 
 		string = "there exists X : friends(X,Y)";
 		randomVariableDeclarations.clear();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(friends, 2, Boolean, Boolean, Boolean)"));
 		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query(Y) <=> there exists X : friends(X,Y);"),
 				                                    ruleParser.parseFormula("query(Y)"));
@@ -995,6 +998,9 @@ public class RuleConverterTest {
 
 		string = "conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z)";
 		randomVariableDeclarations.clear();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(conspiracy, 1, Boolean, Boolean)"));
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(leader, 1, Boolean, Boolean)"));
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(member, 2, Boolean, Boolean, Boolean)"));
 		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query(C, X, Y, Z) <=> conspiracy(C) and leader(C) = X and member(C,Y) and member(C,Z);"),
 				                                    ruleParser.parseFormula("query(C, X, Y, Z)"));
@@ -1002,10 +1008,61 @@ public class RuleConverterTest {
 
 		string = "mother(X) = lucy";
 		randomVariableDeclarations.clear();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(mother, 1, Boolean, Boolean)"));
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(lucy, 0, Boolean)"));
 		result = ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
 		expected = new Pair<Expression, Expression>(ruleParser.parse("query(X) <=> (mother(X) = lucy);"),
 				                                    ruleParser.parseFormula("query(X)"));
 		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testQueryContainsUnknownRandomVariablesException() {
+		String string;
+		Set<Expression> randomVariableDeclarations = new LinkedHashSet<Expression>(); 
+		
+		string = "epidemic";
+		randomVariableDeclarations.clear();
+		try {
+			ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
+			Assert.fail("QueryContainsUnknownRandomVariablesException should have been thrown");
+		}
+		catch (QueryContainsUnknownRandomVariablesException e) {
+			// Expected
+		}
+		
+		string = "sicko(X)";
+		randomVariableDeclarations.clear();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(sick, 1, Boolean, Boolean)"));
+		try {
+			ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
+			Assert.fail("QueryContainsUnknownRandomVariablesException should have been thrown");
+		}
+		catch (QueryContainsUnknownRandomVariablesException e) {
+			// Expected
+		}
+		
+		string = "sick(X) and epidemic";
+		randomVariableDeclarations.clear();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(sick, 1, Boolean, Boolean)"));
+		try {
+			ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
+			Assert.fail("QueryContainsUnknownRandomVariablesException should have been thrown");
+		}
+		catch (QueryContainsUnknownRandomVariablesException e) {
+			// Expected
+		}
+		
+		string = "sick(john) and john";
+		randomVariableDeclarations.clear();
+		randomVariableDeclarations.add(lowParser.parse("randomVariable(sick, 1, Boolean, Boolean)"));
+		try {
+			ruleConverter.queryRuleAndAtom(ruleParser.parseFormula(string), randomVariableDeclarations, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
+			Assert.fail("QueryContainsUnknownRandomVariablesException should have been thrown");
+		}
+		catch (QueryContainsUnknownRandomVariablesException e) {
+			// Expected
+		}
 	}
 	
 	@Test
@@ -1609,6 +1666,10 @@ public class RuleConverterTest {
 			e.printStackTrace();
 			Assert.fail("Unexpected reserved word exception thrown");
 		}
+		catch (QueryContainsUnknownRandomVariablesException e) {
+			e.printStackTrace();
+			Assert.fail("Unexpected query contains unknown random variables exception thrown");
+		}
 		catch (ModelException e) {
 			e.printStackTrace();
 			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
@@ -1633,6 +1694,10 @@ public class RuleConverterTest {
 			e.printStackTrace();
 			Assert.fail("Unexpected reserved word exception thrown");
 		}
+		catch (QueryContainsUnknownRandomVariablesException e) {
+			e.printStackTrace();
+			Assert.fail("Unexpected query contains unknown random variables exception thrown");
+		}
 		catch (ModelException e) {
 			e.printStackTrace();
 			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
@@ -1649,6 +1714,10 @@ public class RuleConverterTest {
 		catch (ReservedWordException e) {
 			e.printStackTrace();
 			Assert.fail("Unexpected reserved word exception thrown");
+		}
+		catch (QueryContainsUnknownRandomVariablesException e) {
+			e.printStackTrace();
+			Assert.fail("Unexpected query contains unknown random variables exception thrown");
 		}
 		catch (ModelException e) {
 			e.printStackTrace();
@@ -1695,6 +1764,10 @@ public class RuleConverterTest {
 			e.printStackTrace();
 			Assert.fail("Unexpected reserved word exception thrown");
 		}
+		catch (QueryContainsUnknownRandomVariablesException e) {
+			e.printStackTrace();
+			Assert.fail("Unexpected query contains unknown random variables exception thrown");
+		}
 		catch (ModelException e) {
 			e.printStackTrace();
 			Assert.fail("Errors in model string " + modelString + ": " + Util.join(e.getErrors()));
@@ -1724,6 +1797,10 @@ public class RuleConverterTest {
 		catch (ReservedWordException e) {
 			e.printStackTrace();
 			Assert.fail("Unexpected reserved word exception thrown");
+		}
+		catch (QueryContainsUnknownRandomVariablesException e) {
+			e.printStackTrace();
+			Assert.fail("Unexpected query contains unknown random variables exception thrown");
 		}
 		catch (ModelException e) {
 			e.printStackTrace();

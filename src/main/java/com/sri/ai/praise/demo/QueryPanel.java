@@ -44,7 +44,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
-import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -136,17 +135,17 @@ public class QueryPanel extends JPanel {
 		JPanel queryPanel = new JPanel();
 		add(queryPanel, BorderLayout.NORTH);
 		queryPanel.setBorder(null);
-		queryPanel.setLayout(new BoxLayout(queryPanel, BoxLayout.X_AXIS));
+		queryPanel.setLayout(new BorderLayout(5, 0));
 		
 		JLabel lblQuery = new JLabel("Query ");
-		queryPanel.add(lblQuery);
+		queryPanel.add(lblQuery, BorderLayout.WEST);
 		
 		JPanel panel = new JPanel();
-		queryPanel.add(panel);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		queryPanel.add(panel, BorderLayout.CENTER);
+		panel.setLayout(new BorderLayout(5, 0));
 		
 		queryComboBox = new JComboBox<>(queryModel);
-		panel.add(queryComboBox);
+		panel.add(queryComboBox, BorderLayout.CENTER);
 		queryComboBox.setEditable(true);
 		queryComboBox.setToolTipText("You can press enter to execute the current query");
 		
@@ -165,7 +164,7 @@ public class QueryPanel extends JPanel {
 				super.setIcon(defaultIcon);
 		    }
 		};
-		panel.add(btnExecuteQuery);
+		panel.add(btnExecuteQuery, BorderLayout.EAST);
 		btnExecuteQuery.setPreferredSize(new Dimension(28, 28));
 		btnExecuteQuery.setHideActionText(true);
 		btnExecuteQuery.setIcon(ImageLookup.EXECUTE_QUERY_LARGE);
@@ -173,7 +172,7 @@ public class QueryPanel extends JPanel {
 		
 		progressBar = new JProgressBar();
 		progressBar.setEnabled(false);
-		queryPanel.add(progressBar);
+		queryPanel.add(progressBar, BorderLayout.EAST);
 		queryComboBox.getEditor().addActionListener(new ActionListener() {
 			
 			@Override

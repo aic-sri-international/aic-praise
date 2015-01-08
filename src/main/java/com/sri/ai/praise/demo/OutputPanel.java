@@ -62,6 +62,9 @@ import com.sri.ai.praise.lbp.LBPQueryEngine;
 @Beta
 public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener, LBPQueryEngine.JustificationListener {
 	private static final long serialVersionUID = 1L;
+	//
+	private static final int RESULT_TAB_IDX  = 0;
+	private static final int PROBLEM_TAB_IDX = 1;
 	
 	//
 	private ExpressionNode activeJustificationNode, rootJustificationNode = new ExpressionNode("", null);
@@ -119,7 +122,13 @@ public class OutputPanel extends JPanel implements LBPQueryEngine.TraceListener,
 	}
 	
 	public void gotoProblemTab() {
-		outputTabbedPane.setSelectedIndex(1);
+		outputTabbedPane.setSelectedIndex(PROBLEM_TAB_IDX);
+	}
+	
+	public void switchToResultTabIfOnProblemTab() {
+		if (outputTabbedPane.getSelectedIndex() == PROBLEM_TAB_IDX) {
+			outputTabbedPane.setSelectedIndex(RESULT_TAB_IDX);
+		}
 	}
 	
 	//

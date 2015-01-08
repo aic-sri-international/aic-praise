@@ -81,6 +81,7 @@ import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.ParfactorsDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.praise.rules.QueryContainsUnknownRandomVariablesException;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.util.Configuration;
@@ -355,9 +356,14 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 							
 							app.outputPanel.setResult(translatedRule);
 							
+							app.outputPanel.switchToResultTabIfOnProblemTab();
+							
 							cleanupMemory();
 						} catch (ReservedWordException rwe) {
 							app.outputPanel.addProblem("ERROR: "+rwe.getMessage());
+							app.outputPanel.gotoProblemTab();
+						} catch (QueryContainsUnknownRandomVariablesException qex) {
+							app.outputPanel.addProblem("ERROR: query contains unknown random variables "+qex.getUnknownRandomVariables());
 							app.outputPanel.gotoProblemTab();
 						} catch (Model.ModelException me) {
 							app.outputPanel.addProblem(me.getMessage());

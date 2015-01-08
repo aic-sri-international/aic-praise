@@ -187,8 +187,9 @@ public class RuleConverter {
 	 *            Description to use for the low level model
 	 * @return A triple consisting of (low-level-model, low-level-query, low-level-model-extended-by-query).
 	 * @throws ReservedWordException
+	 * @throws QueryContainsUnknownRandomVariablesException
 	 */
-	public Triple<Model, Expression, Model> query(String queryFormulaString, String ruleAndDeclarationsListString, String llmName, String llmDescription, RewritingProcess process) throws ReservedWordException {
+	public Triple<Model, Expression, Model> query(String queryFormulaString, String ruleAndDeclarationsListString, String llmName, String llmDescription, RewritingProcess process) throws ReservedWordException, QueryContainsUnknownRandomVariablesException {
 		return query(queryFormulaString != null ? ruleParser.parseFormula(queryFormulaString) : null, ruleParser.parseAll(ruleAndDeclarationsListString), llmName, llmDescription, process);
 	}
 	
@@ -212,8 +213,9 @@ public class RuleConverter {
 	 *            The description to be used for the low level model.
 	 * @return A triple consisting of (low-level-model, low-level-query, low-level-model-extended-by-query).
 	 * @throws ReservedWordException
+	 * @throws QueryContainsUnknownRandomVariablesException
 	 */
-	public Triple<Model, Expression, Model> query(Expression queryFormula, List<Expression> ruleAndDeclarationsList, String llmName, String llmDescription, RewritingProcess process) throws ReservedWordException {
+	public Triple<Model, Expression, Model> query(Expression queryFormula, List<Expression> ruleAndDeclarationsList, String llmName, String llmDescription, RewritingProcess process) throws ReservedWordException, QueryContainsUnknownRandomVariablesException {
 
 		Model lowLevelModel = makeModel(ruleAndDeclarationsList, llmName, llmDescription, process);
 		
@@ -285,8 +287,9 @@ public class RuleConverter {
 	 * @param lowLevelModel
 	 *            A low level model against which the query is to be applied.
 	 * @return A triple consisting of (low-level-model, low-level-query, low-level-model-extended-by-query).
+	 * @throws QueryContainsUnknownRandomVariablesException
 	 */
-	public Pair<Expression, Model> query(Expression queryFormula, Model lowLevelModel, RewritingProcess process) {
+	public Pair<Expression, Model> query(Expression queryFormula, Model lowLevelModel, RewritingProcess process) throws QueryContainsUnknownRandomVariablesException {
 		Expression      queryEquivalenceRule, queryAtom = null;
 		Model           lowLevelModelExtendedByQuery    = null;
 		Set<Expression> sorts                           = new LinkedHashSet<Expression>();
@@ -333,7 +336,7 @@ public class RuleConverter {
 		
 		lowLevelModelExtendedByQuery = createModel(lowLevelModel.getName().toString(), 
 				                                    lowLevelModel.getDescription().toString(), 
-													sorts, randomVariables, parfactors);
+													sorts, randomVariables, parfactors);		
 		
 		return new Pair<Expression, Model>(queryAtom, lowLevelModelExtendedByQuery);
 	}
@@ -588,8 +591,20 @@ public class RuleConverter {
 		}
 
 		// If the expression is one of the known functors or terminal symbols, return false.
-		String functor = e.getFunctor().getValue().toString();	
+		if (isKnownFunctorOrTerminalSymbol(e.getFunctor())) {
+			return false;
+		}
+
+		// Else, return true.
+		return true;
+	}
 	
+	
+	public boolean isKnownFunctorOrTerminalSymbol(Expression functorOrSymbol) {
+		boolean result = false;
+
+		String functor = functorOrSymbol.getValue().toString();	
+		
 		if (FunctorConstants.BOOLEAN_FUNCTORS.contains(functor) ||
 			functor.equals(FunctorConstants.EQUAL) ||
 			functor.equals(FunctorConstants.INEQUALITY) ||
@@ -604,11 +619,10 @@ public class RuleConverter {
 			functor.equals(FUNCTOR_QUERY) ||
 			RuleTerminalSymbols.isTerminalSymbol(functor) ||
 			AntlrGrinderTerminalSymbols.isTerminalSymbol(functor)) {
-			return false;
+			result = true;
 		}
-
-		// Else, return true.
-		return true;
+		
+		return result;
 	}
 	
 	/**
@@ -1555,21 +1569,23 @@ public class RuleConverter {
 	 * @param randomVariableDeclarations
 	 *          The current collection of random variable declarations.
 	 * @return A pair with the query rule and query atom.
+	 * @throws QueryContainsUnknownRandomVariablesException
 	 */
-	public Pair<Expression, Expression> queryRuleAndAtom(Expression query, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
-		Pair<Expression, Expression> result = null;
+	public Pair<Expression, Expression> queryRuleAndAtom(Expression query, Set<Expression> randomVariableDeclarations, RewritingProcess process) throws QueryContainsUnknownRandomVariablesException {
+		Pair<Expression, Expression> result;
+		
+		// Firstly, ensure the random variables present in the query exist in the model
+		Set<Expression> unknownRandomVariables = collectUnknownRandomVariables(query, randomVariableDeclarations, process);		
+		if (unknownRandomVariables.size() > 0) {
+			throw new QueryContainsUnknownRandomVariablesException(unknownRandomVariables);
+		}
 		
 		// | if queryFormula is isRandomVariableValue(queryFormula, highLevelDeclarations)
 		// | .... return null
-		boolean createQueryTerm = true;
-		for (Expression randomVariableDeclaration : randomVariableDeclarations) {
-			if (randomVariableDeclaration.get(0).equals(query.getFunctorOrSymbol()) && randomVariableDeclaration.get(1).intValue() == query.numberOfArguments()) {
-				createQueryTerm = false;
-				break;
-			}
+		if (isRandomVariableValue(query, randomVariableDeclarations)) {
+			result = null;
 		}
-
-		if (createQueryTerm) {
+		else {			
 			// | F <- free variables of queryFormula
 			Set<Expression> variablesF = Expressions.freeVariables(query, process);
 			// | queryAtom <- predicate 'query' applied to F
@@ -2137,6 +2153,42 @@ public class RuleConverter {
 		sb.append(finalDigit);
 		
 		return sb.toString();
+	}
+	
+	private Set<Expression> collectUnknownRandomVariables(Expression expression, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
+		Map<Expression, Integer> knownRandomVariables = new LinkedHashMap<>();
+		for (Expression randomVariableDeclaration : randomVariableDeclarations) {
+			knownRandomVariables.put(randomVariableDeclaration.get(0), randomVariableDeclaration.get(1).intValue());
+		}
+		
+		Set<Expression> unknownRandomVariables = new LinkedHashSet<>();
+		
+		collectUnknownRandomVariables(expression, knownRandomVariables, unknownRandomVariables, process);
+		
+		return unknownRandomVariables;
+	}
+	
+	private void collectUnknownRandomVariables(Expression expression, Map<Expression, Integer> knownRandomVariables, Set<Expression> unknownRandomVariables, RewritingProcess process) {
+
+		if (Expressions.isFunctionApplicationWithArguments(expression)) {
+			if (isRandomFunctionApplication(expression)) {
+				if (!(knownRandomVariables.containsKey(expression.getFunctorOrSymbol()) 
+						&& 
+				      knownRandomVariables.get(expression.getFunctorOrSymbol()) == expression.numberOfArguments())) {					
+					unknownRandomVariables.add(expression);
+				}
+			}
+			else {
+				expression.getArguments().forEach(argument -> collectUnknownRandomVariables(argument, knownRandomVariables, unknownRandomVariables, process));
+			}
+		}
+		else if (process.isUniquelyNamedConstant(expression) && !isKnownFunctorOrTerminalSymbol(expression)) {	
+			if (!(knownRandomVariables.containsKey(expression.getFunctorOrSymbol()) 
+					&& 
+			      knownRandomVariables.get(expression.getFunctorOrSymbol()) == 0)) {	
+				unknownRandomVariables.add(expression);
+			}
+		}
 	}
 
 	/*===================================================================================
