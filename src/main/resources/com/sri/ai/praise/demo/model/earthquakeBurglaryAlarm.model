@@ -4,9 +4,9 @@
 //
 //
 // RANDOM VARIABLE DECLARATIONS:
-random earthquake: -> Boolean;
-random burglary: -> Boolean;
-random alarm: -> Boolean;
+random earthquake: Boolean;
+random burglary: Boolean;
+random alarm: Boolean;
 
 //
 // RULES

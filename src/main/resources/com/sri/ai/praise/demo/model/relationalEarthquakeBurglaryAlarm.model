@@ -7,7 +7,7 @@ sort Homes: 10000;
 
 //
 // RANDOM VARIABLE DECLARATIONS:
-random earthquake: -> Boolean;
+random earthquake: Boolean;
 random burglary: Homes -> Boolean;
 random alarm: Homes -> Boolean;
 

@@ -411,7 +411,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			rArgs.append(CHURCH_VALUES_SORT);
 			cnt++;
 		}
-		randoms.add("random "+name+":"+rArgs+" -> Boolean");
+		randoms.add("random "+name+":"+rArgs+(rArgs.length() > 0 ? " -> " : " ") + "Boolean");
 		StringJoiner knownRandomVariablesHLM = new StringJoiner(";\n", "", ";");
 		randoms.forEach(r -> knownRandomVariablesHLM.add(r));
 		RewritingProcess processForRV = LBPFactory.newLBPProcessWithHighLevelModel("sort "+CHURCH_VALUES_SORT+";\n\n"+knownRandomVariablesHLM.toString());		

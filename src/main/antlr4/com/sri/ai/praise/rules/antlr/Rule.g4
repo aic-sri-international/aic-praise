@@ -10,7 +10,8 @@ aformula
 
 model_element
     : sort_decl
-    | random_variable_decl
+    | propositional_random_variable_decl
+    | relational_random_variable_decl
     | root_atomic_rule
     | prolog_rule
     | root_probability_notation_rule
@@ -23,8 +24,12 @@ sort_decl // sort symbol [ ":" ( number | "Unknown" ) [ ", " constant+ ] ]
     : SORT name=symbol (':' size=(INTEGER | UNKNOWN) (',' constants+=CONSTANT)*)? ';'
     ;
 
-random_variable_decl // "random" symbol ":" [ ( symbol | symbol "x" )+ ] "->" symbol
-    : RANDOM name=symbol ':' (parameters+=symbol (X parameters+=symbol)*)? '->' range=symbol ';'
+propositional_random_variable_decl // "random" symbol : symbol
+    : RANDOM name=symbol ':' range=symbol ';'
+    ;
+
+relational_random_variable_decl // "random" symbol ":" [ ( symbol | symbol "x" )+ ] "->" symbol
+    : RANDOM name=symbol ':' parameters+=symbol (X parameters+=symbol)* '->' range=symbol ';'
     ;
 
 root_atomic_rule

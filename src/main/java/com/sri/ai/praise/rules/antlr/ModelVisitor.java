@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.sri.ai.expresso.api.Expression;
@@ -67,19 +68,32 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 		return result;
 	}
 
-	// RANDOM name=atomic_symbol ':' (parameters+=atomic_symbol (X
-	// parameters+=atomic_symbol)*)? SINGLE_ARROW range=atomic_symbol ';'
-	@Override
-	public Expression visitRandom_variable_decl(
-			RuleParser.Random_variable_declContext ctx) {
+	// RANDOM name=symbol ':' range=symbol ';'
+	@Override 
+	public Expression visitPropositional_random_variable_decl(@NotNull RuleParser.Propositional_random_variable_declContext ctx) { 
+		Expression name  = newSymbol(ctx.name.getText());
+		Expression arity = Expressions.ZERO;
+		Expression range = newSymbol(ctx.range.getText());
 
+		List<Expression> declarationArgs = new ArrayList<Expression>();
+		declarationArgs.add(name);
+		declarationArgs.add(arity);
+		declarationArgs.add(range);
+
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
+				RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,
+				declarationArgs.toArray());
+
+		return result;
+	}
+	
+	// RANDOM name=symbol ':' parameters+=symbol (X parameters+=symbol)* '->' range=symbol ';'
+	@Override
+	public Expression visitRelational_random_variable_decl(@NotNull RuleParser.Relational_random_variable_declContext ctx) {
 		Expression name = newSymbol(ctx.name.getText());
 		List<Expression> parameters = expressionsList(ctx.parameters);
 		Expression arity = Expressions.makeSymbol(parameters.size());
-		Expression range = Expressions.makeSymbol("Boolean");
-		if (ctx.range != null) {
-			range = newSymbol(ctx.range.getText());
-		}
+		Expression range = newSymbol(ctx.range.getText());
 
 		List<Expression> declarationArgs = new ArrayList<Expression>();
 		declarationArgs.add(name);

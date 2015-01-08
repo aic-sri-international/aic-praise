@@ -61,7 +61,6 @@ import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.Model.ModelException;
-import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
@@ -895,7 +894,7 @@ public class RuleConverterTest {
 		rules.clear();
 		rules.add(ruleParser.parse("if president = obama then government(socialism) else government(freedom);"));
 		randomVariableDefinitions.clear();
-		randomVariableDefinitions.add(ruleParser.parse("random president: -> Boolean;"));
+		randomVariableDefinitions.add(ruleParser.parse("random president: Boolean;"));
 		expectedRules.clear();
 		expectedRules.add(ruleParser.parse("if president(obama) then government(socialism) else government(freedom);"));
 		expectedRules.add(ruleParser.parse("if president(Y) then not president(Z);"));
@@ -1162,7 +1161,7 @@ public class RuleConverterTest {
 		queryAtom = lowParser.parse("query");
 		randomVariables.clear();
 		result = ruleConverter.createQueryDeclaration(queryAtom, query, randomVariables, getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE));
-		expected = ruleParser.parse("random query: -> Boolean;");
+		expected = ruleParser.parse("random query: Boolean;");
 		assertEquals(expected, result);
 		
 		query = ruleParser.parseFormula("not sick(X)");
@@ -1618,8 +1617,8 @@ public class RuleConverterTest {
 		// Missing sort declaration for People.
 		modelString =
 				"sort People;" +
-				"random president: -> People;" +
-				"random firstLady: -> People;" +
+				"random president: People;" +
+				"random firstLady: People;" +
 				"president = barrackObama <=> firstLady = michelleObama;" +
 				"president = billClinton <=> firstLady = hillaryClinton;" +
 				"firstLady = michelleObama 0.9;";
@@ -1667,7 +1666,7 @@ public class RuleConverterTest {
 				"\n"+
 				"//\n"+
 				"// RANDOM VARIABLE DECLARATIONS:\n"+
-				"random epidemic: -> Boolean;\n"+
+				"random epidemic: Boolean;\n"+
 				"random sick: People -> Boolean;\n"+
 				"random fever: People -> Boolean;\n"+
 				"random rash: People -> Boolean;\n"+
@@ -1702,7 +1701,7 @@ public class RuleConverterTest {
 		}
 
 		modelString = "// RANDOM VARIABLE DECLARATIONS:" +
-				"random epidemic: -> Boolean;\n" +
+				"random epidemic: Boolean;\n" +
 				"random sick: People -> Boolean;\n" +
 				"random fever: People -> Boolean;\n" +
 				"random happy: People -> Boolean;\n" +
@@ -1736,8 +1735,8 @@ public class RuleConverterTest {
 	@Test(expected=UnsupportedOperationException.class)
 	public void testRVequalRVTranslateException() {
 		String modelString = "// RANDOM VARIABLE DECLARATIONS:\n" +
-				"random earthquake: -> Boolean;\n" +
-				"random burglary: -> Boolean;\n" +
+				"random earthquake: Boolean;\n" +
+				"random burglary: Boolean;\n" +
 				"earthquake 0.5;\n" +
 				"burglary 0.5;\n" +
 				"if earthquake = burglary then 1 else 0;";

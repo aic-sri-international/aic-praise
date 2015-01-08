@@ -99,7 +99,7 @@ public class RuleParserTest extends AbstractParserTest {
 		string = "random happy: People -> Boolean;";
 		test(string, Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "People", "Boolean"));
 
-		string = "random president: -> People;";
+		string = "random president: People;";
 		test(string, Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "president", "0", "People"));
 
 		System.out.println("test count = " + testCount);

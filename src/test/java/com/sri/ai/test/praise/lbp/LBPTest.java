@@ -2963,7 +2963,7 @@ public class LBPTest extends AbstractLPITest {
 								"Model Description: Epidemic Sick Example.",
 								"sort People: 10, bob, dave, rodrigo, ciaran;\n" + 
 								"// RANDOM VARIABLE DECLARATIONS:\n" + 
-								"random epidemic: -> Boolean;\n" + 
+								"random epidemic: Boolean;\n" + 
 								"random sick: People -> Boolean;\n" + 
 								"random fever: People -> Boolean;\n" + 
 								"random rash: People -> Boolean;\n" + 
@@ -3319,7 +3319,7 @@ public class LBPTest extends AbstractLPITest {
 								"Model Description: Epidemic Sick Example.",
 								"sort People: 10, bob, dave, rodrigo, ciaran;\n" + 
 								"// RANDOM VARIABLE DECLARATIONS:\n" + 
-								"random epidemic: -> Boolean;\n" + 
+								"random epidemic: Boolean;\n" + 
 								"random sick: People -> Boolean;\n" + 
 								"random fever: People -> Boolean;\n" + 
 								"random rash: People -> Boolean;\n" + 

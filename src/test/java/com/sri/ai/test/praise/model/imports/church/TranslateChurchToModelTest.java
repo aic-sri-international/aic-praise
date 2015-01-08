@@ -42,7 +42,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"",
 				"sort Values;",
 				"",
-				"random sunny: -> Boolean;",
+				"random sunny: Boolean;",
 				"",
 				"if sunny then 1 else 0;"
 		);
@@ -64,7 +64,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"",
 				"sort Values;",
 				"",
-				"random sunny: -> Boolean;",
+				"random sunny: Boolean;",
 				"",
 				"if sunny then 0.3 else 0.7;"
 		);

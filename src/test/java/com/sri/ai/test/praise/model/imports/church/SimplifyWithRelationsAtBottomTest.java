@@ -111,8 +111,8 @@ public class SimplifyWithRelationsAtBottomTest {
 
 		// tests equality between propositions
 		process = LBPFactory.newLBPProcessWithHighLevelModel(
-				"random earthquake: -> Boolean;" +
-				"random burglary: -> Boolean;");
+				"random earthquake: Boolean;" +
+				"random burglary: Boolean;");
 		
 		expression = parse("if earthquake = burglary then 1 else 0");
 		expected   = parse("if earthquake then if burglary then 1 else 0 else if burglary then 0 else 1");

@@ -8,7 +8,7 @@ sort People: 4, bob, dave, rodrigo, ciaran;
 
 //
 // RANDOM VARIABLE DECLARATIONS:
-random epidemic: -> Boolean;
+random epidemic: Boolean;
 random sick: People -> Boolean;
 random fever: People -> Boolean;
 random rash: People -> Boolean;
