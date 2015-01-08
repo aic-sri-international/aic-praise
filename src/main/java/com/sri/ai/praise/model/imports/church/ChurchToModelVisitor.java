@@ -41,8 +41,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import org.antlr.v4.runtime.misc.NotNull;
@@ -59,6 +61,7 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
@@ -67,6 +70,7 @@ import com.sri.ai.praise.imports.church.antlr.ChurchBaseVisitor;
 import com.sri.ai.praise.imports.church.antlr.ChurchParser;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 import com.sri.ai.util.math.Rational;
@@ -85,11 +89,12 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	//
 	private String                   churchProgramName = null;
 	private String                   churchProgram     = null;
-	private List<String>             randoms           = new ArrayList<String>();
-	private List<String>             rules             = new ArrayList<String>();
-	private List<Expression>         queries           = new ArrayList<Expression>();
-	private Map<Integer, Rational>   flipIdToValue     = new LinkedHashMap<Integer, Rational>();
-	private List<Expression>         lambdaParams      = new ArrayList<Expression>();
+	private List<String>             randoms           = new ArrayList<>();
+	private Set<Expression>          knownConstants    = new LinkedHashSet<>();
+	private List<String>             rules             = new ArrayList<>();
+	private List<Expression>         queries           = new ArrayList<>();
+	private Map<Integer, Rational>   flipIdToValue     = new LinkedHashMap<>();
+	private List<Expression>         lambdaParams      = new ArrayList<>();
 	private Rewriter                 rNormalize        = LBPFactory.newNormalize();
 	
 	public void setChurchProgramInformation(String name, String program) {
@@ -103,6 +108,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		
 		// Clear down the working variables
 		randoms.clear();
+		knownConstants.clear();
 		rules.clear();
 		queries.clear();
 		flipIdToValue.clear();
@@ -112,7 +118,15 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		// Construct the HOGM		
 		StringBuilder hogm = new StringBuilder();
 		hogm.append("\n");
-		hogm.append("sort "+CHURCH_VALUES_SORT+";\n\n");
+		if (knownConstants.size() > 0) {
+			StringJoiner knownConstantsCommaSeparatedList = new StringJoiner(", ", ", ", "");
+			knownConstants.forEach(constant -> knownConstantsCommaSeparatedList.add(constant.toString()));
+			hogm.append("sort " + CHURCH_VALUES_SORT + " : " + SortDeclaration.UNKNOWN_SIZE + knownConstantsCommaSeparatedList + ";\n\n");
+		}
+		else {
+			hogm.append("sort " + CHURCH_VALUES_SORT + ";\n\n");
+		}
+		
 		for (String rv : randoms) {
 			hogm.append(rv+";\n");
 		}
@@ -400,7 +414,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		randoms.add("random "+name+":"+rArgs+" -> Boolean");
 		StringJoiner knownRandomVariablesHLM = new StringJoiner(";\n", "", ";");
 		randoms.forEach(r -> knownRandomVariablesHLM.add(r));
-		RewritingProcess processForRV = LBPFactory.newLBPProcessWithHighLevelModel(knownRandomVariablesHLM.toString());		
+		RewritingProcess processForRV = LBPFactory.newLBPProcessWithHighLevelModel("sort "+CHURCH_VALUES_SORT+";\n\n"+knownRandomVariablesHLM.toString());		
 		if (rvArgs.size() > 0) {
 			randomVariable = Expressions.apply(randomVariable, rvArgs);
 			processForRV   = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, processForRV);
@@ -457,8 +471,21 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 				}
 											
 				h.add(createPotentialRule(randomVariable, caseH, Expressions.makeSymbol(q), Expressions.ZERO));				
-			}		
-			result = SimplifyWithRelationsAtBottom.simplify(Plus.make(h), name, processForRV);
+			}
+			Expression plusH = Plus.make(h);
+			List<Expression> constants = new ArrayList<>(FormulaUtil.getConstants(plusH, processForRV));
+			if (constants.size() > 0) {
+				knownConstants.addAll(constants);
+				Model model = Model.getRewritingProcessesModel(processForRV);
+				Set<Expression> sortDeclarationExpressions = new LinkedHashSet<>();
+				sortDeclarationExpressions.add(new SortDeclaration(Expressions.makeSymbol(CHURCH_VALUES_SORT), SortDeclaration.UNKNOWN_SIZE, 
+						ExtensionalSet.makeUniSet(constants)).getSortDeclaration());
+				Set<Expression> randomVariableDeclarationExpressions = new LinkedHashSet<>();
+				model.getRandomVariableDeclarations().forEach(randomVariableDeclaration -> randomVariableDeclarationExpressions.add(randomVariableDeclaration.getRandomVariableDeclaration()));
+				processForRV = Model.setKnownSortsAndRandomVariables(sortDeclarationExpressions, randomVariableDeclarationExpressions, processForRV);
+			}
+			
+			result = SimplifyWithRelationsAtBottom.simplify(plusH, name, processForRV);
 		}
 		
 		rules.add(result.toString());		

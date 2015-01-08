@@ -40,6 +40,7 @@ package com.sri.ai.test.praise.rules;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,6 +61,7 @@ import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.Model.ModelException;
+import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.rules.ReservedWordException;
 import com.sri.ai.praise.rules.RuleConverter;
 import com.sri.ai.praise.rules.antlr.RuleParserWrapper;
@@ -1793,7 +1795,7 @@ public class RuleConverterTest {
 	
 	private static RewritingProcess getNewRewritingProcessWithDefaultTypeSizeAndRandomVariableDeclarations(final int n, Set<Expression> randomVariableDeclarations) {
 		RewritingProcess process = getNewRewritingProcessWithDefaultTypeSize(DEFAULT_DOMAIN_SIZE);
-		process = Model.setKnownRandomVariables(randomVariableDeclarations, process);
+		process = Model.setKnownSortsAndRandomVariables(Collections.<Expression>emptySet(), randomVariableDeclarations, process);
 		return process;
 	}
 	

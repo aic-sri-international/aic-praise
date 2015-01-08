@@ -588,7 +588,7 @@ public class Model {
 		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES, allKnownRandomVariableNameAndArities);
 		process.putGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG, new RandomPredicateCatalog(randomPredicates));
 		
-		process = extendContextualSymbolsOnProcessWithRandomVariableTypeInformation(model.getRandomVariableDeclarations(), process);
+		process = extendContextualSymbolsOnProcessWithSortAndRandomVariableTypeInformation(model.getSortDeclarations(), model.getRandomVariableDeclarations(), process);
 		
 		// Setup the sort names for easy access
 		List<Expression> sortNames = new ArrayList<Expression>();
@@ -608,7 +608,9 @@ public class Model {
 	 * Set up the known random variables and random predicate catalog to be
 	 * associated with the passed in rewriting process.
 	 * 
-	 * @param randomVariableDeclarations
+	 * @param sortDeclarationExpressions
+	 *            the sort declarations.
+	 * @param randomVariableDeclarationExpressions
 	 *            the random variable declarations from which to instantiate the
 	 *            known random variable names and catalog to be associated with
 	 *            the passed in rewriting process.
@@ -617,13 +619,15 @@ public class Model {
 	 *            and a random predicate catalog to.
 	 * @return a new rewriting process based on the passed in process with random variable information associated with its context.
 	 */
-	public static RewritingProcess setKnownRandomVariables(Set<Expression> randomVariableDeclarations, RewritingProcess process) {
-
-		Set<RandomVariableDeclaration> declarations = new LinkedHashSet<>();
+	public static RewritingProcess setKnownSortsAndRandomVariables(Set<Expression> sortDeclarationExpressions, Set<Expression> randomVariableDeclarationExpressions, RewritingProcess process) {
+		Set<SortDeclaration> sortDeclarations = new LinkedHashSet<>();
+		sortDeclarationExpressions.forEach(sortDeclarationExpression -> sortDeclarations.add(SortDeclaration.makeSortDeclaration(sortDeclarationExpression)));
+		
+		Set<RandomVariableDeclaration> randomVariableDeclarations = new LinkedHashSet<>();
 		Set<String> knownVarNames = new LinkedHashSet<String>();
-		for (Expression rvd : randomVariableDeclarations) {
+		for (Expression rvd : randomVariableDeclarationExpressions) {
 			RandomVariableDeclaration declaration = RandomVariableDeclaration.makeRandomVariableDeclaration(rvd);
-			declarations.add(declaration);
+			randomVariableDeclarations.add(declaration);
 			knownVarNames.add(nameAndArityFromRandomVariableDeclaration(declaration));
 		}
 		// Now ensure we setup the random predicate catalog with all the known names
@@ -635,7 +639,7 @@ public class Model {
 		process.putGlobalObject(GLOBAL_KEY_KNOWN_RANDOM_VARIABLE_NAME_AND_ARITIES, knownVarNames);
 		process.putGlobalObject(GLOBAL_KEY_MODEL_RANDOM_PREDICATE_CATALOG, new RandomPredicateCatalog(randomPredicates));
 		
-		RewritingProcess result = extendContextualSymbolsOnProcessWithRandomVariableTypeInformation(declarations, process);
+		RewritingProcess result = extendContextualSymbolsOnProcessWithSortAndRandomVariableTypeInformation(sortDeclarations, randomVariableDeclarations, process);
 		
 		return result;
 	}
@@ -1081,18 +1085,21 @@ public class Model {
 		return result;
 	}
 	
-	private static RewritingProcess extendContextualSymbolsOnProcessWithRandomVariableTypeInformation(Collection<RandomVariableDeclaration> randomVariableDeclarations, RewritingProcess process) {
+	private static RewritingProcess extendContextualSymbolsOnProcessWithSortAndRandomVariableTypeInformation(Collection<SortDeclaration> sortDeclarations, Collection<RandomVariableDeclaration> randomVariableDeclarations, RewritingProcess process) {
 		final Map<Expression, Expression> typeMap = new LinkedHashMap<>();
-		randomVariableDeclarations.forEach(declaration -> {
+		sortDeclarations.forEach(sortDeclaration -> {
+			sortDeclaration.getAssignedConstants().forEach(sortConstant -> typeMap.put(sortConstant, sortDeclaration.getName()));
+		});
+		randomVariableDeclarations.forEach(randomVariableDeclaration -> {
 			List<Expression> args = new ArrayList<>();
-			if (declaration.getParameterSorts().size() > 1) {
-				args.add(Expressions.apply(FunctorConstants.CARTESIAN_PRODUCT, declaration.getParameterSorts()));
+			if (randomVariableDeclaration.getParameterSorts().size() > 1) {
+				args.add(Expressions.apply(FunctorConstants.CARTESIAN_PRODUCT, randomVariableDeclaration.getParameterSorts()));
 			}
 			else {
-				args.addAll(declaration.getParameterSorts());
+				args.addAll(randomVariableDeclaration.getParameterSorts());
 			}
-			args.add(declaration.getRangeSort());
-			typeMap.put(declaration.getName(), Expressions.apply(FunctorConstants.FUNCTION_TYPE, args));
+			args.add(randomVariableDeclaration.getRangeSort());
+			typeMap.put(randomVariableDeclaration.getName(), Expressions.apply(FunctorConstants.FUNCTION_TYPE, args));
 		});
 		
 		RewritingProcess result = GrinderUtil.extendContextualSymbols(typeMap, process);

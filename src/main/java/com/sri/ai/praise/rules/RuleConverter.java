@@ -420,7 +420,7 @@ public class RuleConverter {
 		
 		// Note: This is required to ensure random variable information is available on
 		// the rewriting process when performing R_normalize and R_complete_normalize operations.
-		process = Model.setKnownRandomVariables(randomVariableDeclarations, process);
+		process = Model.setKnownSortsAndRandomVariables(sortDeclarations, randomVariableDeclarations, process);
 		
 		// | constrainedPotentialExpressions <- disembedConstraints(potentialExpressions)
 		List<Pair<Expression, Expression>> constrainedPotentialExpressions = disembedConstraints(potentialExpressions, process);
