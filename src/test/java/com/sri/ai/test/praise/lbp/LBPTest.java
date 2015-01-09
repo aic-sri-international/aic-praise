@@ -4384,7 +4384,7 @@ public class LBPTest extends AbstractLPITest {
 //						+ "sort Dogs: 10;"
 //						+ "random happy: People -> Boolean;"
 //						+ "random fluffy: Dogs -> Boolean;"
-//						+ "random absurd: -> Boolean;"
+//						+ "random absurd: Boolean;"
 //						+ ""
 //						+ "happy(X); // every person is happy"
 //						+ "fluffy(Y); // every dog is fluffy"

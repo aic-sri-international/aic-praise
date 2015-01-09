@@ -62,7 +62,7 @@ public class RuleTokenMakerTest extends JFrame {
 				"\n"+
 				"//\n"+
 				"// RANDOM VARIABLE DECLARATIONS:\n"+
-				"random epidemic: -> Boolean;\n"+
+				"random epidemic: Boolean;\n"+
 				"random sick: People -> Boolean;\n"+
 				"random fever: People -> Boolean;\n"+
 				"random rash: People -> Boolean;\n"+
