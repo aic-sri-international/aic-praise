@@ -41,9 +41,11 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.List;
 
 import javax.swing.Action;
@@ -616,8 +618,38 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 	}
 	
 	private Expression lowLevelParse(String string) {
+		Expression result = null;
 		AntlrGrinderParserWrapper parser = new AntlrGrinderParserWrapper();
-		Expression result = parser.parse(string);
+		
+		PrintStream out = System.out;
+		PrintStream err = System.err;
+		
+		ByteArrayOutputStream localByteArrayOut = new ByteArrayOutputStream();
+		System.setOut(new PrintStream(localByteArrayOut));
+		ByteArrayOutputStream localByteArrayErr = new ByteArrayOutputStream();
+		System.setErr(new PrintStream(localByteArrayErr));
+		
+		
+		try {
+			result = parser.parse(string);				
+		}
+		finally {
+			System.out.flush(); System.err.flush();
+			System.setOut(out);
+			System.setErr(err);
+		}
+		
+		if (result == null) {
+			String outStr = localByteArrayOut.toString();
+			if (outStr.trim().length() > 0) {
+				app.outputPanel.addProblem(outStr);
+			}
+			String errStr = localByteArrayErr.toString();
+			if (errStr.trim().length() > 0) {
+				app.outputPanel.addProblem(errStr);
+			}
+		}
+		
 		return result;
 	}
 		
