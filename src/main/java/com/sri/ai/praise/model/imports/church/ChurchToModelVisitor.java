@@ -87,15 +87,16 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	private static final String FLIP_ID_PREFIX     = "flip";
 	private static final String CHURCH_VALUES_SORT = "Values";
 	//
-	private String                   churchProgramName = null;
-	private String                   churchProgram     = null;
-	private List<String>             randoms           = new ArrayList<>();
-	private Set<Expression>          knownConstants    = new LinkedHashSet<>();
-	private List<String>             rules             = new ArrayList<>();
-	private List<Expression>         queries           = new ArrayList<>();
-	private Map<Integer, Rational>   flipIdToValue     = new LinkedHashMap<>();
-	private List<Expression>         lambdaParams      = new ArrayList<>();
-	private Rewriter                 rNormalize        = LBPFactory.newNormalize();
+	private String                   churchProgramName        = null;
+	private String                   churchProgram            = null;
+	private List<String>             randoms                  = new ArrayList<>();
+	private Set<Expression>          knownConstants           = new LinkedHashSet<>();
+	private Set<Expression>          knownRandomVariableNames = new LinkedHashSet<>();
+	private List<String>             rules                    = new ArrayList<>();
+	private List<Expression>         queries                  = new ArrayList<>();
+	private Map<Integer, Rational>   flipIdToValue            = new LinkedHashMap<>();
+	private List<Expression>         lambdaParams             = new ArrayList<>();
+	private Rewriter                 rNormalize               = LBPFactory.newNormalize();
 	
 	public void setChurchProgramInformation(String name, String program) {
 		churchProgramName = name;
@@ -109,6 +110,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		// Clear down the working variables
 		randoms.clear();
 		knownConstants.clear();
+		knownRandomVariableNames.clear();
 		rules.clear();
 		queries.clear();
 		flipIdToValue.clear();
@@ -384,6 +386,9 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	protected Expression defineInHOGM(Expression name, List<Expression> params, Expression body) {
 		Expression result = null;
 		
+		// Track the known random variable names
+		knownRandomVariableNames.add(name);
+		
 		// Determine the correct argument names for any of the
 		StringBuilder                     rArgs         = new StringBuilder();
 		final Map<Expression, Expression> paramVarNames = new HashMap<Expression, Expression>();
@@ -474,6 +479,8 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			}
 			Expression plusH = Plus.make(h);
 			List<Expression> constants = new ArrayList<>(FormulaUtil.getConstants(plusH, processForRV));
+			// Ensure we exclude known random variable names
+			constants.removeAll(knownRandomVariableNames);
 			if (constants.size() > 0) {
 				knownConstants.addAll(constants);
 				Model model = Model.getRewritingProcessesModel(processForRV);

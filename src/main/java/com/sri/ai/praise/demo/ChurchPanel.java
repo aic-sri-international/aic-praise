@@ -58,6 +58,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.demo.model.ChurchEg1;
 import com.sri.ai.praise.demo.model.ChurchEg2;
 import com.sri.ai.praise.demo.model.ChurchEg3;
+import com.sri.ai.praise.demo.model.ChurchEg4;
 import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.imports.church.TranslateChurchToModel;
@@ -81,7 +82,8 @@ public class ChurchPanel extends AbstractEditorPanel {
 	public List<Example> getExamples() {
 		return Arrays.asList(new ChurchEg1(),
 				new ChurchEg2(),
-				new ChurchEg3()
+				new ChurchEg3(),
+				new ChurchEg4()
 				);
 	}
 	

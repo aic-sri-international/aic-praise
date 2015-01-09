@@ -96,6 +96,33 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	}
 	
 	@Test
+	public void testExample4() {					
+		Triple<String, Model, List<Expression>> translation = translator.translate("Example 4", ""
+				+ "(define epidemic (mem (lambda () (flip 0.01))))\n"
+				+ "(define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))\n"
+				+ "(sick john)\n"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(define epidemic (mem (lambda () (flip 0.01))))",
+				"(define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))",
+				"(sick john)",				
+				"",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random epidemic: Boolean;",
+				"random sick: Values -> Boolean;",
+				"",
+				"if epidemic then 0.01 else 0.99;",
+				"if epidemic then if sick(Person) then 0.6 else 0.4 else if sick(Person) then 0.1 else 0.9;"
+		);
+	}
+	
+	@Test
 	public void testLogicalNotOnVariable() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Not on Variable", ""
 				+ "(define goOut (mem (lambda (day) (if (not (= day friday)) (flip 0.8) (flip 0.3)))))\n"
