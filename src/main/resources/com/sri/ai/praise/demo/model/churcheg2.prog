@@ -3,5 +3,5 @@
 ;
 ; Program
 (define sunny (flip 0.3))
-; Queries
+; Query
 sunny

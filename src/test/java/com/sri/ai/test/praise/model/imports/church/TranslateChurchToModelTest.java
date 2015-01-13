@@ -75,15 +75,13 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 3", ""
 				+ "(define goOut (mem (lambda (day) (if (eq? day 'friday) (flip 0.8) (flip 0.3)))))\n"
 				+ "(goOut 'friday)\n"
-				+ "(goOut 'monday)\n"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(define goOut (mem (lambda (day) (if (eq? day \\'friday) (flip 0.8) (flip 0.3)))))",
-				"(goOut \\'friday)",
-				"(goOut \\'monday)",				
+				"(goOut \\'friday)",				
 				"",
 				"--->",
 				"",

@@ -3,5 +3,5 @@
 ;
 ; Program
 (define sunny #t)
-; Queries
+; Query
 sunny
