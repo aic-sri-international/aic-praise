@@ -44,7 +44,7 @@ GRAMMAR RULES
 */
 
 parse
-  :  commandOrDefinition* EOF
+  :  '(' 'query' commandOrDefinition* ')' EOF
   ;
 
 commandOrDefinition

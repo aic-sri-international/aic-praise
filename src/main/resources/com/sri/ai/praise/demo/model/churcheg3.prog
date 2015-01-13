@@ -1,7 +1,10 @@
 ;
-;    Church Example 3
+; Church Example 3
 ;
-; Program
-(define goOut (mem (lambda (day) (if (eq? day 'friday) (flip 0.8) (flip 0.3)))))
-; Query
-(goOut 'friday)
+(query
+  ; -- generative-model -- 
+  (define goOut (mem (lambda (day) (if (eq? day 'friday) (flip 0.8) (flip 0.3)))))
+  ; -- what-we-want-to-know --
+  (goOut 'friday)
+  ; -- what-we-know -- 
+)

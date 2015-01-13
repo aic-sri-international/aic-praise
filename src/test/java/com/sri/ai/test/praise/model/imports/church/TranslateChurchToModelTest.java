@@ -30,14 +30,17 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testExample1() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 1", ""
-				+ "(define sunny #t)\n"
+				+ "(query \n"
+				+ "  (define sunny #t)\n"
+				+ ")"
 				);
 	
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define sunny #t)",				
-				"",
+				"(query ",
+				"  (define sunny #t)",				
+				")",
 				"--->",
 				"",
 				"sort Values;",
@@ -52,14 +55,17 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testExample2() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 2", ""
-				+ "(define sunny (flip 0.3))\n"
+				+ "(query \n"
+				+ "  (define sunny (flip 0.3))\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define sunny (flip 0.3))",				
-				"",
+				"(query ",
+				"  (define sunny (flip 0.3))",				
+				")",
 				"--->",
 				"",
 				"sort Values;",
@@ -73,16 +79,19 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testExample3() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 3", ""
-				+ "(define goOut (mem (lambda (day) (if (eq? day 'friday) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut 'friday)\n"
+				+ "(query \n"
+				+ "  (define goOut (mem (lambda (day) (if (eq? day 'friday) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (goOut 'friday)\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define goOut (mem (lambda (day) (if (eq? day \\'friday) (flip 0.8) (flip 0.3)))))",
-				"(goOut \\'friday)",				
-				"",
+				"(query ",
+				"  (define goOut (mem (lambda (day) (if (eq? day \\'friday) (flip 0.8) (flip 0.3)))))",
+				"  (goOut \\'friday)",				
+				")",
 				"--->",
 				"",
 				"sort Values : Unknown, friday;",
@@ -96,18 +105,21 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testExample4() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 4", ""
-				+ "(define epidemic (mem (lambda () (flip 0.01))))\n"
-				+ "(define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))\n"
-				+ "(sick 'john)\n"
+				+ "(query \n"
+				+ "  (define epidemic (mem (lambda () (flip 0.01))))\n"
+				+ "  (define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))\n"
+				+ "  (sick 'john)\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define epidemic (mem (lambda () (flip 0.01))))",
-				"(define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))",
-				"(sick \\'john)",				
-				"",
+				"(query ",
+				"  (define epidemic (mem (lambda () (flip 0.01))))",
+				"  (define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))",
+				"  (sick \\'john)",				
+				")",
 				"--->",
 				"",
 				"sort Values;",
@@ -123,16 +135,19 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testLogicalNotOnVariable() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Not on Variable", ""
-				+ "(define goOut (mem (lambda (day) (if (not (eqv? day 'friday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut 'friday)\n"
+				+ "(query \n"
+				+ "  (define goOut (mem (lambda (day) (if (not (eqv? day 'friday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (goOut 'friday)\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define goOut (mem (lambda (day) (if (not (eqv? day \\'friday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut \\'friday)",			
-				"",
+				"(query ",
+				"  (define goOut (mem (lambda (day) (if (not (eqv? day \\'friday)) (flip 0.8) (flip 0.3)))))",
+				"  (goOut \\'friday)",			
+				")",
 				"--->",
 				"",
 				"sort Values : Unknown, friday;",
@@ -146,16 +161,19 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testLogicalOrOnVariable() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Or on Variable", ""
-				+ "(define goOut (mem (lambda (day) (if (or (equal? day 'friday) (equal? day 'saturday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut 'friday)\n"
+				+ "(query \n"
+				+ "  (define goOut (mem (lambda (day) (if (or (equal? day 'friday) (equal? day 'saturday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (goOut 'friday)\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define goOut (mem (lambda (day) (if (or (equal? day \\'friday) (equal? day \\'saturday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut \\'friday)",			
-				"",
+				"(query ",
+				"  (define goOut (mem (lambda (day) (if (or (equal? day \\'friday) (equal? day \\'saturday)) (flip 0.8) (flip 0.3)))))",
+				"  (goOut \\'friday)",			
+				")",
 				"--->",
 				"",
 				"sort Values : Unknown, friday, saturday;",
@@ -169,15 +187,18 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testLogicalAndOnVariables() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Or on Variable", ""
-				+ "(define goOut (mem (lambda (day1 day2) (if (and (eq? day1 'friday) (eq? day2 'saturday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut 'friday 'saturday)\n"
+				+ "(query \n"
+				+ "  (define goOut (mem (lambda (day1 day2) (if (and (eq? day1 'friday) (eq? day2 'saturday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (goOut 'friday 'saturday)\n"
+				+ ")"
 				);
 		
 		print(translation);
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define goOut (mem (lambda (day1 day2) (if (and (eq? day1 \\'friday) (eq? day2 \\'saturday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut \\'friday \\'saturday)",			
-				"",
+				"(query ",
+				"  (define goOut (mem (lambda (day1 day2) (if (and (eq? day1 \\'friday) (eq? day2 \\'saturday)) (flip 0.8) (flip 0.3)))))",
+				"  (goOut \\'friday \\'saturday)",			
+				")",
 				"--->",
 				"",
 				"sort Values : Unknown, friday, saturday;",
@@ -191,18 +212,21 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testReferToOtherVariableInDefinition() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Refer to other variable in definition", ""
-				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
-				+ "(define goOut (mem (lambda (day) (if (sunny day) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut 'friday)\n"
+				+ "(query \n"
+				+ "  (define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "  (define goOut (mem (lambda (day) (if (sunny day) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (goOut 'friday)\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define sunny (mem (lambda (day) (flip 0.3))))",
-				"(define goOut (mem (lambda (day) (if (sunny day) (flip 0.8) (flip 0.3)))))",
-				"(goOut \\'friday)",				
-				"",
+				"(query ",
+				"  (define sunny (mem (lambda (day) (flip 0.3))))",
+				"  (define goOut (mem (lambda (day) (if (sunny day) (flip 0.8) (flip 0.3)))))",
+				"  (goOut \\'friday)",				
+				")",
 				"--->",
 				"",
 				"sort Values;",
@@ -218,18 +242,21 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testReferringLogicalNot() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical Not", ""
-				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
-				+ "(define goOut (mem (lambda (day) (if (not (sunny day)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut 'friday)\n"
+				+ "(query \n"
+				+ "  (define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "  (define goOut (mem (lambda (day) (if (not (sunny day)) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (goOut 'friday)\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define sunny (mem (lambda (day) (flip 0.3))))",
-				"(define goOut (mem (lambda (day) (if (not (sunny day)) (flip 0.8) (flip 0.3)))))",
-				"(goOut \\'friday)",				
-				"",
+				"(query ",
+				"  (define sunny (mem (lambda (day) (flip 0.3))))",
+				"  (define goOut (mem (lambda (day) (if (not (sunny day)) (flip 0.8) (flip 0.3)))))",
+				"  (goOut \\'friday)",	
+				")",
 				"--->",
 				"",
 				"sort Values;",
@@ -245,18 +272,21 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testReferringLogicalAnd() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical And", ""
-				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
-				+ "(define goOut (mem (lambda (day) (if (and (sunny day) (eq? day 'friday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut 'friday)\n"
+				+ "(query \n"
+				+ "  (define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "  (define goOut (mem (lambda (day) (if (and (sunny day) (eq? day 'friday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (goOut 'friday)\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define sunny (mem (lambda (day) (flip 0.3))))",
-				"(define goOut (mem (lambda (day) (if (and (sunny day) (eq? day \\'friday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut \\'friday)",				
-				"",
+				"(query ",
+				"  (define sunny (mem (lambda (day) (flip 0.3))))",
+				"  (define goOut (mem (lambda (day) (if (and (sunny day) (eq? day \\'friday)) (flip 0.8) (flip 0.3)))))",
+				"  (goOut \\'friday)",				
+				")",
 				"--->",
 				"",
 				"sort Values : Unknown, friday;",
@@ -272,18 +302,21 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testReferringLogicalOr() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical Or", ""
-				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
-				+ "(define goOut (mem (lambda (day) (if (or (sunny day) (eq? day 'friday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut 'friday)\n"
+				+ "(query \n"
+				+ "  (define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "  (define goOut (mem (lambda (day) (if (or (sunny day) (eq? day 'friday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (goOut 'friday)\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define sunny (mem (lambda (day) (flip 0.3))))",
-				"(define goOut (mem (lambda (day) (if (or (sunny day) (eq? day \\'friday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut \\'friday)",				
-				"",
+				"(query ",
+				"  (define sunny (mem (lambda (day) (flip 0.3))))",
+				"  (define goOut (mem (lambda (day) (if (or (sunny day) (eq? day \\'friday)) (flip 0.8) (flip 0.3)))))",
+				"  (goOut \\'friday)",				
+				")",
 				"--->",
 				"",
 				"sort Values : Unknown, friday;",
@@ -297,32 +330,36 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	}
 	
 	@Test
-	public void testImplicitEvidence() {
-		Triple<String, Model, List<Expression>> translation = translator.translate("Implicit Evidence", ""
-				+ "(define A (flip))\n"
-				+ "(define B (flip))\n"
-				+ "(define C (flip))\n"
-				+ "A\n"
-				+ "(or (and A B) (and A C) (and B C))"
+	public void testConditionalEvidence() {
+		Triple<String, Model, List<Expression>> translation = translator.translate("Conditional Evidence", ""
+				+ "(query \n"
+				+ "  (define a (flip))\n"
+				+ "  (define b (flip))\n"
+				+ "  (define c (flip))\n"
+				+ "  a\n"
+				+ "  (or (and a b) (and a c) (and b c))\n"
+				+ ")"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define A (flip))",
-				"(define B (flip))",
-				"(define C (flip))",
-				"A",
-				"(or (and A B) (and A C) (and B C))",
+				"(query ",
+				"  (define a (flip))",
+				"  (define b (flip))",
+				"  (define c (flip))",
+				"  a",
+				"  (or (and a b) (and a c) (and b c))",
+				")",
 				"--->",
 				"",
 				"sort Values;",
 				"",
-				"random A: Boolean;",
-				"random B: Boolean;",
-				"random C: Boolean;",
+				"random a: Boolean;",
+				"random b: Boolean;",
+				"random c: Boolean;",
 				"",
-				"if (A and B or A and C or B and C) then 1 else 0;"
+				"if (a and b or a and c or b and c) then 1 else 0;"
 		);
 	}
 	

@@ -1,11 +1,13 @@
 ;
-;    Church Example 5
+; Church Example 5
 ;
-; Program
-(define a (flip))
-(define b (flip))
-(define c (flip))
-; Query
-a
-; Conditional Evidence
-(or (and a b) (and a c) (and b c))
+(query
+  ; -- generative-model -- 
+  (define a (flip))
+  (define b (flip))
+  (define c (flip))
+  ; -- what-we-want-to-know --
+  a
+  ; -- what-we-know --
+  (or (and a b) (and a c) (and b c)) 
+)

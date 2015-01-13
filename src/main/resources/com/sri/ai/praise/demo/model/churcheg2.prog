@@ -1,7 +1,10 @@
 ;
-;     Church Example 2
+; Church Example 2
 ;
-; Program
-(define sunny (flip 0.3))
-; Query
-sunny
+(query
+  ; -- generative-model -- 
+  (define sunny (flip 0.3))
+  ; -- what-we-want-to-know --
+  sunny
+  ; -- what-we-know -- 
+)

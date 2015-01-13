@@ -1,8 +1,11 @@
 ;
-;    Church Example 4
+; Church Example 4
 ;
-; Program
-(define epidemic (mem (lambda () (flip 0.01))))
-(define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))
-; Query
-(sick 'john)
+(query
+  ; -- generative-model -- 
+  (define epidemic (mem (lambda () (flip 0.01))))
+  (define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))
+  ; -- what-we-want-to-know --
+  (sick 'john)
+  ; -- what-we-know -- 
+)
