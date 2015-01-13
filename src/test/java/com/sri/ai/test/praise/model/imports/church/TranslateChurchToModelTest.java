@@ -296,6 +296,36 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		);
 	}
 	
+	@Test
+	public void testImplicitEvidence() {
+		Triple<String, Model, List<Expression>> translation = translator.translate("Implicit Evidence", ""
+				+ "(define A (flip))\n"
+				+ "(define B (flip))\n"
+				+ "(define C (flip))\n"
+				+ "A\n"
+				+ "(or (and A B) (and A C) (and B C))"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(define A (flip))",
+				"(define B (flip))",
+				"(define C (flip))",
+				"A",
+				"(or (and A B) (and A C) (and B C))",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random A: Boolean;",
+				"random B: Boolean;",
+				"random C: Boolean;",
+				"",
+				"if (A and B or A and C or B and C) then 1 else 0;"
+		);
+	}
+	
 	//
 	// PRIVATE
 	//		

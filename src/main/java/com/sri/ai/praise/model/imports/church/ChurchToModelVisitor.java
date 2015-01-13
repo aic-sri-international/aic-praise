@@ -139,7 +139,10 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			hogm.append(rv+";\n");
 		}
 		hogm.append("\n");
-		for (String r : rules) {		
+		for (String r : rules) {
+			if (Expressions.ZERO_POINT_FIVE.equals(r)) {
+				continue; // simplified to know nothing about the random variable so skip it
+			}
 			hogm.append(r+";\n");
 		}
 
@@ -160,8 +163,15 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	
 	@Override 
 	public Expression visitCommand(@NotNull ChurchParser.CommandContext ctx) {
-		Expression result = visitChildren(ctx);
-		queries.add(result);
+		Expression result             = visitChildren(ctx);
+		boolean isConditionalEvidence = !knownRandomVariableNames.contains(result.getFunctorOrSymbol());
+		
+		if (isConditionalEvidence) {
+			// Church evidence is defined in terms of conditions
+			rules.add("if ("+result.toString()+") then 1 else 0");
+		} else {
+			queries.add(result);
+		}
 		return result;
 	}
 	
