@@ -73,17 +73,17 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testExample3() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 3", ""
-				+ "(define goOut (mem (lambda (day) (if (= day friday) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut friday)\n"
-				+ "(goOut monday)\n"
+				+ "(define goOut (mem (lambda (day) (if (eq? day 'friday) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut 'friday)\n"
+				+ "(goOut 'monday)\n"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define goOut (mem (lambda (day) (if (= day friday) (flip 0.8) (flip 0.3)))))",
-				"(goOut friday)",
-				"(goOut monday)",				
+				"(define goOut (mem (lambda (day) (if (eq? day \\'friday) (flip 0.8) (flip 0.3)))))",
+				"(goOut \\'friday)",
+				"(goOut \\'monday)",				
 				"",
 				"--->",
 				"",
@@ -100,7 +100,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 4", ""
 				+ "(define epidemic (mem (lambda () (flip 0.01))))\n"
 				+ "(define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))\n"
-				+ "(sick john)\n"
+				+ "(sick 'john)\n"
 				);
 		
 		print(translation);
@@ -108,7 +108,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(define epidemic (mem (lambda () (flip 0.01))))",
 				"(define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))",
-				"(sick john)",				
+				"(sick \\'john)",				
 				"",
 				"--->",
 				"",
@@ -125,15 +125,15 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testLogicalNotOnVariable() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Not on Variable", ""
-				+ "(define goOut (mem (lambda (day) (if (not (= day friday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut friday)\n"
+				+ "(define goOut (mem (lambda (day) (if (not (eqv? day 'friday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut 'friday)\n"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define goOut (mem (lambda (day) (if (not (= day friday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut friday)",			
+				"(define goOut (mem (lambda (day) (if (not (eqv? day \\'friday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut \\'friday)",			
 				"",
 				"--->",
 				"",
@@ -148,15 +148,15 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testLogicalOrOnVariable() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Or on Variable", ""
-				+ "(define goOut (mem (lambda (day) (if (or (= day friday) (= day saturday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut friday)\n"
+				+ "(define goOut (mem (lambda (day) (if (or (equal? day 'friday) (equal? day 'saturday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut 'friday)\n"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define goOut (mem (lambda (day) (if (or (= day friday) (= day saturday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut friday)",			
+				"(define goOut (mem (lambda (day) (if (or (equal? day \\'friday) (equal? day \\'saturday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut \\'friday)",			
 				"",
 				"--->",
 				"",
@@ -171,14 +171,14 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	@Test
 	public void testLogicalAndOnVariables() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Or on Variable", ""
-				+ "(define goOut (mem (lambda (day1 day2) (if (and (= day1 friday) (= day2 saturday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut friday saturday)\n"
+				+ "(define goOut (mem (lambda (day1 day2) (if (and (eq? day1 'friday) (eq? day2 'saturday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut 'friday 'saturday)\n"
 				);
 		
 		print(translation);
 		assertDescriptionEquals(translation.second.getDescription(),
-				"(define goOut (mem (lambda (day1 day2) (if (and (= day1 friday) (= day2 saturday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut friday saturday)",			
+				"(define goOut (mem (lambda (day1 day2) (if (and (eq? day1 \\'friday) (eq? day2 \\'saturday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut \\'friday \\'saturday)",			
 				"",
 				"--->",
 				"",
@@ -195,7 +195,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Refer to other variable in definition", ""
 				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
 				+ "(define goOut (mem (lambda (day) (if (sunny day) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut friday)\n"
+				+ "(goOut 'friday)\n"
 				);
 		
 		print(translation);
@@ -203,7 +203,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(define sunny (mem (lambda (day) (flip 0.3))))",
 				"(define goOut (mem (lambda (day) (if (sunny day) (flip 0.8) (flip 0.3)))))",
-				"(goOut friday)",				
+				"(goOut \\'friday)",				
 				"",
 				"--->",
 				"",
@@ -222,7 +222,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical Not", ""
 				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
 				+ "(define goOut (mem (lambda (day) (if (not (sunny day)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut friday)\n"
+				+ "(goOut 'friday)\n"
 				);
 		
 		print(translation);
@@ -230,7 +230,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(define sunny (mem (lambda (day) (flip 0.3))))",
 				"(define goOut (mem (lambda (day) (if (not (sunny day)) (flip 0.8) (flip 0.3)))))",
-				"(goOut friday)",				
+				"(goOut \\'friday)",				
 				"",
 				"--->",
 				"",
@@ -248,16 +248,16 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	public void testReferringLogicalAnd() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical And", ""
 				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
-				+ "(define goOut (mem (lambda (day) (if (and (sunny day) (= day friday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut friday)\n"
+				+ "(define goOut (mem (lambda (day) (if (and (sunny day) (eq? day 'friday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut 'friday)\n"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(define sunny (mem (lambda (day) (flip 0.3))))",
-				"(define goOut (mem (lambda (day) (if (and (sunny day) (= day friday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut friday)",				
+				"(define goOut (mem (lambda (day) (if (and (sunny day) (eq? day \\'friday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut \\'friday)",				
 				"",
 				"--->",
 				"",
@@ -275,16 +275,16 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	public void testReferringLogicalOr() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Referring Logical Or", ""
 				+ "(define sunny (mem (lambda (day) (flip 0.3))))\n"
-				+ "(define goOut (mem (lambda (day) (if (or (sunny day) (= day friday)) (flip 0.8) (flip 0.3)))))\n"
-				+ "(goOut friday)\n"
+				+ "(define goOut (mem (lambda (day) (if (or (sunny day) (eq? day 'friday)) (flip 0.8) (flip 0.3)))))\n"
+				+ "(goOut 'friday)\n"
 				);
 		
 		print(translation);
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(define sunny (mem (lambda (day) (flip 0.3))))",
-				"(define goOut (mem (lambda (day) (if (or (sunny day) (= day friday)) (flip 0.8) (flip 0.3)))))",
-				"(goOut friday)",				
+				"(define goOut (mem (lambda (day) (if (or (sunny day) (eq? day \\'friday)) (flip 0.8) (flip 0.3)))))",
+				"(goOut \\'friday)",				
 				"",
 				"--->",
 				"",

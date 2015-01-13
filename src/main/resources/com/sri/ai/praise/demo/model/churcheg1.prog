@@ -1,7 +1,7 @@
-#|
-     Church Example 1
-|#
+;
+;     Church Example 1
+;
 ; Program
 (define sunny #t)
 ; Queries
-(sunny)
+sunny

@@ -1,8 +1,8 @@
-#|
-     Church Example 3
-|#
+;
+;    Church Example 3
+;
 ; Program
-(define goOut (mem (lambda (day) (if (= day friday) (flip 0.8) (flip 0.3)))))
+(define goOut (mem (lambda (day) (if (eq? day 'friday) (flip 0.8) (flip 0.3)))))
 ; Queries
-(goOut friday)
-(goOut monday)
+(goOut 'friday)
+(goOut 'monday)

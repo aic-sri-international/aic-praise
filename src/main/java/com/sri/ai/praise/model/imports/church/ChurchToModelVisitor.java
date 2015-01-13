@@ -72,6 +72,7 @@ import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.rules.RuleConverter;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 import com.sri.ai.util.math.Rational;
 
@@ -86,6 +87,11 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	//
 	private static final String FLIP_ID_PREFIX     = "flip";
 	private static final String CHURCH_VALUES_SORT = "Values";
+	private static final Map<Expression, Expression> operatorMap = Util.map(
+				Expressions.makeSymbol("eq?"), Expressions.makeSymbol("="),
+				Expressions.makeSymbol("eqv?"), Expressions.makeSymbol("="),
+				Expressions.makeSymbol("equal?"), Expressions.makeSymbol("=")
+			);
 	//
 	private String                   churchProgramName        = null;
 	private String                   churchProgram            = null;
@@ -175,6 +181,23 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		Expression body = visit(ctx.binding);
 						
 		Expression result = defineInHOGM(name, Collections.<Expression>emptyList(), body);
+		
+		return result;
+	}
+	
+	@Override 
+	public Expression visitDefineProcedure(@NotNull ChurchParser.DefineProcedureContext ctx) { 
+		Expression name = visit(ctx.name);
+		Expression body = visit(ctx.bodyLogic);
+		
+		List<Expression> params = new ArrayList<>();
+		if (ctx.arguments != null && ctx.arguments.variable() != null && ctx.arguments.variable().size() > 0) {
+			for (int i = 0; i < ctx.arguments.variable().size(); i++) {
+				params.add(visit(ctx.arguments.variable(i)));
+			}
+		}
+						
+		Expression result = defineInHOGM(name, params, body);
 		
 		return result;
 	}
@@ -292,6 +315,9 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			for (int i = 0; i < ctx.operand().size(); i++) {
 				operands.add(visit(ctx.operand(i)));			
 			}
+		}
+		if (operatorMap.containsKey(operator)) {
+			operator = operatorMap.get(operator);
 		}
 		
 		Expression result = Expressions.apply(operator, operands);
