@@ -262,8 +262,8 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	public Expression visitFlip(@NotNull ChurchParser.FlipContext ctx) {
 		
 		Expression value = Expressions.ZERO_POINT_FIVE;
-		if (ctx.number() != null) {
-			value = visit(ctx.number());
+		if (ctx.value != null) {
+			value = visit(ctx.value);
 		}
 		
 		// Must be a number and in the interval [0, 1]

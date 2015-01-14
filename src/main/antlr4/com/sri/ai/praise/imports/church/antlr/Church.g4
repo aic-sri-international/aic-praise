@@ -159,8 +159,7 @@ alternate
   ;
 
 flip
-  :  '(' FLIP number? ')'
-  | FLIP number?
+  :  '(' FLIP (value=expression)? ')'
   ;
 
 logicalOperatorExpression

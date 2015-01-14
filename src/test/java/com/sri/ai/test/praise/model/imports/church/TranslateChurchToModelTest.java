@@ -494,6 +494,16 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		);
 	}
 	
+	@Test(expected=IllegalArgumentException.class)
+	public void testIllegalArgumentToFlip() {
+		// NOTE: Currently require literal number arguments in the interval [0, 1] to flip.
+		translator.translate("Illegal argument to flip", ""
+				+ "(query \n"
+				+ "  (define (make-coin weight) (if (flip weight) #t #f))\n"
+				+ ")"
+				);
+	}
+	
 	//
 	// PRIVATE
 	//		
