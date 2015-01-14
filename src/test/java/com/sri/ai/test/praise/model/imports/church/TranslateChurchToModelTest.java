@@ -363,6 +363,88 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		);
 	}
 	
+	@Test
+	public void testUpperToLowerCase() {
+		Triple<String, Model, List<Expression>> translation = translator.translate("Example 1 using upper case", ""
+				+ "(query \n"
+				+ "  (define Sunny #t)\n"
+				+ ")"
+				);
+	
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define Sunny #t)",				
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random sunny: Boolean;",
+				"",
+				"if sunny then 1 else 0;"
+		);
+		
+		translation = translator.translate("Conditional Evidence using upper case", ""
+				+ "(query \n"
+				+ "  (define A (flip))\n"
+				+ "  (define B (flip))\n"
+				+ "  (define C (flip))\n"
+				+ "  A\n"
+				+ "  (or (and A B) (and A C) (and B C))\n"
+				+ ")"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define A (flip))",
+				"  (define B (flip))",
+				"  (define C (flip))",
+				"  A",
+				"  (or (and A B) (and A C) (and B C))",
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random a: Boolean;",
+				"random b: Boolean;",
+				"random c: Boolean;",
+				"",
+				"if (a and b or a and c or b and c) then 1 else 0;"
+		);
+		
+		translation = translator.translate("Refer to other variable in definition using upper case", ""
+				+ "(query \n"
+				+ "  (define Sunny (mem (lambda (dayOfWeek) (flip 0.3))))\n"
+				+ "  (define GoOut (mem (lambda (day) (if (Sunny day) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (GoOut 'friday)\n"
+				+ ")"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define Sunny (mem (lambda (dayOfWeek) (flip 0.3))))",
+				"  (define GoOut (mem (lambda (day) (if (Sunny day) (flip 0.8) (flip 0.3)))))",
+				"  (GoOut \\'friday)",				
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random sunny: Values -> Boolean;",
+				"random goOut: Values -> Boolean;",
+				"",
+				"if sunny(DayOfWeek) then 0.3 else 0.7;",				
+				"if sunny(Day) then if goOut(Day) then 0.8 else 0.2 else if goOut(Day) then 0.3 else 0.7;"
+		);
+	}
+	
 	//
 	// PRIVATE
 	//		

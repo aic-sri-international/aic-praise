@@ -441,12 +441,9 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 				rArgs.append(" x ");			
 			}
 			// Ensure name is upper cased
-			String sArg = arg.toString();
-			if (!sArg.substring(0, 1).toUpperCase().equals(sArg.substring(0, 1))) {
-				sArg = sArg.substring(0, 1).toUpperCase() + (sArg.length() > 1 ? sArg.substring(1) : "");
-			}
-			rvArgs.add(newSymbol(sArg));
-			params.set(cnt, newSymbol(sArg));
+			Expression logicalVariableArg = newLogicalVariable(arg.toString());
+			rvArgs.add(logicalVariableArg);
+			params.set(cnt, logicalVariableArg);
 			paramVarNames.put(arg, params.get(cnt));
 // TODO - anything better?			
 			rArgs.append(CHURCH_VALUES_SORT);
@@ -582,9 +579,27 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		// Ensure escapes are applied.
 		text = StringEscapeUtils.unescapeJava(text);
 
-		text = new String(text);
+		if (!text.contains(" ")) {
+			text = ensureLegalRandomVariableName(new String(text));
+		}
 
 		Expression result = Expressions.makeSymbol(text);
+		return result;
+	}
+	
+	protected Expression newLogicalVariable(String logicalVariableName) {
+		if (!logicalVariableName.substring(0, 1).toUpperCase().equals(logicalVariableName.substring(0, 1))) {
+			logicalVariableName = logicalVariableName.substring(0, 1).toUpperCase() + (logicalVariableName.length() > 1 ? logicalVariableName.substring(1) : "");
+		}
+		Expression result = Expressions.makeSymbol(logicalVariableName);
+		return result;
+	}
+	
+	protected String ensureLegalRandomVariableName(String name) {
+		String result = name;
+		if (name.length() > 0 && name.toUpperCase().substring(0, 1).equals(name.substring(0, 1))) {
+			result = name.substring(0, 1).toLowerCase() + (name.length() > 1 ? name.substring(1) : "");
+		}
 		return result;
 	}
 }

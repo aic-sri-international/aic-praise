@@ -3,11 +3,11 @@
 ;
 (query
   ; -- generative-model -- 
-  (define a (flip))
-  (define b (flip))
-  (define c (flip))
+  (define A (flip))
+  (define B (flip))
+  (define C (flip))
   ; -- what-we-want-to-know --
-  a
+  A
   ; -- what-we-know --
-  (or (and a b) (and a c) (and b c)) 
+  (or (and A B) (and A C) (and B C)) 
 )
