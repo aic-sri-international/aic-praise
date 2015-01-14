@@ -364,6 +364,55 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	}
 	
 	@Test
+	public void testChurchQuoteSupport() {
+		Triple<String, Model, List<Expression>> translation = translator.translate("Example 1 using upper case", ""
+				+ "(query \n"
+				+ "  (define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "  (sunny 'friday)\n"
+				+ ")"
+				);
+	
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define sunny (mem (lambda (day) (flip 0.3))))",	
+				"  (sunny \\'friday)",
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random sunny: Values -> Boolean;",
+				"",
+				"if sunny(Day) then 0.3 else 0.7;"
+		);
+		
+		translation = translator.translate("Example 1 using upper case", ""
+				+ "(query \n"
+				+ "  (define sunny (mem (lambda (day) (flip 0.3))))\n"
+				+ "  (sunny (quote friday))\n"
+				+ ")"
+				);
+	
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define sunny (mem (lambda (day) (flip 0.3))))",	
+				"  (sunny (quote friday))",
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random sunny: Values -> Boolean;",
+				"",
+				"if sunny(Day) then 0.3 else 0.7;"
+		);
+	}
+	
+	@Test
 	public void testUpperToLowerCase() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 1 using upper case", ""
 				+ "(query \n"
