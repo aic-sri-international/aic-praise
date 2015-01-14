@@ -580,6 +580,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 		text = StringEscapeUtils.unescapeJava(text);
 
 		if (!text.contains(" ")) {
+			text = text.replaceAll("-", "_");
 			text = ensureLegalRandomVariableName(new String(text));
 		}
 
@@ -596,7 +597,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	}
 	
 	protected String ensureLegalRandomVariableName(String name) {
-		String result = name;
+		String result = name.replaceAll("-", "_");
 		if (name.length() > 0 && name.toUpperCase().substring(0, 1).equals(name.substring(0, 1))) {
 			result = name.substring(0, 1).toLowerCase() + (name.length() > 1 ? name.substring(1) : "");
 		}

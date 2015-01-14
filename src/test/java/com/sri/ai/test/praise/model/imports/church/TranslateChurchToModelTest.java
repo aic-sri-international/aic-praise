@@ -504,6 +504,53 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				);
 	}
 	
+	@Test
+	public void testHyphenReplacementWithUnderscore() {
+		Triple<String, Model, List<Expression>> translation = translator.translate("Hyphen random variable", ""
+				+ "(query \n"
+				+ "  (define stomach-flu (flip 0.1))\n"
+				+ ")"
+				);
+	
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define stomach-flu (flip 0.1))",				
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random stomach_flu: Boolean;",
+				"",
+				"if stomach_flu then 0.1 else 0.9;"
+		);
+		
+		translation = translator.translate("Hyphen logical variable", ""
+				+ "(query \n"
+				+ "  (define a-sunny-day (mem (lambda (a-day) (flip 0.3))))\n"
+				+ "  (a-sunny-day 'friday)\n"
+				+ ")"
+				);
+	
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define a-sunny-day (mem (lambda (a-day) (flip 0.3))))",	
+				"  (a-sunny-day \\'friday)",
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random a_sunny_day: Values -> Boolean;",
+				"",
+				"if a_sunny_day(A_day) then 0.3 else 0.7;"
+		);
+	}
+	
 	//
 	// PRIVATE
 	//		
