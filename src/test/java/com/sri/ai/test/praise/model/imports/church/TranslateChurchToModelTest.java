@@ -133,6 +133,126 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	}
 	
 	@Test
+	public void testExample5() {					
+		Triple<String, Model, List<Expression>> translation = translator.translate("Example 5", ""
+				+ "(query \n"
+				+ "  (define A (flip))\n"
+				+ "  (define B (flip))\n"
+				+ "  (define C (flip))\n"
+				+ "  A\n"
+				+ "  (or (and A B) (and A C) (and B C))\n"
+				+ ")"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define A (flip))",
+				"  (define B (flip))",
+				"  (define C (flip))",
+				"  A",
+				"  (or (and A B) (and A C) (and B C))",
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random a: Boolean;",
+				"random b: Boolean;",
+				"random c: Boolean;",
+				"",
+				"if (a and b or a and c or b and c) then 1 else 0;"
+		);
+	}
+	
+	@Test
+	public void testExample6() {					
+		Triple<String, Model, List<Expression>> translation = translator.translate("Example 5", ""
+				+ "(query \n"
+				+ "  (define lung-cancer (flip 0.01))\n"
+				+ "  (define TB (flip 0.005))\n"
+				+ "  (define stomach-flu (flip 0.1))\n"
+				+ "  (define cold (flip 0.2))\n"
+				+ "  (define other (flip 0.1))\n"
+				+ "  (define cough \n"
+				+ "    (or (and cold (flip 0.5))\n"
+				+ "        (and lung-cancer (flip 0.3))\n"
+				+ "        (and TB (flip 0.7))\n"
+				+ "        (and other (flip 0.01))))\n"
+				+ "  (define fever \n"
+				+ "    (or (and cold (flip 0.3))\n"
+				+ "        (and stomach-flu (flip 0.5))\n"
+				+ "        (and TB (flip 0.1))\n"
+				+ "        (and other (flip 0.01))))\n"
+				+ "  (define chest-pain \n"
+				+ "    (or (and lung-cancer (flip 0.5))\n"
+				+ "        (and TB (flip 0.5))\n"
+				+ "        (and other (flip 0.01))))\n"
+				+ "  (define shortness-of-breath \n"
+				+ "    (or (and lung-cancer (flip 0.5))\n"
+				+ "        (and TB (flip 0.2))\n"
+				+ "        (and other (flip 0.01))))\n"
+				+ "  cough\n"
+				+ ")"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define lung-cancer (flip 0.01))",
+                "  (define TB (flip 0.005))",
+                "  (define stomach-flu (flip 0.1))",
+                "  (define cold (flip 0.2))",
+                "  (define other (flip 0.1))",
+                "  (define cough ",
+                "    (or (and cold (flip 0.5))",
+                "        (and lung-cancer (flip 0.3))",
+                "        (and TB (flip 0.7))",
+                "        (and other (flip 0.01))))",
+                "  (define fever ",
+                "    (or (and cold (flip 0.3))",
+                "        (and stomach-flu (flip 0.5))",
+                "        (and TB (flip 0.1))",
+                "        (and other (flip 0.01))))",
+                "  (define chest-pain ",
+                "    (or (and lung-cancer (flip 0.5))",
+                "        (and TB (flip 0.5))",
+                "        (and other (flip 0.01))))",
+                "  (define shortness-of-breath ",
+                "    (or (and lung-cancer (flip 0.5))",
+                "        (and TB (flip 0.2))",
+                "        (and other (flip 0.01))))",
+                "  cough",
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random lung_cancer: Boolean;",
+				"random tB: Boolean;",
+				"random stomach_flu: Boolean;",
+				"random cold: Boolean;",
+				"random other: Boolean;",
+				"random cough: Boolean;",
+				"random fever: Boolean;",
+				"random chest_pain: Boolean;",
+				"random shortness_of_breath: Boolean;",
+                "",
+				"if lung_cancer then 0.01 else 0.99;",
+				"if tB then 0.005 else 0.995;",
+				"if stomach_flu then 0.1 else 0.9;",
+				"if cold then 0.2 else 0.8;",
+				"if other then 0.1 else 0.9;",
+				"if other then if tB then if lung_cancer then if cold then if cough then 0.89605 else 0.10395 else if cough then 0.7921 else 0.2079 else if cold then if cough then 0.8515 else 0.1485 else if cough then 0.703 else 0.297 else if lung_cancer then if cold then if cough then 0.6535 else 0.3465 else if cough then 0.307 else 0.693 else if cold then if cough then 0.505 else 0.495 else if cough then 0.01 else 0.99 else if tB then if lung_cancer then if cold then if cough then 0.895 else 0.105 else if cough then 0.79 else 0.21 else if cold then if cough then 0.85 else 0.15 else if cough then 0.7 else 0.3 else if lung_cancer then if cold then if cough then 0.65 else 0.35 else if cough then 0.3 else 0.7 else if cold then 0.5 else if cough then 0 else 1;",
+				"if other then if tB then if stomach_flu then if cold then if fever then 0.68815 else 0.31185 else if fever then 0.5545 else 0.4455 else if cold then if fever then 0.3763 else 0.6237 else if fever then 0.109 else 0.891 else if stomach_flu then if cold then if fever then 0.6535 else 0.3465 else if fever then 0.505 else 0.495 else if cold then if fever then 0.307 else 0.693 else if fever then 0.01 else 0.99 else if tB then if stomach_flu then if cold then if fever then 0.685 else 0.315 else if fever then 0.55 else 0.45 else if cold then if fever then 0.37 else 0.63 else if fever then 0.1 else 0.9 else if stomach_flu then if cold then if fever then 0.65 else 0.35 else 0.5 else if cold then if fever then 0.3 else 0.7 else if fever then 0 else 1;",
+				"if other then if tB then if lung_cancer then if chest_pain then 0.7525 else 0.2475 else if chest_pain then 0.505 else 0.495 else if lung_cancer then if chest_pain then 0.505 else 0.495 else if chest_pain then 0.01 else 0.99 else if tB then if lung_cancer then if chest_pain then 0.75 else 0.25 else 0.5 else if lung_cancer then 0.5 else if chest_pain then 0 else 1;",
+				"if other then if tB then if lung_cancer then if shortness_of_breath then 0.604 else 0.396 else if shortness_of_breath then 0.208 else 0.792 else if lung_cancer then if shortness_of_breath then 0.505 else 0.495 else if shortness_of_breath then 0.01 else 0.99 else if tB then if lung_cancer then if shortness_of_breath then 0.6 else 0.4 else if shortness_of_breath then 0.2 else 0.8 else if lung_cancer then 0.5 else if shortness_of_breath then 0 else 1;"
+		);
+	}
+	
+	@Test
 	public void testLogicalNotOnVariable() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Not on Variable", ""
 				+ "(query \n"

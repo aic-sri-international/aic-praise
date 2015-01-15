@@ -145,7 +145,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			}
 			hogm.append(r+";\n");
 		}
-System.out.println("hogm=\n"+hogm.toString());
+
 		Model m = RuleConverter.makeModel(churchProgramName, "\n"+churchProgram+"\n--->\n"+hogm.toString(), hogm.toString());
 		
 		result = Tuple.make(newSymbol(hogm.toString()),
@@ -457,22 +457,29 @@ System.out.println("hogm=\n"+hogm.toString());
 			randomVariable = Expressions.apply(randomVariable, rvArgs);
 			processForRV   = LPIUtil.extendContextualSymbolsWithFreeVariablesInferringDomainsFromUsageInRandomVariables(randomVariable, processForRV);
 		}
-				
-		if (flipIdToValue.size() == 0) {
+		
+		final List<List<Boolean>>       flipValues                = new ArrayList<List<Boolean>>();
+		final List<Boolean>             trueFalseValues           = new ArrayList<Boolean>();
+		final Map<Expression, Integer>  flipMarkerToId            = new LinkedHashMap<Expression, Integer>();
+		final Map<Expression, Integer>  flipMarkerToFlipValuesIdx = new LinkedHashMap<Expression, Integer>();
+		// Flips <- array of flip applications in body
+		trueFalseValues.add(Boolean.FALSE);
+		trueFalseValues.add(Boolean.TRUE);
+		
+		for (Integer flipId : flipIdToValue.keySet()) {
+			Expression flipMarker = newSymbol(FLIP_ID_PREFIX+flipId);			
+			if (!flipMarkerToId.containsKey(flipMarker) && Expressions.isSubExpressionOf(flipMarker, body)) {
+				flipMarkerToId.put(flipMarker, flipId);
+				flipMarkerToFlipValuesIdx.put(flipMarker, flipMarkerToFlipValuesIdx.size());
+				flipValues.add(trueFalseValues);
+			}
+		}
+
+		if (flipValues.size() == 0) {
 			Expression potentialRule = createPotentialRule(randomVariable, deterministicChurch2HOGM(body, paramVarNames, processForRV), Expressions.ONE, Expressions.ZERO);
 			result = rNormalize.rewrite(potentialRule, processForRV);
 		}
 		else {
-			final List<List<Boolean>>       flipValues      = new ArrayList<List<Boolean>>();
-			final List<Boolean>             trueFalseValues = new ArrayList<Boolean>();
-			final Map<Expression, Integer>  flipMarkerToIdx = new HashMap<Expression, Integer>();
-			// Flips <- array of flip applications in body
-			trueFalseValues.add(Boolean.FALSE);
-			trueFalseValues.add(Boolean.TRUE);
-			for (Integer flipId : flipIdToValue.keySet()) {
-				flipValues.add(trueFalseValues);
-				flipMarkerToIdx.put(newSymbol(FLIP_ID_PREFIX+flipId), flipId);
-			}
 			// H <- empty list
 			List<Expression> h = new ArrayList<Expression>();
 			// for all assignments of FlipsValues to Flips do
@@ -486,7 +493,7 @@ System.out.println("hogm=\n"+hogm.toString());
 					public Expression apply(Expression expression, RewritingProcess process) {
 						Expression result = expression;
 						if (Expressions.isSymbol(expression)) {
-							Integer idx = flipMarkerToIdx.get(expression);
+							Integer idx = flipMarkerToFlipValuesIdx.get(expression);
 							if (idx != null) {
 								result = values.get(idx) ? Expressions.TRUE : Expressions.FALSE;
 							}
@@ -498,10 +505,10 @@ System.out.println("hogm=\n"+hogm.toString());
 				Expression caseH = deterministicChurch2HOGM(caseC, paramVarNames, processForRV);				
 				
 				// Calculate q
-				Rational q = Rational.ONE;
-				for (Map.Entry<Integer, Rational> flipEntry : flipIdToValue.entrySet()) {
-					Rational pi = flipEntry.getValue();
-					if (!values.get(flipEntry.getKey())) {
+				Rational q   = Rational.ONE;
+				for (Map.Entry<Expression, Integer> flipMarkerToIdEntry : flipMarkerToId.entrySet()) {
+					Rational pi = flipIdToValue.get(flipMarkerToIdEntry.getValue());
+					if (!values.get(flipMarkerToFlipValuesIdx.get(flipMarkerToIdEntry.getKey()))) {
 						pi = Rational.ONE.subtract(pi);
 					}
 					
@@ -524,7 +531,7 @@ System.out.println("hogm=\n"+hogm.toString());
 				model.getRandomVariableDeclarations().forEach(randomVariableDeclaration -> randomVariableDeclarationExpressions.add(randomVariableDeclaration.getRandomVariableDeclaration()));
 				processForRV = Model.setKnownSortsAndRandomVariables(sortDeclarationExpressions, randomVariableDeclarationExpressions, processForRV);
 			}
-System.out.println("plusH="+plusH);			
+			
 			result = SimplifyWithRelationsAtBottom.simplify(plusH, name, processForRV);
 		}
 		
