@@ -145,7 +145,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			}
 			hogm.append(r+";\n");
 		}
-
+System.out.println("hogm=\n"+hogm.toString());
 		Model m = RuleConverter.makeModel(churchProgramName, "\n"+churchProgram+"\n--->\n"+hogm.toString(), hogm.toString());
 		
 		result = Tuple.make(newSymbol(hogm.toString()),
@@ -524,7 +524,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 				model.getRandomVariableDeclarations().forEach(randomVariableDeclaration -> randomVariableDeclarationExpressions.add(randomVariableDeclaration.getRandomVariableDeclaration()));
 				processForRV = Model.setKnownSortsAndRandomVariables(sortDeclarationExpressions, randomVariableDeclarationExpressions, processForRV);
 			}
-			
+System.out.println("plusH="+plusH);			
 			result = SimplifyWithRelationsAtBottom.simplify(plusH, name, processForRV);
 		}
 		

@@ -551,6 +551,30 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		);
 	}
 	
+	@Test
+	public void testLogicalVariableCondition() {
+		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Variable Condition", ""
+				+ "(query \n"
+				+ "  (define observer (mem (lambda (h) (if (eq? h #f) (flip 0.8) (flip 0.3)))))\n"
+				+ ")"
+				);
+	
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define observer (mem (lambda (h) (if (eq? h #f) (flip 0.8) (flip 0.3)))))",				
+				")",
+				"--->",
+				"",
+				"sort Values : Unknown, false;",
+				"",
+				"random observer: Values -> Boolean;",
+				"",
+				"if H = false then if observer(false) then 0.8 else 0.2 else if observer(H) then 0.3 else 0.7;"
+		);
+	}
+	
 	//
 	// PRIVATE
 	//		
