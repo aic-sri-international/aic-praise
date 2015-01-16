@@ -45,6 +45,6 @@ public class ChurchEg4 extends Example {
 		super("Church Example 4 Program");
 		setModel(getExampleFromResource("churcheg4.prog"));
 		setEvidence(getExampleFromResource("empty.es"));
-		setQueryToRun("sick(john)");
+		setQueryToRun("epidemic");
 	}
 }

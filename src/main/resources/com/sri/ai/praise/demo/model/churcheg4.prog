@@ -3,9 +3,11 @@
 ;
 (query
   ; -- generative-model -- 
-  (define epidemic (mem (lambda () (flip 0.01))))
+  (define epidemic (flip 0.01))
   (define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))
+  (define testsPositive (mem (lambda (person) (if (sick person) (flip 0.6) (flip 0.2)))))
   ; -- what-we-want-to-know --
-  (sick 'john)
+  epidemic
   ; -- what-we-know -- 
+  (forall (person) (if (eq? person 'john) (not (testsPositive 'john)) (testsPositive person)))
 )
