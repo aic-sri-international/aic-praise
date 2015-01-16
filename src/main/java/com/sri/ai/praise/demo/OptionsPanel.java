@@ -50,11 +50,11 @@ import java.awt.event.FocusEvent;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -130,7 +130,7 @@ public class OptionsPanel extends JPanel {
 		
 	}
 	//
-	JFormattedTextField typeSizeTextField = null;
+	JTextField typeSizeTextField = null;
 	JComboBox<String> scheduleComboBox;
 	JCheckBox chckbxJustificationToConsole;
 	JCheckBox chckbxJustificationToJustTab;
@@ -252,7 +252,7 @@ public class OptionsPanel extends JPanel {
 		chckbxKnownTypeSize.setEnabled(false);
 		knownSizePanel.add(chckbxKnownTypeSize);
 		
-		typeSizeTextField = new JFormattedTextField();
+		typeSizeTextField = new JTextField();
 		typeSizeTextField.setEnabled(false);
 		typeSizeTextField.addFocusListener(new FocusAdapter() {
 			@Override
@@ -262,15 +262,15 @@ public class OptionsPanel extends JPanel {
 					size = new Integer(typeSizeTextField.getText());
 					if (size < 1) {
 						size = 1;
-						typeSizeTextField.setValue(size);
+						typeSizeTextField.setText(size.toString());
 					}
 				} catch (NumberFormatException nfe) {
-					typeSizeTextField.setValue(size);
+					typeSizeTextField.setText(size.toString());
 				}
 			}
 		});
 		typeSizeTextField.setPreferredSize(new Dimension(80, 25));
-		typeSizeTextField.setValue(new Integer(10));
+		typeSizeTextField.setText(new Integer(10).toString());
 		knownSizePanel.add(typeSizeTextField);
 		
 		JPanel assumePanel = new JPanel();
