@@ -177,10 +177,8 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	@Override 
 	public Expression visitChurchQueryCondition(@NotNull ChurchParser.ChurchQueryConditionContext ctx) { 
 		Expression condition = visit(ctx.command());
-		// Church evidence is defined in terms of conditions
-		Expression evidence  = IfThenElse.make(condition, Expressions.ONE, Expressions.ZERO);
 		
-		rules.add(evidence.toString());
+		rules.add(condition.toString());
 		
 		return null; // Required information is gathered into relevant attributes and not passed back through API
 	}

@@ -160,7 +160,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random b: Boolean;",
 				"random c: Boolean;",
 				"",
-				"if a and b or a and c or b and c then 1 else 0;"
+				"a and b or a and c or b and c;"
 		);
 	}
 	
@@ -275,7 +275,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"",
 				"if breast_cancer then 0.01 else 0.99;",
 				"if breast_cancer then if positive_mammogram then 0.8 else 0.2 else if positive_mammogram then 0.096 else 0.904;",
-				"if positive_mammogram then 1 else 0;"
+				"positive_mammogram;"
 		);
 	}
 	
@@ -504,7 +504,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random b: Boolean;",
 				"random c: Boolean;",
 				"",
-				"if a and b or a and c or b and c then 1 else 0;"
+				"a and b or a and c or b and c;"
 		);
 	}
 	
@@ -606,7 +606,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random b: Boolean;",
 				"random c: Boolean;",
 				"",
-				"if a and b or a and c or b and c then 1 else 0;"
+				"a and b or a and c or b and c;"
 		);
 		
 		translation = translator.translate("Refer to other variable in definition using upper case", ""
@@ -722,7 +722,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"",
 				"if breast_cancer then 0.01 else 0.99;",
 				"if breast_cancer then if positive_mammogram then 0.8 else 0.2 else if positive_mammogram then 0.096 else 0.904;",
-				"if positive_mammogram then 1 else 0;"
+				"positive_mammogram;"
 		);
 	}
 	
