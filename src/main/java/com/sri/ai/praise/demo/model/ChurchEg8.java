@@ -45,6 +45,6 @@ public class ChurchEg8 extends Example {
 		super("Church Example 8 Program");
 		setModel(getExampleFromResource("churcheg8.prog"));
 		setEvidence(getExampleFromResource("empty.es"));
-		setQueryToRun("breast_cancer(mary)");
+		setQueryToRun("breast_cancer(X)");
 	}
 }
