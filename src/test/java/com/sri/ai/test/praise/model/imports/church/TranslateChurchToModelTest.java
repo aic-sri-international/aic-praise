@@ -106,9 +106,11 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	public void testExample4() {					
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 4", ""
 				+ "(query \n"
-				+ "  (define epidemic (mem (lambda () (flip 0.01))))\n"
+				+ "  (define epidemic (flip 0.01))\n"
 				+ "  (define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))\n"
-				+ "  (sick 'john)\n"
+				+ "  (define testsPositive (mem (lambda (person) (if (sick person) (flip 0.6) (flip 0.2)))))\n"
+				+ "  epidemic\n"
+				+ "  (forall (person) (if (eq? person 'john) (not (testsPositive 'john)) (testsPositive person)))\n"
 				+ ")"
 				);
 		
@@ -116,9 +118,11 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(query ",
-				"  (define epidemic (mem (lambda () (flip 0.01))))",
+				"  (define epidemic (flip 0.01))",
 				"  (define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))",
-				"  (sick \\'john)",				
+				"  (define testsPositive (mem (lambda (person) (if (sick person) (flip 0.6) (flip 0.2)))))",
+				"  epidemic",
+				"  (forall (person) (if (eq? person \\'john) (not (testsPositive \\'john)) (testsPositive person)))",
 				")",
 				"--->",
 				"",
@@ -126,9 +130,12 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"",
 				"random epidemic: Boolean;",
 				"random sick: Values -> Boolean;",
-				"",
+				"random testsPositive: Values -> Boolean;",
+                "",
 				"if epidemic then 0.01 else 0.99;",
-				"if epidemic then if sick(Person) then 0.6 else 0.4 else if sick(Person) then 0.1 else 0.9;"
+				"if epidemic then if sick(Person) then 0.6 else 0.4 else if sick(Person) then 0.1 else 0.9;",
+				"if sick(Person) then if testsPositive(Person) then 0.6 else 0.4 else if testsPositive(Person) then 0.2 else 0.8;",
+				"if Person = john then not testsPositive(john) else testsPositive(Person);"
 		);
 	}
 	
@@ -728,9 +735,9 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	
 	@Test
 	public void testSpecialUniversallyQuantifiedEvidence() {					
-		Triple<String, Model, List<Expression>> translation = translator.translate("Example 4", ""
+		Triple<String, Model, List<Expression>> translation = translator.translate("Special Universally Quantified Evidence", ""
 				+ "(query \n"
-				+ "  (define epidemic (mem (lambda () (flip 0.01))))\n"
+				+ "  (define epidemic (flip 0.01))\n"
 				+ "  (define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))\n"
 				+ "  (sick 'john)\n"
 				+ "  (forall (x) (if (eq? x 'john) (sick 'john) (not (sick x))))\n"
@@ -741,7 +748,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(query ",
-				"  (define epidemic (mem (lambda () (flip 0.01))))",
+				"  (define epidemic (flip 0.01))",
 				"  (define sick (mem (lambda (person) (if epidemic (flip 0.6) (flip 0.1)))))",
 				"  (sick \\'john)",				
 				"  (forall (x) (if (eq? x \\'john) (sick \\'john) (not (sick x))))",
