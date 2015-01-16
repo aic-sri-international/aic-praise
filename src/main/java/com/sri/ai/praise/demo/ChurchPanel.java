@@ -77,7 +77,7 @@ public class ChurchPanel extends AbstractEditorPanel {
 	private File         currentChurchFile;
 	// 
 	private TranslateChurchToModel translator = new TranslateChurchToModel();
-	private String lastHOGMModelTranslated = null;
+	private String lastChurchProgram = null;
 
 	public ChurchPanel() {
 		initialize();
@@ -261,17 +261,17 @@ public class ChurchPanel extends AbstractEditorPanel {
 	private List<String> generateModel() {
 		List<String> problems = new ArrayList<>();
 		try {
+			String churchProgram = churchEditor.getText();
 			Triple<String, Model, List<Expression>> translation = translator.translate("Church Program", ""
-				+ churchEditor.getText()
+				+ churchProgram
 				);
 			String hogmModel = translation.first;
 			hogmEditor.setText(hogmModel);
-			String translationText = hogmModel + translation.third.get(0).toString();
-			// If there has been a change in the model update the query field.
-			if (!translationText.equals(lastHOGMModelTranslated)) {
+			// If there has been a change in the church program update the query field.
+			if (!churchProgram.equals(lastChurchProgram)) {
 				getQueryPanel().setCurrentQuery(translation.third.get(0).toString());
 			}
-			lastHOGMModelTranslated = translationText;
+			lastChurchProgram = churchProgram;
 		} catch (Throwable t) {
 			String problem = "/* ERROR in Translation:\n"+ExceptionUtils.getStackTrace(t)+"\n*/";
 			problems.add(problem);

@@ -56,8 +56,21 @@ churchModelDefinition
   ;
 
 churchQueryCondition
-  : '(' 'condition' command ')'
+  : '(' 'condition' churchEvidenceCommand ')'
+  | churchEvidenceCommand
+  ;
+  
+churchEvidenceCommand
+  : specialUniversallyQuantifiedCommand
   | command
+  ;
+  
+specialUniversallyQuantifiedCommand
+  : '(' 'forall' universals=specialUniversalFormals  bodyLogic=command ')'
+  ;
+  
+specialUniversalFormals
+  : '(' variable+ ')'
   ;
 
 definition

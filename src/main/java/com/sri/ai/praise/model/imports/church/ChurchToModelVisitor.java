@@ -176,12 +176,44 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	
 	@Override 
 	public Expression visitChurchQueryCondition(@NotNull ChurchParser.ChurchQueryConditionContext ctx) { 
-		Expression condition = visit(ctx.command());
+		Expression condition = visit(ctx.churchEvidenceCommand());
 		
 		rules.add(condition.toString());
 		
 		return null; // Required information is gathered into relevant attributes and not passed back through API
 	}
+	
+	@Override 
+	public Expression visitSpecialUniversallyQuantifiedCommand(@NotNull ChurchParser.SpecialUniversallyQuantifiedCommandContext ctx) { 
+		final Map<Expression, Expression> variableIdentifierToLogicalName = new LinkedHashMap<>();
+		if (ctx.universals != null && ctx.universals.variable() != null && ctx.universals.variable().size() > 0) {
+			for (int i = 0; i < ctx.universals.variable().size(); i++) {
+				Expression variable = visit(ctx.universals.variable(i));
+				variableIdentifierToLogicalName.put(variable, this.newLogicalVariable(variable.toString()));
+			}
+		}
+		Expression body = visit(ctx.bodyLogic);
+		
+		Expression result = body;
+		if (variableIdentifierToLogicalName.size() > 0) {
+			result = body.replaceAllOccurrences(new AbstractReplacementFunctionWithContextuallyUpdatedProcess() {					
+				@Override
+				public Expression apply(Expression expression, RewritingProcess process) {
+					Expression result = expression;
+					if (Expressions.isSymbol(expression)) {
+						Expression varName = variableIdentifierToLogicalName.get(expression);
+						if (varName != null) {
+							result = varName;
+						}
+					}
+					return result;
+				}
+			}, LBPFactory.newLBPProcess());
+		}
+		
+		return result;
+	}
+
 	
 	@Override 
 	public Expression visitDefinition(@NotNull ChurchParser.DefinitionContext ctx) {
