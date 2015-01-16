@@ -1,0 +1,12 @@
+;
+; Church Example 8
+;
+(query
+  ; -- generative-model -- 
+  (define breast-cancer (mem (lambda (x) (flip 0.01))))
+  (define positive-mammogram (mem (lambda (x) (if (breast-cancer x) (flip 0.8) (flip 0.096)))))
+  ; -- what-we-want-to-know --
+  (breast-cancer 'mary)
+  ; -- what-we-know -- 
+  (positive-mammogram 'mary)
+)

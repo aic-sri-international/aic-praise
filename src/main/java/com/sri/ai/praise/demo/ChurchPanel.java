@@ -62,6 +62,7 @@ import com.sri.ai.praise.demo.model.ChurchEg4;
 import com.sri.ai.praise.demo.model.ChurchEg5;
 import com.sri.ai.praise.demo.model.ChurchEg6;
 import com.sri.ai.praise.demo.model.ChurchEg7;
+import com.sri.ai.praise.demo.model.ChurchEg8;
 import com.sri.ai.praise.demo.model.Example;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.imports.church.TranslateChurchToModel;
@@ -89,7 +90,8 @@ public class ChurchPanel extends AbstractEditorPanel {
 				new ChurchEg4(),
 				new ChurchEg5(),
 				new ChurchEg6(),
-				new ChurchEg7()
+				new ChurchEg7(),
+				new ChurchEg8()
 				);
 	}
 	
