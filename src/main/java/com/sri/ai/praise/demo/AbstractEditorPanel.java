@@ -65,6 +65,7 @@ public abstract class AbstractEditorPanel extends JPanel {
 	//
 	protected JFileChooser fileChooser       = null;
 	protected JComponent   fileChooserParent = null;
+	protected QueryPanel   queryPanel        = null;
 	
 	public void addActiveEditorListener(ActiveEditorListener l) {
 		if (!activeEditorListeners.contains(l)) {
@@ -75,6 +76,14 @@ public abstract class AbstractEditorPanel extends JPanel {
 	public void setFileChooser(JFileChooser fileChooser, JComponent fileChooserParent) {
 		this.fileChooser       = fileChooser;
 		this.fileChooserParent = fileChooserParent;
+	}
+	
+	public QueryPanel getQueryPanel() {
+		return queryPanel;
+	}
+	
+	public void setQueryPanel(QueryPanel queryPanel) {
+		this.queryPanel = queryPanel;
 	}
 		
 	public abstract List<Example> getExamples();

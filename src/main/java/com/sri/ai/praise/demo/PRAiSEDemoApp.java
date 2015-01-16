@@ -205,6 +205,7 @@ public class PRAiSEDemoApp {
 			throw new IllegalArgumentException("Perspective no supported:"+perspective);
 		}
 		this.activeEditorPanel.setFileChooser(fileChooser, toolBar.btnSave);
+		this.activeEditorPanel.setQueryPanel(queryPanel);
 		// If no controller yet, we need to do post gui initialization first.
 		if (this.controller == null) {
 			postGUIInitialization();
