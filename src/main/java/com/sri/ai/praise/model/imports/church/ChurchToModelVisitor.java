@@ -132,7 +132,16 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			hogm.append("sort " + CHURCH_VALUES_SORT + " : " + SortDeclaration.UNKNOWN_SIZE + knownConstantsCommaSeparatedList + ";\n\n");
 		}
 		else {
-			hogm.append("sort " + CHURCH_VALUES_SORT + ";\n\n");
+			boolean randomsReferToValuesSort = false;
+			for (String randomDeclaration : randoms) {
+				if (randomDeclaration.contains(CHURCH_VALUES_SORT)) {
+					randomsReferToValuesSort = true;
+					break;
+				}
+			}
+			if (randomsReferToValuesSort) {
+				hogm.append("sort " + CHURCH_VALUES_SORT + ";\n\n");
+			}
 		}
 		
 		for (String rv : randoms) {
