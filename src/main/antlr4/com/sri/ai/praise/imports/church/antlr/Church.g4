@@ -44,12 +44,20 @@ GRAMMAR RULES
 */
 
 parse
-  :  '(' 'query' commandOrDefinition* ')' EOF
+  :  churchQuery EOF
+  ;
+  
+churchQuery
+  : '(' 'query' model=churchModelDefinition query=command condition=churchQueryCondition? ')'
+  ;
+  
+churchModelDefinition
+  : definition+
   ;
 
-commandOrDefinition
-  :  definition
-  |  command
+churchQueryCondition
+  : '(' 'condition' command ')'
+  | command
   ;
 
 definition

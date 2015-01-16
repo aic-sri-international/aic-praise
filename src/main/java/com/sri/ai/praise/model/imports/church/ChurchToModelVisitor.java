@@ -156,22 +156,35 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 	}
 	
 	@Override 
+	public Expression visitChurchQuery(@NotNull ChurchParser.ChurchQueryContext ctx) { 
+		visit(ctx.model);
+		queries.add(visit(ctx.query));
+		if (ctx.condition != null) {
+			visit(ctx.condition);
+		}
+		return null; // Required information is gathered into relevant attributes and not passed back through API
+	}
+	
+	@Override 
+	public Expression visitChurchQueryCondition(@NotNull ChurchParser.ChurchQueryConditionContext ctx) { 
+		Expression condition = visit(ctx.command());
+		// Church evidence is defined in terms of conditions
+		Expression evidence  = IfThenElse.make(condition, Expressions.ONE, Expressions.ZERO);
+		
+		rules.add(evidence.toString());
+		
+		return null; // Required information is gathered into relevant attributes and not passed back through API
+	}
+	
+	@Override 
 	public Expression visitDefinition(@NotNull ChurchParser.DefinitionContext ctx) {
-		Expression result = visitChildren(ctx);		
+		Expression result = visitChildren(ctx);			
 		return result;
 	}
 	
 	@Override 
 	public Expression visitCommand(@NotNull ChurchParser.CommandContext ctx) {
-		Expression result             = visitChildren(ctx);
-		boolean isConditionalEvidence = !knownRandomVariableNames.contains(result.getFunctorOrSymbol());
-		
-		if (isConditionalEvidence) {
-			// Church evidence is defined in terms of conditions
-			rules.add("if ("+result.toString()+") then 1 else 0");
-		} else {
-			queries.add(result);
-		}
+		Expression result = visitChildren(ctx);
 		return result;
 	}
 	

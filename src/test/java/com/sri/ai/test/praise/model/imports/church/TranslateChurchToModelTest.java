@@ -32,6 +32,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 1", ""
 				+ "(query \n"
 				+ "  (define sunny #t)\n"
+				+ "  sunny\n"
 				+ ")"
 				);
 	
@@ -39,7 +40,8 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(query ",
-				"  (define sunny #t)",				
+				"  (define sunny #t)",	
+				"  sunny",
 				")",
 				"--->",
 				"",
@@ -57,6 +59,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 2", ""
 				+ "(query \n"
 				+ "  (define sunny (flip 0.3))\n"
+				+ "  sunny\n"
 				+ ")"
 				);
 		
@@ -64,7 +67,8 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(query ",
-				"  (define sunny (flip 0.3))",				
+				"  (define sunny (flip 0.3))",	
+				"  sunny",
 				")",
 				"--->",
 				"",
@@ -162,13 +166,13 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random b: Boolean;",
 				"random c: Boolean;",
 				"",
-				"if (a and b or a and c or b and c) then 1 else 0;"
+				"if a and b or a and c or b and c then 1 else 0;"
 		);
 	}
 	
 	@Test
 	public void testExample6() {					
-		Triple<String, Model, List<Expression>> translation = translator.translate("Example 5", ""
+		Triple<String, Model, List<Expression>> translation = translator.translate("Example 6", ""
 				+ "(query \n"
 				+ "  (define lung-cancer (flip 0.01))\n"
 				+ "  (define TB (flip 0.005))\n"
@@ -249,6 +253,39 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"if other then if tB then if stomach_flu then if cold then if fever then 0.68815 else 0.31185 else if fever then 0.5545 else 0.4455 else if cold then if fever then 0.3763 else 0.6237 else if fever then 0.109 else 0.891 else if stomach_flu then if cold then if fever then 0.6535 else 0.3465 else if fever then 0.505 else 0.495 else if cold then if fever then 0.307 else 0.693 else if fever then 0.01 else 0.99 else if tB then if stomach_flu then if cold then if fever then 0.685 else 0.315 else if fever then 0.55 else 0.45 else if cold then if fever then 0.37 else 0.63 else if fever then 0.1 else 0.9 else if stomach_flu then if cold then if fever then 0.65 else 0.35 else 0.5 else if cold then if fever then 0.3 else 0.7 else if fever then 0 else 1;",
 				"if other then if tB then if lung_cancer then if chest_pain then 0.7525 else 0.2475 else if chest_pain then 0.505 else 0.495 else if lung_cancer then if chest_pain then 0.505 else 0.495 else if chest_pain then 0.01 else 0.99 else if tB then if lung_cancer then if chest_pain then 0.75 else 0.25 else 0.5 else if lung_cancer then 0.5 else if chest_pain then 0 else 1;",
 				"if other then if tB then if lung_cancer then if shortness_of_breath then 0.604 else 0.396 else if shortness_of_breath then 0.208 else 0.792 else if lung_cancer then if shortness_of_breath then 0.505 else 0.495 else if shortness_of_breath then 0.01 else 0.99 else if tB then if lung_cancer then if shortness_of_breath then 0.6 else 0.4 else if shortness_of_breath then 0.2 else 0.8 else if lung_cancer then 0.5 else if shortness_of_breath then 0 else 1;"
+		);
+	}
+	
+	@Test
+	public void testExample7() {					
+		Triple<String, Model, List<Expression>> translation = translator.translate("Example 7", ""
+				+ "(query \n"
+				+ "  (define breast-cancer (flip 0.01))\n"
+				+ "  (define positive-mammogram (if breast-cancer (flip 0.8) (flip 0.096)))\n"
+				+ "  breast-cancer\n"
+				+ "  positive-mammogram\n"
+				+ ")"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define breast-cancer (flip 0.01))",
+				"  (define positive-mammogram (if breast-cancer (flip 0.8) (flip 0.096)))",
+				"  breast-cancer",
+				"  positive-mammogram",
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random breast_cancer: Boolean;",
+				"random positive_mammogram: Boolean;",
+				"",
+				"if breast_cancer then 0.01 else 0.99;",
+				"if breast_cancer then if positive_mammogram then 0.8 else 0.2 else if positive_mammogram then 0.096 else 0.904;",
+				"if positive_mammogram then 1 else 0;"
 		);
 	}
 	
@@ -479,7 +516,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random b: Boolean;",
 				"random c: Boolean;",
 				"",
-				"if (a and b or a and c or b and c) then 1 else 0;"
+				"if a and b or a and c or b and c then 1 else 0;"
 		);
 	}
 	
@@ -537,6 +574,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Example 1 using upper case", ""
 				+ "(query \n"
 				+ "  (define Sunny #t)\n"
+				+ "  Sunny\n"
 				+ ")"
 				);
 	
@@ -544,7 +582,8 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(query ",
-				"  (define Sunny #t)",				
+				"  (define Sunny #t)",
+				"  Sunny",
 				")",
 				"--->",
 				"",
@@ -583,7 +622,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				"random b: Boolean;",
 				"random c: Boolean;",
 				"",
-				"if (a and b or a and c or b and c) then 1 else 0;"
+				"if a and b or a and c or b and c then 1 else 0;"
 		);
 		
 		translation = translator.translate("Refer to other variable in definition using upper case", ""
@@ -619,7 +658,8 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		// NOTE: Currently require literal number arguments in the interval [0, 1] to flip.
 		translator.translate("Illegal argument to flip", ""
 				+ "(query \n"
-				+ "  (define (make-coin weight) (if (flip weight) #t #f))\n"
+				+ "  (define (coin-flip weight) (if (flip weight) #t #f))\n"
+				+ "  (coin-flip 0.5)"
 				+ ")"
 				);
 	}
@@ -629,6 +669,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Hyphen random variable", ""
 				+ "(query \n"
 				+ "  (define stomach-flu (flip 0.1))\n"
+				+ "  stomach-flu\n"
 				+ ")"
 				);
 	
@@ -636,7 +677,8 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(query ",
-				"  (define stomach-flu (flip 0.1))",				
+				"  (define stomach-flu (flip 0.1))",	
+				"  stomach-flu",
 				")",
 				"--->",
 				"",
@@ -672,10 +714,44 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	}
 	
 	@Test
+	public void testExplicitlyConditionedEvidence() {					
+		Triple<String, Model, List<Expression>> translation = translator.translate("Explicitly Conditioned Evidence", ""
+				+ "(query \n"
+				+ "  (define breast-cancer (flip 0.01))\n"
+				+ "  (define positive-mammogram (if breast-cancer (flip 0.8) (flip 0.096)))\n"
+				+ "  breast-cancer\n"
+				+ "  (condition positive-mammogram)\n"
+				+ ")"
+				);
+		
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define breast-cancer (flip 0.01))",
+				"  (define positive-mammogram (if breast-cancer (flip 0.8) (flip 0.096)))",
+				"  breast-cancer",
+				"  (condition positive-mammogram)",
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random breast_cancer: Boolean;",
+				"random positive_mammogram: Boolean;",
+				"",
+				"if breast_cancer then 0.01 else 0.99;",
+				"if breast_cancer then if positive_mammogram then 0.8 else 0.2 else if positive_mammogram then 0.096 else 0.904;",
+				"if positive_mammogram then 1 else 0;"
+		);
+	}
+	
+	@Test
 	public void testLogicalVariableCondition() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Variable Condition", ""
 				+ "(query \n"
 				+ "  (define observer (mem (lambda (h) (if (eq? h #f) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (observer #f)\n"
 				+ ")"
 				);
 	
@@ -683,7 +759,8 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		
 		assertDescriptionEquals(translation.second.getDescription(),
 				"(query ",
-				"  (define observer (mem (lambda (h) (if (eq? h #f) (flip 0.8) (flip 0.3)))))",				
+				"  (define observer (mem (lambda (h) (if (eq? h #f) (flip 0.8) (flip 0.3)))))",	
+				"  (observer #f)",
 				")",
 				"--->",
 				"",
