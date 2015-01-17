@@ -577,8 +577,7 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			constants.remove(Expressions.TRUE);
 			constants.remove(Expressions.FALSE);
 			if (constants.size() > 0) {
-				knownConstants.addAll(constants);
-System.out.println("knownConstants="+knownConstants);				
+				knownConstants.addAll(constants);				
 				Model model = Model.getRewritingProcessesModel(processForRV);
 				Set<Expression> sortDeclarationExpressions = new LinkedHashSet<>();
 				sortDeclarationExpressions.add(new SortDeclaration(Expressions.makeSymbol(CHURCH_VALUES_SORT), SortDeclaration.UNKNOWN_SIZE, 
