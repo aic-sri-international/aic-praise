@@ -6,6 +6,7 @@ import java.util.StringJoiner;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
@@ -766,6 +767,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 		);
 	}
 	
+	@Ignore("TODO - Need to figure out how to map Boolean constants to Values sort")
 	@Test
 	public void testLogicalVariableCondition() {
 		Triple<String, Model, List<Expression>> translation = translator.translate("Logical Variable Condition", ""
@@ -784,11 +786,34 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 				")",
 				"--->",
 				"",
-				"sort Values : Unknown, false;",
+				"sort Values;",
 				"",
 				"random observer: Values -> Boolean;",
 				"",
 				"if H = false then if observer(false) then 0.8 else 0.2 else if observer(H) then 0.3 else 0.7;"
+		);
+		
+		translation = translator.translate("Logical Variable Condition", ""
+				+ "(query \n"
+				+ "  (define observer (mem (lambda (h) (if (eq? h #t) (flip 0.8) (flip 0.3)))))\n"
+				+ "  (observer #t)\n"
+				+ ")"
+				);
+	
+		print(translation);
+		
+		assertDescriptionEquals(translation.second.getDescription(),
+				"(query ",
+				"  (define observer (mem (lambda (h) (if (eq? h #t) (flip 0.8) (flip 0.3)))))",	
+				"  (observer #t)",
+				")",
+				"--->",
+				"",
+				"sort Values;",
+				"",
+				"random observer: Values -> Boolean;",
+				"",
+				"if H = true then if observer(true) then 0.8 else 0.2 else if observer(H) then 0.3 else 0.7;"
 		);
 	}
 	

@@ -573,8 +573,12 @@ public class ChurchToModelVisitor extends ChurchBaseVisitor<Expression> {
 			List<Expression> constants = new ArrayList<>(FormulaUtil.getConstants(plusH, processForRV));
 			// Ensure we exclude known random variable names
 			constants.removeAll(knownRandomVariableNames);
+			// And also ensure we remove these known constants as well.
+			constants.remove(Expressions.TRUE);
+			constants.remove(Expressions.FALSE);
 			if (constants.size() > 0) {
 				knownConstants.addAll(constants);
+System.out.println("knownConstants="+knownConstants);				
 				Model model = Model.getRewritingProcessesModel(processForRV);
 				Set<Expression> sortDeclarationExpressions = new LinkedHashSet<>();
 				sortDeclarationExpressions.add(new SortDeclaration(Expressions.makeSymbol(CHURCH_VALUES_SORT), SortDeclaration.UNKNOWN_SIZE, 
