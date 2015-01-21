@@ -45,7 +45,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
-import com.sri.ai.expresso.core.DefaultIndexExpressionsSet;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Trace;
@@ -98,7 +98,9 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 		Expression intSetHead      = ((IntensionalSet) intensionalSet).getHead();
 		Expression intSetCondition = ((IntensionalSet) intensionalSet).getCondition();
 		
-		List<Expression> intensionalSetIndexExpressions = new ArrayList<Expression>(((IntensionalSet) intensionalSet).getIndexExpressions());
+		IndexExpressionsSet indexExpressions = ((IntensionalSet) intensionalSet).getIndexExpressions();
+		assert indexExpressions instanceof ExtensionalIndexExpressionsSet : "IntensionalSimplification not implemented for intensional sets with non-extensional index expressions"; 
+		List<Expression> intensionalSetIndexExpressions = new ArrayList<Expression>(((ExtensionalIndexExpressionsSet)indexExpressions).getList());
 		Object[]         cPrimeAndiEqualsBeta   = new Object[3];
 		
 		RewritingProcess subProcess = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
@@ -151,7 +153,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 			Expression substitutedIntensionalSet = IntensionalSet
 					.make(
 							Sets.getLabel(intensionalSet),
-							new DefaultIndexExpressionsSet(intensionalSetIndexExpressions),
+							new ExtensionalIndexExpressionsSet(intensionalSetIndexExpressions),
 							substitutedAlpha,
 							substitutedCPrime);
 

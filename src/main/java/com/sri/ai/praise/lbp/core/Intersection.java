@@ -37,15 +37,12 @@
  */
 package com.sri.ai.praise.lbp.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
-import com.sri.ai.expresso.core.DefaultIndexExpressionsSet;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -115,7 +112,7 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 			}
 			else {
 				Trace.log("    standardize Set1 apart from (I2, Alpha2, C2)");
-				List<Expression> i2        = ((IntensionalSet) set2).getIndexExpressions();
+				List<Expression> i2 = ((ExtensionalIndexExpressionsSet) ((IntensionalSet) set2).getIndexExpressions()).getList();
 				Expression alpha2          = ((IntensionalSet) set2).getHead();
 				Expression c2              = ((IntensionalSet) set2).getCondition();
 				Expression tupleI2Alpha2C2 = Tuple.make(Tuple.make(i2), alpha2, c2);
@@ -138,10 +135,19 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 					Trace.log("    I <- concatenation of I1 and I2");
 					Trace.log("    return { (on I) Alpha1 | C } (or multiset version)");
 					List<Expression> i = Util.list();
-					i.addAll(((IntensionalSet) saSet1).getIndexExpressions());
-					i.addAll(((IntensionalSet) set2).getIndexExpressions());
+					ExtensionalIndexExpressionsSet saSet1IndexExpressions;
+					ExtensionalIndexExpressionsSet set2IndexExpressions;
+					try {
+						saSet1IndexExpressions = (ExtensionalIndexExpressionsSet) ((IntensionalSet) saSet1).getIndexExpressions();
+						set2IndexExpressions = (ExtensionalIndexExpressionsSet) ((IntensionalSet) set2).getIndexExpressions();
+					}
+					catch (ClassCastException e) {
+						throw new Error("Intersection for intensional sets implemented for extensional index expressions case only");
+					}
+					i.addAll(saSet1IndexExpressions.getList());
+					i.addAll(set2IndexExpressions.getList());
 					
-					Expression unsimplifiedResult = IntensionalSet.make(Sets.getLabel(set1), new DefaultIndexExpressionsSet(i), alpha1, c);
+					Expression unsimplifiedResult = IntensionalSet.make(Sets.getLabel(set1), new ExtensionalIndexExpressionsSet(i), alpha1, c);
 					result = process.rewrite(R_simplify, unsimplifiedResult);
 //					System.out.println("Unsimplified: " + unsimplifiedResult);	
 //					System.out.println("Simplified  : " + result + "\n");	

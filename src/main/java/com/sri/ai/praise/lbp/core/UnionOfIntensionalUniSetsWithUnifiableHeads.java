@@ -37,14 +37,13 @@
  */
 package com.sri.ai.praise.lbp.core;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -95,10 +94,17 @@ public class UnionOfIntensionalUniSetsWithUnifiableHeads extends AbstractLBPHier
 							Or.make(condition1, condition2)
 							);
 			
-			IndexExpressionsSet indexExpressions1 = ((IntensionalSet) set1).getIndexExpressions();
-			IndexExpressionsSet indexExpressions2 = ((IntensionalSet) set2).getIndexExpressions();
-			IndexExpressionsSet newIndexExpressions = indexExpressions1;
-			newIndexExpressions.addAll(indexExpressions2);
+			ExtensionalIndexExpressionsSet indexExpressions1;
+			ExtensionalIndexExpressionsSet indexExpressions2;
+			try {
+				indexExpressions1 = (ExtensionalIndexExpressionsSet) ((IntensionalSet) set1).getIndexExpressions();
+				indexExpressions2 = (ExtensionalIndexExpressionsSet) ((IntensionalSet) set2).getIndexExpressions();
+			}
+			catch(ClassCastException e) {
+				throw new Error("Union of intensional sets defined for extensional index expressions case only");
+			}
+			List<Expression> newIndexExpressions = indexExpressions1.getList();
+			newIndexExpressions.addAll(indexExpressions2.getList());
 			
 			result = new DefaultIntensionalUniSet(newIndexExpressions, head1, newCondition);
 			

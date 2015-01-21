@@ -39,13 +39,11 @@ package com.sri.ai.praise.lbp.core;
 
 import static com.sri.ai.util.Util.list;
 
-import java.util.List;
-
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
-import com.sri.ai.expresso.core.DefaultIndexExpressionsSet;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -95,7 +93,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 		
 		Expression msgToV_F                  = Tuple.get(expression, 0);
 		Expression conditionC                = Tuple.get(expression, 1);
-		IndexExpressionsSet indexExpressions = new DefaultIndexExpressionsSet(Tuple.getElements(Tuple.get(expression, 2))); 
+		IndexExpressionsSet indexExpressions = new ExtensionalIndexExpressionsSet(Tuple.getElements(Tuple.get(expression, 2))); 
 		Expression beingComputed             = Tuple.get(expression, 3);
 
 		if (!Expressions.hasFunctor(msgToV_F, LPIUtil.FUNCTOR_MSG_TO_FROM)

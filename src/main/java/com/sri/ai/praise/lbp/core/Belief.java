@@ -47,9 +47,11 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -477,7 +479,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 	}
 
 	private void expand(Expression messageSet, List<Expression> messagesAlreadyExpandedUnionArguments, List<Expression> messagesToBeExpanded, List<Expression> messageExpansions, RewritingProcess process) {
-		List<Expression> expressionI = ((IntensionalSet) messageSet).getIndexExpressions();
+		IndexExpressionsSet indexExpressions = ((IntensionalSet) messageSet).getIndexExpressions();
+		List<Expression> expressionI = ((ExtensionalIndexExpressionsSet) indexExpressions).getList();
 		Expression destinationOriginTuple = ((IntensionalSet) messageSet).getHead();
 		Expression destination            = Tuple.get(destinationOriginTuple, 0);
 		Expression origin                 = Tuple.get(destinationOriginTuple, 1);

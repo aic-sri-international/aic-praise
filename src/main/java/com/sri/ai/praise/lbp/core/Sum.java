@@ -45,10 +45,11 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
-import com.sri.ai.expresso.core.DefaultIndexExpressionsSet;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.core.DefaultLambdaExpression;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -178,7 +179,8 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			else {
 				
 				Expression incomingMessagesSet = productOfIncomingMessages.get(0);
-				Expression indexExpression     = ((IntensionalSet) incomingMessagesSet).getIndexExpressions().get(0);
+				List<Expression> indexExpressionsList = ((ExtensionalIndexExpressionsSet) ((IntensionalSet) incomingMessagesSet).getIndexExpressions()).getList();
+				Expression indexExpression     = indexExpressionsList.get(0);
 				Expression NPrime              = IndexExpressions.getType(indexExpression);
 				
 				Trace.log("// N' = {}", NPrime);
@@ -313,8 +315,9 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression n1        = IfThenElse.getThenBranch(NPrime);
 		Expression n2        = IfThenElse.getElseBranch(NPrime);
 
-		Expression prodIntensionalSet   = productOfIncomingMessages.get(0);
-		Expression indexExpression      = ((IntensionalSet) prodIntensionalSet).getIndexExpressions().get(0);
+		Expression prodIntensionalSet         = productOfIncomingMessages.get(0);
+		List<Expression> indexExpressionsList = ((ExtensionalIndexExpressionsSet) ((IntensionalSet) prodIntensionalSet).getIndexExpressions()).getList();
+		Expression indexExpression            = indexExpressionsList.get(0);
 		Expression index                = IndexExpressions.getIndex(indexExpression);
 		Expression msgToF_V             = ((IntensionalSet) prodIntensionalSet).getHead();
 		Expression prodScopingCondition = ((IntensionalSet) prodIntensionalSet).getCondition();
@@ -353,7 +356,9 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		LPIUtil.assertProductOk(productOfIncomingMessages);
 
 		Expression incomingMessagesSet          = productOfIncomingMessages.get(0);
-		Expression indexExpression              = ((IntensionalSet) incomingMessagesSet).getIndexExpressions().get(0);
+		IndexExpressionsSet indexExpressions    = ((IntensionalSet) incomingMessagesSet).getIndexExpressions();
+		List<Expression> indexExpressionsList   = ((ExtensionalIndexExpressionsSet) indexExpressions).getList();
+		Expression indexExpression              = indexExpressionsList.get(0);
 		Expression indexOfOfIncomingMessagesSet = IndexExpressions.getIndex(indexExpression);
 		Expression msgToF_V                     = ((IntensionalSet) incomingMessagesSet).getHead();
 		Expression F                            = msgToF_V.get(0);
@@ -529,7 +534,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression result = 
 			Expressions.apply(
 					FunctorConstants.SUM,
-					((IntensionalSet) currentExpression.get(0)).setIndexExpressions(new DefaultIndexExpressionsSet(ExtensionalSet.getElements(newN))));
+					((IntensionalSet) currentExpression.get(0)).setIndexExpressions(new ExtensionalIndexExpressionsSet(ExtensionalSet.getElements(newN))));
 		return result;
 	}
 

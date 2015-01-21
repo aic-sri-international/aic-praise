@@ -59,8 +59,8 @@ import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.SyntaxTree;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
-import com.sri.ai.expresso.core.DefaultIndexExpressionsSet;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Apply;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
@@ -991,13 +991,14 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: (m_V<-F, true, (on ), beingComputed)
 	 */
 	public static Expression argForMessageToVariableFromFactorRewriteCall(Expression msgToV_F, Expression beingComputed) {
-		Expression result = Tuple.make(msgToV_F, Expressions.TRUE, makeScopingSyntaxTree(new DefaultIndexExpressionsSet(new ArrayList<Expression>())), beingComputed);
+		Expression result = Tuple.make(msgToV_F, Expressions.TRUE, makeScopingSyntaxTree(new ExtensionalIndexExpressionsSet(new ArrayList<Expression>())), beingComputed);
 		return result;
 	}
 	
 	/** Makes a scoping expression out of a list of scoping variables. */
 	private static SyntaxTree makeScopingSyntaxTree(IndexExpressionsSet indexExpressions) {
-		Expression kleeneListExpression = Expressions.makeKleeneListIfNeeded(indexExpressions);
+		List<Expression> indexExpressionsList = ((ExtensionalIndexExpressionsSet) indexExpressions).getList();
+		Expression kleeneListExpression = Expressions.makeKleeneListIfNeeded(indexExpressionsList);
 		SyntaxTree kleeneListSyntaxTree = kleeneListExpression.getSyntaxTree();
 		SyntaxTree result = SyntaxTrees.makeCompoundSyntaxTree(IntensionalSet.SCOPED_VARIABLES_LABEL, kleeneListSyntaxTree);
 		return result;

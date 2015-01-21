@@ -48,6 +48,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.IsApplicationOf;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -116,7 +117,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 			Expression prodIntensionalSet   = productOfFactorsToVariable.get(0);
 			Expression msgToV_F             = ((IntensionalSet) prodIntensionalSet).getHead();
 			Expression prodScopingCondition = ((IntensionalSet) prodIntensionalSet).getCondition();
-			Expression indexExpression      = ((IntensionalSet) prodIntensionalSet).getIndexExpressions().get(0);
+			Expression indexExpression      = ((ExtensionalIndexExpressionsSet)((IntensionalSet) prodIntensionalSet).getIndexExpressions()).getList().get(0);
 			Expression factorIndexF         = IndexExpressions.getIndex(indexExpression);
 			Expression typeS                = IndexExpressions.getType(indexExpression);
 
@@ -165,7 +166,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 
 				Justification.beginEqualityStep("solve message to variable from factor");
 				Expression R_msgToV_F1 = cPrimeSubProcess.rewrite(R_m_to_v_from_f,
-											LPIUtil.argForMessageToVariableFromFactorRewriteCall(msgToV_F1, condition, indexExpressions, beingComputed));
+											LPIUtil.argForMessageToVariableFromFactorRewriteCall(msgToV_F1, condition, ((ExtensionalIndexExpressionsSet) indexExpressions).getList(), beingComputed));
 
 				Expression messageSet        = new DefaultIntensionalMultiSet(indexExpressions, R_msgToV_F1, condition);
 				Expression productOfMessages = Expressions.apply(FunctorConstants.PRODUCT, messageSet);

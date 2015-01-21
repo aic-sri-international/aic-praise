@@ -45,6 +45,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
@@ -64,7 +65,6 @@ import com.sri.ai.grinder.library.equality.cardinality.direct.core.Cardinality;
 import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.Sets;
-import com.sri.ai.grinder.library.set.intensional.IntensionalSetWithFalseConditionIsEmptySet;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
 
@@ -158,7 +158,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 		Expression result = expression;
 		if (LPIUtil.isProductExpression(expression)) {
 			Expression prodSet    = expression.get(0);
-			List<Expression> onI  = ((IntensionalSet) prodSet).getIndexExpressions();
+			List<Expression> onI  = ((ExtensionalIndexExpressionsSet) ((IntensionalSet) prodSet).getIndexExpressions()).getList();
 			Expression alpha      = ((IntensionalSet) prodSet).getHead();
 			Expression conditionC = ((IntensionalSet) prodSet).getCondition();
 			
@@ -206,7 +206,8 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 						if (singleAlpha != null) {
 							// return alpha ^ {@link Cardinality R_card}(| C |_I)
 							IndexExpressionsSet indexExpressions = ((IntensionalSet) prodSet).getIndexExpressions();
-							Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, indexExpressions.toArray(new Expression[indexExpressions.size()]));
+							List<Expression> indexExpressionsList = ((ExtensionalIndexExpressionsSet) indexExpressions).getList();
+							Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, indexExpressionsList.toArray(new Expression[indexExpressionsList.size()]));
 							Justification.beginEqualityStep("cardinality of equality boolean formula");
 							Justification.log(cardinalityOfIndexedFormula);
 							Expression cardinalityResult = process.rewrite(CardinalityRewriter.R_card, cardinalityOfIndexedFormula);
