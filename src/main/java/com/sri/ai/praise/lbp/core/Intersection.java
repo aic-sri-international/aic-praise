@@ -38,11 +38,14 @@
 package com.sri.ai.praise.lbp.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
+import com.sri.ai.expresso.core.DefaultIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -60,6 +63,7 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.util.Util;
 
 /**
  * Default implementation of {@link LBPRewriter#R_intersection}.
@@ -133,11 +137,11 @@ public class Intersection extends AbstractLBPHierarchicalRewriter implements LBP
 				else {
 					Trace.log("    I <- concatenation of I1 and I2");
 					Trace.log("    return { (on I) Alpha1 | C } (or multiset version)");
-					List<Expression> i = new ArrayList<Expression>();
+					List<Expression> i = Util.list();
 					i.addAll(((IntensionalSet) saSet1).getIndexExpressions());
 					i.addAll(((IntensionalSet) set2).getIndexExpressions());
 					
-					Expression unsimplifiedResult = IntensionalSet.make(Sets.getLabel(set1), i, alpha1, c);
+					Expression unsimplifiedResult = IntensionalSet.make(Sets.getLabel(set1), new DefaultIndexExpressionsSet(i), alpha1, c);
 					result = process.rewrite(R_simplify, unsimplifiedResult);
 //					System.out.println("Unsimplified: " + unsimplifiedResult);	
 //					System.out.println("Simplified  : " + result + "\n");	

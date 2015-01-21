@@ -338,8 +338,8 @@ public class LBPFactory {
         System.out.println("unknown under background knowledge: " + unknownPlusBackgroundKnowledgeSimplified);
         
         // Now we do it with sets, which takes care of standardizing apart.
-        // Set format is: { (on <Indices> <Head> | <Condition> }
-        // A value is in this set if and only if it is equal to <Head>[<Indices>/sigma] for some sigma a value to <Indices> satisfying <Condition>.
+        // Set format is: { (on <IndexExpressionsSet> <Head> | <Condition> }
+        // A value is in this set if and only if it is equal to <Head>[<IndexExpressionsSet>/sigma] for some sigma a value to <IndexExpressionsSet> satisfying <Condition>.
         // For example { (on X, Y) [p(X,Y)] | X != c and Y = b } is { [p(a, b)], [p(b, b)], [p(d, b)], [p(e, b)], ..., [p(z, b)] }
         // and is equivalent to { (on X) [p(X,b)] | X != c }
         process = LBPFactory.newLBPProcess();

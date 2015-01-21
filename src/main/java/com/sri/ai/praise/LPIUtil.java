@@ -54,10 +54,12 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.api.ReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.api.SyntaxTree;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
+import com.sri.ai.expresso.core.DefaultIndexExpressionsSet;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Apply;
 import com.sri.ai.expresso.helper.Expressions;
@@ -824,7 +826,7 @@ public class LPIUtil {
 	 * @return R_basic(beingComputed union {{ by | C }}_I)
 	 */
 	public static Expression extendBeingComputedWithIntensionalMultiSet(Expression beingComputed, Expression by, Expression conditionC, 
-			List<Expression> indexExpressions, RewritingProcess process) {
+			IndexExpressionsSet indexExpressions, RewritingProcess process) {
 		Expression result = beingComputed;
 		
 		if (!Tuple.isTuple(by) || Tuple.size(by) != 2) {
@@ -989,12 +991,12 @@ public class LPIUtil {
 	 * @return a tuple argument of the form: (m_V<-F, true, (on ), beingComputed)
 	 */
 	public static Expression argForMessageToVariableFromFactorRewriteCall(Expression msgToV_F, Expression beingComputed) {
-		Expression result = Tuple.make(msgToV_F, Expressions.TRUE, makeScopingSyntaxTree(new ArrayList<Expression>()), beingComputed);
+		Expression result = Tuple.make(msgToV_F, Expressions.TRUE, makeScopingSyntaxTree(new DefaultIndexExpressionsSet(new ArrayList<Expression>())), beingComputed);
 		return result;
 	}
 	
 	/** Makes a scoping expression out of a list of scoping variables. */
-	private static SyntaxTree makeScopingSyntaxTree(List<Expression> indexExpressions) {
+	private static SyntaxTree makeScopingSyntaxTree(IndexExpressionsSet indexExpressions) {
 		Expression kleeneListExpression = Expressions.makeKleeneListIfNeeded(indexExpressions);
 		SyntaxTree kleeneListSyntaxTree = kleeneListExpression.getSyntaxTree();
 		SyntaxTree result = SyntaxTrees.makeCompoundSyntaxTree(IntensionalSet.SCOPED_VARIABLES_LABEL, kleeneListSyntaxTree);
@@ -1287,9 +1289,9 @@ public class LPIUtil {
 		return result;
 	}
 
-	public static List<Expression> getIndexExpressionsFromRandomVariableUsage(Expression expression, Set<Expression> randomVariableDeclarationsExpressions, RewritingProcess process) {
+	public static IndexExpressionsSet getIndexExpressionsFromRandomVariableUsage(Expression expression, Set<Expression> randomVariableDeclarationsExpressions, RewritingProcess process) {
 		Map<Expression, Expression> freeSymbolsAndTypes = DetermineSortsOfLogicalVariables.getFreeSymbolsAndTypesFromUsageInRandomVariables(expression, randomVariableDeclarationsExpressions, process);
-		List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromSymbolsAndTypes(freeSymbolsAndTypes);
+		IndexExpressionsSet indexExpressions = IndexExpressions.getIndexExpressionsFromSymbolsAndTypes(freeSymbolsAndTypes);
 		return indexExpressions;
 	}
 

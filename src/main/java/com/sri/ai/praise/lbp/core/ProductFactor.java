@@ -45,6 +45,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Expressions;
@@ -149,7 +150,7 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 				
 				Expression factor1                = ((IntensionalSet) typeS).getHead();
 				Expression condition              = ((IntensionalSet) typeS).getCondition();
-				List<Expression> indexExpressions = ((IntensionalSet) typeS).getIndexExpressions();
+				IndexExpressionsSet indexExpressions = ((IntensionalSet) typeS).getIndexExpressions();
 				
 				Trace.log("    message <- R_m_to_v_from_f(m_V<-F1, C, I, beingComputed) // under cont. constraint extended by C and contextual symbols extended by I");
 				Expression       msgToV_F1        = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(LPIUtil.FUNCTOR_MSG_TO_FROM, msgToV_F.get(0), factor1);

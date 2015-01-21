@@ -45,6 +45,7 @@ import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
 import com.sri.ai.expresso.helper.Expressions;
@@ -135,7 +136,7 @@ public class ExtractPreviousMessageSets extends AbstractLBPHierarchicalRewriter 
 				// These correspond to the variables appearing free in a type of the previous message and contextual constraint:
 				Set<Expression> indices = Expressions.freeVariables(Tuple.make(expression, process.getContextualConstraint()), process);
 				Map<Expression, Expression> indexToTypeMap = Util.getFunctionMapForGivenKeys(indices, new GetType(process));
-				List<Expression> indexExpressions = IndexExpressions.getIndexExpressionsFromSymbolsAndTypes(indexToTypeMap);
+				IndexExpressionsSet indexExpressions = IndexExpressions.getIndexExpressionsFromSymbolsAndTypes(indexToTypeMap);
 				
 				Expression tuplePair = Tuple.make(expression.get(0), expression.get(1));
 				Expression set = new DefaultIntensionalUniSet(indexExpressions, tuplePair, process.getContextualConstraint());

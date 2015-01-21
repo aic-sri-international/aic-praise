@@ -43,7 +43,9 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
+import com.sri.ai.expresso.core.DefaultIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Trace;
@@ -96,7 +98,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 		Expression intSetHead      = ((IntensionalSet) intensionalSet).getHead();
 		Expression intSetCondition = ((IntensionalSet) intensionalSet).getCondition();
 		
-		List<Expression> intSetIndexExpressions = new ArrayList<Expression>(((IntensionalSet) intensionalSet).getIndexExpressions());
+		List<Expression> intensionalSetIndexExpressions = new ArrayList<Expression>(((IntensionalSet) intensionalSet).getIndexExpressions());
 		Object[]         cPrimeAndiEqualsBeta   = new Object[3];
 		
 		RewritingProcess subProcess = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(intensionalSet, process);
@@ -108,7 +110,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 			Trace.log("    return empty_set");
 			result = _emptySet;
 		} 
-		else if (intSetIndexExpressions.isEmpty()) {
+		else if (intensionalSetIndexExpressions.isEmpty()) {
 			Trace.log("if I is empty");
 			Trace.log("    return if C then { Alpha } else empty_set");
 
@@ -126,7 +128,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 				result = IfThenElse.make(intSetCondition, thenBranch, _emptySet);
 			}
 		} 
-		else if (isConditionConjunctForIndex(intSetCondition, intSetIndexExpressions, cPrimeAndiEqualsBeta)) {
+		else if (isConditionConjunctForIndex(intSetCondition, intensionalSetIndexExpressions, cPrimeAndiEqualsBeta)) {
 			// Note: from Rodrigo 11 Nov 2011 -
 			// We are assuming that Beta is in the range of i.
 			// This follows the assumption we talked about a
@@ -139,17 +141,18 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 			Expression cPrime = (Expression) cPrimeAndiEqualsBeta[0];
 			int        i      = (Integer)    cPrimeAndiEqualsBeta[1];
 			Expression beta   = (Expression) cPrimeAndiEqualsBeta[2];
-			Expression index  = IndexExpressions.getIndex(intSetIndexExpressions.get(i));
+			Expression index  = IndexExpressions.getIndex(intensionalSetIndexExpressions.get(i));
 
 			Expression substitutedAlpha  = SemanticSubstitute.replace(intSetHead, index, beta, subProcess);
 			Expression substitutedCPrime = SemanticSubstitute.replace(cPrime, index, beta, subProcess);
 			
-			intSetIndexExpressions.remove(i);
+			intensionalSetIndexExpressions.remove(i);
 
 			Expression substitutedIntensionalSet = IntensionalSet
 					.make(
 							Sets.getLabel(intensionalSet),
-							intSetIndexExpressions, substitutedAlpha,
+							new DefaultIndexExpressionsSet(intensionalSetIndexExpressions),
+							substitutedAlpha,
 							substitutedCPrime);
 
 			// Ensure not simplified to an extensional or 

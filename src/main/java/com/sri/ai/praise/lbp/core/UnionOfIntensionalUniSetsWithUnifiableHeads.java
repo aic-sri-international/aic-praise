@@ -42,6 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -94,9 +95,9 @@ public class UnionOfIntensionalUniSetsWithUnifiableHeads extends AbstractLBPHier
 							Or.make(condition1, condition2)
 							);
 			
-			List<Expression> indexExpressions1 = ((IntensionalSet) set1).getIndexExpressions();
-			List<Expression> indexExpressions2 = ((IntensionalSet) set2).getIndexExpressions();
-			List<Expression> newIndexExpressions = new ArrayList<Expression>(indexExpressions1);
+			IndexExpressionsSet indexExpressions1 = ((IntensionalSet) set1).getIndexExpressions();
+			IndexExpressionsSet indexExpressions2 = ((IntensionalSet) set2).getIndexExpressions();
+			IndexExpressionsSet newIndexExpressions = indexExpressions1;
 			newIndexExpressions.addAll(indexExpressions2);
 			
 			result = new DefaultIntensionalUniSet(newIndexExpressions, head1, newCondition);

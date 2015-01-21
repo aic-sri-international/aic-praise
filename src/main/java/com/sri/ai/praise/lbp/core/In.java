@@ -41,6 +41,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -286,7 +287,7 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 	
 			Expression setPrime = StandardizedApartFrom.standardizedApartFrom(set, alpha, process);
 	
-			List<Expression> indexExpressionsPrime = ((IntensionalSet) setPrime).getIndexExpressions();
+			IndexExpressionsSet indexExpressionsPrime = ((IntensionalSet) setPrime).getIndexExpressions();
 			Expression       conditionPrime        = ((IntensionalSet) setPrime).getCondition();
 			Expression       headBetaPrime         = ((IntensionalSet) setPrime).getHead();
 	

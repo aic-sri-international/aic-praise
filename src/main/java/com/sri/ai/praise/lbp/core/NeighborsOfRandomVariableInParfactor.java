@@ -42,6 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -159,7 +160,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 			Expression factorPrime            = ((IntensionalSet) saParfactor).getHead();
 			Expression factorValuePrime       = LPIUtil.getFactorValueExpression(factorPrime, process);
 			Expression conditionPrime         = ((IntensionalSet) saParfactor).getCondition();
-			List<Expression> indexExpressionsPrime = ((IntensionalSet) saParfactor).getIndexExpressions();
+			IndexExpressionsSet indexExpressionsPrime = ((IntensionalSet) saParfactor).getIndexExpressions();
 			
 			Trace.log("    Extend contextual symbols with I'");
 			RewritingProcess processIPrime = LPIUtil.extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(saParfactor, process);

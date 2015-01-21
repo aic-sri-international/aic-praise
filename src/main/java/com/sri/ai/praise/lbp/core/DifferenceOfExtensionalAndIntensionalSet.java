@@ -41,6 +41,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
@@ -131,7 +132,7 @@ public class DifferenceOfExtensionalAndIntensionalSet extends AbstractLBPHierarc
 			Expression intensionalSetHead         = ((IntensionalSet) saIntensionalSet).getHead();
 			Expression comparison                 = Equality.make(iThElementOfExtensionalSet, intensionalSetHead);
 			
-			List<Expression> intensionalSetIndexExpressions = ((IntensionalSet) saIntensionalSet).getIndexExpressions();
+			IndexExpressionsSet intensionalSetIndexExpressions = ((IntensionalSet) saIntensionalSet).getIndexExpressions();
 			
 			Expression unificationCondition = ThereExists.make(intensionalSetIndexExpressions, CardinalityUtil.makeAnd(intensionalSetCondition, comparison));
 			Expression ifThenElseCondition  = process.rewrite(R_formula_simplification, unificationCondition);

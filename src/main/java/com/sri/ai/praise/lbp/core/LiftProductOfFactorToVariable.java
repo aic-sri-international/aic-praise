@@ -42,6 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.core.DefaultIntensionalUniSet;
 import com.sri.ai.expresso.helper.Expressions;
@@ -204,7 +205,7 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 						Expression singleAlpha             = PickSingleElement.pickSingleElement(singletonIntensionalSet, process);				
 						if (singleAlpha != null) {
 							// return alpha ^ {@link Cardinality R_card}(| C |_I)
-							List<Expression> indexExpressions = ((IntensionalSet) prodSet).getIndexExpressions();
+							IndexExpressionsSet indexExpressions = ((IntensionalSet) prodSet).getIndexExpressions();
 							Expression cardinalityOfIndexedFormula = CardinalityUtil.makeCardinalityOfIndexedFormulaExpression(conditionC, indexExpressions.toArray(new Expression[indexExpressions.size()]));
 							Justification.beginEqualityStep("cardinality of equality boolean formula");
 							Justification.log(cardinalityOfIndexedFormula);

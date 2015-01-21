@@ -46,6 +46,7 @@ import java.util.List;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IntensionalSet;
+import com.sri.ai.expresso.core.DefaultIndexExpressionsSet;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.core.DefaultLambdaExpression;
 import com.sri.ai.expresso.helper.Expressions;
@@ -528,7 +529,7 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Expression result = 
 			Expressions.apply(
 					FunctorConstants.SUM,
-					((IntensionalSet) currentExpression.get(0)).setIndexExpressions(ExtensionalSet.getElements(newN)));
+					((IntensionalSet) currentExpression.get(0)).setIndexExpressions(new DefaultIndexExpressionsSet(ExtensionalSet.getElements(newN))));
 		return result;
 	}
 

@@ -42,6 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -532,9 +533,9 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Trace.log("// {{ Alpha' | C' }}_I'={}", saS1);
 			
 	
-			Expression alphaPrime   = ((IntensionalSet) saS1).getHead();
-			Expression cPrime       = ((IntensionalSet) saS1).getCondition();
-			List<Expression> iPrime = ((IntensionalSet) saS1).getIndexExpressions();
+			Expression alphaPrime      = ((IntensionalSet) saS1).getHead();
+			Expression cPrime          = ((IntensionalSet) saS1).getCondition();
+			IndexExpressionsSet iPrime = ((IntensionalSet) saS1).getIndexExpressions();
 	
 			Expression alphaPrimeEqualb    = Equality.make(alphaPrime, b);
 			Expression notAlphaPrimeEqualb = Not.make(alphaPrimeEqualb);
@@ -628,9 +629,9 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 
 			Expression saS1 = StandardizedApartFrom.standardizedApartFrom(set1, set2, process);
 
-			Expression alphaPrime   = ((IntensionalSet) saS1).getHead();
-			Expression cPrime       = ((IntensionalSet) saS1).getCondition();
-			List<Expression> iPrime = ((IntensionalSet) saS1).getIndexExpressions();
+			Expression alphaPrime      = ((IntensionalSet) saS1).getHead();
+			Expression cPrime          = ((IntensionalSet) saS1).getCondition();
+			IndexExpressionsSet iPrime = ((IntensionalSet) saS1).getIndexExpressions();
 
 			for (Expression b_i : ExtensionalSet.getElements(set2)) {
 				Expression equality = Equality.make(alphaPrime, b_i);
@@ -706,17 +707,17 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			Justification.endEqualityStep(result);
 		}
 		else {			
-			Expression       c = ((IntensionalSet) set1).getCondition();
-			List<Expression> i = ((IntensionalSet) set1).getIndexExpressions();
+			Expression          c = ((IntensionalSet) set1).getCondition();
+			IndexExpressionsSet i = ((IntensionalSet) set1).getIndexExpressions();
 
 			Trace.log("    { Alpha' | C' }_I' <- standardize { Alpha' | C' }_I' apart from (Alpha, C)");
 			
 			Expression tupleAlphaC = Tuple.make(alpha, c);
 			Expression saS2        = StandardizedApartFrom.standardizedApartFrom(set2, tupleAlphaC, process);
 			
-			alphaPrime              = ((IntensionalSet) saS2).getHead(); 
-			Expression       cPrime = ((IntensionalSet) saS2).getCondition();
-			List<Expression> iPrime = ((IntensionalSet) saS2).getIndexExpressions();
+			alphaPrime                 = ((IntensionalSet) saS2).getHead(); 
+			Expression          cPrime = ((IntensionalSet) saS2).getCondition();
+			IndexExpressionsSet iPrime = ((IntensionalSet) saS2).getIndexExpressions();
 	
 			Expression disequality      = Disequality.make(alpha, alphaPrime);
 			Expression implication      = Implication.make(cPrime, disequality);

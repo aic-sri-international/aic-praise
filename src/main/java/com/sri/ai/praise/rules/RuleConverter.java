@@ -52,6 +52,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Expressions;
@@ -1542,7 +1543,7 @@ public class RuleConverter {
 	public Expression createParfactor(Expression potentialExpression, Expression constraintC, Set<Expression> randomVariableDeclarations, RewritingProcess process) {
 		// |.... parfactors <- add R_normalize({{ (on <free variables in P and C>) [ P ] | C }})
 
-		List<Expression> indexExpressions = null;
+		IndexExpressionsSet indexExpressions = null;
 
 		indexExpressions =
 				LPIUtil.getIndexExpressionsFromRandomVariableUsage(
