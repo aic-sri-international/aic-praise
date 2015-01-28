@@ -277,8 +277,8 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 			Justification.beginEqualityStep("externalizing conditional on neighbors");
 			List<Expression> ln1 = Util.list(n1);
 			List<Expression> ln2 = Util.list(n2);
- 			Expression subSummation1 = Expressions.apply(FunctorConstants.SUM, ((IntensionalSet) currentExpression.get(0)).setIndexExpressions(ln1));
-			Expression subSummation2 = Expressions.apply(FunctorConstants.SUM, ((IntensionalSet) currentExpression.get(0)).setIndexExpressions(ln2));
+ 			Expression subSummation1 = Expressions.apply(FunctorConstants.SUM, ((IntensionalSet) currentExpression.get(0)).setIndexExpressions(new ExtensionalIndexExpressionsSet(ln1)));
+			Expression subSummation2 = Expressions.apply(FunctorConstants.SUM, ((IntensionalSet) currentExpression.get(0)).setIndexExpressions(new ExtensionalIndexExpressionsSet(ln2)));
 			Expression ifThenElse = IfThenElse.make(condition, subSummation1, subSummation2);
 			Justification.endEqualityStep(ifThenElse);
 		}
