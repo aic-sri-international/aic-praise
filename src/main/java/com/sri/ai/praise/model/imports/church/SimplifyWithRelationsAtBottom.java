@@ -46,7 +46,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.AtomsAndEqualityOnTermsTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.DPLLGeneralizedAndSymbolic;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.EqualityOnTermsTheory;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.EqualityAndDisequalityOnTermsTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.FunctionalTermTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.Sum;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.SymbolTermTheory;
@@ -108,7 +108,7 @@ public class SimplifyWithRelationsAtBottom {
 		private Expression targetPredicate;
 		
 		public DPLLForEqualitiesOnSymbolsAndConstantExpressionWithAtomsButTarget(Expression targetPredicate) {
-			super(new EqualityOnTermsTheory(new NonRandomSymbolTermTheory()), new Sum());
+			super(new EqualityAndDisequalityOnTermsTheory(new NonRandomSymbolTermTheory()), new Sum());
 			this.targetPredicate = targetPredicate;
 		}
 		
@@ -138,7 +138,7 @@ public class SimplifyWithRelationsAtBottom {
 		public Expression normalizeUnconditionalExpression(Expression expression, RewritingProcess process) {
 			DPLLGeneralizedAndSymbolic thirdDPLL =
 					new DPLLGeneralizedAndSymbolic(
-							new AtomsAndEqualityOnTermsTheory(new EqualityOnTermsTheory(new FunctionalTermTheory())),
+							new AtomsAndEqualityOnTermsTheory(new EqualityAndDisequalityOnTermsTheory(new FunctionalTermTheory())),
 							new Sum());
 			// thirdDPLL accepts equalities and non-target atoms, but in this context it will only ever
 			// receive expressions with target atoms only, without other atoms and without equalities
@@ -155,7 +155,7 @@ public class SimplifyWithRelationsAtBottom {
 		private Expression targetPredicate;
 		
 		public AtomsOnlyButForTarget(Expression targetPredicate) {
-			super(new EqualityOnTermsTheory(new FunctionalTermTheory())); // equality theory is irrelevant because makeSplitterIfPossible below filters everything but atoms
+			super(new EqualityAndDisequalityOnTermsTheory(new FunctionalTermTheory())); // equality theory is irrelevant because makeSplitterIfPossible below filters everything but atoms
 			this.targetPredicate = targetPredicate;
 		}
 
