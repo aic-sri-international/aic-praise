@@ -44,9 +44,9 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.AtomsAndEqualityOnTermsTheory;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.AtomsAndEqualityTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.DPLLGeneralizedAndSymbolic;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.EqualityOnTermsTheory;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.EqualityTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.FunctionalTermTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.Sum;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.SymbolTermTheory;
@@ -84,7 +84,7 @@ public class SimplifyWithRelationsAtBottom {
 	 * and also overriding the normalizeUnconditionalExpression method so that it invokes the
 	 * second DPLL on the "unconditional" equality-free expressions.
 	 * 
-	 * We implement the second DPLL by extending AtomsAndEqualityOnTermsTheory's
+	 * We implement the second DPLL by extending AtomsAndEqualityTheory's
 	 * with an overridden makeSplitterIfPossible that does not consider equalities, or atoms with the target
 	 * predicate as splitters; this way, all other atoms will be placed above it. 
 	 * 
@@ -108,7 +108,7 @@ public class SimplifyWithRelationsAtBottom {
 		private Expression targetPredicate;
 		
 		public DPLLForEqualitiesOnSymbolsAndConstantExpressionWithAtomsButTarget(Expression targetPredicate) {
-			super(new EqualityOnTermsTheory(new NonRandomSymbolTermTheory()), new Sum());
+			super(new EqualityTheory(new NonRandomSymbolTermTheory()), new Sum());
 			this.targetPredicate = targetPredicate;
 		}
 		
@@ -138,7 +138,7 @@ public class SimplifyWithRelationsAtBottom {
 		public Expression normalizeUnconditionalExpression(Expression expression, RewritingProcess process) {
 			DPLLGeneralizedAndSymbolic thirdDPLL =
 					new DPLLGeneralizedAndSymbolic(
-							new AtomsAndEqualityOnTermsTheory(new EqualityOnTermsTheory(new FunctionalTermTheory())),
+							new AtomsAndEqualityTheory(new EqualityTheory(new FunctionalTermTheory())),
 							new Sum());
 			// thirdDPLL accepts equalities and non-target atoms, but in this context it will only ever
 			// receive expressions with target atoms only, without other atoms and without equalities
@@ -150,12 +150,12 @@ public class SimplifyWithRelationsAtBottom {
 		}
 	}
 	
-	private static class AtomsOnlyButForTarget extends AtomsAndEqualityOnTermsTheory {
+	private static class AtomsOnlyButForTarget extends AtomsAndEqualityTheory {
 
 		private Expression targetPredicate;
 		
 		public AtomsOnlyButForTarget(Expression targetPredicate) {
-			super(new EqualityOnTermsTheory(new FunctionalTermTheory())); // equality theory is irrelevant because makeSplitterIfPossible below filters everything but atoms
+			super(new EqualityTheory(new FunctionalTermTheory())); // equality theory is irrelevant because makeSplitterIfPossible below filters everything but atoms
 			this.targetPredicate = targetPredicate;
 		}
 
