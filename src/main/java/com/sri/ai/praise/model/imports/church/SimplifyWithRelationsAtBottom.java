@@ -44,7 +44,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.AtomsAndEqualityTheory;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.AtomsOnTheoryWithEquality;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.DPLLGeneralizedAndSymbolic;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.EqualityTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.FunctionalTermTheory;
@@ -84,7 +84,7 @@ public class SimplifyWithRelationsAtBottom {
 	 * and also overriding the normalizeUnconditionalExpression method so that it invokes the
 	 * second DPLL on the "unconditional" equality-free expressions.
 	 * 
-	 * We implement the second DPLL by extending AtomsAndEqualityTheory's
+	 * We implement the second DPLL by extending AtomsOnTheoryWithEquality's
 	 * with an overridden makeSplitterIfPossible that does not consider equalities, or atoms with the target
 	 * predicate as splitters; this way, all other atoms will be placed above it. 
 	 * 
@@ -138,7 +138,7 @@ public class SimplifyWithRelationsAtBottom {
 		public Expression normalizeUnconditionalExpression(Expression expression, RewritingProcess process) {
 			DPLLGeneralizedAndSymbolic thirdDPLL =
 					new DPLLGeneralizedAndSymbolic(
-							new AtomsAndEqualityTheory(new EqualityTheory(new FunctionalTermTheory())),
+							new AtomsOnTheoryWithEquality(new EqualityTheory(new FunctionalTermTheory())),
 							new Sum());
 			// thirdDPLL accepts equalities and non-target atoms, but in this context it will only ever
 			// receive expressions with target atoms only, without other atoms and without equalities
@@ -150,7 +150,7 @@ public class SimplifyWithRelationsAtBottom {
 		}
 	}
 	
-	private static class AtomsOnlyButForTarget extends AtomsAndEqualityTheory {
+	private static class AtomsOnlyButForTarget extends AtomsOnTheoryWithEquality {
 
 		private Expression targetPredicate;
 		
