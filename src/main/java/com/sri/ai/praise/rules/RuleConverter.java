@@ -1473,7 +1473,7 @@ public class RuleConverter {
 		// Extract the embedded constraints from the potential expressions.
 		List<Pair<Expression, Expression>> result = new ArrayList<Pair<Expression, Expression>>();
 		// | while there is (P, C) in setOfConstrainedPotentialExpressions such that P contains a formula
-		// | ............ Constraint involving only equalities and disequalities (a constraint)
+		// | ............ AbstractEqualityConstraint involving only equalities and disequalities (a constraint)
 		for (int ii = 0; ii < setOfConstrainedPotentialExpressions.size(); ii++) {
 			// | .... remove (P, C) from setOfConstrainedPotentialExpressions
 			// Check if the potential expression has any more embedded constraints.
@@ -1483,7 +1483,7 @@ public class RuleConverter {
 			RewritingProcess subProcess = GrinderUtil.extendContextualSymbolsWithFreeSymbolsInExpressionwithUnknownTypeForSetUpPurposesOnly(Tuple.make(potentialExpression, constraintC), process);
 			CollectAtomicConstraint collectAtomicConstraint = new CollectAtomicConstraint(subProcess);
 			if (Util.thereExists(new SubExpressionsDepthFirstIterator(potentialExpression), collectAtomicConstraint)) {
-				// // | .... for Assumption in (Constraint, not Constraint)
+				// // | .... for Assumption in (AbstractEqualityConstraint, not AbstractEqualityConstraint)
 				Expression assumption = collectAtomicConstraint.constraint;
 				addFurtherConstrainedPotentialExpression(setOfConstrainedPotentialExpressions, potentialExpression, constraintC, assumption, subProcess);
 				Expression notAssumption = Not.make(collectAtomicConstraint.constraint);

@@ -3583,7 +3583,7 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						"{ ( on ) ( ([ p(a) ]), ([ Beta ]) ) | true }"),	
 				//
-				// Basic: Contextual Constraint Tests
+				// Basic: Contextual AbstractEqualityConstraint Tests
 				//
 				// Test a false contextual constraint
 				new ExtractPreviousMessageSetsTestData(Expressions.FALSE.toString(),

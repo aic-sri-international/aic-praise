@@ -186,7 +186,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 						"there exists X: (X = a) => (X = b)", 
 						"true"),	
 				//
-				// Basic: Contextual Constraint Tests
+				// Basic: Contextual AbstractEqualityConstraint Tests
 				//
 				// Test a false contextual constraint
 				new NormalizeTestData(Expressions.FALSE.toString(), 
