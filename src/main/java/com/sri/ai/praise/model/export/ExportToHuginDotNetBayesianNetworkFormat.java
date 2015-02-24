@@ -122,7 +122,7 @@ public class ExportToHuginDotNetBayesianNetworkFormat {
 				}
 				
 				private void output(String toOutput) {
-					// Write to the console so the user can see the ouput as it occurs
+					// Write to the console so the user can see the output as it occurs
 					System.out.println(toOutput);
 					try {
 						writer.write(toOutput);

@@ -41,14 +41,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProbabilisticInference;
+import com.sri.ai.grinder.library.number.Times;
 
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructGenericTableExpression;
+import static com.sri.ai.praise.model.imports.uai.UAIUtil.convertGenericTableToInstance;
 
 /**
  * 
@@ -80,12 +85,13 @@ public class UAIMARSolver {
 		}
 		
 		// Sort based on what we consider to be the simplest to hardest
-		Collections.sort(models, (model1, model2) -> Double.compare(model1.ratioUniqueFunctionTableToCliques(), model2.ratioUniqueFunctionTableToCliques()));
+		//Collections.sort(models, (model1, model2) -> Double.compare(model1.ratioUniqueFunctionTableToCliques(), model2.ratioUniqueFunctionTableToCliques()));
+		Collections.sort(models, (model1, model2) -> Integer.compare(model1.largestNumberOfFunctionTableEntries(), model2.largestNumberOfFunctionTableEntries()));
+		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.numberCliques(), model2.numberCliques()));
 		
 		System.out.println("#model read="+models.size());
 		final AtomicInteger cnt = new AtomicInteger(1);
 		models.stream().forEach(model -> {
-			;
 			System.out.println("Starting to Solve: "+model.getFile().getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
 			long start = System.currentTimeMillis();
 			solve(model);
@@ -98,8 +104,42 @@ public class UAIMARSolver {
 		System.out.println("#cliques="+model.numberCliques());
 		System.out.println("#unique function tables="+model.numberUniqueFunctionTables());
 		System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
-		for (Map.Entry<FunctionTable, List<Integer>> tableToCliques : model.getTableToCliques()) {		
-			Expression genericTableExpression = constructGenericTableExpression(tableToCliques.getKey());	                                    
+		
+		List<Expression> factors = new ArrayList<Expression>();
+		for (Map.Entry<FunctionTable, List<Integer>> tableToCliques : model.getTableToCliques()) {	
+			Expression genericTableExpression  = constructGenericTableExpression(tableToCliques.getKey());	
+			for (int cliqueIdx : tableToCliques.getValue()) {			
+				Expression instanceTableExpression = convertGenericTableToInstance(tableToCliques.getKey(), genericTableExpression, model.getVariableIdxsForClique(cliqueIdx));
+				factors.add(instanceTableExpression);
+			}
+		}
+		
+		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
+		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
+		for (int i = 0; i < model.numberVars(); i++) {
+			String varTypeName = UAIUtil.instanceTypeNameForVariable(i);
+			mapFromTypeNameToSizeString.put(varTypeName, Integer.toString(model.cardinality(i)));
+			mapFromVariableNameToTypeName.put(UAIUtil.instanceVariableName(i), varTypeName);
+		}
+		
+		Expression markovNetwork = Times.make(factors);
+
+
+System.out.println("mapFromTypeNameToSizeString="+mapFromTypeNameToSizeString);
+System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
+System.out.println("Markov Network=\n"+markovNetwork);
+		Expression evidence = null; // TODO - handle
+		
+		for (int i = 0; i < model.numberVars(); i++) {
+			Expression queryExpression = Expressions.makeSymbol(UAIUtil.instanceVariableName(i));
+			Expression marginal = ProbabilisticInference.solveFactorGraph(markovNetwork, false, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
+			
+			if (evidence == null) {
+				System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);
+			}
+			else {
+				System.out.println("Query posterior probability P(" + queryExpression + " | " + evidence + ") is: " + marginal);
+			}
 		}
 	}
 	

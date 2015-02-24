@@ -48,6 +48,9 @@ import java.util.Map;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.core.DefaultRewritingProcess;
+import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.DPLLGeneralizedAndSymbolic;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.EqualityTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.Max;
@@ -128,16 +131,43 @@ public class UAIUtil {
 		return result;
 	}
 	
+	public static Expression convertGenericTableToInstance(FunctionTable functionTable, Expression genericFunctionTableExpr, List<Integer> instanceVarIdxs) {
+		Expression result = genericFunctionTableExpr;
+		RewritingProcess process = new DefaultRewritingProcess(null);
+		for (int i = 0; i < functionTable.numberVariables(); i++) {
+			// Replace the generic variable name with the correct instance name
+			result = SyntacticSubstitute.replace(result, Expressions.makeSymbol(genericVariableName(i)), Expressions.makeSymbol(instanceVariableName(instanceVarIdxs.get(i))), process);
+			for (int c = 0; c < functionTable.cardinality(i); c++) {
+				// Replace the generic constants with constants for the variable index
+				result = SyntacticSubstitute.replace(result, Expressions.makeSymbol(genericConstantValueForVariable(c, i)), Expressions.makeSymbol(instanceConstantValueForVariable(c, instanceVarIdxs.get(i))), process);
+			}
+		}
+		
+		return result;
+	}
+	
 	public static String genericVariableName(int varIdx) {
 		return "G"+varIdx;
+	}
+	
+	public static String instanceVariableName(int varIdx) {
+		return "V"+varIdx;
 	}
 	
 	public static String genericConstantValueForVariable(int value, int variableIndex) {
 		return "cons"+genericVariableName(variableIndex)+"_"+value;
 	}
 	
+	public static String instanceConstantValueForVariable(int value, int variableIndex) {
+		return "cons"+instanceVariableName(variableIndex)+"_"+value;
+	}
+	
 	public static String genericTypeNameForVariable(int variableIndex) {
 		return "G"+variableIndex+"SIZE";
+	}
+	
+	public static String instanceTypeNameForVariable(int variableIndex) {
+		return "V"+variableIndex+"SIZE";
 	}
 	
 	public static List<List<Integer>> cardinalityValues(FunctionTable functionTable) {

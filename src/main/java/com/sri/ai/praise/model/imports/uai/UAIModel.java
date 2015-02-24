@@ -106,6 +106,10 @@ public class UAIModel {
 		return cliques.size();
 	}
 	
+	public List<Integer> getVariableIdxsForClique(int cliqueIdx) {
+		return cliques.get(cliqueIdx);
+	}
+	
 	public int numberUniqueFunctionTables() {
 		return tableToCliques.size();
 	}
