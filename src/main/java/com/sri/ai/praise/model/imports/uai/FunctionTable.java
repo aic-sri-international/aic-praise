@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.model.imports.uai;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,11 +54,13 @@ public class FunctionTable {
 	private List<Integer> varCardinalities = new ArrayList<>();
 	private int numEntries;
 	private List<Double> entries;
+	private MixedRadixNumber entryIndex;
 	
 	public FunctionTable(List<Integer> varCardinalities) {
 		this.varCardinalities.addAll(varCardinalities);		
 		this.numEntries = varCardinalities.stream().reduce((card1, card2) -> card1 * card2).get();
 		this.entries    = new ArrayList<>(numEntries);
+		this.entryIndex = new MixedRadixNumber(BigInteger.ZERO, this.varCardinalities);
 	}
 	
 	public int numberVariables() {
@@ -86,7 +89,11 @@ public class FunctionTable {
 	public Double entryFor(List<Integer> values) {
 		Double result = null;
 	
-		result = entries.get(new MixedRadixNumber(values, varCardinalities).getValue().intValue());
+		int[] radixValues = new int[values.size()];
+		for (int i = 0; i < radixValues.length; i++) {
+			radixValues[i] = values.get(i);
+		}
+		result = entries.get(this.entryIndex.getValueFor(radixValues).intValue());
 		
 		return result;
 	}

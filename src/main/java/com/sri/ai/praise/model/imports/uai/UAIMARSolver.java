@@ -46,8 +46,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
 
-import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructTableExpression;
+import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructGenericTableExpression;
 
 /**
  * 
@@ -97,10 +98,8 @@ public class UAIMARSolver {
 		System.out.println("#cliques="+model.numberCliques());
 		System.out.println("#unique function tables="+model.numberUniqueFunctionTables());
 		System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
-		for (Map.Entry<FunctionTable, List<Integer>> tableToCliques : model.getTableToCliques()) {
-// TODO			
-//			Expression tableExpression = 
-			constructTableExpression(tableToCliques.getKey());
+		for (Map.Entry<FunctionTable, List<Integer>> tableToCliques : model.getTableToCliques()) {		
+			Expression genericTableExpression = constructGenericTableExpression(tableToCliques.getKey());	                                    
 		}
 	}
 	

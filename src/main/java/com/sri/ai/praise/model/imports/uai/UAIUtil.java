@@ -77,21 +77,17 @@ public class UAIUtil {
 		return line.split("\\s+");
 	}
 	
-	public static Expression constructTableExpression(FunctionTable functionTable) {
-
-		// We want to normalize the values in the table we construct.
-		Double sum = functionTable.getEntries().stream().reduce((entry1, entry2) -> entry1 + entry2).get();
-		
+	public static Expression constructGenericTableExpression(FunctionTable functionTable) {
 		StringBuilder table = new StringBuilder();
 		CartesianProductEnumeration<Integer> cartesianProduct = new CartesianProductEnumeration<>(cardinalityValues(functionTable));
 		int cnt = 0;
 		while (cartesianProduct.hasMoreElements()) {
 			cnt++;
 			List<Integer> values = cartesianProduct.nextElement();
-			Double normalizedEntryValue = functionTable.entryFor(values) / sum;
+			Double entryValue = functionTable.entryFor(values);
 			if (cnt == cartesianProduct.size().intValue()) {
 				// i.e. final value
-				table.append(normalizedEntryValue);
+				table.append(entryValue);
 			}
 			else {
 				table.append("if ");
@@ -104,7 +100,7 @@ public class UAIUtil {
 					table.append(genericConstantValueForVariable(values.get(i), i));
 				}
 				table.append(" then ");
-				table.append(normalizedEntryValue);
+				table.append(entryValue);
 				table.append(" else ");
 			}
 		}
@@ -125,7 +121,7 @@ public class UAIUtil {
 		
 		// The solver for the parameters above.
 		DPLLGeneralizedAndSymbolic solver = new DPLLGeneralizedAndSymbolic(theory, problemType);
-		
+	
 		// Solve the problem.
 		Expression result = solver.solve(tableExpr, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);	
 		
@@ -133,7 +129,7 @@ public class UAIUtil {
 	}
 	
 	public static String genericVariableName(int varIdx) {
-		return "V"+varIdx;
+		return "G"+varIdx;
 	}
 	
 	public static String genericConstantValueForVariable(int value, int variableIndex) {
@@ -141,7 +137,7 @@ public class UAIUtil {
 	}
 	
 	public static String genericTypeNameForVariable(int variableIndex) {
-		return "V"+variableIndex+"SIZE";
+		return "G"+variableIndex+"SIZE";
 	}
 	
 	public static List<List<Integer>> cardinalityValues(FunctionTable functionTable) {
