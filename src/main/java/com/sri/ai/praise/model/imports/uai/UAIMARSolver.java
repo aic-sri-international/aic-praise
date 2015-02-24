@@ -49,6 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProbabilisticInference;
 import com.sri.ai.grinder.library.number.Times;
 
@@ -89,7 +90,7 @@ public class UAIMARSolver {
 		Collections.sort(models, (model1, model2) -> Integer.compare(model1.largestNumberOfFunctionTableEntries(), model2.largestNumberOfFunctionTableEntries()));
 		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.numberCliques(), model2.numberCliques()));
 		
-		System.out.println("#model read="+models.size());
+		System.out.println("#models read="+models.size());
 		final AtomicInteger cnt = new AtomicInteger(1);
 		models.stream().forEach(model -> {
 			System.out.println("Starting to Solve: "+model.getFile().getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
@@ -131,14 +132,17 @@ System.out.println("Markov Network=\n"+markovNetwork);
 		Expression evidence = null; // TODO - handle
 		
 		for (int i = 0; i < model.numberVars(); i++) {
-			Expression queryExpression = Expressions.makeSymbol(UAIUtil.instanceVariableName(i));
-			Expression marginal = ProbabilisticInference.solveFactorGraph(markovNetwork, false, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
 			
-			if (evidence == null) {
-				System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);
-			}
-			else {
-				System.out.println("Query posterior probability P(" + queryExpression + " | " + evidence + ") is: " + marginal);
+			for (int c = 0; c < model.cardinality(i); c++) {
+				Expression queryExpression = Equality.make(Expressions.makeSymbol(UAIUtil.instanceVariableName(i)), Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i)));
+				Expression marginal = ProbabilisticInference.solveFactorGraph(markovNetwork, false, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
+				
+				if (evidence == null) {
+					System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);
+				}
+				else {
+					System.out.println("Query posterior probability P(" + queryExpression + " | " + evidence + ") is: " + marginal);
+				}
 			}
 		}
 	}
