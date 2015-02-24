@@ -141,9 +141,19 @@ public class UAIModel {
 		evidence.put(varIdx, valueIdx);
 	}
 	
+	public int totalNumberEntriesForAllFunctionTables() {
+		int result = tableToCliques.keySet().stream().mapToInt(ft -> ft.numberEntries() * tableToCliques.get(ft).size()).reduce((n1, n2) -> n1 + n2).getAsInt();
+		return result;
+	}
+	
 	public int largestNumberOfFunctionTableEntries() {		
 		int result = tableToCliques.keySet().stream().max((ft1, ft2) -> Integer.compare(ft1.numberEntries(), ft2.numberEntries())).get().numberEntries();
 		
+		return result;
+	}
+	
+	public int largestCardinality() {
+		int result = varIdxToCardinality.values().stream().max((c1, c2) -> Integer.compare(c1, c2)).get().intValue();
 		return result;
 	}
 	

@@ -87,7 +87,8 @@ public class UAIMARSolver {
 		
 		// Sort based on what we consider to be the simplest to hardest
 		//Collections.sort(models, (model1, model2) -> Double.compare(model1.ratioUniqueFunctionTableToCliques(), model2.ratioUniqueFunctionTableToCliques()));
-		Collections.sort(models, (model1, model2) -> Integer.compare(model1.largestNumberOfFunctionTableEntries(), model2.largestNumberOfFunctionTableEntries()));
+		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.largestNumberOfFunctionTableEntries(), model2.largestNumberOfFunctionTableEntries()));
+		Collections.sort(models, (model1, model2) -> Integer.compare(model1.totalNumberEntriesForAllFunctionTables(), model2.totalNumberEntriesForAllFunctionTables()));
 		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.numberCliques(), model2.numberCliques()));
 		
 		System.out.println("#models read="+models.size());
@@ -104,8 +105,14 @@ public class UAIMARSolver {
 		System.out.println("#variables="+model.numberVars());
 		System.out.println("#cliques="+model.numberCliques());
 		System.out.println("#unique function tables="+model.numberUniqueFunctionTables());
+		System.out.println("Largest variable cardinality="+model.largestCardinality());
 		System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
-		
+		System.out.println("Total #entries across all function tables="+model.totalNumberEntriesForAllFunctionTables());
+	
+// TODO - remove		
+//if (true) {
+//	return;
+//}
 		List<Expression> factors = new ArrayList<Expression>();
 		for (Map.Entry<FunctionTable, List<Integer>> tableToCliques : model.getTableToCliques()) {	
 			Expression genericTableExpression  = constructGenericTableExpression(tableToCliques.getKey());	
@@ -136,6 +143,7 @@ System.out.println("Markov Network=\n"+markovNetwork);
 			int varCardinality = model.cardinality(i);
 			for (int c = 0; c < varCardinality; c++) {
 				Expression queryExpression = Equality.make(Expressions.makeSymbol(UAIUtil.instanceVariableName(i)), Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i, varCardinality)));
+System.out.println("query="+queryExpression);	
 				Expression marginal = ProbabilisticInference.solveFactorGraph(markovNetwork, false, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
 				
 				if (evidence == null) {
