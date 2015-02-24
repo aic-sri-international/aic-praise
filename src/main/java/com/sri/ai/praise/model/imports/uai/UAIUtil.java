@@ -127,11 +127,7 @@ public class UAIUtil {
 		DPLLGeneralizedAndSymbolic solver = new DPLLGeneralizedAndSymbolic(theory, problemType);
 		
 		// Solve the problem.
-		Expression result = solver.solve(tableExpr, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);
-
-// TODO - remove these 2 lines		
-System.out.println("Original table is:\n"+tableExpr);		
-System.out.println("Decision tree for table is:\n" + result);	
+		Expression result = solver.solve(tableExpr, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);	
 		
 		return result;
 	}

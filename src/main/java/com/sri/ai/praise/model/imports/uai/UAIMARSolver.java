@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.annotations.Beta;
 
@@ -78,17 +79,24 @@ public class UAIMARSolver {
 		}
 		
 		// Sort based on what we consider to be the simplest to hardest
-		Collections.sort(models, (model1, model2) -> model1.ratioUniqueFunctionTableToCliques().compareTo(model2.ratioUniqueFunctionTableToCliques()));
+		Collections.sort(models, (model1, model2) -> Double.compare(model1.ratioUniqueFunctionTableToCliques(), model2.ratioUniqueFunctionTableToCliques()));
 		
 		System.out.println("#model read="+models.size());
+		final AtomicInteger cnt = new AtomicInteger(1);
 		models.stream().forEach(model -> {
-			System.out.println("Starting to Solve: "+model.getFile().getName());
+			;
+			System.out.println("Starting to Solve: "+model.getFile().getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
+			long start = System.currentTimeMillis();
 			solve(model);
-			System.out.println("----\n");
+			System.out.println("---- Took "+(System.currentTimeMillis() - start)+"ms.");
 		});
 	}
 	
 	public static void solve(UAIModel model) {
+		System.out.println("#variables="+model.numberVars());
+		System.out.println("#cliques="+model.numberCliques());
+		System.out.println("#unique function tables="+model.numberUniqueFunctionTables());
+		System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
 		for (Map.Entry<FunctionTable, List<Integer>> tableToCliques : model.getTableToCliques()) {
 // TODO			
 //			Expression tableExpression = 

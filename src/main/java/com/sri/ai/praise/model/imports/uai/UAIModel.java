@@ -110,7 +110,7 @@ public class UAIModel {
 		return tableToCliques.size();
 	}
 	
-	public Double ratioUniqueFunctionTableToCliques() {
+	public double ratioUniqueFunctionTableToCliques() {
 		return ((double) numberUniqueFunctionTables()) / ((double) numberCliques());
 	}
 	
@@ -135,6 +135,12 @@ public class UAIModel {
 			throw new IllegalArgumentException("Not a leval value index: "+valueIdx+" must be in interval [0, "+cardinality+")");
 		}
 		evidence.put(varIdx, valueIdx);
+	}
+	
+	public int largestNumberOfFunctionTableEntries() {		
+		int result = tableToCliques.keySet().stream().max((ft1, ft2) -> Integer.compare(ft1.numberEntries(), ft2.numberEntries())).get().numberEntries();
+		
+		return result;
 	}
 	
 	@Override
