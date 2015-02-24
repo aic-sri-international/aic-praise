@@ -122,6 +122,10 @@ public class UAIModel {
 		return evidence.entrySet();
 	}
 	
+	public Set<Map.Entry<FunctionTable, List<Integer>>> getTableToCliques() {
+		return tableToCliques.entrySet();
+	}
+	
 	public void addEvidence(Integer varIdx, Integer valueIdx) {
 		if (varIdx < 0 || varIdx >= numberVars()) {
 			throw new IllegalArgumentException("Not a legal variable index: "+varIdx+" must be in interval [0, "+numberVars()+")");

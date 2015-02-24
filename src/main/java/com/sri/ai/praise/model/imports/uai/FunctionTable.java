@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.util.math.MixedRadixNumber;
 
 /**
  * 
@@ -80,6 +81,14 @@ public class FunctionTable {
 		if (entries.size() > numEntries) {
 			throw new IllegalStateException("Trying to add too many entries");
 		}
+	}
+	
+	public Double entryFor(List<Integer> values) {
+		Double result = null;
+	
+		result = entries.get(new MixedRadixNumber(values, varCardinalities).getValue().intValue());
+		
+		return result;
 	}
 	
 	@Override

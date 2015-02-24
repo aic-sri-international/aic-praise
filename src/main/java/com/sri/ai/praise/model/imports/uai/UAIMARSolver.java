@@ -42,8 +42,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
+
+import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructTableExpression;
 
 /**
  * 
@@ -86,7 +90,9 @@ public class UAIMARSolver {
 	}
 	
 	public static void solve(UAIModel model) {
-// TODO		
+		for (Map.Entry<FunctionTable, List<Integer>> tableToCliques : model.getTableToCliques()) {
+			Expression tableExpression = constructTableExpression(tableToCliques.getKey());
+		}
 	}
 	
 	//
