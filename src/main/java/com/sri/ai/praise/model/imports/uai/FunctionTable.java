@@ -56,7 +56,7 @@ public class FunctionTable {
 	
 	public FunctionTable(List<Integer> varCardinalities) {
 		this.varCardinalities.addAll(varCardinalities);		
-		this.numEntries = varCardinalities.stream().reduce((c1, c2) -> c1 * c2).get();
+		this.numEntries = varCardinalities.stream().reduce((card1, card2) -> card1 * card2).get();
 		this.entries    = new ArrayList<>(numEntries);
 	}
 	

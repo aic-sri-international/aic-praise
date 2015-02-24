@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.api.Expression;
 
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructTableExpression;
 
@@ -59,7 +58,7 @@ public class UAIMARSolver {
 	public static void main(String[] args) throws IOException {
 		
 		if (args.length != 1) {
-			throw new IllegalArgumentException("Must specify UAI model directory of file to solve");
+			throw new IllegalArgumentException("Must specify UAI model directory or model file to solve");
 		}
 		
 		File uaiInput = new File(args[0]);
@@ -79,19 +78,21 @@ public class UAIMARSolver {
 		}
 		
 		// Sort based on what we consider to be the simplest to hardest
-		Collections.sort(models, (m1, m2) -> m1.ratioUniqueFunctionTableToCliques().compareTo(m2.ratioUniqueFunctionTableToCliques()));
+		Collections.sort(models, (model1, model2) -> model1.ratioUniqueFunctionTableToCliques().compareTo(model2.ratioUniqueFunctionTableToCliques()));
 		
 		System.out.println("#model read="+models.size());
-		models.stream().forEach(m -> {
-			System.out.println("Starting to Solve: "+m.getFile().getName());
-			solve(m);
+		models.stream().forEach(model -> {
+			System.out.println("Starting to Solve: "+model.getFile().getName());
+			solve(model);
 			System.out.println("----\n");
 		});
 	}
 	
 	public static void solve(UAIModel model) {
 		for (Map.Entry<FunctionTable, List<Integer>> tableToCliques : model.getTableToCliques()) {
-			Expression tableExpression = constructTableExpression(tableToCliques.getKey());
+// TODO			
+//			Expression tableExpression = 
+			constructTableExpression(tableToCliques.getKey());
 		}
 	}
 	

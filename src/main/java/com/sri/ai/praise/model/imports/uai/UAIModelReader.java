@@ -136,40 +136,40 @@ public class UAIModelReader {
 		// The order of the factor is identical to the one in which they were introduced in the preamble, 
 		// the first variable have the role of the 'most significant’ digit. 
 		for (int c = 0; c < preamble.numCliques(); c++) {
-			FunctionTable ft = new FunctionTable(preamble.cardinalitiesForClique(c));			
-			populateFunctionTable(ft, br);
-			cliqueToTable.put(c, ft);
+			FunctionTable functionTable = new FunctionTable(preamble.cardinalitiesForClique(c));			
+			populateFunctionTable(functionTable, br);
+			cliqueToTable.put(c, functionTable);
 		}
 		
 		return cliqueToTable;
 	}
 	
-	private static void populateFunctionTable(FunctionTable ft, BufferedReader br) throws IOException {
+	private static void populateFunctionTable(FunctionTable functionTable, BufferedReader br) throws IOException {
 		// For each factor table, first the number of entries is given (this should be equal to the product 
 		// of the domain sizes of the variables in the scope). Then, one by one, separated by whitespace, 
 		// the values for each assignment to the variables in the function's scope are enumerated.
 		String[] entryLineEntries = split(readLine(br));
 		int numberEntries = Integer.parseInt(entryLineEntries[0]); 
-		if (numberEntries != ft.numberEntries()) {
-			throw new IllegalArgumentException("Expecting "+ft.numberEntries()+" getting "+numberEntries);
+		if (numberEntries != functionTable.numberEntries()) {
+			throw new IllegalArgumentException("Expecting "+functionTable.numberEntries()+" getting "+numberEntries);
 		}
 		
 		// Handle table entries on the same line as the #entries information.
 		if (entryLineEntries.length > 1) {
 			for (int i = 1; i < entryLineEntries.length; i++) {
-				ft.addEntry(Double.parseDouble(entryLineEntries[i]));
+				functionTable.addEntry(Double.parseDouble(entryLineEntries[i]));
 			}
 		}
 
-		while (ft.getEntries().size() < numberEntries) { 
+		while (functionTable.getEntries().size() < numberEntries) { 
 			String[] entries = split(readLine(br));
 			for (String entry : entries) {
-				ft.addEntry(Double.parseDouble(entry));
+				functionTable.addEntry(Double.parseDouble(entry));
 			}
 		}
 		
-		if (ft.getEntries().size() > numberEntries) {
-			throw new IllegalArgumentException("Read in too many function table entries: "+ft.getEntries().size()+" instead of "+numberEntries);
+		if (functionTable.getEntries().size() > numberEntries) {
+			throw new IllegalArgumentException("Read in too many function table entries: "+functionTable.getEntries().size()+" instead of "+numberEntries);
 		}
 	}
 	

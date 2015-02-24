@@ -77,75 +77,83 @@ public class UAIUtil {
 		return line.split("\\s+");
 	}
 	
-	public static Expression constructTableExpression(FunctionTable ft) {
-		Expression result = null;
+	public static Expression constructTableExpression(FunctionTable functionTable) {
+
+		// We want to normalize the values in the table we construct.
+		Double sum = functionTable.getEntries().stream().reduce((entry1, entry2) -> entry1 + entry2).get();
 		
-		Double sum = ft.getEntries().stream().reduce((e1, e2) -> e1 + e2).get();
-		
-		StringBuilder e = new StringBuilder();
-		CartesianProductEnumeration<Integer> cartProd = new CartesianProductEnumeration<>(cardinalityValues(ft));
+		StringBuilder table = new StringBuilder();
+		CartesianProductEnumeration<Integer> cartesianProduct = new CartesianProductEnumeration<>(cardinalityValues(functionTable));
 		int cnt = 0;
-		while (cartProd.hasMoreElements()) {
+		while (cartesianProduct.hasMoreElements()) {
 			cnt++;
-			List<Integer> values = cartProd.nextElement();
-			Double normalizedEntryValue = ft.entryFor(values) / sum;
-			if (cnt == cartProd.size().intValue()) {
+			List<Integer> values = cartesianProduct.nextElement();
+			Double normalizedEntryValue = functionTable.entryFor(values) / sum;
+			if (cnt == cartesianProduct.size().intValue()) {
 				// i.e. final value
-				e.append(normalizedEntryValue);
+				table.append(normalizedEntryValue);
 			}
 			else {
-				e.append("if ");
+				table.append("if ");
 				for (int i = 0; i < values.size(); i++) {
 					if (i > 0) {
-						e.append(" and ");
+						table.append(" and ");
 					}
-					e.append("V");
-					e.append(i);
-					e.append(" = ");
-					e.append("consV");
-					e.append(i);
-					e.append("_");
-					e.append(values.get(i));
+					table.append(genericVariableName(i));
+					table.append(" = ");
+					table.append(genericConstantValueForVariable(values.get(i), i));
 				}
-				e.append(" then ");
-				e.append(normalizedEntryValue);
-				e.append(" else ");
+				table.append(" then ");
+				table.append(normalizedEntryValue);
+				table.append(" else ");
 			}
 		}
 		
 		// The theory of equality on symbols (includes a model counter for formulas in it).
 		Theory      theory      = new EqualityTheory(new SymbolTermTheory());
 		ProblemType problemType = new Max(); // the problem type actually does not matter, because we are not going to have any indices.
-		Expression  table       = Expressions.parse(e.toString());
+		Expression  tableExpr   = Expressions.parse(table.toString());
 		
 		Collection<Expression> indices = Util.list(); // no indices; we want to keep all variables
 		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
-		for (int i = 0; i < ft.numberVariables(); i++) {
-			String typeName = "V"+i+"SIZE"; ;
-			mapFromTypeNameToSizeString.put(typeName, ""+ft.cardinality(i));
-			mapFromVariableNameToTypeName.put("V"+i, typeName);
+		for (int i = 0; i < functionTable.numberVariables(); i++) {
+			String typeName = genericTypeNameForVariable(i);
+			mapFromTypeNameToSizeString.put(typeName, ""+functionTable.cardinality(i));
+			mapFromVariableNameToTypeName.put(genericVariableName(i), typeName);
 		}
 		
-		/* The solver for the parameters above. */
+		// The solver for the parameters above.
 		DPLLGeneralizedAndSymbolic solver = new DPLLGeneralizedAndSymbolic(theory, problemType);
 		
-		/* Solve the problem. */
-		result = solver.solve(table, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);
+		// Solve the problem.
+		Expression result = solver.solve(tableExpr, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);
 
-System.out.println("Original table is:\n"+e);		
+// TODO - remove these 2 lines		
+System.out.println("Original table is:\n"+tableExpr);		
 System.out.println("Decision tree for table is:\n" + result);	
-
 		
 		return result;
 	}
 	
-	public static List<List<Integer>> cardinalityValues(FunctionTable ft) {
+	public static String genericVariableName(int varIdx) {
+		return "V"+varIdx;
+	}
+	
+	public static String genericConstantValueForVariable(int value, int variableIndex) {
+		return "cons"+genericVariableName(variableIndex)+"_"+value;
+	}
+	
+	public static String genericTypeNameForVariable(int variableIndex) {
+		return "V"+variableIndex+"SIZE";
+	}
+	
+	public static List<List<Integer>> cardinalityValues(FunctionTable functionTable) {
 		List<List<Integer>> result = new ArrayList<>();
 		
-		for (int v = 0; v < ft.numberVariables(); v++) {
+		for (int v = 0; v < functionTable.numberVariables(); v++) {
 			List<Integer> vals = new ArrayList<>();
-			for (int c = 0; c < ft.cardinality(v); c++) {
+			for (int c = 0; c < functionTable.cardinality(v); c++) {
 				vals.add(c);
 			}
 			result.add(vals);
