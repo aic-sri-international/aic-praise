@@ -118,8 +118,9 @@ public class UAIMARSolver {
 		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
 		for (int i = 0; i < model.numberVars(); i++) {
-			String varTypeName = UAIUtil.instanceTypeNameForVariable(i);
-			mapFromTypeNameToSizeString.put(varTypeName, Integer.toString(model.cardinality(i)));
+			int varCardinality = model.cardinality(i);
+			String varTypeName = UAIUtil.instanceTypeNameForVariable(i, varCardinality);
+			mapFromTypeNameToSizeString.put(varTypeName, Integer.toString(varCardinality));
 			mapFromVariableNameToTypeName.put(UAIUtil.instanceVariableName(i), varTypeName);
 		}
 		
@@ -132,9 +133,9 @@ System.out.println("Markov Network=\n"+markovNetwork);
 		Expression evidence = null; // TODO - handle
 		
 		for (int i = 0; i < model.numberVars(); i++) {
-			
-			for (int c = 0; c < model.cardinality(i); c++) {
-				Expression queryExpression = Equality.make(Expressions.makeSymbol(UAIUtil.instanceVariableName(i)), Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i)));
+			int varCardinality = model.cardinality(i);
+			for (int c = 0; c < varCardinality; c++) {
+				Expression queryExpression = Equality.make(Expressions.makeSymbol(UAIUtil.instanceVariableName(i)), Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i, varCardinality)));
 				Expression marginal = ProbabilisticInference.solveFactorGraph(markovNetwork, false, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
 				
 				if (evidence == null) {

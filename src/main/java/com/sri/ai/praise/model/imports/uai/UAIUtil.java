@@ -100,7 +100,7 @@ public class UAIUtil {
 					}
 					table.append(genericVariableName(i));
 					table.append(" = ");
-					table.append(genericConstantValueForVariable(values.get(i), i));
+					table.append(genericConstantValueForVariable(values.get(i), i, functionTable.cardinality(i)));
 				}
 				table.append(" then ");
 				table.append(entryValue);
@@ -117,7 +117,7 @@ public class UAIUtil {
 		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
 		for (int i = 0; i < functionTable.numberVariables(); i++) {
-			String typeName = genericTypeNameForVariable(i);
+			String typeName = genericTypeNameForVariable(i, functionTable.cardinality(i));
 			mapFromTypeNameToSizeString.put(typeName, ""+functionTable.cardinality(i));
 			mapFromVariableNameToTypeName.put(genericVariableName(i), typeName);
 		}
@@ -137,9 +137,14 @@ public class UAIUtil {
 		for (int i = 0; i < functionTable.numberVariables(); i++) {
 			// Replace the generic variable name with the correct instance name
 			result = SyntacticSubstitute.replace(result, Expressions.makeSymbol(genericVariableName(i)), Expressions.makeSymbol(instanceVariableName(instanceVarIdxs.get(i))), process);
-			for (int c = 0; c < functionTable.cardinality(i); c++) {
-				// Replace the generic constants with constants for the variable index
-				result = SyntacticSubstitute.replace(result, Expressions.makeSymbol(genericConstantValueForVariable(c, i)), Expressions.makeSymbol(instanceConstantValueForVariable(c, instanceVarIdxs.get(i))), process);
+			int varCardinality = functionTable.cardinality(i);
+			for (int c = 0; c < varCardinality; c++) {
+				// Replace the generic constants with constants for the variable index (if they differ)
+				Expression genericConstant  = Expressions.makeSymbol(genericConstantValueForVariable(c, i, varCardinality));
+				Expression instanceConstant = Expressions.makeSymbol(instanceConstantValueForVariable(c, instanceVarIdxs.get(i), varCardinality));
+				if (!genericConstant.equals(instanceConstant)) {
+					result = SyntacticSubstitute.replace(result, genericConstant, instanceConstant, process);
+				}
 			}
 		}
 		
@@ -154,19 +159,37 @@ public class UAIUtil {
 		return "V"+varIdx;
 	}
 	
-	public static String genericConstantValueForVariable(int value, int variableIndex) {
+	public static String genericConstantValueForVariable(int value, int variableIndex, int varCardinality) {
+		if (varCardinality == 2) {
+			if (value == 0) {
+				return "false";
+			}
+			return "true";
+		}
 		return "cons"+genericVariableName(variableIndex)+"_"+value;
 	}
 	
-	public static String instanceConstantValueForVariable(int value, int variableIndex) {
+	public static String instanceConstantValueForVariable(int value, int variableIndex, int varCardinality) {
+		if (varCardinality == 2) {
+			if (value == 0) {
+				return "false";
+			}
+			return "true";
+		}
 		return "cons"+instanceVariableName(variableIndex)+"_"+value;
 	}
 	
-	public static String genericTypeNameForVariable(int variableIndex) {
+	public static String genericTypeNameForVariable(int variableIndex, int varCardinality) {
+		if (varCardinality == 2) {
+			return "Boolean";
+		}
 		return "G"+variableIndex+"SIZE";
 	}
 	
-	public static String instanceTypeNameForVariable(int variableIndex) {
+	public static String instanceTypeNameForVariable(int variableIndex, int varCardinality) {
+		if (varCardinality == 2) {
+			return "Boolean";
+		}
 		return "V"+variableIndex+"SIZE";
 	}
 	
