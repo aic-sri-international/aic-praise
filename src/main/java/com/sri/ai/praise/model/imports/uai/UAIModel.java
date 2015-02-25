@@ -54,13 +54,9 @@ import com.google.common.annotations.Beta;
  * @author oreilly
  */
 @Beta
-public class UAIModel {
-	enum Type {
-		MARKOV, BAYES
-	}
-	
+public class UAIModel {	
 	private File file;
-	private Type type;
+	UAIModelType type;
 	Map<Integer, Integer> varIdxToCardinality        = new LinkedHashMap<>();
 	Map<Integer, Integer> evidence                   = new LinkedHashMap<>();
 	List<List<Integer>> cliques                      = new ArrayList<>();
@@ -68,7 +64,7 @@ public class UAIModel {
 	Map<FunctionTable, List<Integer>> tableToCliques = new LinkedHashMap<>();
 	Map<Integer, List<Double>> marSolution           = new LinkedHashMap<>();
 	
-	public UAIModel(File file, Type type, 
+	public UAIModel(File file, UAIModelType type, 
 			Map<Integer, Integer> varIdxToCardinality,
 			List<List<Integer>> cliques,
 			Map<Integer, FunctionTable> cliqueToTable) {
@@ -92,7 +88,7 @@ public class UAIModel {
 		return file;
 	}
 	
-	public Type getType() {
+	public UAIModelType getType() {
 		return type;
 	}
 	

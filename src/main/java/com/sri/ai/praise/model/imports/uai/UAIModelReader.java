@@ -84,11 +84,11 @@ public class UAIModelReader {
 		//
 		// The preamble starts with one line denoting the type of network
 		String typeOfNetwork = readLine(br);
-		if (!UAIModel.Type.MARKOV.name().equals(typeOfNetwork)) {
+		if (!UAIModelType.MARKOV.name().equals(typeOfNetwork)) {
 			// NOTE: 2014 competitions files only contain markov networks.
 			throw new IllegalArgumentException("Type of network ["+typeOfNetwork+"] is not supported");
 		}
-		result.type = UAIModel.Type.MARKOV; // Only type currently supported
+		result.type = UAIModelType.MARKOV; // Only type currently supported
 		
 		//
 		// The second line contains the number of variables 
@@ -174,7 +174,7 @@ public class UAIModelReader {
 	}
 	
 	static class Preamble {
-		UAIModel.Type         type;
+		UAIModelType          type;
 		Map<Integer, Integer> variableToCardinality = new LinkedHashMap<>();
 		List<List<Integer>>   cliques               = new ArrayList<>();
 		

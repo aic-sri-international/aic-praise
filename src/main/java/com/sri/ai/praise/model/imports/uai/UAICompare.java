@@ -56,9 +56,32 @@ import com.google.common.annotations.Beta;
  */
 @Beta
 public class UAICompare {
-	// Appears to be the precision used in the solution files provided.
+	// Appears to be the precision and rounding used in the solution files provided.
 	public static final int          UAI_PRECISON      = 6; 
 	public static final RoundingMode UAI_ROUNDING_MODE = RoundingMode.HALF_UP;
+	
+	/**
+	 * Simple command line application for comparing a MAR solution with a computed result from a solver.
+	 * 
+	 * @param args
+	 *        args[0] file path to the solution file.
+	 *        args[1] file path to the computed results from a solver.
+	 * @throws IOException
+	 */
+	public static void main(String[] args) throws IOException {
+		Map<Integer, List<Double>> solution = UAIResultReader.readMAR(new File(args[0]));
+		Map<Integer, List<Double>> computed = UAIResultReader.readMAR(new File(args[1]));
+		
+		List<Integer> doNotMatch = compareMAR(solution, computed);
+		if (doNotMatch.size() == 0) {
+			System.out.println("Computed values match solution: "+computed);
+		}
+		else {
+			System.err.println("These computed variables' values "+doNotMatch+" did not match the solution.");
+			System.err.println("solution="+solution);
+			System.err.println("computed="+computed);
+		}
+	}
 	
 	/**
 	 * Compare two MAR results.
