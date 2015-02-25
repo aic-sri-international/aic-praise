@@ -65,24 +65,28 @@ import static com.sri.ai.praise.model.imports.uai.UAIUtil.convertGenericTableToI
 public class UAIMARSolver {
 	public static void main(String[] args) throws IOException {
 		
-		if (args.length != 1) {
-			throw new IllegalArgumentException("Must specify UAI model directory or model file to solve");
+		if (args.length != 2) {
+			throw new IllegalArgumentException("Must specify UAI model directory or model file to solve and the directory containing the corresponding solutions");
 		}
 		
 		File uaiInput = new File(args[0]);
 		if (!uaiInput.exists()) {
 			throw new IllegalArgumentException("File or directory specified does not exist: "+uaiInput.getAbsolutePath());
 		}
+		File solutionDir = new File(args[1]);
+		if (!solutionDir.exists() || !solutionDir.isDirectory()) {
+			throw new IllegalArgumentException("Solution directory is invalid: "+solutionDir.getAbsolutePath());
+		}
 		
 		List<UAIModel> models = new ArrayList<>();
 		
 		if (uaiInput.isDirectory()) {
 			for (File uaiFile : uaiInput.listFiles((dir, name) -> name.endsWith(".uai"))) {
-				models.add(read(uaiFile));
+				models.add(read(uaiFile, solutionDir));
 			}
 		}
 		else {
-			models.add(read(uaiInput));
+			models.add(read(uaiInput, solutionDir));
 		}
 		
 		// Sort based on what we consider to be the simplest to hardest
@@ -109,7 +113,7 @@ public class UAIMARSolver {
 		System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
 		System.out.println("Total #entries across all function tables="+model.totalNumberEntriesForAllFunctionTables());
 	
-// TODO - remove		
+//// TODO - remove		
 //if (true) {
 //	return;
 //}
@@ -159,10 +163,21 @@ System.out.println("query="+queryExpression);
 	//
 	// PRIVATE
 	//
-	private static UAIModel read(File uaiFile) throws IOException {
+	private static UAIModel read(File uaiFile, File solutionDir) throws IOException {
 		UAIModel model = UAIModelReader.read(uaiFile);
 		
 		UAIEvidenceReader.read(model);
+		
+		// Result is specified in a separate file. This file has the same name as the original network 
+		// file but with an added .MAR suffix. For instance, problem.uai will have a MAR result file problem.uai.MAR. 
+		File marResultFile = new File(solutionDir, uaiFile.getName()+".MAR");
+		Map<Integer, List<Double>> marResult = UAIResultReader.readMAR(marResultFile);
+		if (marResult.size() != model.numberVars()) {
+			throw new IllegalArgumentException("Number of variables in result file, "+marResult.size()+", does not match # in model, which is "+model.numberVars());
+		}
+		for (Map.Entry<Integer, List<Double>> entry : marResult.entrySet()) {
+			model.addMarResult(entry.getKey(), entry.getValue());
+		}
 		
 		return model;
 	}

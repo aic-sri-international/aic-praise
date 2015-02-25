@@ -65,6 +65,7 @@ public class UAIModel {
 	List<List<Integer>> cliques                      = new ArrayList<>();
 	Map<Integer, FunctionTable> cliqueToTable        = new LinkedHashMap<>();
 	Map<FunctionTable, List<Integer>> tableToCliques = new LinkedHashMap<>();
+	Map<Integer, List<Double>> marResults            = new LinkedHashMap<>();
 	
 	public UAIModel(File file, Type type, 
 			Map<Integer, Integer> varIdxToCardinality,
@@ -139,6 +140,25 @@ public class UAIModel {
 			throw new IllegalArgumentException("Not a leval value index: "+valueIdx+" must be in interval [0, "+cardinality+")");
 		}
 		evidence.put(varIdx, valueIdx);
+	}
+	
+	public void clearMARResults() {
+		this.marResults.clear();
+	}
+	
+	public void addMarResult(Integer varIdx, List<Double> values) {
+		Integer cardinality = varIdxToCardinality.get(varIdx);
+		if (cardinality == null) {
+			throw new IllegalArgumentException("Variable Index is invalid, give "+ varIdx +" must be in interval [0, "+numberVars()+")");
+		}
+		if (cardinality != values.size()) {
+			throw new IllegalArgumentException("Size of values given, "+values.size()+", does not match variables cardinality, which is "+cardinality);
+		}
+		this.marResults.put(varIdx, new ArrayList<>(values));
+	}
+	
+	public Map<Integer, List<Double>> getMARResults() {
+		return this.marResults;
 	}
 	
 	public int totalNumberEntriesForAllFunctionTables() {

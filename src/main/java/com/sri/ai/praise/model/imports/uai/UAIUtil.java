@@ -70,8 +70,11 @@ public class UAIUtil {
 	public static String readLine(BufferedReader br) throws IOException {
 		String result = "";
 		// This ensures empty lines are removed
-		while (result.equals("")) {
-			result = br.readLine().trim();
+		while ("".equals(result)) {
+			result = br.readLine();
+			if (result != null) {
+				result = result.trim();
+			}
 		}
 		return result;
 	}
