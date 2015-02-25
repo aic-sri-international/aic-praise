@@ -146,7 +146,8 @@ System.out.println("Markov Network=\n"+markovNetwork);
 		for (int i = 0; i < model.numberVars(); i++) {
 			int varCardinality = model.cardinality(i);
 			for (int c = 0; c < varCardinality; c++) {
-				Expression queryExpression = Equality.make(Expressions.makeSymbol(UAIUtil.instanceVariableName(i)), Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i, varCardinality)));
+				Expression queryExpression =
+						Equality.make(Expressions.makeSymbol(UAIUtil.instanceVariableName(i)), Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i, varCardinality)));
 System.out.println("query="+queryExpression);	
 				Expression marginal = ProbabilisticInference.solveFactorGraph(markovNetwork, false, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
 				
