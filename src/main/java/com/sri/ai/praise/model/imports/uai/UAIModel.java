@@ -39,6 +39,7 @@ package com.sri.ai.praise.model.imports.uai;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +66,7 @@ public class UAIModel {
 	List<List<Integer>> cliques                      = new ArrayList<>();
 	Map<Integer, FunctionTable> cliqueToTable        = new LinkedHashMap<>();
 	Map<FunctionTable, List<Integer>> tableToCliques = new LinkedHashMap<>();
-	Map<Integer, List<Double>> marResults            = new LinkedHashMap<>();
+	Map<Integer, List<Double>> marSolution           = new LinkedHashMap<>();
 	
 	public UAIModel(File file, Type type, 
 			Map<Integer, Integer> varIdxToCardinality,
@@ -142,11 +143,11 @@ public class UAIModel {
 		evidence.put(varIdx, valueIdx);
 	}
 	
-	public void clearMARResults() {
-		this.marResults.clear();
+	public void clearMARSolution() {
+		this.marSolution.clear();
 	}
 	
-	public void addMarResult(Integer varIdx, List<Double> values) {
+	public void addMARSolution(Integer varIdx, List<Double> values) {
 		Integer cardinality = varIdxToCardinality.get(varIdx);
 		if (cardinality == null) {
 			throw new IllegalArgumentException("Variable Index is invalid, give "+ varIdx +" must be in interval [0, "+numberVars()+")");
@@ -154,11 +155,11 @@ public class UAIModel {
 		if (cardinality != values.size()) {
 			throw new IllegalArgumentException("Size of values given, "+values.size()+", does not match variables cardinality, which is "+cardinality);
 		}
-		this.marResults.put(varIdx, new ArrayList<>(values));
+		this.marSolution.put(varIdx, new ArrayList<>(values));
 	}
 	
-	public Map<Integer, List<Double>> getMARResults() {
-		return this.marResults;
+	public Map<Integer, List<Double>> getMARSolution() {
+		return Collections.unmodifiableMap(this.marSolution);
 	}
 	
 	public int totalNumberEntriesForAllFunctionTables() {

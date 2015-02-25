@@ -40,16 +40,21 @@ package com.sri.ai.praise.model.imports.uai;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.boole.And;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProbabilisticInference;
 import com.sri.ai.grinder.library.number.Times;
 
@@ -137,18 +142,32 @@ public class UAIMARSolver {
 		
 		Expression markovNetwork = Times.make(factors);
 
-
-System.out.println("mapFromTypeNameToSizeString="+mapFromTypeNameToSizeString);
-System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
-System.out.println("Markov Network=\n"+markovNetwork);
-		Expression evidence = null; // TODO - handle
+		Expression evidence = null; 
+		List<Expression> conjuncts = new ArrayList<Expression>();
+		for (Map.Entry<Integer, Integer> entry : model.getEvidence()) {
+			int varIdx = entry.getKey();
+			int valIdx = entry.getValue();
+			Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(varIdx));
+			Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, model.cardinality(varIdx)));
+			conjuncts.add(Equality.make(varExpr, valueExpr));
+		}
+		if (conjuncts.size() > 0) {
+			evidence = And.make(conjuncts);
+		}
+		System.out.println("mapFromTypeNameToSizeString="+mapFromTypeNameToSizeString);
+		System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
+		System.out.println("Markov Network=\n"+markovNetwork);
 		
+		Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 		for (int i = 0; i < model.numberVars(); i++) {
 			int varCardinality = model.cardinality(i);
-			for (int c = 0; c < varCardinality; c++) {
-				Expression queryExpression =
-						Equality.make(Expressions.makeSymbol(UAIUtil.instanceVariableName(i)), Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i, varCardinality)));
-System.out.println("query="+queryExpression);	
+			List<Integer> remainingQueryValueIdxs = IntStream.range(0, varCardinality).boxed().collect(Collectors.toList());
+			double[] values = new double[varCardinality];
+			while (remainingQueryValueIdxs.size() > 0) {
+				int queryValueIdx = remainingQueryValueIdxs.get(0);
+				Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(i));
+				Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(queryValueIdx, i, varCardinality));
+				Expression queryExpression = Equality.make(varExpr, valueExpr);	
 				Expression marginal = ProbabilisticInference.solveFactorGraph(markovNetwork, false, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
 				
 				if (evidence == null) {
@@ -157,7 +176,29 @@ System.out.println("query="+queryExpression);
 				else {
 					System.out.println("Query posterior probability P(" + queryExpression + " | " + evidence + ") is: " + marginal);
 				}
+				
+				Map<Expression, Integer> possibleValueExprToIndex = new LinkedHashMap<>();
+				possibleValueExprToIndex.put(valueExpr, queryValueIdx);
+				if (IfThenElse.isIfThenElse(marginal)) {
+					for (Integer c : remainingQueryValueIdxs) {
+						possibleValueExprToIndex.put(Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i, varCardinality)), c);
+					}
+				}
+				
+				assignComputedValues(varExpr, marginal, possibleValueExprToIndex, remainingQueryValueIdxs, values);
 			}
+			computed.put(i, Arrays.stream(values).boxed().collect(Collectors.toList()));
+		}
+		
+		List<Integer> diffs = UAICompare.compareMAR(model.getMARSolution(), computed);
+		System.out.println("----");
+		if (diffs.size() == 0) {
+			System.out.println("Computed values match solution: "+computed);
+		}
+		else {
+			System.err.println("These variables "+diffs+" did not match the solution.");
+			System.err.println("solution="+model.getMARSolution());
+			System.err.println("computed="+computed);
 		}
 	}
 	
@@ -177,9 +218,59 @@ System.out.println("query="+queryExpression);
 			throw new IllegalArgumentException("Number of variables in result file, "+marResult.size()+", does not match # in model, which is "+model.numberVars());
 		}
 		for (Map.Entry<Integer, List<Double>> entry : marResult.entrySet()) {
-			model.addMarResult(entry.getKey(), entry.getValue());
+			model.addMARSolution(entry.getKey(), entry.getValue());
 		}
 		
 		return model;
+	}
+	
+	private static void assignComputedValues(Expression varExpr, Expression marginal, Map<Expression, Integer> possibleValueExprToIndex, List<Integer> remainingQueryValueIdxs, double[] values) {
+		
+		if (IfThenElse.isIfThenElse(marginal)) {
+			Expression condExpr = IfThenElse.getCondition(marginal);
+			int valueIdx = identifyValueIdx(varExpr, condExpr, possibleValueExprToIndex);
+			Expression thenExpr = IfThenElse.getThenBranch(marginal);
+			for (Map.Entry<Expression, Integer> entry : possibleValueExprToIndex.entrySet()) {
+				if (entry.getValue() == valueIdx) {
+					possibleValueExprToIndex.remove(entry.getKey());
+					break;
+				}
+			}
+			remainingQueryValueIdxs.remove(remainingQueryValueIdxs.indexOf(valueIdx));
+			values[valueIdx] = thenExpr.rationalValue().doubleValue();
+			Expression elseExpr = IfThenElse.getElseBranch(marginal);
+			assignComputedValues(varExpr, elseExpr, possibleValueExprToIndex, remainingQueryValueIdxs, values);
+		}
+		else {
+			if (possibleValueExprToIndex.size() != 1) {
+				throw new IllegalStateException("Unable to identify what value index to assing the marginal too: "+marginal+" to "+possibleValueExprToIndex);
+			}
+			int valueIdx = possibleValueExprToIndex.values().iterator().next();
+			possibleValueExprToIndex.clear();
+			remainingQueryValueIdxs.remove(remainingQueryValueIdxs.indexOf(valueIdx));
+			values[valueIdx] = marginal.rationalValue().doubleValue();
+		}
+	}
+	
+	private static int identifyValueIdx(Expression varExpr, Expression condExpr,  Map<Expression, Integer> possibleValueExprToIndex) {
+		int result = -1;
+		
+		if (!Equality.isEquality(condExpr)) {
+			throw new IllegalStateException("Currently unable to handle non equalities :"+condExpr);
+		}
+	
+		for (int i = 0; i < 2; i++) {
+			Integer v = possibleValueExprToIndex.get(condExpr.get(i));
+			if (v != null) {
+				result = v;
+				break;
+			}
+		}
+		
+		if (result == -1) {
+			throw new IllegalStateException("Unable to identify value idex for "+varExpr+" "+condExpr+" "+possibleValueExprToIndex);
+		}
+				
+		return result;
 	}
 }

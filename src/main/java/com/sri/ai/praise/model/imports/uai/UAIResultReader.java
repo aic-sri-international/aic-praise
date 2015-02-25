@@ -41,9 +41,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,61 +63,6 @@ import static com.sri.ai.praise.model.imports.uai.UAIUtil.split;
  */
 @Beta
 public class UAIResultReader {
-	
-	public static final int UAI_PRECISON = 6; // Appears to be the precision used in the solution files provided.
-	
-	public static void main(String[] args) throws IOException {
-		Map<Integer, List<Double>> solution = readMAR(new File(args[0]));
-		Map<Integer, List<Double>> computed = readMAR(new File(args[1]));
-		
-		List<Integer> doNotMatch = compareMAR(solution, computed);
-		if (doNotMatch.size() == 0) {
-			System.out.println("MATCH");
-		}
-		else {
-			System.out.println("DO NOT MATCH: "+doNotMatch);
-		}
-	}
-	
-	/**
-	 * Compare two MAR results.
-	 * 
-	 * @param solution
-	 * @param computed
-	 * @return a list of the variable indexes whose results do not match.
-	 */
-	public static List<Integer> compareMAR(Map<Integer, List<Double>> solution, Map<Integer, List<Double>> computed) {
-		List<Integer> result = new ArrayList<>();
-		
-		if (solution.size() != computed.size()) {
-			throw new IllegalArgumentException("Solution size of "+solution.size()+" != Computed size of "+computed.size());
-		}
-		
-		MathContext mc = new MathContext(UAI_PRECISON, RoundingMode.DOWN);
-		for (int varIdx = 0; varIdx < solution.size(); varIdx++) {
-			List<Double> solutionValues = solution.get(varIdx);
-			List<Double> computedValues = computed.get(varIdx);
-			
-			if (solutionValues.size() != computedValues.size()) {
-				throw new IllegalArgumentException("Solution values size of "+solutionValues.size()+" does not match the computed values size of "+computedValues.size()+" for var "+varIdx);
-			}
-			
-			for (int valueIdx = 0; valueIdx < solutionValues.size(); valueIdx++) {
-				BigDecimal sol = new BigDecimal(solutionValues.get(valueIdx), mc);
-				BigDecimal com = new BigDecimal(computedValues.get(valueIdx), mc);
-				
-				double diff = sol.doubleValue() - com.doubleValue();
-				
-				if (diff != 0.0) {
-					result.add(varIdx);
-					break;
-				}
-			}
-		}
-		
-		
-		return result;
-	}
 
 	/**
 	 * Marginals, MAR: A space separated line that includes:
