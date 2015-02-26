@@ -159,6 +159,7 @@ public class UAIMARSolver {
 		System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
 		System.out.println("Markov Network=\n"+markovNetwork);
 		
+		ProbabilisticInference.Result queryResult = null;  // stores query marginal and reusable information for the next query
 		Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 		for (int i = 0; i < model.numberVars(); i++) {
 			int varCardinality = model.cardinality(i);
@@ -169,7 +170,8 @@ public class UAIMARSolver {
 				Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(i));
 				Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(queryValueIdx, i, varCardinality));
 				Expression queryExpression = Equality.make(varExpr, valueExpr);	
-				Expression marginal = ProbabilisticInference.solveFactorGraph(markovNetwork, false, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
+				queryResult = ProbabilisticInference.solveFactorGraphAndReturnIntermediateInformation(markovNetwork, false, queryResult, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
+				Expression marginal = queryResult.getQueryMarginal();
 				
 				if (evidence == null) {
 					System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);
