@@ -57,6 +57,7 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProbabilisticInference;
 import com.sri.ai.grinder.library.number.Times;
+import com.sri.ai.praise.model.grounded.common.FunctionTable;
 
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructGenericTableExpression;
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.convertGenericTableToInstance;

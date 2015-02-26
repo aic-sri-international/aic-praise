@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.model.grounded.common.FunctionTable;
 
 /**
  * In memory representation of an Uncertainty in Artificial Intelligence (UAI) 

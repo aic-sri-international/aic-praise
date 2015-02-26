@@ -57,6 +57,7 @@ import com.sri.ai.grinder.library.equality.cardinality.plaindpll.Max;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProblemType;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.SymbolTermTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.Theory;
+import com.sri.ai.praise.model.grounded.common.FunctionTable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 

@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.model.grounded.common.FunctionTable;
 
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.readLine;
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.split;
@@ -135,42 +136,39 @@ public class UAIModelReader {
 		// In this section each factor is specified by giving its full table (i.e, specifying value for each assignment). 
 		// The order of the factor is identical to the one in which they were introduced in the preamble, 
 		// the first variable have the role of the 'most significant’ digit. 
-		for (int c = 0; c < preamble.numCliques(); c++) {
-			FunctionTable functionTable = new FunctionTable(preamble.cardinalitiesForClique(c));			
-			populateFunctionTable(functionTable, br);
+		for (int c = 0; c < preamble.numCliques(); c++) {		
+			FunctionTable functionTable = createFunctionTable(preamble.cardinalitiesForClique(c), br);
 			cliqueToTable.put(c, functionTable);
 		}
 		
 		return cliqueToTable;
 	}
 	
-	private static void populateFunctionTable(FunctionTable functionTable, BufferedReader br) throws IOException {
+	private static FunctionTable createFunctionTable(List<Integer> variableCardinalities, BufferedReader br) throws IOException {
 		// For each factor table, first the number of entries is given (this should be equal to the product 
 		// of the domain sizes of the variables in the scope). Then, one by one, separated by whitespace, 
 		// the values for each assignment to the variables in the function's scope are enumerated.
 		String[] entryLineEntries = split(readLine(br));
 		int numberEntries = Integer.parseInt(entryLineEntries[0]); 
-		if (numberEntries != functionTable.numberEntries()) {
-			throw new IllegalArgumentException("Expecting "+functionTable.numberEntries()+" getting "+numberEntries);
-		}
 		
+		List<Double> entries = new ArrayList<Double>();
 		// Handle table entries on the same line as the #entries information.
 		if (entryLineEntries.length > 1) {
 			for (int i = 1; i < entryLineEntries.length; i++) {
-				functionTable.addEntry(Double.parseDouble(entryLineEntries[i]));
+				entries.add(Double.parseDouble(entryLineEntries[i]));
 			}
 		}
 
-		while (functionTable.getEntries().size() < numberEntries) { 
-			String[] entries = split(readLine(br));
-			for (String entry : entries) {
-				functionTable.addEntry(Double.parseDouble(entry));
+		while (entries.size() < numberEntries) { 
+			String[] entryValues = split(readLine(br));
+			for (String entry : entryValues) {
+				entries.add(Double.parseDouble(entry));
 			}
 		}
 		
-		if (functionTable.getEntries().size() > numberEntries) {
-			throw new IllegalArgumentException("Read in too many function table entries: "+functionTable.getEntries().size()+" instead of "+numberEntries);
-		}
+		FunctionTable result = new FunctionTable(variableCardinalities, entries);
+		
+		return result;
 	}
 	
 	static class Preamble {

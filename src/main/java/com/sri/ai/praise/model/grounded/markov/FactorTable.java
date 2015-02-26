@@ -37,18 +37,30 @@
  */
 package com.sri.ai.praise.model.grounded.markov;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
 
 @Beta
-public interface MarkovNetwork {
-	int numberVariables();
-	int cardinality(int variableIndex);
-	int numberFactors();
-	FactorTable getFactorTable(int factorTableIndex);
-	List<Integer> getVariableIndexesForFactor(int factorIdx);
-	int numberUniqueFunctionTables();
-	FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx);
+public class FactorTable {
+	private List<Integer> variableIndexes;
+	private FunctionTable functionTable;
+	public FactorTable(List<Integer> variableIndexes, FunctionTable table) {
+		this.variableIndexes = new ArrayList<>(variableIndexes);
+		this.functionTable   = table;
+		
+		if (functionTable.numberVariables() != this.variableIndexes.size()) {
+			throw new IllegalArgumentException("Function table's # vars "+functionTable.numberVariables()+" does not match # of variable indexes "+this.variableIndexes.size());
+		}
+	}
+	
+	public List<Integer> getVariableIndexes() {
+		return variableIndexes;
+	}
+	
+	public FunctionTable getTable() {
+		return functionTable;
+	}
 }

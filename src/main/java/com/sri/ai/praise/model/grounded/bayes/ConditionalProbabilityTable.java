@@ -35,20 +35,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.grounded.markov;
-
-import java.util.List;
+package com.sri.ai.praise.model.grounded.bayes;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.model.grounded.common.FunctionTable;
 
 @Beta
-public interface MarkovNetwork {
-	int numberVariables();
-	int cardinality(int variableIndex);
-	int numberFactors();
-	FactorTable getFactorTable(int factorTableIndex);
-	List<Integer> getVariableIndexesForFactor(int factorIdx);
-	int numberUniqueFunctionTables();
-	FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx);
+public class ConditionalProbabilityTable {
+
 }
