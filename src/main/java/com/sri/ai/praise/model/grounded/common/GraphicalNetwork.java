@@ -35,20 +35,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.grounded.markov;
-
-import java.util.List;
+package com.sri.ai.praise.model.grounded.common;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 
 @Beta
-public interface MarkovNetwork extends GraphicalNetwork {
-	int numberFactors();
-	List<Integer> getVariableIndexesForFactor(int factorIdx);
-	List<Integer> getFactorIndexes(int uniqueFunctionTableIdx);
+public interface GraphicalNetwork {
+	int numberVariables();
+	int cardinality(int variableIndex);
+	int numberUniqueFunctionTables();
+	FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx);
 	
-	default double ratioUniqueFunctionTablesToFactors() {
-		return ((double) numberUniqueFunctionTables()) / ((double) numberFactors());
+	default int largestCardinality() {
+		int result = 0;
+		for (int i = 0; i < numberVariables(); i++) {
+			int card = cardinality(i);
+			if (card > result) {
+				result = card;
+			}
+		}
+		return result;
+	}
+	
+	default int largestNumberOfFunctionTableEntries() {		
+		int result = 0;
+		for (int i = 0; i < numberUniqueFunctionTables(); i++) {
+			int numEntries = getUniqueFunctionTable(i).numberEntries();
+			if (numEntries > result) {
+				result = numEntries;
+			}
+		}
+ 		return result;
+	}
+	
+	default int totalNumberEntriesForAllFunctionTables() {
+		int result = 0;
+		for (int i = 0; i < numberUniqueFunctionTables(); i++) {
+			result += getUniqueFunctionTable(i).numberEntries();
+		}		
+		return result;
 	}
 }

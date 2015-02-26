@@ -58,6 +58,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProbabilisticInference;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
+import com.sri.ai.praise.model.grounded.markov.MarkovNetwork;
 
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructGenericTableExpression;
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.convertGenericTableToInstance;
@@ -106,14 +107,14 @@ public class UAIMARSolver {
 		models.stream().forEach(model -> {
 			System.out.println("Starting to Solve: "+model.getFile().getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
 			long start = System.currentTimeMillis();
-			solve(model);
+			solve(model, model.getEvidence(), model.getMARSolution());
 			System.out.println("---- Took "+(System.currentTimeMillis() - start)+"ms.");
 		});
 	}
 	
-	public static void solve(UAIModel model) {
-		System.out.println("#variables="+model.numberVars());
-		System.out.println("#cliques="+model.numberCliques());
+	public static void solve(MarkovNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
+		System.out.println("#variables="+model.numberVariables());
+		System.out.println("#factors="+model.numberFactors());
 		System.out.println("#unique function tables="+model.numberUniqueFunctionTables());
 		System.out.println("Largest variable cardinality="+model.largestCardinality());
 		System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
@@ -124,17 +125,18 @@ public class UAIMARSolver {
 //	return;
 //}
 		List<Expression> factors = new ArrayList<Expression>();
-		for (Map.Entry<FunctionTable, List<Integer>> tableToCliques : model.getTableToCliques()) {	
-			Expression genericTableExpression  = constructGenericTableExpression(tableToCliques.getKey());	
-			for (int cliqueIdx : tableToCliques.getValue()) {			
-				Expression instanceTableExpression = convertGenericTableToInstance(tableToCliques.getKey(), genericTableExpression, model.getVariableIdxsForClique(cliqueIdx));
+		for (int i = 0; i < model.numberUniqueFunctionTables(); i++) {
+			FunctionTable table = model.getUniqueFunctionTable(i);
+			Expression genericTableExpression  = constructGenericTableExpression(table);
+			for (int factorIdx : model.getFactorIndexes(i)) {
+				Expression instanceTableExpression = convertGenericTableToInstance(table, genericTableExpression, model.getVariableIndexesForFactor(factorIdx));
 				factors.add(instanceTableExpression);
 			}
 		}
 		
 		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
-		for (int i = 0; i < model.numberVars(); i++) {
+		for (int i = 0; i < model.numberVariables(); i++) {
 			int varCardinality = model.cardinality(i);
 			String varTypeName = UAIUtil.instanceTypeNameForVariable(i, varCardinality);
 			mapFromTypeNameToSizeString.put(varTypeName, Integer.toString(varCardinality));
@@ -143,9 +145,9 @@ public class UAIMARSolver {
 		
 		Expression markovNetwork = Times.make(factors);
 
-		Expression evidence = null; 
+		Expression evidenceExpr = null; 
 		List<Expression> conjuncts = new ArrayList<Expression>();
-		for (Map.Entry<Integer, Integer> entry : model.getEvidence()) {
+		for (Map.Entry<Integer, Integer> entry : evidence.entrySet()) {
 			int varIdx = entry.getKey();
 			int valIdx = entry.getValue();
 			Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(varIdx));
@@ -153,7 +155,7 @@ public class UAIMARSolver {
 			conjuncts.add(Equality.make(varExpr, valueExpr));
 		}
 		if (conjuncts.size() > 0) {
-			evidence = And.make(conjuncts);
+			evidenceExpr = And.make(conjuncts);
 		}
 		System.out.println("mapFromTypeNameToSizeString="+mapFromTypeNameToSizeString);
 		System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
@@ -161,7 +163,7 @@ public class UAIMARSolver {
 		
 		ProbabilisticInference.Result queryResult = null;  // stores query marginal and reusable information for the next query
 		Map<Integer, List<Double>> computed = new LinkedHashMap<>();
-		for (int i = 0; i < model.numberVars(); i++) {
+		for (int i = 0; i < model.numberVariables(); i++) {
 			int varCardinality = model.cardinality(i);
 			List<Integer> remainingQueryValueIdxs = IntStream.range(0, varCardinality).boxed().collect(Collectors.toList());
 			double[] values = new double[varCardinality];
@@ -170,14 +172,14 @@ public class UAIMARSolver {
 				Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(i));
 				Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(queryValueIdx, i, varCardinality));
 				Expression queryExpression = Equality.make(varExpr, valueExpr);	
-				queryResult = ProbabilisticInference.solveFactorGraphAndReturnIntermediateInformation(markovNetwork, false, queryResult, queryExpression, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
+				queryResult = ProbabilisticInference.solveFactorGraphAndReturnIntermediateInformation(markovNetwork, false, queryResult, queryExpression, evidenceExpr, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
 				Expression marginal = queryResult.getQueryMarginal();
 				
-				if (evidence == null) {
+				if (evidenceExpr == null) {
 					System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);
 				}
 				else {
-					System.out.println("Query posterior probability P(" + queryExpression + " | " + evidence + ") is: " + marginal);
+					System.out.println("Query posterior probability P(" + queryExpression + " | " + evidenceExpr + ") is: " + marginal);
 				}
 				
 				Map<Expression, Integer> possibleValueExprToIndex = new LinkedHashMap<>();
@@ -193,14 +195,14 @@ public class UAIMARSolver {
 			computed.put(i, Arrays.stream(values).boxed().collect(Collectors.toList()));
 		}
 		
-		List<Integer> diffs = UAICompare.compareMAR(model.getMARSolution(), computed);
+		List<Integer> diffs = UAICompare.compareMAR(solution, computed);
 		System.out.println("----");
 		if (diffs.size() == 0) {
 			System.out.println("Computed values match solution: "+computed);
 		}
 		else {
 			System.err.println("These variables "+diffs+" did not match the solution.");
-			System.err.println("solution="+model.getMARSolution());
+			System.err.println("solution="+solution);
 			System.err.println("computed="+computed);
 		}
 	}
@@ -217,8 +219,8 @@ public class UAIMARSolver {
 		// file but with an added .MAR suffix. For instance, problem.uai will have a MAR result file problem.uai.MAR. 
 		File marResultFile = new File(solutionDir, uaiFile.getName()+".MAR");
 		Map<Integer, List<Double>> marResult = UAIResultReader.readMAR(marResultFile);
-		if (marResult.size() != model.numberVars()) {
-			throw new IllegalArgumentException("Number of variables in result file, "+marResult.size()+", does not match # in model, which is "+model.numberVars());
+		if (marResult.size() != model.numberVariables()) {
+			throw new IllegalArgumentException("Number of variables in result file, "+marResult.size()+", does not match # in model, which is "+model.numberVariables());
 		}
 		for (Map.Entry<Integer, List<Double>> entry : marResult.entrySet()) {
 			model.addMARSolution(entry.getKey(), entry.getValue());

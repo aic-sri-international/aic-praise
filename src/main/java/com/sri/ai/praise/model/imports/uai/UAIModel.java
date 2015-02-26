@@ -43,10 +43,10 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
+import com.sri.ai.praise.model.grounded.markov.MarkovNetwork;
 
 /**
  * In memory representation of an Uncertainty in Artificial Intelligence (UAI) 
@@ -55,33 +55,35 @@ import com.sri.ai.praise.model.grounded.common.FunctionTable;
  * @author oreilly
  */
 @Beta
-public class UAIModel {	
+public class UAIModel implements MarkovNetwork {	
 	private File file;
-	UAIModelType type;
-	Map<Integer, Integer> varIdxToCardinality        = new LinkedHashMap<>();
-	Map<Integer, Integer> evidence                   = new LinkedHashMap<>();
-	List<List<Integer>> cliques                      = new ArrayList<>();
-	Map<Integer, FunctionTable> cliqueToTable        = new LinkedHashMap<>();
-	Map<FunctionTable, List<Integer>> tableToCliques = new LinkedHashMap<>();
-	Map<Integer, List<Double>> marSolution           = new LinkedHashMap<>();
+	private UAIModelType type;
+	private Map<Integer, Integer> varIdxToCardinality        = new LinkedHashMap<>();
+	private Map<Integer, Integer> evidence                   = new LinkedHashMap<>();
+	private List<List<Integer>> factorVariableIndexes        = new ArrayList<>();
+	private Map<Integer, FunctionTable> factorToTable        = new LinkedHashMap<>();
+	private Map<FunctionTable, List<Integer>> tableToFactors = new LinkedHashMap<>();
+	private Map<Integer, FunctionTable> tableIdxToTable      = new LinkedHashMap<>();
+	private Map<Integer, List<Double>> marSolution           = new LinkedHashMap<>();
 	
 	public UAIModel(File file, UAIModelType type, 
 			Map<Integer, Integer> varIdxToCardinality,
-			List<List<Integer>> cliques,
-			Map<Integer, FunctionTable> cliqueToTable) {
+			List<List<Integer>> factorVariableIndexes,
+			Map<Integer, FunctionTable> factorToTable) {
 		this.file = file;
 		this.type = type;
 		this.varIdxToCardinality.putAll(varIdxToCardinality);
-		this.cliques.addAll(cliques);
-		this.cliqueToTable.putAll(cliqueToTable);
+		this.factorVariableIndexes.addAll(factorVariableIndexes);
+		this.factorToTable.putAll(factorToTable);
 		
-		for (Map.Entry<Integer, FunctionTable> entry : this.cliqueToTable.entrySet()) {
-			List<Integer> cliquesForTable = this.tableToCliques.get(entry.getValue());
-			if (cliquesForTable == null) {
-				cliquesForTable = new ArrayList<>();
-				this.tableToCliques.put(entry.getValue(), cliquesForTable);
+		for (Map.Entry<Integer, FunctionTable> entry : this.factorToTable.entrySet()) {
+			List<Integer> factorIndexesForTable = this.tableToFactors.get(entry.getValue());
+			if (factorIndexesForTable == null) {
+				factorIndexesForTable = new ArrayList<>();
+				this.tableToFactors.put(entry.getValue(), factorIndexesForTable);
+				this.tableIdxToTable.put(this.tableIdxToTable.size(), entry.getValue());
 			}
-			cliquesForTable.add(entry.getKey());
+			factorIndexesForTable.add(entry.getKey());
 		}	
 	}
 	
@@ -93,45 +95,60 @@ public class UAIModel {
 		return type;
 	}
 	
-	public int numberVars() {
+	//
+	// START-GraphicalNetwork
+	@Override
+	public int numberVariables() {
 		return varIdxToCardinality.size();
 	}
 	
+	@Override
 	public int cardinality(int varIdx) {
 		return varIdxToCardinality.get(varIdx);
 	}
 	
-	public int numberCliques() {
-		return cliques.size();
-	}
-	
-	public List<Integer> getVariableIdxsForClique(int cliqueIdx) {
-		return cliques.get(cliqueIdx);
-	}
-	
+	@Override
 	public int numberUniqueFunctionTables() {
-		return tableToCliques.size();
+		return tableToFactors.size();
 	}
 	
-	public double ratioUniqueFunctionTableToCliques() {
-		return ((double) numberUniqueFunctionTables()) / ((double) numberCliques());
+	@Override
+	public FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx) {
+		return tableIdxToTable.get(uniqueFunctionTableIdx);
 	}
+	// END-GraphicalNetwork
+	//
+	
+	//
+	// START-MarkovNetwork
+	@Override
+	public int numberFactors() {
+		return factorVariableIndexes.size();
+	}
+	
+	@Override
+	public List<Integer> getVariableIndexesForFactor(int factorIdx) {
+		return factorVariableIndexes.get(factorIdx);
+	}
+	
+	@Override
+	public List<Integer> getFactorIndexes(int uniqueFunctionTableIdx) {
+		return tableToFactors.get(getUniqueFunctionTable(uniqueFunctionTableIdx));
+	}
+	// END-MarkovNetwork
+	//
 	
 	public void clearEvidence() {
 		this.evidence.clear();
 	}
 	
-	public Set<Map.Entry<Integer, Integer>> getEvidence() {
-		return evidence.entrySet();
-	}
-	
-	public Set<Map.Entry<FunctionTable, List<Integer>>> getTableToCliques() {
-		return tableToCliques.entrySet();
+	public Map<Integer, Integer> getEvidence() {
+		return Collections.unmodifiableMap(evidence);
 	}
 	
 	public void addEvidence(Integer varIdx, Integer valueIdx) {
-		if (varIdx < 0 || varIdx >= numberVars()) {
-			throw new IllegalArgumentException("Not a legal variable index: "+varIdx+" must be in interval [0, "+numberVars()+")");
+		if (varIdx < 0 || varIdx >= numberVariables()) {
+			throw new IllegalArgumentException("Not a legal variable index: "+varIdx+" must be in interval [0, "+numberVariables()+")");
 		}
 		Integer cardinality = cardinality(varIdx);
 		if (valueIdx < 0 || valueIdx >= cardinality) {
@@ -147,7 +164,7 @@ public class UAIModel {
 	public void addMARSolution(Integer varIdx, List<Double> values) {
 		Integer cardinality = varIdxToCardinality.get(varIdx);
 		if (cardinality == null) {
-			throw new IllegalArgumentException("Variable Index is invalid, give "+ varIdx +" must be in interval [0, "+numberVars()+")");
+			throw new IllegalArgumentException("Variable Index is invalid, give "+ varIdx +" must be in interval [0, "+numberVariables()+")");
 		}
 		if (cardinality != values.size()) {
 			throw new IllegalArgumentException("Size of values given, "+values.size()+", does not match variables cardinality, which is "+cardinality);
@@ -159,24 +176,8 @@ public class UAIModel {
 		return Collections.unmodifiableMap(this.marSolution);
 	}
 	
-	public int totalNumberEntriesForAllFunctionTables() {
-		int result = tableToCliques.keySet().stream().mapToInt(ft -> ft.numberEntries() * tableToCliques.get(ft).size()).reduce((n1, n2) -> n1 + n2).getAsInt();
-		return result;
-	}
-	
-	public int largestNumberOfFunctionTableEntries() {		
-		int result = tableToCliques.keySet().stream().max((ft1, ft2) -> Integer.compare(ft1.numberEntries(), ft2.numberEntries())).get().numberEntries();
-		
-		return result;
-	}
-	
-	public int largestCardinality() {
-		int result = varIdxToCardinality.values().stream().max((c1, c2) -> Integer.compare(c1, c2)).get().intValue();
-		return result;
-	}
-	
 	@Override
 	public String toString() {
-		return "UAI model file="+getFile().getName()+", #vars="+numberVars()+", #cliques="+numberCliques()+", #unique function tables="+numberUniqueFunctionTables()+", ratio="+ratioUniqueFunctionTableToCliques();
+		return "UAI model file="+getFile().getName()+", #vars="+numberVariables()+", #factors="+numberFactors()+", #unique function tables="+numberUniqueFunctionTables()+", ratio="+ratioUniqueFunctionTablesToFactors();
 	}
 }
