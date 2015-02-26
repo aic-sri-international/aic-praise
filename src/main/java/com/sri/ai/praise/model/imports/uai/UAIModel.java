@@ -46,7 +46,7 @@ import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.grounded.markov.MarkovNetwork;
+import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 
 /**
  * In memory representation of an Uncertainty in Artificial Intelligence (UAI) 
@@ -55,35 +55,35 @@ import com.sri.ai.praise.model.grounded.markov.MarkovNetwork;
  * @author oreilly
  */
 @Beta
-public class UAIModel implements MarkovNetwork {	
+public class UAIModel implements GraphicalNetwork {	
 	private File file;
 	private UAIModelType type;
-	private Map<Integer, Integer> varIdxToCardinality        = new LinkedHashMap<>();
-	private Map<Integer, Integer> evidence                   = new LinkedHashMap<>();
-	private List<List<Integer>> factorVariableIndexes        = new ArrayList<>();
-	private Map<Integer, FunctionTable> factorToTable        = new LinkedHashMap<>();
-	private Map<FunctionTable, List<Integer>> tableToFactors = new LinkedHashMap<>();
-	private Map<Integer, FunctionTable> tableIdxToTable      = new LinkedHashMap<>();
-	private Map<Integer, List<Double>> marSolution           = new LinkedHashMap<>();
+	private Map<Integer, Integer> varIdxToCardinality                        = new LinkedHashMap<>();
+	private Map<Integer, Integer> evidence                                   = new LinkedHashMap<>();
+	private List<List<Integer>> tableInstanceVariableIndexes                 = new ArrayList<>();
+	private Map<Integer, FunctionTable> uniqueTableIdxToUniqueTable          = new LinkedHashMap<>();
+	private Map<FunctionTable, List<Integer>> uniqueTableToTableInstanceIdxs = new LinkedHashMap<>();
+	private Map<Integer, FunctionTable> tableInstanceIdxToTable              = new LinkedHashMap<>();
+	private Map<Integer, List<Double>> marSolution                           = new LinkedHashMap<>();
 	
 	public UAIModel(File file, UAIModelType type, 
 			Map<Integer, Integer> varIdxToCardinality,
-			List<List<Integer>> factorVariableIndexes,
-			Map<Integer, FunctionTable> factorToTable) {
+			List<List<Integer>> tableInstanceVariableIndexes,
+			Map<Integer, FunctionTable> tableIdxToTable) {
 		this.file = file;
 		this.type = type;
 		this.varIdxToCardinality.putAll(varIdxToCardinality);
-		this.factorVariableIndexes.addAll(factorVariableIndexes);
-		this.factorToTable.putAll(factorToTable);
+		this.tableInstanceVariableIndexes.addAll(tableInstanceVariableIndexes);
+		this.tableInstanceIdxToTable.putAll(tableIdxToTable);
 		
-		for (Map.Entry<Integer, FunctionTable> entry : this.factorToTable.entrySet()) {
-			List<Integer> factorIndexesForTable = this.tableToFactors.get(entry.getValue());
-			if (factorIndexesForTable == null) {
-				factorIndexesForTable = new ArrayList<>();
-				this.tableToFactors.put(entry.getValue(), factorIndexesForTable);
-				this.tableIdxToTable.put(this.tableIdxToTable.size(), entry.getValue());
+		for (Map.Entry<Integer, FunctionTable> entry : this.tableInstanceIdxToTable.entrySet()) {
+			List<Integer> tableInstanceIndexesForUniqueTable = this.uniqueTableToTableInstanceIdxs.get(entry.getValue());
+			if (tableInstanceIndexesForUniqueTable == null) {
+				tableInstanceIndexesForUniqueTable = new ArrayList<>();
+				this.uniqueTableToTableInstanceIdxs.put(entry.getValue(), tableInstanceIndexesForUniqueTable);
+				this.uniqueTableIdxToUniqueTable.put(this.uniqueTableIdxToUniqueTable.size(), entry.getValue());
 			}
-			factorIndexesForTable.add(entry.getKey());
+			tableInstanceIndexesForUniqueTable.add(entry.getKey());
 		}	
 	}
 	
@@ -109,33 +109,34 @@ public class UAIModel implements MarkovNetwork {
 	
 	@Override
 	public int numberUniqueFunctionTables() {
-		return tableToFactors.size();
+		return uniqueTableIdxToUniqueTable.size();
 	}
 	
 	@Override
 	public FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx) {
-		return tableIdxToTable.get(uniqueFunctionTableIdx);
+		return uniqueTableIdxToUniqueTable.get(uniqueFunctionTableIdx);
+	}
+	
+	@Override
+	public int numberTables() {
+		return tableInstanceVariableIndexes.size();
+	}
+	
+	@Override
+	public FunctionTable getTable(int tableIdx) {
+		return tableInstanceIdxToTable.get(tableIdx);
+	}
+	
+	@Override
+	public List<Integer> getVariableIndexesForTable(int tableIdx) {
+		return tableInstanceVariableIndexes.get(tableIdx);
+	}
+	
+	@Override
+	public List<Integer> getTableIndexes(int uniqueFunctionTableIdx) {
+		return uniqueTableToTableInstanceIdxs.get(getUniqueFunctionTable(uniqueFunctionTableIdx));
 	}
 	// END-GraphicalNetwork
-	//
-	
-	//
-	// START-MarkovNetwork
-	@Override
-	public int numberFactors() {
-		return factorVariableIndexes.size();
-	}
-	
-	@Override
-	public List<Integer> getVariableIndexesForFactor(int factorIdx) {
-		return factorVariableIndexes.get(factorIdx);
-	}
-	
-	@Override
-	public List<Integer> getFactorIndexes(int uniqueFunctionTableIdx) {
-		return tableToFactors.get(getUniqueFunctionTable(uniqueFunctionTableIdx));
-	}
-	// END-MarkovNetwork
 	//
 	
 	public void clearEvidence() {
@@ -178,6 +179,6 @@ public class UAIModel implements MarkovNetwork {
 	
 	@Override
 	public String toString() {
-		return "UAI model file="+getFile().getName()+", #vars="+numberVariables()+", #factors="+numberFactors()+", #unique function tables="+numberUniqueFunctionTables()+", ratio="+ratioUniqueFunctionTablesToFactors();
+		return "UAI model file="+getFile().getName()+", #vars="+numberVariables()+", #tables="+numberTables()+", #unique function tables="+numberUniqueFunctionTables()+", ratio="+ratioUniqueTablesToTables();
 	}
 }

@@ -58,7 +58,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProbabilisticInference;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.grounded.markov.MarkovNetwork;
+import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructGenericTableExpression;
 import static com.sri.ai.praise.model.imports.uai.UAIUtil.convertGenericTableToInstance;
@@ -97,10 +97,10 @@ public class UAIMARSolver {
 		}
 		
 		// Sort based on what we consider to be the simplest to hardest
-		//Collections.sort(models, (model1, model2) -> Double.compare(model1.ratioUniqueFunctionTableToCliques(), model2.ratioUniqueFunctionTableToCliques()));
+		//Collections.sort(models, (model1, model2) -> Double.compare(model1.ratioUniqueTablesToTables(), model2.ratioUniqueTablesToTables()));
 		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.largestNumberOfFunctionTableEntries(), model2.largestNumberOfFunctionTableEntries()));
 		Collections.sort(models, (model1, model2) -> Integer.compare(model1.totalNumberEntriesForAllFunctionTables(), model2.totalNumberEntriesForAllFunctionTables()));
-		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.numberCliques(), model2.numberCliques()));
+		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.numberTables(), model2.numberTables()));
 		
 		System.out.println("#models read="+models.size());
 		final AtomicInteger cnt = new AtomicInteger(1);
@@ -112,25 +112,25 @@ public class UAIMARSolver {
 		});
 	}
 	
-	public static void solve(MarkovNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
+	public static void solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
 		System.out.println("#variables="+model.numberVariables());
-		System.out.println("#factors="+model.numberFactors());
+		System.out.println("#tables="+model.numberTables());
 		System.out.println("#unique function tables="+model.numberUniqueFunctionTables());
 		System.out.println("Largest variable cardinality="+model.largestCardinality());
 		System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
 		System.out.println("Total #entries across all function tables="+model.totalNumberEntriesForAllFunctionTables());
 	
-//// TODO - remove		
+// TODO - remove		
 //if (true) {
 //	return;
 //}
-		List<Expression> factors = new ArrayList<Expression>();
+		List<Expression> tables = new ArrayList<>();
 		for (int i = 0; i < model.numberUniqueFunctionTables(); i++) {
 			FunctionTable table = model.getUniqueFunctionTable(i);
 			Expression genericTableExpression  = constructGenericTableExpression(table);
-			for (int factorIdx : model.getFactorIndexes(i)) {
-				Expression instanceTableExpression = convertGenericTableToInstance(table, genericTableExpression, model.getVariableIndexesForFactor(factorIdx));
-				factors.add(instanceTableExpression);
+			for (int tableIdx : model.getTableIndexes(i)) {
+				Expression instanceTableExpression = convertGenericTableToInstance(table, genericTableExpression, model.getVariableIndexesForTable(tableIdx));
+				tables.add(instanceTableExpression);
 			}
 		}
 		
@@ -143,7 +143,7 @@ public class UAIMARSolver {
 			mapFromVariableNameToTypeName.put(UAIUtil.instanceVariableName(i), varTypeName);
 		}
 		
-		Expression markovNetwork = Times.make(factors);
+		Expression markovNetwork = Times.make(tables);
 
 		Expression evidenceExpr = null; 
 		List<Expression> conjuncts = new ArrayList<Expression>();

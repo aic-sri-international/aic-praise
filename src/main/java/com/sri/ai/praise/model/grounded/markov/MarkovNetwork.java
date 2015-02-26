@@ -37,18 +37,10 @@
  */
 package com.sri.ai.praise.model.grounded.markov;
 
-import java.util.List;
-
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 
 @Beta
 public interface MarkovNetwork extends GraphicalNetwork {
-	int numberFactors();
-	List<Integer> getVariableIndexesForFactor(int factorIdx);
-	List<Integer> getFactorIndexes(int uniqueFunctionTableIdx);
-	
-	default double ratioUniqueFunctionTablesToFactors() {
-		return ((double) numberUniqueFunctionTables()) / ((double) numberFactors());
-	}
+
 }

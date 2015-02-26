@@ -47,7 +47,6 @@ import com.sri.ai.util.math.MixedRadixNumber;
 @Beta
 public class FunctionTable {
 	private List<Integer> varCardinalities = new ArrayList<>();
-	private int numEntries;
 	private List<Double> entries;
 	private MixedRadixNumber entryIndex;
 	
@@ -72,7 +71,7 @@ public class FunctionTable {
 	}
 	
 	public int numberEntries() {
-		return numEntries;
+		return entries.size();
 	}
 	
 	public List<Double> getEntries() {

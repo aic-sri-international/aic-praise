@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.model.grounded.common;
 
+import java.util.List;
+
 import com.google.common.annotations.Beta;
 
 @Beta
@@ -45,6 +47,15 @@ public interface GraphicalNetwork {
 	int cardinality(int variableIndex);
 	int numberUniqueFunctionTables();
 	FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx);
+	
+	int numberTables();
+	FunctionTable getTable(int tableIdx);
+	List<Integer> getVariableIndexesForTable(int tableIdx);
+	List<Integer> getTableIndexes(int uniqueFunctionTableIdx);
+	
+	default double ratioUniqueTablesToTables() {
+		return ((double) numberUniqueFunctionTables()) / ((double) numberTables());
+	}
 	
 	default int largestCardinality() {
 		int result = 0;
@@ -70,8 +81,8 @@ public interface GraphicalNetwork {
 	
 	default int totalNumberEntriesForAllFunctionTables() {
 		int result = 0;
-		for (int i = 0; i < numberUniqueFunctionTables(); i++) {
-			result += getUniqueFunctionTable(i).numberEntries();
+		for (int i = 0; i < numberTables(); i++) {
+			result += getTable(i).numberEntries();
 		}		
 		return result;
 	}

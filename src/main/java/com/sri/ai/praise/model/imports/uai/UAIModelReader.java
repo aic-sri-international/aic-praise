@@ -65,11 +65,11 @@ public class UAIModelReader {
 		UAIModel result = null;
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(modelFile))) {
-			Preamble     preamble                     = readPreamble(br);		
-			Map<Integer, FunctionTable> cliqueToTable = readFunctionTables(preamble, br);
+			Preamble     preamble                       = readPreamble(br);		
+			Map<Integer, FunctionTable> tableIdxToTable = readFunctionTables(preamble, br);
 		
 			result = new UAIModel(modelFile, preamble.type, preamble.variableToCardinality,
-									preamble.cliques, cliqueToTable);
+									preamble.tableVariableIdxs, tableIdxToTable);
 		}
 		
 		return result;
@@ -106,42 +106,42 @@ public class UAIModelReader {
 		
 		//
 		// The fourth line contains only one integer, denoting the number of cliques in the problem.
-		int numberCliques = Integer.parseInt(readLine(br));
+		int numberTables = Integer.parseInt(readLine(br));
 		
 		//
 		// Then, one clique per line, the scope of each clique is given as follows: 
 		// The first integer in each line specifies the number of variables in the clique, 
 		// followed by the actual indexes of the variables. The order of this list is not restricted. 
 		// Note that the ordering of variables within a factor will follow the order provided here.
-		for (int i = 0; i < numberCliques; i++) {
-			String   cliqueData = readLine(br);
-			String[] cliqueInfo = split(cliqueData);
-			// Ensure the clique is specified correctly
-			if (Integer.parseInt(cliqueInfo[0]) != (cliqueInfo.length-1)) {
-				throw new IllegalArgumentException("Badly defined clique: "+cliqueData);
+		for (int i = 0; i < numberTables; i++) {
+			String   tableData = readLine(br);
+			String[] tableInfo = split(tableData);
+			// Ensure the table is specified correctly
+			if (Integer.parseInt(tableInfo[0]) != (tableInfo.length-1)) {
+				throw new IllegalArgumentException("Badly defined table: "+tableData);
 			}
-			List<Integer> clique = new ArrayList<>();
-			for (int c = 1; c < cliqueInfo.length; c++) {
-				clique.add(Integer.parseInt(cliqueInfo[c]));
+			List<Integer> tableVarIdxs = new ArrayList<>();
+			for (int t = 1; t < tableInfo.length; t++) {
+				tableVarIdxs.add(Integer.parseInt(tableInfo[t]));
 			}
-			result.cliques.add(clique);
+			result.tableVariableIdxs.add(tableVarIdxs);
 		}
 		
 		return result;
 	}
 	
 	private static Map<Integer, FunctionTable> readFunctionTables(Preamble preamble, BufferedReader br) throws IOException {
-		Map<Integer, FunctionTable> cliqueToTable = new LinkedHashMap<>();
+		Map<Integer, FunctionTable> tableIdxToTable = new LinkedHashMap<>();
 		
 		// In this section each factor is specified by giving its full table (i.e, specifying value for each assignment). 
 		// The order of the factor is identical to the one in which they were introduced in the preamble, 
 		// the first variable have the role of the 'most significant’ digit. 
-		for (int c = 0; c < preamble.numCliques(); c++) {		
-			FunctionTable functionTable = createFunctionTable(preamble.cardinalitiesForClique(c), br);
-			cliqueToTable.put(c, functionTable);
+		for (int t = 0; t < preamble.numTables(); t++) {		
+			FunctionTable functionTable = createFunctionTable(preamble.cardinalitiesForTable(t), br);
+			tableIdxToTable.put(t, functionTable);
 		}
 		
-		return cliqueToTable;
+		return tableIdxToTable;
 	}
 	
 	private static FunctionTable createFunctionTable(List<Integer> variableCardinalities, BufferedReader br) throws IOException {
@@ -174,25 +174,25 @@ public class UAIModelReader {
 	static class Preamble {
 		UAIModelType          type;
 		Map<Integer, Integer> variableToCardinality = new LinkedHashMap<>();
-		List<List<Integer>>   cliques               = new ArrayList<>();
+		List<List<Integer>>   tableVariableIdxs     = new ArrayList<>();
 		
 		int numVariables() {
 			return variableToCardinality.size();
 		}
 		
-		int numCliques() {
-			return cliques.size();
+		int numTables() {
+			return tableVariableIdxs.size();
 		}
 		
-		List<Integer> cardinalitiesForClique(int cliqueIdx) {
+		List<Integer> cardinalitiesForTable(int tableIdx) {
 			List<Integer> result = new ArrayList<>();
 			
-			for (Integer varId : cliques.get(cliqueIdx)) {
+			for (Integer varId : tableVariableIdxs.get(tableIdx)) {
 				result.add(variableToCardinality.get(varId));
 			}
 			
 			if (result.size() == 0) {
-				throw new IllegalArgumentException("Cardintalitis for clique should not be = 0");
+				throw new IllegalArgumentException("Cardintalitis for table should not be = 0");
 			}
 			
 			return result;
@@ -200,7 +200,7 @@ public class UAIModelReader {
 		
 		@Override
 		public String toString() {
-			return ""+type+", #vars="+numVariables()+", #cliques="+cliques.size();
+			return ""+type+", #vars="+numVariables()+", #table="+tableVariableIdxs.size();
 		}
 	}
 }
