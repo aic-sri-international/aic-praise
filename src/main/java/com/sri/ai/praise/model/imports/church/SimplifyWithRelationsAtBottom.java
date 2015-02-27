@@ -45,7 +45,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.AtomsOnTheoryWithEquality;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.DPLLGeneralizedAndSymbolic;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.SGDPLLT;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.EqualityTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.FunctionalTermTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.Sum;
@@ -79,7 +79,7 @@ public class SimplifyWithRelationsAtBottom {
 	 * Finally, a third DPLL simplification is performed on the expression containing the target predicate only.
 	 * 
 	 * This is achieved in the following way.
-	 * First, we extend DPLLGeneralizedAndSymbolic for the first DPLL defined above
+	 * First, we extend SGDPLLT for the first DPLL defined above
 	 * by fixing the theory to an equality theory on terms (and not the one that takes atoms as well),
 	 * and also overriding the normalizeUnconditionalExpression method so that it invokes the
 	 * second DPLL on the "unconditional" equality-free expressions.
@@ -103,7 +103,7 @@ public class SimplifyWithRelationsAtBottom {
 		return result;
 	}
 
-	private static class DPLLForEqualitiesOnSymbolsAndConstantExpressionWithAtomsButTarget extends DPLLGeneralizedAndSymbolic {
+	private static class DPLLForEqualitiesOnSymbolsAndConstantExpressionWithAtomsButTarget extends SGDPLLT {
 
 		private Expression targetPredicate;
 		
@@ -129,15 +129,15 @@ public class SimplifyWithRelationsAtBottom {
 		}
 	}
 	
-	private static class DPLLForAtomsButTarget extends DPLLGeneralizedAndSymbolic {
+	private static class DPLLForAtomsButTarget extends SGDPLLT {
 		public DPLLForAtomsButTarget(Expression targetPredicate) {
 			super(new AtomsOnlyButForTarget(targetPredicate), new Sum());
 		}
 		
 		@Override
 		public Expression normalizeUnconditionalExpression(Expression expression, RewritingProcess process) {
-			DPLLGeneralizedAndSymbolic thirdDPLL =
-					new DPLLGeneralizedAndSymbolic(
+			SGDPLLT thirdDPLL =
+					new SGDPLLT(
 							new AtomsOnTheoryWithEquality(new EqualityTheory(new FunctionalTermTheory())),
 							new Sum());
 			// thirdDPLL accepts equalities and non-target atoms, but in this context it will only ever

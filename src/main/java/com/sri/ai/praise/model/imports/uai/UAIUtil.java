@@ -51,7 +51,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.DPLLGeneralizedAndSymbolic;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.SGDPLLT;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.EqualityTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.Max;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProblemType;
@@ -127,7 +127,7 @@ public class UAIUtil {
 		}
 		
 		// The solver for the parameters above.
-		DPLLGeneralizedAndSymbolic solver = new DPLLGeneralizedAndSymbolic(theory, problemType);
+		SGDPLLT solver = new SGDPLLT(theory, problemType);
 	
 		// Solve the problem.
 		Expression result = solver.solve(tableExpr, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);	
