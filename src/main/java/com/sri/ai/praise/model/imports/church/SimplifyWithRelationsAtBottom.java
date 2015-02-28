@@ -99,7 +99,7 @@ public class SimplifyWithRelationsAtBottom {
 				prologConstantPredicate.apply(e) &&
 				! LPIUtil.isRandomVariableValueExpression(e, process));
 		DPLLForEqualitiesOnSymbolsAndConstantExpressionWithAtomsButTarget equalitiesSimplifier = new DPLLForEqualitiesOnSymbolsAndConstantExpressionWithAtomsButTarget(targetPredicate);
-		Expression result = equalitiesSimplifier.solve(expression, Util.list() /* no supportedIndices -- simplification only */, process);
+		Expression result = equalitiesSimplifier.solve(expression, Util.list() /* no indices -- simplification only */, process);
 		return result;
 	}
 

@@ -255,7 +255,7 @@ public class MessageToVariableFromFactor extends AbstractLBPHierarchicalRewriter
 
 	/**
 	 * Method creating current expression for justification purposes.
-	 * It abuses notation as N might be a function to be evaluated into a set of supportedIndices,
+	 * It abuses notation as N might be a function to be evaluated into a set of indices,
 	 * which is not supported by the current language (it used to be supported by the use of a meta-operator 'value of', but
 	 * that is not supported anymore).
 	 * As a result, this method should be used for presentation purposes only.

@@ -2264,7 +2264,7 @@ public class LBPTest extends AbstractLPITest {
 						// "if Z = a then if p(a) then 6400 else 8100 else if p(Z) then 25 else 36"
 						// Note: no constraint applier used in R_normalize so p(Z) instead of p(a).
 						"if Z = a then if p(a) then 6400 else 8100 else if p(Z) then 25 else 36"
-						// This tests conditionals inside the message that do not depend on the supportedIndices of the product.
+						// This tests conditionals inside the message that do not depend on the indices of the product.
 						// for Z = a, message on q(a,Y) is if q(a,y) then 10 else 20.
 						// Then we sum over q and get 2*10 + 3*20 for true p and 3*10 + 3*20 for false p
 						// That gives us 80 and 90, which are then squared to 6400 and 8100.
@@ -2286,7 +2286,7 @@ public class LBPTest extends AbstractLPITest {
 						Util.map(parse("|type(X)|"), parse("3")),
 						false,
 						"if p then 2000 else 3240"
-						// This tests conditionals inside the message that *do* depend on the supportedIndices of the product.
+						// This tests conditionals inside the message that *do* depend on the indices of the product.
 						// Message from [if p and q(X) then 2 else 3] to [p] will be:
 						// if X = a then if p then 80 else 90 else if p then 5 else 6
 						// (this comes from 10*2 + 20*3 and 10*3 + 20*3 and 2 + 3 and 3 + 3)
@@ -3514,13 +3514,13 @@ public class LBPTest extends AbstractLPITest {
 				//
 				// Basic:
 				// 
-				// An intensional set without supportedIndices should be returned
+				// An intensional set without indices should be returned
 				new ExtractPreviousMessageSetsTestData("X = a",
 						new TrivialPQ(), 
 						"previous message to [p(a)] from [ Beta ]",
 						false,
 						"{ (on ) ([p(a)], [Beta]) | true }"),
-				// An intensional set without supportedIndices should be returned
+				// An intensional set without indices should be returned
 				new ExtractPreviousMessageSetsTestData(Expressions.TRUE.toString(),
 						new TrivialPQ(), 
 						"previous message to [p(X)] from [ Alpha ]",

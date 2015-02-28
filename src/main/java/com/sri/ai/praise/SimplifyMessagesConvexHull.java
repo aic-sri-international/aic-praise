@@ -296,7 +296,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 		
 		// If I've not run into a case like: [if p then 0 else 0], which requires a trivial bound to be returned.
 		if (result == null) {
-			// Find supportedIndices and values of maximum probabilities for 'true' in all messages
+			// Find indices and values of maximum probabilities for 'true' in all messages
 			Rational minTrueValue  = getTrueValue(normalizedMessageValues.get(0));
 			int      minTrueIndex  = 0;
 			Rational maxTrueValue  = minTrueValue;
