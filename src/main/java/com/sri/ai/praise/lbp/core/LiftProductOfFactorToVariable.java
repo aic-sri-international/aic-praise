@@ -74,7 +74,7 @@ import com.sri.ai.praise.lbp.LBPRewriter;
  * An atomic rewriter to be used within the context of R_normalize that rewrites/lifts expressions of the form:
  * product({{(on I) Alpha | C }})
  * Whereby Alpha is a representative message from a factor to the variable.
- * Rewriting only occurs if Alpha is a conditional numeric expression or if Alpha does not depend on the indices. 
+ * Rewriting only occurs if Alpha is a conditional numeric expression or if Alpha does not depend on the supportedIndices. 
  * (that means Alpha may be dependent on I, but the if then else leaves are constant in I -- only the conditions depend on I)
  * Returns an equivalent numeric expression that does not depend on I, computed in time independent on the number of values of the type of I
  * or the input argument if it cannot be lifted.

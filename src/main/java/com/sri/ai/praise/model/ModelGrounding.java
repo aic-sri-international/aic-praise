@@ -280,7 +280,7 @@ public class ModelGrounding {
 				boolean cannotDetermineIntensionalGrounding = false;
 				if (parfactorInformation.indexToSortNameMap.size() == 0) {
 					// Just a single grounding for this intensional set
-					// as no free variables or indices. However,
+					// as no free variables or supportedIndices. However,
 					// still need to check the condition before
 					// including it in the grounded set.
 					Expression ifThenElse = IfThenElse.make(parfactorInformation.intensionalCondition, Expressions.TRUE, Expressions.FALSE);
@@ -298,7 +298,7 @@ public class ModelGrounding {
 					// Create the information needed to enumerate a cartesian product of the
 					// sort information indexed by the parfactor
 					List<List<Expression>> listOfListOfElements = new ArrayList<List<Expression>>();
-					// Note: different indices can refer to the same sort, so you need
+					// Note: different supportedIndices can refer to the same sort, so you need
 					// to populate in this direction in order to ensure a valid grounding.
 					for (Expression indexName : parfactorInformation.indexToSortNameMap.keySet()) {
 						Expression sortName = parfactorInformation.indexToSortNameMap.get(indexName);

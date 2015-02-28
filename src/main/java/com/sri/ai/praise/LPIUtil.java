@@ -494,7 +494,7 @@ public class LPIUtil {
 	 * - Alpha: any legal expressions for the context, that is being 
 	 *          multiplied.
 	 *          
-	 * - C: an optional condition on the indices in the scoping 
+	 * - C: an optional condition on the supportedIndices in the scoping 
 	 *      expression S.
 	 * 
 	 * Free variables are allowed in any of the sub-expressions.
@@ -1243,7 +1243,7 @@ public class LPIUtil {
 	
 	/**
 	 * Same as {@link #extendContextualSymbolsAndConstraintWithIntensionalSetInferringDomainsFromUsageInRandomVariables(Expression, RewritingProcess)},
-	 * but only for the indices (that is, it does not extend the contextual constraint with the intensional set's condition.
+	 * but only for the supportedIndices (that is, it does not extend the contextual constraint with the intensional set's condition.
 	 */
 	public static RewritingProcess extendContextualSymbolsWithIntensionalSetIndicesInferringDomainsFromUsageInRandomVariables(Expression intensionalSet, RewritingProcess process) {
 		Map<Expression, Expression> indexToTypeMap =
@@ -1431,7 +1431,7 @@ public class LPIUtil {
 	 * returns the simplification of the (either singleton or empty) set <code>{(on I) value | C and key = key'}</code>
 	 * (if M is a multi-set, then this is either a multiset with multiple copies of a single value, or an empty multi-set).
 	 * Note that, due to the uniqueness of <code>value</code> given <code>key</code>,
-	 * the simplified set will have no indices (they will be equated to the corresponding values in <code>key'</code>
+	 * the simplified set will have no supportedIndices (they will be equated to the corresponding values in <code>key'</code>
 	 * and eliminated by the simplification).
 	 * <p>
 	 * The effect is to look at the intensional set as an intensional representation of a map and

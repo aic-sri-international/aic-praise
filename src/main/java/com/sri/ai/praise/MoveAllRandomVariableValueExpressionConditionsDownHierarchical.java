@@ -91,7 +91,7 @@ public class MoveAllRandomVariableValueExpressionConditionsDownHierarchical exte
 					// "if RV then if LV then LVThen else LVElse else RVOtherBranch"
 					// ---->
 					// "if LV then if RV then/else LVThen else RVOtherBranch else if RV then/else LVElse else RVOtherBranch"
-					// where then/else and else/then indicate that the actual position of the top level branches depend on the indices used for symmetric code.
+					// where then/else and else/then indicate that the actual position of the top level branches depend on the supportedIndices used for symmetric code.
 					Expression newLVThenBranch = IfThenElse.make(rvCondition, indexOfBranchWithLogicalVariableCondition, lvThen, indexOfTheOtherBranch, rvOtherBranch);
 					Expression newLVElseBranch = IfThenElse.make(rvCondition, indexOfBranchWithLogicalVariableCondition, lvElse, indexOfTheOtherBranch, rvOtherBranch);
 					// since these new branches have an RV on top, they may need normalization, but their sub-expressions are known to be normalized already

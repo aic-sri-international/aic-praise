@@ -114,10 +114,10 @@ public class UAIUtil {
 		
 		// The theory of equality on symbols (includes a model counter for formulas in it).
 		Theory      theory      = new EqualityTheory(new SymbolTermTheory());
-		ProblemType problemType = new Max(); // the problem type actually does not matter, because we are not going to have any indices.
+		ProblemType problemType = new Max(); // the problem type actually does not matter, because we are not going to have any supportedIndices.
 		Expression  tableExpr   = Expressions.parse(table.toString());
 		
-		Collection<Expression> indices = Util.list(); // no indices; we want to keep all variables
+		Collection<Expression> indices = Util.list(); // no supportedIndices; we want to keep all variables
 		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
 		for (int i = 0; i < functionTable.numberVariables(); i++) {

@@ -180,7 +180,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 			Object[] cPrimeAndiEqualsBeta) {
 		// if C is (C' and i = Beta) for i an index in I
 
-		// Get the indices on their own first
+		// Get the supportedIndices on their own first
 		List<Expression> indices = new ArrayList<Expression>();
 		for (Expression indexExpression : intSetIndexExpressions) {
 			indices.add(IndexExpressions.getIndex(indexExpression));

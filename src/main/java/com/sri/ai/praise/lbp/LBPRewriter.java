@@ -706,7 +706,7 @@ public interface LBPRewriter extends Rewriter {
 	 * </pre>
 	 * 
 	 * that is, a parfactor in which the factor template does not use all the
-	 * indices, then there will be repeated factors. For now we can simply
+	 * supportedIndices, then there will be repeated factors. For now we can simply
 	 * forbid users to write something like that (it's pretty nonsensical
 	 * anyway), error-checking or not (that would be nice, of course). There are
 	 * ways of dealing with it, but we can do it down the road.

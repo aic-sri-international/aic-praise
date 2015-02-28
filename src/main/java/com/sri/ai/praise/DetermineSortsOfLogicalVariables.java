@@ -27,7 +27,7 @@ import com.sri.ai.praise.model.RandomVariableDeclaration;
 public class DetermineSortsOfLogicalVariables {
 
 	/**
-	 * Determines a map from an intensional set's indices to their types, obtaining this information from both index expressions and,
+	 * Determines a map from an intensional set's supportedIndices to their types, obtaining this information from both index expressions and,
 	 * when those do not contain the types, from usage as random variable value expressions arguments (using the random variable declaration from a given Model).
 	 * Throws an error if types as defined by the index expressions or contextual symbol types (from the process) conflict with random variable value expression argument usage. 
 	 */
