@@ -536,7 +536,7 @@ public class ConvexRewriterOnMessageBounds extends
 		if (IfThenElse.isIfThenElse(messageValueWithPlaceholders) && !isMessageValueWithPossiblePlaceholders(messageValueWithPlaceholders, process)) {
 			Trace.log("if message_value_with_placeholders is conditionaal if C then M1 else M2");
 			Trace.log("    return if C then expand_message_value_with_placeholders(M1, map_from_placeholder_to_bound) else expand_message_value_with_placeholders(M2, map_from_placeholder_to_bound)");
-			result = GrinderUtil.branchAndMergeOnACondition(IfThenElse.getCondition(messageValueWithPlaceholders), 
+			result = GrinderUtil.branchAndMergeOnACondition(IfThenElse.condition(messageValueWithPlaceholders), 
 					new RewriteOnBranch() {	
 						@Override
 						public Expression rewrite(Expression[] expressions, RewritingProcess process) {
@@ -544,7 +544,7 @@ public class ConvexRewriterOnMessageBounds extends
 							return result;
 						}
 					}, 
-					new Expression[] {IfThenElse.getThenBranch(messageValueWithPlaceholders)}, 
+					new Expression[] {IfThenElse.thenBranch(messageValueWithPlaceholders)}, 
 					new RewriteOnBranch() {
 						@Override
 						public Expression rewrite(Expression[] expressions, RewritingProcess process) {
@@ -552,7 +552,7 @@ public class ConvexRewriterOnMessageBounds extends
 							return result;
 						}
 					}, 
-					new Expression[] {IfThenElse.getElseBranch(messageValueWithPlaceholders)}, 
+					new Expression[] {IfThenElse.elseBranch(messageValueWithPlaceholders)}, 
 					LBPRewriter.R_check_branch_reachable, 
 					null, process);
 		}
@@ -604,12 +604,12 @@ public class ConvexRewriterOnMessageBounds extends
 				Trace.log("        // Externalize Conditionals");
 				Trace.log("        thenMap <- copy of map_from_placeholder_to_bound with P mapping to B1");
 				final Map<Placeholder, Expression> thenMap = new LinkedHashMap<Placeholder, Expression>(mapFromPlaceholderToBound);
-				thenMap.put(placeholderP, IfThenElse.getThenBranch(expressionB));
+				thenMap.put(placeholderP, IfThenElse.thenBranch(expressionB));
 				Trace.log("        elseMap <- copy of map_from_placeholder_to_bound with P mapping to B2");
 				final Map<Placeholder, Expression> elseMap = new LinkedHashMap<Placeholder, Expression>(mapFromPlaceholderToBound);
-				elseMap.put(placeholderP, IfThenElse.getElseBranch(expressionB));
+				elseMap.put(placeholderP, IfThenElse.elseBranch(expressionB));
 				Trace.log("        return if C then iterate_extrema(message_values_set, thenMap) else iterate_extrema(message_values_set, elseMap)");				
-				result = GrinderUtil.branchAndMergeOnACondition(IfThenElse.getCondition(expressionB), 
+				result = GrinderUtil.branchAndMergeOnACondition(IfThenElse.condition(expressionB), 
 						new RewriteOnBranch() {	
 							@Override
 							public Expression rewrite(Expression[] expressions, RewritingProcess process) {
@@ -672,7 +672,7 @@ public class ConvexRewriterOnMessageBounds extends
 		if (IfThenElse.isIfThenElse(messageValuesSet)) {
 			Trace.log("if message_values_set is if C then message_values_set1 else message_values_set2");
 			Trace.log("    return if C then make_simpflified_convex_hull([V], message_values_set1) else make_simplified_convex_hull([V], message_values_set2)");
-			result = GrinderUtil.branchAndMergeOnACondition(IfThenElse.getCondition(messageValuesSet), 
+			result = GrinderUtil.branchAndMergeOnACondition(IfThenElse.condition(messageValuesSet), 
 					new RewriteOnBranch() {	
 						@Override
 						public Expression rewrite(Expression[] expressions, RewritingProcess process) {
@@ -680,7 +680,7 @@ public class ConvexRewriterOnMessageBounds extends
 							return result;
 						}
 					}, 
-					new Expression[] { IfThenElse.getThenBranch(messageValuesSet) }, 
+					new Expression[] { IfThenElse.thenBranch(messageValuesSet) }, 
 					new RewriteOnBranch() {
 						@Override
 						public Expression rewrite(Expression[] expressions, RewritingProcess process) {
@@ -688,7 +688,7 @@ public class ConvexRewriterOnMessageBounds extends
 							return result;
 						}
 					}, 
-					new Expression[] { IfThenElse.getElseBranch(messageValuesSet) }, 
+					new Expression[] { IfThenElse.elseBranch(messageValuesSet) }, 
 					LBPRewriter.R_check_branch_reachable, 
 					LBPRewriter.R_normalize, 
 					process);
@@ -772,7 +772,7 @@ public class ConvexRewriterOnMessageBounds extends
 	private boolean isMessageValueWithPossiblePlaceholders(Expression expression, RewritingProcess process) {
 		boolean result = false;
 		if (IfThenElse.isIfThenElse(expression)) {
-			Expression condition = IfThenElse.getCondition(expression);
+			Expression condition = IfThenElse.condition(expression);
 			if (LPIUtil.isRandomVariableValueExpression(condition, process)) {			
 				result = true;
 			}

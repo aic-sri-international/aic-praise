@@ -138,9 +138,9 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Trace.log("if alpha is 'if C then alpha_1 else beta_1'");
 		Trace.log("    return R_basic(if C then R_in(alpha_1, Set) else R_in(beta_1, Set)");
 		
-		Expression condition  = IfThenElse.getCondition(alpha);
-		Expression thenBranch = IfThenElse.getThenBranch(alpha);
-		Expression elseBranch = IfThenElse.getElseBranch(alpha);
+		Expression condition  = IfThenElse.condition(alpha);
+		Expression thenBranch = IfThenElse.thenBranch(alpha);
+		Expression elseBranch = IfThenElse.elseBranch(alpha);
 
 		Justification.beginEqualityStep("externalizing condition " + alpha);
 		if (Justification.isEnabled()) {
@@ -168,9 +168,9 @@ public class In extends AbstractLBPHierarchicalRewriter implements LBPRewriter {
 		Trace.log("if Set is 'if C then alpha_Set else beta_Set'");
 		Trace.log("    return R_basic(if C then R_in(alpha, alpha_Set) else R_in(alpha, beta_Set)");
 		
-		Expression condition  = IfThenElse.getCondition(set);
-		Expression thenBranch = IfThenElse.getThenBranch(set);
-		Expression elseBranch = IfThenElse.getElseBranch(set);
+		Expression condition  = IfThenElse.condition(set);
+		Expression thenBranch = IfThenElse.thenBranch(set);
+		Expression elseBranch = IfThenElse.elseBranch(set);
 
 		Justification.beginEqualityStep("externalizing conditional Set");
 		if (Justification.isEnabled()) {

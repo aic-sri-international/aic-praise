@@ -31,9 +31,9 @@ public class IsDeterministicBooleanMessageValue implements Predicate<Expression>
 		boolean result =
 				IfThenElse.isIfThenElse(messageValue)
 				&&
-				LPIUtil.isRandomVariableValueExpression(IfThenElse.getCondition(messageValue), process)
+				LPIUtil.isRandomVariableValueExpression(IfThenElse.condition(messageValue), process)
 				&&
-				(IfThenElse.getThenBranch(messageValue).equals(0) || IfThenElse.getElseBranch(messageValue).equals(0));
+				(IfThenElse.thenBranch(messageValue).equals(0) || IfThenElse.elseBranch(messageValue).equals(0));
 		return result;
 	}
 

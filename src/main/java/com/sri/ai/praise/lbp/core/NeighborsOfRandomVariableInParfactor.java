@@ -130,7 +130,7 @@ public class NeighborsOfRandomVariableInParfactor extends AbstractLBPHierarchica
 
 			int argumentIndex = 0;
 			for (Expression fI : union.getArguments()) {
-				Expression factorValue = IfThenElse.getCondition(fI).get(1);
+				Expression factorValue = IfThenElse.condition(fI).get(1);
 				
 				Justification.beginEqualityStep("by determining occurrence conditions");
 				Expression rvIsReferencedBy = 

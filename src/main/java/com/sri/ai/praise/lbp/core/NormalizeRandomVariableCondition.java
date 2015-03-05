@@ -88,12 +88,12 @@ public class NormalizeRandomVariableCondition extends AbstractLBPHierarchicalRew
 		
 		Expression result = null;
 
-		if (IfThenElse.isIfThenElse(expressionE) && LPIUtil.isConstraint(IfThenElse.getCondition(expressionE), process)) {
+		if (IfThenElse.isIfThenElse(expressionE) && LPIUtil.isConstraint(IfThenElse.condition(expressionE), process)) {
 			Trace.log("Externalizing conditional");
 
-			Expression condition  = IfThenElse.getCondition(expressionE);
-			Expression thenBranch = IfThenElse.getThenBranch(expressionE);
-			Expression elseBranch = IfThenElse.getElseBranch(expressionE);
+			Expression condition  = IfThenElse.condition(expressionE);
+			Expression thenBranch = IfThenElse.thenBranch(expressionE);
+			Expression elseBranch = IfThenElse.elseBranch(expressionE);
 
 			result = GrinderUtil.branchAndMergeOnACondition(
 					condition,

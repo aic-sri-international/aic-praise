@@ -166,9 +166,9 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 		Trace.log("                   else R_prod_m_and_prod_factor(ExprM2 * prod_F in S m_V<-F, beingComputed))");
 
 		Justification.beginEqualityStep("externalizing conditional on initial message");
-		Expression condition = IfThenElse.getCondition(conditionalMessage);
-		Expression m1        = IfThenElse.getThenBranch(conditionalMessage);
-		Expression m2        = IfThenElse.getElseBranch(conditionalMessage);
+		Expression condition = IfThenElse.condition(conditionalMessage);
+		Expression m1        = IfThenElse.thenBranch(conditionalMessage);
+		Expression m2        = IfThenElse.elseBranch(conditionalMessage);
 		if (Justification.isEnabled()) {
 			Expression currentExpression = 
 				IfThenElse.make(
@@ -201,9 +201,9 @@ public class ProductMessageAndProductFactor extends AbstractLBPHierarchicalRewri
 		Trace.log("                   else R_prod_m_and_prod_factor(m * ExprPi2, beingComputed))");
 
 		Justification.beginEqualityStep("externalizing conditional on remaining product of messages");
-		Expression condition   = IfThenElse.getCondition(productOfFactorsToVariable);
-		Expression productThen = IfThenElse.getThenBranch(productOfFactorsToVariable);
-		Expression productElse = IfThenElse.getElseBranch(productOfFactorsToVariable);
+		Expression condition   = IfThenElse.condition(productOfFactorsToVariable);
+		Expression productThen = IfThenElse.thenBranch(productOfFactorsToVariable);
+		Expression productElse = IfThenElse.elseBranch(productOfFactorsToVariable);
 		if (Justification.isEnabled()) {
 			Expression currentExpression = 
 				IfThenElse.make(

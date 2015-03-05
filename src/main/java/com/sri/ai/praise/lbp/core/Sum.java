@@ -230,9 +230,9 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 		Trace.log("                   then R_sum(sum_N E1 prod_{V in N'} m_F<-V, T, beingComputed)  under C'");
 		Trace.log("                   else R_sum(sum_N E2 prod_{V in N'} m_F<-V, T, beingComputed)) under not C'");
 
-		Expression condition = IfThenElse.getCondition(E);
-		Expression e1        = IfThenElse.getThenBranch(E);
-		Expression e2        = IfThenElse.getElseBranch(E);
+		Expression condition = IfThenElse.condition(E);
+		Expression e1        = IfThenElse.thenBranch(E);
+		Expression e2        = IfThenElse.elseBranch(E);
 		
 		if (Justification.isEnabled()) {
 			Justification.beginEqualityStep("externalizing conditional on summand");
@@ -269,9 +269,9 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 
 		LPIUtil.assertProductOk(productOfIncomingMessages);
 
-		Expression condition = IfThenElse.getCondition(summationIndexN);
-		Expression n1        = IfThenElse.getThenBranch(summationIndexN);
-		Expression n2        = IfThenElse.getElseBranch(summationIndexN);
+		Expression condition = IfThenElse.condition(summationIndexN);
+		Expression n1        = IfThenElse.thenBranch(summationIndexN);
+		Expression n2        = IfThenElse.elseBranch(summationIndexN);
 
 		if (Justification.isEnabled()) {
 			Justification.beginEqualityStep("externalizing conditional on neighbors");
@@ -311,9 +311,9 @@ public class Sum extends AbstractLBPHierarchicalRewriter implements LBPRewriter 
 
 		LPIUtil.assertProductOk(productOfIncomingMessages);
 
-		Expression condition = IfThenElse.getCondition(NPrime);
-		Expression n1        = IfThenElse.getThenBranch(NPrime);
-		Expression n2        = IfThenElse.getElseBranch(NPrime);
+		Expression condition = IfThenElse.condition(NPrime);
+		Expression n1        = IfThenElse.thenBranch(NPrime);
+		Expression n2        = IfThenElse.elseBranch(NPrime);
 
 		Expression prodIntensionalSet         = productOfIncomingMessages.get(0);
 		List<Expression> indexExpressionsList = ((ExtensionalIndexExpressionsSet) ((IntensionalSet) prodIntensionalSet).getIndexExpressions()).getList();

@@ -297,9 +297,9 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("if S1 is 'if C then Alpha else Beta'");
 		Trace.log("    return R_basic(if C then R_set_diff(Alpha \\ S2) else R_set_diff(Beta \\ S2))");
 
-		Expression condition  = IfThenElse.getCondition(set1);
-		Expression thenBranch = IfThenElse.getThenBranch(set1);
-		Expression elseBranch = IfThenElse.getElseBranch(set1);
+		Expression condition  = IfThenElse.condition(set1);
+		Expression thenBranch = IfThenElse.thenBranch(set1);
+		Expression elseBranch = IfThenElse.elseBranch(set1);
 
 		Justification.beginEqualityStep("externalizing conditional");
 		if (Justification.isEnabled()) {
@@ -327,9 +327,9 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("if S2 is 'if C then Alpha else Beta'");
 		Trace.log("    return R_basic(if C then R_set_diff(S1 \\ Alpha) else R_set_diff(S1 \\ Beta))");
 
-		Expression condition  = IfThenElse.getCondition(set2);
-		Expression thenBranch = IfThenElse.getThenBranch(set2);
-		Expression elseBranch = IfThenElse.getElseBranch(set2);
+		Expression condition  = IfThenElse.condition(set2);
+		Expression thenBranch = IfThenElse.thenBranch(set2);
+		Expression elseBranch = IfThenElse.elseBranch(set2);
 
 		Justification.beginEqualityStep("externalizing conditional");
 		if (Justification.isEnabled()) {

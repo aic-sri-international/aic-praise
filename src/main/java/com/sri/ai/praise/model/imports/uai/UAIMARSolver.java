@@ -232,9 +232,9 @@ public class UAIMARSolver {
 	private static void assignComputedValues(Expression varExpr, Expression marginal, Map<Expression, Integer> possibleValueExprToIndex, List<Integer> remainingQueryValueIdxs, double[] values) {
 		
 		if (IfThenElse.isIfThenElse(marginal)) {
-			Expression condExpr = IfThenElse.getCondition(marginal);
+			Expression condExpr = IfThenElse.condition(marginal);
 			int valueIdx = identifyValueIdx(varExpr, condExpr, possibleValueExprToIndex);
-			Expression thenExpr = IfThenElse.getThenBranch(marginal);
+			Expression thenExpr = IfThenElse.thenBranch(marginal);
 			for (Map.Entry<Expression, Integer> entry : possibleValueExprToIndex.entrySet()) {
 				if (entry.getValue() == valueIdx) {
 					possibleValueExprToIndex.remove(entry.getKey());
@@ -243,7 +243,7 @@ public class UAIMARSolver {
 			}
 			remainingQueryValueIdxs.remove(remainingQueryValueIdxs.indexOf(valueIdx));
 			values[valueIdx] = thenExpr.rationalValue().doubleValue();
-			Expression elseExpr = IfThenElse.getElseBranch(marginal);
+			Expression elseExpr = IfThenElse.elseBranch(marginal);
 			assignComputedValues(varExpr, elseExpr, possibleValueExprToIndex, remainingQueryValueIdxs, values);
 		}
 		else {

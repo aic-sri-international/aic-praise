@@ -170,15 +170,15 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 			if (isARepresentativeMessageFromAFactorToTheVariable(alpha, processExtendedByProductSet)) {
 				// Alpha is if C' then Alpha_1 else Alpha_2
 				if (IfThenElse.isIfThenElse(alpha)) {
-					Expression conditionCPrime = IfThenElse.getCondition(alpha);
+					Expression conditionCPrime = IfThenElse.condition(alpha);
 					if (FormulaUtil.isFormula(conditionCPrime, processExtendedByProductSet)) {
 						// return R_lift_product(prod_{{(on I) Alpha_1 | C and C'}}) * R_lift_product(prod_{{(on I) Alpha_2 | C and not C'})
-						Expression alpha1        = IfThenElse.getThenBranch(alpha);
+						Expression alpha1        = IfThenElse.thenBranch(alpha);
 						Expression thenCondition = And.make(conditionC, conditionCPrime);
 						Expression thenSet       = ((IntensionalSet)prodSet).setHeadAndCondition(alpha1, thenCondition);
 						Expression thenProduct   = Expressions.apply(FunctorConstants.PRODUCT, thenSet);
 		
-						Expression alpha2        = IfThenElse.getElseBranch(alpha);
+						Expression alpha2        = IfThenElse.elseBranch(alpha);
 						Expression elseCondition = And.make(conditionC, Not.make(conditionCPrime));
 						Expression elseSet       = ((IntensionalSet)prodSet).setHeadAndCondition(alpha2, elseCondition);
 						Expression elseProduct   = Expressions.apply(FunctorConstants.PRODUCT, elseSet);
@@ -242,9 +242,9 @@ public class LiftProductOfFactorToVariable extends AbstractRewriter {
 			}
 			else {
 				// Conditional
-				result = isARepresentativeMessageFromAFactorToTheVariable(IfThenElse.getThenBranch(alpha), process) 
+				result = isARepresentativeMessageFromAFactorToTheVariable(IfThenElse.thenBranch(alpha), process) 
 						 &&
-						 isARepresentativeMessageFromAFactorToTheVariable(IfThenElse.getElseBranch(alpha), process);
+						 isARepresentativeMessageFromAFactorToTheVariable(IfThenElse.elseBranch(alpha), process);
 			}
 		}
 		else {

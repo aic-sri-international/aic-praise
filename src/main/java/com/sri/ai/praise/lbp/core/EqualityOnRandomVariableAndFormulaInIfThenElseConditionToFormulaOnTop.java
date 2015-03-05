@@ -70,7 +70,7 @@ public class EqualityOnRandomVariableAndFormulaInIfThenElseConditionToFormulaOnT
 		Expression condition;
 		if (IfThenElse.isIfThenElse(expression) 
 				&& 
-			Equality.isEquality(condition = IfThenElse.getCondition(expression))
+			Equality.isEquality(condition = IfThenElse.condition(expression))
 				&&
 			condition.numberOfArguments() == 2) {
 			
@@ -96,8 +96,8 @@ public class EqualityOnRandomVariableAndFormulaInIfThenElseConditionToFormulaOnT
 			}
 			
 			if (randomVariableValue != null && formula != null) {						
-				Expression alpha      = IfThenElse.getThenBranch(expression);
-				Expression beta       = IfThenElse.getElseBranch(expression);
+				Expression alpha      = IfThenElse.thenBranch(expression);
+				Expression beta       = IfThenElse.elseBranch(expression);
 				Expression thenBranch = IfThenElse.make(randomVariableValue, alpha, beta);
 				Expression elseBranch = IfThenElse.make(randomVariableValue, beta, alpha);
 				result = IfThenElse.make(formula, thenBranch, elseBranch);

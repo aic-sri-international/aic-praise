@@ -89,9 +89,9 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 			Trace.log("if U is if C then Alpha else Beta");
 			Trace.log("    return R_basic(if C then R_union(Alpha) else R_union(Beta))");
 
-			Expression condition = IfThenElse.getCondition(union);
-			Expression alpha     = IfThenElse.getThenBranch(union);
-			Expression beta      = IfThenElse.getElseBranch(union);
+			Expression condition = IfThenElse.condition(union);
+			Expression alpha     = IfThenElse.thenBranch(union);
+			Expression beta      = IfThenElse.elseBranch(union);
 
 			result = GrinderUtil.branchAndMergeOnACondition(
 					condition,
@@ -141,9 +141,9 @@ public class Union extends AbstractLBPHierarchicalRewriter implements LBPRewrite
 					Trace.log("if U is 'If C then Alpha else Beta' union Union'");
 					Trace.log("    return R_basic(if C then R_union(Alpha union Union') else R_union(Beta union Union'))");
 
-					Expression condition = IfThenElse.getCondition(first);
-					Expression alpha     = IfThenElse.getThenBranch(first);
-					Expression beta      = IfThenElse.getElseBranch(first);
+					Expression condition = IfThenElse.condition(first);
+					Expression alpha     = IfThenElse.thenBranch(first);
+					Expression beta      = IfThenElse.elseBranch(first);
 
 					result = GrinderUtil.branchAndMergeOnACondition(
 							condition,

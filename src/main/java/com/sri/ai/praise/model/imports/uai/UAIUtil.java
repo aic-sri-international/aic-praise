@@ -54,7 +54,7 @@ import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.SGDPLLT;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.EqualityTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.Max;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProblemType;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.GroupProblemType;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.SymbolTermTheory;
 import com.sri.ai.grinder.library.equality.cardinality.plaindpll.Theory;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
@@ -114,7 +114,7 @@ public class UAIUtil {
 		
 		// The theory of equality on symbols (includes a model counter for formulas in it).
 		Theory      theory      = new EqualityTheory(new SymbolTermTheory());
-		ProblemType problemType = new Max(); // the problem type actually does not matter, because we are not going to have any indices.
+		GroupProblemType problemType = new Max(); // the problem type actually does not matter, because we are not going to have any indices.
 		Expression  tableExpr   = Expressions.parse(table.toString());
 		
 		Collection<Expression> indices = Util.list(); // no indices; we want to keep all variables

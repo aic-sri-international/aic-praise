@@ -282,11 +282,11 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("                   else R_prod_factor(P2, beingComputed))");
 
 		Expression condition = IfThenElse
-				.getCondition(productOfFactorsToVariable);
+				.condition(productOfFactorsToVariable);
 		Expression productThen = IfThenElse
-				.getThenBranch(productOfFactorsToVariable);
+				.thenBranch(productOfFactorsToVariable);
 		Expression productElse = IfThenElse
-				.getElseBranch(productOfFactorsToVariable);
+				.elseBranch(productOfFactorsToVariable);
 
 		if (Justification.isEnabled()) {
 			Justification.beginEqualityStep("by externalizing conditional");
@@ -315,9 +315,9 @@ public class ProductFactor extends AbstractLBPHierarchicalRewriter implements LB
 		Trace.log("                   then R_prod_factor(prod_F in S1 m_V<-F, beingComputed)");
 		Trace.log("                   else R_prod_factor(prod_F in S2 m_V<-F, beingComputed))");
 
-		Expression condition = IfThenElse.getCondition(typeS);
-		Expression s1 = IfThenElse.getThenBranch(typeS);
-		Expression s2 = IfThenElse.getElseBranch(typeS);
+		Expression condition = IfThenElse.condition(typeS);
+		Expression s1 = IfThenElse.thenBranch(typeS);
+		Expression s2 = IfThenElse.elseBranch(typeS);
 
 		Expression productThen = LPIUtil.makeProductOfMessages(
 				factorIndexF, s1, msgToV_F, prodScopingCondition);

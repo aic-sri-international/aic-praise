@@ -162,7 +162,7 @@ public class LPIUtil {
 		boolean result = false;
 		
 		if (IfThenElse.isIfThenElse(expression)) {
-			Expression condition = IfThenElse.getCondition(expression);
+			Expression condition = IfThenElse.condition(expression);
 			
 			result = !containsRandomVariableValueExpression(condition, process);
 		}
@@ -706,11 +706,11 @@ public class LPIUtil {
 		boolean result = false;
 		
 		if (IfThenElse.isIfThenElse(expression)) {
-			Expression condition = IfThenElse.getCondition(expression);
+			Expression condition = IfThenElse.condition(expression);
 			if (LPIUtil.isRandomVariableValueExpression(condition, process)) {		
-				result = isMessageValue(IfThenElse.getThenBranch(expression), process)
+				result = isMessageValue(IfThenElse.thenBranch(expression), process)
 						 &&
-						 isMessageValue(IfThenElse.getElseBranch(expression), process);
+						 isMessageValue(IfThenElse.elseBranch(expression), process);
 			}
 		} 
 		else if (expression.getSyntacticFormType().equals("Symbol")) {
@@ -1362,7 +1362,7 @@ public class LPIUtil {
 		
 		if (IfThenElse.isIfThenElse(factorValue)) {
 			factorValue = IfThenElse.equivalentWithNonNegatedCondition(factorValue);
-			Expression condition = IfThenElse.getCondition(factorValue);
+			Expression condition = IfThenElse.condition(factorValue);
 			
 			boolean conditionEqualsRandomVariableValue = false;
 			if (condition.equals(randomVariableValue)) {
@@ -1376,8 +1376,8 @@ public class LPIUtil {
 			
 			result =
 					conditionEqualsRandomVariableValue
-					&& factorValueIsSimpleWithRespectToRandomVariable(IfThenElse.getThenBranch(factorValue), randomVariable, randomVariableValue, process)
-					&& factorValueIsSimpleWithRespectToRandomVariable(IfThenElse.getElseBranch(factorValue), randomVariable, randomVariableValue, process);
+					&& factorValueIsSimpleWithRespectToRandomVariable(IfThenElse.thenBranch(factorValue), randomVariable, randomVariableValue, process)
+					&& factorValueIsSimpleWithRespectToRandomVariable(IfThenElse.elseBranch(factorValue), randomVariable, randomVariableValue, process);
 		}
 		else if (Expressions.isNumber(factorValue) || ! LPIUtil.containsRandomVariableValueExpression(factorValue, process)) {
 			result = true;

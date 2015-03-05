@@ -93,9 +93,9 @@ public class NormalizeMessage extends AbstractLBPHierarchicalRewriter implements
 		}
 
 		if (IfThenElse.isIfThenElse(expressionE)) {
-			Expression condition  = IfThenElse.getCondition(expressionE);
-			Expression thenBranch = IfThenElse.getThenBranch(expressionE);
-			Expression elseBranch = IfThenElse.getElseBranch(expressionE);
+			Expression condition  = IfThenElse.condition(expressionE);
+			Expression thenBranch = IfThenElse.thenBranch(expressionE);
+			Expression elseBranch = IfThenElse.elseBranch(expressionE);
 
 			if (!LPIUtil.containsRandomVariableValueExpression(condition, process)) {
 				Trace.log("Externalizing conditional");

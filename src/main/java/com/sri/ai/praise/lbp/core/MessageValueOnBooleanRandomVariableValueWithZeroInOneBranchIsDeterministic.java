@@ -79,7 +79,7 @@ public class MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterm
 		// this may result is an expression that is no longer an if then else
 
 		if (IfThenElse.isIfThenElse(expression)) {
-			Expression condition = IfThenElse.getCondition(expression);
+			Expression condition = IfThenElse.condition(expression);
 
 			Expression randomVariableBeingNormalized =
 					(Expression) process.getGlobalObject(LPIUtil.RANDOM_VARIABLE_BEING_NORMALIZED);
@@ -88,10 +88,10 @@ public class MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterm
 				Expression randomVariableBeingNormalizedValue =
 						((BracketedExpression) randomVariableBeingNormalized).getInnerExpression();
 				if (condition.equals(randomVariableBeingNormalizedValue)) {
-					if (IfThenElse.getThenBranch(expression).equals(Expressions.ZERO)) {
+					if (IfThenElse.thenBranch(expression).equals(Expressions.ZERO)) {
 						expression = IfThenElse.make(condition, Expressions.ZERO, Expressions.ONE);
 					}
-					else if (IfThenElse.getElseBranch(expression).equals(Expressions.ZERO)) {
+					else if (IfThenElse.elseBranch(expression).equals(Expressions.ZERO)) {
 						expression = IfThenElse.make(condition, Expressions.ONE, Expressions.ZERO);
 					}
 				}

@@ -68,7 +68,7 @@ public class MoveAllRandomVariableValueExpressionConditionsDownHierarchical exte
 		
 		if (IfThenElse.isIfThenElse(expression)) {
 			expression = normalizeSubExpressionsIfNeeded(expression, subExpressionsAreNormalized, process);
-			if (FormulaUtil.isFormula(IfThenElse.getCondition(expression), process)) {
+			if (FormulaUtil.isFormula(IfThenElse.condition(expression), process)) {
 				// expression is already normalized
 				result = expression;
 			}
@@ -78,14 +78,14 @@ public class MoveAllRandomVariableValueExpressionConditionsDownHierarchical exte
 					// In the comments examples, we assume the picked branch is the then branch
 					// (the else one is symmetric and the code is written once for both cases by using an index)
 					// expression is of the form "if RV then if LV then LVThen else LVElse else RVOtherBranch"
-					Expression rvCondition = IfThenElse.getCondition(expression);
+					Expression rvCondition = IfThenElse.condition(expression);
 					Expression lvBranch = expression.get(indexOfBranchWithLogicalVariableCondition);
 					int indexOfTheOtherBranch = IfThenElse.oppositeBranchIndex(indexOfBranchWithLogicalVariableCondition);
 					Expression rvOtherBranch = expression.get(indexOfTheOtherBranch);
 
-					Expression lvCondition = IfThenElse.getCondition(lvBranch);
-					Expression lvThen      = IfThenElse.getThenBranch(lvBranch);
-					Expression lvElse      = IfThenElse.getElseBranch(lvBranch);
+					Expression lvCondition = IfThenElse.condition(lvBranch);
+					Expression lvThen      = IfThenElse.thenBranch(lvBranch);
+					Expression lvElse      = IfThenElse.elseBranch(lvBranch);
 
 					// expression is
 					// "if RV then if LV then LVThen else LVElse else RVOtherBranch"
@@ -108,7 +108,7 @@ public class MoveAllRandomVariableValueExpressionConditionsDownHierarchical exte
 		for (int branchIndex = 1; branchIndex != 3; branchIndex++) {
 			Expression branch = expression.get(branchIndex);
 			if (IfThenElse.isIfThenElse(branch)) {
-				if (FormulaUtil.isFormula(IfThenElse.getCondition(branch), process)) {
+				if (FormulaUtil.isFormula(IfThenElse.condition(branch), process)) {
 					return branchIndex;
 				}
 			}

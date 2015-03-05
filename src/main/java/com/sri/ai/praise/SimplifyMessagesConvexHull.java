@@ -260,9 +260,9 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 		Expression messageValue = ((BracketedExpression) message).getInnerExpression();
 		if (!LPIUtil.isMessageValue(messageValue, process)) {
 			if (IfThenElse.isIfThenElse(messageValue)) {
-				Expression thenBranch = externalizeMessage(BracketedExpressionSubExpressionsProvider.make(IfThenElse.getThenBranch(messageValue)), process);
-				Expression elseBranch = externalizeMessage(BracketedExpressionSubExpressionsProvider.make(IfThenElse.getElseBranch(messageValue)), process);
-				result = IfThenElse.make(IfThenElse.getCondition(messageValue), thenBranch, elseBranch);
+				Expression thenBranch = externalizeMessage(BracketedExpressionSubExpressionsProvider.make(IfThenElse.thenBranch(messageValue)), process);
+				Expression elseBranch = externalizeMessage(BracketedExpressionSubExpressionsProvider.make(IfThenElse.elseBranch(messageValue)), process);
+				result = IfThenElse.make(IfThenElse.condition(messageValue), thenBranch, elseBranch);
 			}
 			else {
 				throw new IllegalArgumentException("Not a recognized message: "+message);
@@ -288,7 +288,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 			// [if p(X) then 0 else 0]
 			// which indicates the whole bound needs to be treated as a trivial bound.
 			if (normalizedValue.equals(Expressions.ZERO)) {
-				result = LPIUtil.makeTrivialBound(IfThenElse.getCondition(unnormalizedMessageValue));
+				result = LPIUtil.makeTrivialBound(IfThenElse.condition(unnormalizedMessageValue));
 				break;
 			}
 			normalizedMessageValues.add(normalizedValue);
@@ -356,7 +356,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 			result = Expressions.ZERO_POINT_FIVE;
 		}
 		else {
-			result  = IfThenElse.make(IfThenElse.getCondition(messageValue), 
+			result  = IfThenElse.make(IfThenElse.condition(messageValue), 
 					Expressions.makeSymbol(trueValue.divide(partition)), 
 					Expressions.makeSymbol(falseValue.divide(partition)));
 		}
@@ -371,7 +371,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 			result = messageValue.rationalValue();
 		}
 		else {
-			Expression thenValue = IfThenElse.getThenBranch(messageValue);
+			Expression thenValue = IfThenElse.thenBranch(messageValue);
 			if (thenValue.getSyntacticFormType().equals("Symbol")) {
 				result = thenValue.rationalValue();
 			}
@@ -390,7 +390,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 			result = messageValue.rationalValue();
 		}
 		else {
-			Expression elseValue = IfThenElse.getElseBranch(messageValue);
+			Expression elseValue = IfThenElse.elseBranch(messageValue);
 			if (elseValue.getSyntacticFormType().equals("Symbol")) {
 				result = elseValue.rationalValue();
 			}

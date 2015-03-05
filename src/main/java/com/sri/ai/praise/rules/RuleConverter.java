@@ -1624,7 +1624,7 @@ public class RuleConverter {
 		
 		// we can only really simplify if then else expressions
 		if (isIfThenElse) {
-			Expression condition = IfThenElse.getCondition(input);
+			Expression condition = IfThenElse.condition(input);
 			boolean isConstraint = LPIUtil.isConstraint(condition, process);
 			if (isConstraint) {
 				Expression translationOfE1 = queryAnswerPotentialExpression2Rule(input.get(1), queryAtom, GrinderUtil.extendContextualConstraint(condition, process));
