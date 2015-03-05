@@ -37,20 +37,58 @@
  */
 package com.sri.ai.praise.model.grounded.bayes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
 
+/**
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
 public class ConditionalProbabilityTable {
-	
+	private List<Integer> parentVarIdxs = new ArrayList<>();
+	private Integer childVarIdx;
+	private FunctionTable functionTable;
 	
 	public ConditionalProbabilityTable(List<Integer> parentVarIdxs, int childVarIdx, FunctionTable table) {
 		if (parentVarIdxs.contains(childVarIdx)) {
 			throw new IllegalArgumentException("Child variable index, "+childVarIdx+", is also listed as a parent idx "+parentVarIdxs);
 		}
 		
-// TODO		
+// TODO - ensure each child row sums to 1
+		
+		this.parentVarIdxs.addAll(parentVarIdxs);
+		this.childVarIdx   = childVarIdx;
+		this.functionTable = table;
+	}
+	
+	public List<Integer> getParentVariableIndexes() {
+		return parentVarIdxs;
+	}
+	
+	public Integer getChildVariableIndex() {
+		return childVarIdx;
+	}
+	
+	public FunctionTable getTable() {
+		return functionTable;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof ConditionalProbabilityTable) {
+			ConditionalProbabilityTable other = (ConditionalProbabilityTable) obj;
+			return this.childVarIdx.equals(other.childVarIdx) && this.parentVarIdxs.equals(other.parentVarIdxs) && this.functionTable.equals(other.functionTable);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.childVarIdx.hashCode() + this.parentVarIdxs.hashCode() + this.functionTable.hashCode();
 	}
 }

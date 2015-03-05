@@ -38,18 +38,23 @@
 package com.sri.ai.praise.model.grounded.transform;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.bayes.ConditionalProbabilityTable;
+import com.sri.ai.praise.model.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.grounded.markov.FactorTable;
 import com.sri.ai.praise.model.grounded.markov.MarkovNetwork;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**
  * 
@@ -90,8 +95,8 @@ public class XFormMarkovToBayes {
 				p.addAll(f.getVariableIndexes());
 			}
 			
+			FactorTable cFactor = newFactor(markov, p, factorsContainingC);
 			p.remove(c); // Now ensure c is not included in p
-			FactorTable cFactor = newFactor(p, c, factorsContainingC);
 			
 			randomVariableToFactors.remove(c);
 			factors.removeAll(factorsContainingC);			
@@ -107,7 +112,7 @@ public class XFormMarkovToBayes {
 			// Replace each entry phi(C,P) by phi(C,P)/Z(P).
 			// Store the now normalized CPT in the Bayesian network, and 
 			// add factor Z to the factor network.		
-			Pair<FactorTable, ConditionalProbabilityTable> zFactorAndcCPT = sumOutChildAndCreateCPT(c, cFactor); 
+			Pair<FactorTable, ConditionalProbabilityTable> zFactorAndcCPT = sumOutChildAndCreateCPT(markov, c, cFactor); 
 			FactorTable                 zFactor = zFactorAndcCPT.first;
 			ConditionalProbabilityTable cCPT    = zFactorAndcCPT.second;
 			
@@ -151,17 +156,120 @@ public class XFormMarkovToBayes {
 		return result;
 	}
 	
-	private static FactorTable newFactor(Set<Integer> p, Integer c, List<FactorTable> factorsContainingC) {
-		FactorTable result = null;
+	private static FactorTable newFactor(MarkovNetwork markov, Set<Integer> varIdxs,  List<FactorTable> factorsContainingC) {
+		List<Integer> variableIndexes = new ArrayList<>(varIdxs);
 		
-// TODO		
+		Map<Integer, Integer> varIdxToOffset   = new LinkedHashMap<>();
+		List<Integer>         varCardinalities = new ArrayList<>();
+		for (Integer varIdx : variableIndexes) {
+			varIdxToOffset.put(varIdx, varIdxToOffset.size());
+			varCardinalities.add(markov.cardinality(varIdx));
+		}
+		List<Double> entries = new ArrayList<>(FunctionTable.numEntriesFor(varCardinalities));
+		CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(cardinalityValues(varCardinalities));
+		while (cpe.hasMoreElements()) {
+			List<Integer> assignments = cpe.nextElement();
+			
+			double product = 1;
+			for (FactorTable ft : factorsContainingC) {
+				List<Integer> varValues = new ArrayList<>();
+				for (Integer varIdx : ft.getVariableIndexes()) {
+					varValues.add(assignments.get(varIdxToOffset.get(varIdx)));
+				}
+				product *= ft.getTable().entryFor(varValues);
+			}
+			entries.add(product);
+		}
+		
+		FactorTable result = new FactorTable(variableIndexes, new FunctionTable(varCardinalities, entries));
 		
 		return result;
 	}
 	
-	private static Pair<FactorTable, ConditionalProbabilityTable> sumOutChildAndCreateCPT(Integer c, FactorTable cFactor) {
-		Pair<FactorTable, ConditionalProbabilityTable> result = null;
-// TODO		
+	private static Pair<FactorTable, ConditionalProbabilityTable> sumOutChildAndCreateCPT(MarkovNetwork markov, Integer c, FactorTable cFactor) {
+		List<Integer> parentVarIdxs = new ArrayList<>(cFactor.getVariableIndexes());
+		parentVarIdxs.remove(c);
+		int cCardinality = markov.cardinality(c);
+		int cIdx         = cFactor.getVariableIndexes().indexOf(c);        
+		FactorTable   summedOut = null;
+		FunctionTable cptTable  = null;
+		if (parentVarIdxs.size() == 0) {
+			// No summed out factor as no remaining elements but still need to ensure the cpt values are normalized			
+			int idx = 0;
+			List<Double> factorEntries = cFactor.getTable().getEntries();
+			List<Double> cptEntries    = new ArrayList<>(factorEntries.size());
+			while (idx < factorEntries.size()) {
+				double total = 0;
+				for (int i = 0; i < cCardinality; i++) {
+					total += factorEntries.get(idx+i);
+				}
+				for (int i = 0; i < cCardinality; i++) {
+					cptEntries.add(factorEntries.get(idx+i)/total);
+				}
+				idx += cCardinality;
+			}
+			cptTable = new FunctionTable(Arrays.asList(cCardinality), cptEntries);
+		}
+		else {
+			List<Integer> cptVarIdxs             = new ArrayList<>();
+			List<Integer> cptCardinalities       = new ArrayList<>();
+			List<Integer> parentVarCardinalities = new ArrayList<>();
+			Map<Integer, Integer> parentCardIdxToCFactorIdx = new LinkedHashMap<>();
+			int cFactorCardIdx = 0;
+			for (Integer varIdx : cFactor.getVariableIndexes()) {
+				if (!varIdx.equals(c)) {
+					cptVarIdxs.add(varIdx);					
+					int card = markov.cardinality(varIdx);
+					cptCardinalities.add(card);
+					parentVarCardinalities.add(card);
+					parentCardIdxToCFactorIdx.put(parentCardIdxToCFactorIdx.size(), cFactorCardIdx);
+				}
+				
+				cFactorCardIdx++;
+			}
+			// The child index will be placed at the end of the table by convention
+			cptVarIdxs.add(c);
+			cptCardinalities.add(markov.cardinality(c));
+			
+			int numCPTEntries    = FunctionTable.numEntriesFor(cptCardinalities);
+			int numParentEntries = FunctionTable.numEntriesFor(parentVarCardinalities);
+			List<Double> cptEntries             = new ArrayList<>(numCPTEntries);
+			List<Double> parentSummedOutEntries = new ArrayList<>(numParentEntries);	
+			Map<Integer, Integer> assignmentMap = new LinkedHashMap<>();
+			CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(cardinalityValues(parentVarCardinalities));
+			while (cpe.hasMoreElements()) {
+				List<Integer> parentValues = cpe.nextElement();
+				assignmentMap.clear();
+				for (int i = 0; i < parentValues.size(); i++) {
+					assignmentMap.put(parentCardIdxToCFactorIdx.get(i), parentValues.get(i));
+				}
+				Double sum = cFactor.getTable().valueFor(assignmentMap);
+				parentSummedOutEntries.add(sum);
+				for (int i = 0; i < cCardinality; i++) {
+					assignmentMap.put(cIdx, i);
+					if (sum.equals(0.0)) {
+						cptEntries.add(Double.MIN_NORMAL); // NOTE: This prevents invalid models being generated by assigning an impossibly small probability to an event that should never occur
+					}
+					else {
+						cptEntries.add(cFactor.getTable().valueFor(assignmentMap) / sum);
+					}
+				}				
+			}
+			summedOut = new FactorTable(parentVarIdxs, new FunctionTable(parentVarCardinalities, parentSummedOutEntries));
+			cptTable  = new FunctionTable(cptCardinalities, cptEntries);
+		}
+		
+		Pair<FactorTable, ConditionalProbabilityTable> result = new Pair<>(summedOut, new ConditionalProbabilityTable(parentVarIdxs, c, cptTable));		
+		return result;
+	}
+	
+	private static List<List<Integer>> cardinalityValues(List<Integer> varCardinalities) {
+		List<List<Integer>> result = new ArrayList<>();
+		
+		for (Integer card : varCardinalities) {
+			result.add(IntStream.range(0, card).boxed().collect(Collectors.toList()));
+		}
+		
 		return result;
 	}
 }

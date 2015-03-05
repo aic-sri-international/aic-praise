@@ -39,9 +39,14 @@ package com.sri.ai.praise.model.grounded.common;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.util.collect.CartesianProductEnumeration;
 import com.sri.ai.util.math.MixedRadixNumber;
 
 @Beta
@@ -54,7 +59,7 @@ public class FunctionTable {
 		this.varCardinalities.addAll(varCardinalities);				
 		this.entries = new ArrayList<>(entries);
 				
-		int numEntriesExpected = varCardinalities.stream().reduce((card1, card2) -> card1 * card2).get();
+		int numEntriesExpected = numEntriesFor(varCardinalities);
 		if (numEntriesExpected != this.entries.size()) {
 			throw new IllegalArgumentException("#entries "+this.entries.size()+" does not match the expected # of "+numEntriesExpected);
 		}
@@ -87,6 +92,36 @@ public class FunctionTable {
 		}
 		result = entries.get(this.entryIndex.getValueFor(radixValues).intValue());
 		
+		return result;
+	}
+	
+	public Double valueFor(Map<Integer, Integer> assignmentMap) {
+		double result = 0;
+		
+		List<List<Integer>> possibleValues = new ArrayList<>(); 
+		for (int i = 0; i < varCardinalities.size(); i++) {
+			Integer value = assignmentMap.get(i);
+			if (value == null) {
+				possibleValues.add(IntStream.range(0, varCardinalities.get(i)).boxed().collect(Collectors.toList()));
+			}
+			else {
+				possibleValues.add(Arrays.asList(value));
+			}
+		}
+		
+		CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(possibleValues);
+		while (cpe.hasMoreElements()) {
+			result += entryFor(cpe.nextElement());
+		}
+		
+		return result;
+	}
+	 
+	public static int numEntriesFor(List<Integer> varCardinalities) {
+		int result = 0;
+		if (varCardinalities.size() > 0) {
+			result = varCardinalities.stream().reduce((card1, card2) -> card1 * card2).get();
+		}
 		return result;
 	}
 	
