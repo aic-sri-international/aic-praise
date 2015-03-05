@@ -47,6 +47,7 @@ import com.sri.ai.praise.model.grounded.common.FunctionTable;
 public class FactorTable {
 	private List<Integer> variableIndexes;
 	private FunctionTable functionTable;
+	
 	public FactorTable(List<Integer> variableIndexes, FunctionTable table) {
 		this.variableIndexes = new ArrayList<>(variableIndexes);
 		this.functionTable   = table;
@@ -62,5 +63,19 @@ public class FactorTable {
 	
 	public FunctionTable getTable() {
 		return functionTable;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof FactorTable) {
+			FactorTable other = (FactorTable) obj;
+			return this.variableIndexes.equals(other.variableIndexes) && this.functionTable.equals(other.functionTable);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.variableIndexes.hashCode() + this.functionTable.hashCode();
 	}
 }

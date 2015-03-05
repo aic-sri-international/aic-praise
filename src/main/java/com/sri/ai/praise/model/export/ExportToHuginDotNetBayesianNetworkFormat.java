@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 
+import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.BracketedExpression;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
@@ -43,6 +44,7 @@ import com.sri.ai.util.math.MixedRadixNumber;
  * @author oreilly
  *
  */
+@Beta
 public class ExportToHuginDotNetBayesianNetworkFormat {
 	
 	public static interface CPTOutputListener {
@@ -261,7 +263,7 @@ public class ExportToHuginDotNetBayesianNetworkFormat {
 		for (Set<Expression> randomVariablesInFactor : factorToRandomVariables.values()) {
 			for (Expression rv : randomVariablesInFactor) {
 				Set<Expression> neighbors = Util.getValuePossiblyCreatingIt(randomVariableNeighbors, rv, LinkedHashSet.class);
-				neighbors.addAll(randomVariablesInFactor); // NOTE: include self for efficience as all counts will end up being + 1.				
+				neighbors.addAll(randomVariablesInFactor); // NOTE: include self for efficiency as all counts will end up being + 1.				
 			}
 		}
 		int smallest = Integer.MAX_VALUE;

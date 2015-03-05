@@ -42,5 +42,11 @@ import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 
 @Beta
 public interface MarkovNetwork extends GraphicalNetwork {
-
+	default int numberFactors() {
+		return numberTables();
+	}
+	
+	default FactorTable getFactor(int factorIdx) {
+		return new FactorTable(getVariableIndexesForTable(factorIdx), getTable(factorIdx));
+	}
 }

@@ -37,9 +37,20 @@
  */
 package com.sri.ai.praise.model.grounded.bayes;
 
+import java.util.List;
+
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.model.grounded.common.FunctionTable;
 
 @Beta
 public class ConditionalProbabilityTable {
-
+	
+	
+	public ConditionalProbabilityTable(List<Integer> parentVarIdxs, int childVarIdx, FunctionTable table) {
+		if (parentVarIdxs.contains(childVarIdx)) {
+			throw new IllegalArgumentException("Child variable index, "+childVarIdx+", is also listed as a parent idx "+parentVarIdxs);
+		}
+		
+// TODO		
+	}
 }
