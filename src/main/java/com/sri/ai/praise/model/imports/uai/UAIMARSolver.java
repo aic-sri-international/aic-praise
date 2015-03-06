@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.Equality;
@@ -70,6 +71,9 @@ import static com.sri.ai.praise.model.imports.uai.UAIUtil.convertGenericTableToI
  */
 @Beta
 public class UAIMARSolver {
+	
+	private static final boolean DO_NOT_SOLVE = Boolean.getBoolean("uai.mar.solver.do.not.solve");
+	
 	public static void main(String[] args) throws IOException {
 		
 		if (args.length != 2) {
@@ -102,36 +106,72 @@ public class UAIMARSolver {
 		Collections.sort(models, (model1, model2) -> Integer.compare(model1.totalNumberEntriesForAllFunctionTables(), model2.totalNumberEntriesForAllFunctionTables()));
 		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.numberTables(), model2.numberTables()));
 		
+		Map<String, Boolean> modelSolvedStatus = new LinkedHashMap<>();
+		
 		System.out.println("#models read="+models.size());
 		final AtomicInteger cnt = new AtomicInteger(1);
 		models.stream().forEach(model -> {
 			System.out.println("Starting to Solve: "+model.getFile().getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
 			long start = System.currentTimeMillis();
-			solve(model, model.getEvidence(), model.getMARSolution());
-			System.out.println("---- Took "+(System.currentTimeMillis() - start)+"ms.");
+			boolean solved = solve(model, model.getEvidence(), model.getMARSolution());
+			System.out.println("---- Took "+(System.currentTimeMillis() - start)+"ms. solved="+solved);
+			
+			modelSolvedStatus.put(model.getFile().getName(), solved);
 		});
+		
+		System.out.println("MODELS SOLVE STATUS");
+		modelSolvedStatus.entrySet().stream().forEach(e -> System.out.printf("%30s %b\n", e.getKey(), e.getValue()));	
+		System.out.println("SUMMARY");
+		System.out.println("#models   solved="+modelSolvedStatus.values().stream().filter(status -> status == true).count());
+		System.out.println("#models unsolved="+modelSolvedStatus.values().stream().filter(status -> status == false).count());
 	}
 	
-	public static void solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
+	public static boolean solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
 		System.out.println("#variables="+model.numberVariables());
 		System.out.println("#tables="+model.numberTables());
 		System.out.println("#unique function tables="+model.numberUniqueFunctionTables());
 		System.out.println("Largest variable cardinality="+model.largestCardinality());
 		System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
 		System.out.println("Total #entries across all function tables="+model.totalNumberEntriesForAllFunctionTables());
-	
-// TODO - remove		
-//if (true) {
-//	return;
-//}
+
+		double totalNumberUniqueEntries        = 0;
+		double totalCompressedEntries          = 0;
+		double bestIndividualCompressionRatio  = 100; // i.e. none at all
+		double worstIndividualCompressionRatio = 0;
 		List<Expression> tables = new ArrayList<>();
 		for (int i = 0; i < model.numberUniqueFunctionTables(); i++) {
 			FunctionTable table = model.getUniqueFunctionTable(i);
+			
+			totalNumberUniqueEntries += table.numberEntries();
+			
 			Expression genericTableExpression  = constructGenericTableExpression(table);
+			
+			double compressedEntries = calculateCompressedEntries(genericTableExpression);
+			
+			double compressedRatio = compressedEntries / table.numberEntries();
+			if (compressedRatio < bestIndividualCompressionRatio) {
+				bestIndividualCompressionRatio = compressedRatio;
+			}
+			if (compressedRatio > worstIndividualCompressionRatio) {
+				worstIndividualCompressionRatio = compressedRatio;
+			}
+			
+			totalCompressedEntries += compressedEntries;
+			
 			for (int tableIdx : model.getTableIndexes(i)) {
 				Expression instanceTableExpression = convertGenericTableToInstance(table, genericTableExpression, model.getVariableIndexesForTable(tableIdx));
 				tables.add(instanceTableExpression);
 			}
+		}
+		
+		System.out.println("Table compression ratio           ="+(totalCompressedEntries/totalNumberUniqueEntries));
+		System.out.println("Best individual compression ratio ="+bestIndividualCompressionRatio);
+		System.out.println("Worst individual compression ratio="+worstIndividualCompressionRatio);
+		
+		// If Solving not to actually be performed (i.e. just getting a summary of the models) then 
+		// indicate failed to solve
+		if (DO_NOT_SOLVE) {
+			return false;
 		}
 		
 		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
@@ -197,14 +237,18 @@ public class UAIMARSolver {
 		
 		List<Integer> diffs = UAICompare.compareMAR(solution, computed);
 		System.out.println("----");
+		boolean result = true;
 		if (diffs.size() == 0) {
 			System.out.println("Computed values match solution: "+computed);
 		}
 		else {
+			result = false; // Failed to solve correctly
 			System.err.println("These variables "+diffs+" did not match the solution.");
 			System.err.println("solution="+solution);
 			System.err.println("computed="+computed);
 		}
+		
+		return result;
 	}
 	
 	//
@@ -227,6 +271,25 @@ public class UAIMARSolver {
 		}
 		
 		return model;
+	}
+	
+	private static double calculateCompressedEntries(Expression compressedTableExpression) {
+		AtomicDouble count = new AtomicDouble(0);
+		
+		visitCompressedTableEntries(compressedTableExpression, count);
+		
+		return count.doubleValue();
+	}
+	
+	private static void visitCompressedTableEntries(Expression compressedTableExpression, AtomicDouble count) {
+		if (IfThenElse.isIfThenElse(compressedTableExpression)) {
+			visitCompressedTableEntries(IfThenElse.thenBranch(compressedTableExpression), count);
+			visitCompressedTableEntries(IfThenElse.elseBranch(compressedTableExpression), count);
+		}
+		else {
+			// We are at a leaf node, therefore increment the count
+			count.addAndGet(1);
+		}
 	}
 	
 	private static void assignComputedValues(Expression varExpr, Expression marginal, Map<Expression, Integer> possibleValueExprToIndex, List<Integer> remainingQueryValueIdxs, double[] values) {
