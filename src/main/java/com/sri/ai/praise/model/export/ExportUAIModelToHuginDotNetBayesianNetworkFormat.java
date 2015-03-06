@@ -60,6 +60,7 @@ import com.sri.ai.praise.model.imports.uai.UAIModelReader;
  */
 @Beta
 public class ExportUAIModelToHuginDotNetBayesianNetworkFormat {
+	
 	public static void main(String[] args) throws IOException {	
 		if (args.length != 2) {
 			throw new IllegalArgumentException("Must specify UAI model directory or model file to solve and the directory the Hugin files should be output to.");
@@ -86,7 +87,7 @@ public class ExportUAIModelToHuginDotNetBayesianNetworkFormat {
 	public static void export(File uaiFile, File outputDirectory) throws IOException {
 		UAIModel model = UAIModelReader.read(uaiFile);
 		
-		System.out.println("Export "+uaiFile.getName());
+		System.out.println(model.toString());
 		
 		// Collect the data required by the Hugin Output utility.
 		Map<Integer, String>       varIdxToName        = new LinkedHashMap<>();

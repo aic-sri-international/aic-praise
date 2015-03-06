@@ -57,6 +57,7 @@ import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**
+ * Utility for transforming a Markov Network into an equivalent Bayes Network.
  * 
  * @author oreilly
  *
@@ -96,12 +97,10 @@ public class XFormMarkovToBayes {
 			for (FactorTable f : factorsContainingC) {
 				p.addAll(f.getVariableIndexes());
 			}
-// TODO - remove
-long fStartTime = System.currentTimeMillis();
-System.out.println("# factors containing c ="+factorsContainingC.size());			
-			FactorTable cFactor = newFactor(markov, p, factorsContainingC);
+		
+			FactorTable cFactor = newMegaFactor(markov, p, factorsContainingC);
 			p.remove(c); // Now ensure c is not included in p
-System.out.println("Took "+(System.currentTimeMillis()-fStartTime)+"ms.");			
+			
 			randomVariableToFactors.remove(c);
 			factors.removeAll(factorsContainingC);			
 			for (Integer pv : p) {
@@ -115,13 +114,9 @@ System.out.println("Took "+(System.currentTimeMillis()-fStartTime)+"ms.");
 			// Z(P) = sum_{C} phi(C,P).	
 			// Replace each entry phi(C,P) by phi(C,P)/Z(P).
 			// Store the now normalized CPT in the Bayesian network, and 
-			// add factor Z to the factor network.	
-// TODO - remove			
-long startTime = System.currentTimeMillis();			
-System.out.println("About to sum out");			
+			// add factor Z to the factor network.			
 			Pair<FactorTable, ConditionalProbabilityTable> zFactorAndcCPT = sumOutChildAndCreateCPT(markov, c, cFactor);
-// TODO - remove
-System.out.println("Summed out in "+(System.currentTimeMillis()-startTime)+"ms.");			
+			
 			FactorTable                 zFactor = zFactorAndcCPT.first;
 			ConditionalProbabilityTable cCPT    = zFactorAndcCPT.second;
 			
@@ -156,19 +151,17 @@ System.out.println("Summed out in "+(System.currentTimeMillis()-startTime)+"ms."
 		
 		Map.Entry<Integer, Set<Integer>> smallestEntry = randomVariableNeighbors.entrySet().stream()
 					.min((e1, e2) -> Integer.compare(e1.getValue().size(), e2.getValue().size())).get();
-		
-// TODO - remove
-System.out.println("smallest #parents="+(smallestEntry.getValue().size()-1));		
-		if (smallestEntry.getValue().size() > MAX_NUM_ALLOWED_PARENTS_IN_CPT) {
+
+		if (smallestEntry.getValue().size() > MAX_NUM_ALLOWED_PARENTS_IN_CPT) {			
 			throw new IllegalStateException("Too large a CPT will need be generated as #parents="+(smallestEntry.getValue().size()-1));
-		}
+		}	
 		
 		Integer result = smallestEntry.getKey();		
 		
 		return result;
 	}
 	
-	private static FactorTable newFactor(MarkovNetwork markov, Set<Integer> varIdxs,  List<FactorTable> factorsContainingC) {
+	private static FactorTable newMegaFactor(MarkovNetwork markov, Set<Integer> varIdxs,  List<FactorTable> factorsContainingC) {
 		List<Integer> variableIndexes = new ArrayList<>(varIdxs);
 		
 		Map<Integer, Integer> varIdxToOffset   = new LinkedHashMap<>();
@@ -264,6 +257,7 @@ System.out.println("smallest #parents="+(smallestEntry.getValue().size()-1));
 				}				
 			}
 			summedOut = new FactorTable(parentVarIdxs, new FunctionTable(parentVarCardinalities, parentSummedOutEntries));
+			
 			cptTable  = new FunctionTable(cptCardinalities, cptEntries);
 		}
 		
