@@ -86,6 +86,8 @@ public class ExportUAIModelToHuginDotNetBayesianNetworkFormat {
 	public static void export(File uaiFile, File outputDirectory) throws IOException {
 		UAIModel model = UAIModelReader.read(uaiFile);
 		
+		System.out.println("Export "+uaiFile.getName());
+		
 		// Collect the data required by the Hugin Output utility.
 		Map<Integer, String>       varIdxToName        = new LinkedHashMap<>();
 		Map<Integer, List<String>> varIdxToRangeValues = new LinkedHashMap<>();
@@ -95,8 +97,13 @@ public class ExportUAIModelToHuginDotNetBayesianNetworkFormat {
 			varIdxToRangeValues.put(i, IntStream.range(0, model.cardinality(i)).boxed().map(cValue -> varName+"c"+cValue).collect(Collectors.toList()));
 		}
 		
-		try (final Writer writer = new BufferedWriter(new FileWriter(new File(outputDirectory, uaiFile.getName()+".net")))) {
+		File outFile = new File(outputDirectory, uaiFile.getName()+".net");
+		try (final Writer writer = new BufferedWriter(new FileWriter(outFile))) {
 			XFormMarkovToBayes.transform(model, new HuginOutput(writer, varIdxToName, varIdxToRangeValues));
+		}
+		catch (Throwable t) {
+			System.err.println("Failed to export "+uaiFile.getName()+", "+t.getMessage());
+			outFile.delete(); // Remove partial output
 		}
 	}
 }

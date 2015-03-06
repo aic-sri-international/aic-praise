@@ -98,20 +98,27 @@ public class FunctionTable {
 	public Double valueFor(Map<Integer, Integer> assignmentMap) {
 		double result = 0;
 		
-		List<List<Integer>> possibleValues = new ArrayList<>(); 
-		for (int i = 0; i < varCardinalities.size(); i++) {
-			Integer value = assignmentMap.get(i);
-			if (value == null) {
-				possibleValues.add(IntStream.range(0, varCardinalities.get(i)).boxed().collect(Collectors.toList()));
-			}
-			else {
-				possibleValues.add(Arrays.asList(value));
-			}
+		// If have all assignments then get the entry straight off as opposed to summing them
+		if (assignmentMap.size() == varCardinalities.size()) {
+			result = entryFor(IntStream.range(0, varCardinalities.size()).boxed().map(i -> assignmentMap.get(i)).collect(Collectors.toList()));
 		}
-		
-		CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(possibleValues);
-		while (cpe.hasMoreElements()) {
-			result += entryFor(cpe.nextElement());
+		else {
+			// More than 1 entry value needs to be summed up
+			List<List<Integer>> possibleValues = new ArrayList<>(); 
+			for (int i = 0; i < varCardinalities.size(); i++) {
+				Integer value = assignmentMap.get(i);
+				if (value == null) {
+					possibleValues.add(IntStream.range(0, varCardinalities.get(i)).boxed().collect(Collectors.toList()));
+				}
+				else {
+					possibleValues.add(Arrays.asList(value));
+				}
+			}
+			
+			CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(possibleValues);
+			while (cpe.hasMoreElements()) {
+				result += entryFor(cpe.nextElement());
+			}
 		}
 		
 		return result;

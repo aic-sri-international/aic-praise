@@ -63,6 +63,8 @@ import com.sri.ai.util.collect.CartesianProductEnumeration;
  */
 @Beta
 public class XFormMarkovToBayes {
+	public static final int MAX_NUM_ALLOWED_PARENTS_IN_CPT = 15;
+	
 	public static interface BayesOutputListener {
 		void newCPT(ConditionalProbabilityTable cpt);
 	}
@@ -94,10 +96,12 @@ public class XFormMarkovToBayes {
 			for (FactorTable f : factorsContainingC) {
 				p.addAll(f.getVariableIndexes());
 			}
-			
+// TODO - remove
+long fStartTime = System.currentTimeMillis();
+System.out.println("# factors containing c ="+factorsContainingC.size());			
 			FactorTable cFactor = newFactor(markov, p, factorsContainingC);
 			p.remove(c); // Now ensure c is not included in p
-			
+System.out.println("Took "+(System.currentTimeMillis()-fStartTime)+"ms.");			
 			randomVariableToFactors.remove(c);
 			factors.removeAll(factorsContainingC);			
 			for (Integer pv : p) {
@@ -111,8 +115,13 @@ public class XFormMarkovToBayes {
 			// Z(P) = sum_{C} phi(C,P).	
 			// Replace each entry phi(C,P) by phi(C,P)/Z(P).
 			// Store the now normalized CPT in the Bayesian network, and 
-			// add factor Z to the factor network.		
-			Pair<FactorTable, ConditionalProbabilityTable> zFactorAndcCPT = sumOutChildAndCreateCPT(markov, c, cFactor); 
+			// add factor Z to the factor network.	
+// TODO - remove			
+long startTime = System.currentTimeMillis();			
+System.out.println("About to sum out");			
+			Pair<FactorTable, ConditionalProbabilityTable> zFactorAndcCPT = sumOutChildAndCreateCPT(markov, c, cFactor);
+// TODO - remove
+System.out.println("Summed out in "+(System.currentTimeMillis()-startTime)+"ms.");			
 			FactorTable                 zFactor = zFactorAndcCPT.first;
 			ConditionalProbabilityTable cCPT    = zFactorAndcCPT.second;
 			
@@ -147,11 +156,14 @@ public class XFormMarkovToBayes {
 		
 		Map.Entry<Integer, Set<Integer>> smallestEntry = randomVariableNeighbors.entrySet().stream()
 					.min((e1, e2) -> Integer.compare(e1.getValue().size(), e2.getValue().size())).get();
-		if (smallestEntry.getValue().size() > 30) {
+		
+// TODO - remove
+System.out.println("smallest #parents="+(smallestEntry.getValue().size()-1));		
+		if (smallestEntry.getValue().size() > MAX_NUM_ALLOWED_PARENTS_IN_CPT) {
 			throw new IllegalStateException("Too large a CPT will need be generated as #parents="+(smallestEntry.getValue().size()-1));
 		}
 		
-		Integer result = smallestEntry.getKey();
+		Integer result = smallestEntry.getKey();		
 		
 		return result;
 	}
@@ -165,14 +177,15 @@ public class XFormMarkovToBayes {
 			varIdxToOffset.put(varIdx, varIdxToOffset.size());
 			varCardinalities.add(markov.cardinality(varIdx));
 		}
-		List<Double> entries = new ArrayList<>(FunctionTable.numEntriesFor(varCardinalities));
+		List<Double>  entries   = new ArrayList<>(FunctionTable.numEntriesFor(varCardinalities));
+		List<Integer> varValues = new ArrayList<>();
 		CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(cardinalityValues(varCardinalities));
 		while (cpe.hasMoreElements()) {
 			List<Integer> assignments = cpe.nextElement();
 			
 			double product = 1;
 			for (FactorTable ft : factorsContainingC) {
-				List<Integer> varValues = new ArrayList<>();
+				varValues.clear();
 				for (Integer varIdx : ft.getVariableIndexes()) {
 					varValues.add(assignments.get(varIdxToOffset.get(varIdx)));
 				}
@@ -211,14 +224,12 @@ public class XFormMarkovToBayes {
 			cptTable = new FunctionTable(Arrays.asList(cCardinality), cptEntries);
 		}
 		else {
-			List<Integer> cptVarIdxs             = new ArrayList<>();
 			List<Integer> cptCardinalities       = new ArrayList<>();
 			List<Integer> parentVarCardinalities = new ArrayList<>();
 			Map<Integer, Integer> parentCardIdxToCFactorIdx = new LinkedHashMap<>();
 			int cFactorCardIdx = 0;
 			for (Integer varIdx : cFactor.getVariableIndexes()) {
-				if (!varIdx.equals(c)) {
-					cptVarIdxs.add(varIdx);					
+				if (!varIdx.equals(c)) {				
 					int card = markov.cardinality(varIdx);
 					cptCardinalities.add(card);
 					parentVarCardinalities.add(card);
@@ -228,13 +239,10 @@ public class XFormMarkovToBayes {
 				cFactorCardIdx++;
 			}
 			// The child index will be placed at the end of the table by convention
-			cptVarIdxs.add(c);
 			cptCardinalities.add(markov.cardinality(c));
 			
-			int numCPTEntries    = FunctionTable.numEntriesFor(cptCardinalities);
-			int numParentEntries = FunctionTable.numEntriesFor(parentVarCardinalities);
-			List<Double> cptEntries             = new ArrayList<>(numCPTEntries);
-			List<Double> parentSummedOutEntries = new ArrayList<>(numParentEntries);	
+			List<Double> cptEntries             = new ArrayList<>(FunctionTable.numEntriesFor(cptCardinalities));
+			List<Double> parentSummedOutEntries = new ArrayList<>( FunctionTable.numEntriesFor(parentVarCardinalities));	
 			Map<Integer, Integer> assignmentMap = new LinkedHashMap<>();
 			CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(cardinalityValues(parentVarCardinalities));
 			while (cpe.hasMoreElements()) {

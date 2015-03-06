@@ -105,7 +105,7 @@ public class HuginOutput implements XFormMarkovToBayes.BayesOutputListener {
 	
 	private void output(String toOutput) {
 		// Write to the console so the user can see the output as it occurs
-		System.out.println(toOutput);
+		//System.out.println(toOutput);
 		try {
 			writer.write(toOutput);
 			writer.write("\n");
