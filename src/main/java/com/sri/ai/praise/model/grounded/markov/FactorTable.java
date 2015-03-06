@@ -43,6 +43,12 @@ import java.util.List;
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
 
+/**
+ * A table representation of a factor for use in a Markov Network.
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
 public class FactorTable {
 	private List<Integer> variableIndexes;

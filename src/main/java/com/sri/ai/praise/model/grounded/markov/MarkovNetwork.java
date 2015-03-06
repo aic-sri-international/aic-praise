@@ -40,6 +40,12 @@ package com.sri.ai.praise.model.grounded.markov;
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 
+/**
+ * Basic representation of a Markov Network.
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
 public interface MarkovNetwork extends GraphicalNetwork {
 	default int numberFactors() {

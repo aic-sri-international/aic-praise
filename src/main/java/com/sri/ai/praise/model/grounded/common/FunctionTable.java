@@ -40,6 +40,7 @@ package com.sri.ai.praise.model.grounded.common;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,6 +50,12 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 import com.sri.ai.util.math.MixedRadixNumber;
 
+/**
+ * Basic representation of a function described by a table of values.
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
 public class FunctionTable {
 	private List<Integer> varCardinalities = new ArrayList<>();
@@ -56,7 +63,8 @@ public class FunctionTable {
 	private MixedRadixNumber entryIndex;
 	
 	public FunctionTable(List<Integer> varCardinalities, List<Double> entries) {
-		this.varCardinalities.addAll(varCardinalities);				
+		this.varCardinalities.addAll(varCardinalities);	
+		this.varCardinalities = Collections.unmodifiableList(this.varCardinalities);
 		this.entries = new ArrayList<>(entries);
 				
 		int numEntriesExpected = numEntriesFor(varCardinalities);
@@ -73,6 +81,10 @@ public class FunctionTable {
 	
 	public int cardinality(int varIdx) {
 		return varCardinalities.get(varIdx);
+	}
+	
+	public List<Integer> getVariableCardinalities() {
+		return varCardinalities; 
 	}
 	
 	public int numberEntries() {
@@ -129,6 +141,16 @@ public class FunctionTable {
 		if (varCardinalities.size() > 0) {
 			result = varCardinalities.stream().reduce((card1, card2) -> card1 * card2).get();
 		}
+		return result;
+	}
+	
+	public static List<List<Integer>> cardinalityValues(List<Integer> varCardinalities) {
+		List<List<Integer>> result = new ArrayList<>();
+		
+		for (Integer card : varCardinalities) {
+			result.add(IntStream.range(0, card).boxed().collect(Collectors.toList()));
+		}
+		
 		return result;
 	}
 	

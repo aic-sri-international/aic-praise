@@ -104,6 +104,7 @@ public class ExportUAIModelToHuginDotNetBayesianNetworkFormat {
 		}
 		catch (Throwable t) {
 			System.err.println("Failed to export "+uaiFile.getName()+", "+t.getMessage());
+			System.err.flush();
 			outFile.delete(); // Remove partial output
 		}
 	}

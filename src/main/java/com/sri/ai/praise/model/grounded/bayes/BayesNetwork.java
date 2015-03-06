@@ -38,8 +38,24 @@
 package com.sri.ai.praise.model.grounded.bayes;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 
+/**
+ * Basic representation of a Bayesian Network.
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
-public class BayesNetwork {
-
+public interface BayesNetwork extends GraphicalNetwork {
+	
+	/**
+	 * 
+	 * @return the # of Conditional Probability Tables (CPTs) in the network.
+	 */
+	default int numberCPTs() {
+		return numberTables();
+	}
+	
+	ConditionalProbabilityTable getCPT(int cptIdx);
 }

@@ -44,8 +44,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.bayes.ConditionalProbabilityTable;
@@ -172,7 +170,7 @@ public class XFormMarkovToBayes {
 		}
 		List<Double>  entries   = new ArrayList<>(FunctionTable.numEntriesFor(varCardinalities));
 		List<Integer> varValues = new ArrayList<>();
-		CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(cardinalityValues(varCardinalities));
+		CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(FunctionTable.cardinalityValues(varCardinalities));
 		while (cpe.hasMoreElements()) {
 			List<Integer> assignments = cpe.nextElement();
 			
@@ -235,9 +233,9 @@ public class XFormMarkovToBayes {
 			cptCardinalities.add(markov.cardinality(c));
 			
 			List<Double> cptEntries             = new ArrayList<>(FunctionTable.numEntriesFor(cptCardinalities));
-			List<Double> parentSummedOutEntries = new ArrayList<>( FunctionTable.numEntriesFor(parentVarCardinalities));	
+			List<Double> parentSummedOutEntries = new ArrayList<>(FunctionTable.numEntriesFor(parentVarCardinalities));	
 			Map<Integer, Integer> assignmentMap = new LinkedHashMap<>();
-			CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(cardinalityValues(parentVarCardinalities));
+			CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(FunctionTable.cardinalityValues(parentVarCardinalities));
 			while (cpe.hasMoreElements()) {
 				List<Integer> parentValues = cpe.nextElement();
 				assignmentMap.clear();
@@ -260,18 +258,8 @@ public class XFormMarkovToBayes {
 			
 			cptTable  = new FunctionTable(cptCardinalities, cptEntries);
 		}
-		
-		Pair<FactorTable, ConditionalProbabilityTable> result = new Pair<>(summedOut, new ConditionalProbabilityTable(parentVarIdxs, c, cptTable));		
-		return result;
-	}
-	
-	private static List<List<Integer>> cardinalityValues(List<Integer> varCardinalities) {
-		List<List<Integer>> result = new ArrayList<>();
-		
-		for (Integer card : varCardinalities) {
-			result.add(IntStream.range(0, card).boxed().collect(Collectors.toList()));
-		}
-		
+		ConditionalProbabilityTable cpt = new ConditionalProbabilityTable(parentVarIdxs, c, cptTable);
+		Pair<FactorTable, ConditionalProbabilityTable> result = new Pair<>(summedOut, cpt);		
 		return result;
 	}
 }

@@ -41,6 +41,12 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 
+/**
+ * Basic representation of a Graphical Network. Contains representations common to both Markov and Bayes networks.
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
 public interface GraphicalNetwork {
 	int numberVariables();

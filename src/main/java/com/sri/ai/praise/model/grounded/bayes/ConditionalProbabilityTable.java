@@ -38,32 +38,52 @@
 package com.sri.ai.praise.model.grounded.bayes;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
+import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**
+ * Representation of a Bayesian Network Conditional Probability Table - P(C | P1,...,Pn).
  * 
  * @author oreilly
  *
  */
 @Beta
 public class ConditionalProbabilityTable {
+	public final double DEFAULT_ROUNDING_THRESHOLD = 1e-8;
+	
 	private List<Integer> parentVarIdxs = new ArrayList<>();
 	private Integer childVarIdx;
 	private FunctionTable functionTable;
 	
+	/**
+	 * Constructor.
+	 * @param parentVarIdxs
+	 *        the parent variable indexes (must match up with the first n cardinality positions
+	 *        in the passed in table).
+	 * @param childVarIdx
+	 *        the child variable index (i.e. P(C | P1,...,Pn))
+	 * @param table
+	 *        a function table representation of the CPT. Note: The child index should correspond to the
+	 *        last cardinality value position on the function table provided.
+	 */
 	public ConditionalProbabilityTable(List<Integer> parentVarIdxs, int childVarIdx, FunctionTable table) {
 		if (parentVarIdxs.contains(childVarIdx)) {
 			throw new IllegalArgumentException("Child variable index, "+childVarIdx+", is also listed as a parent idx "+parentVarIdxs);
 		}
 		
-// TODO - ensure each child row sums to 1
-		
 		this.parentVarIdxs.addAll(parentVarIdxs);
 		this.childVarIdx   = childVarIdx;
 		this.functionTable = table;
+	}
+	
+	public int numberParentVariables() {
+		return parentVarIdxs.size();
 	}
 	
 	public List<Integer> getParentVariableIndexes() {
@@ -74,8 +94,46 @@ public class ConditionalProbabilityTable {
 		return childVarIdx;
 	}
 	
+	/**
+	 * NOTE: the parent indexes map first to the cardinality values in the function table. The child index
+	 * corresponds to the last cardinality value position on the function table.
+	 * 
+	 * @return the FunctionTable that provides the underlying representation for this CPT.
+	 */
 	public FunctionTable getTable() {
 		return functionTable;
+	}
+	
+	/**
+	 * 
+	 * @return true if the underlying function table represents a legal CPT (i.e. child values sum to 1 for each combination of parent values), false otherwise.
+	 */
+	public boolean isValid() {
+		boolean result = true;
+	
+		if (numberParentVariables() == 0) {
+			Double sum = getTable().getEntries().stream().collect(Collectors.summingDouble(e -> e));
+			if (Math.abs(sum - 1.0) > DEFAULT_ROUNDING_THRESHOLD) {
+				result = false;
+			}
+		} 
+		else {
+			Map<Integer, Integer> assignmentMap = new LinkedHashMap<>();
+			CartesianProductEnumeration<Integer> cpe = new CartesianProductEnumeration<>(FunctionTable.cardinalityValues(getTable().getVariableCardinalities().subList(0, numberParentVariables())));
+			while (cpe.hasMoreElements()) {
+				List<Integer> parentAssignments = cpe.nextElement();
+				for (int i = 0; i < parentAssignments.size(); i++) {
+					assignmentMap.put(i, parentAssignments.get(i));
+				}
+				Double sum = getTable().valueFor(assignmentMap);
+				if (Math.abs(sum - 1.0) > DEFAULT_ROUNDING_THRESHOLD) {
+					result = false;
+					break;
+				}
+			}
+		}
+		
+		return result;
 	}
 	
 	@Override
