@@ -45,6 +45,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -76,8 +81,8 @@ public class UAIMARSolver {
 	
 	public static void main(String[] args) throws IOException {
 		
-		if (args.length != 2) {
-			throw new IllegalArgumentException("Must specify UAI model directory or model file to solve and the directory containing the corresponding solutions");
+		if (args.length != 3) {
+			throw new IllegalArgumentException("Must specify UAI model directory or model file to solve, the directory containing the corresponding solutions, and the max time in seconds to solve a problem");
 		}
 		
 		File uaiInput = new File(args[0]);
@@ -88,6 +93,7 @@ public class UAIMARSolver {
 		if (!solutionDir.exists() || !solutionDir.isDirectory()) {
 			throw new IllegalArgumentException("Solution directory is invalid: "+solutionDir.getAbsolutePath());
 		}
+		int maxSolverTimeInSeconds = Integer.parseInt(args[2]);
 		
 		List<UAIModel> models = new ArrayList<>();
 		
@@ -113,7 +119,7 @@ public class UAIMARSolver {
 		models.stream().forEach(model -> {
 			System.out.println("Starting to Solve: "+model.getFile().getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
 			long start = System.currentTimeMillis();
-			boolean solved = solve(model, model.getEvidence(), model.getMARSolution());
+			boolean solved = solve(model, model.getEvidence(), model.getMARSolution(), maxSolverTimeInSeconds);
 			System.out.println("---- Took "+(System.currentTimeMillis() - start)+"ms. solved="+solved);
 			
 			modelSolvedStatus.put(model.getFile().getName(), solved);
@@ -126,134 +132,167 @@ public class UAIMARSolver {
 		System.out.println("#models unsolved="+modelSolvedStatus.values().stream().filter(status -> status == false).count());
 	}
 	
-	public static boolean solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
-		System.out.println("#variables="+model.numberVariables());
-		System.out.println("#tables="+model.numberTables());
-		System.out.println("#unique function tables="+model.numberUniqueFunctionTables());
-		System.out.println("Largest variable cardinality="+model.largestCardinality());
-		System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
-		System.out.println("Total #entries across all function tables="+model.totalNumberEntriesForAllFunctionTables());
+	public static boolean solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, int maxSolverTimeInSeconds) {
+		boolean result = false;
+		
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		Future<Boolean> future   = executor.submit(new SolverTask(model, evidence, solution));  
+		
+		try {
+            System.out.println("Started..");
+            result = future.get(maxSolverTimeInSeconds, TimeUnit.SECONDS);
+            System.out.println("Finished!");
+        }
+		catch (Throwable t) {
+            System.out.println("Terminated! : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));
+        }
 
-		double totalNumberUniqueEntries        = 0;
-		double totalCompressedEntries          = 0;
-		double bestIndividualCompressionRatio  = 100; // i.e. none at all
-		double worstIndividualCompressionRatio = 0;
-		List<Expression> tables = new ArrayList<>();
-		for (int i = 0; i < model.numberUniqueFunctionTables(); i++) {
-			FunctionTable table = model.getUniqueFunctionTable(i);
-			
-			totalNumberUniqueEntries += table.numberEntries();
-			
-			Expression genericTableExpression  = constructGenericTableExpression(table);
-			
-			double compressedEntries = calculateCompressedEntries(genericTableExpression);
-			
-			double compressedRatio = compressedEntries / table.numberEntries();
-			if (compressedRatio < bestIndividualCompressionRatio) {
-				bestIndividualCompressionRatio = compressedRatio;
-			}
-			if (compressedRatio > worstIndividualCompressionRatio) {
-				worstIndividualCompressionRatio = compressedRatio;
-			}
-			
-			totalCompressedEntries += compressedEntries;
-			
-			for (int tableIdx : model.getTableIndexes(i)) {
-				Expression instanceTableExpression = convertGenericTableToInstance(table, genericTableExpression, model.getVariableIndexesForTable(tableIdx));
-				tables.add(instanceTableExpression);
-			}
-		}
-		
-		System.out.println("Table compression ratio           ="+(totalCompressedEntries/totalNumberUniqueEntries));
-		System.out.println("Best individual compression ratio ="+bestIndividualCompressionRatio);
-		System.out.println("Worst individual compression ratio="+worstIndividualCompressionRatio);
-		
-		// If Solving not to actually be performed (i.e. just getting a summary of the models) then 
-		// indicate failed to solve
-		if (DO_NOT_SOLVE) {
-			return false;
-		}
-		
-		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
-		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
-		for (int i = 0; i < model.numberVariables(); i++) {
-			int varCardinality = model.cardinality(i);
-			String varTypeName = UAIUtil.instanceTypeNameForVariable(i, varCardinality);
-			mapFromTypeNameToSizeString.put(varTypeName, Integer.toString(varCardinality));
-			mapFromVariableNameToTypeName.put(UAIUtil.instanceVariableName(i), varTypeName);
-		}
-		
-		Expression markovNetwork = Times.make(tables);
-
-		Expression evidenceExpr = null; 
-		List<Expression> conjuncts = new ArrayList<Expression>();
-		for (Map.Entry<Integer, Integer> entry : evidence.entrySet()) {
-			int varIdx = entry.getKey();
-			int valIdx = entry.getValue();
-			Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(varIdx));
-			Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, model.cardinality(varIdx)));
-			conjuncts.add(Equality.make(varExpr, valueExpr));
-		}
-		if (conjuncts.size() > 0) {
-			evidenceExpr = And.make(conjuncts);
-		}
-		System.out.println("mapFromTypeNameToSizeString="+mapFromTypeNameToSizeString);
-		System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
-		System.out.println("Markov Network=\n"+markovNetwork);
-		
-		ProbabilisticInference.Result queryResult = null;  // stores query marginal and reusable information for the next query
-		Map<Integer, List<Double>> computed = new LinkedHashMap<>();
-		for (int i = 0; i < model.numberVariables(); i++) {
-			int varCardinality = model.cardinality(i);
-			List<Integer> remainingQueryValueIdxs = IntStream.range(0, varCardinality).boxed().collect(Collectors.toList());
-			double[] values = new double[varCardinality];
-			while (remainingQueryValueIdxs.size() > 0) {
-				int queryValueIdx = remainingQueryValueIdxs.get(0);
-				Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(i));
-				Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(queryValueIdx, i, varCardinality));
-				Expression queryExpression = Equality.make(varExpr, valueExpr);	
-				queryResult = ProbabilisticInference.solveFactorGraphAndReturnIntermediateInformation(markovNetwork, false, queryResult, queryExpression, evidenceExpr, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
-				Expression marginal = queryResult.getQueryMarginal();
-				
-				if (evidenceExpr == null) {
-					System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);
-				}
-				else {
-					System.out.println("Query posterior probability P(" + queryExpression + " | " + evidenceExpr + ") is: " + marginal);
-				}
-				
-				Map<Expression, Integer> possibleValueExprToIndex = new LinkedHashMap<>();
-				possibleValueExprToIndex.put(valueExpr, queryValueIdx);
-				if (IfThenElse.isIfThenElse(marginal)) {
-					for (Integer c : remainingQueryValueIdxs) {
-						possibleValueExprToIndex.put(Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i, varCardinality)), c);
-					}
-				}
-				
-				assignComputedValues(varExpr, marginal, possibleValueExprToIndex, remainingQueryValueIdxs, values);
-			}
-			computed.put(i, Arrays.stream(values).boxed().collect(Collectors.toList()));
-		}
-		
-		List<Integer> diffs = UAICompare.compareMAR(solution, computed);
-		System.out.println("----");
-		boolean result = true;
-		if (diffs.size() == 0) {
-			System.out.println("Computed values match solution: "+computed);
-		}
-		else {
-			result = false; // Failed to solve correctly
-			System.err.println("These variables "+diffs+" did not match the solution.");
-			System.err.println("solution="+solution);
-			System.err.println("computed="+computed);
-		}
-		
-		return result;
+        executor.shutdownNow();
+        
+		return result;		
 	}
 	
 	//
 	// PRIVATE
 	//
+	static class SolverTask implements Callable<Boolean> {
+		private GraphicalNetwork           model;
+		private Map<Integer, Integer>      evidence;
+		private Map<Integer, List<Double>> solution;
+		
+		SolverTask(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
+			this.model    = model;
+			this.evidence = evidence;
+			this.solution = solution;
+		}
+		
+		@Override
+		public Boolean call() throws Exception {
+			System.out.println("#variables="+model.numberVariables());
+			System.out.println("#tables="+model.numberTables());
+			System.out.println("#unique function tables="+model.numberUniqueFunctionTables());
+			System.out.println("Largest variable cardinality="+model.largestCardinality());
+			System.out.println("Largest # entries="+model.largestNumberOfFunctionTableEntries());
+			System.out.println("Total #entries across all function tables="+model.totalNumberEntriesForAllFunctionTables());
+
+			double totalNumberUniqueEntries        = 0;
+			double totalCompressedEntries          = 0;
+			double bestIndividualCompressionRatio  = 100; // i.e. none at all
+			double worstIndividualCompressionRatio = 0;
+			List<Expression> tables = new ArrayList<>();
+			for (int i = 0; i < model.numberUniqueFunctionTables(); i++) {
+				FunctionTable table = model.getUniqueFunctionTable(i);
+				
+				totalNumberUniqueEntries += table.numberEntries();
+				
+				Expression genericTableExpression  = constructGenericTableExpression(table);
+				
+				double compressedEntries = calculateCompressedEntries(genericTableExpression);
+				
+				double compressedRatio = compressedEntries / table.numberEntries();
+				if (compressedRatio < bestIndividualCompressionRatio) {
+					bestIndividualCompressionRatio = compressedRatio;
+				}
+				if (compressedRatio > worstIndividualCompressionRatio) {
+					worstIndividualCompressionRatio = compressedRatio;
+				}
+				
+				totalCompressedEntries += compressedEntries;
+				
+				for (int tableIdx : model.getTableIndexes(i)) {
+					Expression instanceTableExpression = convertGenericTableToInstance(table, genericTableExpression, model.getVariableIndexesForTable(tableIdx));
+					tables.add(instanceTableExpression);
+				}
+			}
+			
+			System.out.println("Table compression ratio           ="+(totalCompressedEntries/totalNumberUniqueEntries));
+			System.out.println("Best individual compression ratio ="+bestIndividualCompressionRatio);
+			System.out.println("Worst individual compression ratio="+worstIndividualCompressionRatio);
+			
+			// If Solving not to actually be performed (i.e. just getting a summary of the models) then 
+			// indicate failed to solve
+			if (DO_NOT_SOLVE) {
+				return false;
+			}
+			
+			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
+			Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
+			for (int i = 0; i < model.numberVariables(); i++) {
+				int varCardinality = model.cardinality(i);
+				String varTypeName = UAIUtil.instanceTypeNameForVariable(i, varCardinality);
+				mapFromTypeNameToSizeString.put(varTypeName, Integer.toString(varCardinality));
+				mapFromVariableNameToTypeName.put(UAIUtil.instanceVariableName(i), varTypeName);
+			}
+			
+			Expression markovNetwork = Times.make(tables);
+
+			Expression evidenceExpr = null; 
+			List<Expression> conjuncts = new ArrayList<Expression>();
+			for (Map.Entry<Integer, Integer> entry : evidence.entrySet()) {
+				int varIdx = entry.getKey();
+				int valIdx = entry.getValue();
+				Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(varIdx));
+				Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, model.cardinality(varIdx)));
+				conjuncts.add(Equality.make(varExpr, valueExpr));
+			}
+			if (conjuncts.size() > 0) {
+				evidenceExpr = And.make(conjuncts);
+			}
+			System.out.println("mapFromTypeNameToSizeString="+mapFromTypeNameToSizeString);
+			System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
+			System.out.println("Markov Network=\n"+markovNetwork);
+			
+			ProbabilisticInference.Result queryResult = null;  // stores query marginal and reusable information for the next query
+			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
+			for (int i = 0; i < model.numberVariables(); i++) {
+				int varCardinality = model.cardinality(i);
+				List<Integer> remainingQueryValueIdxs = IntStream.range(0, varCardinality).boxed().collect(Collectors.toList());
+				double[] values = new double[varCardinality];
+				while (remainingQueryValueIdxs.size() > 0) {
+					int queryValueIdx = remainingQueryValueIdxs.get(0);
+					Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(i));
+					Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(queryValueIdx, i, varCardinality));
+					Expression queryExpression = Equality.make(varExpr, valueExpr);	
+					queryResult = ProbabilisticInference.solveFactorGraphAndReturnIntermediateInformation(markovNetwork, false, queryResult, queryExpression, evidenceExpr, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
+					Expression marginal = queryResult.getQueryMarginal();
+					
+					if (evidenceExpr == null) {
+						System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);
+					}
+					else {
+						System.out.println("Query posterior probability P(" + queryExpression + " | " + evidenceExpr + ") is: " + marginal);
+					}
+					
+					Map<Expression, Integer> possibleValueExprToIndex = new LinkedHashMap<>();
+					possibleValueExprToIndex.put(valueExpr, queryValueIdx);
+					if (IfThenElse.isIfThenElse(marginal)) {
+						for (Integer c : remainingQueryValueIdxs) {
+							possibleValueExprToIndex.put(Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(c, i, varCardinality)), c);
+						}
+					}
+					
+					assignComputedValues(varExpr, marginal, possibleValueExprToIndex, remainingQueryValueIdxs, values);
+				}
+				computed.put(i, Arrays.stream(values).boxed().collect(Collectors.toList()));
+			}
+			
+			List<Integer> diffs = UAICompare.compareMAR(solution, computed);
+			System.out.println("----");
+			boolean result = true;
+			if (diffs.size() == 0) {
+				System.out.println("Computed values match solution: "+computed);
+			}
+			else {
+				result = false; // Failed to solve correctly
+				System.err.println("These variables "+diffs+" did not match the solution.");
+				System.err.println("solution="+solution);
+				System.err.println("computed="+computed);
+			}
+			
+			return result;
+		}
+	}
+	
 	private static UAIModel read(File uaiFile, File solutionDir) throws IOException {
 		UAIModel model = UAIModelReader.read(uaiFile);
 		
