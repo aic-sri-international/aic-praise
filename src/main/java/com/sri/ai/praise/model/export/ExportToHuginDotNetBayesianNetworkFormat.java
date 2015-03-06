@@ -106,7 +106,7 @@ public class ExportToHuginDotNetBayesianNetworkFormat {
 			explicitSortSizes[v] = new Pair<String, Integer>(args[i], Integer.valueOf(args[i+1]));
 		}
 		
-		try (final Writer writer = new BufferedWriter(new FileWriter(args[2]));){
+		try (final Writer writer = new BufferedWriter(new FileWriter(args[2]))) {
 			final GroundedModelResult groundedModelResult = ModelGrounding.groundModel(modelDeclaration, explicitSortSizes);
 		
 			export(groundedModelResult, writer);
@@ -126,7 +126,7 @@ public class ExportToHuginDotNetBayesianNetworkFormat {
 		RewritingProcess process = groundedModelResult.getRewritingProcess();
 		GroundedModelMarkovNetwork groundedMarkovNetwork = new GroundedModelMarkovNetwork(groundedModelResult);
 		
-		// Collect the date required by the Hugin Output utility.
+		// Collect the data required by the Hugin Output utility.
 		Map<Integer, String>       varIdxToName        = new LinkedHashMap<>();
 		Map<Integer, List<String>> varIdxToRangeValues = new LinkedHashMap<>();
 		

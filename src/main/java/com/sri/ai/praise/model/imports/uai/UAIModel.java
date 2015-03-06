@@ -46,7 +46,7 @@ import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
+import com.sri.ai.praise.model.grounded.markov.MarkovNetwork;
 
 /**
  * In memory representation of an Uncertainty in Artificial Intelligence (UAI) 
@@ -55,7 +55,7 @@ import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
  * @author oreilly
  */
 @Beta
-public class UAIModel implements GraphicalNetwork {	
+public class UAIModel implements MarkovNetwork {	
 	private File file;
 	private UAIModelType type;
 	private Map<Integer, Integer> varIdxToCardinality                        = new LinkedHashMap<>();
