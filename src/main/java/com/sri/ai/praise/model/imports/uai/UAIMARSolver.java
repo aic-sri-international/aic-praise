@@ -64,8 +64,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.application.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.grinder.library.number.Times;
+import com.sri.ai.grinder.plaindpll.application.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 
