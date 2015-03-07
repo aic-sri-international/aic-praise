@@ -37,6 +37,9 @@
  */
 package com.sri.ai.praise.model.imports.uai;
 
+import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructGenericTableExpression;
+import static com.sri.ai.praise.model.imports.uai.UAIUtil.convertGenericTableToInstance;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,13 +64,10 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.ProbabilisticInference;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.application.ProbabilisticInference;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
-
-import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructGenericTableExpression;
-import static com.sri.ai.praise.model.imports.uai.UAIUtil.convertGenericTableToInstance;
 
 /**
  * 
