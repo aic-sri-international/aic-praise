@@ -64,7 +64,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.equality.cardinality.plaindpll.application.ProbabilisticInference;
+import com.sri.ai.grinder.library.equality.cardinality.plaindpll.application.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
@@ -242,7 +242,7 @@ public class UAIMARSolver {
 			System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
 			System.out.println("Markov Network=\n"+markovNetwork);
 			
-			ProbabilisticInference.Result queryResult = null;  // stores query marginal and reusable information for the next query
+			InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, evidenceExpr, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
 				int varCardinality = model.cardinality(i);
@@ -253,8 +253,8 @@ public class UAIMARSolver {
 					Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(i));
 					Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(queryValueIdx, i, varCardinality));
 					Expression queryExpression = Equality.make(varExpr, valueExpr);	
-					queryResult = ProbabilisticInference.solveFactorGraphAndReturnIntermediateInformation(markovNetwork, false, queryResult, queryExpression, evidenceExpr, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
-					Expression marginal = queryResult.getQueryMarginal();
+					Expression marginal;
+					marginal = inferencer.solve(queryExpression);
 					
 					if (evidenceExpr == null) {
 						System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);
