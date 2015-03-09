@@ -53,6 +53,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -65,6 +66,7 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Times;
+import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.application.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
@@ -113,6 +115,7 @@ public class UAIMARSolver {
 		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.numberTables(), model2.numberTables()));
 		
 		Map<String, Boolean> modelSolvedStatus = new LinkedHashMap<>();
+		Map<String, Long>    modelSolvedTime   = new LinkedHashMap<>();
 		
 		System.out.println("#models read="+models.size());
 		final AtomicInteger cnt = new AtomicInteger(1);
@@ -120,13 +123,15 @@ public class UAIMARSolver {
 			System.out.println("Starting to Solve: "+model.getFile().getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
 			long start = System.currentTimeMillis();
 			boolean solved = solve(model, model.getEvidence(), model.getMARSolution(), maxSolverTimeInSeconds);
-			System.out.println("---- Took "+(System.currentTimeMillis() - start)+"ms. solved="+solved);
+			long took = (System.currentTimeMillis() - start);
+			System.out.println("---- Took "+took+"ms. solved="+solved);
 			
 			modelSolvedStatus.put(model.getFile().getName(), solved);
+			modelSolvedTime.put(model.getFile().getName(), took);
 		});
 		
 		System.out.println("MODELS SOLVE STATUS");
-		modelSolvedStatus.entrySet().stream().forEach(e -> System.out.printf("%30s %b\n", e.getKey(), e.getValue()));	
+		modelSolvedStatus.entrySet().stream().forEach(e -> System.out.printf("%-25s %-5b %12sms.\n", e.getKey(), e.getValue(), modelSolvedTime.get(e.getKey())));	
 		System.out.println("SUMMARY");
 		System.out.println("#models   solved="+modelSolvedStatus.values().stream().filter(status -> status == true).count());
 		System.out.println("#models unsolved="+modelSolvedStatus.values().stream().filter(status -> status == false).count());
@@ -136,13 +141,27 @@ public class UAIMARSolver {
 		boolean result = false;
 		
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		Future<Boolean> future   = executor.submit(new SolverTask(model, evidence, solution));  
+		SolverTask      solver   = new SolverTask(model, evidence, solution);
+		Future<Boolean> future   = executor.submit(solver);  
 		
 		try {
             System.out.println("Started..");
             result = future.get(maxSolverTimeInSeconds, TimeUnit.SECONDS);
             System.out.println("Finished!");
         }
+		catch (TimeoutException toe) {
+			System.out.println("Timeout occurred, interrupting solver.");
+			solver.interrupt();
+			try {
+				// Wait until the solver shuts down properly from the interrupt
+				System.out.println("Waiting for interrupted result");
+				result = future.get();
+				System.out.println("Finished waiting for interrupted result");
+			}
+			catch (Throwable t) {
+				System.out.println("Finished waiting for interrupted result : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));
+			}
+		}
 		catch (Throwable t) {
             System.out.println("Terminated! : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));
         }
@@ -159,11 +178,47 @@ public class UAIMARSolver {
 		private GraphicalNetwork           model;
 		private Map<Integer, Integer>      evidence;
 		private Map<Integer, List<Double>> solution;
+		//
+		private InferenceForFactorGraphAndEvidence inferencer;
+		boolean interrupted = false;
+		private Solver genericTableSolver = null;
 		
 		SolverTask(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
 			this.model    = model;
 			this.evidence = evidence;
 			this.solution = solution;
+		}
+		
+		public Solver apply(Solver solver) {
+			this.genericTableSolver = solver;
+			if (interrupted) {
+				interrupt();
+			}
+			return solver;
+		}
+		
+		public void interrupt() {
+			interrupted = true;
+			
+			if (genericTableSolver != null) {
+				try {
+					genericTableSolver.interrupt();
+					System.out.println("Generic Table Compression Solver interrupted (c).");
+				}
+				catch (Throwable t) {
+					System.out.println("Generic Table Compression Solver interrupted (e) : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));
+				}
+			}
+			
+			if (inferencer != null) {
+				try {
+					inferencer.interrupt();
+					System.out.println("Solver interrupted (c).");
+				}
+				catch (Throwable t) {
+					System.out.println("Solver interrupted (e) : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));
+				}
+			}	
 		}
 		
 		@Override
@@ -185,7 +240,12 @@ public class UAIMARSolver {
 				
 				totalNumberUniqueEntries += table.numberEntries();
 				
-				Expression genericTableExpression  = constructGenericTableExpression(table);
+				if (interrupted) {
+					System.out.println("Solver Interrupted (t).");
+					return false;
+				}
+				
+				Expression genericTableExpression  = constructGenericTableExpression(table, this::apply);
 				
 				double compressedEntries = calculateCompressedEntries(genericTableExpression);
 				
@@ -238,11 +298,16 @@ public class UAIMARSolver {
 			if (conjuncts.size() > 0) {
 				evidenceExpr = And.make(conjuncts);
 			}
-			System.out.println("mapFromTypeNameToSizeString="+mapFromTypeNameToSizeString);
-			System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
-			System.out.println("Markov Network=\n"+markovNetwork);
 			
-			InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, evidenceExpr, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
+			//System.out.println("mapFromTypeNameToSizeString="+mapFromTypeNameToSizeString);
+			//System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
+			//System.out.println("Markov Network=\n"+markovNetwork);
+			
+			if (interrupted) {
+				System.out.println("Solver Interrupted (b).");
+				return false;
+			}
+			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, evidenceExpr, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
 				int varCardinality = model.cardinality(i);
@@ -254,6 +319,10 @@ public class UAIMARSolver {
 					Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(queryValueIdx, i, varCardinality));
 					Expression queryExpression = Equality.make(varExpr, valueExpr);	
 					Expression marginal;
+					if (interrupted) {
+						System.out.println("Solver Interrupted (l).");
+						return false;
+					}
 					marginal = inferencer.solve(queryExpression);
 					
 					if (evidenceExpr == null) {

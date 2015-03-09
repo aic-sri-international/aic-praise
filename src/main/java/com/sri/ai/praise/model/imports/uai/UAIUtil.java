@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -52,6 +53,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.plaindpll.api.GroupProblemType;
+import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.api.Theory;
 import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.problemtype.Max;
@@ -84,7 +86,7 @@ public class UAIUtil {
 		return line.split("\\s+");
 	}
 	
-	public static Expression constructGenericTableExpression(FunctionTable functionTable) {
+	public static Expression constructGenericTableExpression(FunctionTable functionTable, Function<Solver, Solver> solverListener) {
 		StringBuilder table = new StringBuilder();
 		CartesianProductEnumeration<Integer> cartesianProduct = new CartesianProductEnumeration<>(cardinalityValues(functionTable));
 		int cnt = 0;
@@ -128,9 +130,13 @@ public class UAIUtil {
 		
 		// The solver for the parameters above.
 		SGDPLLT solver = new SGDPLLT(theory, problemType);
+		
+		solverListener.apply(solver);
 	
 		// Solve the problem.
 		Expression result = solver.solve(tableExpr, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);	
+		
+		solverListener.apply(null);
 		
 		return result;
 	}
