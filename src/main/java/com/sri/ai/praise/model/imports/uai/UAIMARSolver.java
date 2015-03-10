@@ -63,8 +63,10 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.application.InferenceForFactorGraphAndEvidence;
@@ -164,6 +166,7 @@ public class UAIMARSolver {
 		}
 		catch (Throwable t) {
             System.out.println("Terminated! : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));
+            t.printStackTrace();
         }
 
         executor.shutdownNow();
@@ -216,7 +219,7 @@ public class UAIMARSolver {
 					System.out.println("Solver interrupted (c).");
 				}
 				catch (Throwable t) {
-					System.out.println("Solver interrupted (e) : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));
+					System.out.println("Solver interrupted (e) : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));					
 				}
 			}	
 		}
@@ -401,8 +404,9 @@ public class UAIMARSolver {
 	}
 	
 	private static void assignComputedValues(Expression varExpr, Expression marginal, Map<Expression, Integer> possibleValueExprToIndex, List<Integer> remainingQueryValueIdxs, double[] values) {
-		
+		boolean leafValue = true;
 		if (IfThenElse.isIfThenElse(marginal)) {
+			leafValue = false;
 			Expression condExpr = IfThenElse.condition(marginal);
 			int valueIdx = identifyValueIdx(varExpr, condExpr, possibleValueExprToIndex);
 			Expression thenExpr = IfThenElse.thenBranch(marginal);
@@ -417,13 +421,19 @@ public class UAIMARSolver {
 			Expression elseExpr = IfThenElse.elseBranch(marginal);
 			assignComputedValues(varExpr, elseExpr, possibleValueExprToIndex, remainingQueryValueIdxs, values);
 		}
-		else {
+		else if (Expressions.hasFunctor(marginal, FunctorConstants.DIVISION)) {
+			marginal = Division.simplify(marginal);
+		}
+		
+		
+		if (leafValue) {
 			if (possibleValueExprToIndex.size() != 1) {
-				throw new IllegalStateException("Unable to identify what value index to assing the marginal too: "+marginal+" to "+possibleValueExprToIndex);
+				throw new IllegalStateException("Unable to identify what value index to assing the marginal : "+marginal+" to "+possibleValueExprToIndex);
 			}
 			int valueIdx = possibleValueExprToIndex.values().iterator().next();
 			possibleValueExprToIndex.clear();
 			remainingQueryValueIdxs.remove(remainingQueryValueIdxs.indexOf(valueIdx));
+			
 			values[valueIdx] = marginal.rationalValue().doubleValue();
 		}
 	}
