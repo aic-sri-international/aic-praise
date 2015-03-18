@@ -58,6 +58,7 @@ import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.util.Util;
 
 /**
  * Default implementation of {@link LBPRewriter#R_intensional_simplification}.
@@ -99,7 +100,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 		Expression intSetCondition = ((IntensionalSet) intensionalSet).getCondition();
 		
 		IndexExpressionsSet indexExpressions = ((IntensionalSet) intensionalSet).getIndexExpressions();
-		assert indexExpressions instanceof ExtensionalIndexExpressionsSet : "IntensionalSimplification not implemented for intensional sets with non-extensional index expressions"; 
+		Util.myAssert(() -> indexExpressions instanceof ExtensionalIndexExpressionsSet, "IntensionalSimplification not implemented for intensional sets with non-extensional index expressions"); 
 		List<Expression> intensionalSetIndexExpressions = new ArrayList<Expression>(((ExtensionalIndexExpressionsSet)indexExpressions).getList());
 		Object[]         cPrimeAndiEqualsBeta   = new Object[3];
 		
