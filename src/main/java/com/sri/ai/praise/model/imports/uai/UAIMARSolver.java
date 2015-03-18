@@ -137,6 +137,8 @@ public class UAIMARSolver {
 		System.out.println("SUMMARY");
 		System.out.println("#models   solved="+modelSolvedStatus.values().stream().filter(status -> status == true).count());
 		System.out.println("#models unsolved="+modelSolvedStatus.values().stream().filter(status -> status == false).count());
+		
+		System.exit(0);
 	}
 	
 	public static boolean solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, int maxSolverTimeInSeconds) {
