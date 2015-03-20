@@ -47,10 +47,8 @@ term
       // universal quantification, e.g.: for all X : X != a
     | FOR ALL index=term ':' body=term #forAll  // <boolean-typed> terms
       // existential quantification, e.g.: there exists X : X = a
-    | THERE EXISTS index=term ':' body=term #thereExists // <boolean-typed> terms
-    | term potential #termPotential
-    | CONSTANT potential  #constantPotential
-    | VARIABLE potential  #variablePotential
+    | THERE EXISTS index=term ':' body=term #thereExists // <boolean-typed> terms    
+    | term potential #termPotential  
     | CONSTANT #constantTerm
     | VARIABLE #constantVariable
     ;
