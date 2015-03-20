@@ -1,0 +1,27 @@
+.scroll-pane > .viewport {
+   -fx-background-color: transparent;
+}
+
+.scroll-pane {
+   -fx-background-color: white;
+}
+
+.contentPane {
+    -fx-border-color: lightgray;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-padding: 1px;
+}
+
+.hiddenSplitter {
+    -fx-background-color: null;
+    -fx-padding: 0px;
+}
+
+.hiddenSplitter *.split-pane-divider,
+        #hiddenSplitter *.vertical-grabber,
+        #hiddenSplitter *.horizontal-grabber {
+    -fx-background-color: null;
+    -fx-border-color: null;
+    -fx-padding: 3px;
+}
