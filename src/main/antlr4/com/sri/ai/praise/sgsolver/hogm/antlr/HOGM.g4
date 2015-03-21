@@ -6,7 +6,7 @@ model
     
 statement
     : declaration
-    | term     // <number-typed> term;
+    | term ';' 
     ;
 
 declaration
@@ -14,78 +14,91 @@ declaration
     | random_variable_decl
     ;
     
-sort_decl // sort VariableName [ ":" ( number | "Unknown" ) [ ", " constant+ ] ]
-    : SORT name=VARIABLE (':' size=(INTEGER | UNKNOWN) (',' constants+=CONSTANT)*)?
+sort_decl // sort Name [ ":" ( number | "Unknown" ) [ ", " constant+ ] ]
+    : SORT name=sort_name (':' size=(INTEGER | UNKNOWN) (',' constants+=constant_name)*)? (';')?
     ;
 
 // "random" constantName : SortName
-// "random" constantName ":" SortName (',' SortName)* '->' SortName
+// "random" constantName ":" SortName ('x' SortName)* '->' SortName
 random_variable_decl 
-    : RANDOM name=CONSTANT ':' range=VARIABLE
-    | RANDOM name=CONSTANT ':' parameters+=VARIABLE (',' parameters+=VARIABLE)* '->' range=VARIABLE
+    : RANDOM name=constant_name ':' range=sort_name (';')?
+    | RANDOM name=constant_name ':' parameters+=sort_name (X parameters+=sort_name)* '->' range=sort_name (';')?
     ;
     
 term
       // parenthesis, e.g.:(1+2)
     : '(' term ')' #parentheses
       // function application, e.g.: f(X)
-    | functor=functor_name '(' ( args+=term (',' args+=term)* )? ')' #functionApplication
+    | function_application #functionApplication
       // not, e.g.: not A and B -> (not(A)) and B
     | NOT term #not // <boolean-typed> term
+      // negative, e.g.: 2 * -1 -> 2 * (-1)
+    | '-' term #unaryMinus // We set the unary minus to higher precedence
+    // NOTE:  P)arentheses, E)xponents, ( M)ultiplication, D)ivision ), ( A)ddition, S)ubtraction )
+    // see: http://en.wikipedia.org/wiki/Order_of_operations
+	  // exponentiation, e.g. 2^3^4 ---> 2^(3^4)
+	|  <assoc=right> base=term '^' exponent=term #exponentiation
+	  // multiplication or division, e.g.: 2*3/2 ---> 2*(3/2)
+	| leftop=term op=('*' | '/') rightop=term #multiplicationOrDivision
+	  // addition or subtraction, e.g.: 1-2+3 ---> (1-2)+3
+	| leftop=term op=('+' | '-') rightop=term #additionOrSubtraction
       // comparison operators, e.g.: X = Y, 2 < 3
     | leftop=term op=('<' | '<=' | '=' | '!=' | '>=' | '>') rightop=term #comparison
       // conjunction, e.g.: A or B and C ---> A or (B and C)
-    | leftconj=term AND rightconj=term #conjunction // <boolean-typed> terms
+    | leftconj=term AND rightconj=term #conjunction
       // disjunction, e.g.: A => B or C ---> A => (B or C)
-    | leftconj=term OR rightconj=term #disjunction // <boolean-typed> terms
+    | leftconj=term OR rightconj=term #disjunction
       // implication, e.g.: A = B => C = D
-    |<assoc=right> antecedent=term IMPLICATION consequent=term #implication // <boolean-typed> terms
+    |<assoc=right> antecedent=term IMPLICATION consequent=term #implication
       // biconditional, e.g.: A = B <=> C = D
-    |<assoc=right> leftop=term BICONDITIONAL rightop=term #biconditional // <boolean-typed> terms
+    |<assoc=right> leftop=term BICONDITIONAL rightop=term #biconditional
       // conditional, e.g.: if X = Y then 1 else 2
-    | IF condition=term THEN thenbranch=term ELSE elsebranch=term #conditional // same type terms on all leafs
+    | IF condition=term THEN thenbranch=term ELSE elsebranch=term #conditional
       // universal quantification, e.g.: for all X : X != a
-    | FOR ALL index=term ':' body=term #forAll  // <boolean-typed> terms
+    | FOR ALL index=quantifier_index ':' body=term #forAll
       // existential quantification, e.g.: there exists X : X = a
-    | THERE EXISTS index=term ':' body=term #thereExists // <boolean-typed> terms    
-    | term potential #termPotential  
-    | CONSTANT #constantTerm
-    | VARIABLE #constantVariable
-    ;
-
-// NOTE:  P)arentheses, E)xponents, ( M)ultiplication, D)ivision ), ( A)ddition, S)ubtraction )
-// see: http://en.wikipedia.org/wiki/Order_of_operations
-potential
-    :  // parenthesis, e.g.:(1+2)
-     '(' potential ')' #potentialWithParentheses
-       // negative, e.g.: 2 * -1 -> 2 * (-1)
-    | '-' potential #negative // We set the unary minus to higher precedence
-	  // exponentiation, e.g. 2^3^4 ---> 2^(3^4)
-	|  <assoc=right> base=potential '^' exponent=potential #exponentiation
-	  // multiplication or division, e.g.: 2*3/2 ---> 2*(3/2)
-	| leftop=potential op=('*' | '/') rightop=potential #multiplicationOrDivision
-	  // addition or subtraction, e.g.: 1-2+3 ---> (1-2)+3
-	| leftop=potential op=('+' | '-') rightop=potential #additionOrSubtraction
-      // i.e. a constant value between [0-1]
-    | atomic_potential #potentialValue
-    ;
-
-atomic_potential
-    : INTEGER
-    | RATIONAL
+    | THERE EXISTS index=quantifier_index ':' body=term #thereExists
+    | term term #chainedTerm 
+    | symbol #atomicTerm
     ;
     
+function_application
+    : functor=functor_name '(' ( args+=term (',' args+=term)* )? ')'
+    ;
+    
+quantifier_index
+    : indexes+=quantifier_index_term (',' indexes+=quantifier_index_term)*
+    ;
+    
+quantifier_index_term
+    : function_application #quantifierIndexTermFunctionApplication
+    | VARIABLE #quantifierIndexTermVariable
+    | variable=VARIABLE 'in' sort=sort_name #quantifierIndexTermVariableInSort
+    ;
+
+sort_name
+    : VARIABLE
+    ;
+       
 functor_name
     : VARIABLE
+    | constant_name
+    ;
+        
+symbol
+    : VARIABLE
+    | constant_name
+    | constant_number
+    ;
+    
+constant_name
+    : X
     | CONSTANT
     | QUOTED_CONSTANT
     ;
     
-symbol
-    : VARIABLE
-    | CONSTANT
-    | QUOTED_CONSTANT
-    | INTEGER
+constant_number
+    : INTEGER
     | RATIONAL
     ;
 
@@ -116,6 +129,7 @@ ELSE                    : 'else' ;
 SORT                    : 'sort' ;
 UNKNOWN                 : 'Unknown';
 RANDOM                  : 'random' ;
+X                       : 'x' ;
 // Logic Operators
 IMPLICATION             : '=>' ;
 BICONDITIONAL           : '<=>' ;
