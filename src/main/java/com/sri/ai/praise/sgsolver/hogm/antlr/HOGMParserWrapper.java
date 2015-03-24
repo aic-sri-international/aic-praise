@@ -37,9 +37,6 @@
  */
 package com.sri.ai.praise.sgsolver.hogm.antlr;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -56,33 +53,24 @@ public class HOGMParserWrapper implements Parser {
 	
 	@Override
 	public Expression parse(String string) {
-		List<Expression> result = parseAll(string);
-		if (result == null || result.size() == 0) {
-			return null;
-		}
-		return result.get(0);
-	}
-
-	public List<Expression> parseAll(String string) {
-		List<Expression> result = parseAll(string, new ModelParseTreeRetriever());
+		Expression result = parse(string, new ModelParseTreeRetriever());
 
 		return result;
 	}
 	
-	public Expression parseFormula(String string) {
-		List<Expression> result = parseAll(string, new ATermParseTreeRetriever());
-		if (result == null || result.size() == 0) {
-			return null;
-		}
-		return result.get(0);
+	public Expression parseTerm(String string) {
+		Expression result = parse(string, new ATermParseTreeRetriever());
+		return result;
 	}
 	
 	@Override
 	public void close() {
-	}
-
-	public List<Expression> parseAll(String string, ParseTreeRetriever parseTreeRetriever) {
-		List<Expression> result = new ArrayList<Expression>();
+	}	
+	//
+	// PRIVATE
+	//
+	private Expression parse(String string, ParseTreeRetriever parseTreeRetriever) {
+		Expression result = null;
 		
 		try {
 			ErrorListener lexerErrorListener = new ErrorListener("Lexer Error");
@@ -110,8 +98,7 @@ public class HOGMParserWrapper implements Parser {
 					lexer.removeErrorListeners();
 					parser.removeErrorListeners();
 					HOGMModelVisitor hogmModelVisitor = new HOGMModelVisitor();
-					Expression parseExpression = hogmModelVisitor.visit(tree);
-					result = parseTreeRetriever.extractResults(parseExpression);
+					result = hogmModelVisitor.visit(tree);
 				}
 			}
 		} catch (RecognitionException re) {
@@ -123,13 +110,8 @@ public class HOGMParserWrapper implements Parser {
 		return result;
 	}
 	
-	//
-	// PRIVATE
-	//
-	
 	private interface ParseTreeRetriever {
 		ParseTree retrieve(HOGMParser ruleParser);
-		List<Expression> extractResults(Expression parseExpression);
 	}
 	
 	private class ModelParseTreeRetriever implements ParseTreeRetriever {
@@ -137,28 +119,12 @@ public class HOGMParserWrapper implements Parser {
 		public ParseTree retrieve(HOGMParser hogmParser) {
 			return hogmParser.model();
 		}
-		
-		@Override
-		public List<Expression> extractResults(Expression parseExpression) {
-			List<Expression> result = new ArrayList<Expression>();
-			for (Expression modelElement : parseExpression.getArguments()) {
-				result.add(modelElement);
-			}
-			return result;
-		}
 	}
 	
 	private class ATermParseTreeRetriever implements ParseTreeRetriever {
 		@Override
 		public ParseTree retrieve(HOGMParser hogmParser) {
 			return hogmParser.aterm();
-		}
-		
-		@Override
-		public List<Expression> extractResults(Expression parseExpression) {
-			List<Expression> result = new ArrayList<Expression>();
-			result.add(parseExpression); // Should just be the term
-			return result;
 		}
 	}
 

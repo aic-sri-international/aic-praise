@@ -81,6 +81,8 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 		terms.clear();
 		
 		ctx.statements.forEach(s -> visit(s));
+		
+// TODO - need to validate terms and convert to conditional potentials where appropriate.		
 
 		Expression result = Tuple.make(Tuple.make(sortDeclarations), Tuple.make(randomVariableDeclarations), Tuple.make(terms));
 
@@ -91,6 +93,21 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 	@Override 
 	public Expression visitAterm(@NotNull HOGMParser.AtermContext ctx) { 
 		Expression result = visit(ctx.term());
+		return result;
+	}
+	
+	@Override 
+	public Expression visitStatement(@NotNull HOGMParser.StatementContext ctx) { 
+		Expression result;
+		
+		if (ctx.declaration() != null) {
+			result = visit(ctx.declaration());
+		}
+		else {
+			result = visit(ctx.term());
+			terms.add(result);
+		}
+		
 		return result;
 	}
 	
