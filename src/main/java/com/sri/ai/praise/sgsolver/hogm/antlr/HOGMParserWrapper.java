@@ -37,9 +37,146 @@
  */
 package com.sri.ai.praise.sgsolver.hogm.antlr;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.tree.ParseTree;
+
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Parser;
 
 @Beta
-public class HOGMParserWrapper {
+public class HOGMParserWrapper implements Parser {
+	
+	@Override
+	public Expression parse(String string) {
+		List<Expression> result = parseAll(string);
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
 
+	public List<Expression> parseAll(String string) {
+		List<Expression> result = parseAll(string, new ModelParseTreeRetriever());
+
+		return result;
+	}
+	
+	public Expression parseFormula(String string) {
+		List<Expression> result = parseAll(string, new ATermParseTreeRetriever());
+		if (result == null || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
+	
+	@Override
+	public void close() {
+	}
+
+	public List<Expression> parseAll(String string, ParseTreeRetriever parseTreeRetriever) {
+		List<Expression> result = new ArrayList<Expression>();
+		
+		try {
+			ErrorListener lexerErrorListener = new ErrorListener("Lexer Error");
+			ErrorListener parseErrorListener = new ErrorListener("Parse Error");
+
+			ANTLRInputStream input = new ANTLRInputStream(string);
+			HOGMLexer lexer = new HOGMLexer(input);
+			
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
+			HOGMParser parser = new HOGMParser(tokens);
+			
+			lexer.removeErrorListeners();
+			parser.removeErrorListeners();
+			lexer.addErrorListener(lexerErrorListener);
+			parser.addErrorListener(parseErrorListener);
+
+			ParseTree tree = parseTreeRetriever.retrieve(parser);
+
+			boolean eof = parser.getInputStream().LA(1) == Recognizer.EOF;
+
+			if (!lexerErrorListener.errorsDetected && !parseErrorListener.errorsDetected) {
+				if (!eof) {
+					System.err.println("Unable to parse the complete input model: " + input);
+				} else {
+					lexer.removeErrorListeners();
+					parser.removeErrorListeners();
+					HOGMModelVisitor hogmModelVisitor = new HOGMModelVisitor();
+					Expression parseExpression = hogmModelVisitor.visit(tree);
+					result = parseTreeRetriever.extractResults(parseExpression);
+				}
+			}
+		} catch (RecognitionException re) {
+			re.printStackTrace();
+		} catch (RuntimeException re) {
+			re.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	//
+	// PRIVATE
+	//
+	
+	private interface ParseTreeRetriever {
+		ParseTree retrieve(HOGMParser ruleParser);
+		List<Expression> extractResults(Expression parseExpression);
+	}
+	
+	private class ModelParseTreeRetriever implements ParseTreeRetriever {
+		@Override
+		public ParseTree retrieve(HOGMParser hogmParser) {
+			return hogmParser.model();
+		}
+		
+		@Override
+		public List<Expression> extractResults(Expression parseExpression) {
+			List<Expression> result = new ArrayList<Expression>();
+			for (Expression modelElement : parseExpression.getArguments()) {
+				result.add(modelElement);
+			}
+			return result;
+		}
+	}
+	
+	private class ATermParseTreeRetriever implements ParseTreeRetriever {
+		@Override
+		public ParseTree retrieve(HOGMParser hogmParser) {
+			return hogmParser.aterm();
+		}
+		
+		@Override
+		public List<Expression> extractResults(Expression parseExpression) {
+			List<Expression> result = new ArrayList<Expression>();
+			result.add(parseExpression); // Should just be the term
+			return result;
+		}
+	}
+
+	private class ErrorListener extends BaseErrorListener {
+		public boolean errorsDetected = false;
+		private String name;
+
+		public ErrorListener(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public void syntaxError(Recognizer<?, ?> recognizer,
+				Object offendingSymbol, int line, int charPositionInLine,
+				String msg, RecognitionException e) {
+			System.err.println(name + ": line " + line + ":"
+					+ charPositionInLine + " " + msg);
+			errorsDetected = true;
+		}
+	}
 }
