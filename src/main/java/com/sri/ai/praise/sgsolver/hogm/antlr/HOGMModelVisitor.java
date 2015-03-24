@@ -62,15 +62,17 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.praise.sgsolver.model.HOGMModel;
+import com.sri.ai.praise.sgsolver.model.StatementInfo;
 
 @Beta
 public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 	// Note track bracketed expressions based on identity to ensure no accidental overwrite by value.
 	private Map<Expression, Expression> parenthesizedExpressions = new IdentityHashMap<Expression, Expression>(); 
 	//
-	private List<Expression> sortDeclarations           = new ArrayList<>();
-	private List<Expression> randomVariableDeclarations = new ArrayList<>();
-	private List<Expression> terms                      = new ArrayList<>();
+	private List<StatementInfo> sortDeclarations           = new ArrayList<>();
+	private List<StatementInfo> randomVariableDeclarations = new ArrayList<>();
+	private List<StatementInfo> terms                      = new ArrayList<>();
 
 	// model : statements+=statement* EOF
 	@Override 
@@ -82,9 +84,7 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 		
 		ctx.statements.forEach(s -> visit(s));
 		
-// TODO - need to validate terms and convert to conditional potentials where appropriate.		
-
-		Expression result = Tuple.make(Tuple.make(sortDeclarations), Tuple.make(randomVariableDeclarations), Tuple.make(terms));
+		Expression result = HOGMModel.validateAndConstruct(sortDeclarations, randomVariableDeclarations, terms);
 
 		return result;
 	}
@@ -92,7 +92,7 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 	// aterm : term EOF
 	@Override 
 	public Expression visitAterm(@NotNull HOGMParser.AtermContext ctx) { 
-		Expression result = visit(ctx.term());
+		Expression result = visit(ctx.term());	
 		return result;
 	}
 	
@@ -105,7 +105,7 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 		}
 		else {
 			result = visit(ctx.term());
-			terms.add(result);
+			terms.add(newStatementInfo(result, ctx));
 		}
 		
 		return result;
@@ -128,7 +128,7 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 				SortDeclaration.FUNCTOR_SORT_DECLARATION, name, size,
 				ExtensionalSet.makeUniSet(constants));
 		
-		sortDeclarations.add(result);
+		sortDeclarations.add(newStatementInfo(result, ctx));
 		
 		return result;
 	}
@@ -150,7 +150,7 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 				RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,
 				declarationArgs.toArray());
 		
-		randomVariableDeclarations.add(result);
+		randomVariableDeclarations.add(newStatementInfo(result, ctx));
 
 		return result; 
 	}
@@ -174,7 +174,7 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 				RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,
 				declarationArgs.toArray());
 		
-		randomVariableDeclarations.add(result);
+		randomVariableDeclarations.add(newStatementInfo(result, ctx));
 
 		return result;
 	}
@@ -408,6 +408,11 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 	//
 	// PROTECTED
 	//
+ 	protected StatementInfo newStatementInfo(Expression statement, ParserRuleContext ctx) {
+ 		StatementInfo result = new StatementInfo(statement, ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex());
+ 		return result;
+ 	}
+ 	
 	protected Expression newSymbol(String text) {
 		// Remove quotes from around quoted strings
 		if ((text.startsWith("'") && text.endsWith("'"))
