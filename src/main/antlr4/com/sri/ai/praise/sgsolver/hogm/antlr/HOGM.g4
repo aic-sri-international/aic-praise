@@ -4,6 +4,10 @@ model
     : statements+=statement* EOF
     ;
     
+aterm
+    : term EOF
+    ;
+    
 statement
     : declaration
     | term SEMICOLON
@@ -21,8 +25,8 @@ sort_decl // sort Name [ ":" ( number | "Unknown" ) [ ", " constant+ ] ]
 // "random" constantName : SortName
 // "random" constantName ":" SortName ('x' SortName)* '->' SortName
 random_variable_decl 
-    : RANDOM name=constant_name COLON range=sort_name (SEMICOLON)?
-    | RANDOM name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)?
+    : RANDOM name=constant_name COLON range=sort_name (SEMICOLON)? #propositionalRandomVariableDeclaration
+    | RANDOM name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)? #relationalRandomVariableDeclaration
     ;
     
 term
@@ -47,7 +51,7 @@ term
       // conjunction, e.g.: A or B and C ---> A or (B and C)
     | leftconj=term AND rightconj=term #conjunction
       // disjunction, e.g.: A => B or C ---> A => (B or C)
-    | leftconj=term OR rightconj=term #disjunction
+    | leftdisj=term OR rightdisj=term #disjunction
       // implication, e.g.: A = B => C = D
     |<assoc=right> antecedent=term IMPLICATION consequent=term #implication
       // biconditional, e.g.: A = B <=> C = D
@@ -58,7 +62,8 @@ term
     | FOR ALL index=quantifier_index COLON body=term #forAll
       // existential quantification, e.g.: there exists X : X = a
     | THERE EXISTS index=quantifier_index COLON body=term #thereExists
-    | term term #chainedTerm 
+      // condition=term(0) potential=term(1) ---> if condition then potential else 1-potential
+    | term term #shorthandConditionedPotential 
     | symbol #atomicTerm
     ;
     
