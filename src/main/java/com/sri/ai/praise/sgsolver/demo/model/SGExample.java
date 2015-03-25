@@ -35,33 +35,55 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo;
+package com.sri.ai.praise.sgsolver.demo.model;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 import com.google.common.annotations.Beta;
 
-import de.jensd.fx.glyphs.GlyphsStyle;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
 @Beta
-public class SGSolverDemoApp extends Application {
+public class SGExample {
+	private final String name;
+	private final String model;
+	private final List<String> defaultQueriesToRun;
+	
+	public SGExample(String name, String model, List<String> defaultQueriesToRun) {
+		this.name = name;
+		this.model = model;
+		this.defaultQueriesToRun = Collections.unmodifiableList(new ArrayList<>(defaultQueriesToRun));
+	}
 
-    @Override
-    public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("sgsolverdemo.fxml"));
-        primaryStage.setTitle("SG Solver");
-        Scene scene = new Scene(root, 1024, 768);
-        primaryStage.setScene(scene);
-        scene.getStylesheets().add("com/sri/ai/praise/sgsolver/demo/sgsolverdemo.css");
-        scene.getStylesheets().add(GlyphsStyle.BLUE.getStylePath());
-        primaryStage.show();
-    }
+	public String getName() {
+		return name;
+	}
 
+	public String getModel() {
+		return model;
+	}
 
-    public static void main(String[] args) {
-        launch(args);
-    }
+	public List<String> getDefaultQueriesToRun() {
+		return defaultQueriesToRun;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
+	
+	public static String getExampleFromResource(String resourceName) {
+		StringBuilder sb = new StringBuilder();
+		
+		try (Stream<String> lines = Files.lines(Paths.get(SGExample.class.getResource(resourceName).toURI()))) {			
+			lines.forEach(line -> sb.append(line+"\n"));			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		return sb.toString();
+	}
 }

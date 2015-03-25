@@ -37,7 +37,12 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
@@ -52,9 +57,12 @@ import javafx.scene.layout.AnchorPane;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
+import com.sri.ai.praise.sgsolver.demo.model.EarthquakeBurglaryAlarm;
+import com.sri.ai.praise.sgsolver.demo.model.SGExample;
 
 @Beta
-public class HOGMEditorController {
+public class HOGMEditorController implements ModelEditor {
+	public static final String EVIDENCE_SCENARIO_MARKER_PREFIX = "@";
 	
 	@FXML private AnchorPane modelEditorPane;
 	@FXML private Pagination evidencePagination;
@@ -64,6 +72,53 @@ public class HOGMEditorController {
 	//
 	private HOGMCodeArea modelCodeArea = new HOGMCodeArea();
 	private Map<Integer, HOGMCodeArea> evidenceCodeAreas = new HashMap<>();
+	
+	//
+	// START-ModelEditor
+	@Override
+	public List<SGExample> getExamples() {
+		return Arrays.asList(new EarthquakeBurglaryAlarm());
+	}
+	
+	@Override
+	public void setExample(SGExample example) {
+		evidencePagination.setPageCount(0);
+		evidenceCodeAreas.clear();
+		
+		List<StringBuilder> modelParts= new ArrayList<>();
+		StringBuilder modelPart = new StringBuilder();
+		modelParts.add(modelPart);
+		try (BufferedReader br = new BufferedReader(new StringReader(example.getModel()))) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				if (line.startsWith(EVIDENCE_SCENARIO_MARKER_PREFIX)) {
+					modelPart = new StringBuilder();
+					modelParts.add(modelPart);
+				}
+				else {
+					modelPart.append(line);
+					modelPart.append("\n");
+				}
+			}
+		} catch (Exception ex) {
+			// ignore
+		}
+		
+		modelCodeArea.setText(modelParts.get(0).toString());
+		if (modelParts.size() == 1) {
+			evidencePagination.setPageCount(1); // i.e. default evidence page
+		}
+		else {
+			for (int i = 1; i < modelParts.size(); i++) {
+				HOGMCodeArea evidenceCodeArea = new HOGMCodeArea();
+				evidenceCodeArea.setText(modelParts.get(i).toString());
+				evidenceCodeAreas.put(i-1, evidenceCodeArea);
+			}
+			evidencePagination.setPageCount(modelParts.size()-1);
+		}
+	}
+	// END-ModelEditor
+	//
 	
 	@FXML
 	private void initialize() {
@@ -89,9 +144,22 @@ public class HOGMEditorController {
 	
 	@FXML
 	private void addEvidencePage(ActionEvent ae) {
+		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
+		
+		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
+		evidenceCodeAreas.entrySet().forEach(e -> {
+			if (e.getKey() > currentPageIdx) {
+				newEvidenceCodeAreaPageIdxs.put(e.getKey()+1, e.getValue());
+			}
+			else {
+				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
+			}
+		});
+		evidenceCodeAreas.clear();
+		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);
+		
 		evidencePagination.setPageCount(evidencePagination.getPageCount()+1);
-	
-		evidencePagination.setCurrentPageIndex(evidencePagination.getPageCount()-1);
+		evidencePagination.setCurrentPageIndex(currentPageIdx+1);
 	}
 	
 	@FXML

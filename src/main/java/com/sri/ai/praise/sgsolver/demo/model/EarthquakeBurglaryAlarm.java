@@ -35,33 +35,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo;
+package com.sri.ai.praise.sgsolver.demo.model;
+
+import java.util.Arrays;
 
 import com.google.common.annotations.Beta;
 
-import de.jensd.fx.glyphs.GlyphsStyle;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
 @Beta
-public class SGSolverDemoApp extends Application {
+public class EarthquakeBurglaryAlarm extends SGExample {
 
-    @Override
-    public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("sgsolverdemo.fxml"));
-        primaryStage.setTitle("SG Solver");
-        Scene scene = new Scene(root, 1024, 768);
-        primaryStage.setScene(scene);
-        scene.getStylesheets().add("com/sri/ai/praise/sgsolver/demo/sgsolverdemo.css");
-        scene.getStylesheets().add(GlyphsStyle.BLUE.getStylePath());
-        primaryStage.show();
-    }
-
-
-    public static void main(String[] args) {
-        launch(args);
-    }
+	public EarthquakeBurglaryAlarm() {
+		super("Earthquake/Burglary/Alarm", 
+			   getExampleFromResource("earthquakeBurglaryAlarm.sgmodel"), 
+			   Arrays.asList("earthquake", "burglary"));
+	}
 }

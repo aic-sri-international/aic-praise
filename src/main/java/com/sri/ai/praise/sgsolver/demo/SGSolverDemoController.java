@@ -40,12 +40,14 @@ package com.sri.ai.praise.sgsolver.demo;
 import java.io.IOException;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.demo.model.SGExample;
 
 import de.jensd.fx.glyphs.GlyphsBuilder;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.GlyphsStack;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -70,7 +72,7 @@ public class SGSolverDemoController {
 	@FXML private Button saveButton;
 	@FXML private Button saveAsButton;
 	//
-	@FXML private ComboBox<String> examplesComboBox;
+	@FXML private ComboBox<SGExample> examplesComboBox;
 	//
 	@FXML private Button undoButton;
 	@FXML private Button redoButton;
@@ -86,7 +88,7 @@ public class SGSolverDemoController {
 	@FXML private AnchorPane editorPane;
 	//
 	//
-	@FXML private ComboBox queryComboBox;
+	@FXML private ComboBox<String> queryComboBox;
 	@FXML private Button queryExecuteButton;
 	@FXML private ProgressBar queryProgressBar;
 	//
@@ -101,7 +103,26 @@ public class SGSolverDemoController {
 	@FXML private Tooltip redoTooltip;
 	@FXML private Tooltip topExecuteTooltip;
 	@FXML private Tooltip queryExecuteTooltip;
+	//
+	ModelEditor activeModelEditor = null;
 	
+	//
+	// PRIVATE
+	//
+	@FXML
+	private void exampleSelected(ActionEvent ae) {
+		SGExample eg = examplesComboBox.getValue();
+		this.activeModelEditor.setExample(eg);
+		
+		if (eg.getDefaultQueriesToRun().size() > 0) {
+			eg.getDefaultQueriesToRun().forEach(query -> {
+				if (!queryComboBox.getItems().contains(query)) {
+					queryComboBox.getItems().add(query);
+				}
+			});
+			queryComboBox.setValue(eg.getDefaultQueriesToRun().get(0));
+		}
+	}
 
     @FXML
     private void initialize() throws IOException {
@@ -127,9 +148,24 @@ public class SGSolverDemoController {
     	
     	GlyphsDude.setIcon(queryExecuteButton, FontAwesomeIcons.PLAY, _iconMediumSize, ContentDisplay.GRAPHIC_ONLY);
     	
+    	setHOGMPerspective();
+    }
+    
+    private void setHOGMPerspective() throws IOException {
     	FXMLLoader editorLoader = new FXMLLoader(HOGMEditorController.class.getResource("hogmeditor.fxml"));
     	Pane editorPane = editorLoader.load();
     	FXUtil.anchor(editorPane);
     	this.editorPane.getChildren().add(editorPane);
+    	
+    	setEditorPerspective(editorLoader.getController());
+    }
+    
+    private void setEditorPerspective(ModelEditor modelEditor) {
+    	this.activeModelEditor = modelEditor;
+    	
+    	// Set up the examples
+    	examplesComboBox.getItems().clear();
+    	modelEditor.getExamples().forEach(eg -> examplesComboBox.getItems().add(eg));
+    	examplesComboBox.setValue(modelEditor.getExamples().get(0));
     }
 }
