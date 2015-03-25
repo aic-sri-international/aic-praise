@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane prefHeight="600.0" prefWidth="1024.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.HOGMEditorController">
+	<center>
+		<SplitPane dividerPositions="0.6" orientation="VERTICAL" styleClass="hiddenSplitter">
+         <items>
+            <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="contentPane">
+               <top>
+                  <Label text="Model" underline="true" BorderPane.alignment="CENTER_LEFT" />
+               </top>
+               <center>
+                  <Pagination maxPageIndicatorCount="1" pageCount="1" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+               </center>
+            </BorderPane>
+            <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="contentPane">
+               <top>
+                  <Label text="Evidence" underline="true" BorderPane.alignment="CENTER_LEFT" />
+               </top>
+               <center>
+                  <Pagination maxPageIndicatorCount="1" pageCount="1" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+               </center>
+            </BorderPane>
+         </items></SplitPane>
+	</center>
+</BorderPane>
