@@ -25,3 +25,8 @@
     -fx-border-color: null;
     -fx-padding: 3px;
 }
+
+.lineno {
+	-fx-background-color: rgb(61,114,144);
+	-fx-text-fill: white;
+}

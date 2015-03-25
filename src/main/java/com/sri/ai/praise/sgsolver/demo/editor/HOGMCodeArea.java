@@ -63,7 +63,7 @@ public class HOGMCodeArea extends AnchorPane {
 	//
 	private void initialize() {
 		codeArea = new CodeArea();
-		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea, digits -> "%"+ (digits < 2 ? 2 : digits) + "d"));
 		
 		FXUtil.anchor(codeArea);
 		
