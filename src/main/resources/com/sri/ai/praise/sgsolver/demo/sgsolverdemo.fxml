@@ -34,7 +34,7 @@
                      </tooltip></Button>
                   <Separator orientation="VERTICAL" />
                   <Label text="Example" />
-                  <ComboBox fx:id="examplesComboBox" prefWidth="220.0" />
+                  <ComboBox fx:id="examplesComboBox" prefWidth="300.0" />
                   <Separator orientation="VERTICAL" />
                   <Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
                      <tooltip>
@@ -136,6 +136,12 @@
                            </children>
                         </AnchorPane>
                      </center>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                     </padding>
                   </BorderPane>
                </top></BorderPane>
         </items>

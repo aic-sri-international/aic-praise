@@ -37,9 +37,96 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Pagination;
+import javafx.scene.layout.AnchorPane;
+
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
 
 @Beta
 public class HOGMEditorController {
-
+	
+	@FXML private AnchorPane modelEditorPane;
+	@FXML private Pagination evidencePagination;
+	@FXML private Menu evidenceMenu;
+	@FXML private MenuItem addEvidencePageMenuItem;
+	@FXML private MenuItem removeEvidencePageMenuItem;
+	//
+	private HOGMCodeArea modelCodeArea = new HOGMCodeArea();
+	private Map<Integer, HOGMCodeArea> evidenceCodeAreas = new HashMap<>();
+	
+	@FXML
+	private void initialize() {
+		evidenceMenu.setText("");
+		evidenceMenu.setGraphic(FXUtil.configMenuIcon());
+		
+		FXUtil.anchor(modelCodeArea);
+		modelEditorPane.getChildren().add(modelCodeArea);	
+		evidencePagination.pageCountProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {				
+				if (newValue.intValue() <= 1) {
+					removeEvidencePageMenuItem.setDisable(true);
+				}
+				else {
+					removeEvidencePageMenuItem.setDisable(false);
+				}
+			}
+		});
+		
+		evidencePagination.setPageCount(1);
+		evidencePagination.setPageFactory(this::createEvidencePage);
+	}
+	
+	@FXML
+	private void addEvidencePage(ActionEvent ae) {
+		evidencePagination.setPageCount(evidencePagination.getPageCount()+1);
+	
+		evidencePagination.setCurrentPageIndex(evidencePagination.getPageCount()-1);
+	}
+	
+	@FXML
+	private void removeEvidencePage(ActionEvent ae) {
+		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
+		evidenceCodeAreas.remove(currentPageIdx);
+		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
+		evidenceCodeAreas.entrySet().forEach(e -> {
+			if (e.getKey() > currentPageIdx) {
+				newEvidenceCodeAreaPageIdxs.put(e.getKey()-1, e.getValue());
+			}
+			else {
+				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
+			}
+		});
+		evidenceCodeAreas.clear();
+		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);	
+		// Reduce the # of pages
+		evidencePagination.setPageCount(evidencePagination.getPageCount()-1);
+		
+		if (currentPageIdx < evidencePagination.getPageCount()) {
+			evidencePagination.setCurrentPageIndex(currentPageIdx);
+		}
+		else {
+			evidencePagination.setCurrentPageIndex(evidencePagination.getPageCount()-1);
+		}
+	}
+	
+	private Node createEvidencePage(Integer pgIndex) {	
+		HOGMCodeArea evidencePage = evidenceCodeAreas.get(pgIndex);
+		if (evidencePage == null) {
+			evidencePage = new HOGMCodeArea();
+			evidenceCodeAreas.put(pgIndex, evidencePage);
+		}
+		
+		return evidencePage;
+	}
 }

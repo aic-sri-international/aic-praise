@@ -61,9 +61,9 @@ import javafx.scene.layout.Region;
 @Beta
 public class SGSolverDemoController {
 	//
-	private static final String _iconSmallSize = "17px";
+	private static final String _iconSmallSize  = "17px";
 	private static final String _iconMediumSize = "18px";
-	private static final String _iconSize      = "24px";
+	private static final String _iconSize       = "24px";
 	//
 	@FXML private Button newButton;
 	@FXML private Button openFileButton;
@@ -129,14 +129,7 @@ public class SGSolverDemoController {
     	
     	FXMLLoader editorLoader = new FXMLLoader(HOGMEditorController.class.getResource("hogmeditor.fxml"));
     	Pane editorPane = editorLoader.load();
-    	anchor(editorPane);
+    	FXUtil.anchor(editorPane);
     	this.editorPane.getChildren().add(editorPane);
-    }
-    
-    private void anchor(Pane pane) {
-        AnchorPane.setTopAnchor(pane, 0.0);
-        AnchorPane.setLeftAnchor(pane, 0.0);
-        AnchorPane.setRightAnchor(pane, 0.0);
-        AnchorPane.setBottomAnchor(pane, 0.0);
     }
 }

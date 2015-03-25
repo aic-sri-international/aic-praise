@@ -39,29 +39,29 @@ package com.sri.ai.praise.sgsolver.demo;
 
 import com.google.common.annotations.Beta;
 
-import de.jensd.fx.glyphs.GlyphsStyle;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import javafx.scene.Node;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import de.jensd.fx.glyphs.GlyphsBuilder;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
 @Beta
-public class SGSolverDemoApp extends Application {
-
-    @Override
-    public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("sgsolverdemo.fxml"));
-        primaryStage.setTitle("SG Solver");
-        Scene scene = new Scene(root, 1024, 768);
-        primaryStage.setScene(scene);
-        scene.getStylesheets().add("com/sri/ai/praise/sgsolver/demo/sgsolverdemo.css");
-        scene.getStylesheets().add(GlyphsStyle.DARK.getStylePath());
-        primaryStage.show();
+public class FXUtil {
+	
+    public static void anchor(Node node) {
+        AnchorPane.setTopAnchor(node, 0.0);
+        AnchorPane.setLeftAnchor(node, 0.0);
+        AnchorPane.setRightAnchor(node, 0.0);
+        AnchorPane.setBottomAnchor(node, 0.0);
     }
-
-
-    public static void main(String[] args) {
-        launch(args);
-    }
+    
+	public static Node configMenuIcon() {
+		HBox node = new HBox();
+		
+		node.getChildren().add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(FontAwesomeIcons.COG).size("12px").build());
+		node.getChildren().add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(FontAwesomeIcons.CARET_DOWN).size("10px").build());
+		
+		return node;
+	}
 }
