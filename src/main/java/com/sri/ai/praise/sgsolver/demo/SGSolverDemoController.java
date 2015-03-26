@@ -65,7 +65,7 @@ public class SGSolverDemoController {
 	//
 	private static final String _iconSmallSize  = "17px";
 	private static final String _iconMediumSize = "18px";
-	private static final String _iconSize       = "22px";
+	private static final String _iconSize       = "24px";
 	//
 	@FXML private Button newButton;
 	@FXML private Button openFileButton;
