@@ -1,3 +1,7 @@
+@MODEL:name=[Page 1] parts=[base-model,evidence#1] queries=[query#1,query#2]
+@MODEL:name=[Page 2] parts=[base-model,evidence#2] queries=[query#1,query#2]
+@MODEL:name=[Page 3] parts=[base-model,evidence#3] queries=[query#1,query#2]
+@FRAGMENT:base-model
 /**
  * Classic earthquake, burglary and alarm network with explaining away effect;
  * Try the given scenarios and query 'earthquake' and 'burglary' for each of them.
@@ -18,9 +22,18 @@ if earthquake
    else if burglary
       then alarm 0.9
       else alarm 0.01;
-@ Evidence Scenario #1
+     
+@FRAGMENT:evidence#1
 not alarm;
-@ Evidence Scenario #2
+
+@FRAGMENT:evidence#2
 alarm;
-@ Evidence Scenario #3
+
+@FRAGMENT:evidence#3
 alarm and not burglary;
+
+@FRAGMENT:query#1
+earthquake
+
+@FRAGMENT:query#2
+burglary

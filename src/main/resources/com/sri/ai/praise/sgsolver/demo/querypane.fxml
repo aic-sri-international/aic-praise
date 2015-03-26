@@ -7,66 +7,48 @@
 
 <BorderPane prefHeight="768.0" prefWidth="1024.0"
 	style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8"
-	xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.QueryController"
-	styleClass="contentPane">
+	xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.QueryController">
 	<top>
-		<BorderPane BorderPane.alignment="CENTER">
-			<left>
-				<HBox spacing="3.0" BorderPane.alignment="CENTER">
-					<children>
-						<VBox alignment="CENTER_LEFT">
-							<children>
-								<Label text="Query" />
-							</children>
-						</VBox>
-					</children>
-					<BorderPane.margin>
-						<Insets right="3.0" />
-					</BorderPane.margin>
-				</HBox>
-			</left>
-			<center>
-				<AnchorPane BorderPane.alignment="CENTER">
-					<children>
-						<ComboBox fx:id="queryComboBox" editable="true"
-							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-					</children>
-				</AnchorPane>
-			</center>
-			<right>
-				<HBox spacing="3.0" BorderPane.alignment="CENTER">
-					<ToolBar style="-fx-background-color: null;"
-						BorderPane.alignment="CENTER">
-						<items>
-							<Separator orientation="VERTICAL" />
-							<Button fx:id="checkInputButton" mnemonicParsing="false"
-								text="Validate">
-								<tooltip>
-									<Tooltip text="Check Query Input" />
-								</tooltip>
-							</Button>
-							<Button fx:id="executeButton" mnemonicParsing="false"
-								text="Execute">
-								<tooltip>
-									<Tooltip fx:id="executeTooltip" text="Execute Query" />
-								</tooltip>
-							</Button>
-							<Button fx:id="clearOutputButton" mnemonicParsing="false"
-								text="Clear">
-								<tooltip>
-									<Tooltip text="Clear Output" />
-								</tooltip>
-							</Button>
-							<Separator orientation="VERTICAL" />
-						</items>
-					</ToolBar>
-				</HBox>
-			</right>
-			<padding>
-				<Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-			</padding>
-		</BorderPane>
+		<ToolBar style="-fx-background-color: null;"
+			BorderPane.alignment="CENTER">
+			<items>
+				<Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
+					<tooltip>
+						<Tooltip fx:id="undoTooltip" text="Undo" />
+					</tooltip>
+				</Button>
+				<Button fx:id="redoButton" mnemonicParsing="false" text="Redo">
+					<tooltip>
+						<Tooltip fx:id="redoTooltip" text="Redo" />
+					</tooltip>
+				</Button>
+				<Separator />
+				<Button fx:id="checkInputButton" mnemonicParsing="false"
+					text="Validate">
+					<tooltip>
+						<Tooltip text="Check Query Input" />
+					</tooltip>
+				</Button>
+				<Label text="Query" />
+				<ComboBox fx:id="queryComboBox" editable="true" prefWidth="400.0" />
+				<Separator orientation="VERTICAL" />
+				<Button fx:id="executeButton" mnemonicParsing="false" text="Execute">
+					<tooltip>
+						<Tooltip fx:id="executeTooltip" text="Execute Query" />
+					</tooltip>
+				</Button>
+				<ProgressBar fx:id="queryProgressBar" prefWidth="200.0"
+					progress="0.0" />
+				<Separator orientation="VERTICAL" />	
+				<Button fx:id="clearOutputButton" mnemonicParsing="false"
+					text="Clear">
+					<tooltip>
+						<Tooltip text="Clear Output" />
+					</tooltip>
+				</Button>
+				<Separator orientation="VERTICAL" />
+			</items>
+		</ToolBar>
 	</top>
 	<center>
 		<TabPane fx:id="outputTabPane" tabClosingPolicy="UNAVAILABLE"

@@ -37,13 +37,38 @@
  */
 package com.sri.ai.praise.sgsolver.demo.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.common.annotations.Beta;
 
 @Beta
-public class EarthquakeBurglaryAlarm extends ExamplePages {
+public class ExamplePage {
+	private final String name;
+	private final String model;
+	private final List<String> defaultQueriesToRun;
+	
+	public ExamplePage(String name, String model, List<String> defaultQueriesToRun) {
+		this.name = name;
+		this.model = model;
+		this.defaultQueriesToRun = Collections.unmodifiableList(new ArrayList<>(defaultQueriesToRun));
+	}
 
-	public EarthquakeBurglaryAlarm() {
-		super("Earthquake/Burglary/Alarm", 
-			   getExamplePagesFromResource("earthquakeBurglaryAlarm.sgmodel"));
+	public String getName() {
+		return name;
+	}
+
+	public String getModel() {
+		return model;
+	}
+
+	public List<String> getDefaultQueriesToRun() {
+		return defaultQueriesToRun;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
 	}
 }

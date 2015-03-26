@@ -38,16 +38,22 @@
 package com.sri.ai.praise.sgsolver.demo;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.Tooltip;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.demo.model.SGExample;
+import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
@@ -60,10 +66,7 @@ public class SGSolverDemoController {
 	@FXML private Button openFileButton;
 	@FXML private Button saveButton;
 	//
-	@FXML private ComboBox<SGExample> examplesComboBox;
-	//
-	@FXML private Button undoButton;
-	@FXML private Button redoButton;
+	@FXML private ComboBox<ExamplePages> examplesComboBox;
 	//
 	@FXML private Button addPageButton;
 	@FXML private Button removePageButton;
@@ -72,6 +75,10 @@ public class SGSolverDemoController {
 	@FXML private Tooltip redoTooltip;
 	//
 	@FXML private Pagination modelPagination;
+	
+	//
+	private Perspective perspective;
+	private Map<Integer, ModelEditor> modelPages = new HashMap<>();
 	
 	//
 	// PRIVATE
@@ -130,64 +137,6 @@ public class SGSolverDemoController {
 //		}
 	}
 
-// TODO - rewrire up to work at top level	
-//	@FXML
-//	private void addEvidencePage(ActionEvent ae) {
-//		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
-//		
-//		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
-//		evidenceCodeAreas.entrySet().forEach(e -> {
-//			if (e.getKey() > currentPageIdx) {
-//				newEvidenceCodeAreaPageIdxs.put(e.getKey()+1, e.getValue());
-//			}
-//			else {
-//				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
-//			}
-//		});
-//		evidenceCodeAreas.clear();
-//		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);
-//		
-//		evidencePagination.setPageCount(evidencePagination.getPageCount()+1);
-//		evidencePagination.setCurrentPageIndex(currentPageIdx+1);
-//	}
-//	
-//	@FXML
-//	private void removeEvidencePage(ActionEvent ae) {
-//		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
-//		evidenceCodeAreas.remove(currentPageIdx);
-//		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
-//		evidenceCodeAreas.entrySet().forEach(e -> {
-//			if (e.getKey() > currentPageIdx) {
-//				newEvidenceCodeAreaPageIdxs.put(e.getKey()-1, e.getValue());
-//			}
-//			else {
-//				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
-//			}
-//		});
-//		evidenceCodeAreas.clear();
-//		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);	
-//		// Reduce the # of pages
-//		evidencePagination.setPageCount(evidencePagination.getPageCount()-1);
-//		
-//		if (currentPageIdx < evidencePagination.getPageCount()) {
-//			evidencePagination.setCurrentPageIndex(currentPageIdx);
-//		}
-//		else {
-//			evidencePagination.setCurrentPageIndex(evidencePagination.getPageCount()-1);
-//		}
-//	}
-//	
-//	@FXML
-//	private Node createEvidencePage(Integer pgIndex) {	
-//		HOGMCodeArea evidencePage = evidenceCodeAreas.get(pgIndex);
-//		if (evidencePage == null) {
-//			evidencePage = new HOGMCodeArea();
-//			evidenceCodeAreas.put(pgIndex, evidencePage);
-//		}
-//		
-//		return evidencePage;
-//	}
-
     @FXML
     private void initialize() throws IOException {
     	FXUtil.setDefaultButtonIcon(openMenuButton, FontAwesomeIcons.BARS);
@@ -196,27 +145,95 @@ public class SGSolverDemoController {
     	FXUtil.setDefaultButtonIcon(openFileButton, FontAwesomeIcons.FOLDER_OPEN);
     	FXUtil.setDefaultButtonIcon(saveButton, FontAwesomeIcons.SAVE);
     	//
-    	FXUtil.setDefaultButtonIcon(undoButton, FontAwesomeIcons.ROTATE_LEFT);
-    	FXUtil.setDefaultButtonIcon(redoButton, FontAwesomeIcons.ROTATE_RIGHT);
-    	//
     	FXUtil.setDefaultButtonIcon(addPageButton, FontAwesomeIcons.PLUS);
     	FXUtil.setDefaultButtonIcon(removePageButton, FontAwesomeIcons.MINUS);
- 
-// TODO - wire up to model pagination    	
-//		evidencePagination.pageCountProperty().addListener(new ChangeListener<Number>() {
-//			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {				
-//				if (newValue.intValue() <= 1) {
-//					removeEvidencePageMenuItem.setDisable(true);
-//				}
-//				else {
-//					removeEvidencePageMenuItem.setDisable(false);
-//				}
-//			}
-//		});
-//		
-//		evidencePagination.setPageCount(1);
-//		evidencePagination.setPageFactory(this::createEvidencePage);
+  	
+		modelPagination.pageCountProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {				
+				if (newValue.intValue() <= 1) {
+					removePageButton.setDisable(true);
+				}
+				else {
+					removePageButton.setDisable(false);
+				}
+			}
+		});
+		
+		modelPagination.setPageFactory(this::createModelPage);
+		
+		setPerspective(new HOGMPerspective());
     }
+    
+    private void setPerspective(Perspective perspective) {
+    	this.perspective = perspective;
+// TODO - wire up examples.   	
+    	modelPagination.setPageCount(1);
+    }
+    
+ 	private Node createModelPage(Integer pgIndex) {	
+ 		ModelEditor modelEditor = modelPages.get(pgIndex);
+ 		if (modelEditor == null) {
+ 			try {
+ 				modelEditor = perspective.create("", Collections.emptyList()); 
+ 				modelPages.put(pgIndex, modelEditor);
+ 			}
+ 			catch (IOException ioe) {
+ // TODO - handle properly
+ 				ioe.printStackTrace();				
+ 			}
+ 		}
+ 		
+ 		return modelEditor.getRootPane();
+ 	}
+    
+    
+ // TODO - rewrire up to work at top level	
+// 	@FXML
+// 	private void addEvidencePage(ActionEvent ae) {
+// 		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
+// 		
+// 		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
+// 		evidenceCodeAreas.entrySet().forEach(e -> {
+// 			if (e.getKey() > currentPageIdx) {
+// 				newEvidenceCodeAreaPageIdxs.put(e.getKey()+1, e.getValue());
+// 			}
+// 			else {
+// 				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
+// 			}
+// 		});
+// 		evidenceCodeAreas.clear();
+// 		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);
+// 		
+// 		evidencePagination.setPageCount(evidencePagination.getPageCount()+1);
+// 		evidencePagination.setCurrentPageIndex(currentPageIdx+1);
+// 	}
+ //	
+// 	@FXML
+// 	private void removeEvidencePage(ActionEvent ae) {
+// 		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
+// 		evidenceCodeAreas.remove(currentPageIdx);
+// 		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
+// 		evidenceCodeAreas.entrySet().forEach(e -> {
+// 			if (e.getKey() > currentPageIdx) {
+// 				newEvidenceCodeAreaPageIdxs.put(e.getKey()-1, e.getValue());
+// 			}
+// 			else {
+// 				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
+// 			}
+// 		});
+// 		evidenceCodeAreas.clear();
+// 		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);	
+// 		// Reduce the # of pages
+// 		evidencePagination.setPageCount(evidencePagination.getPageCount()-1);
+// 		
+// 		if (currentPageIdx < evidencePagination.getPageCount()) {
+// 			evidencePagination.setCurrentPageIndex(currentPageIdx);
+// 		}
+// 		else {
+// 			evidencePagination.setCurrentPageIndex(evidencePagination.getPageCount()-1);
+// 		}
+// 	}
+ //	
  
 // TODO - rework how this gets setup    
 //    private void setHOGMPerspective() throws IOException {

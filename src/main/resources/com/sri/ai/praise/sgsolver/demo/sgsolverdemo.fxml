@@ -5,18 +5,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="768.0" prefWidth="1024.0"
-	style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8"
-	xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.SGSolverDemoController">
+<BorderPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.SGSolverDemoController">
 	<top>
-		<BorderPane style="-fx-background-color: white"
-			BorderPane.alignment="CENTER">
+		<BorderPane style="-fx-background-color: white" BorderPane.alignment="CENTER">
 			<top>
-				<ToolBar style="-fx-background-color: null;"
-					BorderPane.alignment="CENTER">
+				<ToolBar style="-fx-background-color: null;" BorderPane.alignment="CENTER">
 					<items>
-						<Button fx:id="openMenuButton" mnemonicParsing="false"
-							text="Open Menu">
+						<Button fx:id="openMenuButton" mnemonicParsing="false" text="Open Menu">
 							<tooltip>
 								<Tooltip text="Open Menu" />
 							</tooltip>
@@ -27,8 +22,7 @@
 								<Tooltip text="New" />
 							</tooltip>
 						</Button>
-						<Button fx:id="openFileButton" mnemonicParsing="false"
-							text="Open">
+						<Button fx:id="openFileButton" mnemonicParsing="false" text="Open">
 							<tooltip>
 								<Tooltip text="Open File" />
 							</tooltip>
@@ -40,27 +34,14 @@
 						</Button>
 						<Separator orientation="VERTICAL" />
 						<Label text="Example" />
-						<ComboBox fx:id="examplesComboBox" onAction="#exampleSelected"
-							prefWidth="300.0" />
+						<ComboBox fx:id="examplesComboBox" onAction="#exampleSelected" prefWidth="300.0" />
 						<Separator orientation="VERTICAL" />
-						<Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
-							<tooltip>
-								<Tooltip fx:id="undoTooltip" text="Undo" />
-							</tooltip>
-						</Button>
-						<Button fx:id="redoButton" mnemonicParsing="false" text="Redo">
-							<tooltip>
-								<Tooltip fx:id="redoTooltip" text="Redo" />
-							</tooltip>
-						</Button>
-						<Separator />
 						<Button fx:id="addPageButton" mnemonicParsing="false" text="+">
 							<tooltip>
 								<Tooltip text="Add Page" />
 							</tooltip>
 						</Button>
-						<Button fx:id="removePageButton" mnemonicParsing="false"
-							text="-">
+						<Button fx:id="removePageButton" mnemonicParsing="false" text="-">
 							<tooltip>
 								<Tooltip text="Remove Page" />
 							</tooltip>
@@ -71,4 +52,7 @@
 			</top>
 		</BorderPane>
 	</top>
+   <center>
+      <Pagination fx:id="modelPagination" pageCount="0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+   </center>
 </BorderPane>

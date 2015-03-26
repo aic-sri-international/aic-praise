@@ -10,10 +10,14 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 
 public class QueryController {
+	
 	//
-	@FXML private ComboBox<String> queryComboBox;
+	@FXML private Button undoButton;
+	@FXML private Button redoButton;
 	//
 	@FXML private Button checkInputButton;
+	@FXML private ComboBox<String> queryComboBox;
+	//
 	@FXML private Button executeButton;
 	@FXML private Button clearOutputButton;
 	//
@@ -29,7 +33,12 @@ public class QueryController {
 	
 	@FXML
 	private void initialize() {
+		//
+    	FXUtil.setDefaultButtonIcon(undoButton, FontAwesomeIcons.ROTATE_LEFT);
+    	FXUtil.setDefaultButtonIcon(redoButton, FontAwesomeIcons.ROTATE_RIGHT);
+    	//
 		FXUtil.setDefaultButtonIcon(checkInputButton, FontAwesomeIcons.CHECK);
+		//
     	FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.PLAY);
     	FXUtil.setDefaultButtonIcon(clearOutputButton, FontAwesomeIcons.ERASER);
 	}

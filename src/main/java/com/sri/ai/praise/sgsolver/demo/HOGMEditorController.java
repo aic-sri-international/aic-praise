@@ -37,42 +37,50 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.List;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
-import com.sri.ai.praise.sgsolver.demo.model.EarthquakeBurglaryAlarm;
-import com.sri.ai.praise.sgsolver.demo.model.SGExample;
 
 @Beta
 public class HOGMEditorController implements ModelEditor {
-	public static final String EVIDENCE_SCENARIO_MARKER_PREFIX = "@";
-	
+	@FXML private Pane       rootPane;
 	@FXML private AnchorPane modelEditorPane;
+	@FXML private AnchorPane queryOutputPane;
 	//
-	private HOGMCodeArea modelCodeArea = new HOGMCodeArea();
+	private HOGMCodeArea    modelCodeArea = new HOGMCodeArea();
+	private QueryController queryController;
 	
 	//
 	// START-ModelEditor
 	@Override
-	public List<SGExample> getExamples() {
-		return Arrays.asList(new EarthquakeBurglaryAlarm());
+	public Pane getRootPane() {
+		return rootPane;
 	}
 	
 	@Override
-	public void setExample(SGExample example) {
-// TODO
+	public void setModel(String model, List<String> defaultQueries) {
+		modelCodeArea.setText(model);
+// TODO - assign default queries		
 	}
 	// END-ModelEditor
 	//
 	
 	@FXML
-	private void initialize() {
+	private void initialize() throws IOException {
 		FXUtil.anchor(modelCodeArea);
 		modelEditorPane.getChildren().add(modelCodeArea);
+		
+		FXMLLoader queryLoader = new FXMLLoader(QueryController.class.getResource("querypane.fxml"));
+		Pane queryPane  = queryLoader.load();
+		queryController = queryLoader.getController();
+		FXUtil.anchor(queryPane);
+		queryOutputPane.getChildren().add(queryPane);
 	}
 }

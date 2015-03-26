@@ -37,9 +37,14 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 @Beta
 public interface Perspective {
-	
+	List<ExamplePages> getExamples();
+	ModelEditor create(String model, List<String> defaultQueries) throws IOException;
 }

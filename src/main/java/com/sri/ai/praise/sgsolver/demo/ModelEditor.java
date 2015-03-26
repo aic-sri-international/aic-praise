@@ -39,12 +39,13 @@ package com.sri.ai.praise.sgsolver.demo;
 
 import java.util.List;
 
+import javafx.scene.layout.Pane;
+
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.demo.model.SGExample;
 
 @Beta
 public interface ModelEditor {
-
-	List<SGExample> getExamples();
-	void setExample(SGExample example);
+	
+	Pane getRootPane();
+	void setModel(String model, List<String> defaultQueries);
 }

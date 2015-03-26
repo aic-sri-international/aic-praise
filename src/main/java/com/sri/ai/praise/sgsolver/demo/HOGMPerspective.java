@@ -35,55 +35,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo.model;
+package com.sri.ai.praise.sgsolver.demo;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
+
+import javafx.fxml.FXMLLoader;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.demo.model.EarthquakeBurglaryAlarm;
+import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 @Beta
-public class SGExample {
-	private final String name;
-	private final String model;
-	private final List<String> defaultQueriesToRun;
+public class HOGMPerspective implements Perspective {
 	
-	public SGExample(String name, String model, List<String> defaultQueriesToRun) {
-		this.name = name;
-		this.model = model;
-		this.defaultQueriesToRun = Collections.unmodifiableList(new ArrayList<>(defaultQueriesToRun));
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getModel() {
-		return model;
-	}
-
-	public List<String> getDefaultQueriesToRun() {
-		return defaultQueriesToRun;
+	//
+	// START-Perspective
+	@Override
+	public List<ExamplePages> getExamples() {
+		return Arrays.asList(new EarthquakeBurglaryAlarm());
 	}
 	
 	@Override
-	public String toString() {
-		return name;
+	public ModelEditor create(String model, List<String> defaultQueries) throws IOException {
+		FXMLLoader  loader = new FXMLLoader(HOGMEditorController.class.getResource("hogmeditor.fxml"));
+		loader.load();
+		ModelEditor result = loader.getController();
+		
+		result.setModel(model, defaultQueries);
+		
+		return result;
 	}
+	// END-Perspective
+	//
 	
-	public static String getExampleFromResource(String resourceName) {
-		StringBuilder sb = new StringBuilder();
-		
-		try (Stream<String> lines = Files.lines(Paths.get(SGExample.class.getResource(resourceName).toURI()))) {			
-			lines.forEach(line -> sb.append(line+"\n"));			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		
-		return sb.toString();
-	}
 }
