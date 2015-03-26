@@ -12,7 +12,11 @@ import javafx.scene.layout.AnchorPane;
 public class QueryController {
 	//
 	@FXML private ComboBox<String> queryComboBox;
-	@FXML private Button queryExecuteButton;
+	//
+	@FXML private Button checkInputButton;
+	@FXML private Button executeButton;
+	@FXML private Button clearOutputButton;
+	//
 	@FXML private ProgressBar queryProgressBar;
 	//
 	//
@@ -21,10 +25,12 @@ public class QueryController {
 	@FXML private AnchorPane problemPane;
 	@FXML private AnchorPane consolePane;
 	//
-	@FXML private Tooltip queryExecuteTooltip;
+	@FXML private Tooltip executeTooltip;
 	
 	@FXML
 	private void initialize() {
-		FXUtil.setMediumButtonIcon(queryExecuteButton, FontAwesomeIcons.PLAY);
+		FXUtil.setDefaultButtonIcon(checkInputButton, FontAwesomeIcons.CHECK);
+    	FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.PLAY);
+    	FXUtil.setDefaultButtonIcon(clearOutputButton, FontAwesomeIcons.ERASER);
 	}
 }

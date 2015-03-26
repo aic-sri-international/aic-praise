@@ -68,13 +68,8 @@ public class SGSolverDemoController {
 	@FXML private Button addPageButton;
 	@FXML private Button removePageButton;
 	//
-	@FXML private Button checkInputButton;
-	@FXML private Button topExecuteButton;
-	@FXML private Button clearOutputButton;
-	//
 	@FXML private Tooltip undoTooltip;
 	@FXML private Tooltip redoTooltip;
-	@FXML private Tooltip topExecuteTooltip;
 	//
 	@FXML private Pagination modelPagination;
 	
@@ -206,10 +201,6 @@ public class SGSolverDemoController {
     	//
     	FXUtil.setDefaultButtonIcon(addPageButton, FontAwesomeIcons.PLUS);
     	FXUtil.setDefaultButtonIcon(removePageButton, FontAwesomeIcons.MINUS);
-    	//
-    	FXUtil.setDefaultButtonIcon(checkInputButton, FontAwesomeIcons.CHECK);
-    	FXUtil.setDefaultButtonIcon(topExecuteButton, FontAwesomeIcons.PLAY);
-    	FXUtil.setDefaultButtonIcon(clearOutputButton, FontAwesomeIcons.ERASER);
  
 // TODO - wire up to model pagination    	
 //		evidencePagination.pageCountProperty().addListener(new ChangeListener<Number>() {

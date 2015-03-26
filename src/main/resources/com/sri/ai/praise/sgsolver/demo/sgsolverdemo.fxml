@@ -66,25 +66,6 @@
 							</tooltip>
 						</Button>
 						<Separator orientation="VERTICAL" />
-						<Button fx:id="checkInputButton" mnemonicParsing="false"
-							text="Validate">
-							<tooltip>
-								<Tooltip text="Check Query Input" />
-							</tooltip>
-						</Button>
-						<Button fx:id="topExecuteButton" mnemonicParsing="false"
-							text="Execute">
-							<tooltip>
-								<Tooltip fx:id="topExecuteTooltip" text="Execute Query" />
-							</tooltip>
-						</Button>
-						<Button fx:id="clearOutputButton" mnemonicParsing="false"
-							text="Clear">
-							<tooltip>
-								<Tooltip text="Clear Output" />
-							</tooltip>
-						</Button>
-						<Separator orientation="VERTICAL" />
 					</items>
 				</ToolBar>
 			</top>

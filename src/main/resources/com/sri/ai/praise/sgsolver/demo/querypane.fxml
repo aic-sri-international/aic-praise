@@ -25,26 +25,6 @@
 					</BorderPane.margin>
 				</HBox>
 			</left>
-			<right>
-				<HBox spacing="3.0" BorderPane.alignment="CENTER">
-					<children>
-						<Button fx:id="queryExecuteButton" mnemonicParsing="false"
-							text="Execute">
-							<tooltip>
-								<Tooltip text="Execute Query" />
-							</tooltip>
-						</Button>
-						<VBox alignment="CENTER_LEFT">
-							<children>
-								<ProgressBar fx:id="queryProgressBar" progress="0.0" />
-							</children>
-						</VBox>
-					</children>
-					<padding>
-						<Insets left="3.0" right="3.0" />
-					</padding>
-				</HBox>
-			</right>
 			<center>
 				<AnchorPane BorderPane.alignment="CENTER">
 					<children>
@@ -54,9 +34,35 @@
 					</children>
 				</AnchorPane>
 			</center>
-			<opaqueInsets>
-				<Insets />
-			</opaqueInsets>
+			<right>
+				<HBox spacing="3.0" BorderPane.alignment="CENTER">
+					<ToolBar style="-fx-background-color: null;"
+						BorderPane.alignment="CENTER">
+						<items>
+							<Separator orientation="VERTICAL" />
+							<Button fx:id="checkInputButton" mnemonicParsing="false"
+								text="Validate">
+								<tooltip>
+									<Tooltip text="Check Query Input" />
+								</tooltip>
+							</Button>
+							<Button fx:id="executeButton" mnemonicParsing="false"
+								text="Execute">
+								<tooltip>
+									<Tooltip fx:id="executeTooltip" text="Execute Query" />
+								</tooltip>
+							</Button>
+							<Button fx:id="clearOutputButton" mnemonicParsing="false"
+								text="Clear">
+								<tooltip>
+									<Tooltip text="Clear Output" />
+								</tooltip>
+							</Button>
+							<Separator orientation="VERTICAL" />
+						</items>
+					</ToolBar>
+				</HBox>
+			</right>
 			<padding>
 				<Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
 			</padding>
