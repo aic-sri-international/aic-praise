@@ -52,7 +52,7 @@ public class SGSolverDemoApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("sgsolverdemo.fxml"));
-        primaryStage.setTitle("SG Solver");
+        primaryStage.setTitle("PRAiSE");
         Scene scene = new Scene(root, 1024, 768);
         primaryStage.setScene(scene);
         scene.getStylesheets().add("com/sri/ai/praise/sgsolver/demo/sgsolverdemo.css");

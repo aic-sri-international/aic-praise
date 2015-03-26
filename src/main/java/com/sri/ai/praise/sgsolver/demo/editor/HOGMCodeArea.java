@@ -37,17 +37,27 @@
  */
 package com.sri.ai.praise.sgsolver.demo.editor;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.StyleSpans;
+import org.fxmisc.richtext.StyleSpansBuilder;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
+import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMLexer;
+import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMTerminalSymbols;
 
 import javafx.scene.layout.AnchorPane;
 
+import java.util.Collection;
+import java.util.Collections;
+
 @Beta
 public class HOGMCodeArea extends AnchorPane {
-	private CodeArea        codeArea;
+	private CodeArea codeArea;
 	
 	public HOGMCodeArea() {
 		super();
@@ -61,12 +71,49 @@ public class HOGMCodeArea extends AnchorPane {
 	//
 	// PRIVATE
 	//
-	private void initialize() {
+	private void initialize() {		
 		codeArea = new CodeArea();
 		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea, digits -> "%"+ (digits < 2 ? 2 : digits) + "d"));
 		
-		FXUtil.anchor(codeArea);
+		codeArea.textProperty().addListener((obs, oldText, newText) -> {
+			codeArea.setStyleSpans(0, computeHighlighting(newText));
+		});	
 		
+		FXUtil.anchor(codeArea);		
 		getChildren().add(codeArea);
+	}
+		 
+	private static StyleSpans<Collection<String>> computeHighlighting(String text) {
+		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+		int lastTokenEnd = 0;
+		ANTLRInputStream input = new ANTLRInputStream(text);
+		HOGMLexer lexer = new HOGMLexer(input);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		tokens.fill();	
+		for (int i = 0; i < tokens.size(); i++) {
+			Token t = tokens.get(i);
+			if (t.getType() == Token.EOF) {
+				break;
+			}			
+			String styleClass;
+			if (t.getType() == HOGMLexer.COMMENT || t.getType() == HOGMLexer.LINE_COMMENT) {
+				styleClass = "codeComment";
+			}
+			else if (HOGMTerminalSymbols.isTerminalSymbol(t.getText())) {
+				styleClass = "codeKeyword";
+			}
+			else {
+				styleClass = "codeOther";
+			}
+			int spacing = t.getStartIndex() - lastTokenEnd;
+			if (spacing > 0) {			
+				spansBuilder.add(Collections.emptyList(), spacing);
+			}
+			int stylesize = (t.getStopIndex() - t.getStartIndex()) +1;			
+			spansBuilder.add(Collections.singleton(styleClass), stylesize);
+			lastTokenEnd = t.getStopIndex()+1;
+		}
+		
+		return spansBuilder.create();
 	}
 }

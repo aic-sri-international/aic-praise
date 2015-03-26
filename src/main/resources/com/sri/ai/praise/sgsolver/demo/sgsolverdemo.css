@@ -27,6 +27,18 @@
 }
 
 .lineno {
-	-fx-background-color: rgb(61,114,144);
-	-fx-text-fill: white;
+	-fx-background-color: ghostwhite;
+	-fx-text-fill: rgb(61,114,144);
+}
+
+.codeComment {
+	-fx-fill: darkgreen;
+}
+
+.codeKeyword {
+	-fx-fill: blue;
+}
+
+.codeOther {
+	-fx-fill: black;
 }
