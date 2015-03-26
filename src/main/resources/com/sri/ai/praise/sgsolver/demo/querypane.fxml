@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="768.0" prefWidth="1024.0"
+	style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8"
+	xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.QueryController"
+	styleClass="contentPane">
+	<top>
+		<BorderPane BorderPane.alignment="CENTER">
+			<left>
+				<HBox spacing="3.0" BorderPane.alignment="CENTER">
+					<children>
+						<VBox alignment="CENTER_LEFT">
+							<children>
+								<Label text="Query" />
+							</children>
+						</VBox>
+					</children>
+					<BorderPane.margin>
+						<Insets right="3.0" />
+					</BorderPane.margin>
+				</HBox>
+			</left>
+			<right>
+				<HBox spacing="3.0" BorderPane.alignment="CENTER">
+					<children>
+						<Button fx:id="queryExecuteButton" mnemonicParsing="false"
+							text="Execute">
+							<tooltip>
+								<Tooltip text="Execute Query" />
+							</tooltip>
+						</Button>
+						<VBox alignment="CENTER_LEFT">
+							<children>
+								<ProgressBar fx:id="queryProgressBar" progress="0.0" />
+							</children>
+						</VBox>
+					</children>
+					<padding>
+						<Insets left="3.0" right="3.0" />
+					</padding>
+				</HBox>
+			</right>
+			<center>
+				<AnchorPane BorderPane.alignment="CENTER">
+					<children>
+						<ComboBox fx:id="queryComboBox" editable="true"
+							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+					</children>
+				</AnchorPane>
+			</center>
+			<opaqueInsets>
+				<Insets />
+			</opaqueInsets>
+			<padding>
+				<Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+			</padding>
+		</BorderPane>
+	</top>
+	<center>
+		<TabPane fx:id="outputTabPane" tabClosingPolicy="UNAVAILABLE"
+			BorderPane.alignment="CENTER">
+			<tabs>
+				<Tab text="Result">
+					<content>
+						<AnchorPane fx:id="resultPane" />
+					</content>
+				</Tab>
+				<Tab text="Problems">
+					<content>
+						<AnchorPane fx:id="problemPane" />
+					</content>
+				</Tab>
+				<Tab text="Console">
+					<content>
+						<AnchorPane fx:id="consolePane" />
+					</content>
+				</Tab>
+			</tabs>
+		</TabPane>
+	</center>
+</BorderPane>

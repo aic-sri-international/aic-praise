@@ -5,157 +5,89 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.SGSolverDemoController">
-   <top>
-      <BorderPane style="-fx-background-color: white" BorderPane.alignment="CENTER">
-         <top>
-            <ToolBar style="-fx-background-color: null;" BorderPane.alignment="CENTER">
-              <items>
-                <Button fx:id="openMenuButton" mnemonicParsing="false" text="Open Menu">
-                     <tooltip>
-                        <Tooltip text="Open Menu" />
-                     </tooltip></Button>
-                  <Separator orientation="VERTICAL" />
-                <Button fx:id="newButton" mnemonicParsing="false" text="New">
-                     <tooltip>
-                        <Tooltip text="New" />
-                     </tooltip></Button>
-                  <Button fx:id="openFileButton" mnemonicParsing="false" text="Open">
-                     <tooltip>
-                        <Tooltip text="Open File" />
-                     </tooltip></Button>
-                  <Button fx:id="saveButton" mnemonicParsing="false" text="Save">
-                     <tooltip>
-                        <Tooltip text="Save" />
-                     </tooltip></Button>
-                  <Button fx:id="saveAsButton" mnemonicParsing="false" text="Save As">
-                     <tooltip>
-                        <Tooltip text="Save As" />
-                     </tooltip></Button>
-                  <Separator orientation="VERTICAL" />
-                  <Label text="Example" />
-                  <ComboBox fx:id="examplesComboBox" onAction="#exampleSelected" prefWidth="300.0" />
-                  <Separator orientation="VERTICAL" />
-                  <Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
-                     <tooltip>
-                        <Tooltip fx:id="undoTooltip" text="Undo" />
-                     </tooltip></Button>
-                  <Button fx:id="redoButton" mnemonicParsing="false" text="Redo">
-                     <tooltip>
-                        <Tooltip fx:id="redoTooltip" text="Redo" />
-                     </tooltip></Button>
-                  <Separator />
-                  <Button fx:id="addPageButton" mnemonicParsing="false" text="+">
-                     <tooltip>
-                        <Tooltip text="Add Page" />
-                     </tooltip>
-                  </Button>
-                  <Button fx:id="removePageButton" mnemonicParsing="false" text="-">
-                     <tooltip>
-                        <Tooltip text="Remove Page" />
-                     </tooltip>
-                  </Button>
-                  <Separator orientation="VERTICAL" />
-                  <Button fx:id="checkInputButton" mnemonicParsing="false" text="Validate">
-                     <tooltip>
-                        <Tooltip text="Check Query Input" />
-                     </tooltip></Button>
-                  <Button fx:id="topExecuteButton" mnemonicParsing="false" text="Execute">
-                     <tooltip>
-                        <Tooltip fx:id="topExecuteTooltip" text="Execute Query" />
-                     </tooltip></Button>
-                  <Button fx:id="clearOutputButton" mnemonicParsing="false" text="Clear">
-                     <tooltip>
-                        <Tooltip text="Clear Output" />
-                     </tooltip></Button>
-                  <Separator orientation="VERTICAL" />
-                  <Button fx:id="newWindowButton" mnemonicParsing="false" text="New Window">
-                     <tooltip>
-                        <Tooltip text="New Window" />
-                     </tooltip></Button>
-                  <Separator orientation="VERTICAL" />
-              </items>
-            </ToolBar>
-         </top>
-      </BorderPane>
-   </top>
-   <center>
-      <SplitPane dividerPositions="0.65" orientation="VERTICAL" styleClass="hiddenSplitter" BorderPane.alignment="CENTER">
-        <items>
-          <AnchorPane fx:id="editorPane" minHeight="0.0" minWidth="0.0" />
-            <BorderPane styleClass="contentPane">
-               <center>
-                  <TabPane fx:id="outputTabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-                    <tabs>
-                      <Tab text="Result">
-                        <content>
-                          <AnchorPane fx:id="resultPane" />
-                        </content>
-                      </Tab>
-                      <Tab text="Problems">
-                        <content>
-                          <AnchorPane fx:id="problemPane" />
-                        </content>
-                      </Tab>
-                        <Tab text="Console">
-                          <content>
-                            <AnchorPane fx:id="consolePane" />
-                          </content>
-                        </Tab>
-                    </tabs>
-                  </TabPane>
-               </center>
-               <top>
-                  <BorderPane BorderPane.alignment="CENTER">
-                     <left>
-                        <HBox spacing="3.0" BorderPane.alignment="CENTER">
-                           <children>
-                              <VBox alignment="CENTER_LEFT">
-                                 <children>
-                                    <Label text="Query" />
-                                 </children>
-                              </VBox>
-                           </children>
-                           <BorderPane.margin>
-                              <Insets right="3.0" />
-                           </BorderPane.margin>
-                        </HBox>
-                     </left>
-                     <right>
-                        <HBox spacing="3.0" BorderPane.alignment="CENTER">
-                           <children>
-                              <Button fx:id="queryExecuteButton" mnemonicParsing="false" text="Execute">
-                                 <tooltip>
-                                    <Tooltip text="Execute Query" />
-                                 </tooltip>
-                              </Button>
-                              <VBox alignment="CENTER_LEFT">
-                                 <children>
-                                    <ProgressBar fx:id="queryProgressBar" progress="0.0" />
-                                 </children>
-                              </VBox>
-                           </children>
-                           <padding>
-                              <Insets left="3.0" right="3.0" />
-                           </padding>
-                        </HBox>
-                     </right>
-                     <center>
-                        <AnchorPane BorderPane.alignment="CENTER">
-                           <children>
-                              <ComboBox fx:id="queryComboBox" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                           </children>
-                        </AnchorPane>
-                     </center>
-                     <opaqueInsets>
-                        <Insets />
-                     </opaqueInsets>
-                     <padding>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </padding>
-                  </BorderPane>
-               </top></BorderPane>
-        </items>
-      </SplitPane>
-   </center>
+<BorderPane prefHeight="768.0" prefWidth="1024.0"
+	style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8"
+	xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.SGSolverDemoController">
+	<top>
+		<BorderPane style="-fx-background-color: white"
+			BorderPane.alignment="CENTER">
+			<top>
+				<ToolBar style="-fx-background-color: null;"
+					BorderPane.alignment="CENTER">
+					<items>
+						<Button fx:id="openMenuButton" mnemonicParsing="false"
+							text="Open Menu">
+							<tooltip>
+								<Tooltip text="Open Menu" />
+							</tooltip>
+						</Button>
+						<Separator orientation="VERTICAL" />
+						<Button fx:id="newButton" mnemonicParsing="false" text="New">
+							<tooltip>
+								<Tooltip text="New" />
+							</tooltip>
+						</Button>
+						<Button fx:id="openFileButton" mnemonicParsing="false"
+							text="Open">
+							<tooltip>
+								<Tooltip text="Open File" />
+							</tooltip>
+						</Button>
+						<Button fx:id="saveButton" mnemonicParsing="false" text="Save">
+							<tooltip>
+								<Tooltip text="Save" />
+							</tooltip>
+						</Button>
+						<Separator orientation="VERTICAL" />
+						<Label text="Example" />
+						<ComboBox fx:id="examplesComboBox" onAction="#exampleSelected"
+							prefWidth="300.0" />
+						<Separator orientation="VERTICAL" />
+						<Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
+							<tooltip>
+								<Tooltip fx:id="undoTooltip" text="Undo" />
+							</tooltip>
+						</Button>
+						<Button fx:id="redoButton" mnemonicParsing="false" text="Redo">
+							<tooltip>
+								<Tooltip fx:id="redoTooltip" text="Redo" />
+							</tooltip>
+						</Button>
+						<Separator />
+						<Button fx:id="addPageButton" mnemonicParsing="false" text="+">
+							<tooltip>
+								<Tooltip text="Add Page" />
+							</tooltip>
+						</Button>
+						<Button fx:id="removePageButton" mnemonicParsing="false"
+							text="-">
+							<tooltip>
+								<Tooltip text="Remove Page" />
+							</tooltip>
+						</Button>
+						<Separator orientation="VERTICAL" />
+						<Button fx:id="checkInputButton" mnemonicParsing="false"
+							text="Validate">
+							<tooltip>
+								<Tooltip text="Check Query Input" />
+							</tooltip>
+						</Button>
+						<Button fx:id="topExecuteButton" mnemonicParsing="false"
+							text="Execute">
+							<tooltip>
+								<Tooltip fx:id="topExecuteTooltip" text="Execute Query" />
+							</tooltip>
+						</Button>
+						<Button fx:id="clearOutputButton" mnemonicParsing="false"
+							text="Clear">
+							<tooltip>
+								<Tooltip text="Clear Output" />
+							</tooltip>
+						</Button>
+						<Separator orientation="VERTICAL" />
+					</items>
+				</ToolBar>
+			</top>
+		</BorderPane>
+	</top>
 </BorderPane>

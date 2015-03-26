@@ -6,43 +6,10 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="600.0" prefWidth="1024.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.HOGMEditorController">
+<BorderPane prefHeight="600.0" prefWidth="1024.0"
+	style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8"
+	xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.HOGMEditorController">
 	<center>
-		<SplitPane dividerPositions="0.65" orientation="VERTICAL" styleClass="hiddenSplitter">
-         <items>
-            <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="contentPane">
-               <center>
-                  <AnchorPane fx:id="modelEditorPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-               </center>
-            </BorderPane>
-            <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="contentPane">
-               <center>
-                  <Pagination fx:id="evidencePagination" maxPageIndicatorCount="10" pageCount="0" BorderPane.alignment="CENTER" />
-               </center>
-               <top>
-                  <BorderPane BorderPane.alignment="CENTER">
-                     <left>
-                        <VBox alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
-                           <children>
-                              <Label text="Evidence Scenario" underline="true" />
-                           </children>
-                        </VBox>
-                     </left>
-                     <right>
-                        <MenuBar style="-fx-background-color: null;" BorderPane.alignment="CENTER">
-                          <menus>
-                            <Menu fx:id="evidenceMenu" mnemonicParsing="false" text="Pages">
-                              <items>
-                                <MenuItem fx:id="addEvidencePageMenuItem" mnemonicParsing="false" onAction="#addEvidencePage" text="Add Page" />
-                                    <MenuItem fx:id="removeEvidencePageMenuItem" mnemonicParsing="false" onAction="#removeEvidencePage" text="Remove Page" />
-                              </items>
-                            </Menu>
-                          </menus>
-                        </MenuBar>
-                     </right>
-                  </BorderPane>
-               </top>
-            </BorderPane>
-         </items></SplitPane>
+		<AnchorPane fx:id="modelEditorPane" BorderPane.alignment="CENTER" />
 	</center>
 </BorderPane>

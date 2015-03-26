@@ -40,20 +40,47 @@ package com.sri.ai.praise.sgsolver.demo;
 import com.google.common.annotations.Beta;
 
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.GlyphsBuilder;
+import de.jensd.fx.glyphs.GlyphsDude;
+import de.jensd.fx.glyphs.GlyphsStack;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
 @Beta
 public class FXUtil {
+	//
+	public static final String _iconSmallSize         = "17px";
+	public static final String _iconMediumSize        = "18px";
+	public static final String _buttonDefaultIconSize = "24px";
 	
     public static void anchor(Node node) {
         AnchorPane.setTopAnchor(node, 0.0);
         AnchorPane.setLeftAnchor(node, 0.0);
         AnchorPane.setRightAnchor(node, 0.0);
         AnchorPane.setBottomAnchor(node, 0.0);
+    }
+    
+    public static void setDefaultButtonIcon(Button button, GlyphIcons icon) {
+    	GlyphsDude.setIcon(button, icon, _buttonDefaultIconSize, ContentDisplay.GRAPHIC_ONLY);
+    }
+    
+    public static void setMediumButtonIcon(Button button, GlyphIcons icon) {
+    	GlyphsDude.setIcon(button, icon, _buttonDefaultIconSize, ContentDisplay.GRAPHIC_ONLY);
+    }
+    
+    public static void setButtonStackedIcons(Button button, GlyphIcons icon1, GlyphIcons icon2) {
+    	Region saveAsImg = GlyphsStack.create()
+    			.add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(icon1).size(_buttonDefaultIconSize).build())
+    			.add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(icon2).size(_iconSmallSize).build());
+    			
+    	button.setGraphic(saveAsImg);
+    	button.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
     
 	public static Node configMenuIcon() {

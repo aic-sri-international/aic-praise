@@ -37,22 +37,10 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Pagination;
 import javafx.scene.layout.AnchorPane;
 
 import com.google.common.annotations.Beta;
@@ -65,13 +53,8 @@ public class HOGMEditorController implements ModelEditor {
 	public static final String EVIDENCE_SCENARIO_MARKER_PREFIX = "@";
 	
 	@FXML private AnchorPane modelEditorPane;
-	@FXML private Pagination evidencePagination;
-	@FXML private Menu evidenceMenu;
-	@FXML private MenuItem addEvidencePageMenuItem;
-	@FXML private MenuItem removeEvidencePageMenuItem;
 	//
 	private HOGMCodeArea modelCodeArea = new HOGMCodeArea();
-	private Map<Integer, HOGMCodeArea> evidenceCodeAreas = new HashMap<>();
 	
 	//
 	// START-ModelEditor
@@ -82,119 +65,14 @@ public class HOGMEditorController implements ModelEditor {
 	
 	@Override
 	public void setExample(SGExample example) {
-		evidencePagination.setPageCount(0);
-		evidenceCodeAreas.clear();
-		
-		List<StringBuilder> modelParts= new ArrayList<>();
-		StringBuilder modelPart = new StringBuilder();
-		modelParts.add(modelPart);
-		try (BufferedReader br = new BufferedReader(new StringReader(example.getModel()))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				if (line.startsWith(EVIDENCE_SCENARIO_MARKER_PREFIX)) {
-					modelPart = new StringBuilder();
-					modelParts.add(modelPart);
-				}
-				else {
-					modelPart.append(line);
-					modelPart.append("\n");
-				}
-			}
-		} catch (Exception ex) {
-			// ignore
-		}
-		
-		modelCodeArea.setText(modelParts.get(0).toString());
-		if (modelParts.size() == 1) {
-			evidencePagination.setPageCount(1); // i.e. default evidence page
-		}
-		else {
-			for (int i = 1; i < modelParts.size(); i++) {
-				HOGMCodeArea evidenceCodeArea = new HOGMCodeArea();
-				evidenceCodeArea.setText(modelParts.get(i).toString());
-				evidenceCodeAreas.put(i-1, evidenceCodeArea);
-			}
-			evidencePagination.setPageCount(modelParts.size()-1);
-		}
+// TODO
 	}
 	// END-ModelEditor
 	//
 	
 	@FXML
 	private void initialize() {
-		evidenceMenu.setText("");
-		evidenceMenu.setGraphic(FXUtil.configMenuIcon());
-		
 		FXUtil.anchor(modelCodeArea);
-		modelEditorPane.getChildren().add(modelCodeArea);	
-		evidencePagination.pageCountProperty().addListener(new ChangeListener<Number>() {
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {				
-				if (newValue.intValue() <= 1) {
-					removeEvidencePageMenuItem.setDisable(true);
-				}
-				else {
-					removeEvidencePageMenuItem.setDisable(false);
-				}
-			}
-		});
-		
-		evidencePagination.setPageCount(1);
-		evidencePagination.setPageFactory(this::createEvidencePage);
-	}
-	
-	@FXML
-	private void addEvidencePage(ActionEvent ae) {
-		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
-		
-		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
-		evidenceCodeAreas.entrySet().forEach(e -> {
-			if (e.getKey() > currentPageIdx) {
-				newEvidenceCodeAreaPageIdxs.put(e.getKey()+1, e.getValue());
-			}
-			else {
-				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
-			}
-		});
-		evidenceCodeAreas.clear();
-		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);
-		
-		evidencePagination.setPageCount(evidencePagination.getPageCount()+1);
-		evidencePagination.setCurrentPageIndex(currentPageIdx+1);
-	}
-	
-	@FXML
-	private void removeEvidencePage(ActionEvent ae) {
-		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
-		evidenceCodeAreas.remove(currentPageIdx);
-		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
-		evidenceCodeAreas.entrySet().forEach(e -> {
-			if (e.getKey() > currentPageIdx) {
-				newEvidenceCodeAreaPageIdxs.put(e.getKey()-1, e.getValue());
-			}
-			else {
-				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
-			}
-		});
-		evidenceCodeAreas.clear();
-		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);	
-		// Reduce the # of pages
-		evidencePagination.setPageCount(evidencePagination.getPageCount()-1);
-		
-		if (currentPageIdx < evidencePagination.getPageCount()) {
-			evidencePagination.setCurrentPageIndex(currentPageIdx);
-		}
-		else {
-			evidencePagination.setCurrentPageIndex(evidencePagination.getPageCount()-1);
-		}
-	}
-	
-	private Node createEvidencePage(Integer pgIndex) {	
-		HOGMCodeArea evidencePage = evidenceCodeAreas.get(pgIndex);
-		if (evidencePage == null) {
-			evidencePage = new HOGMCodeArea();
-			evidenceCodeAreas.put(pgIndex, evidencePage);
-		}
-		
-		return evidencePage;
+		modelEditorPane.getChildren().add(modelCodeArea);
 	}
 }
