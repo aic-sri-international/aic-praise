@@ -8,7 +8,7 @@
 <BorderPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.SGSolverDemoController">
    <top>
       <BorderPane style="-fx-background-color: white" BorderPane.alignment="CENTER">
-         <left>
+         <top>
             <ToolBar style="-fx-background-color: null;" BorderPane.alignment="CENTER">
               <items>
                 <Button fx:id="openMenuButton" mnemonicParsing="false" text="Open Menu">
@@ -45,6 +45,17 @@
                         <Tooltip fx:id="redoTooltip" text="Redo" />
                      </tooltip></Button>
                   <Separator />
+                  <Button fx:id="addPageButton" mnemonicParsing="false" text="+">
+                     <tooltip>
+                        <Tooltip text="Add Page" />
+                     </tooltip>
+                  </Button>
+                  <Button fx:id="removePageButton" mnemonicParsing="false" text="-">
+                     <tooltip>
+                        <Tooltip text="Remove Page" />
+                     </tooltip>
+                  </Button>
+                  <Separator orientation="VERTICAL" />
                   <Button fx:id="checkInputButton" mnemonicParsing="false" text="Validate">
                      <tooltip>
                         <Tooltip text="Check Query Input" />
@@ -65,7 +76,7 @@
                   <Separator orientation="VERTICAL" />
               </items>
             </ToolBar>
-         </left>
+         </top>
       </BorderPane>
    </top>
    <center>

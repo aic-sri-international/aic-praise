@@ -65,7 +65,7 @@ public class SGSolverDemoController {
 	//
 	private static final String _iconSmallSize  = "17px";
 	private static final String _iconMediumSize = "18px";
-	private static final String _iconSize       = "24px";
+	private static final String _iconSize       = "22px";
 	//
 	@FXML private Button newButton;
 	@FXML private Button openFileButton;
@@ -76,6 +76,9 @@ public class SGSolverDemoController {
 	//
 	@FXML private Button undoButton;
 	@FXML private Button redoButton;
+	//
+	@FXML private Button addPageButton;
+	@FXML private Button removePageButton;
 	//
 	@FXML private Button checkInputButton;
 	@FXML private Button topExecuteButton;
@@ -138,6 +141,9 @@ public class SGSolverDemoController {
     	//
     	GlyphsDude.setIcon(undoButton, FontAwesomeIcons.ROTATE_LEFT, _iconSize, ContentDisplay.GRAPHIC_ONLY);
     	GlyphsDude.setIcon(redoButton, FontAwesomeIcons.ROTATE_RIGHT, _iconSize, ContentDisplay.GRAPHIC_ONLY);
+    	//
+    	GlyphsDude.setIcon(addPageButton, FontAwesomeIcons.PLUS, _iconSize, ContentDisplay.GRAPHIC_ONLY);
+    	GlyphsDude.setIcon(removePageButton, FontAwesomeIcons.MINUS, _iconSize, ContentDisplay.GRAPHIC_ONLY);
     	//
     	GlyphsDude.setIcon(checkInputButton, FontAwesomeIcons.CHECK, _iconSize, ContentDisplay.GRAPHIC_ONLY);
     	GlyphsDude.setIcon(topExecuteButton, FontAwesomeIcons.PLAY, _iconSize, ContentDisplay.GRAPHIC_ONLY);
