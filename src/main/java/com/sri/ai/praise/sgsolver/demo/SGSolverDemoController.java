@@ -159,53 +159,50 @@ public class SGSolverDemoController {
 		
 		modelPagination.setPageCount(pages.size());
 	}
-
-    
-    
- // TODO - rewrire up to work at top level	
+	
  	@FXML
  	private void addModelPage(ActionEvent ae) {
-// 		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
-// 		
-// 		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
-// 		evidenceCodeAreas.entrySet().forEach(e -> {
-// 			if (e.getKey() > currentPageIdx) {
-// 				newEvidenceCodeAreaPageIdxs.put(e.getKey()+1, e.getValue());
-// 			}
-// 			else {
-// 				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
-// 			}
-// 		});
-// 		evidenceCodeAreas.clear();
-// 		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);
-// 		
-// 		evidencePagination.setPageCount(evidencePagination.getPageCount()+1);
-// 		evidencePagination.setCurrentPageIndex(currentPageIdx+1);
+ 		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
+ 		
+ 		Map<Integer, ModelEditor> newModelEditorPageIdxs = new HashMap<>();
+ 		modelPages.entrySet().forEach(e -> {
+ 			if (e.getKey() > currentPageIdx) {
+ 				newModelEditorPageIdxs.put(e.getKey()+1, e.getValue());
+ 			}
+ 			else {
+ 				newModelEditorPageIdxs.put(e.getKey(), e.getValue());
+ 			}
+ 		});
+ 		modelPages.clear();
+ 		modelPages.putAll(newModelEditorPageIdxs);
+ 		
+ 		modelPagination.setPageCount(modelPagination.getPageCount()+1);
+ 		modelPagination.setCurrentPageIndex(currentPageIdx+1);
  	}
  	
  	@FXML
  	private void removeModelPage(ActionEvent ae) {
-// 		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
-// 		evidenceCodeAreas.remove(currentPageIdx);
-// 		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
-// 		evidenceCodeAreas.entrySet().forEach(e -> {
-// 			if (e.getKey() > currentPageIdx) {
-// 				newEvidenceCodeAreaPageIdxs.put(e.getKey()-1, e.getValue());
-// 			}
-// 			else {
-// 				newEvidenceCodeAreaPageIdxs.put(e.getKey(), e.getValue());
-// 			}
-// 		});
-// 		evidenceCodeAreas.clear();
-// 		evidenceCodeAreas.putAll(newEvidenceCodeAreaPageIdxs);	
-// 		// Reduce the # of pages
-// 		evidencePagination.setPageCount(evidencePagination.getPageCount()-1);
-// 		
-// 		if (currentPageIdx < evidencePagination.getPageCount()) {
-// 			evidencePagination.setCurrentPageIndex(currentPageIdx);
-// 		}
-// 		else {
-// 			evidencePagination.setCurrentPageIndex(evidencePagination.getPageCount()-1);
-// 		}
+ 		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
+ 		modelPages.remove(currentPageIdx);
+ 		Map<Integer, ModelEditor> newModelEditorPageIdxs = new HashMap<>();
+ 		modelPages.entrySet().forEach(e -> {
+ 			if (e.getKey() > currentPageIdx) {
+ 				newModelEditorPageIdxs.put(e.getKey()-1, e.getValue());
+ 			}
+ 			else {
+ 				newModelEditorPageIdxs.put(e.getKey(), e.getValue());
+ 			}
+ 		});
+ 		modelPages.clear();
+ 		modelPages.putAll(newModelEditorPageIdxs);	
+ 		// Reduce the # of pages
+ 		modelPagination.setPageCount(modelPagination.getPageCount()-1);
+ 		
+ 		if (currentPageIdx < modelPagination.getPageCount()) {
+ 			modelPagination.setCurrentPageIndex(currentPageIdx);
+ 		}
+ 		else {
+ 			modelPagination.setCurrentPageIndex(modelPagination.getPageCount()-1);
+ 		}
  	}
 }
