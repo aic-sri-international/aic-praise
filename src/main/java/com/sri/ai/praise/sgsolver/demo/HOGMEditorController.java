@@ -67,7 +67,7 @@ public class HOGMEditorController implements ModelEditor {
 	@Override
 	public void setModel(String model, List<String> defaultQueries) {
 		modelCodeArea.setText(model);
-// TODO - assign default queries		
+		queryController.addDefaultQueries(defaultQueries);		
 	}
 	// END-ModelEditor
 	//

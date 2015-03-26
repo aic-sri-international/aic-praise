@@ -14,12 +14,12 @@
 			<items>
 				<Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
 					<tooltip>
-						<Tooltip fx:id="undoTooltip" text="Undo" />
+						<Tooltip fx:id="undoTooltip" text="Undo Last Input Edit" />
 					</tooltip>
 				</Button>
 				<Button fx:id="redoButton" mnemonicParsing="false" text="Redo">
 					<tooltip>
-						<Tooltip fx:id="redoTooltip" text="Redo" />
+						<Tooltip fx:id="redoTooltip" text="Redo Last Input Edit" />
 					</tooltip>
 				</Button>
 				<Separator />

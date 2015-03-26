@@ -36,12 +36,12 @@
 						<Label text="Example" />
 						<ComboBox fx:id="examplesComboBox" onAction="#exampleSelected" prefWidth="300.0" />
 						<Separator orientation="VERTICAL" />
-						<Button fx:id="addPageButton" mnemonicParsing="false" text="+">
+						<Button fx:id="addPageButton" mnemonicParsing="false" text="+" onAction="#addModelPage">
 							<tooltip>
 								<Tooltip text="Add Page" />
 							</tooltip>
 						</Button>
-						<Button fx:id="removePageButton" mnemonicParsing="false" text="-">
+						<Button fx:id="removePageButton" mnemonicParsing="false" text="-" onAction="#removeModelPage">
 							<tooltip>
 								<Tooltip text="Remove Page" />
 							</tooltip>

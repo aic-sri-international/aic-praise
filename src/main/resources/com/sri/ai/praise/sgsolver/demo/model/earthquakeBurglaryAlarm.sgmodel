@@ -1,5 +1,5 @@
 @MODEL:name=[Page 1] parts=[base-model,evidence#1] queries=[query#1,query#2]
-@MODEL:name=[Page 2] parts=[base-model,evidence#2] queries=[query#1,query#2]
+@MODEL:name=[Page 2] parts=[base-model,evidence#2] queries=[query#2,query#1]
 @MODEL:name=[Page 3] parts=[base-model,evidence#3] queries=[query#1,query#2]
 @FRAGMENT:base-model
 /**

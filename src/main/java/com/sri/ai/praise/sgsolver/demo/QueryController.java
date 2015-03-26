@@ -1,5 +1,7 @@
 package com.sri.ai.praise.sgsolver.demo;
 
+import java.util.List;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -30,6 +32,17 @@ public class QueryController {
 	@FXML private AnchorPane consolePane;
 	//
 	@FXML private Tooltip executeTooltip;
+	
+	public void addDefaultQueries(List<String> queries) {
+		if (queries.size() > 0) {
+			queries.forEach(query -> {
+				if (!queryComboBox.getItems().contains(query)) {
+					queryComboBox.getItems().add(query);
+				}
+			});
+			queryComboBox.setValue(queries.get(0));
+		}
+	}
 	
 	@FXML
 	private void initialize() {

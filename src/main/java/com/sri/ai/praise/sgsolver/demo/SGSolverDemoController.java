@@ -40,6 +40,7 @@ package com.sri.ai.praise.sgsolver.demo;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
@@ -53,6 +54,7 @@ import javafx.scene.control.Pagination;
 import javafx.scene.control.Tooltip;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.demo.model.ExamplePage;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
@@ -83,60 +85,6 @@ public class SGSolverDemoController {
 	//
 	// PRIVATE
 	//
-	@FXML
-	private void exampleSelected(ActionEvent ae) {
-// TODO - reset up
-//		SGExample eg = examplesComboBox.getValue();
-//		this.activeModelEditor.setExample(eg);
-		
-		
-// TODO - reset up
-//		evidencePagination.setPageCount(0);
-//		evidenceCodeAreas.clear();
-//		
-//		List<StringBuilder> modelParts= new ArrayList<>();
-//		StringBuilder modelPart = new StringBuilder();
-//		modelParts.add(modelPart);
-//		try (BufferedReader br = new BufferedReader(new StringReader(example.getModel()))) {
-//			String line;
-//			while ((line = br.readLine()) != null) {
-//				if (line.startsWith(EVIDENCE_SCENARIO_MARKER_PREFIX)) {
-//					modelPart = new StringBuilder();
-//					modelParts.add(modelPart);
-//				}
-//				else {
-//					modelPart.append(line);
-//					modelPart.append("\n");
-//				}
-//			}
-//		} catch (Exception ex) {
-//			// ignore
-//		}
-//		
-//		modelCodeArea.setText(modelParts.get(0).toString());
-//		if (modelParts.size() == 1) {
-//			evidencePagination.setPageCount(1); // i.e. default evidence page
-//		}
-//		else {
-//			for (int i = 1; i < modelParts.size(); i++) {
-//				HOGMCodeArea evidenceCodeArea = new HOGMCodeArea();
-//				evidenceCodeArea.setText(modelParts.get(i).toString());
-//				evidenceCodeAreas.put(i-1, evidenceCodeArea);
-//			}
-//			evidencePagination.setPageCount(modelParts.size()-1);
-//		}
-
-// TODO - notify query controller for active page
-//		if (eg.getDefaultQueriesToRun().size() > 0) {
-//			eg.getDefaultQueriesToRun().forEach(query -> {
-//				if (!queryComboBox.getItems().contains(query)) {
-//					queryComboBox.getItems().add(query);
-//				}
-//			});
-//			queryComboBox.setValue(eg.getDefaultQueriesToRun().get(0));
-//		}
-	}
-
     @FXML
     private void initialize() throws IOException {
     	FXUtil.setDefaultButtonIcon(openMenuButton, FontAwesomeIcons.BARS);
@@ -166,8 +114,11 @@ public class SGSolverDemoController {
     
     private void setPerspective(Perspective perspective) {
     	this.perspective = perspective;
-// TODO - wire up examples.   	
-    	modelPagination.setPageCount(1);
+    	
+    	// Set up the examples
+    	examplesComboBox.getItems().clear();
+    	perspective.getExamples().forEach(eg -> examplesComboBox.getItems().add(eg));
+    	examplesComboBox.setValue(perspective.getExamples().get(0));   	
     }
     
  	private Node createModelPage(Integer pgIndex) {	
@@ -185,11 +136,35 @@ public class SGSolverDemoController {
  		
  		return modelEditor.getRootPane();
  	}
+ 	
+	@FXML
+	private void exampleSelected(ActionEvent ae) {
+		ExamplePages egPages = examplesComboBox.getValue();
+		
+		modelPagination.setPageCount(0);
+		modelPages.clear();
+		
+		List<ExamplePage> pages = egPages.getPages();
+		for (int i = 0; i < pages.size(); i++) {
+			ExamplePage page = pages.get(i);
+			try {
+				ModelEditor modelEditor = perspective.create(page.getModel(), page.getDefaultQueriesToRun());
+				modelPages.put(i, modelEditor);
+			}
+			catch (IOException ioe) {
+// TODO handle properly
+				ioe.printStackTrace();
+			}
+		}
+		
+		modelPagination.setPageCount(pages.size());
+	}
+
     
     
  // TODO - rewrire up to work at top level	
-// 	@FXML
-// 	private void addEvidencePage(ActionEvent ae) {
+ 	@FXML
+ 	private void addModelPage(ActionEvent ae) {
 // 		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
 // 		
 // 		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
@@ -206,10 +181,10 @@ public class SGSolverDemoController {
 // 		
 // 		evidencePagination.setPageCount(evidencePagination.getPageCount()+1);
 // 		evidencePagination.setCurrentPageIndex(currentPageIdx+1);
-// 	}
- //	
-// 	@FXML
-// 	private void removeEvidencePage(ActionEvent ae) {
+ 	}
+ 	
+ 	@FXML
+ 	private void removeModelPage(ActionEvent ae) {
 // 		Integer currentPageIdx = evidencePagination.getCurrentPageIndex();
 // 		evidenceCodeAreas.remove(currentPageIdx);
 // 		Map<Integer, HOGMCodeArea> newEvidenceCodeAreaPageIdxs = new HashMap<>();
@@ -232,25 +207,5 @@ public class SGSolverDemoController {
 // 		else {
 // 			evidencePagination.setCurrentPageIndex(evidencePagination.getPageCount()-1);
 // 		}
-// 	}
- //	
- 
-// TODO - rework how this gets setup    
-//    private void setHOGMPerspective() throws IOException {
-//    	FXMLLoader editorLoader = new FXMLLoader(HOGMEditorController.class.getResource("hogmeditor.fxml"));
-//    	Pane editorPane = editorLoader.load();
-//    	FXUtil.anchor(editorPane);
-//    	this.editorPane.getChildren().add(editorPane);
-//    	
-//    	setEditorPerspective(editorLoader.getController());
-//    }
-//    
-//    private void setEditorPerspective(ModelEditor modelEditor) {
-//    	this.activeModelEditor = modelEditor;
-//    	
-//    	// Set up the examples
-//    	examplesComboBox.getItems().clear();
-//    	modelEditor.getExamples().forEach(eg -> examplesComboBox.getItems().add(eg));
-//    	examplesComboBox.setValue(modelEditor.getExamples().get(0));
-//    }
+ 	}
 }
