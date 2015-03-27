@@ -5,79 +5,91 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.SGSolverDemoController">
+<BorderPane prefHeight="768.0" prefWidth="1024.0"
+	style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8"
+	xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.SGSolverDemoController">
 	<center>
-		<Pagination fx:id="modelPagination" pageCount="0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+		<Pagination fx:id="modelPagination"
+			prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
 	</center>
-   <top>
-				<ToolBar style="-fx-background-color: null;" BorderPane.alignment="CENTER">
+	<top>
+		<ToolBar style="-fx-background-color: null;"
+			BorderPane.alignment="CENTER">
+			<items>
+				<Button fx:id="openMenuButton" mnemonicParsing="false" text="Open Menu">
+					<tooltip>
+						<Tooltip text="Open Menu" />
+					</tooltip>
+				</Button>
+				<Separator orientation="VERTICAL" />
+				<Button fx:id="newButton" mnemonicParsing="false" text="New">
+					<tooltip>
+						<Tooltip text="New" />
+					</tooltip>
+				</Button>
+				<Button fx:id="openFileButton" mnemonicParsing="false" text="Open">
+					<tooltip>
+						<Tooltip text="Open File" />
+					</tooltip>
+				</Button>
+				<Button fx:id="saveButton" mnemonicParsing="false" text="Save">
+					<tooltip>
+						<Tooltip text="Save" />
+					</tooltip>
+				</Button>
+				<Separator orientation="VERTICAL" />
+				<Label text="Example" />
+				<ComboBox fx:id="examplesComboBox" prefWidth="300.0" />
+				<Separator orientation="VERTICAL" />
+				<Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
+					<tooltip>
+						<Tooltip fx:id="undoTooltip" text="Undo Last Edit" />
+					</tooltip>
+				</Button>
+				<Button fx:id="redoButton" mnemonicParsing="false" text="Redo">
+					<tooltip>
+						<Tooltip fx:id="redoTooltip" text="Redo Last Edit" />
+					</tooltip>
+				</Button>
+				<Separator orientation="VERTICAL" />
+			</items>
+		</ToolBar>
+	</top>
+	<bottom>
+		<HBox alignment="CENTER" BorderPane.alignment="CENTER">
+			<children>
+				<ToolBar style="-fx-background-color: null;">
 					<items>
-						<Button fx:id="openMenuButton" mnemonicParsing="false" text="Open Menu">
+						<Button fx:id="removePageButton" mnemonicParsing="false"
+							onAction="#removeModelPage" text="-">
 							<tooltip>
-								<Tooltip text="Open Menu" />
+								<Tooltip text="Remove Page" />
 							</tooltip>
 						</Button>
 						<Separator orientation="VERTICAL" />
-						<Button fx:id="newButton" mnemonicParsing="false" text="New">
+						<Button fx:id="previousPageButton" mnemonicParsing="false"
+							onAction="#previousModelPage" text="&lt;">
 							<tooltip>
-								<Tooltip text="New" />
+								<Tooltip text="Previous Page" />
 							</tooltip>
 						</Button>
-						<Button fx:id="openFileButton" mnemonicParsing="false" text="Open">
+						<Label fx:id="pageNofPLabel" text="n/p" />
+						<Button fx:id="nextPageButton" mnemonicParsing="false"
+							onAction="#nextModelPage" text="&gt;">
 							<tooltip>
-								<Tooltip text="Open File" />
-							</tooltip>
-						</Button>
-						<Button fx:id="saveButton" mnemonicParsing="false" text="Save">
-							<tooltip>
-								<Tooltip text="Save" />
-							</tooltip>
-						</Button>
-						<Separator orientation="VERTICAL" />
-						<Label text="Example" />
-						<ComboBox fx:id="examplesComboBox" prefWidth="300.0" />
-						<Separator orientation="VERTICAL" />
-						<Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
-							<tooltip>
-								<Tooltip fx:id="undoTooltip" text="Undo Last Edit" />
-							</tooltip>
-						</Button>
-						<Button fx:id="redoButton" mnemonicParsing="false" text="Redo">
-							<tooltip>
-								<Tooltip fx:id="redoTooltip" text="Redo Last Edit" />
+								<Tooltip text="Next Page" />
 							</tooltip>
 						</Button>
 						<Separator orientation="VERTICAL" />
+						<Button fx:id="addPageButton" mnemonicParsing="false"
+							onAction="#addModelPage" text="+">
+							<tooltip>
+								<Tooltip text="Add Page" />
+							</tooltip>
+						</Button>
 					</items>
 				</ToolBar>
-   </top>
-   <bottom>
-      <HBox alignment="CENTER" BorderPane.alignment="CENTER">
-         <children>
-            <ToolBar style="-fx-background-color: null;">
-              <items>
-                  <Button fx:id="removePageButton" mnemonicParsing="false" onAction="#removeModelPage" text="-">
-                     <tooltip>
-                        <Tooltip text="Remove Page" />
-                     </tooltip></Button>
-                  <Separator orientation="VERTICAL" />
-                <Button fx:id="previousPageButton" mnemonicParsing="false" onAction="#previousModelPage" text="&lt;">
-                     <tooltip>
-                        <Tooltip text="Previous Page" />
-                     </tooltip></Button>
-                  <Label fx:id="pageNofPLabel" text="n/p" />
-                  <Button fx:id="nextPageButton" mnemonicParsing="false" onAction="#nextModelPage" text="&gt;">
-                     <tooltip>
-                        <Tooltip text="Next Page" />
-                     </tooltip></Button>
-                  <Separator orientation="VERTICAL" />
-                  <Button fx:id="addPageButton" mnemonicParsing="false" onAction="#addModelPage" text="+">
-                     <tooltip>
-                        <Tooltip text="Add Page" />
-                     </tooltip></Button>
-              </items>
-            </ToolBar>
-         </children>
-      </HBox>
-   </bottom>
+			</children>
+		</HBox>
+	</bottom>
 </BorderPane>

@@ -104,6 +104,7 @@ public class SGSolverDemoController {
     	FXUtil.setPaginationButtonIcon(nextPageButton, FontAwesomeIcons.CARET_RIGHT);
     	FXUtil.setPaginationButtonIcon(addPageButton, FontAwesomeIcons.PLUS);
   	
+    	modelPagination.setPageFactory(this::createModelPage);
 		modelPagination.pageCountProperty().addListener(new ChangeListener<Number>() {
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 				updatePaginationControls(modelPagination.getCurrentPageIndex(), newValue.intValue());
@@ -119,8 +120,7 @@ public class SGSolverDemoController {
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 				if (newValue.intValue() >= 0 && newValue.intValue() < examplesComboBox.getItems().size()) {
 					ExamplePages egPages = examplesComboBox.getItems().get(newValue.intValue());
-	
-					modelPagination.setPageCount(0);
+									
 					modelPages.clear();
 					
 					List<ExamplePage> pages = egPages.getPages();
@@ -131,17 +131,17 @@ public class SGSolverDemoController {
 							modelPages.put(i, modelEditor);
 						}
 						catch (IOException ioe) {
-			// TODO handle properly
+// TODO handle properly
 							ioe.printStackTrace();
 						}
 					}
-					
+			
 					modelPagination.setPageCount(pages.size());
+					modelPagination.setCurrentPageIndex(0);
 				}
 			}
 		});
 		
-		modelPagination.setPageFactory(this::createModelPage);		
 		setPerspective(new HOGMPerspective());
     }
     
@@ -155,7 +155,7 @@ public class SGSolverDemoController {
     }
     
  	private Node createModelPage(Integer pgIndex) {	
- 		ModelEditor modelEditor = modelPages.get(pgIndex);
+ 		ModelEditor modelEditor = modelPages.get(pgIndex);		
  		if (modelEditor == null) {
  			try {
  				modelEditor = perspective.create("", Collections.emptyList()); 
@@ -167,13 +167,9 @@ public class SGSolverDemoController {
  			}
  		}
  		
- 		return modelEditor.getRootPane();
+ 		Node result = modelEditor.getRootPane();			
+ 		return result;
  	}
- 	
-	@FXML
-	private void exampleSelected(ActionEvent ae) {
-	
-	}
 	
 	@FXML
  	private void addModelPage(ActionEvent ae) {
