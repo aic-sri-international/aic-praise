@@ -6,6 +6,10 @@
    -fx-background-color: white;
 }
 
+.pagination > .pagination-control {
+	visibility: collapse;
+}
+
 .contentPane {
     -fx-border-color: lightgray;
     -fx-border-width: 1px;

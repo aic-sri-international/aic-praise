@@ -55,9 +55,10 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 @Beta
 public class FXUtil {
 	//
-	public static final String _iconSmallSize         = "17px";
-	public static final String _iconMediumSize        = "18px";
-	public static final String _buttonDefaultIconSize = "24px";
+	public static final String _iconSmallSize            = "17px";
+	public static final String _iconMediumSize           = "18px";
+	public static final String _buttonDefaultIconSize    = "24px";
+	public static final String _buttonPaginationIconSize = "8px";
 	
     public static void anchor(Node node) {
         AnchorPane.setTopAnchor(node, 0.0);
@@ -68,6 +69,10 @@ public class FXUtil {
     
     public static void setDefaultButtonIcon(Button button, GlyphIcons icon) {
     	GlyphsDude.setIcon(button, icon, _buttonDefaultIconSize, ContentDisplay.GRAPHIC_ONLY);
+    }
+    
+    public static void setPaginationButtonIcon(Button button, GlyphIcons icon) {
+    	GlyphsDude.setIcon(button, icon, _buttonPaginationIconSize, ContentDisplay.GRAPHIC_ONLY);
     }
     
     public static void setMediumButtonIcon(Button button, GlyphIcons icon) {

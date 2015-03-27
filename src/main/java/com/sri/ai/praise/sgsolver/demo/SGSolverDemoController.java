@@ -50,8 +50,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
-import javafx.scene.control.Tooltip;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePage;
@@ -70,13 +70,16 @@ public class SGSolverDemoController {
 	//
 	@FXML private ComboBox<ExamplePages> examplesComboBox;
 	//
-	@FXML private Button addPageButton;
-	@FXML private Button removePageButton;
-	//
-	@FXML private Tooltip undoTooltip;
-	@FXML private Tooltip redoTooltip;
+	@FXML private Button undoButton;
+	@FXML private Button redoButton;
 	//
 	@FXML private Pagination modelPagination;
+	//
+	@FXML private Button removePageButton;
+	@FXML private Button previousPageButton;
+	@FXML private Label  pageNofPLabel;
+	@FXML private Button nextPageButton;
+	@FXML private Button addPageButton;
 	
 	//
 	private Perspective perspective;
@@ -92,18 +95,23 @@ public class SGSolverDemoController {
     	FXUtil.setDefaultButtonIcon(newButton, FontAwesomeIcons.FILE_ALT);
     	FXUtil.setDefaultButtonIcon(openFileButton, FontAwesomeIcons.FOLDER_OPEN);
     	FXUtil.setDefaultButtonIcon(saveButton, FontAwesomeIcons.SAVE);
+		//
+    	FXUtil.setDefaultButtonIcon(undoButton, FontAwesomeIcons.ROTATE_LEFT);
+    	FXUtil.setDefaultButtonIcon(redoButton, FontAwesomeIcons.ROTATE_RIGHT);
     	//
-    	FXUtil.setDefaultButtonIcon(addPageButton, FontAwesomeIcons.PLUS);
-    	FXUtil.setDefaultButtonIcon(removePageButton, FontAwesomeIcons.MINUS);
+    	FXUtil.setPaginationButtonIcon(removePageButton, FontAwesomeIcons.MINUS);
+    	FXUtil.setPaginationButtonIcon(previousPageButton, FontAwesomeIcons.CARET_LEFT);
+    	FXUtil.setPaginationButtonIcon(nextPageButton, FontAwesomeIcons.CARET_RIGHT);
+    	FXUtil.setPaginationButtonIcon(addPageButton, FontAwesomeIcons.PLUS);
   	
 		modelPagination.pageCountProperty().addListener(new ChangeListener<Number>() {
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {				
-				if (newValue.intValue() <= 1) {
-					removePageButton.setDisable(true);
-				}
-				else {
-					removePageButton.setDisable(false);
-				}
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				updatePaginationControls(modelPagination.getCurrentPageIndex(), newValue.intValue());
+			}
+		});
+		modelPagination.currentPageIndexProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				updatePaginationControls(newValue.intValue(), modelPagination.getPageCount());
 			}
 		});
 		
@@ -160,7 +168,7 @@ public class SGSolverDemoController {
 		modelPagination.setPageCount(pages.size());
 	}
 	
- 	@FXML
+	@FXML
  	private void addModelPage(ActionEvent ae) {
  		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
  		
@@ -179,8 +187,18 @@ public class SGSolverDemoController {
  		modelPagination.setPageCount(modelPagination.getPageCount()+1);
  		modelPagination.setCurrentPageIndex(currentPageIdx+1);
  	}
+	
+	@FXML
+ 	private void previousModelPage(ActionEvent ae) {
+		modelPagination.setCurrentPageIndex(modelPagination.getCurrentPageIndex()-1);
+	}
+	
+	@FXML
+ 	private void nextModelPage(ActionEvent ae) {
+		modelPagination.setCurrentPageIndex(modelPagination.getCurrentPageIndex()+1);
+	}
  	
- 	@FXML
+	@FXML
  	private void removeModelPage(ActionEvent ae) {
  		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
  		modelPages.remove(currentPageIdx);
@@ -205,4 +223,27 @@ public class SGSolverDemoController {
  			modelPagination.setCurrentPageIndex(modelPagination.getPageCount()-1);
  		}
  	}
+	
+	private void updatePaginationControls(int currentPageIndex, int pageCount) {
+		if (pageCount <= 1) {
+			removePageButton.setDisable(true);
+		}
+		else {
+			removePageButton.setDisable(false);
+		}
+		pageNofPLabel.setText(""+(currentPageIndex+1)+"/"+pageCount);
+		
+		if (currentPageIndex <= 0) {
+			previousPageButton.setDisable(true);
+		}
+		else {
+			previousPageButton.setDisable(false);
+		}
+		if (currentPageIndex >= modelPagination.getPageCount() -1) {
+			nextPageButton.setDisable(true);
+		}
+		else {
+			nextPageButton.setDisable(false);
+		}
+	}
 }
