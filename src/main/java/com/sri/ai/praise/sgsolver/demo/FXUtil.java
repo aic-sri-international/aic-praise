@@ -58,7 +58,7 @@ public class FXUtil {
 	public static final String _iconSmallSize            = "17px";
 	public static final String _iconMediumSize           = "18px";
 	public static final String _buttonDefaultIconSize    = "24px";
-	public static final String _buttonPaginationIconSize = "8px";
+	public static final String _buttonPaginationIconSize = "20px";
 	
     public static void anchor(Node node) {
         AnchorPane.setTopAnchor(node, 0.0);
