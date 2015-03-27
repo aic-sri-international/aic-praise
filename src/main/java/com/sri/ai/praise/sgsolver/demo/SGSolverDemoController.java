@@ -115,8 +115,33 @@ public class SGSolverDemoController {
 			}
 		});
 		
-		modelPagination.setPageFactory(this::createModelPage);
+		examplesComboBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				if (newValue.intValue() >= 0 && newValue.intValue() < examplesComboBox.getItems().size()) {
+					ExamplePages egPages = examplesComboBox.getItems().get(newValue.intValue());
+	
+					modelPagination.setPageCount(0);
+					modelPages.clear();
+					
+					List<ExamplePage> pages = egPages.getPages();
+					for (int i = 0; i < pages.size(); i++) {
+						ExamplePage page = pages.get(i);
+						try {
+							ModelEditor modelEditor = perspective.create(page.getModel(), page.getDefaultQueriesToRun());
+							modelPages.put(i, modelEditor);
+						}
+						catch (IOException ioe) {
+			// TODO handle properly
+							ioe.printStackTrace();
+						}
+					}
+					
+					modelPagination.setPageCount(pages.size());
+				}
+			}
+		});
 		
+		modelPagination.setPageFactory(this::createModelPage);		
 		setPerspective(new HOGMPerspective());
     }
     
@@ -124,9 +149,9 @@ public class SGSolverDemoController {
     	this.perspective = perspective;
     	
     	// Set up the examples
-    	examplesComboBox.getItems().clear();
+    	examplesComboBox.getItems().clear();    	
     	perspective.getExamples().forEach(eg -> examplesComboBox.getItems().add(eg));
-    	examplesComboBox.setValue(perspective.getExamples().get(0));   	
+    	examplesComboBox.getSelectionModel().selectFirst();
     }
     
  	private Node createModelPage(Integer pgIndex) {	
@@ -147,25 +172,7 @@ public class SGSolverDemoController {
  	
 	@FXML
 	private void exampleSelected(ActionEvent ae) {
-		ExamplePages egPages = examplesComboBox.getValue();
-		
-		modelPagination.setPageCount(0);
-		modelPages.clear();
-		
-		List<ExamplePage> pages = egPages.getPages();
-		for (int i = 0; i < pages.size(); i++) {
-			ExamplePage page = pages.get(i);
-			try {
-				ModelEditor modelEditor = perspective.create(page.getModel(), page.getDefaultQueriesToRun());
-				modelPages.put(i, modelEditor);
-			}
-			catch (IOException ioe) {
-// TODO handle properly
-				ioe.printStackTrace();
-			}
-		}
-		
-		modelPagination.setPageCount(pages.size());
+	
 	}
 	
 	@FXML

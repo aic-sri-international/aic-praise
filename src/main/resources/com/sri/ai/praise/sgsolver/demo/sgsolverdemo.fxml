@@ -35,7 +35,7 @@
 						</Button>
 						<Separator orientation="VERTICAL" />
 						<Label text="Example" />
-						<ComboBox fx:id="examplesComboBox" onAction="#exampleSelected" prefWidth="300.0" />
+						<ComboBox fx:id="examplesComboBox" prefWidth="300.0" />
 						<Separator orientation="VERTICAL" />
 						<Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
 							<tooltip>

@@ -35,7 +35,7 @@ public class QueryController {
 					queryComboBox.getItems().add(query);
 				}
 			});
-			queryComboBox.setValue(queries.get(0));
+			queryComboBox.getSelectionModel().select(queryComboBox.getItems().indexOf(queries.get(0)));
 		}
 	}
 	
