@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -83,7 +84,7 @@ public class SGSolverDemoController {
 	
 	//
 	private Perspective perspective;
-	private Map<Integer, ModelEditor> modelPages = new HashMap<>();
+	private Map<Integer, ModelPage> modelPages = new HashMap<>();
 	
 	//
 	// PRIVATE
@@ -126,14 +127,7 @@ public class SGSolverDemoController {
 					List<ExamplePage> pages = egPages.getPages();
 					for (int i = 0; i < pages.size(); i++) {
 						ExamplePage page = pages.get(i);
-						try {
-							ModelEditor modelEditor = perspective.create(page.getModel(), page.getDefaultQueriesToRun());
-							modelPages.put(i, modelEditor);
-						}
-						catch (IOException ioe) {
-// TODO handle properly
-							ioe.printStackTrace();
-						}
+						modelPages.put(i, new ModelPage(() -> constructModelEditor(page.getModel(), page.getDefaultQueriesToRun())));
 					}
 			
 					modelPagination.setPageCount(pages.size());
@@ -155,19 +149,13 @@ public class SGSolverDemoController {
     }
     
  	private Node createModelPage(Integer pgIndex) {	
- 		ModelEditor modelEditor = modelPages.get(pgIndex);		
- 		if (modelEditor == null) {
- 			try {
- 				modelEditor = perspective.create("", Collections.emptyList()); 
- 				modelPages.put(pgIndex, modelEditor);
- 			}
- 			catch (IOException ioe) {
- // TODO - handle properly
- 				ioe.printStackTrace();				
- 			}
+ 		ModelPage modelPage = modelPages.get(pgIndex);		
+ 		if (modelPage == null) {
+ 			modelPage = new ModelPage(() -> constructModelEditor("", Collections.emptyList())); 
+ 			modelPages.put(pgIndex, modelPage);
  		}
  		
- 		Node result = modelEditor.getRootPane();			
+ 		Node result = modelPage.getModelEditor().getRootPane();			
  		return result;
  	}
 	
@@ -175,17 +163,17 @@ public class SGSolverDemoController {
  	private void addModelPage(ActionEvent ae) {
  		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
  		
- 		Map<Integer, ModelEditor> newModelEditorPageIdxs = new HashMap<>();
+ 		Map<Integer, ModelPage> newModelPageIdxs = new HashMap<>();
  		modelPages.entrySet().forEach(e -> {
  			if (e.getKey() > currentPageIdx) {
- 				newModelEditorPageIdxs.put(e.getKey()+1, e.getValue());
+ 				newModelPageIdxs.put(e.getKey()+1, e.getValue());
  			}
  			else {
- 				newModelEditorPageIdxs.put(e.getKey(), e.getValue());
+ 				newModelPageIdxs.put(e.getKey(), e.getValue());
  			}
  		});
  		modelPages.clear();
- 		modelPages.putAll(newModelEditorPageIdxs);
+ 		modelPages.putAll(newModelPageIdxs);
  		
  		modelPagination.setPageCount(modelPagination.getPageCount()+1);
  		modelPagination.setCurrentPageIndex(currentPageIdx+1);
@@ -193,29 +181,31 @@ public class SGSolverDemoController {
 	
 	@FXML
  	private void previousModelPage(ActionEvent ae) {
-		modelPagination.setCurrentPageIndex(modelPagination.getCurrentPageIndex()-1);
+		int prevPageIdx = modelPagination.getCurrentPageIndex()-1;
+		modelPagination.setCurrentPageIndex(prevPageIdx);
 	}
 	
 	@FXML
  	private void nextModelPage(ActionEvent ae) {
-		modelPagination.setCurrentPageIndex(modelPagination.getCurrentPageIndex()+1);
+		int nextPageIdx = modelPagination.getCurrentPageIndex()+1;
+		modelPagination.setCurrentPageIndex(nextPageIdx);
 	}
  	
 	@FXML
  	private void removeModelPage(ActionEvent ae) {
  		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
  		modelPages.remove(currentPageIdx);
- 		Map<Integer, ModelEditor> newModelEditorPageIdxs = new HashMap<>();
+ 		Map<Integer, ModelPage> newModelPageIdxs = new HashMap<>();
  		modelPages.entrySet().forEach(e -> {
  			if (e.getKey() > currentPageIdx) {
- 				newModelEditorPageIdxs.put(e.getKey()-1, e.getValue());
+ 				newModelPageIdxs.put(e.getKey()-1, e.getValue());
  			}
  			else {
- 				newModelEditorPageIdxs.put(e.getKey(), e.getValue());
+ 				newModelPageIdxs.put(e.getKey(), e.getValue());
  			}
  		});
  		modelPages.clear();
- 		modelPages.putAll(newModelEditorPageIdxs);	
+ 		modelPages.putAll(newModelPageIdxs);	
  		// Reduce the # of pages
  		modelPagination.setPageCount(modelPagination.getPageCount()-1);
  		
@@ -247,6 +237,33 @@ public class SGSolverDemoController {
 		}
 		else {
 			nextPageButton.setDisable(false);
+		}
+	}
+	
+	private ModelEditor constructModelEditor(String model, List<String> defaultQueries) {
+		ModelEditor result = null;
+		try {
+			result = perspective.create(model, defaultQueries); 
+		}
+		catch (IOException ioe) {
+// TODO - handle properly
+			ioe.printStackTrace();				
+		}
+		return result;
+	}
+	
+	private class ModelPage {
+		private Supplier<ModelEditor> modelEditorSupplier;
+		private ModelEditor modelEditor;
+		public ModelPage(Supplier<ModelEditor> modelEditorSupplier) {
+			this.modelEditorSupplier = modelEditorSupplier;
+		}
+		
+		public ModelEditor getModelEditor() {
+			if (modelEditor == null) {
+				modelEditor = modelEditorSupplier.get();
+			}
+			return modelEditor;
 		}
 	}
 }
