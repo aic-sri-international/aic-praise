@@ -51,7 +51,10 @@ public class SGSolverDemoApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("sgsolverdemo.fxml"));
+    	FXMLLoader rootLoader = new FXMLLoader(getClass().getResource("sgsolverdemo.fxml"));
+        Parent root = rootLoader.load();
+        SGSolverDemoController controller = rootLoader.getController();
+        controller.setMainStage(primaryStage);
         primaryStage.setTitle("PRAiSE");
         Scene scene = new Scene(root, 1024, 768);
         primaryStage.setScene(scene);

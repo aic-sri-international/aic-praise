@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +54,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePage;
@@ -62,6 +65,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
 @Beta
 public class SGSolverDemoController {
+	private Stage mainStage;
 	//
 	@FXML private Button openMenuButton;
 	//
@@ -81,10 +85,16 @@ public class SGSolverDemoController {
 	@FXML private Label  pageNofPLabel;
 	@FXML private Button nextPageButton;
 	@FXML private Button addPageButton;
+	//
+	private FileChooser fileChooser;
 	
 	//
 	private Perspective perspective;
 	private Map<Integer, ModelPage> modelPages = new HashMap<>();
+	
+	public void setMainStage(Stage stage) {
+		this.mainStage = stage;
+	}
 	
 	//
 	// PRIVATE
@@ -104,7 +114,13 @@ public class SGSolverDemoController {
     	FXUtil.setPaginationButtonIcon(previousPageButton, FontAwesomeIcons.CARET_LEFT);
     	FXUtil.setPaginationButtonIcon(nextPageButton, FontAwesomeIcons.CARET_RIGHT);
     	FXUtil.setPaginationButtonIcon(addPageButton, FontAwesomeIcons.PLUS);
-  	
+    	//
+    	//
+    	fileChooser = new FileChooser();
+    	fileChooser.getExtensionFilters().addAll(
+    	         		new FileChooser.ExtensionFilter("Model Files", "*.sgmodel"));
+    	//
+    	//
     	modelPagination.setPageFactory(this::createModelPage);
 		modelPagination.pageCountProperty().addListener(new ChangeListener<Number>() {
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -120,6 +136,8 @@ public class SGSolverDemoController {
 		examplesComboBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 				if (newValue.intValue() >= 0 && newValue.intValue() < examplesComboBox.getItems().size()) {
+// TODO - check if current model should be saved first
+					
 					ExamplePages egPages = examplesComboBox.getItems().get(newValue.intValue());
 									
 					modelPages.clear();
@@ -146,6 +164,36 @@ public class SGSolverDemoController {
     	examplesComboBox.getItems().clear();    	
     	perspective.getExamples().forEach(eg -> examplesComboBox.getItems().add(eg));
     	examplesComboBox.getSelectionModel().selectFirst();
+    }
+   
+    @FXML
+    private void newModel(ActionEvent ae) {
+ // TODO - check if current model should be saved first
+    	
+    	modelPages.clear();
+    	
+    	modelPagination.setPageCount(1);
+		modelPagination.setCurrentPageIndex(0);
+		
+		// Want to indicate that we are not using a particular example after a new model is instantiated.
+		examplesComboBox.getSelectionModel().select(-1);
+    }
+    
+    @FXML
+    private void openModel(ActionEvent ae) {
+// TODO - check if current model should be saved first
+    	File selectedFile = fileChooser.showOpenDialog(mainStage);
+    	if (selectedFile != null) {
+// TODO - tell the perspective to open it    		 
+    	}
+    }
+    
+    @FXML
+    private void saveModel(ActionEvent ae) {
+    	File savedFile = fileChooser.showSaveDialog(mainStage);
+    	if (savedFile != null) {
+ // TODO - tell the perspective to save to it   		
+    	}
     }
     
  	private Node createModelPage(Integer pgIndex) {	
