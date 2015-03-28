@@ -192,7 +192,7 @@ public class SGSolverDemoController {
     private void saveModel(ActionEvent ae) {
     	File savedFile = fileChooser.showSaveDialog(mainStage);
     	if (savedFile != null) {
- // TODO - tell the perspective to save to it   		
+ // TODO - tell the perspective to save to it  
     	}
     }
     
@@ -294,8 +294,7 @@ public class SGSolverDemoController {
 			result = perspective.create(model, defaultQueries); 
 		}
 		catch (IOException ioe) {
-// TODO - handle properly
-			ioe.printStackTrace();				
+			FXUtil.exception(ioe);
 		}
 		return result;
 	}

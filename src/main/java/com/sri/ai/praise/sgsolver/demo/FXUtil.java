@@ -37,14 +37,25 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import com.google.common.annotations.Beta;
 
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.stage.Modality;
 import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.GlyphsBuilder;
 import de.jensd.fx.glyphs.GlyphsDude;
@@ -95,5 +106,40 @@ public class FXUtil {
 		node.getChildren().add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(FontAwesomeIcons.CARET_DOWN).size("10px").build());
 		
 		return node;
+	}
+	
+	public static void exception(Throwable th) {
+		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
+
+		dialog.setTitle("Program exception");
+
+		final DialogPane dialogPane = dialog.getDialogPane();
+		dialogPane.setContentText("Details of the problem:");
+		dialogPane.getButtonTypes().addAll(ButtonType.OK);
+		dialogPane.setContentText(th.getMessage());
+		dialog.initModality(Modality.APPLICATION_MODAL);
+
+		Label label = new Label("Exception stacktrace:");
+		StringWriter sw = new StringWriter();
+		PrintWriter  pw = new PrintWriter(sw);
+		th.printStackTrace(pw);
+		pw.close();
+
+		TextArea textArea = new TextArea(sw.toString());
+		textArea.setEditable(false);
+		textArea.setWrapText(true);
+
+		textArea.setMaxWidth(Double.MAX_VALUE);
+		textArea.setMaxHeight(Double.MAX_VALUE);
+		GridPane.setVgrow(textArea, Priority.ALWAYS);
+		GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+		GridPane root = new GridPane();
+		root.setVisible(false);
+		root.setMaxWidth(Double.MAX_VALUE);
+		root.add(label, 0, 0);
+		root.add(textArea, 0, 1);
+		dialogPane.setExpandableContent(root);
+		dialog.showAndWait();
 	}
 }
