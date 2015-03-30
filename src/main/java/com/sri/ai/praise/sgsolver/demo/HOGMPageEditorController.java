@@ -49,13 +49,18 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
 
 @Beta
-public class HOGMEditorController implements ModelEditor {
+public class HOGMPageEditorController implements ModelPageEditor {
 	@FXML private Pane       rootPane;
 	@FXML private AnchorPane modelEditorPane;
 	@FXML private AnchorPane queryOutputPane;
 	//
 	private HOGMCodeArea    modelCodeArea = new HOGMCodeArea();
 	private QueryController queryController;
+	
+	public static FXMLLoader newLoader( ) {
+		FXMLLoader result = new FXMLLoader(HOGMPageEditorController.class.getResource("hogmpageeditor.fxml"));
+		return result;
+	}
 	
 	//
 	// START-ModelEditor
@@ -65,8 +70,8 @@ public class HOGMEditorController implements ModelEditor {
 	}
 	
 	@Override
-	public void setModel(String model, List<String> defaultQueries) {
-		modelCodeArea.setText(model);
+	public void setPage(String modelPage, List<String> defaultQueries) {
+		modelCodeArea.setText(modelPage);
 		queryController.addDefaultQueries(defaultQueries);		
 	}
 	// END-ModelEditor

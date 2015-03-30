@@ -44,8 +44,7 @@ import javafx.scene.layout.Pane;
 import com.google.common.annotations.Beta;
 
 @Beta
-public interface ModelEditor {
-	
+public interface ModelPageEditor {
 	Pane getRootPane();
-	void setModel(String model, List<String> defaultQueries);
+	void setPage(String modelPage, List<String> defaultQueries);
 }

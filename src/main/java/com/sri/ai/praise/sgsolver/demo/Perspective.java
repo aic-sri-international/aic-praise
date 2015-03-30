@@ -37,14 +37,40 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.List;
+import java.util.function.Supplier;
+
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyMapProperty;
+import javafx.collections.ObservableMap;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 @Beta
-public interface Perspective {
+public interface Perspective {		
 	List<ExamplePages> getExamples();
-	ModelEditor create(String model, List<String> defaultQueries) throws IOException;
+	
+	boolean isCanUndo();
+	ReadOnlyBooleanProperty canUndoProperty(); 
+	boolean isCanRedo();
+	ReadOnlyBooleanProperty canRedoProperty();
+	default boolean isModified() {
+		return isCanUndo() || isCanRedo();
+	}
+	
+	ObservableMap<Integer, Supplier<ModelPageEditor>> getModelEditorPages();
+	ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelEditorPagesProperty();	
+	
+	void newModel();
+	void newModel(File modelFile);
+	void newModel(ExamplePages examples);
+	
+	void addPage(Integer atPageIndex);
+	void removePage(Integer pageIndex);
+	
+	File getModelFile();
+	void save();
+	void saveAs(File file);
 }

@@ -39,14 +39,11 @@ package com.sri.ai.praise.sgsolver.demo;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -58,7 +55,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.demo.model.ExamplePage;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
@@ -90,7 +86,6 @@ public class SGSolverDemoController {
 	
 	//
 	private Perspective perspective;
-	private Map<Integer, ModelPage> modelPages = new HashMap<>();
 	
 	public void setMainStage(Stage stage) {
 		this.mainStage = stage;
@@ -99,7 +94,7 @@ public class SGSolverDemoController {
 	//
 	// PRIVATE
 	//
-    @FXML
+	@FXML
     private void initialize() throws IOException {
     	FXUtil.setDefaultButtonIcon(openMenuButton, FontAwesomeIcons.BARS);
     	//
@@ -135,20 +130,11 @@ public class SGSolverDemoController {
 		
 		examplesComboBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				if (newValue.intValue() >= 0 && newValue.intValue() < examplesComboBox.getItems().size()) {
-// TODO - check if current model should be saved first
-					
+				if (newValue.intValue() >= 0 && newValue.intValue() < examplesComboBox.getItems().size()) {					
 					ExamplePages egPages = examplesComboBox.getItems().get(newValue.intValue());
-									
-					modelPages.clear();
 					
-					List<ExamplePage> pages = egPages.getPages();
-					for (int i = 0; i < pages.size(); i++) {
-						ExamplePage page = pages.get(i);
-						modelPages.put(i, new ModelPage(() -> constructModelEditor(page.getModel(), page.getDefaultQueriesToRun())));
-					}
-			
-					modelPagination.setPageCount(pages.size());
+					checkSaveRequired();
+					perspective.newModel(egPages);
 					modelPagination.setCurrentPageIndex(0);
 				}
 			}
@@ -158,7 +144,12 @@ public class SGSolverDemoController {
     }
     
     private void setPerspective(Perspective perspective) {
+    	if (this.perspective != null) {
+    		this.perspective.modelEditorPagesProperty().removeListener(this::modelPagesChanged);
+    	}
+    	
     	this.perspective = perspective;
+    	this.perspective.modelEditorPagesProperty().addListener(this::modelPagesChanged);
     	
     	// Set up the examples
     	examplesComboBox.getItems().clear();    	
@@ -168,12 +159,10 @@ public class SGSolverDemoController {
    
     @FXML
     private void newModel(ActionEvent ae) {
- // TODO - check if current model should be saved first
+    	checkSaveRequired();
+    	perspective.newModel();
     	
-    	modelPages.clear();
-    	
-    	modelPagination.setPageCount(1);
-		modelPagination.setCurrentPageIndex(0);
+    	modelPagination.setCurrentPageIndex(0);
 		
 		// Want to indicate that we are not using a particular example after a new model is instantiated.
 		examplesComboBox.getSelectionModel().select(-1);
@@ -181,50 +170,64 @@ public class SGSolverDemoController {
     
     @FXML
     private void openModel(ActionEvent ae) {
-// TODO - check if current model should be saved first
+    	checkSaveRequired();
     	File selectedFile = fileChooser.showOpenDialog(mainStage);
     	if (selectedFile != null) {
-// TODO - tell the perspective to open it    		 
+    		perspective.newModel(selectedFile);
+    		modelPagination.setCurrentPageIndex(0);
     	}
     }
     
     @FXML
     private void saveModel(ActionEvent ae) {
-    	File savedFile = fileChooser.showSaveDialog(mainStage);
-    	if (savedFile != null) {
- // TODO - tell the perspective to save to it  
+    	checkSaveRequired();
+    }
+    
+    private void checkSaveRequired() {
+    	if (perspective.isModified()) {
+    		if (perspective.getModelFile() == null) {
+    			File saveAsFile = fileChooser.showSaveDialog(mainStage);
+    			if (saveAsFile != null) {
+    				perspective.saveAs(saveAsFile);
+    			}
+    		}
+    		else {
+    			perspective.save();
+    		}
     	}
     }
     
  	private Node createModelPage(Integer pgIndex) {	
- 		ModelPage modelPage = modelPages.get(pgIndex);		
- 		if (modelPage == null) {
- 			modelPage = new ModelPage(() -> constructModelEditor("", Collections.emptyList())); 
- 			modelPages.put(pgIndex, modelPage);
+ 		Node result = null;
+ 		if (perspective != null && perspective.getModelEditorPages().containsKey(pgIndex)) {			
+ 			ModelPageEditor modelPage = perspective.getModelEditorPages().get(pgIndex).get();
+ 			result = modelPage.getRootPane(); 
  		}
  		
- 		Node result = modelPage.getModelEditor().getRootPane();			
  		return result;
  	}
 	
 	@FXML
  	private void addModelPage(ActionEvent ae) {
  		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
- 		
- 		Map<Integer, ModelPage> newModelPageIdxs = new HashMap<>();
- 		modelPages.entrySet().forEach(e -> {
- 			if (e.getKey() > currentPageIdx) {
- 				newModelPageIdxs.put(e.getKey()+1, e.getValue());
- 			}
- 			else {
- 				newModelPageIdxs.put(e.getKey(), e.getValue());
- 			}
- 		});
- 		modelPages.clear();
- 		modelPages.putAll(newModelPageIdxs);
- 		
- 		modelPagination.setPageCount(modelPagination.getPageCount()+1);
+
+ 		perspective.addPage(currentPageIdx);
+
  		modelPagination.setCurrentPageIndex(currentPageIdx+1);
+ 	}
+	
+	@FXML
+ 	private void removeModelPage(ActionEvent ae) {
+		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
+		
+ 		perspective.removePage(currentPageIdx);
+ 		
+ 		if (currentPageIdx >= perspective.getModelEditorPages().size()) {
+ 			modelPagination.setCurrentPageIndex(perspective.getModelEditorPages().size()-1);
+ 		}
+ 		else {
+ 			modelPagination.setCurrentPageIndex(currentPageIdx);
+ 		}
  	}
 	
 	@FXML
@@ -238,32 +241,6 @@ public class SGSolverDemoController {
 		int nextPageIdx = modelPagination.getCurrentPageIndex()+1;
 		modelPagination.setCurrentPageIndex(nextPageIdx);
 	}
- 	
-	@FXML
- 	private void removeModelPage(ActionEvent ae) {
- 		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
- 		modelPages.remove(currentPageIdx);
- 		Map<Integer, ModelPage> newModelPageIdxs = new HashMap<>();
- 		modelPages.entrySet().forEach(e -> {
- 			if (e.getKey() > currentPageIdx) {
- 				newModelPageIdxs.put(e.getKey()-1, e.getValue());
- 			}
- 			else {
- 				newModelPageIdxs.put(e.getKey(), e.getValue());
- 			}
- 		});
- 		modelPages.clear();
- 		modelPages.putAll(newModelPageIdxs);	
- 		// Reduce the # of pages
- 		modelPagination.setPageCount(modelPagination.getPageCount()-1);
- 		
- 		if (currentPageIdx < modelPagination.getPageCount()) {
- 			modelPagination.setCurrentPageIndex(currentPageIdx);
- 		}
- 		else {
- 			modelPagination.setCurrentPageIndex(modelPagination.getPageCount()-1);
- 		}
- 	}
 	
 	private void updatePaginationControls(int currentPageIndex, int pageCount) {
 		if (pageCount <= 1) {
@@ -287,30 +264,13 @@ public class SGSolverDemoController {
 			nextPageButton.setDisable(false);
 		}
 	}
-	
-	private ModelEditor constructModelEditor(String model, List<String> defaultQueries) {
-		ModelEditor result = null;
-		try {
-			result = perspective.create(model, defaultQueries); 
-		}
-		catch (IOException ioe) {
-			FXUtil.exception(ioe);
-		}
-		return result;
-	}
-	
-	private class ModelPage {
-		private Supplier<ModelEditor> modelEditorSupplier;
-		private ModelEditor modelEditor;
-		public ModelPage(Supplier<ModelEditor> modelEditorSupplier) {
-			this.modelEditorSupplier = modelEditorSupplier;
-		}
-		
-		public ModelEditor getModelEditor() {
-			if (modelEditor == null) {
-				modelEditor = modelEditorSupplier.get();
-			}
-			return modelEditor;
-		}
+
+	private void modelPagesChanged(
+			ObservableValue<? extends ObservableMap<Integer, Supplier<ModelPageEditor>>> observable,
+			ObservableMap<Integer, Supplier<ModelPageEditor>> oldValue,
+			ObservableMap<Integer, Supplier<ModelPageEditor>> newValue) {
+				
+		// Ensure the # of pages is correct
+		modelPagination.setPageCount(newValue.size());
 	}
 }

@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -48,7 +48,7 @@ import com.sri.ai.praise.sgsolver.demo.model.EarthquakeBurglaryAlarm;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 @Beta
-public class HOGMPerspective implements Perspective {
+public class HOGMPerspective extends AbstractPerspective {
 	
 	//
 	// START-Perspective
@@ -58,16 +58,36 @@ public class HOGMPerspective implements Perspective {
 	}
 	
 	@Override
-	public ModelEditor create(String model, List<String> defaultQueries) throws IOException {
-		FXMLLoader  loader = new FXMLLoader(HOGMEditorController.class.getResource("hogmeditor.fxml"));
-		loader.load();
-		ModelEditor result = loader.getController();
-		
-		result.setModel(model, defaultQueries);
-		
-		return result;
+	public File getModelFile() {
+// TODO	
+		return null; // TODO
+	}
+	
+	@Override
+	public void save() {
+// TODO		
+	}
+	
+	@Override
+	public void saveAs(File file) {
+// TODO		
 	}
 	// END-Perspective
 	//
+	
+	protected ModelPageEditor create(String model, List<String> defaultQueries) {
+		ModelPageEditor result = null;
+		FXMLLoader      loader = HOGMPageEditorController.newLoader();
+		try {
+			loader.load();
+			result = loader.getController();
+			result.setPage(model, defaultQueries);
+		}
+		catch (Throwable t) {
+			FXUtil.exception(t);
+		}
+		
+		return result;
+	}
 	
 }
