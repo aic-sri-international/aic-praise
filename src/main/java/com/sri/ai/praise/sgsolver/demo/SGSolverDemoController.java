@@ -153,8 +153,9 @@ public class SGSolverDemoController {
     		this.perspective.modelEditorPagesProperty().removeListener(this::modelPagesChanged);
     		this.perspective.canUndoModelPageEditProperty().removeListener(this::undoModelEditChanged);
     		this.perspective.canRedoModelPageEditProperty().removeListener(this::redoModelEditChanged);
-    		this.perspective.getPageChangeUndoManager().undoAvailableProperty().removeListener(this::undoPageChange);
-    		this.perspective.getPageChangeUndoManager().redoAvailableProperty().removeListener(this::redoPageChange);
+    		this.perspective.canUndoPageChange().removeListener(this::undoPageChange);
+    		this.perspective.canRedoPageChange().removeListener(this::redoPageChange);
+    		this.perspective.saveRequiredProperty().removeListener(this::saveRequiredChange);
     	}
     	
     	this.perspective = perspective;
@@ -162,8 +163,9 @@ public class SGSolverDemoController {
     	this.perspective.modelEditorPagesProperty().addListener(this::modelPagesChanged);
     	this.perspective.canUndoModelPageEditProperty().addListener(this::undoModelEditChanged);
 		this.perspective.canRedoModelPageEditProperty().addListener(this::redoModelEditChanged);
-		this.perspective.getPageChangeUndoManager().undoAvailableProperty().addListener(this::undoPageChange);
-		this.perspective.getPageChangeUndoManager().redoAvailableProperty().addListener(this::redoPageChange);
+		this.perspective.canUndoPageChange().addListener(this::undoPageChange);
+		this.perspective.canRedoPageChange().addListener(this::redoPageChange);
+		this.perspective.saveRequiredProperty().addListener(this::saveRequiredChange);
     	
     	// Set up the examples
     	examplesComboBox.getItems().clear();    	
@@ -206,12 +208,12 @@ public class SGSolverDemoController {
     
     @FXML
     private void undoPagesChange(ActionEvent ae) {
-    	perspective.getPageChangeUndoManager().undo();
+    	perspective.undoPageChange();
     }
     
     @FXML
     private void redoPagesChange(ActionEvent ae) {
-    	perspective.getPageChangeUndoManager().redo();
+    	perspective.redoPageChange();
     }    
 	
 	@FXML
@@ -320,5 +322,9 @@ public class SGSolverDemoController {
 	
 	private void redoPageChange(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		redoPagesChangeButton.setDisable(!newValue);
+	}
+	
+	private void saveRequiredChange(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+		saveButton.setDisable(!newValue);
 	}
 }
