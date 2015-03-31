@@ -141,7 +141,6 @@ public class SGSolverDemoController {
 					
 					checkSaveRequired();
 					perspective.newModel(egPages);
-					modelPagination.setCurrentPageIndex(0);
 				}
 			}
 		});
@@ -154,6 +153,8 @@ public class SGSolverDemoController {
     		this.perspective.modelEditorPagesProperty().removeListener(this::modelPagesChanged);
     		this.perspective.canUndoModelPageEditProperty().removeListener(this::undoModelEditChanged);
     		this.perspective.canRedoModelPageEditProperty().removeListener(this::redoModelEditChanged);
+    		this.perspective.getPageChangeUndoManager().undoAvailableProperty().removeListener(this::undoPageChange);
+    		this.perspective.getPageChangeUndoManager().redoAvailableProperty().removeListener(this::redoPageChange);
     	}
     	
     	this.perspective = perspective;
@@ -161,6 +162,8 @@ public class SGSolverDemoController {
     	this.perspective.modelEditorPagesProperty().addListener(this::modelPagesChanged);
     	this.perspective.canUndoModelPageEditProperty().addListener(this::undoModelEditChanged);
 		this.perspective.canRedoModelPageEditProperty().addListener(this::redoModelEditChanged);
+		this.perspective.getPageChangeUndoManager().undoAvailableProperty().addListener(this::undoPageChange);
+		this.perspective.getPageChangeUndoManager().redoAvailableProperty().addListener(this::redoPageChange);
     	
     	// Set up the examples
     	examplesComboBox.getItems().clear();    	
@@ -172,8 +175,6 @@ public class SGSolverDemoController {
     private void newModel(ActionEvent ae) {
     	checkSaveRequired();
     	perspective.newModel();
-    	
-    	modelPagination.setCurrentPageIndex(0);
 		
 		// Want to indicate that we are not using a particular example after a new model is instantiated.
 		examplesComboBox.getSelectionModel().select(-1);
@@ -185,7 +186,6 @@ public class SGSolverDemoController {
     	File selectedFile = fileChooser.showOpenDialog(mainStage);
     	if (selectedFile != null) {
     		perspective.newModel(selectedFile);
-    		modelPagination.setCurrentPageIndex(0);
     	}
     }
     
@@ -206,12 +206,12 @@ public class SGSolverDemoController {
     
     @FXML
     private void undoPagesChange(ActionEvent ae) {
- // TODO   	
+    	perspective.getPageChangeUndoManager().undo();
     }
     
     @FXML
     private void redoPagesChange(ActionEvent ae) {
- // TODO   	
+    	perspective.getPageChangeUndoManager().redo();
     }    
 	
 	@FXML
@@ -228,13 +228,6 @@ public class SGSolverDemoController {
 		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
 		
  		perspective.removePage(currentPageIdx);
- 		
- 		if (currentPageIdx >= perspective.getModelEditorPages().size()) {
- 			modelPagination.setCurrentPageIndex(perspective.getModelEditorPages().size()-1);
- 		}
- 		else {
- 			modelPagination.setCurrentPageIndex(currentPageIdx);
- 		}
  	}
 	
 	@FXML
@@ -319,5 +312,13 @@ public class SGSolverDemoController {
 	
 	private void redoModelEditChanged(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		redoModelEditButton.setDisable(!newValue);
+	}
+	
+	private void undoPageChange(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {		
+		undoPagesChangeButton.setDisable(!newValue);
+	}
+	
+	private void redoPageChange(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+		redoPagesChangeButton.setDisable(!newValue);
 	}
 }

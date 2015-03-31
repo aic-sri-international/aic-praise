@@ -28,7 +28,7 @@
 						<Tooltip text="Open File" />
 					</tooltip>
 				</Button>
-				<Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveModel" text="Save">
+				<Button fx:id="saveButton" disable="true" mnemonicParsing="false" onAction="#saveModel" text="Save">
 					<tooltip>
 						<Tooltip text="Save" />
 					</tooltip>

@@ -43,7 +43,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.fxmisc.undo.UndoManager;
+import org.fxmisc.undo.UndoManagerFactory;
+import org.reactfx.EventSource;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePage;
@@ -65,15 +70,26 @@ import javafx.collections.ObservableMap;
 @Beta
 public abstract class AbstractPerspective implements Perspective {
 	
+	private IntegerProperty currentModelPageIndexProperty;
+	//
 	private BooleanProperty canUndoModelPageEdit = new SimpleBooleanProperty(false);
 	private BooleanProperty canRedoModelPageEdit = new SimpleBooleanProperty(false);
 	private MapProperty<Integer, Supplier<ModelPageEditor>> modelEditorPages = new SimpleMapProperty<>(FXCollections.observableHashMap());
 	private ObjectProperty<File> modelFile = new SimpleObjectProperty<>();
 	//
+	private EventSource<PageChange> pageChanges = new EventSource<>();
+	private UndoManager pageChangeUndoManager   = UndoManagerFactory.unlimitedHistoryUndoManager(
+														pageChanges, // stream of changes to observe
+														c -> c.redo(), // function to redo a change
+														c -> c.undo(), // function to undo a change
+														(c1, c2) -> c1.mergeWith(c2));
+	
+	//
 	// START-Perspective default implementations
 	@Override
 	public void setCurrentModelPageIndexProperty(IntegerProperty currentModelPageIndexProperty) {
-		currentModelPageIndexProperty.addListener((observer, oldValue, newValue) -> {
+		this.currentModelPageIndexProperty = currentModelPageIndexProperty;
+		this.currentModelPageIndexProperty.addListener((observer, oldValue, newValue) -> {
 			Integer currentPageIdx = newValue.intValue();
 			if (modelEditorPages.containsKey(currentPageIdx)) {
 				ModelPageEditor mpe = modelEditorPages.get().get(currentPageIdx).get();
@@ -103,6 +119,11 @@ public abstract class AbstractPerspective implements Perspective {
 	@Override
 	public ReadOnlyBooleanProperty canRedoModelPageEditProperty() {
 		return canRedoModelPageEdit;
+	}
+	
+	@Override
+	public UndoManager getPageChangeUndoManager() {
+		return pageChangeUndoManager;
 	}
 	
 	@Override
@@ -138,34 +159,15 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	@Override
 	public void addPage(Integer atPageIndex) {
-		Map<Integer, Supplier<ModelPageEditor>> newModelPageIdxs = new HashMap<>();
- 		modelEditorPages.get().entrySet().forEach(e -> {
- 			if (e.getKey() > atPageIndex) {
- 				newModelPageIdxs.put(e.getKey()+1, e.getValue());
- 			}
- 			else {
- 				newModelPageIdxs.put(e.getKey(), e.getValue());
- 			}
- 		});
- 		newModelPageIdxs.put(atPageIndex+1, new ModelPageEditorSupplier("// MODEL PAGE "+(atPageIndex+2), Collections.emptyList()));  		
- 		modelEditorPages.set(FXCollections.observableMap(newModelPageIdxs));	
+		Supplier<ModelPageEditor> addSupplier = new ModelPageEditorSupplier("// MODEL PAGE "+(atPageIndex+2), Collections.emptyList());
+		addPage(atPageIndex, addSupplier);
+		pageChanges.push(new AddPageChange(atPageIndex, addSupplier));
 	}
 	
 	@Override 
 	public void removePage(Integer pageIndex) {
- 		Map<Integer, Supplier<ModelPageEditor>> newModelPageIdxs = new HashMap<>();
- 		modelEditorPages.get().entrySet().forEach(e -> {
- 			// Skip the page to be removed
- 			if (!e.getKey().equals(pageIndex)) {	
-	 			if (e.getKey() > pageIndex) {
-	 				newModelPageIdxs.put(e.getKey()-1, e.getValue());
-	 			}
-	 			else {
-	 				newModelPageIdxs.put(e.getKey(), e.getValue());
-	 			}
- 			}
- 		});
- 		modelEditorPages.set(FXCollections.observableMap(newModelPageIdxs));	
+ 		Supplier<ModelPageEditor> removeSupplier = removePageAt(pageIndex);	
+ 		pageChanges.push(new RemovePageChange(pageIndex, removeSupplier));
 	}
 	
 	@Override
@@ -197,7 +199,47 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	protected abstract ModelPageEditor create(String modelPage, List<String> defaultQueries);
 	
-	class ModelPageEditorSupplier implements Supplier<ModelPageEditor> {
+	protected void addPage(Integer atPageIndex, Supplier<ModelPageEditor> modelPageEditorSupplier) {
+		Map<Integer, Supplier<ModelPageEditor>> newModelPageIdxs = new HashMap<>();
+ 		modelEditorPages.get().entrySet().forEach(e -> {
+ 			if (e.getKey() > atPageIndex) {
+ 				newModelPageIdxs.put(e.getKey()+1, e.getValue());
+ 			}
+ 			else {
+ 				newModelPageIdxs.put(e.getKey(), e.getValue());
+ 			}
+ 		});
+ 		newModelPageIdxs.put(atPageIndex+1, modelPageEditorSupplier);  		
+ 		modelEditorPages.set(FXCollections.observableMap(newModelPageIdxs));
+ 		currentModelPageIndexProperty.set(atPageIndex+1);
+	}
+	
+	protected Supplier<ModelPageEditor> removePageAt(Integer pageIndex) {
+		Supplier<ModelPageEditor> result = modelEditorPages.get(pageIndex);
+ 		Map<Integer, Supplier<ModelPageEditor>> newModelPageIdxs = new HashMap<>();
+ 		modelEditorPages.get().entrySet().forEach(e -> {
+ 			// Skip the page to be removed
+ 			if (!e.getKey().equals(pageIndex)) {
+	 			if (e.getKey() > pageIndex) {
+	 				newModelPageIdxs.put(e.getKey()-1, e.getValue());
+	 			}
+	 			else {
+	 				newModelPageIdxs.put(e.getKey(), e.getValue());
+	 			}
+ 			}
+ 		});
+ 		modelEditorPages.set(FXCollections.observableMap(newModelPageIdxs));
+ 		
+ 		if (pageIndex >= modelEditorPages.size()) {
+ 			currentModelPageIndexProperty.set(modelEditorPages.size()-1);
+ 		}
+ 		else {
+ 			currentModelPageIndexProperty.set(pageIndex);
+ 		}
+ 		return result;
+	}
+	
+	protected class ModelPageEditorSupplier implements Supplier<ModelPageEditor> {
 		private ModelPageEditor modelPageEditor = null;
 		private String          modelPage;
 		private List<String>    defaultQueries  = new ArrayList<>();
@@ -213,6 +255,57 @@ public abstract class AbstractPerspective implements Perspective {
 				modelPageEditor = create(modelPage, defaultQueries);
 			}
 			return modelPageEditor;
+		}
+	}
+	
+	protected abstract class PageChange {
+		protected int pageIdx;
+		protected Supplier<ModelPageEditor> pageEditorSupplier;
+		
+		protected PageChange(int  pageIdx, Supplier<ModelPageEditor> pageEditorSupplier) {
+			this.pageIdx            = pageIdx;
+			this.pageEditorSupplier = pageEditorSupplier;
+		}
+		
+		abstract void redo();
+
+		abstract void undo();
+
+		Optional<PageChange> mergeWith(PageChange other) {
+			// don't merge changes by default
+			return Optional.empty();
+		}
+	}
+	
+	protected class AddPageChange extends PageChange {
+		public AddPageChange(int pageIdx, Supplier<ModelPageEditor> pageEditorSupplier) {
+			super(pageIdx, pageEditorSupplier);
+		}
+		
+		void redo() {
+			addPage(pageIdx, pageEditorSupplier);
+		}
+
+		void undo() {
+			if (pageEditorSupplier != removePageAt(pageIdx+1)) {
+				throw new IllegalStateException("Page change add undo history appears corrupted.");
+			}
+		}
+	}
+	
+	protected class RemovePageChange extends PageChange {
+		public RemovePageChange(int pageIdx, Supplier<ModelPageEditor> pageEditorSupplier) {
+			super(pageIdx, pageEditorSupplier);
+		}
+		
+		void redo() {
+			if (pageEditorSupplier != removePageAt(pageIdx)) {
+				throw new IllegalStateException("Page change remove redo history appears corrupted.");
+			}
+		}
+
+		void undo() {
+			addPage(pageIdx-1, pageEditorSupplier);
 		}
 	}
 }

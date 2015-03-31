@@ -41,6 +41,8 @@ import java.io.File;
 import java.util.List;
 import java.util.function.Supplier;
 
+import org.fxmisc.undo.UndoManager;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyMapProperty;
@@ -60,6 +62,8 @@ public interface Perspective {
 	ReadOnlyBooleanProperty canUndoModelPageEditProperty(); 
 	boolean isCanRedoModelPageEdit();
 	ReadOnlyBooleanProperty canRedoModelPageEditProperty();
+	
+	UndoManager getPageChangeUndoManager();
 	
 	ObservableMap<Integer, Supplier<ModelPageEditor>> getModelEditorPages();
 	ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelEditorPagesProperty();	
