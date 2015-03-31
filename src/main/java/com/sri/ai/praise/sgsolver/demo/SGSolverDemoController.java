@@ -39,6 +39,7 @@ package com.sri.ai.praise.sgsolver.demo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javafx.beans.value.ChangeListener;
@@ -71,8 +72,11 @@ public class SGSolverDemoController {
 	//
 	@FXML private ComboBox<ExamplePages> examplesComboBox;
 	//
-	@FXML private Button undoButton;
-	@FXML private Button redoButton;
+	@FXML private Button undoModelEditButton;
+	@FXML private Button redoModelEditButton;
+	//
+	@FXML private Button undoPagesChangeButton;
+	@FXML private Button redoPagesChangeButton;
 	//
 	@FXML private Pagination modelPagination;
 	//
@@ -102,14 +106,16 @@ public class SGSolverDemoController {
     	FXUtil.setDefaultButtonIcon(openFileButton, FontAwesomeIcons.FOLDER_OPEN);
     	FXUtil.setDefaultButtonIcon(saveButton, FontAwesomeIcons.SAVE);
 		//
-    	FXUtil.setDefaultButtonIcon(undoButton, FontAwesomeIcons.ROTATE_LEFT);
-    	FXUtil.setDefaultButtonIcon(redoButton, FontAwesomeIcons.ROTATE_RIGHT);
+    	FXUtil.setDefaultButtonIcon(undoModelEditButton, FontAwesomeIcons.ROTATE_LEFT);
+    	FXUtil.setDefaultButtonIcon(redoModelEditButton, FontAwesomeIcons.ROTATE_RIGHT);
+    	//
+    	FXUtil.setButtonStackedIcons(undoPagesChangeButton, FontAwesomeIcons.ROTATE_LEFT, FontAwesomeIcons.SQUARE_ALT);
+    	FXUtil.setButtonStackedIcons(redoPagesChangeButton, FontAwesomeIcons.ROTATE_RIGHT, FontAwesomeIcons.SQUARE_ALT);
     	//
     	FXUtil.setPaginationButtonIcon(removePageButton, FontAwesomeIcons.MINUS);
     	FXUtil.setPaginationButtonIcon(previousPageButton, FontAwesomeIcons.CARET_LEFT);
     	FXUtil.setPaginationButtonIcon(nextPageButton, FontAwesomeIcons.CARET_RIGHT);
     	FXUtil.setPaginationButtonIcon(addPageButton, FontAwesomeIcons.PLUS);
-    	//
     	//
     	fileChooser = new FileChooser();
     	fileChooser.getExtensionFilters().addAll(
@@ -146,10 +152,15 @@ public class SGSolverDemoController {
     private void setPerspective(Perspective perspective) {
     	if (this.perspective != null) {
     		this.perspective.modelEditorPagesProperty().removeListener(this::modelPagesChanged);
+    		this.perspective.canUndoModelPageEditProperty().removeListener(this::undoModelEditChanged);
+    		this.perspective.canRedoModelPageEditProperty().removeListener(this::redoModelEditChanged);
     	}
     	
     	this.perspective = perspective;
+    	this.perspective.setCurrentModelPageIndexProperty(modelPagination.currentPageIndexProperty());
     	this.perspective.modelEditorPagesProperty().addListener(this::modelPagesChanged);
+    	this.perspective.canUndoModelPageEditProperty().addListener(this::undoModelEditChanged);
+		this.perspective.canRedoModelPageEditProperty().addListener(this::redoModelEditChanged);
     	
     	// Set up the examples
     	examplesComboBox.getItems().clear();    	
@@ -183,29 +194,25 @@ public class SGSolverDemoController {
     	checkSaveRequired();
     }
     
-    private void checkSaveRequired() {
-    	if (perspective.isModified()) {
-    		if (perspective.getModelFile() == null) {
-    			File saveAsFile = fileChooser.showSaveDialog(mainStage);
-    			if (saveAsFile != null) {
-    				perspective.saveAs(saveAsFile);
-    			}
-    		}
-    		else {
-    			perspective.save();
-    		}
-    	}
+    @FXML
+    private void undoModelPageEdit(ActionEvent ae) {
+    	callCurrentModelPageEditor(mpe -> mpe.undo());
     }
     
- 	private Node createModelPage(Integer pgIndex) {	
- 		Node result = null;
- 		if (perspective != null && perspective.getModelEditorPages().containsKey(pgIndex)) {			
- 			ModelPageEditor modelPage = perspective.getModelEditorPages().get(pgIndex).get();
- 			result = modelPage.getRootPane(); 
- 		}
- 		
- 		return result;
- 	}
+    @FXML
+    private void redoModelPageEdit(ActionEvent ae) {
+    	callCurrentModelPageEditor(mpe -> mpe.redo());
+    }
+    
+    @FXML
+    private void undoPagesChange(ActionEvent ae) {
+ // TODO   	
+    }
+    
+    @FXML
+    private void redoPagesChange(ActionEvent ae) {
+ // TODO   	
+    }    
 	
 	@FXML
  	private void addModelPage(ActionEvent ae) {
@@ -242,6 +249,38 @@ public class SGSolverDemoController {
 		modelPagination.setCurrentPageIndex(nextPageIdx);
 	}
 	
+    private void callCurrentModelPageEditor(Consumer<ModelPageEditor> caller) {
+    	int currentPageIdx = modelPagination.getCurrentPageIndex();
+    	if (perspective.getModelEditorPages().containsKey(currentPageIdx)) {
+    		ModelPageEditor modelPage = perspective.getModelEditorPages().get(currentPageIdx).get();
+    		caller.accept(modelPage);
+    	}	
+    }
+	
+    private void checkSaveRequired() {
+    	if (perspective.isSaveRequired()) {
+    		if (perspective.getModelFile() == null) {
+    			File saveAsFile = fileChooser.showSaveDialog(mainStage);
+    			if (saveAsFile != null) {
+    				perspective.saveAs(saveAsFile);
+    			}
+    		}
+    		else {
+    			perspective.save();
+    		}
+    	}
+    }
+    
+ 	private Node createModelPage(Integer pgIndex) {	
+ 		Node result = null;
+ 		if (perspective != null && perspective.getModelEditorPages().containsKey(pgIndex)) {			
+ 			ModelPageEditor modelPage = perspective.getModelEditorPages().get(pgIndex).get();
+ 			result = modelPage.getRootPane(); 
+ 		}
+ 		
+ 		return result;
+ 	}
+	
 	private void updatePaginationControls(int currentPageIndex, int pageCount) {
 		if (pageCount <= 1) {
 			removePageButton.setDisable(true);
@@ -272,5 +311,13 @@ public class SGSolverDemoController {
 				
 		// Ensure the # of pages is correct
 		modelPagination.setPageCount(newValue.size());
+	}
+	
+	private void undoModelEditChanged(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {		
+		undoModelEditButton.setDisable(!newValue);
+	}
+	
+	private void redoModelEditChanged(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+		redoModelEditButton.setDisable(!newValue);
 	}
 }

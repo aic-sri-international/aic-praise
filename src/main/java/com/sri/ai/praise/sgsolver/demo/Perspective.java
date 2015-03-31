@@ -41,24 +41,25 @@ import java.io.File;
 import java.util.List;
 import java.util.function.Supplier;
 
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyMapProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.ObservableMap;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 @Beta
-public interface Perspective {		
+public interface Perspective {	
+	void setCurrentModelPageIndexProperty(IntegerProperty currentModelPageIndexProperty);
+	
 	List<ExamplePages> getExamples();
 	
-	boolean isCanUndo();
-	ReadOnlyBooleanProperty canUndoProperty(); 
-	boolean isCanRedo();
-	ReadOnlyBooleanProperty canRedoProperty();
-	default boolean isModified() {
-		return isCanUndo() || isCanRedo();
-	}
+	boolean isCanUndoModelPageEdit();
+	ReadOnlyBooleanProperty canUndoModelPageEditProperty(); 
+	boolean isCanRedoModelPageEdit();
+	ReadOnlyBooleanProperty canRedoModelPageEditProperty();
 	
 	ObservableMap<Integer, Supplier<ModelPageEditor>> getModelEditorPages();
 	ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelEditorPagesProperty();	
@@ -71,6 +72,9 @@ public interface Perspective {
 	void removePage(Integer pageIndex);
 	
 	File getModelFile();
+	ReadOnlyObjectProperty<File> modelFileProperty();
+	
+	boolean isSaveRequired();
 	void save();
 	void saveAs(File file);
 }

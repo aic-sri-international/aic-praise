@@ -44,6 +44,7 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
+import org.fxmisc.undo.UndoManager;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
@@ -66,6 +67,19 @@ public class HOGMCodeArea extends AnchorPane {
 	
 	public void setText(String text) {
 		codeArea.replaceText(text);
+		codeArea.getUndoManager().forgetHistory();
+	}
+	
+	public UndoManager getUndoManager() {
+		return codeArea.getUndoManager();
+	}
+	
+	public void undo() {
+		codeArea.undo();
+	}
+	
+	public void redo() {
+		codeArea.redo();
 	}
 	
 	//

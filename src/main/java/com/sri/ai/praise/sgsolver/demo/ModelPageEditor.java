@@ -39,6 +39,8 @@ package com.sri.ai.praise.sgsolver.demo;
 
 import java.util.List;
 
+import org.fxmisc.undo.UndoManager;
+
 import javafx.scene.layout.Pane;
 
 import com.google.common.annotations.Beta;
@@ -47,4 +49,8 @@ import com.google.common.annotations.Beta;
 public interface ModelPageEditor {
 	Pane getRootPane();
 	void setPage(String modelPage, List<String> defaultQueries);
+	
+	UndoManager getUndoManager();
+	void undo();
+	void redo();
 }

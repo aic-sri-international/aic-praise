@@ -37,17 +37,28 @@
 				<Label text="Example" />
 				<ComboBox fx:id="examplesComboBox" prefWidth="300.0" />
 				<Separator orientation="VERTICAL" />
-				<Button fx:id="undoButton" mnemonicParsing="false" text="Undo">
+				<Button fx:id="undoModelEditButton" disable="true" mnemonicParsing="false" onAction="#undoModelPageEdit" text="Undo">
 					<tooltip>
-						<Tooltip fx:id="undoTooltip" text="Undo Last Edit" />
+						<Tooltip fx:id="undoTooltip" text="Undo Last Model Edit" />
 					</tooltip>
 				</Button>
-				<Button fx:id="redoButton" mnemonicParsing="false" text="Redo">
+				<Button fx:id="redoModelEditButton" disable="true" mnemonicParsing="false" onAction="#redoModelPageEdit" text="Redo">
 					<tooltip>
-						<Tooltip fx:id="redoTooltip" text="Redo Last Edit" />
+						<Tooltip fx:id="redoTooltip" text="Redo Last Model Edit" />
 					</tooltip>
 				</Button>
 				<Separator orientation="VERTICAL" />
+            <Button fx:id="undoPagesChangeButton" disable="true" mnemonicParsing="false" onAction="#undoPagesChange" text="+-Undo">
+               <tooltip>
+                  <Tooltip text="Undo Last Page Addition/Removal" />
+               </tooltip>
+            </Button>
+            <Button fx:id="redoPagesChangeButton" disable="true" mnemonicParsing="false" onAction="#redoPagesChange" text="+-Redo">
+               <tooltip>
+                  <Tooltip text="Redo Last Page Addition/Removal" />
+               </tooltip>
+            </Button>
+            <Separator orientation="VERTICAL" />
 			</items>
 		</ToolBar>
 	</top>

@@ -40,6 +40,8 @@ package com.sri.ai.praise.sgsolver.demo;
 import java.io.IOException;
 import java.util.List;
 
+import org.fxmisc.undo.UndoManager;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.AnchorPane;
@@ -73,6 +75,21 @@ public class HOGMPageEditorController implements ModelPageEditor {
 	public void setPage(String modelPage, List<String> defaultQueries) {
 		modelCodeArea.setText(modelPage);
 		queryController.addDefaultQueries(defaultQueries);		
+	}
+	
+	@Override
+	public UndoManager getUndoManager() {
+		return modelCodeArea.getUndoManager();
+	}
+	
+	@Override
+	public void undo() {
+		modelCodeArea.undo();
+	}
+	
+	@Override
+	public void redo() {
+		modelCodeArea.redo();
 	}
 	// END-ModelEditor
 	//

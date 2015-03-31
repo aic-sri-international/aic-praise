@@ -37,7 +37,6 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,22 +54,6 @@ public class HOGMPerspective extends AbstractPerspective {
 	@Override
 	public List<ExamplePages> getExamples() {
 		return Arrays.asList(new EarthquakeBurglaryAlarm());
-	}
-	
-	@Override
-	public File getModelFile() {
-// TODO	
-		return null; // TODO
-	}
-	
-	@Override
-	public void save() {
-// TODO		
-	}
-	
-	@Override
-	public void saveAs(File file) {
-// TODO		
 	}
 	// END-Perspective
 	//
