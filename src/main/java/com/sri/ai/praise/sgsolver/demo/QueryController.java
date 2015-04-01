@@ -80,6 +80,10 @@ public class QueryController {
 		}
 	}
 	
+	public String getCurrentQuery() {
+		return queryComboBox.getValue();
+	}
+	
 	public List<String> getCurrentQueries() {
 		List<String> result = new ArrayList<>(queryComboBox.getItems().subList(0, queryComboBox.getItems().size()));
 		return result;
@@ -90,5 +94,17 @@ public class QueryController {
 		//
     	FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.PLAY);
     	FXUtil.setDefaultButtonIcon(clearOutputButton, FontAwesomeIcons.ERASER);
+    	
+    	queryComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+    		if (newValue != null) {
+    			String value = newValue.trim();
+    			if (value.length() > 0) {
+    				if (!queryComboBox.getItems().contains(value)) {
+    					queryComboBox.getItems().add(value);
+    					queryComboBox.getSelectionModel().select(queryComboBox.getItems().size()-1);
+    				}
+    			}
+    		}
+    	});
 	}
 }

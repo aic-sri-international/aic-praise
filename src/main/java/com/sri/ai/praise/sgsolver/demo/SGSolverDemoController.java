@@ -166,7 +166,7 @@ public class SGSolverDemoController {
 		if (newValue.intValue() >= 0 && newValue.intValue() < examplesComboBox.getItems().size()) {					
 			ExamplePages egPages = examplesComboBox.getItems().get(newValue.intValue());
 			
-			checkSaveRequired();
+			checkSaveRequired(true);
 			modelPagination.setPageCount(Pagination.INDETERMINATE);
 			perspective.newModel(egPages);
 		}
@@ -174,7 +174,7 @@ public class SGSolverDemoController {
     
     @FXML
     private void newModel(ActionEvent ae) {
-    	checkSaveRequired();
+    	checkSaveRequired(true);
     	modelPagination.setPageCount(Pagination.INDETERMINATE);
     	perspective.newModel();
 		
@@ -184,7 +184,7 @@ public class SGSolverDemoController {
     
     @FXML
     private void openModel(ActionEvent ae) {
-    	checkSaveRequired();
+    	checkSaveRequired(true);
     	File selectedFile = fileChooser.showOpenDialog(mainStage);
     	if (selectedFile != null) {
     		modelPagination.setPageCount(Pagination.INDETERMINATE);
@@ -196,7 +196,9 @@ public class SGSolverDemoController {
     
     @FXML
     private void saveModel(ActionEvent ae) {
-    	checkSaveRequired();
+    	checkSaveRequired(false);
+    	// After saving indicate not an example
+    	examplesComboBox.getSelectionModel().select(-1);
     }
     
     @FXML
@@ -255,7 +257,7 @@ public class SGSolverDemoController {
     	}	
     }
 	
-    private void checkSaveRequired() {
+    private void checkSaveRequired(boolean confirmationRequired) {
     	if (perspective.isSaveRequired()) {
     		if (perspective.getModelFile() == null) {
     			File saveAsFile = fileChooser.showSaveDialog(mainStage);
@@ -264,7 +266,7 @@ public class SGSolverDemoController {
     			}
     		}
     		else {
-    			if (FXUtil.confirmation(mainStage, "Save Changes?")) {
+    			if (!confirmationRequired || FXUtil.confirmation(mainStage, "Save Changes?")) {
     				perspective.save();
     			}
     		}
