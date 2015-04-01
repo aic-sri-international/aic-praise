@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
@@ -77,6 +78,11 @@ public class QueryController {
 			});
 			queryComboBox.getSelectionModel().select(queryComboBox.getItems().indexOf(queries.get(0)));
 		}
+	}
+	
+	public List<String> getCurrentQueries() {
+		List<String> result = new ArrayList<>(queryComboBox.getItems().subList(0, queryComboBox.getItems().size()));
+		return result;
 	}
 	
 	@FXML

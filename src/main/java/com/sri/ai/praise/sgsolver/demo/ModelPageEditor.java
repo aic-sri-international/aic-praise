@@ -50,6 +50,9 @@ public interface ModelPageEditor {
 	Pane getRootPane();
 	void setPage(String modelPage, List<String> defaultQueries);
 	
+	String getCurrentPageContents();
+	List<String> getCurrentQueries();
+	
 	UndoManager getUndoManager();
 	void undo();
 	void redo();

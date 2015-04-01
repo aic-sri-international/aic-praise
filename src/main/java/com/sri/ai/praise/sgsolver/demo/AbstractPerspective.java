@@ -38,6 +38,7 @@
 package com.sri.ai.praise.sgsolver.demo;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,8 +54,10 @@ import org.fxmisc.undo.UndoManagerFactory;
 import org.reactfx.EventSource;
 
 import com.google.common.annotations.Beta;
+import com.google.common.io.Files;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePage;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
+import com.sri.ai.util.base.Pair;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -77,7 +80,7 @@ public abstract class AbstractPerspective implements Perspective {
 	//
 	private BooleanProperty canUndoModelPageEdit = new SimpleBooleanProperty(false);
 	private BooleanProperty canRedoModelPageEdit = new SimpleBooleanProperty(false);
-	private MapProperty<Integer, Supplier<ModelPageEditor>> modelEditorPages = new SimpleMapProperty<>(FXCollections.observableHashMap());
+	private MapProperty<Integer, Supplier<ModelPageEditor>> modelPageEditors = new SimpleMapProperty<>(FXCollections.observableHashMap());
 	//
 	private BooleanProperty canUndoPageChange   = new SimpleBooleanProperty(false);
 	private BooleanProperty canRedoPageChange   = new SimpleBooleanProperty(false);
@@ -94,8 +97,8 @@ public abstract class AbstractPerspective implements Perspective {
 		this.currentModelPageIndexProperty = currentModelPageIndexProperty;
 		this.currentModelPageIndexProperty.addListener((observer, oldValue, newValue) -> {
 			Integer currentPageIdx = newValue.intValue();
-			if (modelEditorPages.containsKey(currentPageIdx)) {
-				ModelPageEditor mpe = modelEditorPages.get().get(currentPageIdx).get();
+			if (modelPageEditors.containsKey(currentPageIdx)) {
+				ModelPageEditor mpe = modelPageEditors.get().get(currentPageIdx).get();
 				canUndoModelPageEdit.unbind();
 				canRedoModelPageEdit.unbind();
 				canUndoModelPageEdit.bind(mpe.getUndoManager().undoAvailableProperty());
@@ -155,13 +158,13 @@ public abstract class AbstractPerspective implements Perspective {
 	}
 	
 	@Override
-	public ObservableMap<Integer, Supplier<ModelPageEditor>> getModelEditorPages() {
-		return modelEditorPagesProperty().get();
+	public ObservableMap<Integer, Supplier<ModelPageEditor>> getModelPageEditors() {
+		return modelPageEditorsProperty().get();
 	}
 	
 	@Override
-	public ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelEditorPagesProperty() {
-		return modelEditorPages;
+	public ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelPageEditorsProperty() {
+		return modelPageEditors;
 	}
 	
 	@Override
@@ -230,25 +233,51 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	@Override
 	public void saveAs(File file) {
-// TODO - actually save the file
+		List<Pair<String, List<String>>> pageContents = new ArrayList<>();
+		this.modelPageEditors.values().forEach(mes -> {
+			ModelPageEditorSupplier mpeSupplier = (ModelPageEditorSupplier) mes;
+			if (mpeSupplier.modelPageEditor == null) { 
+				// has not been initialized on screen, use the initial values supplied to it
+				pageContents.add(new Pair<>(mpeSupplier.modelPage, mpeSupplier.defaultQueries));
+			}
+			else {
+				// the page editor has been initialized and displayed to the screen, therefore
+				// get its most current contents as the user may have changed them
+				ModelPageEditor mpe = mpeSupplier.get();
+				pageContents.add(new Pair<>(mpe.getCurrentPageContents(), mpe.getCurrentQueries()));
+			}
+		});
 		
-		// If saving to a different file
-		if (file != getModelFile()) {
-			modelFile.set(file);
+		String model = getModel(pageContents);
+		
+		try {
+			Files.write(model.getBytes(ExamplePages.FILE_CHARSET), file);
+			// If saving to a different file
+			if (file != getModelFile()) {
+				modelFile.set(file);
+			}
+			// Once saved we can clear the undo histories
+			undoManagersForgetHistory();
 		}
-		// Once saved we can clear the undo histories
-		undoManagersForgetHistory();
+		catch (IOException ioe) {
+			FXUtil.exception(ioe);
+		}
 	}
 	// END-Perspective default implementations
 	//
 	
 	protected abstract ModelPageEditor create(String modelPage, List<String> defaultQueries);
 	
+	protected String getModel(List<Pair<String, List<String>>> pageContents) {
+		String result = ExamplePages.getModel(pageContents);
+		return result;
+	}
+	
 	protected void newModel(Supplier<ObservableMap<Integer, Supplier<ModelPageEditor>>> initialModelPagesSupplier) {
 		undoManagersForgetHistory();
 		callUndoManagers(um -> um.undoAvailableProperty().removeListener(this::checkGlobalUndoState));
 		
-		modelEditorPages.set(initialModelPagesSupplier.get());
+		modelPageEditors.set(initialModelPagesSupplier.get());
 		
 		// Unbind and create a new page change undo manager for the new model
 		canUndoPageChange.unbind();
@@ -258,6 +287,8 @@ public abstract class AbstractPerspective implements Perspective {
 		pageChangeUndoManager = newPageChangeUndoManager();
 		canUndoPageChange.bind(pageChangeUndoManager.undoAvailableProperty());
 		canRedoPageChange.bind(pageChangeUndoManager.redoAvailableProperty());
+		
+		currentModelPageIndexProperty.set(0);
 		
 		callUndoManagers(um -> um.undoAvailableProperty().addListener(this::checkGlobalUndoState));
 	}
@@ -278,7 +309,7 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	protected void callUndoManagers(Consumer<UndoManager> umConsumer) {
 		umConsumer.accept(pageChangeUndoManager);
-		modelEditorPages.values().forEach(meps -> {
+		modelPageEditors.values().forEach(meps -> {
 			ModelPageEditorSupplier mepSupplier = (ModelPageEditorSupplier) meps;
 			if (mepSupplier.modelPageEditor != null) {
 				umConsumer.accept(mepSupplier.get().getUndoManager());
@@ -288,7 +319,7 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	protected void addPage(Integer atPageIndex, Supplier<ModelPageEditor> modelPageEditorSupplier) {
 		Map<Integer, Supplier<ModelPageEditor>> newModelPageIdxs = new HashMap<>();
- 		modelEditorPages.get().entrySet().forEach(e -> {
+ 		modelPageEditors.get().entrySet().forEach(e -> {
  			if (e.getKey() > atPageIndex) {
  				newModelPageIdxs.put(e.getKey()+1, e.getValue());
  			}
@@ -298,14 +329,14 @@ public abstract class AbstractPerspective implements Perspective {
  		});
  		newModelPageIdxs.put(atPageIndex+1, modelPageEditorSupplier);
  		modelPageEditorSupplier.get().getUndoManager().undoAvailableProperty().addListener(this::checkGlobalUndoState);
- 		modelEditorPages.set(FXCollections.observableMap(newModelPageIdxs));
+ 		modelPageEditors.set(FXCollections.observableMap(newModelPageIdxs));
  		currentModelPageIndexProperty.set(atPageIndex+1);
 	}
 	
 	protected Supplier<ModelPageEditor> removePageAt(Integer pageIndex) {
-		Supplier<ModelPageEditor> result = modelEditorPages.get(pageIndex);
+		Supplier<ModelPageEditor> result = modelPageEditors.get(pageIndex);
  		Map<Integer, Supplier<ModelPageEditor>> newModelPageIdxs = new HashMap<>();
- 		modelEditorPages.get().entrySet().forEach(e -> {
+ 		modelPageEditors.get().entrySet().forEach(e -> {
  			// Skip the page to be removed
  			if (!e.getKey().equals(pageIndex)) {
 	 			if (e.getKey() > pageIndex) {
@@ -317,10 +348,10 @@ public abstract class AbstractPerspective implements Perspective {
  			}
  		});
  		result.get().getUndoManager().undoAvailableProperty().removeListener(this::checkGlobalUndoState);
- 		modelEditorPages.set(FXCollections.observableMap(newModelPageIdxs));
+ 		modelPageEditors.set(FXCollections.observableMap(newModelPageIdxs));
  		
- 		if (pageIndex >= modelEditorPages.size()) {
- 			currentModelPageIndexProperty.set(modelEditorPages.size()-1);
+ 		if (pageIndex >= modelPageEditors.size()) {
+ 			currentModelPageIndexProperty.set(modelPageEditors.size()-1);
  		}
  		else {
  			currentModelPageIndexProperty.set(pageIndex);

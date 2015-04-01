@@ -55,7 +55,6 @@ public class SGSolverDemoApp extends Application {
         Parent root = rootLoader.load();
         SGSolverDemoController controller = rootLoader.getController();
         controller.setMainStage(primaryStage);
-        primaryStage.setTitle("PRAiSE");
         Scene scene = new Scene(root, 1024, 768);
         primaryStage.setScene(scene);
         scene.getStylesheets().add("com/sri/ai/praise/sgsolver/demo/sgsolverdemo.css");

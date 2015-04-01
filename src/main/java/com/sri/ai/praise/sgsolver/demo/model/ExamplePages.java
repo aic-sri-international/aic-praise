@@ -39,6 +39,7 @@ package com.sri.ai.praise.sgsolver.demo.model;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -50,10 +51,14 @@ import java.util.StringJoiner;
 import java.util.stream.Stream;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Charsets;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
+import com.sri.ai.util.base.Pair;
 
 @Beta
 public class ExamplePages {
+	public static final Charset FILE_CHARSET = Charsets.UTF_8;
+	//
 	private static final String MODEL_FRAGMENT_PREFIX      = "@FRAGMENT:";
 	private static final String MODEL_SPECIFICATION_PREFIX = "@MODEL:";
 	private static final String MODEL_FIELD_NAME           = "name";
@@ -92,6 +97,48 @@ public class ExamplePages {
 		return result;
 	}
 	
+	public static String getModel(List<Pair<String, List<String>>> pageContents) {
+		StringBuilder result = new StringBuilder();
+		
+		// Output the models first
+		for (int i = 0; i < pageContents.size(); i++) {
+			Pair<String, List<String>> pageContent = pageContents.get(i);
+			result.append(MODEL_SPECIFICATION_PREFIX);
+			appendField(MODEL_FIELD_NAME, Collections.singletonList("Page "+(i+1)), result);
+			appendField(MODEL_FIELD_PARTS, Collections.singletonList("page-"+(i+1)), result);
+			List<String> queryNamesForPage = new ArrayList<>();
+			for (int q = 0; q < pageContent.second.size(); q++) {
+				queryNamesForPage.add("query-page-"+(i+1)+"#"+(q+1));
+			}
+			appendField(MODEL_FIELD_QUERIES, queryNamesForPage, result);
+			result.append("\n");
+		}
+		
+		// Output the fragments and queries
+		for (int i = 0; i < pageContents.size(); i++) {
+			Pair<String, List<String>> pageContent = pageContents.get(i);
+			// Ensure fragment indicators are on a newline
+			if (!result.toString().endsWith("\n")) {
+				result.append("\n");
+			}
+			result.append(MODEL_FRAGMENT_PREFIX);
+			result.append("page-"+(i+1));
+			result.append("\n");
+			result.append(pageContent.first);
+			List<String> queries = pageContent.second;
+			for (int q = 0; q < queries.size(); q++) {
+				result.append("\n");
+				result.append(MODEL_FRAGMENT_PREFIX);
+				result.append("query-page-"+(i+1)+"#"+(q+1));
+				result.append("\n");
+				result.append(queries.get(q));
+				result.append("\n");
+			}	
+		}
+		
+		return result.toString();
+	}
+	
 	public static List<ExamplePage> getExamplePagesFromFile(File file) {
 		List<ExamplePage> result = null;
 		try {
@@ -109,7 +156,7 @@ public class ExamplePages {
 		List<String> modelSpecifications = new ArrayList<>();
 		Map<String, List<String>> fragments = new HashMap<>();
 		StringBuilder currentFragment = new StringBuilder();
-		try (Stream<String> lines = Files.lines(Paths.get(uri))) {	
+		try (Stream<String> lines = Files.lines(Paths.get(uri), FILE_CHARSET)) {	
 			lines.forEachOrdered(line -> {
 				if (line.startsWith(MODEL_SPECIFICATION_PREFIX)) {
 					modelSpecifications.add(line);
@@ -145,6 +192,15 @@ public class ExamplePages {
 	//
 	// PRIVATE
 	//
+	private static void appendField(String fieldName, List<String> values, StringBuilder sb) {
+		sb.append(fieldName);
+		sb.append("=[");
+		StringJoiner sjValues = new StringJoiner(",");
+		values.forEach(v -> sjValues.add(v));
+		sb.append(sjValues.toString());
+		sb.append("]");
+	}
+	
 	private static String extractField(String fieldName, String modelSpecification) {
 		String result     = "";
 		String fieldStart = fieldName+"=[";
@@ -163,13 +219,16 @@ public class ExamplePages {
 	private static String extractModel(String fieldName, String modelSpecification, Map<String, List<String>> fragments) {
 		StringJoiner result = new StringJoiner("\n");
 		
-		String[] partNames = extractField(fieldName, modelSpecification).split(",");
-		for (String partName : partNames) {
-			if (!fragments.containsKey(partName)) {
-				throw new RuntimeException("Unable to identify fragment: "+partName);
-			}
-			for (String line : fragments.get(partName)) {
-				result.add(line);
+		String names = extractField(fieldName, modelSpecification).trim();
+		if (names.length() > 0) {
+			String[] partNames = names.split(",");
+			for (String partName : partNames) {
+				if (!fragments.containsKey(partName)) {
+					throw new RuntimeException("Unable to identify fragment: ["+partName+"]");
+				}
+				for (String line : fragments.get(partName)) {
+					result.add(line);
+				}
 			}
 		}
 		
@@ -178,19 +237,22 @@ public class ExamplePages {
 	
 	private static List<String> extractQueries(String fieldName, String modelSpecification, Map<String, List<String>> fragments) {
 		List<String> result = new ArrayList<>();
-		
-		String[] queryNames = extractField(fieldName, modelSpecification).split(",");
-		for (String queryName : queryNames) {
-			if (!fragments.containsKey(queryName)) {
-				throw new RuntimeException("Unable to identify fragment: "+queryName);
-			}
-			StringJoiner query = new StringJoiner(" and ");
-			for (String queryFragment : fragments.get(queryName)) {
-				if (queryFragment.trim().length() > 0) {
-					query.add(queryFragment.trim());
+		 
+		String names = extractField(fieldName, modelSpecification).trim();
+		if (names.length() > 0) {
+			String[] queryNames = names.split(",");
+			for (String queryName : queryNames) {
+				if (!fragments.containsKey(queryName)) {
+					throw new RuntimeException("Unable to identify fragment: "+queryName);
 				}
+				StringJoiner query = new StringJoiner(" and ");
+				for (String queryFragment : fragments.get(queryName)) {
+					if (queryFragment.trim().length() > 0) {
+						query.add(queryFragment.trim());
+					}
+				}
+				result.add(query.toString());
 			}
-			result.add(query.toString());
 		}
 		
 		return result;

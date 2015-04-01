@@ -70,6 +70,10 @@ public class HOGMCodeArea extends AnchorPane {
 		codeArea.getUndoManager().forgetHistory();
 	}
 	
+	public String getText() {
+		return codeArea.getText();
+	}
+	
 	public UndoManager getUndoManager() {
 		return codeArea.getUndoManager();
 	}

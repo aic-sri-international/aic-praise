@@ -69,8 +69,8 @@ public interface Perspective {
 	void undoPageChange();
 	void redoPageChange();
 
-	ObservableMap<Integer, Supplier<ModelPageEditor>> getModelEditorPages();
-	ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelEditorPagesProperty();	
+	ObservableMap<Integer, Supplier<ModelPageEditor>> getModelPageEditors();
+	ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelPageEditorsProperty();	
 	
 	void newModel();
 	void newModel(File modelFile);

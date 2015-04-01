@@ -78,6 +78,16 @@ public class HOGMPageEditorController implements ModelPageEditor {
 	}
 	
 	@Override
+	public String getCurrentPageContents() {
+		return modelCodeArea.getText();
+	}
+	
+	@Override
+	public List<String> getCurrentQueries() {
+		return queryController.getCurrentQueries();
+	}
+	
+	@Override
 	public UndoManager getUndoManager() {
 		return modelCodeArea.getUndoManager();
 	}

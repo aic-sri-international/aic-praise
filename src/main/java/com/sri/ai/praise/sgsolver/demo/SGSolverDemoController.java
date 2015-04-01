@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
@@ -93,6 +92,7 @@ public class SGSolverDemoController {
 	
 	public void setMainStage(Stage stage) {
 		this.mainStage = stage;
+		this.mainStage.setTitle("PRAiSE");
 	}
 	
 	//
@@ -123,49 +123,38 @@ public class SGSolverDemoController {
     	//
     	//
     	modelPagination.setPageFactory(this::createModelPage);
-		modelPagination.pageCountProperty().addListener(new ChangeListener<Number>() {
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				updatePaginationControls(modelPagination.getCurrentPageIndex(), newValue.intValue());
-			}
-		});
-		modelPagination.currentPageIndexProperty().addListener(new ChangeListener<Number>() {
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				updatePaginationControls(newValue.intValue(), modelPagination.getPageCount());
-			}
-		});
 		
-		examplesComboBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				if (newValue.intValue() >= 0 && newValue.intValue() < examplesComboBox.getItems().size()) {					
-					ExamplePages egPages = examplesComboBox.getItems().get(newValue.intValue());
-					
-					checkSaveRequired();
-					perspective.newModel(egPages);
-				}
-			}
-		});
+    	modelPagination.pageCountProperty().addListener((observable, oldValue, newValue) ->
+				updatePaginationControls(modelPagination.getCurrentPageIndex(), newValue.intValue()));
+		
+		modelPagination.currentPageIndexProperty().addListener((observable, oldValue, newValue) ->
+				updatePaginationControls(newValue.intValue(), modelPagination.getPageCount()));
+		
+		examplesComboBox.getSelectionModel().selectedIndexProperty().addListener(this::exampleSelectionChaned);
 		
 		setPerspective(new HOGMPerspective());
     }
     
     private void setPerspective(Perspective perspective) {
     	if (this.perspective != null) {
-    		this.perspective.modelEditorPagesProperty().removeListener(this::modelPagesChanged);
+    		this.perspective.modelPageEditorsProperty().removeListener(this::modelPagesChanged);
     		this.perspective.canUndoModelPageEditProperty().removeListener(this::undoModelEditChanged);
     		this.perspective.canRedoModelPageEditProperty().removeListener(this::redoModelEditChanged);
     		this.perspective.canUndoPageChange().removeListener(this::undoPageChange);
     		this.perspective.canRedoPageChange().removeListener(this::redoPageChange);
     		this.perspective.saveRequiredProperty().removeListener(this::saveRequiredChange);
+    		this.perspective.modelFileProperty().removeListener(this::modelFileChanged);
     	}
     	
     	this.perspective = perspective;
     	this.perspective.setCurrentModelPageIndexProperty(modelPagination.currentPageIndexProperty());
-    	this.perspective.modelEditorPagesProperty().addListener(this::modelPagesChanged);
+    	this.perspective.modelPageEditorsProperty().addListener(this::modelPagesChanged);
     	this.perspective.canUndoModelPageEditProperty().addListener(this::undoModelEditChanged);
 		this.perspective.canRedoModelPageEditProperty().addListener(this::redoModelEditChanged);
 		this.perspective.canUndoPageChange().addListener(this::undoPageChange);
 		this.perspective.canRedoPageChange().addListener(this::redoPageChange);
 		this.perspective.saveRequiredProperty().addListener(this::saveRequiredChange);
+		this.perspective.modelFileProperty().addListener(this::modelFileChanged);
     	
     	// Set up the examples
     	examplesComboBox.getItems().clear();    	
@@ -173,9 +162,20 @@ public class SGSolverDemoController {
     	examplesComboBox.getSelectionModel().selectFirst();
     }
    
+    public void exampleSelectionChaned(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+		if (newValue.intValue() >= 0 && newValue.intValue() < examplesComboBox.getItems().size()) {					
+			ExamplePages egPages = examplesComboBox.getItems().get(newValue.intValue());
+			
+			checkSaveRequired();
+			modelPagination.setPageCount(Pagination.INDETERMINATE);
+			perspective.newModel(egPages);
+		}
+	}
+    
     @FXML
     private void newModel(ActionEvent ae) {
     	checkSaveRequired();
+    	modelPagination.setPageCount(Pagination.INDETERMINATE);
     	perspective.newModel();
 		
 		// Want to indicate that we are not using a particular example after a new model is instantiated.
@@ -187,7 +187,10 @@ public class SGSolverDemoController {
     	checkSaveRequired();
     	File selectedFile = fileChooser.showOpenDialog(mainStage);
     	if (selectedFile != null) {
+    		modelPagination.setPageCount(Pagination.INDETERMINATE);
     		perspective.newModel(selectedFile);
+        	// Want to indicate that we are not using a particular example after a new model is instantiated.
+        	examplesComboBox.getSelectionModel().select(-1);
     	}
     }
     
@@ -246,8 +249,8 @@ public class SGSolverDemoController {
 	
     private void callCurrentModelPageEditor(Consumer<ModelPageEditor> caller) {
     	int currentPageIdx = modelPagination.getCurrentPageIndex();
-    	if (perspective.getModelEditorPages().containsKey(currentPageIdx)) {
-    		ModelPageEditor modelPage = perspective.getModelEditorPages().get(currentPageIdx).get();
+    	if (perspective.getModelPageEditors().containsKey(currentPageIdx)) {
+    		ModelPageEditor modelPage = perspective.getModelPageEditors().get(currentPageIdx).get();
     		caller.accept(modelPage);
     	}	
     }
@@ -263,13 +266,15 @@ public class SGSolverDemoController {
     		else {
     			perspective.save();
     		}
+    		// After a save has occurred ensure we indicate that its not an example anymore
+    		examplesComboBox.getSelectionModel().select(-1);
     	}
     }
     
  	private Node createModelPage(Integer pgIndex) {	
  		Node result = null;
- 		if (perspective != null && perspective.getModelEditorPages().containsKey(pgIndex)) {			
- 			ModelPageEditor modelPage = perspective.getModelEditorPages().get(pgIndex).get();
+ 		if (perspective != null && perspective.getModelPageEditors().containsKey(pgIndex)) {			
+ 			ModelPageEditor modelPage = perspective.getModelPageEditors().get(pgIndex).get();
  			result = modelPage.getRootPane(); 
  		}
  		
@@ -326,5 +331,13 @@ public class SGSolverDemoController {
 	
 	private void saveRequiredChange(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		saveButton.setDisable(!newValue);
+	}
+	
+	private void modelFileChanged(ObservableValue<? extends File> observable, File oldValue, File newValue) {
+		String title = "PRAiSE";
+		if (newValue != null) {
+			title += " ["+newValue.getAbsolutePath()+"]";
+		}
+		this.mainStage.setTitle(title);
 	}
 }
