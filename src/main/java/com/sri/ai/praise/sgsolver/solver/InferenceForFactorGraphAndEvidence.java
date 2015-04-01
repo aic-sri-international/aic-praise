@@ -57,6 +57,7 @@ import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.api.Theory;
+import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.core.SGVET;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
 import com.sri.ai.grinder.plaindpll.theory.AtomsOnTheoryWithEquality;
@@ -102,6 +103,7 @@ public class InferenceForFactorGraphAndEvidence {
 	
 	/**
 	 * Constructs a solver for a factor graph and an evidence expression.
+	 * @param useFactorization TODO
 	 * @param mapFromTypeNameToSizeStringParam a map from type name strings to their size strings
 	 * @param mapFromRandomVariableNameToTypeNameParam a map from random variable name strings to their type name strings
 	 * @param allTheSameButQuery the {@link Result} object from a previous query for the same model and evidence, if available, or null.
@@ -112,7 +114,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 */
 	public InferenceForFactorGraphAndEvidence(
 			Expression factorGraphParam, boolean isBayesianNetworkParam,
-			Expression evidenceParam, Map<String, String> mapFromTypeNameToSizeStringParam, Map<String, String> mapFromRandomVariableNameToTypeNameParam) {
+			Expression evidenceParam, boolean useFactorization, Map<String, String> mapFromTypeNameToSizeStringParam, Map<String, String> mapFromRandomVariableNameToTypeNameParam) {
 
 		factorGraph = factorGraphParam;
 		isBayesianNetwork = isBayesianNetworkParam;
@@ -132,11 +134,19 @@ public class InferenceForFactorGraphAndEvidence {
 		theory = new AtomsOnTheoryWithEquality(new EqualityTheory(new SymbolTermTheory()));
 		problemType = new SumProduct(); // for marginalization
 		// The solver for the parameters above.
-		solver = new SGVET(theory, problemType);
-		((SGVET) solver).basicOutput = true;
-		//			solver = new SGDPLLT(theory, problemType);
+		if (useFactorization) {
+			solver = new SGVET(theory, problemType);
+			//((SGVET) solver).basicOutput = true;
+		}
+		else {
+			solver = new SGDPLLT(theory, problemType);
+		}
 
 		evidenceProbability = null;
+	}
+	
+	public Theory getTheory() {
+		return theory;
 	}
 
 	public Expression solve(Expression queryExpression) {
@@ -148,7 +158,7 @@ public class InferenceForFactorGraphAndEvidence {
 
 		if (evidence != null) {
 			// add evidence factor
-			factorGraphWithEvidence = Times.make(list(factorGraph, IfThenElse.make(evidence, ONE, ZERO)));
+			factorGraphWithEvidence = Times.make(list(factorGraphWithEvidence, IfThenElse.make(evidence, ONE, ZERO)));
 		}
 
 		// We sum out all variables but the query
@@ -175,7 +185,7 @@ public class InferenceForFactorGraphAndEvidence {
 
 			marginal = Division.make(unnormalizedMarginal, evidenceProbability); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
 			// now we use the algorithm again for simplifying the above division; this is a lazy way of doing this, as it performs search on the query variable again -- we could instead write an ad hoc function to divide all numerical constants by the normalization constant, but the code would be uglier and the gain very small, since this is a search on a single variable anyway.
-			marginal = solver.solve(marginal, list(), mapFromRandomVariableNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+			marginal = evaluate(marginal);
 		}
 
 		// replace the query variable with the query expression
@@ -184,56 +194,12 @@ public class InferenceForFactorGraphAndEvidence {
 		return marginal;
 	}
 
-	public static void burglarExample() {
-		// The definitions of types
-		Map<String, String> mapFromTypeNameToSizeString = Util.map(
-				"Folks", "10",
-				"Boolean", "2");
-
-		// The definitions of variables, types, and type sizes
-		Map<String, String> mapFromVariableNameToTypeName = Util.map(
-				"earthquake", "Boolean",
-				"burglar",    "Folks", // a multi-value random variable
-				"alarm",      "Boolean"
-				);
-
-		// a variant of the earthquake/burglary model in which some burglars are more active than others.
-		Expression bayesianNetwork = parse("" + 
-				"(if earthquake then 0.01 else 0.99) * " +
-				"(if burglar = none then 0.7 else if burglar = tom then 0.1 else 0.2 / (|Folks| - 2)) * " +
-				 // note the division above of the potential by number of remaining values, as the probabilities must sum up to 1
-				"(if burglar != none or earthquake "
-				+    "then if alarm then 0.9 else 0.1 "
-				+    "else if alarm then 0.05 else 0.95) " +
-				"");
-
-//      Expression evidence = null; // null indicates no evidence
-//		Expression evidence = parse("alarm");
-		Expression evidence = parse("alarm and burglar = none");
-//		Expression evidence = parse("not alarm"); // can be any boolean expression
-//		Expression evidence = parse("(alarm or not alarm) and (burglar = tom or burglar != tom)"); // tautology has same effect as no evidence
-
-//		Expression queryExpression = parse("earthquake");
-//		Expression queryExpression = parse("burglar = none");
-		Expression queryExpression = parse("not earthquake");
-//		Expression queryExpression = parse("earthquake and burglar = bob");
-
-		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(bayesianNetwork, true, evidence, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
-		Expression marginal = inferencer.solve(queryExpression);
-
-		if (evidence == null) {
-			System.out.println("Query marginal probability P(" + queryExpression + ") = " + marginal);
-		}
-		else {
-			System.out.println("Query posterior probability P(" + queryExpression + " | " + evidence + ") = " + marginal);
-		}
-	}
-
 	/**
-	 * An example.
-	 * @param args
+	 * Symbolically evaluates an expression.
+	 * @param expression
+	 * @return
 	 */
-	public static void main(String[] args) {
-		burglarExample();
+	public Expression evaluate(Expression expression) {
+		return solver.solve(expression, list(), mapFromRandomVariableNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
 	}
 }
