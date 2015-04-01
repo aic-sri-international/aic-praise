@@ -40,15 +40,22 @@ package com.sri.ai.praise.sgsolver.demo;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 import com.google.common.annotations.Beta;
 
+
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 
 @Beta
@@ -106,5 +113,16 @@ public class QueryController {
     			}
     		}
     	});
+    	// For details - 
+    	// see: http://stackoverflow.com/questions/26512143/javafx-capture-enter-key-pressed
+    	queryComboBox.getEditor().addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent keyEvent) -> {
+            if (keyEvent.getCode() == KeyCode.ENTER) {
+            	keyEvent.consume();
+            	// Run later so that we can ensure the value is set on the combo box before triggering the query.
+            	Platform.runLater(() -> {
+            		executeButton.fire();
+            	});
+            }
+        });
 	}
 }
