@@ -298,12 +298,12 @@ public abstract class AbstractPerspective implements Perspective {
 	}
 	
 	protected void checkGlobalUndoState(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-		AtomicBoolean isASaveRequired = new AtomicBoolean();
+		AtomicBoolean isASaveRequired = new AtomicBoolean(false);	
 		callUndoManagers(um -> {
 			if (um.isUndoAvailable()) {
 				isASaveRequired.set(true);
 			}
-		});
+		});	
 		saveRequired.set(isASaveRequired.get());
 	}
 	

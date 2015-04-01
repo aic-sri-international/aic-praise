@@ -264,10 +264,10 @@ public class SGSolverDemoController {
     			}
     		}
     		else {
-    			perspective.save();
+    			if (FXUtil.confirmation(mainStage, "Save Changes?")) {
+    				perspective.save();
+    			}
     		}
-    		// After a save has occurred ensure we indicate that its not an example anymore
-    		examplesComboBox.getSelectionModel().select(-1);
     	}
     }
     

@@ -39,10 +39,13 @@ package com.sri.ai.praise.sgsolver.demo;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.annotations.Beta;
 
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContentDisplay;
@@ -56,6 +59,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.GlyphsBuilder;
 import de.jensd.fx.glyphs.GlyphsDude;
@@ -106,6 +110,18 @@ public class FXUtil {
 		node.getChildren().add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(FontAwesomeIcons.CARET_DOWN).size("10px").build());
 		
 		return node;
+	}
+	
+	public static boolean confirmation(Stage stage, String message) {
+		AtomicBoolean confirmed = new AtomicBoolean(false);
+        Alert alert = new Alert(AlertType.CONFIRMATION, "");
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.initOwner(stage);
+        alert.getDialogPane().setContentText(message);
+        alert.getDialogPane().setHeaderText(null);
+        alert.showAndWait().filter(response -> response == ButtonType.OK).ifPresent(response -> confirmed.set(true));
+        
+        return confirmed.get();
 	}
 	
 	public static void exception(Throwable th) {
