@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.sgsolver.demo.model;
 
+import java.io.File;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ import java.util.StringJoiner;
 import java.util.stream.Stream;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.demo.FXUtil;
 
 @Beta
 public class ExamplePages {
@@ -79,12 +82,34 @@ public class ExamplePages {
 	}
 	
 	public static List<ExamplePage> getExamplePagesFromResource(String resourceName) {
+		List<ExamplePage> result = null;
+		try {
+			result = getExamplePagesFromURI(ExamplePages.class.getResource(resourceName).toURI());
+		}
+		catch (Throwable t) {
+			FXUtil.exception(t);
+		}
+		return result;
+	}
+	
+	public static List<ExamplePage> getExamplePagesFromFile(File file) {
+		List<ExamplePage> result = null;
+		try {
+			result = getExamplePagesFromURI(file.toURI());
+		}
+		catch (Throwable t) {
+			FXUtil.exception(t);
+		}
+		return result;
+	}
+		
+	public static List<ExamplePage> getExamplePagesFromURI(URI uri) {	
 		List<ExamplePage> result = new ArrayList<>();
 		
 		List<String> modelSpecifications = new ArrayList<>();
 		Map<String, List<String>> fragments = new HashMap<>();
 		StringBuilder currentFragment = new StringBuilder();
-		try (Stream<String> lines = Files.lines(Paths.get(ExamplePages.class.getResource(resourceName).toURI()))) {	
+		try (Stream<String> lines = Files.lines(Paths.get(uri))) {	
 			lines.forEachOrdered(line -> {
 				if (line.startsWith(MODEL_SPECIFICATION_PREFIX)) {
 					modelSpecifications.add(line);
@@ -103,7 +128,7 @@ public class ExamplePages {
 				}
 			});			
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			FXUtil.exception(ex);
 		}
 		
 		for (String modelSpecification : modelSpecifications) {

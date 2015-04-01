@@ -172,8 +172,7 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	@Override
 	public void newModel(File modelFile) {
-// TODO	- read model from file
-		
+		newModel(new ExamplePages(modelFile.getName(), ExamplePages.getExamplePagesFromFile(modelFile)));
 		this.modelFile.set(modelFile);
 	}
 	
