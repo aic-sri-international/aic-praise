@@ -109,7 +109,7 @@ public class HOGMPageEditorController implements ModelPageEditor {
 		FXUtil.anchor(modelCodeArea);
 		modelEditorPane.getChildren().add(modelCodeArea);
 		
-		FXMLLoader queryLoader = new FXMLLoader(QueryController.class.getResource("querypane.fxml"));
+		FXMLLoader queryLoader = QueryController.newLoader();
 		Pane queryPane  = queryLoader.load();
 		queryController = queryLoader.getController();
 		FXUtil.anchor(queryPane);

@@ -42,13 +42,18 @@ import java.util.List;
 
 
 
+
+
 import com.google.common.annotations.Beta;
+
+
 
 
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ProgressBar;
@@ -75,6 +80,11 @@ public class QueryController {
 	@FXML private AnchorPane consolePane;
 	//
 	@FXML private Tooltip executeTooltip;
+	
+	public static FXMLLoader newLoader( ) {
+		FXMLLoader result = new FXMLLoader(QueryController.class.getResource("querypane.fxml"));
+		return result;
+	}
 	
 	public void addDefaultQueries(List<String> queries) {
 		if (queries.size() > 0) {
