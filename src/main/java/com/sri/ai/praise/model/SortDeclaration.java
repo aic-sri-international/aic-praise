@@ -38,6 +38,7 @@
 package com.sri.ai.praise.model;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -111,7 +112,10 @@ public class SortDeclaration {
 			false, Expressions.makeSymbol("Boolean"), Expressions.makeSymbol(2),
 			ExtensionalSet.makeUniSetExpression(Arrays.asList(new Expression[] {
 					Expressions.FALSE, Expressions.TRUE })));
-	public static final SortDeclaration[] IN_BUILT_SORTS = new SortDeclaration[] { IN_BUILT_BOOLEAN, };
+	public static final SortDeclaration IN_BUILT_NUMBER = new SortDeclaration(
+			false, Expressions.makeSymbol("Number"), UNKNOWN_SIZE,
+			ExtensionalSet.makeUniSetExpression(Collections.emptyList()));
+	public static final SortDeclaration[] IN_BUILT_SORTS = new SortDeclaration[] { IN_BUILT_BOOLEAN, IN_BUILT_NUMBER };
 	//
 	public static final String FUNCTOR_SORT_DECLARATION = "sort";
 
