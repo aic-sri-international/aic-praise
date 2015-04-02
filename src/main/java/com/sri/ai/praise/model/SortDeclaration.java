@@ -112,6 +112,9 @@ public class SortDeclaration {
 			false, Expressions.makeSymbol("Boolean"), Expressions.makeSymbol(2),
 			ExtensionalSet.makeUniSetExpression(Arrays.asList(new Expression[] {
 					Expressions.FALSE, Expressions.TRUE })));
+	/**
+	 * An in-built sort representing numeric values.
+	 */
 	public static final SortDeclaration IN_BUILT_NUMBER = new SortDeclaration(
 			false, Expressions.makeSymbol("Number"), UNKNOWN_SIZE,
 			ExtensionalSet.makeUniSetExpression(Collections.emptyList()));

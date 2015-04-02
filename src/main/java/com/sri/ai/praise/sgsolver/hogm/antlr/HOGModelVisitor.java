@@ -62,11 +62,11 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
-import com.sri.ai.praise.sgsolver.model.HOGMModel;
+import com.sri.ai.praise.sgsolver.model.HOGModel;
 import com.sri.ai.praise.sgsolver.model.StatementInfo;
 
 @Beta
-public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
+public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// Note track bracketed expressions based on identity to ensure no accidental overwrite by value.
 	private Map<Expression, Expression> parenthesizedExpressions = new IdentityHashMap<Expression, Expression>(); 
 	//
@@ -84,7 +84,7 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
 		
 		ctx.statements.forEach(s -> visit(s));
 		
-		Expression result = HOGMModel.validateAndConstruct(sortDeclarations, randomVariableDeclarations, terms);
+		Expression result = HOGModel.validateAndConstruct(sortDeclarations, randomVariableDeclarations, terms);
 
 		return result;
 	}
@@ -363,7 +363,7 @@ public class HOGMModelVisitor extends HOGMBaseVisitor<Expression> {
     // : VARIABLE
  	@Override 
  	public Expression visitSort_name(@NotNull HOGMParser.Sort_nameContext ctx) { 
- 		Expression result = newSymbol(ctx.VARIABLE().getText());
+ 		Expression result = newSymbol(ctx.getText());
  		return result;
  	}
  	

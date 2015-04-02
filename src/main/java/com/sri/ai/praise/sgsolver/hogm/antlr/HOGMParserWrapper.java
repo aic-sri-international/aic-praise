@@ -96,7 +96,7 @@ public class HOGMParserWrapper implements Parser {
 			} else {
 				lexer.removeErrorListeners();
 				parser.removeErrorListeners();
-				HOGMModelVisitor hogmModelVisitor = new HOGMModelVisitor();
+				HOGModelVisitor hogmModelVisitor = new HOGModelVisitor();
 				result = hogmModelVisitor.visit(tree);
 			}
 		}

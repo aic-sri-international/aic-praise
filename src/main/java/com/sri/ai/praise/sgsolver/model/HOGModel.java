@@ -38,6 +38,7 @@
 package com.sri.ai.praise.sgsolver.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,19 +48,62 @@ import java.util.stream.Collectors;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.boole.ForAll;
+import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
-import com.sri.ai.praise.sgsolver.model.HOGMModelError.Type;
+import com.sri.ai.praise.sgsolver.model.HOGModelError.Type;
 
 @Beta
-public class HOGMModel {
+public class HOGModel {
+	
+	public final static Set<String> KNOWN_BOOLEAN_FUNCTORS;
+	static {
+		Set<String> knownBooleanFunctors = new LinkedHashSet<String>();
+		knownBooleanFunctors.add(FunctorConstants.NOT);
+		knownBooleanFunctors.add(FunctorConstants.AND);
+		knownBooleanFunctors.add(FunctorConstants.OR);
+		knownBooleanFunctors.add(ForAll.LABEL);
+		knownBooleanFunctors.add(ThereExists.LABEL);
+		knownBooleanFunctors.add(FunctorConstants.IMPLICATION);
+		knownBooleanFunctors.add(FunctorConstants.EQUIVALENCE);
+		knownBooleanFunctors.add(FunctorConstants.LESS_THAN);
+		knownBooleanFunctors.add(FunctorConstants.LESS_THAN_OR_EQUAL_TO);
+		knownBooleanFunctors.add(FunctorConstants.EQUALITY);
+		knownBooleanFunctors.add(FunctorConstants.DISEQUALITY);
+		knownBooleanFunctors.add(FunctorConstants.GREATER_THAN_OR_EQUAL_TO);
+		knownBooleanFunctors.add(FunctorConstants.GREATER_THAN);
+		
+		KNOWN_BOOLEAN_FUNCTORS = Collections.unmodifiableSet(knownBooleanFunctors);
+	}
+	
+	public final static Set<String> KNOWN_NUMERIC_FUNCTORS;
+	static {
+		Set<String> knownNumericFunctors = new LinkedHashSet<String>();
+		knownNumericFunctors.add(FunctorConstants.EXPONENTIATION);
+		knownNumericFunctors.add(FunctorConstants.DIVISION);
+		knownNumericFunctors.add(FunctorConstants.TIMES);
+		knownNumericFunctors.add(FunctorConstants.PLUS);
+		knownNumericFunctors.add(FunctorConstants.MINUS);
+		
+		KNOWN_NUMERIC_FUNCTORS = Collections.unmodifiableSet(knownNumericFunctors);
+	}
+	public final static Set<String> KNOWN_FUNCTORS;
+	static {
+		Set<String> knownFunctors = new LinkedHashSet<>();
+		knownFunctors.addAll(KNOWN_BOOLEAN_FUNCTORS);
+		knownFunctors.addAll(KNOWN_NUMERIC_FUNCTORS);
+		
+		KNOWN_FUNCTORS = Collections.unmodifiableSet(knownFunctors);
+	}
 
 	public static Expression validateAndConstruct(List<StatementInfo> sortDecs, List<StatementInfo> randomVarDecs, List<StatementInfo> terms) {
 		HOGMModelValidator validator = new HOGMModelValidator(sortDecs, randomVarDecs, terms);
 		
 		if (!validator.isValid()) {
-			throw new HOGMModelException("Invalid model", validator.errors);
+			throw new HOGModelException("Invalid model", validator.errors);
 		}
 		
 		Expression result = Tuple.make(
@@ -75,7 +119,7 @@ public class HOGMModel {
 		List<Expression> randomVariableDeclarations = new ArrayList<>();
 		List<Expression> conditionedPotentials      = new ArrayList<>();
 		//
-		List<HOGMModelError> errors = new ArrayList<>();
+		List<HOGModelError> errors = new ArrayList<>();
 		//
 		Set<Expression> sortConstants = new LinkedHashSet<>();
 		Map<Expression, SortDeclaration> sorts = new LinkedHashMap<>();
@@ -146,13 +190,16 @@ public class HOGMModel {
 						if (!sorts.containsKey(rvDeclaration.getRangeSort()) && !SortDeclaration.isNameOfInBuilt(rvDeclaration.getRangeSort())) {
 							newError(Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED, rvDeclaration.getRangeSort(), rvStatement);
 						}
+						if (KNOWN_FUNCTORS.contains(rvDeclaration.getName().toString())) {
+							newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_IN_BUILT_FUNCTOR, rvDeclaration.getName(), rvStatement);
+						}
 					}
 				}
 			});
 		}
 		
 		void newError(Type errorType, Object msg, StatementInfo statement) {
-			errors.add(new HOGMModelError(errorType, msg.toString(), statement));
+			errors.add(new HOGModelError(errorType, msg.toString(), statement));
 		}
 	}
 }

@@ -82,7 +82,9 @@ quantifier_index_term
     ;
 
 sort_name
-    : VARIABLE
+    : IN_BUILT_SORT_BOOLEAN
+    | IN_BUILT_SORT_NUMBER
+    | VARIABLE
     ;
        
 functor_name
@@ -136,6 +138,8 @@ UNKNOWN                 : 'Unknown';
 RANDOM                  : 'random' ;
 X                       : 'x' ;
 IN                      : 'in' ;
+IN_BUILT_SORT_BOOLEAN   : 'Boolean' ;
+IN_BUILT_SORT_NUMBER    : 'Number' ;
 // Logic Operators
 IMPLICATION             : '=>' ;
 BICONDITIONAL           : '<=>' ;

@@ -37,53 +37,29 @@
  */
 package com.sri.ai.praise.sgsolver.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+
 import com.google.common.annotations.Beta;
 
 @Beta
-public class HOGMModelError {
-	public static enum Type {
-		SORT_DECLARATION_IS_NOT_LEGAL,
-		//
-		SORT_NAME_PREDEFINED,
-		//
-		SORT_NAME_NOT_UNIQUE,
-		//
-		CONSTANT_NAME_NOT_UNIQUE,
-		//
-		RANDOM_VARIABLE_IS_NOT_LEGAL,
-		//
-		RANDOM_VARIABLE_NAME_NOT_UNIQUE,
-		//
-		RANDOM_VARIABLE_NAME_SAME_AS_CONSTANT,
-		//
-		RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED
-	}
-	
+public class HOGModelException extends RuntimeException {
+	private static final long serialVersionUID = 1L;
 	//
-	private Type          errorType   = null;
-	private String        message     = null;
-	private StatementInfo inStatement = null;
+	private List<HOGModelError> errors = new ArrayList<>();
 	
-	public HOGMModelError(Type errorType, String message, StatementInfo inStatement) {
-		this.errorType   = errorType;
-		this.message     = message;
-		this.inStatement = inStatement;
-	}
-	
-	public Type getErrorType() {
-		return errorType;
-	}
-	
-	public String getMessage() {
-		return message;
-	}
-	
-	public StatementInfo getInStatementInfo() {
-		return inStatement;
+	public HOGModelException(String message, List<HOGModelError> errors) {
+		super(message);
+		this.errors.addAll(errors);
 	}
 	
 	@Override
-	public String toString() {
-		return errorType.name()+":["+message+"] - "+inStatement;
+	public String getMessage() {
+		StringJoiner sj = new StringJoiner("\n", "\n", "\n");
+		
+		errors.forEach(e -> sj.add(e.toString()));
+		
+		return super.getMessage() + sj.toString(); 
 	}
 }

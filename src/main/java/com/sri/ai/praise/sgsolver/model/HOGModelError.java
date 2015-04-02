@@ -37,29 +37,55 @@
  */
 package com.sri.ai.praise.sgsolver.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
-
 import com.google.common.annotations.Beta;
 
 @Beta
-public class HOGMModelException extends RuntimeException {
-	private static final long serialVersionUID = 1L;
-	//
-	private List<HOGMModelError> errors = new ArrayList<>();
+public class HOGModelError {
+	public static enum Type {
+		//
+		// SORT RELATED ERRORS
+		SORT_DECLARATION_IS_NOT_LEGAL,
+		SORT_NAME_PREDEFINED,
+		SORT_NAME_NOT_UNIQUE,
+		CONSTANT_NAME_NOT_UNIQUE,
+		//
+		// RANDOM RELATED ERRORS
+		RANDOM_VARIABLE_IS_NOT_LEGAL,
+		RANDOM_VARIABLE_NAME_NOT_UNIQUE,
+		RANDOM_VARIABLE_NAME_SAME_AS_CONSTANT,
+		RANDOM_VARIABLE_NAME_SAME_AS_IN_BUILT_FUNCTOR,		
+		RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED,
+		//
+		// TERM RELATED ERRORS
+		TERM_TYPE_OF_FUNCTION_NOT_DECLARED,
+		TERM_CONDITIONAL_TYPE_CANNOT_BE_DETERMINED,
+	}
 	
-	public HOGMModelException(String message, List<HOGMModelError> errors) {
-		super(message);
-		this.errors.addAll(errors);
+	//
+	private Type          errorType   = null;
+	private String        message     = null;
+	private StatementInfo inStatement = null;
+	
+	public HOGModelError(Type errorType, String message, StatementInfo inStatement) {
+		this.errorType   = errorType;
+		this.message     = message;
+		this.inStatement = inStatement;
+	}
+	
+	public Type getErrorType() {
+		return errorType;
+	}
+	
+	public String getMessage() {
+		return message;
+	}
+	
+	public StatementInfo getInStatementInfo() {
+		return inStatement;
 	}
 	
 	@Override
-	public String getMessage() {
-		StringJoiner sj = new StringJoiner("\n", "\n", "\n");
-		
-		errors.forEach(e -> sj.add(e.toString()));
-		
-		return super.getMessage() + sj.toString(); 
+	public String toString() {
+		return errorType.name()+":["+message+"] - "+inStatement;
 	}
 }
