@@ -42,29 +42,40 @@ import com.google.common.annotations.Beta;
 @Beta
 public class HOGMModelError {
 	public static enum Type {
+		SORT_DECLARATION_IS_NOT_LEGAL,
+		//
+		SORT_NAME_PREDEFINED,
 		//
 		SORT_NAME_NOT_UNIQUE,
 		//
 		CONSTANT_NAME_NOT_UNIQUE,
 		//
+		RANDOM_VARIABLE_IS_NOT_LEGAL,
+		//
 		RANDOM_VARIABLE_NAME_NOT_UNIQUE,
 		//
-		RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED,
+		RANDOM_VARIABLE_NAME_SAME_AS_CONSTANT,
 		//
-		CONSTANT_IN_MORE_THAN_1_SORT
+		RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED
 	}
 	
 	//
 	private Type          errorType   = null;
+	private String        message     = null;
 	private StatementInfo inStatement = null;
 	
-	public HOGMModelError(Type errorType, StatementInfo inStatement) {
+	public HOGMModelError(Type errorType, String message, StatementInfo inStatement) {
 		this.errorType   = errorType;
+		this.message     = message;
 		this.inStatement = inStatement;
 	}
 	
 	public Type getErrorType() {
 		return errorType;
+	}
+	
+	public String getMessage() {
+		return message;
 	}
 	
 	public StatementInfo getInStatementInfo() {
@@ -73,6 +84,6 @@ public class HOGMModelError {
 	
 	@Override
 	public String toString() {
-		return errorType.name()+": "+inStatement;
+		return errorType.name()+":["+message+"] - "+inStatement;
 	}
 }

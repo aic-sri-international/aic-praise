@@ -52,24 +52,24 @@ public class HOGMParserTest {
 	@Test
 	public void testRandomVariableDeclaration() {
 		String string;
-		string = "random grade: People x Class -> Number;";
+		string = "random grade: Boolean x Boolean -> Boolean;";
 		test(string, expected(null, 
-							  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "grade", "2", "People", "Class", "Number"),
+							  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "grade", "2", "Boolean", "Boolean", "Boolean"),
 							  null));
 
-		string = "random father: People -> People;";
+		string = "random father: Boolean -> Boolean;";
 		test(string, expected(null, 
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "father", "1", "People", "People"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "father", "1", "Boolean", "Boolean"),
 				              null));
 
-		string = "random happy: People -> Boolean;";
+		string = "random happy: Boolean -> Boolean;";
 		test(string, expected(null, 
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "People", "Boolean"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", "Boolean"),
 				              null));
 
-		string = "random president: People;";
+		string = "random president: Boolean;";
 		test(string, expected(null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "president", "0", "People"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "president", "0", "Boolean"),
 				              null));	
 	}
 	
@@ -77,37 +77,21 @@ public class HOGMParserTest {
 	// PROTECTED
 	//
 	protected Expression expected(Expression sortDeclarations, Expression randomVariableDeclarations, Expression statements) {
-		Expression sorts, rvs, terms;
-		if (sortDeclarations == null) {
-			sorts = Tuple.make(new Object[0]);
+		Expression result = Tuple.make(new Object[] {ensureTuple(sortDeclarations), ensureTuple(randomVariableDeclarations), ensureTuple(statements)});
+		return result;
+	}
+	
+	protected Expression ensureTuple(Expression expr) {
+		Expression result = null;
+		if (expr == null) {
+			result = Tuple.make(new Object[0]);
 		}
-		else if (Tuple.isTuple(sortDeclarations)) {
-			sorts = sortDeclarations;
-		}
-		else {
-			sorts = Tuple.make(sortDeclarations);
-		}
-		
-		if (randomVariableDeclarations == null) {
-			rvs = Tuple.make(new Object[0]);
-		}
-		else if (Tuple.isTuple(randomVariableDeclarations)) {
-			rvs = randomVariableDeclarations;
+		else if (Tuple.isTuple(expr)) {
+			result = expr;
 		}
 		else {
-			rvs = Tuple.make(randomVariableDeclarations);
+			result = Tuple.make(expr);
 		}
-		
-		if (statements == null) {
-			terms = Tuple.make(new Object[0]);
-		}
-		else if (Tuple.isTuple(statements)) {
-			terms = statements;
-		}
-		else {
-			terms = Tuple.make(statements);
-		}
-		Expression result = Tuple.make(new Object[] {sorts, rvs, terms});
 		return result;
 	}
 	

@@ -72,39 +72,33 @@ public class HOGMParserWrapper implements Parser {
 	private Expression parse(String string, ParseTreeRetriever parseTreeRetriever) {
 		Expression result = null;
 		
-		try {
-			ErrorListener lexerErrorListener = new ErrorListener("Lexer Error");
-			ErrorListener parseErrorListener = new ErrorListener("Parse Error");
+		ErrorListener lexerErrorListener = new ErrorListener("Lexer Error");
+		ErrorListener parseErrorListener = new ErrorListener("Parse Error");
 
-			ANTLRInputStream input = new ANTLRInputStream(string);
-			HOGMLexer lexer = new HOGMLexer(input);
-			
-			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			HOGMParser parser = new HOGMParser(tokens);
-			
-			lexer.removeErrorListeners();
-			parser.removeErrorListeners();
-			lexer.addErrorListener(lexerErrorListener);
-			parser.addErrorListener(parseErrorListener);
+		ANTLRInputStream input = new ANTLRInputStream(string);
+		HOGMLexer lexer = new HOGMLexer(input);
+		
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		HOGMParser parser = new HOGMParser(tokens);
+		
+		lexer.removeErrorListeners();
+		parser.removeErrorListeners();
+		lexer.addErrorListener(lexerErrorListener);
+		parser.addErrorListener(parseErrorListener);
 
-			ParseTree tree = parseTreeRetriever.retrieve(parser);
+		ParseTree tree = parseTreeRetriever.retrieve(parser);
 
-			boolean eof = parser.getInputStream().LA(1) == Recognizer.EOF;
+		boolean eof = parser.getInputStream().LA(1) == Recognizer.EOF;
 
-			if (!lexerErrorListener.errorsDetected && !parseErrorListener.errorsDetected) {
-				if (!eof) {
-					System.err.println("Unable to parse the complete input model: " + input);
-				} else {
-					lexer.removeErrorListeners();
-					parser.removeErrorListeners();
-					HOGMModelVisitor hogmModelVisitor = new HOGMModelVisitor();
-					result = hogmModelVisitor.visit(tree);
-				}
+		if (!lexerErrorListener.errorsDetected && !parseErrorListener.errorsDetected) {
+			if (!eof) {
+				System.err.println("Unable to parse the complete input model: " + input);
+			} else {
+				lexer.removeErrorListeners();
+				parser.removeErrorListeners();
+				HOGMModelVisitor hogmModelVisitor = new HOGMModelVisitor();
+				result = hogmModelVisitor.visit(tree);
 			}
-		} catch (RecognitionException re) {
-			re.printStackTrace();
-		} catch (RuntimeException re) {
-			re.printStackTrace();
 		}
 		
 		return result;
