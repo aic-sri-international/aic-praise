@@ -38,7 +38,6 @@
 package com.sri.ai.praise.sgsolver.hogm.antlr;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -47,19 +46,35 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Parser;
+import com.sri.ai.praise.sgsolver.model.HOGModelException;
 
 @Beta
 public class HOGMParserWrapper implements Parser {
 	
 	@Override
-	public Expression parse(String string) {
-		Expression result = parse(string, new ModelParseTreeRetriever());
+	public Expression parse(String string) 
+			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
+		Expression result = parse(string, new ErrorListener("Lexer Error"), new ErrorListener("Parse Error"));
 
 		return result;
 	}
 	
-	public Expression parseTerm(String string) {
-		Expression result = parse(string, new ATermParseTreeRetriever());
+	public Expression parse(String string, ErrorListener lexerErrorListener, ErrorListener parseErrorListener) 
+			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
+		Expression result = parse(string, lexerErrorListener, parseErrorListener, new ModelParseTreeRetriever());
+		return result;
+	}
+
+	
+	public Expression parseTerm(String string) 
+			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
+		Expression result = parseTerm(string, new ErrorListener("Lexer Error"), new ErrorListener("Parse Error"));
+		return result;
+	}
+	
+	public Expression parseTerm(String string, ErrorListener lexerErrorListener, ErrorListener parseErrorListener)
+			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
+		Expression result = parse(string, lexerErrorListener, parseErrorListener, new ATermParseTreeRetriever());
 		return result;
 	}
 	
@@ -69,17 +84,15 @@ public class HOGMParserWrapper implements Parser {
 	//
 	// PRIVATE
 	//
-	private Expression parse(String string, ParseTreeRetriever parseTreeRetriever) {
+	private Expression parse(String string, ErrorListener lexerErrorListener, ErrorListener parseErrorListener, ParseTreeRetriever parseTreeRetriever) 
+			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
 		Expression result = null;
-		
-		ErrorListener lexerErrorListener = new ErrorListener("Lexer Error");
-		ErrorListener parseErrorListener = new ErrorListener("Parse Error");
 
 		ANTLRInputStream input = new ANTLRInputStream(string);
-		HOGMLexer lexer = new HOGMLexer(input);
+		HOGMLexer        lexer = new HOGMLexer(input);
 		
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		HOGMParser parser = new HOGMParser(tokens);
+		HOGMParser        parser = new HOGMParser(tokens);
 		
 		lexer.removeErrorListeners();
 		parser.removeErrorListeners();
@@ -88,11 +101,11 @@ public class HOGMParserWrapper implements Parser {
 
 		ParseTree tree = parseTreeRetriever.retrieve(parser);
 
-		boolean eof = parser.getInputStream().LA(1) == Recognizer.EOF;
+		boolean eofReached = parser.getInputStream().LA(1) == Recognizer.EOF;
 
-		if (!lexerErrorListener.errorsDetected && !parseErrorListener.errorsDetected) {
-			if (!eof) {
-				System.err.println("Unable to parse the complete input model: " + input);
+		if (!lexerErrorListener.isSyntaxErrorsDetected() && !parseErrorListener.isSyntaxErrorsDetected()) {
+			if (!eofReached) {
+				throw new UnableToParseAllTheInputError();
 			} else {
 				lexer.removeErrorListeners();
 				parser.removeErrorListeners();
@@ -119,24 +132,6 @@ public class HOGMParserWrapper implements Parser {
 		@Override
 		public ParseTree retrieve(HOGMParser hogmParser) {
 			return hogmParser.aterm();
-		}
-	}
-
-	private class ErrorListener extends BaseErrorListener {
-		public boolean errorsDetected = false;
-		private String name;
-
-		public ErrorListener(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public void syntaxError(Recognizer<?, ?> recognizer,
-				Object offendingSymbol, int line, int charPositionInLine,
-				String msg, RecognitionException e) {
-			System.err.println(name + ": line " + line + ":"
-					+ charPositionInLine + " " + msg);
-			errorsDetected = true;
 		}
 	}
 }
