@@ -12,14 +12,14 @@
 				<Label text="Query" />
 				<ComboBox fx:id="queryComboBox" editable="true" prefWidth="500.0" />
 				<Separator orientation="VERTICAL" />
-				<Button fx:id="executeButton" mnemonicParsing="false" text="Execute">
+				<Button fx:id="executeButton" mnemonicParsing="false" onAction="#executeQuery" text="Execute">
 					<tooltip>
-						<Tooltip fx:id="executeTooltip" text="Execute Query" />
+						<Tooltip fx:id="executeTooltip" text="Run query" />
 					</tooltip>
 				</Button>
 				<ProgressBar fx:id="queryProgressBar" prefWidth="200.0" progress="0.0" />
 				<Separator orientation="VERTICAL" />	
-				<Button fx:id="clearOutputButton" mnemonicParsing="false" text="Clear">
+				<Button fx:id="clearOutputButton" mnemonicParsing="false" onAction="#clearOutput" text="Clear">
 					<tooltip>
 						<Tooltip text="Clear Output" />
 					</tooltip>

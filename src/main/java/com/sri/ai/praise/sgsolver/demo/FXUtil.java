@@ -43,6 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.annotations.Beta;
 
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -70,10 +71,10 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 @Beta
 public class FXUtil {
 	//
-	public static final String _iconSmallSize            = "10px";
-	public static final String _iconMediumSize           = "18px";
-	public static final String _buttonDefaultIconSize    = "24px";
-	public static final String _buttonPaginationIconSize = "20px";
+	public static final int _iconSmallSize            = 10;
+	public static final int _iconMediumSize           = 18;
+	public static final int _buttonDefaultIconSize    = 24;
+	public static final int _buttonPaginationIconSize = 20;
 	
     public static void anchor(Node node) {
         AnchorPane.setTopAnchor(node, 0.0);
@@ -83,24 +84,24 @@ public class FXUtil {
     }
     
     public static void setDefaultButtonIcon(Button button, GlyphIcons icon) {
-    	GlyphsDude.setIcon(button, icon, _buttonDefaultIconSize, ContentDisplay.GRAPHIC_ONLY);
+    	GlyphsDude.setIcon(button, icon, iconSize(_buttonDefaultIconSize), ContentDisplay.GRAPHIC_ONLY);
+    	fixButtonSize(button, _buttonDefaultIconSize);
     }
     
     public static void setPaginationButtonIcon(Button button, GlyphIcons icon) {
-    	GlyphsDude.setIcon(button, icon, _buttonPaginationIconSize, ContentDisplay.GRAPHIC_ONLY);
-    }
-    
-    public static void setMediumButtonIcon(Button button, GlyphIcons icon) {
-    	GlyphsDude.setIcon(button, icon, _buttonDefaultIconSize, ContentDisplay.GRAPHIC_ONLY);
+    	GlyphsDude.setIcon(button, icon, iconSize(_buttonPaginationIconSize), ContentDisplay.GRAPHIC_ONLY);
+    	fixButtonSize(button, _buttonPaginationIconSize);
     }
     
     public static void setButtonStackedIcons(Button button, GlyphIcons icon1, GlyphIcons icon2) {
     	Region saveAsImg = GlyphsStack.create()
-    			.add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(icon1).size(_buttonDefaultIconSize).build())
-    			.add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(icon2).size(_iconSmallSize).build());
+    			.add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(icon1).size(iconSize(_buttonDefaultIconSize)).build())
+    			.add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(icon2).size(iconSize(_iconSmallSize)).build());
     			
     	button.setGraphic(saveAsImg);
     	button.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+    	
+    	fixButtonSize(button, _buttonDefaultIconSize);
     }
     
 	public static Node configMenuIcon() {
@@ -157,5 +158,19 @@ public class FXUtil {
 		root.add(textArea, 0, 1);
 		dialogPane.setExpandableContent(root);
 		dialog.showAndWait();
+	}
+	
+	//
+	// PRIVATE
+	//
+	private static String iconSize(int size) {
+		return ""+size+"px";
+	}
+	
+	private static void fixButtonSize(Button button, int size) {
+		button.setMaxSize(size+(8.7*2), size+(4.3*2));
+    	button.setPrefWidth(size+(8.7*2));
+    	button.setPrefHeight(size+(4.3*2));
+    	button.setPadding(Insets.EMPTY);
 	}
 }

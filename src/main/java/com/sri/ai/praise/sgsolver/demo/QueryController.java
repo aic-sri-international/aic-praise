@@ -44,14 +44,19 @@ import java.util.List;
 
 
 
+
+
 import com.google.common.annotations.Beta;
 
 
 
 
 
+import com.sri.ai.praise.sgsolver.demo.service.ExecuteHOGMQueryService;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -80,11 +85,20 @@ public class QueryController {
 	@FXML private AnchorPane consolePane;
 	//
 	@FXML private Tooltip executeTooltip;
+	//
+	private ModelPageEditor modelPageEditor;
+	//
+	private ExecuteHOGMQueryService executeQueryService = new ExecuteHOGMQueryService();
 	
 	public static FXMLLoader newLoader( ) {
 		FXMLLoader result = new FXMLLoader(QueryController.class.getResource("querypane.fxml"));
 		return result;
 	}
+	
+	public void setModelPageEditor(ModelPageEditor modelPageEditor) {
+		this.modelPageEditor = modelPageEditor;
+	}
+	
 	
 	public void addDefaultQueries(List<String> queries) {
 		if (queries.size() > 0) {
@@ -134,5 +148,33 @@ public class QueryController {
             	});
             }
         });
+    	
+    	executeQueryService.runningProperty().addListener((observable, previouslyRunning, currentlyRunning) -> {
+    		if (currentlyRunning) {
+    			FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.STOP);
+    			executeTooltip.setText("Stop query");
+    			queryProgressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
+    		}
+    		else {
+    			FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.PLAY);
+    			executeTooltip.setText("Run query");
+    			queryProgressBar.setProgress(0);
+    		}
+    	});
+	}
+	
+	@FXML
+    private void executeQuery(ActionEvent event) {
+		if (executeQueryService.isRunning()) {
+			executeQueryService.cancel();
+		}
+		else {
+			executeQueryService.restart();
+		}
+	}
+	
+	@FXML
+    private void clearOutput(ActionEvent event) {
+// TODO		
 	}
 }
