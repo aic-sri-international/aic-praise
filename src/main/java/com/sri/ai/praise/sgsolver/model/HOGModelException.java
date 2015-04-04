@@ -54,6 +54,10 @@ public class HOGModelException extends RuntimeException {
 		this.errors.addAll(errors);
 	}
 	
+	public List<HOGModelError> getErrors() {
+		return errors;
+	}
+	
 	@Override
 	public String getMessage() {
 		StringJoiner sj = new StringJoiner("\n", "\n", "\n");

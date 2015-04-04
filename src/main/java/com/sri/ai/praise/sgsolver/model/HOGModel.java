@@ -342,7 +342,21 @@ public class HOGModel {
 						result = TermCategoryType.NUMERIC;
 					}
 					else if (isPrologConstant.apply(expr)) {
-						result = TermCategoryType.OTHER;
+						RandomVariableDeclaration rvDeclaration = randoms.get(expr);
+						if (rvDeclaration != null) {
+							if (SortDeclaration.IN_BUILT_BOOLEAN.getName().equals(rvDeclaration.getRangeSort())) {
+								result = TermCategoryType.BOOLEAN;
+							}
+							else if (SortDeclaration.IN_BUILT_NUMBER.getName().equals(rvDeclaration.getRangeSort())) {
+								result = TermCategoryType.NUMERIC;
+							}
+							else {
+								result = TermCategoryType.OTHER;
+							}
+						}
+						else {
+							result = TermCategoryType.OTHER;
+						}
 					}
 					else {
 						result = TermCategoryType.OTHER;

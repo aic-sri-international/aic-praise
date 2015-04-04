@@ -46,6 +46,7 @@ import java.util.List;
 
 
 
+
 import com.google.common.annotations.Beta;
 
 
@@ -63,6 +64,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -81,6 +83,7 @@ public class QueryController {
 	//
 	@FXML private TabPane outputTabPane;
 	@FXML private AnchorPane resultPane;
+	@FXML private TextArea resultTextArea;
 	@FXML private AnchorPane problemPane;
 	@FXML private AnchorPane consolePane;
 	//
@@ -161,6 +164,16 @@ public class QueryController {
     			queryProgressBar.setProgress(0);
     		}
     	});
+    	
+    	executeQueryService.valueProperty().addListener((observable, oldResult, newResult) -> {
+// TODO display the query result    
+resultTextArea.setText(newResult.toString());
+    	});
+    	
+    	executeQueryService.onFailedProperty().addListener((workStateEvent) -> {
+// TODO something unexpected occurred, as errors are meant to be returned in the query result if detected, therefore notify user of situation  
+executeQueryService.getException().printStackTrace();
+    	});
 	}
 	
 	@FXML
@@ -169,6 +182,8 @@ public class QueryController {
 			executeQueryService.cancel();
 		}
 		else {
+			executeQueryService.setModel(modelPageEditor.getCurrentPageContents());
+			executeQueryService.setQuery(queryComboBox.getValue());
 			executeQueryService.restart();
 		}
 	}

@@ -37,53 +37,71 @@
  */
 package com.sri.ai.praise.sgsolver.demo.service;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
+import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
-@Beta
-public class ExecuteHOGMQueryService extends Service<QueryResult> {
-	private StringProperty model = new SimpleStringProperty(this, "model");
-	private StringProperty query = new SimpleStringProperty(this, "query");
 
-	public ExecuteHOGMQueryService() {
-		
+@Beta
+public class QueryError {
+	public enum Context {
+		MODEL, QUERY, UNKNOWN
 	}
 	
-	public StringProperty modelProperty() {
-		return model;
+	private Context   context         = Context.UNKNOWN;
+	private int       startContextIdx = -1;
+	private int       endContextIdx   = -1;
+	private String    errorMessage    = "";
+	private Throwable throwable       = null;
+	
+	public QueryError(Throwable t) {
+		this.errorMessage = t.getMessage();
+		this.throwable    = t;
 	}
-
-
-	public String getModel() {
-		return modelProperty().get();
+	
+	public QueryError(Context context, String errorMessage, int startContextIdx, int endContextIdx) {
+		this(context, errorMessage, startContextIdx, endContextIdx, null);
 	}
-
-
-	public void setModel(final String model) {
-		modelProperty().set(model);
+	
+	public QueryError(Context context, String errorMessage, int startContextIdx, int endContextIdx, Throwable t) {
+		if (context == Context.UNKNOWN) {
+			throw new IllegalArgumentException("Context cannot be set to UNKNOWN when providing context start and end infofrmation.");
+		}
+		if (startContextIdx < 0 || endContextIdx < 0 || endContextIdx < startContextIdx) {
+			throw new IllegalArgumentException("Start and End context information is invalid: start="+startContextIdx+", end="+endContextIdx);
+		}
+		this.context         = context;
+		this.startContextIdx = startContextIdx;
+		this.endContextIdx   = endContextIdx;
+		this.errorMessage    = errorMessage;
 	}
-
-
-	public StringProperty queryProperty() {
-		return query;
+	
+	public Context getContext() {
+		return context;
 	}
-
-
-	public String getQuery() {
-		return queryProperty().get();
+	
+	public int getStartContextIndex() {
+		return startContextIdx;
 	}
-
-
-	public void setQuery(final String query) {
-		queryProperty().set(query);
+	
+	public int getEndContextIndex() {
+		return endContextIdx;
+	}
+	
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+	
+	public Throwable getThrowable() {
+		return throwable;
 	}
 	
 	@Override
-    protected Task<QueryResult> createTask() {	
-		Task<QueryResult> result = new HOGMQueryTask(getQuery(), getModel());
-		return result;
+	public String toString() {
+		StringJoiner sj = new StringJoiner("\n");
+		
+		sj.add("Context: "+context+(context == Context.UNKNOWN ? "" : "@"+startContextIdx+":"+endContextIdx));
+		sj.add("Message: "+errorMessage);
+		
+		return sj.toString();
 	}
 }

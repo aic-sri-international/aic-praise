@@ -37,53 +37,65 @@
  */
 package com.sri.ai.praise.sgsolver.demo.service;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
-@Beta
-public class ExecuteHOGMQueryService extends Service<QueryResult> {
-	private StringProperty model = new SimpleStringProperty(this, "model");
-	private StringProperty query = new SimpleStringProperty(this, "query");
 
-	public ExecuteHOGMQueryService() {
-		
+@Beta
+public class QueryResult {
+	private String query  = null;
+	private String model  = null;
+	private String result = null;
+	private List<QueryError> errors = new ArrayList<>();
+	
+	public QueryResult(String query, String model, String result) {
+		this.query  = query;
+		this.model  = model;
+		this.result = result;
 	}
 	
-	public StringProperty modelProperty() {
-		return model;
+	public QueryResult(String query, String model, List<QueryError> errors) {
+		this.query = query;
+		this.model = model;
+		this.errors.addAll(errors);
 	}
-
-
-	public String getModel() {
-		return modelProperty().get();
+	
+	public boolean isErrors() {
+		boolean result = errors.size() > 0;
+		return result;
 	}
-
-
-	public void setModel(final String model) {
-		modelProperty().set(model);
-	}
-
-
-	public StringProperty queryProperty() {
+	
+	public String getQuery() {
 		return query;
 	}
-
-
-	public String getQuery() {
-		return queryProperty().get();
+	
+	public String getModel() {
+		return model;
 	}
-
-
-	public void setQuery(final String query) {
-		queryProperty().set(query);
+	
+	public String getResult() {
+		return result;
+	}
+	
+	public List<QueryError> getErrors() {
+		return errors;
 	}
 	
 	@Override
-    protected Task<QueryResult> createTask() {	
-		Task<QueryResult> result = new HOGMQueryTask(getQuery(), getModel());
+	public String toString() {
+		String result = null;
+		
+		if (isErrors()) {
+			StringJoiner sj = new StringJoiner("\n", "Query Errors:\n", "\n");
+			errors.forEach(error -> sj.add(error.toString()));
+			result = sj.toString();
+		}
+		else {
+			result = this.result;
+		}
+		
 		return result;
 	}
 }

@@ -18,10 +18,10 @@ burglary 0.1;
 if earthquake
    then if burglary
       then alarm 0.95
-      else alarm 0.6
+      else (alarm 0.6)
    else if burglary
       then alarm 0.9
-      else alarm 0.01;
+      else (alarm 0.01);
      
 @FRAGMENT:evidence#1
 not alarm;
