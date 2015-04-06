@@ -195,7 +195,8 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	@Override
 	public void addPage(Integer atPageIndex) {
-		Supplier<ModelPageEditor> addSupplier = new ModelPageEditorSupplier("// MODEL PAGE "+(atPageIndex+2), Collections.emptyList());
+		final ModelPageEditor currentPage = modelPageEditors.get(atPageIndex).get();
+		Supplier<ModelPageEditor> addSupplier = new ModelPageEditorSupplier(currentPage.getCurrentPageContents(), currentPage.getCurrentQueries());
 		addPage(atPageIndex, addSupplier);
 		pageChanges.push(new AddPageChange(atPageIndex, addSupplier));
 	}

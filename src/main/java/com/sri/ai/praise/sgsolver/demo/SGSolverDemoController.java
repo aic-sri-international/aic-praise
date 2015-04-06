@@ -226,8 +226,6 @@ public class SGSolverDemoController {
  		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
 
  		perspective.addPage(currentPageIdx);
-
- 		modelPagination.setCurrentPageIndex(currentPageIdx+1);
  	}
 	
 	@FXML
