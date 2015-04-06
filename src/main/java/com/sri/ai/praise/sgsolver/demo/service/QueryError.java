@@ -97,10 +97,10 @@ public class QueryError {
 	
 	@Override
 	public String toString() {
-		StringJoiner sj = new StringJoiner("\n");
+		StringJoiner sj = new StringJoiner(" - ");
 		
-		sj.add("Context: "+context+(context == Context.UNKNOWN ? "" : "@"+startContextIdx+":"+endContextIdx));
-		sj.add("Message: "+errorMessage);
+		sj.add(""+context+(context == Context.UNKNOWN ? "" : "@"+startContextIdx+":"+endContextIdx));
+		sj.add(errorMessage);
 		
 		return sj.toString();
 	}

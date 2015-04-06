@@ -97,13 +97,7 @@ public abstract class AbstractPerspective implements Perspective {
 		this.currentModelPageIndexProperty = currentModelPageIndexProperty;
 		this.currentModelPageIndexProperty.addListener((observer, oldValue, newValue) -> {
 			Integer currentPageIdx = newValue.intValue();
-			if (modelPageEditors.containsKey(currentPageIdx)) {
-				ModelPageEditor mpe = modelPageEditors.get().get(currentPageIdx).get();
-				canUndoModelPageEdit.unbind();
-				canRedoModelPageEdit.unbind();
-				canUndoModelPageEdit.bind(mpe.getUndoManager().undoAvailableProperty());
-				canRedoModelPageEdit.bind(mpe.getUndoManager().redoAvailableProperty());
-			}
+			bindModelPageEditorUndoManager(currentPageIdx);
 		});
 	}
 	
@@ -289,6 +283,7 @@ public abstract class AbstractPerspective implements Perspective {
 		canUndoPageChange.bind(pageChangeUndoManager.undoAvailableProperty());
 		canRedoPageChange.bind(pageChangeUndoManager.redoAvailableProperty());
 		
+		bindModelPageEditorUndoManager(0);
 		currentModelPageIndexProperty.set(0);
 		
 		callUndoManagers(um -> um.undoAvailableProperty().addListener(this::checkGlobalUndoState));
@@ -306,6 +301,16 @@ public abstract class AbstractPerspective implements Perspective {
 			}
 		});	
 		saveRequired.set(isASaveRequired.get());
+	}
+	
+	protected void bindModelPageEditorUndoManager(Integer currentPageIdx) {	
+		if (modelPageEditors.containsKey(currentPageIdx)) {
+			ModelPageEditor mpe = modelPageEditors.get().get(currentPageIdx).get();
+			canUndoModelPageEdit.unbind();
+			canRedoModelPageEdit.unbind();
+			canUndoModelPageEdit.bind(mpe.getUndoManager().undoAvailableProperty());
+			canRedoModelPageEdit.bind(mpe.getUndoManager().redoAvailableProperty());
+		}
 	}
 	
 	protected void callUndoManagers(Consumer<UndoManager> umConsumer) {

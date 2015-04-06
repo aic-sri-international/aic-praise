@@ -28,28 +28,11 @@
 			</items>
 		</ToolBar>
 	</top>
-	<center>
-		<TabPane fx:id="outputTabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-			<tabs>
-				<Tab text="Result">
-					<content>
-						<AnchorPane fx:id="resultPane">
-                     <children>
-                        <TextArea fx:id="resultTextArea" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children></AnchorPane>
-					</content>
-				</Tab>
-				<Tab text="Problems">
-					<content>
-						<AnchorPane fx:id="problemPane" />
-					</content>
-				</Tab>
-				<Tab text="Console">
-					<content>
-						<AnchorPane fx:id="consolePane" />
-					</content>
-				</Tab>
-			</tabs>
-		</TabPane>
-	</center>
+   <center>
+      <ScrollPane fx:id="outputScrollPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <content>
+            <Accordion fx:id="outputAccordion" />
+         </content>
+      </ScrollPane>
+   </center>
 </BorderPane>

@@ -86,6 +86,10 @@ public class HOGMCodeArea extends AnchorPane {
 		codeArea.redo();
 	}
 	
+	public void setEditable(boolean value) {
+		codeArea.setEditable(value);
+	}
+	
 	//
 	// PRIVATE
 	//

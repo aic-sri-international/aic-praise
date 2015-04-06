@@ -54,6 +54,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -71,10 +72,11 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 @Beta
 public class FXUtil {
 	//
-	public static final int _iconSmallSize            = 10;
-	public static final int _iconMediumSize           = 18;
-	public static final int _buttonDefaultIconSize    = 24;
-	public static final int _buttonPaginationIconSize = 20;
+	public static final int _iconSmallSize             = 10;
+	public static final int _iconMediumSize            = 18;
+	public static final int _buttonDefaultIconSize     = 24;
+	public static final int _buttonPaginationIconSize  = 20;
+	public static final int _titledPaneDefaultIconSize = 16;
 	
     public static void anchor(Node node) {
         AnchorPane.setTopAnchor(node, 0.0);
@@ -102,6 +104,10 @@ public class FXUtil {
     	button.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     	
     	fixButtonSize(button, _buttonDefaultIconSize);
+    }
+    
+    public static void setTitledPaneIcon(TitledPane titledPane, GlyphIcons icon) {
+    	GlyphsDude.setIcon(titledPane, icon, iconSize(_titledPaneDefaultIconSize), ContentDisplay.LEFT);
     }
     
 	public static Node configMenuIcon() {

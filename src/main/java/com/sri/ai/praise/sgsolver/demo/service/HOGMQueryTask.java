@@ -75,7 +75,8 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	
 	@Override
 	public QueryResult call() {
-    	QueryResult result = null;    	
+    	QueryResult result = null; 
+    	long start = System.currentTimeMillis();
     	try {
     		HOGMParserWrapper parser = new HOGMParserWrapper();
     		Expression queryExpr      = parser.parseTerm(query, new LexerErrorListener(QueryError.Context.QUERY), new ParserErrorListener(QueryError.Context.QUERY));
@@ -103,7 +104,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
     			
     			Expression marginal = inferencer.solve(queryExpr); 			
     			
-    			result = new QueryResult(query, model, marginal.toString());
+    			result = new QueryResult(query, model, marginal.toString(), System.currentTimeMillis() - start);
     		}
     	}
     	catch (RecognitionException re) {
@@ -125,7 +126,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
     	}
     	
     	if (errors.size() > 0) {
-			result = new QueryResult(query, model, errors);
+			result = new QueryResult(query, model, errors, System.currentTimeMillis() - start);
 		}
 
         return result;

@@ -40,35 +40,27 @@ package com.sri.ai.praise.sgsolver.demo;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-
-
-
-
 import com.google.common.annotations.Beta;
-
-
-
-
-
+import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
 import com.sri.ai.praise.sgsolver.demo.service.ExecuteHOGMQueryService;
+import com.sri.ai.praise.sgsolver.demo.service.QueryError;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.AnchorPane;
 
 @Beta
 public class QueryController {
@@ -80,12 +72,8 @@ public class QueryController {
 	//
 	@FXML private ProgressBar queryProgressBar;
 	//
-	//
-	@FXML private TabPane outputTabPane;
-	@FXML private AnchorPane resultPane;
-	@FXML private TextArea resultTextArea;
-	@FXML private AnchorPane problemPane;
-	@FXML private AnchorPane consolePane;
+	@FXML private ScrollPane outputScrollPane;
+	@FXML private Accordion outputAccordion;
 	//
 	@FXML private Tooltip executeTooltip;
 	//
@@ -166,15 +154,33 @@ public class QueryController {
     	});
     	
     	executeQueryService.valueProperty().addListener((observable, oldResult, newResult) -> {
-// TODO display the query result  
-if (newResult != null) {    		
-resultTextArea.setText(newResult.toString());
-}
+			if (newResult != null) { 
+				final TitledPane resultPane;
+				if (newResult.isErrors()) {
+					String title = "Query '"+newResult.getQuery()+"' encountered "+newResult.getErrors().size()+" error(s) when attempting to compute answer ("+duration("took ", newResult.getMillisecondsToCopmpute())+")";
+					ListView<QueryError> errors = new ListView<>(FXCollections.observableList(newResult.getErrors()));
+					errors.setFixedCellSize(24);
+					errors.setPrefHeight(24*5);
+					resultPane = new TitledPane(title, errors);
+					FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.TIMES);				
+				}
+				else {
+					String title = "Query '"+newResult.getQuery()+duration("' took ", newResult.getMillisecondsToCopmpute())+" to compute answer '"+newResult.getResult()+"'";
+					HOGMCodeArea resultCodeArea= new HOGMCodeArea();
+					resultCodeArea.setText(newResult.getResult());
+					resultCodeArea.setEditable(false);
+					resultPane = new TitledPane(title, resultCodeArea);
+					FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.CHECK);				
+				}
+				resultPane.setPrefWidth(outputScrollPane.getViewportBounds().getWidth());
+				outputScrollPane.viewportBoundsProperty().addListener((observer, oldValue, newValue) -> resultPane.setPrefWidth(newValue.getWidth()));
+				outputAccordion.getPanes().add(0, resultPane);
+			}
     	});
     	
     	executeQueryService.onFailedProperty().addListener((workStateEvent) -> {
-// TODO something unexpected occurred, as errors are meant to be returned in the query result if detected, therefore notify user of situation  
-executeQueryService.getException().printStackTrace();
+    		// something unexpected occurred, as errors are meant to be returned in the query result if detected, therefore notify user of situation  
+    		FXUtil.exception(executeQueryService.getException());
     	});
 	}
 	
@@ -192,6 +198,28 @@ executeQueryService.getException().printStackTrace();
 	
 	@FXML
     private void clearOutput(ActionEvent event) {
-// TODO		
+		outputAccordion.getPanes().clear();
+	}
+	
+	private String duration(String prefix, long duration) {
+		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
+		
+		if (duration != 0) {
+			hours    = duration / 3600000;
+			duration = duration % 3600000; 
+		}
+		if (duration != 0) {
+			minutes  = duration / 60000;
+			duration = duration % 60000;
+		}
+		if (duration != 0) {
+			seconds  = duration / 1000;
+			duration = duration % 1000;
+		}
+		milliseconds = duration;
+		
+		String result = prefix + hours + "h" + minutes + "m" + seconds + "." + milliseconds+"s";
+		
+		return result;
 	}
 }

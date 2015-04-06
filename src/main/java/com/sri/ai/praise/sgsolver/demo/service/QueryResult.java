@@ -49,17 +49,20 @@ public class QueryResult {
 	private String model  = null;
 	private String result = null;
 	private List<QueryError> errors = new ArrayList<>();
+	private long millisecondsToCompute = 0L;
 	
-	public QueryResult(String query, String model, String result) {
+	public QueryResult(String query, String model, String result, long millisecondsToCompute) {
 		this.query  = query;
 		this.model  = model;
 		this.result = result;
+		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
-	public QueryResult(String query, String model, List<QueryError> errors) {
+	public QueryResult(String query, String model, List<QueryError> errors, long millisecondsToCompute) {
 		this.query = query;
 		this.model = model;
 		this.errors.addAll(errors);
+		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
 	public boolean isErrors() {
@@ -81,6 +84,10 @@ public class QueryResult {
 	
 	public List<QueryError> getErrors() {
 		return errors;
+	}
+	
+	public long getMillisecondsToCopmpute() {
+		return millisecondsToCompute;
 	}
 	
 	@Override
