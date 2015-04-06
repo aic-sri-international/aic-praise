@@ -166,8 +166,10 @@ public class QueryController {
     	});
     	
     	executeQueryService.valueProperty().addListener((observable, oldResult, newResult) -> {
-// TODO display the query result    
+// TODO display the query result  
+if (newResult != null) {    		
 resultTextArea.setText(newResult.toString());
+}
     	});
     	
     	executeQueryService.onFailedProperty().addListener((workStateEvent) -> {

@@ -56,14 +56,14 @@ term
     |<assoc=right> antecedent=term IMPLICATION consequent=term #implication
       // biconditional, e.g.: A = B <=> C = D
     |<assoc=right> leftop=term BICONDITIONAL rightop=term #biconditional
-      // conditional, e.g.: if X = Y then 1 else 2
-    | IF condition=term THEN thenbranch=term ELSE elsebranch=term #conditional
       // universal quantification, e.g.: for all X : X != a
     | FOR ALL index=quantifier_index COLON body=term #forAll
       // existential quantification, e.g.: there exists X : X = a
     | THERE EXISTS index=quantifier_index COLON body=term #thereExists
       // condition=term(0) potential=term(1) ---> if condition then potential else 1-potential
     | term term #shorthandConditionedPotential 
+      // conditional, e.g.: if X = Y then 1 else 2
+    | IF condition=term THEN thenbranch=term ELSE elsebranch=term #conditional
     | symbol #atomicTerm
     ;
     
