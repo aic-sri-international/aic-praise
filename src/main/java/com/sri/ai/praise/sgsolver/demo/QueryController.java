@@ -39,6 +39,7 @@ package com.sri.ai.praise.sgsolver.demo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
@@ -58,6 +59,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
@@ -176,10 +179,33 @@ public class QueryController {
 				}
 				else {
 					String title = "Query '"+newResult.getQuery()+duration("' took ", newResult.getMillisecondsToCopmpute())+" to compute answer '"+newResult.getResult()+"'";
-					HOGMCodeArea resultCodeArea= new HOGMCodeArea();
+					HOGMCodeArea resultCodeArea = new HOGMCodeArea();
 					resultCodeArea.setText(newResult.getResult());
 					resultCodeArea.setEditable(false);
-					resultPane = new TitledPane(title, resultCodeArea);
+					
+					HOGMCodeArea parsedModelArea = new HOGMCodeArea();
+					StringJoiner sj = new StringJoiner("\n");
+					sj.add("// SORT DECLARATIONS:");
+					newResult.getParsedModel().getSortDeclarations().forEach(sd -> {
+						sj.add(sd.getSortDeclaration().toString()+";");
+					});
+					sj.add("// RANDOM VARIABLE DECLARATIONS:");
+					newResult.getParsedModel().getRandomVariableDeclarations().forEach(rd -> {
+						sj.add(rd.getRandomVariableDeclaration().toString()+";");
+					});
+					sj.add("// CONDITIONED POTENTIALS:");
+					newResult.getParsedModel().getConditionedPotentials().forEach(cp -> {
+						sj.add(cp.toString()+";");
+					});
+					parsedModelArea.setText(sj.toString());
+					parsedModelArea.setEditable(false);
+					
+					
+					TabPane resultTabs = new TabPane();
+					resultTabs.getTabs().add(new Tab("Answer", resultCodeArea));
+					resultTabs.getTabs().add(new Tab("Parsed As", parsedModelArea));
+					
+					resultPane = new TitledPane(title, resultTabs);
 					FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.CHECK);				
 				}
 				resultPane.setPrefWidth(outputScrollPane.getViewportBounds().getWidth());

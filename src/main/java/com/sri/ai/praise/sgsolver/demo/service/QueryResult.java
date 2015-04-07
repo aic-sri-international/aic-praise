@@ -46,21 +46,21 @@ import com.google.common.annotations.Beta;
 @Beta
 public class QueryResult {
 	private String query  = null;
-	private String model  = null;
+	private ParsedModel parsedModel = null;
 	private String result = null;
 	private List<QueryError> errors = new ArrayList<>();
 	private long millisecondsToCompute = 0L;
 	
-	public QueryResult(String query, String model, String result, long millisecondsToCompute) {
-		this.query  = query;
-		this.model  = model;
-		this.result = result;
+	public QueryResult(String query, ParsedModel parsedModel, String result, long millisecondsToCompute) {
+		this.query       = query;
+		this.parsedModel = parsedModel;
+		this.result      = result;
 		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
-	public QueryResult(String query, String model, List<QueryError> errors, long millisecondsToCompute) {
+	public QueryResult(String query, ParsedModel parsedModel, List<QueryError> errors, long millisecondsToCompute) {
 		this.query = query;
-		this.model = model;
+		this.parsedModel = parsedModel;
 		this.errors.addAll(errors);
 		this.millisecondsToCompute = millisecondsToCompute;
 	}
@@ -74,8 +74,8 @@ public class QueryResult {
 		return query;
 	}
 	
-	public String getModel() {
-		return model;
+	public ParsedModel getParsedModel() {
+		return parsedModel;
 	}
 	
 	public String getResult() {

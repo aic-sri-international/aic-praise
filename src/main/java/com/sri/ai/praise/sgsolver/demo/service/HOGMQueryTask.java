@@ -75,7 +75,12 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	
 	@Override
 	public QueryResult call() {
-    	QueryResult result = null; 
+    	QueryResult result = null;
+    	
+    	List<SortDeclaration>           sorts                 = new ArrayList<>();
+    	List<RandomVariableDeclaration> randoms               = new ArrayList<>();
+    	List<Expression>                conditionedPotentials = new ArrayList<>();
+    	
     	long start = System.currentTimeMillis();
     	try {
     		if (query == null || query.trim().equals("")) {
@@ -91,9 +96,11 @@ public class HOGMQueryTask extends Task<QueryResult> {
         		Expression modelTupleExpr = parser.parse(model, new LexerErrorListener(QueryError.Context.MODEL), new ParserErrorListener(QueryError.Context.MODEL));
      
         		if (errors.size() == 0) {
-	    			List<SortDeclaration>           sorts               = extractSorts(Tuple.get(modelTupleExpr, 0));
-	    			List<RandomVariableDeclaration> randoms             = extractRandom(Tuple.get(modelTupleExpr, 1));
-	    			List<Expression>                conditiedPotentials = extractConditionedPotentials(Tuple.get(modelTupleExpr, 2));
+	    			sorts.add(SortDeclaration.IN_BUILT_BOOLEAN);
+	    			sorts.add(SortDeclaration.IN_BUILT_NUMBER);
+        			sorts.addAll(extractSorts(Tuple.get(modelTupleExpr, 0)));	
+	    			randoms.addAll(extractRandom(Tuple.get(modelTupleExpr, 1)));
+	    			conditionedPotentials.addAll(extractConditionedPotentials(Tuple.get(modelTupleExpr, 2)));
 	    			
 	    			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 	    			sorts.forEach(sort -> {
@@ -101,18 +108,17 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	    					mapFromTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
 	    				}
 	    			});
-	    			mapFromTypeNameToSizeString.put("Boolean", "2");
 	    			Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
 	    			randoms.forEach(random -> {
 	    				mapFromVariableNameToTypeName.put(random.getName().toString(), random.getRangeSort().toString());
 	    			});
 	    			
-	    			Expression markovNetwork = Times.make(conditiedPotentials);
+	    			Expression markovNetwork = Times.make(conditionedPotentials);
 	    			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, null, true, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
 	    			
 	    			Expression marginal = inferencer.solve(queryExpr); 			
 	    			
-	    			result = new QueryResult(query, model, marginal.toString(), System.currentTimeMillis() - start);
+	    			result = new QueryResult(query, new ParsedModel(model, sorts, randoms, conditionedPotentials), marginal.toString(), System.currentTimeMillis() - start);
         		}
     		}
     	}
@@ -137,7 +143,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
     	}
     	
     	if (errors.size() > 0) {
-			result = new QueryResult(query, model, errors, System.currentTimeMillis() - start);
+			result = new QueryResult(query, new ParsedModel(model, sorts, randoms, conditionedPotentials), errors, System.currentTimeMillis() - start);
 		}
 
         return result;
