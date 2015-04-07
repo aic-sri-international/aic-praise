@@ -297,14 +297,6 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	}
  	
  	// term
- 	// | IF condition=term THEN thenbranch=term ELSE elsebranch=term
- 	@Override 
- 	public Expression visitConditional(@NotNull HOGMParser.ConditionalContext ctx) { 
- 		Expression result = IfThenElse.make(visit(ctx.condition), visit(ctx.thenbranch), visit(ctx.elsebranch));
- 		return result;
- 	}
- 	
- 	// term
  	// | FOR ALL index=quantifier_index COLON body=term
  	@Override 
  	public Expression visitForAll(@NotNull HOGMParser.ForAllContext ctx) { 
@@ -328,6 +320,22 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  		Expression potential = visit(ctx.term(1));
  		
  		Expression result = IfThenElse.make(condition, potential, Minus.make(Expressions.ONE, potential));
+ 		return result;
+ 	}
+ 	
+ 	// term
+ 	// | IF condition=term THEN thenbranch=term ELSE elsebranch=term
+ 	@Override 
+ 	public Expression visitConditional(@NotNull HOGMParser.ConditionalContext ctx) { 
+ 		Expression result = IfThenElse.make(visit(ctx.condition), visit(ctx.thenbranch), visit(ctx.elsebranch));
+ 		return result;
+ 	}
+ 	
+ 	// term
+ 	// | IF condition=term THEN thenbranch=term
+ 	@Override 
+ 	public Expression visitConditionalUnknownElseBranch(@NotNull HOGMParser.ConditionalUnknownElseBranchContext ctx) { 
+ 		Expression result = IfThenElse.make(visit(ctx.condition), visit(ctx.thenbranch), Expressions.ZERO_POINT_FIVE);
  		return result;
  	}
  	
@@ -409,7 +417,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// PROTECTED
 	//
  	protected StatementInfo newStatementInfo(Expression statement, ParserRuleContext ctx) {
- 		StatementInfo result = new StatementInfo(statement, ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex());
+ 		StatementInfo result = new StatementInfo(statement, ctx.getStart().getLine(), ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex());
  		return result;
  	}
  	

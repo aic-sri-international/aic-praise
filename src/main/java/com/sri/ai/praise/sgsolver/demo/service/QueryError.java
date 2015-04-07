@@ -48,6 +48,7 @@ public class QueryError {
 	}
 	
 	private Context   context         = Context.UNKNOWN;
+	private int       line            = -1;
 	private int       startContextIdx = -1;
 	private int       endContextIdx   = -1;
 	private String    errorMessage    = "";
@@ -58,11 +59,11 @@ public class QueryError {
 		this.throwable    = t;
 	}
 	
-	public QueryError(Context context, String errorMessage, int startContextIdx, int endContextIdx) {
-		this(context, errorMessage, startContextIdx, endContextIdx, null);
+	public QueryError(Context context, String errorMessage, int line, int startContextIdx, int endContextIdx) {
+		this(context, errorMessage, line, startContextIdx, endContextIdx, null);
 	}
 	
-	public QueryError(Context context, String errorMessage, int startContextIdx, int endContextIdx, Throwable t) {
+	public QueryError(Context context, String errorMessage, int line, int startContextIdx, int endContextIdx, Throwable t) {
 		if (context == Context.UNKNOWN) {
 			throw new IllegalArgumentException("Context cannot be set to UNKNOWN when providing context start and end infofrmation.");
 		}
@@ -70,6 +71,7 @@ public class QueryError {
 			throw new IllegalArgumentException("Start and End context information is invalid: start="+startContextIdx+", end="+endContextIdx);
 		}
 		this.context         = context;
+		this.line            = line;
 		this.startContextIdx = startContextIdx;
 		this.endContextIdx   = endContextIdx;
 		this.errorMessage    = errorMessage;
@@ -99,7 +101,7 @@ public class QueryError {
 	public String toString() {
 		StringJoiner sj = new StringJoiner(" - ");
 		
-		sj.add(""+context+(context == Context.UNKNOWN ? "" : "@"+startContextIdx+":"+endContextIdx));
+		sj.add(""+context+(context == Context.UNKNOWN ? "" : "@["+line+":"+startContextIdx+" to "+endContextIdx+"]"));
 		sj.add(errorMessage);
 		
 		return sj.toString();
