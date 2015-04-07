@@ -90,6 +90,12 @@ public class HOGMCodeArea extends AnchorPane {
 		codeArea.setEditable(value);
 	}
 	
+	public void highlight(int startIdx, int endIdx) {
+		int s = startIdx > 0 ? startIdx -1 : startIdx;
+		int e = endIdx < (getText().length()-1) ? endIdx+1 : endIdx;
+		codeArea.selectRange(s, e);
+	}
+	
 	//
 	// PRIVATE
 	//

@@ -56,4 +56,6 @@ public interface ModelPageEditor {
 	UndoManager getUndoManager();
 	void undo();
 	void redo();
+	
+	void highlight(int startIdx, int endIdx);
 }

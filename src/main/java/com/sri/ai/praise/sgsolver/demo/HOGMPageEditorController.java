@@ -65,7 +65,7 @@ public class HOGMPageEditorController implements ModelPageEditor {
 	}
 	
 	//
-	// START-ModelEditor
+	// START-ModelPageEditor
 	@Override
 	public Pane getRootPane() {
 		return rootPane;
@@ -101,7 +101,12 @@ public class HOGMPageEditorController implements ModelPageEditor {
 	public void redo() {
 		modelCodeArea.redo();
 	}
-	// END-ModelEditor
+	
+	@Override
+	public void highlight(int startIdx, int endIdx) {
+		modelCodeArea.highlight(startIdx, endIdx);
+	}
+	// END-ModelPageEditor
 	//
 	
 	@FXML

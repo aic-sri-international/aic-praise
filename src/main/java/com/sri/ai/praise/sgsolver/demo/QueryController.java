@@ -57,6 +57,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
@@ -161,6 +162,15 @@ public class QueryController {
 					ListView<QueryError> errors = new ListView<>(FXCollections.observableList(newResult.getErrors()));
 					errors.setFixedCellSize(24);
 					errors.setPrefHeight(24*5);
+					errors.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+					errors.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
+						if (newValue.intValue() >= 0) {
+							QueryError qError = errors.getItems().get(newValue.intValue());
+							if (qError.getContext() == QueryError.Context.MODEL) {
+								modelPageEditor.highlight(qError.getStartContextIndex(), qError.getEndContextIndex());
+							}
+						}
+					});
 					resultPane = new TitledPane(title, errors);
 					FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.TIMES);				
 				}
@@ -175,6 +185,8 @@ public class QueryController {
 				resultPane.setPrefWidth(outputScrollPane.getViewportBounds().getWidth());
 				outputScrollPane.viewportBoundsProperty().addListener((observer, oldValue, newValue) -> resultPane.setPrefWidth(newValue.getWidth()));
 				outputAccordion.getPanes().add(0, resultPane);
+				resultPane.setExpanded(true);
+				outputScrollPane.setVvalue(0);
 			}
     	});
     	
