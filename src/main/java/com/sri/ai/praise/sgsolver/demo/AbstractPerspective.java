@@ -258,8 +258,28 @@ public abstract class AbstractPerspective implements Perspective {
 			FXUtil.exception(ioe);
 		}
 	}
+	
+	@Override 
+	public void gotoModelEditor() {
+		getCurrentModelPageEditor().gotoModelEditor();
+	}
+	
+	@Override
+	public void gotoQueryEditor() {
+		getCurrentModelPageEditor().gotoQueryEditor();
+	}
+	
+	@Override
+	public void executeQuery() {
+		getCurrentModelPageEditor().executeQuery();
+	}
 	// END-Perspective default implementations
 	//
+	
+	protected ModelPageEditor getCurrentModelPageEditor() {
+		ModelPageEditor result = modelPageEditors.get(currentModelPageIndexProperty.get()).get();
+		return result;
+	}
 	
 	protected abstract ModelPageEditor create(String modelPage, List<String> defaultQueries);
 	

@@ -96,6 +96,10 @@ public class HOGMCodeArea extends AnchorPane {
 		codeArea.selectRange(s, e);
 	}
 	
+	public void setFocus() {		
+		codeArea.requestFocus();
+	}
+	
 	//
 	// PRIVATE
 	//

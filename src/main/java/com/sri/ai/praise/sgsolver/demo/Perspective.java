@@ -87,4 +87,8 @@ public interface Perspective {
 	
 	void save();
 	void saveAs(File file);
+	
+	void gotoModelEditor();
+	void gotoQueryEditor();
+	void executeQuery();
 }

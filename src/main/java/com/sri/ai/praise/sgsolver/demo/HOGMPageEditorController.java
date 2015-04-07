@@ -106,6 +106,21 @@ public class HOGMPageEditorController implements ModelPageEditor {
 	public void highlight(int startIdx, int endIdx) {
 		modelCodeArea.highlight(startIdx, endIdx);
 	}
+	
+	@Override
+	public void gotoModelEditor() {
+		modelCodeArea.setFocus();
+	}
+	
+	@Override
+	public void gotoQueryEditor() {
+		queryController.gotoQueryEditor();
+	}
+	
+	@Override 
+	public void executeQuery() {
+		queryController.executeQuery();
+	}
 	// END-ModelPageEditor
 	//
 	

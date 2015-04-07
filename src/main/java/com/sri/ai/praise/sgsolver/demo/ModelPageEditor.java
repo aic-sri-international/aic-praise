@@ -58,4 +58,8 @@ public interface ModelPageEditor {
 	void redo();
 	
 	void highlight(int startIdx, int endIdx);
+	
+	void gotoModelEditor();
+	void gotoQueryEditor();
+	void executeQuery();
 }

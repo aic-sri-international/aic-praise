@@ -115,6 +115,15 @@ public class QueryController {
 		return result;
 	}
 	
+	public void gotoQueryEditor() {
+		queryComboBox.requestFocus();
+		queryComboBox.show();
+	}
+	
+	public void executeQuery() {
+		executeButton.fire();
+	}
+	
 	@FXML
 	private void initialize() {
 		//

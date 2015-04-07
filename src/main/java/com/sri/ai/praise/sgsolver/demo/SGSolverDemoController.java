@@ -51,6 +51,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -61,6 +64,10 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
 @Beta
 public class SGSolverDemoController {
+	public static final KeyCombination GOTO_EDITOR_SHORTCUT = new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN);
+	public static final KeyCombination GOTO_QUERY_SHORTCUT  = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+	public static final KeyCombination RUN_SHORTCUT         = new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN);
+	//
 	private Stage mainStage;
 	//
 	@FXML private Button openMenuButton;
@@ -93,6 +100,22 @@ public class SGSolverDemoController {
 	public void setMainStage(Stage stage) {
 		this.mainStage = stage;
 		this.mainStage.setTitle("PRAiSE");
+		
+		stage.sceneProperty().addListener((observer, oldScene, newScene) -> {
+			if (newScene != null) {				
+				newScene.setOnKeyPressed(ke -> {
+					if (GOTO_EDITOR_SHORTCUT.match(ke)) {						
+						perspective.gotoModelEditor();
+					} 
+					else if (GOTO_QUERY_SHORTCUT.match(ke)) {
+						perspective.gotoQueryEditor();
+					}
+					else if (RUN_SHORTCUT.match(ke)) {
+						perspective.executeQuery();
+					}
+				});
+			}
+		});
 	}
 	
 	//
