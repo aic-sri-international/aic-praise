@@ -55,7 +55,7 @@ public class QueryError {
 	private Throwable throwable       = null;
 	
 	public QueryError(Throwable t) {
-		this.errorMessage = t.getMessage();
+		this.errorMessage = t.getMessage() == null ? t.toString() : t.getMessage();
 		this.throwable    = t;
 	}
 	

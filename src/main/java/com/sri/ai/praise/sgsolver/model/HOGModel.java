@@ -212,6 +212,7 @@ public class HOGModel {
 		Set<Expression> sortConstants = new LinkedHashSet<>();
 		Map<Expression, SortDeclaration> sorts = new LinkedHashMap<>();
 		Map<Expression, RandomVariableDeclaration> randoms = new LinkedHashMap<>();
+		List<Expression> conditioned = new ArrayList<>();
 		
 		HOGMModelValidator(List<StatementInfo> sortStatements, List<StatementInfo> randomVariableStatements, List<StatementInfo> termStatements) {
 			validateSortStatements(sortStatements);
@@ -221,13 +222,7 @@ public class HOGModel {
 			// Map validated values
 			sortDeclarations.addAll(sorts.values().stream().map(sd -> sd.getSortDeclaration()).collect(Collectors.toList()));
 			randomVariableDeclarations.addAll(randoms.values().stream().map(rd -> rd.getRandomVariableDeclaration()).collect(Collectors.toList()));
-			conditionedPotentials.addAll(termStatements.stream().map(termStatement -> {
-				Expression result = termStatement.statement;
-				if (!IfThenElse.isIfThenElse(termStatement.statement)) {
-					result =  IfThenElse.make(termStatement.statement, Expressions.ONE, Expressions.ZERO);
-				}
-				return result;
-			}).collect(Collectors.toList()));
+			conditionedPotentials.addAll(conditioned);
 		}
 		
 		boolean isValid() {
@@ -235,6 +230,10 @@ public class HOGModel {
 		}
 		
 		void validateSortStatements(List<StatementInfo> sortStatements) {
+			// Pre-associated with the Boolean Sort
+			sortConstants.add(Expressions.FALSE);
+			sortConstants.add(Expressions.TRUE);
+			
 			sortStatements.forEach(sortStatement -> {
 				if (!SortDeclaration.isSortDeclaration(sortStatement.statement)) {
 					newError(Type.SORT_DECLARATION_IS_NOT_LEGAL, "", sortStatement);
@@ -310,13 +309,24 @@ public class HOGModel {
 				// Determine type
 				TermCategoryType termType = determineTermCategoryType(statement);
 				if (IfThenElse.isIfThenElse(statement)) {
+					Expression conditionedPotential = statement;
 					if (termType != TermCategoryType.NUMERIC) {
+						conditionedPotential = attemptMakeRule(statement);
+					}
+					
+					if (conditionedPotential == null) {
 						newError(Type.TERM_CONDITONAL_STATEMENT_MUST_BE_OF_TYPE_NUMERIC, "", termStatement);
+					}
+					else {
+						conditioned.add(conditionedPotential);
 					}
 				}
 				else if (termType != TermCategoryType.BOOLEAN) {
 					newError(Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN, "", termStatement);
-				}	
+				}
+				else {
+					conditioned.add(IfThenElse.make(statement, Expressions.ONE, Expressions.ZERO));
+				}
 			});
 		}
 		
@@ -379,6 +389,41 @@ public class HOGModel {
 			return result;
 		}
 		
+		private Expression attemptMakeRule(Expression conditional) {
+			Expression result = null;
+			
+			TermCategoryType conditionType  = determineTermCategoryType(IfThenElse.condition(conditional));
+			if (conditionType == TermCategoryType.BOOLEAN) {
+				Expression thenBranch;
+				if ((thenBranch = attemptMakeNumeric(IfThenElse.thenBranch(conditional))) != null) {
+					Expression elseBranch;
+					if ((elseBranch = attemptMakeNumeric(IfThenElse.elseBranch(conditional))) != null) {
+						result = IfThenElse.make(IfThenElse.condition(conditional), thenBranch, elseBranch);
+					}
+				}
+				
+			}
+			
+			return result;
+		}
+		
+		private Expression attemptMakeNumeric(Expression expr) {
+			Expression result = null;
+			
+			TermCategoryType exprType = determineTermCategoryType(expr);
+			if (exprType == TermCategoryType.NUMERIC) {
+				result = expr; // Already numeric
+			}
+			else if (IfThenElse.isIfThenElse(expr)) {
+				result = attemptMakeRule(expr);
+			}
+			else if (exprType == TermCategoryType.BOOLEAN) {
+				result = IfThenElse.make(expr, Expressions.ONE, Expressions.ZERO);
+			}
+			
+			return result;
+		}
+		
 		void validateFunctors(StatementInfo termStatement) {
 			Iterator<Expression> subExpressionsIterator =  new SubExpressionsDepthFirstIterator(termStatement.statement);
 		
@@ -386,18 +431,31 @@ public class HOGModel {
 				if (expr.getFunctor() != null) {
 					if (isKnownFunctor(expr.getFunctor())) {
 						if (!isValidKnownFunctorArity(expr)) {
-							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, expr, termStatement);
+							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+expr+"'", termStatement);
 						}
 // TODO - validate arguments are of correct types						
 					}
 					else if (isDeclaredRandomFunctor(expr.getFunctor())) {
 						if (!isValidDeclaredRandomFunctorArity(expr)) {
-							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, expr, termStatement);
+							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+expr+"'", termStatement);
 						}
 // TODO - validate arguments are of correct type						
 					}
 					else {					
-						newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, expr.getFunctor(), termStatement);
+						newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, "'"+expr.getFunctor()+"'", termStatement);
+					}
+				}
+				else if (isPrologConstant.apply(expr)) {				
+					if (isDeclaredRandomFunctor(expr)) {
+						if (!isValidDeclaredRandomFunctorArity(expr)) {
+							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+expr+"'", termStatement);
+						}
+					}
+					else if (this.isKnownFunctor(expr) || Expressions.isNumber(expr)) {
+						// ignore
+					}
+					else if (!sortConstants.contains(expr)) {
+						newError(Type.TERM_CONSTANT_NOT_DEFINED, "'"+expr+"'", termStatement);
 					}
 				}
 			});
@@ -453,7 +511,7 @@ public class HOGModel {
 		
 		boolean isValidDeclaredRandomFunctorArity(Expression expr) {
 			boolean result = true;
-			RandomVariableDeclaration rvDeclaration = randoms.get(expr.getFunctor());
+			RandomVariableDeclaration rvDeclaration = randoms.get(expr.getFunctorOrSymbol());
 			if (rvDeclaration.getArity().intValue() != expr.numberOfArguments()) {
 				result = false;
 			}
