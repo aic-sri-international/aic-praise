@@ -49,7 +49,7 @@ import javafx.stage.Stage;
 
 @Beta
 public class SGSolverDemoApp extends Application {
-	public static final int DISPLAY_PRECISION          = 2;
+	public static final int DISPLAY_PRECISION          = 4;
 	public static final int DISPLAY_SCIENTIFIC_GREATER = 6;
 	public static final int DISPLAY_SCIENTIFIC_AFTER   = 4; 
 
