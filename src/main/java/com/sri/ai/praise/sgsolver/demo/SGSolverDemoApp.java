@@ -38,6 +38,7 @@
 package com.sri.ai.praise.sgsolver.demo;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.helper.SyntaxTrees;
 
 import de.jensd.fx.glyphs.GlyphsStyle;
 import javafx.application.Application;
@@ -48,6 +49,9 @@ import javafx.stage.Stage;
 
 @Beta
 public class SGSolverDemoApp extends Application {
+	public static final int DISPLAY_PRECISION          = 2;
+	public static final int DISPLAY_SCIENTIFIC_GREATER = 6;
+	public static final int DISPLAY_SCIENTIFIC_AFTER   = 4; 
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -64,6 +68,11 @@ public class SGSolverDemoApp extends Application {
 
 
     public static void main(String[] args) {
+    	// Assign display defaults for numerics
+		SyntaxTrees.setNumericDisplayPrecision(DISPLAY_PRECISION);
+		SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces(DISPLAY_SCIENTIFIC_GREATER);
+		SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(DISPLAY_SCIENTIFIC_AFTER);
+    			
         launch(args);
     }
 }
