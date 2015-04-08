@@ -12,7 +12,7 @@
 	<top>
 		<ToolBar style="-fx-background-color: null;" BorderPane.alignment="CENTER">
 			<items>
-				<Button fx:id="openMenuButton" mnemonicParsing="false" text="Open Menu">
+				<Button fx:id="openMenuButton" mnemonicParsing="false" onAction="#openMenu" text="Open Menu">
 					<tooltip>
 						<Tooltip text="Open Menu" />
 					</tooltip>
@@ -58,6 +58,11 @@
                   <Tooltip text="Redo Last Page Addition/Removal" />
                </tooltip>
             </Button>
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="configureButton" mnemonicParsing="false" onAction="#configureSettings" text="Configure">
+               <tooltip>
+                  <Tooltip text="Configure Settings" />
+               </tooltip></Button>
             <Separator orientation="VERTICAL" />
 			</items>
 		</ToolBar>

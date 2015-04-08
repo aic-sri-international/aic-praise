@@ -67,6 +67,8 @@ public class SGSolverDemoController {
 	public static final KeyCombination GOTO_EDITOR_SHORTCUT = new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN);
 	public static final KeyCombination GOTO_QUERY_SHORTCUT  = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
 	public static final KeyCombination RUN_SHORTCUT         = new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN);
+	public static final KeyCombination NEXT_PAGE_SHORTCUT   = new KeyCodeCombination(KeyCode.PAGE_UP, KeyCombination.SHORTCUT_ANY);
+	public static final KeyCombination PREV_PAGE_SHORTCUT   = new KeyCodeCombination(KeyCode.PAGE_DOWN, KeyCombination.SHORTCUT_ANY);
 	//
 	private Stage mainStage;
 	//
@@ -92,6 +94,8 @@ public class SGSolverDemoController {
 	@FXML private Button nextPageButton;
 	@FXML private Button addPageButton;
 	//
+	@FXML private Button configureButton;
+	//
 	private FileChooser fileChooser;
 	
 	//
@@ -112,6 +116,16 @@ public class SGSolverDemoController {
 					}
 					else if (RUN_SHORTCUT.match(ke)) {
 						perspective.executeQuery();
+					}
+					else if (NEXT_PAGE_SHORTCUT.match(ke)) {
+						if (!nextPageButton.isDisabled()) {
+							nextPageButton.fire();
+						}
+					}
+					else if (PREV_PAGE_SHORTCUT.match(ke)) {
+						if (!previousPageButton.isDisabled()) {
+							previousPageButton.fire();
+						}
 					}
 				});
 			}
@@ -139,6 +153,8 @@ public class SGSolverDemoController {
     	FXUtil.setPaginationButtonIcon(previousPageButton, FontAwesomeIcons.CARET_LEFT);
     	FXUtil.setPaginationButtonIcon(nextPageButton, FontAwesomeIcons.CARET_RIGHT);
     	FXUtil.setPaginationButtonIcon(addPageButton, FontAwesomeIcons.PLUS);
+    	//
+    	FXUtil.setDefaultButtonIcon(configureButton, FontAwesomeIcons.WRENCH);
     	//
     	fileChooser = new FileChooser();
     	fileChooser.getExtensionFilters().addAll(
@@ -196,6 +212,11 @@ public class SGSolverDemoController {
 	}
     
     @FXML
+    private void openMenu(ActionEvent ae) {
+// TODO    	
+    }
+    
+    @FXML
     private void newModel(ActionEvent ae) {
     	checkSaveRequired(true);
     	modelPagination.setPageCount(Pagination.INDETERMINATE);
@@ -245,13 +266,6 @@ public class SGSolverDemoController {
     }    
 	
 	@FXML
- 	private void addModelPage(ActionEvent ae) {
- 		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
-
- 		perspective.addPage(currentPageIdx);
- 	}
-	
-	@FXML
  	private void removeModelPage(ActionEvent ae) {
 		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
 		
@@ -269,6 +283,18 @@ public class SGSolverDemoController {
 		int nextPageIdx = modelPagination.getCurrentPageIndex()+1;
 		modelPagination.setCurrentPageIndex(nextPageIdx);
 	}
+	
+	@FXML
+ 	private void addModelPage(ActionEvent ae) {
+ 		Integer currentPageIdx = modelPagination.getCurrentPageIndex();
+
+ 		perspective.addPage(currentPageIdx);
+ 	}
+	
+    @FXML
+    private void configureSettings(ActionEvent ae) {
+// TODO    	
+    }
 	
     private void callCurrentModelPageEditor(Consumer<ModelPageEditor> caller) {
     	int currentPageIdx = modelPagination.getCurrentPageIndex();
