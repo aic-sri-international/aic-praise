@@ -46,8 +46,8 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.problemtype.Sum;
-import com.sri.ai.grinder.plaindpll.theory.AtomsOnTheoryWithEquality;
-import com.sri.ai.grinder.plaindpll.theory.EqualityTheory;
+import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
+import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.praise.LPIUtil;
@@ -69,22 +69,22 @@ public class SimplifyWithRelationsAtBottom {
 
 	/*
 	 * This class is a little tricky, so here's the explanation.
-	 * We want to perform a DPLL on equality on non-boolean symbols theory splitters only first,
+	 * We want to perform a DPLL on equality on non-boolean symbols constraintTheory splitters only first,
 	 * so that equalities on logical variables are on top
 	 * (the non-boolean requirement ensures propositional boolean atoms are not selected).
 	 * For the inner "unconditional" expressions (that is, without equalities on non-boolean symbols,
-	 * which are the only conditions under the above theory, but it may contain atoms and equalities on atoms),
+	 * which are the only conditions under the above constraintTheory, but it may contain atoms and equalities on atoms),
 	 * we want to perform a second, inner DPLL on all atoms but the ones with the target predicate
 	 * (so that the target predicate is always in the lowest portions of the final expression).
 	 * Finally, a third DPLL simplification is performed on the expression containing the target predicate only.
 	 * 
 	 * This is achieved in the following way.
 	 * First, we extend SGDPLLT for the first DPLL defined above
-	 * by fixing the theory to an equality theory on terms (and not the one that takes atoms as well),
+	 * by fixing the constraintTheory to an equality constraintTheory on terms (and not the one that takes atoms as well),
 	 * and also overriding the normalizeUnconditionalExpression method so that it invokes the
 	 * second DPLL on the "unconditional" equality-free expressions.
 	 * 
-	 * We implement the second DPLL by extending AtomsOnTheoryWithEquality's
+	 * We implement the second DPLL by extending AtomsOnConstraintTheoryWithEquality's
 	 * with an overridden makeSplitterIfPossible that does not consider equalities, or atoms with the target
 	 * predicate as splitters; this way, all other atoms will be placed above it. 
 	 * 
@@ -108,7 +108,7 @@ public class SimplifyWithRelationsAtBottom {
 		private Expression targetPredicate;
 		
 		public DPLLForEqualitiesOnSymbolsAndConstantExpressionWithAtomsButTarget(Expression targetPredicate) {
-			super(new EqualityTheory(new NonRandomSymbolTermTheory()), new Sum());
+			super(new EqualityConstraintTheory(new NonRandomSymbolTermTheory()), new Sum());
 			this.targetPredicate = targetPredicate;
 		}
 		
@@ -138,7 +138,7 @@ public class SimplifyWithRelationsAtBottom {
 		public Expression normalizeUnconditionalExpression(Expression expression, RewritingProcess process) {
 			SGDPLLT thirdDPLL =
 					new SGDPLLT(
-							new AtomsOnTheoryWithEquality(new EqualityTheory(new FunctionalTermTheory())),
+							new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new FunctionalTermTheory())),
 							new Sum());
 			// thirdDPLL accepts equalities and non-target atoms, but in this context it will only ever
 			// receive expressions with target atoms only, without other atoms and without equalities
@@ -150,12 +150,12 @@ public class SimplifyWithRelationsAtBottom {
 		}
 	}
 	
-	private static class AtomsOnlyButForTarget extends AtomsOnTheoryWithEquality {
+	private static class AtomsOnlyButForTarget extends AtomsOnConstraintTheoryWithEquality {
 
 		private Expression targetPredicate;
 		
 		public AtomsOnlyButForTarget(Expression targetPredicate) {
-			super(new EqualityTheory(new FunctionalTermTheory())); // equality theory is irrelevant because makeSplitterIfPossible below filters everything but atoms
+			super(new EqualityConstraintTheory(new FunctionalTermTheory())); // equality constraintTheory is irrelevant because makeSplitterIfPossible below filters everything but atoms
 			this.targetPredicate = targetPredicate;
 		}
 

@@ -56,12 +56,12 @@ import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.plaindpll.api.Solver;
-import com.sri.ai.grinder.plaindpll.api.Theory;
+import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
 import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.core.SGVET;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
-import com.sri.ai.grinder.plaindpll.theory.AtomsOnTheoryWithEquality;
-import com.sri.ai.grinder.plaindpll.theory.EqualityTheory;
+import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
+import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.util.Util;
 
@@ -81,7 +81,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Expression queryVariable;
 	private Collection<Expression> allVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
-	private Theory theory;
+	private ConstraintTheory theory;
 	private SemiRingProblemType problemType;
 	private Solver solver;
 
@@ -130,8 +130,8 @@ public class InferenceForFactorGraphAndEvidence {
 		Predicate<Expression> isPrologConstant = new PrologConstantPredicate();
 		isUniquelyNamedConstantPredicate = e -> isPrologConstant.apply(e) && ! allVariables.contains(e);
 
-		// The theory of atoms plus equality on function (relational) terms.
-		theory = new AtomsOnTheoryWithEquality(new EqualityTheory(new SymbolTermTheory()));
+		// The constraintTheory of atoms plus equality on function (relational) terms.
+		theory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new SymbolTermTheory()));
 		problemType = new SumProduct(); // for marginalization
 		// The solver for the parameters above.
 		if (useFactorization) {
@@ -145,7 +145,7 @@ public class InferenceForFactorGraphAndEvidence {
 		evidenceProbability = null;
 	}
 	
-	public Theory getTheory() {
+	public ConstraintTheory getTheory() {
 		return theory;
 	}
 

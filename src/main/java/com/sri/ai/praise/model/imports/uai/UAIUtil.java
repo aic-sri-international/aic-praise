@@ -54,10 +54,10 @@ import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.plaindpll.api.GroupProblemType;
 import com.sri.ai.grinder.plaindpll.api.Solver;
-import com.sri.ai.grinder.plaindpll.api.Theory;
+import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
 import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.problemtype.Max;
-import com.sri.ai.grinder.plaindpll.theory.EqualityTheory;
+import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
 import com.sri.ai.util.Util;
@@ -114,8 +114,8 @@ public class UAIUtil {
 			}
 		}
 		
-		// The theory of equality on symbols (includes a model counter for formulas in it).
-		Theory      theory      = new EqualityTheory(new SymbolTermTheory());
+		// The constraintTheory of equality on symbols (includes a model counter for formulas in it).
+		ConstraintTheory      theory      = new EqualityConstraintTheory(new SymbolTermTheory());
 		GroupProblemType problemType = new Max(); // the problem type actually does not matter, because we are not going to have any indices.
 		Expression  tableExpr   = Expressions.parse(table.toString());
 		
