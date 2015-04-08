@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
@@ -9,7 +10,17 @@
 	<top>
 		<ToolBar style="-fx-background-color: null;" BorderPane.alignment="CENTER">
 			<items>
-				<Label text="Query" />
+            <Label>
+               <graphic>
+                  <TextFlow textAlignment="CENTER">
+                     <children>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Q" />
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="u" underline="true" />
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="ery" />
+                     </children>
+                  </TextFlow>
+               </graphic>
+            </Label>
 				<ComboBox fx:id="queryComboBox" editable="true" prefWidth="500.0" />
 				<Separator orientation="VERTICAL" />
 				<Button fx:id="executeButton" mnemonicParsing="false" onAction="#executeQuery" text="Execute">

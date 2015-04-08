@@ -447,9 +447,10 @@ public class HOGModel {
 				}
 				else if (isPrologConstant.apply(expr)) {				
 					if (isDeclaredRandomFunctor(expr)) {
-						if (!isValidDeclaredRandomFunctorArity(expr)) {
-							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+expr+"'", termStatement);
-						}
+// TODO - this won't work when visiting the functor of a random variable with arity > 0.						
+//						if (!isValidDeclaredRandomFunctorArity(expr)) {
+//							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+expr+"'", termStatement);
+//						}
 					}
 					else if (this.isKnownFunctor(expr) || Expressions.isNumber(expr)) {
 						// ignore

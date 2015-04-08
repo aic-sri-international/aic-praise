@@ -65,7 +65,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 @Beta
 public class SGSolverDemoController {
 	public static final KeyCombination GOTO_EDITOR_SHORTCUT = new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN);
-	public static final KeyCombination GOTO_QUERY_SHORTCUT  = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+	public static final KeyCombination GOTO_QUERY_SHORTCUT  = new KeyCodeCombination(KeyCode.U, KeyCombination.SHORTCUT_DOWN);
 	public static final KeyCombination RUN_SHORTCUT         = new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN);
 	public static final KeyCombination NEXT_PAGE_SHORTCUT   = new KeyCodeCombination(KeyCode.PAGE_UP, KeyCombination.SHORTCUT_ANY);
 	public static final KeyCombination PREV_PAGE_SHORTCUT   = new KeyCodeCombination(KeyCode.PAGE_DOWN, KeyCombination.SHORTCUT_ANY);

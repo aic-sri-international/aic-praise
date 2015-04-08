@@ -107,7 +107,7 @@ public class QueryController {
 	}
 	
 	public String getCurrentQuery() {
-		return queryComboBox.getValue();
+		return queryComboBox.getEditor().getText();
 	}
 	
 	public List<String> getCurrentQueries() {
@@ -117,11 +117,13 @@ public class QueryController {
 	
 	public void gotoQueryEditor() {
 		queryComboBox.requestFocus();
-		queryComboBox.show();
+		queryComboBox.getEditor().selectAll();
 	}
 	
-	public void executeQuery() {
-		executeButton.fire();
+	public void executeQuery() {		
+		queryComboBox.getEditor().commitValue();
+		queryComboBox.setValue(queryComboBox.getEditor().getText());	
+		Platform.runLater(() -> executeButton.fire());
 	}
 	
 	@FXML
@@ -149,6 +151,12 @@ public class QueryController {
             	// Run later so that we can ensure the value is set on the combo box before triggering the query.
             	Platform.runLater(() -> {
             		executeButton.fire();
+            	});
+            }
+            else if (keyEvent.getCode() == KeyCode.DOWN && !queryComboBox.isShowing()) {
+            	//keyEvent.consume(); // NOTE: comment out as we want the default behavior of going to the end of the text to still work
+            	Platform.runLater(() -> {
+            		queryComboBox.show();
             	});
             }
         });
@@ -238,7 +246,7 @@ public class QueryController {
 		}
 		else {
 			executeQueryService.setModel(modelPageEditor.getCurrentPageContents());
-			executeQueryService.setQuery(queryComboBox.getValue());
+			executeQueryService.setQuery(getCurrentQuery());
 			executeQueryService.restart();
 		}
 	}
