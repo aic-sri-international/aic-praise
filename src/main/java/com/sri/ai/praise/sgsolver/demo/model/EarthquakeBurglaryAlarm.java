@@ -44,6 +44,6 @@ public class EarthquakeBurglaryAlarm extends ExamplePages {
 
 	public EarthquakeBurglaryAlarm() {
 		super("Earthquake/Burglary/Alarm", 
-			   getExamplePagesFromResource("earthquakeBurglaryAlarm.sgmodel"));
+			   getExamplePagesFromResource("earthquakeBurglaryAlarm.praise"));
 	}
 }

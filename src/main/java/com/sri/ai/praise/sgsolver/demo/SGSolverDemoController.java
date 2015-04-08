@@ -158,7 +158,7 @@ public class SGSolverDemoController {
     	//
     	fileChooser = new FileChooser();
     	fileChooser.getExtensionFilters().addAll(
-    	         		new FileChooser.ExtensionFilter("Model Files", "*.sgmodel"));
+    	         		new FileChooser.ExtensionFilter("Model Files", "*.praise"));
     	//
     	//
     	modelPagination.setPageFactory(this::createModelPage);
