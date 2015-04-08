@@ -42,6 +42,9 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.controlsfx.control.PopOver;
+import org.controlsfx.control.PopOver.ArrowLocation;
+
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
@@ -97,6 +100,8 @@ public class SGSolverDemoController {
 	@FXML private Button configureButton;
 	//
 	private FileChooser fileChooser;
+	private PopOver openMenuPopOver          = new PopOver();
+	private PopOver configureSettingsPopOver = new PopOver();
 	
 	//
 	private Perspective perspective;
@@ -159,6 +164,10 @@ public class SGSolverDemoController {
     	fileChooser = new FileChooser();
     	fileChooser.getExtensionFilters().addAll(
     	         		new FileChooser.ExtensionFilter("Model Files", "*.praise"));
+    	
+    	openMenuPopOver.setArrowLocation(ArrowLocation.RIGHT_TOP);
+    	openMenuPopOver.setDetachedTitle("Menu");
+    	configureSettingsPopOver.setDetachedTitle("Configure Settings");
     	//
     	//
     	modelPagination.setPageFactory(this::createModelPage);
@@ -213,7 +222,12 @@ public class SGSolverDemoController {
     
     @FXML
     private void openMenu(ActionEvent ae) {
-// TODO    	
+    	if (openMenuPopOver.isShowing()) {
+    		openMenuPopOver.hide();
+    	}
+    	else {
+    		openMenuPopOver.show(openMenuButton);
+    	}
     }
     
     @FXML
@@ -293,7 +307,12 @@ public class SGSolverDemoController {
 	
     @FXML
     private void configureSettings(ActionEvent ae) {
-// TODO    	
+    	if (configureSettingsPopOver.isShowing()) {
+    		configureSettingsPopOver.hide();
+    	}
+    	else {
+    		configureSettingsPopOver.show(configureButton);
+    	}
     }
 	
     private void callCurrentModelPageEditor(Consumer<ModelPageEditor> caller) {
