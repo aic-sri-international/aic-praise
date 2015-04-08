@@ -35,31 +35,52 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo;
+package com.sri.ai.praise.sgsolver.demo.perspective;
 
+import java.util.Arrays;
 import java.util.List;
 
-import org.fxmisc.undo.UndoManager;
-
-import javafx.scene.layout.Pane;
+import javafx.fxml.FXMLLoader;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.demo.FXUtil;
+import com.sri.ai.praise.sgsolver.demo.editor.ChurchPageEditorController;
+import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
+import com.sri.ai.praise.sgsolver.demo.model.ChurchExample1;
+import com.sri.ai.praise.sgsolver.demo.model.ChurchExample2;
+import com.sri.ai.praise.sgsolver.demo.model.ChurchExample3;
+import com.sri.ai.praise.sgsolver.demo.model.ChurchExample4;
+import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 @Beta
-public interface ModelPageEditor {
-	Pane getRootPane();
-	void setPage(String modelPage, List<String> defaultQueries);
+public class ChurchPerspective extends AbstractPerspective {
 	
-	String getCurrentPageContents();
-	List<String> getCurrentQueries();
+	//
+	// START-Perspective
+	@Override
+	public List<ExamplePages> getExamples() {
+		return Arrays.asList(
+				new ChurchExample1(), 
+				new ChurchExample2(), 
+				new ChurchExample3(), 
+				new ChurchExample4());
+	}
+	// END-Perspective
+	//
 	
-	UndoManager getUndoManager();
-	void undo();
-	void redo();
+	protected ModelPageEditor create(String model, List<String> defaultQueries) {
+		ModelPageEditor result = null;
+		FXMLLoader      loader = ChurchPageEditorController.newLoader();
+		try {
+			loader.load();
+			result = loader.getController();
+			result.setPage(model, defaultQueries);
+		}
+		catch (Throwable t) {
+			FXUtil.exception(t);
+		}
+		
+		return result;
+	}
 	
-	void highlight(int startIdx, int endIdx);
-	
-	void gotoModelEditor();
-	void gotoQueryEditor();
-	void executeQuery();
 }

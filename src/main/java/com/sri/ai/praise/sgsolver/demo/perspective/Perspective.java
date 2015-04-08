@@ -35,42 +35,61 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo;
+package com.sri.ai.praise.sgsolver.demo.perspective;
 
-import java.util.Arrays;
+import java.io.File;
 import java.util.List;
+import java.util.function.Supplier;
 
-import javafx.fxml.FXMLLoader;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyMapProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.collections.ObservableMap;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.demo.model.EarthquakeBurglaryAlarm;
+import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 @Beta
-public class HOGMPerspective extends AbstractPerspective {
+public interface Perspective {	
+	void setCurrentModelPageIndexProperty(IntegerProperty currentModelPageIndexProperty);
 	
-	//
-	// START-Perspective
-	@Override
-	public List<ExamplePages> getExamples() {
-		return Arrays.asList(new EarthquakeBurglaryAlarm());
-	}
-	// END-Perspective
-	//
+	List<ExamplePages> getExamples();
 	
-	protected ModelPageEditor create(String model, List<String> defaultQueries) {
-		ModelPageEditor result = null;
-		FXMLLoader      loader = HOGMPageEditorController.newLoader();
-		try {
-			loader.load();
-			result = loader.getController();
-			result.setPage(model, defaultQueries);
-		}
-		catch (Throwable t) {
-			FXUtil.exception(t);
-		}
-		
-		return result;
-	}
+	boolean isCanUndoModelPageEdit();
+	ReadOnlyBooleanProperty canUndoModelPageEditProperty(); 
+	boolean isCanRedoModelPageEdit();
+	ReadOnlyBooleanProperty canRedoModelPageEditProperty();
 	
+	boolean isCanUndoPageChange();
+	ReadOnlyBooleanProperty canUndoPageChange(); 
+	boolean isCanRedoPageChange();
+	ReadOnlyBooleanProperty canRedoPageChange();
+	
+	void undoPageChange();
+	void redoPageChange();
+
+	ObservableMap<Integer, Supplier<ModelPageEditor>> getModelPageEditors();
+	ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelPageEditorsProperty();	
+	
+	void newModel();
+	void newModel(File modelFile);
+	void newModel(ExamplePages examples);
+	
+	void addPage(Integer atPageIndex);
+	void removePage(Integer pageIndex);
+	
+	File getModelFile();
+	ReadOnlyObjectProperty<File> modelFileProperty();
+	
+	boolean isSaveRequired();
+	ReadOnlyBooleanProperty saveRequiredProperty();
+	
+	void save();
+	void saveAs(File file);
+	
+	void gotoModelEditor();
+	void gotoQueryEditor();
+	void executeQuery();
 }

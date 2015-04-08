@@ -61,7 +61,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
+import com.sri.ai.praise.sgsolver.demo.perspective.ChurchPerspective;
+import com.sri.ai.praise.sgsolver.demo.perspective.HOGMPerspective;
+import com.sri.ai.praise.sgsolver.demo.perspective.Perspective;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
@@ -166,7 +170,10 @@ public class SGSolverDemoController {
     	         		new FileChooser.ExtensionFilter("Model Files", "*.praise"));
     	
     	openMenuPopOver.setArrowLocation(ArrowLocation.RIGHT_TOP);
+    	openMenuPopOver.setAutoHide(true);
     	openMenuPopOver.setDetachedTitle("Menu");
+    	
+    	configureSettingsPopOver.setAutoHide(true);
     	configureSettingsPopOver.setDetachedTitle("Configure Settings");
     	//
     	//
@@ -181,6 +188,7 @@ public class SGSolverDemoController {
 		examplesComboBox.getSelectionModel().selectedIndexProperty().addListener(this::exampleSelectionChaned);
 		
 		setPerspective(new HOGMPerspective());
+		//setPerspective(new ChurchPerspective());
     }
     
     private void setPerspective(Perspective perspective) {

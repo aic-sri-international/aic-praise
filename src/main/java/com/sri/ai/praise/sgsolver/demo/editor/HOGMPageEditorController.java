@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo;
+package com.sri.ai.praise.sgsolver.demo.editor;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +48,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
+import com.sri.ai.praise.sgsolver.demo.FXUtil;
+import com.sri.ai.praise.sgsolver.demo.query.QueryController;
 
 @Beta
 public class HOGMPageEditorController implements ModelPageEditor {

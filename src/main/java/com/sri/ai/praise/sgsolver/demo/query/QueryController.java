@@ -35,14 +35,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo;
+package com.sri.ai.praise.sgsolver.demo.query;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
+import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.service.ExecuteHOGMQueryService;
 import com.sri.ai.praise.sgsolver.demo.service.QueryError;
 
@@ -245,6 +247,8 @@ public class QueryController {
 			executeQueryService.cancel();
 		}
 		else {
+// TODO - need to get query model from the modelPageEditor in a different way, so that we can get any errors if appropriate (i.e. Church translation when in that perspective).
+			
 			executeQueryService.setModel(modelPageEditor.getCurrentPageContents());
 			executeQueryService.setQuery(getCurrentQuery());
 			executeQueryService.restart();

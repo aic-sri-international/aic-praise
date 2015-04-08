@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo;
+package com.sri.ai.praise.sgsolver.demo.perspective;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +55,8 @@ import org.reactfx.EventSource;
 
 import com.google.common.annotations.Beta;
 import com.google.common.io.Files;
+import com.sri.ai.praise.sgsolver.demo.FXUtil;
+import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePage;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.util.base.Pair;

@@ -35,58 +35,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo;
+package com.sri.ai.praise.sgsolver.demo.editor;
 
-import java.io.File;
 import java.util.List;
-import java.util.function.Supplier;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyMapProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.collections.ObservableMap;
+import org.fxmisc.undo.UndoManager;
+
+import javafx.scene.layout.Pane;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 @Beta
-public interface Perspective {	
-	void setCurrentModelPageIndexProperty(IntegerProperty currentModelPageIndexProperty);
+public interface ModelPageEditor {
+	Pane getRootPane();
+	void setPage(String modelPage, List<String> defaultQueries);
 	
-	List<ExamplePages> getExamples();
+	String getCurrentPageContents();
+	List<String> getCurrentQueries();
 	
-	boolean isCanUndoModelPageEdit();
-	ReadOnlyBooleanProperty canUndoModelPageEditProperty(); 
-	boolean isCanRedoModelPageEdit();
-	ReadOnlyBooleanProperty canRedoModelPageEditProperty();
+	UndoManager getUndoManager();
+	void undo();
+	void redo();
 	
-	boolean isCanUndoPageChange();
-	ReadOnlyBooleanProperty canUndoPageChange(); 
-	boolean isCanRedoPageChange();
-	ReadOnlyBooleanProperty canRedoPageChange();
-	
-	void undoPageChange();
-	void redoPageChange();
-
-	ObservableMap<Integer, Supplier<ModelPageEditor>> getModelPageEditors();
-	ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelPageEditorsProperty();	
-	
-	void newModel();
-	void newModel(File modelFile);
-	void newModel(ExamplePages examples);
-	
-	void addPage(Integer atPageIndex);
-	void removePage(Integer pageIndex);
-	
-	File getModelFile();
-	ReadOnlyObjectProperty<File> modelFileProperty();
-	
-	boolean isSaveRequired();
-	ReadOnlyBooleanProperty saveRequiredProperty();
-	
-	void save();
-	void saveAs(File file);
+	void highlight(int startIdx, int endIdx);
 	
 	void gotoModelEditor();
 	void gotoQueryEditor();
