@@ -35,14 +35,38 @@
 	-fx-text-fill: rgb(61,114,144);
 }
 
-.codeComment {
+.hogmCodeComment {
 	-fx-fill: darkgreen;
 }
 
-.codeKeyword {
+.hogmCodeKeyword {
 	-fx-fill: blue;
 }
 
-.codeOther {
+.hogmCodeOther {
+	-fx-fill: black;
+}
+
+.churchCodeComment {
+	-fx-fill: darkred;
+}
+
+.churchCodeKeyword {
+	-fx-fill: slateblue;
+}
+
+.churchCodeNumberLiteral {
+	-fx-fill: darkgreen;
+}
+
+.churchCodeStringLiteral {
+	-fx-fill: firebrick;
+}
+
+.churchCodeParenthesis {
+	-fx-fill: lightgray;
+}
+
+.churchCodeOther {
 	-fx-fill: black;
 }

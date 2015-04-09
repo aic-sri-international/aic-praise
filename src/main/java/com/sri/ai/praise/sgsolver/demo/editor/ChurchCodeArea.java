@@ -132,13 +132,19 @@ public class ChurchCodeArea extends AnchorPane {
 			}			
 			String styleClass;
 			if (t.getType() == ChurchLexer.COMMENT || t.getType() == ChurchLexer.LINE_COMMENT) {
-				styleClass = "codeComment";
-			}			
+				styleClass = "churchCodeComment";
+			}
+			else if (t.getType() == ChurchLexer.NUM_10) {
+				styleClass = "churchCodeNumberLiteral";
+			}
+			else if (t.getType() == ChurchLexer.STRING) {
+				styleClass = "churchCodeStringLiteral";
+			}
 			else if (ChurchTerminalSymbols.isTerminalSymbol(t.getText())) {
-				styleClass = "codeKeyword";
+				styleClass = "churchCodeKeyword";
 			}
 			else {
-				styleClass = "codeOther";
+				styleClass = "churchCodeOther";
 			}
 			int spacing = t.getStartIndex() - lastTokenEnd;
 			if (spacing > 0) {			

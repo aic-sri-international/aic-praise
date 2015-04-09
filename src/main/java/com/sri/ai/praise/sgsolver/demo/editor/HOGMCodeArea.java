@@ -132,13 +132,16 @@ public class HOGMCodeArea extends AnchorPane {
 			}			
 			String styleClass;
 			if (t.getType() == HOGMLexer.COMMENT || t.getType() == HOGMLexer.LINE_COMMENT) {
-				styleClass = "codeComment";
+				styleClass = "hogmCodeComment";
+			}
+			else if (t.getText().equals("(") || t.getText().equals(")")) {
+				styleClass = "churchCodeParenthesis";
 			}
 			else if (HOGMTerminalSymbols.isTerminalSymbol(t.getText())) {
-				styleClass = "codeKeyword";
+				styleClass = "hogmCodeKeyword";
 			}
 			else {
-				styleClass = "codeOther";
+				styleClass = "hogmCodeOther";
 			}
 			int spacing = t.getStartIndex() - lastTokenEnd;
 			if (spacing > 0) {			
