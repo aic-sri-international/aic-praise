@@ -49,14 +49,22 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.Separator;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -106,6 +114,10 @@ public class SGSolverDemoController {
 	private FileChooser fileChooser;
 	private PopOver openMenuPopOver          = new PopOver();
 	private PopOver configureSettingsPopOver = new PopOver();
+	//
+	private ToggleGroup perspectiveToggleGroup       = new ToggleGroup();
+	private RadioButton hogmPerspectiveRadioButton   = new RadioButton("HOGM");
+	private RadioButton churchPerspectiveRadioButton = new RadioButton("Church");
 	
 	//
 	private Perspective perspective;
@@ -172,6 +184,7 @@ public class SGSolverDemoController {
     	openMenuPopOver.setArrowLocation(ArrowLocation.RIGHT_TOP);
     	openMenuPopOver.setAutoHide(true);
     	openMenuPopOver.setDetachedTitle("Menu");
+    	openMenuPopOver.setContentNode(openMenuContent());
     	
     	configureSettingsPopOver.setAutoHide(true);
     	configureSettingsPopOver.setDetachedTitle("Configure Settings");
@@ -188,10 +201,11 @@ public class SGSolverDemoController {
 		examplesComboBox.getSelectionModel().selectedIndexProperty().addListener(this::exampleSelectionChaned);
 		
 		setPerspective(new HOGMPerspective());
-		//setPerspective(new ChurchPerspective());
     }
     
     private void setPerspective(Perspective perspective) {
+    	checkSaveRequired(true);
+    	
     	if (this.perspective != null) {
     		this.perspective.modelPageEditorsProperty().removeListener(this::modelPagesChanged);
     		this.perspective.canUndoModelPageEditProperty().removeListener(this::undoModelEditChanged);
@@ -262,9 +276,10 @@ public class SGSolverDemoController {
     
     @FXML
     private void saveModel(ActionEvent ae) {
-    	checkSaveRequired(false);
-    	// After saving indicate not an example
-    	examplesComboBox.getSelectionModel().select(-1);
+    	if (checkSaveRequired(false)) {
+	    	// After saving indicate not an example
+	    	examplesComboBox.getSelectionModel().select(-1);
+    	}
     }
     
     @FXML
@@ -322,6 +337,24 @@ public class SGSolverDemoController {
     		configureSettingsPopOver.show(configureButton);
     	}
     }
+    
+    private void saveModelAs(ActionEvent ae) {
+    	File saveAsFile = fileChooser.showSaveDialog(mainStage);
+		if (saveAsFile != null) {
+			perspective.saveAs(saveAsFile);
+			// After saving indicate not an example
+	    	examplesComboBox.getSelectionModel().select(-1);
+		}
+    }
+    
+    private void togglePerspective(ActionEvent ae) { 	
+    	if (perspectiveToggleGroup.getSelectedToggle() == hogmPerspectiveRadioButton) {
+    		setPerspective(new HOGMPerspective());
+    	}
+    	else if (perspectiveToggleGroup.getSelectedToggle() == churchPerspectiveRadioButton) {
+    		setPerspective(new ChurchPerspective());
+    	}
+    }
 	
     private void callCurrentModelPageEditor(Consumer<ModelPageEditor> caller) {
     	int currentPageIdx = modelPagination.getCurrentPageIndex();
@@ -331,20 +364,24 @@ public class SGSolverDemoController {
     	}	
     }
 	
-    private void checkSaveRequired(boolean confirmationRequired) {
-    	if (perspective.isSaveRequired()) {
+    private boolean checkSaveRequired(boolean confirmationRequired) {
+    	boolean result = false; // Not saved
+    	if (perspective != null && perspective.isSaveRequired()) {
     		if (perspective.getModelFile() == null) {
     			File saveAsFile = fileChooser.showSaveDialog(mainStage);
     			if (saveAsFile != null) {
     				perspective.saveAs(saveAsFile);
+    				result = true;
     			}
     		}
     		else {
     			if (!confirmationRequired || FXUtil.confirmation(mainStage, "Save Changes?")) {
     				perspective.save();
+    				result = true;
     			}
     		}
     	}
+    	return result;
     }
     
  	private Node createModelPage(Integer pgIndex) {	
@@ -415,5 +452,45 @@ public class SGSolverDemoController {
 			title += " ["+newValue.getAbsolutePath()+"]";
 		}
 		this.mainStage.setTitle(title);
+	}
+	
+	private Node openMenuContent() {
+		VBox openMenu = new VBox(2);
+		openMenu.setPadding(new Insets(3,3,3,3));
+		
+		Button saveAsButton = new Button("Save As...");
+		saveAsButton.setOnAction(this::saveModelAs);
+    	FXUtil.setButtonStackedIcons(saveAsButton, FontAwesomeIcons.SAVE, FontAwesomeIcons.PENCIL);
+    	HBox saveAsHBox = newButtonHBox();
+    	saveAsHBox.getChildren().addAll(saveAsButton, new Label("Save As..."));
+		
+		Separator hSep = new Separator(Orientation.HORIZONTAL);
+		hSep.setPrefWidth(120);
+	
+		Label perspectiveLabel = new Label("Perspective");
+		
+		hogmPerspectiveRadioButton.setSelected(true); // HOGM perspective by default
+		hogmPerspectiveRadioButton.setToggleGroup(perspectiveToggleGroup);
+		churchPerspectiveRadioButton.setToggleGroup(perspectiveToggleGroup);
+		hogmPerspectiveRadioButton.setOnAction(this::togglePerspective);
+		churchPerspectiveRadioButton.setOnAction(this::togglePerspective);
+		
+		openMenu.getChildren().addAll(
+				saveAsHBox,
+				hSep,
+				perspectiveLabel,
+				hogmPerspectiveRadioButton,
+				churchPerspectiveRadioButton,
+				new Separator(Orientation.HORIZONTAL)
+		);
+		
+		return openMenu;
+	}
+	
+	private HBox newButtonHBox() {
+		HBox hBox = new HBox(2);
+		hBox.setAlignment(Pos.CENTER_LEFT);
+		
+		return hBox;
 	}
 }
