@@ -38,8 +38,10 @@
 package com.sri.ai.praise.sgsolver.demo.editor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.fxmisc.undo.UndoManager;
 
 import javafx.fxml.FXML;
@@ -48,8 +50,14 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.imports.church.TranslateChurchToModel;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.query.QueryController;
+import com.sri.ai.praise.sgsolver.demo.service.QueryError;
+import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.base.Triple;
 
 @Beta
 public class ChurchPageEditorController implements ModelPageEditor {
@@ -61,6 +69,8 @@ public class ChurchPageEditorController implements ModelPageEditor {
 	private ChurchCodeArea  churchCodeArea = new ChurchCodeArea();
 	private HOGMCodeArea    hogmCodeArea   = new HOGMCodeArea();
 	private QueryController queryController;
+	// 
+	private TranslateChurchToModel translator = new TranslateChurchToModel();
 	
 	public static FXMLLoader newLoader( ) {
 		FXMLLoader result = new FXMLLoader(ChurchPageEditorController.class.getResource("churchpageeditor.fxml"));
@@ -77,7 +87,8 @@ public class ChurchPageEditorController implements ModelPageEditor {
 	@Override
 	public void setPage(String modelPage, List<String> defaultQueries) {
 		churchCodeArea.setText(modelPage);
-		queryController.addDefaultQueries(defaultQueries);		
+		queryController.addDefaultQueries(defaultQueries);	
+		generateModel();
 	}
 	
 	@Override
@@ -88,6 +99,13 @@ public class ChurchPageEditorController implements ModelPageEditor {
 	@Override
 	public List<String> getCurrentQueries() {
 		return queryController.getCurrentQueries();
+	}
+	
+	@Override
+	public Pair<List<QueryError>, String> validateAndGetModel() {
+		List<QueryError> errors = generateModel();
+		Pair<List<QueryError>, String> result = new Pair<>(errors, hogmCodeArea.getText());
+		return result;
 	}
 	
 	@Override
@@ -142,5 +160,22 @@ public class ChurchPageEditorController implements ModelPageEditor {
 		queryController.setModelPageEditor(this);
 		FXUtil.anchor(queryPane);
 		queryOutputPane.getChildren().add(queryPane);
+	}
+	
+	private List<QueryError> generateModel() {
+		List<QueryError> problems = new ArrayList<>();
+		try {
+			String churchProgram = churchCodeArea.getText();
+			Triple<String, Model, List<Expression>> translation = translator.translate("Church Program", ""
+				+ churchProgram
+				);
+			String hogmModel = translation.first;
+			hogmCodeArea.setText(hogmModel);
+		} catch (Throwable t) {
+			String problem = "/* ERROR in Translation:\n"+ExceptionUtils.getStackTrace(t)+"\n*/";
+			problems.add(new QueryError(t));
+			hogmCodeArea.setText(problem);
+		}
+		return problems;
 	}
 }

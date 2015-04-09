@@ -66,8 +66,11 @@ public class HOGMCodeArea extends AnchorPane {
 	}
 	
 	public void setText(String text) {
-		codeArea.replaceText(text);
-		codeArea.getUndoManager().forgetHistory();
+		if (getText() != null && !getText().equals(text)) {
+			codeArea.replaceText(text);
+			codeArea.selectRange(0, 0);
+			codeArea.getUndoManager().forgetHistory();
+		}
 	}
 	
 	public String getText() {

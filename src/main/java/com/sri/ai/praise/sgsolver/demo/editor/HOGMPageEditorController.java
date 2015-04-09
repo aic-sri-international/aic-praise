@@ -38,6 +38,7 @@
 package com.sri.ai.praise.sgsolver.demo.editor;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import org.fxmisc.undo.UndoManager;
@@ -50,6 +51,8 @@ import javafx.scene.layout.Pane;
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.query.QueryController;
+import com.sri.ai.praise.sgsolver.demo.service.QueryError;
+import com.sri.ai.util.base.Pair;
 
 @Beta
 public class HOGMPageEditorController implements ModelPageEditor {
@@ -86,6 +89,13 @@ public class HOGMPageEditorController implements ModelPageEditor {
 	@Override
 	public List<String> getCurrentQueries() {
 		return queryController.getCurrentQueries();
+	}
+	
+	@Override
+	public Pair<List<QueryError>, String> validateAndGetModel() {
+		//Nothing to validate up front with the default model
+		Pair<List<QueryError>, String> result = new Pair<>(Collections.emptyList(), getCurrentPageContents());
+		return result;
 	}
 	
 	@Override

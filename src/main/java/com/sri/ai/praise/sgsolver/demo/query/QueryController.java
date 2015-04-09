@@ -46,7 +46,9 @@ import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.service.ExecuteHOGMQueryService;
+import com.sri.ai.praise.sgsolver.demo.service.ParsedModel;
 import com.sri.ai.praise.sgsolver.demo.service.QueryError;
+import com.sri.ai.util.base.Pair;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
@@ -178,60 +180,12 @@ public class QueryController {
     	
     	executeQueryService.valueProperty().addListener((observable, oldResult, newResult) -> {
 			if (newResult != null) { 
-				final TitledPane resultPane;
 				if (newResult.isErrors()) {
-					String title = "Query '"+newResult.getQuery()+"' encountered "+newResult.getErrors().size()+" error(s) when attempting to compute answer ("+duration("took ", newResult.getMillisecondsToCopmpute())+")";
-					ListView<QueryError> errors = new ListView<>(FXCollections.observableList(newResult.getErrors()));
-					errors.setFixedCellSize(24);
-					errors.setPrefHeight(24*5);
-					errors.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-					errors.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
-						if (newValue.intValue() >= 0) {
-							QueryError qError = errors.getItems().get(newValue.intValue());
-							if (qError.getContext() == QueryError.Context.MODEL) {
-								modelPageEditor.highlight(qError.getStartContextIndex(), qError.getEndContextIndex());
-							}
-						}
-					});
-					resultPane = new TitledPane(title, errors);
-					FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.TIMES);				
+					displayQueryErrors(newResult.getQuery(), newResult.getErrors(), newResult.getMillisecondsToCopmpute());			
 				}
 				else {
-					String title = "Query '"+newResult.getQuery()+duration("' took ", newResult.getMillisecondsToCopmpute())+" to compute answer '"+newResult.getResult()+"'";
-					HOGMCodeArea resultCodeArea = new HOGMCodeArea();
-					resultCodeArea.setText(newResult.getResult());
-					resultCodeArea.setEditable(false);
-					
-					HOGMCodeArea parsedModelArea = new HOGMCodeArea();
-					StringJoiner sj = new StringJoiner("\n");
-					sj.add("// SORT DECLARATIONS:");
-					newResult.getParsedModel().getSortDeclarations().forEach(sd -> {
-						sj.add(sd.getSortDeclaration().toString()+";");
-					});
-					sj.add("// RANDOM VARIABLE DECLARATIONS:");
-					newResult.getParsedModel().getRandomVariableDeclarations().forEach(rd -> {
-						sj.add(rd.getRandomVariableDeclaration().toString()+";");
-					});
-					sj.add("// CONDITIONED POTENTIALS:");
-					newResult.getParsedModel().getConditionedPotentials().forEach(cp -> {
-						sj.add(cp.toString()+";");
-					});
-					parsedModelArea.setText(sj.toString());
-					parsedModelArea.setEditable(false);
-					
-					
-					TabPane resultTabs = new TabPane();
-					resultTabs.getTabs().add(new Tab("Answer", resultCodeArea));
-					resultTabs.getTabs().add(new Tab("Parsed As", parsedModelArea));
-					
-					resultPane = new TitledPane(title, resultTabs);
-					FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.CHECK);				
+					displayQueryAnswer(newResult.getQuery(), newResult.getResult(), newResult.getParsedModel(), newResult.getMillisecondsToCopmpute());	
 				}
-				resultPane.setPrefWidth(outputScrollPane.getViewportBounds().getWidth());
-				outputScrollPane.viewportBoundsProperty().addListener((observer, oldValue, newValue) -> resultPane.setPrefWidth(newValue.getWidth()));
-				outputAccordion.getPanes().add(0, resultPane);
-				resultPane.setExpanded(true);
-				outputScrollPane.setVvalue(0);
 			}
     	});
     	
@@ -247,17 +201,84 @@ public class QueryController {
 			executeQueryService.cancel();
 		}
 		else {
-// TODO - need to get query model from the modelPageEditor in a different way, so that we can get any errors if appropriate (i.e. Church translation when in that perspective).
+			Pair<List<QueryError>, String> initialModelValidation = modelPageEditor.validateAndGetModel();
 			
-			executeQueryService.setModel(modelPageEditor.getCurrentPageContents());
-			executeQueryService.setQuery(getCurrentQuery());
-			executeQueryService.restart();
+			if (initialModelValidation.first.size() > 0) {
+				displayQueryErrors(getCurrentQuery(), initialModelValidation.first, 0);
+			}
+			else {
+				executeQueryService.setModel(initialModelValidation.second);
+				executeQueryService.setQuery(getCurrentQuery());
+				executeQueryService.restart();
+			}
 		}
 	}
 	
 	@FXML
     private void clearOutput(ActionEvent event) {
 		outputAccordion.getPanes().clear();
+	}
+	
+	private void displayQueryErrors(String query, List<QueryError> queryErrors, long millisecondsToCompute) {
+		String title = "Query '"+query+"' encountered "+queryErrors.size()+" error(s) when attempting to compute answer ("+duration("took ", millisecondsToCompute)+")";
+		ListView<QueryError> errors = new ListView<>(FXCollections.observableList(queryErrors));
+		errors.setFixedCellSize(24);
+		errors.setPrefHeight(24*5);
+		errors.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+		errors.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
+			if (newValue.intValue() >= 0) {
+				QueryError qError = errors.getItems().get(newValue.intValue());
+				if (qError.getContext() == QueryError.Context.MODEL) {
+					modelPageEditor.highlight(qError.getStartContextIndex(), qError.getEndContextIndex());
+				}
+			}
+		});
+		TitledPane resultPane = new TitledPane(title, errors);
+		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.TIMES);
+		
+		showResultPane(resultPane);
+	}
+	
+	private void displayQueryAnswer(String query, String result, ParsedModel parseModel, long millisecondsToCompute) {
+		String title = "Query '"+query+duration("' took ", millisecondsToCompute)+" to compute answer '"+result+"'";
+		HOGMCodeArea resultCodeArea = new HOGMCodeArea();
+		resultCodeArea.setText(result);
+		resultCodeArea.setEditable(false);
+		
+		HOGMCodeArea parsedModelArea = new HOGMCodeArea();
+		StringJoiner sj = new StringJoiner("\n");
+		sj.add("// SORT DECLARATIONS:");
+		parseModel.getSortDeclarations().forEach(sd -> {
+			sj.add(sd.getSortDeclaration().toString()+";");
+		});
+		sj.add("// RANDOM VARIABLE DECLARATIONS:");
+		parseModel.getRandomVariableDeclarations().forEach(rd -> {
+			sj.add(rd.getRandomVariableDeclaration().toString()+";");
+		});
+		sj.add("// CONDITIONED POTENTIALS:");
+		parseModel.getConditionedPotentials().forEach(cp -> {
+			sj.add(cp.toString()+";");
+		});
+		parsedModelArea.setText(sj.toString());
+		parsedModelArea.setEditable(false);
+		
+		
+		TabPane resultTabs = new TabPane();
+		resultTabs.getTabs().add(new Tab("Answer", resultCodeArea));
+		resultTabs.getTabs().add(new Tab("Parsed As", parsedModelArea));
+		
+		TitledPane resultPane = new TitledPane(title, resultTabs);
+		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.CHECK);
+		
+		showResultPane(resultPane);
+	}
+	
+	private void showResultPane(TitledPane resultPane) {
+		resultPane.setPrefWidth(outputScrollPane.getViewportBounds().getWidth());
+		outputScrollPane.viewportBoundsProperty().addListener((observer, oldValue, newValue) -> resultPane.setPrefWidth(newValue.getWidth()));
+		outputAccordion.getPanes().add(0, resultPane);
+		resultPane.setExpanded(true);
+		outputScrollPane.setVvalue(0);
 	}
 	
 	private String duration(String prefix, long duration) {
