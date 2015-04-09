@@ -104,9 +104,18 @@ public class UAIUtil {
 					if (i > 0) {
 						table.append(" and ");
 					}
-					table.append(genericVariableName(i));
-					table.append(" = ");
-					table.append(genericConstantValueForVariable(values.get(i), i, functionTable.cardinality(i)));
+					String value = genericConstantValueForVariable(values.get(i), i, functionTable.cardinality(i));
+					if (value.equals("true")) {
+						table.append(genericVariableName(i));
+					}
+					else if (value.equals("false")) {
+						table.append("not "+genericVariableName(i));
+					}
+					else {
+						table.append(genericVariableName(i));
+						table.append(" = ");
+						table.append(value);
+					}
 				}
 				table.append(" then ");
 				table.append(entryValue);
@@ -130,9 +139,8 @@ public class UAIUtil {
 		
 		// The solver for the parameters above.
 		SGDPLLT solver = new SGDPLLT(theory, problemType);
-		
 		solverListener.apply(solver);
-	
+		
 		// Solve the problem.
 		Expression result = solver.solve(tableExpr, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);	
 		
@@ -162,11 +170,11 @@ public class UAIUtil {
 	}
 	
 	public static String genericVariableName(int varIdx) {
-		return "G"+varIdx;
+		return "g"+varIdx;
 	}
 	
 	public static String instanceVariableName(int varIdx) {
-		return "V"+varIdx;
+		return "v"+varIdx;
 	}
 	
 	public static String genericConstantValueForVariable(int value, int variableIndex, int varCardinality) {
@@ -193,14 +201,14 @@ public class UAIUtil {
 		if (varCardinality == 2) {
 			return "Boolean";
 		}
-		return "G"+variableIndex+"SIZE";
+		return "G"+variableIndex+"TYPE";
 	}
 	
 	public static String instanceTypeNameForVariable(int variableIndex, int varCardinality) {
 		if (varCardinality == 2) {
 			return "Boolean";
 		}
-		return "V"+variableIndex+"SIZE";
+		return "V"+variableIndex+"TYPE";
 	}
 	
 	public static List<List<Integer>> cardinalityValues(FunctionTable functionTable) {

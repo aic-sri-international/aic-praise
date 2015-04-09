@@ -164,8 +164,8 @@ public abstract class AbstractPerspective implements Perspective {
 	}
 	
 	@Override
-	public void newModel() {
-		newModel(() -> FXCollections.observableMap(Collections.singletonMap(0, new ModelPageEditorSupplier("", Collections.emptyList()))));
+	public void newModel(String contents, List<String> defaultQueries) {
+		newModel(() -> FXCollections.observableMap(Collections.singletonMap(0, new ModelPageEditorSupplier(contents, defaultQueries))));
 		modelFile.set(null);
 	}
 	

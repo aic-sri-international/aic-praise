@@ -49,9 +49,9 @@ import javafx.stage.Stage;
 
 @Beta
 public class SGSolverDemoApp extends Application {
-	public static final int DISPLAY_PRECISION          = 4;
-	public static final int DISPLAY_SCIENTIFIC_GREATER = 6;
-	public static final int DISPLAY_SCIENTIFIC_AFTER   = 4; 
+	public static final int DISPLAY_PRECISION          = 6;
+	public static final int DISPLAY_SCIENTIFIC_GREATER = 8;
+	public static final int DISPLAY_SCIENTIFIC_AFTER   = 10; 
 
     @Override
     public void start(Stage primaryStage) throws Exception{

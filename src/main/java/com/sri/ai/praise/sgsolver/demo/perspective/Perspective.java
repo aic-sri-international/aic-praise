@@ -73,7 +73,7 @@ public interface Perspective {
 	ObservableMap<Integer, Supplier<ModelPageEditor>> getModelPageEditors();
 	ReadOnlyMapProperty<Integer, Supplier<ModelPageEditor>> modelPageEditorsProperty();	
 	
-	void newModel();
+	void newModel(String contents, List<String> defaultQueries);
 	void newModel(File modelFile);
 	void newModel(ExamplePages examples);
 	

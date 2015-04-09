@@ -65,6 +65,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
+import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
@@ -297,7 +298,15 @@ public class UAIMARSolver {
 				int valIdx = entry.getValue();
 				Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(varIdx));
 				Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, model.cardinality(varIdx)));
-				conjuncts.add(Equality.make(varExpr, valueExpr));
+				if (valueExpr.equals(Expressions.TRUE)) {
+					conjuncts.add(varExpr);
+				}
+				else if (valueExpr.equals(Expressions.FALSE)) {
+					conjuncts.add(Not.make(varExpr));
+				}
+				else {
+					conjuncts.add(Equality.make(varExpr, valueExpr));
+				}
 			}
 			if (conjuncts.size() > 0) {
 				evidenceExpr = And.make(conjuncts);

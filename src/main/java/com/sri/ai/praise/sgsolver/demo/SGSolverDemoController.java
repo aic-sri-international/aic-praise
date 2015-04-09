@@ -39,8 +39,14 @@ package com.sri.ai.praise.sgsolver.demo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
@@ -69,6 +75,18 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import com.google.common.annotations.Beta;
+import com.google.common.util.concurrent.AtomicDouble;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.boole.Not;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.praise.model.grounded.common.FunctionTable;
+import com.sri.ai.praise.model.imports.uai.UAIEvidenceReader;
+import com.sri.ai.praise.model.imports.uai.UAIModel;
+import com.sri.ai.praise.model.imports.uai.UAIModelReader;
+import com.sri.ai.praise.model.imports.uai.UAIUtil;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.praise.sgsolver.demo.perspective.ChurchPerspective;
@@ -111,13 +129,15 @@ public class SGSolverDemoController {
 	//
 	@FXML private Button configureButton;
 	//
-	private FileChooser fileChooser;
+	private FileChooser praiseFileChooser;
+	private FileChooser uaiFileChooser;
 	private PopOver openMenuPopOver          = new PopOver();
 	private PopOver configureSettingsPopOver = new PopOver();
 	//
 	private ToggleGroup perspectiveToggleGroup       = new ToggleGroup();
 	private RadioButton hogmPerspectiveRadioButton   = new RadioButton("HOGM");
 	private RadioButton churchPerspectiveRadioButton = new RadioButton("Church");
+	private Button      importUAIModelButton         = new Button("Import UAI Model...");
 	
 	//
 	private Perspective perspective;
@@ -177,9 +197,13 @@ public class SGSolverDemoController {
     	//
     	FXUtil.setDefaultButtonIcon(configureButton, FontAwesomeIcons.WRENCH);
     	//
-    	fileChooser = new FileChooser();
-    	fileChooser.getExtensionFilters().addAll(
+    	praiseFileChooser = new FileChooser();
+    	praiseFileChooser.getExtensionFilters().addAll(
     	         		new FileChooser.ExtensionFilter("Model Files", "*.praise"));
+    	
+    	uaiFileChooser = new FileChooser();
+    	uaiFileChooser.getExtensionFilters().addAll(
+         		new FileChooser.ExtensionFilter("UAI Files", "*.uai"));
     	
     	openMenuPopOver.setArrowLocation(ArrowLocation.RIGHT_TOP);
     	openMenuPopOver.setAutoHide(true);
@@ -254,18 +278,13 @@ public class SGSolverDemoController {
     
     @FXML
     private void newModel(ActionEvent ae) {
-    	checkSaveRequired(true);
-    	modelPagination.setPageCount(Pagination.INDETERMINATE);
-    	perspective.newModel();
-		
-		// Want to indicate that we are not using a particular example after a new model is instantiated.
-		examplesComboBox.getSelectionModel().select(-1);
+    	newModel("", Collections.emptyList());
     }
     
     @FXML
     private void openModel(ActionEvent ae) {
     	checkSaveRequired(true);
-    	File selectedFile = fileChooser.showOpenDialog(mainStage);
+    	File selectedFile = praiseFileChooser.showOpenDialog(mainStage);
     	if (selectedFile != null) {
     		modelPagination.setPageCount(Pagination.INDETERMINATE);
     		perspective.newModel(selectedFile);
@@ -338,8 +357,17 @@ public class SGSolverDemoController {
     	}
     }
     
+    private void newModel(String contents, List<String> defaultQueries) {
+    	checkSaveRequired(true);
+    	modelPagination.setPageCount(Pagination.INDETERMINATE);
+    	perspective.newModel(contents, defaultQueries);
+		
+		// Want to indicate that we are not using a particular example after a new model is instantiated.
+		examplesComboBox.getSelectionModel().select(-1);
+    }
+    
     private void saveModelAs(ActionEvent ae) {
-    	File saveAsFile = fileChooser.showSaveDialog(mainStage);
+    	File saveAsFile = praiseFileChooser.showSaveDialog(mainStage);
 		if (saveAsFile != null) {
 			perspective.saveAs(saveAsFile);
 			// After saving indicate not an example
@@ -350,9 +378,127 @@ public class SGSolverDemoController {
     private void togglePerspective(ActionEvent ae) { 	
     	if (perspectiveToggleGroup.getSelectedToggle() == hogmPerspectiveRadioButton) {
     		setPerspective(new HOGMPerspective());
+    		importUAIModelButton.setDisable(false);
     	}
     	else if (perspectiveToggleGroup.getSelectedToggle() == churchPerspectiveRadioButton) {
     		setPerspective(new ChurchPerspective());
+    		importUAIModelButton.setDisable(true);
+    	}
+    }
+    
+    private void importUAIModel(ActionEvent ae) {
+ // TODO   	
+    	try {
+    		File uaiFile = uaiFileChooser.showOpenDialog(mainStage);
+    		if (uaiFile != null) {
+    			UAIModel model = UAIModelReader.read(uaiFile);
+    			UAIEvidenceReader.read(model);
+    			
+    			StringJoiner sj = new StringJoiner("\n");
+    			sj.add("// IMPORT OF: "+uaiFile.getName());
+    			sj.add("//");
+    			sj.add("// #variables                                = "+model.numberVariables());
+    			sj.add("// #tables                                   = "+model.numberTables());
+    			sj.add("// #unique function tables                   = "+model.numberUniqueFunctionTables());
+    			sj.add("// Largest variable cardinality              = "+model.largestCardinality());
+    			sj.add("// Largest # entries                         = "+model.largestNumberOfFunctionTableEntries());
+    			sj.add("// Total #entries across all function tables = "+model.totalNumberEntriesForAllFunctionTables());
+
+    			double totalNumberUniqueEntries        = 0;
+    			double totalCompressedEntries          = 0;
+    			double bestIndividualCompressionRatio  = 100; // i.e. none at all
+    			double worstIndividualCompressionRatio = 0;
+    			List<Expression> tables = new ArrayList<>();
+    			for (int i = 0; i < model.numberUniqueFunctionTables(); i++) {
+    				FunctionTable table = model.getUniqueFunctionTable(i);
+    				
+    				totalNumberUniqueEntries += table.numberEntries();
+    				
+/// TODO - make interruptable by running as a service
+    				
+    				Expression genericTableExpression = UAIUtil.constructGenericTableExpression(table, solver -> {
+    					return solver;
+    				});
+    				
+    				double compressedEntries = calculateCompressedEntries(genericTableExpression);
+    				
+    				double compressedRatio = compressedEntries / table.numberEntries();
+    				if (compressedRatio < bestIndividualCompressionRatio) {
+    					bestIndividualCompressionRatio = compressedRatio;
+    				}
+    				if (compressedRatio > worstIndividualCompressionRatio) {
+    					worstIndividualCompressionRatio = compressedRatio;
+    				}
+    				
+    				totalCompressedEntries += compressedEntries;
+    				
+    				for (int tableIdx : model.getTableIndexes(i)) {
+    					Expression instanceTableExpression = UAIUtil.convertGenericTableToInstance(table, genericTableExpression, model.getVariableIndexesForTable(tableIdx));
+    					tables.add(instanceTableExpression);
+    				}
+    			}
+    			
+    			sj.add("//");
+    			sj.add("// Table compression ratio            = "+(totalCompressedEntries/totalNumberUniqueEntries));
+    			sj.add("// Best individual compression ratio  = "+bestIndividualCompressionRatio);
+    			sj.add("// Worst individual compression ratio = "+worstIndividualCompressionRatio);
+    	
+    			List<String> sorts   = new ArrayList<>();
+    			List<String> randoms = new ArrayList<>(); 
+    			List<String> queries = new ArrayList<>();
+    			for (int varIdx = 0; varIdx < model.numberVariables(); varIdx++) {
+    				int varCardinality = model.cardinality(varIdx);
+    				String varName     = UAIUtil.instanceVariableName(varIdx);
+    				String varTypeName = UAIUtil.instanceTypeNameForVariable(varIdx, varCardinality);
+    				
+    				StringJoiner sortConstants = new StringJoiner(", ", ", ", ";");
+    				final int innerVarIdx = varIdx;
+    				IntStream.range(0, varCardinality).forEach(valIdx -> {
+    					sortConstants.add(UAIUtil.instanceConstantValueForVariable(valIdx, innerVarIdx, varCardinality));
+    				});
+    				if (!SortDeclaration.IN_BUILT_BOOLEAN.getName().equals(varTypeName)) {
+    					sorts.add("sort "+varTypeName+": "+varCardinality+sortConstants.toString());
+    				}
+    				randoms.add("random "+varName+": "+varTypeName+";");
+    				queries.add(varName);
+    			}
+    			if (sorts.size() > 0) {
+	    			sj.add("");
+	    			sj.add("// SORT DECLARATIONS:");
+	    			sorts.forEach(sort -> sj.add(sort));
+    			}
+    			sj.add("");
+    			sj.add("// RANDOM VARIABLE DECLARATIONS:");
+    			randoms.forEach(random -> sj.add(random));
+    			sj.add("");
+    			sj.add("// RULES:");
+    			tables.forEach(table -> sj.add(table.toString()+";"));
+    			
+    			if (model.getEvidence().size() > 0) {
+    				sj.add("");
+        			sj.add("// EVIDENCE:");
+    				for (Map.Entry<Integer, Integer> entry : model.getEvidence().entrySet()) {
+	    				int varIdx = entry.getKey();
+	    				int valIdx = entry.getValue();
+	    				Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(varIdx));
+	    				Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, model.cardinality(varIdx)));
+	    				if (valueExpr.equals(Expressions.TRUE)) {
+	    					sj.add(varExpr.toString()+";");
+	    				}
+	    				else if (valueExpr.equals(Expressions.FALSE)) {
+	    					sj.add(Not.make(varExpr).toString()+";");
+	    				}
+	    				else {
+	    					sj.add(Equality.make(varExpr, valueExpr).toString()+";");
+	    				}
+	    			}
+    			}
+    			
+    			newModel(sj.toString(), queries);
+    		}
+    	}
+    	catch (Throwable th) {
+    		FXUtil.exception(th);
     	}
     }
 	
@@ -368,7 +514,7 @@ public class SGSolverDemoController {
     	boolean result = false; // Not saved
     	if (perspective != null && perspective.isSaveRequired()) {
     		if (perspective.getModelFile() == null) {
-    			File saveAsFile = fileChooser.showSaveDialog(mainStage);
+    			File saveAsFile = praiseFileChooser.showSaveDialog(mainStage);
     			if (saveAsFile != null) {
     				perspective.saveAs(saveAsFile);
     				result = true;
@@ -465,7 +611,7 @@ public class SGSolverDemoController {
     	saveAsHBox.getChildren().addAll(saveAsButton, new Label("Save As..."));
 		
 		Separator hSep = new Separator(Orientation.HORIZONTAL);
-		hSep.setPrefWidth(120);
+		hSep.setPrefWidth(170);
 	
 		Label perspectiveLabel = new Label("Perspective");
 		
@@ -475,13 +621,19 @@ public class SGSolverDemoController {
 		hogmPerspectiveRadioButton.setOnAction(this::togglePerspective);
 		churchPerspectiveRadioButton.setOnAction(this::togglePerspective);
 		
+		importUAIModelButton.setOnAction(this::importUAIModel);
+		FXUtil.setDefaultButtonIcon(importUAIModelButton, FontAwesomeIcons.PUZZLE_PIECE);
+		HBox importUAIHBox = newButtonHBox();
+		importUAIHBox.getChildren().addAll(importUAIModelButton, new Label("Import UAI Model..."));
+		
 		openMenu.getChildren().addAll(
 				saveAsHBox,
 				hSep,
 				perspectiveLabel,
 				hogmPerspectiveRadioButton,
 				churchPerspectiveRadioButton,
-				new Separator(Orientation.HORIZONTAL)
+				new Separator(Orientation.HORIZONTAL),
+				importUAIHBox
 		);
 		
 		return openMenu;
@@ -492,5 +644,24 @@ public class SGSolverDemoController {
 		hBox.setAlignment(Pos.CENTER_LEFT);
 		
 		return hBox;
+	}
+	
+	private static double calculateCompressedEntries(Expression compressedTableExpression) {
+		AtomicDouble count = new AtomicDouble(0);
+		
+		visitCompressedTableEntries(compressedTableExpression, count);
+		
+		return count.doubleValue();
+	}
+	
+	private static void visitCompressedTableEntries(Expression compressedTableExpression, AtomicDouble count) {
+		if (IfThenElse.isIfThenElse(compressedTableExpression)) {
+			visitCompressedTableEntries(IfThenElse.thenBranch(compressedTableExpression), count);
+			visitCompressedTableEntries(IfThenElse.elseBranch(compressedTableExpression), count);
+		}
+		else {
+			// We are at a leaf node, therefore increment the count
+			count.addAndGet(1);
+		}
 	}
 }
