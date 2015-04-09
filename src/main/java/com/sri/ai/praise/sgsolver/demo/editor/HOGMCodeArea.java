@@ -134,9 +134,6 @@ public class HOGMCodeArea extends AnchorPane {
 			if (t.getType() == HOGMLexer.COMMENT || t.getType() == HOGMLexer.LINE_COMMENT) {
 				styleClass = "hogmCodeComment";
 			}
-			else if (t.getText().equals("(") || t.getText().equals(")")) {
-				styleClass = "churchCodeParenthesis";
-			}
 			else if (HOGMTerminalSymbols.isTerminalSymbol(t.getText())) {
 				styleClass = "hogmCodeKeyword";
 			}

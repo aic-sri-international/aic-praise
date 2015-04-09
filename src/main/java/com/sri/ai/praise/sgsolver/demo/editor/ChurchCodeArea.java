@@ -140,6 +140,9 @@ public class ChurchCodeArea extends AnchorPane {
 			else if (t.getType() == ChurchLexer.STRING) {
 				styleClass = "churchCodeStringLiteral";
 			}
+			else if (t.getText().equals("(") || t.getText().equals(")")) {
+				styleClass = "churchCodeParenthesis";
+			}
 			else if (ChurchTerminalSymbols.isTerminalSymbol(t.getText())) {
 				styleClass = "churchCodeKeyword";
 			}
