@@ -104,8 +104,8 @@ public class InferenceForFactorGraphAndEvidence {
 	/**
 	 * Constructs a solver for a factor graph and an evidence expression.
 	 * @param useFactorization TODO
-	 * @param mapFromTypeNameToSizeStringParam a map from type name strings to their size strings
-	 * @param mapFromRandomVariableNameToTypeNameParam a map from random variable name strings to their type name strings
+	 * @param mapFromTypeNameToSizeString a map from type name strings to their size strings
+	 * @param mapFromRandomVariableNameToTypeName a map from random variable name strings to their type name strings
 	 * @param allTheSameButQuery the {@link Result} object from a previous query for the same model and evidence, if available, or null.
 	 * @param factorGraph an Expression representing the product of potential functions
 	 * @param isBayesianNetwork indicates the factor graph is a bayesian network (each potential function in normalized for one of its variables, forms a DAG).
@@ -113,15 +113,15 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public InferenceForFactorGraphAndEvidence(
-			Expression factorGraphParam, boolean isBayesianNetworkParam,
-			Expression evidenceParam, boolean useFactorization, Map<String, String> mapFromTypeNameToSizeStringParam, Map<String, String> mapFromRandomVariableNameToTypeNameParam) {
+			Expression factorGraph, boolean isBayesianNetwork,
+			Expression evidence, boolean useFactorization, Map<String, String> mapFromTypeNameToSizeString, Map<String, String> mapFromRandomVariableNameToTypeName) {
 
-		factorGraph = factorGraphParam;
-		isBayesianNetwork = isBayesianNetworkParam;
-		evidence = evidenceParam;
-		mapFromTypeNameToSizeString = mapFromTypeNameToSizeStringParam;
-		mapFromRandomVariableNameToTypeName = mapFromRandomVariableNameToTypeNameParam;
-		mapFromRandomVariableNameToTypeName.put("query", "Boolean");
+		this.factorGraph = factorGraph;
+		this.isBayesianNetwork = isBayesianNetwork;
+		this.evidence = evidence;
+		this.mapFromTypeNameToSizeString = mapFromTypeNameToSizeString;
+		this.mapFromRandomVariableNameToTypeName = mapFromRandomVariableNameToTypeName;
+		this.mapFromRandomVariableNameToTypeName.put("query", "Boolean");
 		queryVariable = parse("query");
 
 		allVariables = Util.mapIntoList(mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
