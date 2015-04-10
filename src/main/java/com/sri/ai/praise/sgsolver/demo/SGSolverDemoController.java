@@ -386,8 +386,7 @@ public class SGSolverDemoController {
     	}
     }
     
-    private void importUAIModel(ActionEvent ae) {
- // TODO   	
+    private void importUAIModel(ActionEvent ae) { 	
     	try {
     		File uaiFile = uaiFileChooser.showOpenDialog(mainStage);
     		if (uaiFile != null) {
@@ -413,8 +412,6 @@ public class SGSolverDemoController {
     				FunctionTable table = model.getUniqueFunctionTable(i);
     				
     				totalNumberUniqueEntries += table.numberEntries();
-    				
-/// TODO - make interruptable by running as a service
     				
     				Expression genericTableExpression = UAIUtil.constructGenericTableExpression(table, solver -> {
     					return solver;
