@@ -39,7 +39,7 @@ package com.sri.ai.praise.sgsolver.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -51,7 +51,6 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.expresso.helper.SubExpressionsDepthFirstIterator;
 import com.sri.ai.grinder.core.PrologConstantPredicate;
 import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.Equality;
@@ -197,6 +196,7 @@ public class HOGModel {
 		
 		void associateUnassignedConstantsToSorts(List<StatementInfo> termStatements) {		
 			termStatements.forEach(termStatement -> {
+				// arguments to = and !=
 				Set<Expression> equalities = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> Equality.isEquality(expr) || Disequality.isDisequality(expr));
 				equalities.forEach(equality -> {
 					List<RandomVariableDeclaration> randomVars       = new ArrayList<>();
@@ -233,20 +233,6 @@ public class HOGModel {
 			});		
 		}
 		
-		boolean isUnknownConstant(Expression expr) {
-			boolean result = Expressions.isSymbol(expr) && !Expressions.isNumber(expr) && !sortConstants.contains(expr);
-			return result;
-		}
-		
-		void updateSort(SortDeclaration sort, Set<Expression> unknownConstants) {
-			if (sort != null) {
-				List<Expression> constants = new ArrayList<>(ExtensionalSet.getElements(sort.getConstants()));
-				constants.addAll(unknownConstants);
-				sorts.put(sort.getName(), new SortDeclaration(sort.getName(), sort.getSize(), ExtensionalSet.makeUniSet(constants)));
-				sortConstants.addAll(unknownConstants);
-			}
-		}
-		
 		void validateTermStatements(List<StatementInfo> termStatements) {
 			termStatements.forEach(termStatement -> {
 				// Ensure all functors are known and have correct arity
@@ -280,58 +266,101 @@ public class HOGModel {
 		TermCategoryType determineTermCategoryType(Expression expr) {
 			TermCategoryType result = TermCategoryType.INVALID;
 			
+			SortDeclaration sortType = determineSortType(expr);
+			if (sortType != null) {
+				if (sortType == SortDeclaration.IN_BUILT_BOOLEAN) {
+					result = TermCategoryType.BOOLEAN;
+				}
+				else if (sortType == SortDeclaration.IN_BUILT_NUMBER) {
+					result = TermCategoryType.NUMERIC;
+				}
+				else  {
+					result = TermCategoryType.OTHER;
+				}
+			}
+			
+			return result;
+		}
+		
+		SortDeclaration determineSortType(Expression expr) {
+			SortDeclaration result = null;
+			
 			if (IfThenElse.isIfThenElse(expr)) {
-				TermCategoryType condition  = determineTermCategoryType(IfThenElse.condition(expr));
-				TermCategoryType thenBranch = determineTermCategoryType(IfThenElse.thenBranch(expr));
-				TermCategoryType elseBranch = determineTermCategoryType(IfThenElse.elseBranch(expr));
+				SortDeclaration condition  = determineSortType(IfThenElse.condition(expr));
+				SortDeclaration thenBranch = determineSortType(IfThenElse.thenBranch(expr));
+				SortDeclaration elseBranch = determineSortType(IfThenElse.elseBranch(expr));
 				// Ensure legal 
-				if (condition == TermCategoryType.BOOLEAN && thenBranch == elseBranch) {
+				if (condition == SortDeclaration.IN_BUILT_BOOLEAN && thenBranch == elseBranch) {
 					result = thenBranch; // same as elseBranch
+				}
+				else {
+					result = null; // Don't know
 				}
 			}
 			else {
 				Expression functor = expr.getFunctor();
 				if (functor == null) {
 					if (Expressions.FALSE.equals(expr) || Expressions.TRUE.equals(expr)) {
-						result = TermCategoryType.BOOLEAN;
+						result = SortDeclaration.IN_BUILT_BOOLEAN;
 					}
-					else if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
-						result = TermCategoryType.BOOLEAN;
+					else if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) { // NOTE: quantifiers are not functions
+						result = SortDeclaration.IN_BUILT_BOOLEAN;
 					}
 					else if (Expressions.isNumber(expr)) {
-						result = TermCategoryType.NUMERIC;
+						result = SortDeclaration.IN_BUILT_NUMBER;
 					}
 					else if (isPrologConstant.apply(expr)) {
 						RandomVariableDeclaration rvDeclaration = randoms.get(expr);
 						if (rvDeclaration != null) {
 							if (SortDeclaration.IN_BUILT_BOOLEAN.getName().equals(rvDeclaration.getRangeSort())) {
-								result = TermCategoryType.BOOLEAN;
+								result = SortDeclaration.IN_BUILT_BOOLEAN;
 							}
 							else if (SortDeclaration.IN_BUILT_NUMBER.getName().equals(rvDeclaration.getRangeSort())) {
-								result = TermCategoryType.NUMERIC;
+								result = SortDeclaration.IN_BUILT_NUMBER;
 							}
 							else {
-								result = TermCategoryType.OTHER;
+								result = sorts.get(rvDeclaration.getRangeSort());
+							}
+						}
+						else if (sortConstants.contains(expr)){
+							for (SortDeclaration sort : sorts.values()) {
+								// Have mapped the constant sort.
+								if (ExtensionalSet.getElements(sort.getConstants()).contains(expr)) {
+									result = sort;
+									break;
+								}
 							}
 						}
 						else {
-							result = TermCategoryType.OTHER;
+							// Don't know
 						}
 					}
 					else {
-						result = TermCategoryType.OTHER;
+						result = null; // Don't know
 					}
 				}
 				else {
 					String functorName = functorName(functor);
 					if (booleanTypeFunctors.contains(functorName)) {
-						result = TermCategoryType.BOOLEAN;
+						result = SortDeclaration.IN_BUILT_BOOLEAN;
 					}
 					else if (numericTypeFunctors.contains(functorName)) {
-						result = TermCategoryType.NUMERIC;
+						result = SortDeclaration.IN_BUILT_NUMBER;
 					}
-					else if (otherTypeFunctors.contains(functorName)) {
-						result = TermCategoryType.OTHER;
+					else if (isDeclaredRandomFunctor(functor)) {
+						RandomVariableDeclaration rvDeclaration = randoms.get(expr);
+						if (SortDeclaration.IN_BUILT_BOOLEAN.getName().equals(rvDeclaration.getRangeSort())) {
+							result = SortDeclaration.IN_BUILT_BOOLEAN;
+						}
+						else if (SortDeclaration.IN_BUILT_NUMBER.getName().equals(rvDeclaration.getRangeSort())) {
+							result = SortDeclaration.IN_BUILT_NUMBER;
+						}
+						else {
+							result = sorts.get(rvDeclaration.getRangeSort());
+						}
+					}
+					else {
+						result = null; // Don't know
 					}
 				}
 			}
@@ -375,43 +404,125 @@ public class HOGModel {
 		}
 		
 		void validateFunctorsAndArguments(StatementInfo termStatement) {
-// TODO			Expressions.getSubExpressionsSatisfying(termStatement.statement, predicate)
-// TODO - for all and their exists			
-			Iterator<Expression> subExpressionsIterator =  new SubExpressionsDepthFirstIterator(termStatement.statement);
-		
-			subExpressionsIterator.forEachRemaining(expr -> {
-				if (expr.getFunctor() != null) {
-					if (isKnownFunctor(expr.getFunctor())) {
-						if (!isValidKnownFunctorArity(expr)) {
-							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+expr+"'", termStatement);
-						}
-// TODO - validate arguments are of correct types						
-					}
-					else if (isDeclaredRandomFunctor(expr.getFunctor())) {
-						if (!isValidDeclaredRandomFunctorArity(expr)) {
-							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+expr+"'", termStatement);
-						}
-// TODO - validate arguments are of correct type						
-					}
-					else {					
-						newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, "'"+expr.getFunctor()+"'", termStatement);
-					}
+			// Ensure random functions with arity > 0 have the correct arity and their arguments are of the correct type
+			Set<Expression> randomFunctions = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> 
+					isDeclaredRandomFunctor(expr.getFunctor()));
+			randomFunctions.forEach(randomFunction -> {
+				if (!isValidDeclaredRandomFunctorArity(randomFunction)) {
+					newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+randomFunction+"'", termStatement);
 				}
-				else if (isPrologConstant.apply(expr)) {				
-					if (isDeclaredRandomFunctor(expr)) {
-// TODO - this won't work when visiting the functor of a random variable with arity > 0.						
-//						if (!isValidDeclaredRandomFunctorArity(expr)) {
-//							newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+expr+"'", termStatement);
-//						}
-					}
-					else if (this.isKnownFunctor(expr) || Expressions.isNumber(expr)) {
-						// ignore
-					}
-					else if (!sortConstants.contains(expr)) {
-						newError(Type.TERM_CONSTANT_NOT_DEFINED, "'"+expr+"'", termStatement);
+				else {
+					RandomVariableDeclaration rvDeclaration = randoms.get(randomFunction.getFunctorOrSymbol());
+					for (int i = 0; i < randomFunction.numberOfArguments(); i++) {
+						Expression arg = randomFunction.get(i);
+						if (isUnknownConstant(arg)) {
+							newError(Type.TERM_CONSTANT_NOT_DEFINED, "'"+arg+"'", termStatement);
+						}
+						else {
+							if (sorts.get(rvDeclaration.getRangeSort()) != determineSortType(arg)) {
+								newError(Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+							}
+						}
 					}
 				}
 			});
+			
+			// Now find the propositional random variables and ensure they are not used with arguments
+			Set<Expression> propositionalRandoms = new HashSet<>();
+			randoms.values().forEach(random -> {
+				if (random.getArityValue() == 0) {
+					propositionalRandoms.add(random.getName());
+				}
+			});
+			Set<Expression> illegalPropositionalUsage = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> propositionalRandoms.contains(expr.getFunctor()));
+			illegalPropositionalUsage.forEach(illegal -> newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+illegal+"'", termStatement));
+			
+			// All of these should belong to the known set of functors
+			Set<Expression> nonRandomFunctions = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> 
+					Expressions.isFunctionApplicationWithArguments(expr) && 
+					!isDeclaredRandomFunctor(expr.getFunctorOrSymbol()));
+			
+			nonRandomFunctions.forEach(nonRandomFunction -> {
+				if (isKnownFunctor(nonRandomFunction.getFunctor())) {
+					String functorName = functorName(nonRandomFunction.getFunctor());
+					if (!isValidKnownFunctorArity(nonRandomFunction)) {
+						newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+nonRandomFunction+"'", termStatement);
+					}
+					else {
+						Set<SortDeclaration> argSorts = new HashSet<>();
+						for (int i = 0; i < nonRandomFunction.numberOfArguments(); i++) {
+							Expression arg = nonRandomFunction.get(i);
+							if (!isDeclaredRandomFunctor(arg.getFunctorOrSymbol()) && isUnknownConstant(arg)) {
+								newError(Type.TERM_CONSTANT_NOT_DEFINED, "'"+arg+"'", termStatement);
+							}
+							else {
+								// All arguments must be of the same type
+								SortDeclaration sortType = determineSortType(arg);
+								if (sortType == null) {
+									newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, "'"+arg+"'", termStatement);
+								}
+								if (IfThenElse.isIfThenElse(nonRandomFunction)) {
+									if (i == 0) {
+										// The conditional must be boolean
+										if (sortType != SortDeclaration.IN_BUILT_BOOLEAN) {
+											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+										}
+									}
+									else {
+										// otherwise the branches sorts must match
+										argSorts.add(sortType);
+									}
+							    }    // For equalities the types must match up
+								else if (Equality.isEquality(nonRandomFunction) || Disequality.isDisequality(nonRandomFunction)) {
+									if (sortType != null) {
+										argSorts.add(sortType);
+									}
+								}
+								else {
+									if (booleanTypeFunctors.contains(functorName)) {
+										if (sortType != SortDeclaration.IN_BUILT_BOOLEAN) {
+											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+										}
+									}
+									else if (numericTypeFunctors.contains(functorName)) {
+										if (sortType != SortDeclaration.IN_BUILT_NUMBER) {
+											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+										}
+									}
+									else {
+										newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+									}
+								}
+							}
+						}
+						
+						// The type of arguments must all match in these instances
+						if (Equality.isEquality(nonRandomFunction) || Disequality.isDisequality(nonRandomFunction)) {
+							if (argSorts.size() != 1) {							
+								newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE, "'"+nonRandomFunction+"'", termStatement);
+							}
+						}
+					}
+				}
+				else {					
+					newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, "'"+nonRandomFunction.getFunctor()+"'", termStatement);
+				}
+			});
+			
+			// NOTE: quantifiers are not functions so need to be handled separately
+			Set<Expression> quantifiers = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> ForAll.isForAll(expr) || ThereExists.isThereExists(expr));
+			quantifiers.forEach(quantifier -> {
+// TODO - validate index				
+				Expression body = ForAll.isForAll(quantifier) ? ForAll.getBody(quantifier) : ThereExists.getBody(quantifier);
+				if (determineSortType(body) != SortDeclaration.IN_BUILT_BOOLEAN) {
+					newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+body+"'", termStatement);
+				}
+			});			
+		}
+		
+		boolean isUnknownConstant(Expression expr) {
+			boolean result = Expressions.isSymbol(expr) && !Expressions.isNumber(expr) && !sortConstants.contains(expr);
+			return result;
 		}
 		
 		boolean isKnownFunctor(Expression functorName) {
@@ -469,6 +580,15 @@ public class HOGModel {
 				result = false;
 			}
 			return result;
+		}
+		
+		void updateSort(SortDeclaration sort, Set<Expression> unknownConstants) {
+			if (sort != null) {
+				List<Expression> constants = new ArrayList<>(ExtensionalSet.getElements(sort.getConstants()));
+				constants.addAll(unknownConstants);
+				sorts.put(sort.getName(), new SortDeclaration(sort.getName(), sort.getSize(), ExtensionalSet.makeUniSet(constants)));
+				sortConstants.addAll(unknownConstants);
+			}
 		}
 		
 		String functorName(Expression exprFunctorName) {
