@@ -371,7 +371,7 @@ public class HOGModel {
 		private Expression attemptMakeRule(Expression conditional) {
 			Expression result = null;
 			
-			TermCategoryType conditionType  = determineTermCategoryType(IfThenElse.condition(conditional));
+			TermCategoryType conditionType = determineTermCategoryType(IfThenElse.condition(conditional));
 			if (conditionType == TermCategoryType.BOOLEAN) {
 				Expression thenBranch;
 				if ((thenBranch = attemptMakeNumeric(IfThenElse.thenBranch(conditional))) != null) {
@@ -405,8 +405,8 @@ public class HOGModel {
 		
 		void validateFunctorsAndArguments(StatementInfo termStatement) {
 			// Ensure random functions with arity > 0 have the correct arity and their arguments are of the correct type
-			Set<Expression> randomFunctions = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> 
-					isDeclaredRandomFunctor(expr.getFunctor()));
+			Set<Expression> randomFunctions = new LinkedHashSet<>();
+			getRandomFunctions(termStatement.statement, randomFunctions);
 			randomFunctions.forEach(randomFunction -> {
 				if (!isValidDeclaredRandomFunctorArity(randomFunction)) {
 					newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+randomFunction+"'", termStatement);
@@ -415,28 +415,21 @@ public class HOGModel {
 					RandomVariableDeclaration rvDeclaration = randoms.get(randomFunction.getFunctorOrSymbol());
 					for (int i = 0; i < randomFunction.numberOfArguments(); i++) {
 						Expression arg = randomFunction.get(i);
+						if (isVariable(arg)) {
+							continue; // takes on type of the sort at this position
+						}
 						if (isUnknownConstant(arg)) {
 							newError(Type.TERM_CONSTANT_NOT_DEFINED, "'"+arg+"'", termStatement);
 						}
 						else {
-							if (sorts.get(rvDeclaration.getRangeSort()) != determineSortType(arg)) {
+							if (sorts.get(rvDeclaration.getParameterSorts().get(i)) != determineSortType(arg)) {
 								newError(Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
 							}
 						}
 					}
 				}
 			});
-			
-			// Now find the propositional random variables and ensure they are not used with arguments
-			Set<Expression> propositionalRandoms = new HashSet<>();
-			randoms.values().forEach(random -> {
-				if (random.getArityValue() == 0) {
-					propositionalRandoms.add(random.getName());
-				}
-			});
-			Set<Expression> illegalPropositionalUsage = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> propositionalRandoms.contains(expr.getFunctor()));
-			illegalPropositionalUsage.forEach(illegal -> newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+illegal+"'", termStatement));
-			
+						
 			// All of these should belong to the known set of functors
 			Set<Expression> nonRandomFunctions = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> 
 					Expressions.isFunctionApplicationWithArguments(expr) && 
@@ -452,6 +445,9 @@ public class HOGModel {
 						Set<SortDeclaration> argSorts = new HashSet<>();
 						for (int i = 0; i < nonRandomFunction.numberOfArguments(); i++) {
 							Expression arg = nonRandomFunction.get(i);
+							if (isVariable(arg)) {
+								continue; // Takes on the type of its position
+							}
 							if (!isDeclaredRandomFunctor(arg.getFunctorOrSymbol()) && isUnknownConstant(arg)) {
 								newError(Type.TERM_CONSTANT_NOT_DEFINED, "'"+arg+"'", termStatement);
 							}
@@ -520,8 +516,29 @@ public class HOGModel {
 			});			
 		}
 		
+		void getRandomFunctions(Expression expr, Set<Expression> randomFunctions) {
+			if (this.isDeclaredRandomFunctor(expr.getFunctorOrSymbol())) {
+				randomFunctions.add(expr);
+			}
+			
+			if (Expressions.isFunctionApplicationWithArguments(expr)) {
+				expr.getArguments().forEach(arg -> getRandomFunctions(arg, randomFunctions));
+			}
+			else if (ForAll.isForAll(expr)) {
+				getRandomFunctions(ForAll.getBody(expr), randomFunctions);
+			}
+			else if (ThereExists.isThereExists(expr)) {
+				getRandomFunctions(ThereExists.getBody(expr), randomFunctions);
+			}
+		}
+		
+		boolean isVariable(Expression expr) {
+			boolean result = !isPrologConstant.apply(expr);
+			return result;
+		}
+		
 		boolean isUnknownConstant(Expression expr) {
-			boolean result = Expressions.isSymbol(expr) && !Expressions.isNumber(expr) && !sortConstants.contains(expr);
+			boolean result = Expressions.isSymbol(expr) && !Expressions.isNumber(expr) && !isVariable(expr) && !sortConstants.contains(expr);
 			return result;
 		}
 		
