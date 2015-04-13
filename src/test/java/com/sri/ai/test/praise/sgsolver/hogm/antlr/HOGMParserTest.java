@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.model.HOGModelError;
@@ -80,6 +81,48 @@ public class HOGMParserTest {
 		testExpectedModelError(
 				 "sort People: Unknown, fred, washington;\n"
 				+"sort Places: Unknown, washington;", HOGModelError.Type.CONSTANT_NAME_NOT_UNIQUE);
+	}
+	
+	@Test
+	public void testAssociateUnassignedSortsToToSorts() {
+		String string;
+		string = "sort People: 1000, bob, ann, mary;\n"
+				+"random partner: People -> People;\n"
+				+"tom = partner(ann);";
+		test(string, expected(Tuple.make(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "People", "1000", 
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list", "bob", "ann", "mary", "tom")))
+							), 
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "partner", "1", "People", "People"), 
+							IfThenElse.make(
+									Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("=", "tom", Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("partner", "ann")),
+									Expressions.ONE, Expressions.ZERO)
+							));
+		string = "sort People: 1000, bob, ann, mary;\n"
+				+"random partner: People -> People;\n"
+				+"tom != partner(ann);";
+		test(string, expected(Tuple.make(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "People", "1000", 
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list", "bob", "ann", "mary", "tom")))
+							), 
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "partner", "1", "People", "People"), 
+							IfThenElse.make(
+									Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("!=", "tom", Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("partner", "ann")),
+									Expressions.ONE, Expressions.ZERO)
+							));
+		
+		string = "sort People: 1000, bob, ann, mary;\n"
+				+"random partner: People -> People;\n"
+				+"ann = partner(tom);";
+		test(string, expected(Tuple.make(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "People", "1000", 
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list", "bob", "ann", "mary", "tom")))
+							), 
+							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "partner", "1", "People", "People"), 
+							IfThenElse.make(
+									Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("=", "ann", Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("partner", "tom")),
+									Expressions.ONE, Expressions.ZERO)
+							));
 	}
 	
 	@Test
