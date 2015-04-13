@@ -112,6 +112,28 @@ public class SGSolverDemoController {
 	public static final KeyCombination NEXT_PAGE_SHORTCUT   = new KeyCodeCombination(KeyCode.PAGE_UP, KeyCombination.SHORTCUT_ANY);
 	public static final KeyCombination PREV_PAGE_SHORTCUT   = new KeyCodeCombination(KeyCode.PAGE_DOWN, KeyCombination.SHORTCUT_ANY);
 	//
+	public enum DisplayRoundingMode {
+		UP(Rational.ROUND_UP), 
+		DOWN(Rational.ROUND_DOWN), 
+		CEILING(Rational.ROUND_CEILING), 
+		FLOOR(Rational.ROUND_FLOOR), 
+		HALF_UP(Rational.ROUND_HALF_UP), 
+		HALF_DOWN(Rational.ROUND_HALF_DOWN), 
+		HALF_EVEN(Rational.ROUND_HALF_EVEN), 
+		HALF_CEILING(Rational.ROUND_HALF_CEILING),
+		HALF_FLOOR(Rational.ROUND_HALF_FLOOR), 
+		ROUND_HALF_ODD(Rational.ROUND_HALF_ODD);
+	
+		private int value;
+		private DisplayRoundingMode(int value) {
+			this.value = value;
+		}
+		
+		public int getValue() {
+			return value;
+		}
+	}
+	//
 	private Stage mainStage;
 	//
 	@FXML private Button openMenuButton;
@@ -138,10 +160,11 @@ public class SGSolverDemoController {
 	//
 	@FXML private Button configureButton;
 	//
-	static IntegerProperty _displayPrecision         = new SimpleIntegerProperty(4);
-	static IntegerProperty _displayScientificGreater = new SimpleIntegerProperty(8);
-	static IntegerProperty _displayScientificAfter   = new SimpleIntegerProperty(6);
-	static BooleanProperty _inDebugMode              = new SimpleBooleanProperty(false);
+	static IntegerProperty     _displayPrecision         = new SimpleIntegerProperty(4);
+	static DisplayRoundingMode _displayRoundingMode      = DisplayRoundingMode.FLOOR;
+	static IntegerProperty     _displayScientificGreater = new SimpleIntegerProperty(8);
+	static IntegerProperty     _displayScientificAfter   = new SimpleIntegerProperty(6);
+	static BooleanProperty     _inDebugMode              = new SimpleBooleanProperty(false);
 	//
 	private FileChooser praiseFileChooser;
 	private FileChooser uaiFileChooser;
@@ -195,7 +218,7 @@ public class SGSolverDemoController {
 	public static String displayResultPrecision(String answer) {
 		String result = answer;
 				
-		int oldRoundingMode      = Rational.setToStringDotRoundingMode(Rational.ROUND_FLOOR);
+		int oldRoundingMode      = Rational.setToStringDotRoundingMode(_displayRoundingMode.getValue());
 		int oldDisplayPrecision  = SyntaxTrees.setNumericDisplayPrecision(_displayPrecision.get());
 		int oldScientificGreater = SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces(_displayScientificGreater.get());
 		int oldScientificAfter   = SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(_displayScientificAfter.get());
