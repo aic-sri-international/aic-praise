@@ -43,6 +43,7 @@ import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
+import com.sri.ai.praise.sgsolver.demo.SGSolverDemoController;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.service.ExecuteHOGMQueryService;
@@ -242,7 +243,7 @@ public class QueryController {
 	private void displayQueryAnswer(String query, String result, ParsedModel parseModel, long millisecondsToCompute) {
 		String title = "Query '"+query+duration("' took ", millisecondsToCompute)+" to compute answer '"+result+"'";
 		HOGMCodeArea resultCodeArea = new HOGMCodeArea();
-		resultCodeArea.setText(result);
+		resultCodeArea.setText(SGSolverDemoController.displayResultPrecision(result));
 		resultCodeArea.setEditable(false);
 		
 		HOGMCodeArea parsedModelArea = new HOGMCodeArea();

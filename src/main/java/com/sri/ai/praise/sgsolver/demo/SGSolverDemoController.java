@@ -51,6 +51,8 @@ import java.util.stream.IntStream;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
@@ -78,6 +80,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -92,6 +95,7 @@ import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.praise.sgsolver.demo.perspective.ChurchPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.HOGMPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.Perspective;
+import com.sri.ai.util.math.Rational;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
@@ -128,6 +132,10 @@ public class SGSolverDemoController {
 	@FXML private Button addPageButton;
 	//
 	@FXML private Button configureButton;
+	//
+	static IntegerProperty _displayPrecision         = new SimpleIntegerProperty(4);
+	static IntegerProperty _displayScientificGreater = new SimpleIntegerProperty(8);
+	static IntegerProperty _displayScientificAfter   = new SimpleIntegerProperty(6);
 	//
 	private FileChooser praiseFileChooser;
 	private FileChooser uaiFileChooser;
@@ -171,6 +179,33 @@ public class SGSolverDemoController {
 				});
 			}
 		});
+	}
+	
+	public static String displayResultPrecision(String answer) {
+		String result = answer;
+				
+		int oldRoundingMode      = Rational.setToStringDotRoundingMode(Rational.ROUND_FLOOR);
+		int oldDisplayPrecision  = SyntaxTrees.setNumericDisplayPrecision(_displayPrecision.get());
+		int oldScientificGreater = SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces(_displayScientificGreater.get());
+		int oldScientificAfter   = SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(_displayScientificAfter.get());
+		
+		try {
+			Expression parsed = Expressions.parse(answer);
+			if (parsed != null) {
+				result = parsed.toString();
+			}
+		}
+		catch (Throwable t) {
+			FXUtil.exception(t);
+		}
+		finally {
+			Rational.setToStringDotRoundingMode(oldRoundingMode);
+			SyntaxTrees.setNumericDisplayPrecision(oldDisplayPrecision);
+			SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces(oldScientificGreater);
+			SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(oldScientificAfter);
+		}
+		
+		return result;
 	}
 	
 	//
