@@ -126,11 +126,11 @@ public class HOGModel {
 			sortConstants.add(Expressions.TRUE);
 			
 			sortStatements.forEach(sortStatement -> {
-				if (!SortDeclaration.isSortDeclaration(sortStatement.statement)) {
-					newError(Type.SORT_DECLARATION_IS_NOT_LEGAL, "", sortStatement);
-				}
-				else if (SortDeclaration.isInBuilt(sortStatement.statement)) {
+				if (SortDeclaration.isNameOfInBuilt(sortStatement.statement.get(0))) {
 					newError(Type.SORT_NAME_PREDEFINED, "", sortStatement);
+				}
+				else if (!SortDeclaration.isSortDeclaration(sortStatement.statement)) {
+					newError(Type.SORT_DECLARATION_IS_NOT_LEGAL, "", sortStatement);
 				}
 				else {
 					SortDeclaration sortDeclaration = SortDeclaration.makeSortDeclaration(sortStatement.statement);

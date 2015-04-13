@@ -1,5 +1,8 @@
 package com.sri.ai.test.praise.sgsolver.hogm.antlr;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -8,6 +11,8 @@ import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.sgsolver.model.HOGModelError;
+import com.sri.ai.praise.sgsolver.model.HOGModelException;
 
 public class HOGMParserTest {
 	protected Parser parser;
@@ -47,6 +52,30 @@ public class HOGMParserTest {
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list"))),
 							  null, null));
+	}
+	
+	@Test
+	public void testDetectedSortErrors() {
+		// Should not parse
+		test("sort People: -1;", null);
+		test("sort People: Something;", null);
+		
+		// Predefined
+		testExpectedModelError("sort Boolean: 2, false, true;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort Boolean: 2, true, false;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort Boolean;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		
+		testExpectedModelError("sort Number: Unknown;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort Number: 2;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort Number;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		
+		testExpectedModelError(
+				"sort People: 2, fred, tom;\n"
+				+"sort People: Unknown;", HOGModelError.Type.SORT_NAME_NOT_UNIQUE);
+
+		testExpectedModelError(
+				 "sort People: Unknown, fred, washington;\n"
+				+"sort Places: Unknown, washington;", HOGModelError.Type.CONSTANT_NAME_NOT_UNIQUE);
 	}
 	
 	@Test
@@ -123,6 +152,28 @@ public class HOGMParserTest {
 		}
 		else {
 			Assert.assertNull(result);
+		}
+	}
+	
+	protected void testExpectedModelError(String input, HOGModelError.Type... expectedModelErrorTypes) {
+		try {
+			parser.parse(input);
+			Assert.fail(HOGModelException.class.getName()+" should have been thrown");
+		}
+		catch (HOGModelException modelException) {
+			Set<HOGModelError.Type> expected = new HashSet<>();
+			for (HOGModelError.Type e : expectedModelErrorTypes) {
+				expected.add(e);
+			}
+			Set<HOGModelError.Type> detected = new HashSet<>();
+			modelException.getErrors().forEach(me -> detected.add(me.getErrorType()));
+			
+			if (!detected.equals(expected)) {
+				Assert.fail("HOGModelError.Types do not match\n"
+						 +  "Expected="+expected+"\n"
+						 +  "Detected="+detected+"\n"
+						 +  "Errors  ="+modelException.getErrors());
+			}
 		}
 	}
 }
