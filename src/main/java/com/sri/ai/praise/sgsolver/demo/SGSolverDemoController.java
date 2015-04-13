@@ -64,11 +64,14 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -149,6 +152,11 @@ public class SGSolverDemoController {
 	private RadioButton hogmPerspectiveRadioButton   = new RadioButton("HOGM");
 	private RadioButton churchPerspectiveRadioButton = new RadioButton("Church");
 	private Button      importUAIModelButton         = new Button("Import UAI Model...");
+	//
+	private Spinner<Integer> displayPrecisionSpinner  = new Spinner<>();
+	private Spinner<Integer> displayScientificGreater = new Spinner<>();
+	private Spinner<Integer> displayScientificAfter   = new Spinner<>();
+	private CheckBox         debugModeCheckBox        = new CheckBox();
 	
 	//
 	private Perspective perspective;
@@ -254,6 +262,7 @@ public class SGSolverDemoController {
     	
     	configureSettingsPopOver.setAutoHide(true);
     	configureSettingsPopOver.setDetachedTitle("Configure Settings");
+    	configureSettingsPopOver.setContentNode(configureSettingsContent());
     	//
     	//
     	modelPagination.setPageFactory(this::createModelPage);
@@ -676,6 +685,39 @@ public class SGSolverDemoController {
 		);
 		
 		return openMenu;
+	}
+	
+	private Node configureSettingsContent() {
+		VBox configureMenu = new VBox(2);
+		configureMenu.setPadding(new Insets(3,3,3,3));
+		
+		HBox displayPrecisionHBox = newButtonHBox();
+		displayPrecisionSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 80, _displayPrecision.get()));
+		displayPrecisionSpinner.setPrefWidth(60);
+		_displayPrecision.bind(displayPrecisionSpinner.valueProperty());
+		displayPrecisionHBox.getChildren().addAll(new Label("Display Numeric Precision:"), displayPrecisionSpinner);
+		
+		HBox displayScientificHBox = newButtonHBox();
+		displayScientificGreater.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 80, _displayScientificGreater.get()));
+		displayScientificGreater.setPrefWidth(60);
+		_displayScientificGreater.bind(displayScientificGreater.valueProperty());	
+		displayScientificAfter.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 80, _displayScientificAfter.get()));
+		displayScientificAfter.setPrefWidth(60);
+		_displayScientificAfter.bind(displayScientificAfter.valueProperty());
+		displayScientificHBox.getChildren().addAll(new Label("Use Scientific When Outside Range:"), displayScientificGreater, new Label("."), displayScientificAfter);
+
+		debugModeCheckBox.setSelected(_inDebugMode.get());
+		debugModeCheckBox.setText("In Debug Mode");
+		_inDebugMode.bind(debugModeCheckBox.selectedProperty());
+		
+		configureMenu.getChildren().addAll(
+						displayPrecisionHBox,
+						displayScientificHBox,
+						new Separator(Orientation.HORIZONTAL),
+						debugModeCheckBox
+		);
+		
+		return configureMenu;
 	}
 	
 	private HBox newButtonHBox() {
