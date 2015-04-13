@@ -102,6 +102,41 @@ public class HOGMParserTest {
 				              null));	
 	}
 	
+	@Test
+	public void testDetectedRandomVariableErrors() {
+		test("random times: Number x Number;", null);
+		test("random times: x Number;", null);
+		test("random times: x -> Number;", null);
+		
+		testExpectedModelError(			 
+				 "sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random grade: Number -> Grade;\n"
+				+"random grade: Number -> Boolean;", HOGModelError.Type.RANDOM_VARIABLE_NAME_NOT_UNIQUE);
+
+		testExpectedModelError(			 
+				 "sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random ng: Boolean;", HOGModelError.Type.RANDOM_VARIABLE_NAME_SAME_AS_CONSTANT);
+
+		test("random not: Boolean;", null);
+		test("random and: Boolean;", null);
+		test("random or: Boolean;", null);
+		testExpectedModelError("random 'if . then . else .': Boolean;", HOGModelError.Type.RANDOM_VARIABLE_NAME_SAME_AS_IN_BUILT_FUNCTOR);
+		test("random sort: Boolean;", null);
+		test("random random: Boolean;", null);
+		
+		testExpectedModelError("random 'for all . : .': Boolean;", HOGModelError.Type.RANDOM_VARIABLE_NAME_SAME_AS_QUANTIFIER);
+		testExpectedModelError("random 'there exists . : .': Boolean;", HOGModelError.Type.RANDOM_VARIABLE_NAME_SAME_AS_QUANTIFIER);
+	
+		testExpectedModelError("random location: Place;", HOGModelError.Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED);
+		testExpectedModelError("random location: Number x Number -> Place;", HOGModelError.Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED);
+
+		testExpectedModelError( 
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random goodGrade: Grade -> Boolean;\n"
+				+"goodGrade(55);",
+				HOGModelError.Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRENT_TYPE);
+	}
+	
 	//
 	// PROTECTED
 	//

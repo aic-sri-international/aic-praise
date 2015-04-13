@@ -173,10 +173,10 @@ public class HOGModel {
 						if (!sorts.containsKey(rvDeclaration.getRangeSort()) && !SortDeclaration.isNameOfInBuilt(rvDeclaration.getRangeSort())) {
 							newError(Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED, rvDeclaration.getRangeSort(), rvStatement);
 						}
-						if (HOGMModelConstants.KNOWN_FUNCTORS.contains(rvDeclaration.getName().toString())) {
+						if (HOGMModelConstants.KNOWN_FUNCTORS.contains(functorName(rvDeclaration.getName()))) {
 							newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_IN_BUILT_FUNCTOR, rvDeclaration.getName(), rvStatement);
 						}
-						if (ForAll.LABEL.equals(rvDeclaration.getName().toString()) || ThereExists.LABEL.equals(rvDeclaration.getName().toString())) {
+						if (ForAll.LABEL.equals(functorName(rvDeclaration.getName())) || ThereExists.LABEL.equals(functorName(rvDeclaration.getName()))) {
 							newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_QUANTIFIER, rvDeclaration.getName(), rvStatement);
 						}
 						// Track the category type of the random variable
@@ -348,7 +348,7 @@ public class HOGModel {
 						result = SortDeclaration.IN_BUILT_NUMBER;
 					}
 					else if (isDeclaredRandomFunctor(functor)) {
-						RandomVariableDeclaration rvDeclaration = randoms.get(expr);
+						RandomVariableDeclaration rvDeclaration = randoms.get(functor);
 						if (SortDeclaration.IN_BUILT_BOOLEAN.getName().equals(rvDeclaration.getRangeSort())) {
 							result = SortDeclaration.IN_BUILT_BOOLEAN;
 						}
@@ -538,7 +538,11 @@ public class HOGModel {
 		}
 		
 		boolean isUnknownConstant(Expression expr) {
-			boolean result = Expressions.isSymbol(expr) && !Expressions.isNumber(expr) && !isVariable(expr) && !sortConstants.contains(expr);
+			boolean result = Expressions.isSymbol(expr) && 
+							!Expressions.isNumber(expr) && 
+							!isVariable(expr) && 
+							!randoms.containsKey(expr) && 
+							!sortConstants.contains(expr);
 			return result;
 		}
 		
