@@ -312,15 +312,7 @@ public class HOGModel {
 					else if (isPrologConstant.apply(expr)) {
 						RandomVariableDeclaration rvDeclaration = randoms.get(expr);
 						if (rvDeclaration != null) {
-							if (SortDeclaration.IN_BUILT_BOOLEAN.getName().equals(rvDeclaration.getRangeSort())) {
-								result = SortDeclaration.IN_BUILT_BOOLEAN;
-							}
-							else if (SortDeclaration.IN_BUILT_NUMBER.getName().equals(rvDeclaration.getRangeSort())) {
-								result = SortDeclaration.IN_BUILT_NUMBER;
-							}
-							else {
-								result = sorts.get(rvDeclaration.getRangeSort());
-							}
+							result = getSort(rvDeclaration.getRangeSort());
 						}
 						else if (sortConstants.contains(expr)){
 							for (SortDeclaration sort : sorts.values()) {
@@ -349,15 +341,7 @@ public class HOGModel {
 					}
 					else if (isDeclaredRandomFunctor(functor)) {
 						RandomVariableDeclaration rvDeclaration = randoms.get(functor);
-						if (SortDeclaration.IN_BUILT_BOOLEAN.getName().equals(rvDeclaration.getRangeSort())) {
-							result = SortDeclaration.IN_BUILT_BOOLEAN;
-						}
-						else if (SortDeclaration.IN_BUILT_NUMBER.getName().equals(rvDeclaration.getRangeSort())) {
-							result = SortDeclaration.IN_BUILT_NUMBER;
-						}
-						else {
-							result = sorts.get(rvDeclaration.getRangeSort());
-						}
+						result = getSort(rvDeclaration.getRangeSort());
 					}
 					else {
 						result = null; // Don't know
@@ -422,7 +406,7 @@ public class HOGModel {
 							newError(Type.TERM_CONSTANT_NOT_DEFINED, "'"+arg+"'", termStatement);
 						}
 						else {
-							if (sorts.get(rvDeclaration.getParameterSorts().get(i)) != determineSortType(arg)) {
+							if (getSort(rvDeclaration.getParameterSorts().get(i)) != determineSortType(arg)) {
 								newError(Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
 							}
 						}
@@ -493,7 +477,7 @@ public class HOGModel {
 						}
 						
 						// The type of arguments must all match in these instances
-						if (Equality.isEquality(nonRandomFunction) || Disequality.isDisequality(nonRandomFunction)) {
+						if (IfThenElse.isIfThenElse(nonRandomFunction) || Equality.isEquality(nonRandomFunction) || Disequality.isDisequality(nonRandomFunction)) {
 							if (argSorts.size() != 1) {							
 								newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE, "'"+nonRandomFunction+"'", termStatement);
 							}
@@ -533,7 +517,7 @@ public class HOGModel {
 		}
 		
 		boolean isVariable(Expression expr) {
-			boolean result = !isPrologConstant.apply(expr);
+			boolean result = Expressions.isSymbol(expr) && !isPrologConstant.apply(expr);
 			return result;
 		}
 		
@@ -603,12 +587,32 @@ public class HOGModel {
 			return result;
 		}
 		
+		SortDeclaration getSort(Expression sortName) {
+			SortDeclaration result = null;
+			
+			if (SortDeclaration.IN_BUILT_BOOLEAN.getName().equals(sortName)) {
+				result = SortDeclaration.IN_BUILT_BOOLEAN;
+			}
+			else if (SortDeclaration.IN_BUILT_NUMBER.getName().equals(sortName)) {
+				result = SortDeclaration.IN_BUILT_NUMBER;
+			}
+			else {
+				result = sorts.get(sortName);
+			}
+			
+			return result;
+		}
+		
 		void updateSort(SortDeclaration sort, Set<Expression> unknownConstants) {
 			if (sort != null) {
 				List<Expression> constants = new ArrayList<>(ExtensionalSet.getElements(sort.getConstants()));
-				constants.addAll(unknownConstants);
-				sorts.put(sort.getName(), new SortDeclaration(sort.getName(), sort.getSize(), ExtensionalSet.makeUniSet(constants)));
-				sortConstants.addAll(unknownConstants);
+				// Ensure we can extend the constants associated with the sort
+				if (SortDeclaration.UNKNOWN_SIZE.equals(sort.getSize()) ||
+					(constants.size() + unknownConstants.size()) < sort.getSize().intValue()) {
+					constants.addAll(unknownConstants);
+					sorts.put(sort.getName(), new SortDeclaration(sort.getName(), sort.getSize(), ExtensionalSet.makeUniSet(constants)));
+					sortConstants.addAll(unknownConstants);
+				}
 			}
 		}
 		

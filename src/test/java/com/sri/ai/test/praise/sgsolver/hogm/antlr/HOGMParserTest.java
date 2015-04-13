@@ -60,6 +60,10 @@ public class HOGMParserTest {
 		test("sort People: -1;", null);
 		test("sort People: Something;", null);
 		
+		testExpectedModelError( // Too many constants 
+				"sort Grade: 7, a, b, c, d, e, f, g, ng;\n",
+				HOGModelError.Type.SORT_DECLARATION_IS_NOT_LEGAL);
+		
 		// Predefined
 		testExpectedModelError("sort Boolean: 2, false, true;", HOGModelError.Type.SORT_NAME_PREDEFINED);
 		testExpectedModelError("sort Boolean: 2, true, false;", HOGModelError.Type.SORT_NAME_PREDEFINED);
@@ -135,6 +139,100 @@ public class HOGMParserTest {
 				+"random goodGrade: Grade -> Boolean;\n"
 				+"goodGrade(55);",
 				HOGModelError.Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRENT_TYPE);
+	}
+	
+	@Test
+	public void testDetectedStatementErrors() {
+		testExpectedModelError("goodGrade(55);", 
+				HOGModelError.Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, 
+				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);		
+
+		testExpectedModelError( 
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random goodGrade: Grade -> Boolean;\n"
+				+"goodGrade(a, true);",
+				HOGModelError.Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION);
+		testExpectedModelError( 
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random goodGrade: Grade -> Boolean;\n"
+				+"goodGrade;",
+				HOGModelError.Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION);	
+		testExpectedModelError( 
+				"random president: Boolean;\n"
+				+"president(true);",
+				HOGModelError.Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION);
+		
+		
+		testExpectedModelError("president = true;",
+				HOGModelError.Type.TERM_CONSTANT_NOT_DEFINED);		
+		
+		testExpectedModelError( 
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random goodGrade: Grade -> Boolean;\n"
+				+"goodGrade(a1);", // Can't add to sort as already too large
+				HOGModelError.Type.TERM_CONSTANT_NOT_DEFINED);	
+		testExpectedModelError("a1 and true;", HOGModelError.Type.TERM_CONSTANT_NOT_DEFINED);
+		
+		testExpectedModelError(
+				"random president: Boolean;\n"
+				+"if 1 then president else not president;",
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE,
+				HOGModelError.Type.TERM_CONDITONAL_STATEMENT_MUST_BE_OF_TYPE_NUMERIC);
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random grade: Number -> Grade;\n"
+				+"grade(55) and (grade(55) = a);",
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE);	
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random grade: Number -> Grade;\n"
+				+"grade(55) + (grade(55) = a);",
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE,
+				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);	
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random grade: Number -> Grade;\n"
+				+"for all X: grade(X);",
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE);
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random grade: Number -> Grade;\n"
+				+"there exists X: grade(X);",
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE);
+		
+		testExpectedModelError(
+				"true = 1;",
+				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE);
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random grade: Number -> Grade;\n"
+				+"grade(55) = 55;",
+				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE);
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random grade: Number -> Grade;\n"
+				+"random president: Boolean;"
+				+"if president then grade(55) else 0.3;",
+				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE,
+				HOGModelError.Type.TERM_CONDITONAL_STATEMENT_MUST_BE_OF_TYPE_NUMERIC);
+		
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"grade(55) = 55;",
+				HOGModelError.Type.TERM_SORT_CANNOT_BE_DETERMINED,
+				HOGModelError.Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED);
+		
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random grade: Number -> Grade;\n"
+				+"random president: Boolean;"
+				+"if president then grade(55) else grade(22);",
+				HOGModelError.Type.TERM_CONDITONAL_STATEMENT_MUST_BE_OF_TYPE_NUMERIC);		
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random grade: Number -> Grade;\n"
+				+"grade(55);",
+				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);
 	}
 	
 	//
