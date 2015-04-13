@@ -51,7 +51,9 @@ import java.util.stream.IntStream;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
@@ -136,6 +138,7 @@ public class SGSolverDemoController {
 	static IntegerProperty _displayPrecision         = new SimpleIntegerProperty(4);
 	static IntegerProperty _displayScientificGreater = new SimpleIntegerProperty(8);
 	static IntegerProperty _displayScientificAfter   = new SimpleIntegerProperty(6);
+	static BooleanProperty _inDebugMode              = new SimpleBooleanProperty(false);
 	//
 	private FileChooser praiseFileChooser;
 	private FileChooser uaiFileChooser;
@@ -206,6 +209,10 @@ public class SGSolverDemoController {
 		}
 		
 		return result;
+	}
+	
+	public static boolean isInDebugMode() {
+		return _inDebugMode.get();
 	}
 	
 	//

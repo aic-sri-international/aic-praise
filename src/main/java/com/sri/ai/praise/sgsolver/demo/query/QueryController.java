@@ -57,6 +57,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -246,29 +247,37 @@ public class QueryController {
 		resultCodeArea.setText(SGSolverDemoController.displayResultPrecision(result));
 		resultCodeArea.setEditable(false);
 		
-		HOGMCodeArea parsedModelArea = new HOGMCodeArea();
-		StringJoiner sj = new StringJoiner("\n");
-		sj.add("// SORT DECLARATIONS:");
-		parseModel.getSortDeclarations().forEach(sd -> {
-			sj.add(sd.getSortDeclaration().toString()+";");
-		});
-		sj.add("// RANDOM VARIABLE DECLARATIONS:");
-		parseModel.getRandomVariableDeclarations().forEach(rd -> {
-			sj.add(rd.getRandomVariableDeclaration().toString()+";");
-		});
-		sj.add("// CONDITIONED POTENTIALS:");
-		parseModel.getConditionedPotentials().forEach(cp -> {
-			sj.add(cp.toString()+";");
-		});
-		parsedModelArea.setText(sj.toString());
-		parsedModelArea.setEditable(false);
+		Node resultContent = null;
+		if (SGSolverDemoController.isInDebugMode()) {
+			HOGMCodeArea parsedModelArea = new HOGMCodeArea();
+			StringJoiner sj = new StringJoiner("\n");
+			sj.add("// SORT DECLARATIONS:");
+			parseModel.getSortDeclarations().forEach(sd -> {
+				sj.add(sd.getSortDeclaration().toString()+";");
+			});
+			sj.add("// RANDOM VARIABLE DECLARATIONS:");
+			parseModel.getRandomVariableDeclarations().forEach(rd -> {
+				sj.add(rd.getRandomVariableDeclaration().toString()+";");
+			});
+			sj.add("// CONDITIONED POTENTIALS:");
+			parseModel.getConditionedPotentials().forEach(cp -> {
+				sj.add(cp.toString()+";");
+			});
+			parsedModelArea.setText(sj.toString());
+			parsedModelArea.setEditable(false);
+			
+			
+			TabPane resultTabs = new TabPane();
+			resultTabs.getTabs().add(new Tab("Answer", resultCodeArea));
+			resultTabs.getTabs().add(new Tab("Parsed As", parsedModelArea));
+			
+			resultContent = resultTabs;
+		}
+		else {
+			resultContent = resultCodeArea;
+		}
 		
-		
-		TabPane resultTabs = new TabPane();
-		resultTabs.getTabs().add(new Tab("Answer", resultCodeArea));
-		resultTabs.getTabs().add(new Tab("Parsed As", parsedModelArea));
-		
-		TitledPane resultPane = new TitledPane(title, resultTabs);
+		TitledPane resultPane = new TitledPane(title, resultContent);
 		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.CHECK);
 		
 		showResultPane(resultPane);
