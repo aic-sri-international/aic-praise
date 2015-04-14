@@ -130,8 +130,21 @@ public class HOGMQueryTask extends Task<QueryResult> {
     	}
     	catch (HOGModelException me) {
     		me.getErrors().forEach(modelError -> {
+    			String inStatement    = modelError.getInStatementInfo().statement.toString();
+    			String inSource       = modelError.getInStatementInfo().sourceText;
+    			String inSubStatement = modelError.getMessage(); 
+    			String inInfo = "";
+    			if (inSubStatement.equals("") || inSubStatement.equals(inSource)) {
+    				inInfo = " in '"+inStatement+"'";
+    			}
+    			else {
+    				inInfo = " ('"+inSubStatement+"') in '"+inStatement+"'";
+    			}
+    			if (!inSource.replaceAll(" ", "").replaceAll(";", "").equals(inStatement.replaceAll(" ", ""))) {
+    				inInfo = inInfo + " derived from '"+inSource+"'";
+    			}
     			errors.add(new QueryError(QueryError.Context.MODEL,
-    					""+modelError.getErrorType()+": "+modelError.getMessage()+" "+modelError.getInStatementInfo().statement, 
+    					modelError.getErrorType().formattedMessage()+inInfo, 
     					modelError.getInStatementInfo().line,
     					modelError.getInStatementInfo().startIndex, 
     					modelError.getInStatementInfo().endIndex));
@@ -186,11 +199,20 @@ public class HOGMQueryTask extends Task<QueryResult> {
 		
 		@Override
 		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+			int start = 0; 
+			int end   = 0; 
+			if (e != null && e.getOffendingToken() != null) {
+				start = e.getOffendingToken().getStartIndex();
+				end   = e.getOffendingToken().getStopIndex();
+			}
+			if (start > end) {
+				start = end;
+			}
 			errors.add(new QueryError(context,
-					    name +"[" + line + ":"+ charPositionInLine + "] " + msg,
-					    e.getOffendingToken().getLine(),
-					   	e.getOffendingToken().getStartIndex(),
-					   	e.getOffendingToken().getStopIndex()
+					    name +" error at line " + line + " column "+ charPositionInLine + " - " + msg,
+					    line,
+					   	start,
+					   	end
 					));
 			errorsDetected = true;
 		}

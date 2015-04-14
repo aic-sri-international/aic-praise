@@ -39,6 +39,8 @@ package com.sri.ai.praise.sgsolver.demo.service;
 
 import java.util.StringJoiner;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.google.common.annotations.Beta;
 
 @Beta
@@ -68,13 +70,14 @@ public class QueryError {
 			throw new IllegalArgumentException("Context cannot be set to UNKNOWN when providing context start and end infofrmation.");
 		}
 		if (startContextIdx < 0 || endContextIdx < 0 || endContextIdx < startContextIdx) {
-			throw new IllegalArgumentException("Start and End context information is invalid: start="+startContextIdx+", end="+endContextIdx);
+			throw new IllegalArgumentException("Start and end context information is invalid: start="+startContextIdx+", end="+endContextIdx);
 		}
 		this.context         = context;
 		this.line            = line;
 		this.startContextIdx = startContextIdx;
 		this.endContextIdx   = endContextIdx;
 		this.errorMessage    = errorMessage;
+		this.throwable       = t;
 	}
 	
 	public Context getContext() {
@@ -99,10 +102,27 @@ public class QueryError {
 	
 	@Override
 	public String toString() {
-		StringJoiner sj = new StringJoiner(" - ");
+		StringJoiner sj = new StringJoiner("");
 		
-		sj.add(""+context+(context == Context.UNKNOWN ? "" : "@["+line+":"+startContextIdx+" to "+endContextIdx+"]"));
+		if (context == Context.UNKNOWN) {
+			sj.add("General Error: ");
+		}
+		else if (context == Context.QUERY) {
+			sj.add("Error in Query ");
+		}
+		else if (context == Context.MODEL) {
+			sj.add("Error in Model ");
+		}
+		
+		if (context != Context.UNKNOWN) {
+			sj.add("at Line "+line+": ");
+		}
 		sj.add(errorMessage);
+		
+		if (throwable != null) {			
+			sj.add("\n");
+			sj.add(ExceptionUtils.getStackTrace(throwable));
+		}
 		
 		return sj.toString();
 	}

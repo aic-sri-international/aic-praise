@@ -43,12 +43,14 @@ import com.sri.ai.expresso.api.Expression;
 @Beta
 public class StatementInfo {
 	public final Expression statement;
+	public final String     sourceText;
 	public final int        line;
 	public final int        startIndex;
 	public final int        endIndex;
 	
-	public StatementInfo(Expression statement, int line, int startIndex, int endIndex) {
+	public StatementInfo(Expression statement, String sourceText, int line, int startIndex, int endIndex) {
 		this.statement  = statement;
+		this.sourceText = sourceText;
 		this.line       = line;
 		this.startIndex = startIndex;
 		this.endIndex   = endIndex;
@@ -56,6 +58,6 @@ public class StatementInfo {
 	
 	@Override
 	public String toString() {
-		return "@["+line+":"+startIndex+" to "+endIndex+"] "+statement.toString();
+		return "@["+line+":"+startIndex+" to "+endIndex+"] "+sourceText.toString();
 	}
 }

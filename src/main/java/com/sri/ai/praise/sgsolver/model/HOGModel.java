@@ -393,7 +393,7 @@ public class HOGModel {
 			getRandomFunctions(termStatement.statement, randomFunctions);
 			randomFunctions.forEach(randomFunction -> {
 				if (!isValidDeclaredRandomFunctorArity(randomFunction)) {
-					newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+randomFunction+"'", termStatement);
+					newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, randomFunction, termStatement);
 				}
 				else {
 					RandomVariableDeclaration rvDeclaration = randoms.get(randomFunction.getFunctorOrSymbol());
@@ -403,11 +403,11 @@ public class HOGModel {
 							continue; // takes on type of the sort at this position
 						}
 						if (isUnknownConstant(arg)) {
-							newError(Type.TERM_CONSTANT_NOT_DEFINED, "'"+arg+"'", termStatement);
+							newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
 						}
 						else {
 							if (getSort(rvDeclaration.getParameterSorts().get(i)) != determineSortType(arg)) {
-								newError(Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+								newError(Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
 							}
 						}
 					}
@@ -433,19 +433,19 @@ public class HOGModel {
 								continue; // Takes on the type of its position
 							}
 							if (!isDeclaredRandomFunctor(arg.getFunctorOrSymbol()) && isUnknownConstant(arg)) {
-								newError(Type.TERM_CONSTANT_NOT_DEFINED, "'"+arg+"'", termStatement);
+								newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
 							}
 							else {
 								// All arguments must be of the same type
 								SortDeclaration sortType = determineSortType(arg);
 								if (sortType == null) {
-									newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, "'"+arg+"'", termStatement);
+									newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, arg, termStatement);
 								}
 								if (IfThenElse.isIfThenElse(nonRandomFunction)) {
 									if (i == 0) {
 										// The conditional must be boolean
 										if (sortType != SortDeclaration.IN_BUILT_BOOLEAN) {
-											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
 										}
 									}
 									else {
@@ -461,16 +461,16 @@ public class HOGModel {
 								else {
 									if (booleanTypeFunctors.contains(functorName)) {
 										if (sortType != SortDeclaration.IN_BUILT_BOOLEAN) {
-											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
 										}
 									}
 									else if (numericTypeFunctors.contains(functorName)) {
 										if (sortType != SortDeclaration.IN_BUILT_NUMBER) {
-											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
 										}
 									}
 									else {
-										newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+arg+"'", termStatement);
+										newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
 									}
 								}
 							}
@@ -479,13 +479,13 @@ public class HOGModel {
 						// The type of arguments must all match in these instances
 						if (IfThenElse.isIfThenElse(nonRandomFunction) || Equality.isEquality(nonRandomFunction) || Disequality.isDisequality(nonRandomFunction)) {
 							if (argSorts.size() != 1) {							
-								newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE, "'"+nonRandomFunction+"'", termStatement);
+								newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE, nonRandomFunction, termStatement);
 							}
 						}
 					}
 				}
 				else {					
-					newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, "'"+nonRandomFunction.getFunctor()+"'", termStatement);
+					newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, nonRandomFunction.getFunctor(), termStatement);
 				}
 			});
 			
@@ -495,7 +495,7 @@ public class HOGModel {
 // TODO - validate index				
 				Expression body = ForAll.isForAll(quantifier) ? ForAll.getBody(quantifier) : ThereExists.getBody(quantifier);
 				if (determineSortType(body) != SortDeclaration.IN_BUILT_BOOLEAN) {
-					newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, "'"+body+"'", termStatement);
+					newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, body, termStatement);
 				}
 			});			
 		}

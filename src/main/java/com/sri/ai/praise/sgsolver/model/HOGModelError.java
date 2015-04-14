@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.sgsolver.model;
 
+import java.util.StringJoiner;
+
 import com.google.common.annotations.Beta;
 
 @Beta
@@ -66,7 +68,25 @@ public class HOGModelError {
 		TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE,
 		TERM_SORT_CANNOT_BE_DETERMINED,
 		TERM_CONDITONAL_STATEMENT_MUST_BE_OF_TYPE_NUMERIC,
-		TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN,
+		TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN;
+		
+		public String formattedMessage() {
+			String msg = toString();
+			msg = msg.replaceAll("_", " ");
+			StringJoiner sj = new StringJoiner(" ");
+			String[] words = msg.split(" ");
+			for (int i = 0; i < words.length; i++) {
+				if (i == 0) {
+					String leadingWord = words[i].toLowerCase();
+					sj.add(leadingWord.substring(0, 1).toUpperCase()+leadingWord.substring(1, leadingWord.length()));
+				}
+				else {
+					sj.add(words[i].toLowerCase());
+				}
+			}
+			
+			return sj.toString();
+		}
 	}
 	
 	//

@@ -224,7 +224,7 @@ public class QueryController {
 	private void displayQueryErrors(String query, List<QueryError> queryErrors, long millisecondsToCompute) {
 		String title = "Query '"+query+"' encountered "+queryErrors.size()+" error(s) when attempting to compute answer ("+duration("took ", millisecondsToCompute)+")";
 		ListView<QueryError> errors = new ListView<>(FXCollections.observableList(queryErrors));
-		errors.setFixedCellSize(24);
+		//errors.setFixedCellSize(24);
 		errors.setPrefHeight(24*5);
 		errors.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		errors.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
@@ -233,12 +233,17 @@ public class QueryController {
 				if (qError.getContext() == QueryError.Context.MODEL) {
 					modelPageEditor.highlight(qError.getStartContextIndex(), qError.getEndContextIndex());
 				}
+				else if (qError.getContext() == QueryError.Context.QUERY) {
+					queryComboBox.getEditor().selectAll();
+				}
 			}
 		});
 		TitledPane resultPane = new TitledPane(title, errors);
 		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.TIMES);
 		
 		showResultPane(resultPane);
+		
+		errors.getSelectionModel().selectFirst();
 	}
 	
 	private void displayQueryAnswer(String query, String result, ParsedModel parseModel, long millisecondsToCompute) {

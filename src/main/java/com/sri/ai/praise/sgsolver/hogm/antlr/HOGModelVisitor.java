@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -417,7 +418,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// PROTECTED
 	//
  	protected StatementInfo newStatementInfo(Expression statement, ParserRuleContext ctx) {
- 		StatementInfo result = new StatementInfo(statement, ctx.getStart().getLine(), ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex());
+ 		StatementInfo result = new StatementInfo(statement, ctx.getText(), ctx.getStart().getLine(), ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex());
  		return result;
  	}
  	
