@@ -445,7 +445,7 @@ public class HOGModel {
 									if (i == 0) {
 										// The conditional must be boolean
 										if (sortType != SortDeclaration.IN_BUILT_BOOLEAN) {
-											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
+											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
 										}
 									}
 									else {
@@ -461,16 +461,16 @@ public class HOGModel {
 								else {
 									if (booleanTypeFunctors.contains(functorName)) {
 										if (sortType != SortDeclaration.IN_BUILT_BOOLEAN) {
-											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
+											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
 										}
 									}
 									else if (numericTypeFunctors.contains(functorName)) {
 										if (sortType != SortDeclaration.IN_BUILT_NUMBER) {
-											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
+											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
 										}
 									}
 									else {
-										newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
+										newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
 									}
 								}
 							}
@@ -495,7 +495,7 @@ public class HOGModel {
 // TODO - validate index				
 				Expression body = ForAll.isForAll(quantifier) ? ForAll.getBody(quantifier) : ThereExists.getBody(quantifier);
 				if (determineSortType(body) != SortDeclaration.IN_BUILT_BOOLEAN) {
-					newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, body, termStatement);
+					newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, body, termStatement);
 				}
 			});			
 		}

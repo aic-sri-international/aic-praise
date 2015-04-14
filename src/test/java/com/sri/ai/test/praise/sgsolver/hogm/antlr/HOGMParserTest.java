@@ -219,29 +219,29 @@ public class HOGMParserTest {
 		testExpectedModelError(
 				"random president: Boolean;\n"
 				+"if 1 then president else not president;",
-				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE,
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE,
 				HOGModelError.Type.TERM_CONDITONAL_STATEMENT_MUST_BE_OF_TYPE_NUMERIC);
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
 				+"random grade: Number -> Grade;\n"
 				+"grade(55) and (grade(55) = a);",
-				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE);	
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);	
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
 				+"random grade: Number -> Grade;\n"
 				+"grade(55) + (grade(55) = a);",
-				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE,
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE,
 				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);	
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
 				+"random grade: Number -> Grade;\n"
 				+"for all X: grade(X);",
-				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE);
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
 				+"random grade: Number -> Grade;\n"
 				+"there exists X: grade(X);",
-				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRENT_TYPE);
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
 		
 		testExpectedModelError(
 				"true = 1;",
