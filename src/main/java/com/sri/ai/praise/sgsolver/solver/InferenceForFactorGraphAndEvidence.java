@@ -58,11 +58,13 @@ import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
+import com.sri.ai.grinder.plaindpll.api.TermTheory;
 import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.core.SGVET;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
 import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
+import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.util.Util;
 
@@ -102,16 +104,6 @@ public class InferenceForFactorGraphAndEvidence {
 	public void interrupt() {
 		solver.interrupt();
 	}
-
-	@Deprecated
-	public InferenceForFactorGraphAndEvidence(
-			Expression factorGraph, boolean isBayesianNetwork,
-			Expression evidence, boolean useFactorization,
-			Map<String, String> mapFromRandomVariableNameToTypeName,
-			Map<String, String> mapFromTypeNameToSizeString) {
-		// uses empty map of non-uniquely-named constants for backward compatibility; deprecated as this should become a standard feature
-		this(factorGraph, isBayesianNetwork, evidence, useFactorization, mapFromRandomVariableNameToTypeName, Util.map(), mapFromTypeNameToSizeString);
-	}
 	
 	/**
 	 * Constructs a solver for a factor graph and an evidence expression.
@@ -150,9 +142,18 @@ public class InferenceForFactorGraphAndEvidence {
 		// We use the Prolog convention of small-letter initials for constants, but we need an exception for the random variables and the non-uniquely named constants.
 		Predicate<Expression> isPrologConstant = new PrologConstantPredicate();
 		isUniquelyNamedConstantPredicate = e -> isPrologConstant.apply(e) && ! allSymbols.contains(e);
+		
+		TermTheory termTheory = null;
+		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
+			mapFromNonUniquelyNamedConstantNameToTypeName.values().stream().anyMatch(type -> type.contains("->"))) {
+			termTheory = new FunctionalTermTheory();			
+		}
+		else {
+			termTheory = new SymbolTermTheory();
+		}
 
 		// The constraintTheory of atoms plus equality on function (relational) terms.
-		theory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new SymbolTermTheory()));
+		theory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(termTheory));
 		problemType = new SumProduct(); // for marginalization
 		// The solver for the parameters above.
 		if (useFactorization) {

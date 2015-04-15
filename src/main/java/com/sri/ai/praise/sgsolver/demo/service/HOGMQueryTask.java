@@ -108,11 +108,11 @@ public class HOGMQueryTask extends Task<QueryResult> {
 
 	    			Map<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>();
 	    			randoms.forEach(random -> {
-	    				mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.getRangeSort().toString());
+	    				mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.toTypeRepresentation());
 	    			});
 	    			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
 	    			constants.forEach(constant -> {
-	    				mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.getRangeSort().toString());
+	    				mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.toTypeRepresentation());
 	    			});
 	    			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 	    			sorts.forEach(sort -> {

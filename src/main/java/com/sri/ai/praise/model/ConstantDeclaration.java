@@ -40,6 +40,7 @@ package com.sri.ai.praise.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -198,6 +199,27 @@ public class ConstantDeclaration {
 		}
 
 		return constantDeclaration;
+	}
+	
+	/**
+	 * 
+	 * @return the type representation of the constant declaration.
+	 */
+	public String toTypeRepresentation() {
+		String result = null;
+		if (getArityValue() == 0) {
+			result = getRangeSort().toString();
+		}
+		else if (getArityValue() == 1) {
+			result = getParameterSorts().get(0).toString() + " -> " + getRangeSort().toString();
+		} else {
+			StringJoiner params = new StringJoiner(", ");
+			getParameterSorts().forEach(paramSort -> params.add(paramSort.toString()));
+			
+			result = "'->'(x("+params.toString()+"), "+getRangeSort().toString()+")";
+		}
+		
+		return result;
 	}
 
 	//
