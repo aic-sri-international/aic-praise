@@ -260,6 +260,12 @@ public class QueryController {
 			parseModel.getSortDeclarations().forEach(sd -> {
 				sj.add(sd.getSortDeclaration().toString()+";");
 			});
+			if (parseModel.getConstatDeclarations().size() > 0) {
+				sj.add("// CONSTANT DECLARATIONS:");
+				parseModel.getConstatDeclarations().forEach(cd -> {
+					sj.add(cd.getConstantDeclaration().toString()+";");
+				});
+			}
 			sj.add("// RANDOM VARIABLE DECLARATIONS:");
 			parseModel.getRandomVariableDeclarations().forEach(rd -> {
 				sj.add(rd.getRandomVariableDeclaration().toString()+";");

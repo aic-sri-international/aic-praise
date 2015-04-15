@@ -278,11 +278,12 @@ public class SGSolverDemoController {
     	uaiFileChooser.getExtensionFilters().addAll(
          		new FileChooser.ExtensionFilter("UAI Files", "*.uai"));
     	
-    	openMenuPopOver.setArrowLocation(ArrowLocation.RIGHT_TOP);
+    	openMenuPopOver.setArrowLocation(ArrowLocation.LEFT_TOP);
     	openMenuPopOver.setAutoHide(true);
     	openMenuPopOver.setDetachedTitle("Menu");
     	openMenuPopOver.setContentNode(openMenuContent());
     	
+    	configureSettingsPopOver.setArrowLocation(ArrowLocation.RIGHT_TOP);
     	configureSettingsPopOver.setAutoHide(true);
     	configureSettingsPopOver.setDetachedTitle("Configure Settings");
     	configureSettingsPopOver.setContentNode(configureSettingsContent());

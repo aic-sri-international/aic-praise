@@ -60,6 +60,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Minus;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
+import com.sri.ai.praise.model.ConstantDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGModel;
@@ -71,6 +72,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	private Map<Expression, Expression> parenthesizedExpressions = new IdentityHashMap<Expression, Expression>(); 
 	//
 	private List<StatementInfo> sortDeclarations           = new ArrayList<>();
+	private List<StatementInfo> constantDeclarations       = new ArrayList<>();
 	private List<StatementInfo> randomVariableDeclarations = new ArrayList<>();
 	private List<StatementInfo> terms                      = new ArrayList<>();
 
@@ -79,12 +81,13 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	public Expression visitModel(@NotNull HOGMParser.ModelContext ctx) { 
 
 		sortDeclarations.clear();
+		constantDeclarations.clear();
 		randomVariableDeclarations.clear();
 		terms.clear();
 		
 		ctx.statements.forEach(s -> visit(s));
 		
-		Expression result = HOGModel.validateAndConstruct(sortDeclarations, randomVariableDeclarations, terms);
+		Expression result = HOGModel.validateAndConstruct(sortDeclarations, constantDeclarations, randomVariableDeclarations, terms);
 
 		return result;
 	}
@@ -130,6 +133,52 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		
 		sortDeclarations.add(newStatementInfo(result, ctx));
 		
+		return result;
+	}
+	
+	// constant_decl 
+    // : CONSTANT name=constant_name COLON range=sort_name (SEMICOLON)? #propositionalConstantDeclaration
+	@Override 
+	public Expression visitPropositionalConstantDeclaration(@NotNull HOGMParser.PropositionalConstantDeclarationContext ctx) { 
+		Expression name  = newSymbol(ctx.name.getText());
+		Expression arity = Expressions.ZERO;
+		Expression range = newSymbol(ctx.range.getText());
+
+		List<Expression> declarationArgs = new ArrayList<Expression>();
+		declarationArgs.add(name);
+		declarationArgs.add(arity);
+		declarationArgs.add(range);
+
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
+				ConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
+				declarationArgs.toArray());
+		
+		constantDeclarations.add(newStatementInfo(result, ctx));
+
+		return result; 
+	}
+	
+	// constant_decl 
+    // | CONSTANT name=unique_constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)? #relationalConstantDeclaration
+	@Override 
+	public Expression visitRelationalConstantDeclaration(@NotNull HOGMParser.RelationalConstantDeclarationContext ctx) { 
+		Expression name = newSymbol(ctx.name.getText());
+		List<Expression> parameters = expressionsList(ctx.parameters);
+		Expression arity = Expressions.makeSymbol(parameters.size());
+		Expression range = newSymbol(ctx.range.getText());
+
+		List<Expression> declarationArgs = new ArrayList<Expression>();
+		declarationArgs.add(name);
+		declarationArgs.add(arity);
+		declarationArgs.addAll(parameters);
+		declarationArgs.add(range);
+
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
+				ConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
+				declarationArgs.toArray());
+		
+		constantDeclarations.add(newStatementInfo(result, ctx));
+
 		return result;
 	}
 	
@@ -349,18 +398,18 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  		return result;
  	}
  	
- 	// | VARIABLE #quantifierIndexTermVariable
+ 	// | PROPOSITIONAL_CONSTANT #quantifierIndexTermVariable
  	@Override 
  	public Expression visitQuantifierIndexTermVariable(@NotNull HOGMParser.QuantifierIndexTermVariableContext ctx) { 
- 		Expression result = newSymbol(ctx.VARIABLE().getText());
+ 		Expression result = newSymbol(ctx.constant_name().getText());
  		return result;
  	}
  	
- 	// | variable=VARIABLE IN sort=sort_name #quantifierIndexTermVariableInSort
+ 	// | variable=PROPOSITIONAL_CONSTANT IN sort=sort_name #quantifierIndexTermVariableInSort
  	@Override 
  	public Expression visitQuantifierIndexTermVariableInSort(@NotNull HOGMParser.QuantifierIndexTermVariableInSortContext ctx) {
  		Expression variable = newSymbol(ctx.variable.getText());
- 		Expression sortName = newSymbol(ctx.variable.getText());
+ 		Expression sortName = newSymbol(ctx.sort.getText());
  		
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IN, variable, sortName);
  		
@@ -368,7 +417,9 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	}
 
  	// sort_name
-    // : VARIABLE
+    // : IN_BUILT_SORT_BOOLEAN
+    // | IN_BUILT_SORT_NUMBER
+    // | PROPOSITIONAL_CONSTANT
  	@Override 
  	public Expression visitSort_name(@NotNull HOGMParser.Sort_nameContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
@@ -396,8 +447,8 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	
  	// constant_name
     // : X
-    // | CONSTANT
-    // | QUOTED_CONSTANT
+    // | CONSTANT_STR
+    // | QUOTED_CONSTANT_STR
  	@Override 
  	public Expression visitConstant_name(@NotNull HOGMParser.Constant_nameContext ctx) { 
  		Expression result = newSymbol(ctx.getText());

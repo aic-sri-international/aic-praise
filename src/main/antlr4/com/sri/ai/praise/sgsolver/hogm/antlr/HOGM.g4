@@ -15,12 +15,20 @@ statement
 
 declaration
     : sort_decl
+    | constant_decl
     | random_variable_decl
     ;
     
 sort_decl // sort Name [ ":" ( number | "Unknown" ) [ ", " constant+ ] ]
     : SORT name=sort_name (COLON size=(INTEGER | UNKNOWN) (COMMA constants+=constant_name)*)? (SEMICOLON)?
     ;
+    
+// "constant" constantName : SortName
+// "constant" constantName ":" SortName ('x' SortName)* '->' SortName
+constant_decl 
+    : CONSTANT name=constant_name COLON range=sort_name (SEMICOLON)? #propositionalConstantDeclaration
+    | CONSTANT name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)? #relationalConstantDeclaration
+    ;    
 
 // "random" constantName : SortName
 // "random" constantName ":" SortName ('x' SortName)* '->' SortName
@@ -79,31 +87,29 @@ quantifier_index
     
 quantifier_index_term
     : function_application #quantifierIndexTermFunctionApplication
-    | VARIABLE #quantifierIndexTermVariable
-    | variable=VARIABLE IN sort=sort_name #quantifierIndexTermVariableInSort
+    | constant_name #quantifierIndexTermVariable
+    | variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
     ;
 
 sort_name
     : IN_BUILT_SORT_BOOLEAN
     | IN_BUILT_SORT_NUMBER
-    | VARIABLE
+    | constant_name
     ;
        
 functor_name
-    : VARIABLE
-    | constant_name
+    : constant_name
     ;
         
 symbol
-    : VARIABLE
-    | constant_name
+    : constant_name
     | constant_number
     ;
     
 constant_name
     : X
-    | CONSTANT
-    | QUOTED_CONSTANT
+    | CONSTANT_STR
+    | QUOTED_CONSTANT_STR
     ;
     
 constant_number
@@ -137,6 +143,7 @@ THEN                    : 'then' ;
 ELSE                    : 'else' ;
 SORT                    : 'sort' ;
 UNKNOWN                 : 'Unknown';
+CONSTANT                : 'constant';
 RANDOM                  : 'random' ;
 X                       : 'x' ;
 IN                      : 'in' ;
@@ -185,17 +192,13 @@ RATIONAL
       FLOAT_TYPE_SUFFIX?
     ;
 
-CONSTANT 
-    : [a-z] ([a-z] | [A-Z] | [0-9] | '_')* ('\'')*
+CONSTANT_STR 
+    : ([a-z] | [A-Z]) ([a-z] | [A-Z] | [0-9] | '_')* ('\'')*
     ;
 
-QUOTED_CONSTANT
+QUOTED_CONSTANT_STR
     : '"'  (ESCAPE_SEQUENCE | ~('\\' | '"' ) )* '"'
     | '\'' (ESCAPE_SEQUENCE | ~('\\' | '\'') )* '\''
-    ;
-
-VARIABLE 
-    : [A-Z] ([a-z] | [A-Z] | [0-9] | '_')* ('\'')*
     ;
 
 fragment

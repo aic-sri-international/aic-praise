@@ -62,6 +62,7 @@ public class HOGMTerminalSymbols {
 		terminalSymbols.add("else");
 		terminalSymbols.add("sort");
 		terminalSymbols.add("Unknown");
+		terminalSymbols.add("constant");
 		terminalSymbols.add("random");
 		terminalSymbols.add("x");
 		terminalSymbols.add("in");

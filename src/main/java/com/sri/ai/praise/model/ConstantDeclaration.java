@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, SRI International
+ * Copyright (c) 2015, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -46,25 +46,24 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 
 /**
- * A parametric random variable declaration. The basic structure of a random
- * variable declaration is as follows:<br>
+ * A constant declaration. The basic structure of a constant declaration is as follows:<br>
  * 
  * <pre>
- * // A random variable declaration
- * randomVariable(name, arity, parameterSortName1,...,parameterSortNameN, rangeSortName),
+ * // A constant declaration
+ * constant(name, arity, parameterSortName1,...,parameterSortNameN, rangeSortName),
  * 
  * name:
- * . mandatory: must be a unique string valued symbol within the model for identifying the random variable.
+ * . mandatory: must be a unique string valued symbol within the model for identifying the constant.
  * 
  * arity:
  * . optional: defaults to an integer valued symbol 0.
  *   specifies the number of parameters that the
- *   random variable takes.
+ *   constant takes.
  *   
  * parameterSortName<n>:
  * . optional: only if arity is = 0. Otherwise a sort name
  *   must be specified for each parameter that the 
- *   random variable takes (i.e. number specified must match
+ *   constant takes (i.e. number specified must match
  *   the declared arity).
  * 
  * rangeSortName:
@@ -78,27 +77,26 @@ import com.sri.ai.expresso.helper.Expressions;
  * 
  */
 @Beta
-public class RandomVariableDeclaration {
+public class ConstantDeclaration {
 
 	//
-	public static final String FUNCTOR_RANDOM_VARIABLE_DECLARATION = "randomVariable";
+	public static final String FUNCTOR_CONSTANT_DECLARATION = "constant";
 	//
 	private Expression name = null;
 	private Expression arity = null;
 	private int intArity = 0;
 	private List<Expression> parameters = new ArrayList<Expression>();
 	private Expression range = null;
-	private Expression randomVariableDeclaration = null;
+	private Expression constantDeclaration = null;
 
 	/**
-	 * Default constructor. Will default the arity of the random variable
+	 * Default constructor. Will default the arity of the constant
 	 * declaration to 0 and range to be of sort 'Boolean'.
 	 * 
 	 * @param name
-	 *            a unique string valued symbol for the random variable
-	 *            declaration.
+	 *            a unique string valued symbol for the constant declaration.
 	 */
-	public RandomVariableDeclaration(Expression name) {
+	public ConstantDeclaration(Expression name) {
 		this(name, Expressions.ZERO, SortDeclaration.IN_BUILT_BOOLEAN.getName());
 	}
 
@@ -107,17 +105,16 @@ public class RandomVariableDeclaration {
 	 * added to end of list of parameters.
 	 * 
 	 * @param name
-	 *            a unique string valued symbol for the random variable
-	 *            declaration.
+	 *            a unique string valued symbol for the constant declaration.
 	 * @param arity
-	 *            the number of parameters that the random variable takes
+	 *            the number of parameters that the constant takes
 	 * @param parametersAndRange
 	 *            is arity > 0 must specify the sort for each parameter.
-	 *            Optional append the sort for the range of the random variable
+	 *            Optional append the sort for the range of the constant
 	 *            to the end of this list (will default to 'Boolean' if not
 	 *            specified).
 	 */
-	public RandomVariableDeclaration(Expression name, Expression arity,
+	public ConstantDeclaration(Expression name, Expression arity,
 			Expression... parametersAndRange) {
 		assertNameOk(name);
 		assertArityOk(arity);
@@ -143,7 +140,7 @@ public class RandomVariableDeclaration {
 
 	/**
 	 * 
-	 * @return the unique identifying name for the random variable.
+	 * @return the unique identifying name for the constant.
 	 */
 	public Expression getName() {
 		return name;
@@ -151,8 +148,7 @@ public class RandomVariableDeclaration {
 
 	/**
 	 * 
-	 * @return the arity of the number of parameters that the parametric random
-	 *         variable declaration takes.
+	 * @return the arity of the number of parameters that the parametric constant declaration takes.
 	 */
 	public Expression getArity() {
 		return arity;
@@ -161,7 +157,7 @@ public class RandomVariableDeclaration {
 	/**
 	 * 
 	 * @return the actual value of the number of parameters that the parametric
-	 *         random variable declaration takes.
+	 *         constant declaration takes.
 	 */
 	public int getArityValue() {
 		return intArity;
@@ -169,7 +165,7 @@ public class RandomVariableDeclaration {
 
 	/**
 	 * 
-	 * @return the sorts for the parameters of the random variable declaration.
+	 * @return the sorts for the parameters of the constant declaration.
 	 */
 	public List<Expression> getParameterSorts() {
 		return Collections.unmodifiableList(parameters);
@@ -177,7 +173,7 @@ public class RandomVariableDeclaration {
 
 	/**
 	 * 
-	 * @return the sort for the range that the random variable can take.
+	 * @return the sort for the range that the constant can take.
 	 */
 	public Expression getRangeSort() {
 		return range;
@@ -185,23 +181,23 @@ public class RandomVariableDeclaration {
 
 	/**
 	 * 
-	 * @return an expression representing the full random variable declaration.
+	 * @return an expression representing the full constant declaration.
 	 */
-	public Expression getRandomVariableDeclaration() {
+	public Expression getConstantDeclaration() {
 		// Lazy initialize this attribute
-		if (randomVariableDeclaration == null) {
+		if (constantDeclaration == null) {
 			List<Expression> declarationArgs = new ArrayList<Expression>();
 			declarationArgs.add(name);
 			declarationArgs.add(arity);
 			declarationArgs.addAll(parameters);
 			declarationArgs.add(range);
 
-			randomVariableDeclaration = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-					FUNCTOR_RANDOM_VARIABLE_DECLARATION,
+			constantDeclaration = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
+					FUNCTOR_CONSTANT_DECLARATION,
 					declarationArgs.toArray());
 		}
 
-		return randomVariableDeclaration;
+		return constantDeclaration;
 	}
 
 	//
@@ -209,42 +205,42 @@ public class RandomVariableDeclaration {
 	//
 
 	/**
-	 * Determine if an expressions is a legal random variable declaration.
+	 * Determine if an expressions is a legal constant declaration.
 	 * 
 	 * @param expression
 	 *            an expression to be checked for whether or not it is a legal
-	 *            random variable declaration.
-	 * @return true if a legal random variable declaration, false otherwise.
+	 *            constant declaration.
+	 * @return true if a legal constant declaration, false otherwise.
 	 */
-	public static boolean isRandomVariableDeclaration(Expression expression) {
-		boolean isRandomVariableDeclaration = false;
+	public static boolean isConstantDeclaration(Expression expression) {
+		boolean isConstantDeclaration = false;
 		
 		try {
-			// Attempt to construct a RandomVariableDeclaration instance from the expression
-			makeRandomVariableDeclaration(expression);
-			isRandomVariableDeclaration = true;
+			// Attempt to construct a ConstantDeclaration instance from the expression
+			makeConstantDeclaration(expression);
+			isConstantDeclaration = true;
 		} catch (IllegalArgumentException iae) {
-			isRandomVariableDeclaration = false;
+			isConstantDeclaration = false;
 		}
 		
-		return isRandomVariableDeclaration;
+		return isConstantDeclaration;
 	}
 
 	/**
-	 * Make a random variable declaration object. Will default the arity of the
-	 * random variable declaration to 0 and range to be of sort 'Boolean' if not
+	 * Make a constant declaration object. Will default the arity of the
+	 * constant declaration to 0 and range to be of sort 'Boolean' if not
 	 * specified in the expression passed in.
 	 * 
 	 * @param expression
-	 *            an expression in the form of a random variable declaration.
-	 * @return a RandomVariableDeclaration object corresonding to the expression
+	 *            an expression in the form of a constant declaration.
+	 * @return a ConstantDeclaration object corresponding to the expression
 	 *         passed in.
 	 */
-	public static RandomVariableDeclaration makeRandomVariableDeclaration(
+	public static ConstantDeclaration makeConstantDeclaration(
 			Expression expression) {
-		RandomVariableDeclaration declaration = null;
+		ConstantDeclaration declaration = null;
 
-		if (Expressions.hasFunctor(expression, FUNCTOR_RANDOM_VARIABLE_DECLARATION)) {
+		if (Expressions.hasFunctor(expression, FUNCTOR_CONSTANT_DECLARATION)) {
 			int numArgs = expression.numberOfArguments();
 			if (numArgs > 0) {
 
@@ -266,13 +262,13 @@ public class RandomVariableDeclaration {
 					parametersAndRange = new Expression[0];
 				}
 				
-				declaration = new RandomVariableDeclaration(name, arity, parametersAndRange);
+				declaration = new ConstantDeclaration(name, arity, parametersAndRange);
 			}
 		}
 		
 		if (declaration == null) {
 			throw new IllegalArgumentException(
-					"Not a legal definition of a random variable declartion:" + expression);
+					"Not a legal definition of a constant declartion:" + expression);
 		}
 
 		return declaration;
@@ -291,7 +287,7 @@ public class RandomVariableDeclaration {
 			throw new IllegalArgumentException(
 					"name ["
 							+ name
-							+ "] is not of the correct type. must be a string valued symbol.");
+							+ "] is not of the correct type. must be a correctly formed string valued symbol.");
 		}
 	}
 
@@ -324,7 +320,7 @@ public class RandomVariableDeclaration {
 		if (intArity == parametersAndRange.length
 				|| intArity == parametersAndRange.length - 1) {
 			// Ensure are legal names for sorts and do not conflict with name of
-			// the random variable declaration
+			// the constant declaration
 			boolean sortNamesOk = true;
 			for (int i = 0; i < parametersAndRange.length; i++) {
 				assertNameOk(parametersAndRange[i]);

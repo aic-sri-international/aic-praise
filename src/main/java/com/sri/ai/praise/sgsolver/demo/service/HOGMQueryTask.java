@@ -49,6 +49,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
+import com.sri.ai.praise.model.ConstantDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ErrorListener;
@@ -78,6 +79,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
     	QueryResult result = null;
     	
     	List<SortDeclaration>           sorts                 = new ArrayList<>();
+    	List<ConstantDeclaration>       constants             = new ArrayList<>();
     	List<RandomVariableDeclaration> randoms               = new ArrayList<>();
     	List<Expression>                conditionedPotentials = new ArrayList<>();
     	
@@ -98,9 +100,10 @@ public class HOGMQueryTask extends Task<QueryResult> {
         		if (errors.size() == 0) {
 	    			sorts.add(SortDeclaration.IN_BUILT_BOOLEAN);
 	    			sorts.add(SortDeclaration.IN_BUILT_NUMBER);
-        			sorts.addAll(extractSorts(Tuple.get(modelTupleExpr, 0)));	
-	    			randoms.addAll(extractRandom(Tuple.get(modelTupleExpr, 1)));
-	    			conditionedPotentials.addAll(extractConditionedPotentials(Tuple.get(modelTupleExpr, 2)));
+        			sorts.addAll(extractSorts(Tuple.get(modelTupleExpr, 0)));
+        			constants.addAll(extractConstants(Tuple.get(modelTupleExpr, 1)));
+	    			randoms.addAll(extractRandom(Tuple.get(modelTupleExpr, 2)));
+	    			conditionedPotentials.addAll(extractConditionedPotentials(Tuple.get(modelTupleExpr, 3)));
 	    			
 	    			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 	    			sorts.forEach(sort -> {
@@ -118,7 +121,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	    			
 	    			Expression marginal = inferencer.solve(queryExpr); 			
 	    			
-	    			result = new QueryResult(query, new ParsedModel(model, sorts, randoms, conditionedPotentials), marginal.toString(), System.currentTimeMillis() - start);
+	    			result = new QueryResult(query, new ParsedModel(model, sorts, constants, randoms, conditionedPotentials), marginal.toString(), System.currentTimeMillis() - start);
         		}
     		}
     	}
@@ -156,7 +159,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
     	}
     	
     	if (errors.size() > 0) {
-			result = new QueryResult(query, new ParsedModel(model, sorts, randoms, conditionedPotentials), errors, System.currentTimeMillis() - start);
+			result = new QueryResult(query, new ParsedModel(model, sorts, constants, randoms, conditionedPotentials), errors, System.currentTimeMillis() - start);
 		}
 
         return result;
@@ -173,6 +176,14 @@ public class HOGMQueryTask extends Task<QueryResult> {
 		List<SortDeclaration> result = new ArrayList<>();
 		
 		Tuple.getElements(sortsTuple).forEach(sortExpr -> result.add(SortDeclaration.makeSortDeclaration(sortExpr)));
+		
+		return result;
+	}
+	
+	protected List<ConstantDeclaration> extractConstants(Expression constantsTuple) {
+		List<ConstantDeclaration> result = new ArrayList<>();
+		
+		Tuple.getElements(constantsTuple).forEach(constantExpr -> result.add(ConstantDeclaration.makeConstantDeclaration(constantExpr)));
 		
 		return result;
 	}

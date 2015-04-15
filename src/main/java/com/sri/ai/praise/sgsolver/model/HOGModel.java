@@ -38,7 +38,6 @@
 package com.sri.ai.praise.sgsolver.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -48,10 +47,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.core.PrologConstantPredicate;
 import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.ForAll;
@@ -59,6 +56,7 @@ import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
+import com.sri.ai.praise.model.ConstantDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGModelError.Type;
@@ -69,8 +67,8 @@ public class HOGModel {
 		BOOLEAN, NUMERIC, OTHER, INVALID
 	}
 
-	public static Expression validateAndConstruct(List<StatementInfo> sortDecs, List<StatementInfo> randomVarDecs, List<StatementInfo> terms) {
-		HOGMModelValidator validator = new HOGMModelValidator(sortDecs, randomVarDecs, terms);
+	public static Expression validateAndConstruct(List<StatementInfo> sortDecs, List<StatementInfo> constantDecs, List<StatementInfo> randomVarDecs, List<StatementInfo> terms) {
+		HOGMModelValidator validator = new HOGMModelValidator(sortDecs, constantDecs, randomVarDecs, terms);
 		
 		if (!validator.isValid()) {
 			throw new HOGModelException("Invalid model", validator.errors);
@@ -78,6 +76,7 @@ public class HOGModel {
 		
 		Expression result = Tuple.make(
 				Tuple.make(validator.sortDeclarations), 
+				Tuple.make(validator.constantDeclarations),
 				Tuple.make(validator.randomVariableDeclarations), 
 				Tuple.make(validator.conditionedPotentials));
 		
@@ -86,6 +85,7 @@ public class HOGModel {
 	
 	private static class HOGMModelValidator {
 		List<Expression> sortDeclarations           = new ArrayList<>();
+		List<Expression> constantDeclarations       = new ArrayList<>();
 		List<Expression> randomVariableDeclarations = new ArrayList<>();
 		List<Expression> conditionedPotentials      = new ArrayList<>();
 		//
@@ -95,23 +95,22 @@ public class HOGModel {
 		Set<String> numericTypeFunctors = new LinkedHashSet<>(HOGMModelConstants.KNOWN_NUMERIC_FUNCTORS);
 		Set<String> otherTypeFunctors   = new LinkedHashSet<>();
 		//
-		Predicate<Expression> isPrologConstant = new PrologConstantPredicate();
-		//
 		Set<Expression>                            sortConstants = new LinkedHashSet<>();
 		Map<Expression, SortDeclaration>           sorts         = new LinkedHashMap<>();
+		Map<Expression, ConstantDeclaration>       constants     = new LinkedHashMap<>();
 		Map<Expression, RandomVariableDeclaration> randoms       = new LinkedHashMap<>();
 		List<Expression> conditioned = new ArrayList<>();
 		
-		HOGMModelValidator(List<StatementInfo> sortStatements, List<StatementInfo> randomVariableStatements, List<StatementInfo> termStatements) {
+		HOGMModelValidator(List<StatementInfo> sortStatements, List<StatementInfo> constantStatements, List<StatementInfo> randomVariableStatements, List<StatementInfo> termStatements) {
 			validateSortStatements(sortStatements);
+			validateConstantStatements(constantStatements);
 			validateRandomVariableStatements(randomVariableStatements);
-			
-			associateUnassignedConstantsToSorts(termStatements);
 			
 			validateTermStatements(termStatements);	
 			
 			// Map validated values
 			sortDeclarations.addAll(sorts.values().stream().map(sd -> sd.getSortDeclaration()).collect(Collectors.toList()));
+			constantDeclarations.addAll(constants.values().stream().map(cd -> cd.getConstantDeclaration()).collect(Collectors.toList()));
 			randomVariableDeclarations.addAll(randoms.values().stream().map(rd -> rd.getRandomVariableDeclaration()).collect(Collectors.toList()));
 			conditionedPotentials.addAll(conditioned);
 		}
@@ -137,15 +136,59 @@ public class HOGModel {
 					if (sorts.containsKey(sortDeclaration.getName())) {
 						newError(Type.SORT_NAME_NOT_UNIQUE, sortDeclaration.getName(), sortStatement);
 					}
+					else if (HOGMModelConstants.KNOWN_FUNCTORS.contains(functorName(sortDeclaration.getName()))) {
+						newError(Type.SORT_NAME_SAME_AS_IN_BUILT_FUNCTOR, sortDeclaration.getName(), sortStatement);
+					}
+					else if (ForAll.LABEL.equals(functorName(sortDeclaration.getName())) || ThereExists.LABEL.equals(functorName(sortDeclaration.getName()))) {
+						newError(Type.SORT_NAME_SAME_AS_QUANTIFIER, sortDeclaration.getName(), sortStatement);
+					}
 					else {
 						sorts.put(sortDeclaration.getName(), sortDeclaration);
+						sortDeclaration.getAssignedConstants().forEach(constant -> {
+							if (sortConstants.contains(constant)) {
+								newError(Type.SORT_CONSTANT_NAME_NOT_UNIQUE, constant, sortStatement);
+							}
+							sortConstants.add(constant);
+						});
 					}
-					sortDeclaration.getAssignedConstants().forEach(constant -> {
-						if (sortConstants.contains(constant)) {
-							newError(Type.CONSTANT_NAME_NOT_UNIQUE, constant, sortStatement);
-						}
-						sortConstants.add(constant);
-					});
+				}
+			});
+		}
+		
+		void validateConstantStatements(List<StatementInfo> constantStatements) {				
+			constantStatements.forEach(constantStatement -> {
+				if (!ConstantDeclaration.isConstantDeclaration(constantStatement.statement)) {
+					newError(Type.CONSTANT_DECLARATION_IS_NOT_LEGAL, "", constantStatement);
+				}
+				else {
+					ConstantDeclaration constantDeclaration = ConstantDeclaration.makeConstantDeclaration(constantStatement.statement);
+					if (constants.containsKey(constantDeclaration.getName())) {
+						newError(Type.CONSTANT_NAME_NOT_UNIQUE, constantDeclaration.getName(), constantStatement);
+					}
+					else if (sortConstants.contains(constantDeclaration.getName())) {
+						newError(Type.CONSTANT_NAME_SAME_AS_UNIQUE_CONSTANT, constantDeclaration.getName(), constantStatement);
+					}
+					else if (getSort(constantDeclaration.getName()) != null) {
+						newError(Type.CONSTANT_NAME_SAME_AS_SORT, constantDeclaration.getName(), constantStatement);
+					}
+					else if (HOGMModelConstants.KNOWN_FUNCTORS.contains(functorName(constantDeclaration.getName()))) {
+						newError(Type.CONSTANT_NAME_SAME_AS_IN_BUILT_FUNCTOR, constantDeclaration.getName(), constantStatement);
+					}
+					else if (ForAll.LABEL.equals(functorName(constantDeclaration.getName())) || ThereExists.LABEL.equals(functorName(constantDeclaration.getName()))) {
+						newError(Type.CONSTANT_NAME_SAME_AS_QUANTIFIER, constantDeclaration.getName(), constantStatement);
+					}
+					else {
+						constants.put(constantDeclaration.getName(), constantDeclaration);
+						constantDeclaration.getParameterSorts().forEach(parameterSortName -> {
+							if (getSort(parameterSortName) == null) {
+								newError(Type.CONSTANT_SORT_ARGUMENT_NOT_DECLARED, parameterSortName, constantStatement);
+							}
+						});
+						if (getSort(constantDeclaration.getRangeSort()) == null) {
+							newError(Type.CONSTANT_SORT_ARGUMENT_NOT_DECLARED, constantDeclaration.getRangeSort(), constantStatement);
+						}	
+						trackCategoryType(constantDeclaration.getName(), constantDeclaration.getRangeSort());
+					}
 				}
 			});
 		}
@@ -161,76 +204,47 @@ public class HOGModel {
 						newError(Type.RANDOM_VARIABLE_NAME_NOT_UNIQUE, rvDeclaration.getName(), rvStatement);
 					}
 					else if (sortConstants.contains(rvDeclaration.getName())) {
+						newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_UNIQUE_CONSTANT, rvDeclaration.getName(), rvStatement);
+					} 
+					else if (getSort(rvDeclaration.getName()) != null) {
+						newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_SORT, rvDeclaration.getName(), rvStatement);
+					}
+					else if (constants.containsKey(rvDeclaration.getName())) {
 						newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_CONSTANT, rvDeclaration.getName(), rvStatement);
+					}
+					else if (HOGMModelConstants.KNOWN_FUNCTORS.contains(functorName(rvDeclaration.getName()))) {
+						newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_IN_BUILT_FUNCTOR, rvDeclaration.getName(), rvStatement);
+					}
+					else if (ForAll.LABEL.equals(functorName(rvDeclaration.getName())) || ThereExists.LABEL.equals(functorName(rvDeclaration.getName()))) {
+						newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_QUANTIFIER, rvDeclaration.getName(), rvStatement);
 					}
 					else {
 						randoms.put(rvDeclaration.getName(), rvDeclaration);
 						rvDeclaration.getParameterSorts().forEach(parameterSortName -> {
-							if (!sorts.containsKey(parameterSortName) && !SortDeclaration.isNameOfInBuilt(parameterSortName)) {
+							if (getSort(parameterSortName) == null) {
 								newError(Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED, parameterSortName, rvStatement);
 							}
 						});
-						if (!sorts.containsKey(rvDeclaration.getRangeSort()) && !SortDeclaration.isNameOfInBuilt(rvDeclaration.getRangeSort())) {
+						if (getSort(rvDeclaration.getRangeSort()) == null) {
 							newError(Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED, rvDeclaration.getRangeSort(), rvStatement);
-						}
-						if (HOGMModelConstants.KNOWN_FUNCTORS.contains(functorName(rvDeclaration.getName()))) {
-							newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_IN_BUILT_FUNCTOR, rvDeclaration.getName(), rvStatement);
-						}
-						if (ForAll.LABEL.equals(functorName(rvDeclaration.getName())) || ThereExists.LABEL.equals(functorName(rvDeclaration.getName()))) {
-							newError(Type.RANDOM_VARIABLE_NAME_SAME_AS_QUANTIFIER, rvDeclaration.getName(), rvStatement);
-						}
-						// Track the category type of the random variable
-						if (rvDeclaration.getRangeSort().equals(SortDeclaration.IN_BUILT_BOOLEAN.getName())) {
-							booleanTypeFunctors.add(functorName(rvDeclaration.getName()));
-						}
-						else if (rvDeclaration.getRangeSort().equals(SortDeclaration.IN_BUILT_NUMBER.getName())) {
-							numericTypeFunctors.add(functorName(rvDeclaration.getName()));
-						}
-						else {
-							otherTypeFunctors.add(functorName(rvDeclaration.getName()));
-						}
+						}	
+						trackCategoryType(rvDeclaration.getName(), rvDeclaration.getRangeSort());
 					}
 				}
 			});
 		}
 		
-		void associateUnassignedConstantsToSorts(List<StatementInfo> termStatements) {		
-			termStatements.forEach(termStatement -> {
-				// arguments to = and !=
-				Set<Expression> equalities = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> Equality.isEquality(expr) || Disequality.isDisequality(expr));
-				equalities.forEach(equality -> {
-					List<RandomVariableDeclaration> randomVars       = new ArrayList<>();
-					Set<Expression>  unknownConstants = new LinkedHashSet<>();
-					equality.getArguments().forEach(arg -> {
-						RandomVariableDeclaration rvDeclaration = randoms.get(arg.getFunctorOrSymbol());
-						if (rvDeclaration != null) {
-							randomVars.add(rvDeclaration);
-						}
-						else if (isUnknownConstant(arg)) {
-							unknownConstants.add(arg);
-						}
-					});
-					
-					if (randomVars.size() == 1 && unknownConstants.size() > 0) {
-						updateSort(sorts.get(randomVars.get(0).getRangeSort()), unknownConstants);
-					}
-				});
-				
-				// random variable arguments
-				Set<Expression> randomVars = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> Expressions.isFunctionApplicationWithArguments(expr) && isDeclaredRandomFunctor(expr.getFunctor()));
-				randomVars.forEach(randomVar -> {
-					RandomVariableDeclaration rvDeclaration = randoms.get(randomVar.getFunctor());
-					if (rvDeclaration.getArityValue() == randomVar.numberOfArguments()) {
-						for (int i = 0; i < randomVar.numberOfArguments(); i++) {
-							Expression arg = randomVar.get(i);
-							if (isUnknownConstant(arg)) {
-								Expression argSort = rvDeclaration.getParameterSorts().get(i);
-								updateSort(sorts.get(argSort), Collections.singleton(arg));
-							}
-						}
-					}
-				});
-			});		
+		void trackCategoryType(Expression functorName, Expression sortName) {
+			// Track the category type of the functor
+			if (sortName.equals(SortDeclaration.IN_BUILT_BOOLEAN.getName())) {
+				booleanTypeFunctors.add(functorName(functorName));
+			}
+			else if (sortName.equals(SortDeclaration.IN_BUILT_NUMBER.getName())) {
+				numericTypeFunctors.add(functorName(functorName));
+			}
+			else {
+				otherTypeFunctors.add(functorName(functorName));
+			}
 		}
 		
 		void validateTermStatements(List<StatementInfo> termStatements) {
@@ -309,14 +323,18 @@ public class HOGModel {
 					else if (Expressions.isNumber(expr)) {
 						result = SortDeclaration.IN_BUILT_NUMBER;
 					}
-					else if (isPrologConstant.apply(expr)) {
-						RandomVariableDeclaration rvDeclaration = randoms.get(expr);
-						if (rvDeclaration != null) {
+					else {
+						if (isDeclaredConstantFunctor(expr.getFunctorOrSymbol())) {
+							ConstantDeclaration constantDeclaration = constants.get(expr.getFunctorOrSymbol());
+							result = getSort(constantDeclaration.getRangeSort());
+						}
+						else if (isDeclaredRandomFunctor(expr.getFunctorOrSymbol())) {
+							RandomVariableDeclaration rvDeclaration = randoms.get(expr.getFunctorOrSymbol());
 							result = getSort(rvDeclaration.getRangeSort());
 						}
 						else if (sortConstants.contains(expr)){
 							for (SortDeclaration sort : sorts.values()) {
-								// Have mapped the constant sort.
+								// Have mapped the unique constant sort.
 								if (ExtensionalSet.getElements(sort.getConstants()).contains(expr)) {
 									result = sort;
 									break;
@@ -327,9 +345,6 @@ public class HOGModel {
 							// Don't know
 						}
 					}
-					else {
-						result = null; // Don't know
-					}
 				}
 				else {
 					String functorName = functorName(functor);
@@ -338,6 +353,10 @@ public class HOGModel {
 					}
 					else if (numericTypeFunctors.contains(functorName)) {
 						result = SortDeclaration.IN_BUILT_NUMBER;
+					}
+					else if (isDeclaredConstantFunctor(functor)) {
+						ConstantDeclaration constantDeclaration = constants.get(functor);
+						result = getSort(constantDeclaration.getRangeSort());
 					}
 					else if (isDeclaredRandomFunctor(functor)) {
 						RandomVariableDeclaration rvDeclaration = randoms.get(functor);
@@ -388,7 +407,30 @@ public class HOGModel {
 		}
 		
 		void validateFunctorsAndArguments(StatementInfo termStatement) {
-			// Ensure random functions with arity > 0 have the correct arity and their arguments are of the correct type
+			// Ensure constant functions have the correct arity and their arguments are of the correct type
+			Set<Expression> constantFunctions = new LinkedHashSet<>();
+			getConstantFunctions(termStatement.statement, constantFunctions);
+			constantFunctions.forEach(constantFunction -> {
+				if (!isValidDeclaredConstantFunctorArity(constantFunction)) {
+					newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, constantFunction, termStatement);
+				}
+				else {
+					ConstantDeclaration constantDeclaration = constants.get(constantFunction.getFunctorOrSymbol());
+					for (int i = 0; i < constantFunction.numberOfArguments(); i++) {
+						Expression arg = constantFunction.get(i);
+						if (isUnknownConstant(arg)) {
+							newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
+						}
+						else {
+							if (getSort(constantDeclaration.getParameterSorts().get(i)) != determineSortType(arg)) {
+								newError(Type.CONSTANT_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
+							}
+						}
+					}
+				}
+			});
+						
+			// Ensure random functions have the correct arity and their arguments are of the correct type
 			Set<Expression> randomFunctions = new LinkedHashSet<>();
 			getRandomFunctions(termStatement.statement, randomFunctions);
 			randomFunctions.forEach(randomFunction -> {
@@ -399,40 +441,38 @@ public class HOGModel {
 					RandomVariableDeclaration rvDeclaration = randoms.get(randomFunction.getFunctorOrSymbol());
 					for (int i = 0; i < randomFunction.numberOfArguments(); i++) {
 						Expression arg = randomFunction.get(i);
-						if (isVariable(arg)) {
-							continue; // takes on type of the sort at this position
-						}
-						if (isUnknownConstant(arg)) {
+						if (isUnknownConstant(arg)) {							
 							newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
 						}
 						else {
 							if (getSort(rvDeclaration.getParameterSorts().get(i)) != determineSortType(arg)) {
-								newError(Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRENT_TYPE, arg, termStatement);
+								newError(Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
 							}
 						}
 					}
 				}
 			});
+			
 						
 			// All of these should belong to the known set of functors
-			Set<Expression> nonRandomFunctions = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> 
-					Expressions.isFunctionApplicationWithArguments(expr) && 
+			Set<Expression> nonConstantAndRandomFunctions = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> 
+					Expressions.isFunctionApplicationWithArguments(expr) &&
+					!isDeclaredConstantFunctor(expr.getFunctorOrSymbol()) &&
 					!isDeclaredRandomFunctor(expr.getFunctorOrSymbol()));
 			
-			nonRandomFunctions.forEach(nonRandomFunction -> {
-				if (isKnownFunctor(nonRandomFunction.getFunctor())) {
-					String functorName = functorName(nonRandomFunction.getFunctor());
-					if (!isValidKnownFunctorArity(nonRandomFunction)) {
-						newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+nonRandomFunction+"'", termStatement);
+			nonConstantAndRandomFunctions.forEach(nonConstantAndRandomFunction -> {
+				if (isKnownFunctor(nonConstantAndRandomFunction.getFunctor())) {
+					String functorName = functorName(nonConstantAndRandomFunction.getFunctor());
+					if (!isValidKnownFunctorArity(nonConstantAndRandomFunction)) {
+						newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+nonConstantAndRandomFunction+"'", termStatement);
 					}
 					else {
 						Set<SortDeclaration> argSorts = new HashSet<>();
-						for (int i = 0; i < nonRandomFunction.numberOfArguments(); i++) {
-							Expression arg = nonRandomFunction.get(i);
-							if (isVariable(arg)) {
-								continue; // Takes on the type of its position
-							}
-							if (!isDeclaredRandomFunctor(arg.getFunctorOrSymbol()) && isUnknownConstant(arg)) {
+						for (int i = 0; i < nonConstantAndRandomFunction.numberOfArguments(); i++) {
+							Expression arg = nonConstantAndRandomFunction.get(i);
+							if (!isDeclaredConstantFunctor(arg.getFunctorOrSymbol()) &&
+								!isDeclaredRandomFunctor(arg.getFunctorOrSymbol()) &&
+								isUnknownConstant(arg)) {								
 								newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
 							}
 							else {
@@ -441,7 +481,7 @@ public class HOGModel {
 								if (sortType == null) {
 									newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, arg, termStatement);
 								}
-								if (IfThenElse.isIfThenElse(nonRandomFunction)) {
+								if (IfThenElse.isIfThenElse(nonConstantAndRandomFunction)) {
 									if (i == 0) {
 										// The conditional must be boolean
 										if (sortType != SortDeclaration.IN_BUILT_BOOLEAN) {
@@ -453,7 +493,7 @@ public class HOGModel {
 										argSorts.add(sortType);
 									}
 							    }    // For equalities the types must match up
-								else if (Equality.isEquality(nonRandomFunction) || Disequality.isDisequality(nonRandomFunction)) {
+								else if (Equality.isEquality(nonConstantAndRandomFunction) || Disequality.isDisequality(nonConstantAndRandomFunction)) {
 									if (sortType != null) {
 										argSorts.add(sortType);
 									}
@@ -477,15 +517,15 @@ public class HOGModel {
 						}
 						
 						// The type of arguments must all match in these instances
-						if (IfThenElse.isIfThenElse(nonRandomFunction) || Equality.isEquality(nonRandomFunction) || Disequality.isDisequality(nonRandomFunction)) {
+						if (IfThenElse.isIfThenElse(nonConstantAndRandomFunction) || Equality.isEquality(nonConstantAndRandomFunction) || Disequality.isDisequality(nonConstantAndRandomFunction)) {
 							if (argSorts.size() != 1) {							
-								newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE, nonRandomFunction, termStatement);
+								newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE, nonConstantAndRandomFunction, termStatement);
 							}
 						}
 					}
 				}
 				else {					
-					newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, nonRandomFunction.getFunctor(), termStatement);
+					newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, nonConstantAndRandomFunction.getFunctor(), termStatement);
 				}
 			});
 			
@@ -516,16 +556,27 @@ public class HOGModel {
 			}
 		}
 		
-		boolean isVariable(Expression expr) {
-			boolean result = Expressions.isSymbol(expr) && !isPrologConstant.apply(expr);
-			return result;
+		void getConstantFunctions(Expression expr, Set<Expression> constantFunctions) {
+			if (this.isDeclaredConstantFunctor(expr.getFunctorOrSymbol())) {
+				constantFunctions.add(expr);
+			}
+			
+			if (Expressions.isFunctionApplicationWithArguments(expr)) {
+				expr.getArguments().forEach(arg -> getConstantFunctions(arg, constantFunctions));
+			}
+			else if (ForAll.isForAll(expr)) {
+				getConstantFunctions(ForAll.getBody(expr), constantFunctions);
+			}
+			else if (ThereExists.isThereExists(expr)) {
+				getConstantFunctions(ThereExists.getBody(expr), constantFunctions);
+			}
 		}
 		
 		boolean isUnknownConstant(Expression expr) {
-			boolean result = Expressions.isSymbol(expr) && 
-							!Expressions.isNumber(expr) && 
-							!isVariable(expr) && 
-							!randoms.containsKey(expr) && 
+			boolean result = Expressions.isSymbol(expr) &&
+							!Expressions.isNumber(expr) &&
+							!constants.containsKey(expr) &&
+							!randoms.containsKey(expr) &&
 							!sortConstants.contains(expr);
 			return result;
 		}
@@ -538,10 +589,27 @@ public class HOGModel {
 			return result;
 		}
 		
+		boolean isDeclaredConstantFunctor(Expression functorName) {
+			boolean result = false;
+			if (constants.containsKey(functorName)) {
+				result = true;
+			}
+			return result;
+		}
+		
 		boolean isDeclaredRandomFunctor(Expression functorName) {
 			boolean result = false;
 			if (randoms.containsKey(functorName)) {
 				result = true;
+			}
+			return result;
+		}
+		
+		boolean isValidDeclaredConstantFunctorArity(Expression expr) {
+			boolean result = true;
+			ConstantDeclaration constantDeclaration = constants.get(expr.getFunctorOrSymbol());
+			if (constantDeclaration.getArity().intValue() != expr.numberOfArguments()) {
+				result = false;
 			}
 			return result;
 		}
@@ -601,19 +669,6 @@ public class HOGModel {
 			}
 			
 			return result;
-		}
-		
-		void updateSort(SortDeclaration sort, Set<Expression> unknownConstants) {
-			if (sort != null) {
-				List<Expression> constants = new ArrayList<>(ExtensionalSet.getElements(sort.getConstants()));
-				// Ensure we can extend the constants associated with the sort
-				if (SortDeclaration.UNKNOWN_SIZE.equals(sort.getSize()) ||
-					(constants.size() + unknownConstants.size()) < sort.getSize().intValue()) {
-					constants.addAll(unknownConstants);
-					sorts.put(sort.getName(), new SortDeclaration(sort.getName(), sort.getSize(), ExtensionalSet.makeUniSet(constants)));
-					sortConstants.addAll(unknownConstants);
-				}
-			}
 		}
 		
 		String functorName(Expression exprFunctorName) {
