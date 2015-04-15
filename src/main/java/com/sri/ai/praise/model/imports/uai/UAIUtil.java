@@ -54,6 +54,7 @@ import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
 import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.application.Compilation;
+import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
@@ -137,7 +138,7 @@ public class UAIUtil {
 			mapFromVariableNameToTypeName.put(genericVariableName(i), typeName);
 		}
 		
-		ConstraintTheory theory = new EqualityConstraintTheory(new SymbolTermTheory());
+		ConstraintTheory theory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new SymbolTermTheory()));
 
 		Expression result = Compilation.compile(inputExpression, theory, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString, solverListener);
 		
