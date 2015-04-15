@@ -117,7 +117,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	    			});
 	    			
 	    			Expression markovNetwork = Times.make(conditionedPotentials);
-	    			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, null, true, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
+	    			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, null, true, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);
 	    			
 	    			Expression marginal = inferencer.solve(queryExpr); 			
 	    			

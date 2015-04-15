@@ -320,7 +320,8 @@ public class UAIMARSolver {
 				System.out.println("Solver Interrupted (b).");
 				return false;
 			}
-			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, evidenceExpr, true, mapFromTypeNameToSizeString, mapFromVariableNameToTypeName);
+			inferencer = new InferenceForFactorGraphAndEvidence(
+					markovNetwork, false, evidenceExpr, true, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
 				int varCardinality = model.cardinality(i);

@@ -44,6 +44,7 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.setDifference;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.google.common.base.Predicate;
@@ -76,10 +77,11 @@ public class InferenceForFactorGraphAndEvidence {
 	private boolean isBayesianNetwork;
 	private Expression evidence;
 	private Expression evidenceProbability;
-	private Map<String, String> mapFromTypeNameToSizeString;
 	private Map<String, String> mapFromRandomVariableNameToTypeName;
+	private Map<String, String> mapFromSymbolNameToTypeName; // union of the two maps above
+	private Map<String, String> mapFromTypeNameToSizeString;
 	private Expression queryVariable;
-	private Collection<Expression> allVariables;
+	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private ConstraintTheory theory;
 	private SemiRingProblemType problemType;
@@ -100,35 +102,54 @@ public class InferenceForFactorGraphAndEvidence {
 	public void interrupt() {
 		solver.interrupt();
 	}
+
+	@Deprecated
+	public InferenceForFactorGraphAndEvidence(
+			Expression factorGraph, boolean isBayesianNetwork,
+			Expression evidence, boolean useFactorization,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromTypeNameToSizeString) {
+		// uses empty map of non-uniquely-named constants for backward compatibility; deprecated as this should become a standard feature
+		this(factorGraph, isBayesianNetwork, evidence, useFactorization, mapFromRandomVariableNameToTypeName, Util.map(), mapFromTypeNameToSizeString);
+	}
 	
 	/**
 	 * Constructs a solver for a factor graph and an evidence expression.
-	 * @param useFactorization TODO
-	 * @param mapFromTypeNameToSizeString a map from type name strings to their size strings
-	 * @param mapFromRandomVariableNameToTypeName a map from random variable name strings to their type name strings
-	 * @param allTheSameButQuery the {@link Result} object from a previous query for the same model and evidence, if available, or null.
 	 * @param factorGraph an Expression representing the product of potential functions
 	 * @param isBayesianNetwork indicates the factor graph is a bayesian network (each potential function in normalized for one of its variables, forms a DAG).
 	 * @param evidence an Expression representing the evidence
+	 * @param useFactorization TODO
+	 * @param mapFromRandomVariableNameToTypeName a map from random variable name strings to their type name strings
+	 * @param mapFromTypeNameToSizeString a map from type name strings to their size strings
+	 * @param allTheSameButQuery the {@link Result} object from a previous query for the same model and evidence, if available, or null.
 	 * @return
 	 */
 	public InferenceForFactorGraphAndEvidence(
 			Expression factorGraph, boolean isBayesianNetwork,
-			Expression evidence, boolean useFactorization, Map<String, String> mapFromTypeNameToSizeString, Map<String, String> mapFromRandomVariableNameToTypeName) {
+			Expression evidence, boolean useFactorization,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromTypeNameToSizeString) {
 
 		this.factorGraph = factorGraph;
 		this.isBayesianNetwork = isBayesianNetwork;
 		this.evidence = evidence;
-		this.mapFromTypeNameToSizeString = mapFromTypeNameToSizeString;
+
 		this.mapFromRandomVariableNameToTypeName = mapFromRandomVariableNameToTypeName;
 		this.mapFromRandomVariableNameToTypeName.put("query", "Boolean");
 		queryVariable = parse("query");
+		
+		this.mapFromSymbolNameToTypeName = new LinkedHashMap<String, String>(mapFromRandomVariableNameToTypeName);
+		this.mapFromSymbolNameToTypeName.putAll(                             mapFromNonUniquelyNamedConstantNameToTypeName);
+		
+		                       allRandomVariables = Util.mapIntoList(this.mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
+		Collection<Expression> allSymbols         = Util.mapIntoList(this.mapFromSymbolNameToTypeName        .keySet(), Expressions::parse);
 
-		allVariables = Util.mapIntoList(mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
+		this.mapFromTypeNameToSizeString = mapFromTypeNameToSizeString;
 
-		// We use the Prolog convention of small-letter initials for constants, but we need an exception for the random variables.
+		// We use the Prolog convention of small-letter initials for constants, but we need an exception for the random variables and the non-uniquely named constants.
 		Predicate<Expression> isPrologConstant = new PrologConstantPredicate();
-		isUniquelyNamedConstantPredicate = e -> isPrologConstant.apply(e) && ! allVariables.contains(e);
+		isUniquelyNamedConstantPredicate = e -> isPrologConstant.apply(e) && ! allSymbols.contains(e);
 
 		// The constraintTheory of atoms plus equality on function (relational) terms.
 		theory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new SymbolTermTheory()));
@@ -162,10 +183,10 @@ public class InferenceForFactorGraphAndEvidence {
 		}
 
 		// We sum out all variables but the query
-		Collection<Expression> indices = setDifference(allVariables, list(queryVariable)); 
+		Collection<Expression> indices = setDifference(allRandomVariables, list(queryVariable)); 
 
 		// Solve the problem.
-		Expression unnormalizedMarginal = solver.solve(factorGraphWithEvidence, indices, mapFromRandomVariableNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+		Expression unnormalizedMarginal = solver.solve(factorGraphWithEvidence, indices, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
 		System.out.println("Unnormalized marginal: " + unnormalizedMarginal);
 
 		Expression marginal;
@@ -175,7 +196,7 @@ public class InferenceForFactorGraphAndEvidence {
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (evidenceProbability == null) {
-				evidenceProbability = solver.solve(unnormalizedMarginal, list(queryVariable), mapFromRandomVariableNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+				evidenceProbability = solver.solve(unnormalizedMarginal, list(queryVariable), mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
 				System.out.print("Normalization constant ");
 				if (evidence != null) {
 					System.out.print("(same as evidence probability P(" + evidence + ") ) ");
@@ -200,6 +221,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
-		return solver.solve(expression, list(), mapFromRandomVariableNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+		return solver.solve(expression, list(), mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
 	}
 }
