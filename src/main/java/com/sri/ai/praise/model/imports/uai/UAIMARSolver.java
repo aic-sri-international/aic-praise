@@ -280,13 +280,14 @@ public class UAIMARSolver {
 				return false;
 			}
 			
-			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
-			Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
+			Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Collections.emptyMap(); // Not used for UAI problems
+			Map<String, String> mapFromTypeNameToSizeString                   = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
 				int varCardinality = model.cardinality(i);
 				String varTypeName = UAIUtil.instanceTypeNameForVariable(i, varCardinality);
+				mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(i), varTypeName);
 				mapFromTypeNameToSizeString.put(varTypeName, Integer.toString(varCardinality));
-				mapFromVariableNameToTypeName.put(UAIUtil.instanceVariableName(i), varTypeName);
 			}
 			
 			Expression markovNetwork = Times.make(tables);
@@ -321,7 +322,7 @@ public class UAIMARSolver {
 				return false;
 			}
 			inferencer = new InferenceForFactorGraphAndEvidence(
-					markovNetwork, false, evidenceExpr, true, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);
+					markovNetwork, false, evidenceExpr, true, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
 				int varCardinality = model.cardinality(i);

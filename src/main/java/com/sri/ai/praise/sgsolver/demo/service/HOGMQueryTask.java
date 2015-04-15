@@ -105,19 +105,25 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	    			randoms.addAll(extractRandom(Tuple.get(modelTupleExpr, 2)));
 	    			conditionedPotentials.addAll(extractConditionedPotentials(Tuple.get(modelTupleExpr, 3)));
 	    			
+
+	    			Map<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>();
+	    			randoms.forEach(random -> {
+	    				mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.getRangeSort().toString());
+	    			});
+	    			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
+	    			constants.forEach(constant -> {
+	    				mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.getRangeSort().toString());
+	    			});
 	    			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 	    			sorts.forEach(sort -> {
 	    				if (!sort.getSize().equals(SortDeclaration.UNKNOWN_SIZE)) {
 	    					mapFromTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
 	    				}
 	    			});
-	    			Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
-	    			randoms.forEach(random -> {
-	    				mapFromVariableNameToTypeName.put(random.getName().toString(), random.getRangeSort().toString());
-	    			});
 	    			
 	    			Expression markovNetwork = Times.make(conditionedPotentials);
-	    			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, null, true, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);
+	    			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, null, true, 
+	    					mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 	    			
 	    			Expression marginal = inferencer.solve(queryExpr); 			
 	    			
