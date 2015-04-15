@@ -40,29 +40,23 @@ package com.sri.ai.praise.model.imports.uai;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
-import com.sri.ai.grinder.core.PrologConstantPredicate;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
-import com.sri.ai.grinder.plaindpll.api.GroupProblemType;
-import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
-import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
-import com.sri.ai.grinder.plaindpll.problemtype.Max;
+import com.sri.ai.grinder.plaindpll.api.Solver;
+import com.sri.ai.grinder.plaindpll.application.Compilation;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
-import com.sri.ai.util.Util;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**
@@ -131,37 +125,25 @@ public class UAIUtil {
 				table.append(" else ");
 			}
 		}
-		
-		// The constraintTheory of equality on symbols (includes a model counter for formulas in it).
-		ConstraintTheory theory      = new EqualityConstraintTheory(new SymbolTermTheory());
-		GroupProblemType problemType = new Max(); // the problem type actually does not matter, because we are not going to have any indices.
-		Expression  tableExpression  = Expressions.parse(table.toString());
-		
-		Collection<Expression> indices = Util.list(); // no indices; we want to keep all variables
+
+		Expression  inputExpression  = Expressions.parse(table.toString());
+		Function<Integer, Integer> cardinalityOfIthVariable = i -> functionTable.cardinality(i);
+
 		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
 		for (int i = 0; i < functionTable.numberVariables(); i++) {
-			String typeName = genericTypeNameForVariable(i, functionTable.cardinality(i));
-			mapFromTypeNameToSizeString.put(typeName, ""+functionTable.cardinality(i));
+			String typeName = genericTypeNameForVariable(i, cardinalityOfIthVariable.apply(i));
+			mapFromTypeNameToSizeString.put(typeName, "" + cardinalityOfIthVariable.apply(i));
 			mapFromVariableNameToTypeName.put(genericVariableName(i), typeName);
 		}
 		
-		// The solver for the parameters above.
-		SGDPLLT solver = new SGDPLLT(theory, problemType);
-		solverListener.apply(solver);
-		
-		// We use the Prolog convention of small-letter initials for constants, but we need an exception for the random variables.
-		Predicate<Expression> isPrologConstant = new PrologConstantPredicate();
-		Predicate<Expression> isUniquelyNamedConstantPredicate = e -> isPrologConstant.apply(e) && ! mapFromVariableNameToTypeName.containsKey(e);
-		
-		// Solve the problem.
-		Expression result = solver.solve(tableExpression, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);	
-		
-		solverListener.apply(null);
+		ConstraintTheory theory = new EqualityConstraintTheory(new SymbolTermTheory());
+
+		Expression result = Compilation.compile(inputExpression, theory, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString, solverListener);
 		
 		return result;
 	}
-	
+
 	public static Expression convertGenericTableToInstance(FunctionTable functionTable, Expression genericFunctionTableExpr, List<Integer> instanceVarIdxs) {
 		Expression result = genericFunctionTableExpr;
 		RewritingProcess process = new DefaultRewritingProcess(null);
