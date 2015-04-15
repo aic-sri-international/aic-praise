@@ -86,9 +86,7 @@ quantifier_index
     ;
     
 quantifier_index_term
-    : function_application #quantifierIndexTermFunctionApplication
-    | constant_name #quantifierIndexTermVariable
-    | variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
+    : variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
     ;
 
 sort_name

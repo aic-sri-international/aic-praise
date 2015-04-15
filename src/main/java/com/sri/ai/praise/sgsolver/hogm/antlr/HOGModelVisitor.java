@@ -159,7 +159,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	}
 	
 	// constant_decl 
-    // | CONSTANT name=unique_constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)? #relationalConstantDeclaration
+    // | CONSTANT name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)? #relationalConstantDeclaration
 	@Override 
 	public Expression visitRelationalConstantDeclaration(@NotNull HOGMParser.RelationalConstantDeclarationContext ctx) { 
 		Expression name = newSymbol(ctx.name.getText());
@@ -389,23 +389,14 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	}
  	
  	// quantifier_index_term
-    // : function_application #quantifierIndexTermFunctionApplication
-    // | VARIABLE #quantifierIndexTermVariable
-    // | variable=VARIABLE IN sort=sort_name #quantifierIndexTermVariableInSort
+    // : variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
  	@Override 
  	public Expression visitQuantifier_index(@NotNull HOGMParser.Quantifier_indexContext ctx) { 
  		Expression result = Tuple.make(expressions(ctx.indexes));
  		return result;
  	}
  	
- 	// | PROPOSITIONAL_CONSTANT #quantifierIndexTermVariable
- 	@Override 
- 	public Expression visitQuantifierIndexTermVariable(@NotNull HOGMParser.QuantifierIndexTermVariableContext ctx) { 
- 		Expression result = newSymbol(ctx.constant_name().getText());
- 		return result;
- 	}
- 	
- 	// | variable=PROPOSITIONAL_CONSTANT IN sort=sort_name #quantifierIndexTermVariableInSort
+ 	// : variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
  	@Override 
  	public Expression visitQuantifierIndexTermVariableInSort(@NotNull HOGMParser.QuantifierIndexTermVariableInSortContext ctx) {
  		Expression variable = newSymbol(ctx.variable.getText());
@@ -419,7 +410,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// sort_name
     // : IN_BUILT_SORT_BOOLEAN
     // | IN_BUILT_SORT_NUMBER
-    // | PROPOSITIONAL_CONSTANT
+    // | constant_name
  	@Override 
  	public Expression visitSort_name(@NotNull HOGMParser.Sort_nameContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
@@ -427,8 +418,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	}
  	
  	// functor_name
-    // : VARIABLE
-    // | constant_name
+    // : constant_name
  	@Override 
  	public Expression visitFunctor_name(@NotNull HOGMParser.Functor_nameContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
@@ -436,8 +426,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	}
  	
  	// symbol
- 	// : VARIABLE
-    // | constant_name
+ 	// : constant_name
     // | constant_number
  	@Override 
  	public Expression visitSymbol(@NotNull HOGMParser.SymbolContext ctx) { 
