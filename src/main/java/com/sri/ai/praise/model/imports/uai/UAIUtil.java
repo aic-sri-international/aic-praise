@@ -47,10 +47,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
+import com.sri.ai.grinder.core.PrologConstantPredicate;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.plaindpll.api.GroupProblemType;
 import com.sri.ai.grinder.plaindpll.api.Solver;
@@ -86,15 +88,22 @@ public class UAIUtil {
 		return line.split("\\s+");
 	}
 	
+	/**
+	 * Returns an {@link Expression} equivalent to a given {@link FunctionTable} but in the form of a decision tree
+	 * (so hopefully more compact).
+	 * @param functionTable
+	 * @param solverListener
+	 * @return
+	 */
 	public static Expression constructGenericTableExpression(FunctionTable functionTable, Function<Solver, Solver> solverListener) {
 		StringBuilder table = new StringBuilder();
 		CartesianProductEnumeration<Integer> cartesianProduct = new CartesianProductEnumeration<>(cardinalityValues(functionTable));
-		int cnt = 0;
+		int counter = 0;
 		while (cartesianProduct.hasMoreElements()) {
-			cnt++;
+			counter++;
 			List<Integer> values = cartesianProduct.nextElement();
 			Double entryValue = functionTable.entryFor(values);
-			if (cnt == cartesianProduct.size().intValue()) {
+			if (counter == cartesianProduct.size().intValue()) {
 				// i.e. final value
 				table.append(entryValue);
 			}
@@ -124,9 +133,9 @@ public class UAIUtil {
 		}
 		
 		// The constraintTheory of equality on symbols (includes a model counter for formulas in it).
-		ConstraintTheory      theory      = new EqualityConstraintTheory(new SymbolTermTheory());
+		ConstraintTheory theory      = new EqualityConstraintTheory(new SymbolTermTheory());
 		GroupProblemType problemType = new Max(); // the problem type actually does not matter, because we are not going to have any indices.
-		Expression  tableExpr   = Expressions.parse(table.toString());
+		Expression  tableExpression  = Expressions.parse(table.toString());
 		
 		Collection<Expression> indices = Util.list(); // no indices; we want to keep all variables
 		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
@@ -141,8 +150,12 @@ public class UAIUtil {
 		SGDPLLT solver = new SGDPLLT(theory, problemType);
 		solverListener.apply(solver);
 		
+		// We use the Prolog convention of small-letter initials for constants, but we need an exception for the random variables.
+		Predicate<Expression> isPrologConstant = new PrologConstantPredicate();
+		Predicate<Expression> isUniquelyNamedConstantPredicate = e -> isPrologConstant.apply(e) && ! mapFromVariableNameToTypeName.containsKey(e);
+		
 		// Solve the problem.
-		Expression result = solver.solve(tableExpr, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString);	
+		Expression result = solver.solve(tableExpression, indices, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);	
 		
 		solverListener.apply(null);
 		

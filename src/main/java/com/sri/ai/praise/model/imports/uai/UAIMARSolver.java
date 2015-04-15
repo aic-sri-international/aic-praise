@@ -250,7 +250,7 @@ public class UAIMARSolver {
 					return false;
 				}
 				
-				Expression genericTableExpression  = constructGenericTableExpression(table, this::apply);
+				Expression genericTableExpression = constructGenericTableExpression(table, this::apply);
 				
 				double compressedEntries = calculateCompressedEntries(genericTableExpression);
 				
@@ -270,9 +270,9 @@ public class UAIMARSolver {
 				}
 			}
 			
-			System.out.println("Table compression ratio           ="+(totalCompressedEntries/totalNumberUniqueEntries));
-			System.out.println("Best individual compression ratio ="+bestIndividualCompressionRatio);
-			System.out.println("Worst individual compression ratio="+worstIndividualCompressionRatio);
+			System.out.println("Table compression ratio            = " + (totalCompressedEntries/totalNumberUniqueEntries));
+			System.out.println("Best individual compression ratio  = " + bestIndividualCompressionRatio);
+			System.out.println("Worst individual compression ratio = " + worstIndividualCompressionRatio);
 			
 			// If Solving not to actually be performed (i.e. just getting a summary of the models) then 
 			// indicate failed to solve
