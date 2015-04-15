@@ -54,12 +54,14 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.ForAll;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.ConstantDeclaration;
 import com.sri.ai.praise.model.RandomVariableDeclaration;
 import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGModelError.Type;
+import com.sri.ai.util.base.Pair;
 
 @Beta
 public class HOGModel {
@@ -531,8 +533,13 @@ public class HOGModel {
 			
 			// NOTE: quantifiers are not functions so need to be handled separately
 			Set<Expression> quantifiers = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> ForAll.isForAll(expr) || ThereExists.isThereExists(expr));
-			quantifiers.forEach(quantifier -> {
-// TODO - validate index				
+			quantifiers.forEach(quantifier -> {	
+				Expression indexExpression = ForAll.isForAll(quantifier) ? ForAll.getIndexExpression(quantifier) : ThereExists.getIndexExpression(quantifier);
+				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
+				if (getSort(indexAndType.second) == null) {
+					newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, indexAndType.second, termStatement);
+				}
+				
 				Expression body = ForAll.isForAll(quantifier) ? ForAll.getBody(quantifier) : ThereExists.getBody(quantifier);
 				if (determineSortType(body) != SortDeclaration.IN_BUILT_BOOLEAN) {
 					newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, body, termStatement);

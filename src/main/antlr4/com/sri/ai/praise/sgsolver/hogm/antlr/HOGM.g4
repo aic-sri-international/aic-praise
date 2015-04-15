@@ -82,7 +82,7 @@ function_application
     ;
     
 quantifier_index
-    : indexes+=quantifier_index_term (COMMA indexes+=quantifier_index_term)*
+    : indexes+=quantifier_index_term // (COMMA indexes+=quantifier_index_term)* Not on For All or There Exists
     ;
     
 quantifier_index_term
