@@ -426,7 +426,7 @@ public class HOGModel {
 					ConstantDeclaration constantDeclaration = scopedConstants.get(constantFunction.getFunctorOrSymbol());
 					for (int i = 0; i < constantFunction.numberOfArguments(); i++) {
 						Expression arg = constantFunction.get(i);
-						if (isUnknownConstant(arg, scopedConstants)) {
+						if (isUnknownConstant(arg, scopedConstants)) {							
 							newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
 						}
 						else {
@@ -463,12 +463,7 @@ public class HOGModel {
 			});
 			
 						
-			// All of these should belong to the known set of functors
-//			Set<Expression> nonConstantAndRandomFunctions = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> 
-//					Expressions.isFunctionApplicationWithArguments(expr) &&
-//					!isDeclaredConstantFunctor(expr.getFunctorOrSymbol()) &&
-//					!isDeclaredRandomFunctor(expr.getFunctorOrSymbol()));
-			
+			// All of these should belong to the known set of functors			
 			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> nonConstantAndRandomFunctionsWithScope = getNonConstantRandomFunctionsWithScope(termStatement.statement);
 			
 			nonConstantAndRandomFunctionsWithScope.forEach(nonConstantAndRandomFunctionWithScope -> {
@@ -486,7 +481,7 @@ public class HOGModel {
 							Expression arg = nonConstantAndRandomFunction.get(i);
 							if (!isDeclaredConstantFunctor(arg.getFunctorOrSymbol(), scopedConstants) &&
 								!isDeclaredRandomFunctor(arg.getFunctorOrSymbol()) &&
-								isUnknownConstant(arg, scopedConstants)) {								
+								isUnknownConstant(arg, scopedConstants)) {									
 								newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
 							}
 							else {
@@ -680,6 +675,8 @@ public class HOGModel {
 		boolean isUnknownConstant(Expression expr, Map<Expression, ConstantDeclaration> scopedConstants) {
 			boolean result = Expressions.isSymbol(expr) &&
 							!Expressions.isNumber(expr) &&
+							!ForAll.isForAll(expr) &&
+							!ThereExists.isThereExists(expr) &&
 							!scopedConstants.containsKey(expr) &&
 							!randoms.containsKey(expr) &&
 							!sortConstants.contains(expr);

@@ -284,6 +284,15 @@ public class HOGMParserTest {
 		string = "there exists X in Boolean: X;";
 		test(string, expected(null, null, null,
 							  Expressions.parse("if there exists X in Boolean: X then 1 else 0")));
+		
+		string = "(for all X in Boolean: X = false or X = true) 0.8;";
+		test(string, expected(null, null, null,
+							  Expressions.parse("if for all X in Boolean: X = false or X = true then 0.8 else 0.2")));
+		
+		string = "(there exists X in Boolean: X) 0.8;";
+		test(string, expected(null, null, null,
+							  Expressions.parse("if there exists X in Boolean: X then 0.8 else 0.2")));
+
 	}
 	
 	@Test
