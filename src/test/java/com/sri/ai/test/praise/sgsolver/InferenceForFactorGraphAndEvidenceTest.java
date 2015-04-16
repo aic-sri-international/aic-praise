@@ -53,35 +53,54 @@ import com.sri.ai.util.Util;
 
 public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 	
+	// The definitions of types
+	Map<String, String> mapFromTypeNameToSizeString;
+
+	// The definitions of variables
+	Map<String, String> mapFromRandomVariableNameToTypeName;
+
+	// The definitions of non-uniquely named constants
+	Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName;
+
+	// The definitions of uniquely named constants
+	Map<String, String> mapFromUniquelyNamedConstantNameToTypeName;
+
+	boolean isBayesianNetwork;
+	Expression factorGraph;
+	Expression evidence;
+	Expression queryExpression;
+	Expression expected;
+	Expression expectedWithNoFactorization;
+	Expression expectedWithFactorization;
+
 	@Test
 	public void test() {
 		
 		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
 		
 		// The definitions of types
-		Map<String, String> mapFromTypeNameToSizeString = Util.map(
+		mapFromTypeNameToSizeString = Util.map(
 				"Folks", "10",
 				"Boolean", "2");
 
 		// The definitions of variables
-		Map<String, String> mapFromVariableNameToTypeName = Util.map(
+		mapFromRandomVariableNameToTypeName = Util.map(
 				"earthquake", "Boolean",
 				"burglar",    "Folks", // a multi-value random variable
 				"alarm",      "Boolean"
 				);
 
 		// The definitions of non-uniquely named constants
-		Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
 				"seismicLocation", "Boolean"
 				);
 
-		Expression bayesianNetwork;
-		Expression evidence;
-		Expression queryExpression;
-		Expression expected;
-		
+		// The definitions of non-uniquely named constants
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+
 		// a variant of the earthquake/burglary model in which some burglars are more active than others.
-		bayesianNetwork = parse("" + 
+		isBayesianNetwork = true;
+		factorGraph = parse("" + 
 				"(if earthquake then 0.01 else 0.99) * " +
 				"(if burglar = none then 0.7 else if burglar = tom then 0.1 else 0.2 / (|Folks| - 2)) * " +
 				// note the division above of the potential by number of remaining values, as the probabilities must sum up to 1
@@ -93,135 +112,135 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		queryExpression = parse("earthquake");
 		evidence = null; // no evidence
 		expected = parse("if earthquake then 0.01 else 0.99"); // the prior
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("earthquake");
 		evidence = parse("not alarm"); // can be any boolean expression
 		expected = parse("if earthquake then 0.00145127349 else 0.998548727");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("earthquake");
 		evidence = parse("alarm");
 		expected = parse("if earthquake then 0.0289435601 else 0.97105644");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("earthquake");
 		evidence = parse("alarm and burglar = none");
 		expected = parse("if earthquake then 0.153846154 else 0.846153846");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("earthquake");
 		evidence = parse("alarm or not alarm"); // no information
 		expected = parse("if earthquake then 0.01 else 0.99"); // the prior
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("earthquake");
 		evidence = parse("true"); // no information
 		expected = parse("if earthquake then 0.01 else 0.99"); // the prior
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 
 	
 		
 		queryExpression = parse("alarm");
 		evidence = null; // no evidence
 		expected = parse("if alarm then 0.31095 else 0.68905"); // the marginal
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("alarm");
 		evidence = parse("not alarm");
 		expected = parse("if alarm then 0 else 1");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("alarm");
 		evidence = parse("alarm");
 		expected = parse("if alarm then 1 else 0");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("alarm");
 		evidence = parse("alarm and burglar = none");
 		expected = parse("if alarm then 1 else 0");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("alarm");
 		evidence = parse("alarm or not alarm"); // no information
 		expected = parse("if alarm then 0.31095 else 0.68905"); // the marginal
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("alarm");
 		evidence = parse("true"); // no information
 		expected = parse("if alarm then 0.31095 else 0.68905"); // the marginal
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 
 	
 		
 		queryExpression = parse("burglar = none");
 		evidence = null; // no evidence
 		expected = parse("if burglar = none then 0.7 else 0.3"); // the marginal
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = none");
 		evidence = parse("not alarm");
 		expected = parse("if burglar = none then 0.956461795 else 0.0435382048");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = none");
 		evidence = parse("alarm");
 		expected = parse("if burglar = none then 0.131693198 else 0.868306802");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = none");
 		evidence = parse("alarm and burglar = none");
 		expected = parse("if burglar = none then 1 else 0");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = none");
 		evidence = parse("alarm or not alarm"); // no information
 		expected = parse("if burglar = none then 0.7 else 0.3"); // the marginal
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = none");
 		evidence = parse("true"); // no information
 		expected = parse("if burglar = none then 0.7 else 0.3"); // the marginal
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 
 	
 		
 		queryExpression = parse("burglar = tom");
 		evidence = null; // no evidence
 		expected = parse("if burglar = tom then 0.1 else 0.9"); // the marginal
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = tom");
 		evidence = parse("not alarm");
 		expected = parse("if burglar = tom then 0.0145127349 else 0.985487265");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = tom");
 		evidence = parse("alarm");
 		expected = parse("if burglar = tom then 0.289435601 else 0.710564399");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = tom");
 		evidence = parse("alarm and burglar = none");
 		expected = parse("if burglar = tom then 0 else 1");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = tom");
 		evidence = parse("alarm or not alarm"); // no information
 		expected = parse("if burglar = tom then 0.1 else 0.9"); // the marginal
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		
 		queryExpression = parse("burglar = tom");
 		evidence = parse("true"); // no information
 		expected = parse("if burglar = tom then 0.1 else 0.9"); // the marginal
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 
 	
 	
 	
 	
 		// now using the constant 'seismicLocation'
-		bayesianNetwork = parse("" + 
+		factorGraph = parse("" + 
 				"(if seismicLocation then if earthquake then 0.1 else 0.9 else if earthquake then 0.01 else 0.99) * " +
 				"(if burglar = none then 0.7 else if burglar = tom then 0.1 else 0.2 / (|Folks| - 2)) * " +
 				// note the division above of the potential by number of remaining values, as the probabilities must sum up to 1
@@ -233,33 +252,118 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		queryExpression = parse("earthquake");
 		evidence = null; // no evidence
 		expected = parse("if seismicLocation then if earthquake then 0.1 else 0.9 else if earthquake then 0.01 else 0.99"); // the prior, parameterized by seismicLocation
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 
 		queryExpression = parse("earthquake");
 		evidence = parse("not alarm"); // can be any boolean expression
 		expected = parse("if seismicLocation then if earthquake then 0.0157356412 else 0.984264359 else if earthquake then 0.00145127349 else 0.998548727");
-		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 
-		// TODO: debug: result changes depending on the value of expected! Both options are correct, but using one leads the result to be the other.
-//		queryExpression = parse("burglar = tom");
-//		evidence = parse("alarm");
-//		expected = parse("if seismicLocation then if burglar = tom then 0.24691358 else 0.75308642 else if burglar = tom then 0.289435601 else 0.710564399");
-////		expected = parse("if burglar = tom then if seismicLocation then 0.24691358 else 0.289435601 else if seismicLocation then 0.75308642 else 0.710564399");
-//		runTest(queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		queryExpression = parse("burglar = tom");
+		evidence = parse("alarm");
+		// Here factorization creates two distinct but equivalent solutions; eventually we should have an equivalence test (didn't do it now because that would require full relational support even in the absence of random relational variables).
+		expectedWithNoFactorization = parse("if seismicLocation then if burglar = tom then 0.24691358 else 0.75308642 else if burglar = tom then 0.289435601 else 0.710564399");
+		expectedWithFactorization   = parse("if burglar = tom then if seismicLocation then 0.24691358 else 0.289435601 else if seismicLocation then 0.75308642 else 0.710564399");
+		runTest(queryExpression, evidence, expectedWithNoFactorization, expectedWithFactorization, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 	}
+
+	@Test
+	public void relationalConstants() {
+		
+		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
+		
+		// The definitions of types
+		mapFromTypeNameToSizeString = Util.map(
+				"Folks", "10",
+				"Boolean", "2");
+	
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"happy", "Boolean",
+				"boss",  "Folks"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map("tom", "Folks");
+		
+		isBayesianNetwork = true;
+		factorGraph = parse(""
+				+ "1/|Folks|*"  // uniform prior for 'boss' does not depend on the actual value of 'boss'
+				+ "(if boss = tom then if happy then 1 else 0 else if happy then 0 else 1)");
+	
+		queryExpression = parse("happy");
+		evidence = null; // no evidence
+		expected = parse("if happy then 0.1 else 0.9");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+	
+		queryExpression = parse("happy");
+		evidence = parse("boss = tom");
+		expected = parse("if happy then 1 else 0");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+
+		// Now 'boss' is a constant:
+	
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"happy", "Boolean"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
+				"boss",  "Folks"
+				);
+
+		isBayesianNetwork = true;
+		factorGraph = parse("" // no need for a prior for 'boss' now
+				+ "(if boss = tom then if happy then 1 else 0 else if happy then 0 else 1)");
+		
+		queryExpression = parse("happy");
+		evidence = null; // no evidence
+		expected = parse("if boss = tom then if happy then 1 else 0 else if happy then 0 else 1"); // query is a function of the constant
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+
+
+		// Now 'boss' is a constant unary predicate:
+	
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"happy", "Boolean"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
+				"boss",  "'->'(Folks, Boolean)"
+				);
+
+		isBayesianNetwork = true;
+		factorGraph = parse("" // no need for a prior for 'boss' now
+				+ "(if boss(tom) then if happy then 0.9 else 0.1 else if happy then 0.2 else 0.8)");
+		
+		queryExpression = parse("happy");
+		evidence = null; // no evidence
+		expected = parse("if boss(tom) then if happy then 0.9 else 0.1 else if happy then 0.2 else 0.8"); // query is a function of the constant
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+
+		queryExpression = parse("happy");
+		evidence = parse("happy");
+		expected = parse("if happy then 1 else 0"); // query is NOT a function of the constant in this case
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+}
 
 	/**
 	 * @param queryExpression
 	 * @param evidence
-	 * @param expected
-	 * @param bayesianNetwork
-	 * @param mapFromVariableNameToTypeName
-	 * @param mapFromNonUniquelyNamedConstantNameToTypeName TODO
+	 * @param expectedWithNoFactorization
+	 * @param expectedWithFactorization
+	 * @param isBayesianNetwork
+	 * @param factorGraph
+	 * @param mapFromRandomVariableNameToTypeName
+	 * @param mapFromNonUniquelyNamedConstantNameToTypeName
+	 * @param mapFromUniquelyNamedConstantNameToTypeName
 	 * @param mapFromTypeNameToSizeString
 	 */
-	private void runTest(Expression queryExpression, Expression evidence, Expression expected, Expression bayesianNetwork, Map<String, String> mapFromVariableNameToTypeName, Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromTypeNameToSizeString) {
-		runTestWithFactorizationOption(false, queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
-		runTestWithFactorizationOption(true,  queryExpression, evidence, expected, bayesianNetwork, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+	private void runTest(Expression queryExpression, Expression evidence, Expression expectedWithNoFactorization, Expression expectedWithFactorization, boolean isBayesianNetwork, Expression factorGraph, Map<String, String> mapFromRandomVariableNameToTypeName, Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromTypeNameToSizeString) {
+		runTestWithFactorizationOption(false, queryExpression, evidence, expectedWithNoFactorization, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		runTestWithFactorizationOption(true,  queryExpression, evidence, expectedWithFactorization,   isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 	}
 
 	/**
@@ -267,15 +371,36 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 	 * @param queryExpression
 	 * @param evidence
 	 * @param expected
-	 * @param bayesianNetwork
-	 * @param mapFromVariableNameToTypeName
-	 * @param mapFromNonUniquelyNamedConstantNameToTypeName TODO
+	 * @param isBayesianNetwork
+	 * @param factorGraph
+	 * @param mapFromRandomVariableNameToTypeName
+	 * @param mapFromNonUniquelyNamedConstantNameToTypeName
+	 * @param mapFromUniquelyNamedConstantNameToTypeName
 	 * @param mapFromTypeNameToSizeString
 	 */
-	private void runTestWithFactorizationOption(boolean useFactorization, Expression queryExpression, Expression evidence, Expression expected, Expression bayesianNetwork, Map<String, String> mapFromVariableNameToTypeName, Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromTypeNameToSizeString) {
+	private void runTestWithFactorizationOption(
+			boolean useFactorization,
+			Expression queryExpression,
+			Expression evidence,
+			Expression expected,
+			boolean isBayesianNetwork,
+			Expression factorGraph,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromTypeNameToSizeString) {
+		
 		InferenceForFactorGraphAndEvidence inferencer;
 		Expression marginal;
-		inferencer = new InferenceForFactorGraphAndEvidence(bayesianNetwork, useFactorization, evidence, useFactorization, mapFromVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		inferencer = new InferenceForFactorGraphAndEvidence(
+				factorGraph,
+				isBayesianNetwork,
+				evidence,
+				useFactorization,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromTypeNameToSizeString);
 		marginal = inferencer.solve(queryExpression);
 		DefaultRewritingProcess process = new DefaultRewritingProcess(null);
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, process);

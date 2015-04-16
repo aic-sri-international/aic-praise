@@ -73,6 +73,7 @@ import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.praise.model.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
+import com.sri.ai.util.Util;
 
 /**
  * 
@@ -322,7 +323,7 @@ public class UAIMARSolver {
 				return false;
 			}
 			inferencer = new InferenceForFactorGraphAndEvidence(
-					markovNetwork, false, evidenceExpr, true, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+					markovNetwork, false, evidenceExpr, true, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, Util.map(), mapFromTypeNameToSizeString);
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
 				int varCardinality = model.cardinality(i);

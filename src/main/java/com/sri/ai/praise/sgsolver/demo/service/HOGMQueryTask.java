@@ -57,6 +57,7 @@ import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.hogm.antlr.UnableToParseAllTheInputError;
 import com.sri.ai.praise.sgsolver.model.HOGModelException;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
+import com.sri.ai.util.Util;
 
 import javafx.concurrent.Task;
 
@@ -123,7 +124,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	    			
 	    			Expression markovNetwork = Times.make(conditionedPotentials);
 	    			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, null, true, 
-	    					mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+	    					mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, Util.map(), mapFromTypeNameToSizeString);
 	    			
 	    			Expression marginal = inferencer.solve(queryExpr); 			
 	    			

@@ -84,6 +84,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Map<String, String> mapFromTypeNameToSizeString;
 	private Expression queryVariable;
 	private Collection<Expression> allRandomVariables;
+	private Collection<Expression> allSymbolsButUniquelyNamedConstants;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private ConstraintTheory theory;
 	private SemiRingProblemType problemType;
@@ -112,6 +113,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @param evidence an Expression representing the evidence
 	 * @param useFactorization TODO
 	 * @param mapFromRandomVariableNameToTypeName a map from random variable name strings to their type name strings
+	 * @param mapFromUniquelyNamedConstantNameToTypeName TODO
 	 * @param mapFromTypeNameToSizeString a map from type name strings to their size strings
 	 * @param allTheSameButQuery the {@link Result} object from a previous query for the same model and evidence, if available, or null.
 	 * @return
@@ -121,6 +123,7 @@ public class InferenceForFactorGraphAndEvidence {
 			Expression evidence, boolean useFactorization,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromTypeNameToSizeString) {
 
 		this.factorGraph = factorGraph;
@@ -133,15 +136,19 @@ public class InferenceForFactorGraphAndEvidence {
 		
 		this.mapFromSymbolNameToTypeName = new LinkedHashMap<String, String>(mapFromRandomVariableNameToTypeName);
 		this.mapFromSymbolNameToTypeName.putAll(                             mapFromNonUniquelyNamedConstantNameToTypeName);
+		this.mapFromSymbolNameToTypeName.putAll(                             mapFromUniquelyNamedConstantNameToTypeName);
 		
-		                       allRandomVariables = Util.mapIntoList(this.mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
-		Collection<Expression> allSymbols         = Util.mapIntoList(this.mapFromSymbolNameToTypeName        .keySet(), Expressions::parse);
+		allRandomVariables = Util.mapIntoList(this.mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
+		                       
+		allSymbolsButUniquelyNamedConstants = list();
+		allSymbolsButUniquelyNamedConstants.addAll(Util.mapIntoList(          mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse));
+		allSymbolsButUniquelyNamedConstants.addAll(Util.mapIntoList(mapFromNonUniquelyNamedConstantNameToTypeName.keySet(), Expressions::parse));
 
 		this.mapFromTypeNameToSizeString = mapFromTypeNameToSizeString;
 
 		// We use the Prolog convention of small-letter initials for constants, but we need an exception for the random variables and the non-uniquely named constants.
 		Predicate<Expression> isPrologConstant = new PrologConstantPredicate();
-		isUniquelyNamedConstantPredicate = e -> isPrologConstant.apply(e) && ! allSymbols.contains(e);
+		isUniquelyNamedConstantPredicate = e -> isPrologConstant.apply(e) && ! allSymbolsButUniquelyNamedConstants.contains(e);
 		
 		TermTheory termTheory = null;
 		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
@@ -188,7 +195,7 @@ public class InferenceForFactorGraphAndEvidence {
 
 		// Solve the problem.
 		Expression unnormalizedMarginal = solver.solve(factorGraphWithEvidence, indices, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
-		System.out.println("Unnormalized marginal: " + unnormalizedMarginal);
+//		System.out.println("Unnormalized marginal: " + unnormalizedMarginal);
 
 		Expression marginal;
 		if (evidence == null && isBayesianNetwork) {
@@ -198,11 +205,12 @@ public class InferenceForFactorGraphAndEvidence {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (evidenceProbability == null) {
 				evidenceProbability = solver.solve(unnormalizedMarginal, list(queryVariable), mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
-				System.out.print("Normalization constant ");
-				if (evidence != null) {
-					System.out.print("(same as evidence probability P(" + evidence + ") ) ");
-				}
-				System.out.print("is " + evidenceProbability + "\n");
+
+//				System.out.print("Normalization constant ");
+//				if (evidence != null) {
+//					System.out.print("(same as evidence probability P(" + evidence + ") ) ");
+//				}
+//				System.out.print("is " + evidenceProbability + "\n");
 			}
 
 			marginal = Division.make(unnormalizedMarginal, evidenceProbability); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
