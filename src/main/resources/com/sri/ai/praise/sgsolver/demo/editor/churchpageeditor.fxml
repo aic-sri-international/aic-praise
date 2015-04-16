@@ -10,7 +10,7 @@
    <center>
       <SplitPane dividerPositions="0.65" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" styleClass="hiddenSplitter" BorderPane.alignment="CENTER">
         <items>
-            <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" styleClass="hiddenSplitter">
+            <SplitPane dividerPositions="0.5" orientation="HORIZONTAL" prefHeight="200.0" prefWidth="160.0" styleClass="hiddenSplitter">
               <items>
                 <AnchorPane fx:id="churchEditorPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" styleClass="contentPane" />
                   <BorderPane prefHeight="200.0" prefWidth="200.0">

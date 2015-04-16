@@ -57,7 +57,6 @@ import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.hogm.antlr.UnableToParseAllTheInputError;
 import com.sri.ai.praise.sgsolver.model.HOGModelException;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
-import com.sri.ai.util.Util;
 
 import javafx.concurrent.Task;
 
@@ -115,6 +114,12 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	    			constants.forEach(constant -> {
 	    				mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.toTypeRepresentation());
 	    			});
+	    			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
+	    			sorts.forEach(sortDeclaration -> {
+	    				sortDeclaration.getAssignedConstants().forEach(constant -> {
+	    					mapFromUniquelyNamedConstantNameToTypeName.put(constant.toString(), sortDeclaration.getName().toString());
+	    				});
+	    			});
 	    			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 	    			sorts.forEach(sort -> {
 	    				if (!sort.getSize().equals(SortDeclaration.UNKNOWN_SIZE)) {
@@ -124,7 +129,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	    			
 	    			Expression markovNetwork = Times.make(conditionedPotentials);
 	    			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, null, true, 
-	    					mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, Util.map(), mapFromTypeNameToSizeString);
+	    					mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 	    			
 	    			Expression marginal = inferencer.solve(queryExpr); 			
 	    			
