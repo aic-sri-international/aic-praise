@@ -544,8 +544,11 @@ public class HOGModel {
 			});
 			
 			// NOTE: quantifiers are not functions so need to be handled separately
-			Set<Expression> quantifiers = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> ForAll.isForAll(expr) || ThereExists.isThereExists(expr));
-			quantifiers.forEach(quantifier -> {	
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> quantifiersWithScope = getQuantifiersWithScope(termStatement.statement);
+			quantifiersWithScope.forEach(quantifierWithScope -> {
+				Expression                           quantifier      = quantifierWithScope.first;
+				Map<Expression, ConstantDeclaration> scopedConstants = quantifierWithScope.second;
+				
 				Expression indexExpression = ForAll.isForAll(quantifier) ? ForAll.getIndexExpression(quantifier) : ThereExists.getIndexExpression(quantifier);
 				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
 				if (getSort(indexAndType.second) == null) {
@@ -553,7 +556,7 @@ public class HOGModel {
 				}
 				
 				Expression body = ForAll.isForAll(quantifier) ? ForAll.getBody(quantifier) : ThereExists.getBody(quantifier);
-				if (determineSortType(body) != SortDeclaration.IN_BUILT_BOOLEAN) {
+				if (determineSortType(body, scopedConstants) != SortDeclaration.IN_BUILT_BOOLEAN) {
 					newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, body, termStatement);
 				}
 			});			
@@ -614,11 +617,6 @@ public class HOGModel {
 				getConstantFunctions(bodyExpression, constantFunctionsWithScope, quantifierScope);
 			}
 		}
-		
-//		Set<Expression> nonConstantAndRandomFunctions = Expressions.getSubExpressionsSatisfying(termStatement.statement, expr -> 
-//		Expressions.isFunctionApplicationWithArguments(expr) &&
-//		!isDeclaredConstantFunctor(expr.getFunctorOrSymbol()) &&
-//		!isDeclaredRandomFunctor(expr.getFunctorOrSymbol()));
 
 		List<Pair<Expression, Map<Expression, ConstantDeclaration>>> getNonConstantRandomFunctionsWithScope(Expression expr) {
 			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> result = new ArrayList<>();
@@ -648,6 +646,35 @@ public class HOGModel {
 				Expression bodyExpression  = ForAll.isForAll(expr) ? ForAll.getBody(expr) : ThereExists.getBody(expr);
 				getNonConstantRandomFunctions(bodyExpression, nonConstantRandomFunctionsWithScope, quantifierScope);
 			}
+		}
+		
+		List<Pair<Expression, Map<Expression, ConstantDeclaration>>> getQuantifiersWithScope(Expression expr) {
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> result = new ArrayList<>();
+			getQuantifiers(expr, result, constants);
+			return result;
+		}
+		
+		void getQuantifiers(Expression expr, List<Pair<Expression, Map<Expression, ConstantDeclaration>>> quantifiersWithScope, Map<Expression, ConstantDeclaration> currentScope) {
+			if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
+				Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
+				
+				Expression indexExpression = ForAll.isForAll(expr) ? ForAll.getIndexExpression(expr) : ThereExists.getIndexExpression(expr);
+				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
+				SortDeclaration localSort = getSort(indexAndType.second);
+				if (localSort != null) {
+					quantifierScope.put(indexAndType.first, new ConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
+				}
+				
+				quantifiersWithScope.add(new Pair<>(expr, quantifierScope));
+				
+				Expression bodyExpression  = ForAll.isForAll(expr) ? ForAll.getBody(expr) : ThereExists.getBody(expr);	
+				getQuantifiers(bodyExpression, quantifiersWithScope, quantifierScope);
+			}
+			
+			if (Expressions.isFunctionApplicationWithArguments(expr)) {
+				expr.getArguments().forEach(arg -> getQuantifiers(arg, quantifiersWithScope, currentScope));
+			}
+
 		}
 		
 		boolean isUnknownConstant(Expression expr, Map<Expression, ConstantDeclaration> scopedConstants) {

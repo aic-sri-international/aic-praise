@@ -171,6 +171,18 @@ public class HOGMParserTest {
 				+"constant goodGrade: Grade -> Boolean;\n"
 				+"goodGrade(55);",
 				HOGModelError.Type.CONSTANT_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
+		
+		testExpectedModelError( 
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"constant goodGrade: Grade -> Boolean;\n"
+				+"for all X in Boolean: goodGrade(X);",
+				HOGModelError.Type.CONSTANT_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
+		
+		testExpectedModelError( 
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"constant goodGrade: Grade -> Boolean;\n"
+				+"there exists X in Boolean: goodGrade(X);",
+				HOGModelError.Type.CONSTANT_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
 	}
 	
 	@Test
@@ -249,6 +261,29 @@ public class HOGMParserTest {
 				+"random goodGrade: Grade -> Boolean;\n"
 				+"goodGrade(55);",
 				HOGModelError.Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
+		
+		testExpectedModelError( 
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random goodGrade: Grade -> Boolean;\n"
+				+"for all X in Boolean: goodGrade(X);",
+				HOGModelError.Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
+		
+		testExpectedModelError( 
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"random goodGrade: Grade -> Boolean;\n"
+				+"there exists X in Boolean: goodGrade(X);",
+				HOGModelError.Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
+	}
+	
+	@Test
+	public void testTerms() {
+		String string;
+		string = "for all X in Boolean: X = false or X = true;";
+		test(string, expected(null, null, null,
+							  Expressions.parse("if for all X in Boolean: X = false or X = true then 1 else 0")));
+		string = "there exists X in Boolean: X;";
+		test(string, expected(null, null, null,
+							  Expressions.parse("if there exists X in Boolean: X then 1 else 0")));
 	}
 	
 	@Test
@@ -298,18 +333,15 @@ public class HOGMParserTest {
 				+"random grade: Number -> Grade;\n"
 				+"grade(55) + (grade(55) = a);",
 				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE,
-				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);
-// TODO - Quantifiers currently not supported properly		
-//		testExpectedModelError(
-//				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-//				+"random grade: Number -> Grade;\n"
-//				+"for all X: grade(X);",
-//				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
-//		testExpectedModelError(
-//				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-//				+"random grade: Number -> Grade;\n"
-//				+"there exists X: grade(X);",
-//				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
+				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);		
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"for all X in Grade: X;",
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"there exists X in Grade: X;",
+				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);
 		
 		testExpectedModelError(
 				"true = 1;",
@@ -332,6 +364,16 @@ public class HOGMParserTest {
 				+"grade(55) = 55;",
 				HOGModelError.Type.TERM_SORT_CANNOT_BE_DETERMINED,
 				HOGModelError.Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED);
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"for all X in Something: X = a;",
+				HOGModelError.Type.TERM_CONSTANT_NOT_DEFINED,
+				HOGModelError.Type.TERM_SORT_CANNOT_BE_DETERMINED);
+		testExpectedModelError(
+				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
+				+"there exists X in Something: X = a;",
+				HOGModelError.Type.TERM_CONSTANT_NOT_DEFINED,
+				HOGModelError.Type.TERM_SORT_CANNOT_BE_DETERMINED);
 		
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
