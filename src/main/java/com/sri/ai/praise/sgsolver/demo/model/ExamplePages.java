@@ -40,7 +40,10 @@ package com.sri.ai.praise.sgsolver.demo.model;
 import java.io.File;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -155,27 +158,26 @@ public class ExamplePages {
 		
 		List<String> modelSpecifications = new ArrayList<>();
 		Map<String, List<String>> fragments = new HashMap<>();
-		StringBuilder currentFragment = new StringBuilder();
-		try (Stream<String> lines = Files.lines(Paths.get(uri), FILE_CHARSET)) {	
-			lines.forEachOrdered(line -> {
-				if (line.startsWith(MODEL_SPECIFICATION_PREFIX)) {
-					modelSpecifications.add(line);
+		
+		// Need to do this if reading form jar file.
+		if (uri.toString().contains("!")) {
+			final Map<String, String> env = new HashMap<>();
+			final String[] array = uri.toString().split("!");
+			try (FileSystem fs  = FileSystems.newFileSystem(URI.create(array[0]), env)) {
+				Path path = fs.getPath(array[1]);
+				try (Stream<String> lines = Files.lines(path, FILE_CHARSET)) {	
+					getContent(lines, modelSpecifications, fragments);	
 				}
-				else if (line.startsWith(MODEL_FRAGMENT_PREFIX)) {
-					currentFragment.setLength(0);
-					currentFragment.append(line.substring(MODEL_FRAGMENT_PREFIX.length(), line.length()).trim());
-					fragments.put(currentFragment.toString(), new ArrayList<>());
-				}
-				else {
-					if (currentFragment.length() == 0) {
-						throw new RuntimeException("No current fragment identifier exists before :" +line);
-					}
-					
-					fragments.get(currentFragment.toString()).add(line);
-				}
-			});			
-		} catch (Exception ex) {
-			FXUtil.exception(ex);
+			} catch (Exception ex) {
+				FXUtil.exception(ex);
+			}
+		}
+		else {
+			try (Stream<String> lines = Files.lines(Paths.get(uri), FILE_CHARSET)) {	
+				getContent(lines, modelSpecifications, fragments);	
+			} catch (Exception ex) {
+				FXUtil.exception(ex);
+			}
 		}
 		
 		for (String modelSpecification : modelSpecifications) {
@@ -192,6 +194,26 @@ public class ExamplePages {
 	//
 	// PRIVATE
 	//
+	private static void getContent(Stream<String> lines, List<String> modelSpecifications, Map<String, List<String>> fragments) {
+		StringBuilder currentFragment = new StringBuilder();
+		lines.forEachOrdered(line -> {
+			if (line.startsWith(MODEL_SPECIFICATION_PREFIX)) {
+				modelSpecifications.add(line);
+			}
+			else if (line.startsWith(MODEL_FRAGMENT_PREFIX)) {
+				currentFragment.setLength(0);
+				currentFragment.append(line.substring(MODEL_FRAGMENT_PREFIX.length(), line.length()).trim());
+				fragments.put(currentFragment.toString(), new ArrayList<>());
+			}
+			else {
+				if (currentFragment.length() == 0) {
+					throw new RuntimeException("No current fragment identifier exists before :" +line);
+				}
+				
+				fragments.get(currentFragment.toString()).add(line);
+			}
+		});
+	}
 	private static void appendField(String fieldName, List<String> values, StringBuilder sb) {
 		sb.append(fieldName);
 		sb.append("=[");

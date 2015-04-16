@@ -87,6 +87,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.model.SortDeclaration;
@@ -226,7 +227,7 @@ public class SGSolverDemoController {
 		try {
 			Expression parsed = Expressions.parse(answer);
 			if (parsed != null) {
-				result = parsed.toString();
+				result = toTermFormat(parsed);
 			}
 		}
 		catch (Throwable t) {
@@ -768,5 +769,55 @@ public class SGSolverDemoController {
 			// We are at a leaf node, therefore increment the count
 			count.addAndGet(1);
 		}
+	}
+	
+	private static String toTermFormat(Expression expr) {
+		StringBuilder result = new StringBuilder();
+		
+		toTermFormat(expr, result);
+		
+		return result.toString();
+	}
+	
+	private static void toTermFormat(Expression expr, StringBuilder sb) {
+		if (IfThenElse.isIfThenElse(expr)) {
+			Expression condition  = IfThenElse.condition(expr);
+			Expression thenBranch = IfThenElse.thenBranch(expr);
+			Expression elseBranch = IfThenElse.elseBranch(expr);
+			
+			if (Expressions.isNumber(thenBranch) && Expressions.isNumber(thenBranch)) {
+				// Simplify the form of the conditional
+				Rational potential = thenBranch.rationalValue();	
+				if (potential.isZero()) { // things with 0 potential are negations; it's more intuitive to convert them to that.
+					if (condition.hasFunctor(FunctorConstants.NOT)) { // negate condition, avoiding double negations
+						condition = condition.get(0);
+					}
+					else {
+						condition = Not.make(condition);
+					}
+					potential = new Rational(1);
+				}
+				else if (potential.compareTo(1) < 0 && condition.hasFunctor(FunctorConstants.NOT)) {
+					// 'unlikely negations' are better understood as likely statements -- eliminating a sort of double negation
+					condition = condition.get(0);
+					potential = potential.subtract(1).negate(); // this is the same as potential = 1.0 - potential;
+				}
+				sb.append(condition.toString());
+				sb.append(" ");
+				sb.append(Expressions.makeSymbol(potential).toString());
+			}
+			else {
+				sb.append("if ");
+				sb.append(condition.toString());
+				sb.append(" then ");
+				toTermFormat(thenBranch, sb);
+				sb.append(" else ");
+				toTermFormat(elseBranch, sb);
+			}
+		}
+		else {
+			sb.append(expr.toString());
+		}
+		
 	}
 }

@@ -61,8 +61,12 @@ public class HOGMCodeArea extends AnchorPane {
 	private CodeArea codeArea;
 	
 	public HOGMCodeArea() {
+		this(true);
+	}
+	
+	public HOGMCodeArea(boolean showLineNumbers) {
 		super();
-		initialize();
+		initialize(showLineNumbers);
 	}
 	
 	public void setText(String text) {
@@ -106,9 +110,11 @@ public class HOGMCodeArea extends AnchorPane {
 	//
 	// PRIVATE
 	//
-	private void initialize() {		
+	private void initialize(boolean showLineNumbers) {		
 		codeArea = new CodeArea();
-		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea, digits -> "%"+ (digits < 2 ? 2 : digits) + "d"));
+		if (showLineNumbers) {
+			codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea, digits -> "%"+ (digits < 2 ? 2 : digits) + "d"));
+		}
 		
 		codeArea.textProperty().addListener((obs, oldText, newText) -> {
 			codeArea.setStyleSpans(0, computeHighlighting(newText));

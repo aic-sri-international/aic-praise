@@ -248,7 +248,7 @@ public class QueryController {
 	
 	private void displayQueryAnswer(String query, String result, ParsedModel parseModel, long millisecondsToCompute) {
 		String title = "Query '"+query+duration("' took ", millisecondsToCompute)+" to compute answer '"+result+"'";
-		HOGMCodeArea resultCodeArea = new HOGMCodeArea();
+		HOGMCodeArea resultCodeArea = new HOGMCodeArea(false);
 		resultCodeArea.setText(SGSolverDemoController.displayResultPrecision(result));
 		resultCodeArea.setEditable(false);
 		

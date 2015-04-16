@@ -253,7 +253,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>com.sri.ai.praise.demo.PRAiSEDemoApp</mainClass>
+							<mainClass>com.sri.ai.praise.sgsolver.demo.SGSolverDemoApp</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
