@@ -194,7 +194,7 @@ public class InferenceForFactorGraphAndEvidence {
 		Collection<Expression> indices = setDifference(allRandomVariables, list(queryVariable)); 
 
 		// Solve the problem.
-		Expression unnormalizedMarginal = solver.solve(factorGraphWithEvidence, indices, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+		Expression unnormalizedMarginal = sum(indices, factorGraphWithEvidence);
 //		System.out.println("Unnormalized marginal: " + unnormalizedMarginal);
 
 		Expression marginal;
@@ -222,6 +222,15 @@ public class InferenceForFactorGraphAndEvidence {
 		marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new DefaultRewritingProcess(null));
 
 		return marginal;
+	}
+
+	/**
+	 * @param indices
+	 * @param expression
+	 * @return
+	 */
+	public Expression sum(Collection<Expression> indices, Expression expression) {
+		return solver.solve(expression, indices, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
 	}
 
 	/**

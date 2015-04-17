@@ -37,6 +37,7 @@
  */
 package com.sri.ai.test.praise.sgsolver;
 
+import static com.sri.ai.util.Util.list;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
@@ -268,47 +269,89 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 	}
 
 	@Test
-	public void relationalConstants() {
+	public void testBurglary() {
 		
 		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
 		
 		// The definitions of types
 		mapFromTypeNameToSizeString = Util.map(
+				"Boolean", "2");
+
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"burglary",   "Boolean",
+				"alarm",      "Boolean",
+				"call",       "Boolean"
+				);
+
+		// The definitions of non-uniquely named constants
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+
+		// The definitions of non-uniquely named constants
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+
+		isBayesianNetwork = false;
+		factorGraph = parse(""
+				+ "(if alarm then if call then 0.7 else 0.3 else if call then 0 else 1)*"
+				+ "(if burglary then if alarm then 0.9 else 0.1 else if alarm then 0.01 else 0.99)*"
+				+ "(if burglary then 0.1 else 0.9)");
+
+		InferenceForFactorGraphAndEvidence inferencer;
+		inferencer = new InferenceForFactorGraphAndEvidence(
+				factorGraph,
+				isBayesianNetwork,
+				evidence,
+				false,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromTypeNameToSizeString);
+		Expression result = inferencer.sum(list(parse("alarm")), factorGraph);
+		System.out.println(result);
+	}
+
+	@Test
+	public void relationalConstants() {
+
+		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
+
+		// The definitions of types
+		mapFromTypeNameToSizeString = Util.map(
 				"Folks", "10",
 				"Boolean", "2");
-	
+
 		// The definitions of variables
 		mapFromRandomVariableNameToTypeName = Util.map(
 				"happy", "Boolean",
 				"boss",  "Folks"
 				);
-		
+
 		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
 
 		mapFromUniquelyNamedConstantNameToTypeName = Util.map("tom", "Folks");
-		
+
 		isBayesianNetwork = true;
 		factorGraph = parse(""
 				+ "1/|Folks|*"  // uniform prior for 'boss' does not depend on the actual value of 'boss'
 				+ "(if boss = tom then if happy then 1 else 0 else if happy then 0 else 1)");
-	
+
 		queryExpression = parse("happy");
 		evidence = null; // no evidence
 		expected = parse("if happy then 0.1 else 0.9");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
-	
+
 		queryExpression = parse("happy");
 		evidence = parse("boss = tom");
 		expected = parse("if happy then 1 else 0");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 
 		// Now 'boss' is a constant:
-	
+
 		// The definitions of variables
 		mapFromRandomVariableNameToTypeName = Util.map(
 				"happy", "Boolean"
 				);
-		
+
 		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
 				"boss",  "Folks"
 				);
@@ -316,7 +359,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		isBayesianNetwork = true;
 		factorGraph = parse("" // no need for a prior for 'boss' now
 				+ "(if boss = tom then if happy then 1 else 0 else if happy then 0 else 1)");
-		
+
 		queryExpression = parse("happy");
 		evidence = null; // no evidence
 		expected = parse("if boss = tom then if happy then 1 else 0 else if happy then 0 else 1"); // query is a function of the constant
@@ -324,12 +367,12 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 
 
 		// Now 'boss' is a constant unary predicate:
-	
+
 		// The definitions of variables
 		mapFromRandomVariableNameToTypeName = Util.map(
 				"happy", "Boolean"
 				);
-		
+
 		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
 				"boss",  "'->'(Folks, Boolean)"
 				);
@@ -337,7 +380,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		isBayesianNetwork = true;
 		factorGraph = parse("" // no need for a prior for 'boss' now
 				+ "(if boss(tom) then if happy then 0.9 else 0.1 else if happy then 0.2 else 0.8)");
-		
+
 		queryExpression = parse("happy");
 		evidence = null; // no evidence
 		expected = parse("if boss(tom) then if happy then 0.9 else 0.1 else if happy then 0.2 else 0.8"); // query is a function of the constant
@@ -347,7 +390,71 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		evidence = parse("happy");
 		expected = parse("if happy then 1 else 0"); // query is NOT a function of the constant in this case
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
-}
+	}
+
+	@Test
+	public void lucky() {
+		
+		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
+		
+		// The definitions of types
+		mapFromTypeNameToSizeString = Util.map(
+				"People", "1000",
+				"Boolean", "2");
+	
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"lucky",  "Boolean",
+				"winner", "People"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map("rodrigo", "People");
+		
+		isBayesianNetwork = false;
+		factorGraph = parse(""
+				+ "(if lucky then 1 else 0)*"
+				+ "(if lucky then if winner = rodrigo then 1 else 0 else 0.5)");
+	
+		queryExpression = parse("winner = rodrigo");
+		evidence = null;
+		expected = parse("if winner = rodrigo then 1 else 0");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+	}
+	
+
+	@Test
+	public void smartest() {
+		
+		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
+		
+		// The definitions of types
+		mapFromTypeNameToSizeString = Util.map(
+				"People", "1000",
+				"Boolean", "2");
+	
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"boss",   "People",
+				"smartest", "People"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map("bob", "People", "tom", "People");
+		
+		isBayesianNetwork = false;
+		factorGraph = parse(""
+				+ "(if (for all P in People :   smartest = P   =>  boss = P) then 1 else 0) * " + 
+				"( if smartest != bob then 1 else 0)" + 
+				"");
+	
+		queryExpression = parse("boss = tom");
+		evidence = null;
+		expected = parse("if boss = tom then 0.001 else 0.999");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+	}
 
 	/**
 	 * @param queryExpression
@@ -362,7 +469,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 	 * @param mapFromTypeNameToSizeString
 	 */
 	private void runTest(Expression queryExpression, Expression evidence, Expression expectedWithNoFactorization, Expression expectedWithFactorization, boolean isBayesianNetwork, Expression factorGraph, Map<String, String> mapFromRandomVariableNameToTypeName, Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromTypeNameToSizeString) {
-		runTestWithFactorizationOption(false, queryExpression, evidence, expectedWithNoFactorization, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		//runTestWithFactorizationOption(false, queryExpression, evidence, expectedWithNoFactorization, isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 		runTestWithFactorizationOption(true,  queryExpression, evidence, expectedWithFactorization,   isBayesianNetwork, factorGraph, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 	}
 
