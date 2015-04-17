@@ -86,6 +86,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SyntaxTrees;
+import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.Not;
@@ -793,7 +794,15 @@ public class SGSolverDemoController {
 						condition = condition.get(0);
 					}
 					else {
-						condition = Not.make(condition);
+						if (Equality.isEquality(condition) && condition.numberOfArguments() == 2) {
+							condition = Disequality.make(condition.get(0), condition.get(1));
+						}
+						else if (Disequality.isDisequality(condition)) {
+							condition = Equality.make(condition.getArguments());
+						}
+						else {
+							condition = Not.make(condition);
+						}
 					}
 					potential = new Rational(1);
 				}
