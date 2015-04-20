@@ -312,6 +312,17 @@ public class HOGMParserTest {
 							  null, 
 							  Expressions.parse("tuple(randomVariable(lucky, 0, Boolean), randomVariable(winner, 0, People))"),
 							  Expressions.parse("if lucky then (if winner = rodrigo then 1 else 0) else 0.5")));
+		
+		// allow mismatched conditioned branch types during validation when the overall expression can be converted
+		// to a conditioned potential.
+		string = "sort People : 10000000, rodrigo;\n"
+				+"random lucky : Boolean;\n"
+				+"random winner : People;\n"				
+				+"if lucky then winner = rodrigo else winner = rodrigo 1/10000000;";	
+		test(string, expected(Expressions.parse("sort(People, 10000000, {rodrigo})"), 
+							  null, 
+							  Expressions.parse("tuple(randomVariable(lucky, 0, Boolean), randomVariable(winner, 0, People))"),
+							  Expressions.parse("if lucky then (if winner = rodrigo then 1 else 0) else (if winner = rodrigo then 1 / 10000000 else 1 - 1 / 10000000)")));
 	}
 	
 	@Test
