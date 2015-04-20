@@ -42,8 +42,6 @@ term
     : OPEN_PAREN term CLOSE_PAREN #parentheses
       // function application, e.g.: f(X)
     | function_application #functionApplication
-      // not, e.g.: not A and B ---> (not(A)) and B
-    | NOT term #not
       // negative, e.g.: 2 * -1 ---> 2 * (-1)
     | SUBTRACT term #unaryMinus // We set the unary minus to higher precedence
       // NOTE:  P)arentheses, E)xponents, ( M)ultiplication, D)ivision ), ( A)ddition, S)ubtraction )
@@ -56,6 +54,8 @@ term
 	| leftop=term op=(PLUS | SUBTRACT) rightop=term #additionOrSubtraction
       // comparison operators, e.g.: X = Y, 2 < 3
     | leftop=term op=(LESS_THAN | LESS_THAN_EQUAL | EQUAL | NOT_EQUAL | GREATER_THAN_EQUAL | GREATER_THAN) rightop=term #comparison
+      // not, e.g.: not A and B ---> (not(A)) and B
+    | NOT term #not
       // conjunction, e.g.: A or B and C ---> A or (B and C)
     | leftconj=term AND rightconj=term #conjunction
       // disjunction, e.g.: A => B or C ---> A => (B or C)

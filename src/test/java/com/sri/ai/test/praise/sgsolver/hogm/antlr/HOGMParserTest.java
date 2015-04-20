@@ -293,6 +293,14 @@ public class HOGMParserTest {
 		test(string, expected(null, null, null,
 							  Expressions.parse("if there exists X in Boolean: X then 0.8 else 0.2")));
 
+		// 'not' is to have lower precedence than equality and arithmetic functors.
+		string = "sort AlarmState: 2, on, off;\n"
+				+"random alarm: AlarmState;\n"
+				+"not alarm = on;";	
+		test(string, expected(Expressions.parse("sort(AlarmState, 2, {on, off})"), 
+							  null, 
+							  Expressions.parse("randomVariable(alarm, 0, AlarmState)"),
+							  Expressions.parse("if not (alarm = on) then 1 else 0")));
 	}
 	
 	@Test
