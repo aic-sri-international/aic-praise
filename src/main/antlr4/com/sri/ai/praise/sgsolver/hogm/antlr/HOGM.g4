@@ -70,10 +70,10 @@ term
     | THERE EXISTS index=quantifier_index COLON body=term #thereExists
       // condition=term(0) potential=term(1) ---> if condition then potential else 1-potential
     | term term #shorthandConditionedPotential 
+      // conditional unknown else branch, e.g.: if X = Y then 0.3 ---> if X = Y then 0.3 else 0.5
+    | IF condition=term THEN thenbranch=term #conditionalUnknownElseBranch    
       // conditional, e.g.: if X = Y then 1 else 2
     | IF condition=term THEN thenbranch=term ELSE elsebranch=term #conditional
-      // conditional unknown else branch, e.g.: if X = Y then 0.3 ---> if X = Y then 0.3 else 0.5
-    | IF condition=term THEN thenbranch=term #conditionalUnknownElseBranch
     | symbol #atomicTerm
     ;
     

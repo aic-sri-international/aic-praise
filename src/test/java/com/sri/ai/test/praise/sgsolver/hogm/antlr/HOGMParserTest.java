@@ -301,6 +301,17 @@ public class HOGMParserTest {
 							  null, 
 							  Expressions.parse("randomVariable(alarm, 0, AlarmState)"),
 							  Expressions.parse("if not (alarm = on) then 1 else 0")));
+		
+
+		// 'else' is to attach to the closest conditional.		
+		string = "sort People : 10000000, rodrigo;\n"
+				+"random lucky : Boolean;\n"
+				+"random winner : People;\n"				
+				+"if lucky then if winner = rodrigo then 1 else 0;";	
+		test(string, expected(Expressions.parse("sort(People, 10000000, {rodrigo})"), 
+							  null, 
+							  Expressions.parse("tuple(randomVariable(lucky, 0, Boolean), randomVariable(winner, 0, People))"),
+							  Expressions.parse("if lucky then (if winner = rodrigo then 1 else 0) else 0.5")));
 	}
 	
 	@Test
