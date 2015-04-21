@@ -51,6 +51,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.Disequality;
 import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.ForAll;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -339,6 +340,9 @@ public class HOGModel {
 							RandomVariableDeclaration rvDeclaration = randoms.get(expr.getFunctorOrSymbol());
 							result = getSort(rvDeclaration.getRangeSort());
 						}
+						else if ((result = getSort(expr)) != null) {
+							// has been assigned.
+						}
 						else if (sortConstants.contains(expr)){
 							for (SortDeclaration sort : sorts.values()) {
 								// Have mapped the unique constant sort.
@@ -426,7 +430,7 @@ public class HOGModel {
 					ConstantDeclaration constantDeclaration = scopedConstants.get(constantFunction.getFunctorOrSymbol());
 					for (int i = 0; i < constantFunction.numberOfArguments(); i++) {
 						Expression arg = constantFunction.get(i);
-						if (isUnknownConstant(arg, scopedConstants)) {							
+						if (isUnknownConstant(arg, scopedConstants)) {								
 							newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
 						}
 						else {
@@ -514,7 +518,9 @@ public class HOGModel {
 										}
 									}
 									else if (numericTypeFunctors.contains(functorName)) {
-										if (sortType != SortDeclaration.IN_BUILT_NUMBER) {
+										if (sortType != SortDeclaration.IN_BUILT_NUMBER 
+										    && !FunctorConstants.CARDINALITY.equals(functorName) // Cardinality functor takes any sort name
+										) {
 											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
 										}
 									}
@@ -688,6 +694,7 @@ public class HOGModel {
 							!ThereExists.isThereExists(expr) &&
 							!scopedConstants.containsKey(expr) &&
 							!randoms.containsKey(expr) &&
+							!sorts.containsKey(expr) &&
 							!sortConstants.contains(expr);
 			return result;
 		}

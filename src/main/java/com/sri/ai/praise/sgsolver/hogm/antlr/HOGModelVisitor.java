@@ -255,6 +255,15 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	}
  	
  	// term
+    // | VERTICAL_BAR constant_name VERTICAL_BAR #typeCardinality
+ 	@Override 
+ 	public Expression visitTypeCardinality(@NotNull HOGMParser.TypeCardinalityContext ctx) { 
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.CARDINALITY, newSymbol(ctx.constant_name().getText()));
+ 		
+ 		return result;
+ 	}
+ 	
+ 	// term
  	// | NOT term
  	public Expression visitNot(@NotNull HOGMParser.NotContext ctx) { 
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(Not.FUNCTOR, visit(ctx.term()));

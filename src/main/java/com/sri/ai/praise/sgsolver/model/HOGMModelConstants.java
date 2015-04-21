@@ -67,6 +67,7 @@ public class HOGMModelConstants {
 	public final static Set<String> KNOWN_NUMERIC_FUNCTORS;
 	static {
 		Set<String> knownNumericFunctors = new LinkedHashSet<String>();
+		knownNumericFunctors.add(FunctorConstants.CARDINALITY);
 		knownNumericFunctors.add(FunctorConstants.EXPONENTIATION);
 		knownNumericFunctors.add(FunctorConstants.DIVISION);
 		knownNumericFunctors.add(FunctorConstants.TIMES);
@@ -97,6 +98,7 @@ public class HOGMModelConstants {
 	public final static Set<String> KNOWN_ARITY_1_FUNCTORS;
 	static {
 		Set<String> arity1 = new LinkedHashSet<>();
+		arity1.add(FunctorConstants.CARDINALITY);
 		arity1.add(FunctorConstants.NOT);
 		
 		KNOWN_ARITY_1_FUNCTORS = Collections.unmodifiableSet(arity1);

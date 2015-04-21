@@ -42,6 +42,8 @@ term
     : OPEN_PAREN term CLOSE_PAREN #parentheses
       // function application, e.g.: f(X)
     | function_application #functionApplication
+      // type cardinality, e.g. | People |
+    | VERTICAL_BAR constant_name VERTICAL_BAR #typeCardinality
       // negative, e.g.: 2 * -1 ---> 2 * (-1)
     | SUBTRACT term #unaryMinus // We set the unary minus to higher precedence
       // NOTE:  P)arentheses, E)xponents, ( M)ultiplication, D)ivision ), ( A)ddition, S)ubtraction )
@@ -170,6 +172,7 @@ SEMICOLON               : ';' ;
 COLON                   : ':' ;
 COMMA                   : ',' ;
 // Misc
+VERTICAL_BAR            : '|' ;
 MAPPING_RIGHT_ARROW     : '->' ;
 
 INTEGER 
