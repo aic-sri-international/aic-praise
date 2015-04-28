@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.grounded.bayes;
+package com.sri.ai.praise.sgsolver.model.grounded.bayes;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.model.grounded.common.FunctionTable;
+import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**

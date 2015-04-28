@@ -35,27 +35,61 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.grounded.bayes;
+package com.sri.ai.praise.sgsolver.model.grounded.common;
+
+import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
 
 /**
- * Basic representation of a Bayesian Network.
+ * Basic representation of a Graphical Network. Contains representations common to both Markov and Bayes networks.
  * 
  * @author oreilly
  *
  */
 @Beta
-public interface BayesNetwork extends GraphicalNetwork {
+public interface GraphicalNetwork {
+	int numberVariables();
+	int cardinality(int variableIndex);
+	int numberUniqueFunctionTables();
+	FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx);
 	
-	/**
-	 * 
-	 * @return the # of Conditional Probability Tables (CPTs) in the network.
-	 */
-	default int numberCPTs() {
-		return numberTables();
+	int numberTables();
+	FunctionTable getTable(int tableIdx);
+	List<Integer> getVariableIndexesForTable(int tableIdx);
+	List<Integer> getTableIndexes(int uniqueFunctionTableIdx);
+	
+	default double ratioUniqueTablesToTables() {
+		return ((double) numberUniqueFunctionTables()) / ((double) numberTables());
 	}
 	
-	ConditionalProbabilityTable getCPT(int cptIdx);
+	default int largestCardinality() {
+		int result = 0;
+		for (int i = 0; i < numberVariables(); i++) {
+			int card = cardinality(i);
+			if (card > result) {
+				result = card;
+			}
+		}
+		return result;
+	}
+	
+	default int largestNumberOfFunctionTableEntries() {		
+		int result = 0;
+		for (int i = 0; i < numberUniqueFunctionTables(); i++) {
+			int numEntries = getUniqueFunctionTable(i).numberEntries();
+			if (numEntries > result) {
+				result = numEntries;
+			}
+		}
+ 		return result;
+	}
+	
+	default int totalNumberEntriesForAllFunctionTables() {
+		int result = 0;
+		for (int i = 0; i < numberTables(); i++) {
+			result += getTable(i).numberEntries();
+		}		
+		return result;
+	}
 }

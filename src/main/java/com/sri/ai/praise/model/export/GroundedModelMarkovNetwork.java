@@ -56,9 +56,9 @@ import com.sri.ai.praise.model.GetRandomVariables;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.ModelGrounding;
 import com.sri.ai.praise.model.ParfactorsDeclaration;
-import com.sri.ai.praise.model.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.grounded.markov.FactorTable;
-import com.sri.ai.praise.model.grounded.markov.MarkovNetwork;
+import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
+import com.sri.ai.praise.sgsolver.model.grounded.markov.FactorTable;
+import com.sri.ai.praise.sgsolver.model.grounded.markov.MarkovNetwork;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**

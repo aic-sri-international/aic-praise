@@ -92,7 +92,6 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.model.SortDeclaration;
-import com.sri.ai.praise.model.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.imports.uai.UAIEvidenceReader;
 import com.sri.ai.praise.model.imports.uai.UAIModel;
 import com.sri.ai.praise.model.imports.uai.UAIModelReader;
@@ -102,6 +101,7 @@ import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.praise.sgsolver.demo.perspective.ChurchPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.HOGMPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.Perspective;
+import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
 import com.sri.ai.util.math.Rational;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;

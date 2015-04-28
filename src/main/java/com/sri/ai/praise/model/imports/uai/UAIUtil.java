@@ -57,7 +57,7 @@ import com.sri.ai.grinder.plaindpll.application.Compilation;
 import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
-import com.sri.ai.praise.model.grounded.common.FunctionTable;
+import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**

@@ -44,8 +44,8 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.model.grounded.bayes.ConditionalProbabilityTable;
-import com.sri.ai.praise.model.grounded.transform.XFormMarkovToBayes;
+import com.sri.ai.praise.sgsolver.model.grounded.bayes.ConditionalProbabilityTable;
+import com.sri.ai.praise.sgsolver.model.grounded.transform.XFormMarkovToBayes;
 
 /**
  * Utility class for generating a Hugin dot net bayesian network output file based on a general purpose 

@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.model.grounded.transform.XFormMarkovToBayes;
+import com.sri.ai.praise.sgsolver.model.grounded.transform.XFormMarkovToBayes;
 import com.sri.ai.praise.model.imports.uai.UAIModel;
 import com.sri.ai.praise.model.imports.uai.UAIModelReader;
 

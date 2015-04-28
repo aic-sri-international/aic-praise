@@ -71,8 +71,8 @@ import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.praise.model.SortDeclaration;
-import com.sri.ai.praise.model.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.grounded.common.GraphicalNetwork;
+import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
+import com.sri.ai.praise.sgsolver.model.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 
 /**
