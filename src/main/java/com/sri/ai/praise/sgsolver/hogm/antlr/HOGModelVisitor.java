@@ -60,9 +60,9 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Minus;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.model.ConstantDeclaration;
-import com.sri.ai.praise.model.RandomVariableDeclaration;
-import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.praise.sgsolver.model.HOGMConstantDeclaration;
+import com.sri.ai.praise.sgsolver.model.HOGMRandomVariableDeclaration;
+import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGModel;
 import com.sri.ai.praise.sgsolver.model.StatementInfo;
 
@@ -118,7 +118,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	@Override 
 	public Expression visitSort_decl(@NotNull HOGMParser.Sort_declContext ctx) { 
 		Expression name = newSymbol(ctx.name.getText());
-		Expression size = SortDeclaration.UNKNOWN_SIZE;
+		Expression size = HOGMSortDeclaration.UNKNOWN_SIZE;
 		if (ctx.size != null) {
 			size = newSymbol(ctx.size.getText());
 		}
@@ -128,7 +128,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		}
 		
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-				SortDeclaration.FUNCTOR_SORT_DECLARATION, name, size,
+				HOGMSortDeclaration.FUNCTOR_SORT_DECLARATION, name, size,
 				ExtensionalSet.makeUniSet(constants));
 		
 		sortDeclarations.add(newStatementInfo(result, ctx));
@@ -150,7 +150,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		declarationArgs.add(range);
 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-				ConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
+				HOGMConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
 				declarationArgs.toArray());
 		
 		constantDeclarations.add(newStatementInfo(result, ctx));
@@ -174,7 +174,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		declarationArgs.add(range);
 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-				ConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
+				HOGMConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
 				declarationArgs.toArray());
 		
 		constantDeclarations.add(newStatementInfo(result, ctx));
@@ -196,7 +196,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		declarationArgs.add(range);
 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-				RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,
+				HOGMRandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,
 				declarationArgs.toArray());
 		
 		randomVariableDeclarations.add(newStatementInfo(result, ctx));
@@ -220,7 +220,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		declarationArgs.add(range);
 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-				RandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,
+				HOGMRandomVariableDeclaration.FUNCTOR_RANDOM_VARIABLE_DECLARATION,
 				declarationArgs.toArray());
 		
 		randomVariableDeclarations.add(newStatementInfo(result, ctx));
@@ -423,6 +423,29 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	@Override 
  	public Expression visitSort_name(@NotNull HOGMParser.Sort_nameContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
+ 		return result;
+ 	}
+ 	
+ 	// range_name
+    // : sort_name
+    // | number_sub_range_name
+ 	@Override 
+ 	public Expression visitRange_name(@NotNull HOGMParser.Range_nameContext ctx) { 
+ 		Expression result = null;
+ 		if (ctx.sort_name() != null) {
+ 			result = visitSort_name(ctx.sort_name());
+ 		}
+ 		else {
+ 			result = visitNumber_sub_range_name(ctx.number_sub_range_name());
+ 		}
+ 		return result;
+ 	}
+   
+ 	// number_sub_range_name
+    // : INTEGER DOUBLE_DOT INTEGER
+ 	@Override 
+ 	public Expression visitNumber_sub_range_name(@NotNull HOGMParser.Number_sub_range_nameContext ctx) { 
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, newSymbol(ctx.start.getText()), newSymbol(ctx.end.getText()));
  		return result;
  	}
  	

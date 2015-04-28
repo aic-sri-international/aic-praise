@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.model.ConstantDeclaration;
-import com.sri.ai.praise.model.RandomVariableDeclaration;
-import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.praise.sgsolver.model.HOGMConstantDeclaration;
+import com.sri.ai.praise.sgsolver.model.HOGMRandomVariableDeclaration;
+import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 
 public class ParsedModel {
-	private String                          inputModel            = null;
-	private List<SortDeclaration>           sorts                 = new ArrayList<>();
-	private List<ConstantDeclaration>       constants             = new ArrayList<>();
-	private List<RandomVariableDeclaration> randoms               = new ArrayList<>();
-	private List<Expression>                conditionedPotentials = new ArrayList<>();
+	private String                              inputModel            = null;
+	private List<HOGMSortDeclaration>           sorts                 = new ArrayList<>();
+	private List<HOGMConstantDeclaration>       constants             = new ArrayList<>();
+	private List<HOGMRandomVariableDeclaration> randoms               = new ArrayList<>();
+	private List<Expression>                    conditionedPotentials = new ArrayList<>();
 	
-	public ParsedModel(String inputModel, List<SortDeclaration> sorts, List<ConstantDeclaration> constants, List<RandomVariableDeclaration> randoms, List<Expression> conditionedPotentials) {
+	public ParsedModel(String inputModel, List<HOGMSortDeclaration> sorts, List<HOGMConstantDeclaration> constants, List<HOGMRandomVariableDeclaration> randoms, List<Expression> conditionedPotentials) {
 		this.inputModel = inputModel;
 		this.sorts.addAll(sorts);
 		this.constants.addAll(constants);
@@ -27,15 +27,15 @@ public class ParsedModel {
 		return inputModel;
 	}
 
-	public List<SortDeclaration> getSortDeclarations() {
+	public List<HOGMSortDeclaration> getSortDeclarations() {
 		return sorts;
 	}
 	
-	public List<ConstantDeclaration> getConstatDeclarations() {
+	public List<HOGMConstantDeclaration> getConstatDeclarations() {
 		return constants;
 	}
 
-	public List<RandomVariableDeclaration> getRandomVariableDeclarations() {
+	public List<HOGMRandomVariableDeclaration> getRandomVariableDeclarations() {
 		return randoms;
 	}
 

@@ -91,7 +91,6 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.model.imports.uai.UAIEvidenceReader;
 import com.sri.ai.praise.model.imports.uai.UAIModel;
 import com.sri.ai.praise.model.imports.uai.UAIModelReader;
@@ -101,6 +100,7 @@ import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.praise.sgsolver.demo.perspective.ChurchPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.HOGMPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.Perspective;
+import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
 import com.sri.ai.util.math.Rational;
 
@@ -530,7 +530,7 @@ public class SGSolverDemoController {
     				IntStream.range(0, varCardinality).forEach(valIdx -> {
     					sortConstants.add(UAIUtil.instanceConstantValueForVariable(valIdx, innerVarIdx, varCardinality));
     				});
-    				if (!SortDeclaration.IN_BUILT_BOOLEAN.getName().equals(varTypeName)) {
+    				if (!HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(varTypeName)) {
     					sorts.add("sort "+varTypeName+": "+varCardinality+sortConstants.toString());
     				}
     				randoms.add("random "+varName+": "+varTypeName+";");

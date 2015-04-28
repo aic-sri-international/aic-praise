@@ -26,15 +26,15 @@ sort_decl // sort Name [ ":" ( number | "Unknown" ) [ ", " constant+ ] ]
 // "constant" constantName : SortName
 // "constant" constantName ":" SortName ('x' SortName)* '->' SortName
 constant_decl 
-    : CONSTANT name=constant_name COLON range=sort_name (SEMICOLON)? #propositionalConstantDeclaration
-    | CONSTANT name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)? #relationalConstantDeclaration
+    : CONSTANT name=constant_name COLON range=range_name (SEMICOLON)? #propositionalConstantDeclaration
+    | CONSTANT name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=range_name (SEMICOLON)? #relationalConstantDeclaration
     ;    
 
 // "random" constantName : SortName
 // "random" constantName ":" SortName ('x' SortName)* '->' SortName
 random_variable_decl 
-    : RANDOM name=constant_name COLON range=sort_name (SEMICOLON)? #propositionalRandomVariableDeclaration
-    | RANDOM name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)? #relationalRandomVariableDeclaration
+    : RANDOM name=constant_name COLON range=range_name (SEMICOLON)? #propositionalRandomVariableDeclaration
+    | RANDOM name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=range_name (SEMICOLON)? #relationalRandomVariableDeclaration
     ;
     
 term
@@ -95,6 +95,15 @@ sort_name
     : IN_BUILT_SORT_BOOLEAN
     | IN_BUILT_SORT_NUMBER
     | constant_name
+    ;
+    
+range_name
+    : sort_name
+    | number_sub_range_name
+    ;
+    
+number_sub_range_name
+    : start=INTEGER DOUBLE_DOT end=INTEGER
     ;
        
 functor_name
@@ -174,6 +183,7 @@ COMMA                   : ',' ;
 // Misc
 VERTICAL_BAR            : '|' ;
 MAPPING_RIGHT_ARROW     : '->' ;
+DOUBLE_DOT              : '..' ;
 
 INTEGER 
     : ('0'..'9')+

@@ -91,6 +91,7 @@ public class HOGMTerminalSymbols {
 		// Misc
 		terminalSymbols.add("|");
 		terminalSymbols.add("->");
+		terminalSymbols.add("..");
 		
 		_terminalSymbols = Collections.unmodifiableSet(terminalSymbols);
 	}

@@ -70,7 +70,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.plaindpll.api.Solver;
-import com.sri.ai.praise.model.SortDeclaration;
+import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
 import com.sri.ai.praise.sgsolver.model.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
@@ -289,7 +289,7 @@ public class UAIMARSolver {
 				int varCardinality = model.cardinality(varIdx);
 				String varTypeName = UAIUtil.instanceTypeNameForVariable(varIdx, varCardinality);
 				mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(varIdx), varTypeName);
-				if (!varTypeName.equals(SortDeclaration.IN_BUILT_BOOLEAN.getName().toString())) {
+				if (!varTypeName.equals(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().toString())) {
 					for (int valIdx = 0; valIdx < varCardinality; valIdx++) {
 						mapFromUniquelyNamedConstantNameToTypeName.put(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, varCardinality), varTypeName);
 					}

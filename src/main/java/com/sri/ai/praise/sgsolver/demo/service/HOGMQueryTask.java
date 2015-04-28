@@ -49,13 +49,13 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.model.ConstantDeclaration;
-import com.sri.ai.praise.model.RandomVariableDeclaration;
-import com.sri.ai.praise.model.SortDeclaration;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ErrorListener;
 import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.hogm.antlr.UnableToParseAllTheInputError;
+import com.sri.ai.praise.sgsolver.model.HOGMConstantDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGModelException;
+import com.sri.ai.praise.sgsolver.model.HOGMRandomVariableDeclaration;
+import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 
 import javafx.concurrent.Task;
@@ -78,11 +78,11 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	public QueryResult call() {
     	QueryResult result = null;
     	
-    	List<SortDeclaration>           sorts                 = new ArrayList<>();
-    	List<ConstantDeclaration>       constants             = new ArrayList<>();
-    	List<RandomVariableDeclaration> randoms               = new ArrayList<>();
-    	List<Expression>                conditionedPotentials = new ArrayList<>();
-    	
+    	List<HOGMSortDeclaration>           sorts                 = new ArrayList<>();
+    	List<HOGMConstantDeclaration>       constants             = new ArrayList<>();
+    	List<HOGMRandomVariableDeclaration> randoms               = new ArrayList<>();
+    	List<Expression>                    conditionedPotentials = new ArrayList<>();
+    	 
     	long start = System.currentTimeMillis();
     	try {
     		if (query == null || query.trim().equals("")) {
@@ -98,8 +98,8 @@ public class HOGMQueryTask extends Task<QueryResult> {
         		Expression modelTupleExpr = parser.parse(model, new LexerErrorListener(QueryError.Context.MODEL), new ParserErrorListener(QueryError.Context.MODEL));
      
         		if (errors.size() == 0) {
-	    			sorts.add(SortDeclaration.IN_BUILT_BOOLEAN);
-	    			sorts.add(SortDeclaration.IN_BUILT_NUMBER);
+	    			sorts.add(HOGMSortDeclaration.IN_BUILT_BOOLEAN);
+	    			sorts.add(HOGMSortDeclaration.IN_BUILT_NUMBER);
         			sorts.addAll(extractSorts(Tuple.get(modelTupleExpr, 0)));
         			constants.addAll(extractConstants(Tuple.get(modelTupleExpr, 1)));
 	    			randoms.addAll(extractRandom(Tuple.get(modelTupleExpr, 2)));
@@ -122,7 +122,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	    			});
 	    			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
 	    			sorts.forEach(sort -> {
-	    				if (!sort.getSize().equals(SortDeclaration.UNKNOWN_SIZE)) {
+	    				if (!sort.getSize().equals(HOGMSortDeclaration.UNKNOWN_SIZE)) {
 	    					mapFromTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
 	    				}
 	    			});
@@ -184,26 +184,26 @@ public class HOGMQueryTask extends Task<QueryResult> {
 		}
 	}
 	
-	protected List<SortDeclaration> extractSorts(Expression sortsTuple) {
-		List<SortDeclaration> result = new ArrayList<>();
+	protected List<HOGMSortDeclaration> extractSorts(Expression sortsTuple) {
+		List<HOGMSortDeclaration> result = new ArrayList<>();
 		
-		Tuple.getElements(sortsTuple).forEach(sortExpr -> result.add(SortDeclaration.makeSortDeclaration(sortExpr)));
-		
-		return result;
-	}
-	
-	protected List<ConstantDeclaration> extractConstants(Expression constantsTuple) {
-		List<ConstantDeclaration> result = new ArrayList<>();
-		
-		Tuple.getElements(constantsTuple).forEach(constantExpr -> result.add(ConstantDeclaration.makeConstantDeclaration(constantExpr)));
+		Tuple.getElements(sortsTuple).forEach(sortExpr -> result.add(HOGMSortDeclaration.makeSortDeclaration(sortExpr)));
 		
 		return result;
 	}
 	
-	protected List<RandomVariableDeclaration> extractRandom(Expression randomsTuple) {
-		List<RandomVariableDeclaration> result = new ArrayList<>();
+	protected List<HOGMConstantDeclaration> extractConstants(Expression constantsTuple) {
+		List<HOGMConstantDeclaration> result = new ArrayList<>();
 		
-		Tuple.getElements(randomsTuple).forEach(randomExpr -> result.add(RandomVariableDeclaration.makeRandomVariableDeclaration(randomExpr)));
+		Tuple.getElements(constantsTuple).forEach(constantExpr -> result.add(HOGMConstantDeclaration.makeConstantDeclaration(constantExpr)));
+		
+		return result;
+	}
+	
+	protected List<HOGMRandomVariableDeclaration> extractRandom(Expression randomsTuple) {
+		List<HOGMRandomVariableDeclaration> result = new ArrayList<>();
+		
+		Tuple.getElements(randomsTuple).forEach(randomExpr -> result.add(HOGMRandomVariableDeclaration.makeRandomVariableDeclaration(randomExpr)));
 		
 		return result;
 	}
