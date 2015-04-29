@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.sgsolver.model.HOGMConstantDeclaration;
+import com.sri.ai.praise.sgsolver.model.ConstantDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 
 public class ParsedModel {
 	private String                              inputModel            = null;
 	private List<HOGMSortDeclaration>           sorts                 = new ArrayList<>();
-	private List<HOGMConstantDeclaration>       constants             = new ArrayList<>();
+	private List<ConstantDeclaration>           constants             = new ArrayList<>();
 	private List<HOGMRandomVariableDeclaration> randoms               = new ArrayList<>();
 	private List<Expression>                    conditionedPotentials = new ArrayList<>();
 	
-	public ParsedModel(String inputModel, List<HOGMSortDeclaration> sorts, List<HOGMConstantDeclaration> constants, List<HOGMRandomVariableDeclaration> randoms, List<Expression> conditionedPotentials) {
+	public ParsedModel(String inputModel, List<HOGMSortDeclaration> sorts, List<ConstantDeclaration> constants, List<HOGMRandomVariableDeclaration> randoms, List<Expression> conditionedPotentials) {
 		this.inputModel = inputModel;
 		this.sorts.addAll(sorts);
 		this.constants.addAll(constants);
@@ -31,7 +31,7 @@ public class ParsedModel {
 		return sorts;
 	}
 	
-	public List<HOGMConstantDeclaration> getConstatDeclarations() {
+	public List<ConstantDeclaration> getConstatDeclarations() {
 		return constants;
 	}
 

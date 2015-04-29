@@ -78,7 +78,7 @@ import com.sri.ai.expresso.helper.Expressions;
  * 
  */
 @Beta
-public class HOGMConstantDeclaration {
+public class ConstantDeclaration {
 
 	//
 	public static final String FUNCTOR_CONSTANT_DECLARATION = "constant";
@@ -97,7 +97,7 @@ public class HOGMConstantDeclaration {
 	 * @param name
 	 *            a unique string valued symbol for the constant declaration.
 	 */
-	public HOGMConstantDeclaration(Expression name) {
+	public ConstantDeclaration(Expression name) {
 		this(name, Expressions.ZERO, HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName());
 	}
 
@@ -115,7 +115,7 @@ public class HOGMConstantDeclaration {
 	 *            to the end of this list (will default to 'Boolean' if not
 	 *            specified).
 	 */
-	public HOGMConstantDeclaration(Expression name, Expression arity,
+	public ConstantDeclaration(Expression name, Expression arity,
 			Expression... parametersAndRange) {
 		assertNameOk(name);
 		assertArityOk(arity);
@@ -258,9 +258,9 @@ public class HOGMConstantDeclaration {
 	 * @return a ConstantDeclaration object corresponding to the expression
 	 *         passed in.
 	 */
-	public static HOGMConstantDeclaration makeConstantDeclaration(
+	public static ConstantDeclaration makeConstantDeclaration(
 			Expression expression) {
-		HOGMConstantDeclaration declaration = null;
+		ConstantDeclaration declaration = null;
 
 		if (Expressions.hasFunctor(expression, FUNCTOR_CONSTANT_DECLARATION)) {
 			int numArgs = expression.numberOfArguments();
@@ -284,7 +284,7 @@ public class HOGMConstantDeclaration {
 					parametersAndRange = new Expression[0];
 				}
 				
-				declaration = new HOGMConstantDeclaration(name, arity, parametersAndRange);
+				declaration = new ConstantDeclaration(name, arity, parametersAndRange);
 			}
 		}
 		

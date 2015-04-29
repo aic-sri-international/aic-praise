@@ -60,7 +60,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Minus;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.sgsolver.model.HOGMConstantDeclaration;
+import com.sri.ai.praise.sgsolver.model.ConstantDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGModel;
@@ -150,7 +150,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		declarationArgs.add(range);
 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-				HOGMConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
+				ConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
 				declarationArgs.toArray());
 		
 		constantDeclarations.add(newStatementInfo(result, ctx));
@@ -174,7 +174,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		declarationArgs.add(range);
 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-				HOGMConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
+				ConstantDeclaration.FUNCTOR_CONSTANT_DECLARATION,
 				declarationArgs.toArray());
 		
 		constantDeclarations.add(newStatementInfo(result, ctx));

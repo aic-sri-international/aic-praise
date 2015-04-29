@@ -58,7 +58,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.sgsolver.model.HOGMConstantDeclaration;
+import com.sri.ai.praise.sgsolver.model.ConstantDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGModelError.Type;
@@ -100,7 +100,7 @@ public class HOGModel {
 		//
 		Set<Expression>                                sortConstants = new LinkedHashSet<>();
 		Map<Expression, HOGMSortDeclaration>           sorts         = new LinkedHashMap<>();
-		Map<Expression, HOGMConstantDeclaration>       constants     = new LinkedHashMap<>();
+		Map<Expression, ConstantDeclaration>           constants     = new LinkedHashMap<>();
 		Map<Expression, HOGMRandomVariableDeclaration> randoms       = new LinkedHashMap<>();
 		List<Expression> conditioned = new ArrayList<>();
 		
@@ -160,11 +160,11 @@ public class HOGModel {
 		
 		void validateConstantStatements(List<StatementInfo> constantStatements) {				
 			constantStatements.forEach(constantStatement -> {
-				if (!HOGMConstantDeclaration.isConstantDeclaration(constantStatement.statement)) {
+				if (!ConstantDeclaration.isConstantDeclaration(constantStatement.statement)) {
 					newError(Type.CONSTANT_DECLARATION_IS_NOT_LEGAL, "", constantStatement);
 				}
 				else {
-					HOGMConstantDeclaration constantDeclaration = HOGMConstantDeclaration.makeConstantDeclaration(constantStatement.statement);
+					ConstantDeclaration constantDeclaration = ConstantDeclaration.makeConstantDeclaration(constantStatement.statement);
 					if (constants.containsKey(constantDeclaration.getName())) {
 						newError(Type.CONSTANT_NAME_NOT_UNIQUE, constantDeclaration.getName(), constantStatement);
 					}
@@ -304,7 +304,7 @@ public class HOGModel {
 			return result;
 		}
 		
-		HOGMSortDeclaration determineSortType(Expression expr, Map<Expression, HOGMConstantDeclaration> scopedConstants) {
+		HOGMSortDeclaration determineSortType(Expression expr, Map<Expression, ConstantDeclaration> scopedConstants) {
 			HOGMSortDeclaration result = null;
 			
 			if (IfThenElse.isIfThenElse(expr)) {
@@ -333,7 +333,7 @@ public class HOGModel {
 					}
 					else {
 						if (isDeclaredConstantFunctor(expr.getFunctorOrSymbol(), scopedConstants)) {
-							HOGMConstantDeclaration constantDeclaration = scopedConstants.get(expr.getFunctorOrSymbol());
+							ConstantDeclaration constantDeclaration = scopedConstants.get(expr.getFunctorOrSymbol());
 							result = getSort(constantDeclaration.getRangeSort());
 						}
 						else if (isDeclaredRandomFunctor(expr.getFunctorOrSymbol())) {
@@ -366,7 +366,7 @@ public class HOGModel {
 						result = HOGMSortDeclaration.IN_BUILT_NUMBER;
 					}
 					else if (isDeclaredConstantFunctor(functor, scopedConstants)) {
-						HOGMConstantDeclaration constantDeclaration = scopedConstants.get(functor);
+						ConstantDeclaration constantDeclaration = scopedConstants.get(functor);
 						result = getSort(constantDeclaration.getRangeSort());
 					}
 					else if (isDeclaredRandomFunctor(functor)) {
@@ -419,15 +419,15 @@ public class HOGModel {
 		
 		void validateFunctorsAndArguments(StatementInfo termStatement) {
 			// Ensure constant functions have the correct arity and their arguments are of the correct type
-			List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> constantFunctionsWithScope = getConstantFunctionsWithScope(termStatement.statement);
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> constantFunctionsWithScope = getConstantFunctionsWithScope(termStatement.statement);
 			constantFunctionsWithScope.forEach(constantFunctionAndScope -> {
 				Expression                               constantFunction = constantFunctionAndScope.first;
-				Map<Expression, HOGMConstantDeclaration> scopedConstants  = constantFunctionAndScope.second;
+				Map<Expression, ConstantDeclaration> scopedConstants  = constantFunctionAndScope.second;
 				if (!isValidDeclaredConstantFunctorArity(constantFunction, scopedConstants)) {
 					newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, constantFunction, termStatement);
 				}
 				else {
-					HOGMConstantDeclaration constantDeclaration = scopedConstants.get(constantFunction.getFunctorOrSymbol());
+					ConstantDeclaration constantDeclaration = scopedConstants.get(constantFunction.getFunctorOrSymbol());
 					for (int i = 0; i < constantFunction.numberOfArguments(); i++) {
 						Expression arg = constantFunction.get(i);
 						if (isUnknownConstant(arg, scopedConstants)) {								
@@ -443,10 +443,10 @@ public class HOGModel {
 			});
 						
 			// Ensure random functions have the correct arity and their arguments are of the correct type
-			List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> randomFunctionsWithScope = getRandomFunctionsWithScope(termStatement.statement);
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> randomFunctionsWithScope = getRandomFunctionsWithScope(termStatement.statement);
 			randomFunctionsWithScope.forEach(randomFunctionAndScope -> {
 				Expression                               randomFunction  = randomFunctionAndScope.first;
-				Map<Expression, HOGMConstantDeclaration> scopedConstants = randomFunctionAndScope.second;
+				Map<Expression, ConstantDeclaration> scopedConstants = randomFunctionAndScope.second;
 				if (!isValidDeclaredRandomFunctorArity(randomFunction)) {
 					newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, randomFunction, termStatement);
 				}
@@ -468,11 +468,11 @@ public class HOGModel {
 			
 						
 			// All of these should belong to the known set of functors			
-			List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> nonConstantAndRandomFunctionsWithScope = getNonConstantRandomFunctionsWithScope(termStatement.statement);
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> nonConstantAndRandomFunctionsWithScope = getNonConstantRandomFunctionsWithScope(termStatement.statement);
 			
 			nonConstantAndRandomFunctionsWithScope.forEach(nonConstantAndRandomFunctionWithScope -> {
-				Expression                               nonConstantAndRandomFunction = nonConstantAndRandomFunctionWithScope.first;
-				Map<Expression, HOGMConstantDeclaration> scopedConstants              = nonConstantAndRandomFunctionWithScope.second;
+				Expression                           nonConstantAndRandomFunction = nonConstantAndRandomFunctionWithScope.first;
+				Map<Expression, ConstantDeclaration> scopedConstants              = nonConstantAndRandomFunctionWithScope.second;
 				
 				if (isKnownFunctor(nonConstantAndRandomFunction.getFunctor())) {
 					String functorName = functorName(nonConstantAndRandomFunction.getFunctor());
@@ -554,10 +554,10 @@ public class HOGModel {
 			});
 			
 			// NOTE: quantifiers are not functions so need to be handled separately
-			List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> quantifiersWithScope = getQuantifiersWithScope(termStatement.statement);
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> quantifiersWithScope = getQuantifiersWithScope(termStatement.statement);
 			quantifiersWithScope.forEach(quantifierWithScope -> {
-				Expression                               quantifier      = quantifierWithScope.first;
-				Map<Expression, HOGMConstantDeclaration> scopedConstants = quantifierWithScope.second;
+				Expression                           quantifier      = quantifierWithScope.first;
+				Map<Expression, ConstantDeclaration> scopedConstants = quantifierWithScope.second;
 				
 				Expression indexExpression = ForAll.isForAll(quantifier) ? ForAll.getIndexExpression(quantifier) : ThereExists.getIndexExpression(quantifier);
 				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
@@ -572,13 +572,13 @@ public class HOGModel {
 			});			
 		}
 		
-		List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> getRandomFunctionsWithScope(Expression expr) {
-			List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> result = new ArrayList<>();
+		List<Pair<Expression, Map<Expression, ConstantDeclaration>>> getRandomFunctionsWithScope(Expression expr) {
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> result = new ArrayList<>();
 			getRandomFunctions(expr, result, constants);
 			return result;
 		}
 		
-		void getRandomFunctions(Expression expr, List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> randomFunctionsWithScope, Map<Expression, HOGMConstantDeclaration> currentScope) {
+		void getRandomFunctions(Expression expr, List<Pair<Expression, Map<Expression, ConstantDeclaration>>> randomFunctionsWithScope, Map<Expression, ConstantDeclaration> currentScope) {
 			if (this.isDeclaredRandomFunctor(expr.getFunctorOrSymbol())) {
 				randomFunctionsWithScope.add(new Pair<>(expr, currentScope));
 			}
@@ -587,26 +587,26 @@ public class HOGModel {
 				expr.getArguments().forEach(arg -> getRandomFunctions(arg, randomFunctionsWithScope, currentScope));
 			}
 			else if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
-				Map<Expression, HOGMConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
+				Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
 				
 				Expression indexExpression = ForAll.isForAll(expr) ? ForAll.getIndexExpression(expr) : ThereExists.getIndexExpression(expr);
 				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
 				HOGMSortDeclaration localSort = getSort(indexAndType.second);
 				if (localSort != null) {
-					quantifierScope.put(indexAndType.first, new HOGMConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
+					quantifierScope.put(indexAndType.first, new ConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
 				}
 				Expression bodyExpression  = ForAll.isForAll(expr) ? ForAll.getBody(expr) : ThereExists.getBody(expr);
 				getRandomFunctions(bodyExpression, randomFunctionsWithScope, quantifierScope);
 			}
 		}
 		
-		List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> getConstantFunctionsWithScope(Expression expr) {
-			List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> result = new ArrayList<>();
+		List<Pair<Expression, Map<Expression, ConstantDeclaration>>> getConstantFunctionsWithScope(Expression expr) {
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> result = new ArrayList<>();
 			getConstantFunctions(expr, result, constants);
 			return result;
 		}
 		
-		void getConstantFunctions(Expression expr, List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> constantFunctionsWithScope, Map<Expression, HOGMConstantDeclaration> currentScope) {
+		void getConstantFunctions(Expression expr, List<Pair<Expression, Map<Expression, ConstantDeclaration>>> constantFunctionsWithScope, Map<Expression, ConstantDeclaration> currentScope) {
 			if (this.isDeclaredConstantFunctor(expr.getFunctorOrSymbol(), currentScope)) {
 				constantFunctionsWithScope.add(new Pair<>(expr, currentScope));
 			}
@@ -615,26 +615,26 @@ public class HOGModel {
 				expr.getArguments().forEach(arg -> getConstantFunctions(arg, constantFunctionsWithScope, currentScope));
 			}
 			else if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
-				Map<Expression, HOGMConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
+				Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
 				
 				Expression indexExpression = ForAll.isForAll(expr) ? ForAll.getIndexExpression(expr) : ThereExists.getIndexExpression(expr);
 				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
 				HOGMSortDeclaration localSort = getSort(indexAndType.second);
 				if (localSort != null) {
-					quantifierScope.put(indexAndType.first, new HOGMConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
+					quantifierScope.put(indexAndType.first, new ConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
 				}
 				Expression bodyExpression  = ForAll.isForAll(expr) ? ForAll.getBody(expr) : ThereExists.getBody(expr);
 				getConstantFunctions(bodyExpression, constantFunctionsWithScope, quantifierScope);
 			}
 		}
 
-		List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> getNonConstantRandomFunctionsWithScope(Expression expr) {
-			List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> result = new ArrayList<>();
+		List<Pair<Expression, Map<Expression, ConstantDeclaration>>> getNonConstantRandomFunctionsWithScope(Expression expr) {
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> result = new ArrayList<>();
 			getNonConstantRandomFunctions(expr, result, constants);
 			return result;
 		}
 		
-		void getNonConstantRandomFunctions(Expression expr, List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> nonConstantRandomFunctionsWithScope, Map<Expression, HOGMConstantDeclaration> currentScope) {
+		void getNonConstantRandomFunctions(Expression expr, List<Pair<Expression, Map<Expression, ConstantDeclaration>>> nonConstantRandomFunctionsWithScope, Map<Expression, ConstantDeclaration> currentScope) {
 			if (Expressions.isFunctionApplicationWithArguments(expr) &&
 				!isDeclaredConstantFunctor(expr.getFunctorOrSymbol(), currentScope) &&
 				!isDeclaredRandomFunctor(expr.getFunctorOrSymbol())) {
@@ -645,34 +645,34 @@ public class HOGModel {
 				expr.getArguments().forEach(arg -> getNonConstantRandomFunctions(arg, nonConstantRandomFunctionsWithScope, currentScope));
 			}
 			else if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
-				Map<Expression, HOGMConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
+				Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
 				
 				Expression indexExpression = ForAll.isForAll(expr) ? ForAll.getIndexExpression(expr) : ThereExists.getIndexExpression(expr);
 				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
 				HOGMSortDeclaration localSort = getSort(indexAndType.second);
 				if (localSort != null) {
-					quantifierScope.put(indexAndType.first, new HOGMConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
+					quantifierScope.put(indexAndType.first, new ConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
 				}
 				Expression bodyExpression  = ForAll.isForAll(expr) ? ForAll.getBody(expr) : ThereExists.getBody(expr);
 				getNonConstantRandomFunctions(bodyExpression, nonConstantRandomFunctionsWithScope, quantifierScope);
 			}
 		}
 		
-		List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> getQuantifiersWithScope(Expression expr) {
-			List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> result = new ArrayList<>();
+		List<Pair<Expression, Map<Expression, ConstantDeclaration>>> getQuantifiersWithScope(Expression expr) {
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> result = new ArrayList<>();
 			getQuantifiers(expr, result, constants);
 			return result;
 		}
 		
-		void getQuantifiers(Expression expr, List<Pair<Expression, Map<Expression, HOGMConstantDeclaration>>> quantifiersWithScope, Map<Expression, HOGMConstantDeclaration> currentScope) {
+		void getQuantifiers(Expression expr, List<Pair<Expression, Map<Expression, ConstantDeclaration>>> quantifiersWithScope, Map<Expression, ConstantDeclaration> currentScope) {
 			if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
-				Map<Expression, HOGMConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
+				Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
 				
 				Expression indexExpression = ForAll.isForAll(expr) ? ForAll.getIndexExpression(expr) : ThereExists.getIndexExpression(expr);
 				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
 				HOGMSortDeclaration localSort = getSort(indexAndType.second);
 				if (localSort != null) {
-					quantifierScope.put(indexAndType.first, new HOGMConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
+					quantifierScope.put(indexAndType.first, new ConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
 				}
 				
 				quantifiersWithScope.add(new Pair<>(expr, quantifierScope));
@@ -687,7 +687,7 @@ public class HOGModel {
 
 		}
 		
-		boolean isUnknownConstant(Expression expr, Map<Expression, HOGMConstantDeclaration> scopedConstants) {
+		boolean isUnknownConstant(Expression expr, Map<Expression, ConstantDeclaration> scopedConstants) {
 			boolean result = Expressions.isSymbol(expr) &&
 							!Expressions.isNumber(expr) &&
 							!ForAll.isForAll(expr) &&
@@ -707,7 +707,7 @@ public class HOGModel {
 			return result;
 		}
 		
-		boolean isDeclaredConstantFunctor(Expression functorName, Map<Expression, HOGMConstantDeclaration> scopedConstants) {
+		boolean isDeclaredConstantFunctor(Expression functorName, Map<Expression, ConstantDeclaration> scopedConstants) {
 			boolean result = false;
 			if (scopedConstants.containsKey(functorName)) {
 				result = true;
@@ -723,9 +723,9 @@ public class HOGModel {
 			return result;
 		}
 		
-		boolean isValidDeclaredConstantFunctorArity(Expression expr, Map<Expression, HOGMConstantDeclaration> scopedConstants) {
+		boolean isValidDeclaredConstantFunctorArity(Expression expr, Map<Expression, ConstantDeclaration> scopedConstants) {
 			boolean result = true;
-			HOGMConstantDeclaration constantDeclaration = scopedConstants.get(expr.getFunctorOrSymbol());
+			ConstantDeclaration constantDeclaration = scopedConstants.get(expr.getFunctorOrSymbol());
 			if (constantDeclaration.getArity().intValue() != expr.numberOfArguments()) {
 				result = false;
 			}

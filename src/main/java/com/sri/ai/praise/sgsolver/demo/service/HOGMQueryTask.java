@@ -52,7 +52,7 @@ import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ErrorListener;
 import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.hogm.antlr.UnableToParseAllTheInputError;
-import com.sri.ai.praise.sgsolver.model.HOGMConstantDeclaration;
+import com.sri.ai.praise.sgsolver.model.ConstantDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGModelException;
 import com.sri.ai.praise.sgsolver.model.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
@@ -79,7 +79,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
     	QueryResult result = null;
     	
     	List<HOGMSortDeclaration>           sorts                 = new ArrayList<>();
-    	List<HOGMConstantDeclaration>       constants             = new ArrayList<>();
+    	List<ConstantDeclaration>           constants             = new ArrayList<>();
     	List<HOGMRandomVariableDeclaration> randoms               = new ArrayList<>();
     	List<Expression>                    conditionedPotentials = new ArrayList<>();
     	 
@@ -192,10 +192,10 @@ public class HOGMQueryTask extends Task<QueryResult> {
 		return result;
 	}
 	
-	protected List<HOGMConstantDeclaration> extractConstants(Expression constantsTuple) {
-		List<HOGMConstantDeclaration> result = new ArrayList<>();
+	protected List<ConstantDeclaration> extractConstants(Expression constantsTuple) {
+		List<ConstantDeclaration> result = new ArrayList<>();
 		
-		Tuple.getElements(constantsTuple).forEach(constantExpr -> result.add(HOGMConstantDeclaration.makeConstantDeclaration(constantExpr)));
+		Tuple.getElements(constantsTuple).forEach(constantExpr -> result.add(ConstantDeclaration.makeConstantDeclaration(constantExpr)));
 		
 		return result;
 	}
