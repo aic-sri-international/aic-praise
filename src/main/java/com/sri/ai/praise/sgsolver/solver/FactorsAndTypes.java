@@ -37,9 +37,21 @@
  */
 package com.sri.ai.praise.sgsolver.solver;
 
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
 
 @Beta
 public interface FactorsAndTypes {
-
+	List<Expression> getFactors();
+	
+	Map<String, String> getMapFromRandomVariableNameToTypeName();
+	
+	Map<String, String> getMapFromNonUniquelyNamedConstantNameToTypeName();
+	
+	Map<String, String> getMapFromUniquelyNamedConstantNameToTypeName();
+	
+	Map<String, String> getMapFromTypeNameToSizeString();
 }

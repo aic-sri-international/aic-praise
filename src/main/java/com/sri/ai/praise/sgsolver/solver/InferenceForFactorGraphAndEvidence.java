@@ -108,43 +108,39 @@ public class InferenceForFactorGraphAndEvidence {
 	
 	/**
 	 * Constructs a solver for a factor graph and an evidence expression.
-	 * @param factorGraph an Expression representing the product of potential functions
-	 * @param isBayesianNetwork indicates the factor graph is a bayesian network (each potential function in normalized for one of its variables, forms a DAG).
-	 * @param evidence an Expression representing the evidence
-	 * @param useFactorization TODO
-	 * @param mapFromRandomVariableNameToTypeName a map from random variable name strings to their type name strings
-	 * @param mapFromUniquelyNamedConstantNameToTypeName TODO
-	 * @param mapFromTypeNameToSizeString a map from type name strings to their size strings
-	 * @param allTheSameButQuery the {@link Result} object from a previous query for the same model and evidence, if available, or null.
-	 * @return
+	 * @param factorsAndTypes 
+	 *        the factors and their type information over which inference is to be performed.
+	 * @param isBayesianNetwork 
+	 *        indicates if the factor graph is a bayesian network (each potential function in normalized for one of its variables, forms a DAG).
+	 * @param evidence 
+	 *        an Expression representing the evidence
+	 * @param useFactorization 
+	 *        TODO
+	 * @return the marginal.
 	 */
 	public InferenceForFactorGraphAndEvidence(
-			Expression factorGraph, boolean isBayesianNetwork,
-			Expression evidence, boolean useFactorization,
-			Map<String, String> mapFromRandomVariableNameToTypeName,
-			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
-			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
-			Map<String, String> mapFromTypeNameToSizeString) {
+			FactorsAndTypes factorsAndTypes, boolean isBayesianNetwork,
+			Expression evidence, boolean useFactorization) {
 
-		this.factorGraph = factorGraph;
+		this.factorGraph       = Times.make(factorsAndTypes.getFactors());
 		this.isBayesianNetwork = isBayesianNetwork;
-		this.evidence = evidence;
+		this.evidence          = evidence;
 
-		this.mapFromRandomVariableNameToTypeName = mapFromRandomVariableNameToTypeName;
+		this.mapFromRandomVariableNameToTypeName = new LinkedHashMap<>(factorsAndTypes.getMapFromRandomVariableNameToTypeName());
 		this.mapFromRandomVariableNameToTypeName.put("query", "Boolean");
 		queryVariable = parse("query");
 		
-		this.mapFromSymbolNameToTypeName = new LinkedHashMap<String, String>(mapFromRandomVariableNameToTypeName);
-		this.mapFromSymbolNameToTypeName.putAll(                             mapFromNonUniquelyNamedConstantNameToTypeName);
-		this.mapFromSymbolNameToTypeName.putAll(                             mapFromUniquelyNamedConstantNameToTypeName);
+		this.mapFromSymbolNameToTypeName = new LinkedHashMap<>(mapFromRandomVariableNameToTypeName);
+		this.mapFromSymbolNameToTypeName.putAll(factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName());
+		this.mapFromSymbolNameToTypeName.putAll(factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName());
 		
 		allRandomVariables = Util.mapIntoList(this.mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
 		                       
 		allSymbolsButUniquelyNamedConstants = list();
-		allSymbolsButUniquelyNamedConstants.addAll(Util.mapIntoList(          mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse));
-		allSymbolsButUniquelyNamedConstants.addAll(Util.mapIntoList(mapFromNonUniquelyNamedConstantNameToTypeName.keySet(), Expressions::parse));
+		allSymbolsButUniquelyNamedConstants.addAll(Util.mapIntoList(mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse));
+		allSymbolsButUniquelyNamedConstants.addAll(Util.mapIntoList(factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse));
 
-		this.mapFromTypeNameToSizeString = mapFromTypeNameToSizeString;
+		this.mapFromTypeNameToSizeString = new LinkedHashMap<>(factorsAndTypes.getMapFromTypeNameToSizeString());
 
 		// We use the Prolog convention of small-letter initials for constants, but we need an exception for the random variables and the non-uniquely named constants.
 		Predicate<Expression> isPrologConstant = new PrologConstantPredicate();
@@ -152,7 +148,7 @@ public class InferenceForFactorGraphAndEvidence {
 		
 		TermTheory termTheory = null;
 		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
-			mapFromNonUniquelyNamedConstantNameToTypeName.values().stream().anyMatch(type -> type.contains("->"))) {
+			factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().values().stream().anyMatch(type -> type.contains("->"))) {
 			termTheory = new FunctionalTermTheory();			
 		}
 		else {
@@ -160,7 +156,7 @@ public class InferenceForFactorGraphAndEvidence {
 		}
 
 		// The constraintTheory of atoms plus equality on function (relational) terms.
-		theory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(termTheory));
+		theory      = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(termTheory));
 		problemType = new SumProduct(); // for marginalization
 		// The solver for the parameters above.
 		if (useFactorization) {

@@ -38,25 +38,23 @@
 package com.sri.ai.praise.sgsolver.demo.service;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+
+import javafx.concurrent.Task;
 
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ErrorListener;
 import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.hogm.antlr.UnableToParseAllTheInputError;
 import com.sri.ai.praise.sgsolver.model.HOGModelException;
-import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
+import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
-
-import javafx.concurrent.Task;
 
 @Beta
 public class HOGMQueryTask extends Task<QueryResult> {
@@ -92,31 +90,8 @@ public class HOGMQueryTask extends Task<QueryResult> {
         		parsedModel              = parser.parseModel(model, new LexerErrorListener(QueryError.Context.MODEL), new ParserErrorListener(QueryError.Context.MODEL));
      
         		if (errors.size() == 0) {
-
-	    			Map<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>();
-	    			parsedModel.getRandomVariableDeclarations().forEach(random -> {
-	    				mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.toTypeRepresentation());
-	    			});
-	    			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
-	    			parsedModel.getConstatDeclarations().forEach(constant -> {
-	    				mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.toTypeRepresentation());
-	    			});
-	    			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
-	    			parsedModel.getSortDeclarations().forEach(sortDeclaration -> {
-	    				sortDeclaration.getAssignedConstants().forEach(constant -> {
-	    					mapFromUniquelyNamedConstantNameToTypeName.put(constant.toString(), sortDeclaration.getName().toString());
-	    				});
-	    			});
-	    			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
-	    			parsedModel.getSortDeclarations().forEach(sort -> {
-	    				if (!sort.getSize().equals(HOGMSortDeclaration.UNKNOWN_SIZE)) {
-	    					mapFromTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
-	    				}
-	    			});
-	    			
-	    			Expression markovNetwork = Times.make(parsedModel.getConditionedPotentials());
-	    			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, null, true, 
-	    					mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+        			FactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
+	    			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true);
 	    			
 	    			Expression marginal = inferencer.solve(queryExpr); 			
 	    			
