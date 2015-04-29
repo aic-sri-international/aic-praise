@@ -23,18 +23,18 @@ sort_decl // sort Name [ ":" ( number | "Unknown" ) [ ", " constant+ ] ]
     : SORT name=sort_name (COLON size=(INTEGER | UNKNOWN) (COMMA constants+=constant_name)*)? (SEMICOLON)?
     ;
     
-// "constant" constantName : SortName
-// "constant" constantName ":" SortName ('x' SortName)* '->' SortName
+// "constant" constantName : SortReference
+// "constant" constantName ":" SortReference ('x' SortReference)* '->' SortReference
 constant_decl 
-    : CONSTANT name=constant_name COLON range=range_name (SEMICOLON)? #propositionalConstantDeclaration
-    | CONSTANT name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=range_name (SEMICOLON)? #relationalConstantDeclaration
+    : CONSTANT name=constant_name COLON range=sort_reference (SEMICOLON)? #propositionalConstantDeclaration
+    | CONSTANT name=constant_name COLON parameters+=sort_reference (X parameters+=sort_reference)* MAPPING_RIGHT_ARROW range=sort_reference (SEMICOLON)? #relationalConstantDeclaration
     ;    
 
-// "random" constantName : SortName
-// "random" constantName ":" SortName ('x' SortName)* '->' SortName
+// "random" constantName : SortReference
+// "random" constantName ":" SortReference ('x' SortReference)* '->' SortReference
 random_variable_decl 
-    : RANDOM name=constant_name COLON range=range_name (SEMICOLON)? #propositionalRandomVariableDeclaration
-    | RANDOM name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=range_name (SEMICOLON)? #relationalRandomVariableDeclaration
+    : RANDOM name=constant_name COLON range=sort_reference (SEMICOLON)? #propositionalRandomVariableDeclaration
+    | RANDOM name=constant_name COLON parameters+=sort_reference (X parameters+=sort_reference)* MAPPING_RIGHT_ARROW range=sort_reference (SEMICOLON)? #relationalRandomVariableDeclaration
     ;
     
 term
@@ -97,13 +97,13 @@ sort_name
     | constant_name
     ;
     
-range_name
+sort_reference
     : sort_name
-    | number_sub_range_name
+    | sort_number_sub_range
     ;
     
-number_sub_range_name
-    : start=INTEGER DOUBLE_DOT end=INTEGER
+sort_number_sub_range
+    : start=INTEGER RANGE_SEPARTOR end=INTEGER
     ;
        
 functor_name
@@ -126,6 +126,7 @@ constant_number
     | RATIONAL
     ;
 
+
 /*
     The lexer tokenizes the input string that the parser is asked to
     parse.  The tokens are all typed. Whitespace
@@ -139,6 +140,7 @@ constant_number
           with any changes made.
     
 */
+    
 // Keywords
 NOT                     : 'not' ;
 AND                     : 'and' ;
@@ -183,7 +185,7 @@ COMMA                   : ',' ;
 // Misc
 VERTICAL_BAR            : '|' ;
 MAPPING_RIGHT_ARROW     : '->' ;
-DOUBLE_DOT              : '..' ;
+RANGE_SEPARTOR          : '..' ;
 
 INTEGER 
     : ('0'..'9')+
@@ -191,7 +193,7 @@ INTEGER
 
 RATIONAL 
     : ('0' | '1'..'9' '0'..'9'*)
-    | ('0'..'9')+ '.' ('0'..'9')* EXPONENT? FLOAT_TYPE_SUFFIX?
+    | ('0'..'9')+ '.' ('0'..'9')+ EXPONENT? FLOAT_TYPE_SUFFIX?
     | '.' ('0'..'9')+ EXPONENT? FLOAT_TYPE_SUFFIX?
     | ('0'..'9')+ EXPONENT FLOAT_TYPE_SUFFIX?
     | ('0'..'9')+ FLOAT_TYPE_SUFFIX

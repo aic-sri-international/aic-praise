@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.model.HOGModelError;
@@ -131,6 +132,25 @@ public class HOGMParserTest {
 		test(string, expected(null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "President", "0", "Boolean"),
 				              null, null));	
+		
+		string = "constant happy: 1..5";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "0", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5")),
+				              null, null));
+		
+		string = "constant happy: Boolean -> 1..5";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5")),
+				              null, null));
+		
+		string = "constant happy: 1..5 -> 10..15";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5"),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "10", "15")),
+				              null, null));
 	}
 	
 	@Test
@@ -216,6 +236,25 @@ public class HOGMParserTest {
 		string = "random President: Boolean;";
 		test(string, expected(null, null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "President", "0", "Boolean"),
+				              null));
+		
+		string = "random happy: 1..5";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "0", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5")),
+				              null));
+		
+		string = "random happy: Boolean -> 1..5";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5")),
+				              null));
+		
+		string = "random happy: 1..5 -> 10..15";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5"),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "10", "15")),
 				              null));
 	}
 	

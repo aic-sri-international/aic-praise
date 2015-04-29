@@ -46,6 +46,7 @@ import java.util.Set;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 
@@ -303,6 +304,32 @@ public class HOGMSortDeclaration {
 		}
 
 		return isInBuilt;
+	}
+	
+	public static boolean isSortReference(Expression reference) {
+		boolean result = false;
+		
+		if ((Expressions.isSymbol(reference) && reference.getValue() instanceof String) ||
+		    isNumberRangeReference(reference)) {
+			result = true;
+		}
+		
+		return result;
+	}
+	
+	public static boolean isNumberRangeReference(Expression reference) {
+		boolean result = false;
+		try {
+			if (Expressions.hasFunctor(reference, FunctorConstants.NUMBER_RANGE)) {
+				if (reference.numberOfArguments() == 2 && reference.get(0).intValueExact() <= reference.get(1).intValueExact()) {
+					result = true;
+				}
+			}
+		} 
+		catch (Throwable t) {
+			// ignore
+		}
+		return result;
 	}
 
 	/**

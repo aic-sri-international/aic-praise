@@ -782,6 +782,9 @@ public class HOGModel {
 			else if (HOGMSortDeclaration.IN_BUILT_NUMBER.getName().equals(sortName)) {
 				result = HOGMSortDeclaration.IN_BUILT_NUMBER;
 			}
+			else if (HOGMSortDeclaration.isNumberRangeReference(sortName)) {
+				result = HOGMSortDeclaration.IN_BUILT_NUMBER;
+			}
 			else {
 				result = sorts.get(sortName);
 			}

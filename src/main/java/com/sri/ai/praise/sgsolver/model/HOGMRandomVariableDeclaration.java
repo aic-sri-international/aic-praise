@@ -349,7 +349,7 @@ public class HOGMRandomVariableDeclaration {
 			// the random variable declaration
 			boolean sortNamesOk = true;
 			for (int i = 0; i < parametersAndRange.length; i++) {
-				assertNameOk(parametersAndRange[i]);
+				HOGMSortDeclaration.isSortReference(parametersAndRange[i]);
 				if (name.equals(parametersAndRange[i])) {
 					sortNamesOk = false;
 					break;

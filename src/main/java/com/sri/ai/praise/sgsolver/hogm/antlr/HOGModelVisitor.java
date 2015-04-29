@@ -142,7 +142,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	public Expression visitPropositionalConstantDeclaration(@NotNull HOGMParser.PropositionalConstantDeclarationContext ctx) { 
 		Expression name  = newSymbol(ctx.name.getText());
 		Expression arity = Expressions.ZERO;
-		Expression range = newSymbol(ctx.range.getText());
+		Expression range = visit(ctx.range );
 
 		List<Expression> declarationArgs = new ArrayList<Expression>();
 		declarationArgs.add(name);
@@ -165,7 +165,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		Expression name = newSymbol(ctx.name.getText());
 		List<Expression> parameters = expressionsList(ctx.parameters);
 		Expression arity = Expressions.makeSymbol(parameters.size());
-		Expression range = newSymbol(ctx.range.getText());
+		Expression range = visit(ctx.range);
 
 		List<Expression> declarationArgs = new ArrayList<Expression>();
 		declarationArgs.add(name);
@@ -188,7 +188,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	public Expression visitPropositionalRandomVariableDeclaration(@NotNull HOGMParser.PropositionalRandomVariableDeclarationContext ctx) { 
 		Expression name  = newSymbol(ctx.name.getText());
 		Expression arity = Expressions.ZERO;
-		Expression range = newSymbol(ctx.range.getText());
+		Expression range = visit(ctx.range);
 
 		List<Expression> declarationArgs = new ArrayList<Expression>();
 		declarationArgs.add(name);
@@ -211,7 +211,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		Expression name = newSymbol(ctx.name.getText());
 		List<Expression> parameters = expressionsList(ctx.parameters);
 		Expression arity = Expressions.makeSymbol(parameters.size());
-		Expression range = newSymbol(ctx.range.getText());
+		Expression range = visit(ctx.range);
 
 		List<Expression> declarationArgs = new ArrayList<Expression>();
 		declarationArgs.add(name);
@@ -423,28 +423,14 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	@Override 
  	public Expression visitSort_name(@NotNull HOGMParser.Sort_nameContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
- 		return result;
- 	}
- 	
- 	// range_name
-    // : sort_name
-    // | number_sub_range_name
- 	@Override 
- 	public Expression visitRange_name(@NotNull HOGMParser.Range_nameContext ctx) { 
- 		Expression result = null;
- 		if (ctx.sort_name() != null) {
- 			result = visitSort_name(ctx.sort_name());
- 		}
- 		else {
- 			result = visitNumber_sub_range_name(ctx.number_sub_range_name());
- 		}
+ 		
  		return result;
  	}
    
- 	// number_sub_range_name
-    // : INTEGER DOUBLE_DOT INTEGER
+ 	// sort_number_sub_range
+    // : start=INTEGER DOUBLE_DOT end=INTEGER
  	@Override 
- 	public Expression visitNumber_sub_range_name(@NotNull HOGMParser.Number_sub_range_nameContext ctx) { 
+ 	public Expression visitSort_number_sub_range(@NotNull HOGMParser.Sort_number_sub_rangeContext ctx) { 
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, newSymbol(ctx.start.getText()), newSymbol(ctx.end.getText()));
  		return result;
  	}
