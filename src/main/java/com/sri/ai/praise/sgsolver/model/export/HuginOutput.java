@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.export;
+package com.sri.ai.praise.sgsolver.model.export;
 
 import java.io.IOException;
 import java.io.Writer;

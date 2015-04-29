@@ -35,10 +35,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.imports.uai;
+package com.sri.ai.praise.sgsolver.model.imports.uai;
 
-import static com.sri.ai.praise.model.imports.uai.UAIUtil.constructGenericTableExpression;
-import static com.sri.ai.praise.model.imports.uai.UAIUtil.convertGenericTableToInstance;
+import static com.sri.ai.praise.sgsolver.model.imports.uai.UAIUtil.constructGenericTableExpression;
+import static com.sri.ai.praise.sgsolver.model.imports.uai.UAIUtil.convertGenericTableToInstance;
 
 import java.io.File;
 import java.io.IOException;

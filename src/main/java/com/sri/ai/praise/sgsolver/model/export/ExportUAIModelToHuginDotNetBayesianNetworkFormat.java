@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.export;
+package com.sri.ai.praise.sgsolver.model.export;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -50,8 +50,8 @@ import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.model.grounded.transform.XFormMarkovToBayes;
-import com.sri.ai.praise.model.imports.uai.UAIModel;
-import com.sri.ai.praise.model.imports.uai.UAIModelReader;
+import com.sri.ai.praise.sgsolver.model.imports.uai.UAIModel;
+import com.sri.ai.praise.sgsolver.model.imports.uai.UAIModelReader;
 
 /**
  * Utility class for converting UAI Models to Hugin Dot Net Models.

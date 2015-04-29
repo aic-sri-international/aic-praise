@@ -1,4 +1,4 @@
-package com.sri.ai.praise.model.imports.uai;
+package com.sri.ai.praise.sgsolver.model.imports.uai;
 
 public enum UAITask {
 	PR,   // Computing the partition function and probability of evidence (PR inference)

@@ -1,4 +1,4 @@
-package com.sri.ai.praise.model.imports.uai;
+package com.sri.ai.praise.sgsolver.model.imports.uai;
 
 /*
  * Copyright (c) 2015, SRI International
