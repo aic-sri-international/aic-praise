@@ -48,13 +48,11 @@ import org.antlr.v4.runtime.Recognizer;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ErrorListener;
 import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.hogm.antlr.UnableToParseAllTheInputError;
-import com.sri.ai.praise.sgsolver.model.ConstantDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGModelException;
-import com.sri.ai.praise.sgsolver.model.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 
@@ -76,12 +74,8 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	
 	@Override
 	public QueryResult call() {
-    	QueryResult result = null;
-    	
-    	List<HOGMSortDeclaration>           sorts                 = new ArrayList<>();
-    	List<ConstantDeclaration>           constants             = new ArrayList<>();
-    	List<HOGMRandomVariableDeclaration> randoms               = new ArrayList<>();
-    	List<Expression>                    conditionedPotentials = new ArrayList<>();
+    	QueryResult    result      = null;
+    	ParsedHOGModel parsedModel = null;
     	 
     	long start = System.currentTimeMillis();
     	try {
@@ -93,47 +87,40 @@ public class HOGMQueryTask extends Task<QueryResult> {
     		}
     		   		
     		if (errors.size() == 0) {
-    	   		HOGMParserWrapper parser  = new HOGMParserWrapper();
-        		Expression queryExpr      = parser.parseTerm(query, new LexerErrorListener(QueryError.Context.QUERY), new ParserErrorListener(QueryError.Context.QUERY));
-        		Expression modelTupleExpr = parser.parse(model, new LexerErrorListener(QueryError.Context.MODEL), new ParserErrorListener(QueryError.Context.MODEL));
+    	   		HOGMParserWrapper parser = new HOGMParserWrapper();
+        		Expression queryExpr     = parser.parseTerm(query, new LexerErrorListener(QueryError.Context.QUERY), new ParserErrorListener(QueryError.Context.QUERY));
+        		parsedModel              = parser.parseModel(model, new LexerErrorListener(QueryError.Context.MODEL), new ParserErrorListener(QueryError.Context.MODEL));
      
         		if (errors.size() == 0) {
-	    			sorts.add(HOGMSortDeclaration.IN_BUILT_BOOLEAN);
-	    			sorts.add(HOGMSortDeclaration.IN_BUILT_NUMBER);
-        			sorts.addAll(extractSorts(Tuple.get(modelTupleExpr, 0)));
-        			constants.addAll(extractConstants(Tuple.get(modelTupleExpr, 1)));
-	    			randoms.addAll(extractRandom(Tuple.get(modelTupleExpr, 2)));
-	    			conditionedPotentials.addAll(extractConditionedPotentials(Tuple.get(modelTupleExpr, 3)));
-	    			
 
 	    			Map<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>();
-	    			randoms.forEach(random -> {
+	    			parsedModel.getRandomVariableDeclarations().forEach(random -> {
 	    				mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.toTypeRepresentation());
 	    			});
 	    			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
-	    			constants.forEach(constant -> {
+	    			parsedModel.getConstatDeclarations().forEach(constant -> {
 	    				mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.toTypeRepresentation());
 	    			});
 	    			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
-	    			sorts.forEach(sortDeclaration -> {
+	    			parsedModel.getSortDeclarations().forEach(sortDeclaration -> {
 	    				sortDeclaration.getAssignedConstants().forEach(constant -> {
 	    					mapFromUniquelyNamedConstantNameToTypeName.put(constant.toString(), sortDeclaration.getName().toString());
 	    				});
 	    			});
 	    			Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
-	    			sorts.forEach(sort -> {
+	    			parsedModel.getSortDeclarations().forEach(sort -> {
 	    				if (!sort.getSize().equals(HOGMSortDeclaration.UNKNOWN_SIZE)) {
 	    					mapFromTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
 	    				}
 	    			});
 	    			
-	    			Expression markovNetwork = Times.make(conditionedPotentials);
+	    			Expression markovNetwork = Times.make(parsedModel.getConditionedPotentials());
 	    			inferencer = new InferenceForFactorGraphAndEvidence(markovNetwork, false, null, true, 
 	    					mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 	    			
 	    			Expression marginal = inferencer.solve(queryExpr); 			
 	    			
-	    			result = new QueryResult(query, new ParsedModel(model, sorts, constants, randoms, conditionedPotentials), marginal.toString(), System.currentTimeMillis() - start);
+	    			result = new QueryResult(query, parsedModel, marginal.toString(), System.currentTimeMillis() - start);
         		}
     		}
     	}
@@ -171,7 +158,7 @@ public class HOGMQueryTask extends Task<QueryResult> {
     	}
     	
     	if (errors.size() > 0) {
-			result = new QueryResult(query, new ParsedModel(model, sorts, constants, randoms, conditionedPotentials), errors, System.currentTimeMillis() - start);
+			result = new QueryResult(query, parsedModel, errors, System.currentTimeMillis() - start);
 		}
 
         return result;
@@ -182,35 +169,6 @@ public class HOGMQueryTask extends Task<QueryResult> {
 		if (inferencer != null) {
 			inferencer.interrupt();
 		}
-	}
-	
-	protected List<HOGMSortDeclaration> extractSorts(Expression sortsTuple) {
-		List<HOGMSortDeclaration> result = new ArrayList<>();
-		
-		Tuple.getElements(sortsTuple).forEach(sortExpr -> result.add(HOGMSortDeclaration.makeSortDeclaration(sortExpr)));
-		
-		return result;
-	}
-	
-	protected List<ConstantDeclaration> extractConstants(Expression constantsTuple) {
-		List<ConstantDeclaration> result = new ArrayList<>();
-		
-		Tuple.getElements(constantsTuple).forEach(constantExpr -> result.add(ConstantDeclaration.makeConstantDeclaration(constantExpr)));
-		
-		return result;
-	}
-	
-	protected List<HOGMRandomVariableDeclaration> extractRandom(Expression randomsTuple) {
-		List<HOGMRandomVariableDeclaration> result = new ArrayList<>();
-		
-		Tuple.getElements(randomsTuple).forEach(randomExpr -> result.add(HOGMRandomVariableDeclaration.makeRandomVariableDeclaration(randomExpr)));
-		
-		return result;
-	}
-	
-	protected List<Expression> extractConditionedPotentials(Expression conditionedPotentialsTuple) {
-		List<Expression> result = Tuple.getElements(conditionedPotentialsTuple);
-		return result;
 	}
 	
 	protected class QueryErrorListener extends ErrorListener {

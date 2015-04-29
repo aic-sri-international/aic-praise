@@ -47,8 +47,8 @@ import com.sri.ai.praise.sgsolver.demo.SGSolverDemoController;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.service.ExecuteHOGMQueryService;
-import com.sri.ai.praise.sgsolver.demo.service.ParsedModel;
 import com.sri.ai.praise.sgsolver.demo.service.QueryError;
+import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.base.Pair;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
@@ -246,7 +246,7 @@ public class QueryController {
 		errors.getSelectionModel().selectFirst();
 	}
 	
-	private void displayQueryAnswer(String query, String result, ParsedModel parseModel, long millisecondsToCompute) {
+	private void displayQueryAnswer(String query, String result, ParsedHOGModel parseModel, long millisecondsToCompute) {
 		String title = "Query '"+query+duration("' took ", millisecondsToCompute)+" to compute answer '"+result+"'";
 		HOGMCodeArea resultCodeArea = new HOGMCodeArea(false);
 		resultCodeArea.setText(SGSolverDemoController.displayResultPrecision(result));
@@ -256,26 +256,31 @@ public class QueryController {
 		if (SGSolverDemoController.isInDebugMode()) {
 			HOGMCodeArea parsedModelArea = new HOGMCodeArea();
 			StringJoiner sj = new StringJoiner("\n");
-			sj.add("// SORT DECLARATIONS:");
-			parseModel.getSortDeclarations().forEach(sd -> {
-				sj.add(sd.getSortDeclaration().toString()+";");
-			});
-			if (parseModel.getConstatDeclarations().size() > 0) {
-				sj.add("// CONSTANT DECLARATIONS:");
-				parseModel.getConstatDeclarations().forEach(cd -> {
-					sj.add(cd.getConstantDeclaration().toString()+";");
-				});
+			if (parseModel == null) {
+				sj.add("// UNABLE TO PARSE");
 			}
-			sj.add("// RANDOM VARIABLE DECLARATIONS:");
-			parseModel.getRandomVariableDeclarations().forEach(rd -> {
-				sj.add(rd.getRandomVariableDeclaration().toString()+";");
-			});
-			sj.add("// CONDITIONED POTENTIALS:");
-			parseModel.getConditionedPotentials().forEach(cp -> {
-				sj.add(cp.toString()+";");
-			});
-			parsedModelArea.setText(sj.toString());
-			parsedModelArea.setEditable(false);
+			else {
+				sj.add("// SORT DECLARATIONS:");
+				parseModel.getSortDeclarations().forEach(sd -> {
+					sj.add(sd.getSortDeclaration().toString()+";");
+				});
+				if (parseModel.getConstatDeclarations().size() > 0) {
+					sj.add("// CONSTANT DECLARATIONS:");
+					parseModel.getConstatDeclarations().forEach(cd -> {
+						sj.add(cd.getConstantDeclaration().toString()+";");
+					});
+				}
+				sj.add("// RANDOM VARIABLE DECLARATIONS:");
+				parseModel.getRandomVariableDeclarations().forEach(rd -> {
+					sj.add(rd.getRandomVariableDeclaration().toString()+";");
+				});
+				sj.add("// CONDITIONED POTENTIALS:");
+				parseModel.getConditionedPotentials().forEach(cp -> {
+					sj.add(cp.toString()+";");
+				});
+				parsedModelArea.setText(sj.toString());
+				parsedModelArea.setEditable(false);
+			}
 			
 			
 			TabPane resultTabs = new TabPane();

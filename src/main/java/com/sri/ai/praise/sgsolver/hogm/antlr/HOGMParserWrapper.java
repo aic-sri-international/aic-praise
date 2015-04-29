@@ -51,6 +51,17 @@ import com.sri.ai.praise.sgsolver.model.HOGModelException;
 @Beta
 public class HOGMParserWrapper implements Parser {
 	
+	public ParsedHOGModel parseModel(String string) {
+		ParsedHOGModel result = parseModel(string, new ErrorListener("Lexer Error"), new ErrorListener("Parse Error"));
+		return result;
+	}
+	
+	public ParsedHOGModel parseModel(String string, ErrorListener lexerErrorListener, ErrorListener parseErrorListener) {
+		Expression     modelTupleExpr = parse(string, lexerErrorListener, parseErrorListener);
+		ParsedHOGModel result         = new ParsedHOGModel(string, modelTupleExpr);
+		return result;
+	}
+	
 	@Override
 	public Expression parse(String string) 
 			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {

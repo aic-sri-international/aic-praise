@@ -35,75 +35,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo.service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
+package com.sri.ai.praise.sgsolver.solver;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 
 @Beta
-public class QueryResult {
-	private String query  = null;
-	private ParsedHOGModel parsedModel = null;
-	private String result = null;
-	private List<QueryError> errors = new ArrayList<>();
-	private long millisecondsToCompute = 0L;
-	
-	public QueryResult(String query, ParsedHOGModel parsedModel, String result, long millisecondsToCompute) {
-		this.query       = query;
-		this.parsedModel = parsedModel;
-		this.result      = result;
-		this.millisecondsToCompute = millisecondsToCompute;
-	}
-	
-	public QueryResult(String query, ParsedHOGModel parsedModel, List<QueryError> errors, long millisecondsToCompute) {
-		this.query = query;
-		this.parsedModel = parsedModel;
-		this.errors.addAll(errors);
-		this.millisecondsToCompute = millisecondsToCompute;
-	}
-	
-	public boolean isErrors() {
-		boolean result = errors.size() > 0;
-		return result;
-	}
-	
-	public String getQuery() {
-		return query;
-	}
-	
-	public ParsedHOGModel getParsedModel() {
-		return parsedModel;
-	}
-	
-	public String getResult() {
-		return result;
-	}
-	
-	public List<QueryError> getErrors() {
-		return errors;
-	}
-	
-	public long getMillisecondsToCopmpute() {
-		return millisecondsToCompute;
-	}
-	
-	@Override
-	public String toString() {
-		String result = null;
-		
-		if (isErrors()) {
-			StringJoiner sj = new StringJoiner("\n", "Query Errors:\n", "\n");
-			errors.forEach(error -> sj.add(error.toString()));
-			result = sj.toString();
-		}
-		else {
-			result = this.result;
-		}
-		
-		return result;
-	}
+public interface FactorsAndTypes {
+
 }
