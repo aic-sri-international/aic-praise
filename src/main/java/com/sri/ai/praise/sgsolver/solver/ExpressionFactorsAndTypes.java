@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -121,4 +122,17 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 	}	
 	// END-FactorsAndTypes
 	//
+	
+	@Override
+	public String toString() {
+		StringJoiner sj = new StringJoiner("\n");
+		
+		sj.add("factors                                      ="+factors);
+		sj.add("mapFromRandomVariableNameToTypeName          ="+mapFromRandomVariableNameToTypeName);
+		sj.add("mapFromNonUniquelyNamedConstantNameToTypeName="+mapFromNonUniquelyNamedConstantNameToTypeName);
+		sj.add("mapFromUniquelyNamedConstantNameToTypeName   ="+mapFromUniquelyNamedConstantNameToTypeName);
+		sj.add("mapFromTypeNameToSizeString                  ="+mapFromTypeNameToSizeString);
+		
+		return sj.toString();
+	}
 }
