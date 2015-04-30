@@ -77,10 +77,10 @@ public class HOGModelGrounding {
 	
 	public static void main(String[] args) {
 		StringJoiner sj = new StringJoiner("\n");
-		sj.add("sort People : 5, putin, bob;");
+		sj.add("sort People : 5, Putin, bob;");
 		sj.add("random president : People;");
 		sj.add("random communism : Boolean;");
-		sj.add("if president = putin then communism else not communism;");
+		sj.add("if president = Putin then communism else not communism;");
 		sj.add("if president = bob then not communism else communism;");
 		
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
