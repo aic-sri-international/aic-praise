@@ -142,9 +142,7 @@ public class InferenceForFactorGraphAndEvidence {
 
 		this.mapFromTypeNameToSizeString = new LinkedHashMap<>(factorsAndTypes.getMapFromTypeNameToSizeString());
 
-		// We use the Prolog convention of small-letter initials for constants, but we need an exception for the random variables and the non-uniquely named constants.
-		Predicate<Expression> isPrologConstant = new PrologConstantPredicate();
-		isUniquelyNamedConstantPredicate = e -> isPrologConstant.apply(e) && ! allSymbolsButUniquelyNamedConstants.contains(e);
+		isUniquelyNamedConstantPredicate = e -> Expressions.isSymbol(e) && ! allSymbolsButUniquelyNamedConstants.contains(e);
 		
 		TermTheory termTheory = null;
 		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
