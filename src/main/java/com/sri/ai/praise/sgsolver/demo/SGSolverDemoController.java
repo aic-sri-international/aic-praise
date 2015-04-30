@@ -48,8 +48,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
+
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
+
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -81,6 +83,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
@@ -100,9 +103,16 @@ import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.praise.sgsolver.demo.perspective.ChurchPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.HOGMPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.Perspective;
+import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
+import com.sri.ai.praise.sgsolver.model.export.UAIHOGModelGroundingListener;
 import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
+import com.sri.ai.praise.sgsolver.model.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.util.math.Rational;
+
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
@@ -177,6 +187,7 @@ public class SGSolverDemoController {
 	private RadioButton hogmPerspectiveRadioButton   = new RadioButton("HOGM");
 	private RadioButton churchPerspectiveRadioButton = new RadioButton("Church");
 	private Button      importUAIModelButton         = new Button("Import UAI Model...");
+	private Button      exportUAIModelButton         = new Button("Export UAI Model...");
 	//
 	private Spinner<Integer> displayPrecisionSpinner  = new Spinner<>();
 	private Spinner<Integer> displayScientificGreater = new Spinner<>();
@@ -456,10 +467,12 @@ public class SGSolverDemoController {
     	if (perspectiveToggleGroup.getSelectedToggle() == hogmPerspectiveRadioButton) {
     		setPerspective(new HOGMPerspective());
     		importUAIModelButton.setDisable(false);
+    		exportUAIModelButton.setDisable(false);
     	}
     	else if (perspectiveToggleGroup.getSelectedToggle() == churchPerspectiveRadioButton) {
     		setPerspective(new ChurchPerspective());
     		importUAIModelButton.setDisable(true);
+    		exportUAIModelButton.setDisable(true);
     	}
     }
     
@@ -572,6 +585,23 @@ public class SGSolverDemoController {
     		}
     	}
     	catch (Throwable th) {
+    		FXUtil.exception(th);
+    	}
+    }
+    
+    private void exportUAIModel(ActionEvent ae) {
+    	try {
+	    	callCurrentModelPageEditor(modelPage -> {
+	    		File uaiFile = uaiFileChooser.showSaveDialog(mainStage);
+	    		if (uaiFile != null) {
+	    			HOGMParserWrapper parser          = new HOGMParserWrapper();
+	    			ParsedHOGModel    parsedModel     = parser.parseModel(modelPage.getCurrentPageContents());
+	    			FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
+	    			
+	    			HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(uaiFile));
+	    		}
+	    	});
+    	} catch (Throwable th) {
     		FXUtil.exception(th);
     	}
     }
@@ -700,6 +730,11 @@ public class SGSolverDemoController {
 		HBox importUAIHBox = newButtonHBox();
 		importUAIHBox.getChildren().addAll(importUAIModelButton, new Label("Import UAI Model..."));
 		
+		exportUAIModelButton.setOnAction(this::exportUAIModel);
+		FXUtil.setDefaultButtonIcon(exportUAIModelButton, FontAwesomeIcons.ARCHIVE);
+		HBox exportUAIHBox = newButtonHBox();
+		exportUAIHBox.getChildren().addAll(exportUAIModelButton, new Label("Export to UAI Model..."));
+		
 		openMenu.getChildren().addAll(
 				saveAsHBox,
 				hSep,
@@ -707,7 +742,8 @@ public class SGSolverDemoController {
 				hogmPerspectiveRadioButton,
 				churchPerspectiveRadioButton,
 				new Separator(Orientation.HORIZONTAL),
-				importUAIHBox
+				importUAIHBox,
+				exportUAIHBox
 		);
 		
 		return openMenu;
