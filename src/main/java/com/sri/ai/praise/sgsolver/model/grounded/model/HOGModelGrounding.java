@@ -37,12 +37,14 @@
  */
 package com.sri.ai.praise.sgsolver.model.grounded.model;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
@@ -58,30 +60,86 @@ import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.util.base.Triple;
-import com.sri.ai.util.collect.CartesianProductEnumeration;
+import com.sri.ai.util.math.MixedRadixNumber;
+import com.sri.ai.util.math.Rational;
 
 @Beta
 public class HOGModelGrounding {
-	// Type Information:
-	// sort-name
-	// ->(args+, range)
-	// '..'(start, end)
+	
 	public interface Listener {
-		
+		void numberGroundVariables(int number);
+		void groundVariableCardinality(int variableIndex, int cardinality);
+		void numberFactors(int number);
+		void factorParticipants(int factorIndex, int[] variableIndexes);
+		void factorValue(int factorIndex, int numberFactorValues, int valueIndex, Rational value);
+		void groundingComplete();
 	}
 	
 	public static void main(String[] args) {
 		StringJoiner sj = new StringJoiner("\n");
-		sj.add("sort People : 5, Putin;");
+		sj.add("sort People : 5, putin, bob;");
 		sj.add("random president : People;");
 		sj.add("random communism : Boolean;");
-		sj.add("if president = Putin then communism else not communism;");
+		sj.add("if president = putin then communism else not communism;");
+		sj.add("if president = bob then not communism else communism;");
 		
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
 		ParsedHOGModel    parsedModel     = parser.parseModel(sj.toString());
 		FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
 		
-		ground(factorsAndTypes, null);
+		ground(factorsAndTypes, new Listener() { // NOTE: an example listener that outputs in the UAI format
+			int numberVariables;
+			StringJoiner preamble       = new StringJoiner("");
+			StringJoiner functionTables = new StringJoiner("");
+			@Override
+			public void numberGroundVariables(int number) { 
+				this.numberVariables = number;
+				preamble.add("MARKOV\n");
+				preamble.add(""+number+"\n");
+			}	
+			@Override
+			public void groundVariableCardinality(int variableIndex, int cardinality) {
+				preamble.add(""+cardinality);
+				if (variableIndex == (numberVariables-1)) {
+					preamble.add("\n");
+				}
+				else {
+					preamble.add(" ");
+				}
+			}
+			@Override
+			public void numberFactors(int number) {
+				preamble.add(""+number+"\n");
+			}
+			@Override
+			public void factorParticipants(int factorIndex, int[] variableIndexes) {
+				preamble.add(""+variableIndexes.length);
+				for (int i = 0; i < variableIndexes.length; i++) {
+					preamble.add(" "+variableIndexes[i]);
+				}
+				preamble.add("\n");
+			}
+			@Override
+			public void factorValue(int factorIndex, int numberFactorValues, int valueIndex, Rational value) {
+				if (valueIndex == 0) {
+					functionTables.add("\n"+numberFactorValues+"\n");
+				}
+				else {
+					functionTables.add(" ");
+				}
+				
+				functionTables.add(""+value.doubleValue());
+				
+				if (valueIndex == (numberFactorValues -1)) {
+					functionTables.add("\n");
+				}
+			}	
+			@Override
+			public void groundingComplete() {
+				System.out.print(preamble);
+				System.out.print(functionTables);
+			}
+		});
 	}
 	
 	public static void ground(FactorsAndTypes factorsAndTypes, Listener listener) {
@@ -89,6 +147,14 @@ public class HOGModelGrounding {
 			throw new IllegalArgumentException("Constants cannot be grounded");
 		}
 		Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants = createRandomVariableNameToTypeSizeAndUnqiueConstantsMap(factorsAndTypes);
+		Map<Expression, Integer> randomVariableIndexes = new LinkedHashMap<>();
+		AtomicInteger variableIndex = new AtomicInteger(-1);
+		listener.numberGroundVariables(randomVariableNameToTypeSizeAndUniqueConstants.size());
+		randomVariableNameToTypeSizeAndUniqueConstants.entrySet().forEach(entry -> {
+			randomVariableIndexes.put(entry.getKey(), variableIndex.addAndGet(1));
+			listener.groundVariableCardinality(variableIndex.get(), entry.getValue().second);
+		});
+		
 		Map<Expression, List<Expression>> typeToValues = createTypeToValuesMap(factorsAndTypes, randomVariableNameToTypeSizeAndUniqueConstants);
 		Map<String, String> newUniqueConstantToTypeMap = createGroundedUnqiueConstantToTypeMap(typeToValues);
 	    
@@ -97,34 +163,58 @@ public class HOGModelGrounding {
 							factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName(),
 							newUniqueConstantToTypeMap,
 							factorsAndTypes.getMapFromTypeNameToSizeString());
-System.out.println("grounedFactorsAndType=\n"+grounedFactorsAndTypes);		
+
 		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(grounedFactorsAndTypes, false, null, true);
 		
+		listener.numberFactors(factorsAndTypes.getFactors().size());
+		int factorIndex = 0;
 		for (Expression factor : factorsAndTypes.getFactors()) {
 	    	List<Expression> randomVariablesInFactor = new ArrayList<>(Expressions.getSubExpressionsSatisfying(factor, randomVariableNameToTypeSizeAndUniqueConstants::containsKey));
 	    	if (randomVariablesInFactor.size() == 0) {
 	    		throw new IllegalArgumentException("Factor contains no random variables: "+factor);
 	    	}
 	    	
+	    	int[] radices                    = new int[randomVariablesInFactor.size()];
+	    	int[] particiapntVariableIndexes = new int[randomVariablesInFactor.size()];
 	    	List<List<Expression>> factorRandomVariableTypeValues = new ArrayList<>();
-	    	randomVariablesInFactor.forEach(randomVariable -> {
-	    		Expression type = randomVariableNameToTypeSizeAndUniqueConstants.get(randomVariable).first;
+	    	for (int i = 0; i < randomVariablesInFactor.size(); i++) {
+	    		Expression randomVariable = randomVariablesInFactor.get(i);
+	    		
+	    		Expression type               = randomVariableNameToTypeSizeAndUniqueConstants.get(randomVariable).first;
+	    		radices[i]                    = randomVariableNameToTypeSizeAndUniqueConstants.get(randomVariable).second;
+	    		particiapntVariableIndexes[i] = randomVariableIndexes.get(randomVariable);
+	    		
 	    		factorRandomVariableTypeValues.add(typeToValues.get(type));
-	    	});
-System.out.println("factor="+factor);	    	
-	    	RewritingProcess process = new DefaultRewritingProcess(null);
-	    	CartesianProductEnumeration<Expression> cartesianProduct = new CartesianProductEnumeration<>(factorRandomVariableTypeValues);
-	    	while (cartesianProduct.hasMoreElements()) {
-	    		Expression groundedFactor = factor;
-	    		List<Expression> values = cartesianProduct.nextElement();
-	    		for (int i = 0; i < randomVariablesInFactor.size(); i++) {
-	    			groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), values.get(i), process);
-	    		}
-System.out.println("grounded="+groundedFactor);	    		
-				Expression value = inferencer.evaluate(groundedFactor);
-System.out.println("value="+value);					
 	    	}
+	    	
+	    	listener.factorParticipants(factorIndex, particiapntVariableIndexes);
+	    	
+	    	RewritingProcess process = new DefaultRewritingProcess(null);
+	    	boolean didIncrement     = true;
+	    	MixedRadixNumber mrn     = new MixedRadixNumber(BigInteger.ZERO, radices);
+	    	int numberFactorValues   = mrn.getMaxAllowedValue().intValue()+1;
+	    	do {
+	    		Expression groundedFactor = factor;
+	    		for (int i = 0; i < randomVariablesInFactor.size(); i++) {
+	    			int valueIndex = mrn.getCurrentNumeralValue(i);
+	    			groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), factorRandomVariableTypeValues.get(i).get(valueIndex), process);
+	    		}  		
+				Expression value = inferencer.evaluate(groundedFactor);
+				if (!Expressions.isNumber(value)) {
+					throw new IllegalStateException("Unable to compute a number for the grounded factor ["+groundedFactor+"], instead got:"+value);
+				}
+				
+				listener.factorValue(factorIndex, numberFactorValues, mrn.getValue().intValue(), value.rationalValue());
+				
+				if (didIncrement = mrn.canIncrement()) {
+					mrn.increment();
+				}				
+	    	} while (didIncrement);
 	    }
+		
+		listener.groundingComplete();
+		
+		factorIndex++;
 	}
 	
 	//
@@ -184,7 +274,7 @@ System.out.println("value="+value);
 						// Is a sort name
 						values.addAll(uniqueConstants);
 						for (int i = uniqueConstants.size()+1; i <= size; i++) {
-							values.add(Expressions.makeSymbol(type.toString()+"_"+i));
+							values.add(Expressions.makeSymbol(type.toString().toLowerCase()+"_"+i));
 						}
 					}
 				}
