@@ -200,7 +200,9 @@ System.out.println("value="+value);
 		
 		typeToValues.entrySet().stream()
 			.filter(entry -> Expressions.isSymbol(entry.getKey()))
-			.forEach(sortEntry -> result.put(sortEntry.getValue().toString(), sortEntry.getKey().toString()));
+			.forEach(sortEntry -> {
+				sortEntry.getValue().forEach(constant -> result.put(constant.toString(), sortEntry.getKey().toString()));
+			});
 		
 		return result;
 	}
