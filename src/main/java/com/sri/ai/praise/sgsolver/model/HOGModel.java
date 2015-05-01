@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
@@ -510,6 +511,14 @@ public class HOGModel {
 									if (sortType != null) {
 										argSorts.add(sortType);
 									}
+								}
+								else if (functorName.equals(FunctorConstants.LESS_THAN) ||
+										 functorName.equals(FunctorConstants.LESS_THAN_OR_EQUAL_TO) ||
+										 functorName.equals(FunctorConstants.GREATER_THAN) ||
+										 functorName.equals(FunctorConstants.GREATER_THAN_OR_EQUAL_TO)) {
+									if (sortType != HOGMSortDeclaration.IN_BUILT_NUMBER) {
+										newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
+									}	
 								}
 								else {
 									if (booleanTypeFunctors.contains(functorName)) {

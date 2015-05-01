@@ -75,13 +75,16 @@ public class HOGModelGrounding {
 		void groundingComplete();
 	}
 	
+	private static String PARSED_NUMBER_RANGE_FUNCTOR = "..";
+	
 	public static void main(String[] args) {
 		StringJoiner sj = new StringJoiner("\n");
-		sj.add("sort People : 5, Putin, bob;");
+		sj.add("sort People : 10, Putin;");
 		sj.add("random president : People;");
 		sj.add("random communism : Boolean;");
+		sj.add("random votePutin : 2..11");
 		sj.add("if president = Putin then communism else not communism;");
-		sj.add("if president = bob then not communism else communism;");
+		sj.add("if votePutin > 5 then president = Putin else not president = Putin;");
 		
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
 		ParsedHOGModel    parsedModel     = parser.parseModel(sj.toString());
@@ -225,18 +228,18 @@ public class HOGModelGrounding {
 		factorsAndTypes.getMapFromRandomVariableNameToTypeName().entrySet().forEach(entry -> {
 			Expression       randomVariableName = Expressions.parse(entry.getKey());
 			Expression       type               = Expressions.parse(entry.getValue());
-			int              size               = 0;
+			int              size               = 0;			
 			List<Expression> uniqueConstants    = new ArrayList<>();
 			if (Expressions.hasFunctor(type, FunctorConstants.FUNCTION_TYPE)) {
 				throw new UnsupportedOperationException("Relational random variables, "+randomVariableName+", are currently not supported.");
 			}
-			else if (Expressions.hasFunctor(type, FunctorConstants.NUMBER_RANGE)) {
+			else if (Expressions.hasFunctor(type, PARSED_NUMBER_RANGE_FUNCTOR)) {
 				size = (type.get(1).intValueExact() - type.get(0).intValueExact()) + 1;
 			}
 			else {
-				String strSize = factorsAndTypes.getMapFromTypeNameToSizeString().get(entry.getValue());
+				String strSize = factorsAndTypes.getMapFromTypeNameToSizeString().get(type);
 				if (strSize == null) {
-					throw new IllegalArgumentException("Size of sort, "+entry.getValue()+", is unknown");
+					throw new IllegalArgumentException("Size of sort, "+type+", is unknown");
 				}
 				size = Integer.parseInt(strSize);
 				factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName()
@@ -260,7 +263,7 @@ public class HOGModelGrounding {
 			if (!result.containsKey(type)) {
 				List<Expression> values = new ArrayList<>();
 				// Is a numeric range
-				if (Expressions.hasFunctor(type, FunctorConstants.NUMBER_RANGE)) {
+				if (Expressions.hasFunctor(type, PARSED_NUMBER_RANGE_FUNCTOR)) {
 					int startInclusive = type.get(0).intValueExact();
 					int endInclusive   = type.get(1).intValueExact();
 					IntStream.rangeClosed(startInclusive, endInclusive).sequential().forEach(value -> values.add(Expressions.makeSymbol(value)));
