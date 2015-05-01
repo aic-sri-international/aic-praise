@@ -82,7 +82,7 @@ public class HOGModelGrounding {
 		sj.add("sort People : 10, Putin;");
 		sj.add("random president : People;");
 		sj.add("random communism : Boolean;");
-		sj.add("random votePutin : 2..11");
+		sj.add("random votePutin : 2..11;");
 		sj.add("if president = Putin then communism else not communism;");
 		sj.add("if votePutin > 5 then president = Putin else not president = Putin;");
 		
