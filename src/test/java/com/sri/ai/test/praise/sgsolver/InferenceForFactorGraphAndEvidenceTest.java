@@ -100,7 +100,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 				);
 
 		// The definitions of non-uniquely named constants
-		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map("none", "Folks", "tom", "Folks");
 
 		// a variant of the earthquake/burglary model in which some burglars are more active than others.
 		isBayesianNetwork = true;

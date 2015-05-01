@@ -41,11 +41,13 @@ import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.setDifference;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
@@ -83,7 +85,6 @@ public class InferenceForFactorGraphAndEvidence {
 	private Map<String, String> mapFromTypeNameToSizeString;
 	private Expression queryVariable;
 	private Collection<Expression> allRandomVariables;
-	private Collection<Expression> allSymbolsButUniquelyNamedConstants;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private ConstraintTheory theory;
 	private SemiRingProblemType problemType;
@@ -135,13 +136,10 @@ public class InferenceForFactorGraphAndEvidence {
 		
 		allRandomVariables = Util.mapIntoList(this.mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
 		                       
-		allSymbolsButUniquelyNamedConstants = list();
-		allSymbolsButUniquelyNamedConstants.addAll(Util.mapIntoList(mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse));
-		allSymbolsButUniquelyNamedConstants.addAll(Util.mapIntoList(factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse));
-
 		this.mapFromTypeNameToSizeString = new LinkedHashMap<>(factorsAndTypes.getMapFromTypeNameToSizeString());
 
-		isUniquelyNamedConstantPredicate = e -> Expressions.isSymbol(e) && ! allSymbolsButUniquelyNamedConstants.contains(e);
+		Set<Expression> uniquelyNamedConstants = mapIntoSet(factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
+		isUniquelyNamedConstantPredicate = e -> uniquelyNamedConstants.contains(e) || Expressions.isNumber(e) || Expressions.isBoolean(e);
 		
 		TermTheory termTheory = null;
 		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
