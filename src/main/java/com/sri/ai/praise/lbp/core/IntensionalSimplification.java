@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.lbp.core;
 
+import static com.sri.ai.util.Util.myAssert;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -100,7 +102,7 @@ public class IntensionalSimplification extends AbstractLBPHierarchicalRewriter i
 		Expression intSetCondition = ((IntensionalSet) intensionalSet).getCondition();
 		
 		IndexExpressionsSet indexExpressions = ((IntensionalSet) intensionalSet).getIndexExpressions();
-		Util.myAssert(() -> indexExpressions instanceof ExtensionalIndexExpressionsSet, "IntensionalSimplification not implemented for intensional sets with non-extensional index expressions"); 
+		myAssert(() -> indexExpressions instanceof ExtensionalIndexExpressionsSet, () -> "IntensionalSimplification not implemented for intensional sets with non-extensional index expressions"); 
 		List<Expression> intensionalSetIndexExpressions = new ArrayList<Expression>(((ExtensionalIndexExpressionsSet)indexExpressions).getList());
 		Object[]         cPrimeAndiEqualsBeta   = new Object[3];
 		
