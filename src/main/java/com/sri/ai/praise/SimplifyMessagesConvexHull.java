@@ -56,7 +56,7 @@ import com.sri.ai.util.math.Rational;
 /**
  * <p>
  * A rewriter that simplifies applications of 'convex hull' applications on a
- * set of messages. A message bound is the convex hull of a set of messages,
+ * set of messages. A message separator is the convex hull of a set of messages,
  * where messages can be seen as a vector in space. The dimension of the vector
  * is the number of values taken by the corresponding random variable (so a
  * boolean random variable message has dimension two). The convex hull of two
@@ -89,7 +89,7 @@ import com.sri.ai.util.math.Rational;
  * variables with more values.
  * </p>
  * <p>
- * So a message bound is one such convex hull. The nice thing about it is that,
+ * So a message separator is one such convex hull. The nice thing about it is that,
  * for boolean random variables, we only need two messages to represent an
  * entire convex hull.
  * </p>
@@ -286,7 +286,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 			Expression normalizedValue = normalizedMessageValue(unnormalizedMessageValue);
 			// This implies we have a message like:
 			// [if p(X) then 0 else 0]
-			// which indicates the whole bound needs to be treated as a trivial bound.
+			// which indicates the whole separator needs to be treated as a trivial separator.
 			if (normalizedValue.equals(Expressions.ZERO)) {
 				result = LPIUtil.makeTrivialBound(IfThenElse.condition(unnormalizedMessageValue));
 				break;
@@ -294,7 +294,7 @@ public class SimplifyMessagesConvexHull extends AbstractLBPHierarchicalRewriter 
 			normalizedMessageValues.add(normalizedValue);
 		}
 		
-		// If I've not run into a case like: [if p then 0 else 0], which requires a trivial bound to be returned.
+		// If I've not run into a case like: [if p then 0 else 0], which requires a trivial separator to be returned.
 		if (result == null) {
 			// Find indices and values of maximum probabilities for 'true' in all messages
 			Rational minTrueValue  = getTrueValue(normalizedMessageValues.get(0));

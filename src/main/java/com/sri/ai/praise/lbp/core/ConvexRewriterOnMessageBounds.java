@@ -110,8 +110,8 @@ import com.sri.ai.util.base.Triple;
  * When it is time for ConvexRewriterOnMessageBounds to rewrite something, it
  * runs the inner rewriter with hooks on child-rewriter invocation. This
  * intercepter does the following: if the child-rewriter on an expression E
- * returns something that is not a bound, the listener simply returns the same
- * thing; if the child-rewriter does return a bound B (a 'convex hull' function
+ * returns something that is not a separator, the listener simply returns the same
+ * thing; if the child-rewriter does return a separator B (a 'convex hull' function
  * application on its extremum messages), the listener saves B and returns a
  * placeholder associated with B. At the end of this executing of the inner
  * rewriter, we have a basic expression that contains a bunch of
@@ -145,7 +145,7 @@ import com.sri.ai.util.base.Triple;
  * respectively.<br>
  * <br>
  * In our new scenario, the child-rewriter call is intercepted. Say we still get
- * a non-bound value for the first child-rewriter, with the same value as
+ * a non-separator value for the first child-rewriter, with the same value as
  * before:
  * 
  * <pre>
@@ -165,7 +165,7 @@ import com.sri.ai.util.base.Triple;
  * 'convex hull'( { [if p then 0.8 else 0.2], [if p then 0.4 else 0.6] } )
  * </pre>
  * 
- * We save this bound associated with a placeholder 'convex hull child
+ * We save this separator associated with a placeholder 'convex hull child
  * placeholder'(1) and return the placeholder. Now we have the basic expression:
  * 
  * <pre>
@@ -173,7 +173,7 @@ import com.sri.ai.util.base.Triple;
  * </pre>
  * 
  * For each combination of extrema (not too interesting since there is only one
- * bound) and then applying 'convex hull' on their set, we get:
+ * separator) and then applying 'convex hull' on their set, we get:
  * 
  * <pre>
  * 'convex hull'( { (if p then 0.7 else 0.3)^5 * (if p then 0.8 else 0.2),  
@@ -194,7 +194,7 @@ import com.sri.ai.util.base.Triple;
  *                  [if p then 0.978772967 else 0.021227033] } )
  * </pre>
  * 
- * <b>Note</b> that if another child-call had also resolved to a bound, we would
+ * <b>Note</b> that if another child-call had also resolved to a separator, we would
  * have four arguments in that convex hull. In that case, we would have a
  * simplification of 'convex hull' to something with two arguments only.<br>
  * <br>
@@ -205,12 +205,12 @@ import com.sri.ai.util.base.Triple;
  * // NOTE: This logic is as it is due to the fact message values and not messages
  * // are currently returned by message rewriters within the system.
  * R is a rewriter such that R(E) is a message M on a random variable [ V ].
- * Returns a conditional bound B on messages on [ V ] at time step t.
- * (each bound is represented by the convex hull of a set of messages on [ V ]).
+ * Returns a conditional separator B on messages on [ V ] at time step t.
+ * (each separator is represented by the convex hull of a set of messages on [ V ]).
  * The relationship between B and M is as follows.
  * M can be seen as a function M(M1,...,Mn) on input messages M1,...,Mn computed by R.
  * R_convex_rewriter_on_message_bounds intercepts the calculation of M1,...,Mn and obtains conditional bounds Bt1,...,Btn instead, where Btj contains Mj.
- * The resulting bound B is the convex hull of { (on E1,...,En) M(E1,...,En) }, where Ej ranges over the extrema of bound Btj.
+ * The resulting separator B is the convex hull of { (on E1,...,En) M(E1,...,En) }, where Ej ranges over the extrema of separator Btj.
  * 
  * C  <- contextual constraint
  * RV <- get_random_variable_for(R, E)
@@ -219,10 +219,10 @@ import com.sri.ai.util.base.Triple;
  *         intercept(child_rewriter, E', C')
  *             if child_rewriter is a message producer
  *                 placeholder <- placeholder(child_rewriter, E', C')
- *                 bound <- map_from_placeholder_to_bound(E,C).get(placeholder)
+ *                 separator <- map_from_placeholder_to_bound(E,C).get(placeholder)
  *                          possibly creating and storing the value with
  *                             R_convex_rewriter_on_message_bounds(child_rewriter, E', t) under C'
- *                          // bound will be created pretty much every time;
+ *                          // separator will be created pretty much every time;
  *                          // it will only be reused instead if R invoked (E', C') more than once  
  *                 [v'] <- get_random_variable_for(child_rewriter, E')                       
  *                 return (lambda v' : placeholder)(v')
@@ -231,8 +231,8 @@ import com.sri.ai.util.base.Triple;
  * else
  *     for each placeholder in keys of map_from_placeholder_to_bound(E,C)
  *         (child_rewriter, E', C') <- from placeholder
- *         bound <- R_convex_rewriter_on_message_bounds(child_rewriter, E', t) under C'
- *         map_from_placeholder_to_bound(E,C).put(placeholder, bound)
+ *         separator <- R_convex_rewriter_on_message_bounds(child_rewriter, E', t) under C'
+ *         map_from_placeholder_to_bound(E,C).put(placeholder, separator)
  * 
  * // at this point, map_from_placeholder_to_bound contains Bt1,...,Btn
  * message_values_without_placeholders 
@@ -258,10 +258,10 @@ import com.sri.ai.util.base.Triple;
  * Receives an extensional set of message values with placeholders
  * and a map from placeholders to conditional bounds,
  * and replaces every message value in the set by all the possible message values
- * obtained by replacing each placeholder by one of its bound's extrema
+ * obtained by replacing each placeholder by one of its separator's extrema
  * 
  * if there is a P in message_values_set and (P, B) is in map_from_placeholder_to_bound 
- *     if B is conditional bound if C then B1 else B2 and P is not scoped by message_values_set
+ *     if B is conditional separator if C then B1 else B2 and P is not scoped by message_values_set
  *         // Externalize conditionals
  *         thenMap <- copy of map_from_placeholder_to_bound with P mapping to B1
  *         elseMap <- copy of map_from_placeholder_to_bound with P mapping to B2
@@ -281,7 +281,7 @@ import com.sri.ai.util.base.Triple;
  *      
  * -----
  * make_simplified_convex_hull([V], message_values_set)
- * [V] is the random variable for which messages are being bound.
+ * [V] is the random variable for which messages are being separator.
  * message_values_set is a conditional extensional set of unconditional message values
  * 
  * // Externalizes conditionals, that is,
@@ -334,17 +334,17 @@ public class ConvexRewriterOnMessageBounds extends
 	 * Constructor.
 	 * 
 	 * @param name
-	 *            the name to be associated with this instance of a bound
+	 *            the name to be associated with this instance of a separator
 	 *            wrapper (e.g. R_bound_prod_factor).
 	 * @param innerRewriterName
-	 *            the name of the inner rewriter that this is a bound wrapper
+	 *            the name of the inner rewriter that this is a separator wrapper
 	 *            for (e.g. R_prod_factor).
 	 * @param randomVariableFromInnerRewriterCall
 	 *            a utility routine that works for each of the rewriters that
 	 *            an instance of this class is a rewriter for.
 	 * @param boundChildCallRedirectMap
 	 *            a map indicating which child rewriters that can be called by
-	 *            the named inner rewriter should be mapped to bound wrappers,
+	 *            the named inner rewriter should be mapped to separator wrappers,
 	 *            e.g.:<br>
 	 *            'R_m_to_v_from_f'          -> 'R_bound_m_to_v_from_f'
 	 *            'R_prod_m_and_prod_factor' -> 'R_bound_prod_m_and_prod_factor'
@@ -365,7 +365,7 @@ public class ConvexRewriterOnMessageBounds extends
 	}
 	
 	/**
-	 * Determine whether or not a given expressions contains any bound
+	 * Determine whether or not a given expressions contains any separator
 	 * placedholder expressions.
 	 * 
 	 * @param expression
@@ -442,9 +442,9 @@ public class ConvexRewriterOnMessageBounds extends
 				Trace.log("    for each placeholder in keys of map_from_placeholder_to_bound(E,C)");
 				for (Placeholder placeholder : mapFromPlaceholderToBound.keySet()) {
 					Trace.log("        (child_rewriter, E', C') <- from placeholder");
-					Trace.log("        bound <- R_convex_rewriter_on_message_bounds(child_rewriter, E', t) under C'");
+					Trace.log("        separator <- R_convex_rewriter_on_message_bounds(child_rewriter, E', t) under C'");
 					Expression bound = placeholder.callMessageBoundsOnChildRewriter(expressionTimestep);
-					Trace.log("        map_from_placeholder_to_bound(E,C).put(placeholder, bound)");
+					Trace.log("        map_from_placeholder_to_bound(E,C).put(placeholder, separator)");
 					mapFromPlaceholderToBound.put(placeholder, bound);
 				}
 			}
@@ -494,9 +494,9 @@ public class ConvexRewriterOnMessageBounds extends
 			if (boundRewriterName != null) {				
 				Trace.log("if child_rewriter is a message producer");
 				Trace.log("    placeholder <- placeholder(child_rewriter, E', C')");
-				Trace.log("    bound <- map_from_placeholder_to_bound(E,C).get(placeholder)");
+				Trace.log("    separator <- map_from_placeholder_to_bound(E,C).get(placeholder)");
 				Trace.log("             possibly creating and storing the value with R_convex_rewriter_on_message_bounds(child_rewriter, E', t) under C'");
-				// Note: bound will be created pretty much every time;
+				// Note: separator will be created pretty much every time;
 				// it will only be reused instead if R invokes (E',C') more than once
 				Placeholder                            placeholder    = null;
 				Triple<String, Expression, Expression> placeholderKey = new Triple<String, Expression, Expression>(boundRewriterName, expression, process.getContextualConstraint());
@@ -573,7 +573,7 @@ public class ConvexRewriterOnMessageBounds extends
 	 * Receives an extensional set of message values with placeholders and a map
 	 * from placeholders to conditional bounds, and replaces every message value
 	 * in the set by all the possible message values obtained by replacing each
-	 * placeholder by one of its bound's extrema
+	 * placeholder by one of its separator's extrema
 	 * 
 	 * @param messageValuesSet
 	 *            a set of message values with placeholders.
@@ -583,7 +583,7 @@ public class ConvexRewriterOnMessageBounds extends
 	 *            the process under which the rewriting is occurring.
 	 * @return an extensional set with every message value in the set replaced
 	 *         by all the possible message values obtained by replacing each
-	 *         placeholder by one of its bound's extrema.
+	 *         placeholder by one of its separator's extrema.
 	 */
 	private Expression iterateExtrema(Expression messageValuesSet, Map<Placeholder, Expression> mapFromPlaceholderToBound, RewritingProcess process) {
 		Expression result = messageValuesSet;
@@ -600,7 +600,7 @@ public class ConvexRewriterOnMessageBounds extends
 			Trace.log("// B={}", expressionB);
 			
 			if (IfThenElse.isIfThenElse(expressionB) && !isMessageValueWithPossiblePlaceholders(expressionB, process) && !isPlaceholderScopedBy(placeholderP.getPlaceholderExpression(), messageValuesSet, process)) {
-				Trace.log("    if B is conditional bound if C then B1 else B2 and P is not scoped by message_values_set");
+				Trace.log("    if B is conditional separator if C then B1 else B2 and P is not scoped by message_values_set");
 				Trace.log("        // Externalize Conditionals");
 				Trace.log("        thenMap <- copy of map_from_placeholder_to_bound with P mapping to B1");
 				final Map<Placeholder, Expression> thenMap = new LinkedHashMap<Placeholder, Expression>(mapFromPlaceholderToBound);

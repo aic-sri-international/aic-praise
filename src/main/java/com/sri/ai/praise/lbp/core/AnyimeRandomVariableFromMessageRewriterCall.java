@@ -44,7 +44,7 @@ import com.sri.ai.praise.lbp.LBPRewriter;
 
 /**
  * An extension to the LBPRandomVariableFromMessageRewriterCall implementations
- * that extracts the random variable argument from from bound message rewriters
+ * that extracts the random variable argument from from separator message rewriters
  * in addition to those handled by the super class.
  * 
  * @author oreilly

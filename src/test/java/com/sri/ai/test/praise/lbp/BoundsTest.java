@@ -214,7 +214,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #2:          if p(a) then 0.5 else 0.5 * if p(a) then 0.3 else 0.7 * if p(a) then 0.6 else 0.4
 					//            = if p(a) then 0.5 * 0.3 * 0.6 else 0.5 * 0.7 * 0.4 
 					//            = if p(a) then 0.09 else 0.14
-					// bound      =
+					// separator      =
 					// 'convex hull'({ ([if p(a) then 0.24 else 0.04]),                 ([if p(a) then 0.09 else 0.14]) })
 					// simplified = 
 					"  'convex hull'({ ([ if p(a) then 0.857142857 else 0.142857143 ]), ([ if p(a) then 0.391304348 else 0.608695652 ]) })"),
@@ -242,7 +242,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #4:        = if p(a) then 0.5 else 0.5 * if p(a) then 0.3 else 0.7 * if p(a) then 0.45 else 0.55
 					//            = if p(a) then 0.5 * 0.3 * 0.45 else 0.5 * 0.7 * 0.55 
 					//            = if p(a) then 0.0675 else 0.1925
-					// bound      =
+					// separator      =
 					// 'convex hull'({ ([if p(a) then 0.24 else 0.04]), ([if p(a) then 0.18 else 0.055]), ([if p(a) then 0.09 else 0.14]), ([if p(a) then 0.0675 else 0.1925])})
 					// normalized =
 					// 'convex hull'({ ([if p(a) then 0.857142857 else 0.142857143]), ([if p(a) then 0.765957447 else 0.234042553]), ([if p(a) then 0.391304348 else 0.608695652]), ([if p(a) then 0.259615385 else 0.740384615])})
@@ -267,7 +267,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #a.2:      = if p(X) then 0.5 else 0.5 * if p(X) then 0.3 else 0.7 * if p(X) then 0.6 else 0.4
 					//            = if p(X) then 0.5 * 0.3 * 0.6 else 0.5 * 0.7 * 0.4 
 					//            = if p(X) then 0.09 else 0.14
-					// bound      =
+					// separator      =
 					// 'convex hull'({ ([if p(a) then 0.24 else 0.04]),                 ([if p(a) then 0.09 else 0.14]) })
 					// simplified =
 					// 'convex hull'({ ([ if p(a) then 0.857142857 else 0.142857143 ]), ([ if p(a) then 0.391304348 else 0.608695652 ]) })
@@ -279,7 +279,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #e.2:      = if p(X) then 0.5 else 0.5 * if p(X) then 0.89 else 0.11 * if p(X) then 0.6 else 0.4
 					//            = if p(X) then 0.5 * 0.89 * 0.6 else 0.5 * 0.11 *0.4
 					//            = if p(X) then 0.267 else 0.022
-					// bound      =
+					// separator      =
 					// 'convex hull'({ ([if p(X) then 0.285 else 0.01]),                 ([if p(X) then 0.267 else 0.022]) })
 					// simplified = 
 					// 'convex hull'({ ([ if p(X) then 0.966101695 else 0.0338983051 ]), ([ if p(X) then 0.923875433 else 0.0761245675 ]) })
@@ -311,7 +311,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #a.4:      = if p(X) then 0.5 else 0.5 * if p(X) then 0.3 else 0.7 * if p(X) then 0.45 else 0.55
 					//            = if p(X) then 0.5 * 0.3 * 0.45 else 0.5 * 0.7 * 0.55
 					//            = if p(X) then 0.0675 else 0.1925
-					// bound      =
+					// separator      =
 					// 'convex hull'({ ([if p(X) then 0.24 else 0.04]), ([if p(X) then 0.18 else 0.055]), ([if p(X) then 0.09 else 0.14]), ([if p(X) then 0.0675 else 0.1925]) })
 					// normalized =
 					// 'convex hull'({ ([if p(X) then 0.857142857 else 0.142857143]), ([if p(X) then 0.765957447 else 0.234042553]), ([if p(X) then 0.391304348 else 0.608695652]), ([if p(X) then 0.259615385 else 0.740384615]) })
@@ -331,7 +331,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #e.4:      = if p(X) then 0.5 else 0.5 * if p(X) then 0.89 else 0.11 * if p(X) then 0.78 else 0.22
 					//            = if p(X) then 0.5 * 0.89 * 0.78 else 0.5 * 0.11 * 0.22
 					//            = if p(X) then 0.3471 else 0.0121
-					// bound      =
+					// separator      =
 					// 'convex hull'({ ([if p(X) then 0.30875 else 0.00875]), ([if p(X) then 0.3705 else 0.0055]), ([if p(X) then 0.28925 else 0.01925]), ([if p(X) then 0.3471 else 0.0121]) })
 					// normalized =
 					// 'convex hull'({ ([if p(X) then 0.972440945 else 0.027559055]), ([if p(X) then 0.985372340 else 0.0146276596]), ([if p(X) then 0.937601297 else 0.0623987034]), ([if p(X) then 0.966314031 else 0.033685969]) })
@@ -364,7 +364,7 @@ public class BoundsTest extends AbstractLPITest {
 					//            = if p(X) then 0.0975 else 0.1225
 					// #a.4:      = if p(X) then 0.5 else 0.5 * if p(X) then 0.3 else 0.7 * if p(X) then 0.78 else 0.22
 					//            = if p(X) then 0.5 * 0.3 * 0.78 else 0.5 * 0.7 * 0.22
-					// bound      = if p(X) then 0.117 else  0.077
+					// separator      = if p(X) then 0.117 else  0.077
 					// 'convex hull'({ ([if p(X) then 0.26 else 0.035]), ([if p(X) then 0.312 else 0.022]), ([if p(X) then 0.0975 else 0.1225]), ([if p(X) then 0.117 else  0.077]) })
 					// normalized =
 					// 'convex hull'({ ([if p(X) then 0.881355932 else 0.118644068]), ([if p(X) then 0.934131737 else 0.0658682635]), ([if p(X) then 0.443181818 else 0.556818182]), ([if p(X) then 0.603092784 else 0.396907216]) })
@@ -384,7 +384,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #b.4:      = if p(X) then 0.5 else 0.5 * if p(X) then 0.89 else 0.11 * if p(X) then 0.45 else 0.55
 					//            = if p(X) then 0.5 * 0.89 * 0.45 else 0.5 * 0.11 * 0.55
 					//            = if p(X) then 0.20025 else 0.03025
-					// bound      = 
+					// separator      = 
 					// 'convex hull'({ ([if p(X) then 0.285 else 0.01]), ([if p(X) then 0.21375 else 0.01375]), ([if p(X) then 0.267 else 0.022]), ([if p(X) then 0.20025 else 0.03025]) })
 					// normalized =
 					// 'convex hull'({ ([if p(X) then 0.966101695 else 0.0338983051]), ([if p(X) then 0.93956044 else 0.0604395604]), ([if p(X) then 0.923875432 else 0.0761245675]), ([if p(X) then 0.868763557 else 0.131236443]) })
@@ -404,7 +404,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #e.4:      = if p(X) then 0.5 else 0.5 * if p(X) then 0.89 else 0.11 * if p(X) then 0.78 else 0.22
 					//            = if p(X) then 0.5 * 0.89 * 0.78 else 0.5 * 0.11 * 0.22
 					//            = if p(X) then 0.3471 else 0.0121
-					// bound      = 
+					// separator      = 
 					// 'convex hull'({ ([if p(X) then 0.30875 else 0.00875]), ([if p(X) then 0.3705 else 0.0055]), ([if p(X) then 0.28925 else 0.01925]), ([if p(X) then 0.3471 else 0.0121]) })
 					// normalized =
 					// 'convex hull'({ ([if p(X) then 0.972440945 else 0.0275590551]), ([if p(X) then 0.985372340 else 0.0146276596]), ([if p(X) then 0.937601297 else 0.0623987034]), ([if p(X) then 0.966314031 else 0.0336859688]) })
@@ -474,7 +474,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #2:          if p(a) then 0.3 else 0.7 * if p(a) then 0.6 else 0.4
 					//            = if p(a) then 0.3 * 0.6 else 0.7 * 0.4 
 					//            = if p(a) then 0.18 else 0.28
-					// bound      =
+					// separator      =
 					// 'convex hull'({ ([if p(a) then 0.48 else 0.08]), ([if p(a) then 0.18 else 0.28]) })
 					// Condition: else
 					// #1           if p(a) then 0.35 else 0.65 
@@ -499,7 +499,7 @@ public class BoundsTest extends AbstractLPITest {
 					// #2:          if p(a) then 0.3 else 0.7 * if p(X) then 0.35 else 0.65
 					//            = if p(a) then 0.3 * 0.35 else 0.7 * 0.65 
 					//            = if p(a) then 0.105 else 0.455 
-					// bound      =
+					// separator      =
 					// 'convex hull'({ ([if p(a) then 0.28 else 0.13]), ([if p(a) then 0.105 else 0.455]) })
 					// Condition: else
 					// #1         = if X = b then (if p(X) then 0.6 else 0.4)   else (if p(X) then 0.65 else 0.35)

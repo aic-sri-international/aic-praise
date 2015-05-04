@@ -99,11 +99,11 @@ public class BoundBelief extends AbstractLBPHierarchicalRewriter implements LBPR
 		if (Justification.isEnabled()) {
 			Justification.log(Expressions.apply(LPIUtil.FUNCTOR_BELIEF, randomVariable, Model.getModelDefinition(process)));
 
-			Justification.beginEqualityStep("lifted bound belief");
+			Justification.beginEqualityStep("lifted separator belief");
 
 			Justification.log(belief); // detailed justification
 
-			Justification.beginEqualityStep("definition of bound  belief");
+			Justification.beginEqualityStep("definition of separator  belief");
 
 			Expression expandedBelief =
 					Expressions.apply(

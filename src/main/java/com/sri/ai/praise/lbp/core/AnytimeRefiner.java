@@ -100,7 +100,7 @@ public class AnytimeRefiner extends RewriterRefiner {
 		Expression randomVariable = randomVariableFromMessageRewriterCall.getRandomVariableFor(rewriterName, expression);
 		
 		if (randomVariable == null) {
-			throw new Error("AnytimeRefiner must wrap bound rewriters only, not " + rewriterName + " (it needs a random variable to create a trivial bound on as an initial value)");
+			throw new Error("AnytimeRefiner must wrap separator rewriters only, not " + rewriterName + " (it needs a random variable to create a trivial separator on as an initial value)");
 		}
 
 		Expression randomVariableValueExpression = LPIUtil.getRandomVariableValueExpression(randomVariable, process);

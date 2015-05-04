@@ -740,7 +740,7 @@ public class LPIUtil {
 	}
 	
 	/**
-	 * Make a trivial bound expression for the specified random variable value, i.e:<br>
+	 * Make a trivial separator expression for the specified random variable value, i.e:<br>
 	 * <pre>
 	 * 'convex hull'({[if randomVariableValue then 1 else 0],
 	 *                [if randomVariableValue then 0 else 1] })
@@ -748,8 +748,8 @@ public class LPIUtil {
 	 * 
 	 * @param randomVariableValue
 	 *            the random variable value expression (i.e. the V of [V]) for
-	 *            which a trivial bound is to be made.
-	 * @return a trivial bound for the specified random variable value.
+	 *            which a trivial separator is to be made.
+	 * @return a trivial separator for the specified random variable value.
 	 */
 	public static Expression makeTrivialBound(Expression randomVariableValue) {
 		List<Expression> elements = new ArrayList<Expression>();

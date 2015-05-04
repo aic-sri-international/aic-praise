@@ -236,7 +236,7 @@ public class LBPFactory {
 		RandomVariableFromMessageRewriterCall randomVariableFromInnerRewriterCall = new LBPRandomVariableFromMessageRewriterCall();
 
 		//
-		// Add in the bound rewriters
+		// Add in the separator rewriters
 		boundLBPRewriterLookup.put(LBPRewriter.R_bound_belief, new BoundBelief());
 		//
 		Map<String, String> messageToFactorFromVariableChildRedirectMap = new LinkedHashMap<String, String>();
