@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.sgsolver.solver.experiment;
 
+import java.io.File;
 import java.util.List;
 import java.util.Random;
 import java.util.StringJoiner;
@@ -44,10 +45,13 @@ import java.util.StringJoiner;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.AbstractRandomDPLLProblemGenerator;
 import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.sgsolver.model.export.UAIHOGModelGroundingListener;
+import com.sri.ai.praise.sgsolver.model.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
@@ -59,23 +63,43 @@ public class CompareSGSolverToUAISolver {
 	static int    _numberFactors     = 5;
 	static int    _numberOfVariables = 2;
 	static long   _seed              = 3;
+	//
+	static final String _variablePrefix = "X";
+	static final String _constantPrefix = "a";
 	
 	public static void main(String[] args) {
-		ConditionalGenerator iterator = new ConditionalGenerator(new Random(_seed), _numberOfVariables, 2, 2);
-		
-		StringJoiner factors = new StringJoiner("\n");
-		for (int i = 0; i != _numberFactors; i++) {
-			factors.add(""+iterator.next()+";");	
+		if (args.length != 1) {
+			throw new IllegalArgumentException("UAI output directory must be specified");
 		}
-		StringJoiner randoms = new StringJoiner("\n");
-		for (int i = 0; i < _numberOfVariables; i++) {
-			randoms.add("random X"+i+" : TestDomain;");
+		File uaiOutDirectory = new File(args[0]);
+		if (!uaiOutDirectory.exists()) {
+			throw new IllegalArgumentException("UAI output directory does not exist");
+		}
+		if (!uaiOutDirectory.isDirectory()) {
+			throw new IllegalArgumentException("UAI output directory is not a directory: "+args[0]);
 		}
 		
 		for (int i = 0; i < _domainSizes.length; i++) {
-			StringJoiner model = new StringJoiner("\n");
-			model.add("sort TestDomain : "+_domainSizes[i]+";");
+			ConditionalGenerator iterator = new ConditionalGenerator(new Random(_seed), _numberOfVariables, _domainSizes[i], 2, 2);			
+			StringJoiner model = new StringJoiner("");
+			model.add("sort TestDomain : "+_domainSizes[i]);
+			for (int c = 0; c < _domainSizes[i]; c++) {				
+				model.add(", ");				
+				model.add(_constantPrefix+c);
+			}
+			model.add(";\n");
+			
+			StringJoiner factors = new StringJoiner("\n");
+			for (int f = 0; f != _numberFactors; f++) {
+				factors.add(""+iterator.next()+";");	
+			}
+			StringJoiner randoms = new StringJoiner("\n");
+			for (int r = 0; r < _numberOfVariables; r++) {
+				randoms.add("random X"+r+" : TestDomain;");
+			}
+			
 			model.add(randoms.toString());
+			model.add("\n");
 			model.add(factors.toString());
 			
 			HOGMParserWrapper parser          = new HOGMParserWrapper();
@@ -85,18 +109,22 @@ System.out.println("model="+model);
 System.out.println("factors and types="+factorsAndTypes);
 			InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true);
 			for (int q = 0; q < _numberOfVariables; q++) {
-				Expression queryExpr = Expressions.makeSymbol("X"+q);
-				Expression marginal = inferencer.solve(queryExpr);
-System.out.println("marginal="+marginal);
+				for (int c = 0; c <  _domainSizes[i]; c++) {
+					Expression queryExpr = Equality.make(Expressions.makeSymbol(_variablePrefix+q), Expressions.makeSymbol(_constantPrefix+c));
+					Expression marginal  = inferencer.solve(queryExpr);				
+System.out.println(""+queryExpr+" has marginal="+marginal);
+				}
 			}
+			
+			HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiOutDirectory, "sgproblem_"+_domainSizes[i]+".uai")));
 		}
 	}
 }
 
 class ConditionalGenerator extends AbstractRandomDPLLProblemGenerator {
 	private Random random;
-	public ConditionalGenerator(Random random, int numberOfVariables, int depth, int breadth) {
-		super(random, numberOfVariables, 0, numberOfVariables, depth, breadth);
+	public ConditionalGenerator(Random random, int numberOfVariables, int numberOfConstants, int depth, int breadth) {
+		super(random, numberOfVariables, numberOfConstants, numberOfVariables, depth, breadth);
 		this.random = random;
 	}
 	
