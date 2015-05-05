@@ -86,7 +86,6 @@ public class InferenceForFactorGraphAndEvidence {
 	private Map<String, String> mapFromRandomVariableNameToTypeName;
 	private Map<String, String> mapFromSymbolNameToTypeName; // union of the two maps above
 	private Map<String, String> mapFromTypeNameToSizeString;
-	private Expression queryVariable;
 	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private ConstraintTheory theory;
@@ -130,8 +129,6 @@ public class InferenceForFactorGraphAndEvidence {
 		this.evidence          = evidence;
 
 		this.mapFromRandomVariableNameToTypeName = new LinkedHashMap<>(factorsAndTypes.getMapFromRandomVariableNameToTypeName());
-//		this.mapFromRandomVariableNameToTypeName.put("query", "Boolean");
-//		queryVariable = parse("query");
 		
 		this.mapFromSymbolNameToTypeName = new LinkedHashMap<>(mapFromRandomVariableNameToTypeName);
 		this.mapFromSymbolNameToTypeName.putAll(factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName());
@@ -174,18 +171,11 @@ public class InferenceForFactorGraphAndEvidence {
 
 	public Expression solve(Expression queryExpression) {
 		Expression factorGraphWithEvidence = factorGraph;
-//		if (queryVariable != queryExpression) {
-//			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
-//			factorGraphWithEvidence = Times.make(list(factorGraph, parse("if query <=> " + queryExpression + " then 1 else 0")));
-//		}
 
 		if (evidence != null) {
 			// add evidence factor
 			factorGraphWithEvidence = Times.make(list(factorGraphWithEvidence, IfThenElse.make(evidence, ONE, ZERO)));
 		}
-
-		// We sum out all variables but the query
-//		Collection<Expression> indices = setDifference(allRandomVariables, list(queryVariable));
 
 		boolean queryIsCompoundExpression;
 		Expression queryVariable;
@@ -220,7 +210,6 @@ public class InferenceForFactorGraphAndEvidence {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (evidenceProbability == null) {
 				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
-//				evidenceProbability = solver.solve(unnormalizedMarginal, list(queryVariable), mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
 
 //				System.out.print("Normalization constant ");
 //				if (evidence != null) {
