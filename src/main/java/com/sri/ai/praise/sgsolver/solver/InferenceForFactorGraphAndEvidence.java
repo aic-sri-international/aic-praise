@@ -39,6 +39,8 @@ package com.sri.ai.praise.sgsolver.solver;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
+import static com.sri.ai.expresso.helper.Expressions.getSubExpressionsSatisfying;
+import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoSet;
@@ -46,6 +48,7 @@ import static com.sri.ai.util.Util.setDifference;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -127,8 +130,8 @@ public class InferenceForFactorGraphAndEvidence {
 		this.evidence          = evidence;
 
 		this.mapFromRandomVariableNameToTypeName = new LinkedHashMap<>(factorsAndTypes.getMapFromRandomVariableNameToTypeName());
-		this.mapFromRandomVariableNameToTypeName.put("query", "Boolean");
-		queryVariable = parse("query");
+//		this.mapFromRandomVariableNameToTypeName.put("query", "Boolean");
+//		queryVariable = parse("query");
 		
 		this.mapFromSymbolNameToTypeName = new LinkedHashMap<>(mapFromRandomVariableNameToTypeName);
 		this.mapFromSymbolNameToTypeName.putAll(factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName());
@@ -171,10 +174,10 @@ public class InferenceForFactorGraphAndEvidence {
 
 	public Expression solve(Expression queryExpression) {
 		Expression factorGraphWithEvidence = factorGraph;
-		if (queryVariable != queryExpression) {
-			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
-			factorGraphWithEvidence = Times.make(list(factorGraph, parse("if query <=> " + queryExpression + " then 1 else 0")));
-		}
+//		if (queryVariable != queryExpression) {
+//			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
+//			factorGraphWithEvidence = Times.make(list(factorGraph, parse("if query <=> " + queryExpression + " then 1 else 0")));
+//		}
 
 		if (evidence != null) {
 			// add evidence factor
@@ -182,8 +185,29 @@ public class InferenceForFactorGraphAndEvidence {
 		}
 
 		// We sum out all variables but the query
-		Collection<Expression> indices = setDifference(allRandomVariables, list(queryVariable)); 
+//		Collection<Expression> indices = setDifference(allRandomVariables, list(queryVariable));
 
+		boolean queryIsCompoundExpression;
+		Expression queryVariable;
+		Collection<Expression> queryVariables;
+		Collection<Expression> indices; 
+		if (allRandomVariables.contains(queryExpression)) {
+			queryIsCompoundExpression = false;
+			queryVariable = queryExpression;
+			queryVariables = list(queryVariable);
+			indices = setDifference(allRandomVariables, queryVariables);
+		}
+		else {
+			queryIsCompoundExpression = true;
+			queryVariable = makeSymbol("query");
+			queryVariables = list(queryVariable);
+			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
+			factorGraphWithEvidence = Times.make(list(factorGraphWithEvidence, parse("if query <=> " + queryExpression + " then 1 else 0")));
+			indices = allRandomVariables; // 'query' is not in 'allRandomVariables' 
+			mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
+			mapFromTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
+		}
+		
 		// Solve the problem.
 		Expression unnormalizedMarginal = sum(indices, factorGraphWithEvidence);
 //		System.out.println("Unnormalized marginal: " + unnormalizedMarginal);
@@ -195,7 +219,8 @@ public class InferenceForFactorGraphAndEvidence {
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (evidenceProbability == null) {
-				evidenceProbability = solver.solve(unnormalizedMarginal, list(queryVariable), mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+//				evidenceProbability = solver.solve(unnormalizedMarginal, list(queryVariable), mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
 
 //				System.out.print("Normalization constant ");
 //				if (evidence != null) {
@@ -209,8 +234,10 @@ public class InferenceForFactorGraphAndEvidence {
 			marginal = evaluate(marginal);
 		}
 
-		// replace the query variable with the query expression
-		marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new DefaultRewritingProcess(null));
+		if (queryIsCompoundExpression) {
+			// replace the query variable with the query expression
+			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new DefaultRewritingProcess(null));
+		}
 
 		return marginal;
 	}

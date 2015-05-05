@@ -242,6 +242,41 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 	
 	
 	
+		// queries on non-Boolean variable burglar:
+		
+		queryExpression = parse("burglar");
+		evidence = null; // no evidence
+		expected = parse("if burglar = none then 0.7 else if burglar = tom then 0.1 else 0.025"); // the marginal
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		
+		queryExpression = parse("burglar");
+		evidence = parse("not alarm");
+		expected = parse("if burglar = none then 0.956461795 else if burglar = tom then 0.0145127349 else 0.00362818373");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		
+		queryExpression = parse("burglar");
+		evidence = parse("alarm");
+		expected = parse("if burglar = none then 0.131693198 else if burglar = tom then 0.289435601 else 0.0723589001");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		
+		queryExpression = parse("burglar");
+		evidence = parse("alarm and burglar = none");
+		expected = parse("if burglar = none then 1 else 0");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		
+		queryExpression = parse("burglar");
+		evidence = parse("alarm or not alarm"); // no information
+		expected = parse("if burglar = none then 0.7 else if burglar = tom then 0.1 else 0.025"); // the marginal
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		
+		queryExpression = parse("burglar");
+		evidence = parse("true"); // no information
+		expected = parse("if burglar = none then 0.7 else if burglar = tom then 0.1 else 0.025"); // the marginal
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+
+	
+	
+	
 	
 		// now using the constant 'seismicLocation'
 		factors = Times.getMultiplicands(parse("" + 
@@ -452,10 +487,15 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 				+ "(if (for all P in People :   smartest = P   =>  boss = P) then 1 else 0) * " + // same as (if smartest = boss then 1 else 0) 
 				"( if smartest != bob and smartest != mary then 1 else 0)" + 
 				""));
-	
+		
 		queryExpression = parse("boss = tom");
 		evidence = null;
 		expected = parse("if boss = tom then 0.00100200401 else 0.998997996"); // tom is 1 out of 998 people left to be the smartest and boss
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+		
+		queryExpression = parse("boss");
+		evidence = null;
+		expected = parse("if boss = bob then 0 else if boss = mary then 0 else 0.00100200401"); // gives the distribution to all values of queried variable
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 	}
 
