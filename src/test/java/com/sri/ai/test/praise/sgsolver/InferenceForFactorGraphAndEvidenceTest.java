@@ -445,17 +445,17 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		
 		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
 
-		mapFromUniquelyNamedConstantNameToTypeName = Util.map("bob", "People", "tom", "People");
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map("bob", "People", "mary", "People", "tom", "People");
 		
 		isBayesianNetwork = false;
 		factors = Times.getMultiplicands(parse(""
-				+ "(if (for all P in People :   smartest = P   =>  boss = P) then 1 else 0) * " + 
-				"( if smartest != bob then 1 else 0)" + 
+				+ "(if (for all P in People :   smartest = P   =>  boss = P) then 1 else 0) * " + // same as (if smartest = boss then 1 else 0) 
+				"( if smartest != bob and smartest != mary then 1 else 0)" + 
 				""));
 	
 		queryExpression = parse("boss = tom");
 		evidence = null;
-		expected = parse("if boss = tom then 0.001 else 0.999");
+		expected = parse("if boss = tom then 0.00100200401 else 0.998997996"); // tom is 1 out of 998 people left to be the smartest and boss
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 	}
 
