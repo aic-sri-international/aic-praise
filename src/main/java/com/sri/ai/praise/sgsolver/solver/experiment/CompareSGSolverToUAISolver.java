@@ -95,10 +95,13 @@ public class CompareSGSolverToUAISolver {
 		for (int i = 0; i < _domainSizes.length; i++) {			
 			StringJoiner model = new StringJoiner("");
 			model.add("sort TestDomain : "+_domainSizes[i]);
-			for (int c = 0; c < _domainSizes[i]; c++) {				
-				model.add(", ");				
-				model.add(_constantPrefix+c);
-			}
+	
+// Don't output for now, as not needed at the moment.			
+//			for (int c = 0; c < _domainSizes[i]; c++) {				
+//				model.add(", ");				
+//				model.add(_constantPrefix+c);
+//			}
+			
 			model.add(";\n");
 			
 			StringJoiner randoms = new StringJoiner("\n");
