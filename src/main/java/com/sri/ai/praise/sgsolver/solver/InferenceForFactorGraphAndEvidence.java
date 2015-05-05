@@ -39,7 +39,6 @@ package com.sri.ai.praise.sgsolver.solver;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
-import static com.sri.ai.expresso.helper.Expressions.getSubExpressionsSatisfying;
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
@@ -48,7 +47,6 @@ import static com.sri.ai.util.Util.setDifference;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
