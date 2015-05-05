@@ -1468,7 +1468,8 @@ public class LBPTest extends AbstractLPITest {
 						false,
 						GrinderUtil.usePlain ? 
 								//"{ ( on A, A', B ) ([ m(A) ], [ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else if m(B) then 5 else 30 else 1 ]) | if A' = A then (A != X) and (A' != B) and (B != X) and (B = A) else (A != X) and (A' != B) and (A = B) and (A' = X) }" // plain cardinality
-								  "{ ( on A, A', B ) ([ m(A) ], [ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else if m(B) then 5 else 30 else 1 ]) | if A' = A then (A != X) and (A' != B) and (B != X) and (B = A) else (A != X) and (A' != B) and (A = B) and (X = A') }" 
+								  "{ ( on A, A', B ) ([ m(A) ], [ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else if m(B) then 5 else 30 else 1 ]) | if A' = A then (A != X) and (A' != B) and (B != X) and (A = B) else (A != X) and (A' != B) and (A = B) and (A' = X) }" 
+								//"{ ( on A, A', B ) ([ m(A) ], [ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else if m(B) then 5 else 30 else 1 ]) | if A' = A then (A != X) and (A' != B) and (B != X) and (B = A) else (A != X) and (A' != B) and (A = B) and (X = A') }" 
 								//"{ ( on A, A', B ) ([ m(A) ], [ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else if m(B) then 5 else 30 else 1 ]) | if A' = A then (A != X) and (A' != B) and (B != X) and (A = B) else (A != X) and (A' != B) and (A = B) and (A' = X) }"
 								: "{ ( on A, A', B ) (  [ m(A) ],   [ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else if m(B) then 5 else 30 else 1 ]) | (A != X) and (A' != B) and ((A' != A) or (B != X)) and not ((A' != X) or (B != A)) }"), // direct cardinality
 //					"{ ( on A, A', B ) ( ([ m(A) ]), ([ if gA(A') and gB(B) then if m(A') then if m(B) then 10 else 1 else (if m(B) then 5 else 30) else 1 ]) ) | A != X and A' != B and (A = A' or A = B) and (A' != A or B != X) and not (B = A and A' != A and A' != X or A' = A and B != A) }"),
