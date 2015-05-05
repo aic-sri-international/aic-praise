@@ -70,6 +70,7 @@ import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
+import com.sri.ai.grinder.plaindpll.util.DPLLUtil;
 import com.sri.ai.util.Util;
 
 /**
@@ -241,11 +242,20 @@ public class InferenceForFactorGraphAndEvidence {
 	}
 
 	/**
-	 * Symbolically evaluates an expression.
+	 * Symbolically evaluates an expression into a solution (possibly nested if then else expression).
 	 * @param expression
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
 		return solver.solve(expression, list(), mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+	}
+
+	/**
+	 * Simplifies an expression.
+	 * @param expression
+	 * @return
+	 */
+	public Expression simplify(Expression expression) {
+		return theory.simplify(expression, DPLLUtil.makeProcess(theory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
 	}
 }

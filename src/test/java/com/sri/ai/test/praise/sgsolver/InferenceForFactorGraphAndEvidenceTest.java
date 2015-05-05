@@ -564,4 +564,58 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 //		expected = inferencer.evaluate(parse(negationMarginal + " = 1 - " + marginal));
 //		assertEquals(expected, TRUE);
 	}
+
+	@Test
+	public void simplifyTest() {
+		
+		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
+		
+		// The definitions of types
+		mapFromTypeNameToSizeString = Util.map(
+				"People", "1000",
+				"Boolean", "2");
+	
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"lucky",  "Boolean",
+				"winner", "People"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+	
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map("rodrigo", "People");
+		
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(""
+				+ "(if lucky then 1 else 0)*"
+				+ "(if lucky then if winner = rodrigo then 1 else 0 else 0.5)"));
+	
+		queryExpression = parse("true or false");
+		expected = parse("true");
+	
+		queryExpression = parse("true and false");
+		expected = parse("false");
+	
+		queryExpression = parse("1.2 + 1.3 + if rodrigo = rodrigo then 1 else 2");
+		expected = parse("3.5");
+	
+		runSimplifyTest();
+	}
+
+	private void runSimplifyTest() {
+		InferenceForFactorGraphAndEvidence inferencer;
+		Expression simplification;
+		inferencer = new InferenceForFactorGraphAndEvidence(
+				new ExpressionFactorsAndTypes(factors,
+						mapFromRandomVariableNameToTypeName,
+						mapFromNonUniquelyNamedConstantNameToTypeName,
+						mapFromUniquelyNamedConstantNameToTypeName,
+						mapFromTypeNameToSizeString),
+				isBayesianNetwork,
+				evidence,
+				true);
+	
+		simplification = inferencer.simplify(queryExpression);
+		assertEquals(expected, simplification);
+	}
 }

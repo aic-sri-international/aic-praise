@@ -111,8 +111,8 @@ public class CompareSGSolverToUAISolver {
 			HOGMParserWrapper parser          = new HOGMParserWrapper();
 			ParsedHOGModel    parsedModel     = parser.parseModel(model.toString());
 			FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
-//System.out.println("model=\n"+model);
-//System.out.println("f&t  =\n"+factorsAndTypes);
+System.out.println("model=\n"+model);
+System.out.println("f&t  =\n"+factorsAndTypes);
 			long startSGInference = System.currentTimeMillis();
 			File uaiSolution = new File(uaiSolutionDirectory, "sgproblem_"+_domainSizes[i]+".uai.MAR");	
 			InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true);
@@ -126,8 +126,8 @@ public class CompareSGSolverToUAISolver {
 					solutionWriter.write(" "+_domainSizes[i]);
 					Expression queryExpr = Expressions.makeSymbol(_variablePrefix+q);
 					Expression marginal  = inferencer.solve(queryExpr);
-//System.out.println("query   ="+queryExpr);
-//System.out.println("marginal="+marginal);
+System.out.println("query   ="+queryExpr);
+System.out.println("marginal="+marginal);
 					for (int c = 0; c <  _domainSizes[i]; c++) {
 						solutionWriter.write(" "+UAICompare.roundToUAIOutput(extractValue(queryExpr, marginal)));
 					}
