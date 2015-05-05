@@ -137,10 +137,10 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 			preamble.flush();preamble.close();
 			functionTables.flush();functionTables.close();
 			
-			try (OutputStream uaiOut            = new BufferedOutputStream(new FileOutputStream(outputUAIFile));
-			     OutputStream uaiEvidenceOut    = new BufferedOutputStream(new FileOutputStream(new File(outputUAIFile.getParent(), outputUAIFile.getName()+".evid")));
-				 InputStream  fisPreamble       = new FileInputStream(tempPreambleFile);
-				 InputStream  fisFunctionTables = new FileInputStream(tempFunctionTablesFile);) {
+			try (OutputStream uaiOut               = new BufferedOutputStream(new FileOutputStream(outputUAIFile));
+				 OutputStreamWriter uaiEvidenceOut = new OutputStreamWriter(new FileOutputStream(new File(outputUAIFile.getParent(), outputUAIFile.getName()+".evid")), StandardCharsets.UTF_8);
+				 InputStream  fisPreamble          = new FileInputStream(tempPreambleFile);
+				 InputStream  fisFunctionTables    = new FileInputStream(tempFunctionTablesFile);) {
 				
 				byte[] buffer = new byte[1024];
 				int read;
@@ -150,6 +150,9 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 				while ((read = fisFunctionTables.read(buffer)) != -1) {
 					uaiOut.write(buffer, 0, read);
 				}
+				
+				// Indicate no observed variables in the evidence file
+				uaiEvidenceOut.write("0");
 				
 				uaiOut.flush();
 				uaiEvidenceOut.flush();
