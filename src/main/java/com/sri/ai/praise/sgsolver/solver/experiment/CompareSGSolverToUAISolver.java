@@ -65,12 +65,14 @@ import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 @Beta
 public class CompareSGSolverToUAISolver {
 
-	static int [] _domainSizes       = new int[] {2, 4, 8, 16, 32, 64, 128, 254, 1000, 10000};
+	static int [] _domainSizes       = new int[] {2, 4, 8, 16, 32, 64, 128, 254, 1000, 10000, 100000, 1000000, 10000000};
 	static int    _numberFactors     = 5;
 	static int    _numberOfVariables = 10;
 	static int    _depth             = 2;
 	static int    _breadth           = 2;
 	static long   _seed              = 4;
+	//
+	static boolean _ground = false;
 	//
 	static final String _variablePrefix = "X";
 	static final String _constantPrefix = "a";
@@ -111,8 +113,10 @@ public class CompareSGSolverToUAISolver {
 			HOGMParserWrapper parser          = new HOGMParserWrapper();
 			ParsedHOGModel    parsedModel     = parser.parseModel(model.toString());
 			FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
-System.out.println("model=\n"+model);
-System.out.println("f&t  =\n"+factorsAndTypes);
+
+//System.out.println("model=\n"+model);
+//System.out.println("f&t  =\n"+factorsAndTypes);
+
 			long startSGInference = System.currentTimeMillis();
 			File uaiSolution = new File(uaiSolutionDirectory, "sgproblem_"+_domainSizes[i]+".uai.MAR");	
 			InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true);
@@ -120,19 +124,25 @@ System.out.println("f&t  =\n"+factorsAndTypes);
 				OutputStream os             = new FileOutputStream(uaiSolution);
 				Writer       solutionWriter = new OutputStreamWriter(os, StandardCharsets.UTF_8);	
 			) {
-				solutionWriter.write("MAR\n");
-				solutionWriter.write(""+_numberOfVariables);
+				if (_ground) {
+					solutionWriter.write("MAR\n");
+					solutionWriter.write(""+_numberOfVariables);
+				}
 				for (int q = 0; q < _numberOfVariables; q++) {
-					solutionWriter.write(" "+_domainSizes[i]);
 					Expression queryExpr = Expressions.makeSymbol(_variablePrefix+q);
 					Expression marginal  = inferencer.solve(queryExpr);
-System.out.println("query   ="+queryExpr);
-System.out.println("marginal="+marginal);
-					for (int c = 0; c <  _domainSizes[i]; c++) {
-						solutionWriter.write(" "+UAICompare.roundToUAIOutput(extractValue(queryExpr, marginal)));
+//System.out.println("query   ="+queryExpr);
+//System.out.println("marginal="+marginal);
+					if (_ground) {
+						solutionWriter.write(" "+_domainSizes[i]);					
+						for (int c = 0; c <  _domainSizes[i]; c++) {
+							solutionWriter.write(" "+UAICompare.roundToUAIOutput(extractValue(queryExpr, marginal)));
+						}
 					}
 				}
-				solutionWriter.flush();
+				if (_ground) {
+					solutionWriter.flush();
+				}
 			}
 			catch (IOException ioe) {
 				throw new RuntimeException(ioe);
@@ -140,7 +150,9 @@ System.out.println("marginal="+marginal);
 			long endSGInference = System.currentTimeMillis() - startSGInference;
 			
 			long startGroundingToUAI = System.currentTimeMillis();
-			HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiProblemDirectory, "sgproblem_"+_domainSizes[i]+".uai")));
+			if (_ground) {
+				HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiProblemDirectory, "sgproblem_"+_domainSizes[i]+".uai")));
+			}
 			long endGroundingToUAI = System.currentTimeMillis() - startGroundingToUAI;
 			
 			System.out.println(""+_numberOfVariables+", "+_numberFactors+", "+_domainSizes[i]+", "+endSGInference+", "+endGroundingToUAI);
