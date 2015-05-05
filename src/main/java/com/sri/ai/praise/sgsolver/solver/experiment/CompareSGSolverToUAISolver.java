@@ -51,7 +51,6 @@ import java.util.StringJoiner;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.AbstractRandomDPLLProblemGenerator;
 import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
@@ -66,7 +65,7 @@ import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 @Beta
 public class CompareSGSolverToUAISolver {
 
-	static int [] _domainSizes       = new int[] {2, 4, 8, 16, 32, 64};//, 128, 254, 1000, 10000};
+	static int [] _domainSizes       = new int[] {2, 4, 8, 16, 32, 64, 128, 254, 1000, 10000};
 	static int    _numberFactors     = 5;
 	static int    _numberOfVariables = 10;
 	static int    _depth             = 2;
@@ -112,8 +111,8 @@ public class CompareSGSolverToUAISolver {
 			HOGMParserWrapper parser          = new HOGMParserWrapper();
 			ParsedHOGModel    parsedModel     = parser.parseModel(model.toString());
 			FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
-System.out.println("model="+model);
-System.out.println("f&t  ="+factorsAndTypes);
+//System.out.println("model=\n"+model);
+//System.out.println("f&t  =\n"+factorsAndTypes);
 			long startSGInference = System.currentTimeMillis();
 			File uaiSolution = new File(uaiSolutionDirectory, "sgproblem_"+_domainSizes[i]+".uai.MAR");	
 			InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true);
@@ -125,14 +124,13 @@ System.out.println("f&t  ="+factorsAndTypes);
 				solutionWriter.write(""+_numberOfVariables);
 				for (int q = 0; q < _numberOfVariables; q++) {
 					solutionWriter.write(" "+_domainSizes[i]);
-//					for (int c = 0; c <  _domainSizes[i]; c++) {
-						// Expression queryExpr = Equality.make(Expressions.makeSymbol(_variablePrefix+q), Expressions.makeSymbol(_constantPrefix+c));
-						Expression queryExpr = Expressions.makeSymbol(_variablePrefix+q);
-						Expression marginal  = inferencer.solve(queryExpr);
-System.out.println("query   ="+queryExpr);
-System.out.println("marginal="+marginal);
+					Expression queryExpr = Expressions.makeSymbol(_variablePrefix+q);
+					Expression marginal  = inferencer.solve(queryExpr);
+//System.out.println("query   ="+queryExpr);
+//System.out.println("marginal="+marginal);
+					for (int c = 0; c <  _domainSizes[i]; c++) {
 						solutionWriter.write(" "+UAICompare.roundToUAIOutput(extractValue(queryExpr, marginal)));
-//					}
+					}
 				}
 				solutionWriter.flush();
 			}
