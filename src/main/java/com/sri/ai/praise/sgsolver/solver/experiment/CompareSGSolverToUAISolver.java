@@ -38,6 +38,12 @@
 package com.sri.ai.praise.sgsolver.solver.experiment;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
 import java.util.StringJoiner;
@@ -52,6 +58,7 @@ import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.model.export.UAIHOGModelGroundingListener;
 import com.sri.ai.praise.sgsolver.model.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.sgsolver.model.imports.uai.UAICompare;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
@@ -59,28 +66,32 @@ import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 @Beta
 public class CompareSGSolverToUAISolver {
 
-	static int [] _domainSizes       = new int[] {2, 4};// 8, 16, 32, 64, 128, 254, 1000, 10000};
+	static int [] _domainSizes       = new int[] {2, 4, 8, 16, 32, 64};//, 128, 254, 1000, 10000};
 	static int    _numberFactors     = 5;
-	static int    _numberOfVariables = 2;
-	static long   _seed              = 3;
+	static int    _numberOfVariables = 10;
+	static int    _depth             = 2;
+	static int    _breadth           = 2;
+	static long   _seed              = 4;
 	//
 	static final String _variablePrefix = "X";
 	static final String _constantPrefix = "a";
 	
 	public static void main(String[] args) {
-		if (args.length != 1) {
-			throw new IllegalArgumentException("UAI output directory must be specified");
+		if (args.length != 2) {
+			throw new IllegalArgumentException("UAI problem and solution output directory must be specified");
 		}
-		File uaiOutDirectory = new File(args[0]);
-		if (!uaiOutDirectory.exists()) {
-			throw new IllegalArgumentException("UAI output directory does not exist");
-		}
-		if (!uaiOutDirectory.isDirectory()) {
-			throw new IllegalArgumentException("UAI output directory is not a directory: "+args[0]);
+		File uaiProblemDirectory  = validateDirectory(args[0]);
+		File uaiSolutionDirectory = validateDirectory(args[1]);
+		
+		ConditionalGenerator iterator = new ConditionalGenerator(new Random(_seed), _numberOfVariables, 0, _depth, _breadth);
+		StringJoiner factors = new StringJoiner("\n");
+		for (int f = 0; f != _numberFactors; f++) {
+			factors.add(""+iterator.next()+";");	
 		}
 		
-		for (int i = 0; i < _domainSizes.length; i++) {
-			ConditionalGenerator iterator = new ConditionalGenerator(new Random(_seed), _numberOfVariables, _domainSizes[i], 2, 2);			
+		System.out.println("Generating SG to UAI models");
+		System.out.println("#variables, #factors, domainsize, time in milliseconds for sg solver to compute solution, time in milliseconds to ground to UAI problem");
+		for (int i = 0; i < _domainSizes.length; i++) {			
 			StringJoiner model = new StringJoiner("");
 			model.add("sort TestDomain : "+_domainSizes[i]);
 			for (int c = 0; c < _domainSizes[i]; c++) {				
@@ -89,10 +100,6 @@ public class CompareSGSolverToUAISolver {
 			}
 			model.add(";\n");
 			
-			StringJoiner factors = new StringJoiner("\n");
-			for (int f = 0; f != _numberFactors; f++) {
-				factors.add(""+iterator.next()+";");	
-			}
 			StringJoiner randoms = new StringJoiner("\n");
 			for (int r = 0; r < _numberOfVariables; r++) {
 				randoms.add("random X"+r+" : TestDomain;");
@@ -106,18 +113,71 @@ public class CompareSGSolverToUAISolver {
 			ParsedHOGModel    parsedModel     = parser.parseModel(model.toString());
 			FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
 System.out.println("model="+model);
-System.out.println("factors and types="+factorsAndTypes);
+System.out.println("f&t  ="+factorsAndTypes);
+			long startSGInference = System.currentTimeMillis();
+			File uaiSolution = new File(uaiSolutionDirectory, "sgproblem_"+_domainSizes[i]+".uai.MAR");	
 			InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true);
-			for (int q = 0; q < _numberOfVariables; q++) {
-				for (int c = 0; c <  _domainSizes[i]; c++) {
-					Expression queryExpr = Equality.make(Expressions.makeSymbol(_variablePrefix+q), Expressions.makeSymbol(_constantPrefix+c));
-					Expression marginal  = inferencer.solve(queryExpr);				
-System.out.println(""+queryExpr+" has marginal="+marginal);
+			try (
+				OutputStream os             = new FileOutputStream(uaiSolution);
+				Writer       solutionWriter = new OutputStreamWriter(os, StandardCharsets.UTF_8);	
+			) {
+				solutionWriter.write("MAR\n");
+				solutionWriter.write(""+_numberOfVariables);
+				for (int q = 0; q < _numberOfVariables; q++) {
+					solutionWriter.write(" "+_domainSizes[i]);
+					for (int c = 0; c <  _domainSizes[i]; c++) {
+						Expression queryExpr = Equality.make(Expressions.makeSymbol(_variablePrefix+q), Expressions.makeSymbol(_constantPrefix+c));
+						Expression marginal  = inferencer.solve(queryExpr);
+System.out.println("query   ="+queryExpr);
+System.out.println("marginal="+marginal);
+						solutionWriter.write(" "+UAICompare.roundToUAIOutput(extractValue(queryExpr, marginal)));
+					}
 				}
+				solutionWriter.flush();
+			}
+			catch (IOException ioe) {
+				throw new RuntimeException(ioe);
+			}
+			long endSGInference = System.currentTimeMillis() - startSGInference;
+			
+			long startGroundingToUAI = System.currentTimeMillis();
+			HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiProblemDirectory, "sgproblem_"+_domainSizes[i]+".uai")));
+			long endGroundingToUAI = System.currentTimeMillis() - startGroundingToUAI;
+			
+			System.out.println(""+_numberOfVariables+", "+_numberFactors+", "+_domainSizes[i]+", "+endSGInference+", "+endGroundingToUAI);
+		}
+	}
+	
+	private static File validateDirectory(String directoryName) {
+		File result = new File(directoryName);
+		if (!result.exists()) {
+			throw new IllegalArgumentException("UAI output directory does not exist");
+		}
+		if (!result.isDirectory()) {
+			throw new IllegalArgumentException("UAI output directory is not a directory: "+result.getAbsolutePath());
+		}
+		
+		return result;
+	}
+	
+	private static double extractValue(Expression query, Expression marginal) {
+		double result = 0;
+// TODO - throw exception if can't extract result		
+		if (Expressions.isNumber(marginal)) {
+			result = marginal.doubleValue();
+		}
+		else if (IfThenElse.isIfThenElse(marginal)) {
+			Expression value = null;
+			if (IfThenElse.condition(marginal).equals(query)) {
+				value = IfThenElse.thenBranch(marginal);
 			}
 			
-			HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiOutDirectory, "sgproblem_"+_domainSizes[i]+".uai")));
+			if (value != null && Expressions.isNumber(value)) {
+				result = value.doubleValue();
+			}
 		}
+		
+		return result;
 	}
 }
 

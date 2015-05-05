@@ -57,9 +57,9 @@ import com.google.common.annotations.Beta;
 @Beta
 public class UAICompare {
 	// Appears to be the precision and rounding used in the solution files provided.
-	public static final int          UAI_PRECISON      = 6; 
-	public static final RoundingMode UAI_ROUNDING_MODE = RoundingMode.HALF_UP;
-	
+	public static final int          UAI_PRECISON               = 6; 
+	public static final RoundingMode UAI_ROUNDING_MODE          = RoundingMode.HALF_UP;
+	public static final MathContext  UAI_PRECISION_MATH_CONTEXT = new MathContext(UAI_PRECISON, UAI_ROUNDING_MODE);
 	/**
 	 * Simple command line application for comparing a MAR solution with a computed result from a solver.
 	 * 
@@ -97,7 +97,7 @@ public class UAICompare {
 			throw new IllegalArgumentException("Solution size of "+solution.size()+" != Computed size of "+computed.size());
 		}
 		
-		MathContext mc = new MathContext(UAI_PRECISON, UAI_ROUNDING_MODE);
+		
 		for (int varIdx = 0; varIdx < solution.size(); varIdx++) {
 			List<Double> solutionValues = solution.get(varIdx);
 			List<Double> computedValues = computed.get(varIdx);
@@ -107,8 +107,8 @@ public class UAICompare {
 			}
 			
 			for (int valueIdx = 0; valueIdx < solutionValues.size(); valueIdx++) {
-				BigDecimal sol = new BigDecimal(solutionValues.get(valueIdx), mc);
-				BigDecimal com = new BigDecimal(computedValues.get(valueIdx), mc);
+				BigDecimal sol = new BigDecimal(solutionValues.get(valueIdx), UAI_PRECISION_MATH_CONTEXT);
+				BigDecimal com = new BigDecimal(computedValues.get(valueIdx), UAI_PRECISION_MATH_CONTEXT);
 				
 				double diff = sol.doubleValue() - com.doubleValue();
 				
@@ -121,5 +121,9 @@ public class UAICompare {
 		
 		
 		return result;
+	}
+	
+	public static double roundToUAIOutput(double value) {
+		return new BigDecimal(value, UAI_PRECISION_MATH_CONTEXT).doubleValue();
 	}
 }
