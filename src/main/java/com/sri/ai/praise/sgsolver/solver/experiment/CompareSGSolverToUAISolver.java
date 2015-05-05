@@ -125,13 +125,14 @@ System.out.println("f&t  ="+factorsAndTypes);
 				solutionWriter.write(""+_numberOfVariables);
 				for (int q = 0; q < _numberOfVariables; q++) {
 					solutionWriter.write(" "+_domainSizes[i]);
-					for (int c = 0; c <  _domainSizes[i]; c++) {
-						Expression queryExpr = Equality.make(Expressions.makeSymbol(_variablePrefix+q), Expressions.makeSymbol(_constantPrefix+c));
+//					for (int c = 0; c <  _domainSizes[i]; c++) {
+						// Expression queryExpr = Equality.make(Expressions.makeSymbol(_variablePrefix+q), Expressions.makeSymbol(_constantPrefix+c));
+						Expression queryExpr = Expressions.makeSymbol(_variablePrefix+q);
 						Expression marginal  = inferencer.solve(queryExpr);
 System.out.println("query   ="+queryExpr);
 System.out.println("marginal="+marginal);
 						solutionWriter.write(" "+UAICompare.roundToUAIOutput(extractValue(queryExpr, marginal)));
-					}
+//					}
 				}
 				solutionWriter.flush();
 			}
