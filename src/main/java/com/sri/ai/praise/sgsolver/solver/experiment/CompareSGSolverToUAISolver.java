@@ -44,9 +44,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -54,8 +56,6 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.AbstractRandomDPLLProblemGenerator;
-import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.model.export.UAIHOGModelGroundingListener;
 import com.sri.ai.praise.sgsolver.model.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.sgsolver.model.imports.uai.UAICompare;
@@ -67,9 +67,9 @@ import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 public class CompareSGSolverToUAISolver {
 
 	static long    _seed   = 3;
-	static boolean _ground = true;
+	static boolean _ground = false;
 	//
-	static int [] _domainSizes = new int[] {2, 4};//, 8, 16};//, 32, 64, 128, 254, 1000, 10000, 100000, 1000000, 10000000};
+	static int [] _domainSizes = new int[] {2, 4, 8, 16, 32, 64, 128, 254, 1000, 10000, 100000, 1000000, 10000000};
 	//
 	static final int _factorIdx   = 0;
 	static final int _variableIdx = 1;
@@ -82,7 +82,14 @@ public class CompareSGSolverToUAISolver {
 		{         5,         10,          0,      2,        2},
 		{         5,         10,          0,      2,        4},
 		{         5,         10,          0,      2,        8},
-		{         5,         10,          0,      2,       16}
+		{         5,         10,          0,      2,       16},
+		{         5,         10,          0,      4,        4},
+		{         5,         10,          0,      4,        8},
+		{         5,         10,          0,      4,       16},
+		{         5,         10,          2,      2,        2},
+		{         5,         10,          4,      4,        4},
+		{         5,         10,          8,      4,        8},
+		{         5,         10,         16,      4,       16},
 	};
 	//
 	static final String _variablePrefix = "X";
@@ -100,13 +107,14 @@ public class CompareSGSolverToUAISolver {
 
 		for (int p = 0; p < _params.length; p++) {
 			int numberOfFactors   = _params[p][_factorIdx];
-			int numberOfVariables = _params[p][_variableIdx];
-			int numberOfConstants = _params[p][_constantIdx];
+			int numberOfVariables = _params[p][_variableIdx];			
 			int depth             = _params[p][_depthIdx];
 			int breadth           = _params[p][_breadthIdx];
 			
 			for (int i = 0; i < _domainSizes.length; i++) {
 				int cardinality = _domainSizes[i];
+				
+				int numberOfConstants = _params[p][_constantIdx];
 				// #constants must be <= domain size
 				if (numberOfConstants > cardinality) {
 					numberOfConstants = cardinality;
@@ -114,42 +122,41 @@ public class CompareSGSolverToUAISolver {
 				
 				String uaiFileSuffix = "_"+cardinality+"_f"+numberOfFactors+"_v"+numberOfVariables+"_c"+numberOfConstants+"_d"+depth+"_b"+breadth;
 				
-				StringJoiner model = new StringJoiner("");
-				model.add("sort TestDomain : "+cardinality);
-				
-				for (int c = 0; c < numberOfConstants; c++) {				
-					model.add(", ");				
-					model.add(_constantPrefix+c);
-				}
-				
-				model.add(";\n");
-				
-				StringJoiner randoms = new StringJoiner("\n");
-				for (int r = 0; r < numberOfVariables; r++) {
-					randoms.add("random X"+r+" : TestDomain;");
-				}
-				
-				model.add(randoms.toString());
-				model.add("\n");
+				List<Expression>    factors                                       = new ArrayList<>();
+				Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
+				Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
+				Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
+				Map<String, String> mapFromTypeNameToSizeString                   = new LinkedHashMap<>();
 				
 				ConditionalGenerator iterator = new ConditionalGenerator(new Random(_seed), numberOfVariables, numberOfConstants, depth, breadth);
-				StringJoiner factors = new StringJoiner("\n");
 				for (int f = 0; f != numberOfFactors; f++) {
 					Expression condition = iterator.next();
 					// Ensure we have variables in the condition
 					if (Expressions.freeVariables(condition, new DefaultRewritingProcess(null)).size() == 0) {							
 						condition = iterator.next();
 					}
-					factors.add(""+condition+";");	
+					factors.add(condition);	
 				}
 				
-				model.add(factors.toString());
+				for (int r = 0; r < numberOfVariables; r++) {
+					mapFromRandomVariableNameToTypeName.put(_variablePrefix+r, "TestDomain");
+				}
 				
-				HOGMParserWrapper parser          = new HOGMParserWrapper();
-				ParsedHOGModel    parsedModel     = parser.parseModel(model.toString());
-				FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
+				for (int c = 0; c < numberOfConstants; c++) {	
+					mapFromUniquelyNamedConstantNameToTypeName.put(_constantPrefix+c, "TestDomain");
+				}
+				mapFromUniquelyNamedConstantNameToTypeName.put("false", "Boolean");
+				mapFromUniquelyNamedConstantNameToTypeName.put("true",  "Boolean");
+				
+				mapFromTypeNameToSizeString.put("Boolean",    "2");
+				mapFromTypeNameToSizeString.put("TestDomain", ""+cardinality);				
+				
+				FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(factors,
+						mapFromRandomVariableNameToTypeName,
+						mapFromNonUniquelyNamedConstantNameToTypeName,
+						mapFromUniquelyNamedConstantNameToTypeName,
+						mapFromTypeNameToSizeString);
 	
-//System.out.println("model=\n"+model);
 //System.out.println("f&t  =\n"+factorsAndTypes);
 	
 				long startSGInference = System.currentTimeMillis();
