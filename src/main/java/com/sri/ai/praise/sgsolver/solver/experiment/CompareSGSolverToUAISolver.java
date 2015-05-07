@@ -126,7 +126,6 @@ public class CompareSGSolverToUAISolver {
 		}
 		File uaiProblemDirectory  = validateDirectory(args[0]);
 		File uaiSolutionDirectory = validateDirectory(args[1]);
-
 		System.out.println("Generating SG to UAI models");
 		System.out.println("domainsize, #factors, #variables, #constants, expression depth, expression breadth, time in milliseconds for sg solver to compute solution, time in milliseconds to ground to UAI problem");
 
