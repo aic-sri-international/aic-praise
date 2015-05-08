@@ -88,7 +88,7 @@ public class CompareSGSolverToUAISolver {
 		{         5,          8,          0,      4,        8},
 		{         5,          8,          0,      4,       16},
 		{         5,          8,          2,      2,        2},
-      //{         5,          8,          4,      4,        4},
+		{         5,          8,          4,      4,        4},
 		{         5,          8,          8,      4,        8},
 		{         5,          8,         16,      4,       16},
 		//
@@ -100,19 +100,19 @@ public class CompareSGSolverToUAISolver {
 		{         5,         10,          0,      4,        8},
 		{         5,         10,          0,      4,       16},
 		{         5,         10,          2,      2,        2},
-	  //{         5,         10,          4,      4,        4},
+		{         5,         10,          4,      4,        4},
 		{         5,         10,          8,      4,        8},
 		{         5,         10,         16,      4,       16},
 		//
 		{         5,         12,          0,      2,        2},
 		{         5,         12,          0,      2,        4},
-	  //{         5,         12,          0,      2,        8},
+		{         5,         12,          0,      2,        8},
 		{         5,         12,          0,      2,       16},
-	  //{         5,         12,          0,      4,        4},
-	  //{         5,         12,          0,      4,        8},
+		{         5,         12,          0,      4,        4},
+		{         5,         12,          0,      4,        8},
 		{         5,         12,          0,      4,       16},
 		{         5,         12,          2,      2,        2},
-	  //{         5,         12,          4,      4,        4},
+		{         5,         12,          4,      4,        4},
 		{         5,         12,          8,      4,        8},
 		{         5,         12,         16,      4,       16},
 	};
@@ -214,14 +214,17 @@ public class CompareSGSolverToUAISolver {
 					throw new RuntimeException(ioe);
 				}
 				long endSGInference = System.currentTimeMillis() - startSGInference;
-				
+
+				String message = cardinality+", "+numberOfFactors+", "+numberOfVariables+", "+numberOfConstants+", "+depth+", "+breadth+", "+endSGInference;
+
 				long startGroundingToUAI = System.currentTimeMillis();
 				if (_ground) {
 					HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiProblemDirectory, "sgproblem_"+uaiFileSuffix+".uai")));
 				}
 				long endGroundingToUAI = System.currentTimeMillis() - startGroundingToUAI;
+				message = message + ", " + endGroundingToUAI;
 				
-				System.out.println(""+cardinality+", "+numberOfFactors+", "+numberOfVariables+", "+numberOfConstants+", "+depth+", "+breadth+", "+endSGInference+", "+endGroundingToUAI);
+				System.out.println(message);
 			}
 		}
 	}
