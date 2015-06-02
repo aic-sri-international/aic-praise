@@ -5,7 +5,7 @@ SRI International's AIC PRAiSE (Probabilistic Reasoning As Symbolic Evaluation) 
 A Probabilistic Reasoning As Symbolic Evaluation (PRAiSE) library, developed at 
 [SRI International's Artificial Intelligence Center](http://www.ai.sri.com/), which provides capabilities in the following areas:
 
-* Lifted First-Order Probabilistic Belief Propagation.
+* Lifted First-Order Probabilistic Inference.
 * Support for defining First-Order Probabilistic Models. 
 
 ### Acknowledgements
