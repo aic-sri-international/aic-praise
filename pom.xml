@@ -27,7 +27,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<name>AIC-PRAiSE</name>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.1.0</version>
 	<groupId>com.googlecode.aic-praise</groupId>
 	<artifactId>aic-praise</artifactId>
 
@@ -68,7 +68,7 @@
 	<properties>
 		<target.jdk.version>1.8</target.jdk.version>
 		<targetJdk>1.8</targetJdk>
-		<aic.expresso.version>1.0.2-SNAPSHOT</aic.expresso.version>
+		<aic.expresso.version>1.1.0</aic.expresso.version>
 		<antlr.version>4.3</antlr.version>
 		<rsyntaxtextarea.version>2.0.6</rsyntaxtextarea.version>
 		<fontawesomefx.version>8.3</fontawesomefx.version>
