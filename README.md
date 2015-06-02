@@ -1,4 +1,4 @@
-# aic-praise
+# AIC-PRAiSE
 SRI International's AIC PRAiSE (Probabilistic Reasoning As Symbolic Evaluation) Library (for Java 1.8+)
 
 ### Overview
