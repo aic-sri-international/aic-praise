@@ -45,6 +45,7 @@ import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 
@@ -56,6 +57,10 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 	private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
 	private Map<String, String> mapFromTypeNameToSizeString                   = new LinkedHashMap<>();
 	private List<Expression>    factors                                       = new ArrayList<>(); 	
+	
+	public ExpressionFactorsAndTypes(String modelString) {
+		this(new HOGMParserWrapper().parseModel(modelString));
+	}
 	
 	public ExpressionFactorsAndTypes(ParsedHOGModel parsedModel) {
 		factors.addAll(parsedModel.getConditionedPotentials());

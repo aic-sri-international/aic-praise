@@ -307,6 +307,56 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 	}
 
 	@Test
+	public void testAPI() {
+		
+		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
+		
+		String modelString = ""
+				+  
+				"random earthquake: Boolean;" + 
+				"random burglary: Boolean;" + 
+				"random alarm: Boolean;" + 
+				"" + 
+				"earthquake 0.01;" + 
+				"burglary 0.1;" + 
+				"" + 
+				"if earthquake" + 
+				"   then if burglary" + 
+				"      then alarm 0.95" + 
+				"      else alarm 0.6" + 
+				"   else if burglary" + 
+				"      then alarm 0.9" + 
+				"      else alarm 0.01;" + 
+				"     " + 
+				"not alarm;"
+				+ "";
+		
+		Expression queryExpression = parse("not earthquake");
+		// can be any boolean expression, or any random variable
+		
+		Expression evidence = parse("not alarm");
+		// can be any boolean expression
+
+		boolean isBayesianNetwork = true;
+		// is a Bayesian network, that is, factors are normalized
+		// and the sum of their product over all assignments to random variables is 1.
+		
+		boolean exploitFactorization = true;
+		// exploit factorization (that is, employ Variable Elimination.
+		
+		InferenceForFactorGraphAndEvidence inferencer =
+				new InferenceForFactorGraphAndEvidence(
+						new ExpressionFactorsAndTypes(modelString),
+						isBayesianNetwork ,
+						evidence,
+						exploitFactorization);
+
+		Expression marginal = inferencer.solve(queryExpression);
+		
+		System.out.println("Marginal is " + marginal);
+	}
+
+	@Test
 	public void testBurglary() {
 		
 		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
