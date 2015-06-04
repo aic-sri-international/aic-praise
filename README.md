@@ -7,6 +7,7 @@ A Probabilistic Reasoning As Symbolic Evaluation (PRAiSE) library, developed at
 
 * Lifted First-Order Probabilistic Inference.
 * Support for defining First-Order Probabilistic Models. 
+* Support for performing inference on (fragments of) Church probabilistic programs.
 
 ### Demos
 
