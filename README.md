@@ -15,7 +15,7 @@ The [more recent demo](https://github.com/aic-sri-international/aic-praise/relea
 
 The [older demo](https://github.com/aic-sri-international/aic-praise/releases/download/20150602_latest_demo_apps/aic-praise-old-demo-app.jar) is approximate (because it is based on belief propagation) and slower, but supports relational models.
 
-To run them, you must have a [Java Runtime Environment](http://java.com/en/download/) installed. Then simply download and run the files above.
+To execute them, you must have a [Java Runtime Environment](http://java.com/en/download/) installed. Then simply download and run the jar files above.
 
 ### Getting Started
 * [Introduction](https://github.com/aic-sri-international/aic-praise/wiki/Introduction)
