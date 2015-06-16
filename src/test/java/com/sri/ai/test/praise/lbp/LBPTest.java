@@ -4209,7 +4209,7 @@ public class LBPTest extends AbstractLPITest {
 				"friends(bob, dave);" + 
 				"");
 		expected = parse("if X = dave then if friends(dave, dave) then 0 else 1 else (if X = bob then if friends(dave, bob) then 1 else 0 else 0.5)");
-		Solver solver = new LiftedBeliefPropagationSolver(true);
+		Solver solver = new LiftedBeliefPropagationSolver();
 		actual = solver.marginal(query, model);
 		Assert.assertEquals(expected, actual);
 
