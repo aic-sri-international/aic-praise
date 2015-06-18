@@ -66,8 +66,8 @@ import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 @Beta
 public class CompareSGSolverToUAISolver {
 
-	static long    _seed   = 3;
-	static boolean _ground = false;
+	static long    _seed   = Integer.getInteger("solver.experiment.random.problem.generator", 3);
+	static boolean _ground = Boolean.getBoolean("solver.experiment.random.problem.generator.ground.uai.output");
 	//
 	static int [] _domainSizes = new int[] {2, 4, 8, 16, 32, 64, 128, 254, 1000, 10000, 100000, 1000000, 10000000};
 	//
@@ -154,12 +154,12 @@ public class CompareSGSolverToUAISolver {
 				
 				ConditionalGenerator iterator = new ConditionalGenerator(new Random(_seed), numberOfVariables, numberOfConstants, depth, breadth);
 				for (int f = 0; f != numberOfFactors; f++) {
-					Expression condition = iterator.next();
-					// Ensure we have variables in the condition
-					if (Expressions.freeVariables(condition, new DefaultRewritingProcess(null)).size() == 0) {							
-						condition = iterator.next();
-					}
-					factors.add(condition);	
+					Expression conditional = iterator.next();
+					// Ensure we have variables in the conditional
+					while (Expressions.freeVariables(conditional, new DefaultRewritingProcess(null)).size() == 0) {							
+						conditional = iterator.next();
+					}				
+					factors.add(conditional);	
 				}
 				
 				for (int r = 0; r < numberOfVariables; r++) {
@@ -175,54 +175,54 @@ public class CompareSGSolverToUAISolver {
 				mapFromTypeNameToSizeString.put("Boolean",    "2");
 				mapFromTypeNameToSizeString.put("TestDomain", ""+cardinality);				
 				
-				FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(factors,
+				FactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(factors,
 						mapFromRandomVariableNameToTypeName,
 						mapFromNonUniquelyNamedConstantNameToTypeName,
 						mapFromUniquelyNamedConstantNameToTypeName,
 						mapFromTypeNameToSizeString);
 	
-//System.out.println("f&t  =\n"+factorsAndTypes);
-	
-				long startSGInference = System.currentTimeMillis();
-				File uaiSolution = new File(uaiSolutionDirectory, "sgproblem_"+uaiFileSuffix+".uai.MAR");	
+				long startSGInference  = System.currentTimeMillis();
+				long endGroundingToUAI = 0;
 				InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true);
-				try (
-					OutputStream os             = new FileOutputStream(uaiSolution);
-					Writer       solutionWriter = new OutputStreamWriter(os, StandardCharsets.UTF_8);	
-				) {
-					if (_ground) {
+				if (_ground) {
+					long startGroundingToUAI = System.currentTimeMillis();
+					endGroundingToUAI        = System.currentTimeMillis() - startGroundingToUAI;
+					
+					HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiProblemDirectory, "sgproblem_"+uaiFileSuffix+".uai")));
+										
+					File uaiSolution = new File(uaiSolutionDirectory, "sgproblem_"+uaiFileSuffix+".uai.MAR");					
+					try (
+						OutputStream os             = new FileOutputStream(uaiSolution);
+						Writer       solutionWriter = new OutputStreamWriter(os, StandardCharsets.UTF_8);	
+					) {
 						solutionWriter.write("MAR\n");
 						solutionWriter.write(""+numberOfVariables);
-					}
-					for (int q = 0; q < numberOfVariables; q++) {
-						Expression queryExpr = Expressions.makeSymbol(_variablePrefix+q);
-						Expression marginal  = inferencer.solve(queryExpr);
-//System.out.println("query   ="+queryExpr);
-//System.out.println("marginal="+marginal);
-						if (_ground) {
+
+						for (int q = 0; q < numberOfVariables; q++) {
+							Expression queryExpr = Expressions.makeSymbol(_variablePrefix+q);
+							Expression marginal  = inferencer.solve(queryExpr);
+
 							solutionWriter.write(" "+cardinality);					
 							for (int c = 0; c < cardinality; c++) {
 								solutionWriter.write(" "+UAICompare.roundToUAIOutput(extractValue(queryExpr, marginal)));
 							}
 						}
+					    solutionWriter.flush();
 					}
-					if (_ground) {
-						solutionWriter.flush();
+					catch (IOException ioe) {
+						throw new RuntimeException(ioe);
 					}
 				}
-				catch (IOException ioe) {
-					throw new RuntimeException(ioe);
+				else {
+					// Not grounding, just solve
+					for (int q = 0; q < numberOfVariables; q++) {
+						Expression queryExpr = Expressions.makeSymbol(_variablePrefix+q);
+						inferencer.solve(queryExpr);
+					}
 				}
 				long endSGInference = System.currentTimeMillis() - startSGInference;
 
-				String message = cardinality+", "+numberOfFactors+", "+numberOfVariables+", "+numberOfConstants+", "+depth+", "+breadth+", "+endSGInference;
-
-				long startGroundingToUAI = System.currentTimeMillis();
-				if (_ground) {
-					HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiProblemDirectory, "sgproblem_"+uaiFileSuffix+".uai")));
-				}
-				long endGroundingToUAI = System.currentTimeMillis() - startGroundingToUAI;
-				message = message + ", " + endGroundingToUAI;
+				String message = cardinality+", "+numberOfFactors+", "+numberOfVariables+", "+numberOfConstants+", "+depth+", "+breadth+", "+endSGInference+", " + endGroundingToUAI;
 				
 				System.out.println(message);
 			}
