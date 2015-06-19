@@ -17,7 +17,7 @@ The [older demo](https://github.com/aic-sri-international/aic-praise/releases/do
 
 To execute them, you must have a [Java Runtime Environment](http://java.com/en/download/) installed. Then simply download and run the jar files above.
 
-The [User Guide](https://github.com/aic-sri-international/aic-praise/raw/master/user%20guide.pdf) explains the language and demos operation.
+The [User Guide](https://github.com/aic-sri-international/aic-praise/wiki/docs/user%20guide.pdf) explains the language and demos operation.
 
 ### Getting Started
 * [Introduction](https://github.com/aic-sri-international/aic-praise/wiki/Introduction)
