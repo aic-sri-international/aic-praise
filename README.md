@@ -21,7 +21,7 @@ The [User Guide](https://github.com/aic-sri-international/aic-praise/raw/master/
 
 ### Getting Started
 * [Introduction](https://github.com/aic-sri-international/aic-praise/wiki/Introduction)
-* [User Guide](https://github.com/aic-sri-international/aic-praise/raw/master/user%20guide.pdf)
+* [User Guide](https://github.com/aic-sri-international/aic-praise/wiki/docs/user%20guide.pdf)
 * Latest Maven Information (for integration as a third party library)
       
       ```
