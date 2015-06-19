@@ -45,8 +45,8 @@ import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
-import com.sri.ai.praise.sgsolver.model.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 
 @Beta

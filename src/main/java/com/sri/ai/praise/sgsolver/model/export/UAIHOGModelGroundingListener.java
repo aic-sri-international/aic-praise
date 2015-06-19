@@ -49,7 +49,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.model.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
 import com.sri.ai.util.math.Rational;
 
 @Beta

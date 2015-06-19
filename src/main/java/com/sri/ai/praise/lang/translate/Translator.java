@@ -35,14 +35,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.evaluate.lang;
+package com.sri.ai.praise.lang.translate;
 
 /**
- * Enumeration of the different languages worked with in some way by the PRAiSE system.
+ * Interface to be implemented by all Language Translators.
  * 
  * @author oreilly
  *
  */
-public enum Language {
+public interface Translator {
 // TODO
+	// Church -> HOGMv0
+	// Church -> HOGMv1
+	// UAI    -> HOGMv1
+	// HOGMv0 -> PMTK3
+	// HOGMv0 -> HuginDotNet
+	// HOGMv1 -> PMTK3
+	// HOGMv1 -> HuginDotNet
+	// HOGMv1 -> UAI
 }

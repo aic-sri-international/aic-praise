@@ -48,10 +48,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
-
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -83,7 +81,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
@@ -94,6 +91,8 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.lang.grounded.common.FunctionTable;
+import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.sgsolver.model.imports.uai.UAIEvidenceReader;
 import com.sri.ai.praise.sgsolver.model.imports.uai.UAIModel;
 import com.sri.ai.praise.sgsolver.model.imports.uai.UAIModelReader;
@@ -107,12 +106,9 @@ import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.model.export.UAIHOGModelGroundingListener;
-import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
-import com.sri.ai.praise.sgsolver.model.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.util.math.Rational;
-
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 

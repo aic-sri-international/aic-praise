@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.model.grounded.model;
+package com.sri.ai.praise.lang.grounded.model;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

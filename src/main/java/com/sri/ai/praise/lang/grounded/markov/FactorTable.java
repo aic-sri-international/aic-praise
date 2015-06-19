@@ -35,22 +35,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.evaluate.lang.translate;
+package com.sri.ai.praise.lang.grounded.markov;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.common.annotations.Beta;
+import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 
 /**
- * Interface to be implemented by all Language Translators.
+ * A table representation of a factor for use in a Markov Network.
  * 
  * @author oreilly
  *
  */
-public interface Translator {
-// TODO
-	// Church -> HOGMv0
-	// Church -> HOGMv1
-	// UAI    -> HOGMv1
-	// HOGMv0 -> PMTK3
-	// HOGMv0 -> HuginDotNet
-	// HOGMv1 -> PMTK3
-	// HOGMv1 -> HuginDotNet
-	// HOGMv1 -> UAI
+@Beta
+public class FactorTable {
+	private List<Integer> variableIndexes;
+	private FunctionTable functionTable;
+	
+	public FactorTable(List<Integer> variableIndexes, FunctionTable table) {
+		this.variableIndexes = new ArrayList<>(variableIndexes);
+		this.functionTable   = table;
+		
+		if (functionTable.numberVariables() != this.variableIndexes.size()) {
+			throw new IllegalArgumentException("Function table's # vars "+functionTable.numberVariables()+" does not match # of variable indexes "+this.variableIndexes.size());
+		}
+	}
+	
+	public List<Integer> getVariableIndexes() {
+		return variableIndexes;
+	}
+	
+	public FunctionTable getTable() {
+		return functionTable;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof FactorTable) {
+			FactorTable other = (FactorTable) obj;
+			return this.variableIndexes.equals(other.variableIndexes) && this.functionTable.equals(other.functionTable);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.variableIndexes.hashCode() + this.functionTable.hashCode();
+	}
 }

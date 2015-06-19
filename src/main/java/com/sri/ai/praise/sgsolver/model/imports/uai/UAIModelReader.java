@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
+import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 
 import static com.sri.ai.praise.sgsolver.model.imports.uai.UAIUtil.readLine;
 import static com.sri.ai.praise.sgsolver.model.imports.uai.UAIUtil.split;

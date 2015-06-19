@@ -35,10 +35,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.model.grounded.bayes;
+package com.sri.ai.praise.lang.grounded.bayes;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.model.grounded.common.GraphicalNetwork;
+import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
 
 /**
  * Basic representation of a Bayesian Network.

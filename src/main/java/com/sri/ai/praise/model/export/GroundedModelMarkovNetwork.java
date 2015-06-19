@@ -51,14 +51,14 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdatedProcess;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
+import com.sri.ai.praise.lang.grounded.common.FunctionTable;
+import com.sri.ai.praise.lang.grounded.markov.FactorTable;
+import com.sri.ai.praise.lang.grounded.markov.MarkovNetwork;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.model.GetRandomVariables;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.ModelGrounding;
 import com.sri.ai.praise.model.ParfactorsDeclaration;
-import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
-import com.sri.ai.praise.sgsolver.model.grounded.markov.FactorTable;
-import com.sri.ai.praise.sgsolver.model.grounded.markov.MarkovNetwork;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**

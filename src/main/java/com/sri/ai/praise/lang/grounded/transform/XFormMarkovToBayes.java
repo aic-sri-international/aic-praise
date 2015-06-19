@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.model.grounded.transform;
+package com.sri.ai.praise.lang.grounded.transform;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,10 +46,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.model.grounded.bayes.ConditionalProbabilityTable;
-import com.sri.ai.praise.sgsolver.model.grounded.common.FunctionTable;
-import com.sri.ai.praise.sgsolver.model.grounded.markov.FactorTable;
-import com.sri.ai.praise.sgsolver.model.grounded.markov.MarkovNetwork;
+import com.sri.ai.praise.lang.grounded.bayes.ConditionalProbabilityTable;
+import com.sri.ai.praise.lang.grounded.common.FunctionTable;
+import com.sri.ai.praise.lang.grounded.markov.FactorTable;
+import com.sri.ai.praise.lang.grounded.markov.MarkovNetwork;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductEnumeration;

@@ -35,14 +35,61 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.evaluate.lang.generate;
+package com.sri.ai.praise.lang.grounded.common;
+
+import java.util.List;
+
+import com.google.common.annotations.Beta;
 
 /**
- * Utility class for generating Random HOGMv1 models.
+ * Basic representation of a Graphical Network. Contains representations common to both Markov and Bayes networks.
  * 
  * @author oreilly
  *
  */
-public class RandomHOGMv1Generator {
-// TODO
+@Beta
+public interface GraphicalNetwork {
+	int numberVariables();
+	int cardinality(int variableIndex);
+	int numberUniqueFunctionTables();
+	FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx);
+	
+	int numberTables();
+	FunctionTable getTable(int tableIdx);
+	List<Integer> getVariableIndexesForTable(int tableIdx);
+	List<Integer> getTableIndexes(int uniqueFunctionTableIdx);
+	
+	default double ratioUniqueTablesToTables() {
+		return ((double) numberUniqueFunctionTables()) / ((double) numberTables());
+	}
+	
+	default int largestCardinality() {
+		int result = 0;
+		for (int i = 0; i < numberVariables(); i++) {
+			int card = cardinality(i);
+			if (card > result) {
+				result = card;
+			}
+		}
+		return result;
+	}
+	
+	default int largestNumberOfFunctionTableEntries() {		
+		int result = 0;
+		for (int i = 0; i < numberUniqueFunctionTables(); i++) {
+			int numEntries = getUniqueFunctionTable(i).numberEntries();
+			if (numEntries > result) {
+				result = numEntries;
+			}
+		}
+ 		return result;
+	}
+	
+	default int totalNumberEntriesForAllFunctionTables() {
+		int result = 0;
+		for (int i = 0; i < numberTables(); i++) {
+			result += getTable(i).numberEntries();
+		}		
+		return result;
+	}
 }

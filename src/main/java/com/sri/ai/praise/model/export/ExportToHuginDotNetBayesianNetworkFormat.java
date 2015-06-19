@@ -53,11 +53,11 @@ import java.util.stream.Stream;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.praise.lang.grounded.transform.XFormMarkovToBayes;
 import com.sri.ai.praise.model.Model;
 import com.sri.ai.praise.model.ModelGrounding;
 import com.sri.ai.praise.model.ModelGrounding.GroundedModelResult;
 import com.sri.ai.praise.sgsolver.model.export.HuginOutput;
-import com.sri.ai.praise.sgsolver.model.grounded.transform.XFormMarkovToBayes;
 import com.sri.ai.util.base.Pair;
 
 /**
