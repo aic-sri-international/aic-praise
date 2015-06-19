@@ -45,4 +45,12 @@ package com.sri.ai.praise.evaluate.lang.translate;
  */
 public interface Translator {
 // TODO
+	// Church -> HOGMv0
+	// Church -> HOGMv1
+	// UAI    -> HOGMv1
+	// HOGMv0 -> PMTK3
+	// HOGMv0 -> HuginDotNet
+	// HOGMv1 -> PMTK3
+	// HOGMv1 -> HuginDotNet
+	// HOGMv1 -> UAI
 }
