@@ -1,11 +1,15 @@
-sudo: true
 language: java
 jdk:
   - oraclejdk8
-
+  
 before_install:
-  - sudo apt-get sudo apt-get update -qq
-  - sudo apt-get install --only-upgrade -y oracle-java8-installer
+  - rm -rf ~/.linuxbrew
+  - yes | ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/linuxbrew/go/install)"
+  - export PATH="$HOME/.linuxbrew/bin:$PATH"
+  - export MANPATH="$HOME/.linuxbrew/share/man:$MANPATH"
+  - export INFOPATH="$HOME/.linuxbrew/share/info:$INFOPATH"
+  - brew install jdk
+  - export JAVA_HOME=/home/travis/.linuxbrew/Cellar/jdk/1.8.0-40
   
 install:
   - mvn install -DskipTests=true -DskipUnitTests=true
