@@ -1,4 +1,4 @@
-# AIC-PRAiSE
+# AIC-PRAiSE [![Build Status](https://travis-ci.org/aic-sri-international/aic-praise.svg?branch=master)](https://travis-ci.org/aic-sri-international/aic-praise)
 SRI International's AIC PRAiSE (Probabilistic Reasoning As Symbolic Evaluation) Library (for Java 1.8+)
 
 ### Overview
