@@ -1,0 +1,9 @@
+language: java
+jdk:
+  - oraclejdk8
+  
+install:
+  - mvn install -DskipTests=true -DskipUnitTests=true
+
+script:
+  - mvn test -Dgrinder.display.tree.util.ui=false -Dtrace.level=off -Djustification.level=off
