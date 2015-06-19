@@ -58,9 +58,8 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.util.Util;
+import com.sri.ai.praise.lbp.LPIUtil;
 
 /**
  * Default implementation of {@link LBPRewriter#R_intensional_simplification}.

@@ -41,7 +41,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.ExpressionAndContext;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.lbp.LPIUtil;
 
 /**
  * Indicates whether an expression in an ExpressionAndContext is the value of a random variable.

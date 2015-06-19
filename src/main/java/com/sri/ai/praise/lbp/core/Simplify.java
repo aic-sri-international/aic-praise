@@ -61,10 +61,10 @@ import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.set.extensional.ProductOnExtensionalSet;
 import com.sri.ai.grinder.library.set.extensional.UnionOnExtensionalSets;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
-import com.sri.ai.praise.CardinalityOfTypeAlwaysDistinctFromZero;
-import com.sri.ai.praise.LPIUtil;
-import com.sri.ai.praise.Type;
+import com.sri.ai.praise.lbp.BracketedExpressionSubExpressionsProvider;
+import com.sri.ai.praise.lbp.CardinalityOfTypeAlwaysDistinctFromZero;
+import com.sri.ai.praise.lbp.LPIUtil;
+import com.sri.ai.praise.lbp.Type;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.util.base.Pair;
 
@@ -94,7 +94,6 @@ public class Simplify extends com.sri.ai.grinder.library.equality.cardinality.di
 		return atomicRewriters;
 	}
 		
-	@SuppressWarnings("unchecked")
 	protected static List<Rewriter> extendAtomicRewriters(List<Rewriter> atomicRewriters) {
 		atomicRewriters = GrinderUtil.addRewritersBefore(atomicRewriters,
 				//

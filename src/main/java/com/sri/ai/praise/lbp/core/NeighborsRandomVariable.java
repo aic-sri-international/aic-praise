@@ -49,8 +49,8 @@ import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.helper.concurrent.BranchRewriteTask;
 import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.lbp.LPIUtil;
 import com.sri.ai.praise.model.v0.Model;
 
 /**

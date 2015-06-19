@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,6 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.core.AbstractLBPHierarchicalRewriter;
 import com.sri.ai.util.math.Rational;
 

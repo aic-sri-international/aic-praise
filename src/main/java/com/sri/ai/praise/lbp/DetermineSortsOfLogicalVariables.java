@@ -1,4 +1,4 @@
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;

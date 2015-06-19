@@ -1,4 +1,4 @@
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.model.v0.Model;

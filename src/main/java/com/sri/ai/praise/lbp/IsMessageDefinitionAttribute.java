@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-praise nor the names of its
+ * Neither the name of the aic-expresso nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,49 +35,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.api.RewriterTestAttribute;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.core.HasKind;
-import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.grinder.library.FunctorConstants;
 
 /**
- * A rewriter that externalizes conditionals containing logical variables, for
- * e.g:
+ * A RewriterTestAttribute indicating whether an expression is a message definition (either regular or previous).
  * 
- * <pre>
- * if X = a and p(X) then E1 else E2
- * </pre>
- * 
- * would have the expression with the logical variable moved to the top:
- * 
- * <pre>
- * if X = a then if p(X) then E1 else E2 else E2
- * </pre>
- * 
- * @author oreilly
- * 
+ * @author braz
+ *
  */
 @Beta
-public class BreakConditionsContainingBothLogicalAndRandomVariables extends AbstractRewriter {
+public class IsMessageDefinitionAttribute implements RewriterTestAttribute {
 
-	public BreakConditionsContainingBothLogicalAndRandomVariables() {
-		this.setReifiedTests(new HasKind(FunctorConstants.IF_THEN_ELSE));
+	public static final IsMessageDefinitionAttribute INSTANCE = new IsMessageDefinitionAttribute();
+	
+	//
+	// START-RewriterTestAttribute
+	@Override
+	public Object getValue(Expression expression, RewritingProcess process) {
+		Boolean result = LPIUtil.isMessageDefinition(expression);
+		return result;
 	}
+	// END-ReriterTestAttribute
+	//
 	
 	@Override
-	public Expression rewriteAfterBookkeeping(Expression expression,
-			RewritingProcess process) {
-
-		// Delegate to this general purpose routine
-		Expression result = GrinderUtil
-				.makeSureConditionsOnLogicalVariablesAreSeparatedAndOnTop(
-						expression, process);
-
-		return result;
+	public String toString() {
+		return "message";
+	}
+	
+	//
+	// PRIVATE
+	//
+	/**
+	 * Private constructor so that only a singleton may be created.
+	 */
+	private IsMessageDefinitionAttribute() {
+		
 	}
 }

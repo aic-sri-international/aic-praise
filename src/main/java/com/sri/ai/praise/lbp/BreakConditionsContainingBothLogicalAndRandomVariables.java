@@ -35,23 +35,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.grinder.api.Library;
-import com.sri.ai.grinder.library.CommonLibrary;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.core.AbstractRewriter;
+import com.sri.ai.grinder.core.HasKind;
+import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.library.FunctorConstants;
 
 /**
- * A basic command line shell.
+ * A rewriter that externalizes conditionals containing logical variables, for
+ * e.g:
  * 
- * @author braz
- *
+ * <pre>
+ * if X = a and p(X) then E1 else E2
+ * </pre>
+ * 
+ * would have the expression with the logical variable moved to the top:
+ * 
+ * <pre>
+ * if X = a then if p(X) then E1 else E2 else E2
+ * </pre>
+ * 
+ * @author oreilly
+ * 
  */
 @Beta
-public class Shell {
-	public static void main(String[] args) {
-		Library library = new CommonLibrary();
-		
-		com.sri.ai.grinder.shell.Shell.run(library);
+public class BreakConditionsContainingBothLogicalAndRandomVariables extends AbstractRewriter {
+
+	public BreakConditionsContainingBothLogicalAndRandomVariables() {
+		this.setReifiedTests(new HasKind(FunctorConstants.IF_THEN_ELSE));
+	}
+	
+	@Override
+	public Expression rewriteAfterBookkeeping(Expression expression,
+			RewritingProcess process) {
+
+		// Delegate to this general purpose routine
+		Expression result = GrinderUtil
+				.makeSureConditionsOnLogicalVariablesAreSeparatedAndOnTop(
+						expression, process);
+
+		return result;
 	}
 }

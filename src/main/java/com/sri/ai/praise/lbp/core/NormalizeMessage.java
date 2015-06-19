@@ -51,8 +51,8 @@ import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.lbp.LPIUtil;
 
 /**
  * Default implementation of {@link LBPRewriter#R_normalize_message}.

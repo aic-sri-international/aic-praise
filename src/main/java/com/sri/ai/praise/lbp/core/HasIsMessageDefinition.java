@@ -39,7 +39,7 @@ package com.sri.ai.praise.lbp.core;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.grinder.core.DefaultRewriterTest;
-import com.sri.ai.praise.IsMessageDefinitionAttribute;
+import com.sri.ai.praise.lbp.IsMessageDefinitionAttribute;
 
 /**
  * Tests whether an expression is a message definition, that is,

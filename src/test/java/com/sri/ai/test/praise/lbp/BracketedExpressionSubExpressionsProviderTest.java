@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise;
+package com.sri.ai.test.praise.lbp;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -6,9 +6,10 @@ import org.junit.Test;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
+import com.sri.ai.praise.lbp.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.model.v0.Model;
 import com.sri.ai.praise.model.v0.example.TrivialPQR;
+import com.sri.ai.test.praise.AbstractLPITest;
 
 public class BracketedExpressionSubExpressionsProviderTest extends AbstractLPITest {
 

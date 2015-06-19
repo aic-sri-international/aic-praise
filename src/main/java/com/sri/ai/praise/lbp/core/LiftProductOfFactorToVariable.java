@@ -65,8 +65,8 @@ import com.sri.ai.grinder.library.equality.cardinality.direct.core.Cardinality;
 import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.library.set.Sets;
-import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.lbp.LPIUtil;
 
 /**
  * <pre>

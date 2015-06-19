@@ -60,8 +60,8 @@ import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOf
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.PRAiSEConfiguration;
+import com.sri.ai.praise.lbp.BracketedExpressionSubExpressionsProvider;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductEnumeration;

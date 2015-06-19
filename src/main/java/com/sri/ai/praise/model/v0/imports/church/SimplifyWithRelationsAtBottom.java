@@ -50,7 +50,7 @@ import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
-import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.lbp.LPIUtil;
 import com.sri.ai.util.Util;
 
 /**

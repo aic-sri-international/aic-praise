@@ -46,7 +46,7 @@ import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.core.HasKind;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.lbp.LPIUtil;
 
 /**
  * Rewrites, for a specific random variable [ V ] present in the RewritingProcess as a global object under

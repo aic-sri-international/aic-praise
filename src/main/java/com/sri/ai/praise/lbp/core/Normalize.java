@@ -42,9 +42,9 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.praise.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
-import com.sri.ai.praise.MoveAllRandomVariableValueExpressionConditionsDownHierarchical;
+import com.sri.ai.praise.lbp.BreakConditionsContainingBothLogicalAndRandomVariablesHierarchical;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.lbp.MoveAllRandomVariableValueExpressionConditionsDownHierarchical;
 
 /**
  * @see LBPRewriter#R_normalize

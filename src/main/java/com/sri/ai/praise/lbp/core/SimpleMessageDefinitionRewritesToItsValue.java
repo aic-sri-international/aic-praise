@@ -41,7 +41,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.lbp.LPIUtil;
 
 /**
  * Rewrites message definitions by their values when they are simple, that is,

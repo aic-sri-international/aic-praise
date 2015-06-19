@@ -43,8 +43,8 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.Justification;
 import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.set.extensional.NormalizeExtensionalUniSet;
-import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
+import com.sri.ai.praise.lbp.LPIUtil;
 
 /**
  * Default implementation of {@link LBPRewriter#R_neigh_f}.

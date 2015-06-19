@@ -46,7 +46,7 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.formula.FormulaUtil;
-import com.sri.ai.praise.LPIUtil;
+import com.sri.ai.praise.lbp.LPIUtil;
 
 /**
  * An atomic rewriter for rewriting expressions of the type:<br>

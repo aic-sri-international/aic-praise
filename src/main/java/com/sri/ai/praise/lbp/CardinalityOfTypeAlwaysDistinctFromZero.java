@@ -35,45 +35,76 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp;
 
 import com.google.common.annotations.Beta;
-import com.google.common.collect.Lists;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.AbstractRewriter;
-import com.sri.ai.grinder.core.HasKind;
-import com.sri.ai.grinder.core.KindAttribute;
-import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.praise.model.v0.IsRandomVariableValueExpression;
+import com.sri.ai.grinder.core.HasNumberOfArguments;
+import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.praise.model.v0.Model;
 
 /**
- * A rewriter for evaluating all "type" syntax function applications to random variable value
- * expressions (e.g. type(tall(X)) in ALBP to <code>{{false, true}}</code>.
+ * A rewriter for evaluating all cardinality expressions on types of the form:
+ * 
+ * <pre>
+ * | type(.) | = 0  -> false
+ * 0 = | type(.) |  -> false
+ * | type(.) | > 0  -> true
+ * 0 > | type(.) |  -> false
+ * </pre>
  * 
  * @author oreilly
+ * 
  */
 @Beta
-public class Type extends AbstractRewriter {
+public class CardinalityOfTypeAlwaysDistinctFromZero extends AbstractRewriter {
 
-	public Type() {
-		this.setReifiedTests(new HasKind(KindAttribute.VALUE_TYPE_SYNTACTIC_FUNCTION));
+	public final static String FUNCTOR_TYPE = "type";
+	
+	public CardinalityOfTypeAlwaysDistinctFromZero() {
+		this.setReifiedTests(new HasNumberOfArguments(2));
 	}
-
-	// the reason for a multiset here is that it does not trigger a
-	// normalization for eliminating repeated elements.
-	private static final Expression _booleanType = ExtensionalSet
-			.makeMultiSet(Lists.newArrayList((Expression) Expressions.makeSymbol("false"), Expressions.makeSymbol("true")));
 
 	@Override
 	public Expression rewriteAfterBookkeeping(Expression expression, RewritingProcess process) {
-		if (expression.getSyntaxTree().numberOfImmediateSubTrees() == 1
-				&& IsRandomVariableValueExpression.apply(Expressions.makeFromSyntaxTree(expression.getSyntaxTree().getImmediateSubTrees().get(0)), process)
-			) {
-			return _booleanType;
+
+		Expression result = expression;
+		if (Model.isCardinalityOfTypesAlwaysGreaterThanZero(process)) {
+			if (expression.hasFunctor(FunctorConstants.EQUAL) || expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
+				Expression arg1 = expression.get(0);
+				Expression arg2 = expression.get(1);
+				if (arg1.hasFunctor(FunctorConstants.CARDINALITY)
+						&& arg1.numberOfArguments() == 1
+						&& arg1.get(0).hasFunctor(FUNCTOR_TYPE)
+						&& arg2.equals(Expressions.ZERO)) {
+					// | type(.) | = 0  -> false
+					if (expression.hasFunctor(FunctorConstants.EQUAL)) {
+						result = Expressions.FALSE;
+					} 
+					else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
+						// | type(.) | > 0  -> true
+						result = Expressions.TRUE;
+					}
+				} 
+				else if (arg2.hasFunctor(FunctorConstants.CARDINALITY)
+						&& arg2.numberOfArguments() == 1
+						&& arg2.get(0).hasFunctor(FUNCTOR_TYPE)
+						&& arg1.equals(Expressions.ZERO)) {
+					// 0 = | type(.) | = 0 
+					if (expression.hasFunctor(FunctorConstants.EQUAL)) {
+						result = Expressions.FALSE;
+					} 
+					else if (expression.hasFunctor(FunctorConstants.GREATER_THAN)) {
+						// 0 > | type(.) | -> false
+						result = Expressions.FALSE;
+					}
+				}
+			}
 		}
 
-		return expression;
+		return result;
 	}
 }

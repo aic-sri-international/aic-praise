@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise;
+package com.sri.ai.praise.lbp;
 
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.util.Util.list;
@@ -82,7 +82,6 @@ import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.core.IsDeterministicBooleanMessageValue;
 import com.sri.ai.praise.lbp.core.MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic;
 import com.sri.ai.praise.model.v0.IsRandomVariableValueExpression;

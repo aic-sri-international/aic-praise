@@ -65,10 +65,10 @@ import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOf
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
-import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
+import com.sri.ai.praise.lbp.LPIUtil;
 import com.sri.ai.praise.model.v0.rules.RuleConverter;
 import com.sri.ai.util.Util;
 

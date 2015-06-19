@@ -56,7 +56,6 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.rewriterrefiner.RewriterRefiner;
-import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.PRAiSEConfiguration;
 import com.sri.ai.praise.lbp.core.AnyimeRandomVariableFromMessageRewriterCall;
 import com.sri.ai.praise.lbp.core.AnytimeRefiner;
