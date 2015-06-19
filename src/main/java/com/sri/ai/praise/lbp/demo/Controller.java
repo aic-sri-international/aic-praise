@@ -104,7 +104,7 @@ public class Controller {
 	private String         activeQueryUUID          = null;
 	private boolean        intentionallyInterrupted = false;
 	//
-	private PRAiSEDemoApp app = null;
+	private LBPPRAiSEDemoApp app = null;
 	//
 	private NewAction newAction = null;
 	private OpenFileAction openFileAction = null;
@@ -119,7 +119,7 @@ public class Controller {
 	private NewWindowAction newWindowAction = null;
 	private HideToolBarAction hideToolBarAction = null;
 
-	public Controller(PRAiSEDemoApp app) {
+	public Controller(LBPPRAiSEDemoApp app) {
 		this.app = app;
 		
 		app.optionsPanel.chckbxJustificationEnabled.addActionListener(new ActionListener() {
@@ -420,7 +420,7 @@ information("Currently Not Implemented\n"+"See: http://code.google.com/p/aic-pra
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				PRAiSEDemoApp newWindow = new PRAiSEDemoApp(app.getCurrentPerspective());
+				LBPPRAiSEDemoApp newWindow = new LBPPRAiSEDemoApp(app.getCurrentPerspective());
 				int x = app.frame.getBounds().x + 15;
 				int y = app.frame.getBounds().y + 15;
 				newWindow.frame.setBounds(x, y, app.frame.getBounds().width, app.frame.getBounds().height);

@@ -72,7 +72,7 @@ import com.sri.ai.util.Configuration;
  *
  */
 @Beta
-public class PRAiSEDemoApp {
+public class LBPPRAiSEDemoApp {
 	public enum Perspective {
 		HOGM, CHURCH
 	}
@@ -160,7 +160,7 @@ public class PRAiSEDemoApp {
 				}
 				
 				try {
-					PRAiSEDemoApp window = new PRAiSEDemoApp(Perspective.HOGM);
+					LBPPRAiSEDemoApp window = new LBPPRAiSEDemoApp(Perspective.HOGM);
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -172,7 +172,7 @@ public class PRAiSEDemoApp {
 	/**
 	 * Create the application.
 	 */
-	public PRAiSEDemoApp(Perspective perspective) {
+	public LBPPRAiSEDemoApp(Perspective perspective) {
 		initialize();
 		setPerspective(perspective);
 	}
@@ -181,7 +181,7 @@ public class PRAiSEDemoApp {
 		return currentPerspective;
 	}
 	
-	private void setPerspective(PRAiSEDemoApp.Perspective perspective) {
+	private void setPerspective(LBPPRAiSEDemoApp.Perspective perspective) {
 		if (this.activeEditorPanel != null) {
 			try {
 				this.activeEditorPanel.saveAll();

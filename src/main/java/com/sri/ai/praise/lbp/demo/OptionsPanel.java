@@ -82,11 +82,11 @@ public class OptionsPanel extends JPanel {
 	private static final String ASYNC_INDIVIDUAL = "ASYNC INDIVIDUAL";
 	private static final String ASYNC_GROUP      = "ASYNC GROUP";
 	// Note: These are global options, that apply to all open windows at the same time.
-	private static SpinnerNumberModel _precisionModel               = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_PRECISION, 1, 80, 1);
-	private static SpinnerNumberModel _scientificGreaterOutputModel = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_SCIENTIFIC_GREATER, 2, 80, 1);
-	private static SpinnerNumberModel _scientificAfterOutputModel   = new SpinnerNumberModel(PRAiSEDemoApp.DISPLAY_SCIENTIFIC_AFTER, 2, 80, 1);
-	private static SpinnerNumberModel _deadEndsCacheSizeModel       = new SpinnerNumberModel(PRAiSEDemoApp.DEAD_ENDS_CACHE_SIZE, -1, 10000, 1);
-	private static SpinnerNumberModel _rewriterCacheSizeModel       = new SpinnerNumberModel(PRAiSEDemoApp.REWRITER_CACHE_SIZE, -1, 10000, 1);
+	private static SpinnerNumberModel _precisionModel               = new SpinnerNumberModel(LBPPRAiSEDemoApp.DISPLAY_PRECISION, 1, 80, 1);
+	private static SpinnerNumberModel _scientificGreaterOutputModel = new SpinnerNumberModel(LBPPRAiSEDemoApp.DISPLAY_SCIENTIFIC_GREATER, 2, 80, 1);
+	private static SpinnerNumberModel _scientificAfterOutputModel   = new SpinnerNumberModel(LBPPRAiSEDemoApp.DISPLAY_SCIENTIFIC_AFTER, 2, 80, 1);
+	private static SpinnerNumberModel _deadEndsCacheSizeModel       = new SpinnerNumberModel(LBPPRAiSEDemoApp.DEAD_ENDS_CACHE_SIZE, -1, 10000, 1);
+	private static SpinnerNumberModel _rewriterCacheSizeModel       = new SpinnerNumberModel(LBPPRAiSEDemoApp.REWRITER_CACHE_SIZE, -1, 10000, 1);
 
 	{
 		_precisionModel.addChangeListener(new ChangeListener() {
@@ -497,8 +497,8 @@ public class OptionsPanel extends JPanel {
 		chckbxUseBeliefCache.setSelected(defaultConfig.isBeliefUseCache());
 		lbpMaxNumIterationsSpinner.setValue(defaultConfig.getMaxNumberOfIterationsForConvergence());
 		lbpPrecisionSpinner.setValue(defaultConfig.getLimitPrecisionToNumberOfSignificantDecimals());
-		deadEndCacheSizeSpinner.setValue(PRAiSEDemoApp.DEAD_ENDS_CACHE_SIZE);
-		rewriterCacheSizeSpinner.setValue(PRAiSEDemoApp.REWRITER_CACHE_SIZE);
+		deadEndCacheSizeSpinner.setValue(LBPPRAiSEDemoApp.DEAD_ENDS_CACHE_SIZE);
+		rewriterCacheSizeSpinner.setValue(LBPPRAiSEDemoApp.REWRITER_CACHE_SIZE);
 		
 		// Don't select by default.
 		chckbxJustificationEnabled.doClick();
