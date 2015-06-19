@@ -53,4 +53,9 @@ public interface Translator {
 	// HOGMv1 -> PMTK3
 	// HOGMv1 -> HuginDotNet
 	// HOGMv1 -> UAI
+	//
+	// PagedModelContainer -> Church
+	// PagedModelContainer -> HOGMv1
+	// Church              -> PagedModelContainer
+	// HOGMv1              -> PagedModelContainer
 }

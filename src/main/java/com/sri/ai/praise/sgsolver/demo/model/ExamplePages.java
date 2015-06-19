@@ -214,6 +214,7 @@ public class ExamplePages {
 			}
 		});
 	}
+	
 	private static void appendField(String fieldName, List<String> values, StringBuilder sb) {
 		sb.append(fieldName);
 		sb.append("=[");
