@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 
 @Beta
 public class QueryResult {

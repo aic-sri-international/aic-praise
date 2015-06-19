@@ -1,7 +1,7 @@
 package com.sri.ai.praise;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 
 /**
  * An object implementing a probabilistic inference solver.

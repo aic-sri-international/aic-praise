@@ -68,7 +68,7 @@ import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 import com.sri.ai.util.Util;
 
 /**

@@ -47,11 +47,11 @@ import org.antlr.v4.runtime.Recognizer;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.sgsolver.hogm.antlr.ErrorListener;
-import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
-import com.sri.ai.praise.sgsolver.hogm.antlr.UnableToParseAllTheInputError;
-import com.sri.ai.praise.sgsolver.model.HOGModelException;
+import com.sri.ai.praise.model.v1.HOGModelException;
+import com.sri.ai.praise.model.v1.hogm.antlr.ErrorListener;
+import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.model.v1.hogm.antlr.UnableToParseAllTheInputError;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;

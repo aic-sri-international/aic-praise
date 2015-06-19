@@ -51,7 +51,7 @@ import com.sri.ai.grinder.helper.concurrent.RewriteOnBranch;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 
 /**
  * Default implementation {@link LBPRewriter#R_neigh_v}.

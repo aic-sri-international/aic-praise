@@ -48,13 +48,13 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOfType;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
-import com.sri.ai.praise.model.example.TrivialGaveTreasureToOwnsRich;
-import com.sri.ai.praise.model.example.TrivialLoopyPQandb;
-import com.sri.ai.praise.model.example.TrivialPQBothArity2;
-import com.sri.ai.praise.model.example.TrivialPQR;
-import com.sri.ai.praise.model.example.TrivialPQRWithPriors;
-import com.sri.ai.praise.model.example.TrivialPRWithNonDeterministicFactor;
+import com.sri.ai.praise.model.v0.Model;
+import com.sri.ai.praise.model.v0.example.TrivialGaveTreasureToOwnsRich;
+import com.sri.ai.praise.model.v0.example.TrivialLoopyPQandb;
+import com.sri.ai.praise.model.v0.example.TrivialPQBothArity2;
+import com.sri.ai.praise.model.v0.example.TrivialPQR;
+import com.sri.ai.praise.model.v0.example.TrivialPQRWithPriors;
+import com.sri.ai.praise.model.v0.example.TrivialPRWithNonDeterministicFactor;
 import com.sri.ai.test.praise.AbstractLPITest;
 
 public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
@@ -481,7 +481,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 						// this is (if r then 2^1 else 3^1)*(3^2)
 						"if r then 18 else 27"),
 				new NormalizeTestData("not (X = b)",
-						new com.sri.ai.praise.model.example.TrivialLoopyPQandb(), 
+						new com.sri.ai.praise.model.v0.example.TrivialLoopyPQandb(), 
 						"product({{ ( on X', Y ) (if p(X) then if X' != b then if Y = b then if true then 1 else 0 else (if true then 1 else 0) else (if true then 1 else 0) else 1) | ((X = X' or X = Y) and not (X' = Y)) and X' = X }})", 
 						100, 
 						"1")
@@ -542,7 +542,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
             // This instance (found from from LBPStressTest#2 4 June 2013) 
         	// appears to expand its rewriting indefinitely using R_normalize.
             new NormalizeTestData("X != b and X != Y",
-                new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
+                new com.sri.ai.praise.model.v0.example.TrivialLoopyPQandb(),
                 "(if p(b) then 1 else 0) ^ (if Y = b then 90 else 0) * ((if p(Y) or p(Y) then 1 else 0) ^ 1 * ((if p(Y) then 0.666666667 else 0.333333333) ^ 9 * (if p(Y) then 0.666666667 else 0.333333333) ^ 8))",
                 "if Y = b then if p(b) then 0.00101495924 else 0 else (if p(Y) then 0.00101495924 else 0)"
                 ),
@@ -557,7 +557,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
             // This instance (found from from LBPStressTest#2 4 June 2013) 
         	// appears to expand its rewriting indefinitely using R_complete_normalize.
             new CompleteNormalizeTestData("X != b and X != Y",
-                new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
+                new com.sri.ai.praise.model.v0.example.TrivialLoopyPQandb(),
                 "(if p(b) then 1 else 0) ^ (if Y = b then 90 else 0) * ((if p(Y) or p(Y) then 1 else 0) ^ 1 * ((if p(Y) then 0.666666667 else 0.333333333) ^ 9 * (if p(Y) then 0.666666667 else 0.333333333) ^ 8))",
                 "if Y = b then if p(b) then 0.00101495924 else 0 else (if p(Y) then 0.00101495924 else 0)"
                 ),

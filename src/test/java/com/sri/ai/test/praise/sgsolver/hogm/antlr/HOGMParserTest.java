@@ -11,9 +11,9 @@ import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
-import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.sgsolver.model.HOGModelError;
-import com.sri.ai.praise.sgsolver.model.HOGModelException;
+import com.sri.ai.praise.model.v1.HOGModelError;
+import com.sri.ai.praise.model.v1.HOGModelException;
+import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 
 public class HOGMParserTest {
 	protected Parser parser;

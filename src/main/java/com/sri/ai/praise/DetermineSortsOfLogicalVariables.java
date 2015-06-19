@@ -14,8 +14,8 @@ import com.sri.ai.expresso.core.AbstractReplacementFunctionWithContextuallyUpdat
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
-import com.sri.ai.praise.model.Model;
-import com.sri.ai.praise.model.RandomVariableDeclaration;
+import com.sri.ai.praise.model.v0.Model;
+import com.sri.ai.praise.model.v0.RandomVariableDeclaration;
 
 /**
  * A collection of methods for obtaining the types of logical variables based on their index expressions

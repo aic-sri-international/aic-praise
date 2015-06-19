@@ -7,8 +7,8 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.praise.BracketedExpressionSubExpressionsProvider;
-import com.sri.ai.praise.model.Model;
-import com.sri.ai.praise.model.example.TrivialPQR;
+import com.sri.ai.praise.model.v0.Model;
+import com.sri.ai.praise.model.v0.example.TrivialPQR;
 
 public class BracketedExpressionSubExpressionsProviderTest extends AbstractLPITest {
 

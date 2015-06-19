@@ -42,13 +42,13 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.SGSolverDemoController;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.service.ExecuteHOGMQueryService;
 import com.sri.ai.praise.sgsolver.demo.service.QueryError;
-import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.base.Pair;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;

@@ -47,9 +47,9 @@ import org.fxmisc.richtext.StyleSpansBuilder;
 import org.fxmisc.undo.UndoManager;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.model.v1.hogm.antlr.HOGMTerminalSymbols;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
-import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMLexer;
-import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMTerminalSymbols;
+import com.sri.ai.praise.model.v1.hogm.antlr.HOGMLexer;
 
 import javafx.scene.layout.AnchorPane;
 

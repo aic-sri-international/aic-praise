@@ -74,9 +74,9 @@ import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.lbp.LBPQueryEngine.QueryError.TYPE;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
-import com.sri.ai.praise.model.Model.ModelException;
-import com.sri.ai.praise.model.ParfactorsDeclaration;
+import com.sri.ai.praise.model.v0.Model;
+import com.sri.ai.praise.model.v0.ParfactorsDeclaration;
+import com.sri.ai.praise.model.v0.Model.ModelException;
 import com.sri.ai.util.Configuration;
 import com.sri.ai.util.log.LogX;
 

@@ -74,34 +74,34 @@ import com.sri.ai.praise.lbp.LBPQueryEngine;
 import com.sri.ai.praise.lbp.LBPQueryEngine.QueryStep;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.LiftedBeliefPropagationSolver;
-import com.sri.ai.praise.model.Model;
-import com.sri.ai.praise.model.example.EmptyPQ;
-import com.sri.ai.praise.model.example.IntensionalFanIn;
-import com.sri.ai.praise.model.example.TrivialEpidemicAndSickNotbob;
-import com.sri.ai.praise.model.example.TrivialEpidemicSickEveryone;
-import com.sri.ai.praise.model.example.TrivialEpidemicSickEveryoneNotbobAmaryAjohn;
-import com.sri.ai.praise.model.example.TrivialEpidemicSickbob;
-import com.sri.ai.praise.model.example.TrivialGaveTreasureToOwnsRich;
-import com.sri.ai.praise.model.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample;
-import com.sri.ai.praise.model.example.TrivialLoopyMisconceptionExample;
-import com.sri.ai.praise.model.example.TrivialLoopyPQ;
-import com.sri.ai.praise.model.example.TrivialLoopyPQWithPriors;
-import com.sri.ai.praise.model.example.TrivialLoopyPQandb;
-import com.sri.ai.praise.model.example.TrivialLoopyParfactorsExample;
-import com.sri.ai.praise.model.example.TrivialPQ;
-import com.sri.ai.praise.model.example.TrivialPQPeoplea1Anda2;
-import com.sri.ai.praise.model.example.TrivialPQR;
-import com.sri.ai.praise.model.example.TrivialPQRWithPriors;
-import com.sri.ai.praise.model.example.TrivialPQWithPArity2AndQArity1;
-import com.sri.ai.praise.model.example.TrivialPQWithPriors;
-import com.sri.ai.praise.model.example.TrivialPRWithNonDeterministicFactor;
-import com.sri.ai.praise.model.example.TrivialPeopleAmericanTallIntelligentUnintelligent;
-import com.sri.ai.praise.model.example.TrivialSickSmokerbob;
-import com.sri.ai.praise.model.example.TrivialSickbob;
-import com.sri.ai.praise.model.example.TrivialSunnyAvailableCanPlayWith;
-import com.sri.ai.praise.model.example.TrivialThereExistsPQWithPriors;
-import com.sri.ai.praise.model.example.WeightedPQWithPriors;
-import com.sri.ai.praise.model.example.WeightedThereExistsPQWithPriors;
+import com.sri.ai.praise.model.v0.Model;
+import com.sri.ai.praise.model.v0.example.EmptyPQ;
+import com.sri.ai.praise.model.v0.example.IntensionalFanIn;
+import com.sri.ai.praise.model.v0.example.TrivialEpidemicAndSickNotbob;
+import com.sri.ai.praise.model.v0.example.TrivialEpidemicSickEveryone;
+import com.sri.ai.praise.model.v0.example.TrivialEpidemicSickEveryoneNotbobAmaryAjohn;
+import com.sri.ai.praise.model.v0.example.TrivialEpidemicSickbob;
+import com.sri.ai.praise.model.v0.example.TrivialGaveTreasureToOwnsRich;
+import com.sri.ai.praise.model.v0.example.TrivialLoopyFriendsAnnBobAndSmokerBobExample;
+import com.sri.ai.praise.model.v0.example.TrivialLoopyMisconceptionExample;
+import com.sri.ai.praise.model.v0.example.TrivialLoopyPQ;
+import com.sri.ai.praise.model.v0.example.TrivialLoopyPQWithPriors;
+import com.sri.ai.praise.model.v0.example.TrivialLoopyPQandb;
+import com.sri.ai.praise.model.v0.example.TrivialLoopyParfactorsExample;
+import com.sri.ai.praise.model.v0.example.TrivialPQ;
+import com.sri.ai.praise.model.v0.example.TrivialPQPeoplea1Anda2;
+import com.sri.ai.praise.model.v0.example.TrivialPQR;
+import com.sri.ai.praise.model.v0.example.TrivialPQRWithPriors;
+import com.sri.ai.praise.model.v0.example.TrivialPQWithPArity2AndQArity1;
+import com.sri.ai.praise.model.v0.example.TrivialPQWithPriors;
+import com.sri.ai.praise.model.v0.example.TrivialPRWithNonDeterministicFactor;
+import com.sri.ai.praise.model.v0.example.TrivialPeopleAmericanTallIntelligentUnintelligent;
+import com.sri.ai.praise.model.v0.example.TrivialSickSmokerbob;
+import com.sri.ai.praise.model.v0.example.TrivialSickbob;
+import com.sri.ai.praise.model.v0.example.TrivialSunnyAvailableCanPlayWith;
+import com.sri.ai.praise.model.v0.example.TrivialThereExistsPQWithPriors;
+import com.sri.ai.praise.model.v0.example.WeightedPQWithPriors;
+import com.sri.ai.praise.model.v0.example.WeightedThereExistsPQWithPriors;
 import com.sri.ai.test.praise.AbstractLPITest;
 import com.sri.ai.util.Configuration;
 import com.sri.ai.util.Util;
@@ -3993,7 +3993,7 @@ public class LBPTest extends AbstractLPITest {
 //		                "if Z = a then c else d"
 		                ),
                 new PickSingleElementTestData("not (X = b)",
-                		new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
+                		new com.sri.ai.praise.model.v0.example.TrivialLoopyPQandb(),
 		                "{ ( on X', Y ) (if p(X) then if X' != b then if Y = b then if true then 1 else 0 else (if true then 1 else 0) else (if true then 1 else 0) else 1) | ((X = X' or X = Y) and not (X' = Y)) and X' = X }",
 		                false,
 		                "if p(X) then if X != b then if b = b then if true then 1 else 0 else (if true then 1 else 0) else (if true then 1 else 0) else 1"
@@ -4001,14 +4001,14 @@ public class LBPTest extends AbstractLPITest {
 		                ),
 		        // Simplified version of the above test
                 new PickSingleElementTestData("not (X = b)",
-                		new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
+                		new com.sri.ai.praise.model.v0.example.TrivialLoopyPQandb(),
 		                "{ ( on X', Y ) (if p(X) then 1 else 1)  | ((X = X' or X = Y) and not (X' = Y)) and X' = X }",
 		                false,
 		                "if p(X) then 1 else 1"
 		                ), 
 		        // Even more simplified version of the above test
                 new PickSingleElementTestData("not (X = b)",
-                		new com.sri.ai.praise.model.example.TrivialLoopyPQandb(),
+                		new com.sri.ai.praise.model.v0.example.TrivialLoopyPQandb(),
 		                "{ ( on X', Y ) 1  | ((X = X' or X = Y) and not (X' = Y)) and X' = X }",
 		                false,
 		                "1"

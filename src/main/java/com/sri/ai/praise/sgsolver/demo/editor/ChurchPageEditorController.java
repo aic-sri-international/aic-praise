@@ -51,8 +51,8 @@ import javafx.scene.layout.Pane;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.model.Model;
-import com.sri.ai.praise.model.imports.church.TranslateChurchToModel;
+import com.sri.ai.praise.model.v0.Model;
+import com.sri.ai.praise.model.v0.imports.church.TranslateChurchToModel;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.query.QueryController;
 import com.sri.ai.praise.sgsolver.demo.service.QueryError;

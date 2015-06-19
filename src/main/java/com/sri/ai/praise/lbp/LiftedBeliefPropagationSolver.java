@@ -6,7 +6,7 @@ import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.Solver;
 import com.sri.ai.praise.lbp.core.Belief;
 import com.sri.ai.praise.lbp.core.DefaultLBPConfiguration;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 
 public class LiftedBeliefPropagationSolver implements Solver {
 

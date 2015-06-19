@@ -50,8 +50,8 @@ import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOf
 import com.sri.ai.grinder.library.set.extensional.EqualityOfExtensionalUniSets;
 import com.sri.ai.grinder.library.set.intensional.EqualityOfIntensionalUniSets;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
-import com.sri.ai.praise.model.example.TrivialPQR;
+import com.sri.ai.praise.model.v0.Model;
+import com.sri.ai.praise.model.v0.example.TrivialPQR;
 import com.sri.ai.test.praise.AbstractLPITest;
 import com.sri.ai.util.Util;
 

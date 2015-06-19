@@ -85,9 +85,9 @@ import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.core.IsDeterministicBooleanMessageValue;
 import com.sri.ai.praise.lbp.core.MessageValueOnBooleanRandomVariableValueWithZeroInOneBranchIsDeterministic;
-import com.sri.ai.praise.model.IsRandomVariableValueExpression;
-import com.sri.ai.praise.model.RandomPredicateCatalog;
-import com.sri.ai.praise.model.RandomVariableDeclaration;
+import com.sri.ai.praise.model.v0.IsRandomVariableValueExpression;
+import com.sri.ai.praise.model.v0.RandomPredicateCatalog;
+import com.sri.ai.praise.model.v0.RandomVariableDeclaration;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.PredicateIterator;
@@ -1184,7 +1184,7 @@ public class LPIUtil {
 		Iterator<Expression> randomVariableValuesIterator =
 			new PredicateIterator<Expression>(
 					subExpressionsDepthFirstIterator,
-					new com.sri.ai.praise.model.IsRandomVariableValueExpression(process));
+					new com.sri.ai.praise.model.v0.IsRandomVariableValueExpression(process));
 
 		List<Expression> randomVariables =
 			Util.mapIntoList(

@@ -52,7 +52,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 
 /**
  * Default implementation of {@link LBPRewriter#R_prod_m_and_prod_factor}.

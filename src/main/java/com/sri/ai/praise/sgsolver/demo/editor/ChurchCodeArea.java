@@ -47,8 +47,8 @@ import org.fxmisc.richtext.StyleSpansBuilder;
 import org.fxmisc.undo.UndoManager;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.imports.church.antlr.ChurchLexer;
-import com.sri.ai.praise.model.imports.church.ChurchTerminalSymbols;
+import com.sri.ai.praise.model.v0.imports.church.antlr.ChurchLexer;
+import com.sri.ai.praise.model.v0.imports.church.ChurchTerminalSymbols;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 
 import javafx.scene.layout.AnchorPane;

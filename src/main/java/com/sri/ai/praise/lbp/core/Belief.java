@@ -74,7 +74,7 @@ import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPRewriter;
 import com.sri.ai.praise.lbp.MessageExpansions;
 import com.sri.ai.praise.lbp.UseValuesForPreviousMessages;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;

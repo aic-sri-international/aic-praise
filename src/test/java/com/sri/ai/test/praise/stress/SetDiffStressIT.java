@@ -10,7 +10,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 import com.sri.ai.test.praise.AbstractLPITest;
 
 /**

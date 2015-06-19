@@ -46,7 +46,7 @@ import com.sri.ai.grinder.helper.Trace;
 import com.sri.ai.grinder.library.set.tuple.Tuple;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 
 /**
  * Default implementation of {@link LBPRewriter#R_bound_belief}.

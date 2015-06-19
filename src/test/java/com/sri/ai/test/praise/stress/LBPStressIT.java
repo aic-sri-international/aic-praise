@@ -13,7 +13,7 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.praise.lbp.LBPConfiguration;
 import com.sri.ai.praise.lbp.LBPFactory;
 import com.sri.ai.praise.lbp.LBPRewriter;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 import com.sri.ai.test.praise.AbstractLPITest;
 
 /**
@@ -38,7 +38,7 @@ public class LBPStressIT extends AbstractLPITest {
 		
 		perform(new TestData[] {
 			new LoopyBeliefTestData(Expressions.TRUE.toString(),
-				new com.sri.ai.praise.model.example.TrivialLoopyMisconceptionExample(),
+				new com.sri.ai.praise.model.v0.example.TrivialLoopyMisconceptionExample(),
 				"belief([m(X)])",
 				false,
 				// TODO - is this correct (10 iterations)?
@@ -52,7 +52,7 @@ public class LBPStressIT extends AbstractLPITest {
 	public void testStressTest2() {
 		perform(new TestData[] {
 				new LoopyBeliefTestData(Expressions.TRUE.toString(),
-						new com.sri.ai.praise.model.example.TrivialLoopyPQandb(), 
+						new com.sri.ai.praise.model.v0.example.TrivialLoopyPQandb(), 
 						"belief([p(X)])", 
 						false, 
 						// TODO -  is this correct (> 2 iterations, doesn't matter as large

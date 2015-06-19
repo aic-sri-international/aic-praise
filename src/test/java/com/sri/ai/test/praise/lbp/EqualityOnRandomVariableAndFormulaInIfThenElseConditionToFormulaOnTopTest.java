@@ -7,8 +7,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Rewriter;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.praise.lbp.core.EqualityOnRandomVariableAndFormulaInIfThenElseConditionToFormulaOnTop;
-import com.sri.ai.praise.model.Model;
-import com.sri.ai.praise.model.example.TrivialPQR;
+import com.sri.ai.praise.model.v0.Model;
+import com.sri.ai.praise.model.v0.example.TrivialPQR;
 import com.sri.ai.test.praise.AbstractLPITest;
 
 public class EqualityOnRandomVariableAndFormulaInIfThenElseConditionToFormulaOnTopTest extends AbstractLPITest {

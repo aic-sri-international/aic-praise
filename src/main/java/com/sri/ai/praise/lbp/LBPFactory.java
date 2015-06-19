@@ -90,7 +90,7 @@ import com.sri.ai.praise.lbp.core.Simplify;
 import com.sri.ai.praise.lbp.core.Sum;
 import com.sri.ai.praise.lbp.core.Union;
 import com.sri.ai.praise.lbp.core.UnionOfIntensionalUniSetsWithUnifiableHeads;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 import com.sri.ai.util.Configuration;
 import com.sri.ai.util.functionalsequence.RefinerIterator;
 

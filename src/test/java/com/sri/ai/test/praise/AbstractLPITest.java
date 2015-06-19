@@ -55,7 +55,7 @@ import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
 import com.sri.ai.grinder.ui.TreeUtil;
 import com.sri.ai.praise.LPIUtil;
 import com.sri.ai.praise.lbp.LBPFactory;
-import com.sri.ai.praise.model.Model;
+import com.sri.ai.praise.model.v0.Model;
 import com.sri.ai.util.Configuration;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.concurrent.BranchAndMerge;

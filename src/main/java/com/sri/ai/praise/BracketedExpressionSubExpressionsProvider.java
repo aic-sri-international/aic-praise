@@ -57,7 +57,7 @@ import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.library.equality.CheapDisequalityModule;
 import com.sri.ai.grinder.library.function.InjectiveModule;
 import com.sri.ai.grinder.library.function.MutuallyExclusiveCoDomainsModule;
-import com.sri.ai.praise.model.IsRandomVariableValueExpression;
+import com.sri.ai.praise.model.v0.IsRandomVariableValueExpression;
 
 /**
  * 

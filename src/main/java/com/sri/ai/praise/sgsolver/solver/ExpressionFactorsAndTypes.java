@@ -45,9 +45,9 @@ import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.sgsolver.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.sgsolver.hogm.antlr.ParsedHOGModel;
-import com.sri.ai.praise.sgsolver.model.HOGMSortDeclaration;
+import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
+import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 
 @Beta
 public class ExpressionFactorsAndTypes implements FactorsAndTypes {

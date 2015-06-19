@@ -46,7 +46,7 @@ import com.sri.ai.grinder.core.AbstractRewriter;
 import com.sri.ai.grinder.core.HasKind;
 import com.sri.ai.grinder.core.KindAttribute;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.praise.model.IsRandomVariableValueExpression;
+import com.sri.ai.praise.model.v0.IsRandomVariableValueExpression;
 
 /**
  * A rewriter for evaluating all "type" syntax function applications to random variable value
