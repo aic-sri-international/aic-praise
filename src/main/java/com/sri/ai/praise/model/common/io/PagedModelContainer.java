@@ -37,14 +37,23 @@
  */
 package com.sri.ai.praise.model.common.io;
 
+import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
 import com.sri.ai.util.base.Pair;
 
@@ -56,6 +65,7 @@ import com.sri.ai.util.base.Pair;
  * @author oreilly
  *
  */
+@Beta
 public class PagedModelContainer {
 	public static final Charset FILE_CHARSET = Charsets.UTF_8;
 	//
@@ -63,9 +73,39 @@ public class PagedModelContainer {
 	private static final String MODEL_SPECIFICATION_PREFIX = "@MODEL:";
 	private static final String MODEL_FIELD_NAME           = "name";
 	private static final String MODEL_FIELD_PARTS          = "parts";
-	private static final String MODEL_FIELD_QUERIES        = "queries";
+	private static final String MODEL_FIELD_QUERIES        = "queries";	
+	//
+	private final String name;
+	private final List<ModelPage> pages;
 	
-	public static String getContainerRepresentation(List<Pair<String, List<String>>> pageContents) {
+	public PagedModelContainer(String name, List<ModelPage> pages) {
+		this.name  = name;
+		this.pages = Collections.unmodifiableList(new ArrayList<>(pages));
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public List<ModelPage> getPages() {
+		return pages;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
+	
+	/**
+	 * Convert a list of pairs, where each pair represents a model and a set of default
+	 * queries associated with it, to the internal paged model container representation.<br>
+	 * NOTE: Intended primarily to get into a form for saving to persistent storage.
+	 * 
+	 * @param pageContents
+	 *        a list of pairs, where each pair represents a model and a set of default queries associated with it.
+	 * @return
+	 */
+	public static String toInternalContainerRepresentation(List<Pair<String, List<String>>> pageContents) {
 		StringBuilder result = new StringBuilder();
 		
 		// Output the models first
@@ -105,6 +145,40 @@ public class PagedModelContainer {
 		}
 		
 		return result.toString();
+	}
+	
+	public static List<ModelPage> getModelPagesFromURI(URI uri) throws IOException {	
+		List<ModelPage> result = new ArrayList<>();
+		
+		List<String> modelSpecifications = new ArrayList<>();
+		Map<String, List<String>> fragments = new HashMap<>();
+		
+		// Need to do this if reading form jar file.
+		if (uri.toString().contains("!")) {
+			final Map<String, String> env = new HashMap<>();
+			final String[] array = uri.toString().split("!");
+			try (FileSystem fs  = FileSystems.newFileSystem(URI.create(array[0]), env)) {
+				Path path = fs.getPath(array[1]);
+				try (Stream<String> lines = Files.lines(path, FILE_CHARSET)) {	
+					getContent(lines, modelSpecifications, fragments);	
+				}
+			}
+		}
+		else {
+			try (Stream<String> lines = Files.lines(Paths.get(uri), FILE_CHARSET)) {	
+				getContent(lines, modelSpecifications, fragments);	
+			}
+		}
+		
+		for (String modelSpecification : modelSpecifications) {
+			String name          = extractField(MODEL_FIELD_NAME, modelSpecification);
+			String model         = extractModel(MODEL_FIELD_PARTS, modelSpecification, fragments);
+			List<String> queries = extractQueries(MODEL_FIELD_QUERIES, modelSpecification, fragments);
+			
+			result.add(new ModelPage(name, model, queries));
+		}
+		
+		return result;
 	}
 	
 	//

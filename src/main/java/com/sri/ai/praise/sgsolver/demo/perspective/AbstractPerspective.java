@@ -55,9 +55,9 @@ import org.reactfx.EventSource;
 
 import com.google.common.annotations.Beta;
 import com.google.common.io.Files;
+import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
-import com.sri.ai.praise.sgsolver.demo.model.ExamplePage;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.util.base.Pair;
 
@@ -178,10 +178,10 @@ public abstract class AbstractPerspective implements Perspective {
 	@Override
 	public void newModel(ExamplePages examples) {
 		newModel(() -> {
-			List<ExamplePage> pages = examples.getPages();
+			List<ModelPage> pages = examples.getPages();
 			Map<Integer, Supplier<ModelPageEditor>> newModelPageIdxs = new HashMap<>();
 			for (int i = 0; i < pages.size(); i++) {
-				ExamplePage page = pages.get(i);
+				ModelPage page = pages.get(i);
 				newModelPageIdxs.put(i, new ModelPageEditorSupplier(page.getModel(), page.getDefaultQueriesToRun()));
 			}
 			return FXCollections.observableMap(newModelPageIdxs);
@@ -245,7 +245,7 @@ public abstract class AbstractPerspective implements Perspective {
 			}
 		});
 		
-		String model = getModel(pageContents);
+		String model = getPagedModelInternalContainerRepresentation(pageContents);
 		
 		try {
 			Files.write(model.getBytes(ExamplePages.FILE_CHARSET), file);
@@ -285,8 +285,8 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	protected abstract ModelPageEditor create(String modelPage, List<String> defaultQueries);
 	
-	protected String getModel(List<Pair<String, List<String>>> pageContents) {
-		String result = ExamplePages.getModel(pageContents);
+	protected String getPagedModelInternalContainerRepresentation(List<Pair<String, List<String>>> pageContents) {
+		String result = ExamplePages.toInternalContainerRepresentation(pageContents);
 		return result;
 	}
 	

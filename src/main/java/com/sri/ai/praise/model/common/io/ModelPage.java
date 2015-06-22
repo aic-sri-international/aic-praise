@@ -37,12 +37,44 @@
  */
 package com.sri.ai.praise.model.common.io;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.google.common.annotations.Beta;
+
 /**
  * Representation of a Model Page (i.e. a complete model) within a PagedModelContainer.
  * 
  * @author oreilly
  *
  */
+@Beta
 public class ModelPage {
+	private final String name;
+	private final String model;
+	private final List<String> defaultQueriesToRun;
+	
+	public ModelPage(String name, String model, List<String> defaultQueriesToRun) {
+		this.name = name;
+		this.model = model;
+		this.defaultQueriesToRun = Collections.unmodifiableList(new ArrayList<>(defaultQueriesToRun));
+	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getModel() {
+		return model;
+	}
+
+	public List<String> getDefaultQueriesToRun() {
+		return defaultQueriesToRun;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
 }
