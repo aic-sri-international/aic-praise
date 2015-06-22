@@ -202,7 +202,7 @@
 				<version>2.12</version>
 				<configuration>
 					<skipTests>${skipUnitTests}</skipTests>
-					<testFailureIgnore>true</testFailureIgnore>
+					<testFailureIgnore>false</testFailureIgnore>
 					<forkMode>always</forkMode>
 					<parallel>methods</parallel>
 					<threadCount>4</threadCount>
