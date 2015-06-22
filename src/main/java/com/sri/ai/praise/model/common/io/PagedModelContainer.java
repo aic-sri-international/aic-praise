@@ -62,11 +62,16 @@ import com.sri.ai.util.base.Pair;
  * (i.e. is neutral of the modeling language) that can be used to read/write 1..n models (i.e. 1 model 
  * per page in the container, usually variants of the same base model) to a single file on disk. 
  * 
+ * NOTE: by convention we are using '.praise' as the file extension name for these types of container files.
+ * 
  * @author oreilly
  *
  */
 @Beta
 public class PagedModelContainer {
+	//
+	public static final String DEFAULT_CONTAINER_FILE_EXTENSION = ".praise";
+	//
 	public static final Charset FILE_CHARSET = Charsets.UTF_8;
 	//
 	private static final String MODEL_FRAGMENT_PREFIX      = "@FRAGMENT:";

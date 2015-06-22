@@ -57,15 +57,17 @@ public enum ModelLanguage {
 		  	Arrays.asList(
 		  			"https://code.google.com/p/aic-praise/wiki/ProbabilisticModels",
 		  			"https://github.com/aic-sri-international/aic-praise/tree/master/src/main/java/com/sri/ai/praise/model/v0",
-		  			"https://github.com/aic-sri-international/aic-praise/wiki/docs/user%20guide.pdf")),		  			
+		  			"https://github.com/aic-sri-international/aic-praise/wiki/docs/user%20guide.pdf"),
+			".model"),		  			
 	HOGMv1("Higher Order Graphical Model Version 1",
 			true,
-		  	"HOGMv1",
+		  	"HOGMv1",		  
 		  	"This refers to the HOGM language developed and used by the newer (than LBP algorithm) for use by the SGDPLL class  of algorithms. "+
 		  	"NOTE: This language while sharing many features of HOGMv0 should be considered a separate language. ",		  	
 		  	Arrays.asList(
 		  			"https://github.com/aic-sri-international/aic-praise/tree/master/src/main/java/com/sri/ai/praise/model/v1",
-		  			"https://github.com/aic-sri-international/aic-praise/wiki/docs/user%20guide.pdf")),
+		  			"https://github.com/aic-sri-international/aic-praise/wiki/docs/user%20guide.pdf"),
+		  	".hogm"),		  	
 	// 
 	// External Languages
 	PMTK3FactorGraph("PMTK3 Factor Graph Format",
@@ -73,7 +75,8 @@ public enum ModelLanguage {
 		  	"PMTK3",
 		  	"PMTK is a collection of Matlab/Octave functions, which includes support for probabilisitc inference.",
 		  	Arrays.asList(
-		  			"https://github.com/probml/pmtk3")),
+		  			"https://github.com/probml/pmtk3"),
+		  	".m"), // i.e. Matlab/Octave files, which are used as input to the PMTK3 interface.
 	HuginDotNet("Hugin NET Language",
 			false,
 			"HuginDotNet",
@@ -84,21 +87,24 @@ public enum ModelLanguage {
 					"http://download.hugin.com/webdocs/manuals/api-manual.pdf",
 					"http://reasoning.cs.ucla.edu/samiam/",
 					"http://reasoning.cs.ucla.edu/samiam/help/",
-					"https://dslpitt.org/genie/")),	  
+					"https://dslpitt.org/genie/"),
+			".net"),	  
 	Church("Church",
 			false,
 			"Church", 
 			"A functional probabilistic programming language, based on Scheme.", 
 			Arrays.asList(
 					"https://probmods.org/index.html", 
-					"https://github.com/probmods")),
+					"https://github.com/probmods"),
+			".church"),
 	UAI("UAI Inference Competition Model Format", 
 			false,
 			"UAI",
 			"A simple propositional text file format to describe UAI Inference Competition problem instances (Markov or Bayesian networks). "  +
 			"The format is a generalization of the Ergo file format initially developed by Noetic systems Ergo software.",
 			Arrays.asList(
-					"http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html"));	
+					"http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html"),
+			".uai");	
 	
 	//
 	//	
@@ -122,6 +128,10 @@ public enum ModelLanguage {
 		return urls;
 	}
 	
+	public String getDefaultFileExtension() {
+		return defaultFileExtension;
+	}
+	
 	//
 	//
 	private String  name;
@@ -129,12 +139,14 @@ public enum ModelLanguage {
 	private String  code;
 	private String  description;
 	private List<String> urls;
+	private String  defaultFileExtension;
 	//
-	private ModelLanguage(String name, boolean internal, String code, String description, List<String> urls) {
-		this.name        = name;
-		this.internal    = internal;
-		this.code        = code;
-		this.description = description;
-		this.urls        = Collections.unmodifiableList(urls);
+	private ModelLanguage(String name, boolean internal, String code, String description, List<String> urls, String defaultFileExtension) {
+		this.name                 = name;
+		this.internal             = internal;
+		this.code                 = code;
+		this.description          = description;
+		this.urls                 = Collections.unmodifiableList(urls);
+		this.defaultFileExtension = defaultFileExtension;
 	}
 }

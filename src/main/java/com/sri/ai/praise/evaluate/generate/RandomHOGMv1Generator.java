@@ -75,11 +75,11 @@ public class RandomHOGMv1Generator {
 		int          domainSize = 1000;       // -s
 		PrintStream  out        = System.out; // -o
 		// Required
-		int numberPotentials = 5; // -p
-		int numberVariables  = 8; // -v
-		int numberConstants  = 4; // -c
-		int formulaDepth     = 2; // -d
-		int formulaBreadth   = 2; // -b		
+		int numberPotentials; // -p
+		int numberVariables;  // -v
+		int numberConstants;  // -c
+		int formulaDepth;     // -d
+		int formulaBreadth;   // -b		
 		
 		public void close() throws IOException {
 			out.flush();
@@ -147,7 +147,7 @@ public class RandomHOGMv1Generator {
 		// Optional
 		OptionSpec<Integer> randomSeed = parser.accepts("r", "random seed.").withRequiredArg().ofType(Integer.class);
 		OptionSpec<Integer> domainSize = parser.accepts("s", "domain size.").withRequiredArg().ofType(Integer.class).defaultsTo(result.domainSize);
-		OptionSpec<File>    outputFile = parser.accepts("o", "output file name.").withRequiredArg().ofType(File.class);
+		OptionSpec<File>    outputFile = parser.accepts("o", "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 		// Required
 		OptionSpec<Integer> numPotentials = parser.accepts("p", "# potentials to generate.").withRequiredArg().required().ofType(Integer.class);
 		OptionSpec<Integer> numVariables  = parser.accepts("v", "# variables to use in the generation process.").withRequiredArg().required().ofType(Integer.class);
