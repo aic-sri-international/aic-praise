@@ -40,30 +40,11 @@ package com.sri.ai.praise.lang.translate;
 import com.google.common.annotations.Beta;
 
 /**
- * Interface to be implemented by all Language Translators.
  * 
  * @author oreilly
  *
  */
 @Beta
-public interface Translator {
-// TODO - API	
-	// int getNumberOfOutputs();
-	// String[] getOutputFileExtensions(); // i.e. can be >= 1 output files generated
-	// translate(File inputModelFile, PrintWriter[] outputs);
-	
-// TODO - implementations
-	// Church -> HOGMv0
-	// Church -> HOGMv1
-	// UAI    -> HOGMv1
-	// HOGMv0 -> PMTK3
-	// HOGMv0 -> HuginDotNet
-	// HOGMv1 -> PMTK3
-	// HOGMv1 -> HuginDotNet
-	// HOGMv1 -> UAI
-	//
-	// PagedModelContainer -> Church
-	// PagedModelContainer -> HOGMv1
-	// Church              -> PagedModelContainer
-	// HOGMv1              -> PagedModelContainer
+public class HOGMv1_to_UAI_Translator implements Translator {
+
 }
