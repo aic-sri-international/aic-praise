@@ -88,7 +88,7 @@ public class NESY2015RandomHOGMv1Generator {
 				RandomHOGMv1Generator.main(new String[] {
 						"-r="+_seed,
 						"-s="+cardinality,
-						"-o="+new File(hogmv1ProblemDirectory, "sg_random_model_"+outputFileSuffix+ModelLanguage.HOGMv1.getDefaultFileExtension()),
+						"-o="+new File(hogmv1ProblemDirectory, "sg_random_model"+outputFileSuffix+ModelLanguage.HOGMv1.getDefaultFileExtension()).getAbsolutePath(),
 						"-p="+numberOfPotentials,
 						"-v="+numberOfVariables,
 						"-c="+numberOfConstants,
