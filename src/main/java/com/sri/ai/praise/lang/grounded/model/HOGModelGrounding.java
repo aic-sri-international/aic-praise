@@ -67,11 +67,17 @@ import com.sri.ai.util.math.Rational;
 public class HOGModelGrounding {
 	
 	public interface Listener {
+		//
+		// Preamble information
 		void numberGroundVariables(int number);
 		void groundVariableCardinality(int variableIndex, int cardinality);
 		void numberFactors(int number);
 		void factorParticipants(int factorIndex, int[] variableIndexes);
+		//
+		// Function tables
 		void factorValue(int factorIndex, int numberFactorValues, int valueIndex, Rational value);
+		//
+		// Indicates grounding complete
 		void groundingComplete();
 	}
 	
@@ -213,11 +219,11 @@ public class HOGModelGrounding {
 					mrn.increment();
 				}				
 	    	} while (didIncrement);
+	    	
+			factorIndex++;
 	    }
 		
 		listener.groundingComplete();
-		
-		factorIndex++;
 	}
 	
 	//

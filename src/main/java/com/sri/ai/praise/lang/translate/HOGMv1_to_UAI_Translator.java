@@ -58,14 +58,18 @@ import com.sri.ai.util.Util;
  */
 @Beta
 public class HOGMv1_to_UAI_Translator implements Translator {
-	private static final String[] _inputFileExtensions  = new String[] {ModelLanguage.HOGMv1.getDefaultFileExtension()};
 	private static final String[] _outputFileExtensions = new String[] {ModelLanguage.UAI.getDefaultFileExtension(),
 		                                                                ModelLanguage.UAI.getDefaultFileExtension()+".evid"}; // The associated evidence file (must exist as expected by UAI propositional solvers)
 	//
 	// START-Translator
 	@Override
-	public String[] getInputFileExtensions() {
-		return _inputFileExtensions;
+	public ModelLanguage getSource() {
+		return ModelLanguage.HOGMv1;
+	}
+	
+	@Override 
+	public ModelLanguage getTarget() {
+		return ModelLanguage.UAI;
 	}
 	
 	@Override
