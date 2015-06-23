@@ -9,12 +9,7 @@ __Note:__ While PMTK3 is dependent on several Matlab toolboxes, for the probabil
 * Install the Matlab xunit library for use with the aicpraise PMTK3 extension project (used to write validation tests within this project).
 * Download and install the latest version of PMTK3.
 * Extract PMTK3 onto your machine (ideally C:\pmtk3).
-* Check out a workspace for:
-    http:code.google.com/p/aic-praise/source/browse/trunk/src/main/resources/pmtk3/projects/aicpraise
-    under:
-    C:\pmtk3\projects
-                     \aicpraise
-    this will ensure the aicpraise PMTK3 extension project is visible in Matlab when the PMTK3 project is initialized (see later for details). 
+* Check out a workspace for:<br>`https://github.com/aic-sri-international/aic-praise/tree/master/src/main/java/com/sri/ai/praise`<br>`under:`<br>`C:\pmtk3\projects\aicpraise`<br>this will ensure the aicpraise PMTK3 extension project is visible in Matlab when the PMTK3 project is initialized (see later for details). 
 * Follow the PMTK3 installation instructions. 
 
 #### Running Exported PRAiSE Models in PMTK3
