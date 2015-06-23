@@ -187,8 +187,9 @@ public class CompareSGSolverToUAISolver {
 				if (_ground) {
 					long startGroundingToUAI = System.currentTimeMillis();
 					endGroundingToUAI        = System.currentTimeMillis() - startGroundingToUAI;
-					
-					HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiProblemDirectory, "sgproblem_"+uaiFileSuffix+".uai")));
+			
+// TODO - replicate functionality in re-factoring			
+//					HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(new File(uaiProblemDirectory, "sgproblem_"+uaiFileSuffix+".uai")));
 										
 					File uaiSolution = new File(uaiSolutionDirectory, "sgproblem_"+uaiFileSuffix+".uai.MAR");					
 					try (

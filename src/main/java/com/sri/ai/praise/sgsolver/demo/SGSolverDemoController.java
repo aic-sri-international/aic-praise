@@ -39,6 +39,9 @@ package com.sri.ai.praise.sgsolver.demo;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,9 +50,6 @@ import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
-
-import org.controlsfx.control.PopOver;
-import org.controlsfx.control.PopOver.ArrowLocation;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -81,6 +81,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.controlsfx.control.PopOver;
+import org.controlsfx.control.PopOver.ArrowLocation;
+
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
@@ -91,12 +94,10 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
-import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.lang.translate.HOGMv1_to_UAI_Translator;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
-import com.sri.ai.praise.model.v1.export.UAIHOGModelGroundingListener;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.model.v1.imports.uai.UAIEvidenceReader;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
@@ -106,8 +107,6 @@ import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.praise.sgsolver.demo.perspective.ChurchPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.HOGMPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.Perspective;
-import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.util.math.Rational;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
@@ -588,13 +587,21 @@ public class SGSolverDemoController {
     private void exportUAIModel(ActionEvent ae) {
     	try {
 	    	callCurrentModelPageEditor(modelPage -> {
-	    		File uaiFile = uaiFileChooser.showSaveDialog(mainStage);
-	    		if (uaiFile != null) {
-	    			HOGMParserWrapper parser          = new HOGMParserWrapper();
-	    			ParsedHOGModel    parsedModel     = parser.parseModel(modelPage.getCurrentPageContents());
-	    			FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
-	    			
-	    			HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(uaiFile));
+	    		File uaiModelFile = uaiFileChooser.showSaveDialog(mainStage);
+	    		if (uaiModelFile != null) {
+	    			if (!uaiModelFile.getName().endsWith(ModelLanguage.UAI.getDefaultFileExtension())) {
+	    				uaiModelFile = new File(uaiModelFile.getParent(), uaiModelFile.getName()+ModelLanguage.UAI.getDefaultFileExtension());
+	    			}
+	    			File uaiEvidenceFile = new File(uaiModelFile.getParent(), uaiModelFile.getName()+ModelLanguage.UAI.getDefaultFileExtension()+".evid");
+	    			try (PrintWriter uaiModelWriter    = new PrintWriter(uaiModelFile);
+	    				 PrintWriter uaiEvidenceWriter = new PrintWriter(uaiEvidenceFile)) {
+	    				HOGMv1_to_UAI_Translator translator = new HOGMv1_to_UAI_Translator();
+	    				translator.translate(new Reader[] {new StringReader(modelPage.getCurrentPageContents())}, 
+	    						             new PrintWriter[] {uaiModelWriter, uaiEvidenceWriter});
+	    			}
+	    			catch (Throwable th) {
+	    				FXUtil.exception(th);
+	    			}
 	    		}
 	    	});
     	} catch (Throwable th) {

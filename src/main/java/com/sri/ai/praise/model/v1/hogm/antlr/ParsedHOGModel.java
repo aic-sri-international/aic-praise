@@ -66,6 +66,7 @@ public class ParsedHOGModel {
 	
 	public ParsedHOGModel(String inputModel, List<HOGMSortDeclaration> sorts, List<ConstantDeclaration> constants, List<HOGMRandomVariableDeclaration> randoms, List<Expression> conditionedPotentials) {
 		this.inputModel = inputModel;
+		// Ensure the in-built sorts are included.
 		if (!sorts.contains(HOGMSortDeclaration.IN_BUILT_BOOLEAN)) {
 			this.sorts.add(HOGMSortDeclaration.IN_BUILT_BOOLEAN);
 		}

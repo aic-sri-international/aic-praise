@@ -80,12 +80,14 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
  * 
  * </pre>
  * 
- * Note: There is one predefined in-built sort declaration: <br>
+ * Note: There two predefined in-built sort declaration: <br>
  * 
  * <pre>
  * 
  * // For boolean valued types (by default the range of random variables).
  * sort(Boolean, 2, {false, true})
+ * // For numeric types
+ * sort(Number, Unknown, {}) 
  * </pre>
  * 
  * that does not need to be declared explicitly in a model declaration.

@@ -37,16 +37,14 @@
  */
 package com.sri.ai.praise.model.v1.export;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
@@ -54,26 +52,24 @@ import com.sri.ai.util.math.Rational;
 
 @Beta
 public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener {
-	private File outputUAIFile          = null;
-	private File tempPreambleFile       = null;
-	private File tempFunctionTablesFile = null;
+	private PrintWriter uaiModelOutput    = null;
+	private PrintWriter uaiEvidenceOutput = null;
+	private File tempPreambleFile         = null;
+	private File tempFunctionTablesFile   = null;
 	
 	private int    numberVariables;
 	private Writer preamble       = null;
 	private Writer functionTables = null;
 	
-	public UAIHOGModelGroundingListener(File outputFile) {
-		this.outputUAIFile = outputFile;
+	public UAIHOGModelGroundingListener(PrintWriter uaiModelOutput, PrintWriter uaiEvidenceOutput) {
+		this.uaiModelOutput    = uaiModelOutput;
+		this.uaiEvidenceOutput = uaiEvidenceOutput;
 		try {	
-			if (!outputUAIFile.getName().endsWith(".uai")) {
-				outputUAIFile = new File(outputUAIFile.getParent(), outputUAIFile.getName()+".uai");
-			}
-			
 			tempPreambleFile       = File.createTempFile("preamble", "uai");
 			tempFunctionTablesFile = File.createTempFile("factorTables", "uai");
 			
-			preamble       = new OutputStreamWriter(new FileOutputStream(tempPreambleFile), StandardCharsets.UTF_8);
-			functionTables = new OutputStreamWriter(new FileOutputStream(tempFunctionTablesFile), StandardCharsets.UTF_8);
+			preamble       = new OutputStreamWriter(new FileOutputStream(tempPreambleFile));
+			functionTables = new OutputStreamWriter(new FileOutputStream(tempFunctionTablesFile));
 		}
 		catch (IOException ioe) {
 			throw new RuntimeException(ioe);
@@ -137,25 +133,22 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 			preamble.flush();preamble.close();
 			functionTables.flush();functionTables.close();
 			
-			try (OutputStream uaiOut               = new BufferedOutputStream(new FileOutputStream(outputUAIFile));
-				 OutputStreamWriter uaiEvidenceOut = new OutputStreamWriter(new FileOutputStream(new File(outputUAIFile.getParent(), outputUAIFile.getName()+".evid")), StandardCharsets.UTF_8);
-				 InputStream  fisPreamble          = new FileInputStream(tempPreambleFile);
-				 InputStream  fisFunctionTables    = new FileInputStream(tempFunctionTablesFile);) {
+			try (Reader fisPreamble       = new FileReader(tempPreambleFile);
+				 Reader fisFunctionTables = new FileReader(tempFunctionTablesFile);) {
 				
-				byte[] buffer = new byte[1024];
+				char[] buffer = new char[1024];
 				int read;
 				while ((read = fisPreamble.read(buffer)) != -1) {
-					uaiOut.write(buffer, 0, read);
+					uaiModelOutput.write(buffer, 0, read);
 				}
 				while ((read = fisFunctionTables.read(buffer)) != -1) {
-					uaiOut.write(buffer, 0, read);
+					uaiModelOutput.write(buffer, 0, read);
 				}
+				uaiModelOutput.flush();
 				
 				// Indicate no observed variables in the evidence file
-				uaiEvidenceOut.write("0");
-				
-				uaiOut.flush();
-				uaiEvidenceOut.flush();
+				uaiEvidenceOutput.write("0");
+				uaiEvidenceOutput.flush();
 			}
 		
 			tempPreambleFile.delete();

@@ -37,14 +37,60 @@
  */
 package com.sri.ai.praise.lang.translate;
 
+import java.io.PrintWriter;
+import java.io.Reader;
+
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.model.v1.export.UAIHOGModelGroundingListener;
+import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
+import com.sri.ai.util.Util;
 
 /**
+ * Translator: HOGMv1->UAI
  * 
  * @author oreilly
  *
  */
 @Beta
 public class HOGMv1_to_UAI_Translator implements Translator {
-
+	private static final String[] _inputFileExtensions  = new String[] {ModelLanguage.HOGMv1.getDefaultFileExtension()};
+	private static final String[] _outputFileExtensions = new String[] {ModelLanguage.UAI.getDefaultFileExtension(),
+		                                                                ModelLanguage.UAI.getDefaultFileExtension()+".evid"}; // The associated evidence file (must exist as expected by UAI propositional solvers)
+	//
+	// START-Translator
+	@Override
+	public String[] getInputFileExtensions() {
+		return _inputFileExtensions;
+	}
+	
+	@Override
+	public int getNumberOfOutputs() {
+		return 2;
+	}
+	
+	@Override
+	public String[] getOutputFileExtensions() {
+		return _outputFileExtensions;
+	}
+	
+	@Override
+	public void translate(Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
+		//
+		// 1. Get the HOGM Model Definition and Parse It
+		String hogmv1Model = Util.readAll(inputModelReaders[0]);
+		HOGMParserWrapper parser          = new HOGMParserWrapper();
+		ParsedHOGModel    parsedModel     = parser.parseModel(hogmv1Model);
+		FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
+		
+		//
+		// 2. Ground out the HOGM Model and translate it to the UAI model format
+		HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
+	}
+	// END-Translator
+	//
 }
