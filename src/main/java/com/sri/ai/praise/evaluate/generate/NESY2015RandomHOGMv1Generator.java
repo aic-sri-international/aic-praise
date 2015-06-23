@@ -64,9 +64,13 @@ public class NESY2015RandomHOGMv1Generator {
 	
 	public static void main(String[] args) {
 		if (args.length != 1) {
-			throw new IllegalArgumentException("HOGMv1 output directory must be specified");
+			throw new IllegalArgumentException("t Root NESY2015 model output directory musbe specified");
 		}
-		File hogmv1ProblemDirectory= validateDirectory(args[0]);
+		File rootNESY2015OutputDirectory = validateDirectory(args[0]);
+		File hogmv1ProblemDirectory      = new File(rootNESY2015OutputDirectory, ModelLanguage.HOGMv1.getCode());
+		if (!hogmv1ProblemDirectory.exists()) {
+			hogmv1ProblemDirectory.mkdir();
+		}
 		
 		for (int p = 0; p < _params.length; p++) {
 			int numberOfPotentials = _params[p][_potentialIdx];
