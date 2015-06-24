@@ -35,66 +35,54 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.lang.translate;
+package com.sri.ai.praise.lang.translate.impl;
 
 import java.io.PrintWriter;
-import java.io.Reader;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lang.ModelLanguage;
-import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
-import com.sri.ai.praise.model.v1.export.UAIHOGModelGroundingListener;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
-import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
-import com.sri.ai.util.Util;
+import com.sri.ai.praise.lang.grounded.transform.XFormMarkovToBayes;
+import com.sri.ai.praise.model.v1.export.HuginOutput;
+import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 
 /**
- * Translator: HOGMv1->UAI
+ * Translator: UAI->HuginDotNet
  * 
  * @author oreilly
  *
  */
 @Beta
-public class HOGMv1_to_UAI_Translator implements Translator {
-	private static final String[] _outputFileExtensions = new String[] {ModelLanguage.UAI.getDefaultFileExtension(),
-		                                                                ModelLanguage.UAI.getDefaultFileExtension()+".evid"}; // The associated evidence file (must exist as expected by UAI propositional solvers)
+public class UAI_to_HuginDotNet_Translator extends AbstractUAI_to_Target_Translator {
 	//
-	// START-Translator
-	@Override
-	public ModelLanguage getSource() {
-		return ModelLanguage.HOGMv1;
-	}
-	
+	// START-Translator	
 	@Override 
 	public ModelLanguage getTarget() {
-		return ModelLanguage.UAI;
-	}
-	
-	@Override
-	public int getNumberOfOutputs() {
-		return 2;
-	}
-	
-	@Override
-	public String[] getOutputFileExtensions() {
-		return _outputFileExtensions;
-	}
-	
-	@Override
-	public void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
-		//
-		// 1. Get the HOGM Model Definition and Parse It
-		String hogmv1Model = Util.readAll(inputModelReaders[0]);
-		HOGMParserWrapper parser          = new HOGMParserWrapper();
-		ParsedHOGModel    parsedModel     = parser.parseModel(hogmv1Model);
-		FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
-		
-		//
-		// 2. Ground out the HOGM Model and translate it to the UAI model format
-		HOGModelGrounding.ground(factorsAndTypes, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
+		return ModelLanguage.HuginDotNet;
 	}
 	// END-Translator
 	//
+	
+	@Override
+	protected void translate(String inputIdentifier, UAIModel uaiModel, PrintWriter[] translatedOutputs) throws Exception {	
+		PrintWriter huginDotNetModelWriter = translatedOutputs[0];
+		
+		// 
+		// 1. Collect the data required by the Hugin Output utility.
+		Map<Integer, String>       varIdxToName        = new LinkedHashMap<>();
+		Map<Integer, List<String>> varIdxToRangeValues = new LinkedHashMap<>();
+		for (int i = 0; i < uaiModel.numberVariables(); i++) {
+			final String varName = "v"+i;
+			varIdxToName.put(i, varName);
+			varIdxToRangeValues.put(i, IntStream.range(0, uaiModel.cardinality(i)).boxed().map(cValue -> varName+"c"+cValue).collect(Collectors.toList()));
+		}
+		
+		//
+		// 2. Transform the UAI Markov Network representation to the Hugin dot Net Bayesian Network format.
+		XFormMarkovToBayes.transform(uaiModel, new HuginOutput(huginDotNetModelWriter, varIdxToName, varIdxToRangeValues));
+	}
 }

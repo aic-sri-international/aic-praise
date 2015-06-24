@@ -35,10 +35,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.lang.translate;
+package com.sri.ai.praise.lang.translate.impl;
 
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -52,7 +51,6 @@ import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 import com.sri.ai.praise.model.v1.imports.uai.UAIUtil;
 
 /**
@@ -62,30 +60,22 @@ import com.sri.ai.praise.model.v1.imports.uai.UAIUtil;
  *
  */
 @Beta
-public class UAI_to_HOGMv1_Translator implements Translator {
+public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 	//
-	// START-Translator
-	@Override
-	public ModelLanguage getSource() {
-		return ModelLanguage.UAI;
-	}
-	
+	// START-Translator	
 	@Override 
 	public ModelLanguage getTarget() {
 		return ModelLanguage.HOGMv1;
 	}
-	
-// TODO - evidence file should be part of the inputs when translating (UAIEvidenceReader)?
+	// END-Translator
+	//
 	
 	@Override
-	public void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {			
-		//
-		// 1. Instantiate the source UAI model, including the model and its evidence
-		UAIModel    uaiModel          = UAIModelReader.read(inputModelReaders[0]);
+	protected void translate(String inputIdentifier, UAIModel uaiModel, PrintWriter[] translatedOutputs) throws Exception {			
 		PrintWriter hogmv1ModelWriter = translatedOutputs[0];
 		
 		//
-		// 2. Output some comments with respect to the input model
+		// 1. Output some comments with respect to the input model
 		hogmv1ModelWriter.println("// IMPORT OF: "+inputIdentifier);
 		hogmv1ModelWriter.println("//");
 		hogmv1ModelWriter.println("// #variables                                = "+uaiModel.numberVariables());
@@ -96,7 +86,7 @@ public class UAI_to_HOGMv1_Translator implements Translator {
 		hogmv1ModelWriter.println("// Total #entries across all function tables = "+uaiModel.totalNumberEntriesForAllFunctionTables());
 		
 		//
-		// 3. Output the sort and random variable declarations
+		// 2. Output the sort and random variable declarations
 		List<String> sorts   = new ArrayList<>();
 		List<String> randoms = new ArrayList<>(); 
 		for (int varIdx = 0; varIdx < uaiModel.numberVariables(); varIdx++) {
@@ -125,7 +115,7 @@ public class UAI_to_HOGMv1_Translator implements Translator {
 		hogmv1ModelWriter.println();
 		
 		//
-		// 4. Output the potentials
+		// 3. Output the potentials
 		hogmv1ModelWriter.println();
 		hogmv1ModelWriter.println("// RULES:");
 		
@@ -162,7 +152,7 @@ public class UAI_to_HOGMv1_Translator implements Translator {
 		}
 		
 		//
-		// 5. Output some stats related to the translation to potentials
+		// 4. Output some stats related to the translation to potentials
 		hogmv1ModelWriter.println();
 		hogmv1ModelWriter.println("// STATS: ");
 		hogmv1ModelWriter.println("// Table compression ratio            = "+(totalCompressedEntries/totalNumberUniqueEntries));

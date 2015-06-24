@@ -96,7 +96,7 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
-import com.sri.ai.praise.lang.translate.HOGMv1_to_UAI_Translator;
+import com.sri.ai.praise.lang.translate.impl.HOGMv1_to_UAI_Translator;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.imports.uai.UAIEvidenceReader;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;

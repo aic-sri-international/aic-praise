@@ -42,6 +42,9 @@ import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.lang.translate.impl.HOGMv1_to_UAI_Translator;
+import com.sri.ai.praise.lang.translate.impl.UAI_to_HOGMv1_Translator;
+import com.sri.ai.praise.lang.translate.impl.UAI_to_HuginDotNet_Translator;
 import com.sri.ai.util.base.Pair;
 
 /**
@@ -55,15 +58,16 @@ public class TranslatorFactory {
 	public static final Map<Pair<ModelLanguage, ModelLanguage>, Class<?>> _translators = new HashMap<>();
 	static {
 		_translators.put(new Pair<>(ModelLanguage.HOGMv1, ModelLanguage.UAI), HOGMv1_to_UAI_Translator.class);
+		//
+		_translators.put(new Pair<>(ModelLanguage.UAI, ModelLanguage.HOGMv1),      UAI_to_HOGMv1_Translator.class);
+		_translators.put(new Pair<>(ModelLanguage.UAI, ModelLanguage.HuginDotNet), UAI_to_HuginDotNet_Translator.class);
 //TODO - implementations of:
 // Church -> HOGMv0
 // Church -> HOGMv1
-// UAI    -> HOGMv1
-// UAI    -> HuginDotNet
 // HOGMv0 -> PMTK3
 // HOGMv0 -> HuginDotNet
 // HOGMv1 -> PMTK3
-// HOGMv1 -> HuginDotNet
+// HOGMv1 -> HuginDotNet		
 //
 // PagedModelContainer -> Church
 // PagedModelContainer -> HOGMv1
