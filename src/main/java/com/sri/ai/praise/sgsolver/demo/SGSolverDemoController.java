@@ -476,7 +476,7 @@ public class SGSolverDemoController {
     		File uaiFile = uaiFileChooser.showOpenDialog(mainStage);
     		if (uaiFile != null) {
     			UAIModel model = UAIModelReader.read(uaiFile);
-    			UAIEvidenceReader.read(model);
+    			UAIEvidenceReader.read(uaiFile, model);
     			
     			StringJoiner sj = new StringJoiner("\n");
     			sj.add("// IMPORT OF: "+uaiFile.getName());
@@ -596,7 +596,7 @@ public class SGSolverDemoController {
 	    			try (PrintWriter uaiModelWriter    = new PrintWriter(uaiModelFile);
 	    				 PrintWriter uaiEvidenceWriter = new PrintWriter(uaiEvidenceFile)) {
 	    				HOGMv1_to_UAI_Translator translator = new HOGMv1_to_UAI_Translator();
-	    				translator.translate(new Reader[] {new StringReader(modelPage.getCurrentPageContents())}, 
+	    				translator.translate("SGSolverDemo", new Reader[] {new StringReader(modelPage.getCurrentPageContents())}, 
 	    						             new PrintWriter[] {uaiModelWriter, uaiEvidenceWriter});
 	    			}
 	    			catch (Throwable th) {

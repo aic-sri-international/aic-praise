@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,15 +101,20 @@ public class UAIMARSolver {
 		}
 		int maxSolverTimeInSeconds = Integer.parseInt(args[2]);
 		
-		List<UAIModel> models = new ArrayList<>();
+		List<UAIModel> models           = new ArrayList<>();
+		Map<UAIModel, File> modelToFile = new HashMap<>();
 		
 		if (uaiInput.isDirectory()) {
 			for (File uaiFile : uaiInput.listFiles((dir, name) -> name.endsWith(".uai"))) {
-				models.add(read(uaiFile, solutionDir));
+				UAIModel model = read(uaiFile, solutionDir);
+				models.add(model);
+				modelToFile.put(model, uaiFile);
 			}
 		}
 		else {
-			models.add(read(uaiInput, solutionDir));
+			UAIModel model = read(uaiInput, solutionDir);
+			models.add(model);
+			modelToFile.put(model, uaiInput);
 		}
 		
 		// Sort based on what we consider to be the simplest to hardest
@@ -123,14 +129,14 @@ public class UAIMARSolver {
 		System.out.println("#models read="+models.size());
 		final AtomicInteger cnt = new AtomicInteger(1);
 		models.stream().forEach(model -> {
-			System.out.println("Starting to Solve: "+model.getFile().getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
+			System.out.println("Starting to Solve: "+modelToFile.get(model).getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
 			long start = System.currentTimeMillis();
 			boolean solved = solve(model, model.getEvidence(), model.getMARSolution(), maxSolverTimeInSeconds);
 			long took = (System.currentTimeMillis() - start);
 			System.out.println("---- Took "+took+"ms. solved="+solved);
 			
-			modelSolvedStatus.put(model.getFile().getName(), solved);
-			modelSolvedTime.put(model.getFile().getName(), took);
+			modelSolvedStatus.put(modelToFile.get(model).getName(), solved);
+			modelSolvedTime.put(modelToFile.get(model).getName(), took);
 		});
 		
 		System.out.println("MODELS SOLVE STATUS");
@@ -371,7 +377,7 @@ public class UAIMARSolver {
 	private static UAIModel read(File uaiFile, File solutionDir) throws IOException {
 		UAIModel model = UAIModelReader.read(uaiFile);
 		
-		UAIEvidenceReader.read(model);
+		UAIEvidenceReader.read(uaiFile, model);
 		
 		// Result is specified in a separate file. This file has the same name as the original network 
 		// file but with an added .MAR suffix. For instance, problem.uai will have a MAR result file problem.uai.MAR. 

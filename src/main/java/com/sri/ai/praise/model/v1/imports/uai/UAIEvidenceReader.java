@@ -56,12 +56,12 @@ import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.split;
 @Beta
 public class UAIEvidenceReader {
 
-	public static void read(UAIModel model) throws IOException {
+	public static void read(File modelFile, UAIModel modelFromFile) throws IOException {
 		// Evidence is specified in a separate file. This file has the same name as the original network 
 		// file but with an added .evid suffix. For instance, problem.uai will have evidence in problem.uai.evid. 
-		File evidenceFile = new File(model.getFile().getAbsolutePath()+".evid");
+		File evidenceFile = new File(modelFile.getAbsolutePath()+".evid");
 		if (!evidenceFile.exists()) {
-			System.err.println("Model "+model.getFile().getName()+" does not have a default evidence file associated with it.");
+			System.err.println("Model "+modelFile.getName()+" does not have a default evidence file associated with it.");
 		}
 		else {
 			// The evidence file consists of a single line. The line will begin with the number of observed variables in the sample, 
@@ -74,7 +74,7 @@ public class UAIEvidenceReader {
 				}
 				else {
 					for (int i = 1; i < evidence.length; i += 2) {
-						model.addEvidence(Integer.parseInt(evidence[i]), Integer.parseInt(evidence[i+1]));
+						modelFromFile.addEvidence(Integer.parseInt(evidence[i]), Integer.parseInt(evidence[i+1]));
 					}
 				}
 			}

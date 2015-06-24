@@ -37,7 +37,6 @@
  */
 package com.sri.ai.praise.model.v1.imports.uai;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -56,7 +55,6 @@ import com.sri.ai.praise.lang.grounded.markov.MarkovNetwork;
  */
 @Beta
 public class UAIModel implements MarkovNetwork {	
-	private File file;
 	private UAIModelType type;
 	private Map<Integer, Integer> varIdxToCardinality                        = new LinkedHashMap<>();
 	private Map<Integer, Integer> evidence                                   = new LinkedHashMap<>();
@@ -66,11 +64,10 @@ public class UAIModel implements MarkovNetwork {
 	private Map<Integer, FunctionTable> tableInstanceIdxToTable              = new LinkedHashMap<>();
 	private Map<Integer, List<Double>> marSolution                           = new LinkedHashMap<>();
 	
-	public UAIModel(File file, UAIModelType type, 
+	public UAIModel(UAIModelType type, 
 			Map<Integer, Integer> varIdxToCardinality,
 			List<List<Integer>> tableInstanceVariableIndexes,
 			Map<Integer, FunctionTable> tableIdxToTable) {
-		this.file = file;
 		this.type = type;
 		this.varIdxToCardinality.putAll(varIdxToCardinality);
 		this.tableInstanceVariableIndexes.addAll(tableInstanceVariableIndexes);
@@ -85,10 +82,6 @@ public class UAIModel implements MarkovNetwork {
 			}
 			tableInstanceIndexesForUniqueTable.add(entry.getKey());
 		}	
-	}
-	
-	public File getFile() {
-		return file;
 	}
 	
 	public UAIModelType getType() {
@@ -179,6 +172,6 @@ public class UAIModel implements MarkovNetwork {
 	
 	@Override
 	public String toString() {
-		return "UAI model file="+getFile().getName()+", #vars="+numberVariables()+", #tables="+numberTables()+", #unique function tables="+numberUniqueFunctionTables()+", ratio="+ratioUniqueTablesToTables();
+		return "UAI model #vars="+numberVariables()+", #tables="+numberTables()+", #unique function tables="+numberUniqueFunctionTables()+", ratio="+ratioUniqueTablesToTables();
 	}
 }

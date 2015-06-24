@@ -43,20 +43,6 @@ import java.io.Reader;
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lang.ModelLanguage;
 
-//TODO - implementations
-	// Church -> HOGMv0
-	// Church -> HOGMv1
-	// UAI    -> HOGMv1
-	// HOGMv0 -> PMTK3
-	// HOGMv0 -> HuginDotNet
-	// HOGMv1 -> PMTK3
-	// HOGMv1 -> HuginDotNet
-	// HOGMv1 -> UAI
-	//
-	// PagedModelContainer -> Church
-	// PagedModelContainer -> HOGMv1
-	// Church              -> PagedModelContainer
-	// HOGMv1              -> PagedModelContainer
 /**
  * Interface to be implemented by all Language Translators.
  * 
@@ -91,6 +77,8 @@ public interface Translator {
 	/**
 	 * Used if the translator's inputs are to be read from a file.
 	 * 
+	 * NOTE: the first input file extension is to always be the main model file, others are considered supporting.
+	 * 
 	 * @return the unique file extensions to use for each input (# file extensions must = number of inputs).
 	 */
 	default String[] getInputFileExtensions() {
@@ -110,6 +98,8 @@ public interface Translator {
 	/**
 	 * Used if the translator's outputs are to be written to a file. 
 	 * 
+	 * NOTE: the first output file extension is to always be the main model file, others are considered supporting.
+	 * 
 	 * @return the unique file extensions to use for each output (# file extensions must = number of outputs).
 	 */
 	default String[] getOutputFileExtensions() {
@@ -119,6 +109,8 @@ public interface Translator {
 	/**
 	 * Perform the translation from an input model to an output model.
 	 * 
+	 * @param inputIdentifier
+	 *        an identifying name for the input.
 	 * @param inputModelReaders
 	 *        the readers for the input model definitions.
 	 * @param translatedOutputs
@@ -126,5 +118,5 @@ public interface Translator {
 	 * @throws Exception
 	 *        exceptions handling to be performed outside of the translator.
 	 */
-	void translate(Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception;
+	void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception;
 }

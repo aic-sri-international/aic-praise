@@ -41,6 +41,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,14 +63,17 @@ import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.split;
 public class UAIModelReader {
 	
 	public static UAIModel read(File modelFile) throws IOException {
+		return read(new FileReader(modelFile));
+	}
+	
+	public static UAIModel read(Reader modelReader) throws IOException {
 		UAIModel result = null;
 		
-		try (BufferedReader br = new BufferedReader(new FileReader(modelFile))) {
+		try (BufferedReader br = new BufferedReader(modelReader)) {
 			Preamble     preamble                       = readPreamble(br);		
 			Map<Integer, FunctionTable> tableIdxToTable = readFunctionTables(preamble, br);
 		
-			result = new UAIModel(modelFile, preamble.type, preamble.variableToCardinality,
-									preamble.tableVariableIdxs, tableIdxToTable);
+			result = new UAIModel(preamble.type, preamble.variableToCardinality, preamble.tableVariableIdxs, tableIdxToTable);
 		}
 		
 		return result;
