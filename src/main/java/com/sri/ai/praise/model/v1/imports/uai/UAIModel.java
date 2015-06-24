@@ -38,6 +38,7 @@
 package com.sri.ai.praise.model.v1.imports.uai;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,11 +58,14 @@ import com.sri.ai.praise.lang.grounded.markov.MarkovNetwork;
 public class UAIModel implements MarkovNetwork {	
 	private UAIModelType type;
 	private Map<Integer, Integer> varIdxToCardinality                        = new LinkedHashMap<>();
-	private Map<Integer, Integer> evidence                                   = new LinkedHashMap<>();
 	private List<List<Integer>> tableInstanceVariableIndexes                 = new ArrayList<>();
+	private Map<Integer, FunctionTable> tableInstanceIdxToTable              = new LinkedHashMap<>();
+	//
+	private Map<Integer, Integer> evidence                                   = new LinkedHashMap<>();
+	//
 	private Map<Integer, FunctionTable> uniqueTableIdxToUniqueTable          = new LinkedHashMap<>();
 	private Map<FunctionTable, List<Integer>> uniqueTableToTableInstanceIdxs = new LinkedHashMap<>();
-	private Map<Integer, FunctionTable> tableInstanceIdxToTable              = new LinkedHashMap<>();
+	//
 	private Map<Integer, List<Double>> marSolution                           = new LinkedHashMap<>();
 	
 	public UAIModel(UAIModelType type, 
@@ -73,15 +77,7 @@ public class UAIModel implements MarkovNetwork {
 		this.tableInstanceVariableIndexes.addAll(tableInstanceVariableIndexes);
 		this.tableInstanceIdxToTable.putAll(tableIdxToTable);
 		
-		for (Map.Entry<Integer, FunctionTable> entry : this.tableInstanceIdxToTable.entrySet()) {
-			List<Integer> tableInstanceIndexesForUniqueTable = this.uniqueTableToTableInstanceIdxs.get(entry.getValue());
-			if (tableInstanceIndexesForUniqueTable == null) {
-				tableInstanceIndexesForUniqueTable = new ArrayList<>();
-				this.uniqueTableToTableInstanceIdxs.put(entry.getValue(), tableInstanceIndexesForUniqueTable);
-				this.uniqueTableIdxToUniqueTable.put(this.uniqueTableIdxToUniqueTable.size(), entry.getValue());
-			}
-			tableInstanceIndexesForUniqueTable.add(entry.getKey());
-		}	
+		computeUniqueMappings();	
 	}
 	
 	public UAIModelType getType() {
@@ -151,6 +147,36 @@ public class UAIModel implements MarkovNetwork {
 		evidence.put(varIdx, valueIdx);
 	}
 	
+	public void mergeEvidenceIntoModel() {
+		if (evidence.size() > 0) {
+			// For each evidence assignment create function table with an entry = 1
+			// for the assignment value and 0 for all other values.
+			for (Map.Entry<Integer, Integer> evidenceAssignment : evidence.entrySet()) {
+				Integer evidenceVarIndex = evidenceAssignment.getKey();
+				int     evidenceValue    = evidenceAssignment.getValue();
+				
+				int varCardinality = varIdxToCardinality.get(evidenceVarIndex);
+				List<Double> entries   = new ArrayList<>();
+				for (int i = 0; i < varCardinality; i++) {
+					if (i == evidenceValue) {
+						entries.add(1.0);
+					}
+					else {
+						entries.add(0.0);
+					}
+				}
+				FunctionTable evidenceFactor = new FunctionTable(Arrays.asList(varCardinality), entries);
+				//
+				// Merge in with the other factor information
+				tableInstanceVariableIndexes.add(Arrays.asList(evidenceVarIndex));
+				tableInstanceIdxToTable.put(tableInstanceVariableIndexes.size()-1, evidenceFactor);
+			}
+			
+			// Ensure the unique mapping information is re-created.
+			computeUniqueMappings();
+		}
+	}
+	
 	public void clearMARSolution() {
 		this.marSolution.clear();
 	}
@@ -173,5 +199,19 @@ public class UAIModel implements MarkovNetwork {
 	@Override
 	public String toString() {
 		return "UAI model #vars="+numberVariables()+", #tables="+numberTables()+", #unique function tables="+numberUniqueFunctionTables()+", ratio="+ratioUniqueTablesToTables();
+	}
+	
+	private void computeUniqueMappings() {
+		uniqueTableIdxToUniqueTable.clear();
+		uniqueTableToTableInstanceIdxs.clear();
+		for (Map.Entry<Integer, FunctionTable> entry : this.tableInstanceIdxToTable.entrySet()) {
+			List<Integer> tableInstanceIndexesForUniqueTable = this.uniqueTableToTableInstanceIdxs.get(entry.getValue());
+			if (tableInstanceIndexesForUniqueTable == null) {
+				tableInstanceIndexesForUniqueTable = new ArrayList<>();
+				this.uniqueTableToTableInstanceIdxs.put(entry.getValue(), tableInstanceIndexesForUniqueTable);
+				this.uniqueTableIdxToUniqueTable.put(this.uniqueTableIdxToUniqueTable.size(), entry.getValue());
+			}
+			tableInstanceIndexesForUniqueTable.add(entry.getKey());
+		}
 	}
 }

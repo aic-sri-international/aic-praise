@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
@@ -147,7 +148,11 @@ public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 			
 			for (int tableIdx : uaiModel.getTableIndexes(i)) {
 				Expression instanceTableExpression = UAIUtil.convertGenericTableToInstance(table, genericTableExpression, uaiModel.getVariableIndexesForTable(tableIdx));
-				hogmv1ModelWriter.println(instanceTableExpression.toString()+";");
+// TODO - is this assumption correct?				
+				// If just a number will be 0.5 due to simplification
+				if (!Expressions.isNumber(instanceTableExpression)) {
+					hogmv1ModelWriter.println(instanceTableExpression.toString()+";");
+				}
 			}
 		}
 		

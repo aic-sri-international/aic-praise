@@ -37,19 +37,19 @@
  */
 package com.sri.ai.praise.sgsolver.demo;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -95,18 +95,17 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.lang.ModelLanguage;
-import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.lang.translate.impl.HOGMv1_to_UAI_Translator;
-import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
-import com.sri.ai.praise.model.v1.imports.uai.UAIEvidenceReader;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
-import com.sri.ai.praise.model.v1.imports.uai.UAIUtil;
+import com.sri.ai.praise.lang.translate.impl.UAI_to_HOGMv1_Translator;
+import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.praise.sgsolver.demo.perspective.ChurchPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.HOGMPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.Perspective;
+import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.util.math.Rational;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
@@ -472,116 +471,34 @@ public class SGSolverDemoController {
     }
     
     private void importUAIModel(ActionEvent ae) { 	
-    	try {
-    		File uaiFile = uaiFileChooser.showOpenDialog(mainStage);
-    		if (uaiFile != null) {
-    			UAIModel model = UAIModelReader.read(uaiFile);
-    			UAIEvidenceReader.read(uaiFile, model);
-    			
-    			StringJoiner sj = new StringJoiner("\n");
-    			sj.add("// IMPORT OF: "+uaiFile.getName());
-    			sj.add("//");
-    			sj.add("// #variables                                = "+model.numberVariables());
-    			sj.add("// #tables                                   = "+model.numberTables());
-    			sj.add("// #unique function tables                   = "+model.numberUniqueFunctionTables());
-    			sj.add("// Largest variable cardinality              = "+model.largestCardinality());
-    			sj.add("// Largest # entries                         = "+model.largestNumberOfFunctionTableEntries());
-    			sj.add("// Total #entries across all function tables = "+model.totalNumberEntriesForAllFunctionTables());
-
-    			double totalNumberUniqueEntries        = 0;
-    			double totalCompressedEntries          = 0;
-    			double bestIndividualCompressionRatio  = 100; // i.e. none at all
-    			double worstIndividualCompressionRatio = 0;
-    			List<Expression> tables = new ArrayList<>();
-    			for (int i = 0; i < model.numberUniqueFunctionTables(); i++) {
-    				FunctionTable table = model.getUniqueFunctionTable(i);
-    				
-    				totalNumberUniqueEntries += table.numberEntries();
-    				
-    				Expression genericTableExpression = UAIUtil.constructGenericTableExpression(table, solver -> {
-    					return solver;
-    				});
-    				
-    				double compressedEntries = calculateCompressedEntries(genericTableExpression);
-    				
-    				double compressedRatio = compressedEntries / table.numberEntries();
-    				if (compressedRatio < bestIndividualCompressionRatio) {
-    					bestIndividualCompressionRatio = compressedRatio;
-    				}
-    				if (compressedRatio > worstIndividualCompressionRatio) {
-    					worstIndividualCompressionRatio = compressedRatio;
-    				}
-    				
-    				totalCompressedEntries += compressedEntries;
-    				
-    				for (int tableIdx : model.getTableIndexes(i)) {
-    					Expression instanceTableExpression = UAIUtil.convertGenericTableToInstance(table, genericTableExpression, model.getVariableIndexesForTable(tableIdx));
-    					tables.add(instanceTableExpression);
-    				}
-    			}
-    			
-    			sj.add("//");
-    			sj.add("// Table compression ratio            = "+(totalCompressedEntries/totalNumberUniqueEntries));
-    			sj.add("// Best individual compression ratio  = "+bestIndividualCompressionRatio);
-    			sj.add("// Worst individual compression ratio = "+worstIndividualCompressionRatio);
-    	
-    			List<String> sorts   = new ArrayList<>();
-    			List<String> randoms = new ArrayList<>(); 
-    			List<String> queries = new ArrayList<>();
-    			for (int varIdx = 0; varIdx < model.numberVariables(); varIdx++) {
-    				int varCardinality = model.cardinality(varIdx);
-    				String varName     = UAIUtil.instanceVariableName(varIdx);
-    				String varTypeName = UAIUtil.instanceTypeNameForVariable(varIdx, varCardinality);
-    				
-    				StringJoiner sortConstants = new StringJoiner(", ", ", ", ";");
-    				final int innerVarIdx = varIdx;
-    				IntStream.range(0, varCardinality).forEach(valIdx -> {
-    					sortConstants.add(UAIUtil.instanceConstantValueForVariable(valIdx, innerVarIdx, varCardinality));
-    				});
-    				if (!HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(varTypeName)) {
-    					sorts.add("sort "+varTypeName+": "+varCardinality+sortConstants.toString());
-    				}
-    				randoms.add("random "+varName+": "+varTypeName+";");
-    				queries.add(varName);
-    			}
-    			if (sorts.size() > 0) {
-	    			sj.add("");
-	    			sj.add("// SORT DECLARATIONS:");
-	    			sorts.forEach(sort -> sj.add(sort));
-    			}
-    			sj.add("");
-    			sj.add("// RANDOM VARIABLE DECLARATIONS:");
-    			randoms.forEach(random -> sj.add(random));
-    			sj.add("");
-    			sj.add("// RULES:");
-    			tables.forEach(table -> sj.add(table.toString()+";"));
-    			
-    			if (model.getEvidence().size() > 0) {
-    				sj.add("");
-        			sj.add("// EVIDENCE:");
-    				for (Map.Entry<Integer, Integer> entry : model.getEvidence().entrySet()) {
-	    				int varIdx = entry.getKey();
-	    				int valIdx = entry.getValue();
-	    				Expression varExpr   = Expressions.makeSymbol(UAIUtil.instanceVariableName(varIdx));
-	    				Expression valueExpr = Expressions.makeSymbol(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, model.cardinality(varIdx)));
-	    				if (valueExpr.equals(Expressions.TRUE)) {
-	    					sj.add(varExpr.toString()+";");
-	    				}
-	    				else if (valueExpr.equals(Expressions.FALSE)) {
-	    					sj.add(Not.make(varExpr).toString()+";");
-	    				}
-	    				else {
-	    					sj.add(Equality.make(varExpr, valueExpr).toString()+";");
-	    				}
-	    			}
-    			}
-    			
-    			newModel(sj.toString(), queries);
-    		}
-    	}
-    	catch (Throwable th) {
-    		FXUtil.exception(th);
-    	}
+		File uaiModelFile = uaiFileChooser.showOpenDialog(mainStage);
+		if (uaiModelFile != null) {
+			File         uaiEvidenceFile = new File(uaiModelFile.getParent(), uaiModelFile.getName()+".evid");
+			StringWriter hogmWriter  = new StringWriter();
+			try (BufferedReader uaiModelReader   = new BufferedReader(new FileReader(uaiModelFile));
+				BufferedReader uaiEvidenceReader = new BufferedReader(new FileReader(uaiEvidenceFile));
+				PrintWriter    hogmPrintWriter   = new PrintWriter(hogmWriter)
+				) {
+				
+				UAI_to_HOGMv1_Translator translator = new UAI_to_HOGMv1_Translator();
+				translator.translate(uaiModelFile.getName(), 
+						new Reader[] {uaiModelReader, uaiEvidenceReader}, 
+						new PrintWriter[] {hogmPrintWriter});
+				
+				String hogmModel = hogmWriter.toString();
+			
+				// For convenience, pull out all possible queries
+				HOGMParserWrapper parser          = new HOGMParserWrapper();
+				ParsedHOGModel    parsedModel     = parser.parseModel(hogmModel);
+				FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
+				List<String>      queries         = new ArrayList<>(factorsAndTypes.getMapFromRandomVariableNameToTypeName().keySet());
+				
+				newModel(hogmModel, queries);
+			}
+			catch (Throwable th) {
+	    		FXUtil.exception(th);
+	    	}
+		}
     }
     
     private void exportUAIModel(ActionEvent ae) {
@@ -596,8 +513,9 @@ public class SGSolverDemoController {
 	    			try (PrintWriter uaiModelWriter    = new PrintWriter(uaiModelFile);
 	    				 PrintWriter uaiEvidenceWriter = new PrintWriter(uaiEvidenceFile)) {
 	    				HOGMv1_to_UAI_Translator translator = new HOGMv1_to_UAI_Translator();
-	    				translator.translate("SGSolverDemo", new Reader[] {new StringReader(modelPage.getCurrentPageContents())}, 
-	    						             new PrintWriter[] {uaiModelWriter, uaiEvidenceWriter});
+	    				translator.translate(uaiModelFile.getName(), 
+	    						new Reader[] {new StringReader(modelPage.getCurrentPageContents())}, 
+	    						new PrintWriter[] {uaiModelWriter, uaiEvidenceWriter});
 	    			}
 	    			catch (Throwable th) {
 	    				FXUtil.exception(th);

@@ -41,6 +41,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 
 import com.google.common.annotations.Beta;
 
@@ -64,18 +65,22 @@ public class UAIEvidenceReader {
 			System.err.println("Model "+modelFile.getName()+" does not have a default evidence file associated with it.");
 		}
 		else {
-			// The evidence file consists of a single line. The line will begin with the number of observed variables in the sample, 
-			// followed by pairs of variable and its observed value. The indexes correspond to the ones implied by the original problem file. 
-			try (BufferedReader br = new BufferedReader(new FileReader(evidenceFile))) {
-				String evidenceInfo = readLine(br);
-				String[] evidence = split(evidenceInfo);
-				if (Integer.parseInt(evidence[0]) != ((evidence.length)/2)) {
-					System.err.println("Evidence "+evidenceFile.getName()+" specifies incorrect number of var/value pairs: "+evidenceInfo);
-				}
-				else {
-					for (int i = 1; i < evidence.length; i += 2) {
-						modelFromFile.addEvidence(Integer.parseInt(evidence[i]), Integer.parseInt(evidence[i+1]));
-					}
+			read(new FileReader(evidenceFile), modelFromFile);
+		}
+	}
+	
+	public static void read(Reader evidenceReader, UAIModel uaiModel) throws IOException {
+		// The evidence file consists of a single line. The line will begin with the number of observed variables in the sample, 
+		// followed by pairs of variable and its observed value. The indexes correspond to the ones implied by the original problem file. 
+		try (BufferedReader br = new BufferedReader(evidenceReader)) {
+			String evidenceInfo = readLine(br);
+			String[] evidence = split(evidenceInfo);
+			if (Integer.parseInt(evidence[0]) != ((evidence.length)/2)) {
+				System.err.println("Evidence specifies incorrect number of var/value pairs: "+evidenceInfo);
+			}
+			else {
+				for (int i = 1; i < evidence.length; i += 2) {
+					uaiModel.addEvidence(Integer.parseInt(evidence[i]), Integer.parseInt(evidence[i+1]));
 				}
 			}
 		}

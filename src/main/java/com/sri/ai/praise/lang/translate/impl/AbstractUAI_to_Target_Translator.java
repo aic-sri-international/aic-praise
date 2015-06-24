@@ -43,6 +43,7 @@ import java.io.Reader;
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.Translator;
+import com.sri.ai.praise.model.v1.imports.uai.UAIEvidenceReader;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 
@@ -77,13 +78,21 @@ public abstract class AbstractUAI_to_Target_Translator implements Translator {
 	
 	@Override
 	public void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
-		Reader uaiModelReader = inputModelReaders[0];
+		Reader uaiModelReader    = inputModelReaders[0];
+		Reader uaiEvidenceReader = inputModelReaders[1];
 		
 		//
-		// Instantiate the source UAI model, including the model and its evidence
+		// Instantiate the source UAI model
 		UAIModel uaiModel = UAIModelReader.read(uaiModelReader);
 		
-// TODO - evidence file should be part of the inputs when translating (UAIEvidenceReader)?	
+		//
+		// Read the corresponding evidence and merge into the model
+		// This is required as the UAI solvers all take the evidence
+		// when they are searching for solutions, so other solvers
+		// need to have this information contained in their models 
+		// as well.
+		UAIEvidenceReader.read(uaiEvidenceReader, uaiModel);
+		uaiModel.mergeEvidenceIntoModel();
 		
 		translate(inputIdentifier, uaiModel, translatedOutputs);
 	}
