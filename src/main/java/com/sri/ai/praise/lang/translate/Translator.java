@@ -37,10 +37,13 @@
  */
 package com.sri.ai.praise.lang.translate;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.nio.charset.Charset;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Charsets;
 import com.sri.ai.praise.lang.ModelLanguage;
 
 /**
@@ -60,9 +63,25 @@ public interface Translator {
 	
 	/**
 	 * 
+	 * @return the source model's charset.
+	 */
+	default Charset getSourceCharset() {
+		return Charsets.UTF_8;
+	}
+	
+	/**
+	 * 
 	 * @return the target model language for the translator.
 	 */
 	ModelLanguage getTarget();
+	
+	/**
+	 * 
+	 * @return the target model's charset.
+	 */
+	default Charset getTargetCharset() {
+		return Charsets.UTF_8;
+	}
 	
 	/**
 	 * Get the number of inputs required by the translator (usually just 1).
@@ -119,4 +138,26 @@ public interface Translator {
 	 *        exceptions handling to be performed outside of the translator.
 	 */
 	void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception;
+	
+	/**
+	 * Utility routine that based on the file name convention for models will return an extension neutral model name
+	 * for a source model file.
+	 * 
+	 * @param sourceModelFile
+	 *        The input model file whose extension neutral name is to be returned.
+	 * @return the extension neutral name of the input model file.
+	 */
+	default String getInputModelFileNameWithNoExtension(File sourceModelFile) {
+		String extension = getInputFileExtensions()[0];
+		String result    = sourceModelFile.getName();
+		
+		if (!result.endsWith(extension)) {
+			throw new IllegalArgumentException("Source Model File: "+sourceModelFile.getName()+" does not have the expected extension: "+extension);
+		}
+		
+		result = result.substring(0, result.length()-extension.length());
+		
+		return result;
+		
+	}
 }

@@ -15,7 +15,7 @@ import com.sri.ai.praise.lang.ModelLanguage;
 public class NESY2015RandomHOGMv1Generator {
 	static long _seed = 3;
 	//
-	static int [] _domainSizes = new int[] {2, 4, 8, 16, 32, 64, 128, 254, 1000, 10000, 100000, 1000000, 10000000};
+	static int [] _domainSizes = new int[] {2, 4, 8, 16};
 	//
 	static final int _potentialIdx = 0;
 	static final int _variableIdx  = 1;
@@ -64,7 +64,7 @@ public class NESY2015RandomHOGMv1Generator {
 	
 	public static void main(String[] args) {
 		if (args.length != 1) {
-			throw new IllegalArgumentException("t Root NESY2015 model output directory musbe specified");
+			throw new IllegalArgumentException("t Root NESY2015 model output directory must be specified");
 		}
 		File rootNESY2015OutputDirectory = validateDirectory(args[0]);
 		File hogmv1ProblemDirectory      = new File(rootNESY2015OutputDirectory, ModelLanguage.HOGMv1.getCode());
