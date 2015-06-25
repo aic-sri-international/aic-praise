@@ -87,7 +87,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Map<String, String> mapFromTypeNameToSizeString;
 	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
-	private ConstraintTheory theory;
+	private ConstraintTheory constraintTheory;
 	private SemiRingProblemType problemType;
 	private Solver solver;
 
@@ -150,22 +150,22 @@ public class InferenceForFactorGraphAndEvidence {
 		}
 
 		// The constraintTheory of atoms plus equality on function (relational) terms.
-		theory      = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(termTheory));
+		constraintTheory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(termTheory));
 		problemType = new SumProduct(); // for marginalization
 		// The solver for the parameters above.
 		if (useFactorization) {
-			solver = new SGVET(theory, problemType);
+			solver = new SGVET(constraintTheory, problemType);
 			//((SGVET) solver).basicOutput = true;
 		}
 		else {
-			solver = new SGDPLLT(theory, problemType);
+			solver = new SGDPLLT(constraintTheory, problemType);
 		}
 
 		evidenceProbability = null;
 	}
 	
-	public ConstraintTheory getTheory() {
-		return theory;
+	public ConstraintTheory getConstraintTheory() {
+		return constraintTheory;
 	}
 
 	public Expression solve(Expression queryExpression) {
@@ -254,6 +254,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		return theory.simplify(expression, DPLLUtil.makeProcess(theory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
+		return getConstraintTheory().simplify(expression, DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
 	}
 }
