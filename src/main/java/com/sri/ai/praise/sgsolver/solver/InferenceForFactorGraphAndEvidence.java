@@ -61,10 +61,12 @@ import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
 import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.api.TermTheory;
+import com.sri.ai.grinder.plaindpll.api.Theory;
 import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.core.SGVET;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
 import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
+import com.sri.ai.grinder.plaindpll.theory.DefaultTheory;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
@@ -87,6 +89,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Map<String, String> mapFromTypeNameToSizeString;
 	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
+	private Theory inputTheory;
 	private ConstraintTheory constraintTheory;
 	private SemiRingProblemType problemType;
 	private Solver solver;
@@ -151,6 +154,7 @@ public class InferenceForFactorGraphAndEvidence {
 
 		// The constraintTheory of atoms plus equality on function (relational) terms.
 		constraintTheory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(termTheory));
+		inputTheory = new DefaultTheory(constraintTheory);
 		problemType = new SumProduct(); // for marginalization
 		// The solver for the parameters above.
 		if (useFactorization) {
@@ -164,6 +168,10 @@ public class InferenceForFactorGraphAndEvidence {
 		evidenceProbability = null;
 	}
 	
+	public Theory getInputTheory() {
+		return inputTheory;
+	}
+
 	public ConstraintTheory getConstraintTheory() {
 		return constraintTheory;
 	}
@@ -254,6 +262,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		return getConstraintTheory().simplify(expression, DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
+		return getInputTheory().simplify(expression, DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
 	}
 }

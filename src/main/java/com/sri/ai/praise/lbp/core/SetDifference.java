@@ -739,7 +739,7 @@ public class SetDifference extends AbstractLBPHierarchicalRewriter implements LB
 			//    Expression    cPrimePrime = processI.rewrite(R_formula_simplification, cAndForAllPrimeI);
 			// We will break it apart so that the more expensive quantified formula is resolved first.
 			// However, we do this simplification under the assumption 'c' is true (this is the same
-			// theoryWithEquality/logic used in ConjunctsHoldTrueForEachOther). A more constrained context can
+			// constraintTheoryWithEquality/logic used in ConjunctsHoldTrueForEachOther). A more constrained context can
 			// help improve overall performance.
 			RewritingProcess processI = GrinderUtil.extendContextualSymbolsAndConstraintWithIntensionalSet(set1, process);
 			forAllIPrime              = processI.rewrite(R_normalize, forAllIPrime);
