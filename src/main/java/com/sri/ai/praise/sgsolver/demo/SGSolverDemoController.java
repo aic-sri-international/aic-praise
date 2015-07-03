@@ -85,7 +85,6 @@ import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
 import com.google.common.annotations.Beta;
-import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.SyntaxTrees;
@@ -710,24 +709,24 @@ public class SGSolverDemoController {
 		return hBox;
 	}
 	
-	private static double calculateCompressedEntries(Expression compressedTableExpression) {
-		AtomicDouble count = new AtomicDouble(0);
-		
-		visitCompressedTableEntries(compressedTableExpression, count);
-		
-		return count.doubleValue();
-	}
+//	private static double calculateCompressedEntries(Expression compressedTableExpression) {
+//		AtomicDouble count = new AtomicDouble(0);
+//		
+//		visitCompressedTableEntries(compressedTableExpression, count);
+//		
+//		return count.doubleValue();
+//	}
 	
-	private static void visitCompressedTableEntries(Expression compressedTableExpression, AtomicDouble count) {
-		if (IfThenElse.isIfThenElse(compressedTableExpression)) {
-			visitCompressedTableEntries(IfThenElse.thenBranch(compressedTableExpression), count);
-			visitCompressedTableEntries(IfThenElse.elseBranch(compressedTableExpression), count);
-		}
-		else {
-			// We are at a leaf node, therefore increment the count
-			count.addAndGet(1);
-		}
-	}
+//	private static void visitCompressedTableEntries(Expression compressedTableExpression, AtomicDouble count) {
+//		if (IfThenElse.isIfThenElse(compressedTableExpression)) {
+//			visitCompressedTableEntries(IfThenElse.thenBranch(compressedTableExpression), count);
+//			visitCompressedTableEntries(IfThenElse.elseBranch(compressedTableExpression), count);
+//		}
+//		else {
+//			// We are at a leaf node, therefore increment the count
+//			count.addAndGet(1);
+//		}
+//	}
 	
 	private static String toTermFormat(Expression expr) {
 		StringBuilder result = new StringBuilder();
