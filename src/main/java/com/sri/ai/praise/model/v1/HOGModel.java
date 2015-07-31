@@ -786,17 +786,19 @@ public class HOGModel {
 		HOGMSortDeclaration getSort(Expression sortName) {
 			HOGMSortDeclaration result = null;
 			
-			if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(sortName)) {
-				result = HOGMSortDeclaration.IN_BUILT_BOOLEAN;
-			}
-			else if (HOGMSortDeclaration.IN_BUILT_NUMBER.getName().equals(sortName)) {
-				result = HOGMSortDeclaration.IN_BUILT_NUMBER;
-			}
-			else if (HOGMSortDeclaration.isNumberRangeReference(sortName)) {
+			if (HOGMSortDeclaration.isNumberRangeReference(sortName)) {
 				result = HOGMSortDeclaration.IN_BUILT_NUMBER;
 			}
 			else {
-				result = sorts.get(sortName);
+				for (HOGMSortDeclaration inbuilt : HOGMSortDeclaration.IN_BUILT_SORTS) {
+					if (inbuilt.getName().equals(sortName)) {
+						result = inbuilt;
+						break;
+					}
+				}
+				if (result == null) {
+					result = sorts.get(sortName);
+				}
 			}
 			
 			return result;
