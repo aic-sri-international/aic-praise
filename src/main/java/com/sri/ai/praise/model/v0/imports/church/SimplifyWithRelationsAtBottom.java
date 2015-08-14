@@ -47,6 +47,7 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.problemtype.Sum;
 import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
+import com.sri.ai.grinder.plaindpll.theory.DefaultInputTheory;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
@@ -108,7 +109,7 @@ public class SimplifyWithRelationsAtBottom {
 		private Expression targetPredicate;
 		
 		public DPLLForEqualitiesOnSymbolsAndConstantExpressionWithAtomsButTarget(Expression targetPredicate) {
-			super(new EqualityConstraintTheory(new NonRandomSymbolTermTheory()), new Sum());
+			super(new DefaultInputTheory(new EqualityConstraintTheory(new NonRandomSymbolTermTheory())), new Sum());
 			this.targetPredicate = targetPredicate;
 		}
 		
@@ -131,14 +132,14 @@ public class SimplifyWithRelationsAtBottom {
 	
 	private static class DPLLForAtomsButTarget extends SGDPLLT {
 		public DPLLForAtomsButTarget(Expression targetPredicate) {
-			super(new AtomsOnlyButForTarget(targetPredicate), new Sum());
+			super(new DefaultInputTheory(new AtomsOnlyButForTarget(targetPredicate)), new Sum());
 		}
 		
 		@Override
 		public Expression normalizeUnconditionalExpression(Expression expression, RewritingProcess process) {
 			SGDPLLT thirdDPLL =
 					new SGDPLLT(
-							new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new FunctionalTermTheory())),
+							new DefaultInputTheory(new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new FunctionalTermTheory()))),
 							new Sum());
 			// thirdDPLL accepts equalities and non-target atoms, but in this context it will only ever
 			// receive expressions with target atoms only, without other atoms and without equalities

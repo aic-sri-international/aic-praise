@@ -58,6 +58,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
+import com.sri.ai.grinder.plaindpll.api.InputTheory;
 import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.api.TermTheory;
@@ -66,7 +67,7 @@ import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.core.SGVET;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
 import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
-import com.sri.ai.grinder.plaindpll.theory.DefaultTheory;
+import com.sri.ai.grinder.plaindpll.theory.DefaultInputTheory;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
@@ -89,7 +90,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Map<String, String> mapFromTypeNameToSizeString;
 	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
-	private Theory inputTheory;
+	private InputTheory inputTheory;
 	private ConstraintTheory constraintTheory;
 	private SemiRingProblemType problemType;
 	private Solver solver;
@@ -154,15 +155,15 @@ public class InferenceForFactorGraphAndEvidence {
 
 		// The constraintTheory of atoms plus equality on function (relational) terms.
 		constraintTheory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(termTheory));
-		inputTheory = new DefaultTheory(constraintTheory);
+		inputTheory = new DefaultInputTheory(constraintTheory);
 		problemType = new SumProduct(); // for marginalization
 		// The solver for the parameters above.
 		if (useFactorization) {
-			solver = new SGVET(constraintTheory, problemType);
+			solver = new SGVET(inputTheory, problemType);
 			//((SGVET) solver).basicOutput = true;
 		}
 		else {
-			solver = new SGDPLLT(constraintTheory, problemType);
+			solver = new SGDPLLT(inputTheory, problemType);
 		}
 
 		evidenceProbability = null;

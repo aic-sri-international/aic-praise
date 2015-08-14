@@ -52,9 +52,11 @@ import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
+import com.sri.ai.grinder.plaindpll.api.InputTheory;
 import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.application.Compilation;
 import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
+import com.sri.ai.grinder.plaindpll.theory.DefaultInputTheory;
 import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
@@ -138,9 +140,10 @@ public class UAIUtil {
 			mapFromVariableNameToTypeName.put(genericVariableName(i), typeName);
 		}
 		
-		ConstraintTheory theory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new SymbolTermTheory()));
+		ConstraintTheory constraintTheory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new SymbolTermTheory()));
+		InputTheory inputTheory = new DefaultInputTheory(constraintTheory);
 
-		Expression result = Compilation.compile(inputExpression, theory, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString, solverListener);
+		Expression result = Compilation.compile(inputExpression, inputTheory, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString, solverListener);
 		
 		return result;
 	}
