@@ -56,8 +56,6 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.AbstractRandomDPLLProblemGenerator;
-import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
-import com.sri.ai.praise.model.v1.export.UAIHOGModelGroundingListener;
 import com.sri.ai.praise.model.v1.imports.uai.UAICompare;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;

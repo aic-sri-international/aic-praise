@@ -56,6 +56,7 @@ import org.reactfx.EventSource;
 import com.google.common.annotations.Beta;
 import com.google.common.io.Files;
 import com.sri.ai.praise.model.common.io.ModelPage;
+import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
@@ -248,7 +249,7 @@ public abstract class AbstractPerspective implements Perspective {
 		String model = getPagedModelInternalContainerRepresentation(pageContents);
 		
 		try {
-			Files.write(model.getBytes(ExamplePages.FILE_CHARSET), file);
+			Files.write(model.getBytes(PagedModelContainer.FILE_CHARSET), file);
 			// If saving to a different file
 			if (file != getModelFile()) {
 				modelFile.set(file);
@@ -286,7 +287,7 @@ public abstract class AbstractPerspective implements Perspective {
 	protected abstract ModelPageEditor create(String modelPage, List<String> defaultQueries);
 	
 	protected String getPagedModelInternalContainerRepresentation(List<Pair<String, List<String>>> pageContents) {
-		String result = ExamplePages.toInternalContainerRepresentation(pageContents);
+		String result = PagedModelContainer.toInternalContainerRepresentation(pageContents);
 		return result;
 	}
 	
@@ -431,10 +432,12 @@ public abstract class AbstractPerspective implements Perspective {
 			super(pageIdx, pageEditorSupplier);
 		}
 		
+		@Override
 		void redo() {
 			addPage(pageIdx, pageEditorSupplier);
 		}
 
+		@Override
 		void undo() {
 			if (pageEditorSupplier != removePageAt(pageIdx+1)) {
 				throw new IllegalStateException("Page change add undo history appears corrupted.");
@@ -447,12 +450,14 @@ public abstract class AbstractPerspective implements Perspective {
 			super(pageIdx, pageEditorSupplier);
 		}
 		
+		@Override
 		void redo() {
 			if (pageEditorSupplier != removePageAt(pageIdx)) {
 				throw new IllegalStateException("Page change remove redo history appears corrupted.");
 			}
 		}
 
+		@Override
 		void undo() {
 			addPage(pageIdx-1, pageEditorSupplier);
 		}

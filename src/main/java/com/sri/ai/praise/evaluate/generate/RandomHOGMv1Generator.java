@@ -81,6 +81,7 @@ public class RandomHOGMv1Generator {
 		int formulaDepth;     // -d
 		int formulaBreadth;   // -b		
 		
+		@Override
 		public void close() throws IOException {
 			out.flush();
 			// Only close if not System.out

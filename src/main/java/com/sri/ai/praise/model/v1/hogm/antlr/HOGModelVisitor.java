@@ -267,7 +267,8 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	
  	// term
  	// | NOT term
- 	public Expression visitNot(@NotNull HOGMParser.NotContext ctx) { 
+ 	@Override
+	public Expression visitNot(@NotNull HOGMParser.NotContext ctx) { 
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(Not.FUNCTOR, visit(ctx.term()));
 		return result; 
  	}

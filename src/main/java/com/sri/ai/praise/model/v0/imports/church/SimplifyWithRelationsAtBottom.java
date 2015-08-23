@@ -122,6 +122,7 @@ public class SimplifyWithRelationsAtBottom {
 	}
 	
 	private static class NonRandomSymbolTermTheory extends SymbolTermTheory {
+		@Override
 		public boolean isTerm(Expression expression, RewritingProcess process) {
 			if (LPIUtil.isRandomVariableValueExpression(expression, process)) {
 				return false;
@@ -160,6 +161,7 @@ public class SimplifyWithRelationsAtBottom {
 			this.targetPredicate = targetPredicate;
 		}
 
+		@Override
 		public Expression makeSplitterIfPossible(Expression expression, Collection<Expression> indices, RewritingProcess process) {
 			Expression result;
 			if (expression.hasFunctor(targetPredicate) || expression.equals(targetPredicate) || expression.hasFunctor(FunctorConstants.EQUALITY)) {

@@ -63,6 +63,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
@@ -171,7 +172,7 @@ public class QueryController {
     		if (currentlyRunning) {
     			FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.STOP);
     			executeTooltip.setText("Stop query");
-    			queryProgressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
+    			queryProgressBar.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
     		}
     		else {
     			FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.PLAY);

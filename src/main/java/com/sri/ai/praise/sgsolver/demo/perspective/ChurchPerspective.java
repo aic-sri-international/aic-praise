@@ -68,6 +68,7 @@ public class ChurchPerspective extends AbstractPerspective {
 	// END-Perspective
 	//
 	
+	@Override
 	protected ModelPageEditor create(String model, List<String> defaultQueries) {
 		ModelPageEditor result = null;
 		FXMLLoader      loader = ChurchPageEditorController.newLoader();
