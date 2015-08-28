@@ -53,7 +53,6 @@ import java.util.Set;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.Simplifier;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
@@ -63,6 +62,7 @@ import com.sri.ai.grinder.plaindpll.api.InputTheory;
 import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.plaindpll.api.Solver;
 import com.sri.ai.grinder.plaindpll.api.TermTheory;
+import com.sri.ai.grinder.plaindpll.api.Theory;
 import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
 import com.sri.ai.grinder.plaindpll.core.SGVET;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
@@ -169,7 +169,7 @@ public class InferenceForFactorGraphAndEvidence {
 		evidenceProbability = null;
 	}
 	
-	public Simplifier getInputTheory() {
+	public Theory getInputTheory() {
 		return inputTheory;
 	}
 
@@ -263,6 +263,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		return getInputTheory().apply(expression, DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
+		return getInputTheory().simplify(expression, DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
 	}
 }
