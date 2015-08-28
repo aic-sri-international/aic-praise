@@ -263,6 +263,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		return getInputTheory().simplify(expression, DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
+		return getInputTheory().apply(expression, DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
 	}
 }
