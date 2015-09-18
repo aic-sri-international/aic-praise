@@ -69,7 +69,7 @@ import com.sri.ai.util.base.Pair;
 @Beta
 public class HOGModel {
 	public enum TermCategoryType {
-		BOOLEAN, NUMERIC, OTHER, INVALID
+		BOOLEAN, NUMERIC, STRING, OTHER, INVALID
 	}
 
 	public static Expression validateAndConstruct(List<StatementInfo> sortDecs, List<StatementInfo> constantDecs, List<StatementInfo> randomVarDecs, List<StatementInfo> terms) {
@@ -98,6 +98,7 @@ public class HOGModel {
 		//
 		Set<String> booleanTypeFunctors = new LinkedHashSet<>(HOGMModelConstants.KNOWN_BOOLEAN_FUNCTORS);
 		Set<String> numericTypeFunctors = new LinkedHashSet<>(HOGMModelConstants.KNOWN_NUMERIC_FUNCTORS);
+		Set<String> stringTypeFunctors  = new LinkedHashSet<>();
 		Set<String> otherTypeFunctors   = new LinkedHashSet<>();
 		//
 		Set<Expression>                                sortConstants = new LinkedHashSet<>();
@@ -244,8 +245,11 @@ public class HOGModel {
 			if (sortName.equals(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName())) {
 				booleanTypeFunctors.add(functorName(functorName));
 			}
-			else if (sortName.equals(HOGMSortDeclaration.IN_BUILT_NUMBER.getName())) {
+			else if (HOGMSortDeclaration.isNameOfInBuiltNumberType(sortName)) {
 				numericTypeFunctors.add(functorName(functorName));
+			}
+			else if (sortName.equals(HOGMSortDeclaration.IN_BUILT_STRING.getName())) {
+				stringTypeFunctors.add(functorName(functorName));
 			}
 			else {
 				otherTypeFunctors.add(functorName(functorName));
@@ -290,8 +294,11 @@ public class HOGModel {
 				if (sortType == HOGMSortDeclaration.IN_BUILT_BOOLEAN) {
 					result = TermCategoryType.BOOLEAN;
 				}
-				else if (sortType == HOGMSortDeclaration.IN_BUILT_NUMBER) {
+				else if (sortType == HOGMSortDeclaration.IN_BUILT_INTEGER || sortType == HOGMSortDeclaration.IN_BUILT_REAL) {
 					result = TermCategoryType.NUMERIC;
+				}
+				else if (sortType == HOGMSortDeclaration.IN_BUILT_STRING) {
+					result = TermCategoryType.STRING;
 				}
 				else  {
 					result = TermCategoryType.OTHER;
@@ -331,7 +338,15 @@ public class HOGModel {
 						result = HOGMSortDeclaration.IN_BUILT_BOOLEAN;
 					}
 					else if (Expressions.isNumber(expr)) {
-						result = HOGMSortDeclaration.IN_BUILT_NUMBER;
+						if (expr.rationalValue().isInteger()) {
+							result = HOGMSortDeclaration.IN_BUILT_INTEGER;
+						}
+						else {
+							result = HOGMSortDeclaration.IN_BUILT_REAL;
+						}
+					}
+					else if (Expressions.isQuotedConstantString(expr)) {
+						result = HOGMSortDeclaration.IN_BUILT_STRING;
 					}
 					else {
 						if (isDeclaredConstantFunctor(expr.getFunctorOrSymbol(), scopedConstants)) {
@@ -365,7 +380,28 @@ public class HOGModel {
 						result = HOGMSortDeclaration.IN_BUILT_BOOLEAN;
 					}
 					else if (numericTypeFunctors.contains(functorName)) {
-						result = HOGMSortDeclaration.IN_BUILT_NUMBER;
+						result = HOGMSortDeclaration.IN_BUILT_INTEGER;
+						if (!FunctorConstants.CARDINALITY.equals(functorName)) {
+							for (Expression arg : expr.getArguments()) {
+								if (Expressions.isNumber(arg)) {
+									if (!arg.rationalValue().isInteger()) {
+										result = HOGMSortDeclaration.IN_BUILT_REAL;
+										break;
+									}
+								}
+								else {
+									result = determineSortType(arg, scopedConstants);
+									if (result == HOGMSortDeclaration.IN_BUILT_REAL) {
+										break; 
+									}
+									else if (result != HOGMSortDeclaration.IN_BUILT_INTEGER) {
+										// Something wrong as the argument sort is not numeric
+										result = null;
+										break;
+									}
+								}
+							}
+						}
 					}
 					else if (isDeclaredConstantFunctor(functor, scopedConstants)) {
 						ConstantDeclaration constantDeclaration = scopedConstants.get(functor);
@@ -517,7 +553,7 @@ public class HOGModel {
 										 functorName.equals(FunctorConstants.LESS_THAN_OR_EQUAL_TO) ||
 										 functorName.equals(FunctorConstants.GREATER_THAN) ||
 										 functorName.equals(FunctorConstants.GREATER_THAN_OR_EQUAL_TO)) {
-									if (sortType != HOGMSortDeclaration.IN_BUILT_NUMBER) {
+									if (sortType != HOGMSortDeclaration.IN_BUILT_INTEGER && sortType != HOGMSortDeclaration.IN_BUILT_REAL) {
 										newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
 									}	
 								}
@@ -528,7 +564,7 @@ public class HOGModel {
 										}
 									}
 									else if (numericTypeFunctors.contains(functorName)) {
-										if (sortType != HOGMSortDeclaration.IN_BUILT_NUMBER 
+										if (sortType != HOGMSortDeclaration.IN_BUILT_INTEGER && sortType != HOGMSortDeclaration.IN_BUILT_REAL 
 										    && !FunctorConstants.CARDINALITY.equals(functorName) // Cardinality functor takes any sort name
 										) {
 											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
@@ -787,7 +823,7 @@ public class HOGModel {
 			HOGMSortDeclaration result = null;
 			
 			if (HOGMSortDeclaration.isNumberRangeReference(sortName)) {
-				result = HOGMSortDeclaration.IN_BUILT_NUMBER;
+				result = HOGMSortDeclaration.IN_BUILT_INTEGER;
 			}
 			else {
 				for (HOGMSortDeclaration inbuilt : HOGMSortDeclaration.IN_BUILT_SORTS) {

@@ -82,9 +82,17 @@ public class HOGMParserTest {
 		testExpectedModelError("sort Boolean: 2, true, false;", HOGModelError.Type.SORT_NAME_PREDEFINED);
 		testExpectedModelError("sort Boolean;", HOGModelError.Type.SORT_NAME_PREDEFINED);
 		
-		testExpectedModelError("sort Number: Unknown;", HOGModelError.Type.SORT_NAME_PREDEFINED);
-		testExpectedModelError("sort Number: 2;", HOGModelError.Type.SORT_NAME_PREDEFINED);
-		testExpectedModelError("sort Number;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort Integer: Unknown;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort Integer: 2;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort Integer;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		
+		testExpectedModelError("sort Real: Unknown;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort Real: 2;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort Real;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		
+		testExpectedModelError("sort String: Unknown;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort String: 2;", HOGModelError.Type.SORT_NAME_PREDEFINED);
+		testExpectedModelError("sort String;", HOGModelError.Type.SORT_NAME_PREDEFINED);
 		
 		testExpectedModelError("sort 'if . then . else .';", HOGModelError.Type.SORT_NAME_SAME_AS_IN_BUILT_FUNCTOR);
 		
@@ -155,13 +163,13 @@ public class HOGMParserTest {
 	
 	@Test
 	public void testDetectedConstantErrors() {
-		test("constant times: Number x Number;", null);
-		test("constant times: x Number;", null);
+		test("constant times: Integer x Integer;", null);
+		test("constant times: x Integer;", null);
 		
 		testExpectedModelError(			 
 				 "sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-				+"constant grade: Number -> Grade;\n"
-				+"constant grade: Number -> Boolean;", HOGModelError.Type.CONSTANT_NAME_NOT_UNIQUE);
+				+"constant grade: Integer -> Grade;\n"
+				+"constant grade: Integer -> Boolean;", HOGModelError.Type.CONSTANT_NAME_NOT_UNIQUE);
 
 		testExpectedModelError(			 
 				 "sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
@@ -182,9 +190,9 @@ public class HOGMParserTest {
 		testExpectedModelError("constant 'there exists . : .': Boolean;", HOGModelError.Type.CONSTANT_NAME_SAME_AS_QUANTIFIER);
 		
 		
-		testExpectedModelError("constant times: x -> Number;", HOGModelError.Type.CONSTANT_SORT_ARGUMENT_NOT_DECLARED);
+		testExpectedModelError("constant times: x -> Intger;", HOGModelError.Type.CONSTANT_SORT_ARGUMENT_NOT_DECLARED);
 		testExpectedModelError("constant location: Place;", HOGModelError.Type.CONSTANT_SORT_ARGUMENT_NOT_DECLARED);
-		testExpectedModelError("constant location: Number x Number -> Place;", HOGModelError.Type.CONSTANT_SORT_ARGUMENT_NOT_DECLARED);
+		testExpectedModelError("constant location: Integer x Integer -> Place;", HOGModelError.Type.CONSTANT_SORT_ARGUMENT_NOT_DECLARED);
 
 		testExpectedModelError( 
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
@@ -260,13 +268,13 @@ public class HOGMParserTest {
 	
 	@Test
 	public void testDetectedRandomVariableErrors() {
-		test("random times: Number x Number;", null);
-		test("random times: x Number;", null);
+		test("random times: Integer x Integer;", null);
+		test("random times: x Integer;", null);
 		
 		testExpectedModelError(			 
 				 "sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-				+"random grade: Number -> Grade;\n"
-				+"random grade: Number -> Boolean;", HOGModelError.Type.RANDOM_VARIABLE_NAME_NOT_UNIQUE);
+				+"random grade: Integer -> Grade;\n"
+				+"random grade: Integer -> Boolean;", HOGModelError.Type.RANDOM_VARIABLE_NAME_NOT_UNIQUE);
 
 		testExpectedModelError(			 
 				 "sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
@@ -291,9 +299,9 @@ public class HOGMParserTest {
 		testExpectedModelError("random 'there exists . : .': Boolean;", HOGModelError.Type.RANDOM_VARIABLE_NAME_SAME_AS_QUANTIFIER);
 		
 		
-		testExpectedModelError("random times: x -> Number;", HOGModelError.Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED);
+		testExpectedModelError("random times: x -> Integer;", HOGModelError.Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED);
 		testExpectedModelError("random location: Place;", HOGModelError.Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED);
-		testExpectedModelError("random location: Number x Number -> Place;", HOGModelError.Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED);
+		testExpectedModelError("random location: Integer x Integer -> Place;", HOGModelError.Type.RANDOM_VARIABLE_SORT_ARGUMENT_NOT_DECLARED);
 
 		testExpectedModelError( 
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
@@ -413,12 +421,12 @@ public class HOGMParserTest {
 				HOGModelError.Type.TERM_CONDITONAL_STATEMENT_MUST_BE_OF_TYPE_NUMERIC);
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-				+"random grade: Number -> Grade;\n"
+				+"random grade: Integer -> Grade;\n"
 				+"grade(55) and (grade(55) = a);",
 				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE);	
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-				+"random grade: Number -> Grade;\n"
+				+"random grade: Integer -> Grade;\n"
 				+"grade(55) + (grade(55) = a);",
 				HOGModelError.Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE,
 				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);		
@@ -436,12 +444,12 @@ public class HOGMParserTest {
 				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE);
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-				+"random grade: Number -> Grade;\n"
+				+"random grade: Integer -> Grade;\n"
 				+"grade(55) = 55;",
 				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE);
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-				+"random grade: Number -> Grade;\n"
+				+"random grade: Integer -> Grade;\n"
 				+"random president: Boolean;"
 				+"if president then grade(55) else 0.3;",
 				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE,
@@ -465,13 +473,13 @@ public class HOGMParserTest {
 		
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-				+"random grade: Number -> Grade;\n"
+				+"random grade: Integer -> Grade;\n"
 				+"random president: Boolean;"
 				+"if president then grade(55) else grade(22);",
 				HOGModelError.Type.TERM_CONDITONAL_STATEMENT_MUST_BE_OF_TYPE_NUMERIC);		
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
-				+"random grade: Number -> Grade;\n"
+				+"random grade: Integer -> Grade;\n"
 				+"grade(55);",
 				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);
 	}
