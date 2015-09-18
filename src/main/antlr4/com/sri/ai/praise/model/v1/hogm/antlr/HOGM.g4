@@ -93,7 +93,9 @@ quantifier_index_term
 
 sort_name
     : IN_BUILT_SORT_BOOLEAN
-    | IN_BUILT_SORT_NUMBER
+    | IN_BUILT_SORT_INTEGER
+    | IN_BUILT_SORT_REAL
+    | IN_BUILT_SORT_STRING
     | constant_name
     ;
     
@@ -159,7 +161,9 @@ RANDOM                  : 'random' ;
 X                       : 'x' ;
 IN                      : 'in' ;
 IN_BUILT_SORT_BOOLEAN   : 'Boolean' ;
-IN_BUILT_SORT_NUMBER    : 'Number' ;
+IN_BUILT_SORT_INTEGER   : 'Integer' ;
+IN_BUILT_SORT_REAL      : 'Real' ;
+IN_BUILT_SORT_STRING    : 'String' ;
 // Logic Operators
 IMPLICATION             : '=>' ;
 BICONDITIONAL           : '<=>' ;

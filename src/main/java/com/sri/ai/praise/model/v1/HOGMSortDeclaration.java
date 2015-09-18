@@ -80,14 +80,17 @@ import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
  * 
  * </pre>
  * 
- * Note: There two predefined in-built sort declaration: <br>
+ * Note: There four predefined in-built sort declaration: <br>
  * 
  * <pre>
  * 
  * // For boolean valued types (by default the range of random variables).
  * sort(Boolean, 2, {false, true})
  * // For numeric types
- * sort(Number, Unknown, {}) 
+ * sort(Integer, Unknown, {}) 
+ * sort(Real, Unknown, {}) 
+ * // For 'string' types
+ * sort(String, Unknown, {}) 
  * </pre>
  * 
  * that does not need to be declared explicitly in a model declaration.
@@ -116,12 +119,28 @@ public class HOGMSortDeclaration {
 			ExtensionalSet.makeUniSetExpression(Arrays.asList(new Expression[] {
 					Expressions.FALSE, Expressions.TRUE })));
 	/**
-	 * An in-built sort representing numeric values.
+	 * An in-built sort representing integer values.
 	 */
-	public static final HOGMSortDeclaration IN_BUILT_NUMBER = new HOGMSortDeclaration(
-			false, Expressions.makeSymbol("Number"), UNKNOWN_SIZE,
+	public static final HOGMSortDeclaration IN_BUILT_INTEGER = new HOGMSortDeclaration(
+			false, Expressions.makeSymbol("Integer"), UNKNOWN_SIZE,
 			ExtensionalSet.makeUniSetExpression(Collections.emptyList()));
-	public static final HOGMSortDeclaration[] IN_BUILT_SORTS = new HOGMSortDeclaration[] { IN_BUILT_BOOLEAN, IN_BUILT_NUMBER };
+	
+	/**
+	 * An in-built sort representing real values.
+	 */
+	public static final HOGMSortDeclaration IN_BUILT_REAL = new HOGMSortDeclaration(
+			false, Expressions.makeSymbol("Real"), UNKNOWN_SIZE,
+			ExtensionalSet.makeUniSetExpression(Collections.emptyList()));
+	
+	/**
+	 * An in-built sort representing 'string' values.
+	 */
+	public static final HOGMSortDeclaration IN_BUILT_STRING = new HOGMSortDeclaration(
+			false, Expressions.makeSymbol("String"), UNKNOWN_SIZE,
+			ExtensionalSet.makeUniSetExpression(Collections.emptyList()));
+	
+	
+	public static final HOGMSortDeclaration[] IN_BUILT_SORTS = new HOGMSortDeclaration[] { IN_BUILT_BOOLEAN, IN_BUILT_INTEGER, IN_BUILT_REAL, IN_BUILT_STRING };
 	//
 	public static final String FUNCTOR_SORT_DECLARATION = "sort";
 
@@ -306,6 +325,16 @@ public class HOGMSortDeclaration {
 		}
 
 		return isInBuilt;
+	}
+	
+	public static boolean isNameOfInBuiltNumberType(Expression name) {
+		boolean result = false;
+		
+		if (IN_BUILT_INTEGER.getName().equals(name) || IN_BUILT_REAL.getName().equals(name)) {
+			result = true;
+		}
+		
+		return result;
 	}
 	
 	public static boolean isSortReference(Expression reference) {
