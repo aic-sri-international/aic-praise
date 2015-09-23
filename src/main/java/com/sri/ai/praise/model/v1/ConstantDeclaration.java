@@ -267,7 +267,7 @@ public class ConstantDeclaration {
 			if (numArgs > 0) {
 
 				// Extract arguments
-				Expression name = expression.get(0);
+				Expression name  = expression.get(0);
 				Expression arity = Expressions.ZERO;
 				if (numArgs >= 2) {
 					arity = expression.get(1);

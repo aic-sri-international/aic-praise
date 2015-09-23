@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
@@ -554,6 +555,65 @@ public class HOGMParserTest {
 				+"grade(55);",
 				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);
 	}
+	
+	@Ignore("TODO - implement supporting logic")
+	@Test
+	public void testStringSortTypeDetection() {
+		String string;
+		
+		string = "random stringFunction: String -> Boolean;\n"
+				+"stringFunction(\"a String\");";		
+		test(string, expected(null, null,
+							  Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
+							  Expressions.parse("stringFunction(\"a String\")")));
+		
+		string = "random stringFunction: String -> Boolean;\n"
+				+"stringFunction('a String');";
+		test(string, expected(null, null,
+							  Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
+							  Expressions.parse("stringFunction('a String')")));
+		
+		string = "random stringFunction: String -> Boolean;\n"
+				+"stringFunction(\"aString\");";		
+		test(string, expected(null, null,
+							  Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
+							  Expressions.parse("stringFunction(\"aString\")")));
+		
+		string = "random stringFunction: String -> Boolean;\n"
+				+"stringFunction('aString');";
+		test(string, expected(null, null,
+						      Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
+							  Expressions.parse("stringFunction('aString')")));
+		
+		string = "random stringFunction: String -> Boolean;\n"
+				+"stringFunction(aString);";
+		test(string, expected(null, null,
+						      Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
+							  Expressions.parse("stringFunction(aString)")));
+		
+// Auto assign to non-ambiguous propositional random or constant if one is declared.	
+// TODO "random astring : String;\n"
+// TODO "constant astring : String;\n"
+//		string = "\"a b c\" = \"d e f\"";
+//		test(string, expected(null, null, null,
+//							  Expressions.parse("\"a b c\" = \"d e f\"")));
+//		
+//		string = "'a b c' = 'd e f'";
+//		test(string, expected(null, null, null,
+//							  Expressions.parse("'a b c' = 'd e f'")));
+//		
+//		string = "\"abc\" = \"def\"";
+//		test(string, expected(null, null, null,
+//							  Expressions.parse("\"abc\" = \"def\"")));
+//		
+//		string = "'abc' = 'def'";
+//		test(string, expected(null, null, null,
+//							  Expressions.parse("'abc' = 'def'")));
+//		
+//		string = "abc = def";
+//		test(string, expected(null, null, null,
+//							  Expressions.parse("abc = def")));
+	}	
 	
 	//
 	// PROTECTED

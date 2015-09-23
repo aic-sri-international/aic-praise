@@ -468,7 +468,7 @@ public class HOGModel {
 			// Ensure constant functions have the correct arity and their arguments are of the correct type
 			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> constantFunctionsWithScope = getConstantFunctionsWithScope(termStatement.statement);
 			constantFunctionsWithScope.forEach(constantFunctionAndScope -> {
-				Expression                               constantFunction = constantFunctionAndScope.first;
+				Expression                           constantFunction = constantFunctionAndScope.first;
 				Map<Expression, ConstantDeclaration> scopedConstants  = constantFunctionAndScope.second;
 				if (!isValidDeclaredConstantFunctorArity(constantFunction, scopedConstants)) {
 					newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, constantFunction, termStatement);
@@ -492,7 +492,7 @@ public class HOGModel {
 			// Ensure random functions have the correct arity and their arguments are of the correct type
 			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> randomFunctionsWithScope = getRandomFunctionsWithScope(termStatement.statement);
 			randomFunctionsWithScope.forEach(randomFunctionAndScope -> {
-				Expression                               randomFunction  = randomFunctionAndScope.first;
+				Expression                           randomFunction  = randomFunctionAndScope.first;
 				Map<Expression, ConstantDeclaration> scopedConstants = randomFunctionAndScope.second;
 				if (!isValidDeclaredRandomFunctorArity(randomFunction)) {
 					newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, randomFunction, termStatement);
