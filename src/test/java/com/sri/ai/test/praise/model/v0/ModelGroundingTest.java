@@ -45,7 +45,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.praise.PRAiSEConfiguration;
@@ -64,8 +63,8 @@ public class ModelGroundingTest extends AbstractLPITest {
 	public void testCantGroundDueToNoModelDefinedInProcess() {
 		try {
 			RewritingProcess process = newRewritingProcess(Expressions.ZERO);
-			ModelGrounding.groundModel(DefaultSymbol.createSymbol("Ground Model Name"), 
-					                   DefaultSymbol.createSymbol("Ground Model Description"),
+			ModelGrounding.groundModel(Expressions.makeSymbol("Ground Model Name"), 
+					                   Expressions.makeSymbol("Ground Model Description"),
 					                   process);
 			Assert.fail("GroundModelException should have been thrown.");
 		} catch (ModelGroundingException gmex) {
