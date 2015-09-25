@@ -847,7 +847,7 @@ public class TranslateChurchToModelTest extends AbstractLPITest {
 	}
 	
 	private void assertDescriptionEquals(Expression description, String... descLines) {
-		StringJoiner sj = new StringJoiner("\\n", "'\\n", "\\n'");
+		StringJoiner sj = new StringJoiner("\\n", "\\n", "\\n");
 		Arrays.stream(descLines).forEach(line -> sj.add(line));
 		Assert.assertEquals(sj.toString(), description.toString());
 	}

@@ -29,19 +29,19 @@ public class HOGMParserTest {
 		string = "sort People: 1000, bob, ann, mary;";
 		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "People", "1000", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list", "bob", "ann", "mary"))),
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST, "bob", "ann", "mary"))),
 							  null, null, null));
 		
 		string = "sort people: 1000, Bob, Ann, Mary;";
 		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "people", "1000", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list", "Bob", "Ann", "Mary"))),
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST, "Bob", "Ann", "Mary"))),
 							  null, null, null));
 
 		string = "sort Dogs: 1000;";
 		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "Dogs", "1000", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list"))),
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
 
 		string = "sort Dogs: 1000, rover;";
@@ -52,31 +52,31 @@ public class HOGMParserTest {
 		string = "sort Cats: Unknown;";
 		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "Cats", "Unknown", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list"))),
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
 
 		string = "sort Rats;";
 		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "Rats", "Unknown", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list"))),
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
 		
 		string = "sort rats;";
 		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "rats", "Unknown", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list"))),
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
 		
 		string = "sort \"a string named sort\";";
-		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "a string named sort", "Unknown", 
+		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "\"a string named sort\"", "Unknown", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list"))),
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
 		
 		string = "sort 'a string named sort';";
-		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "a string named sort", "Unknown", 
+		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "'a string named sort'", "Unknown", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("kleene list"))),
+								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
 	}
 	
@@ -156,12 +156,12 @@ public class HOGMParserTest {
 		
 		string = "constant \"a string constant name\": Boolean;";
 		test(string, expected(null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "a string constant name", "0", "Boolean"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "\"a string constant name\"", "0", "Boolean"),
 				              null, null));	
 		
 		string = "constant 'a string constant name\': Boolean;";
 		test(string, expected(null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "a string constant name", "0", "Boolean"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "'a string constant name'", "0", "Boolean"),
 				              null, null));	
 		
 		string = "constant happy: 1..5";
@@ -271,12 +271,12 @@ public class HOGMParserTest {
 		
 		string = "random \"a string constant name\": Boolean;";
 		test(string, expected(null, null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "a string constant name", "0", "Boolean"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "\"a string constant name\"", "0", "Boolean"),
 				              null));
 		
 		string = "random 'a string constant name': Boolean;";
 		test(string, expected(null, null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "a string constant name", "0", "Boolean"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "'a string constant name'", "0", "Boolean"),
 				              null));
 		
 		string = "random happy: 1..5";

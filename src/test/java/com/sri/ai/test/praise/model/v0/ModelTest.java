@@ -46,6 +46,7 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultBracketedExpression;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.FunctionSignature;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
@@ -847,8 +848,8 @@ public class ModelTest extends AbstractLPITest {
 						")"
 				), new LinkedHashSet<String>());
 			
-			Assert.assertEquals(parse("'No name given.'"), model.getName());
-			Assert.assertEquals(parse("'No description given.'"), model.getDescription());
+			Assert.assertEquals(Expressions.makeSymbol("No name given."), model.getName());
+			Assert.assertEquals(Expressions.makeSymbol("No description given."), model.getDescription());
 			Assert.assertEquals(1, model.getSortDeclarations().size());
 			Assert.assertEquals(parse("sort(Universe,   Unknown, {})"), model.getSortDeclarations().get(0).getSortDeclaration());
 			Assert.assertEquals(0, model.getRandomVariableDeclarations().size());
@@ -866,8 +867,8 @@ public class ModelTest extends AbstractLPITest {
 					")"
 			), new LinkedHashSet<String>());
 		
-		Assert.assertEquals(parse("'No name given.'"), model.getName());
-		Assert.assertEquals(parse("'No description given.'"), model.getDescription());
+		Assert.assertEquals(Expressions.makeSymbol("No name given."), model.getName());
+		Assert.assertEquals(Expressions.makeSymbol("No description given."), model.getDescription());
 		Assert.assertEquals(1, model.getSortDeclarations().size());
 		Assert.assertEquals(parse("sort(People,   Unknown, {})"), model.getSortDeclarations().get(0).getSortDeclaration());
 		Assert.assertEquals(0, model.getRandomVariableDeclarations().size());

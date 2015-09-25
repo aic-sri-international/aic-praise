@@ -462,7 +462,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 				);
 
 		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
-				"boss",  "'->'(Folks, Boolean)"
+				"boss",  "->(Folks, Boolean)"
 				);
 
 		isBayesianNetwork = true;

@@ -354,7 +354,7 @@ public class HOGModel {
 							result = HOGMSortDeclaration.IN_BUILT_REAL;
 						}
 					}
-					else if (Expressions.isQuotedConstantString(expr)) {
+					else if (isQuotedConstantString(expr)) {
 						result = HOGMSortDeclaration.IN_BUILT_STRING;
 					}
 					else {
@@ -424,6 +424,19 @@ public class HOGModel {
 						result = null; // Don't know
 					}
 				}
+			}
+			
+			return result;
+		}
+		
+		private boolean isQuotedConstantString(Expression expr) {
+			boolean result = false;
+			String svalue = expr.toString();
+			
+			if ((svalue.startsWith("'") && svalue.endsWith("'")) 
+				|| 
+				(svalue.startsWith("\"") && svalue.endsWith("\""))) {
+				result = true;
 			}
 			
 			return result;

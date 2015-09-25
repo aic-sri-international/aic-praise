@@ -107,7 +107,7 @@ public class LPIUtil {
 	public static final String FUNCTOR_MSG_TO_FROM           = "message to . from .";
 	public static final String FUNCTOR_PREVIOUS_MSG_TO_FROM  = "previous message to . from .";
 	public static final String FUNCTOR_NEIGHBORS_OF_FROM     = "neighbors of . from .";
-	public static final String FUNCTOR_CONVEX_HULL           = "convex hull";
+	public static final String FUNCTOR_CONVEX_HULL           = "'convex hull'";
 	
 	/**
 	 * Returns an expression describing the conditions under which a random

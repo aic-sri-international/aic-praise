@@ -54,6 +54,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.GrinderConfiguration;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.cardinality.direct.core.CardinalityOfType;
 import com.sri.ai.grinder.parser.antlr.AntlrGrinderParserWrapper;
@@ -436,29 +437,29 @@ public class RuleConverterTest {
 				lowParser.parse("if sick(X) then 1 else 0"));
 		
 		testRule2PotentialExpression(
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1"), 
-						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1", "0"));
 
 		// string = "sick(X) 0.3;";
 		testRule2PotentialExpression(ruleParser.parse("sick(X) 0.3;"), 
 				lowParser.parse("if sick(X) then 0.3 else 0.7"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.3"),
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.3", "0.7"));
 
 		// string = "sick(X) and happy(X);";
 		testRule2PotentialExpression(ruleParser.parse("sick(X) and happy(X);"), 
 				lowParser.parse("if sick(X) and happy(X) then 1 else 0"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("happy", "X")), "1"), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("happy", "X")), "1", "0"));
@@ -467,11 +468,11 @@ public class RuleConverterTest {
 		testRule2PotentialExpression(ruleParser.parse("sick(X) and happy(X) 0.1;"), 
 				lowParser.parse("if sick(X) and happy(X) then 0.1 else 0.9"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("happy", "X")), "0.1"),
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("happy", "X")), "0.1", "0.9"));
@@ -484,37 +485,37 @@ public class RuleConverterTest {
 		testRule2PotentialExpression(ruleParser.parse("if circle(X) then round(X);"), 
 				lowParser.parse("if circle(X) then if round(X) then 1 else 0 else 0.5"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("circle", "X"), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("round", "X"), "1")), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("circle", "X"), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("round", "X"), "1", "0"), "0.5"));
 
 		// string = "if epidemic then sick(X) 0.7;";
 		testRule2PotentialExpression(ruleParser.parse("if epidemic then sick(X) 0.7;"), 
 				lowParser.parse("if epidemic then if sick(X) then 0.7 else 0.3 else 0.5"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", "epidemic", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.7")), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", "epidemic", 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, "epidemic", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.7", "0.3"), "0.5"));
 
 		// string = "if epidemic then sick(X) and unhappy(X) 0.9;";
 		testRule2PotentialExpression(ruleParser.parse("if epidemic then sick(X) and unhappy(X) 0.9;"), 
 				lowParser.parse("if epidemic then if sick(X) and unhappy(X) then 0.9 else 0.1 else 0.5"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", "epidemic", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("unhappy", "X")), "0.9")), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", "epidemic", 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, "epidemic", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("unhappy", "X")), "0.9", "0.1"), "0.5"));
@@ -523,17 +524,17 @@ public class RuleConverterTest {
 		testRule2PotentialExpression(ruleParser.parse("if chilly(P) and live(X, P) then sick(X) 0.6;"), 
 				lowParser.parse("if chilly(P) and live(X, P) then if sick(X) then 0.6 else 0.4 else 0.5"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("chilly", "P"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("live", "X", "P")), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.6")), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("chilly", "P"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("live", "X", "P")), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.6", "0.4"), "0.5"));
 
 		// string = "if colleagues(X,Y) and Y != bob then likes(X,Y) 0.8;";	
@@ -541,89 +542,89 @@ public class RuleConverterTest {
 				lowParser.parse("if colleagues(X,Y) and Y != bob then if likes(X,Y) then 0.8 else 0.2 else 0.5"));
 		
 		// string = "if colleagues(X,Y) then likes(X,Y) 0.8;";
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("colleagues", "X", "Y"), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("likes", "X", "Y"), "0.8")), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("colleagues", "X", "Y"), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("likes", "X", "Y"), "0.8", "0.2"), "0.5"));
 
 		// string = "if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8;";
 		testRule2PotentialExpression(ruleParser.parse("if epidemic then if sick(X) and friends(X,Y) then sick(Y) 0.8;"), 
 				lowParser.parse("if epidemic then if sick(X) and friends(X, Y) then if sick(Y) then 0.8 else 0.2 else 0.5 else 0.5"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", "epidemic", 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", "epidemic", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
-						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.8"))), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", "epidemic", 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, "epidemic", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
-						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.8", "0.2"), "0.5"), "0.5"));
 
 		// string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);";
 		testRule2PotentialExpression(ruleParser.parse("if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y);"), 
 				lowParser.parse("if sick(X) and friends(X,Y) then if sick(Y) then 0.8 else 0.2 else if sick(Y) then 1 else 0"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.8"), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), 1)), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.8", "0.2"), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "1", "0")));
 
 		// string = "if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y) 0.3;";
 		testRule2PotentialExpression(ruleParser.parse("if sick(X) and friends(X,Y) then sick(Y) 0.8 else sick(Y) 0.3;"), 
 				lowParser.parse("if sick(X) and friends(X,Y) then if sick(Y) then 0.8 else 0.2 else if sick(Y) then 0.3 else 0.7"));
 
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.8"), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.3")), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.8", "0.2"), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "0.3", "0.7")));
 			
-			testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("conditional rule", 
+			testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'conditional rule'", 
 					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
 					"0.5", 
-					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("atomic rule", 
+					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'atomic rule'", 
 							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), 1)), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", 
 							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("friends", "X", "Y")), 
 					"0.5", 
-					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 							Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "Y"), "1", "0")));	
 			
 			//
@@ -647,28 +648,28 @@ public class RuleConverterTest {
 		testRule2PotentialExpression(ruleParser.parse("sick(john)."), 
 				lowParser.parse("if sick(john) then 1 else 0"));
 
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "1", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'prolog rule'", "1", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "john")),
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "john"), "1", "0"));
 
 		// string = "sick(X).";
 		testRule2PotentialExpression(ruleParser.parse("sick(X)."), 
 				lowParser.parse("if sick(X) then 1 else 0"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "1", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'prolog rule'", "1", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X")), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "1", "0"));
 
 		// string = "not sick(mary).";
 		testRule2PotentialExpression(ruleParser.parse("not sick(mary)."), 
 				lowParser.parse("if not sick(mary) then 1 else 0"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "1", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'prolog rule'", "1", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("not", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "mary"))), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("not", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "mary")), "1", "0"));
 
@@ -676,37 +677,37 @@ public class RuleConverterTest {
 		testRule2PotentialExpression(ruleParser.parse("0.3 sick(X)."), 
 				lowParser.parse("if sick(X) then 0.3 else 0.7"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "0.3", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'prolog rule'", "0.3", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X")), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.3", "0.7"));
 
 		// string = "round(X) :- circle(X).";
 		testRule2PotentialExpression(ruleParser.parse("round(X) :- circle(X)."), 
 				lowParser.parse("if circle(X) then if round(X) then 1 else 0 else 0.5"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "1", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'prolog rule'", "1", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("round", "X"), 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("circle", "X")), 
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("circle", "X"), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 					Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("round", "X"), "1", "0"), "0.5"));
 
 		// string = "0.7 sick(X) :- epidemic and not vaccinated(X).";
 		testRule2PotentialExpression(ruleParser.parse("0.7 sick(X) :- epidemic and not vaccinated(X)."), 
 				lowParser.parse("if epidemic and not vaccinated(X) then if sick(X) then 0.7 else 0.3 else 0.5"));
 		
-		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("prolog rule", "0.7", 
+		testRule2PotentialExpression(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("'prolog rule'", "0.7", 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", "epidemic", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("not", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("vaccinated", "X")))),
-			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+			Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("and", "epidemic", 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("not", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("vaccinated", "X"))), 
-				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("if . then . else .", 
+				Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IF_THEN_ELSE, 
 						Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sick", "X"), "0.7", "0.3"), "0.5"));
 	}
 	
@@ -1177,13 +1178,13 @@ public class RuleConverterTest {
 		input = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees ("=>", 1, 2, 3);
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
-		input = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees ("there exists . : .", 1, 2, 3);
+		input = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees (FunctorConstants.THERE_EXISTS, 1, 2, 3);
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
-		input = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees ("for all . : .", 1, 2, 3);
+		input = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees (FunctorConstants.FOR_ALL, 1, 2, 3);
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
-		input = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees (". may be same as .", "A", "B");
+		input = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees ("'. may be same as .'", "A", "B");
 		Assert.assertEquals(false, ruleConverter.isRandomFunctionApplication(input));
 
 		input = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("mother", 1, 2, 3, 4);
