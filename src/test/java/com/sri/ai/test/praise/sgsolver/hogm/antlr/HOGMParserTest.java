@@ -67,14 +67,14 @@ public class HOGMParserTest {
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
 		
-		string = "sort \"a string named sort\";";
-		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "\"a string named sort\"", "Unknown", 
+		string = "sort \"a string literal named sort\";";
+		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "a string literal named sort", "Unknown", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
 		
-		string = "sort 'a string named sort';";
-		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "'a string named sort'", "Unknown", 
+		string = "sort 'a symbol literal named sort';";
+		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "a symbol literal named sort", "Unknown", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
@@ -154,14 +154,14 @@ public class HOGMParserTest {
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "President", "0", "Boolean"),
 				              null, null));	
 		
-		string = "constant \"a string constant name\": Boolean;";
+		string = "constant \"a string literal name\": Boolean;";
 		test(string, expected(null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "\"a string constant name\"", "0", "Boolean"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "a string literal name", "0", "Boolean"),
 				              null, null));	
 		
-		string = "constant 'a string constant name\': Boolean;";
+		string = "constant 'a symbol literal name\': Boolean;";
 		test(string, expected(null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "'a string constant name'", "0", "Boolean"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "a symbol literal name", "0", "Boolean"),
 				              null, null));	
 		
 		string = "constant happy: 1..5";
@@ -269,14 +269,14 @@ public class HOGMParserTest {
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "President", "0", "Boolean"),
 				              null));
 		
-		string = "random \"a string constant name\": Boolean;";
+		string = "random \"a string literal name\": Boolean;";
 		test(string, expected(null, null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "\"a string constant name\"", "0", "Boolean"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "a string literal name", "0", "Boolean"),
 				              null));
 		
-		string = "random 'a string constant name': Boolean;";
+		string = "random 'a symbol literal name': Boolean;";
 		test(string, expected(null, null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "'a string constant name'", "0", "Boolean"),
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "a symbol literal name", "0", "Boolean"),
 				              null));
 		
 		string = "random happy: 1..5";

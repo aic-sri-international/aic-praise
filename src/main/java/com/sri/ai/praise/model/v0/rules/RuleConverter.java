@@ -108,12 +108,12 @@ import com.sri.ai.util.math.Rational;
 @Beta
 public class RuleConverter {
 
-	public static final String FUNCTOR_ATOMIC_RULE        = "'atomic rule'";
-	public static final String FUNCTOR_CONDITIONAL_RULE   = "'conditional rule'";
-	public static final String FUNCTOR_PROLOG_RULE        = "'prolog rule'";
-	public static final String FUNCTOR_STANDARD_PROB_RULE = "'standard probability rule'";
-	public static final String FUNCTOR_CAUSAL_RULE        = "'causal rule'";
-	public static final String FUNCTOR_MAY_BE_SAME_AS     = "'. may be same as .'";
+	public static final String FUNCTOR_ATOMIC_RULE        = "atomic rule";
+	public static final String FUNCTOR_CONDITIONAL_RULE   = "conditional rule";
+	public static final String FUNCTOR_PROLOG_RULE        = "prolog rule";
+	public static final String FUNCTOR_STANDARD_PROB_RULE = "standard probability rule";
+	public static final String FUNCTOR_CAUSAL_RULE        = "causal rule";
+	public static final String FUNCTOR_MAY_BE_SAME_AS     = ". may be same as .";
 	public static final String FUNCTOR_QUERY              = "query";
 
 	public static final String TYPE_BOOLEAN               = "Boolean";

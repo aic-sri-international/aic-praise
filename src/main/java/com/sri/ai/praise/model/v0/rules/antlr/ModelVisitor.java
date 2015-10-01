@@ -488,7 +488,7 @@ public class ModelVisitor extends RuleBaseVisitor<Expression> {
 	// PROTECTED
 	//
 	protected Expression newSymbol(String text) {
-		Expression result = Expressions.makeSymbol(text);
+		Expression result = Expressions.parseTextAndMakeSymbolOrStringLiteral(text);
 		return result;
 	}
 

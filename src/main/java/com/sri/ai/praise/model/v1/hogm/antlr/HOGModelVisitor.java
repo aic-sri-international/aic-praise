@@ -482,7 +482,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	}
  	
 	protected Expression newSymbol(String text) {
-		Expression result = Expressions.makeSymbol(text);
+		Expression result = Expressions.parseTextAndMakeSymbolOrStringLiteral(text);
 		return result;
 	}
 	
