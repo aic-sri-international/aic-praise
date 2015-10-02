@@ -340,7 +340,7 @@ public class HOGMSortDeclaration {
 	public static boolean isSortReference(Expression reference) {
 		boolean result = false;
 		
-		if ((Expressions.isSymbol(reference) && reference.getValue() instanceof String) ||
+		if ((Expressions.isSymbol(reference) && reference.getValue() instanceof String && !Expressions.isStringLiteral(reference)) ||
 		    isNumberRangeReference(reference)) {
 			result = true;
 		}
@@ -439,10 +439,12 @@ public class HOGMSortDeclaration {
 
 	private static void assertNameOk(Expression name) {
 		boolean illegal = true;
-		if (name.getSyntacticFormType().equals("Symbol")
+		if (Expressions.isSymbol(name)
 			&& name.getValue() instanceof String
 			// Ensure is not an in-built sort
 			&& !isNameOfInBuilt(name)
+			// Ensure is not a String Literal
+			&& !Expressions.isStringLiteral(name)
 			) {
 			
 			illegal = false;
@@ -503,6 +505,10 @@ public class HOGMSortDeclaration {
 				}
 				// Constant can't have same name as the sort its contained in
 				if (name.equals(arg)) {
+					argsOk = false;
+				}
+				// Constant can't be a string literal
+				if (Expressions.isStringLiteral(arg)) {
 					argsOk = false;
 				}
 

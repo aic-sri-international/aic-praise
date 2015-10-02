@@ -305,8 +305,10 @@ public class HOGMRandomVariableDeclaration {
 	//
 	private static void assertNameOk(Expression name) {
 		boolean illegal = true;
-		if (name.getSyntacticFormType().equals("Symbol")
-			&& name.getValue() instanceof String) {
+		if (Expressions.isSymbol(name)
+			&& name.getValue() instanceof String
+			// Ensure is not a String Literal
+			&& !Expressions.isStringLiteral(name)) {
 			illegal = false;
 		}
 		if (illegal) {

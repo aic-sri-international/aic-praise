@@ -131,8 +131,15 @@ public class HOGModel {
 			sortConstants.add(Expressions.TRUE);
 			
 			sortStatements.forEach(sortStatement -> {
-				if (HOGMSortDeclaration.isNameOfInBuilt(sortStatement.statement.get(0))) {
+				if (Expressions.isStringLiteral(sortStatement.statement.get(0))) {
+					newError(Type.SORT_NAME_CANNOT_BE_A_STRING_LITERAL, "", sortStatement);
+				}
+				else if (HOGMSortDeclaration.isNameOfInBuilt(sortStatement.statement.get(0))) {
 					newError(Type.SORT_NAME_PREDEFINED, "", sortStatement);
+				}
+				else if (!validSortConstants(sortStatement)) {
+					// method will have added errors specific to each constant
+					// do nothing here as can't actually construct a sort declaration with invalid constants.
 				}
 				else if (!HOGMSortDeclaration.isSortDeclaration(sortStatement.statement)) {
 					newError(Type.SORT_DECLARATION_IS_NOT_LEGAL, "", sortStatement);
@@ -161,9 +168,23 @@ public class HOGModel {
 			});
 		}
 		
+		boolean validSortConstants(StatementInfo sortStatement) {
+			boolean result = true;	
+			for (Expression constant : ExtensionalSet.getElements(sortStatement.statement.get(2))) {
+				if (Expressions.isStringLiteral(constant)) {
+					result = false;
+					newError(Type.SORT_CONSTANT_NAME_CANNOT_BE_A_STRING_LITERAL, ""+constant, sortStatement);
+				}
+			}
+			return result;
+		}
+		
 		void validateConstantStatements(List<StatementInfo> constantStatements) {				
 			constantStatements.forEach(constantStatement -> {
-				if (!ConstantDeclaration.isConstantDeclaration(constantStatement.statement)) {
+				if (Expressions.isStringLiteral(constantStatement.statement.get(0))) {
+					newError(Type.CONSTANT_NAME_CANNOT_BE_A_STRING_LITERAL, "", constantStatement);
+				}
+				else if (!ConstantDeclaration.isConstantDeclaration(constantStatement.statement)) {
 					newError(Type.CONSTANT_DECLARATION_IS_NOT_LEGAL, "", constantStatement);
 				}
 				else {
@@ -201,7 +222,10 @@ public class HOGModel {
 		
 		void validateRandomVariableStatements(List<StatementInfo> randomVariableStatements) {
 			randomVariableStatements.forEach(rvStatement -> {
-				if (!HOGMRandomVariableDeclaration.isRandomVariableDeclaration(rvStatement.statement)) {
+				if (Expressions.isStringLiteral(rvStatement.statement.get(0))) {
+					newError(Type.RANDOM_VARIABLE_NAME_CANNOT_BE_A_STRING_LITERAL, "", rvStatement);
+				}
+				else if (!HOGMRandomVariableDeclaration.isRandomVariableDeclaration(rvStatement.statement)) {
 					newError(Type.RANDOM_VARIABLE_IS_NOT_LEGAL, "", rvStatement);
 				}
 				else {

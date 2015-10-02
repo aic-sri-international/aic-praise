@@ -66,12 +66,6 @@ public class HOGMParserTest {
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
 							  null, null, null));
 		
-		string = "sort \"a string literal named sort\";";
-		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "a string literal named sort", "Unknown", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
-								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.KLEENE_LIST))),
-							  null, null, null));
-		
 		string = "sort 'a symbol literal named sort';";
 		test(string, expected(Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("sort", "a symbol literal named sort", "Unknown", 
 								Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("{ . }", 
@@ -84,6 +78,10 @@ public class HOGMParserTest {
 		// Should not parse
 		test("sort People: -1;", null);
 		test("sort People: Something;", null);
+		
+		testExpectedModelError(
+				"sort \"a string literal named sort\";",
+				HOGModelError.Type.SORT_NAME_CANNOT_BE_A_STRING_LITERAL);
 		
 		testExpectedModelError( // Too many constants 
 				"sort Grade: 7, a, b, c, d, e, f, g, ng;\n",
@@ -110,6 +108,10 @@ public class HOGMParserTest {
 		
 		testExpectedModelError("sort 'for all . : .';", HOGModelError.Type.SORT_NAME_SAME_AS_QUANTIFIER);
 		testExpectedModelError("sort 'there exists . : .';", HOGModelError.Type.SORT_NAME_SAME_AS_QUANTIFIER);
+		
+		testExpectedModelError(
+				"sort People: 2, fred, \"tom henderson\";", 
+				HOGModelError.Type.SORT_CONSTANT_NAME_CANNOT_BE_A_STRING_LITERAL);
 		
 		testExpectedModelError(
 				"sort People: 2, fred, tom;\n"
@@ -153,11 +155,6 @@ public class HOGMParserTest {
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "President", "0", "Boolean"),
 				              null, null));	
 		
-		string = "constant \"a string literal name\": Boolean;";
-		test(string, expected(null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "a string literal name", "0", "Boolean"),
-				              null, null));	
-		
 		string = "constant 'a symbol literal name\': Boolean;";
 		test(string, expected(null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "a symbol literal name", "0", "Boolean"),
@@ -187,6 +184,10 @@ public class HOGMParserTest {
 	public void testDetectedConstantErrors() {
 		test("constant times: Integer x Integer;", null);
 		test("constant times: x Integer;", null);
+		
+		testExpectedModelError(
+				"constant \"a string literal name\": Boolean;",
+				HOGModelError.Type.CONSTANT_NAME_CANNOT_BE_A_STRING_LITERAL);
 		
 		testExpectedModelError(			 
 				 "sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
@@ -268,11 +269,6 @@ public class HOGMParserTest {
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "President", "0", "Boolean"),
 				              null));
 		
-		string = "random \"a string literal name\": Boolean;";
-		test(string, expected(null, null,
-				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "a string literal name", "0", "Boolean"),
-				              null));
-		
 		string = "random 'a symbol literal name': Boolean;";
 		test(string, expected(null, null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "a symbol literal name", "0", "Boolean"),
@@ -302,6 +298,10 @@ public class HOGMParserTest {
 	public void testDetectedRandomVariableErrors() {
 		test("random times: Integer x Integer;", null);
 		test("random times: x Integer;", null);
+		
+		testExpectedModelError(
+				"random \"a string literal name\": Boolean;",
+				HOGModelError.Type.RANDOM_VARIABLE_NAME_CANNOT_BE_A_STRING_LITERAL);
 		
 		testExpectedModelError(			 
 				 "sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
