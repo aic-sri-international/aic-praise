@@ -750,7 +750,8 @@ public class HOGModel {
 							!scopedConstants.containsKey(expr) &&
 							!randoms.containsKey(expr) &&
 							!sorts.containsKey(expr) &&
-							!sortConstants.contains(expr);
+							!sortConstants.contains(expr) &&
+							!Expressions.isStringLiteral(expr);
 			return result;
 		}
 		

@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
@@ -556,7 +555,6 @@ public class HOGMParserTest {
 				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);
 	}
 	
-	@Ignore("TODO - implement supporting logic")
 	@Test
 	public void testStringSortTypeDetection() {
 		String string;
@@ -565,54 +563,60 @@ public class HOGMParserTest {
 				+"stringFunction(\"a String\");";		
 		test(string, expected(null, null,
 							  Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
-							  Expressions.parse("stringFunction(\"a String\")")));
+							  Expressions.parse("if stringFunction(\"a String\") then 1 else 0")));	
 		
-		string = "random stringFunction: String -> Boolean;\n"
-				+"stringFunction('a String');";
-		test(string, expected(null, null,
-							  Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
-							  Expressions.parse("stringFunction('a String')")));
-		
+		// Note: ensure a string literal with no spaces is still recognized as a string literal
 		string = "random stringFunction: String -> Boolean;\n"
 				+"stringFunction(\"aString\");";		
 		test(string, expected(null, null,
 							  Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
-							  Expressions.parse("stringFunction(\"aString\")")));
+							  Expressions.parse("if stringFunction(\"aString\") then 1 else 0")));
+		
+		string = "random astring: String;\n"
+				+"random stringFunction: String -> Boolean;\n"
+				+"stringFunction(astring);";		
+		test(string, expected(null, null,
+							  Expressions.parse("tuple(randomVariable(astring, 0, String), randomVariable(stringFunction, 1, String, Boolean))"),
+							  Expressions.parse("if stringFunction(astring) then 1 else 0")));
+		
+		string = "constant astring: String;\n"
+				+"random stringFunction: String -> Boolean;\n"
+				+"stringFunction(astring);";		
+		test(string, expected(null, 
+							  Expressions.parse("tuple(constant(astring, 0, String))"),
+							  Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
+							  Expressions.parse("if stringFunction(astring) then 1 else 0")));
+		
+		string = "constant astring: String;\n"
+				+"random stringFunction: String -> String;\n"
+				+"stringFunction(stringFunction(astring)) = \"a goal value\";";		
+		test(string, expected(null, 
+							  Expressions.parse("tuple(constant(astring, 0, String))"),
+							  Expressions.parse("tuple(randomVariable(stringFunction, 1, String, String))"),
+							  Expressions.parse("if stringFunction(stringFunction(astring)) = \"a goal value\"then 1 else 0")));
+		
+		// Note: in this case 'a String' is a quoted symbol not a string literal and does not
+		// map to any defined constants in the model.
+		string = "random stringFunction: String -> Boolean;\n"
+				+"stringFunction('a String');";
+		testExpectedModelError(string, 
+				HOGModelError.Type.TERM_CONSTANT_NOT_DEFINED);
 		
 		string = "random stringFunction: String -> Boolean;\n"
 				+"stringFunction('aString');";
-		test(string, expected(null, null,
-						      Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
-							  Expressions.parse("stringFunction('aString')")));
+		testExpectedModelError(string, 
+				HOGModelError.Type.TERM_CONSTANT_NOT_DEFINED);
 		
 		string = "random stringFunction: String -> Boolean;\n"
 				+"stringFunction(aString);";
-		test(string, expected(null, null,
-						      Expressions.parse("tuple(randomVariable(stringFunction, 1, String, Boolean))"),
-							  Expressions.parse("stringFunction(aString)")));
+		testExpectedModelError(string, 
+				HOGModelError.Type.TERM_CONSTANT_NOT_DEFINED);
 		
-// Auto assign to non-ambiguous propositional random or constant if one is declared.	
-// TODO "random astring : String;\n"
-// TODO "constant astring : String;\n"
-//		string = "\"a b c\" = \"d e f\"";
-//		test(string, expected(null, null, null,
-//							  Expressions.parse("\"a b c\" = \"d e f\"")));
-//		
-//		string = "'a b c' = 'd e f'";
-//		test(string, expected(null, null, null,
-//							  Expressions.parse("'a b c' = 'd e f'")));
-//		
-//		string = "\"abc\" = \"def\"";
-//		test(string, expected(null, null, null,
-//							  Expressions.parse("\"abc\" = \"def\"")));
-//		
-//		string = "'abc' = 'def'";
-//		test(string, expected(null, null, null,
-//							  Expressions.parse("'abc' = 'def'")));
-//		
-//		string = "abc = def";
-//		test(string, expected(null, null, null,
-//							  Expressions.parse("abc = def")));
+		string = "constant astring: String;\n"
+				+"random stringFunction: String -> String;\n"
+				+"stringFunction(stringFunction(astring));";
+		testExpectedModelError(string, 
+				HOGModelError.Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN);
 	}	
 	
 	//
