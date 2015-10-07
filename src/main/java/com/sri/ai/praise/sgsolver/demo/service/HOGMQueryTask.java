@@ -37,33 +37,20 @@
  */
 package com.sri.ai.praise.sgsolver.demo.service;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import com.google.common.annotations.Beta;
+import com.sri.ai.praise.sgsolver.solver.HOGMQuery;
+import com.sri.ai.praise.sgsolver.solver.HOGMQueryResult;
 
 import javafx.concurrent.Task;
 
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-
-import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.model.v1.HOGModelException;
-import com.sri.ai.praise.model.v1.hogm.antlr.ErrorListener;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
-import com.sri.ai.praise.model.v1.hogm.antlr.UnableToParseAllTheInputError;
-import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
-import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
-
 @Beta
-public class HOGMQueryTask extends Task<QueryResult> {
+public class HOGMQueryTask extends Task<HOGMQueryResult> {
 	private String query;
 	private String model;
 	//
-	private List<QueryError> errors = new ArrayList<>();
-	//
-	private InferenceForFactorGraphAndEvidence inferencer = null;
+	private HOGMQuery hogmQuery = null;
 	
 	public HOGMQueryTask(String query, String model) {
 		this.query = query;
@@ -71,118 +58,23 @@ public class HOGMQueryTask extends Task<QueryResult> {
 	}
 	
 	@Override
-	public QueryResult call() {
-    	QueryResult    result      = null;
-    	ParsedHOGModel parsedModel = null;
-    	 
-    	long start = System.currentTimeMillis();
-    	try {
-    		if (query == null || query.trim().equals("")) {
-    			errors.add(new QueryError(QueryError.Context.QUERY, "Query not specified", 0, 0, 0));
-    		}
-    		if (model == null || model.trim().equals("")) {
-    			errors.add(new QueryError(QueryError.Context.MODEL, "Model not specified", 0, 0, 0));
-    		}
-    		   		
-    		if (errors.size() == 0) {
-    	   		HOGMParserWrapper parser = new HOGMParserWrapper();
-        		Expression queryExpr     = parser.parseTerm(query, new LexerErrorListener(QueryError.Context.QUERY), new ParserErrorListener(QueryError.Context.QUERY));
-        		parsedModel              = parser.parseModel(model, new LexerErrorListener(QueryError.Context.MODEL), new ParserErrorListener(QueryError.Context.MODEL));
-     
-        		if (errors.size() == 0) {
-        			FactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
-	    			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true);
-	    			
-	    			Expression marginal = inferencer.solve(queryExpr); 			
-	    			
-	    			result = new QueryResult(query, parsedModel, marginal.toString(), System.currentTimeMillis() - start);
-        		}
-    		}
-    	}
-    	catch (RecognitionException re) {
-    		errors.add(new QueryError(QueryError.Context.MODEL, re.getMessage(), re.getOffendingToken().getLine(), re.getOffendingToken().getStartIndex(), re.getOffendingToken().getStopIndex()));
-    	}
-    	catch (UnableToParseAllTheInputError utpai) {
-    		errors.add(new QueryError(utpai));
-    	}
-    	catch (HOGModelException me) {
-    		me.getErrors().forEach(modelError -> {
-    			String inStatement    = modelError.getInStatementInfo().statement.toString();
-    			String inSource       = modelError.getInStatementInfo().sourceText;
-    			String inSubStatement = modelError.getMessage(); 
-    			String inInfo = "";
-    			if (inSubStatement.equals("") || inSubStatement.equals(inSource)) {
-    				inInfo = " in '"+inStatement+"'";
-    			}
-    			else {
-    				inInfo = " ('"+inSubStatement+"') in '"+inStatement+"'";
-    			}
-    			if (!inSource.replaceAll(" ", "").replaceAll(";", "").equals(inStatement.replaceAll(" ", ""))) {
-    				inInfo = inInfo + " derived from '"+inSource+"'";
-    			}
-    			errors.add(new QueryError(QueryError.Context.MODEL,
-    					modelError.getErrorType().formattedMessage()+inInfo, 
-    					modelError.getInStatementInfo().line,
-    					modelError.getInStatementInfo().startIndex, 
-    					modelError.getInStatementInfo().endIndex));
-    		});
-    	}
-    	catch (Throwable t) {
-    		// Unexpected
-    		errors.add(new QueryError(t));
-    	}
-    	
-    	if (errors.size() > 0) {
-			result = new QueryResult(query, parsedModel, errors, System.currentTimeMillis() - start);
+	public HOGMQueryResult call() {
+		HOGMQueryResult result = null;
+		
+		hogmQuery = new HOGMQuery(model, query);
+		
+		List<HOGMQueryResult> queryResults = hogmQuery.query();
+		if (queryResults.size() == 1) {
+			result = queryResults.get(0);
 		}
-
+ 
         return result;
     }
 	
 	@Override
 	protected void cancelled() {
-		if (inferencer != null) {
-			inferencer.interrupt();
-		}
-	}
-	
-	protected class QueryErrorListener extends ErrorListener {
-		QueryError.Context context;
-		QueryErrorListener(String name, QueryError.Context context) {
-			super(name);
-			this.context = context;
-		}
-		
-		@Override
-		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-			int start = 0; 
-			int end   = 0; 
-			if (e != null && e.getOffendingToken() != null) {
-				start = e.getOffendingToken().getStartIndex();
-				end   = e.getOffendingToken().getStopIndex();
-			}
-			if (start > end) {
-				start = end;
-			}
-			errors.add(new QueryError(context,
-					    name +" error at line " + line + " column "+ charPositionInLine + " - " + msg,
-					    line,
-					   	start,
-					   	end
-					));
-			errorsDetected = true;
-		}
-	} 
-	
-	private class LexerErrorListener extends QueryErrorListener {
-		LexerErrorListener(QueryError.Context context) {
-			super("Lexer", context);
-		}
-	}
-	
-	private class ParserErrorListener extends QueryErrorListener {
-		ParserErrorListener(QueryError.Context context) {
-			super("Lexer", context);
+		if (hogmQuery != null) {
+			hogmQuery.cancelQuery();
 		}
 	}
 }

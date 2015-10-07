@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo.service;
+package com.sri.ai.praise.sgsolver.solver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,22 +45,22 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 
 @Beta
-public class QueryResult {
-	private String query  = null;
-	private ParsedHOGModel parsedModel = null;
-	private String result = null;
-	private List<QueryError> errors = new ArrayList<>();
-	private long millisecondsToCompute = 0L;
+public class HOGMQueryResult {
+	private String               query                 = null;
+	private ParsedHOGModel       parsedModel           = null;
+	private String               result                = null;
+	private List<HOGMQueryError> errors                = new ArrayList<>();
+	private long                 millisecondsToCompute = 0L;
 	
-	public QueryResult(String query, ParsedHOGModel parsedModel, String result, long millisecondsToCompute) {
-		this.query       = query;
-		this.parsedModel = parsedModel;
-		this.result      = result;
+	public HOGMQueryResult(String query, ParsedHOGModel parsedModel, String result, long millisecondsToCompute) {
+		this.query                 = query;
+		this.parsedModel           = parsedModel;
+		this.result                = result;
 		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
-	public QueryResult(String query, ParsedHOGModel parsedModel, List<QueryError> errors, long millisecondsToCompute) {
-		this.query = query;
+	public HOGMQueryResult(String query, ParsedHOGModel parsedModel, List<HOGMQueryError> errors, long millisecondsToCompute) {
+		this.query       = query;
 		this.parsedModel = parsedModel;
 		this.errors.addAll(errors);
 		this.millisecondsToCompute = millisecondsToCompute;
@@ -83,7 +83,7 @@ public class QueryResult {
 		return result;
 	}
 	
-	public List<QueryError> getErrors() {
+	public List<HOGMQueryError> getErrors() {
 		return errors;
 	}
 	

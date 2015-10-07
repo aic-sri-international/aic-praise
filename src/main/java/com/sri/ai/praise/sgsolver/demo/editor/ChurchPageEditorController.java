@@ -55,7 +55,7 @@ import com.sri.ai.praise.model.v0.Model;
 import com.sri.ai.praise.model.v0.imports.church.TranslateChurchToModel;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.query.QueryController;
-import com.sri.ai.praise.sgsolver.demo.service.QueryError;
+import com.sri.ai.praise.sgsolver.solver.HOGMQueryError;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.base.Triple;
 
@@ -102,9 +102,9 @@ public class ChurchPageEditorController implements ModelPageEditor {
 	}
 	
 	@Override
-	public Pair<List<QueryError>, String> validateAndGetModel() {
-		List<QueryError> errors = generateModel();
-		Pair<List<QueryError>, String> result = new Pair<>(errors, hogmCodeArea.getText());
+	public Pair<List<HOGMQueryError>, String> validateAndGetModel() {
+		List<HOGMQueryError> errors = generateModel();
+		Pair<List<HOGMQueryError>, String> result = new Pair<>(errors, hogmCodeArea.getText());
 		return result;
 	}
 	
@@ -162,8 +162,8 @@ public class ChurchPageEditorController implements ModelPageEditor {
 		queryOutputPane.getChildren().add(queryPane);
 	}
 	
-	private List<QueryError> generateModel() {
-		List<QueryError> problems = new ArrayList<>();
+	private List<HOGMQueryError> generateModel() {
+		List<HOGMQueryError> problems = new ArrayList<>();
 		try {
 			String churchProgram = churchCodeArea.getText();
 			Triple<String, Model, List<Expression>> translation = translator.translate("Church Program", ""
@@ -173,7 +173,7 @@ public class ChurchPageEditorController implements ModelPageEditor {
 			hogmCodeArea.setText(hogmModel);
 		} catch (Throwable t) {
 			String problem = "/* ERROR in Translation:\n"+ExceptionUtils.getStackTrace(t)+"\n*/";
-			problems.add(new QueryError(t));
+			problems.add(new HOGMQueryError(t));
 			hogmCodeArea.setText(problem);
 		}
 		return problems;

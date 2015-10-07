@@ -48,7 +48,7 @@ import com.sri.ai.praise.sgsolver.demo.SGSolverDemoController;
 import com.sri.ai.praise.sgsolver.demo.editor.HOGMCodeArea;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.service.ExecuteHOGMQueryService;
-import com.sri.ai.praise.sgsolver.demo.service.QueryError;
+import com.sri.ai.praise.sgsolver.solver.HOGMQueryError;
 import com.sri.ai.util.base.Pair;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
@@ -204,7 +204,7 @@ public class QueryController {
 			executeQueryService.cancel();
 		}
 		else {
-			Pair<List<QueryError>, String> initialModelValidation = modelPageEditor.validateAndGetModel();
+			Pair<List<HOGMQueryError>, String> initialModelValidation = modelPageEditor.validateAndGetModel();
 			
 			if (initialModelValidation.first.size() > 0) {
 				displayQueryErrors(getCurrentQuery(), initialModelValidation.first, 0);
@@ -222,19 +222,19 @@ public class QueryController {
 		outputAccordion.getPanes().clear();
 	}
 	
-	private void displayQueryErrors(String query, List<QueryError> queryErrors, long millisecondsToCompute) {
+	private void displayQueryErrors(String query, List<HOGMQueryError> queryErrors, long millisecondsToCompute) {
 		String title = "Query '"+query+"' encountered "+queryErrors.size()+" error(s) when attempting to compute answer ("+duration("took ", millisecondsToCompute)+")";
-		ListView<QueryError> errors = new ListView<>(FXCollections.observableList(queryErrors));
+		ListView<HOGMQueryError> errors = new ListView<>(FXCollections.observableList(queryErrors));
 		//errors.setFixedCellSize(24);
 		errors.setPrefHeight(24*5);
 		errors.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		errors.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
 			if (newValue.intValue() >= 0) {
-				QueryError qError = errors.getItems().get(newValue.intValue());
-				if (qError.getContext() == QueryError.Context.MODEL) {
+				HOGMQueryError qError = errors.getItems().get(newValue.intValue());
+				if (qError.getContext() == HOGMQueryError.Context.MODEL) {
 					modelPageEditor.highlight(qError.getStartContextIndex(), qError.getEndContextIndex());
 				}
-				else if (qError.getContext() == QueryError.Context.QUERY) {
+				else if (qError.getContext() == HOGMQueryError.Context.QUERY) {
 					queryComboBox.getEditor().selectAll();
 				}
 			}

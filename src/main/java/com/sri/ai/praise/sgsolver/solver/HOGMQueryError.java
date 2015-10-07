@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo.service;
+package com.sri.ai.praise.sgsolver.solver;
 
 import java.util.StringJoiner;
 
@@ -44,7 +44,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.google.common.annotations.Beta;
 
 @Beta
-public class QueryError {
+public class HOGMQueryError {
 	public enum Context {
 		MODEL, QUERY, UNKNOWN
 	}
@@ -56,16 +56,16 @@ public class QueryError {
 	private String    errorMessage    = "";
 	private Throwable throwable       = null;
 	
-	public QueryError(Throwable t) {
+	public HOGMQueryError(Throwable t) {
 		this.errorMessage = t.getMessage() == null ? t.toString() : t.getMessage();
 		this.throwable    = t;
 	}
 	
-	public QueryError(Context context, String errorMessage, int line, int startContextIdx, int endContextIdx) {
+	public HOGMQueryError(Context context, String errorMessage, int line, int startContextIdx, int endContextIdx) {
 		this(context, errorMessage, line, startContextIdx, endContextIdx, null);
 	}
 	
-	public QueryError(Context context, String errorMessage, int line, int startContextIdx, int endContextIdx, Throwable t) {
+	public HOGMQueryError(Context context, String errorMessage, int line, int startContextIdx, int endContextIdx, Throwable t) {
 		if (context == Context.UNKNOWN) {
 			throw new IllegalArgumentException("Context cannot be set to UNKNOWN when providing context start and end infofrmation.");
 		}
