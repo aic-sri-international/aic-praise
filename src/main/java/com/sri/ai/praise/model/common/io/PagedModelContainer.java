@@ -51,16 +51,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
+import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.util.base.Pair;
 
 /**
  * A container model format that can be used to represent different string based model representations 
- * (i.e. is neutral of the modeling language) that can be used to read/write 1..n models (i.e. 1 model 
- * per page in the container, usually variants of the same base model) to a single file on disk. 
+ * (i.e. is neutral of the modeling language) that can be used to read/write 1..n models of the same language 
+ * (i.e. 1 model per page in the container, usually variants of the same base model) to a single file on disk. 
  * 
  * NOTE: by convention we are using '.praise' as the file extension name for these types of container files.
  * 
@@ -74,8 +76,10 @@ public class PagedModelContainer {
 	//
 	public static final Charset FILE_CHARSET = Charsets.UTF_8;
 	//
-	private static final String MODEL_FRAGMENT_PREFIX      = "@FRAGMENT:";
+	private static final String MODEL_LANGUAGE_PREFIX      = "@LANG:";
 	private static final String MODEL_SPECIFICATION_PREFIX = "@MODEL:";
+	private static final String MODEL_FRAGMENT_PREFIX      = "@FRAGMENT:";
+	//
 	private static final String MODEL_FIELD_NAME           = "name";
 	private static final String MODEL_FIELD_PARTS          = "parts";
 	private static final String MODEL_FIELD_QUERIES        = "queries";	
@@ -106,14 +110,20 @@ public class PagedModelContainer {
 	 * queries associated with it, to the internal paged model container representation.<br>
 	 * NOTE: Intended primarily to get into a form for saving to persistent storage.
 	 * 
+	 * @param containerModelLanguage
+	 *        the model language to be associated with the models contained in this container.
 	 * @param pageContents
 	 *        a list of pairs, where each pair represents a model and a set of default queries associated with it.
-	 * @return
+	 * @return a string representation of the container format.
 	 */
-	public static String toInternalContainerRepresentation(List<Pair<String, List<String>>> pageContents) {
+	public static String toInternalContainerRepresentation(ModelLanguage containerModelLanguage, List<Pair<String, List<String>>> pageContents) {
 		StringBuilder result = new StringBuilder();
+		// Output the language
+		result.append(MODEL_LANGUAGE_PREFIX);
+		result.append(containerModelLanguage.getCode());
+		result.append("\n");
 		
-		// Output the models first
+		// Output the models
 		for (int i = 0; i < pageContents.size(); i++) {
 			Pair<String, List<String>> pageContent = pageContents.get(i);
 			result.append(MODEL_SPECIFICATION_PREFIX);
@@ -155,6 +165,7 @@ public class PagedModelContainer {
 	public static List<ModelPage> getModelPagesFromURI(URI uri) throws IOException {	
 		List<ModelPage> result = new ArrayList<>();
 		
+		AtomicReference<ModelLanguage> containerModelLanguage = new AtomicReference<>();
 		List<String> modelSpecifications = new ArrayList<>();
 		Map<String, List<String>> fragments = new HashMap<>();
 		
@@ -165,13 +176,13 @@ public class PagedModelContainer {
 			try (FileSystem fs  = FileSystems.newFileSystem(URI.create(array[0]), env)) {
 				Path path = fs.getPath(array[1]);
 				try (Stream<String> lines = Files.lines(path, FILE_CHARSET)) {	
-					getContent(lines, modelSpecifications, fragments);	
+					getContent(containerModelLanguage, lines, modelSpecifications, fragments);	
 				}
 			}
 		}
 		else {
 			try (Stream<String> lines = Files.lines(Paths.get(uri), FILE_CHARSET)) {	
-				getContent(lines, modelSpecifications, fragments);	
+				getContent(containerModelLanguage, lines, modelSpecifications, fragments);	
 			}
 		}
 		
@@ -180,7 +191,7 @@ public class PagedModelContainer {
 			String model         = extractModel(MODEL_FIELD_PARTS, modelSpecification, fragments);
 			List<String> queries = extractQueries(MODEL_FIELD_QUERIES, modelSpecification, fragments);
 			
-			result.add(new ModelPage(name, model, queries));
+			result.add(new ModelPage(containerModelLanguage.get(), name, model, queries));
 		}
 		
 		return result;
@@ -189,10 +200,14 @@ public class PagedModelContainer {
 	//
 	// PRIVATE
 	//
-	private static void getContent(Stream<String> lines, List<String> modelSpecifications, Map<String, List<String>> fragments) {
+	private static void getContent(AtomicReference<ModelLanguage> containerModelLanguage, Stream<String> lines, List<String> modelSpecifications, Map<String, List<String>> fragments) {
 		StringBuilder currentFragment = new StringBuilder();
 		lines.forEachOrdered(line -> {
-			if (line.startsWith(MODEL_SPECIFICATION_PREFIX)) {
+			if (line.startsWith(MODEL_LANGUAGE_PREFIX)) {
+				String languageCode = line.substring(MODEL_LANGUAGE_PREFIX.length(), line.length()).trim();
+				containerModelLanguage.set(ModelLanguage.getModelLangageForCode(languageCode));
+			}
+			else if (line.startsWith(MODEL_SPECIFICATION_PREFIX)) {
 				modelSpecifications.add(line);
 			}
 			else if (line.startsWith(MODEL_FRAGMENT_PREFIX)) {
@@ -208,6 +223,10 @@ public class PagedModelContainer {
 				fragments.get(currentFragment.toString()).add(line);
 			}
 		});
+		
+		if (containerModelLanguage.get() == null) {
+			throw new RuntimeException("Container Model Language Code is not specified: "+MODEL_LANGUAGE_PREFIX);
+		}
 	}
 	
 	private static void appendField(String fieldName, List<String> values, StringBuilder sb) {

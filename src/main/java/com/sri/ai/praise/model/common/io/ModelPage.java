@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.lang.ModelLanguage;
 
 /**
  * Representation of a Model Page (i.e. a complete model) within a PagedModelContainer.
@@ -51,16 +52,22 @@ import com.google.common.annotations.Beta;
  */
 @Beta
 public class ModelPage {
-	private final String name;
-	private final String model;
-	private final List<String> defaultQueriesToRun;
+	private final ModelLanguage language;
+	private final String        name;
+	private final String        model;
+	private final List<String>  defaultQueriesToRun;
 	
-	public ModelPage(String name, String model, List<String> defaultQueriesToRun) {
-		this.name = name;
-		this.model = model;
+	public ModelPage(ModelLanguage language, String name, String model, List<String> defaultQueriesToRun) {
+		this.language            = language;
+		this.name                = name;
+		this.model               = model;
 		this.defaultQueriesToRun = Collections.unmodifiableList(new ArrayList<>(defaultQueriesToRun));
 	}
 
+	public ModelLanguage getLanguage() {
+		return language;
+	}
+	
 	public String getName() {
 		return name;
 	}

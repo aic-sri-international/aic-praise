@@ -1,3 +1,4 @@
+@LANG:Church
 @MODEL:name=[Page 1] parts=[page-1-model] queries=[query#1,query#2]
 @FRAGMENT:page-1-model
 ;

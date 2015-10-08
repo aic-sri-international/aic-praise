@@ -133,6 +133,16 @@ public enum ModelLanguage {
 	}
 	
 	//
+	public static ModelLanguage getModelLangageForCode(String code) {
+		for (ModelLanguage modelLanguage : ModelLanguage.values()) {
+			if (modelLanguage.getCode().equals(code)) {
+				return modelLanguage;
+			}
+		}
+		throw new RuntimeException("Unrecognized model language code ["+code+"]");
+	}
+	
+	//
 	//
 	private String  name;
 	private boolean internal;

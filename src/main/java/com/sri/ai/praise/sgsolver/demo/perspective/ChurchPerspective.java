@@ -43,6 +43,7 @@ import java.util.List;
 import javafx.fxml.FXMLLoader;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.editor.ChurchPageEditorController;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
@@ -67,6 +68,11 @@ public class ChurchPerspective extends AbstractPerspective {
 	}
 	// END-Perspective
 	//
+	
+	@Override
+	protected ModelLanguage getModelLanguage() {
+		return ModelLanguage.Church;
+	}
 	
 	@Override
 	protected ModelPageEditor create(String model, List<String> defaultQueries) {

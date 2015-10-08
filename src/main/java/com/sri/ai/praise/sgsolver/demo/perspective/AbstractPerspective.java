@@ -55,6 +55,7 @@ import org.reactfx.EventSource;
 
 import com.google.common.annotations.Beta;
 import com.google.common.io.Files;
+import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
@@ -283,11 +284,13 @@ public abstract class AbstractPerspective implements Perspective {
 		ModelPageEditor result = modelPageEditors.get(currentModelPageIndexProperty.get()).get();
 		return result;
 	}
-	
+
+	protected abstract ModelLanguage getModelLanguage();
+
 	protected abstract ModelPageEditor create(String modelPage, List<String> defaultQueries);
 	
 	protected String getPagedModelInternalContainerRepresentation(List<Pair<String, List<String>>> pageContents) {
-		String result = PagedModelContainer.toInternalContainerRepresentation(pageContents);
+		String result = PagedModelContainer.toInternalContainerRepresentation(getModelLanguage(), pageContents);
 		return result;
 	}
 	
