@@ -56,18 +56,18 @@ import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 
 @Beta
-public class HOGMQuery {
+public class HOGMQueryRunner {
 	private String        model;
 	private List<String>  queries  = new ArrayList<>();
 	private boolean       canceled = false;
 	//
 	private InferenceForFactorGraphAndEvidence inferencer = null;
 	
-	public HOGMQuery(String model, String query) {
+	public HOGMQueryRunner(String model, String query) {
 		this(model, Collections.singletonList(query));
 	}
 	
-	public HOGMQuery(String model, List<String> queries) {
+	public HOGMQueryRunner(String model, List<String> queries) {
 		this.model = model;
 		this.queries.addAll(queries);
 	}

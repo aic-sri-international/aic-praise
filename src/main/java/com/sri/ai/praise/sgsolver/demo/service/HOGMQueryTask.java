@@ -40,7 +40,7 @@ package com.sri.ai.praise.sgsolver.demo.service;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.sgsolver.solver.HOGMQuery;
+import com.sri.ai.praise.sgsolver.solver.HOGMQueryRunner;
 import com.sri.ai.praise.sgsolver.solver.HOGMQueryResult;
 
 import javafx.concurrent.Task;
@@ -50,7 +50,7 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 	private String query;
 	private String model;
 	//
-	private HOGMQuery hogmQuery = null;
+	private HOGMQueryRunner hogmQueryRunner = null;
 	
 	public HOGMQueryTask(String query, String model) {
 		this.query = query;
@@ -61,9 +61,9 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 	public HOGMQueryResult call() {
 		HOGMQueryResult result = null;
 		
-		hogmQuery = new HOGMQuery(model, query);
+		hogmQueryRunner = new HOGMQueryRunner(model, query);
 		
-		List<HOGMQueryResult> queryResults = hogmQuery.query();
+		List<HOGMQueryResult> queryResults = hogmQueryRunner.query();
 		if (queryResults.size() == 1) {
 			result = queryResults.get(0);
 		}
@@ -73,8 +73,8 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 	
 	@Override
 	protected void cancelled() {
-		if (hogmQuery != null) {
-			hogmQuery.cancelQuery();
+		if (hogmQueryRunner != null) {
+			hogmQueryRunner.cancelQuery();
 		}
 	}
 }
