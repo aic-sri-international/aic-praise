@@ -177,7 +177,7 @@ System.out.println("Input Model Language is "+solverArgs.inputLanguage);
 	}
 	
 	private static ModelLanguage findLanguageModel(String languageCode) {
-		ModelLanguage result = Arrays.stream(ModelLanguage.values()).filter(ml -> ml.getCode().equals(languageCode.toLowerCase())).findFirst().orElse(null);
+		ModelLanguage result = Arrays.stream(ModelLanguage.values()).filter(ml -> ml.getCode().toLowerCase().equals(languageCode.toLowerCase())).findFirst().orElse(null);
 		
 		return result;
 	}
