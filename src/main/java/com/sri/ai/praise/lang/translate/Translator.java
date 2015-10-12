@@ -157,7 +157,6 @@ public interface Translator {
 		
 		result = result.substring(0, result.length()-extension.length());
 		
-		return result;
-		
+		return result;		
 	}
 }

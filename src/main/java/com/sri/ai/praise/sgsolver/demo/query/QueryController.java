@@ -184,10 +184,10 @@ public class QueryController {
     	executeQueryService.valueProperty().addListener((observable, oldResult, newResult) -> {
 			if (newResult != null) { 
 				if (newResult.isErrors()) {
-					displayQueryErrors(newResult.getQuery(), newResult.getErrors(), newResult.getMillisecondsToCopmpute());			
+					displayQueryErrors(newResult.getQuery(), newResult.getErrors(), newResult.getMillisecondsToCompute());			
 				}
 				else {
-					displayQueryAnswer(newResult.getQuery(), newResult.getResult(), newResult.getParsedModel(), newResult.getMillisecondsToCopmpute());	
+					displayQueryAnswer(newResult.getQuery(), newResult.getResult(), newResult.getParsedModel(), newResult.getMillisecondsToCompute());	
 				}
 			}
     	});

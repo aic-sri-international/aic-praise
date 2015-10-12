@@ -87,7 +87,7 @@ public class HOGMQueryResult {
 		return errors;
 	}
 	
-	public long getMillisecondsToCopmpute() {
+	public long getMillisecondsToCompute() {
 		return millisecondsToCompute;
 	}
 	

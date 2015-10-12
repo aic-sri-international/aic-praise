@@ -53,6 +53,8 @@ import com.google.common.base.Charsets;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
+import com.sri.ai.praise.sgsolver.solver.HOGMQueryResult;
+import com.sri.ai.praise.sgsolver.solver.HOGMQueryRunner;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -86,8 +88,24 @@ public class SGSolverCLI {
 	
 	public static void main(String[] args) {
 		try (SGSolverArgs solverArgs = getArgs(args)) {
-// TODO
-System.out.println("Input Model Language is "+solverArgs.inputLanguage);
+			List<ModelPage> hogModelsToQuery = getHOGModelsToQuery(solverArgs);
+
+			for (ModelPage hogModelToQuery : hogModelsToQuery) {
+				solverArgs.out.print("MODEL NAME =");
+				solverArgs.out.println(hogModelToQuery.getName());
+				HOGMQueryRunner queryRunner = new  HOGMQueryRunner(hogModelToQuery.getModel(), hogModelToQuery.getDefaultQueriesToRun());
+				List<HOGMQueryResult> hogModelQueryResults = queryRunner.query();
+				hogModelQueryResults.forEach(hogModelQueryResult -> {
+					solverArgs.out.print("QUERY      =");
+					solverArgs.out.println(hogModelQueryResult.getQuery());
+					solverArgs.out.print("RESULT     =");
+					solverArgs.out.println(hogModelQueryResult.toString());
+					solverArgs.out.print("TOOK       =");
+					solverArgs.out.println(duration(hogModelQueryResult.getMillisecondsToCompute()));
+				});
+				solverArgs.out.println("MODEL      =");
+				solverArgs.out.println(hogModelToQuery.getModel());
+			}
 		}
 		catch (Exception ex) {
 			System.err.println("Error calling SGSolver");
@@ -182,6 +200,23 @@ System.out.println("Input Model Language is "+solverArgs.inputLanguage);
 		return result;
 	}
 	
+	private static List<ModelPage> getHOGModelsToQuery(SGSolverArgs solverArgs) throws IOException {
+		List<ModelPage> result = new ArrayList<>();
+		
+		for (File inputFile : solverArgs.inputFiles) {
+			if (inputFile.getName().endsWith(PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION)) {
+				 result.addAll(PagedModelContainer.getModelPagesFromURI(inputFile.toURI()));
+			}
+			else {
+// TODO - handle other types (possibly grouping files, e.g. evidence)
+			}
+		}
+		
+// TODO - ensure all results are translated to HOGMv1 if needed.
+		
+		return result;
+	}
+	
 	private static String getLegalModelLanguageCodesDescription() {
 		StringJoiner result = new StringJoiner(", ");
 		Arrays.stream(ModelLanguage.values()).forEach(ml -> result.add(ml.getCode()));
@@ -220,6 +255,28 @@ System.out.println("Input Model Language is "+solverArgs.inputLanguage);
 						})
 						.findFirst().orElse(null);
 		}
+		
+		return result;
+	}
+	
+	private static String duration(long duration) {
+		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
+		
+		if (duration != 0) {
+			hours    = duration / 3600000;
+			duration = duration % 3600000; 
+		}
+		if (duration != 0) {
+			minutes  = duration / 60000;
+			duration = duration % 60000;
+		}
+		if (duration != 0) {
+			seconds  = duration / 1000;
+			duration = duration % 1000;
+		}
+		milliseconds = duration;
+		
+		String result = "" + hours + "h" + minutes + "m" + seconds + "." + milliseconds+"s";
 		
 		return result;
 	}
