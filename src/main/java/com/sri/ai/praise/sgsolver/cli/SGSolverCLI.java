@@ -102,13 +102,13 @@ System.out.println("Input Model Language is "+solverArgs.inputLanguage);
 		SGSolverArgs result = new SGSolverArgs();
 		
 		OptionParser parser = new OptionParser();		
-		// Required
-		OptionSpec<File> input = parser.accepts("input", "input model file(s), use the '"+File.pathSeparator+"' character to separate files").withRequiredArg().required().ofType(File.class).withValuesSeparatedBy(File.pathSeparator);
 		// Optional
 		OptionSpec<String> language   = parser.accepts("language", "input model language (code), allowed values are "+getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
 		OptionSpec<File>   outputFile = parser.accepts("output",   "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 		// Help
 		OptionSpec<Void> help = parser.accepts("help", "command line options help").forHelp();
+		//
+		String commandLine = "java "+SGSolverCLI.class.getName() + " [--help] [--language language_code] [--output output_file_name] inputModelFile ...";
 		
 		List<String> errors   = new ArrayList<>();
 		List<String> warnings = new ArrayList<>();
@@ -116,11 +116,22 @@ System.out.println("Input Model Language is "+solverArgs.inputLanguage);
 			OptionSet options = parser.parse(args);
 			
 			if (options.has(help)) {
+				System.out.println(commandLine);
 				parser.printHelpOn(System.out);
 				System.exit(0);
 			}
-			
-			result.inputFiles.addAll(options.valuesOf(input));
+			for (Object inputFileName : options.nonOptionArguments()) {
+				File inputFile = new File(inputFileName.toString());
+				if (inputFile.exists()) {
+					result.inputFiles.add(inputFile);
+				}
+				else {
+					errors.add("Input file ["+inputFileName+"] is not a file or does not exist.");
+				}
+			}
+			if (result.inputFiles.size() == 0) {
+				errors.add("No input files specified");
+			}
 			
 			if (options.has(language)) {
 				String languageCode = options.valueOf(language);
@@ -163,6 +174,7 @@ System.out.println("Input Model Language is "+solverArgs.inputLanguage);
 		
 		if (errors.size() > 0) {
 			errors.forEach(error -> System.err.println("ERROR: "+ error));
+			System.err.println(commandLine);
 			parser.printHelpOn(System.err);
 			System.exit(1);
 		}
