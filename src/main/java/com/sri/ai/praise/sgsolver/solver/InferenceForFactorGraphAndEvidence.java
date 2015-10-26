@@ -53,6 +53,7 @@ import java.util.Set;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.api.Solver;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -164,6 +165,12 @@ public class InferenceForFactorGraphAndEvidence {
 		}
 		else {
 			solver = new SGDPLLT(inputTheory, problemType);
+//			com.sri.ai.grinder.sgdpll2.api.ConstraintTheory sgdpll2ConstraintTheory =
+//					new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory();
+//			solver = new SymbolicSolver(
+//					new SymbolicCommonInterpreter(sgdpll2ConstraintTheory, true),
+//					problemType,
+//					sgdpll2ConstraintTheory);
 		}
 
 		evidenceProbability = null;
@@ -263,6 +270,8 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		return getInputTheory().simplify(expression, DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate));
+		RewritingProcess process = DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate);
+		Expression result = getInputTheory().simplify(expression, process);
+		return result;
 	}
 }
