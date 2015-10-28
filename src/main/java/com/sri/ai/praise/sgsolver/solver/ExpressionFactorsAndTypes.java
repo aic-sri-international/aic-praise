@@ -86,11 +86,13 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 		});
 	}
 	
-	public ExpressionFactorsAndTypes(List<Expression> factors,
-				Map<String, String> mapFromRandomVariableNameToTypeName,
-				Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
-				Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
-				Map<String, String> mapFromTypeNameToSizeString) {
+	public ExpressionFactorsAndTypes(
+			List<Expression> factors,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromTypeNameToSizeString) {
+		
 		this.factors.addAll(factors);
 		this.mapFromRandomVariableNameToTypeName.putAll(mapFromRandomVariableNameToTypeName);
 		this.mapFromNonUniquelyNamedConstantNameToTypeName.putAll(mapFromNonUniquelyNamedConstantNameToTypeName);

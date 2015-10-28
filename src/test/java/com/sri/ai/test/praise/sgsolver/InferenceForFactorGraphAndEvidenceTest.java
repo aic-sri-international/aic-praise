@@ -37,6 +37,11 @@
  */
 package com.sri.ai.test.praise.sgsolver;
 
+import static com.sri.ai.expresso.helper.Expressions.TRUE;
+import static com.sri.ai.expresso.helper.Expressions.ZERO;
+import static com.sri.ai.expresso.helper.Expressions.apply;
+import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
+import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.util.Util.list;
 import static org.junit.Assert.assertEquals;
 
@@ -49,6 +54,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
@@ -593,7 +599,8 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		InferenceForFactorGraphAndEvidence inferencer;
 		Expression marginal;
 		inferencer = new InferenceForFactorGraphAndEvidence(
-				new ExpressionFactorsAndTypes(factors,
+				new ExpressionFactorsAndTypes(
+						factors,
 						mapFromRandomVariableNameToTypeName,
 						mapFromNonUniquelyNamedConstantNameToTypeName,
 						mapFromUniquelyNamedConstantNameToTypeName,
@@ -605,7 +612,16 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		DefaultRewritingProcess process = new DefaultRewritingProcess(null);
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, process);
 		expected = Expressions.roundToAGivenPrecision(expected, 9, process);
-		assertEquals(expected, marginal);
+		if (expected.equals(marginal)) {
+			// Ok!
+		}
+		// check if they are not identical, but equivalent expressions
+		else if (inferencer.evaluate(apply(MINUS, expected, marginal)).equals(ZERO)) { // first attempt was to compare with equality, but this requires a more complete test of equality theory literals to exclude such a complex equality from being considered a literal, which is much more expensive
+			// Ok!
+		}
+		else {
+			throw new AssertionError("expected:<" + expected + "> but was:<" + marginal + ">, which is not even equivalent.");
+		}
 
 // Not working yet, need to debug		
 //		Expression negationMarginal;
@@ -656,7 +672,8 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		InferenceForFactorGraphAndEvidence inferencer;
 		Expression simplification;
 		inferencer = new InferenceForFactorGraphAndEvidence(
-				new ExpressionFactorsAndTypes(factors,
+				new ExpressionFactorsAndTypes(
+						factors,
 						mapFromRandomVariableNameToTypeName,
 						mapFromNonUniquelyNamedConstantNameToTypeName,
 						mapFromUniquelyNamedConstantNameToTypeName,

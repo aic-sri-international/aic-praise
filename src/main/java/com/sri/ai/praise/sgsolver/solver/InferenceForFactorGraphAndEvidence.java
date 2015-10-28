@@ -42,6 +42,7 @@ import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.setDifference;
 
@@ -56,6 +57,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.api.Solver;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
+import com.sri.ai.grinder.interpreter.SymbolicCommonInterpreter;
+import com.sri.ai.grinder.interpreter.SymbolicSolver;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
@@ -73,6 +76,7 @@ import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.grinder.plaindpll.util.DPLLUtil;
+import com.sri.ai.grinder.sgdpll2.theory.CompoundConstraintTheory;
 import com.sri.ai.util.Util;
 
 /**
@@ -165,12 +169,14 @@ public class InferenceForFactorGraphAndEvidence {
 		}
 		else {
 			solver = new SGDPLLT(inputTheory, problemType);
-//			com.sri.ai.grinder.sgdpll2.api.ConstraintTheory sgdpll2ConstraintTheory =
-//					new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory();
-//			solver = new SymbolicSolver(
-//					new SymbolicCommonInterpreter(sgdpll2ConstraintTheory, true),
-//					problemType,
-//					sgdpll2ConstraintTheory);
+			com.sri.ai.grinder.sgdpll2.api.ConstraintTheory sgdpll2ConstraintTheory =
+					new CompoundConstraintTheory(
+					new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(),
+					new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
+			solver = new SymbolicSolver(
+					new SymbolicCommonInterpreter(sgdpll2ConstraintTheory, true),
+					problemType,
+					sgdpll2ConstraintTheory);
 		}
 
 		evidenceProbability = null;
@@ -185,6 +191,7 @@ public class InferenceForFactorGraphAndEvidence {
 	}
 
 	public Expression solve(Expression queryExpression) {
+		
 		Expression factorGraphWithEvidence = factorGraph;
 
 		if (evidence != null) {
@@ -270,7 +277,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		RewritingProcess process = DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromSymbolNameToTypeName, isUniquelyNamedConstantPredicate);
+		RewritingProcess process = DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
 		Expression result = getInputTheory().simplify(expression, process);
 		return result;
 	}
