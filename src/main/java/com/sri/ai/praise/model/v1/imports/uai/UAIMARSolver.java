@@ -63,7 +63,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.Solver;
+import com.sri.ai.grinder.api.QuantifierEliminatorWithSetup;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
@@ -192,7 +192,7 @@ public class UAIMARSolver {
 		//
 		private InferenceForFactorGraphAndEvidence inferencer;
 		boolean interrupted = false;
-		private Solver genericTableSolver = null;
+		private QuantifierEliminatorWithSetup genericTableSolver = null;
 		
 		SolverTask(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
 			this.model    = model;
@@ -200,7 +200,7 @@ public class UAIMARSolver {
 			this.solution = solution;
 		}
 		
-		public Solver apply(Solver solver) {
+		public QuantifierEliminatorWithSetup apply(QuantifierEliminatorWithSetup solver) {
 			this.genericTableSolver = solver;
 			if (interrupted) {
 				interrupt();

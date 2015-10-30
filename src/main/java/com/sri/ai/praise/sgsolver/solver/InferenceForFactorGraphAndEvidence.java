@@ -42,7 +42,6 @@ import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.setDifference;
 
@@ -54,11 +53,11 @@ import java.util.Set;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.api.QuantifierEliminatorWithSetup;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.api.Solver;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.interpreter.SymbolicCommonInterpreter;
-import com.sri.ai.grinder.interpreter.SymbolicSolver;
+import com.sri.ai.grinder.interpreter.SGDPLLT;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
@@ -67,8 +66,8 @@ import com.sri.ai.grinder.plaindpll.api.InputTheory;
 import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.plaindpll.api.TermTheory;
 import com.sri.ai.grinder.plaindpll.api.Theory;
-import com.sri.ai.grinder.plaindpll.core.SGDPLLT;
-import com.sri.ai.grinder.plaindpll.core.SGVET;
+import com.sri.ai.grinder.plaindpll.core.PlainDPLLSGVET;
+import com.sri.ai.grinder.plaindpll.core.PlainSGDPLLT;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
 import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
 import com.sri.ai.grinder.plaindpll.theory.DefaultInputTheory;
@@ -76,6 +75,7 @@ import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.grinder.plaindpll.util.DPLLUtil;
+import com.sri.ai.grinder.sgdpll2.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpll2.theory.CompoundConstraintTheory;
 import com.sri.ai.util.Util;
 
@@ -98,7 +98,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private InputTheory inputTheory;
 	private ConstraintTheory constraintTheory;
 	private SemiRingProblemType problemType;
-	private Solver solver;
+	private QuantifierEliminatorWithSetup solver;
 
 	public Expression getEvidenceProbability() {
 		return evidenceProbability;
@@ -162,21 +162,20 @@ public class InferenceForFactorGraphAndEvidence {
 		constraintTheory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(termTheory));
 		inputTheory = new DefaultInputTheory(constraintTheory);
 		problemType = new SumProduct(); // for marginalization
+
 		// The solver for the parameters above.
+		com.sri.ai.grinder.sgdpll2.api.ConstraintTheory sgdpll2ConstraintTheory =
+				new CompoundConstraintTheory(
+				new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(),
+				new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
+		SymbolicCommonInterpreter simplifier = new SymbolicCommonInterpreter(sgdpll2ConstraintTheory, true);
 		if (useFactorization) {
-			solver = new SGVET(inputTheory, problemType);
-			//((SGVET) solver).basicOutput = true;
+//			solver = new PlainDPLLSGVET(inputTheory, problemType);
+			solver = new SGVET(simplifier, problemType, sgdpll2ConstraintTheory);
 		}
 		else {
-			solver = new SGDPLLT(inputTheory, problemType);
-			com.sri.ai.grinder.sgdpll2.api.ConstraintTheory sgdpll2ConstraintTheory =
-					new CompoundConstraintTheory(
-					new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(),
-					new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
-			solver = new SymbolicSolver(
-					new SymbolicCommonInterpreter(sgdpll2ConstraintTheory, true),
-					problemType,
-					sgdpll2ConstraintTheory);
+			// solver = new PlainSGDPLLT(inputTheory, problemType);
+			solver = new SGDPLLT(simplifier, problemType, sgdpll2ConstraintTheory);
 		}
 
 		evidenceProbability = null;

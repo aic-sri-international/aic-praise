@@ -49,7 +49,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.api.Solver;
+import com.sri.ai.grinder.api.QuantifierEliminatorWithSetup;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
@@ -92,7 +92,7 @@ public class UAIUtil {
 	 * @param solverListener
 	 * @return
 	 */
-	public static Expression constructGenericTableExpression(FunctionTable functionTable, Function<Solver, Solver> solverListener) {
+	public static Expression constructGenericTableExpression(FunctionTable functionTable, Function<QuantifierEliminatorWithSetup, QuantifierEliminatorWithSetup> solverListener) {
 		StringBuilder table = new StringBuilder();
 		CartesianProductEnumeration<Integer> cartesianProduct = new CartesianProductEnumeration<>(cardinalityValues(functionTable));
 		int counter = 0;
