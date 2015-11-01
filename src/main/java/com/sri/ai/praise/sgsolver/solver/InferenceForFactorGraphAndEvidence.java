@@ -56,7 +56,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.QuantifierEliminatorWithSetup;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
-import com.sri.ai.grinder.interpreter.SymbolicCommonInterpreter;
+import com.sri.ai.grinder.interpreter.SymbolicCommonInterpreterWithLiteralConditioning;
 import com.sri.ai.grinder.interpreter.SGDPLLT;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
@@ -168,7 +168,7 @@ public class InferenceForFactorGraphAndEvidence {
 				new CompoundConstraintTheory(
 				new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(),
 				new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
-		SymbolicCommonInterpreter simplifier = new SymbolicCommonInterpreter(sgdpll2ConstraintTheory, true);
+		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(sgdpll2ConstraintTheory, true);
 		if (useFactorization) {
 //			solver = new PlainDPLLSGVET(inputTheory, problemType);
 			solver = new SGVET(simplifier, problemType, sgdpll2ConstraintTheory);

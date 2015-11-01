@@ -109,7 +109,7 @@ public class SimplifyWithRelationsAtBottom {
 		private Expression targetPredicate;
 		
 		public DPLLForEqualitiesOnSymbolsAndConstantExpressionWithAtomsButTarget(Expression targetPredicate) {
-			super(new DefaultInputTheory(new EqualityConstraintTheory(new NonRandomSymbolTermTheory())), new Sum());
+			super(new DefaultInputTheory(new EqualityConstraintTheory(new NonRandomSymbolTermTheory())), new Sum(), null);
 			this.targetPredicate = targetPredicate;
 		}
 		
@@ -133,7 +133,7 @@ public class SimplifyWithRelationsAtBottom {
 	
 	private static class DPLLForAtomsButTarget extends PlainSGDPLLT {
 		public DPLLForAtomsButTarget(Expression targetPredicate) {
-			super(new DefaultInputTheory(new AtomsOnlyButForTarget(targetPredicate)), new Sum());
+			super(new DefaultInputTheory(new AtomsOnlyButForTarget(targetPredicate)), new Sum(), null);
 		}
 		
 		@Override
@@ -141,7 +141,7 @@ public class SimplifyWithRelationsAtBottom {
 			PlainSGDPLLT thirdDPLL =
 					new PlainSGDPLLT(
 							new DefaultInputTheory(new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new FunctionalTermTheory()))),
-							new Sum());
+							new Sum(), null);
 			// thirdDPLL accepts equalities and non-target atoms, but in this context it will only ever
 			// receive expressions with target atoms only, without other atoms and without equalities
 			// (equalities of target and other atoms will be replaced by equalities between target and boolean constants,
