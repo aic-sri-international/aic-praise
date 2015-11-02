@@ -438,7 +438,7 @@ public class NormalizeAndCompleteNormalizeTest extends AbstractLPITest {
 						// R_formula_simplification =
 						// W = X = person1 or W = X = person2 or W = X = person3
 						//"or((X = person1 and X = W), or((X = W and X = person2), (X = person3 and X = W)))"
-						GrinderUtil.usePlain
+						GrinderUtil.usePlainSGDPLLT
 						? "(W = X) and ((X = person1) or (X = person2) or (X = person3))" // plain cardinality 
 						: "X = person1 and W = person1 or X = person2 and W = person2 or X = person3 and W = person3" // direct cardinality
 						
