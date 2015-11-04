@@ -1,0 +1,112 @@
+@LANG:HOGMv1
+@MODEL:name=[Page 1]parts=[page-1]queries=[query-page-1#1,query-page-1#2,query-page-1#3,query-page-1#4,query-page-1#5,query-page-1#6,query-page-1#7,query-page-1#8,query-page-1#9,query-page-1#10]
+@MODEL:name=[Page 2]parts=[page-2]queries=[query-page-2#1,query-page-2#2]
+@MODEL:name=[Page 3]parts=[page-3]queries=[query-page-3#1,query-page-3#2]
+@FRAGMENT:page-1
+sort People: 100, tom, alice;
+random president: People;
+random war_time: Boolean;
+
+//war_time 0.5;
+//if war_time then president = tom 0.8;
+war_time;
+
+// P(president | war_time)
+//if war_time
+//   then if president = tom then 0.8 else 0.2/(|People|-1)
+//   else if president = tom then 0   else   1/(|People|-1);
+
+// P(president)
+if president = tom then 0.8 else if president = alice then 0.1 else 0.1/(|People|-2);
+
+
+president != tom;
+if president != tom then president = alice;
+
+@FRAGMENT:query-page-1#1
+earthquake
+
+@FRAGMENT:query-page-1#2
+burglary
+
+@FRAGMENT:query-page-1#3
+y
+
+@FRAGMENT:query-page-1#4
+president
+
+@FRAGMENT:query-page-1#5
+president !=
+
+@FRAGMENT:query-page-1#6
+president = alice
+
+@FRAGMENT:query-page-1#7
+president = tom
+
+@FRAGMENT:query-page-1#8
+|People|
+
+@FRAGMENT:query-page-1#9
+president = alice or president = tom
+
+@FRAGMENT:query-page-1#10
+president != alice and president != tom
+@FRAGMENT:page-2
+/**
+ * Classic earthquake, burglary and alarm network with explaining away effect;
+ * Try the given scenarios and query 'earthquake' and 'burglary' for each of them.
+ */
+// RANDOM VARIABLE DECLARATIONS:
+random earthquake: Boolean;
+random burglary: Boolean;
+random alarm: Boolean;
+
+// RULES:
+earthquake 0.01;
+burglary 0.1;
+
+if earthquake
+   then if burglary
+      then alarm 0.95
+      else alarm 0.6
+   else if burglary
+      then alarm 0.9
+      else alarm 0.01;
+     
+alarm;
+
+@FRAGMENT:query-page-2#1
+burglary
+
+@FRAGMENT:query-page-2#2
+earthquake
+@FRAGMENT:page-3
+/**
+ * Classic earthquake, burglary and alarm network with explaining away effect;
+ * Try the given scenarios and query 'earthquake' and 'burglary' for each of them.
+ */
+// RANDOM VARIABLE DECLARATIONS:
+random earthquake: Boolean;
+random burglary: Boolean;
+random alarm: Boolean;
+
+// RULES:
+earthquake 0.01;
+burglary 0.1;
+
+if earthquake
+   then if burglary
+      then alarm 0.95
+      else alarm 0.6
+   else if burglary
+      then alarm 0.9
+      else alarm 0.01;
+     
+alarm and not burglary;
+
+@FRAGMENT:query-page-3#1
+earthquake
+
+@FRAGMENT:query-page-3#2
+burglary

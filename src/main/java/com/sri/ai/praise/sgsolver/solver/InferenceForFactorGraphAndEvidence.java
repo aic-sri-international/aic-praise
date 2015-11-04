@@ -56,8 +56,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.QuantifierEliminatorWithSetup;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
-import com.sri.ai.grinder.interpreter.SymbolicCommonInterpreterWithLiteralConditioning;
 import com.sri.ai.grinder.interpreter.SGDPLLT;
+import com.sri.ai.grinder.interpreter.SymbolicCommonInterpreterWithLiteralConditioning;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
@@ -174,7 +174,7 @@ public class InferenceForFactorGraphAndEvidence {
 			solver = new SGVET(simplifier, problemType, sgdpll2ConstraintTheory);
 		}
 		else {
-			// solver = new PlainSGDPLLT(inputTheory, problemType);
+//			solver = new PlainSGDPLLT(inputTheory, problemType);
 			solver = new SGDPLLT(simplifier, problemType, sgdpll2ConstraintTheory);
 		}
 
