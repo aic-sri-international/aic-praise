@@ -76,7 +76,7 @@ import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
 import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.grinder.plaindpll.util.DPLLUtil;
 import com.sri.ai.grinder.sgdpll2.core.solver.SGVET;
-import com.sri.ai.grinder.sgdpll2.theory.CompoundConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
 import com.sri.ai.util.Util;
 
 /**
