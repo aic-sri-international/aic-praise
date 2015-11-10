@@ -203,16 +203,23 @@ public class SGSolverCLI {
 	private static List<ModelPage> getHOGModelsToQuery(SGSolverArgs solverArgs) throws IOException {
 		List<ModelPage> result = new ArrayList<>();
 		
+		
+		// First handle container files and track non-container files
+		List<File> nonContainerFiles = new ArrayList<>();
 		for (File inputFile : solverArgs.inputFiles) {
 			if (inputFile.getName().endsWith(PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION)) {
 				 result.addAll(PagedModelContainer.getModelPagesFromURI(inputFile.toURI()));
 			}
 			else {
-// TODO - handle other types (possibly grouping files, e.g. evidence)
+				nonContainerFiles.add(inputFile);
 			}
 		}
 		
+// TODO - handle non-container files		
+		
 // TODO - ensure all results are translated to HOGMv1 if needed.
+		
+// TODO - if no queries specified, specify them	by taking all the constants and random variables in the model	
 		
 		return result;
 	}
