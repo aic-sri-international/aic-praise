@@ -38,6 +38,7 @@
 package com.sri.ai.praise.model.v1.hogm.antlr;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -53,41 +54,34 @@ import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParser;
 @Beta
 public class HOGMParserWrapper implements Parser {
 	
-	public ParsedHOGModel parseModel(String string) {
-		ParsedHOGModel result = parseModel(string, new ErrorListener("Lexer Error"), new ErrorListener("Parse Error"));
+	@Override
+	public Expression parse(String string, Parser.ErrorListener errorListener) 
+			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
+		Expression result = parse(string, errorListener, new ModelParseTreeRetriever());
+
 		return result;
 	}
 	
-	public ParsedHOGModel parseModel(String string, ErrorListener lexerErrorListener, ErrorListener parseErrorListener) {
-		Expression     modelTupleExpr = parse(string, lexerErrorListener, parseErrorListener);
+	public ParsedHOGModel parseModel(String string) {
+		ParsedHOGModel result = parseModel(string, newDefaultErrorListener());
+		return result;
+	}
+	
+	public ParsedHOGModel parseModel(String string, Parser.ErrorListener errorListener) {
+		Expression     modelTupleExpr = parse(string, errorListener);
 		ParsedHOGModel result         = new ParsedHOGModel(string, modelTupleExpr);
 		return result;
 	}
 	
-	@Override
-	public Expression parse(String string) 
-			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
-		Expression result = parse(string, new ErrorListener("Lexer Error"), new ErrorListener("Parse Error"));
-
-		return result;
-	}
-	
-	public Expression parse(String string, ErrorListener lexerErrorListener, ErrorListener parseErrorListener) 
-			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
-		Expression result = parse(string, lexerErrorListener, parseErrorListener, new ModelParseTreeRetriever());
-		return result;
-	}
-
-	
 	public Expression parseTerm(String string) 
 			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
-		Expression result = parseTerm(string, new ErrorListener("Lexer Error"), new ErrorListener("Parse Error"));
+		Expression result = parseTerm(string, newDefaultErrorListener());
 		return result;
 	}
 	
-	public Expression parseTerm(String string, ErrorListener lexerErrorListener, ErrorListener parseErrorListener)
+	public Expression parseTerm(String string, Parser.ErrorListener errorListener)
 			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
-		Expression result = parse(string, lexerErrorListener, parseErrorListener, new ATermParseTreeRetriever());
+		Expression result = parse(string, errorListener, new ATermParseTreeRetriever());
 		return result;
 	}
 	
@@ -97,9 +91,11 @@ public class HOGMParserWrapper implements Parser {
 	//
 	// PRIVATE
 	//
-	private Expression parse(String string, ErrorListener lexerErrorListener, ErrorListener parseErrorListener, ParseTreeRetriever parseTreeRetriever) 
+	private Expression parse(String string, Parser.ErrorListener errorListener, ParseTreeRetriever parseTreeRetriever) 
 			throws RecognitionException, UnableToParseAllTheInputError, HOGModelException {
 		Expression result = null;
+		
+		AntlrErrorListener antlrErrorListener = new AntlrErrorListener(errorListener);
 
 		ANTLRInputStream input = new ANTLRInputStream(string);
 		HOGMLexer        lexer = new HOGMLexer(input);
@@ -109,14 +105,14 @@ public class HOGMParserWrapper implements Parser {
 		
 		lexer.removeErrorListeners();
 		parser.removeErrorListeners();
-		lexer.addErrorListener(lexerErrorListener);
-		parser.addErrorListener(parseErrorListener);
+		lexer.addErrorListener(antlrErrorListener);
+		parser.addErrorListener(antlrErrorListener);
 
 		ParseTree tree = parseTreeRetriever.retrieve(parser);
 
 		boolean eofReached = parser.getInputStream().LA(1) == Recognizer.EOF;
 
-		if (!lexerErrorListener.isSyntaxErrorsDetected() && !parseErrorListener.isSyntaxErrorsDetected()) {
+		if (!antlrErrorListener.errorsDetected) {
 			if (!eofReached) {
 				throw new UnableToParseAllTheInputError();
 			} else {
@@ -145,6 +141,24 @@ public class HOGMParserWrapper implements Parser {
 		@Override
 		public ParseTree retrieve(HOGMParser hogmParser) {
 			return hogmParser.aterm();
+		}
+	}
+	
+	private class AntlrErrorListener extends BaseErrorListener {
+		public boolean errorsDetected = false;
+		
+		private Parser.ErrorListener parserEerrorListener;
+		
+		public AntlrErrorListener(Parser.ErrorListener parserEerrorListener) {
+			this.parserEerrorListener = parserEerrorListener;
+		}
+
+		@Override
+		public void syntaxError(Recognizer<?, ?> recognizer,
+				Object offendingSymbol, int line, int charPositionInLine,
+				String msg, RecognitionException e) {
+			errorsDetected = true;
+			parserEerrorListener.parseError(offendingSymbol, line, charPositionInLine, msg, e);
 		}
 	}
 }

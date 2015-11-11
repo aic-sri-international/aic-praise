@@ -42,12 +42,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.praise.model.v1.HOGModelException;
-import com.sri.ai.praise.model.v1.hogm.antlr.ErrorListener;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.model.v1.hogm.antlr.UnableToParseAllTheInputError;
@@ -91,9 +90,9 @@ public class HOGMQueryRunner {
 	    		if (errors.size() == 0) {
 	    	   		HOGMParserWrapper parser = new HOGMParserWrapper();
 	        		if (parsedModel == null) {
-	        			parsedModel = parser.parseModel(model, new LexerErrorListener(HOGMQueryError.Context.MODEL, errors), new ParserErrorListener(HOGMQueryError.Context.MODEL, errors));
+	        			parsedModel = parser.parseModel(model, new QueryErrorListener(HOGMQueryError.Context.MODEL, errors));
 	        		}
-	        		Expression queryExpr = parser.parseTerm(query, new LexerErrorListener(HOGMQueryError.Context.QUERY, errors), new ParserErrorListener(HOGMQueryError.Context.QUERY, errors));
+	        		Expression queryExpr = parser.parseTerm(query, new QueryErrorListener(HOGMQueryError.Context.QUERY, errors));
 		
 	        		if (errors.size() == 0) {
 	        			FactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
@@ -156,45 +155,34 @@ public class HOGMQueryRunner {
 		}
 	}
 	
-	protected class QueryErrorListener extends ErrorListener {
+	protected class QueryErrorListener implements Parser.ErrorListener {
 		HOGMQueryError.Context context;
 		List<HOGMQueryError> errors;
-		QueryErrorListener(String name, HOGMQueryError.Context context, List<HOGMQueryError> errors) {
-			super(name);
+		QueryErrorListener(HOGMQueryError.Context context, List<HOGMQueryError> errors) {
 			this.context = context;
 			this.errors  = errors;
 		}
 		
 		@Override
-		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+		public void parseError(Object offendingSymbol, int line, int charPositionInLine, String msg, Exception e) {
 			int start = 0; 
 			int end   = 0; 
-			if (e != null && e.getOffendingToken() != null) {
-				start = e.getOffendingToken().getStartIndex();
-				end   = e.getOffendingToken().getStopIndex();
+			if (e != null && e instanceof RecognitionException) {
+				RecognitionException re = (RecognitionException) e;
+				if (re.getOffendingToken() != null) {
+					start = re.getOffendingToken().getStartIndex();
+					end   = re.getOffendingToken().getStopIndex();
+				}
 			}
 			if (start > end) {
 				start = end;
 			}
 			errors.add(new HOGMQueryError(context,
-					    name +" error at line " + line + " column "+ charPositionInLine + " - " + msg,
+					    "Error at line " + line + " column "+ charPositionInLine + " - " + msg,
 					    line,
 					   	start,
 					   	end
 					));
-			errorsDetected = true;
 		}
 	} 
-	
-	private class LexerErrorListener extends QueryErrorListener {
-		LexerErrorListener(HOGMQueryError.Context context, List<HOGMQueryError> errors) {
-			super("Lexer", context, errors);
-		}
-	}
-	
-	private class ParserErrorListener extends QueryErrorListener {
-		ParserErrorListener(HOGMQueryError.Context context, List<HOGMQueryError> errors) {
-			super("Lexer", context, errors);
-		}
-	}
 }

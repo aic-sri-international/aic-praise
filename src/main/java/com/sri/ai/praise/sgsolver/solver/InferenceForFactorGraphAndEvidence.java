@@ -66,8 +66,6 @@ import com.sri.ai.grinder.plaindpll.api.InputTheory;
 import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.plaindpll.api.TermTheory;
 import com.sri.ai.grinder.plaindpll.api.Theory;
-import com.sri.ai.grinder.plaindpll.core.PlainDPLLSGVET;
-import com.sri.ai.grinder.plaindpll.core.PlainSGDPLLT;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
 import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
 import com.sri.ai.grinder.plaindpll.theory.DefaultInputTheory;

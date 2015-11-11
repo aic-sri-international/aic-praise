@@ -64,8 +64,8 @@ import com.sri.ai.praise.model.v0.rules.antlr.RuleParser;
 public class RuleParserWrapper implements Parser {
 
 	@Override
-	public Expression parse(String string) {
-		List<Expression> result = parseAll(string);
+	public Expression parse(String string, Parser.ErrorListener errorListener) {
+		List<Expression> result = parseAll(string, errorListener);
 		if (result == null || result.size() == 0) {
 			return null;
 		}
@@ -73,13 +73,25 @@ public class RuleParserWrapper implements Parser {
 	}
 
 	public List<Expression> parseAll(String string) {
-		List<Expression> result = parseAll(string, new ModelParseTreeRetriever());
+		List<Expression> result = parseAll(string, newDefaultErrorListener());
+
+		return result;
+	}
+	
+	public List<Expression> parseAll(String string, Parser.ErrorListener errorListener) {
+		List<Expression> result = parseAll(string, errorListener, new ModelParseTreeRetriever());
 
 		return result;
 	}
 
 	public Expression parseFormula(String string) {
-		List<Expression> result = parseAll(string, new AFormulaParseTreeRetriever());
+		Expression result = parseFormula(string, newDefaultErrorListener());
+		
+		return result;
+	}
+	
+	public Expression parseFormula(String string, Parser.ErrorListener errorListener) {
+		List<Expression> result = parseAll(string, errorListener, new AFormulaParseTreeRetriever());
 		if (result == null || result.size() == 0) {
 			return null;
 		}
@@ -90,11 +102,10 @@ public class RuleParserWrapper implements Parser {
 	public void close() {
 	}
 
-	public List<Expression> parseAll(String string, ParseTreeRetriever parseTreeRetriever) {
+	public List<Expression> parseAll(String string, Parser.ErrorListener errorListener, ParseTreeRetriever parseTreeRetriever) {
 		List<Expression> result = new ArrayList<Expression>();
 		try {
-			ErrorListener lexerErrorListener = new ErrorListener("Lexer Error");
-			ErrorListener parseErrorListener = new ErrorListener("Parse Error");
+			AntlrErrorListener antlrErrorListener = new AntlrErrorListener(errorListener);
 
 			ANTLRInputStream input = new ANTLRInputStream(string);
 			RuleLexer lexer = new RuleLexer(input);
@@ -104,15 +115,14 @@ public class RuleParserWrapper implements Parser {
 
 			lexer.removeErrorListeners();
 			parser.removeErrorListeners();
-			lexer.addErrorListener(lexerErrorListener);
-			parser.addErrorListener(parseErrorListener);
+			lexer.addErrorListener(antlrErrorListener);
+			parser.addErrorListener(antlrErrorListener);
 
 			ParseTree tree = parseTreeRetriever.retrieve(parser);
 
 			boolean eof = parser.getInputStream().LA(1) == Recognizer.EOF;
 
-			if (!lexerErrorListener.errorsDetected
-					&& !parseErrorListener.errorsDetected) {
+			if (!antlrErrorListener.errorsDetected) {
 				if (!eof) {
 					System.err
 							.println("Unable to parse the complete input model: "
@@ -174,21 +184,21 @@ public class RuleParserWrapper implements Parser {
 		}
 	}
 
-	private class ErrorListener extends BaseErrorListener {
+	private class AntlrErrorListener extends BaseErrorListener {
 		public boolean errorsDetected = false;
-		private String name;
-
-		public ErrorListener(String name) {
-			this.name = name;
+		
+		private Parser.ErrorListener parserEerrorListener;
+		
+		public AntlrErrorListener(Parser.ErrorListener parserEerrorListener) {
+			this.parserEerrorListener = parserEerrorListener;
 		}
 
 		@Override
 		public void syntaxError(Recognizer<?, ?> recognizer,
 				Object offendingSymbol, int line, int charPositionInLine,
 				String msg, RecognitionException e) {
-			System.err.println(name + ": line " + line + ":"
-					+ charPositionInLine + " " + msg);
 			errorsDetected = true;
+			parserEerrorListener.parseError(offendingSymbol, line, charPositionInLine, msg, e);
 		}
 	}
 }
