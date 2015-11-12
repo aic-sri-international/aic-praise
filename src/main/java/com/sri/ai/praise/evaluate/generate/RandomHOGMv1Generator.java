@@ -58,6 +58,12 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.AbstractRandomDPLLProblemGenerator;
+import com.sri.ai.grinder.sgdpll2.api.ConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.tester.RandomConditionalExpressionGenerator;
+import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 
 /**
@@ -120,8 +126,11 @@ public class RandomHOGMv1Generator {
 		int numberPotentials;              // -p
 		int numberVariables;               // -v
 		int numberUniquelyNamedConstants;  // -u
-		int formulaDepth;                  // -d
-		int formulaBreadth;                // -b		
+		int depth;                         // -d
+		int breadth;                       // -b		
+		
+		// Derived
+		RandomTermGenerator termGenerator;
 		
 		@Override
 		public void close() throws IOException {
@@ -140,8 +149,7 @@ public class RandomHOGMv1Generator {
 	 *        pass '--help' to see description of expected program arguments.
 	 */
 	public static void main(String[] args) {
-		try (GeneratorArgs genArgs = getArgs(args)) {	
-// TODO - take genArgs.thoeryType into account when generating formulas.			
+		try (GeneratorArgs genArgs = getArgs(args)) {
 			// Output the sort information
 			genArgs.out.append(HOGMSortDeclaration.FUNCTOR_SORT_DECLARATION);
 			genArgs.out.append(" ");
@@ -150,7 +158,7 @@ public class RandomHOGMv1Generator {
 			genArgs.out.append(""+genArgs.domainSize);
 			for (int i = 0; i < genArgs.numberUniquelyNamedConstants; i++) {
 				genArgs.out.append(", ");
-				genArgs.out.append(HistoricalEqualityFormulaConditionalGenerator._constantPrefix+i);
+				genArgs.out.append(genArgs.termGenerator.getUniquelyNamedConstantName(i));
 			}
 			genArgs.out.println(";");
 			genArgs.out.println();
@@ -158,20 +166,18 @@ public class RandomHOGMv1Generator {
 			// output the random variable information
 			for (int i = 0; i < genArgs.numberVariables; i++) {
 				genArgs.out.append("random ");
-				genArgs.out.append(HistoricalEqualityFormulaConditionalGenerator._variablePrefix+i);
+				genArgs.out.append(genArgs.termGenerator.getVariableNameFor(i));
 				genArgs.out.append(" : ");
 				genArgs.out.append(GENERATOR_SORT_NAME);
 				genArgs.out.println(";");
 			}
 			genArgs.out.println();
-		
-			HistoricalEqualityFormulaConditionalGenerator conditionalGenerator = new HistoricalEqualityFormulaConditionalGenerator(genArgs.random, genArgs.numberVariables, genArgs.numberUniquelyNamedConstants, genArgs.formulaDepth, genArgs.formulaBreadth);
-		
+				
 			for (int i = 0; i < genArgs.numberPotentials; i++) {		
-				Expression conditional = conditionalGenerator.next();
+				Expression conditional = genArgs.termGenerator.nextTerm();
 				// Ensure we have variables in the conditional
 				while (Expressions.freeVariables(conditional, new DefaultRewritingProcess(null)).size() == 0) {							
-					conditional = conditionalGenerator.next();
+					conditional = genArgs.termGenerator.nextTerm();
 				}
 				
 				genArgs.out.append(conditional.toString());
@@ -226,8 +232,8 @@ public class RandomHOGMv1Generator {
 		result.numberPotentials             = options.valueOf(numPotentials);
 		result.numberVariables              = options.valueOf(numVariables);
 		result.numberUniquelyNamedConstants = options.valueOf(numConstants);
-		result.formulaDepth                 = options.valueOf(depth);
-		result.formulaBreadth               = options.valueOf(breadth);
+		result.depth                        = options.valueOf(depth);
+		result.breadth                      = options.valueOf(breadth);
 		
 		if (result.theoryType == null) {
 			throw new IllegalArgumentException("Unrecognized theory type code, legal values are: "+TheoryType.getLegalCommandLineCodes());
@@ -238,24 +244,107 @@ public class RandomHOGMv1Generator {
 			throw new IllegalArgumentException("#uniquely named constants "+result.numberUniquelyNamedConstants+" is greater than the given domain size of "+result.domainSize);
 		}
 		
+		switch(result.theoryType) {
+		case HistoricalEqualityFormula:
+			result.termGenerator = new HistoricalEqualityFormulaConditionalGenerator(result.random, result.numberVariables, result.numberUniquelyNamedConstants, result.depth, result.breadth);
+			break;
+		case Propositional:
+		case Equality:
+		case Inequality:
+// TODO - need to take into account the #variables, #uniquely named constants and the breadth parameter (this one maybe not)			
+			result.termGenerator = new RandomConditionalExpressionTermGenerator(result.random, 
+					newConstraintTheory(result.theoryType), 
+					result.depth);
+			break;
+		default:
+			throw new UnsupportedOperationException("Current do not support term generation for theory = "+result.theoryType.getCode());
+		}
+		
+		return result;
+	}
+	
+	private static ConstraintTheory newConstraintTheory(TheoryType theoryType) {
+		ConstraintTheory result = null;
+		
+		switch(theoryType) {
+		case Propositional:
+			result = new PropositionalConstraintTheory();
+			break;
+		case Equality:
+			result = new CompoundConstraintTheory(
+					new EqualityConstraintTheory(true),
+					new PropositionalConstraintTheory());
+			break;
+		case Inequality:
+			result = new CompoundConstraintTheory(
+					new InequalityConstraintTheory(true),
+					new EqualityConstraintTheory(true),
+					new PropositionalConstraintTheory());
+			break;
+		default:
+			throw new UnsupportedOperationException("Currently do not support constraint theory for = "+theoryType.getCode());
+		}
+		
 		return result;
 	}
 }
 
-class HistoricalEqualityFormulaConditionalGenerator extends AbstractRandomDPLLProblemGenerator {
-	//
-	static final String _variablePrefix = "X";
-	static final String _constantPrefix = "a";
+interface RandomTermGenerator {
+	String getVariableNameFor(int idx);
+	String getUniquelyNamedConstantName(int idx);
+	Expression nextTerm();
+}
+
+class RandomConditionalExpressionTermGenerator implements RandomTermGenerator {
 	
+	private RandomConditionalExpressionGenerator randomConditionalGenerator;
+	
+	public RandomConditionalExpressionTermGenerator(Random random, ConstraintTheory constraintTheory, int depth) {		
+		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
+				() -> Expressions.makeSymbol(random.nextDouble()),
+				new DefaultRewritingProcess(null));
+	}
+	
+	@Override
+	public String getVariableNameFor(int idx) {
+		return "XBAD"+idx; // TODO
+	}
+	
+	@Override
+	public String getUniquelyNamedConstantName(int idx) {
+		return "abad"+idx; // TODO
+	}
+	
+	@Override
+	public Expression nextTerm() {
+		return randomConditionalGenerator.apply();
+	}
+}
+
+class HistoricalEqualityFormulaConditionalGenerator extends AbstractRandomDPLLProblemGenerator implements RandomTermGenerator {	
 	private Random random;
-	public HistoricalEqualityFormulaConditionalGenerator(Random random, int numberOfVariables, int numberOfConstants, int depth, int breadth) {
-		super(random, numberOfVariables, numberOfConstants, numberOfVariables, depth, breadth);
+	public HistoricalEqualityFormulaConditionalGenerator(Random random, int numberOfVariables, int numberOfUniquelyNamedConstants, int depth, int breadth) {
+		super(random, numberOfVariables, numberOfUniquelyNamedConstants, numberOfVariables, depth, breadth);
 		this.random = random;
 	}
 	
 	@Override
+	public String getVariableNameFor(int idx) {
+		return "X"+idx;
+	}
+	
+	@Override
+	public String getUniquelyNamedConstantName(int idx) {
+		return "a"+idx;
+	}
+	
+	@Override
+	public Expression nextTerm() {
+		return next();
+	}
+	
+	@Override
 	protected Expression makeProblem(Expression formula, List<Expression> indices) {
-		
 		double thenValue = random.nextDouble();
 		double elseValue = 1.0 - thenValue;
 		
