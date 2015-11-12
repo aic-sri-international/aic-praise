@@ -43,6 +43,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -65,6 +67,44 @@ import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
  *
  */
 public class RandomHOGMv1Generator {
+	enum TheoryType {
+		HistoricalEqualityFormula("historical"),
+		Propositional("propositional"),
+		Equality("equality"),
+		Inequality("inequality");
+		
+		public String getCode() {
+			return commandLineCode;
+		}
+		
+		//
+		public static TheoryType getTheorTypeForCommandLineCode(String code) {
+			TheoryType result = null;
+			code = code.toLowerCase().trim();
+			for (TheoryType tt : TheoryType.values()) {
+				if (code.equals(tt.getCode())) {
+					result = tt;
+					break;
+				}
+			}
+			
+			return result;
+		}
+		
+		public static List<String> getLegalCommandLineCodes() {
+			List<String> result = new ArrayList<>();
+			Arrays.stream(TheoryType.values()).forEach(tt -> result.add(tt.getCode()));
+			return result;
+		}
+		
+		//
+		//
+		private String commandLineCode;
+		private TheoryType(String commandLineCode) {
+			this.commandLineCode = commandLineCode;
+		}
+	}
+	
 	public static final Charset FILE_CHARSET = Charsets.UTF_8;
 	//
 	public static final String GENERATOR_SORT_NAME = "TestDomain";
@@ -74,7 +114,9 @@ public class RandomHOGMv1Generator {
 		Random       random     = null;       // -r 	
 		int          domainSize = 1000;       // -s
 		PrintStream  out        = System.out; // -o
+		
 		// Required
+		TheoryType theoryType;             // -t 
 		int numberPotentials;              // -p
 		int numberVariables;               // -v
 		int numberUniquelyNamedConstants;  // -u
@@ -98,7 +140,8 @@ public class RandomHOGMv1Generator {
 	 *        pass '--help' to see description of expected program arguments.
 	 */
 	public static void main(String[] args) {
-		try (GeneratorArgs genArgs = getArgs(args)) {		
+		try (GeneratorArgs genArgs = getArgs(args)) {	
+// TODO - take genArgs.thoeryType into account when generating formulas.			
 			// Output the sort information
 			genArgs.out.append(HOGMSortDeclaration.FUNCTOR_SORT_DECLARATION);
 			genArgs.out.append(" ");
@@ -107,7 +150,7 @@ public class RandomHOGMv1Generator {
 			genArgs.out.append(""+genArgs.domainSize);
 			for (int i = 0; i < genArgs.numberUniquelyNamedConstants; i++) {
 				genArgs.out.append(", ");
-				genArgs.out.append(ConditionalGenerator._constantPrefix+i);
+				genArgs.out.append(HistoricalEqualityFormulaConditionalGenerator._constantPrefix+i);
 			}
 			genArgs.out.println(";");
 			genArgs.out.println();
@@ -115,14 +158,14 @@ public class RandomHOGMv1Generator {
 			// output the random variable information
 			for (int i = 0; i < genArgs.numberVariables; i++) {
 				genArgs.out.append("random ");
-				genArgs.out.append(ConditionalGenerator._variablePrefix+i);
+				genArgs.out.append(HistoricalEqualityFormulaConditionalGenerator._variablePrefix+i);
 				genArgs.out.append(" : ");
 				genArgs.out.append(GENERATOR_SORT_NAME);
 				genArgs.out.println(";");
 			}
 			genArgs.out.println();
-			
-			ConditionalGenerator conditionalGenerator = new ConditionalGenerator(genArgs.random, genArgs.numberVariables, genArgs.numberUniquelyNamedConstants, genArgs.formulaDepth, genArgs.formulaBreadth);
+		
+			HistoricalEqualityFormulaConditionalGenerator conditionalGenerator = new HistoricalEqualityFormulaConditionalGenerator(genArgs.random, genArgs.numberVariables, genArgs.numberUniquelyNamedConstants, genArgs.formulaDepth, genArgs.formulaBreadth);
 		
 			for (int i = 0; i < genArgs.numberPotentials; i++) {		
 				Expression conditional = conditionalGenerator.next();
@@ -150,11 +193,12 @@ public class RandomHOGMv1Generator {
 		OptionSpec<Integer> domainSize = parser.accepts("s", "domain size.").withRequiredArg().ofType(Integer.class).defaultsTo(result.domainSize);
 		OptionSpec<File>    outputFile = parser.accepts("o", "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 		// Required
-		OptionSpec<Integer> numPotentials = parser.accepts("p", "# potentials to generate.").withRequiredArg().required().ofType(Integer.class);
-		OptionSpec<Integer> numVariables  = parser.accepts("v", "# variables to use in the generation process.").withRequiredArg().required().ofType(Integer.class);
-		OptionSpec<Integer> numConstants  = parser.accepts("u", "# uniquely named constants to use in the generation process.").withRequiredArg().required().ofType(Integer.class);
-		OptionSpec<Integer> depth         = parser.accepts("d", "the depth of the generated formulas (all their sub-expressions will have depth equal to depth - 1.").withRequiredArg().required().ofType(Integer.class);
-		OptionSpec<Integer> breadth       = parser.accepts("b", "the number of sub-expressions of conjunctions and disjunctions in the generated formulas.").withRequiredArg().required().ofType(Integer.class);
+		OptionSpec<String>  theoryTypeCode = parser.accepts("t", "theory type.").withRequiredArg().required().ofType(String.class);
+		OptionSpec<Integer> numPotentials  = parser.accepts("p", "# potentials to generate.").withRequiredArg().required().ofType(Integer.class);
+		OptionSpec<Integer> numVariables   = parser.accepts("v", "# variables to use in the generation process.").withRequiredArg().required().ofType(Integer.class);
+		OptionSpec<Integer> numConstants   = parser.accepts("u", "# uniquely named constants to use in the generation process.").withRequiredArg().required().ofType(Integer.class);
+		OptionSpec<Integer> depth          = parser.accepts("d", "the depth of the generated formulas (all their sub-expressions will have depth equal to depth - 1.").withRequiredArg().required().ofType(Integer.class);
+		OptionSpec<Integer> breadth        = parser.accepts("b", "the number of sub-expressions of conjunctions and disjunctions in the generated formulas.").withRequiredArg().required().ofType(Integer.class);
 		//
 		parser.accepts("help").forHelp();
 		
@@ -178,11 +222,16 @@ public class RandomHOGMv1Generator {
 			result.out = new PrintStream(options.valueOf(outputFile), FILE_CHARSET.name());
 		}
 		
+		result.theoryType                   = TheoryType.getTheorTypeForCommandLineCode(options.valueOf(theoryTypeCode));
 		result.numberPotentials             = options.valueOf(numPotentials);
 		result.numberVariables              = options.valueOf(numVariables);
 		result.numberUniquelyNamedConstants = options.valueOf(numConstants);
 		result.formulaDepth                 = options.valueOf(depth);
 		result.formulaBreadth               = options.valueOf(breadth);
+		
+		if (result.theoryType == null) {
+			throw new IllegalArgumentException("Unrecognized theory type code, legal values are: "+TheoryType.getLegalCommandLineCodes());
+		}
 				
 		// #uniquely named constants must be <= domain size
 		if (result.numberUniquelyNamedConstants > result.domainSize) {
@@ -193,13 +242,13 @@ public class RandomHOGMv1Generator {
 	}
 }
 
-class ConditionalGenerator extends AbstractRandomDPLLProblemGenerator {
+class HistoricalEqualityFormulaConditionalGenerator extends AbstractRandomDPLLProblemGenerator {
 	//
 	static final String _variablePrefix = "X";
 	static final String _constantPrefix = "a";
 	
 	private Random random;
-	public ConditionalGenerator(Random random, int numberOfVariables, int numberOfConstants, int depth, int breadth) {
+	public HistoricalEqualityFormulaConditionalGenerator(Random random, int numberOfVariables, int numberOfConstants, int depth, int breadth) {
 		super(random, numberOfVariables, numberOfConstants, numberOfVariables, depth, breadth);
 		this.random = random;
 	}
