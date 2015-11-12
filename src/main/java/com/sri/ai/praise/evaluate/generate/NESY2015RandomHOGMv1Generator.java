@@ -17,14 +17,15 @@ public class NESY2015RandomHOGMv1Generator {
 	//
 	static int [] _domainSizes = new int[] {2, 4, 8, 16};
 	//
-	static final int _potentialIdx = 0;
-	static final int _variableIdx  = 1;
-	static final int _constantIdx  = 2;
-	static final int _depthIdx     = 3;
-	static final int _breadthIdx   = 4;
+	static final int _potentialIdx             = 0;
+	static final int _variableIdx              = 1;
+	static final int _uniquelNamedConstantIdx  = 2;
+	static final int _depthIdx                 = 3;
+	static final int _breadthIdx               = 4;
 	static int [][] _params = new int[][] {	
 		// #potentials, #variables, #constants, _depth, _breadth
-		//
+		//                          (uniquely 
+		//                           named)  
 		{         5,          8,          0,      2,        2},
 		{         5,          8,          0,      2,        4},
 		{         5,          8,          0,      2,        8},
@@ -55,7 +56,7 @@ public class NESY2015RandomHOGMv1Generator {
 	
 	public static void main(String[] args) {
 		if (args.length != 1) {
-			throw new IllegalArgumentException("t Root NESY2015 model output directory must be specified");
+			throw new IllegalArgumentException("the Root NESY2015 model output directory must be specified");
 		}
 		File rootNESY2015OutputDirectory = validateDirectory(args[0]);
 		File hogmv1ProblemDirectory      = new File(rootNESY2015OutputDirectory, ModelLanguage.HOGMv1.getCode());
@@ -72,13 +73,13 @@ public class NESY2015RandomHOGMv1Generator {
 			for (int i = 0; i < _domainSizes.length; i++) {
 				int cardinality = _domainSizes[i];
 				
-				int numberOfConstants = _params[p][_constantIdx];
+				int numberOfUniquelyNamedConstants = _params[p][_uniquelNamedConstantIdx];
 				// #constants must be <= domain size
-				if (numberOfConstants > cardinality) {
-					numberOfConstants = cardinality;
+				if (numberOfUniquelyNamedConstants > cardinality) {
+					numberOfUniquelyNamedConstants = cardinality;
 				}
 				
-				String outputFileSuffix = "_r"+_seed+"_s"+cardinality+"_p"+numberOfPotentials+"_v"+numberOfVariables+"_c"+numberOfConstants+"_d"+depth+"_b"+breadth;
+				String outputFileSuffix = "_r"+_seed+"_s"+cardinality+"_p"+numberOfPotentials+"_v"+numberOfVariables+"_u"+numberOfUniquelyNamedConstants+"_d"+depth+"_b"+breadth;
 				
 				RandomHOGMv1Generator.main(new String[] {
 						"-r="+_seed,
@@ -86,7 +87,7 @@ public class NESY2015RandomHOGMv1Generator {
 						"-o="+new File(hogmv1ProblemDirectory, "sg_random_model"+outputFileSuffix+ModelLanguage.HOGMv1.getDefaultFileExtension()).getAbsolutePath(),
 						"-p="+numberOfPotentials,
 						"-v="+numberOfVariables,
-						"-c="+numberOfConstants,
+						"-u="+numberOfUniquelyNamedConstants,
 						"-d="+depth,
 						"-b="+breadth
 				});				

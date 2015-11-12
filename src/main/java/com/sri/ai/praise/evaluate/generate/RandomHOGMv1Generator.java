@@ -75,11 +75,11 @@ public class RandomHOGMv1Generator {
 		int          domainSize = 1000;       // -s
 		PrintStream  out        = System.out; // -o
 		// Required
-		int numberPotentials; // -p
-		int numberVariables;  // -v
-		int numberConstants;  // -c
-		int formulaDepth;     // -d
-		int formulaBreadth;   // -b		
+		int numberPotentials;              // -p
+		int numberVariables;               // -v
+		int numberUniquelyNamedConstants;  // -u
+		int formulaDepth;                  // -d
+		int formulaBreadth;                // -b		
 		
 		@Override
 		public void close() throws IOException {
@@ -105,7 +105,7 @@ public class RandomHOGMv1Generator {
 			genArgs.out.append(GENERATOR_SORT_NAME);
 			genArgs.out.append(" : ");
 			genArgs.out.append(""+genArgs.domainSize);
-			for (int i = 0; i < genArgs.numberConstants; i++) {
+			for (int i = 0; i < genArgs.numberUniquelyNamedConstants; i++) {
 				genArgs.out.append(", ");
 				genArgs.out.append(ConditionalGenerator._constantPrefix+i);
 			}
@@ -122,7 +122,7 @@ public class RandomHOGMv1Generator {
 			}
 			genArgs.out.println();
 			
-			ConditionalGenerator conditionalGenerator = new ConditionalGenerator(genArgs.random, genArgs.numberVariables, genArgs.numberConstants, genArgs.formulaDepth, genArgs.formulaBreadth);
+			ConditionalGenerator conditionalGenerator = new ConditionalGenerator(genArgs.random, genArgs.numberVariables, genArgs.numberUniquelyNamedConstants, genArgs.formulaDepth, genArgs.formulaBreadth);
 		
 			for (int i = 0; i < genArgs.numberPotentials; i++) {		
 				Expression conditional = conditionalGenerator.next();
@@ -152,7 +152,7 @@ public class RandomHOGMv1Generator {
 		// Required
 		OptionSpec<Integer> numPotentials = parser.accepts("p", "# potentials to generate.").withRequiredArg().required().ofType(Integer.class);
 		OptionSpec<Integer> numVariables  = parser.accepts("v", "# variables to use in the generation process.").withRequiredArg().required().ofType(Integer.class);
-		OptionSpec<Integer> numConstants  = parser.accepts("c", "# constants to use in the generation process.").withRequiredArg().required().ofType(Integer.class);
+		OptionSpec<Integer> numConstants  = parser.accepts("u", "# uniquely named constants to use in the generation process.").withRequiredArg().required().ofType(Integer.class);
 		OptionSpec<Integer> depth         = parser.accepts("d", "the depth of the generated formulas (all their sub-expressions will have depth equal to depth - 1.").withRequiredArg().required().ofType(Integer.class);
 		OptionSpec<Integer> breadth       = parser.accepts("b", "the number of sub-expressions of conjunctions and disjunctions in the generated formulas.").withRequiredArg().required().ofType(Integer.class);
 		//
@@ -178,15 +178,15 @@ public class RandomHOGMv1Generator {
 			result.out = new PrintStream(options.valueOf(outputFile), FILE_CHARSET.name());
 		}
 		
-		result.numberPotentials = options.valueOf(numPotentials);
-		result.numberVariables  = options.valueOf(numVariables);
-		result.numberConstants  = options.valueOf(numConstants);
-		result.formulaDepth     = options.valueOf(depth);
-		result.formulaBreadth   = options.valueOf(breadth);
+		result.numberPotentials             = options.valueOf(numPotentials);
+		result.numberVariables              = options.valueOf(numVariables);
+		result.numberUniquelyNamedConstants = options.valueOf(numConstants);
+		result.formulaDepth                 = options.valueOf(depth);
+		result.formulaBreadth               = options.valueOf(breadth);
 				
-		// #constants must be <= domain size
-		if (result.numberConstants > result.domainSize) {
-			throw new IllegalArgumentException("#constants "+result.numberConstants+" is greater than the given domain size of "+result.domainSize);
+		// #uniquely named constants must be <= domain size
+		if (result.numberUniquelyNamedConstants > result.domainSize) {
+			throw new IllegalArgumentException("#uniquely named constants "+result.numberUniquelyNamedConstants+" is greater than the given domain size of "+result.domainSize);
 		}
 		
 		return result;
