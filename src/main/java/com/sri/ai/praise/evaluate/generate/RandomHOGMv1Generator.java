@@ -55,6 +55,7 @@ import joptsimple.OptionSpec;
 import com.google.common.base.Charsets;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.equality.AbstractRandomDPLLProblemGenerator;
@@ -300,9 +301,12 @@ class RandomConditionalExpressionTermGenerator implements RandomTermGenerator {
 	private RandomConditionalExpressionGenerator randomConditionalGenerator;
 	
 	public RandomConditionalExpressionTermGenerator(Random random, ConstraintTheory constraintTheory, int depth) {		
+		
+		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess(null));
+		
 		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
 				() -> Expressions.makeSymbol(random.nextDouble()),
-				new DefaultRewritingProcess(null));
+				process);
 	}
 	
 	@Override
