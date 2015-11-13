@@ -45,8 +45,12 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -55,6 +59,7 @@ import joptsimple.OptionSpec;
 import com.google.common.base.Charsets;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.expresso.type.Categorical;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -247,14 +252,20 @@ public class RandomHOGMv1Generator {
 		
 		switch(result.theoryType) {
 		case HistoricalEqualityFormula:
-			result.termGenerator = new HistoricalEqualityFormulaConditionalGenerator(result.random, result.numberVariables, result.numberUniquelyNamedConstants, result.depth, result.breadth);
+			result.termGenerator = new HistoricalEqualityFormulaConditionalGenerator(result.random,
+					result.numberUniquelyNamedConstants, 
+					result.numberVariables, 
+					result.depth, 
+					result.breadth);
 			break;
 		case Propositional:
 		case Equality:
-		case Inequality:
-// TODO - need to take into account the #variables, #uniquely named constants and the breadth parameter (this one maybe not)			
+		case Inequality:		
 			result.termGenerator = new RandomConditionalExpressionTermGenerator(result.random, 
 					newConstraintTheory(result.theoryType), 
+					result.domainSize,
+					result.numberUniquelyNamedConstants,
+					result.numberVariables,
 					result.depth);
 			break;
 		default:
@@ -291,8 +302,14 @@ public class RandomHOGMv1Generator {
 }
 
 interface RandomTermGenerator {
-	String getVariableNameFor(int idx);
-	String getUniquelyNamedConstantName(int idx);
+	default String getVariableNameFor(int idx) {
+		return "X"+idx;
+	}
+	
+	default String getUniquelyNamedConstantName(int idx) {
+		return "a"+idx;
+	}
+	
 	Expression nextTerm();
 }
 
@@ -300,23 +317,25 @@ class RandomConditionalExpressionTermGenerator implements RandomTermGenerator {
 	
 	private RandomConditionalExpressionGenerator randomConditionalGenerator;
 	
-	public RandomConditionalExpressionTermGenerator(Random random, ConstraintTheory constraintTheory, int depth) {		
+	public RandomConditionalExpressionTermGenerator(Random random, ConstraintTheory constraintTheory, int domainSize, int numberOfUniquelyNamedConstants, int numberOfVariables, int depth) {		
+		ArrayList<Expression> knownUniquelyNamedConstants = new ArrayList<>();
+		IntStream.range(0, numberOfUniquelyNamedConstants)
+			.mapToObj(idx -> Expressions.makeSymbol(getUniquelyNamedConstantName(idx)))
+			.forEach(knownUniquelyNamedConstants::add);
+		constraintTheory.setTypesForTesting(Collections.singletonList(
+				new Categorical(RandomHOGMv1Generator.GENERATOR_SORT_NAME, domainSize, knownUniquelyNamedConstants)));
+		
+		Map<String, String> varToTypeMap = new LinkedHashMap<>();		
+		IntStream.range(0, numberOfVariables)
+			.mapToObj(this::getVariableNameFor)
+			.forEach(varName -> varToTypeMap.put(varName, RandomHOGMv1Generator.GENERATOR_SORT_NAME));
+		constraintTheory.setVariableNamesAndTypeNamesForTesting(varToTypeMap);
 		
 		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess(null));
 		
 		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
 				() -> Expressions.makeSymbol(random.nextDouble()),
 				process);
-	}
-	
-	@Override
-	public String getVariableNameFor(int idx) {
-		return "XBAD"+idx; // TODO
-	}
-	
-	@Override
-	public String getUniquelyNamedConstantName(int idx) {
-		return "abad"+idx; // TODO
 	}
 	
 	@Override
@@ -327,19 +346,9 @@ class RandomConditionalExpressionTermGenerator implements RandomTermGenerator {
 
 class HistoricalEqualityFormulaConditionalGenerator extends AbstractRandomDPLLProblemGenerator implements RandomTermGenerator {	
 	private Random random;
-	public HistoricalEqualityFormulaConditionalGenerator(Random random, int numberOfVariables, int numberOfUniquelyNamedConstants, int depth, int breadth) {
+	public HistoricalEqualityFormulaConditionalGenerator(Random random, int numberOfUniquelyNamedConstants, int numberOfVariables, int depth, int breadth) {
 		super(random, numberOfVariables, numberOfUniquelyNamedConstants, numberOfVariables, depth, breadth);
 		this.random = random;
-	}
-	
-	@Override
-	public String getVariableNameFor(int idx) {
-		return "X"+idx;
-	}
-	
-	@Override
-	public String getUniquelyNamedConstantName(int idx) {
-		return "a"+idx;
 	}
 	
 	@Override
