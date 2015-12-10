@@ -164,7 +164,7 @@ public class InferenceForFactorGraphAndEvidence {
 		// The solver for the parameters above.
 		com.sri.ai.grinder.sgdpll2.api.ConstraintTheory sgdpll2ConstraintTheory =
 				new CompoundConstraintTheory(
-				new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(true, false),
+				new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(true, true),
 				new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
 		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(sgdpll2ConstraintTheory, true);
 		if (useFactorization) {
