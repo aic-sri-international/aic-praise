@@ -38,10 +38,6 @@
 package com.sri.ai.praise.lang.translate.cli;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,9 +46,11 @@ import com.google.common.base.Stopwatch;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.lang.translate.TranslatorFactory;
+import com.sri.ai.praise.lang.translate.util.InputModelReaders;
+import com.sri.ai.praise.lang.translate.util.TranslatedOutputs;
 
 /**
- * Command Line Interface (CLI) for for performing a set of translation.
+ * Command Line Interface (CLI) for performing a set of translations.
  * 
  * @author oreilly
  *
@@ -120,48 +118,5 @@ public class RunTranslationsCLI {
 		result.translators.add(TranslatorFactory.newTranslator(ModelLanguage.UAI, ModelLanguage.HuginDotNet));
 		
 		return result;
-	}
-		
-	private static class InputModelReaders implements AutoCloseable {
-		public Reader[] readers;
-		
-		public InputModelReaders(Translator translator, File sourceModelFile, String sourceModelFileExtension) throws Exception {
-			readers = new Reader[translator.getNumberOfInputs()];
-			String modelName = translator.getInputModelFileNameWithNoExtension(sourceModelFile);
-			for (int i = 0; i < readers.length; i++) {
-				readers[i] = Files.newBufferedReader(new File(sourceModelFile.getParent(), modelName+translator.getInputFileExtensions()[i]).toPath(), 
-														translator.getSourceCharset());
-			}
-		}
-			
-		@Override
-		public void close() throws IOException {
-			for (Reader r : readers) {
-				r.close();
-			}
-		}
-	}
-	
-	private static class TranslatedOutputs implements AutoCloseable {
-		public PrintWriter[] writers;
-		
-		public TranslatedOutputs(Translator translator, File sourceModelFile, String sourceModelFileExtension) throws Exception {
-			writers = new PrintWriter[translator.getNumberOfOutputs()];
-			
-			String modelName = translator.getInputModelFileNameWithNoExtension(sourceModelFile);
-			File outputDir = new File(sourceModelFile.getParentFile().getParent(), translator.getTarget().getCode());
-			for (int i = 0; i < writers.length; i++) {
-				writers[i] = new PrintWriter(Files.newBufferedWriter(new File(outputDir, modelName+translator.getOutputFileExtensions()[i]).toPath(),
-											 						 translator.getTargetCharset()));
-			}
-		}
-		
-		@Override
-		public void close() throws IOException {
-			for (PrintWriter writer : writers) {
-				writer.flush();
-				writer.close();
-			}
-		}
 	}
 }
