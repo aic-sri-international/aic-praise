@@ -269,7 +269,7 @@ public class RandomHOGMv1Generator {
 					result.depth);
 			break;
 		default:
-			throw new UnsupportedOperationException("Current do not support term generation for theory = "+result.theoryType.getCode());
+			throw new UnsupportedOperationException("Currently do not support term generation for theory = "+result.theoryType.getCode());
 		}
 		
 		return result;
