@@ -38,8 +38,10 @@
 package com.sri.ai.praise.evaluate.run;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.sri.ai.praise.evaluate.solver.SolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
@@ -61,7 +63,12 @@ public class Evaluation {
 	public static class Configuration {
 		private Evaluation.Type type;
 		private File workingDirectory;
-// TODO - # of 		
+		
+		public Configuration(Evaluation.Type type, File workingDirectory) {
+			this.type             = type;
+			this.workingDirectory = workingDirectory;
+		}
+		
 		public Evaluation.Type getType() {
 			return type;
 		}
@@ -75,12 +82,14 @@ public class Evaluation {
 // TODO - receives evaluation	
 	}
 	
-	public void evaluation(Evaluation.Configuration configuration, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluatorConfiguration> solverConfigurations, Evaluation.Listener evaluationListener) {
+	public void evaluate(Evaluation.Configuration configuration, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluatorConfiguration> solverConfigurations, Evaluation.Listener evaluationListener) {
 		// Note, varying domain sizes etc... is achieved by creating variants of a base model in the provided paged model container
 
 // TODO - Status of relational random variables/constants?
 		
-// TODO - instantiate solvers		
+// TODO - instantiate solvers	
+		List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations);
+		
 // TODO - translate input model(s) to inputs for each solver evaluator	(NOTE: only do if not already translated)	
 // TODO - for each model call each solver
 		// TODO - how to handle translation of the queries for the solver and type of evaluation to be performed?
@@ -94,5 +103,30 @@ public class Evaluation {
 //      takes to solve it.
 //    - then around that, a loop varying domain size to generate a comparison
 //      per domain size.
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<SolverEvaluator> instantiateSolvers(List<SolverEvaluatorConfiguration> solverConfigurations) {
+		List<SolverEvaluator> result = new ArrayList<>(solverConfigurations.size());
+		
+		for (SolverEvaluatorConfiguration configuration : solverConfigurations) {
+			Class<? extends SolverEvaluator> clazz;
+			try {
+				clazz = (Class<? extends SolverEvaluator>) Class.forName(configuration.getImplementationClassName());
+			}
+			catch (ClassNotFoundException cnfe) {
+				throw new IllegalArgumentException("Unable to find "+SolverEvaluator.class.getName()+" implementation class: "+configuration.getImplementationClassName(), cnfe);
+			}
+			try {
+				SolverEvaluator solver = clazz.newInstance();
+				solver.setConfiguration(configuration);
+				result.add(solver);
+			}
+			catch (Throwable t) {
+				throw new IllegalStateException("Unable to instantiate instance of "+clazz.getName(), t);
+			}
+		}
+		
+		return result;
 	}
 }

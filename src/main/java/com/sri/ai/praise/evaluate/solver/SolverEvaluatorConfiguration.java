@@ -39,11 +39,44 @@ package com.sri.ai.praise.evaluate.solver;
 
 import java.util.Map;
 
+/**
+ * Configuration information for a solver evaluator.
+ * 
+ * @author oreilly
+ */
 public class SolverEvaluatorConfiguration {
 	
-	public SolverEvaluatorConfiguration(String name, String implementationClassName, Map<String, String> solverSpecificConfigurations) {
-		
+	private String name;
+	private String implementationClassName;
+	private int totalCPURuntimeLimitSecondsPerSolveAttempt;
+	private int totalMemoryLimitInMegabytesPerSolveAttempt;
+	private Map<String, String> solverSpecificConfiguration;
+	
+	public SolverEvaluatorConfiguration(String name, String implementationClassName, int totalCPURuntimeLimitSecondsPerSolveAttempt, int totalMemoryLimitInMegabytesPerSolveAttempt, Map<String, String> solverSpecificConfiguration) {
+		this.name                                       = name;
+		this.implementationClassName                    = implementationClassName;
+		this.totalCPURuntimeLimitSecondsPerSolveAttempt = totalCPURuntimeLimitSecondsPerSolveAttempt;
+		this.totalMemoryLimitInMegabytesPerSolveAttempt = totalMemoryLimitInMegabytesPerSolveAttempt;
+		this.solverSpecificConfiguration                = solverSpecificConfiguration;
 	}
 
-	
+	public String getName() {
+		return name;
+	}
+
+	public String getImplementationClassName() {
+		return implementationClassName;
+	}
+
+	public int getTotalCPURuntimeLimitSecondsPerSolveAttempt() {
+		return totalCPURuntimeLimitSecondsPerSolveAttempt;
+	}
+
+	public int getTotalMemoryLimitInMegabytesPerSolveAttempt() {
+		return totalMemoryLimitInMegabytesPerSolveAttempt;
+	}
+
+	public Map<String, String> getSolverSpecificConfiguration() {
+		return solverSpecificConfiguration;
+	}
 }
