@@ -37,6 +37,9 @@
  */
 package com.sri.ai.praise.evaluate.generate;
 
+import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
+import static com.sri.ai.util.Util.list;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,7 +48,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +65,7 @@ import com.sri.ai.expresso.type.Categorical;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.equality.AbstractRandomDPLLProblemGenerator;
+import com.sri.ai.grinder.library.equality.AbstractRandomEqualityDPLLProblemGenerator;
 import com.sri.ai.grinder.sgdpll2.api.ConstraintTheory;
 import com.sri.ai.grinder.sgdpll2.tester.RandomConditionalExpressionGenerator;
 import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
@@ -136,7 +138,7 @@ public class RandomHOGMv1Generator {
 		int breadth;                       // -b		
 		
 		// Derived
-		RandomTermGenerator termGenerator;
+		RandomPotentialExpressionGenerator potentialExpressionGenerator;
 		
 		@Override
 		public void close() throws IOException {
@@ -164,7 +166,7 @@ public class RandomHOGMv1Generator {
 			genArgs.out.append(""+genArgs.domainSize);
 			for (int i = 0; i < genArgs.numberUniquelyNamedConstants; i++) {
 				genArgs.out.append(", ");
-				genArgs.out.append(genArgs.termGenerator.getUniquelyNamedConstantName(i));
+				genArgs.out.append(genArgs.potentialExpressionGenerator.getUniquelyNamedConstantName(i));
 			}
 			genArgs.out.println(";");
 			genArgs.out.println();
@@ -172,7 +174,7 @@ public class RandomHOGMv1Generator {
 			// output the random variable information
 			for (int i = 0; i < genArgs.numberVariables; i++) {
 				genArgs.out.append("random ");
-				genArgs.out.append(genArgs.termGenerator.getVariableNameFor(i));
+				genArgs.out.append(genArgs.potentialExpressionGenerator.getVariableNameFor(i));
 				genArgs.out.append(" : ");
 				genArgs.out.append(GENERATOR_SORT_NAME);
 				genArgs.out.println(";");
@@ -180,10 +182,10 @@ public class RandomHOGMv1Generator {
 			genArgs.out.println();
 				
 			for (int i = 0; i < genArgs.numberPotentials; i++) {		
-				Expression conditional = genArgs.termGenerator.nextTerm();
+				Expression conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
 				// Ensure we have variables in the conditional
 				while (Expressions.freeVariables(conditional, new DefaultRewritingProcess(null)).size() == 0) {							
-					conditional = genArgs.termGenerator.nextTerm();
+					conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
 				}
 				
 				genArgs.out.append(conditional.toString());
@@ -252,7 +254,7 @@ public class RandomHOGMv1Generator {
 		
 		switch(result.theoryType) {
 		case HistoricalEqualityFormula:
-			result.termGenerator = new HistoricalEqualityFormulaConditionalGenerator(result.random,
+			result.potentialExpressionGenerator = new HistoricalEqualityFormulaConditionalPotentialExpressionGenerator(result.random,
 					result.numberUniquelyNamedConstants, 
 					result.numberVariables, 
 					result.depth, 
@@ -261,7 +263,7 @@ public class RandomHOGMv1Generator {
 		case Propositional:
 		case Equality:
 		case Inequality:		
-			result.termGenerator = new RandomConditionalExpressionTermGenerator(result.random, 
+			result.potentialExpressionGenerator = new RandomConditionalPotentialExpressionGenerator(result.random, 
 					newConstraintTheory(result.theoryType), 
 					result.domainSize,
 					result.numberUniquelyNamedConstants,
@@ -269,7 +271,7 @@ public class RandomHOGMv1Generator {
 					result.depth);
 			break;
 		default:
-			throw new UnsupportedOperationException("Current do not support term generation for theory = "+result.theoryType.getCode());
+			throw new UnsupportedOperationException("Current do not support potential expression generation for theory = "+result.theoryType.getCode());
 		}
 		
 		return result;
@@ -301,28 +303,29 @@ public class RandomHOGMv1Generator {
 	}
 }
 
-interface RandomTermGenerator {
-	default String getVariableNameFor(int idx) {
-		return "X"+idx;
+interface RandomPotentialExpressionGenerator {
+
+	default String getVariableNameFor(int index) {
+		return "X" + index;
 	}
 	
-	default String getUniquelyNamedConstantName(int idx) {
-		return "a"+idx;
+	default String getUniquelyNamedConstantName(int index) {
+		return "a" + index;
 	}
 	
-	Expression nextTerm();
+	Expression nextPotentialExpression();
 }
 
-class RandomConditionalExpressionTermGenerator implements RandomTermGenerator {
+class RandomConditionalPotentialExpressionGenerator implements RandomPotentialExpressionGenerator {
 	
 	private RandomConditionalExpressionGenerator randomConditionalGenerator;
 	
-	public RandomConditionalExpressionTermGenerator(Random random, ConstraintTheory constraintTheory, int domainSize, int numberOfUniquelyNamedConstants, int numberOfVariables, int depth) {		
+	public RandomConditionalPotentialExpressionGenerator(Random random, ConstraintTheory constraintTheory, int domainSize, int numberOfUniquelyNamedConstants, int numberOfVariables, int depth) {		
 		ArrayList<Expression> knownUniquelyNamedConstants = new ArrayList<>();
 		IntStream.range(0, numberOfUniquelyNamedConstants)
 			.mapToObj(idx -> Expressions.makeSymbol(getUniquelyNamedConstantName(idx)))
 			.forEach(knownUniquelyNamedConstants::add);
-		constraintTheory.setTypesForTesting(Collections.singletonList(
+		constraintTheory.setTypesForTesting(list(
 				new Categorical(RandomHOGMv1Generator.GENERATOR_SORT_NAME, domainSize, knownUniquelyNamedConstants)));
 		
 		Map<String, String> varToTypeMap = new LinkedHashMap<>();		
@@ -334,25 +337,26 @@ class RandomConditionalExpressionTermGenerator implements RandomTermGenerator {
 		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess(null));
 		
 		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
-				() -> Expressions.makeSymbol(random.nextDouble()),
+				() -> makeSymbol(random.nextDouble()),
 				process);
 	}
 	
 	@Override
-	public Expression nextTerm() {
+	public Expression nextPotentialExpression() {
 		return randomConditionalGenerator.apply();
 	}
 }
 
-class HistoricalEqualityFormulaConditionalGenerator extends AbstractRandomDPLLProblemGenerator implements RandomTermGenerator {	
+class HistoricalEqualityFormulaConditionalPotentialExpressionGenerator extends AbstractRandomEqualityDPLLProblemGenerator implements RandomPotentialExpressionGenerator {	
 	private Random random;
-	public HistoricalEqualityFormulaConditionalGenerator(Random random, int numberOfUniquelyNamedConstants, int numberOfVariables, int depth, int breadth) {
+	
+	public HistoricalEqualityFormulaConditionalPotentialExpressionGenerator(Random random, int numberOfUniquelyNamedConstants, int numberOfVariables, int depth, int breadth) {
 		super(random, numberOfVariables, numberOfUniquelyNamedConstants, numberOfVariables, depth, breadth);
 		this.random = random;
 	}
 	
 	@Override
-	public Expression nextTerm() {
+	public Expression nextPotentialExpression() {
 		return next();
 	}
 	
@@ -361,7 +365,7 @@ class HistoricalEqualityFormulaConditionalGenerator extends AbstractRandomDPLLPr
 		double thenValue = random.nextDouble();
 		double elseValue = 1.0 - thenValue;
 		
-		Expression problem = IfThenElse.make(formula, Expressions.makeSymbol(thenValue), Expressions.makeSymbol(elseValue));
+		Expression problem = IfThenElse.make(formula, makeSymbol(thenValue), makeSymbol(elseValue));
 		return problem;
 	}	
 }
