@@ -291,8 +291,8 @@ public class RandomHOGMv1Generator {
 			break;
 		case Inequality:
 			result = new CompoundConstraintTheory(
-					new InequalityConstraintTheory(true, false),
-					new EqualityConstraintTheory(true, true),
+					new InequalityConstraintTheory(false, false),
+					new EqualityConstraintTheory(false, true),
 					new PropositionalConstraintTheory());
 			break;
 		default:
