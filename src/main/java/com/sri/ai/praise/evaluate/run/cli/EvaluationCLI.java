@@ -44,6 +44,7 @@ import java.util.List;
 
 import com.sri.ai.praise.evaluate.run.Evaluation;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
+import com.sri.ai.praise.evaluate.solver.impl.samiam.SamIamSolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.impl.sgsolver.SGSolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.impl.vec.VECSolverEvaluator;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -69,12 +70,14 @@ public class EvaluationCLI {
 		int totalCPURuntimeLimitSecondsPerSolveAttempt = 60;
 		int totalMemoryLimitInMegabytesPerSolveAttempt = 1024;
 		
-		Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PRA, outputDirectory);
+		Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PR, outputDirectory);
 		PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationName, PagedModelContainer.getModelPagesFromURI(modelsContainerFile.toURI()));
 		List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(
 				new SolverEvaluatorConfiguration("SGSolver#1", SGSolverEvaluator.class.getName(), 
 						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
 				new SolverEvaluatorConfiguration("VECSolver#1", VECSolverEvaluator.class.getName(), 
+						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
+				new SolverEvaluatorConfiguration("SamIam#1", SamIamSolverEvaluator.class.getName(), 
 						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap())
 				);
 		

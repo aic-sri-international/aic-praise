@@ -43,6 +43,8 @@ import java.util.List;
 
 import com.sri.ai.praise.evaluate.solver.SolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
+import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
 /**
@@ -54,10 +56,10 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
 public class Evaluation {	
 	// NOTE: Based on http://www.hlt.utdallas.edu/~vgogate/uai14-competition/information.html
 	public enum Type {
-		PRA,  // Computing the probability of assignment(s) given evidence 
+		PR,   // Computing the the partition function and probability of evidence
 		MAR,  // Computing the marginal probability distribution over variable(s) given evidence
-		MAP,  // Computing the most likely assignment to all variables given evidence
-		MMAP, // Computing the most likely assignment to a subset of variables given evidence
+		MAP,  // Computing the most likely assignment to all variables given evidence (also known as MPE, Most Probable Explanation)
+		MMAP, // Computing the most likely assignment to a subset of variables given evidence (Marginal MAP)
 	};
 	
 	public static class Configuration {
@@ -91,6 +93,11 @@ public class Evaluation {
 		List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations);
 		
 // TODO - translate input model(s) to inputs for each solver evaluator	(NOTE: only do if not already translated)	
+		for (ModelPage model : modelsToEvaluateContainer.getPages()) {
+			if (model.getLanguage() != ModelLanguage.HOGMv1) {
+				throw new IllegalArgumentException("Model "+model.getName());
+			}
+		}
 // TODO - for each model call each solver
 		// TODO - how to handle translation of the queries for the solver and type of evaluation to be performed?
 		// TODO - how do we handle the different types of result a solver can return?

@@ -35,19 +35,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.evaluate.solver;
+package com.sri.ai.praise.evaluate.solver.impl.samiam;
 
-import com.sri.ai.util.math.Rational;
+import com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator;
+import com.sri.ai.praise.lang.ModelLanguage;
 
-public class SolverEvaluatorProbabilityAssignmentResult extends SolverEvaluatorResult {
-	private Rational probabilityOfAssignment;
-	
-	public SolverEvaluatorProbabilityAssignmentResult(long millisecondsToCompute, Rational probabilityOfAssignment) {
-		super(millisecondsToCompute);
-		this.probabilityOfAssignment = probabilityOfAssignment;
-	}
-	
-	public Rational getProbabilityOfAssignment() {
-		return probabilityOfAssignment;
+/**
+ * Wrapper around the SamIam inference library, available from:<br>
+ * http://reasoning.cs.ucla.edu/samiam/
+ * 
+ * @author oreilly
+ */
+public class SamIamSolverEvaluator  extends AbstractSolverEvaluator {
+
+	@Override
+	public ModelLanguage getExpectedModelLanguage() {
+		return ModelLanguage.HuginDotNet;
 	}
 }

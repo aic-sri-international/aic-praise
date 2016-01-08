@@ -37,15 +37,17 @@
  */
 package com.sri.ai.praise.evaluate.solver;
 
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.util.math.Rational;
 
-public interface SolverEvaluator {
-	SolverEvaluatorConfiguration getConfiguration();
-	void setConfiguration(SolverEvaluatorConfiguration configuration);
+public class SolverEvaluatorProbabilityEvidenceResult extends SolverEvaluatorResult {
+	private Rational probabilityOfEvidence;
 	
-	ModelLanguage getExpectedModelLanguage();
+	public SolverEvaluatorProbabilityEvidenceResult(long millisecondsToCompute, Rational probabilityOfEvidence) {
+		super(millisecondsToCompute);
+		this.probabilityOfEvidence = probabilityOfEvidence;
+	}
 	
-	default SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(String model, String evidence) {
-		throw new UnsupportedOperationException(getClass().getName()+" does not support solve probability evidence evaluations");
+	public Rational getProbabilityOfEvidence() {
+		return probabilityOfEvidence;
 	}
 }
