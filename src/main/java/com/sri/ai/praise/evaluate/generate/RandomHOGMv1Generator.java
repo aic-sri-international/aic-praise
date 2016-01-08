@@ -271,7 +271,7 @@ public class RandomHOGMv1Generator {
 					result.depth);
 			break;
 		default:
-			throw new UnsupportedOperationException("Current do not support potential expression generation for theory = "+result.theoryType.getCode());
+			throw new UnsupportedOperationException("Currently do not support potential expression generation for theory = "+result.theoryType.getCode());
 		}
 		
 		return result;

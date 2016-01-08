@@ -37,6 +37,17 @@
  */
 package com.sri.ai.praise.evaluate.run.cli;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import com.sri.ai.praise.evaluate.run.Evaluation;
+import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
+import com.sri.ai.praise.evaluate.solver.impl.sgsolver.SGSolverEvaluator;
+import com.sri.ai.praise.evaluate.solver.impl.vec.VECSolverEvaluator;
+import com.sri.ai.praise.model.common.io.PagedModelContainer;
+
 /**
  * Command line interface for running evaluations.
  * 
@@ -44,5 +55,31 @@ package com.sri.ai.praise.evaluate.run.cli;
  *
  */
 public class EvaluationCLI {
-// TODO
+// TODO - consider using commons-configuration to evaluation input file reading, i.e. https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
+	
+	public static void main(String[] args) throws Exception {
+// TODO - implement based on args
+		
+		File rootDirectory       = new File("/Volumes/ExtraSpace/PROJECTS/PPAML/evaluate");
+		File inputDirectory      = new File(rootDirectory, "input");
+		File outputDirectory     = new File(rootDirectory, "output");
+		File modelsContainerFile = new File(inputDirectory,"earthquakeBurglaryAlarm.praise");
+		
+		String evaluationName = "evaluation 1";
+		int totalCPURuntimeLimitSecondsPerSolveAttempt = 60;
+		int totalMemoryLimitInMegabytesPerSolveAttempt = 1024;
+		
+		Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PRA, outputDirectory);
+		PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationName, PagedModelContainer.getModelPagesFromURI(modelsContainerFile.toURI()));
+		List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(
+				new SolverEvaluatorConfiguration("SGSolver#1", SGSolverEvaluator.class.getName(), 
+						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
+				new SolverEvaluatorConfiguration("VECSolver#1", VECSolverEvaluator.class.getName(), 
+						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap())
+				);
+		
+		Evaluation evaluation = new Evaluation();
+		evaluation.evaluate(configuration, modelsContainer, solverConfigurations, new Evaluation.Listener() {
+		});
+	}
 }
