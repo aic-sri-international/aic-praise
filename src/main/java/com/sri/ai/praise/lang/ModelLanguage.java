@@ -103,7 +103,8 @@ public enum ModelLanguage {
 			"A simple propositional text file format to describe UAI Inference Competition problem instances (Markov or Bayesian networks). "  +
 			"The format is a generalization of the Ergo file format initially developed by Noetic systems Ergo software.",
 			Arrays.asList(
-					"http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html"),
+					"http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html",
+					"http://www.hlt.utdallas.edu/~vgogate/vec-uai14.tar.gz"), // Vibhav's solver, used in the competition
 			".uai");	
 	
 	//

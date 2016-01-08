@@ -44,5 +44,6 @@ package com.sri.ai.praise.evaluate.run.cli;
  *
  */
 public class EvaluationCLI {
-// TODO
+// TODO - consider using commons-configuration to evaluation input file reading, i.e. https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
+// TODO - implement
 }
