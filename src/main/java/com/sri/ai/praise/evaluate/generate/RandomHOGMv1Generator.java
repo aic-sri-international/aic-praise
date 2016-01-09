@@ -384,7 +384,7 @@ class RandomConditionalPotentialExpressionGenerator implements RandomPotentialEx
 		String sortName;
 		
 		if (theoryType == RandomHOGMv1Generator.TheoryType.Inequality) {
-			sortName = "Integer(0,"+domainSize+")";
+			sortName = "Integer(0," + (domainSize - 1) + ")"; // interval bounds are both inclusive
 			constraintTheory.setTypesForTesting(list(new IntegerInterval(sortName)));
 		}
 		else {
