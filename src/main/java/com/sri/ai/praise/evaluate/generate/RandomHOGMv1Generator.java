@@ -62,6 +62,7 @@ import com.google.common.base.Charsets;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.Categorical;
+import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -72,6 +73,7 @@ import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
 import com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory;
 import com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory;
 import com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory;
+import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 
 /**
@@ -81,6 +83,12 @@ import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
  *
  */
 public class RandomHOGMv1Generator {
+	static final int _potentialIdx             = 0;
+	static final int _variableIdx              = 1;
+	static final int _uniquelNamedConstantIdx  = 2;
+	static final int _depthIdx                 = 3;
+	static final int _breadthIdx               = 4;
+	
 	enum TheoryType {
 		HistoricalEqualityFormula("historical"),
 		Propositional("propositional"),
@@ -146,6 +154,45 @@ public class RandomHOGMv1Generator {
 			// Only close if not System.out
 			if (out != System.out) {				
 				out.close();
+			}
+		}
+	}
+	
+	public static void generate(String outputDirectory, TheoryType theoryType, long seed, int[] domainSizes, int[][] params) {
+		File rootOutputDirectory = validateDirectory(outputDirectory);
+		File hogmv1ProblemDirectory      = new File(rootOutputDirectory, ModelLanguage.HOGMv1.getCode());
+		if (!hogmv1ProblemDirectory.exists()) {
+			hogmv1ProblemDirectory.mkdir();
+		}
+		
+		for (int p = 0; p < params.length; p++) {
+			int numberOfPotentials = params[p][_potentialIdx];
+			int numberOfVariables  = params[p][_variableIdx];			
+			int depth              = params[p][_depthIdx];
+			int breadth            = params[p][_breadthIdx];
+			
+			for (int i = 0; i < domainSizes.length; i++) {
+				int cardinality = domainSizes[i];
+				
+				int numberOfUniquelyNamedConstants = params[p][_uniquelNamedConstantIdx];
+				// #constants must be <= domain size
+				if (numberOfUniquelyNamedConstants > cardinality) {
+					numberOfUniquelyNamedConstants = cardinality;
+				}
+				
+				String outputFileSuffix = "_r"+seed+"_s"+cardinality+"_t_"+theoryType.getCode()+"_p"+numberOfPotentials+"_v"+numberOfVariables+"_u"+numberOfUniquelyNamedConstants+"_d"+depth+"_b"+breadth;
+				
+				RandomHOGMv1Generator.main(new String[] {
+						"-r="+seed,
+						"-s="+cardinality,
+						"-o="+new File(hogmv1ProblemDirectory, "sg_random_model"+outputFileSuffix+ModelLanguage.HOGMv1.getDefaultFileExtension()).getAbsolutePath(),
+						"-t="+theoryType.getCode(),
+						"-p="+numberOfPotentials,
+						"-v="+numberOfVariables,
+						"-u="+numberOfUniquelyNamedConstants,
+						"-d="+depth,
+						"-b="+breadth
+				});				
 			}
 		}
 	}
@@ -263,7 +310,8 @@ public class RandomHOGMv1Generator {
 		case Propositional:
 		case Equality:
 		case Inequality:		
-			result.potentialExpressionGenerator = new RandomConditionalPotentialExpressionGenerator(result.random, 
+			result.potentialExpressionGenerator = new RandomConditionalPotentialExpressionGenerator(result.theoryType,
+					result.random, 
 					newConstraintTheory(result.theoryType), 
 					result.domainSize,
 					result.numberUniquelyNamedConstants,
@@ -301,6 +349,18 @@ public class RandomHOGMv1Generator {
 		
 		return result;
 	}
+	
+	private static File validateDirectory(String directoryName) {
+		File result = new File(directoryName);
+		if (!result.exists()) {
+			throw new IllegalArgumentException("Output directory does not exist: "+directoryName);
+		}
+		if (!result.isDirectory()) {
+			throw new IllegalArgumentException("Output directory is not a directory: "+result.getAbsolutePath());
+		}
+		
+		return result;
+	}
 }
 
 interface RandomPotentialExpressionGenerator {
@@ -320,18 +380,27 @@ class RandomConditionalPotentialExpressionGenerator implements RandomPotentialEx
 	
 	private RandomConditionalExpressionGenerator randomConditionalGenerator;
 	
-	public RandomConditionalPotentialExpressionGenerator(Random random, ConstraintTheory constraintTheory, int domainSize, int numberOfUniquelyNamedConstants, int numberOfVariables, int depth) {		
-		ArrayList<Expression> knownUniquelyNamedConstants = new ArrayList<>();
-		IntStream.range(0, numberOfUniquelyNamedConstants)
-			.mapToObj(idx -> Expressions.makeSymbol(getUniquelyNamedConstantName(idx)))
-			.forEach(knownUniquelyNamedConstants::add);
-		constraintTheory.setTypesForTesting(list(
-				new Categorical(RandomHOGMv1Generator.GENERATOR_SORT_NAME, domainSize, knownUniquelyNamedConstants)));
+	public RandomConditionalPotentialExpressionGenerator(RandomHOGMv1Generator.TheoryType theoryType, Random random, ConstraintTheory constraintTheory, int domainSize, int numberOfUniquelyNamedConstants, int numberOfVariables, int depth) {		
+		String sortName;
+		
+		if (theoryType == RandomHOGMv1Generator.TheoryType.Inequality) {
+			sortName = "Integer(0,"+domainSize+")";
+			constraintTheory.setTypesForTesting(list(new IntegerInterval(sortName)));
+		}
+		else {
+			sortName = RandomHOGMv1Generator.GENERATOR_SORT_NAME;
+			ArrayList<Expression> knownUniquelyNamedConstants = new ArrayList<>();
+			IntStream.range(0, numberOfUniquelyNamedConstants)
+				.mapToObj(idx -> Expressions.makeSymbol(getUniquelyNamedConstantName(idx)))
+				.forEach(knownUniquelyNamedConstants::add);
+			constraintTheory.setTypesForTesting(list(
+					new Categorical(sortName, domainSize, knownUniquelyNamedConstants)));
+		}
 		
 		Map<String, String> varToTypeMap = new LinkedHashMap<>();		
 		IntStream.range(0, numberOfVariables)
 			.mapToObj(this::getVariableNameFor)
-			.forEach(varName -> varToTypeMap.put(varName, RandomHOGMv1Generator.GENERATOR_SORT_NAME));
+			.forEach(varName -> varToTypeMap.put(varName, sortName));
 		constraintTheory.setVariableNamesAndTypeNamesForTesting(varToTypeMap);
 		
 		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess(null));
