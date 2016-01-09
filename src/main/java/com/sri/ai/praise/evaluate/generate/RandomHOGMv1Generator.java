@@ -60,6 +60,7 @@ import joptsimple.OptionSpec;
 
 import com.google.common.base.Charsets;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.Categorical;
 import com.sri.ai.expresso.type.IntegerInterval;
@@ -382,10 +383,12 @@ class RandomConditionalPotentialExpressionGenerator implements RandomPotentialEx
 	
 	public RandomConditionalPotentialExpressionGenerator(RandomHOGMv1Generator.TheoryType theoryType, Random random, ConstraintTheory constraintTheory, int domainSize, int numberOfUniquelyNamedConstants, int numberOfVariables, int depth) {		
 		String sortName;
+		Type sort;
 		
 		if (theoryType == RandomHOGMv1Generator.TheoryType.Inequality) {
 			sortName = "Integer(0," + (domainSize - 1) + ")"; // interval bounds are both inclusive
-			constraintTheory.setTypesForTesting(list(new IntegerInterval(sortName)));
+			sort = new IntegerInterval(sortName);
+			constraintTheory.setTypesForTesting(list(sort));
 		}
 		else {
 			sortName = RandomHOGMv1Generator.GENERATOR_SORT_NAME;
@@ -393,15 +396,15 @@ class RandomConditionalPotentialExpressionGenerator implements RandomPotentialEx
 			IntStream.range(0, numberOfUniquelyNamedConstants)
 				.mapToObj(idx -> Expressions.makeSymbol(getUniquelyNamedConstantName(idx)))
 				.forEach(knownUniquelyNamedConstants::add);
-			constraintTheory.setTypesForTesting(list(
-					new Categorical(sortName, domainSize, knownUniquelyNamedConstants)));
+			sort = new Categorical(sortName, domainSize, knownUniquelyNamedConstants);
+			constraintTheory.setTypesForTesting(list(sort));
 		}
 		
-		Map<String, String> varToTypeMap = new LinkedHashMap<>();		
+		Map<String, Type> varToTypeMap = new LinkedHashMap<>();		
 		IntStream.range(0, numberOfVariables)
 			.mapToObj(this::getVariableNameFor)
-			.forEach(varName -> varToTypeMap.put(varName, sortName));
-		constraintTheory.setVariableNamesAndTypeNamesForTesting(varToTypeMap);
+			.forEach(varName -> varToTypeMap.put(varName, sort));
+		constraintTheory.setVariableNamesAndTypesForTesting(varToTypeMap);
 		
 		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess(null));
 		
