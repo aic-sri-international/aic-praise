@@ -52,6 +52,7 @@ import java.util.Set;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.QuantifierEliminatorWithSetup;
 import com.sri.ai.grinder.api.RewritingProcess;
@@ -164,8 +165,16 @@ public class InferenceForFactorGraphAndEvidence {
 		// The solver for the parameters above.
 		com.sri.ai.grinder.sgdpll2.api.ConstraintTheory sgdpll2ConstraintTheory =
 				new CompoundConstraintTheory(
-				new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(true, true),
+						new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(false, true),
+						new com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory(false, true),
 				new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
+		
+//		for (Type type : sgdpll2ConstraintTheory.getNativeTypes()) { // add needed types that may not be the type of any variable
+//			String typeName = type.getName();
+//			String sizeString = type.cardinality().toString();
+//			this.mapFromTypeNameToSizeString.put(typeName, sizeString);
+//		}
+		
 		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(sgdpll2ConstraintTheory, true);
 		if (useFactorization) {
 //			solver = new PlainDPLLSGVET(inputTheory, problemType);

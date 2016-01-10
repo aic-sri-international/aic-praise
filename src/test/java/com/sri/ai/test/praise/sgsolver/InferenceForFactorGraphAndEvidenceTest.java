@@ -552,6 +552,36 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
 	}
 
+	//@Test
+	public void inequalities() {
+		
+		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
+		
+		// The definitions of types
+		mapFromTypeNameToSizeString = Util.map(
+				"Integer(0,99)", "1", // the value 1 should be irrelevant since the type already informs its size
+				"Boolean", "2");
+	
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"age",   "Integer(0,99)",
+				"senior", "Boolean"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+		
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(""
+				+ "if age > 65 then if senior then 1 else 0 else if senior then 0 else 1"));
+		
+		queryExpression = parse("senior");
+		evidence = null;
+		expected = parse("if senior then 65/100 else 35/100");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromTypeNameToSizeString);
+	}
+
 	/**
 	 * @param queryExpression
 	 * @param evidence
