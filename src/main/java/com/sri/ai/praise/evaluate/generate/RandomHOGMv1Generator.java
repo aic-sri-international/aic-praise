@@ -38,7 +38,6 @@
 package com.sri.ai.praise.evaluate.generate;
 
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
-import static com.sri.ai.util.Util.list;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -335,13 +334,13 @@ public class RandomHOGMv1Generator {
 			break;
 		case Equality:
 			result = new CompoundConstraintTheory(
-					new EqualityConstraintTheory(true, true),
+					new EqualityConstraintTheory(true, true), // first flag is 'true' because all equalities are atoms in this theory; there is no need to check arguments type
 					new PropositionalConstraintTheory());
 			break;
 		case Inequality:
 			result = new CompoundConstraintTheory(
-					new InequalityConstraintTheory(false, false),
-					new EqualityConstraintTheory(false, true),
+					new InequalityConstraintTheory(false, true), // 'false' because not all equalities are atoms in this theory; need to check arguments type
+					new EqualityConstraintTheory(false, true), // 'false' because not all equalities are atoms in this theory; need to check arguments type
 					new PropositionalConstraintTheory());
 			break;
 		default:
@@ -386,9 +385,8 @@ class RandomConditionalPotentialExpressionGenerator implements RandomPotentialEx
 		Type sort;
 		
 		if (theoryType == RandomHOGMv1Generator.TheoryType.Inequality) {
-			sortName = "Integer(0," + (domainSize - 1) + ")"; // interval bounds are both inclusive
+			sortName = "Integer(0," + (domainSize - 1) + ")"; // IntegerInterval bounds are included bounds, so they need to be 0..(domainSize - 1)
 			sort = new IntegerInterval(sortName);
-			constraintTheory.setTypesForTesting(list(sort));
 		}
 		else {
 			sortName = RandomHOGMv1Generator.GENERATOR_SORT_NAME;
@@ -397,7 +395,6 @@ class RandomConditionalPotentialExpressionGenerator implements RandomPotentialEx
 				.mapToObj(idx -> Expressions.makeSymbol(getUniquelyNamedConstantName(idx)))
 				.forEach(knownUniquelyNamedConstants::add);
 			sort = new Categorical(sortName, domainSize, knownUniquelyNamedConstants);
-			constraintTheory.setTypesForTesting(list(sort));
 		}
 		
 		Map<String, Type> varToTypeMap = new LinkedHashMap<>();		
