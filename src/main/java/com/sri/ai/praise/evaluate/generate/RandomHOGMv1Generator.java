@@ -205,25 +205,33 @@ public class RandomHOGMv1Generator {
 	 */
 	public static void main(String[] args) {
 		try (GeneratorArgs genArgs = getArgs(args)) {
-			// Output the sort information
-			genArgs.out.append(HOGMSortDeclaration.FUNCTOR_SORT_DECLARATION);
-			genArgs.out.append(" ");
-			genArgs.out.append(GENERATOR_SORT_NAME);
-			genArgs.out.append(" : ");
-			genArgs.out.append(""+genArgs.domainSize);
-			for (int i = 0; i < genArgs.numberUniquelyNamedConstants; i++) {
-				genArgs.out.append(", ");
-				genArgs.out.append(genArgs.potentialExpressionGenerator.getUniquelyNamedConstantName(i));
+			
+			if (genArgs.theoryType != TheoryType.Inequality) {
+				// Output the categorical sort information
+				genArgs.out.append(HOGMSortDeclaration.FUNCTOR_SORT_DECLARATION);
+				genArgs.out.append(" ");
+				genArgs.out.append(GENERATOR_SORT_NAME);
+				genArgs.out.append(" : ");
+				genArgs.out.append(""+genArgs.domainSize);
+				for (int i = 0; i < genArgs.numberUniquelyNamedConstants; i++) {
+					genArgs.out.append(", ");
+					genArgs.out.append(genArgs.potentialExpressionGenerator.getUniquelyNamedConstantName(i));
+				}
+				genArgs.out.println(";");
+				genArgs.out.println();
 			}
-			genArgs.out.println(";");
-			genArgs.out.println();
 			
 			// output the random variable information
 			for (int i = 0; i < genArgs.numberVariables; i++) {
 				genArgs.out.append("random ");
 				genArgs.out.append(genArgs.potentialExpressionGenerator.getVariableNameFor(i));
 				genArgs.out.append(" : ");
-				genArgs.out.append(GENERATOR_SORT_NAME);
+				if (genArgs.theoryType != TheoryType.Inequality) {
+					genArgs.out.append(GENERATOR_SORT_NAME);
+				}
+				else {
+					genArgs.out.append("0.."+(genArgs.domainSize-1));
+				}
 				genArgs.out.println(";");
 			}
 			genArgs.out.println();
