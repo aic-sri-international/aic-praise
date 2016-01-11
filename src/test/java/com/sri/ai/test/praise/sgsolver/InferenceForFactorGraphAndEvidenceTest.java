@@ -647,7 +647,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		
 		isBayesianNetwork = false;
 		factors = Times.getMultiplicands(parse(""
-				+ "(if country = brazil then (if age < 50 then 2/3 else 1/3) else 0.01)" // P(age | country)
+				+ "(if country = brazil then (if age < 50 then 2/3 else 1/3) else 1/100)" // P(age | country)
 				+ "*(if age >= 65 then if senior then 1 else 0 else if senior then 0 else 1)"
 				+ "*(if age < 18 then if minor then 1 else 0 else if minor then 0 else 1)"
 				+ "*(if age >= 21 and age < 65 then if workingAge then 1 else 0 else if workingAge then 0 else 1)"));
