@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.lang.grounded.model;
 
+import static com.sri.ai.util.Util.list;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -171,7 +173,8 @@ public class HOGModelGrounding {
 							factorsAndTypes.getMapFromRandomVariableNameToTypeName(),
 							factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName(),
 							newUniqueConstantToTypeMap,
-							factorsAndTypes.getMapFromTypeNameToSizeString());
+							factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
+							list());
 
 		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(grounedFactorsAndTypes, false, null, true);
 		
@@ -243,7 +246,7 @@ public class HOGModelGrounding {
 				size = (type.get(1).intValueExact() - type.get(0).intValueExact()) + 1;
 			}
 			else {
-				String strSize = factorsAndTypes.getMapFromTypeNameToSizeString().get(type);
+				String strSize = factorsAndTypes.getMapFromCategoricalTypeNameToSizeString().get(type);
 				if (strSize == null) {
 					throw new IllegalArgumentException("Size of sort, "+type+", is unknown");
 				}

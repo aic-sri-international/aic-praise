@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.model.v1.imports.uai;
 
+import static com.sri.ai.util.Util.list;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -132,18 +134,18 @@ public class UAIUtil {
 		Expression  inputExpression  = Expressions.parse(table.toString());
 		Function<Integer, Integer> cardinalityOfIthVariable = i -> functionTable.cardinality(i);
 
-		Map<String, String> mapFromTypeNameToSizeString   = new LinkedHashMap<>();
+		Map<String, String> mapFromCategoricalTypeNameToSizeString   = new LinkedHashMap<>();
 		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
 		for (int i = 0; i < functionTable.numberVariables(); i++) {
 			String typeName = genericTypeNameForVariable(i, cardinalityOfIthVariable.apply(i));
-			mapFromTypeNameToSizeString.put(typeName, "" + cardinalityOfIthVariable.apply(i));
+			mapFromCategoricalTypeNameToSizeString.put(typeName, "" + cardinalityOfIthVariable.apply(i));
 			mapFromVariableNameToTypeName.put(genericVariableName(i), typeName);
 		}
 		
 		ConstraintTheory constraintTheory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new SymbolTermTheory()));
 		InputTheory inputTheory = new DefaultInputTheory(constraintTheory);
 
-		Expression result = Compilation.compile(inputExpression, inputTheory, mapFromVariableNameToTypeName, mapFromTypeNameToSizeString, solverListener);
+		Expression result = Compilation.compile(inputExpression, inputTheory, mapFromVariableNameToTypeName, mapFromCategoricalTypeNameToSizeString, list(), solverListener);
 		
 		return result;
 	}

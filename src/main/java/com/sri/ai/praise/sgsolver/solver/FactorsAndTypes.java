@@ -37,11 +37,13 @@
  */
 package com.sri.ai.praise.sgsolver.solver;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Type;
 
 @Beta
 public interface FactorsAndTypes {
@@ -53,5 +55,7 @@ public interface FactorsAndTypes {
 	
 	Map<String, String> getMapFromUniquelyNamedConstantNameToTypeName();
 	
-	Map<String, String> getMapFromTypeNameToSizeString();
+	Map<String, String> getMapFromCategoricalTypeNameToSizeString();
+	
+	Collection<Type> getAdditionalTypes();
 }

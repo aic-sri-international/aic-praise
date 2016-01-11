@@ -47,6 +47,7 @@ import static com.sri.ai.util.Util.setDifference;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -91,7 +92,8 @@ public class InferenceForFactorGraphAndEvidence {
 	private Expression evidenceProbability;
 	private Map<String, String> mapFromRandomVariableNameToTypeName;
 	private Map<String, String> mapFromSymbolNameToTypeName; // union of the two maps above
-	private Map<String, String> mapFromTypeNameToSizeString;
+	private Map<String, String> mapFromCategoricalTypeNameToSizeString;
+	private Collection<Type> additionalTypes;
 	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private InputTheory inputTheory;
@@ -101,10 +103,6 @@ public class InferenceForFactorGraphAndEvidence {
 
 	public Expression getEvidenceProbability() {
 		return evidenceProbability;
-	}
-
-	public Map<String, String> getMapFromTypeNameToSizeString() {
-		return mapFromTypeNameToSizeString;
 	}
 
 	public Map<String, String> getMapFromRandomVariableNameToTypeName() {
@@ -143,7 +141,7 @@ public class InferenceForFactorGraphAndEvidence {
 		
 		allRandomVariables = Util.mapIntoList(this.mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
 		                       
-		this.mapFromTypeNameToSizeString = new LinkedHashMap<>(factorsAndTypes.getMapFromTypeNameToSizeString());
+		this.mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(factorsAndTypes.getMapFromCategoricalTypeNameToSizeString());
 
 		Set<Expression> uniquelyNamedConstants = mapIntoSet(factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
 		isUniquelyNamedConstantPredicate = e -> uniquelyNamedConstants.contains(e) || Expressions.isNumber(e) || Expressions.isBooleanSymbol(e);
@@ -169,11 +167,8 @@ public class InferenceForFactorGraphAndEvidence {
 						new com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory(false, true),
 				new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
 		
-//		for (Type type : sgdpll2ConstraintTheory.getNativeTypes()) { // add needed types that may not be the type of any variable
-//			String typeName = type.getName();
-//			String sizeString = type.cardinality().toString();
-//			this.mapFromTypeNameToSizeString.put(typeName, sizeString);
-//		}
+		this.additionalTypes = new LinkedList<Type>(sgdpll2ConstraintTheory.getNativeTypes()); // add needed types that may not be the type of any variable
+		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
 		
 		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(sgdpll2ConstraintTheory, true);
 		if (useFactorization) {
@@ -223,7 +218,7 @@ public class InferenceForFactorGraphAndEvidence {
 			factorGraphWithEvidence = Times.make(list(factorGraphWithEvidence, parse("if query <=> " + queryExpression + " then 1 else 0")));
 			indices = allRandomVariables; // 'query' is not in 'allRandomVariables' 
 			mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
-			mapFromTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
+			mapFromCategoricalTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
 		}
 		
 		// Solve the problem.
@@ -237,7 +232,7 @@ public class InferenceForFactorGraphAndEvidence {
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (evidenceProbability == null) {
-				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
 
 //				System.out.print("Normalization constant ");
 //				if (evidence != null) {
@@ -265,7 +260,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression sum(Collection<Expression> indices, Expression expression) {
-		return solver.solve(expression, indices, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+		return solver.solve(expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
 	}
 
 	/**
@@ -274,7 +269,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
-		return solver.solve(expression, list(), mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+		return solver.solve(expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
 	}
 
 	/**
@@ -283,7 +278,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		RewritingProcess process = DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromTypeNameToSizeString, isUniquelyNamedConstantPredicate);
+		RewritingProcess process = DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
 		Expression result = getInputTheory().simplify(expression, process);
 		return result;
 	}

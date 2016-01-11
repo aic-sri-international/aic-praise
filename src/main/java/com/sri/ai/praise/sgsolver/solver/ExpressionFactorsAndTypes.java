@@ -38,13 +38,16 @@
 package com.sri.ai.praise.sgsolver.solver;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Type;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
@@ -55,7 +58,8 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
 	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
 	private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
-	private Map<String, String> mapFromTypeNameToSizeString                   = new LinkedHashMap<>();
+	private Map<String, String> mapFromCategoricalTypeNameToSizeString                   = new LinkedHashMap<>();
+	private Collection<Type>    additionalTypes                               = new LinkedList<>();
 	private List<Expression>    factors                                       = new ArrayList<>(); 	
 	
 	public ExpressionFactorsAndTypes(String modelString) {
@@ -81,7 +85,7 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 		
 		parsedModel.getSortDeclarations().forEach(sort -> {
 			if (!sort.getSize().equals(HOGMSortDeclaration.UNKNOWN_SIZE)) {
-				mapFromTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
+				mapFromCategoricalTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
 			}
 		});
 	}
@@ -91,13 +95,15 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
-			Map<String, String> mapFromTypeNameToSizeString) {
+			Map<String, String> mapFromCategoricalTypeNameToSizeString,
+			Collection<Type> additionalTypes) {
 		
 		this.factors.addAll(factors);
 		this.mapFromRandomVariableNameToTypeName.putAll(mapFromRandomVariableNameToTypeName);
 		this.mapFromNonUniquelyNamedConstantNameToTypeName.putAll(mapFromNonUniquelyNamedConstantNameToTypeName);
 		this.mapFromUniquelyNamedConstantNameToTypeName.putAll(mapFromUniquelyNamedConstantNameToTypeName);
-		this.mapFromTypeNameToSizeString.putAll(mapFromTypeNameToSizeString);
+		this.mapFromCategoricalTypeNameToSizeString.putAll(mapFromCategoricalTypeNameToSizeString);
+		this.additionalTypes = additionalTypes;
 	}
 				
 	
@@ -124,9 +130,15 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 	}
 	
 	@Override
-	public Map<String, String> getMapFromTypeNameToSizeString() {
-		return mapFromTypeNameToSizeString;
+	public Map<String, String> getMapFromCategoricalTypeNameToSizeString() {
+		return mapFromCategoricalTypeNameToSizeString;
 	}	
+
+	@Override
+	public Collection<Type> getAdditionalTypes() {
+		return additionalTypes;
+	}	
+
 	// END-FactorsAndTypes
 	//
 	
@@ -138,7 +150,7 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 		sj.add("mapFromRandomVariableNameToTypeName          ="+mapFromRandomVariableNameToTypeName);
 		sj.add("mapFromNonUniquelyNamedConstantNameToTypeName="+mapFromNonUniquelyNamedConstantNameToTypeName);
 		sj.add("mapFromUniquelyNamedConstantNameToTypeName   ="+mapFromUniquelyNamedConstantNameToTypeName);
-		sj.add("mapFromTypeNameToSizeString                  ="+mapFromTypeNameToSizeString);
+		sj.add("mapFromCategoricalTypeNameToSizeString                  ="+mapFromCategoricalTypeNameToSizeString);
 		
 		return sj.toString();
 	}

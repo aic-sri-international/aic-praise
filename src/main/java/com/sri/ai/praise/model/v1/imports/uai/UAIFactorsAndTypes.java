@@ -38,13 +38,16 @@
 package com.sri.ai.praise.model.v1.imports.uai;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Type;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
@@ -54,7 +57,8 @@ public class UAIFactorsAndTypes implements FactorsAndTypes {
 	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
 	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Collections.emptyMap(); // Not used for Graphical Networks
 	private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
-	private Map<String, String> mapFromTypeNameToSizeString                   = new LinkedHashMap<>();
+	private Map<String, String> mapFromCategoricalTypeNameToSizeString                   = new LinkedHashMap<>();
+	private Collection<Type>    additionalTypes                               = new LinkedList<>();
 	private List<Expression>    factors                                       = new ArrayList<>(); 
 	
 	public UAIFactorsAndTypes(List<Expression> tables, GraphicalNetwork network) {
@@ -68,7 +72,7 @@ public class UAIFactorsAndTypes implements FactorsAndTypes {
 					mapFromUniquelyNamedConstantNameToTypeName.put(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, varCardinality), varTypeName);
 				}
 			}
-			mapFromTypeNameToSizeString.put(varTypeName, Integer.toString(varCardinality));
+			mapFromCategoricalTypeNameToSizeString.put(varTypeName, Integer.toString(varCardinality));
 		}
 	}
 	
@@ -95,8 +99,13 @@ public class UAIFactorsAndTypes implements FactorsAndTypes {
 	}
 	
 	@Override
-	public Map<String, String> getMapFromTypeNameToSizeString() {
-		return mapFromTypeNameToSizeString;
+	public Map<String, String> getMapFromCategoricalTypeNameToSizeString() {
+		return mapFromCategoricalTypeNameToSizeString;
+	}	
+
+	@Override
+	public Collection<Type> getAdditionalTypes() {
+		return additionalTypes;
 	}	
 	// END-FactorsAndTypes
 	//

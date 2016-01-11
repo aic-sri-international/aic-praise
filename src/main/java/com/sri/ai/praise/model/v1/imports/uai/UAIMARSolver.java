@@ -309,7 +309,7 @@ public class UAIMARSolver {
 				evidenceExpr = And.make(conjuncts);
 			}
 			
-			//System.out.println("mapFromTypeNameToSizeString="+mapFromTypeNameToSizeString);
+			//System.out.println("mapFromCategoricalTypeNameToSizeString="+mapFromCategoricalTypeNameToSizeString);
 			//System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
 			//System.out.println("Markov Network=\n"+markovNetwork);
 			
