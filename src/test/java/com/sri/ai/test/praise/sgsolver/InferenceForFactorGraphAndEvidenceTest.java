@@ -566,27 +566,134 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
-				"Boolean", "2");
+				"Boolean", "2",
+				"Country", "200");
 	
 		additionalTypes = list(new IntegerInterval(0, 99));
 		
 		// The definitions of variables
 		mapFromRandomVariableNameToTypeName = Util.map(
 				"age",   "Integer(0,99)",
+				"country", "Country",
+				"minor", "Boolean",
+				"workingAge", "Boolean",
 				"senior", "Boolean"
 				);
 		
 		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
 
-		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map("japan", "Country", "brazil", "Country");
 		
 		isBayesianNetwork = false;
 		factors = Times.getMultiplicands(parse(""
-				+ "if age >= 65 then if senior then 1 else 0 else if senior then 0 else 1"));
+				+ "(if age >= 65 then if senior then 1 else 0 else if senior then 0 else 1)"
+				+ "*(if age < 18 then if minor then 1 else 0 else if minor then 0 else 1)"
+				+ "*(if age >= 21 and age < 65 then if workingAge then 1 else 0 else if workingAge then 0 else 1)"));
 		
 		queryExpression = parse("senior");
 		evidence = null;
 		expected = parse("if senior then 0.35 else 0.65");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("workingAge");
+		evidence = null;
+		expected = parse("if workingAge then 0.44 else 0.56");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("minor");
+		evidence = null;
+		expected = parse("if minor then 0.18 else 0.82");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("minor and senior");
+		evidence = null;
+		expected = parse("if minor and senior then 0 else 1");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+	
+	
+		
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(""
+				+ "(if age < 50 then 2/3 else 1/3)"
+				+ "*(if age >= 65 then if senior then 1 else 0 else if senior then 0 else 1)"
+				+ "*(if age < 18 then if minor then 1 else 0 else if minor then 0 else 1)"
+				+ "*(if age >= 21 and age < 65 then if workingAge then 1 else 0 else if workingAge then 0 else 1)"));
+		
+		queryExpression = parse("senior");
+		evidence = null;
+		expected = parse("if senior then 0.233333333 else 0.766666667");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("workingAge");
+		evidence = null;
+		expected = parse("if workingAge then 0.486666667 else 0.513333333");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("minor");
+		evidence = null;
+		expected = parse("if minor then 0.24 else 0.76");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("minor and senior");
+		evidence = null;
+		expected = parse("if minor and senior then 0 else 1");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+
+
+	
+	
+		
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(""
+				+ "(if country = brazil then (if age < 50 then 2/3 else 1/3) else 0.01)" // P(age | country)
+				+ "*(if age >= 65 then if senior then 1 else 0 else if senior then 0 else 1)"
+				+ "*(if age < 18 then if minor then 1 else 0 else if minor then 0 else 1)"
+				+ "*(if age >= 21 and age < 65 then if workingAge then 1 else 0 else if workingAge then 0 else 1)"));
+		
+		queryExpression = parse("senior");
+		evidence = parse("country = brazil");
+		expected = parse("if senior then 0.233333333 else 0.766666667");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("workingAge");
+		evidence = parse("country = brazil");
+		expected = parse("if workingAge then 0.486666667 else 0.513333333");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("minor");
+		evidence = parse("country = brazil");
+		expected = parse("if minor then 0.24 else 0.76");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("minor and senior");
+		evidence = parse("country = brazil");
+		expected = parse("if minor and senior then 0 else 1");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		
+		
+		
+		
+		queryExpression = parse("senior");
+		evidence = parse("country != brazil");
+		expected = parse("if senior then 0.35 else 0.65");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("workingAge");
+		evidence = parse("country != brazil");
+		expected = parse("if workingAge then 0.44 else 0.56");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("minor");
+		evidence = parse("country != brazil");
+		expected = parse("if minor then 0.18 else 0.82");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		queryExpression = parse("minor and senior");
+		evidence = parse("country != brazil");
+		expected = parse("if minor and senior then 0 else 1");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 
