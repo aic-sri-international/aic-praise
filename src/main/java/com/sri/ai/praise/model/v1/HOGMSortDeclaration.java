@@ -362,6 +362,20 @@ public class HOGMSortDeclaration {
 		}
 		return result;
 	}
+	
+	public static String sortReferenceAsTypeString(Expression reference) {
+		if (!isSortReference(reference)) {
+			throw new IllegalArgumentException("Is not a legal sort reference: "+reference);
+		}
+		String result;
+		if (isNumberRangeReference(reference)) {
+			result = "Integer("+reference.get(0)+","+reference.get(1)+")";
+		}
+		else {
+			result = reference.toString();
+		}
+		return result;
+	}
 
 	/**
 	 * Make a sort declaration object. Will set the size of the sort to the

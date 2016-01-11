@@ -57,7 +57,7 @@ public class UAIFactorsAndTypes implements FactorsAndTypes {
 	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
 	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Collections.emptyMap(); // Not used for Graphical Networks
 	private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
-	private Map<String, String> mapFromCategoricalTypeNameToSizeString                   = new LinkedHashMap<>();
+	private Map<String, String> mapFromCategoricalTypeNameToSizeString        = new LinkedHashMap<>();
 	private Collection<Type>    additionalTypes                               = new LinkedList<>();
 	private List<Expression>    factors                                       = new ArrayList<>(); 
 	

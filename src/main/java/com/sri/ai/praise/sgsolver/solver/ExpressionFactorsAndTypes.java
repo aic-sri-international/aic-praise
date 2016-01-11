@@ -40,14 +40,17 @@ package com.sri.ai.praise.sgsolver.solver;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
+import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
@@ -58,7 +61,7 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
 	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
 	private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
-	private Map<String, String> mapFromCategoricalTypeNameToSizeString                   = new LinkedHashMap<>();
+	private Map<String, String> mapFromCategoricalTypeNameToSizeString        = new LinkedHashMap<>();
 	private Collection<Type>    additionalTypes                               = new LinkedList<>();
 	private List<Expression>    factors                                       = new ArrayList<>(); 	
 	
@@ -88,6 +91,15 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 				mapFromCategoricalTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
 			}
 		});
+		
+		Set<String> integerIntervalTypes = new LinkedHashSet<>();
+		parsedModel.getRandomVariableDeclarations().forEach(random -> {
+			integerIntervalTypes.addAll(random.getReferencedIntegerIntervalTypes());
+		});
+		parsedModel.getConstatDeclarations().forEach(constant -> {
+			integerIntervalTypes.addAll(constant.getReferencedIntegerIntervalTypes());
+		});
+		integerIntervalTypes.forEach(integerIntervalName -> additionalTypes.add(new IntegerInterval(integerIntervalName)));
 	}
 	
 	public ExpressionFactorsAndTypes(
@@ -150,7 +162,8 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 		sj.add("mapFromRandomVariableNameToTypeName          ="+mapFromRandomVariableNameToTypeName);
 		sj.add("mapFromNonUniquelyNamedConstantNameToTypeName="+mapFromNonUniquelyNamedConstantNameToTypeName);
 		sj.add("mapFromUniquelyNamedConstantNameToTypeName   ="+mapFromUniquelyNamedConstantNameToTypeName);
-		sj.add("mapFromCategoricalTypeNameToSizeString                  ="+mapFromCategoricalTypeNameToSizeString);
+		sj.add("mapFromCategoricalTypeNameToSizeString       ="+mapFromCategoricalTypeNameToSizeString);
+		sj.add("additionalTypes                              ="+additionalTypes);
 		
 		return sj.toString();
 	}

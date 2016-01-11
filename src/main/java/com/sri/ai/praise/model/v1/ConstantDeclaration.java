@@ -39,7 +39,9 @@ package com.sri.ai.praise.model.v1;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
@@ -208,15 +210,34 @@ public class ConstantDeclaration {
 	public String toTypeRepresentation() {
 		String result = null;
 		if (getArityValue() == 0) {
-			result = getRangeSort().toString();
+			result = HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort());
 		}
 		else if (getArityValue() == 1) {
-			result = getParameterSorts().get(0).toString() + " -> " + getRangeSort().toString();
+			result = HOGMSortDeclaration.sortReferenceAsTypeString(getParameterSorts().get(0)) + " -> " + HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort());
 		} else {
 			StringJoiner params = new StringJoiner(", ");
-			getParameterSorts().forEach(paramSort -> params.add(paramSort.toString()));
+			getParameterSorts().forEach(paramSort -> params.add(HOGMSortDeclaration.sortReferenceAsTypeString(paramSort)));
 			
-			result = "'->'(x("+params.toString()+"), "+getRangeSort().toString()+")";
+			result = "'->'(x("+params.toString()+"), "+HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort())+")";
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @return a set of IntegerInterval type strings for referenced sorts that are integer intervals.
+	 */
+	public Set<String> getReferencedIntegerIntervalTypes() {
+		Set<String> result = new LinkedHashSet<>();
+		
+		getParameterSorts().forEach(paramSort -> {
+			if (HOGMSortDeclaration.isNumberRangeReference(paramSort)) {
+				result.add(HOGMSortDeclaration.sortReferenceAsTypeString(paramSort));
+			}
+		});
+		if (HOGMSortDeclaration.isNumberRangeReference(getRangeSort())) {
+			result.add(HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort()));
 		}
 		
 		return result;

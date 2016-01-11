@@ -165,7 +165,7 @@ public class InferenceForFactorGraphAndEvidence {
 				new CompoundConstraintTheory(
 						new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(false, true),
 						new com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory(false, true),
-				new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
+				        new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
 		
 		this.additionalTypes = new LinkedList<Type>(sgdpll2ConstraintTheory.getNativeTypes()); // add needed types that may not be the type of any variable
 		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
