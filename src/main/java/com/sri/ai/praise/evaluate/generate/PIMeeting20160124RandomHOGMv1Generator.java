@@ -68,10 +68,6 @@ public class PIMeeting20160124RandomHOGMv1Generator {
 		if (args.length != 1) {
 			throw new IllegalArgumentException("the Root model output directory must be specified");
 		}
-		RandomHOGMv1Generator.generate(args[0], getTheoryTypeForGeneratedProblems(), _seed, _domainSizes, _params);
-	}
-	
-	protected RandomHOGMv1Generator.TheoryType getTheoryTypeForGeneratedProblems() {
-		return RandomHOGMv1Generator.TheoryType.Inequality;
+		// TODO - RandomHOGMv1Generator.generate(args[0], getTheoryTypeForGeneratedProblems(), _seed, _domainSizes, _params);
 	}
 }
