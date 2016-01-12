@@ -83,8 +83,6 @@ public class HOGModelGrounding {
 		void groundingComplete();
 	}
 	
-	private static String PARSED_NUMBER_RANGE_FUNCTOR = "..";
-	
 	public static void main(String[] args) {
 		StringJoiner sj = new StringJoiner("\n");
 		sj.add("sort People : 10, Putin;");
@@ -242,7 +240,7 @@ public class HOGModelGrounding {
 			if (Expressions.hasFunctor(type, FunctorConstants.FUNCTION_TYPE)) {
 				throw new UnsupportedOperationException("Relational random variables, "+randomVariableName+", are currently not supported.");
 			}
-			else if (Expressions.hasFunctor(type, PARSED_NUMBER_RANGE_FUNCTOR)) {
+			else if (Expressions.hasFunctor(type, HOGMSortDeclaration.IN_BUILT_INTEGER.getName()) && type.numberOfArguments() == 2) {
 				size = (type.get(1).intValueExact() - type.get(0).intValueExact()) + 1;
 			}
 			else {
@@ -272,11 +270,10 @@ public class HOGModelGrounding {
 			if (!result.containsKey(type)) {
 				List<Expression> values = new ArrayList<>();
 				// Is a numeric range
-				if (Expressions.hasFunctor(type, PARSED_NUMBER_RANGE_FUNCTOR)) {
+				if (Expressions.hasFunctor(type, HOGMSortDeclaration.IN_BUILT_INTEGER.getName()) && type.numberOfArguments() == 2) {
 					int startInclusive = type.get(0).intValueExact();
 					int endInclusive   = type.get(1).intValueExact();
-					IntStream.rangeClosed(startInclusive, endInclusive).sequential().forEach(value -> values.add(Expressions.makeSymbol(value)));
-					
+					IntStream.rangeClosed(startInclusive, endInclusive).sequential().forEach(value -> values.add(Expressions.makeSymbol(value)));	
 				}
 				else {
 					if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(type)) {
