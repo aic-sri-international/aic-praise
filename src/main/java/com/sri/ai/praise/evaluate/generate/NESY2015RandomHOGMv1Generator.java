@@ -94,10 +94,6 @@ public class NESY2015RandomHOGMv1Generator {
 		if (args.length != 1) {
 			throw new IllegalArgumentException("the Root model output directory must be specified");
 		}
-		RandomHOGMv1Generator.generate(args[0], getTheoryTypeForGeneratedProblems(), _seed, _domainSizes, _params);
-	}
-	
-	protected RandomHOGMv1Generator.TheoryType getTheoryTypeForGeneratedProblems() {
-		return RandomHOGMv1Generator.TheoryType.HistoricalEqualityFormula;
+		HistoricalRandomHOGMv1EqualityGenerator.generate(args[0], _seed, _domainSizes, _params);
 	}
 }
