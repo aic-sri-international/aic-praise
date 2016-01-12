@@ -85,7 +85,7 @@ import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 public class RandomHOGMv1Generator {
 	static final int _potentialIdx             = 0;
 	static final int _variableIdx              = 1;
-	static final int _uniquelNamedConstantIdx  = 2;
+	static final int _uniquelyNamedConstantIdx = 2;
 	static final int _depthIdx                 = 3;
 	static final int _breadthIdx               = 4;
 	
@@ -174,7 +174,7 @@ public class RandomHOGMv1Generator {
 			for (int i = 0; i < domainSizes.length; i++) {
 				int cardinality = domainSizes[i];
 				
-				int numberOfUniquelyNamedConstants = params[p][_uniquelNamedConstantIdx];
+				int numberOfUniquelyNamedConstants = params[p][_uniquelyNamedConstantIdx];
 				// #constants must be <= domain size
 				if (numberOfUniquelyNamedConstants > cardinality) {
 					numberOfUniquelyNamedConstants = cardinality;
