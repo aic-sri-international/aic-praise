@@ -45,22 +45,37 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 import com.google.common.base.Charsets;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.expresso.type.Categorical;
+import com.sri.ai.expresso.type.IntegerInterval;
+import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.sgdpll2.api.ConstraintTheory;
 import com.sri.ai.grinder.sgdpll2.tester.RandomConditionalExpressionGenerator;
+import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
+import com.sri.ai.util.Util;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+
+import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 
 /**
  * Utility class for generating Random HOGMv1 models.
@@ -248,7 +263,7 @@ public class RandomHOGMv1Generator {
 
 	public static void generate(String outputDirectory, GenerateArgs[] generateArgs) {
 		File rootOutputDirectory = validateDirectory(outputDirectory);
-		File hogmv1ProblemDirectory      = new File(rootOutputDirectory, ModelLanguage.HOGMv1.getCode());
+		File hogmv1ProblemDirectory = new File(rootOutputDirectory, ModelLanguage.HOGMv1.getCode());
 		if (!hogmv1ProblemDirectory.exists()) {
 			hogmv1ProblemDirectory.mkdir();
 		}
@@ -304,47 +319,54 @@ public class RandomHOGMv1Generator {
 			if (genArgs.equalityTheories.length > 0) {
 				genArgs.out.println(); // Place a blank line after any categorical sort declarations
 			}
-			
-//			if (genArgs.theoryType != TheoryType.Inequality) {
-//				// Output the categorical sort information
-//				genArgs.out.append(HOGMSortDeclaration.FUNCTOR_SORT_DECLARATION);
-//				genArgs.out.append(" ");
-//				genArgs.out.append(GENERATOR_SORT_NAME);
-//				genArgs.out.append(" : ");
-//				genArgs.out.append(""+genArgs.domainSize);
-//				for (int i = 0; i < genArgs.numberUniquelyNamedConstants; i++) {
-//					genArgs.out.append(", ");
-//					genArgs.out.append(genArgs.potentialExpressionGenerator.getUniquelyNamedConstantName(i));
-//				}
-//				genArgs.out.println(";");
-//				genArgs.out.println();
-//			}
-//			
-//			// output the random variable information
-//			for (int i = 0; i < genArgs.numberVariables; i++) {
-//				genArgs.out.append("random ");
-//				genArgs.out.append(genArgs.potentialExpressionGenerator.getVariableNameFor(i));
-//				genArgs.out.append(" : ");
-//				if (genArgs.theoryType != TheoryType.Inequality) {
-//					genArgs.out.append(GENERATOR_SORT_NAME);
-//				}
-//				else {
-//					genArgs.out.append("0.."+(genArgs.domainSize-1));
-//				}
-//				genArgs.out.println(";");
-//			}
-//			genArgs.out.println();
-//				
-//			for (int i = 0; i < genArgs.numberPotentials; i++) {		
-//				Expression conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
-//				// Ensure we have variables in the conditional
-//				while (Expressions.freeVariables(conditional, new DefaultRewritingProcess(null)).size() == 0) {							
-//					conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
-//				}
-//				
-//				genArgs.out.append(conditional.toString());
-//				genArgs.out.println(";");
-//			}
+					
+			// Output the random variable information for propositional theories
+			for (int i = 0; i < genArgs.propositionalTheories.length; i++) {
+				TheoryTypePropositionalArgs propositionalArgs = genArgs.propositionalTheories[i];
+				for (int v = 0; v < propositionalArgs.getNumberVariables(); v++) {
+					genArgs.out.append("random ");
+					genArgs.out.append(genArgs.potentialExpressionGenerator.getPropositionalVariableNameFor(i, v));
+					genArgs.out.append(" : ");
+					genArgs.out.append(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().toString());
+					genArgs.out.println(";");
+				}
+			}
+			// Output the random variable information for equality theories
+			for (int i = 0; i < genArgs.equalityTheories.length; i++) {
+				TheoryTypeEqualityArgs equalityArgs = genArgs.equalityTheories[i];
+				for (int v = 0; v < equalityArgs.getNumberVariables(); v++) {
+					genArgs.out.append("random ");
+					genArgs.out.append(genArgs.potentialExpressionGenerator.getEqualityVariableNameFor(i, v));
+					genArgs.out.append(" : ");
+					genArgs.out.append(GENERATOR_CATEGORICAL_SORT_NAME_PREFIX+i);
+					genArgs.out.println(";");
+				}
+			}
+			// Output the random variable information for the inequality theories
+			for (int i = 0; i < genArgs.inequalityTheories.length; i++) {
+				TheoryTypeInequalityArgs inequalityArgs = genArgs.inequalityTheories[i];
+				for (int v = 0; v < inequalityArgs.getNumberVariables(); v++) {
+					genArgs.out.append("random ");
+					genArgs.out.append(genArgs.potentialExpressionGenerator.getInequalityVariableNameFor(i, v));
+					genArgs.out.append(" : ");
+					genArgs.out.append(""+inequalityArgs.getStartIntervalInclusive());
+					genArgs.out.append("..");
+					genArgs.out.append(""+inequalityArgs.getEndIntervalInclusive());
+					genArgs.out.println(";");
+				}
+			}
+			genArgs.out.println();
+				
+			for (int i = 0; i < genArgs.numberPotentials; i++) {		
+				Expression conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
+				// Ensure we have variables in the conditional
+				while (Expressions.freeVariables(conditional, new DefaultRewritingProcess(null)).size() == 0) {							
+					conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
+				}
+				
+				genArgs.out.append(conditional.toString());
+				genArgs.out.println(";");
+			}
 		} catch (Exception ex) {
 			System.err.println("Error generating random HOGM");
 			ex.printStackTrace();
@@ -423,31 +445,6 @@ public class RandomHOGMv1Generator {
 		return result;
 	}
 	
-	private static ConstraintTheory newConstraintTheory() {
-		ConstraintTheory result = null;
-// TODO		
-//		switch(theoryType) {
-//		case Propositional:
-//			result = new PropositionalConstraintTheory();
-//			break;
-//		case Equality:
-//			result = new CompoundConstraintTheory(
-//					new EqualityConstraintTheory(true, true), // first flag is 'true' because all equalities are atoms in this theory; there is no need to check arguments type
-//					new PropositionalConstraintTheory());
-//			break;
-//		case Inequality:
-//			result = new CompoundConstraintTheory(
-//					new InequalityConstraintTheory(false, true), // 'false' because not all equalities are atoms in this theory; need to check arguments type
-//					new EqualityConstraintTheory(false, true), // 'false' because not all equalities are atoms in this theory; need to check arguments type
-//					new PropositionalConstraintTheory());
-//			break;
-//		default:
-//			throw new UnsupportedOperationException("Currently do not support constraint theory for = "+theoryType.getCode());
-//		}
-		
-		return result;
-	}
-	
 	private static File validateDirectory(String directoryName) {
 		File result = new File(directoryName);
 		if (!result.exists()) {
@@ -469,38 +466,61 @@ class RandomConditionalPotentialExpressionGenerator {
 			RandomHOGMv1Generator.TheoryTypePropositionalArgs[] propositionTheoryArgs, 
 			RandomHOGMv1Generator.TheoryTypeEqualityArgs[] equalityTheoryArgs,
 			RandomHOGMv1Generator.TheoryTypeInequalityArgs[] inequalityTheoryArgs,
-			int depth) {		
-
-		Type sort = null;
-// TODO		
-//		if (theoryType == RandomHOGMv1Generator.TheoryType.Inequality) {
-//			sortName = "Integer(0," + (domainSize - 1) + ")"; // IntegerInterval bounds are included bounds, so they need to be 0..(domainSize - 1)
-//			sort = new IntegerInterval(sortName);
-//		}
-//		else {
-//			sortName = RandomHOGMv1Generator.GENERATOR_SORT_NAME;
-//			ArrayList<Expression> knownUniquelyNamedConstants = new ArrayList<>();
-//			IntStream.range(0, numberOfUniquelyNamedConstants)
-//				.mapToObj(idx -> Expressions.makeSymbol(getUniquelyNamedConstantName(idx)))
-//				.forEach(knownUniquelyNamedConstants::add);
-//			sort = new Categorical(sortName, domainSize, knownUniquelyNamedConstants);
-//		}
+			int depth) {
 		
-//		Map<String, Type> varToTypeMap = new LinkedHashMap<>();		
-//		IntStream.range(0, numberOfVariables)
-//			.mapToObj(this::getVariableNameFor)
-//			.forEach(varName -> varToTypeMap.put(varName, sort));
-//		constraintTheory.setVariableNamesAndTypesForTesting(varToTypeMap);
-//		
-//		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess(null));
-//		
-//		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
-//				() -> makeSymbol(random.nextDouble()),
-//				process);
+		ConstraintTheory constraintTheory = newConstraintTheory(propositionTheoryArgs, equalityTheoryArgs, inequalityTheoryArgs);
+		Map<String, Type> varToTypeMap = new LinkedHashMap<>();
+	
+		if (propositionTheoryArgs.length > 0) {
+			Categorical booleanCategorical = new Categorical(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().toString(), 2, Util.arrayList(Expressions.FALSE, Expressions.TRUE));
+			for (int i = 0; i < propositionTheoryArgs.length; i++) {
+				RandomHOGMv1Generator.TheoryTypePropositionalArgs propositionalArgs = propositionTheoryArgs[i];
+				for (int v = 0; v < propositionalArgs.getNumberVariables(); v++) {
+					varToTypeMap.put(getPropositionalVariableNameFor(i, v), booleanCategorical);
+				}
+			}
+		}
+		// Output the random variable information for equality theories
+		for (int i = 0; i < equalityTheoryArgs.length; i++) {
+			RandomHOGMv1Generator.TheoryTypeEqualityArgs equalityArgs = equalityTheoryArgs[i];
+			ArrayList<Expression> uniquelyNamedConstants = new ArrayList<>();
+			final int categoryIndex = i;
+			IntStream.range(0, equalityArgs.getNumberOfUniquelyNamedConstantsInCategory())
+				.mapToObj(variableIndex -> makeSymbol(getCategoryUniquelyNamedConstantName(categoryIndex, variableIndex)))
+				.forEach(uniquelyNamedConstants::add);
+			Categorical equalityCategorical = new Categorical(RandomHOGMv1Generator.GENERATOR_CATEGORICAL_SORT_NAME_PREFIX+i, equalityArgs.getSizeOfCategory(), uniquelyNamedConstants);
+			for (int v = 0; v < equalityArgs.getNumberVariables(); v++) {
+				varToTypeMap.put(getEqualityVariableNameFor(i, v), equalityCategorical);
+			}
+		}
+		// Output the random variable information for the inequality theories
+		for (int i = 0; i < inequalityTheoryArgs.length; i++) {
+			RandomHOGMv1Generator.TheoryTypeInequalityArgs inequalityArgs = inequalityTheoryArgs[i];
+			IntegerInterval integerInterval = new IntegerInterval(inequalityArgs.getStartIntervalInclusive(), inequalityArgs.getEndIntervalInclusive());
+			for (int v = 0; v < inequalityArgs.getNumberVariables(); v++) {
+				varToTypeMap.put(getInequalityVariableNameFor(i, v), integerInterval);
+			}
+		}
+		
+		constraintTheory.setVariableNamesAndTypesForTesting(varToTypeMap);
+		
+		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess(null));
+		
+		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
+				() -> makeSymbol(random.nextDouble()),
+				process);
 	}
 	
-	public String getVariableNameFor(int theoryIndex, int varIndex) {
-		return "T" + theoryIndex + "X" + varIndex;
+	public String getPropositionalVariableNameFor(int theoryIndex, int varIndex) {
+		return "P" + theoryIndex + "X" + varIndex;
+	}
+	
+	public String getEqualityVariableNameFor(int theoryIndex, int varIndex) {
+		return "E" + theoryIndex + "X" + varIndex;
+	}
+	
+	public String getInequalityVariableNameFor(int theoryIndex, int varIndex) {
+		return "I" + theoryIndex + "X" + varIndex;
 	}
 	
 	public String getCategoryUniquelyNamedConstantName(int categoryIndex, int uniqueConstantIndex) {
@@ -509,5 +529,49 @@ class RandomConditionalPotentialExpressionGenerator {
 	
 	public Expression nextPotentialExpression() {
 		return randomConditionalGenerator.apply();
+	}
+	
+	private ConstraintTheory newConstraintTheory(
+			RandomHOGMv1Generator.TheoryTypePropositionalArgs[] propositionTheoryArgs, 
+			RandomHOGMv1Generator.TheoryTypeEqualityArgs[] equalityTheoryArgs,
+			RandomHOGMv1Generator.TheoryTypeInequalityArgs[] inequalityTheoryArgs) {
+		List<ConstraintTheory> theories = new ArrayList<>();
+		if (propositionTheoryArgs.length > 0) {
+			theories.add(new PropositionalConstraintTheory());
+		}
+		if (equalityTheoryArgs.length > 0) {
+			EqualityConstraintTheory equalityConstraintTheory;
+			if (inequalityTheoryArgs.length == 0) {
+				// first flag is 'true' because all equalities are atoms in the final theory; there is no need to check arguments type
+				equalityConstraintTheory = new EqualityConstraintTheory(true, true);
+			}
+			else {
+				// 'false' because not all equalities are atoms in this final theory; need to check arguments type
+				equalityConstraintTheory = new EqualityConstraintTheory(false, true);
+			}
+			theories.add(equalityConstraintTheory);
+		}
+		if (inequalityTheoryArgs.length > 0) {
+			InequalityConstraintTheory inequalityConstraintTheory;
+			if (equalityTheoryArgs.length == 0) {
+				// first flag is 'true' because all equalities are atoms in the final theory; there is no need to check arguments type
+				inequalityConstraintTheory = new InequalityConstraintTheory(true, true);
+			}
+			else {
+				// 'false' because not all equalities are atoms in this final theory; need to check arguments type
+				inequalityConstraintTheory = new InequalityConstraintTheory(false, true);
+			}
+			theories.add(inequalityConstraintTheory);
+		}
+		
+		ConstraintTheory result;
+		if (theories.size() > 1) {
+			result = new CompoundConstraintTheory(theories.toArray(new ConstraintTheory[theories.size()]));
+		}
+		else {
+			result = theories.get(0);
+		}
+		
+		return result;
 	}
 }
