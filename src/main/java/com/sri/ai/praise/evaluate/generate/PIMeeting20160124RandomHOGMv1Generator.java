@@ -45,15 +45,9 @@ package com.sri.ai.praise.evaluate.generate;
  *
  */
 public class PIMeeting20160124RandomHOGMv1Generator {
-	static long _seed = 3;
 	//
-	static int [] _domainSizes = new int[] {2, 4, 8, 16};
-	//
-	static int [][] _params = new int[][] {	
-		// #potentials, #variables, #constants, _depth, _breadth
-		//                          (uniquely 
-		//                           named)  
-		{         5,          8,          0,      2,        2},
+	static RandomHOGMv1Generator.GenerateArgs[] _params = new RandomHOGMv1Generator.GenerateArgs[] {	
+		new RandomHOGMv1Generator.GenerateArgs(3L, 1, 2, new RandomHOGMv1Generator.TheoryTypeInequalityArgs(1, 1, 10))
 	};
 	
 	public static void main(String[] args) {
@@ -68,6 +62,6 @@ public class PIMeeting20160124RandomHOGMv1Generator {
 		if (args.length != 1) {
 			throw new IllegalArgumentException("the Root model output directory must be specified");
 		}
-		// TODO - RandomHOGMv1Generator.generate(args[0], getTheoryTypeForGeneratedProblems(), _seed, _domainSizes, _params);
+		RandomHOGMv1Generator.generate(args[0], _params);
 	}
 }

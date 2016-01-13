@@ -43,6 +43,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -74,6 +76,8 @@ public class RandomHOGMv1Generator {
 			return numberVariables;
 		}
 		
+		public abstract List<String> toCommandLineArgs();
+		
 		//
 		// PROTECTED
 		protected void setNumberVariables(int numberVariables) {
@@ -95,6 +99,15 @@ public class RandomHOGMv1Generator {
 				throw new IllegalArgumentException("Illegal propositional theory arguments passed: "+args);
 			}
 		}
+		
+		public TheoryTypePropositionalArgs(int numberVariables) {
+			setNumberVariables(numberVariables);
+		}
+		
+		@Override
+		public List<String> toCommandLineArgs() {
+			return Arrays.asList("-p", "v"+getNumberVariables());
+		}
 	}
 	
 	public static class TheoryTypeEqualityArgs extends TheoryTypeArgs {
@@ -108,13 +121,19 @@ public class RandomHOGMv1Generator {
 				setNumberVariables(Integer.valueOf(m.group(1)));
 				this.sizeOfCategory                           = Integer.valueOf(m.group(2));
 				this.numberOfUniquelyNamedConstantsInCategory = Integer.valueOf(m.group(3));
-				if (this.numberOfUniquelyNamedConstantsInCategory > this.sizeOfCategory) {
-					throw new IllegalArgumentException("Cannot have number of uniquely named constants be greater than the size of the category.");
-				}
+				checkForIllegalArguments();
 			}
 			else {
 				throw new IllegalArgumentException("Illegal equality theory arguments passed: "+args);
 			}
+		}
+		
+		public TheoryTypeEqualityArgs(int numberVariables, int sizeOfCategory, int numberOfUniquelyNamedConstantsInCategory) {
+			setNumberVariables(numberVariables);
+			this.sizeOfCategory                           = sizeOfCategory;
+			this.numberOfUniquelyNamedConstantsInCategory = numberOfUniquelyNamedConstantsInCategory;
+			
+			checkForIllegalArguments();
 		}
 		
 		public int getSizeOfCategory() {
@@ -123,6 +142,17 @@ public class RandomHOGMv1Generator {
 		
 		public int getNumberOfUniquelyNamedConstantsInCategory() {
 			return numberOfUniquelyNamedConstantsInCategory;
+		}
+		
+		@Override
+		public List<String> toCommandLineArgs() {
+			return Arrays.asList("-e", "v"+getNumberVariables()+"c"+getSizeOfCategory()+"u"+getNumberOfUniquelyNamedConstantsInCategory());
+		}
+		
+		private void checkForIllegalArguments() {
+			if (this.numberOfUniquelyNamedConstantsInCategory > this.sizeOfCategory) {
+				throw new IllegalArgumentException("Cannot have number of uniquely named constants be greater than the size of the category.");
+			}
 		}
 	}
 	
@@ -137,14 +167,18 @@ public class RandomHOGMv1Generator {
 				setNumberVariables(Integer.valueOf(m.group(1)));
 				this.startIntervalInclusive  = Integer.valueOf(m.group(2));
 				this.endIntervalInclusive    = Integer.valueOf(m.group(3));
-				
-				if (this.startIntervalInclusive > this.endIntervalInclusive) {
-					throw new IllegalArgumentException("Cannot have start of interval be greater than the end of the interval.");
-				}
+				checkForIllegalArguments();
 			}
 			else {
 				throw new IllegalArgumentException("Illegal inequality theory arguments passed: "+args);
 			}
+		}
+		
+		public TheoryTypeInequalityArgs(int numberVariables, int startIntervalInclusive, int endIntervalInclusive) {
+			setNumberVariables(numberVariables);
+			this.startIntervalInclusive = startIntervalInclusive;
+			this.endIntervalInclusive   = endIntervalInclusive;
+			checkForIllegalArguments();
 		}
 		
 		public int getStartIntervalInclusive() {
@@ -153,6 +187,17 @@ public class RandomHOGMv1Generator {
 		
 		public int getEndIntervalInclusive() {
 			return endIntervalInclusive;
+		}
+		
+		@Override
+		public List<String> toCommandLineArgs() {
+			return Arrays.asList("-i", "v"+getNumberVariables()+"s"+getStartIntervalInclusive()+"e"+getEndIntervalInclusive());
+		}
+		
+		private void checkForIllegalArguments() {
+			if (this.startIntervalInclusive > this.endIntervalInclusive) {
+				throw new IllegalArgumentException("Cannot have start of interval be greater than the end of the interval.");
+			}
 		}
 	}
 	
@@ -165,13 +210,14 @@ public class RandomHOGMv1Generator {
 		Random       random     = null;       // -r 	
 		PrintStream  out        = System.out; // -o
 		
+		// Required
+		int numberPotentials; // -n
+		int depth;            // -d	
+		
 		// One instance of the following 3 theory types arguments required at minimum
 		TheoryTypePropositionalArgs[] propositionalTheories; // -p propositional - number variables
 		TheoryTypeEqualityArgs[]      equalityTheories;      // -e equality      - number variables, size of category, number uniquely names constants
 		TheoryTypeInequalityArgs[]    inequalityTheories;    // -i inequality    - number variables, start interval (inclusive), end interval (inclusive)
-		// Required
-		int numberPotentials; // -n
-		int depth;            // -d	
 		
 		// Derived
 		RandomConditionalPotentialExpressionGenerator potentialExpressionGenerator;
@@ -185,46 +231,50 @@ public class RandomHOGMv1Generator {
 			}
 		}
 	}
+	
+	public static class GenerateArgs {
+		public long seed;
+		public int numberPotentials;
+		public int depth;
+		public TheoryTypeArgs[] theoryTypeArgs;
+		
+		GenerateArgs(long seed, int numberPotentials, int depth, TheoryTypeArgs... theoryTypeArgs) {
+			this.seed             = seed;
+			this.numberPotentials = numberPotentials;
+			this.depth            = depth;
+			this.theoryTypeArgs   = theoryTypeArgs;
+		}
+	}
 
-// TODO	
-	public static void generate(String outputDirectory, long seed, TheoryTypeArgs[] theoryTypes) {
+	public static void generate(String outputDirectory, GenerateArgs[] generateArgs) {
 		File rootOutputDirectory = validateDirectory(outputDirectory);
 		File hogmv1ProblemDirectory      = new File(rootOutputDirectory, ModelLanguage.HOGMv1.getCode());
 		if (!hogmv1ProblemDirectory.exists()) {
 			hogmv1ProblemDirectory.mkdir();
 		}
+		
+		for (int a = 0; a < generateArgs.length; a++) {
+			GenerateArgs generateArgSet = generateArgs[a];
+				
+			List<String> args = new ArrayList<>();
 
-// TODO		
-//		for (int p = 0; p < params.length; p++) {
-//			int numberOfPotentials = params[p][_potentialIdx];
-//			int numberOfVariables  = params[p][_variableIdx];			
-//			int depth              = params[p][_depthIdx];
-//			int breadth            = params[p][_breadthIdx];
-//			
-//			for (int i = 0; i < domainSizes.length; i++) {
-//				int cardinality = domainSizes[i];
-//				
-//				int numberOfUniquelyNamedConstants = params[p][_uniquelyNamedConstantIdx];
-//				// #constants must be <= domain size
-//				if (numberOfUniquelyNamedConstants > cardinality) {
-//					numberOfUniquelyNamedConstants = cardinality;
-//				}
-//				
-//				String outputFileSuffix = "_r"+seed+"_s"+cardinality+"_t_"+theoryType.getCode()+"_p"+numberOfPotentials+"_v"+numberOfVariables+"_u"+numberOfUniquelyNamedConstants+"_d"+depth+"_b"+breadth;
-//				
-//				RandomHOGMv1Generator.main(new String[] {
-//						"-r="+seed,
-//						"-s="+cardinality,
-//						"-o="+new File(hogmv1ProblemDirectory, "sg_random_model"+outputFileSuffix+ModelLanguage.HOGMv1.getDefaultFileExtension()).getAbsolutePath(),
-//						"-t="+theoryType.getCode(),
-//						"-p="+numberOfPotentials,
-//						"-v="+numberOfVariables,
-//						"-u="+numberOfUniquelyNamedConstants,
-//						"-d="+depth,
-//						"-b="+breadth
-//				});				
-//			}
-//		}
+			args.add("-r");
+			args.add(""+generateArgSet.seed);
+			args.add("-n");
+			args.add(""+generateArgSet.numberPotentials);
+			args.add("-d");
+			args.add(""+generateArgSet.depth);
+			for (TheoryTypeArgs theoryTypeArgs : generateArgSet.theoryTypeArgs) {
+				theoryTypeArgs.toCommandLineArgs().forEach(arg -> args.add(arg));
+			}
+			StringBuilder outputFileSuffix = new StringBuilder();
+			args.forEach(arg -> outputFileSuffix.append(arg));
+			String outputFileName = new File(hogmv1ProblemDirectory, "randomModel"+outputFileSuffix+ModelLanguage.HOGMv1.getDefaultFileExtension()).getAbsolutePath();
+			args.add("-o");
+			args.add(outputFileName);
+			
+			RandomHOGMv1Generator.main(args.toArray(new String[args.size()]));				
+		}
 	}
 	
 	/**
@@ -309,13 +359,13 @@ public class RandomHOGMv1Generator {
 		// Optional
 		OptionSpec<Integer> randomSeed = parser.accepts("r", "random seed.").withRequiredArg().ofType(Integer.class);
 		OptionSpec<File>    outputFile = parser.accepts("o", "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
+		// Required
+		OptionSpec<Integer> numPotentials  = parser.accepts("n", "# potentials to generate.").withRequiredArg().required().ofType(Integer.class);
+		OptionSpec<Integer> depth          = parser.accepts("d", "the depth of the generated formulas (all their sub-expressions will have depth equal to depth - 1.").withRequiredArg().required().ofType(Integer.class);
 		// At least one instance of one of the following required
 		OptionSpec<String> propositionalTheoryTypes = parser.accepts("p", "propositional theory type args ('v#' - v)variable #number).").withRequiredArg().ofType(String.class);
 		OptionSpec<String> equalityTheoryTypes      = parser.accepts("e", "equality theory type args ('v#c##u' - v)ariable #number, c)ategorical size #number, u)niquely named constants listed in category #number).").withRequiredArg().ofType(String.class);
 		OptionSpec<String> inequalityTheoryTypes    = parser.accepts("i", "inequality theory type args ('v#s#e#' - v)ariable #number, s)tart integer interval inclusive #number, e)nd integer interval inclusive #number).").withRequiredArg().ofType(String.class);
-		// Required
-		OptionSpec<Integer> numPotentials  = parser.accepts("n", "# potentials to generate.").withRequiredArg().required().ofType(Integer.class);
-		OptionSpec<Integer> depth          = parser.accepts("d", "the depth of the generated formulas (all their sub-expressions will have depth equal to depth - 1.").withRequiredArg().required().ofType(Integer.class);
 		//
 		parser.accepts("help").forHelp();
 		
@@ -339,6 +389,10 @@ public class RandomHOGMv1Generator {
 			result.out = new PrintStream(options.valueOf(outputFile), FILE_CHARSET.name());
 		}
 		
+		
+		result.numberPotentials = options.valueOf(numPotentials);
+		result.depth            = options.valueOf(depth);
+		
 		List<String> propositionalTheoryTypeArgs = options.valuesOf(propositionalTheoryTypes);
 		result.propositionalTheories = new TheoryTypePropositionalArgs[propositionalTheoryTypeArgs.size()];
 		for (int i = 0; i < result.propositionalTheories.length; i++) {
@@ -358,9 +412,6 @@ public class RandomHOGMv1Generator {
 		if (result.propositionalTheories.length == 0 && result.equalityTheories.length == 0 && result.inequalityTheories.length == 0) {
 			throw new IllegalArgumentException("At least one set of propositional, equality, or inequality theory type args must be provided.");
 		}
-				
-		result.numberPotentials             = options.valueOf(numPotentials);
-		result.depth                        = options.valueOf(depth);
 						
 		result.potentialExpressionGenerator = new RandomConditionalPotentialExpressionGenerator(
 				result.random, 
