@@ -217,8 +217,6 @@ public class RandomHOGMv1Generator {
 	}
 	
 	public static final Charset FILE_CHARSET = Charsets.UTF_8;
-	//
-	public static final String GENERATOR_CATEGORICAL_SORT_NAME_PREFIX = "Categorical";
 	
 	static class GeneratorArgs implements AutoCloseable {
 		// Optional
@@ -307,7 +305,7 @@ public class RandomHOGMv1Generator {
 				
 				genArgs.out.append(HOGMSortDeclaration.FUNCTOR_SORT_DECLARATION);
 				genArgs.out.append(" ");
-				genArgs.out.append(GENERATOR_CATEGORICAL_SORT_NAME_PREFIX+c);
+				genArgs.out.append(getEqualityCategoricalName(c));
 				genArgs.out.append(" : ");
 				genArgs.out.append(""+equalityTheoryArgs.getSizeOfCategory());
 				for (int u = 0; u < equalityTheoryArgs.getNumberOfUniquelyNamedConstantsInCategory(); u++) {
@@ -338,7 +336,7 @@ public class RandomHOGMv1Generator {
 					genArgs.out.append("random ");
 					genArgs.out.append(genArgs.potentialExpressionGenerator.getEqualityVariableNameFor(i, v));
 					genArgs.out.append(" : ");
-					genArgs.out.append(GENERATOR_CATEGORICAL_SORT_NAME_PREFIX+i);
+					genArgs.out.append(getEqualityCategoricalName(i));
 					genArgs.out.println(";");
 				}
 			}
@@ -372,6 +370,10 @@ public class RandomHOGMv1Generator {
 			ex.printStackTrace();
 		}
 		
+	}
+	
+	public static String getEqualityCategoricalName(int categoricalIndex) {
+		return "Equality"+categoricalIndex+"Categorical";
 	}
 	
 	private static GeneratorArgs getArgs(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
@@ -488,7 +490,7 @@ class RandomConditionalPotentialExpressionGenerator {
 			IntStream.range(0, equalityArgs.getNumberOfUniquelyNamedConstantsInCategory())
 				.mapToObj(variableIndex -> makeSymbol(getCategoryUniquelyNamedConstantName(categoryIndex, variableIndex)))
 				.forEach(uniquelyNamedConstants::add);
-			Categorical equalityCategorical = new Categorical(RandomHOGMv1Generator.GENERATOR_CATEGORICAL_SORT_NAME_PREFIX+i, equalityArgs.getSizeOfCategory(), uniquelyNamedConstants);
+			Categorical equalityCategorical = new Categorical(RandomHOGMv1Generator.getEqualityCategoricalName(i), equalityArgs.getSizeOfCategory(), uniquelyNamedConstants);
 			for (int v = 0; v < equalityArgs.getNumberVariables(); v++) {
 				varToTypeMap.put(getEqualityVariableNameFor(i, v), equalityCategorical);
 			}
