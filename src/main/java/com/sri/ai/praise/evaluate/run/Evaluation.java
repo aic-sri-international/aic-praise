@@ -43,6 +43,7 @@ import java.util.List;
 
 import com.sri.ai.praise.evaluate.solver.SolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
+import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -86,19 +87,22 @@ public class Evaluation {
 	
 	public void evaluate(Evaluation.Configuration configuration, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluatorConfiguration> solverConfigurations, Evaluation.Listener evaluationListener) {
 		// Note, varying domain sizes etc... is achieved by creating variants of a base model in the provided paged model container
-		
-// TODO - instantiate solvers	
+			
 		List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations);
 		
-// TODO - translate input model(s) to inputs for each solver evaluator	(NOTE: only do if not already translated)	
 		for (ModelPage model : modelsToEvaluateContainer.getPages()) {
-			if (model.getLanguage() != ModelLanguage.HOGMv1) {
-				throw new IllegalArgumentException("Model "+model.getName());
+			for (SolverEvaluator solver : solvers) {
+				if (configuration.type == Type.PR) {
+					for (String query: model.getDefaultQueriesToRun()) {
+						SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(model.getLanguage(), model.getModel(), query);
+// TODO - output the result						
+					}
+				}
+				else {
+					throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
+				}
 			}
 		}
-// TODO - for each model call each solver
-		// TODO - how to handle translation of the queries for the solver and type of evaluation to be performed?
-		// TODO - how do we handle the different types of result a solver can return?
 		
 // TODO
 //	We need at least the following capabilities:

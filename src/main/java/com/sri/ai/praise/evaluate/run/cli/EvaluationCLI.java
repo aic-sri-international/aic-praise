@@ -73,8 +73,9 @@ public class EvaluationCLI {
 		Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PR, outputDirectory);
 		PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationName, PagedModelContainer.getModelPagesFromURI(modelsContainerFile.toURI()));
 		List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(
-				new SolverEvaluatorConfiguration("SGSolver#1", SGSolverEvaluator.class.getName(), 
-						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
+// TODO - add the SGSolver back in.				
+//				new SolverEvaluatorConfiguration("SGSolver#1", SGSolverEvaluator.class.getName(), 
+//						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
 				new SolverEvaluatorConfiguration("VECSolver#1", VECSolverEvaluator.class.getName(), 
 						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap())
 				);

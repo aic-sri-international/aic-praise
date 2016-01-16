@@ -156,13 +156,13 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 				uaiModelOutput.flush();
 				
 				// Indicate number of observed variables in the evidence file
-				uaiEvidenceOutput.write(evidence.size());
+				uaiEvidenceOutput.write(""+evidence.size());
 				// and their variable and value indexes
 				for (Pair<Integer, Integer> evidenceAssignment : evidence) {
 					uaiEvidenceOutput.write(" ");
-					uaiEvidenceOutput.write(evidenceAssignment.first);
+					uaiEvidenceOutput.write(""+evidenceAssignment.first);
 					uaiEvidenceOutput.write(" ");
-					uaiEvidenceOutput.write(evidenceAssignment.second);
+					uaiEvidenceOutput.write(""+evidenceAssignment.second);
 				}
 				uaiEvidenceOutput.flush();
 			}

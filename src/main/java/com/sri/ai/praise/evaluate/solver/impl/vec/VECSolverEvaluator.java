@@ -38,10 +38,17 @@
 package com.sri.ai.praise.evaluate.solver.impl.vec;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
 import com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator;
 import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.lang.translate.Translator;
+import com.sri.ai.praise.lang.translate.TranslatorFactory;
 
 /**
  * Wrapper around Vibhav's UAI 2014 Solver, available from:<br>
@@ -59,6 +66,7 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 	public static void main(String[] args) throws Exception {
 		// TODO - quick test
 		ProcessBuilder processBuilder = new ProcessBuilder();
+// TODO - memory and timeout options for VEC		
 		processBuilder.directory(new File("/home/praise/Documents/uai/"));
 		processBuilder.command("vec-uai14", "1.uai", "1.uai.evid", "q", "PR");
 		processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
@@ -68,6 +76,40 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 	}
 
 	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(ModelLanguage modelLanguage, String model, String evidenceQuery) {
+		
+		if (modelLanguage != ModelLanguage.HOGMv1) {
+			throw new UnsupportedOperationException(modelLanguage.name() + " is currently not supported by this solver.");
+		}
+		
+		Translator inputToUAITranslator = TranslatorFactory.newTranslator(modelLanguage, ModelLanguage.UAI);
+		
+		// NOTE: This trick is dependent on the input model being HOGMv1
+		String hogmv1Model = model + "\nrandom UAIQuery : Boolean;\nif "+evidenceQuery+" then UAIQuery else not UAIQuery;\n";
+		
+		StringWriter swUAIModel    = new StringWriter();
+		StringWriter swUAIEvidence = new StringWriter();
+		
+
+		try {
+			// TODO - identifier should be passed into the solver.	
+			inputToUAITranslator.translate("todo Identifier", new Reader[] {
+					new StringReader(hogmv1Model)}, 
+					new PrintWriter[] {new PrintWriter(swUAIModel), new PrintWriter(swUAIEvidence)});
+			System.out.println("--- Partition Function Model=\n"+swUAIModel.toString());
+			System.out.println("--- Partition Function Evidence=\n"+swUAIEvidence.toString());
+			swUAIModel    = new StringWriter();
+			swUAIEvidence = new StringWriter();
+			inputToUAITranslator.translate("todo Identifier", 
+					new Reader[] {new StringReader(hogmv1Model), new StringReader("UAIQuery")},
+					new PrintWriter[] {new PrintWriter(swUAIModel), new PrintWriter(swUAIEvidence)});
+			System.out.println("--- Evidence Model=\n"+swUAIModel.toString());
+			System.out.println("--- Evidence Evidence=\n"+swUAIEvidence.toString());
+		}
+		catch (Exception ex) {
+			// TODO exceptions should be on the API
+			ex.printStackTrace();
+		}
+		
 		return null; // TODO
 	}
 	
