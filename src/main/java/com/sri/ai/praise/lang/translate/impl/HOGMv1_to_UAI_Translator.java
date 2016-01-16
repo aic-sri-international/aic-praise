@@ -38,8 +38,10 @@
 package com.sri.ai.praise.lang.translate.impl;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.model.v1.export.UAIHOGModelGroundingListener;
@@ -74,9 +76,9 @@ public class HOGMv1_to_UAI_Translator extends AbstractHOGMv1_to_Target_Translato
 	//
 	
 	@Override
-	protected void translate(String identifier, FactorsAndTypes hogmv1FactorsAndTypes, PrintWriter[] translatedOutputs) throws Exception {			
+	protected void translate(String identifier, FactorsAndTypes hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
 		//
 		//Ground out the HOGM Model and translate it to the UAI model format
-		HOGModelGrounding.ground(hogmv1FactorsAndTypes, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
+		HOGModelGrounding.ground(hogmv1FactorsAndTypes, evidence, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
 	}
 }

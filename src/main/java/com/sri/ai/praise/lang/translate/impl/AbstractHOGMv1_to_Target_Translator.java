@@ -39,8 +39,12 @@ package com.sri.ai.praise.lang.translate.impl;
 
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
@@ -73,10 +77,18 @@ public abstract class AbstractHOGMv1_to_Target_Translator implements Translator 
 		ParsedHOGModel    parsedModel     = parser.parseModel(hogmv1Model);
 		FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
 		
-		translate(inputIdentifier, factorsAndTypes, translatedOutputs);
+		// Each additional input is treated as an evidence expression
+		List<Expression> evidence = new ArrayList<>();
+		if (inputModelReaders.length > 1) {
+			for (int i = 1; i < inputModelReaders.length; i++) {
+				evidence.add(Expressions.parse(Util.readAll(inputModelReaders[i])));
+			}
+		}
+		
+		translate(inputIdentifier, factorsAndTypes, evidence, translatedOutputs);
 	}
 	// END-Translator
 	//
 	
-	protected abstract void translate(String identifier, FactorsAndTypes hogmv1FactorsAndTypes, PrintWriter[] translatedOutputs) throws Exception;
+	protected abstract void translate(String identifier, FactorsAndTypes hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception;
 }

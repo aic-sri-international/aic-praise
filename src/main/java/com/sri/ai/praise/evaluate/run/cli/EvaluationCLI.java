@@ -61,10 +61,10 @@ public class EvaluationCLI {
 	public static void main(String[] args) throws Exception {
 // TODO - implement based on args
 		
-		File rootDirectory       = new File("/Volumes/ExtraSpace/PROJECTS/PPAML/evaluate");
+		File rootDirectory       = new File("/mnt/hgfs/PPAML/evaluate");
 		File inputDirectory      = new File(rootDirectory, "input");
-		File outputDirectory     = new File(rootDirectory, "output");
-		File modelsContainerFile = new File(inputDirectory,"earthquakeBurglaryAlarm.praise");
+		File outputDirectory     = new File(rootDirectory, "pi20160124");
+		File modelsContainerFile = new File(inputDirectory,"randomModel-r3-n1-d2-iv1s1e10.praise");
 		
 		String evaluationName = "evaluation 1";
 		int totalCPURuntimeLimitSecondsPerSolveAttempt = 60;
@@ -76,8 +76,6 @@ public class EvaluationCLI {
 				new SolverEvaluatorConfiguration("SGSolver#1", SGSolverEvaluator.class.getName(), 
 						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
 				new SolverEvaluatorConfiguration("VECSolver#1", VECSolverEvaluator.class.getName(), 
-						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
-				new SolverEvaluatorConfiguration("SamIam#1", SamIamSolverEvaluator.class.getName(), 
 						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap())
 				);
 		

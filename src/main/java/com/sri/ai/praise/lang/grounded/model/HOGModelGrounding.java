@@ -61,6 +61,7 @@ import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
+import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.base.Triple;
 import com.sri.ai.util.math.MixedRadixNumber;
 import com.sri.ai.util.math.Rational;
@@ -79,6 +80,9 @@ public class HOGModelGrounding {
 		// Function tables
 		void factorValue(int factorIndex, int numberFactorValues, int valueIndex, Rational value);
 		//
+		// Evidence
+		void evidence(int variableIndex, int valueIndex);
+		//
 		// Indicates grounding complete
 		void groundingComplete();
 	}
@@ -95,11 +99,14 @@ public class HOGModelGrounding {
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
 		ParsedHOGModel    parsedModel     = parser.parseModel(sj.toString());
 		FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
+		List<Expression>  evidence        = new ArrayList<>();
+		evidence.add(Expressions.parse("communism"));
 		
-		ground(factorsAndTypes, new Listener() { // NOTE: an example listener that outputs in the UAI format
+		ground(factorsAndTypes, evidence, new Listener() { // NOTE: an example listener that outputs in the UAI format
 			int numberVariables;
-			StringJoiner preamble       = new StringJoiner("");
-			StringJoiner functionTables = new StringJoiner("");
+			StringJoiner  preamble       = new StringJoiner("");
+			StringJoiner  functionTables = new StringJoiner("");
+			List<Pair<Integer, Integer>> evidence = new ArrayList<>();
 			@Override
 			public void numberGroundVariables(int number) { 
 				this.numberVariables = number;
@@ -144,14 +151,27 @@ public class HOGModelGrounding {
 				}
 			}	
 			@Override
+			public void evidence(int variableIndex, int valueIndex) {
+				evidence.add(new Pair<>(variableIndex, valueIndex));
+			}
+			@Override
 			public void groundingComplete() {
+				System.out.println("--- MODEL ---");
 				System.out.print(preamble);
 				System.out.print(functionTables);
+				System.out.println("--- EVIDENCE ---");
+				System.out.print(evidence.size());
+				for (Pair<Integer, Integer> evidenceAssignment : evidence) {
+					System.out.print(" ");
+					System.out.print(evidenceAssignment.first);
+					System.out.print(" ");
+					System.out.print(evidenceAssignment.second);
+				}	
 			}
 		});
 	}
 	
-	public static void ground(FactorsAndTypes factorsAndTypes, Listener listener) {
+	public static void ground(FactorsAndTypes factorsAndTypes, List<Expression> evidence, Listener listener) {
 		if (factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().size() > 0) {
 			throw new IllegalArgumentException("Constants cannot be grounded");
 		}
@@ -223,6 +243,19 @@ public class HOGModelGrounding {
 	    	
 			factorIndex++;
 	    }
+		
+		// Handle the evidence
+		for (Expression evidenceAssignment : evidence) {
+			if (Expressions.isFunctionApplicationWithArguments(evidenceAssignment)) {
+				// TODO - add support for 'not <variable>' and 'variable = value' and 'value = variable'
+				throw new UnsupportedOperationException("Function application of evidence currently not supported: "+evidenceAssignment);
+			}
+			else if (Expressions.isSymbol(evidenceAssignment)) {
+				int evidenceVariableIndex = randomVariableIndexes.get(evidenceAssignment);
+				int evidenceValueIndex    = typeToValues.get(randomVariableNameToTypeSizeAndUniqueConstants.get(evidenceAssignment).first).indexOf(Expressions.TRUE);
+				listener.evidence(evidenceVariableIndex, evidenceValueIndex);
+			}
+		}
 		
 		listener.groundingComplete();
 	}

@@ -37,6 +37,9 @@
  */
 package com.sri.ai.praise.evaluate.solver.impl.vec;
 
+import java.io.File;
+
+import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
 import com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator;
 import com.sri.ai.praise.lang.ModelLanguage;
 
@@ -48,7 +51,26 @@ import com.sri.ai.praise.lang.ModelLanguage;
  *
  */
 public class VECSolverEvaluator extends AbstractSolverEvaluator {
+	
+	private static final String _vecProgramName           = "vec-uai14";
+	private static final String _marginalQuery            = "MAR";
+	private static final String _probabilityEvidenceQuery = "PR";
+	
+	public static void main(String[] args) throws Exception {
+		// TODO - quick test
+		ProcessBuilder processBuilder = new ProcessBuilder();
+		processBuilder.directory(new File("/home/praise/Documents/uai/"));
+		processBuilder.command("vec-uai14", "1.uai", "1.uai.evid", "q", "PR");
+		processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+		processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+		
+		processBuilder.start();
+	}
 
+	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(ModelLanguage modelLanguage, String model, String evidenceQuery) {
+		return null; // TODO
+	}
+	
 	@Override
 	public ModelLanguage getExpectedModelLanguage() {
 		return ModelLanguage.UAI;

@@ -45,9 +45,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
+import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;
 
 @Beta
@@ -56,6 +59,7 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 	private PrintWriter uaiEvidenceOutput = null;
 	private File tempPreambleFile         = null;
 	private File tempFunctionTablesFile   = null;
+	private List<Pair<Integer, Integer>> evidence = new ArrayList<>();
 	
 	private int    numberVariables;
 	private Writer preamble       = null;
@@ -128,6 +132,11 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 	}	
 	
 	@Override
+	public void evidence(int variableIndex, int valueIndex) {
+		evidence.add(new Pair<>(variableIndex, valueIndex));
+	}
+	
+	@Override
 	public void groundingComplete() {
 		try {
 			preamble.flush();preamble.close();
@@ -146,8 +155,15 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 				}
 				uaiModelOutput.flush();
 				
-				// Indicate no observed variables in the evidence file
-				uaiEvidenceOutput.write("0");
+				// Indicate number of observed variables in the evidence file
+				uaiEvidenceOutput.write(evidence.size());
+				// and their variable and value indexes
+				for (Pair<Integer, Integer> evidenceAssignment : evidence) {
+					uaiEvidenceOutput.write(" ");
+					uaiEvidenceOutput.write(evidenceAssignment.first);
+					uaiEvidenceOutput.write(" ");
+					uaiEvidenceOutput.write(evidenceAssignment.second);
+				}
 				uaiEvidenceOutput.flush();
 			}
 		

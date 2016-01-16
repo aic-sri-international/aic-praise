@@ -86,8 +86,6 @@ public class Evaluation {
 	
 	public void evaluate(Evaluation.Configuration configuration, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluatorConfiguration> solverConfigurations, Evaluation.Listener evaluationListener) {
 		// Note, varying domain sizes etc... is achieved by creating variants of a base model in the provided paged model container
-
-// TODO - Status of relational random variables/constants?
 		
 // TODO - instantiate solvers	
 		List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations);
