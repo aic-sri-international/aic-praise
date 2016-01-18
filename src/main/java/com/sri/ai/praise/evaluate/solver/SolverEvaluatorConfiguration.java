@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.evaluate.solver;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -51,6 +52,7 @@ public class SolverEvaluatorConfiguration {
 	private int totalCPURuntimeLimitSecondsPerSolveAttempt;
 	private int totalMemoryLimitInMegabytesPerSolveAttempt;
 	private Map<String, String> solverSpecificConfiguration;
+	private File workingDirectory;
 	
 	public SolverEvaluatorConfiguration(String name, String implementationClassName, int totalCPURuntimeLimitSecondsPerSolveAttempt, int totalMemoryLimitInMegabytesPerSolveAttempt, Map<String, String> solverSpecificConfiguration) {
 		this.name                                       = name;
@@ -78,5 +80,13 @@ public class SolverEvaluatorConfiguration {
 
 	public Map<String, String> getSolverSpecificConfiguration() {
 		return solverSpecificConfiguration;
+	}
+	
+	public File getWorkingDirectory() {
+		return workingDirectory;
+	}
+	
+	public void setWorkingDirectory(File workingDirectory) {
+		this.workingDirectory = workingDirectory;
 	}
 }

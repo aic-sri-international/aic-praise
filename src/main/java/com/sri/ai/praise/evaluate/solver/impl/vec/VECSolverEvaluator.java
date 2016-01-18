@@ -41,8 +41,9 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.List;
 
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
 import com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator;
@@ -62,20 +63,10 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 	private static final String _vecProgramName           = "vec-uai14";
 	private static final String _marginalQuery            = "MAR";
 	private static final String _probabilityEvidenceQuery = "PR";
-	
-	public static void main(String[] args) throws Exception {
-		// TODO - quick test
-		ProcessBuilder processBuilder = new ProcessBuilder();
-// TODO - memory and timeout options for VEC		
-		processBuilder.directory(new File("/home/praise/Documents/uai/"));
-		processBuilder.command("vec-uai14", "1.uai", "1.uai.evid", "q", "PR");
-		processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
-		processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-		
-		processBuilder.start();
-	}
 
-	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(ModelLanguage modelLanguage, String model, String evidenceQuery) {
+	@Override
+	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(String solveRequestId, ModelLanguage modelLanguage, String model, String evidenceQuery) 
+		throws Exception {
 		
 		if (modelLanguage != ModelLanguage.HOGMv1) {
 			throw new UnsupportedOperationException(modelLanguage.name() + " is currently not supported by this solver.");
@@ -85,30 +76,13 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		
 		// NOTE: This trick is dependent on the input model being HOGMv1
 		String hogmv1Model = model + "\nrandom UAIQuery : Boolean;\nif "+evidenceQuery+" then UAIQuery else not UAIQuery;\n";
+	
+		VECCallResult partitionResult = callVECPR("Partition Function "+solveRequestId, inputToUAITranslator, new Reader[] {new StringReader(hogmv1Model)});
+		VECCallResult evidenceResult  = callVECPR("Evidence "+solveRequestId, inputToUAITranslator, new Reader[] {new StringReader(hogmv1Model), new StringReader("UAIQuery")});
 		
-		StringWriter swUAIModel    = new StringWriter();
-		StringWriter swUAIEvidence = new StringWriter();
+		double probabilityResult = Math.pow(10, evidenceResult.resultLog10) / Math.pow(10, partitionResult.resultLog10);
 		
-
-		try {
-			// TODO - identifier should be passed into the solver.	
-			inputToUAITranslator.translate("todo Identifier", new Reader[] {
-					new StringReader(hogmv1Model)}, 
-					new PrintWriter[] {new PrintWriter(swUAIModel), new PrintWriter(swUAIEvidence)});
-			System.out.println("--- Partition Function Model=\n"+swUAIModel.toString());
-			System.out.println("--- Partition Function Evidence=\n"+swUAIEvidence.toString());
-			swUAIModel    = new StringWriter();
-			swUAIEvidence = new StringWriter();
-			inputToUAITranslator.translate("todo Identifier", 
-					new Reader[] {new StringReader(hogmv1Model), new StringReader("UAIQuery")},
-					new PrintWriter[] {new PrintWriter(swUAIModel), new PrintWriter(swUAIEvidence)});
-			System.out.println("--- Evidence Model=\n"+swUAIModel.toString());
-			System.out.println("--- Evidence Evidence=\n"+swUAIEvidence.toString());
-		}
-		catch (Exception ex) {
-			// TODO exceptions should be on the API
-			ex.printStackTrace();
-		}
+		System.out.println("Probability of evidence result = "+probabilityResult);
 		
 		return null; // TODO
 	}
@@ -116,5 +90,59 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 	@Override
 	public ModelLanguage getExpectedModelLanguage() {
 		return ModelLanguage.UAI;
+	}
+	
+	//
+	// PRIVATE
+	private VECCallResult callVECPR(String identifier, Translator inputToUAITranslator, Reader[] input) throws Exception {
+		long translationStart = System.currentTimeMillis();
+		File tempUAI    = File.createTempFile("vec", ".uai", getConfiguration().getWorkingDirectory());
+		File tempEvid   = File.createTempFile("vec", ".uai.evid", getConfiguration().getWorkingDirectory());
+		File tempResult = new File(getConfiguration().getWorkingDirectory(), tempUAI.getName()+"."+_probabilityEvidenceQuery);
+		//
+		File tempSTDERR = File.createTempFile("vec", ".stderr", getConfiguration().getWorkingDirectory());
+		File tempSTDOUT = File.createTempFile("vec", ".stdout", getConfiguration().getWorkingDirectory());
+		
+		PrintWriter pwUAIModel    = new PrintWriter(tempUAI);
+		PrintWriter pwUAIEvidence = new PrintWriter(tempEvid);
+		inputToUAITranslator.translate(identifier, input, new PrintWriter[] {pwUAIModel, pwUAIEvidence});
+		pwUAIModel.flush();
+		pwUAIEvidence.flush();
+		
+		long translationEnd = System.currentTimeMillis();
+		
+		ProcessBuilder processBuilder = new ProcessBuilder();
+// TODO - memory and timeout options for VEC		
+		processBuilder.directory(getConfiguration().getWorkingDirectory());
+		processBuilder.command(_vecProgramName, tempUAI.getName(), tempEvid.getName(), "dummy", _probabilityEvidenceQuery);
+		processBuilder.redirectError(ProcessBuilder.Redirect.to(tempSTDERR));
+		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(tempSTDOUT));
+		
+		long vecStart = System.currentTimeMillis();
+		Process vecProcess = processBuilder.start();
+		vecProcess.waitFor();
+		long vecEnd = System.currentTimeMillis();
+		
+		List<String> results = Files.readAllLines(tempResult.toPath(), StandardCharsets.UTF_8);
+		
+		tempUAI.delete();
+		tempEvid.delete();
+		tempResult.delete();
+		//
+		tempSTDOUT.delete();
+		tempSTDERR.delete();
+		
+		VECCallResult result = new VECCallResult();
+		result.translationTookMS = translationEnd - translationStart;
+		result.vecProcessTookMS  = vecEnd - vecStart;
+		result.resultLog10       = new Double(results.get(results.size()-1));
+		
+		return result;
+	}
+	
+	class VECCallResult {
+		public long translationTookMS;
+		public long vecProcessTookMS;
+		public double resultLog10;
 	}
 }

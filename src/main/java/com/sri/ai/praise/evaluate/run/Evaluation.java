@@ -44,7 +44,6 @@ import java.util.List;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
-import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
@@ -88,34 +87,40 @@ public class Evaluation {
 	public void evaluate(Evaluation.Configuration configuration, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluatorConfiguration> solverConfigurations, Evaluation.Listener evaluationListener) {
 		// Note, varying domain sizes etc... is achieved by creating variants of a base model in the provided paged model container
 			
-		List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations);
-		
+		List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations, configuration.getWorkingDirectory());
+
+// TODO
+// We need at least the following capabilities:
+// - given a probabilistic model in our language and query and a list of
+//	 algorithms (our lifted algorithm (parameterized by a theory) and other,
+//   external solvers such as Vibhav's, SamIAm, etc), computing the time it
+//	 takes to solve it.
+// - then around that, a loop varying domain size to generate a comparison
+//	 per domain size.		
 		for (ModelPage model : modelsToEvaluateContainer.getPages()) {
 			for (SolverEvaluator solver : solvers) {
-				if (configuration.type == Type.PR) {
-					for (String query: model.getDefaultQueriesToRun()) {
-						SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(model.getLanguage(), model.getModel(), query);
+				try {
+					if (configuration.type == Type.PR) {
+						for (String query: model.getDefaultQueriesToRun()) {
+							SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(model.getName()+" - "+query, 
+									model.getLanguage(), model.getModel(), query);
 // TODO - output the result						
+						}
+					}
+					else {
+						throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
 					}
 				}
-				else {
-					throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
+				catch (Exception ex) {
+					// TODO - handle properly
+					ex.printStackTrace();
 				}
 			}
 		}
-		
-// TODO
-//	We need at least the following capabilities:
-//    - given a probabilistic model in our language and query and a list of
-//      algorithms (our lifted algorithm (parameterized by a theory) and other,
-//      external solvers such as Vibhav's, SamIAm, etc), computing the time it
-//      takes to solve it.
-//    - then around that, a loop varying domain size to generate a comparison
-//      per domain size.
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<SolverEvaluator> instantiateSolvers(List<SolverEvaluatorConfiguration> solverConfigurations) {
+	private List<SolverEvaluator> instantiateSolvers(List<SolverEvaluatorConfiguration> solverConfigurations, File workingDirectory) {
 		List<SolverEvaluator> result = new ArrayList<>(solverConfigurations.size());
 		
 		for (SolverEvaluatorConfiguration configuration : solverConfigurations) {
@@ -128,6 +133,7 @@ public class Evaluation {
 			}
 			try {
 				SolverEvaluator solver = clazz.newInstance();
+				configuration.setWorkingDirectory(workingDirectory);
 				solver.setConfiguration(configuration);
 				result.add(solver);
 			}
