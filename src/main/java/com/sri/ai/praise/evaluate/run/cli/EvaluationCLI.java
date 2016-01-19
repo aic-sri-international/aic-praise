@@ -44,7 +44,6 @@ import java.util.List;
 
 import com.sri.ai.praise.evaluate.run.Evaluation;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
-import com.sri.ai.praise.evaluate.solver.impl.samiam.SamIamSolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.impl.sgsolver.SGSolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.impl.vec.VECSolverEvaluator;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -66,17 +65,16 @@ public class EvaluationCLI {
 		File outputDirectory     = new File(rootDirectory, "pi20160124");
 		File modelsContainerFile = new File(inputDirectory,"randomModel-r3-n1-d2-iv1s1e10.praise");
 		
-		String evaluationName = "evaluation 1";
-		int totalCPURuntimeLimitSecondsPerSolveAttempt = 60;
-		int totalMemoryLimitInMegabytesPerSolveAttempt = 1024;
+		String evaluationName = "Evaluation randomModel-r3-n1-d2-iv1s1e10";
+		int totalCPURuntimeLimitSecondsPerSolveAttempt = 600;
+		int totalMemoryLimitInMegabytesPerSolveAttempt = 4096;
 		
 		Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PR, outputDirectory);
 		PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationName, PagedModelContainer.getModelPagesFromURI(modelsContainerFile.toURI()));
-		List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(
-// TODO - add the SGSolver back in.				
-//				new SolverEvaluatorConfiguration("SGSolver#1", SGSolverEvaluator.class.getName(), 
-//						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
-				new SolverEvaluatorConfiguration("VECSolver#1", VECSolverEvaluator.class.getName(), 
+		List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(			
+				new SolverEvaluatorConfiguration("SGSolver", SGSolverEvaluator.class.getName(), 
+						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
+				new SolverEvaluatorConfiguration("VEC", VECSolverEvaluator.class.getName(), 
 						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap())
 				);
 		

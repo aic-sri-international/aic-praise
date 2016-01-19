@@ -37,13 +37,66 @@
  */
 package com.sri.ai.praise.evaluate.solver.impl.sgsolver;
 
+import java.util.Arrays;
+
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.boole.Not;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
 import com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator;
 import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.sgsolver.solver.HOGMQueryResult;
+import com.sri.ai.praise.sgsolver.solver.HOGMQueryRunner;
+import com.sri.ai.util.math.Rational;
 
 public class SGSolverEvaluator extends AbstractSolverEvaluator {
 
 	@Override
 	public ModelLanguage getExpectedModelLanguage() {
 		return ModelLanguage.HOGMv1;
+	}
+	
+	@Override
+	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(String solveRequestId, ModelLanguage modelLanguage, String model, String evidenceQuery) 
+		throws Exception {
+		
+		if (modelLanguage != ModelLanguage.HOGMv1) {
+			throw new UnsupportedOperationException(modelLanguage.name() + " is currently not supported by this solver.");
+		}
+		
+		HOGMQueryRunner hogmQueryRunner = new HOGMQueryRunner(model, Arrays.asList(evidenceQuery));
+		HOGMQueryResult queryResult = hogmQueryRunner.query().get(0);
+		
+		Expression queryExpr  = Expressions.parse(evidenceQuery);
+		Expression resultExpr = Expressions.parse(queryResult.getResult());
+		Rational probabilityEvidence = null;
+		if (IfThenElse.isIfThenElse(resultExpr)) {
+			Expression condition = IfThenElse.condition(resultExpr);
+			if (condition.equals(queryExpr)) {
+				probabilityEvidence = IfThenElse.thenBranch(resultExpr).rationalValue();
+			}
+			else if (Not.isNegation(condition) && condition.get(0).equals(queryExpr)) {
+				probabilityEvidence = IfThenElse.elseBranch(resultExpr).rationalValue();
+			}
+		}
+		else if (resultExpr.equals(queryExpr)) {
+			probabilityEvidence = Rational.ONE;
+		}
+		else if (Not.isNegation(resultExpr)) {
+			if (resultExpr.get(0).equals(queryExpr)) {
+				probabilityEvidence = Rational.ZERO;
+			}
+		}
+		else if (Expressions.isNumber(resultExpr)) {
+			probabilityEvidence = resultExpr.rationalValue();
+		}
+		
+		if (probabilityEvidence == null) {
+			throw new UnsupportedOperationException("Unable to extract result: "+resultExpr);
+		}
+		
+		SolverEvaluatorProbabilityEvidenceResult result = new SolverEvaluatorProbabilityEvidenceResult(0, queryResult.getMillisecondsToCompute(), probabilityEvidence);
+		return result;
 	}
 }

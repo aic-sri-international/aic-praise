@@ -38,8 +38,10 @@
 package com.sri.ai.praise.evaluate.run;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.sri.ai.praise.evaluate.solver.SolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
@@ -81,41 +83,54 @@ public class Evaluation {
 	}
 	
 	public interface Listener {
-// TODO - receives evaluation	
 	}
 	
 	public void evaluate(Evaluation.Configuration configuration, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluatorConfiguration> solverConfigurations, Evaluation.Listener evaluationListener) {
 		// Note, varying domain sizes etc... is achieved by creating variants of a base model in the provided paged model container
 			
-		List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations, configuration.getWorkingDirectory());
-
-// TODO
-// We need at least the following capabilities:
-// - given a probabilistic model in our language and query and a list of
-//	 algorithms (our lifted algorithm (parameterized by a theory) and other,
-//   external solvers such as Vibhav's, SamIAm, etc), computing the time it
-//	 takes to solve it.
-// - then around that, a loop varying domain size to generate a comparison
-//	 per domain size.		
-		for (ModelPage model : modelsToEvaluateContainer.getPages()) {
-			for (SolverEvaluator solver : solvers) {
-				try {
-					if (configuration.type == Type.PR) {
-						for (String query: model.getDefaultQueriesToRun()) {
+		try (PrintWriter resultOutput = new PrintWriter(new File(configuration.getWorkingDirectory(), "solver_results.csv"))) {
+			List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations, configuration.getWorkingDirectory());
+			
+			StringJoiner csvLine = new StringJoiner(",");
+			csvLine.add("Solver");
+			csvLine.add("Problem");
+			csvLine.add("Inference Type");
+			csvLine.add("Result");
+			csvLine.add("Inference ms.");
+			csvLine.add("HH:MM:SS.");
+			csvLine.add("Translation ms.");
+			csvLine.add("HH:MM:SS.");
+			resultOutput.println(csvLine);
+			
+			for (ModelPage model : modelsToEvaluateContainer.getPages()) {
+				
+				for (String query: model.getDefaultQueriesToRun()) {
+					for (SolverEvaluator solver : solvers) {
+						csvLine = new StringJoiner(",");
+						csvLine.add(solver.getConfiguration().getName());
+						csvLine.add(modelsToEvaluateContainer.getName()+" - "+model.getName() + " : " + query);
+						if (configuration.type == Type.PR) {
+							csvLine.add(Type.PR.name());
 							SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(model.getName()+" - "+query, 
 									model.getLanguage(), model.getModel(), query);
-// TODO - output the result						
+							csvLine.add(prResult.getProbabilityOfEvidence() == null ? "FAILED" : ""+prResult.getProbabilityOfEvidence().doubleValue());
+							csvLine.add(""+prResult.getTotalInferenceTimeInMilliseconds());
+							csvLine.add(prResult.toTotalInferenceTimeInMillisecondsString());
+							csvLine.add(""+prResult.getTotalTranslationTimeInMilliseconds());
+							csvLine.add(prResult.toTotalTranslationTimeInMillisecondsString());
 						}
+						else {
+							throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
+						}
+						resultOutput.println(csvLine);
+						resultOutput.flush();
 					}
-					else {
-						throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
-					}
-				}
-				catch (Exception ex) {
-					// TODO - handle properly
-					ex.printStackTrace();
 				}
 			}
+		}
+		catch (Exception ex) {
+// TODO - handle properly
+			ex.printStackTrace();
 		}
 	}
 	

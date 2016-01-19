@@ -38,18 +38,33 @@
 package com.sri.ai.praise.evaluate.solver;
 
 public abstract class SolverEvaluatorResult {
-	private long millisecondsToCompute;
+	private long totalTranslationTimeInMilliseconds;
+	private long totalInferenceTimeInMilliseconds;
 	
-	public SolverEvaluatorResult(long millisecondsToCompute) {
-		this.millisecondsToCompute = millisecondsToCompute;
+	public SolverEvaluatorResult(long totalTranslationTimeInMilliseconds, long totalInferenceTimeInMilliseconds) {
+		this.totalTranslationTimeInMilliseconds = totalTranslationTimeInMilliseconds;
+		this.totalInferenceTimeInMilliseconds   = totalInferenceTimeInMilliseconds;
 	}
 	
-	public long getMillisecondsToCompute() {
-		return millisecondsToCompute;
+	public long getTotalTranslationTimeInMilliseconds() {
+		return totalTranslationTimeInMilliseconds;
+	}
+
+	public long getTotalInferenceTimeInMilliseconds() {
+		return totalInferenceTimeInMilliseconds;
 	}
 	
-	public String toMillisecondsToComputeDurationString() {
-		long duration = getMillisecondsToCompute();
+	public String toTotalTranslationTimeInMillisecondsString() {
+		return toDurationString(totalTranslationTimeInMilliseconds);
+	}
+	
+	public String toTotalInferenceTimeInMillisecondsString() {
+		return toDurationString(totalInferenceTimeInMilliseconds);
+	}
+	
+	//
+	// PRIVATE
+	private String toDurationString(long duration) {
 		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
 		
 		if (duration != 0) {
@@ -66,8 +81,6 @@ public abstract class SolverEvaluatorResult {
 		}
 		milliseconds = duration;
 		
-		String result = "" + hours + "h" + minutes + "m" + seconds + "." + milliseconds+"s";
-		
-		return result;
+		return "" + hours + "h" + minutes + "m" + seconds + "." + milliseconds+"s";
 	}
 }

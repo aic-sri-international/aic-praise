@@ -50,6 +50,7 @@ import com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.lang.translate.TranslatorFactory;
+import com.sri.ai.util.math.Rational;
 
 /**
  * Wrapper around Vibhav's UAI 2014 Solver, available from:<br>
@@ -61,7 +62,6 @@ import com.sri.ai.praise.lang.translate.TranslatorFactory;
 public class VECSolverEvaluator extends AbstractSolverEvaluator {
 	
 	private static final String _vecProgramName           = "vec-uai14";
-	private static final String _marginalQuery            = "MAR";
 	private static final String _probabilityEvidenceQuery = "PR";
 
 	@Override
@@ -80,11 +80,14 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		VECCallResult partitionResult = callVECPR("Partition Function "+solveRequestId, inputToUAITranslator, new Reader[] {new StringReader(hogmv1Model)});
 		VECCallResult evidenceResult  = callVECPR("Evidence "+solveRequestId, inputToUAITranslator, new Reader[] {new StringReader(hogmv1Model), new StringReader("UAIQuery")});
 		
-		double probabilityResult = Math.pow(10, evidenceResult.resultLog10) / Math.pow(10, partitionResult.resultLog10);
+		Double probabilityResult = Math.pow(10, evidenceResult.resultLog10) / Math.pow(10, partitionResult.resultLog10);
+		SolverEvaluatorProbabilityEvidenceResult result = new SolverEvaluatorProbabilityEvidenceResult(
+					Math.max(partitionResult.translationTookMS, evidenceResult.translationTookMS),
+					Math.max(partitionResult.vecProcessTookMS, evidenceResult.vecProcessTookMS),
+					probabilityResult.isNaN() ? null : new Rational(probabilityResult)
+				);
 		
-		System.out.println("Probability of evidence result = "+probabilityResult);
-		
-		return null; // TODO
+		return result;
 	}
 	
 	@Override
@@ -112,11 +115,14 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		long translationEnd = System.currentTimeMillis();
 		
 		ProcessBuilder processBuilder = new ProcessBuilder();
-// TODO - memory and timeout options for VEC		
+		processBuilder.environment().put("INF_TIME", ""+getConfiguration().getTotalCPURuntimeLimitSecondsPerSolveAttempt());
+		// Note: VEC's memory limit is specified in GB
+		processBuilder.environment().put("INF_MEMORY", ""+(getConfiguration().getTotalMemoryLimitInMegabytesPerSolveAttempt() / 1024.0));
 		processBuilder.directory(getConfiguration().getWorkingDirectory());
 		processBuilder.command(_vecProgramName, tempUAI.getName(), tempEvid.getName(), "dummy", _probabilityEvidenceQuery);
 		processBuilder.redirectError(ProcessBuilder.Redirect.to(tempSTDERR));
 		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(tempSTDOUT));
+		
 		
 		long vecStart = System.currentTimeMillis();
 		Process vecProcess = processBuilder.start();
@@ -135,7 +141,12 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		VECCallResult result = new VECCallResult();
 		result.translationTookMS = translationEnd - translationStart;
 		result.vecProcessTookMS  = vecEnd - vecStart;
-		result.resultLog10       = new Double(results.get(results.size()-1));
+		try {
+			result.resultLog10  = new Double(results.get(results.size()-1));
+		}
+		catch (Throwable t) {
+			result.resultLog10 = Double.NaN;
+		}
 		
 		return result;
 	}

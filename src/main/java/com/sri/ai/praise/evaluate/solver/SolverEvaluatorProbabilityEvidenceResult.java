@@ -42,8 +42,10 @@ import com.sri.ai.util.math.Rational;
 public class SolverEvaluatorProbabilityEvidenceResult extends SolverEvaluatorResult {
 	private Rational probabilityOfEvidence;
 	
-	public SolverEvaluatorProbabilityEvidenceResult(long millisecondsToCompute, Rational probabilityOfEvidence) {
-		super(millisecondsToCompute);
+	public SolverEvaluatorProbabilityEvidenceResult(
+			long totalTranslationTimeInMilliseconds, long totalInferenceTimeInMilliseconds, 
+			Rational probabilityOfEvidence) {
+		super(totalTranslationTimeInMilliseconds, totalInferenceTimeInMilliseconds);
 		this.probabilityOfEvidence = probabilityOfEvidence;
 	}
 	
