@@ -92,27 +92,28 @@ public class Evaluation {
 			List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations, configuration.getWorkingDirectory());
 			
 			StringJoiner csvLine = new StringJoiner(",");
-			csvLine.add("Solver");
 			csvLine.add("Problem");
 			csvLine.add("Inference Type");
-			csvLine.add("Result");
-			csvLine.add("Inference ms.");
-			csvLine.add("HH:MM:SS.");
-			csvLine.add("Translation ms.");
-			csvLine.add("HH:MM:SS.");
+			for (SolverEvaluator solver : solvers) {
+				csvLine.add("Solver");
+				csvLine.add("Result for "+solver.getConfiguration().getName());
+				csvLine.add("Inference ms. for "+solver.getConfiguration().getName());
+				csvLine.add("HH:MM:SS.");
+				csvLine.add("Translation ms. for "+solver.getConfiguration().getName());
+				csvLine.add("HH:MM:SS.");
+			}
 			resultOutput.println(csvLine);
 			
 			for (ModelPage model : modelsToEvaluateContainer.getPages()) {
-				
 				for (String query: model.getDefaultQueriesToRun()) {
+					csvLine = new StringJoiner(",");
+					csvLine.add(modelsToEvaluateContainer.getName()+" - "+model.getName() + " : " + query);
+					csvLine.add(configuration.type.name());
 					for (SolverEvaluator solver : solvers) {
-						csvLine = new StringJoiner(",");
-						csvLine.add(solver.getConfiguration().getName());
-						csvLine.add(modelsToEvaluateContainer.getName()+" - "+model.getName() + " : " + query);
 						if (configuration.type == Type.PR) {
-							csvLine.add(Type.PR.name());
 							SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(model.getName()+" - "+query, 
 									model.getLanguage(), model.getModel(), query);
+							csvLine.add(solver.getConfiguration().getName());
 							csvLine.add(prResult.getProbabilityOfEvidence() == null ? "FAILED" : ""+prResult.getProbabilityOfEvidence().doubleValue());
 							csvLine.add(""+prResult.getTotalInferenceTimeInMilliseconds());
 							csvLine.add(prResult.toTotalInferenceTimeInMillisecondsString());
@@ -122,9 +123,9 @@ public class Evaluation {
 						else {
 							throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
 						}
-						resultOutput.println(csvLine);
-						resultOutput.flush();
 					}
+					resultOutput.println(csvLine);
+					resultOutput.flush();
 				}
 			}
 		}
