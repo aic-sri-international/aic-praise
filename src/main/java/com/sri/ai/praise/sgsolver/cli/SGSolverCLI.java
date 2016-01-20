@@ -69,7 +69,8 @@ import joptsimple.OptionSpec;
  */
 @Beta
 public class SGSolverCLI {
-	public static final Charset FILE_CHARSET = Charsets.UTF_8;
+	public static final Charset FILE_CHARSET  = Charsets.UTF_8;
+	public static final String  RESULT_PREFIX = "RESULT     =";
 	
 	static class SGSolverArgs implements AutoCloseable {
 		List<File>    inputFiles      = new ArrayList<>(); // --input    (required)
@@ -98,7 +99,7 @@ public class SGSolverCLI {
 				hogModelQueryResults.forEach(hogModelQueryResult -> {
 					solverArgs.out.print("QUERY      =");
 					solverArgs.out.println(hogModelQueryResult.getQuery());
-					solverArgs.out.print("RESULT     =");
+					solverArgs.out.print(RESULT_PREFIX);
 					solverArgs.out.println(hogModelQueryResult.toString());
 					solverArgs.out.print("TOOK       =");
 					solverArgs.out.println(duration(hogModelQueryResult.getMillisecondsToCompute()));

@@ -44,6 +44,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
 import com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator;
@@ -126,7 +127,11 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		
 		long vecStart = System.currentTimeMillis();
 		Process vecProcess = processBuilder.start();
-		vecProcess.waitFor();
+		// Wait solver time plus a little extra to give VEC itself a chance to startup and shutdown outside the context of solving
+		if (!vecProcess.waitFor(getConfiguration().getTotalCPURuntimeLimitSecondsPerSolveAttempt()+5, TimeUnit.SECONDS)) {
+			// waiting time elapsed
+			vecProcess.destroyForcibly();
+		}
 		long vecEnd = System.currentTimeMillis();
 		
 		List<String> results = Files.readAllLines(tempResult.toPath(), StandardCharsets.UTF_8);

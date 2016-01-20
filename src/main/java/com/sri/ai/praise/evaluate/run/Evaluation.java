@@ -49,7 +49,6 @@ import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResul
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
-import com.sri.ai.util.math.Rational;
 
 /**
  * Class responsible for running an evaluation of 1 or more solvers on a given problem set.
@@ -91,6 +90,7 @@ public class Evaluation {
 	}
 	
 	public interface Listener {
+		void info(String notification);
 	}
 	
 	public void evaluate(Evaluation.Configuration configuration, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluatorConfiguration> solverConfigurations, Evaluation.Listener evaluationListener) {
@@ -99,6 +99,16 @@ public class Evaluation {
 		try (PrintWriter resultOutput = new PrintWriter(new File(configuration.getWorkingDirectory(), "solver_results.csv"))) {
 			List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations, configuration.getWorkingDirectory());
 			
+			// Do an initial burn in to ensure any OS caching etc... occurs so as to even out times across runs
+			ModelPage burnInModel = modelsToEvaluateContainer.getPages().get(0);
+			String    burnInQuery = burnInModel.getDefaultQueriesToRun().get(0);  
+			evaluationListener.info("Starting solver burn in based on '"+modelsToEvaluateContainer.getName()+" - "+burnInModel.getName() + " : " + burnInQuery+"'");
+			for (SolverEvaluator solver : solvers) {
+				SolverCallResult solverResult =  callSolver(configuration, solver, burnInModel, burnInQuery);
+				evaluationListener.info("Burn in for "+solver.getConfiguration().getName()+" complete. Average inference time = "+toDurationString(solverResult.averageInferenceTimeInMilliseconds));
+			}
+			
+			// Output the report header line
 			StringJoiner csvLine = new StringJoiner(",");
 			csvLine.add("Problem");
 			csvLine.add("Inference Type");
@@ -113,7 +123,10 @@ public class Evaluation {
 				csvLine.add("HH:MM:SS.");
 			}
 			resultOutput.println(csvLine);
+			evaluationListener.info("Generating Evaluation Report");
+			evaluationListener.info(csvLine.toString());
 			
+			// Now evaluate each of the model-query-solver combinations.
 			for (ModelPage model : modelsToEvaluateContainer.getPages()) {
 				String domainSizes = getDomainSizes(model.getModel());
 				for (String query: model.getDefaultQueriesToRun()) {
@@ -123,38 +136,17 @@ public class Evaluation {
 					csvLine.add(domainSizes);
 					csvLine.add(""+configuration.getNumberRunsToAverageOver());
 					for (SolverEvaluator solver : solvers) {
-						boolean failed = false;
-						double  result = -1;
-						long sumOfTotalInferenceTimeInMilliseconds   = 0L;
-						long sumOfTotalTranslationTimeInMilliseconds = 0L;
-						for (int i = 0; i < configuration.getNumberRunsToAverageOver(); i++) {
-							if (configuration.type == Type.PR) {
-								SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(model.getName()+" - "+query, 
-										model.getLanguage(), model.getModel(), query);
-								sumOfTotalInferenceTimeInMilliseconds   += prResult.getTotalInferenceTimeInMilliseconds();
-								sumOfTotalTranslationTimeInMilliseconds += prResult.getTotalTranslationTimeInMilliseconds(); 
-								if (prResult.getProbabilityOfEvidence() == null) {
-									failed = true;
-								}
-								else {
-									result = prResult.getProbabilityOfEvidence().doubleValue();
-								}
-							}
-							else {
-								throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
-							}
-						}
-						long averageInferenceTimeInMilliseconds    = sumOfTotalInferenceTimeInMilliseconds / configuration.getNumberRunsToAverageOver();
-						long averagelTranslationTimeInMilliseconds = sumOfTotalTranslationTimeInMilliseconds / configuration.getNumberRunsToAverageOver();
+						SolverCallResult solverResult = callSolver(configuration, solver, model, query);
 						csvLine.add(solver.getConfiguration().getName());
-						csvLine.add(failed ? "FAILED" : ""+result);
-						csvLine.add(""+averageInferenceTimeInMilliseconds);
-						csvLine.add(toDurationString(averageInferenceTimeInMilliseconds));
-						csvLine.add(""+averagelTranslationTimeInMilliseconds);
-						csvLine.add(toDurationString(averagelTranslationTimeInMilliseconds));
+						csvLine.add(solverResult.failed ? "FAILED" : ""+solverResult.answer);
+						csvLine.add(""+solverResult.averageInferenceTimeInMilliseconds);
+						csvLine.add(toDurationString(solverResult.averageInferenceTimeInMilliseconds));
+						csvLine.add(""+solverResult.averagelTranslationTimeInMilliseconds);
+						csvLine.add(toDurationString(solverResult.averagelTranslationTimeInMilliseconds));
 					}
 					resultOutput.println(csvLine);
 					resultOutput.flush();
+					evaluationListener.info(csvLine.toString());
 				}
 			}
 		}
@@ -190,6 +182,37 @@ public class Evaluation {
 		return result;
 	}
 	
+	private SolverCallResult callSolver(Evaluation.Configuration configuration, SolverEvaluator solver, ModelPage model, String query) 
+		throws Exception {
+		
+		SolverCallResult result = new SolverCallResult();	
+		
+		long sumOfTotalInferenceTimeInMilliseconds   = 0L;
+		long sumOfTotalTranslationTimeInMilliseconds = 0L;
+		for (int i = 0; i < configuration.getNumberRunsToAverageOver(); i++) {
+			if (configuration.type == Type.PR) {
+				SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(model.getName()+" - "+query, 
+						model.getLanguage(), model.getModel(), query);
+				sumOfTotalInferenceTimeInMilliseconds   += prResult.getTotalInferenceTimeInMilliseconds();
+				sumOfTotalTranslationTimeInMilliseconds += prResult.getTotalTranslationTimeInMilliseconds(); 
+				if (prResult.getProbabilityOfEvidence() == null) {
+					result.failed = true;
+				}
+				else {
+					result.answer = prResult.getProbabilityOfEvidence().doubleValue();
+				}
+			}
+			else {
+				throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
+			}
+		}
+		result.averageInferenceTimeInMilliseconds    = sumOfTotalInferenceTimeInMilliseconds / configuration.getNumberRunsToAverageOver();
+		result.averagelTranslationTimeInMilliseconds = sumOfTotalTranslationTimeInMilliseconds / configuration.getNumberRunsToAverageOver();
+		
+		return result;
+	}
+
+	
 	private String getDomainSizes(String model) {
 		StringJoiner result = new StringJoiner(",");
 		
@@ -202,7 +225,6 @@ public class Evaluation {
 		return result.toString();
 	}
 	
-	//
 	private String toDurationString(long duration) {
 		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
 		
@@ -221,5 +243,12 @@ public class Evaluation {
 		milliseconds = duration;
 		
 		return "" + hours + "h" + minutes + "m" + seconds + "." + milliseconds+"s";
+	}
+	
+	class SolverCallResult {
+		double answer = -1;
+		boolean failed = false;
+		long averageInferenceTimeInMilliseconds;
+		long averagelTranslationTimeInMilliseconds;
 	}
 }

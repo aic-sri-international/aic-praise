@@ -81,6 +81,9 @@ public class EvaluationCLI {
 		
 		Evaluation evaluation = new Evaluation();
 		evaluation.evaluate(configuration, modelsContainer, solverConfigurations, new Evaluation.Listener() {
+			public void info(String infoMessage) {
+				System.out.println(infoMessage);
+			}
 		});
 	}
 }
