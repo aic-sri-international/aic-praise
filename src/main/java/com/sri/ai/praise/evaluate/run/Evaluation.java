@@ -48,6 +48,8 @@ import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
+import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
+import com.sri.ai.util.math.Rational;
 
 /**
  * Class responsible for running an evaluation of 1 or more solvers on a given problem set.
@@ -67,10 +69,12 @@ public class Evaluation {
 	public static class Configuration {
 		private Evaluation.Type type;
 		private File workingDirectory;
+		private int numberRunsToAverageOver;
 		
-		public Configuration(Evaluation.Type type, File workingDirectory) {
-			this.type             = type;
-			this.workingDirectory = workingDirectory;
+		public Configuration(Evaluation.Type type, File workingDirectory, int numberRunsToAverageOver) {
+			this.type                    = type;
+			this.workingDirectory        = workingDirectory;
+			this.numberRunsToAverageOver = numberRunsToAverageOver;
 		}
 		
 		public Evaluation.Type getType() {
@@ -79,6 +83,10 @@ public class Evaluation {
 		
 		public File getWorkingDirectory() {
 			return workingDirectory;
+		}
+		
+		public int getNumberRunsToAverageOver() {
+			return numberRunsToAverageOver;
 		}
 	}
 	
@@ -94,6 +102,8 @@ public class Evaluation {
 			StringJoiner csvLine = new StringJoiner(",");
 			csvLine.add("Problem");
 			csvLine.add("Inference Type");
+			csvLine.add("Domain Size(s)");
+			csvLine.add("# runs values averaged over");
 			for (SolverEvaluator solver : solvers) {
 				csvLine.add("Solver");
 				csvLine.add("Result for "+solver.getConfiguration().getName());
@@ -105,24 +115,43 @@ public class Evaluation {
 			resultOutput.println(csvLine);
 			
 			for (ModelPage model : modelsToEvaluateContainer.getPages()) {
+				String domainSizes = getDomainSizes(model.getModel());
 				for (String query: model.getDefaultQueriesToRun()) {
 					csvLine = new StringJoiner(",");
 					csvLine.add(modelsToEvaluateContainer.getName()+" - "+model.getName() + " : " + query);
 					csvLine.add(configuration.type.name());
+					csvLine.add(domainSizes);
+					csvLine.add(""+configuration.getNumberRunsToAverageOver());
 					for (SolverEvaluator solver : solvers) {
-						if (configuration.type == Type.PR) {
-							SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(model.getName()+" - "+query, 
-									model.getLanguage(), model.getModel(), query);
-							csvLine.add(solver.getConfiguration().getName());
-							csvLine.add(prResult.getProbabilityOfEvidence() == null ? "FAILED" : ""+prResult.getProbabilityOfEvidence().doubleValue());
-							csvLine.add(""+prResult.getTotalInferenceTimeInMilliseconds());
-							csvLine.add(prResult.toTotalInferenceTimeInMillisecondsString());
-							csvLine.add(""+prResult.getTotalTranslationTimeInMilliseconds());
-							csvLine.add(prResult.toTotalTranslationTimeInMillisecondsString());
+						boolean failed = false;
+						double  result = -1;
+						long sumOfTotalInferenceTimeInMilliseconds   = 0L;
+						long sumOfTotalTranslationTimeInMilliseconds = 0L;
+						for (int i = 0; i < configuration.getNumberRunsToAverageOver(); i++) {
+							if (configuration.type == Type.PR) {
+								SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(model.getName()+" - "+query, 
+										model.getLanguage(), model.getModel(), query);
+								sumOfTotalInferenceTimeInMilliseconds   += prResult.getTotalInferenceTimeInMilliseconds();
+								sumOfTotalTranslationTimeInMilliseconds += prResult.getTotalTranslationTimeInMilliseconds(); 
+								if (prResult.getProbabilityOfEvidence() == null) {
+									failed = true;
+								}
+								else {
+									result = prResult.getProbabilityOfEvidence().doubleValue();
+								}
+							}
+							else {
+								throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
+							}
 						}
-						else {
-							throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
-						}
+						long averageInferenceTimeInMilliseconds    = sumOfTotalInferenceTimeInMilliseconds / configuration.getNumberRunsToAverageOver();
+						long averagelTranslationTimeInMilliseconds = sumOfTotalTranslationTimeInMilliseconds / configuration.getNumberRunsToAverageOver();
+						csvLine.add(solver.getConfiguration().getName());
+						csvLine.add(failed ? "FAILED" : ""+result);
+						csvLine.add(""+averageInferenceTimeInMilliseconds);
+						csvLine.add(toDurationString(averageInferenceTimeInMilliseconds));
+						csvLine.add(""+averagelTranslationTimeInMilliseconds);
+						csvLine.add(toDurationString(averagelTranslationTimeInMilliseconds));
 					}
 					resultOutput.println(csvLine);
 					resultOutput.flush();
@@ -159,5 +188,38 @@ public class Evaluation {
 		}
 		
 		return result;
+	}
+	
+	private String getDomainSizes(String model) {
+		StringJoiner result = new StringJoiner(",");
+		
+		ExpressionFactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(model);
+// TODO - this only works with HOGM models and inequality integer types currently		
+		for (com.sri.ai.expresso.api.Type type : factorsAndTypes.getAdditionalTypes()) {
+			result.add(""+type.cardinality().intValueExact());
+		}
+		
+		return result.toString();
+	}
+	
+	//
+	private String toDurationString(long duration) {
+		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
+		
+		if (duration != 0) {
+			hours    = duration / 3600000;
+			duration = duration % 3600000; 
+		}
+		if (duration != 0) {
+			minutes  = duration / 60000;
+			duration = duration % 60000;
+		}
+		if (duration != 0) {
+			seconds  = duration / 1000;
+			duration = duration % 1000;
+		}
+		milliseconds = duration;
+		
+		return "" + hours + "h" + minutes + "m" + seconds + "." + milliseconds+"s";
 	}
 }

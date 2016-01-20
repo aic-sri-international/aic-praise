@@ -53,34 +53,4 @@ public abstract class SolverEvaluatorResult {
 	public long getTotalInferenceTimeInMilliseconds() {
 		return totalInferenceTimeInMilliseconds;
 	}
-	
-	public String toTotalTranslationTimeInMillisecondsString() {
-		return toDurationString(totalTranslationTimeInMilliseconds);
-	}
-	
-	public String toTotalInferenceTimeInMillisecondsString() {
-		return toDurationString(totalInferenceTimeInMilliseconds);
-	}
-	
-	//
-	// PRIVATE
-	private String toDurationString(long duration) {
-		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
-		
-		if (duration != 0) {
-			hours    = duration / 3600000;
-			duration = duration % 3600000; 
-		}
-		if (duration != 0) {
-			minutes  = duration / 60000;
-			duration = duration % 60000;
-		}
-		if (duration != 0) {
-			seconds  = duration / 1000;
-			duration = duration % 1000;
-		}
-		milliseconds = duration;
-		
-		return "" + hours + "h" + minutes + "m" + seconds + "." + milliseconds+"s";
-	}
 }

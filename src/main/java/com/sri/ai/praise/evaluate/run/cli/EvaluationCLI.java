@@ -68,8 +68,9 @@ public class EvaluationCLI {
 		String evaluationName = "Evaluation randomModel-r3-n1-d2-iv1s1e10";
 		int totalCPURuntimeLimitSecondsPerSolveAttempt = 600;
 		int totalMemoryLimitInMegabytesPerSolveAttempt = 4096;
+		int numberRunsToAverageOver                    = 10;
 		
-		Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PR, outputDirectory);
+		Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PR, outputDirectory, numberRunsToAverageOver);
 		PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationName, PagedModelContainer.getModelPagesFromURI(modelsContainerFile.toURI()));
 		List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(			
 				new SolverEvaluatorConfiguration("SGSolver", SGSolverEvaluator.class.getName(), 
