@@ -96,7 +96,7 @@ public class Evaluation {
 	
 	public void evaluate(Evaluation.Configuration configuration, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluatorConfiguration> solverConfigurations, Evaluation.Listener evaluationListener) {
 		// Note, varying domain sizes etc... is achieved by creating variants of a base model in the provided paged model container
-			
+		long evaluationStart = System.currentTimeMillis();	
 		try {
 			List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations, configuration.getWorkingDirectory());
 			
@@ -123,7 +123,7 @@ public class Evaluation {
 				csvLine.add("Translation ms. for "+solver.getConfiguration().getName());
 				csvLine.add("HH:MM:SS.");
 			}
-			evaluationListener.notification("Generating Evaluation Report");
+			evaluationListener.notification("Starting to generate Evaluation Report");
 			evaluationListener.csvResultOutput(csvLine.toString());
 			
 			// Now evaluate each of the model-query-solver combinations.
@@ -131,7 +131,9 @@ public class Evaluation {
 				String domainSizes = getDomainSizes(model.getModel());
 				for (String query: model.getDefaultQueriesToRun()) {
 					csvLine = new StringJoiner(",");
-					csvLine.add(modelsToEvaluateContainer.getName()+" - "+model.getName() + " : " + query);
+					String problemName = modelsToEvaluateContainer.getName()+" - "+model.getName() + " : " + query;
+					evaluationListener.notification("Starting to evaluate "+problemName);
+					csvLine.add(problemName);
 					csvLine.add(configuration.type.name());
 					csvLine.add(domainSizes);
 					csvLine.add(""+configuration.getNumberRunsToAverageOver());
@@ -143,6 +145,8 @@ public class Evaluation {
 						csvLine.add(toDurationString(solverResult.averageInferenceTimeInMilliseconds));
 						csvLine.add(""+solverResult.averagelTranslationTimeInMilliseconds);
 						csvLine.add(toDurationString(solverResult.averagelTranslationTimeInMilliseconds));
+						
+						evaluationListener.notification("Solver "+solver.getConfiguration().getName()+" took an average inference time of "+toDurationString(solverResult.averageInferenceTimeInMilliseconds)+" to solve "+problemName);
 					}
 					evaluationListener.csvResultOutput(csvLine.toString());
 				}
@@ -151,6 +155,8 @@ public class Evaluation {
 		catch (Exception ex) {
 			evaluationListener.notificationException(ex);
 		}
+		long evaluationEnd = System.currentTimeMillis();
+		evaluationListener.notification("Evaluation took "+toDurationString(evaluationEnd - evaluationStart)+ " to run to completion.");
 	}
 	
 	@SuppressWarnings("unchecked")
