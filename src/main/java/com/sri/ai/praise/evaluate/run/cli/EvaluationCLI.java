@@ -38,6 +38,10 @@
 package com.sri.ai.praise.evaluate.run.cli;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +52,10 @@ import com.sri.ai.praise.evaluate.solver.impl.sgsolver.SGSolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.impl.vec.VECSolverEvaluator;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
+
 /**
  * Command line interface for running evaluations.
  * 
@@ -57,33 +65,118 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
 public class EvaluationCLI {
 // TODO - consider using commons-configuration to evaluation input file reading, i.e. https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
 	
-	public static void main(String[] args) throws Exception {
-// TODO - implement based on args
+	static class EvaluationArgs implements AutoCloseable {
+		// Optional
+		PrintStream  notificationOut = System.out; // -n
+		PrintStream  resultOut       = System.out; // -r 
+		//
+		int totalCPURuntimeLimitSecondsPerSolveAttempt = 600;  // -c
+		int totalMemoryLimitInMegabytesPerSolveAttempt = 4096; // -m
+		int numberRunsToAverageOver                    = 10;   // -a
+				
+		// Required
+		File workingDirectory; // -w
+		File praiseModelsFile; // -p
 		
-		File rootDirectory       = new File("/mnt/hgfs/PPAML/evaluate");
-		File inputDirectory      = new File(rootDirectory, "input");
-		File outputDirectory     = new File(rootDirectory, "pi20160124");
-		File modelsContainerFile = new File(inputDirectory,"randomModel-r3-n1-d2-iv1s1e10.praise");
-		
-		String evaluationName = "Evaluation randomModel-r3-n1-d2-iv1s1e10";
-		int totalCPURuntimeLimitSecondsPerSolveAttempt = 600;
-		int totalMemoryLimitInMegabytesPerSolveAttempt = 4096;
-		int numberRunsToAverageOver                    = 10;
-		
-		Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PR, outputDirectory, numberRunsToAverageOver);
-		PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationName, PagedModelContainer.getModelPagesFromURI(modelsContainerFile.toURI()));
-		List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(			
-				new SolverEvaluatorConfiguration("SGSolver", SGSolverEvaluator.class.getName(), 
-						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
-				new SolverEvaluatorConfiguration("VEC", VECSolverEvaluator.class.getName(), 
-						totalCPURuntimeLimitSecondsPerSolveAttempt, totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap())
-				);
-		
-		Evaluation evaluation = new Evaluation();
-		evaluation.evaluate(configuration, modelsContainer, solverConfigurations, new Evaluation.Listener() {
-			public void info(String infoMessage) {
-				System.out.println(infoMessage);
+		@Override
+		public void close() throws IOException {
+			notificationOut.flush();
+			resultOut.flush();
+			// Only close if not System.out
+			if (notificationOut != System.out) {				
+				notificationOut.close();
 			}
-		});
+			if (resultOut != System.out) {
+				resultOut.close();
+			}
+		}
+	}
+	
+	public static void main(String[] args) throws Exception {		
+		try (EvaluationArgs evaluationArgs = getArgs(args)) {			
+			Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PR, evaluationArgs.workingDirectory, evaluationArgs.numberRunsToAverageOver);
+			PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationArgs.praiseModelsFile.getName(), PagedModelContainer.getModelPagesFromURI(evaluationArgs.praiseModelsFile.toURI()));
+			List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(			
+					new SolverEvaluatorConfiguration("SGSolver", SGSolverEvaluator.class.getName(), 
+							evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt, 
+							evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
+					new SolverEvaluatorConfiguration("VEC", VECSolverEvaluator.class.getName(), 
+							evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt, 
+							evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap())
+					);
+			
+			Evaluation evaluation = new Evaluation();
+			evaluation.evaluate(configuration, modelsContainer, solverConfigurations, new Evaluation.Listener() {
+				public void notification(String notification) {
+					evaluationArgs.notificationOut.println(notification);
+				}
+				
+				public void notificationException(Exception ex) {
+					ex.printStackTrace(evaluationArgs.notificationOut);
+				}
+				
+				public void csvResultOutput(String csvLine) {
+					evaluationArgs.resultOut.println(csvLine);
+				}
+			});
+		}
+	}
+	
+	//
+	// PRIVATE
+	private static EvaluationArgs getArgs(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
+		EvaluationArgs result = new EvaluationArgs();
+		
+		OptionParser parser = new OptionParser();
+		// Optional
+		OptionSpec<File> notificationFile = parser.accepts("n", "Notification output file name (default to stdout).").withRequiredArg().ofType(File.class);
+		OptionSpec<File> resultFile       = parser.accepts("r", "Result output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
+		//
+		OptionSpec<Integer> totalCPURuntimeLimitSecondsPerSolveAttempt = parser.accepts("c", "Total CPU runtime limit seconds per solver attempt (defaults to "+result.totalCPURuntimeLimitSecondsPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
+		OptionSpec<Integer> totalMemoryLimitInMegabytesPerSolveAttempt = parser.accepts("m", "Total memory limit in MB per solver attempt (defaults to "+result.totalMemoryLimitInMegabytesPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
+		OptionSpec<Integer> numberRunsToAverageOver                    = parser.accepts("a", "Number of runs to average each result over (defaults to "+result.numberRunsToAverageOver+").").withRequiredArg().ofType(Integer.class);
+
+		// Required
+		OptionSpec<File> praiseModelsFile  = parser.accepts("p", "The PRAiSE Models file used as input for the evaluations").withRequiredArg().required().ofType(File.class);
+		OptionSpec<File> workingDirectory  = parser.accepts("w", "Solver Working Directory (temp directories and files will be created under here)").withRequiredArg().required().ofType(File.class);
+		
+		//
+		parser.accepts("help").forHelp();
+		
+		OptionSet options = parser.parse(args);
+		
+		if (options.has("help")) {
+			parser.printHelpOn(System.out);
+			System.exit(0);
+		}
+		
+		// 
+		// Handle optional args
+		if (options.has(notificationFile)) {
+			result.notificationOut = new PrintStream(options.valueOf(notificationFile));
+		}
+		if (options.has(resultFile)) {
+			result.resultOut = new PrintStream(options.valueOf(resultFile));
+		}
+		if (options.has(totalCPURuntimeLimitSecondsPerSolveAttempt)) {
+			result.totalCPURuntimeLimitSecondsPerSolveAttempt = options.valueOf(totalCPURuntimeLimitSecondsPerSolveAttempt);
+		}
+		if (options.has(totalMemoryLimitInMegabytesPerSolveAttempt)) {
+			result.totalMemoryLimitInMegabytesPerSolveAttempt = options.valueOf(totalMemoryLimitInMegabytesPerSolveAttempt);
+		}
+		if (options.has(numberRunsToAverageOver)) {
+			result.numberRunsToAverageOver = options.valueOf(numberRunsToAverageOver);
+		}
+		
+		result.praiseModelsFile = options.valueOf(praiseModelsFile);
+		if (!result.praiseModelsFile.isFile()) {
+			throw new IllegalArgumentException("Input PRAiSE models file does not exist: "+result.praiseModelsFile.getAbsolutePath());
+		}
+		result.workingDirectory = options.valueOf(workingDirectory);
+		if (!result.workingDirectory.isDirectory()) {
+			throw new IllegalArgumentException("Working directory does not exist: "+result.workingDirectory);
+		}
+		
+		return result;
 	}
 }

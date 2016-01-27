@@ -38,7 +38,6 @@
 package com.sri.ai.praise.evaluate.run;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -90,22 +89,24 @@ public class Evaluation {
 	}
 	
 	public interface Listener {
-		void info(String notification);
+		void notification(String notification);
+		void notificationException(Exception ex);
+		void csvResultOutput(String csvLine);
 	}
 	
 	public void evaluate(Evaluation.Configuration configuration, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluatorConfiguration> solverConfigurations, Evaluation.Listener evaluationListener) {
 		// Note, varying domain sizes etc... is achieved by creating variants of a base model in the provided paged model container
 			
-		try (PrintWriter resultOutput = new PrintWriter(new File(configuration.getWorkingDirectory(), "solver_results.csv"))) {
+		try {
 			List<SolverEvaluator> solvers = instantiateSolvers(solverConfigurations, configuration.getWorkingDirectory());
 			
 			// Do an initial burn in to ensure any OS caching etc... occurs so as to even out times across runs
 			ModelPage burnInModel = modelsToEvaluateContainer.getPages().get(0);
 			String    burnInQuery = burnInModel.getDefaultQueriesToRun().get(0);  
-			evaluationListener.info("Starting solver burn in based on '"+modelsToEvaluateContainer.getName()+" - "+burnInModel.getName() + " : " + burnInQuery+"'");
+			evaluationListener.notification("Starting solver burn in based on '"+modelsToEvaluateContainer.getName()+" - "+burnInModel.getName() + " : " + burnInQuery+"'");
 			for (SolverEvaluator solver : solvers) {
 				SolverCallResult solverResult =  callSolver(configuration, solver, burnInModel, burnInQuery);
-				evaluationListener.info("Burn in for "+solver.getConfiguration().getName()+" complete. Average inference time = "+toDurationString(solverResult.averageInferenceTimeInMilliseconds));
+				evaluationListener.notification("Burn in for "+solver.getConfiguration().getName()+" complete. Average inference time = "+toDurationString(solverResult.averageInferenceTimeInMilliseconds));
 			}
 			
 			// Output the report header line
@@ -122,9 +123,8 @@ public class Evaluation {
 				csvLine.add("Translation ms. for "+solver.getConfiguration().getName());
 				csvLine.add("HH:MM:SS.");
 			}
-			resultOutput.println(csvLine);
-			evaluationListener.info("Generating Evaluation Report");
-			evaluationListener.info(csvLine.toString());
+			evaluationListener.notification("Generating Evaluation Report");
+			evaluationListener.csvResultOutput(csvLine.toString());
 			
 			// Now evaluate each of the model-query-solver combinations.
 			for (ModelPage model : modelsToEvaluateContainer.getPages()) {
@@ -144,15 +144,12 @@ public class Evaluation {
 						csvLine.add(""+solverResult.averagelTranslationTimeInMilliseconds);
 						csvLine.add(toDurationString(solverResult.averagelTranslationTimeInMilliseconds));
 					}
-					resultOutput.println(csvLine);
-					resultOutput.flush();
-					evaluationListener.info(csvLine.toString());
+					evaluationListener.csvResultOutput(csvLine.toString());
 				}
 			}
 		}
 		catch (Exception ex) {
-// TODO - handle properly
-			ex.printStackTrace();
+			evaluationListener.notificationException(ex);
 		}
 	}
 	
