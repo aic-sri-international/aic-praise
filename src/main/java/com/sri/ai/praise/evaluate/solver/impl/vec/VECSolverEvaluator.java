@@ -66,7 +66,8 @@ import com.sri.ai.util.math.Rational;
  * </pre>
  * 
  * at the end of it.
- * NOTE: once done, ensure you restart your machine and when you log back in check that you can run 'vec-uai14' from the command line.
+ * NOTE: once done, ensure you log out and back in again (to ensure the .profile settings are applied to your session), 
+ * and check that you can run 'vec-uai14' from the command line.
  * 
  * @author oreilly
  *
