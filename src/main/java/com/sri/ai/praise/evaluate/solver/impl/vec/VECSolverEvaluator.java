@@ -55,7 +55,18 @@ import com.sri.ai.util.math.Rational;
 
 /**
  * Wrapper around Vibhav's UAI 2014 Solver, available from:<br>
+ * 
  * http://www.hlt.utdallas.edu/~vgogate/vec-uai14.tar.gz
+ * 
+ * Once un-archived ensure the 'vec-uai14' executable is on your PATH environment variable so that it can be executed.
+ * This can be done by editing your '.profile' and adding something similar to the following:
+ * 
+ * <pre>
+ * PATH="$HOME/vec-uai14/Release:$PATH"
+ * </pre>
+ * 
+ * at the end of it.
+ * NOTE: once done ensure you restart your machine and when you log back in check that you can run 'vec-uai14 from the command line.
  * 
  * @author oreilly
  *
