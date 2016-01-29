@@ -73,6 +73,8 @@ public class EvaluationCLI {
 		int totalCPURuntimeLimitSecondsPerSolveAttempt = 600;  // -c
 		int totalMemoryLimitInMegabytesPerSolveAttempt = 4096; // -m
 		int numberRunsToAverageOver                    = 10;   // -a
+		//
+		boolean translateAlways = false; // -t
 				
 		// Required
 		File workingDirectory; // -w
@@ -99,10 +101,12 @@ public class EvaluationCLI {
 			List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(			
 					new SolverEvaluatorConfiguration("SGSolver", SGSolverEvaluator.class.getName(), 
 							evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt, 
-							evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap()),
+							evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt,
+							!evaluationArgs.translateAlways, Collections.emptyMap()),
 					new SolverEvaluatorConfiguration("VEC", VECSolverEvaluator.class.getName(), 
 							evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt, 
-							evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt, Collections.emptyMap())
+							evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt,
+							!evaluationArgs.translateAlways, Collections.emptyMap())
 					);
 			
 			Evaluation evaluation = new Evaluation();
@@ -135,13 +139,14 @@ public class EvaluationCLI {
 		OptionSpec<Integer> totalCPURuntimeLimitSecondsPerSolveAttempt = parser.accepts("c", "Total CPU runtime limit seconds per solver attempt (defaults to "+result.totalCPURuntimeLimitSecondsPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
 		OptionSpec<Integer> totalMemoryLimitInMegabytesPerSolveAttempt = parser.accepts("m", "Total memory limit in MB per solver attempt (defaults to "+result.totalMemoryLimitInMegabytesPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
 		OptionSpec<Integer> numberRunsToAverageOver                    = parser.accepts("a", "Number of runs to average each result over (defaults to "+result.numberRunsToAverageOver+").").withRequiredArg().ofType(Integer.class);
-
+		parser.accepts("t", "Translate models always, instead of caching them between runs (default behavior)");
+		
 		// Required
 		OptionSpec<File> praiseModelsFile  = parser.accepts("p", "The PRAiSE Models file used as input for the evaluations").withRequiredArg().required().ofType(File.class);
 		OptionSpec<File> workingDirectory  = parser.accepts("w", "Solver Working Directory (temp directories and files will be created under here)").withRequiredArg().required().ofType(File.class);
 		
 		//
-		parser.accepts("help").forHelp();
+		parser.accepts("help", "For help on command line arguments").forHelp();
 		
 		OptionSet options = parser.parse(args);
 		
@@ -166,6 +171,9 @@ public class EvaluationCLI {
 		}
 		if (options.has(numberRunsToAverageOver)) {
 			result.numberRunsToAverageOver = options.valueOf(numberRunsToAverageOver);
+		}
+		if (options.has("t")) {
+			result.translateAlways = true;
 		}
 		
 		result.praiseModelsFile = options.valueOf(praiseModelsFile);

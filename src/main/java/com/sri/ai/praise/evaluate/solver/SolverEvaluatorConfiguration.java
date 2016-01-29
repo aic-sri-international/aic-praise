@@ -51,14 +51,16 @@ public class SolverEvaluatorConfiguration {
 	private String implementationClassName;
 	private int totalCPURuntimeLimitSecondsPerSolveAttempt;
 	private int totalMemoryLimitInMegabytesPerSolveAttempt;
+	private boolean cacheTranslations;
 	private Map<String, String> solverSpecificConfiguration;
 	private File workingDirectory;
 	
-	public SolverEvaluatorConfiguration(String name, String implementationClassName, int totalCPURuntimeLimitSecondsPerSolveAttempt, int totalMemoryLimitInMegabytesPerSolveAttempt, Map<String, String> solverSpecificConfiguration) {
+	public SolverEvaluatorConfiguration(String name, String implementationClassName, int totalCPURuntimeLimitSecondsPerSolveAttempt, int totalMemoryLimitInMegabytesPerSolveAttempt, boolean cacheTranslations, Map<String, String> solverSpecificConfiguration) {
 		this.name                                       = name;
 		this.implementationClassName                    = implementationClassName;
 		this.totalCPURuntimeLimitSecondsPerSolveAttempt = totalCPURuntimeLimitSecondsPerSolveAttempt;
 		this.totalMemoryLimitInMegabytesPerSolveAttempt = totalMemoryLimitInMegabytesPerSolveAttempt;
+		this.cacheTranslations                          = cacheTranslations;
 		this.solverSpecificConfiguration                = solverSpecificConfiguration;
 	}
 
@@ -76,6 +78,10 @@ public class SolverEvaluatorConfiguration {
 
 	public int getTotalMemoryLimitInMegabytesPerSolveAttempt() {
 		return totalMemoryLimitInMegabytesPerSolveAttempt;
+	}
+	
+	public boolean isCacheTranslations() {
+		return cacheTranslations;
 	}
 
 	public Map<String, String> getSolverSpecificConfiguration() {

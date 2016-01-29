@@ -43,6 +43,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -90,8 +93,8 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		// NOTE: This trick is dependent on the input model being HOGMv1
 		String hogmv1Model = model + "\nrandom UAIQuery : Boolean;\nif "+evidenceQuery+" then UAIQuery else not UAIQuery;\n";
 	
-		VECCallResult partitionResult = callVECPR("Partition Function "+solveRequestId, inputToUAITranslator, new Reader[] {new StringReader(hogmv1Model)});
-		VECCallResult evidenceResult  = callVECPR("Evidence "+solveRequestId, inputToUAITranslator, new Reader[] {new StringReader(hogmv1Model), new StringReader("UAIQuery")});
+		VECCallResult partitionResult = callVECPR("Partition Function "+solveRequestId, inputToUAITranslator, hogmv1Model, new Reader[] {new StringReader(hogmv1Model)});
+		VECCallResult evidenceResult  = callVECPR("Evidence "+solveRequestId, inputToUAITranslator, hogmv1Model+"\nUAIQuery;", new Reader[] {new StringReader(hogmv1Model), new StringReader("UAIQuery")});
 		
 		Double probabilityResult = Math.pow(10, evidenceResult.resultLog10) / Math.pow(10, partitionResult.resultLog10);
 		SolverEvaluatorProbabilityEvidenceResult result = new SolverEvaluatorProbabilityEvidenceResult(
@@ -110,7 +113,7 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 	
 	//
 	// PRIVATE
-	private VECCallResult callVECPR(String identifier, Translator inputToUAITranslator, Reader[] input) throws Exception {
+	private VECCallResult callVECPR(String identifier, Translator inputToUAITranslator, String modelQueryIdentifier, Reader[] input) throws Exception {
 		long translationStart = System.currentTimeMillis();
 		File tempUAI    = File.createTempFile("vec", ".uai", getConfiguration().getWorkingDirectory());
 		File tempEvid   = File.createTempFile("vec", ".uai.evid", getConfiguration().getWorkingDirectory());
@@ -119,11 +122,42 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		File tempSTDERR = File.createTempFile("vec", ".stderr", getConfiguration().getWorkingDirectory());
 		File tempSTDOUT = File.createTempFile("vec", ".stdout", getConfiguration().getWorkingDirectory());
 		
-		PrintWriter pwUAIModel    = new PrintWriter(tempUAI);
-		PrintWriter pwUAIEvidence = new PrintWriter(tempEvid);
-		inputToUAITranslator.translate(identifier, input, new PrintWriter[] {pwUAIModel, pwUAIEvidence});
-		pwUAIModel.flush();
-		pwUAIEvidence.flush();
+		boolean translationRequired = true;
+// TODO - the translator should really handle caching but will need to give it working directory and whether to cache or not information.
+//        TBD best way to do this.
+		File cachedUAI = null, cachedEvid = null;
+		if (getConfiguration().isCacheTranslations()) {
+			String cacheIdentifier = computeCacheIdentifier(
+					inputToUAITranslator.getSource().getCode(), 
+					inputToUAITranslator.getTarget().getCode(),
+					modelQueryIdentifier);
+			
+			cachedUAI  = new File(getConfiguration().getWorkingDirectory(), "vec-"+cacheIdentifier+"-cached.uai");
+			cachedEvid = new File(getConfiguration().getWorkingDirectory(), "vec-"+cacheIdentifier+"-cached.uai.evid"); 
+			if (cachedUAI.isFile() && cachedEvid.isFile()) {
+				Files.copy(cachedUAI.toPath(), tempUAI.toPath());
+				Files.copy(cachedEvid.toPath(), tempEvid.toPath());
+				translationRequired = false;
+				// Don't want to re-cache
+				cachedUAI = null; cachedEvid = null;
+			}
+		}
+		
+		if (translationRequired) {
+			PrintWriter pwUAIModel    = new PrintWriter(tempUAI);
+			PrintWriter pwUAIEvidence = new PrintWriter(tempEvid);
+			inputToUAITranslator.translate(identifier, input, new PrintWriter[] {pwUAIModel, pwUAIEvidence});
+			pwUAIModel.flush();
+			pwUAIEvidence.flush();
+			pwUAIModel.close();
+			pwUAIEvidence.close();
+			
+			if (cachedUAI != null && cachedEvid != null) {
+				// Ensure the translation is cached
+				Files.copy(tempUAI.toPath(), cachedUAI.toPath());
+				Files.copy(tempEvid.toPath(), cachedEvid.toPath());
+			}
+		}
 		
 		long translationEnd = System.currentTimeMillis();
 		
@@ -135,8 +169,7 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		processBuilder.command(_vecProgramName, tempUAI.getName(), tempEvid.getName(), "dummy", _probabilityEvidenceQuery);
 		processBuilder.redirectError(ProcessBuilder.Redirect.to(tempSTDERR));
 		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(tempSTDOUT));
-		
-		
+			
 		long vecStart = System.currentTimeMillis();
 		Process vecProcess = processBuilder.start();
 		// Wait solver time plus a little extra to give VEC itself a chance to startup and shutdown outside the context of solving
@@ -165,6 +198,21 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 			result.resultLog10 = Double.NaN;
 		}
 		
+		return result;
+	}
+	
+	private String computeCacheIdentifier(String... identifyingInputs) {
+		String result;
+		try {
+			MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+			for (int i = 0; i < identifyingInputs.length; i++) {
+				messageDigest.digest(identifyingInputs[i].getBytes());
+			}
+			result = Base64.getEncoder().encodeToString(messageDigest.digest());
+		}
+		catch (NoSuchAlgorithmException nsae) {
+			throw new RuntimeException("Unexpected exception", nsae);
+		}
 		return result;
 	}
 	
