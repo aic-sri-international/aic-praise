@@ -135,6 +135,8 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 			cachedUAI  = new File(getConfiguration().getWorkingDirectory(), "vec-"+cacheIdentifier+"-cached.uai");
 			cachedEvid = new File(getConfiguration().getWorkingDirectory(), "vec-"+cacheIdentifier+"-cached.uai.evid"); 
 			if (cachedUAI.isFile() && cachedEvid.isFile()) {
+				tempUAI.delete();
+				tempEvid.delete();
 				Files.copy(cachedUAI.toPath(), tempUAI.toPath());
 				Files.copy(cachedEvid.toPath(), tempEvid.toPath());
 				translationRequired = false;
@@ -206,9 +208,10 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		try {
 			MessageDigest messageDigest = MessageDigest.getInstance("MD5");
 			for (int i = 0; i < identifyingInputs.length; i++) {
-				messageDigest.digest(identifyingInputs[i].getBytes());
+				messageDigest.update(identifyingInputs[i].getBytes());
 			}
-			result = Base64.getEncoder().encodeToString(messageDigest.digest());
+			// NOTE: Use replace calls to ensure only legal filenames are generated from the BASE64 alphabet
+			result = Base64.getEncoder().encodeToString(messageDigest.digest()).replace('+', '-').replace('/', '_');
 		}
 		catch (NoSuchAlgorithmException nsae) {
 			throw new RuntimeException("Unexpected exception", nsae);
