@@ -37,7 +37,9 @@
  */
 package com.sri.ai.praise.lang.grounded.model;
 
+import static com.sri.ai.expresso.helper.Expressions.isNumber;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.myAssert;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -50,24 +52,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.RewritingProcess;
-import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.sgdpll2.api.ConstraintTheory;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
+import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.base.TernaryProcedure;
 import com.sri.ai.util.base.Triple;
 import com.sri.ai.util.math.MixedRadixNumber;
 import com.sri.ai.util.math.Rational;
 
 @Beta
 public class HOGModelGrounding {
+
+	public static boolean useContextSensitiveGrounding = true;
 	
 	public interface Listener {
 		//
@@ -78,7 +85,7 @@ public class HOGModelGrounding {
 		void factorParticipants(int factorIndex, int[] variableIndexes);
 		//
 		// Function tables
-		void factorValue(int factorIndex, int numberFactorValues, int valueIndex, Rational value);
+		void factorValue(int numberFactorValues, boolean isFirstValue, boolean isLastValue, Rational value);
 		//
 		// Evidence
 		void evidence(int variableIndex, int valueIndex);
@@ -88,13 +95,17 @@ public class HOGModelGrounding {
 	}
 	
 	public static void main(String[] args) {
+		long start = System.currentTimeMillis();
 		StringJoiner sj = new StringJoiner("\n");
-		sj.add("sort People : 10, Putin;");
+		sj.add("sort People : 50, Putin;");
+		sj.add("sort Countries : 50, USA, Russia;");
+		sj.add("random country : Countries;");
 		sj.add("random president : People;");
 		sj.add("random communism : Boolean;");
-		sj.add("random votePutin : 2..11;");
-		sj.add("if president = Putin then communism else not communism;");
-		sj.add("if votePutin > 5 then president = Putin else not president = Putin;");
+		sj.add("random democracy : Boolean;");
+		sj.add("random votePutin : 1..15;");
+		sj.add("if country = Russia then if president = Putin then communism else not communism else if democracy then not communism else communism;");
+		sj.add("if country = Russia then if votePutin > 5 then president = Putin else not president = Putin;");
 		
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
 		ParsedHOGModel    parsedModel     = parser.parseModel(sj.toString());
@@ -136,8 +147,8 @@ public class HOGModelGrounding {
 				preamble.add("\n");
 			}
 			@Override
-			public void factorValue(int factorIndex, int numberFactorValues, int valueIndex, Rational value) {
-				if (valueIndex == 0) {
+			public void factorValue(int numberFactorValues, boolean isFirstValue, boolean isLastValue, Rational value) {
+				if (isFirstValue) {
 					functionTables.add("\n"+numberFactorValues+"\n");
 				}
 				else {
@@ -146,7 +157,7 @@ public class HOGModelGrounding {
 				
 				functionTables.add(""+value.doubleValue());
 				
-				if (valueIndex == (numberFactorValues -1)) {
+				if (isLastValue) {
 					functionTables.add("\n");
 				}
 			}	
@@ -156,6 +167,7 @@ public class HOGModelGrounding {
 			}
 			@Override
 			public void groundingComplete() {
+				long end = System.currentTimeMillis() - start;
 				System.out.println("--- MODEL ---");
 				System.out.print(preamble);
 				System.out.print(functionTables);
@@ -167,6 +179,7 @@ public class HOGModelGrounding {
 					System.out.print(" ");
 					System.out.print(evidenceAssignment.second);
 				}	
+				System.out.println("\nTime taken for grounding (not printing): " + end + " ms.");	
 			}
 		});
 	}
@@ -177,72 +190,64 @@ public class HOGModelGrounding {
 		}
 		Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants = createRandomVariableNameToTypeSizeAndUnqiueConstantsMap(factorsAndTypes);
 		Map<Expression, Integer> randomVariableIndexes = new LinkedHashMap<>();
-		AtomicInteger variableIndex = new AtomicInteger(-1);
+		AtomicInteger atomicVariableIndex = new AtomicInteger(-1);
 		listener.numberGroundVariables(randomVariableNameToTypeSizeAndUniqueConstants.size());
 		randomVariableNameToTypeSizeAndUniqueConstants.entrySet().forEach(entry -> {
-			randomVariableIndexes.put(entry.getKey(), variableIndex.addAndGet(1));
-			listener.groundVariableCardinality(variableIndex.get(), entry.getValue().second);
+			randomVariableIndexes.put(entry.getKey(), atomicVariableIndex.addAndGet(1));
+			listener.groundVariableCardinality(atomicVariableIndex.get(), entry.getValue().second);
 		});
 		
 		Map<Expression, List<Expression>> typeToValues = createTypeToValuesMap(factorsAndTypes, randomVariableNameToTypeSizeAndUniqueConstants);
-		Map<String, String> newUniqueConstantToTypeMap = createGroundedUnqiueConstantToTypeMap(typeToValues);
+		Map<String, String> newUniqueConstantToTypeMap = createGroundedUniqueConstantToTypeMap(typeToValues);
 	    
-		ExpressionFactorsAndTypes grounedFactorsAndTypes = new ExpressionFactorsAndTypes(Collections.emptyList(),
+		ExpressionFactorsAndTypes groundedFactorsAndTypes = new ExpressionFactorsAndTypes(Collections.emptyList(),
 							factorsAndTypes.getMapFromRandomVariableNameToTypeName(),
 							factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName(),
 							newUniqueConstantToTypeMap,
 							factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
 							list());
 
-		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(grounedFactorsAndTypes, false, null, true);
+		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(groundedFactorsAndTypes, false, null, true);
+		RewritingProcess process = inferencer.makeProcessWithTypeInformation();
 		
 		listener.numberFactors(factorsAndTypes.getFactors().size());
 		int factorIndex = 0;
 		for (Expression factor : factorsAndTypes.getFactors()) {
-	    	List<Expression> randomVariablesInFactor = new ArrayList<>(Expressions.getSubExpressionsSatisfying(factor, randomVariableNameToTypeSizeAndUniqueConstants::containsKey));
+	    	ArrayList<Expression> randomVariablesInFactor = new ArrayList<>(Expressions.getSubExpressionsSatisfying(factor, randomVariableNameToTypeSizeAndUniqueConstants::containsKey));
 	    	if (randomVariablesInFactor.size() == 0) {
 	    		throw new IllegalArgumentException("Factor contains no random variables: "+factor);
 	    	}
 	    	
-	    	int[] radices                    = new int[randomVariablesInFactor.size()];
-	    	int[] particiapntVariableIndexes = new int[randomVariablesInFactor.size()];
-	    	List<List<Expression>> factorRandomVariableTypeValues = new ArrayList<>();
+	    	int[] participantVariableIndexes = new int[randomVariablesInFactor.size()];
 	    	for (int i = 0; i < randomVariablesInFactor.size(); i++) {
 	    		Expression randomVariable = randomVariablesInFactor.get(i);
-	    		
-	    		Expression type               = randomVariableNameToTypeSizeAndUniqueConstants.get(randomVariable).first;
-	    		radices[i]                    = randomVariableNameToTypeSizeAndUniqueConstants.get(randomVariable).second;
-	    		particiapntVariableIndexes[i] = randomVariableIndexes.get(randomVariable);
-	    		
-	    		factorRandomVariableTypeValues.add(typeToValues.get(type));
+	    		participantVariableIndexes[i] = randomVariableIndexes.get(randomVariable);
 	    	}
-	    	
-	    	listener.factorParticipants(factorIndex, particiapntVariableIndexes);
-	    	
-	    	RewritingProcess process = new DefaultRewritingProcess(null);
-	    	boolean didIncrement     = true;
-	    	MixedRadixNumber mrn     = new MixedRadixNumber(BigInteger.ZERO, radices);
-	    	int numberFactorValues   = mrn.getMaxAllowedValue().intValue()+1;
-	    	do {
-	    		Expression groundedFactor = factor;
-	    		for (int i = 0; i < randomVariablesInFactor.size(); i++) {
-	    			int valueIndex = mrn.getCurrentNumeralValue(i);
-	    			groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), factorRandomVariableTypeValues.get(i).get(valueIndex), process);
-	    		}  		
-				Expression value = inferencer.evaluate(groundedFactor);
-				if (!Expressions.isNumber(value)) {
-					throw new IllegalStateException("Unable to compute a number for the grounded factor ["+groundedFactor+"], instead got:"+value);
-				}
-				
-				listener.factorValue(factorIndex, numberFactorValues, mrn.getValue().intValue(), value.rationalValue());
-				
-				if (didIncrement = mrn.canIncrement()) {
-					mrn.increment();
-				}				
-	    	} while (didIncrement);
-	    	
-			factorIndex++;
-	    }
+	    	listener.factorParticipants(factorIndex, participantVariableIndexes);
+
+	    	if (!useContextSensitiveGrounding) {
+	    		fullGrounding(
+	    				factor,
+	    				randomVariablesInFactor,
+	    				listener,
+	    				randomVariableNameToTypeSizeAndUniqueConstants,
+	    				typeToValues,
+	    				inferencer,
+	    				process);
+	    	}
+	    	else {
+	    		contextSensitiveGrounding(
+	    				factor,
+	    				randomVariablesInFactor,
+	    				listener,
+	    				randomVariableNameToTypeSizeAndUniqueConstants,
+	    				typeToValues,
+	    				inferencer,
+	    				process);
+	    	}
+
+	    	factorIndex++;
+		}
 		
 		// Handle the evidence
 		for (Expression evidenceAssignment : evidence) {
@@ -259,7 +264,88 @@ public class HOGModelGrounding {
 		
 		listener.groundingComplete();
 	}
-	
+
+	/**
+	 * @param randomVariableNameToTypeSizeAndUniqueConstants
+	 * @param randomVariablesInFactor
+	 * @return
+	 */
+	private static BinaryFunction<Integer, Integer, Expression> makeFunctionFromVariableIndexValueIndexToValue(
+			Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants,
+			ArrayList<Expression> randomVariablesInFactor,
+			Map<Expression, List<Expression>> typeToValues) {
+		
+		return (variableIndex, valueIndex)
+		-> {
+			Expression variable = randomVariablesInFactor.get(variableIndex.intValue());
+			Expression type = randomVariableNameToTypeSizeAndUniqueConstants.get(variable).first;
+			return typeToValues.get(type).get(valueIndex);
+		};
+	}
+
+	/**
+	 * @param randomVariableNameToTypeSizeAndUniqueConstants
+	 * @param randomVariablesInFactor
+	 * @return
+	 */
+	private static Function<Integer, Integer> makeFunctionFromVariableIndexToDomainSize(
+			Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants,
+			ArrayList<Expression> randomVariablesInFactor) {
+		
+		return (variableIndex)
+		-> {
+			Expression variable = randomVariablesInFactor.get(variableIndex.intValue());
+			Triple<Expression, Integer, List<Expression>>
+			typeCardinalityAndConstants
+			= randomVariableNameToTypeSizeAndUniqueConstants.get(variable);
+			return typeCardinalityAndConstants.second;
+		};
+	}
+
+	/**
+	 * @param factor
+	 * @param randomVariablesInFactor
+	 * @param listener
+	 * @param randomVariableNameToTypeSizeAndUniqueConstants
+	 * @param typeToValues
+	 * @param inferencer
+	 * @param process
+	 */
+	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, RewritingProcess process) {
+		int[] radices                    = new int[randomVariablesInFactor.size()];
+		List<List<Expression>> factorRandomVariableTypeValues = new ArrayList<>();
+		for (int i = 0; i < randomVariablesInFactor.size(); i++) {
+			Expression randomVariable = randomVariablesInFactor.get(i);
+			Expression type               = randomVariableNameToTypeSizeAndUniqueConstants.get(randomVariable).first;
+			radices[i]                    = randomVariableNameToTypeSizeAndUniqueConstants.get(randomVariable).second;
+			factorRandomVariableTypeValues.add(typeToValues.get(type));
+		}
+		
+		boolean didIncrement     = true;
+		MixedRadixNumber mrn     = new MixedRadixNumber(BigInteger.ZERO, radices);
+		int numberFactorValues   = mrn.getMaxAllowedValue().intValue()+1;
+		do {
+			Expression groundedFactor = factor;
+			for (int i = 0; i < randomVariablesInFactor.size(); i++) {
+				int valueIndex = mrn.getCurrentNumeralValue(i);
+				groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), factorRandomVariableTypeValues.get(i).get(valueIndex), process);
+			}  		
+			Expression value = inferencer.simplify(groundedFactor, process);
+			//				Expression value = inferencer.evaluate(groundedFactor);
+			if (!Expressions.isNumber(value)) {
+				throw new IllegalStateException("Unable to compute a number for the grounded factor ["+groundedFactor+"], instead got:"+value);
+			}
+
+			boolean isFirstValue = mrn.getValue().intValue() == 0;
+			boolean isLastValue = mrn.getValue().intValue() == numberFactorValues - 1;
+			listener.factorValue(numberFactorValues, isFirstValue, isLastValue, value.rationalValue());
+
+			if (didIncrement = mrn.canIncrement()) {
+				mrn.increment();
+			}				
+		} while (didIncrement);
+	}
+
 	//
 	// PRIVATE
 	//
@@ -292,13 +378,13 @@ public class HOGModelGrounding {
 		return result;
 	}
 	
-	private static Map<Expression, List<Expression>> createTypeToValuesMap(FactorsAndTypes factorsAndTypes, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants) {
+	private static Map<Expression, List<Expression>> createTypeToValuesMap(FactorsAndTypes factorsAndTypes, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeExpressionTypeSizeAndUniqueConstants) {
 		Map<Expression, List<Expression>> result = new LinkedHashMap<>();
 		
-		randomVariableNameToTypeSizeAndUniqueConstants.values().forEach(typeSizeAndUnqiueConstants -> {
-			Expression       type            = typeSizeAndUnqiueConstants.first;
-		    Integer          size            = typeSizeAndUnqiueConstants.second;
-		    List<Expression> uniqueConstants = typeSizeAndUnqiueConstants.third;
+		randomVariableNameToTypeExpressionTypeSizeAndUniqueConstants.values().forEach(typeSizeAndUniqueConstants -> {
+			Expression       type            = typeSizeAndUniqueConstants.first;
+		    Integer          size            = typeSizeAndUniqueConstants.second;
+		    List<Expression> uniqueConstants = typeSizeAndUniqueConstants.third;
 			// random variables can share type information
 			if (!result.containsKey(type)) {
 				List<Expression> values = new ArrayList<>();
@@ -327,7 +413,7 @@ public class HOGModelGrounding {
 		return result;
 	}
 	
-	private static Map<String, String> createGroundedUnqiueConstantToTypeMap(Map<Expression, List<Expression>> typeToValues) {
+	private static Map<String, String> createGroundedUniqueConstantToTypeMap(Map<Expression, List<Expression>> typeToValues) {
 		Map<String, String> result = new LinkedHashMap<>();
 		
 		typeToValues.entrySet().stream()
@@ -337,5 +423,117 @@ public class HOGModelGrounding {
 			});
 		
 		return result;
+	}
+	
+	/**
+	 * @param factor
+	 * @param randomVariablesInFactor
+	 * @param listener
+	 * @param randomVariableNameToTypeSizeAndUniqueConstants
+	 * @param typeToValues TODO
+	 * @param inferencer
+	 * @param process
+	 */
+	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, RewritingProcess process) {
+		Function<Integer, Integer> fromVariableIndexToDomainSize = 
+				makeFunctionFromVariableIndexToDomainSize(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor);
+		int numberFactorValues = 
+				numberOfAssignmentsForVariablesStartingAt(0, randomVariablesInFactor.size(), fromVariableIndexToDomainSize);
+		
+		contextSensitiveGroundingFrom(
+				0,
+				factor, // starting from first variable
+				randomVariablesInFactor, // variables to be used
+				makeFunctionFromVariableIndexValueIndexToValue(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor, typeToValues),
+				fromVariableIndexToDomainSize,
+				inferencer.getConstraintTheory(),
+				true, // first time this variable is being iterated (it happens only once)
+				true, // last time this variable is being iterated (it happens only once)
+				(isFirstValue, isLastValue, value)
+				-> listener.factorValue(numberFactorValues, isFirstValue, isLastValue, value.rationalValue()),
+				process);
+	}
+
+	private static void contextSensitiveGroundingFrom(
+			int variableIndex,
+			Expression expression,
+			ArrayList<Expression> variables,
+			BinaryFunction<Integer, Integer, Expression> fromVariableIndexAndValueIndexToValue,
+			Function<Integer, Integer> fromVariableIndexToDomainSize,
+			ConstraintTheory constraintTheory,
+			boolean firstIterationForVariable,
+			boolean lastIterationForVariable,
+			TernaryProcedure<Boolean, Boolean, Expression> recordValue,
+			RewritingProcess process) {
+		
+		Expression variable = variables.get(variableIndex);
+		boolean isLastVariable = variableIndex == variables.size() - 1;
+		int numberOfVariableValues = fromVariableIndexToDomainSize.apply(variableIndex);
+		
+		for (int variableValueIndex = 0; variableValueIndex != numberOfVariableValues; variableValueIndex++) {
+			boolean thisVariableIsAtItsFirstValue = variableValueIndex == 0;
+			boolean thisVariableIsAtItsLastValue = variableValueIndex == numberOfVariableValues - 1;
+			Expression value = fromVariableIndexAndValueIndexToValue.apply(variableIndex, variableValueIndex);
+			Expression expressionWithReplacedValue = expression.replaceAllOccurrences(variable, value, process);
+			Expression simplifiedExpression = constraintTheory.simplify(expressionWithReplacedValue, process);
+			
+			boolean expressionIsSimplifiedToConstant =
+					isLastVariable || simplifiedExpression.getSyntacticFormType().equals("Symbol");
+
+			if (expressionIsSimplifiedToConstant) {
+				myAssert( () -> isNumber(simplifiedExpression) , () -> "Expression being grounded has been simplified to a symbol that is not a numerical constant: " + simplifiedExpression);
+
+				int numberOfTimesThisValueMustBeWritten
+				= numberOfAssignmentsForVariablesStartingAt(variableIndex + 1, variables.size(), fromVariableIndexToDomainSize);
+				
+				for (int i = 0; i != numberOfTimesThisValueMustBeWritten; i++) {
+					boolean isFirstOverallValue = 
+							firstIterationForVariable && 
+							thisVariableIsAtItsFirstValue &&
+							i == 0;
+					
+					boolean isLastOverallValue =
+							lastIterationForVariable &&
+							thisVariableIsAtItsLastValue &&
+							i == numberOfTimesThisValueMustBeWritten - 1;
+					
+					recordValue.apply(isFirstOverallValue, isLastOverallValue, simplifiedExpression);
+				}
+			}
+			else {
+				boolean firstIterationForNextVariable
+				= firstIterationForVariable && thisVariableIsAtItsFirstValue;
+				
+				boolean lastIterationForNextVariable
+				= lastIterationForVariable && thisVariableIsAtItsLastValue;
+				
+				contextSensitiveGroundingFrom(
+						variableIndex + 1,
+						simplifiedExpression,
+						variables,
+						fromVariableIndexAndValueIndexToValue,
+						fromVariableIndexToDomainSize,
+						constraintTheory,
+						firstIterationForNextVariable,
+						lastIterationForNextVariable,
+						recordValue,
+						process);
+			}
+		}
+	}
+
+	private static int numberOfAssignmentsForVariablesStartingAt(int variableIndex, int numberOfVariables, Function<Integer, Integer> domainSize) {
+		if (variableIndex == numberOfVariables) {
+			return 1;
+		}
+		else {
+			int result = 1;
+			for (int i = variableIndex; i != numberOfVariables; i++) {
+				Integer variableDomainSize = domainSize.apply(i);
+				myAssert( () -> variableDomainSize != 0, () -> "Variable domain size cannot be zero");
+				result *= variableDomainSize;
+			}
+			return result;
+		}
 	}
 }

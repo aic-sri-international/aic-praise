@@ -116,8 +116,8 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 	}
 	
 	@Override
-	public void factorValue(int factorIndex, int numberFactorValues, int valueIndex, Rational value) {
-		if (valueIndex == 0) {
+	public void factorValue(int numberFactorValues, boolean isFirstValue, boolean isLastValue, Rational value) {
+		if (isFirstValue) {
 			writeFunctionTables("\n"+numberFactorValues+"\n");
 		}
 		else {
@@ -126,7 +126,7 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 		
 		writeFunctionTables(""+value.doubleValue());
 	
-		if (valueIndex == (numberFactorValues -1)) {
+		if (isLastValue) {
 			writeFunctionTables("\n");
 		}
 	}	

@@ -63,18 +63,10 @@ import com.sri.ai.grinder.interpreter.SymbolicCommonInterpreterWithLiteralCondit
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
-import com.sri.ai.grinder.plaindpll.api.InputTheory;
 import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
-import com.sri.ai.grinder.plaindpll.api.TermTheory;
-import com.sri.ai.grinder.plaindpll.api.Theory;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
-import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
-import com.sri.ai.grinder.plaindpll.theory.DefaultInputTheory;
-import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
-import com.sri.ai.grinder.plaindpll.theory.term.FunctionalTermTheory;
-import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
 import com.sri.ai.grinder.plaindpll.util.DPLLUtil;
+import com.sri.ai.grinder.sgdpll2.api.ConstraintTheory;
 import com.sri.ai.grinder.sgdpll2.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
 import com.sri.ai.util.Util;
@@ -96,8 +88,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Collection<Type> additionalTypes;
 	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
-	private InputTheory inputTheory;
-	private ConstraintTheory constraintTheory;
+	private ConstraintTheory sgdpll2ConstraintTheory;
 	private SemiRingProblemType problemType;
 	private QuantifierEliminatorWithSetup solver;
 
@@ -146,22 +137,16 @@ public class InferenceForFactorGraphAndEvidence {
 		Set<Expression> uniquelyNamedConstants = mapIntoSet(factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
 		isUniquelyNamedConstantPredicate = e -> uniquelyNamedConstants.contains(e) || Expressions.isNumber(e) || Expressions.isBooleanSymbol(e);
 		
-		TermTheory termTheory = null;
 		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
 			factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().values().stream().anyMatch(type -> type.contains("->"))) {
-			termTheory = new FunctionalTermTheory();			
 		}
 		else {
-			termTheory = new SymbolTermTheory();
 		}
 
-		// The constraintTheory of atoms plus equality on function (relational) terms.
-		constraintTheory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(termTheory));
-		inputTheory = new DefaultInputTheory(constraintTheory);
 		problemType = new SumProduct(); // for marginalization
 
 		// The solver for the parameters above.
-		com.sri.ai.grinder.sgdpll2.api.ConstraintTheory sgdpll2ConstraintTheory =
+		sgdpll2ConstraintTheory =
 				new CompoundConstraintTheory(
 						new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(false, true),
 						new com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory(false, true),
@@ -172,23 +157,17 @@ public class InferenceForFactorGraphAndEvidence {
 		
 		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(sgdpll2ConstraintTheory, true);
 		if (useFactorization) {
-//			solver = new PlainDPLLSGVET(inputTheory, problemType);
 			solver = new SGVET(simplifier, problemType, sgdpll2ConstraintTheory);
 		}
 		else {
-//			solver = new PlainSGDPLLT(inputTheory, problemType);
 			solver = new SGDPLLT(simplifier, problemType, sgdpll2ConstraintTheory);
 		}
 
 		evidenceProbability = null;
 	}
 	
-	public Theory getInputTheory() {
-		return inputTheory;
-	}
-
-	public ConstraintTheory getConstraintTheory() {
-		return constraintTheory;
+	public com.sri.ai.grinder.sgdpll2.api.ConstraintTheory getConstraintTheory() {
+		return sgdpll2ConstraintTheory;
 	}
 
 	public Expression solve(Expression queryExpression) {
@@ -278,8 +257,27 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		RewritingProcess process = DPLLUtil.makeProcess(constraintTheory, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
-		Expression result = getInputTheory().simplify(expression, process);
+		RewritingProcess process = makeProcessWithTypeInformation();
+		return simplify(expression, process);
+	}
+
+	/**
+	 * Simplifies an expression given process with all the type information already built-in
+	 * (built by {@link #makeProcessWithTypeInformation()}.
+	 * @param expression
+	 * @param process
+	 * @return
+	 */
+	public Expression simplify(Expression expression, RewritingProcess process) {
+		Expression result = sgdpll2ConstraintTheory.simplify(expression, process);
 		return result;
+	}
+
+	/**
+	 * Makes rewriting process with all the type information on this inferencer.
+	 * @return
+	 */
+	public RewritingProcess makeProcessWithTypeInformation() {
+		return DPLLUtil.makeProcess(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
 	}
 }
