@@ -207,7 +207,7 @@ public class HOGModelGrounding {
 							factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
 							list());
 
-		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(groundedFactorsAndTypes, false, null, true);
+		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(groundedFactorsAndTypes, false, null, true, null);
 		RewritingProcess process = inferencer.makeProcessWithTypeInformation();
 		
 		listener.numberFactors(factorsAndTypes.getFactors().size());

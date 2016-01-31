@@ -69,6 +69,9 @@ import com.sri.ai.grinder.plaindpll.util.DPLLUtil;
 import com.sri.ai.grinder.sgdpll2.api.ConstraintTheory;
 import com.sri.ai.grinder.sgdpll2.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory;
 import com.sri.ai.util.Util;
 
 /**
@@ -88,7 +91,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Collection<Type> additionalTypes;
 	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
-	private ConstraintTheory sgdpll2ConstraintTheory;
+	private ConstraintTheory constraintTheory;
 	private SemiRingProblemType problemType;
 	private QuantifierEliminatorWithSetup solver;
 
@@ -112,13 +115,16 @@ public class InferenceForFactorGraphAndEvidence {
 	 *        indicates if the factor graph is a bayesian network (each potential function in normalized for one of its variables, forms a DAG).
 	 * @param evidence 
 	 *        an Expression representing the evidence
-	 * @param useFactorization 
-	 *        TODO
+	 * @param useFactorization indicates whether to use factorization (as in Variable Elimination)
+	 * @param optionalConstraintTheory the constraint theory to be used; if null, a default one is used (as of January 2016, a compound constraint theory with propositional, equalities on categorical types and inequalities on bounded integers).
 	 * @return the marginal.
 	 */
 	public InferenceForFactorGraphAndEvidence(
-			FactorsAndTypes factorsAndTypes, boolean isBayesianNetwork,
-			Expression evidence, boolean useFactorization) {
+			FactorsAndTypes factorsAndTypes,
+			boolean isBayesianNetwork,
+			Expression evidence,
+			boolean useFactorization,
+			ConstraintTheory optionalConstraintTheory) {
 
 		this.factorGraph       = Times.make(factorsAndTypes.getFactors());
 		this.isBayesianNetwork = isBayesianNetwork;
@@ -145,29 +151,33 @@ public class InferenceForFactorGraphAndEvidence {
 
 		problemType = new SumProduct(); // for marginalization
 
-		// The solver for the parameters above.
-		sgdpll2ConstraintTheory =
-				new CompoundConstraintTheory(
-						new com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory(false, true),
-						new com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory(false, true),
-				        new com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory());
-		
-		this.additionalTypes = new LinkedList<Type>(sgdpll2ConstraintTheory.getNativeTypes()); // add needed types that may not be the type of any variable
-		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
-		
-		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(sgdpll2ConstraintTheory, true);
-		if (useFactorization) {
-			solver = new SGVET(simplifier, problemType, sgdpll2ConstraintTheory);
+		if (optionalConstraintTheory != null) {
+			this.constraintTheory = optionalConstraintTheory;
 		}
 		else {
-			solver = new SGDPLLT(simplifier, problemType, sgdpll2ConstraintTheory);
+			this.constraintTheory =
+					new CompoundConstraintTheory(
+							new EqualityConstraintTheory(false, true),
+							new InequalityConstraintTheory(false, true),
+							new PropositionalConstraintTheory());
+		}
+		
+		this.additionalTypes = new LinkedList<Type>(constraintTheory.getNativeTypes()); // add needed types that may not be the type of any variable
+		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
+		
+		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(constraintTheory, true);
+		if (useFactorization) {
+			solver = new SGVET(simplifier, problemType, constraintTheory);
+		}
+		else {
+			solver = new SGDPLLT(simplifier, problemType, constraintTheory);
 		}
 
 		evidenceProbability = null;
 	}
 	
-	public com.sri.ai.grinder.sgdpll2.api.ConstraintTheory getConstraintTheory() {
-		return sgdpll2ConstraintTheory;
+	public ConstraintTheory getConstraintTheory() {
+		return constraintTheory;
 	}
 
 	public Expression solve(Expression queryExpression) {
@@ -252,7 +262,9 @@ public class InferenceForFactorGraphAndEvidence {
 	}
 
 	/**
-	 * Simplifies an expression.
+	 * Simplifies an expression without requiring a process with all the type information (creating it from scratch);
+	 * use {@link #simplify(Expression, RewritingProcess)} instead for greater efficient if you already have such a process,
+	 * or if you are invoking this method multiple times (you can make the process only once with {@link #makeProcessWithTypeInformation()}.
 	 * @param expression
 	 * @return
 	 */
@@ -263,13 +275,13 @@ public class InferenceForFactorGraphAndEvidence {
 
 	/**
 	 * Simplifies an expression given process with all the type information already built-in
-	 * (built by {@link #makeProcessWithTypeInformation()}.
+	 * (one can be built with {@link #makeProcessWithTypeInformation()}.
 	 * @param expression
 	 * @param process
 	 * @return
 	 */
 	public Expression simplify(Expression expression, RewritingProcess process) {
-		Expression result = sgdpll2ConstraintTheory.simplify(expression, process);
+		Expression result = constraintTheory.simplify(expression, process);
 		return result;
 	}
 

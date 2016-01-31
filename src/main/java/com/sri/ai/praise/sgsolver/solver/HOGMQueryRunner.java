@@ -97,7 +97,7 @@ public class HOGMQueryRunner {
 	        		if (errors.size() == 0) {
 	        			FactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
 	        			if (!canceled) {
-			    			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true);
+			    			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true, null);
 			    			
 			    			startQuery = System.currentTimeMillis();
 			    			Expression marginal = inferencer.solve(queryExpr); 			

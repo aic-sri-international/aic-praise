@@ -358,7 +358,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 						new ExpressionFactorsAndTypes(modelString),
 						isBayesianNetwork ,
 						evidence,
-						exploitFactorization);
+						exploitFactorization, null);
 
 		Expression marginal = inferencer.solve(queryExpression);
 		
@@ -403,7 +403,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 						list()),
 				isBayesianNetwork,
 				evidence,
-				false);
+				false, null);
 		Expression result = inferencer.sum(list(parse("alarm")), Times.make(factors));
 		System.out.println(result);
 	}
@@ -890,7 +890,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 						additionalTypes),
 				isBayesianNetwork,
 				evidence,
-				useFactorization);
+				useFactorization, null);
 		marginal = inferencer.solve(queryExpression);
 		DefaultRewritingProcess process = new DefaultRewritingProcess(null);
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, process);
@@ -964,7 +964,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 						list()),
 				isBayesianNetwork,
 				evidence,
-				true);
+				true, null);
 	
 		simplification = inferencer.simplify(queryExpression);
 		assertEquals(expected, simplification);

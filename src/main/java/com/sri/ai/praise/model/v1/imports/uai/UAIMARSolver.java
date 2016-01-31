@@ -318,7 +318,7 @@ public class UAIMARSolver {
 				return false;
 			}
 			
-			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, evidenceExpr, true);
+			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, evidenceExpr, true, null);
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {

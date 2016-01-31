@@ -87,7 +87,7 @@ public class CompareSGSolverToUAISolver {
 			FactorsAndTypes hogmv1ModelFactorsAndTypes = new ExpressionFactorsAndTypes(hogmv1ModelString);
 			
 			long startSGInference = System.currentTimeMillis();
-			InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(hogmv1ModelFactorsAndTypes, false, null, true);
+			InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(hogmv1ModelFactorsAndTypes, false, null, true, null);
 			
 			for (String varName : hogmv1ModelFactorsAndTypes.getMapFromRandomVariableNameToTypeName().keySet()) {
 				Expression queryExpr = Expressions.makeSymbol(varName);
