@@ -91,7 +91,18 @@ public class UAIUtil {
 	 * Returns an {@link Expression} equivalent to a given {@link FunctionTable} but in the form of a decision tree
 	 * (so hopefully more compact).
 	 * @param functionTable
-	 * @param solverListener
+	 * @param solverListener if not null, invoked on solver used for compilation, before and after compilation is performed; returned solver from "before" invocation is used (it may be the same one used as argument, of course).
+	 * @return
+	 */
+	public static Expression constructGenericTableExpression(FunctionTable functionTable) {
+		return constructGenericTableExpression(functionTable, null);
+	}
+	
+	/**
+	 * Returns an {@link Expression} equivalent to a given {@link FunctionTable} but in the form of a decision tree
+	 * (so hopefully more compact).
+	 * @param functionTable
+	 * @param solverListener if not null, invoked on solver used for compilation, before and after compilation is performed; returned solver from "before" invocation is used (it may be the same one used as argument, of course).
 	 * @return
 	 */
 	public static Expression constructGenericTableExpression(FunctionTable functionTable, Function<QuantifierEliminatorWithSetup, QuantifierEliminatorWithSetup> solverListener) {

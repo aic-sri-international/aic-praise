@@ -130,9 +130,7 @@ public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 			
 			totalNumberUniqueEntries += table.numberEntries();
 			
-			Expression genericTableExpression = UAIUtil.constructGenericTableExpression(table, solver -> {
-				return solver;
-			});
+			Expression genericTableExpression = UAIUtil.constructGenericTableExpression(table);
 			
 			double compressedEntries = calculateCompressedEntries(genericTableExpression);
 			
@@ -148,8 +146,7 @@ public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 			
 			for (int tableIdx : uaiModel.getTableIndexes(i)) {
 				Expression instanceTableExpression = UAIUtil.convertGenericTableToInstance(table, genericTableExpression, uaiModel.getVariableIndexesForTable(tableIdx));
-// TODO - is this assumption correct?				
-				// If just a number will be 0.5 due to simplification
+				// If just a number then table is just a constant and is irrelevant
 				if (!Expressions.isNumber(instanceTableExpression)) {
 					hogmv1ModelWriter.println(instanceTableExpression.toString()+";");
 				}

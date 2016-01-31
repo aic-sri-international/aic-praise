@@ -200,7 +200,7 @@ public class UAIMARSolver {
 			this.solution = solution;
 		}
 		
-		public QuantifierEliminatorWithSetup apply(QuantifierEliminatorWithSetup solver) {
+		public QuantifierEliminatorWithSetup checkInterruption(QuantifierEliminatorWithSetup solver) {
 			this.genericTableSolver = solver;
 			if (interrupted) {
 				interrupt();
@@ -256,7 +256,7 @@ public class UAIMARSolver {
 					return false;
 				}
 				
-				Expression genericTableExpression = constructGenericTableExpression(table, this::apply);
+				Expression genericTableExpression = constructGenericTableExpression(table, this::checkInterruption);
 				
 				double compressedEntries = calculateCompressedEntries(genericTableExpression);
 				
