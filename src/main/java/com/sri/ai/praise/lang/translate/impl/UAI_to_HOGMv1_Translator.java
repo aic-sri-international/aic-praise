@@ -130,7 +130,7 @@ public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 			
 			totalNumberUniqueEntries += table.numberEntries();
 			
-			Expression genericTableExpression = UAIUtil.constructGenericTableExpression(table);
+			Expression genericTableExpression = UAIUtil.constructGenericTableExpressionUsingEqualities(table);
 			
 			double compressedEntries = calculateCompressedEntries(genericTableExpression);
 			

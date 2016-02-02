@@ -50,8 +50,8 @@ import java.util.function.Function;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.api.QuantifierEliminatorWithSetup;
+import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
@@ -89,23 +89,23 @@ public class UAIUtil {
 	
 	/**
 	 * Returns an {@link Expression} equivalent to a given {@link FunctionTable} but in the form of a decision tree
-	 * (so hopefully more compact).
+	 * (so hopefully more compact) using equalities.
 	 * @param functionTable
 	 * @param solverListener if not null, invoked on solver used for compilation, before and after compilation is performed; returned solver from "before" invocation is used (it may be the same one used as argument, of course).
 	 * @return
 	 */
-	public static Expression constructGenericTableExpression(FunctionTable functionTable) {
-		return constructGenericTableExpression(functionTable, null);
+	public static Expression constructGenericTableExpressionUsingEqualities(FunctionTable functionTable) {
+		return constructGenericTableExpressionUsingEqualities(functionTable, null);
 	}
 	
 	/**
 	 * Returns an {@link Expression} equivalent to a given {@link FunctionTable} but in the form of a decision tree
-	 * (so hopefully more compact).
+	 * (so hopefully more compact) using equalities.
 	 * @param functionTable
 	 * @param solverListener if not null, invoked on solver used for compilation, before and after compilation is performed; returned solver from "before" invocation is used (it may be the same one used as argument, of course).
 	 * @return
 	 */
-	public static Expression constructGenericTableExpression(FunctionTable functionTable, Function<QuantifierEliminatorWithSetup, QuantifierEliminatorWithSetup> solverListener) {
+	public static Expression constructGenericTableExpressionUsingEqualities(FunctionTable functionTable, Function<QuantifierEliminatorWithSetup, QuantifierEliminatorWithSetup> solverListener) {
 		StringBuilder table = new StringBuilder();
 		CartesianProductEnumeration<Integer> cartesianProduct = new CartesianProductEnumeration<>(cardinalityValues(functionTable));
 		int counter = 0;

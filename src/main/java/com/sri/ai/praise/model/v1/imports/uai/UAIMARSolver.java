@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.model.v1.imports.uai;
 
-import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.constructGenericTableExpression;
+import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
 import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.convertGenericTableToInstance;
 
 import java.io.File;
@@ -70,6 +70,11 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
+import com.sri.ai.grinder.sgdpll2.api.ConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
@@ -87,8 +92,8 @@ public class UAIMARSolver {
 	
 	public static void main(String[] args) throws IOException {
 		
-		if (args.length != 3) {
-			throw new IllegalArgumentException("Must specify UAI model directory or model file to solve, the directory containing the corresponding solutions, and the max time in seconds to solve a problem");
+		if (args.length != 4) {
+			throw new IllegalArgumentException("Usage: UAIMARSolver <file or directory with UAI-format files> <solution directory> <timeout in ms> equalities|inequalities");
 		}
 		
 		File uaiInput = new File(args[0]);
@@ -100,6 +105,23 @@ public class UAIMARSolver {
 			throw new IllegalArgumentException("Solution directory is invalid: "+solutionDir.getAbsolutePath());
 		}
 		int maxSolverTimeInSeconds = Integer.parseInt(args[2]);
+		
+		ConstraintTheory constraintTheory;
+		if (args[3].equals("equalities")) {
+			constraintTheory = 
+					new CompoundConstraintTheory(
+							new PropositionalConstraintTheory(),
+							new EqualityConstraintTheory(true, true));
+		}
+		else if (args[3].equals("inequalities")) {
+			constraintTheory = 
+					new CompoundConstraintTheory(
+							new PropositionalConstraintTheory(),
+							new InequalityConstraintTheory(true, true));
+		}
+		else {
+			throw new IllegalArgumentException("4-th argument must be either 'equalities' or 'inequalities'");
+		}
 		
 		List<UAIModel> models           = new ArrayList<>();
 		Map<UAIModel, File> modelToFile = new HashMap<>();
@@ -131,7 +153,7 @@ public class UAIMARSolver {
 		models.stream().forEach(model -> {
 			System.out.println("Starting to Solve: "+modelToFile.get(model).getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
 			long start = System.currentTimeMillis();
-			boolean solved = solve(model, model.getEvidence(), model.getMARSolution(), maxSolverTimeInSeconds);
+			boolean solved = solve(model, model.getEvidence(), model.getMARSolution(), maxSolverTimeInSeconds, constraintTheory);
 			long took = (System.currentTimeMillis() - start);
 			System.out.println("---- Took "+took+"ms. solved="+solved);
 			
@@ -146,11 +168,11 @@ public class UAIMARSolver {
 		System.out.println("#models unsolved="+modelSolvedStatus.values().stream().filter(status -> status == false).count());
 	}
 	
-	public static boolean solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, int maxSolverTimeInSeconds) {
+	public static boolean solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, int maxSolverTimeInSeconds, ConstraintTheory constraintTheory) {
 		boolean result = false;
 		
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		SolverTask      solver   = new SolverTask(model, evidence, solution);
+		SolverTask      solver   = new SolverTask(model, evidence, solution, constraintTheory);
 		Future<Boolean> future   = executor.submit(solver);  
 		
 		try {
@@ -189,15 +211,17 @@ public class UAIMARSolver {
 		private GraphicalNetwork           model;
 		private Map<Integer, Integer>      evidence;
 		private Map<Integer, List<Double>> solution;
+		private ConstraintTheory           constraintTheory;
 		//
 		private InferenceForFactorGraphAndEvidence inferencer;
 		boolean interrupted = false;
 		private QuantifierEliminatorWithSetup genericTableSolver = null;
 		
-		SolverTask(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution) {
+		SolverTask(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, ConstraintTheory constraintTheory) {
 			this.model    = model;
 			this.evidence = evidence;
 			this.solution = solution;
+			this.constraintTheory = constraintTheory;
 		}
 		
 		public QuantifierEliminatorWithSetup checkInterruption(QuantifierEliminatorWithSetup solver) {
@@ -256,7 +280,8 @@ public class UAIMARSolver {
 					return false;
 				}
 				
-				Expression genericTableExpression = constructGenericTableExpression(table, this::checkInterruption);
+				Expression genericTableExpression;
+				genericTableExpression = constructGenericTableExpressionUsingEqualities(table, this::checkInterruption);
 				
 				double compressedEntries = calculateCompressedEntries(genericTableExpression);
 				
@@ -318,7 +343,7 @@ public class UAIMARSolver {
 				return false;
 			}
 			
-			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, evidenceExpr, true, null);
+			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, evidenceExpr, true, constraintTheory);
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
