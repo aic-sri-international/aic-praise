@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.v1.imports.uai;
+package com.sri.ai.praise.lang.translate.impl;
 
 import static com.sri.ai.expresso.helper.Expressions.FALSE;
 import static com.sri.ai.expresso.helper.Expressions.TRUE;
@@ -68,6 +68,7 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
+import com.sri.ai.praise.model.v1.imports.uai.UAIUtil;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 import com.sri.ai.util.collect.IntegerIterator;
@@ -352,9 +353,9 @@ public class TranslationOfTableToInequalities {
 			previousIndices = indices;
 			indices = new ArrayList<>(cartesianProduct.nextElement());
 			
-			Double functionValue = functionTable.entryFor(indices);
-			boolean hitNewPortion = currentSubSetFunctionValueIfAny == null || ! functionValue.equals(currentSubSetFunctionValueIfAny);
-			if (hitNewPortion) {
+			Double functionValue = Math.round(functionTable.entryFor(indices)*100)/100.0;
+			boolean hitNewFunctionValue = currentSubSetFunctionValueIfAny == null || ! functionValue.equals(currentSubSetFunctionValueIfAny);
+			if (hitNewFunctionValue) {
 				storeIndicesSubSetOnAllVariables(functionTable, firstIndicesOfCurrentSubSetIfAny, previousIndices, currentSubSetFunctionValueIfAny, functionValuesAndCorrespondingIndicesSubSet);
 				// get information for next indices sub-set
 				currentSubSetFunctionValueIfAny = functionValue;
@@ -433,7 +434,7 @@ public class TranslationOfTableToInequalities {
 	 * Returns an expression using inequalities to represent the same function as given portion.
 	 * @return
 	 */
-	static Expression getInequalitiesExpressionForFunctionTableIndicesSubSet(FunctionTableIndicesSubSet indicesSubSet) {
+	private static Expression getInequalitiesExpressionForFunctionTableIndicesSubSet(FunctionTableIndicesSubSet indicesSubSet) {
 		Expression result;
 	
 		int variableIndex = indicesSubSet.getCurrentVariableIndex();

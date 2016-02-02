@@ -95,7 +95,7 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.impl.HOGMv1_to_UAI_Translator;
-import com.sri.ai.praise.lang.translate.impl.UAI_to_HOGMv1_Translator;
+import com.sri.ai.praise.lang.translate.impl.UAI_to_HOGMv1_Using_Equalities_Translator;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
@@ -479,7 +479,7 @@ public class SGSolverDemoController {
 				PrintWriter    hogmPrintWriter   = new PrintWriter(hogmWriter)
 				) {
 				
-				UAI_to_HOGMv1_Translator translator = new UAI_to_HOGMv1_Translator();
+				UAI_to_HOGMv1_Using_Equalities_Translator translator = new UAI_to_HOGMv1_Using_Equalities_Translator();
 				translator.translate(uaiModelFile.getName(), 
 						new Reader[] {uaiModelReader, uaiEvidenceReader}, 
 						new PrintWriter[] {hogmPrintWriter});

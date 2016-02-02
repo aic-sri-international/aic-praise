@@ -45,7 +45,7 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.v1.imports.uai.TranslationOfTableToInequalities;
+import com.sri.ai.praise.lang.translate.impl.TranslationOfTableToInequalities;
 
 public class TranslationOfTableToInequalitiesTest {
 

@@ -43,7 +43,7 @@ import java.util.Map;
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.impl.HOGMv1_to_UAI_Translator;
-import com.sri.ai.praise.lang.translate.impl.UAI_to_HOGMv1_Translator;
+import com.sri.ai.praise.lang.translate.impl.UAI_to_HOGMv1_Using_Inequalities_Translator;
 import com.sri.ai.praise.lang.translate.impl.UAI_to_HuginDotNet_Translator;
 import com.sri.ai.util.base.Pair;
 
@@ -59,7 +59,8 @@ public class TranslatorFactory {
 	static {
 		_translators.put(new Pair<>(ModelLanguage.HOGMv1, ModelLanguage.UAI), HOGMv1_to_UAI_Translator.class);
 		//
-		_translators.put(new Pair<>(ModelLanguage.UAI, ModelLanguage.HOGMv1),      UAI_to_HOGMv1_Translator.class);
+		_translators.put(new Pair<>(ModelLanguage.UAI, ModelLanguage.HOGMv1),      UAI_to_HOGMv1_Using_Inequalities_Translator.class);
+//		_translators.put(new Pair<>(ModelLanguage.UAI, ModelLanguage.HOGMv1),      UAI_to_HOGMv1_Using_Equalities_Translator.class);
 		_translators.put(new Pair<>(ModelLanguage.UAI, ModelLanguage.HuginDotNet), UAI_to_HuginDotNet_Translator.class);
 //TODO - implementations of:
 // Church -> HOGMv0

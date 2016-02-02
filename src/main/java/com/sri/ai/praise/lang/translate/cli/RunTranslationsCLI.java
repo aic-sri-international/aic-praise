@@ -114,8 +114,9 @@ public class RunTranslationsCLI {
 //      -modelFileDirectory -translate=HOGMv1-to-UAI-to-HuginDotNet	
 // see RandomHOGMv1Generator for example.		
 		result.rootModelOutputDirectory = new File(args[0]);
-		result.translators.add(TranslatorFactory.newTranslator(ModelLanguage.HOGMv1, ModelLanguage.UAI));	
-		result.translators.add(TranslatorFactory.newTranslator(ModelLanguage.UAI, ModelLanguage.HuginDotNet));
+		result.translators.add(TranslatorFactory.newTranslator(ModelLanguage.UAI, ModelLanguage.HOGMv1));	
+//		result.translators.add(TranslatorFactory.newTranslator(ModelLanguage.HOGMv1, ModelLanguage.UAI));	
+//		result.translators.add(TranslatorFactory.newTranslator(ModelLanguage.UAI, ModelLanguage.HuginDotNet));
 		
 		return result;
 	}

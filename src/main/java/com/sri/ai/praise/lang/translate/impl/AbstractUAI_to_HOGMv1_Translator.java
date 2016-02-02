@@ -40,8 +40,6 @@ package com.sri.ai.praise.lang.translate.impl;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
-import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AtomicDouble;
@@ -50,18 +48,17 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.praise.model.v1.imports.uai.UAIUtil;
 
 /**
- * Translator: UAI->HOGMv1
+ * Translator: UAI->HOGMv1 using equalities
  * 
  * @author oreilly
  *
  */
 @Beta
-public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
+public abstract class AbstractUAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 	//
 	// START-Translator	
 	@Override 
@@ -92,18 +89,7 @@ public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 		List<String> randoms = new ArrayList<>(); 
 		for (int varIdx = 0; varIdx < uaiModel.numberVariables(); varIdx++) {
 			int varCardinality = uaiModel.cardinality(varIdx);
-			String varName     = UAIUtil.instanceVariableName(varIdx);
-			String varTypeName = UAIUtil.instanceTypeNameForVariable(varIdx, varCardinality);
-			
-			StringJoiner sortConstants = new StringJoiner(", ", ", ", ";");
-			final int innerVarIdx = varIdx;
-			IntStream.range(0, varCardinality).forEach(valIdx -> {
-				sortConstants.add(UAIUtil.instanceConstantValueForVariable(valIdx, innerVarIdx, varCardinality));
-			});
-			if (!HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(varTypeName)) {
-				sorts.add("sort "+varTypeName+": "+varCardinality+sortConstants.toString());
-			}
-			randoms.add("random "+varName+": "+varTypeName+";");
+			addSortAndRandomVariableDeclarationsRegarding(varIdx, varCardinality, sorts, randoms);
 		}
 		if (sorts.size() > 0) {
 			hogmv1ModelWriter.println();
@@ -113,7 +99,6 @@ public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 		hogmv1ModelWriter.println();
 		hogmv1ModelWriter.println("// RANDOM VARIABLE DECLARATIONS:");
 		randoms.forEach(random -> hogmv1ModelWriter.println(random));
-		hogmv1ModelWriter.println();
 		
 		//
 		// 3. Output the potentials
@@ -130,7 +115,7 @@ public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 			
 			totalNumberUniqueEntries += table.numberEntries();
 			
-			Expression genericTableExpression = UAIUtil.constructGenericTableExpressionUsingEqualities(table);
+			Expression genericTableExpression = convertToHOGMv1Expression(table);
 			
 			double compressedEntries = calculateCompressedEntries(genericTableExpression);
 			
@@ -161,7 +146,23 @@ public class UAI_to_HOGMv1_Translator extends AbstractUAI_to_Target_Translator {
 		hogmv1ModelWriter.println("// Best individual compression ratio  = "+bestIndividualCompressionRatio);
 		hogmv1ModelWriter.println("// Worst individual compression ratio = "+worstIndividualCompressionRatio);		
 	}
-	
+
+	/**
+	 * Adds sort and random variable declarations regarding the variable with given index to their respective given lists.
+	 * @param varIdx
+	 * @param varCardinality
+	 * @param sorts
+	 * @param randoms
+	 */
+	public abstract void addSortAndRandomVariableDeclarationsRegarding(int varIdx, int varCardinality, List<String> sorts, List<String> randoms);
+
+	/**
+	 * Provides the HOGMv1 expression for given {@link FunctionTable}.
+	 * @param table
+	 * @return
+	 */
+	public abstract Expression convertToHOGMv1Expression(FunctionTable table);
+
 	private static double calculateCompressedEntries(Expression compressedTableExpression) {
 		AtomicDouble count = new AtomicDouble(0);
 		
