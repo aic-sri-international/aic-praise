@@ -1,0 +1,43 @@
+@LANG:HOGMv1
+@MODEL:name=[Page 1]parts=[page-1]queries=[]
+@FRAGMENT:page-1
+random terrorAttacks : 0..20;
+random newJobs : 0..100; // 100K
+random dow: 110..180;
+random economyIsPoor : Boolean;
+random economyIsGreat : Boolean;
+random attackPerception: Boolean;
+random likeIncumbent  : 0..1000; // 100M
+random likeChallenger : 0..1000; // 100M
+
+// P(terrorAttacks) =
+if terrorAttacks = 0 then 1/21 else 1/21; // uniform
+
+terrorAttacks = 1;
+dow = 170;
+//newJobs = 1;
+
+// P(newJobs) =
+if newJobs = 0 then 1/101 else 1/101; // uniform
+
+// P(dow) =
+if dow = 0 then 1/(180 - 110 + 1) else 1/(180 - 110 + 1); // uniform
+
+economyIsPoor <=> dow < 130 or newJobs < 30;
+
+economyIsGreat <=> dow > 160 or newJobs > 70;
+
+attackPerception <=> terrorAttacks > 4;
+
+// P(likeIncumbent) = 
+if economyIsGreat
+   then if likeIncumbent > 700 then 0.9/(1000 + 1) else 0.1/(1000 + 1)
+else
+if economyIsPoor
+   then if likeIncumbent < 500 then 0.8/(1000 + 1) else 0.2/(1000 + 1)
+   else if attackPerception
+        then if likeIncumbent < 600 then 0.9/(1000 + 1) else 0.1/(1000 + 1)
+        else if likeIncumbent = 0  then 1/(1000 + 1) else 1/(1000 + 1); // uniform
+
+// P(likeChallenger) =
+if likeChallenger = 0 then 1/(1000 + 1) else 1/(1000 + 1);
