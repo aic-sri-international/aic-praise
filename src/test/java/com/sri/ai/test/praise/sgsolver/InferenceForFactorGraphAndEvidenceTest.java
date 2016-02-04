@@ -835,6 +835,70 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 
+	@Test
+	public void inequalitiesOnIntervalsWithMultipleVariablesWithConstantPotentials() {
+		
+		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
+		
+		// The definitions of types
+		mapFromCategoricalTypeNameToSizeString = Util.map();
+	
+		additionalTypes = list(new IntegerInterval(0, 99));
+		
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"I",   "Integer(0,99)",
+				"J",   "Integer(0,99)",
+				"K",   "Integer(0,99)"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+	
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+		
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(
+				"(if J > I then 0.3 else 0.7) *" + 
+				"(if K > J then 0.6 else 0.4)"));
+		
+		queryExpression = parse("I");
+		evidence = null;
+		expected = parse("if I < 98 then (-0.04 * I ^ 2 + 23.88 * I + 1520.92) / 257164 else if I < 99 then (-0.06 * I ^ 2 + -0.18 * I + 4070.88) / 257164 else (0.14 * I ^ 2 + 0.42 * I + 2079.28) / 257164");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+	}
+
+	//@Test - failing: answer contains J even though it should have been marginalized out
+	public void inequalitiesOnIntervalsWithMultipleVariables() {
+		
+		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
+		
+		// The definitions of types
+		mapFromCategoricalTypeNameToSizeString = Util.map();
+	
+		additionalTypes = list(new IntegerInterval(0, 99));
+		
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"I",   "Integer(0,99)",
+				"J",   "Integer(0,99)",
+				"K",   "Integer(0,99)"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+	
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+		
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(
+				"(if J > I then 1/(1000 - I) else 0) *" + 
+				"(if K > J then 1/(1000 - J) else 0)"));
+		
+		queryExpression = parse("I");
+		evidence = null;
+		expected = parse("1"); // dummy expected answer: we don't know what it should be
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+	}
+
 	/**
 	 * @param queryExpression
 	 * @param evidence
