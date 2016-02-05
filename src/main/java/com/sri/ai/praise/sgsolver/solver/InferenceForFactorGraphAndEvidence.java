@@ -165,7 +165,7 @@ public class InferenceForFactorGraphAndEvidence {
 		this.additionalTypes = new LinkedList<Type>(constraintTheory.getNativeTypes()); // add needed types that may not be the type of any variable
 		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
 		
-		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(constraintTheory, true);
+		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(constraintTheory, false);
 		if (useFactorization) {
 			solver = new SGVET(simplifier, problemType, constraintTheory);
 		}

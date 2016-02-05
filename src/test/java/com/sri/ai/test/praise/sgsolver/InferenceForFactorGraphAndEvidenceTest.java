@@ -833,6 +833,12 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		evidence = parse("age >= 0 and age < 100 and country != brazil");
 		expected = parse("if minor and senior then 0 else 1");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+
+		queryExpression = parse("minor and senior");
+		evidence = parse("age = age and age >= 0 and age < 100 and country != brazil");
+		expected = parse("if minor and senior then 0 else 1");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 
 	@Test
