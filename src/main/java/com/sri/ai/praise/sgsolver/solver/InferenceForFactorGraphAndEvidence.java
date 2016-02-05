@@ -166,11 +166,14 @@ public class InferenceForFactorGraphAndEvidence {
 		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
 		
 		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(constraintTheory, false);
+		// TODO: since we are using the top simplifier of the simplifier above,
+		// the "simplify under constraint" setting is irrelevant.
+		// The whole functionality should be eliminated if it is not being used elsewhere.
 		if (useFactorization) {
-			solver = new SGVET(simplifier, problemType, constraintTheory);
+			solver = new SGVET(simplifier.getTopSimplifier(), problemType, constraintTheory);
 		}
 		else {
-			solver = new SGDPLLT(simplifier, problemType, constraintTheory);
+			solver = new SGDPLLT(simplifier.getTopSimplifier(), problemType, constraintTheory);
 		}
 
 		evidenceProbability = null;
