@@ -836,7 +836,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 	}
 
 	@Test
-	public void inequalitiesOnIntervalsWithMultipleVariablesWithConstantPotentials() {
+	public void inequalitiesOnIntervalsWithMultipleVariables() {
 		
 		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
 		
@@ -865,37 +865,15 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		evidence = null;
 		expected = parse("if I < 98 then (-0.04 * I ^ 2 + 23.88 * I + 1520.92) / 257164 else if I < 99 then (-0.06 * I ^ 2 + -0.18 * I + 4070.88) / 257164 else (0.14 * I ^ 2 + 0.42 * I + 2079.28) / 257164");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
-	}
 
-	//@Test - failing: answer contains J even though it should have been marginalized out
-	public void inequalitiesOnIntervalsWithMultipleVariables() {
-		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
-		
-		// The definitions of types
-		mapFromCategoricalTypeNameToSizeString = Util.map();
-	
-		additionalTypes = list(new IntegerInterval(0, 99));
-		
-		// The definitions of variables
-		mapFromRandomVariableNameToTypeName = Util.map(
-				"I",   "Integer(0,99)",
-				"J",   "Integer(0,99)",
-				"K",   "Integer(0,99)"
-				);
-		
-		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
-	
-		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
-		
 		isBayesianNetwork = false;
 		factors = Times.getMultiplicands(parse(
-				"(if J > I then 1/(1000 - I) else 0) *" + 
-				"(if K > J then 1/(1000 - J) else 0)"));
+				"(if J > I then 0.3*I else 0.7*I) *" + 
+				"(if K > J then 0.6*J else 0.4*J)"));
 		
 		queryExpression = parse("I");
 		evidence = null;
-		expected = parse("1"); // dummy expected answer: we don't know what it should be
+		expected = parse("if I < 98 then (0.0333333333 * I ^ 4 + 18.01 * I ^ 3 + -1176.08333 * I ^ 2 + 70569.06 * I) / 469273533 else if I < 99 then (-0.16 * I ^ 4 + 23.94 * I ^ 3 + -1212.02 * I ^ 2 + 199067.88 * I) / 469273533 else (0.0933333333 * I ^ 4 + 0.28 * I ^ 3 + 0.186666667 * I ^ 2 + 67914 * I) / 469273533");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 
