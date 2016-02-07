@@ -163,20 +163,20 @@ public class HOGMParserTest {
 		string = "constant happy: 1..5";
 		test(string, expected(null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "0", 
-				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5")),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "1", "5")),
 				              null, null));
 		
 		string = "constant happy: Boolean -> 1..5";
 		test(string, expected(null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
-				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5")),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "1", "5")),
 				              null, null));
 		
 		string = "constant happy: 1..5 -> 10..15";
 		test(string, expected(null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", 
-				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5"),
-				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "10", "15")),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "1", "5"),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "10", "15")),
 				              null, null));
 	}
 	
@@ -277,20 +277,20 @@ public class HOGMParserTest {
 		string = "random happy: 1..5";
 		test(string, expected(null, null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "0", 
-				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5")),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "1", "5")),
 				              null));
 		
 		string = "random happy: Boolean -> 1..5";
 		test(string, expected(null, null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
-				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5")),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "1", "5")),
 				              null));
 		
 		string = "random happy: 1..5 -> 10..15";
 		test(string, expected(null, null,
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", 
-				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "1", "5"),
-				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, "10", "15")),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "1", "5"),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "10", "15")),
 				              null));
 	}
 	

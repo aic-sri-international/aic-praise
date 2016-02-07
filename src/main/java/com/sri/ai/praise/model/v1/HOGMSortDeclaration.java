@@ -351,7 +351,7 @@ public class HOGMSortDeclaration {
 	public static boolean isNumberRangeReference(Expression reference) {
 		boolean result = false;
 		try {
-			if (Expressions.hasFunctor(reference, FunctorConstants.NUMBER_RANGE)) {
+			if (Expressions.hasFunctor(reference, FunctorConstants.INTEGER_INTERVAL)) {
 				if (reference.numberOfArguments() == 2 && reference.get(0).intValueExact() <= reference.get(1).intValueExact()) {
 					result = true;
 				}
@@ -369,7 +369,7 @@ public class HOGMSortDeclaration {
 		}
 		String result;
 		if (isNumberRangeReference(reference)) {
-			result = "Integer("+reference.get(0)+","+reference.get(1)+")";
+			result = reference.get(0) + ".." + reference.get(1);
 		}
 		else {
 			result = reference.toString();

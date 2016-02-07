@@ -433,7 +433,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
     // : start=INTEGER DOUBLE_DOT end=INTEGER
  	@Override 
  	public Expression visitSort_number_sub_range(@NotNull HOGMParser.Sort_number_sub_rangeContext ctx) { 
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.NUMBER_RANGE, newSymbol(ctx.start.getText()), newSymbol(ctx.end.getText()));
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, newSymbol(ctx.start.getText()), newSymbol(ctx.end.getText()));
  		return result;
  	}
  	

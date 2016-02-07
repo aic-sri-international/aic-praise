@@ -573,7 +573,7 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		
 		// The definitions of variables
 		mapFromRandomVariableNameToTypeName = Util.map(
-				"age",   "Integer(0,99)",
+				"age",   "0..99",
 				"country", "Country",
 				"minor", "Boolean",
 				"workingAge", "Boolean",
@@ -853,9 +853,9 @@ public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
 		
 		// The definitions of variables
 		mapFromRandomVariableNameToTypeName = Util.map(
-				"I",   "Integer(0,99)",
-				"J",   "Integer(0,99)",
-				"K",   "Integer(0,99)"
+				"I",   "0..99",
+				"J",   "0..99",
+				"K",   "0..99"
 				);
 		
 		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
