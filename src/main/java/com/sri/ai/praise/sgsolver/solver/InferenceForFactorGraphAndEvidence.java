@@ -165,7 +165,7 @@ public class InferenceForFactorGraphAndEvidence {
 		this.additionalTypes = new LinkedList<Type>(constraintTheory.getNativeTypes()); // add needed types that may not be the type of any variable
 		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
 		
-		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(constraintTheory, false);
+		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(constraintTheory);
 		// TODO: since we are using the top simplifier of the simplifier above,
 		// the "simplify under constraint" setting is irrelevant.
 		// The whole functionality should be eliminated if it is not being used elsewhere.
