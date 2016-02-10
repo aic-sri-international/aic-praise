@@ -55,7 +55,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.QuantifierEliminator;
+import com.sri.ai.grinder.api.OldStyleQuantifierEliminator;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.interpreter.SGDPLLT;
@@ -93,7 +93,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private ConstraintTheory constraintTheory;
 	private SemiRingProblemType problemType;
-	private QuantifierEliminator solver;
+	private OldStyleQuantifierEliminator solver;
 
 	public Expression getEvidenceProbability() {
 		return evidenceProbability;
