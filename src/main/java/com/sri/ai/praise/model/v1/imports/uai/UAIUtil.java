@@ -50,7 +50,7 @@ import java.util.function.Function;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.QuantifierEliminatorWithSetup;
+import com.sri.ai.grinder.api.QuantifierEliminator;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
@@ -105,7 +105,7 @@ public class UAIUtil {
 	 * @param solverListener if not null, invoked on solver used for compilation, before and after compilation is performed; returned solver from "before" invocation is used (it may be the same one used as argument, of course).
 	 * @return
 	 */
-	public static Expression constructGenericTableExpressionUsingEqualities(FunctionTable functionTable, Function<QuantifierEliminatorWithSetup, QuantifierEliminatorWithSetup> solverListener) {
+	public static Expression constructGenericTableExpressionUsingEqualities(FunctionTable functionTable, Function<QuantifierEliminator, QuantifierEliminator> solverListener) {
 		StringBuilder table = new StringBuilder();
 		CartesianProductEnumeration<Integer> cartesianProduct = new CartesianProductEnumeration<>(cardinalityValues(functionTable));
 		int counter = 0;
