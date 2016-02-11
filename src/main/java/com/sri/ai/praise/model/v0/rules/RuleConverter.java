@@ -486,7 +486,7 @@ public class RuleConverter {
 							newUniqueVariables, new LinkedHashMap<Expression, Expression>(), 
 							new AtomicInteger(-1), process);
 			// | .... LogicalVariables <- collect logical variables in newRule
-			Set<Expression> logicalVariables = Expressions.getVariables(newRule, process);
+			Set<Expression> logicalVariables = Expressions.getVariableReferences(newRule, process);
 			// | .... for each NewUniqueVariable in NewUniqueVariables
 			for (Expression newUniqueVariable : newUniqueVariables.keySet()) {
 				Expression predicate1Functor = newUniqueVariables.get(newUniqueVariable);			

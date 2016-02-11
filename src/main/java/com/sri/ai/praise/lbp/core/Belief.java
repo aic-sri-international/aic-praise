@@ -798,8 +798,8 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Expression messageValueTuple = ((IntensionalSet) msgExpansionOrValue).getHead();	
 		Expression destination = getDestinationFromMessageValueTuple(messageValueTuple);
 		Expression origin      = getOriginFromMessageValueTuple(messageValueTuple);
-		Set<Expression> destinationVariables          = Expressions.getVariables(destination, process);
-		Set<Expression> originVariables               = Expressions.getVariables(origin, process);
+		Set<Expression> destinationVariables          = Expressions.getVariableReferences(destination, process);
+		Set<Expression> originVariables               = Expressions.getVariableReferences(origin, process);
 		Set<Expression> originAndDestinationVariables = new LinkedHashSet<Expression>();
 		originAndDestinationVariables.addAll(destinationVariables);
 		originAndDestinationVariables.addAll(originVariables);
@@ -808,7 +808,7 @@ public class Belief extends AbstractLBPHierarchicalRewriter implements LBPRewrit
 		Set<Expression> randomVariableValueVariables = new LinkedHashSet<Expression>();
 		Set<Expression> randomVariableValues         = LPIUtil.getRandomVariableValueExpressions(getValueFromMessageValueTuple(messageValueTuple), process);
 		for (Expression randomVariableValue : randomVariableValues) {
-			randomVariableValueVariables.addAll(Expressions.getVariables(randomVariableValue, process));
+			randomVariableValueVariables.addAll(Expressions.getVariableReferences(randomVariableValue, process));
 		}
 		// Only keep random variable value logical variables that are not internally
 		// scoped (e.g. in a product message from an expansion).
