@@ -100,7 +100,6 @@ import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
-import com.sri.ai.praise.sgsolver.demo.perspective.ChurchPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.HOGMPerspective;
 import com.sri.ai.praise.sgsolver.demo.perspective.Perspective;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
@@ -461,11 +460,6 @@ public class SGSolverDemoController {
     		setPerspective(new HOGMPerspective());
     		importUAIModelButton.setDisable(false);
     		exportUAIModelButton.setDisable(false);
-    	}
-    	else if (perspectiveToggleGroup.getSelectedToggle() == churchPerspectiveRadioButton) {
-    		setPerspective(new ChurchPerspective());
-    		importUAIModelButton.setDisable(true);
-    		exportUAIModelButton.setDisable(true);
     	}
     }
     

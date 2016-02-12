@@ -39,6 +39,7 @@ package com.sri.ai.test.praise.sgsolver;
 
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.apply;
+import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.util.Util.list;
 import static org.junit.Assert.assertEquals;
@@ -58,10 +59,9 @@ import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
-import com.sri.ai.test.praise.AbstractLPITest;
 import com.sri.ai.util.Util;
 
-public class InferenceForFactorGraphAndEvidenceTest extends AbstractLPITest {
+public class InferenceForFactorGraphAndEvidenceTest {
 	
 	// The definitions of categorical types
 	Map<String, String> mapFromCategoricalTypeNameToSizeString;

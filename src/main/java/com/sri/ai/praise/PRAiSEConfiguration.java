@@ -38,7 +38,6 @@
 package com.sri.ai.praise;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.lbp.core.DefaultLBPQueryEngine;
 import com.sri.ai.util.Configuration;
 
 /**
@@ -75,9 +74,6 @@ public class PRAiSEConfiguration extends Configuration {
 	//
 	public static final String  KEY_LBP_QUERY_ENGINE_ROUND_RESULT_TO                                       = "praise.lbp.query.engine.round.result.to";
 	public static final Integer DEFAULT_VALUE_LBP_QUERY_ENGINE_ROUND_RESULT_TO                             = new Integer(6);
-	//
-	public static final String  KEY_LBP_QUERY_ENGINE_CLASS                                                 = "praise.lbp.query.engine.class";
-	public static final String  DEFAULT_VALUE_LBP_QUERY_ENGINE_CLASS                                       = DefaultLBPQueryEngine.class.getName();
 	//
 	public static final String  KEY_MODEL_CARDINALITY_OF_TYPES_ALWAYS_GREATER_THAN_ZERO                    = "praise.model.cardinality.of.types.always.greater.than.zero";
 	public static final Boolean DEFAULT_VALUE_MODEL_CARDINALITY_OF_TYPES_ALWAYS_GREATER_THAN_ZERO          = Boolean.TRUE;
@@ -132,12 +128,6 @@ public class PRAiSEConfiguration extends Configuration {
 	
 	public static int getLBPQueryEngineRoundResultTo() {
 		int result = getInt(KEY_LBP_QUERY_ENGINE_ROUND_RESULT_TO, DEFAULT_VALUE_LBP_QUERY_ENGINE_ROUND_RESULT_TO);
-		
-		return result;
-	}
-	
-	public static String getLBPQueryEngineClass() {
-		String result = getString(KEY_LBP_QUERY_ENGINE_CLASS, DEFAULT_VALUE_LBP_QUERY_ENGINE_CLASS);
 		
 		return result;
 	}
