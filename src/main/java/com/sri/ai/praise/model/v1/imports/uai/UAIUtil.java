@@ -54,13 +54,8 @@ import com.sri.ai.grinder.api.OldStyleQuantifierEliminator;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
-import com.sri.ai.grinder.plaindpll.api.ConstraintTheory;
-import com.sri.ai.grinder.plaindpll.api.InputTheory;
-import com.sri.ai.grinder.plaindpll.application.Compilation;
-import com.sri.ai.grinder.plaindpll.theory.AtomsOnConstraintTheoryWithEquality;
-import com.sri.ai.grinder.plaindpll.theory.DefaultInputTheory;
-import com.sri.ai.grinder.plaindpll.theory.EqualityConstraintTheory;
-import com.sri.ai.grinder.plaindpll.theory.term.SymbolTermTheory;
+import com.sri.ai.grinder.sgdpll2.application.Compilation;
+import com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
@@ -147,16 +142,20 @@ public class UAIUtil {
 
 		Map<String, String> mapFromCategoricalTypeNameToSizeString   = new LinkedHashMap<>();
 		Map<String, String> mapFromVariableNameToTypeName = new LinkedHashMap<>();
+		Map<String, String> mapFromUniquelyNamedConstantToTypeName = new LinkedHashMap<>();
 		for (int i = 0; i < functionTable.numberVariables(); i++) {
 			String typeName = genericTypeNameForVariable(i, cardinalityOfIthVariable.apply(i));
 			mapFromCategoricalTypeNameToSizeString.put(typeName, "" + cardinalityOfIthVariable.apply(i));
 			mapFromVariableNameToTypeName.put(genericVariableName(i), typeName);
+			for (int j = 0; j != functionTable.cardinality(i); j++) {
+				String jThConstant = genericConstantValueForVariable(j, i, functionTable.cardinality(i));
+				mapFromUniquelyNamedConstantToTypeName.put(jThConstant, typeName);
+			}
 		}
 		
-		ConstraintTheory constraintTheory = new AtomsOnConstraintTheoryWithEquality(new EqualityConstraintTheory(new SymbolTermTheory()));
-		InputTheory inputTheory = new DefaultInputTheory(constraintTheory);
+		com.sri.ai.grinder.sgdpll2.api.ConstraintTheory constraintTheory = new EqualityConstraintTheory(true, true);
 
-		Expression result = Compilation.compile(inputExpression, inputTheory, mapFromVariableNameToTypeName, mapFromCategoricalTypeNameToSizeString, list(), solverListener);
+		Expression result = Compilation.compile(inputExpression, constraintTheory, mapFromVariableNameToTypeName, mapFromUniquelyNamedConstantToTypeName, mapFromCategoricalTypeNameToSizeString, list(), solverListener);
 		
 		return result;
 	}
