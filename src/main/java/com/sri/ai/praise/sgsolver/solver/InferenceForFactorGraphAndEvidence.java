@@ -63,10 +63,10 @@ import com.sri.ai.grinder.interpreter.SymbolicCommonInterpreterWithLiteralCondit
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.grinder.plaindpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.plaindpll.problemtype.SumProduct;
 import com.sri.ai.grinder.plaindpll.util.DPLLUtil;
 import com.sri.ai.grinder.sgdpll2.api.ConstraintTheory;
+import com.sri.ai.grinder.sgdpll2.api.SemiRingProblemType;
 import com.sri.ai.grinder.sgdpll2.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
 import com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory;
