@@ -54,8 +54,8 @@ import com.sri.ai.grinder.api.OldStyleQuantifierEliminator;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
-import com.sri.ai.grinder.sgdpll2.application.Compilation;
-import com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory;
+import com.sri.ai.grinder.sgdpll.application.Compilation;
+import com.sri.ai.grinder.sgdpll.theory.equality.EqualityConstraintTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
@@ -153,7 +153,7 @@ public class UAIUtil {
 			}
 		}
 		
-		com.sri.ai.grinder.sgdpll2.api.ConstraintTheory constraintTheory = new EqualityConstraintTheory(true, true);
+		com.sri.ai.grinder.sgdpll.api.ConstraintTheory constraintTheory = new EqualityConstraintTheory(true, true);
 
 		Expression result = Compilation.compile(inputExpression, constraintTheory, mapFromVariableNameToTypeName, mapFromUniquelyNamedConstantToTypeName, mapFromCategoricalTypeNameToSizeString, list(), solverListener);
 		

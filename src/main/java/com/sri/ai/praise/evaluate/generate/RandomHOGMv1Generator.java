@@ -61,12 +61,12 @@ import com.sri.ai.expresso.type.Categorical;
 import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.grinder.api.RewritingProcess;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
-import com.sri.ai.grinder.sgdpll2.api.ConstraintTheory;
-import com.sri.ai.grinder.sgdpll2.tester.RandomConditionalExpressionGenerator;
-import com.sri.ai.grinder.sgdpll2.theory.compound.CompoundConstraintTheory;
-import com.sri.ai.grinder.sgdpll2.theory.equality.EqualityConstraintTheory;
-import com.sri.ai.grinder.sgdpll2.theory.inequality.InequalityConstraintTheory;
-import com.sri.ai.grinder.sgdpll2.theory.propositional.PropositionalConstraintTheory;
+import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
+import com.sri.ai.grinder.sgdpll.tester.RandomConditionalExpressionGenerator;
+import com.sri.ai.grinder.sgdpll.theory.compound.CompoundConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.equality.EqualityConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.inequality.InequalityConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalConstraintTheory;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.util.Util;
@@ -74,7 +74,6 @@ import com.sri.ai.util.Util;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 
 /**
