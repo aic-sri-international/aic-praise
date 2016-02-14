@@ -55,7 +55,6 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
-import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
@@ -88,8 +87,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 
 	@Test
 	public void test() {
-		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
 		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
@@ -318,8 +315,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 	@Test
 	public void testAPI() {
 		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
-		
 		String modelString = ""
 				+  
 				"random earthquake: Boolean;" + 
@@ -368,8 +363,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 	@Test
 	public void testBurglary() {
 		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
-		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
 				"Boolean", "2");
@@ -410,8 +403,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 
 	@Test
 	public void relationalConstants() {
-
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
 
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
@@ -493,8 +484,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 	@Test
 	public void lucky() {
 		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
-		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
 				"People", "1000",
@@ -524,8 +513,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 
 	@Test
 	public void smartest() {
-		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
 		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
@@ -561,8 +548,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 
 	@Test
 	public void inequalitiesOnIntervals() {
-		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
 		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
@@ -699,8 +684,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 
 	@Test
 	public void inequalitiesOnIntegers() {
-		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
 		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
@@ -844,8 +827,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 	@Test
 	public void inequalitiesOnIntervalsWithMultipleVariables() {
 		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
-		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map();
 	
@@ -964,8 +945,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 
 	@Test
 	public void simplifyTest() {
-		
-		GrinderUtil.setTraceAndJustificationOffAndTurnOffConcurrency();
 		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(

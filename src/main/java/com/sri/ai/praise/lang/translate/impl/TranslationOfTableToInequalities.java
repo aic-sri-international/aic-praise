@@ -63,10 +63,10 @@ import java.util.function.Function;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.grinder.api.OldStyleQuantifierEliminator;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIUtil;
 import com.sri.ai.util.base.Pair;

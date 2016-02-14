@@ -111,14 +111,17 @@ public class EvaluationCLI {
 			
 			Evaluation evaluation = new Evaluation();
 			evaluation.evaluate(configuration, modelsContainer, solverConfigurations, new Evaluation.Listener() {
+				@Override
 				public void notification(String notification) {
 					evaluationArgs.notificationOut.println(notification);
 				}
 				
+				@Override
 				public void notificationException(Exception ex) {
 					ex.printStackTrace(evaluationArgs.notificationOut);
 				}
 				
+				@Override
 				public void csvResultOutput(String csvLine) {
 					evaluationArgs.resultOut.println(csvLine);
 				}
