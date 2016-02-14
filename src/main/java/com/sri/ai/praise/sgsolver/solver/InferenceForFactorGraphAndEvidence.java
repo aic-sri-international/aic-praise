@@ -240,7 +240,7 @@ public class InferenceForFactorGraphAndEvidence {
 
 		if (queryIsCompoundExpression) {
 			// replace the query variable with the query expression
-			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new DefaultRewritingProcess(null));
+			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new DefaultRewritingProcess());
 		}
 
 		return marginal;

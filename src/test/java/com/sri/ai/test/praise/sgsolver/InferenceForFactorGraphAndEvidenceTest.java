@@ -940,7 +940,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 				evidence,
 				useFactorization, null);
 		marginal = inferencer.solve(queryExpression);
-		DefaultRewritingProcess process = new DefaultRewritingProcess(null);
+		DefaultRewritingProcess process = new DefaultRewritingProcess();
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, process);
 		expected = Expressions.roundToAGivenPrecision(expected, 9, process);
 		if (expected.equals(marginal)) {

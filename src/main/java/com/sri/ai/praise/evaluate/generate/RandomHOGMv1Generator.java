@@ -357,7 +357,7 @@ public class RandomHOGMv1Generator {
 			for (int i = 0; i < genArgs.numberPotentials; i++) {		
 				Expression conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
 				// Ensure we have variables in the conditional
-				while (Expressions.freeVariables(conditional, new DefaultRewritingProcess(null)).size() == 0) {							
+				while (Expressions.freeVariables(conditional, new DefaultRewritingProcess()).size() == 0) {							
 					conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
 				}
 				
@@ -505,7 +505,7 @@ class RandomConditionalPotentialExpressionGenerator {
 		
 		constraintTheory.setVariableNamesAndTypesForTesting(varToTypeMap);
 		
-		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess(null));
+		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess());
 		
 		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
 				() -> makeSymbol(random.nextDouble()),
