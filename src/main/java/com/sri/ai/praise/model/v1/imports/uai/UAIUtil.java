@@ -162,17 +162,17 @@ public class UAIUtil {
 
 	public static Expression convertGenericTableToInstance(FunctionTable functionTable, Expression genericFunctionTableExpr, List<Integer> instanceVarIdxs) {
 		Expression result = genericFunctionTableExpr;
-		Context process = new DefaultRewritingProcess();
+		Context context = new DefaultRewritingProcess();
 		for (int i = 0; i < functionTable.numberVariables(); i++) {
 			// Replace the generic variable name with the correct instance name
-			result = SyntacticSubstitute.replace(result, Expressions.makeSymbol(genericVariableName(i)), Expressions.makeSymbol(instanceVariableName(instanceVarIdxs.get(i))), process);
+			result = SyntacticSubstitute.replace(result, Expressions.makeSymbol(genericVariableName(i)), Expressions.makeSymbol(instanceVariableName(instanceVarIdxs.get(i))), context);
 			int varCardinality = functionTable.cardinality(i);
 			for (int c = 0; c < varCardinality; c++) {
 				// Replace the generic constants with constants for the variable index (if they differ)
 				Expression genericConstant  = Expressions.makeSymbol(genericConstantValueForVariable(c, i, varCardinality));
 				Expression instanceConstant = Expressions.makeSymbol(instanceConstantValueForVariable(c, instanceVarIdxs.get(i), varCardinality));
 				if (!genericConstant.equals(instanceConstant)) {
-					result = SyntacticSubstitute.replace(result, genericConstant, instanceConstant, process);
+					result = SyntacticSubstitute.replace(result, genericConstant, instanceConstant, context);
 				}
 			}
 		}

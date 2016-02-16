@@ -505,11 +505,11 @@ class RandomConditionalPotentialExpressionGenerator {
 		
 		constraintTheory.setVariableNamesAndTypesForTesting(varToTypeMap);
 		
-		Context process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess());
+		Context context = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess());
 		
 		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
 				() -> makeSymbol(random.nextDouble()),
-				process);
+				context);
 	}
 	
 	public String getPropositionalVariableNameFor(int theoryIndex, int varIndex) {

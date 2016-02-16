@@ -208,7 +208,7 @@ public class HOGModelGrounding {
 							list());
 
 		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(groundedFactorsAndTypes, false, null, true, null);
-		Context process = inferencer.makeProcessWithTypeInformation();
+		Context context = inferencer.makeProcessWithTypeInformation();
 		
 		listener.numberFactors(factorsAndTypes.getFactors().size());
 		int factorIndex = 0;
@@ -233,7 +233,7 @@ public class HOGModelGrounding {
 	    				randomVariableNameToTypeSizeAndUniqueConstants,
 	    				typeToValues,
 	    				inferencer,
-	    				process);
+	    				context);
 	    	}
 	    	else {
 	    		contextSensitiveGrounding(
@@ -243,7 +243,7 @@ public class HOGModelGrounding {
 	    				randomVariableNameToTypeSizeAndUniqueConstants,
 	    				typeToValues,
 	    				inferencer,
-	    				process);
+	    				context);
 	    	}
 
 	    	factorIndex++;
@@ -309,9 +309,9 @@ public class HOGModelGrounding {
 	 * @param randomVariableNameToTypeSizeAndUniqueConstants
 	 * @param typeToValues
 	 * @param inferencer
-	 * @param process
+	 * @param context
 	 */
-	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, Context process) {
+	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, Context context) {
 		int[] radices                    = new int[randomVariablesInFactor.size()];
 		List<List<Expression>> factorRandomVariableTypeValues = new ArrayList<>();
 		for (int i = 0; i < randomVariablesInFactor.size(); i++) {
@@ -328,9 +328,9 @@ public class HOGModelGrounding {
 			Expression groundedFactor = factor;
 			for (int i = 0; i < randomVariablesInFactor.size(); i++) {
 				int valueIndex = mrn.getCurrentNumeralValue(i);
-				groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), factorRandomVariableTypeValues.get(i).get(valueIndex), process);
+				groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), factorRandomVariableTypeValues.get(i).get(valueIndex), context);
 			}  		
-			Expression value = inferencer.simplify(groundedFactor, process);
+			Expression value = inferencer.simplify(groundedFactor, context);
 			//				Expression value = inferencer.evaluate(groundedFactor);
 			if (!Expressions.isNumber(value)) {
 				throw new IllegalStateException("Unable to compute a number for the grounded factor ["+groundedFactor+"], instead got:"+value);
@@ -432,9 +432,9 @@ public class HOGModelGrounding {
 	 * @param randomVariableNameToTypeSizeAndUniqueConstants
 	 * @param typeToValues TODO
 	 * @param inferencer
-	 * @param process
+	 * @param context
 	 */
-	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, Context process) {
+	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, Context context) {
 		Function<Integer, Integer> fromVariableIndexToDomainSize = 
 				makeFunctionFromVariableIndexToDomainSize(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor);
 		int numberFactorValues = 
@@ -451,7 +451,7 @@ public class HOGModelGrounding {
 				true, // last time this variable is being iterated (it happens only once)
 				(isFirstValue, isLastValue, value)
 				-> listener.factorValue(numberFactorValues, isFirstValue, isLastValue, value.rationalValue()),
-				process);
+				context);
 	}
 
 	private static void contextSensitiveGroundingFrom(
@@ -464,7 +464,7 @@ public class HOGModelGrounding {
 			boolean firstIterationForVariable,
 			boolean lastIterationForVariable,
 			TernaryProcedure<Boolean, Boolean, Expression> recordValue,
-			Context process) {
+			Context context) {
 		
 		Expression variable = variables.get(variableIndex);
 		boolean isLastVariable = variableIndex == variables.size() - 1;
@@ -474,8 +474,8 @@ public class HOGModelGrounding {
 			boolean thisVariableIsAtItsFirstValue = variableValueIndex == 0;
 			boolean thisVariableIsAtItsLastValue = variableValueIndex == numberOfVariableValues - 1;
 			Expression value = fromVariableIndexAndValueIndexToValue.apply(variableIndex, variableValueIndex);
-			Expression expressionWithReplacedValue = expression.replaceAllOccurrences(variable, value, process);
-			Expression simplifiedExpression = constraintTheory.simplify(expressionWithReplacedValue, process);
+			Expression expressionWithReplacedValue = expression.replaceAllOccurrences(variable, value, context);
+			Expression simplifiedExpression = constraintTheory.simplify(expressionWithReplacedValue, context);
 			
 			boolean expressionIsSimplifiedToConstant =
 					isLastVariable || simplifiedExpression.getSyntacticFormType().equals("Symbol");
@@ -517,7 +517,7 @@ public class HOGModelGrounding {
 						firstIterationForNextVariable,
 						lastIterationForNextVariable,
 						recordValue,
-						process);
+						context);
 			}
 		}
 	}

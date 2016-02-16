@@ -921,9 +921,9 @@ public class InferenceForFactorGraphAndEvidenceTest {
 				evidence,
 				useFactorization, null);
 		marginal = inferencer.solve(queryExpression);
-		DefaultRewritingProcess process = new DefaultRewritingProcess();
-		marginal = Expressions.roundToAGivenPrecision(marginal, 9, process);
-		expected = Expressions.roundToAGivenPrecision(expected, 9, process);
+		DefaultRewritingProcess context = new DefaultRewritingProcess();
+		marginal = Expressions.roundToAGivenPrecision(marginal, 9, context);
+		expected = Expressions.roundToAGivenPrecision(expected, 9, context);
 		if (expected.equals(marginal)) {
 			// Ok!
 		}
@@ -938,7 +938,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 // Not working yet, need to debug		
 //		Expression negationMarginal;
 //		negationMarginal = inferencer.solve(Not.make(queryExpression));
-//		negationMarginal = Expressions.roundToAGivenPrecision(negationMarginal, 9, process);
+//		negationMarginal = Expressions.roundToAGivenPrecision(negationMarginal, 9, context);
 //		expected = inferencer.evaluate(parse(negationMarginal + " = 1 - " + marginal));
 //		assertEquals(expected, TRUE);
 	}

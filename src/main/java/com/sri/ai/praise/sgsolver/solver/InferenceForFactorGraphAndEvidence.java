@@ -265,31 +265,31 @@ public class InferenceForFactorGraphAndEvidence {
 	}
 
 	/**
-	 * Simplifies an expression without requiring a process with all the type information (creating it from scratch);
-	 * use {@link #simplify(Expression, Context)} instead for greater efficient if you already have such a process,
-	 * or if you are invoking this method multiple times (you can make the process only once with {@link #makeProcessWithTypeInformation()}.
+	 * Simplifies an expression without requiring a context with all the type information (creating it from scratch);
+	 * use {@link #simplify(Expression, Context)} instead for greater efficient if you already have such a context,
+	 * or if you are invoking this method multiple times (you can make the context only once with {@link #makeProcessWithTypeInformation()}.
 	 * @param expression
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		Context process = makeProcessWithTypeInformation();
-		return simplify(expression, process);
+		Context context = makeProcessWithTypeInformation();
+		return simplify(expression, context);
 	}
 
 	/**
-	 * Simplifies an expression given process with all the type information already built-in
+	 * Simplifies an expression given context with all the type information already built-in
 	 * (one can be built with {@link #makeProcessWithTypeInformation()}.
 	 * @param expression
-	 * @param process
+	 * @param context
 	 * @return
 	 */
-	public Expression simplify(Expression expression, Context process) {
-		Expression result = constraintTheory.simplify(expression, process);
+	public Expression simplify(Expression expression, Context context) {
+		Expression result = constraintTheory.simplify(expression, context);
 		return result;
 	}
 
 	/**
-	 * Makes rewriting process with all the type information on this inferencer.
+	 * Makes context with all the type information on this inferencer.
 	 * @return
 	 */
 	public Context makeProcessWithTypeInformation() {
