@@ -37,6 +37,20 @@
  */
 package com.sri.ai.praise.model.v1.hogm.antlr;
 
+import static com.sri.ai.grinder.library.FunctorConstants.AND;
+import static com.sri.ai.grinder.library.FunctorConstants.CARDINALITY;
+import static com.sri.ai.grinder.library.FunctorConstants.EQUAL;
+import static com.sri.ai.grinder.library.FunctorConstants.EQUIVALENCE;
+import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIATION;
+import static com.sri.ai.grinder.library.FunctorConstants.IMPLICATION;
+import static com.sri.ai.grinder.library.FunctorConstants.IN;
+import static com.sri.ai.grinder.library.FunctorConstants.INTEGER_INTERVAL;
+import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
+import static com.sri.ai.grinder.library.FunctorConstants.NOT;
+import static com.sri.ai.grinder.library.FunctorConstants.OR;
+import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
+import static com.sri.ai.grinder.library.FunctorConstants.TIMES;
+
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -49,10 +63,8 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.ForAll;
-import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.boole.ThereExists;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -64,8 +76,6 @@ import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.HOGModel;
 import com.sri.ai.praise.model.v1.StatementInfo;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMBaseVisitor;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParser;
 
 @Beta
 public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
@@ -259,7 +269,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
     // | VERTICAL_BAR constant_name VERTICAL_BAR #typeCardinality
  	@Override 
  	public Expression visitTypeCardinality(@NotNull HOGMParser.TypeCardinalityContext ctx) { 
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.CARDINALITY, newSymbol(ctx.constant_name().getText()));
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(CARDINALITY, newSymbol(ctx.constant_name().getText()));
  		
  		return result;
  	}
@@ -268,7 +278,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// | NOT term
  	@Override
 	public Expression visitNot(@NotNull HOGMParser.NotContext ctx) { 
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(Not.FUNCTOR, visit(ctx.term()));
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(NOT, visit(ctx.term()));
 		return result; 
  	}
  	
@@ -282,7 +292,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 			result = Expressions.makeSymbol(argument.rationalValue().negate());
 		}
 		else {
-			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.MINUS, argument);
+			result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(MINUS, argument);
 		}
 		return result;
  	}
@@ -291,7 +301,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// |  <assoc=right> base=term EXPONENTIATION exponent=term
  	@Override 
  	public Expression visitExponentiation(@NotNull HOGMParser.ExponentiationContext ctx) { 
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.EXPONENTIATION, visit(ctx.base), visit(ctx.exponent));
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(EXPONENTIATION, visit(ctx.base), visit(ctx.exponent));
 		return result;
  	}
  	
@@ -344,7 +354,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// |<assoc=right> antecedent=term IMPLICATION consequent=term
  	@Override 
  	public Expression visitImplication(@NotNull HOGMParser.ImplicationContext ctx) { 
-		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IMPLICATION, visit(ctx.antecedent), visit(ctx.consequent));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(IMPLICATION, visit(ctx.antecedent), visit(ctx.consequent));
 		return result; 
  	}
  	
@@ -352,7 +362,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// |<assoc=right> leftop=term BICONDITIONAL rightop=term
  	@Override 
  	public Expression visitBiconditional(@NotNull HOGMParser.BiconditionalContext ctx) { 
-		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.EQUIVALENCE, visit(ctx.leftop), visit(ctx.rightop));
+		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(EQUIVALENCE, visit(ctx.leftop), visit(ctx.rightop));
 		return result; 
  	}
  	
@@ -413,7 +423,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  		Expression variable = newSymbol(ctx.variable.getText());
  		Expression sortName = newSymbol(ctx.sort.getText());
  		
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.IN, variable, sortName);
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(IN, variable, sortName);
  		
  		return result; 
  	}
@@ -433,7 +443,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
     // : start=INTEGER DOUBLE_DOT end=INTEGER
  	@Override 
  	public Expression visitSort_number_sub_range(@NotNull HOGMParser.Sort_number_sub_rangeContext ctx) { 
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, newSymbol(ctx.start.getText()), newSymbol(ctx.end.getText()));
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(INTEGER_INTERVAL, newSymbol(ctx.start.getText()), newSymbol(ctx.end.getText()));
  		return result;
  	}
  	
@@ -502,11 +512,11 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		
 		Object functor = expression.getFunctor();
 		if (functor != null) {
-			if (functor.equals(FunctorConstants.TIMES) || 
-			    functor.equals(FunctorConstants.PLUS)  || 
-			    functor.equals(FunctorConstants.EQUAL) ||
-			    functor.equals(FunctorConstants.AND)   || 
-			    functor.equals(FunctorConstants.OR)) {
+			if (functor.equals(TIMES) || 
+			    functor.equals(PLUS)  || 
+			    functor.equals(EQUAL) ||
+			    functor.equals(AND)   || 
+			    functor.equals(OR)) {
 				List<Expression> args = new ArrayList<Expression>();
 				for (Expression arg : expression.getArguments()) {
 					if (arg.getFunctor() != null && functor.equals(arg.getFunctor()) && !parenthesizedExpressions.containsKey(arg)) {
