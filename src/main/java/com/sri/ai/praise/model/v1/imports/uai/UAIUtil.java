@@ -50,7 +50,7 @@ import java.util.function.Function;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
@@ -162,7 +162,7 @@ public class UAIUtil {
 
 	public static Expression convertGenericTableToInstance(FunctionTable functionTable, Expression genericFunctionTableExpr, List<Integer> instanceVarIdxs) {
 		Expression result = genericFunctionTableExpr;
-		RewritingProcess process = new DefaultRewritingProcess();
+		Context process = new DefaultRewritingProcess();
 		for (int i = 0; i < functionTable.numberVariables(); i++) {
 			// Replace the generic variable name with the correct instance name
 			result = SyntacticSubstitute.replace(result, Expressions.makeSymbol(genericVariableName(i)), Expressions.makeSymbol(instanceVariableName(instanceVarIdxs.get(i))), process);

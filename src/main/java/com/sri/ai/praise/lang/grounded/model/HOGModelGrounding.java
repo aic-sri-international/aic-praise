@@ -55,7 +55,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
@@ -208,7 +208,7 @@ public class HOGModelGrounding {
 							list());
 
 		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(groundedFactorsAndTypes, false, null, true, null);
-		RewritingProcess process = inferencer.makeProcessWithTypeInformation();
+		Context process = inferencer.makeProcessWithTypeInformation();
 		
 		listener.numberFactors(factorsAndTypes.getFactors().size());
 		int factorIndex = 0;
@@ -311,7 +311,7 @@ public class HOGModelGrounding {
 	 * @param inferencer
 	 * @param process
 	 */
-	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, RewritingProcess process) {
+	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, Context process) {
 		int[] radices                    = new int[randomVariablesInFactor.size()];
 		List<List<Expression>> factorRandomVariableTypeValues = new ArrayList<>();
 		for (int i = 0; i < randomVariablesInFactor.size(); i++) {
@@ -434,7 +434,7 @@ public class HOGModelGrounding {
 	 * @param inferencer
 	 * @param process
 	 */
-	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, RewritingProcess process) {
+	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, InferenceForFactorGraphAndEvidence inferencer, Context process) {
 		Function<Integer, Integer> fromVariableIndexToDomainSize = 
 				makeFunctionFromVariableIndexToDomainSize(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor);
 		int numberFactorValues = 
@@ -464,7 +464,7 @@ public class HOGModelGrounding {
 			boolean firstIterationForVariable,
 			boolean lastIterationForVariable,
 			TernaryProcedure<Boolean, Boolean, Expression> recordValue,
-			RewritingProcess process) {
+			Context process) {
 		
 		Expression variable = variables.get(variableIndex);
 		boolean isLastVariable = variableIndex == variables.size() - 1;

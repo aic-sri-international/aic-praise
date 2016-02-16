@@ -59,7 +59,7 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.Categorical;
 import com.sri.ai.expresso.type.IntegerInterval;
-import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
 import com.sri.ai.grinder.sgdpll.tester.RandomConditionalExpressionGenerator;
@@ -505,7 +505,7 @@ class RandomConditionalPotentialExpressionGenerator {
 		
 		constraintTheory.setVariableNamesAndTypesForTesting(varToTypeMap);
 		
-		RewritingProcess process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess());
+		Context process = constraintTheory.extendWithTestingInformation(new DefaultRewritingProcess());
 		
 		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
 				() -> makeSymbol(random.nextDouble()),

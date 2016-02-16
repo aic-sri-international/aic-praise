@@ -55,7 +55,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.RewritingProcess;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.DefaultRewritingProcess;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -266,13 +266,13 @@ public class InferenceForFactorGraphAndEvidence {
 
 	/**
 	 * Simplifies an expression without requiring a process with all the type information (creating it from scratch);
-	 * use {@link #simplify(Expression, RewritingProcess)} instead for greater efficient if you already have such a process,
+	 * use {@link #simplify(Expression, Context)} instead for greater efficient if you already have such a process,
 	 * or if you are invoking this method multiple times (you can make the process only once with {@link #makeProcessWithTypeInformation()}.
 	 * @param expression
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		RewritingProcess process = makeProcessWithTypeInformation();
+		Context process = makeProcessWithTypeInformation();
 		return simplify(expression, process);
 	}
 
@@ -283,7 +283,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @param process
 	 * @return
 	 */
-	public Expression simplify(Expression expression, RewritingProcess process) {
+	public Expression simplify(Expression expression, Context process) {
 		Expression result = constraintTheory.simplify(expression, process);
 		return result;
 	}
@@ -292,7 +292,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * Makes rewriting process with all the type information on this inferencer.
 	 * @return
 	 */
-	public RewritingProcess makeProcessWithTypeInformation() {
+	public Context makeProcessWithTypeInformation() {
 		return GrinderUtil.makeProcess(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
 	}
 }
