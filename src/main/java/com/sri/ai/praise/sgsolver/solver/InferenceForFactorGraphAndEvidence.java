@@ -56,7 +56,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.grinder.core.DefaultRewritingProcess;
+import com.sri.ai.grinder.core.DefaultContext;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
@@ -240,7 +240,7 @@ public class InferenceForFactorGraphAndEvidence {
 
 		if (queryIsCompoundExpression) {
 			// replace the query variable with the query expression
-			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new DefaultRewritingProcess());
+			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new DefaultContext());
 		}
 
 		return marginal;
