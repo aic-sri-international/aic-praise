@@ -60,7 +60,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.Categorical;
 import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.grinder.core.DefaultContext;
+import com.sri.ai.grinder.core.TypeContext;
 import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
 import com.sri.ai.grinder.sgdpll.tester.RandomConditionalExpressionGenerator;
 import com.sri.ai.grinder.sgdpll.theory.compound.CompoundConstraintTheory;
@@ -357,7 +357,7 @@ public class RandomHOGMv1Generator {
 			for (int i = 0; i < genArgs.numberPotentials; i++) {		
 				Expression conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
 				// Ensure we have variables in the conditional
-				while (Expressions.freeVariables(conditional, new DefaultContext()).size() == 0) {							
+				while (Expressions.freeVariables(conditional, new TypeContext()).size() == 0) {							
 					conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
 				}
 				
@@ -505,7 +505,7 @@ class RandomConditionalPotentialExpressionGenerator {
 		
 		constraintTheory.setVariableNamesAndTypesForTesting(varToTypeMap);
 		
-		Context context = constraintTheory.extendWithTestingInformation(new DefaultContext());
+		Context context = constraintTheory.makeContextualConstraintWithTestingInformation();
 		
 		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
 				() -> makeSymbol(random.nextDouble()),

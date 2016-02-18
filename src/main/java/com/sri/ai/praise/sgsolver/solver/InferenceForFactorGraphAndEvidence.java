@@ -56,7 +56,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.grinder.core.DefaultContext;
+import com.sri.ai.grinder.core.TypeContext;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
@@ -224,7 +224,7 @@ public class InferenceForFactorGraphAndEvidence {
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (evidenceProbability == null) {
-				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
+				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
 
 //				System.out.print("Normalization constant ");
 //				if (evidence != null) {
@@ -240,7 +240,7 @@ public class InferenceForFactorGraphAndEvidence {
 
 		if (queryIsCompoundExpression) {
 			// replace the query variable with the query expression
-			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new DefaultContext());
+			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new TypeContext());
 		}
 
 		return marginal;
@@ -252,7 +252,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression sum(Collection<Expression> indices, Expression expression) {
-		return solver.solve(expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
+		return solver.solve(expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
 	}
 
 	/**
@@ -261,7 +261,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
-		return solver.solve(expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
+		return solver.solve(expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
 	}
 
 	/**
@@ -293,6 +293,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Context makeProcessWithTypeInformation() {
-		return GrinderUtil.makeProcess(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate);
+		return GrinderUtil.makeProcess(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
 	}
 }
