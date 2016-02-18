@@ -173,7 +173,7 @@ public class InferenceForFactorGraphAndEvidence {
 			solver = new SGVET(simplifier.getTopSimplifier(), problemType, constraintTheory);
 		}
 		else {
-			solver = new SGDPLLT(simplifier.getTopSimplifier(), problemType, constraintTheory);
+			solver = new SGDPLLT(simplifier.getTopSimplifier(), problemType);
 		}
 
 		evidenceProbability = null;

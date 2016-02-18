@@ -505,7 +505,7 @@ class RandomConditionalPotentialExpressionGenerator {
 		
 		constraintTheory.setVariableNamesAndTypesForTesting(varToTypeMap);
 		
-		Context context = constraintTheory.makeContextualConstraintWithTestingInformation();
+		Context context = constraintTheory.makeContextWithTestingInformation();
 		
 		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
 				() -> makeSymbol(random.nextDouble()),
