@@ -92,6 +92,11 @@ public class PagedModelContainer {
 		this.pages = Collections.unmodifiableList(new ArrayList<>(pages));
 	}
 	
+	public PagedModelContainer(String name, URI uri) throws IOException {
+		this.name  = name;
+		this.pages = getModelPagesFromURI(uri);
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -169,7 +174,7 @@ public class PagedModelContainer {
 		List<String> modelSpecifications = new ArrayList<>();
 		Map<String, List<String>> fragments = new HashMap<>();
 		
-		// Need to do this if reading form jar file.
+		// Need to do this if reading from jar file.
 		if (uri.toString().contains("!")) {
 			final Map<String, String> env = new HashMap<>();
 			final String[] array = uri.toString().split("!");

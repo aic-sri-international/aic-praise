@@ -97,7 +97,7 @@ public class EvaluationCLI {
 	public static void main(String[] args) throws Exception {		
 		try (EvaluationArgs evaluationArgs = getArgs(args)) {			
 			Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PR, evaluationArgs.workingDirectory, evaluationArgs.numberRunsToAverageOver);
-			PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationArgs.praiseModelsFile.getName(), PagedModelContainer.getModelPagesFromURI(evaluationArgs.praiseModelsFile.toURI()));
+			PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationArgs.praiseModelsFile.getName(), evaluationArgs.praiseModelsFile.toURI());
 			List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(			
 					new SolverEvaluatorConfiguration("SGSolver", SGSolverEvaluator.class.getName(), 
 							evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt, 
@@ -142,7 +142,7 @@ public class EvaluationCLI {
 		OptionSpec<Integer> totalCPURuntimeLimitSecondsPerSolveAttempt = parser.accepts("c", "Total CPU runtime limit seconds per solver attempt (defaults to "+result.totalCPURuntimeLimitSecondsPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
 		OptionSpec<Integer> totalMemoryLimitInMegabytesPerSolveAttempt = parser.accepts("m", "Total memory limit in MB per solver attempt (defaults to "+result.totalMemoryLimitInMegabytesPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
 		OptionSpec<Integer> numberRunsToAverageOver                    = parser.accepts("a", "Number of runs to average each result over (defaults to "+result.numberRunsToAverageOver+").").withRequiredArg().ofType(Integer.class);
-		parser.accepts("t", "Translate models always, instead of caching them between runs (default behavior)");
+		parser.accepts("t", "Translate models always, instead of caching them between runs (default behavior is caching)");
 		
 		// Required
 		OptionSpec<File> praiseModelsFile  = parser.accepts("p", "The PRAiSE Models file used as input for the evaluations").withRequiredArg().required().ofType(File.class);
