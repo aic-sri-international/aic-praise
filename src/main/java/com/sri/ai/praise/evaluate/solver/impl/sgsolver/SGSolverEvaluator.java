@@ -154,6 +154,9 @@ public class SGSolverEvaluator extends AbstractSolverEvaluator {
 		if (result.resultExpression != null) {
 			result.resultExpression = result.resultExpression.substring(SGSolverCLI.RESULT_PREFIX.length());
 		}
+		else {
+			throw new Error("Error launching java process for SGSolver:\n" + sgsolverOutputs);
+		}
 		
 		return result;
 	}
