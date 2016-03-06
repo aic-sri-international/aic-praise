@@ -24,7 +24,7 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
  * @author braz
  *
  */
-public class EvaluateCLI {
+public abstract class EvaluateCLI {
 
 	protected static class EvaluationArgs implements AutoCloseable {
 		// Optional
@@ -39,7 +39,6 @@ public class EvaluateCLI {
 
 		// Required
 		File workingDirectory; // -w
-		File praiseModelsFile; // -p
 
 		@Override
 		public void close() throws IOException {
@@ -171,8 +170,8 @@ public class EvaluateCLI {
 
 	public void run(String[] args) throws Exception {
 		try (EvaluationArgs evaluationArgs = getArgs(args)) {			
+			PagedModelContainer                modelsContainer      = makeModelsContainer(evaluationArgs);
 			Evaluation.Configuration           configuration        = new Evaluation.Configuration(Evaluation.Type.PR, evaluationArgs.workingDirectory, evaluationArgs.numberRunsToAverageOver);
-			PagedModelContainer                modelsContainer      = new PagedModelContainer(evaluationArgs.praiseModelsFile.getName(), evaluationArgs.praiseModelsFile.toURI());
 			List<SolverEvaluatorConfiguration> solverConfigurations = Arrays.asList(			
 					new SolverEvaluatorConfiguration("SGSolver", SGSolverEvaluator.class.getName(), 
 							evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt, 
@@ -191,6 +190,14 @@ public class EvaluateCLI {
 			evaluate(configuration, modelsContainer, solverConfigurations, notificationOut, resultOut);
 		}
 	}
+
+	/**
+	 * A method making a {@link PagedModelContainer} from evaluation arguments.
+	 * @param evaluationArgs
+	 * @return
+	 * @throws IOException
+	 */
+	abstract protected PagedModelContainer makeModelsContainer(EvaluationArgs evaluationArgs) throws IOException;
 
 	private EvaluationArgs getArgs(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
 		EvaluationArgs evaluationArgs = makeEvaluationArgs();

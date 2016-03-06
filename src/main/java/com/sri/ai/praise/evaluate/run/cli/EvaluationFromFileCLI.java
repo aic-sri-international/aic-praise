@@ -44,6 +44,8 @@ import java.io.IOException;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import com.sri.ai.praise.model.common.io.PagedModelContainer;
+
 
 /**
  * Command line interface for running evaluations on a collection of models in a praise file.
@@ -79,10 +81,16 @@ public class EvaluationFromFileCLI extends EvaluateCLI {
 	protected void validateArguments(EvaluationArgs evaluationArgs, OptionSpecs optionSpecs, OptionSet options) throws IOException, FileNotFoundException {
 		super.validateArguments(evaluationArgs, optionSpecs, options);
 		OptionSpecsWithPraiseModelsFile optionSpecsWithPraiseModelsFile = (OptionSpecsWithPraiseModelsFile) optionSpecs;
-		evaluationArgs.praiseModelsFile = options.valueOf(optionSpecsWithPraiseModelsFile.praiseModelsFile);
-		if (!evaluationArgs.praiseModelsFile.isFile()) {
-			throw new IllegalArgumentException("Input PRAiSE models file does not exist: "+evaluationArgs.praiseModelsFile.getAbsolutePath());
+		EvaluationArgsWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (EvaluationArgsWithPraiseModelsFile)evaluationArgs;
+		evaluationArgsWithPraiseModelsFile.praiseModelsFile = options.valueOf(optionSpecsWithPraiseModelsFile.praiseModelsFile);
+		if (!evaluationArgsWithPraiseModelsFile.praiseModelsFile.isFile()) {
+			throw new IllegalArgumentException("Input PRAiSE models file does not exist: " + evaluationArgsWithPraiseModelsFile.praiseModelsFile.getAbsolutePath());
 		}
+	}
+
+	protected PagedModelContainer makeModelsContainer(EvaluationArgs evaluationArgs) throws IOException {
+		EvaluationArgsWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (EvaluationArgsWithPraiseModelsFile)evaluationArgs;
+		return new PagedModelContainer(evaluationArgsWithPraiseModelsFile.praiseModelsFile.getName(), evaluationArgsWithPraiseModelsFile.praiseModelsFile.toURI());
 	}
 
 	public static void main(String[] args) throws Exception {
