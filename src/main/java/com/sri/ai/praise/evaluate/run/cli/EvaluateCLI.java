@@ -27,33 +27,33 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
 public class EvaluateCLI {
 
 	protected static class EvaluationArgs implements AutoCloseable {
-			// Optional
-			PrintStream  notificationOut = System.out; // -n
-			PrintStream  resultOut       = System.out; // -r 
-			//
-			int totalCPURuntimeLimitSecondsPerSolveAttempt = 600;  // -c
-			int totalMemoryLimitInMegabytesPerSolveAttempt = 2048; // -m
-			int numberRunsToAverageOver                    = 10;   // -a
-			//
-			boolean translateAlways = false; // -t
-					
-			// Required
-			File workingDirectory; // -w
-			File praiseModelsFile; // -p
-			
-			@Override
-			public void close() throws IOException {
-				notificationOut.flush();
-				resultOut.flush();
-				// Only close if not System.out
-				if (notificationOut != System.out) {				
-					notificationOut.close();
-				}
-				if (resultOut != System.out) {
-					resultOut.close();
-				}
+		// Optional
+		PrintStream  notificationOut = System.out; // -n
+		PrintStream  resultOut       = System.out; // -r 
+		//
+		int totalCPURuntimeLimitSecondsPerSolveAttempt = 600;  // -c
+		int totalMemoryLimitInMegabytesPerSolveAttempt = 2048; // -m
+		int numberRunsToAverageOver                    = 10;   // -a
+		//
+		boolean translateAlways = false; // -t
+
+		// Required
+		File workingDirectory; // -w
+		File praiseModelsFile; // -p
+
+		@Override
+		public void close() throws IOException {
+			notificationOut.flush();
+			resultOut.flush();
+			// Only close if not System.out
+			if (notificationOut != System.out) {				
+				notificationOut.close();
+			}
+			if (resultOut != System.out) {
+				resultOut.close();
 			}
 		}
+	}
 
 	protected static class OptionSpecs {
 		OptionParser parser;
@@ -63,17 +63,16 @@ public class EvaluateCLI {
 		OptionSpec<Integer> totalMemoryLimitInMegabytesPerSolveAttempt;
 		OptionSpec<Integer> numberRunsToAverageOver;
 		OptionSpec<File> workingDirectory;
-		OptionSpec<File> praiseModelsFile;
 		
-		public OptionSpecs(EvaluationArgs result) {
+		public OptionSpecs(EvaluationArgs evaluationArgs) {
 			parser = new OptionParser();
 			// Optional
 			notificationFile = parser.accepts("n", "Notification output file name (default to stdout).").withRequiredArg().ofType(File.class);
 			resultFile       = parser.accepts("r", "Result output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 			//
-			totalCPURuntimeLimitSecondsPerSolveAttempt = parser.accepts("c", "Total CPU runtime limit seconds per solver attempt (defaults to "+result.totalCPURuntimeLimitSecondsPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
-			totalMemoryLimitInMegabytesPerSolveAttempt = parser.accepts("m", "Total memory limit in MB per solver attempt (defaults to "+result.totalMemoryLimitInMegabytesPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
-			numberRunsToAverageOver                    = parser.accepts("a", "Number of runs to average each result over (defaults to "+result.numberRunsToAverageOver+").").withRequiredArg().ofType(Integer.class);
+			totalCPURuntimeLimitSecondsPerSolveAttempt = parser.accepts("c", "Total CPU runtime limit seconds per solver attempt (defaults to "+evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
+			totalMemoryLimitInMegabytesPerSolveAttempt = parser.accepts("m", "Total memory limit in MB per solver attempt (defaults to "+evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
+			numberRunsToAverageOver                    = parser.accepts("a", "Number of runs to average each result over (defaults to "+evaluationArgs.numberRunsToAverageOver+").").withRequiredArg().ofType(Integer.class);
 			parser.accepts("t", "Translate models always, instead of caching them between runs (default behavior is caching)");
 			
 			// Required
@@ -81,8 +80,6 @@ public class EvaluateCLI {
 			
 			//
 			parser.accepts("help", "For help on command line arguments").forHelp();
-
-			praiseModelsFile  = parser.accepts("p", "The PRAiSE Models file used as input for the evaluations").withRequiredArg().required().ofType(File.class);
 		}
 	}
 	
@@ -100,6 +97,47 @@ public class EvaluateCLI {
 	 */
 	protected OptionSpecs makeOptionSpecs(EvaluationArgs evaluationArgs) {
 		return new OptionSpecs(evaluationArgs);
+	}
+
+	/**
+	 * Validates arguments
+	 * @param evaluationArgs
+	 * @param optionSpecs
+	 * @param options
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 */
+	protected void validateArguments(EvaluationArgs evaluationArgs, OptionSpecs optionSpecs, OptionSet options) throws IOException, FileNotFoundException {
+		if (options.has("help")) {
+			optionSpecs.parser.printHelpOn(System.out);
+			System.exit(0);
+		}
+		
+		// 
+		// Handle optional args
+		if (options.has(optionSpecs.notificationFile)) {
+			evaluationArgs.notificationOut = new PrintStream(options.valueOf(optionSpecs.notificationFile));
+		}
+		if (options.has(optionSpecs.resultFile)) {
+			evaluationArgs.resultOut = new PrintStream(options.valueOf(optionSpecs.resultFile));
+		}
+		if (options.has(optionSpecs.totalCPURuntimeLimitSecondsPerSolveAttempt)) {
+			evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt = options.valueOf(optionSpecs.totalCPURuntimeLimitSecondsPerSolveAttempt);
+		}
+		if (options.has(optionSpecs.totalMemoryLimitInMegabytesPerSolveAttempt)) {
+			evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt = options.valueOf(optionSpecs.totalMemoryLimitInMegabytesPerSolveAttempt);
+		}
+		if (options.has(optionSpecs.numberRunsToAverageOver)) {
+			evaluationArgs.numberRunsToAverageOver = options.valueOf(optionSpecs.numberRunsToAverageOver);
+		}
+		if (options.has("t")) {
+			evaluationArgs.translateAlways = true;
+		}
+		
+		evaluationArgs.workingDirectory = options.valueOf(optionSpecs.workingDirectory);
+		if (!evaluationArgs.workingDirectory.isDirectory()) {
+			throw new IllegalArgumentException("Working directory does not exist: "+evaluationArgs.workingDirectory);
+		}
 	}
 
 	/**
@@ -139,7 +177,8 @@ public class EvaluateCLI {
 					new SolverEvaluatorConfiguration("SGSolver", SGSolverEvaluator.class.getName(), 
 							evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt, 
 							evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt,
-							!evaluationArgs.translateAlways, Collections.emptyMap()),
+							!evaluationArgs.translateAlways, Collections.emptyMap())
+					,
 					new SolverEvaluatorConfiguration("VEC", VECSolverEvaluator.class.getName(), 
 							evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt, 
 							evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt,
@@ -154,64 +193,13 @@ public class EvaluateCLI {
 	}
 
 	private EvaluationArgs getArgs(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
-		EvaluationArgs result = makeEvaluationArgs();
+		EvaluationArgs evaluationArgs = makeEvaluationArgs();
+		OptionSpecs optionSpecs = makeOptionSpecs(evaluationArgs);
 		
-		OptionParser parser = new OptionParser();
-		// Optional
-		OptionSpec<File> notificationFile = parser.accepts("n", "Notification output file name (default to stdout).").withRequiredArg().ofType(File.class);
-		OptionSpec<File> resultFile       = parser.accepts("r", "Result output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
-		//
-		OptionSpec<Integer> totalCPURuntimeLimitSecondsPerSolveAttempt = parser.accepts("c", "Total CPU runtime limit seconds per solver attempt (defaults to "+result.totalCPURuntimeLimitSecondsPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
-		OptionSpec<Integer> totalMemoryLimitInMegabytesPerSolveAttempt = parser.accepts("m", "Total memory limit in MB per solver attempt (defaults to "+result.totalMemoryLimitInMegabytesPerSolveAttempt+").").withRequiredArg().ofType(Integer.class);
-		OptionSpec<Integer> numberRunsToAverageOver                    = parser.accepts("a", "Number of runs to average each result over (defaults to "+result.numberRunsToAverageOver+").").withRequiredArg().ofType(Integer.class);
-		parser.accepts("t", "Translate models always, instead of caching them between runs (default behavior is caching)");
+		OptionSet options = optionSpecs.parser.parse(args);
 		
-		// Required
-		OptionSpec<File> workingDirectory  = parser.accepts("w", "Solver Working Directory (temp directories and files will be created under here)").withRequiredArg().required().ofType(File.class);
+		validateArguments(evaluationArgs, optionSpecs, options);
 		
-		//
-		parser.accepts("help", "For help on command line arguments").forHelp();
-
-		OptionSpec<File> praiseModelsFile  = parser.accepts("p", "The PRAiSE Models file used as input for the evaluations").withRequiredArg().required().ofType(File.class);
-
-		OptionSet options = parser.parse(args);
-		
-		if (options.has("help")) {
-			parser.printHelpOn(System.out);
-			System.exit(0);
-		}
-		
-		// 
-		// Handle optional args
-		if (options.has(notificationFile)) {
-			result.notificationOut = new PrintStream(options.valueOf(notificationFile));
-		}
-		if (options.has(resultFile)) {
-			result.resultOut = new PrintStream(options.valueOf(resultFile));
-		}
-		if (options.has(totalCPURuntimeLimitSecondsPerSolveAttempt)) {
-			result.totalCPURuntimeLimitSecondsPerSolveAttempt = options.valueOf(totalCPURuntimeLimitSecondsPerSolveAttempt);
-		}
-		if (options.has(totalMemoryLimitInMegabytesPerSolveAttempt)) {
-			result.totalMemoryLimitInMegabytesPerSolveAttempt = options.valueOf(totalMemoryLimitInMegabytesPerSolveAttempt);
-		}
-		if (options.has(numberRunsToAverageOver)) {
-			result.numberRunsToAverageOver = options.valueOf(numberRunsToAverageOver);
-		}
-		if (options.has("t")) {
-			result.translateAlways = true;
-		}
-		
-		result.workingDirectory = options.valueOf(workingDirectory);
-		if (!result.workingDirectory.isDirectory()) {
-			throw new IllegalArgumentException("Working directory does not exist: "+result.workingDirectory);
-		}
-
-		result.praiseModelsFile = options.valueOf(praiseModelsFile);
-		if (!result.praiseModelsFile.isFile()) {
-			throw new IllegalArgumentException("Input PRAiSE models file does not exist: "+result.praiseModelsFile.getAbsolutePath());
-		}
-		
-		return result;
+		return evaluationArgs;
 	}
 }

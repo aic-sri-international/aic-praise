@@ -37,6 +37,13 @@
  */
 package com.sri.ai.praise.evaluate.run.cli;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
+
 
 /**
  * Command line interface for running evaluations on a collection of models in a praise file.
@@ -47,6 +54,37 @@ package com.sri.ai.praise.evaluate.run.cli;
 public class EvaluationFromFileCLI extends EvaluateCLI {
 // TODO - consider using commons-configuration to evaluation input file reading, i.e. https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
 	
+	protected static class EvaluationArgsWithPraiseModelsFile extends EvaluationArgs {
+		// Required
+		File praiseModelsFile; // -p
+	}
+
+	protected static class OptionSpecsWithPraiseModelsFile extends OptionSpecs {
+		OptionSpec<File> praiseModelsFile;
+		
+		public OptionSpecsWithPraiseModelsFile(EvaluationArgs evaluationArgs) {
+			super(evaluationArgs);
+			praiseModelsFile  = parser.accepts("p", "The PRAiSE Models file used as input for the evaluations").withRequiredArg().required().ofType(File.class);
+		}
+	}
+
+	protected EvaluationArgs makeEvaluationArgs() {
+		return new EvaluationArgsWithPraiseModelsFile(); 
+	}
+	
+	protected OptionSpecs makeOptionSpecs(EvaluationArgs evaluationArgs) {
+		return new OptionSpecsWithPraiseModelsFile(evaluationArgs);
+	}
+	
+	protected void validateArguments(EvaluationArgs evaluationArgs, OptionSpecs optionSpecs, OptionSet options) throws IOException, FileNotFoundException {
+		super.validateArguments(evaluationArgs, optionSpecs, options);
+		OptionSpecsWithPraiseModelsFile optionSpecsWithPraiseModelsFile = (OptionSpecsWithPraiseModelsFile) optionSpecs;
+		evaluationArgs.praiseModelsFile = options.valueOf(optionSpecsWithPraiseModelsFile.praiseModelsFile);
+		if (!evaluationArgs.praiseModelsFile.isFile()) {
+			throw new IllegalArgumentException("Input PRAiSE models file does not exist: "+evaluationArgs.praiseModelsFile.getAbsolutePath());
+		}
+	}
+
 	public static void main(String[] args) throws Exception {
 		EvaluateCLI evaluator = new EvaluationFromFileCLI();
 		evaluator.run(args);
