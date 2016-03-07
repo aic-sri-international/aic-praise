@@ -267,18 +267,18 @@ public class InferenceForFactorGraphAndEvidence {
 	/**
 	 * Simplifies an expression without requiring a context with all the type information (creating it from scratch);
 	 * use {@link #simplify(Expression, Context)} instead for greater efficient if you already have such a context,
-	 * or if you are invoking this method multiple times (you can make the context only once with {@link #makeProcessWithTypeInformation()}.
+	 * or if you are invoking this method multiple times (you can make the context only once with {@link #makeContextWithTypeInformation()}.
 	 * @param expression
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		Context context = makeProcessWithTypeInformation();
+		Context context = makeContextWithTypeInformation();
 		return simplify(expression, context);
 	}
 
 	/**
 	 * Simplifies an expression given context with all the type information already built-in
-	 * (one can be built with {@link #makeProcessWithTypeInformation()}.
+	 * (one can be built with {@link #makeContextWithTypeInformation()}.
 	 * @param expression
 	 * @param context
 	 * @return
@@ -292,7 +292,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * Makes context with all the type information on this inferencer.
 	 * @return
 	 */
-	public Context makeProcessWithTypeInformation() {
-		return GrinderUtil.makeProcess(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
+	public Context makeContextWithTypeInformation() {
+		return GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
 	}
 }

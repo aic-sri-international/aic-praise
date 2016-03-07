@@ -38,6 +38,7 @@
 package com.sri.ai.praise.lang.grounded.model;
 
 import static com.sri.ai.expresso.helper.Expressions.isNumber;
+import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.myAssert;
 
@@ -47,7 +48,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -59,13 +59,10 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.util.base.BinaryFunction;
-import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.base.TernaryProcedure;
 import com.sri.ai.util.base.Triple;
 import com.sri.ai.util.math.MixedRadixNumber;
@@ -74,6 +71,8 @@ import com.sri.ai.util.math.Rational;
 @Beta
 public class HOGModelGrounding {
 
+	// TODO: this class needs to be cleaned up to use the unified functionalities of expresso Types.
+	
 	public static boolean useContextSensitiveGrounding = true;
 	
 	public interface Listener {
@@ -94,101 +93,11 @@ public class HOGModelGrounding {
 		void groundingComplete();
 	}
 	
-	public static void main(String[] args) {
-		long start = System.currentTimeMillis();
-		StringJoiner sj = new StringJoiner("\n");
-		sj.add("sort People : 50, Putin;");
-		sj.add("sort Countries : 50, USA, Russia;");
-		sj.add("random country : Countries;");
-		sj.add("random president : People;");
-		sj.add("random communism : Boolean;");
-		sj.add("random democracy : Boolean;");
-		sj.add("random votePutin : 1..15;");
-		sj.add("if country = Russia then if president = Putin then communism else not communism else if democracy then not communism else communism;");
-		sj.add("if country = Russia then if votePutin > 5 then president = Putin else not president = Putin;");
-		
-		HOGMParserWrapper parser          = new HOGMParserWrapper();
-		ParsedHOGModel    parsedModel     = parser.parseModel(sj.toString());
-		FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
-		List<Expression>  evidence        = new ArrayList<>();
-		evidence.add(Expressions.parse("communism"));
-		
-		ground(factorsAndTypes, evidence, new Listener() { // NOTE: an example listener that outputs in the UAI format
-			int numberVariables;
-			StringJoiner  preamble       = new StringJoiner("");
-			StringJoiner  functionTables = new StringJoiner("");
-			List<Pair<Integer, Integer>> evidence = new ArrayList<>();
-			@Override
-			public void numberGroundVariables(int number) { 
-				this.numberVariables = number;
-				preamble.add("MARKOV\n");
-				preamble.add(""+number+"\n");
-			}	
-			@Override
-			public void groundVariableCardinality(int variableIndex, int cardinality) {
-				preamble.add(""+cardinality);
-				if (variableIndex == (numberVariables-1)) {
-					preamble.add("\n");
-				}
-				else {
-					preamble.add(" ");
-				}
-			}
-			@Override
-			public void numberFactors(int number) {
-				preamble.add(""+number+"\n");
-			}
-			@Override
-			public void factorParticipants(int factorIndex, int[] variableIndexes) {
-				preamble.add(""+variableIndexes.length);
-				for (int i = 0; i < variableIndexes.length; i++) {
-					preamble.add(" "+variableIndexes[i]);
-				}
-				preamble.add("\n");
-			}
-			@Override
-			public void factorValue(int numberFactorValues, boolean isFirstValue, boolean isLastValue, Rational value) {
-				if (isFirstValue) {
-					functionTables.add("\n"+numberFactorValues+"\n");
-				}
-				else {
-					functionTables.add(" ");
-				}
-				
-				functionTables.add(""+value.doubleValue());
-				
-				if (isLastValue) {
-					functionTables.add("\n");
-				}
-			}	
-			@Override
-			public void evidence(int variableIndex, int valueIndex) {
-				evidence.add(new Pair<>(variableIndex, valueIndex));
-			}
-			@Override
-			public void groundingComplete() {
-				long end = System.currentTimeMillis() - start;
-				System.out.println("--- MODEL ---");
-				System.out.print(preamble);
-				System.out.print(functionTables);
-				System.out.println("--- EVIDENCE ---");
-				System.out.print(evidence.size());
-				for (Pair<Integer, Integer> evidenceAssignment : evidence) {
-					System.out.print(" ");
-					System.out.print(evidenceAssignment.first);
-					System.out.print(" ");
-					System.out.print(evidenceAssignment.second);
-				}	
-				System.out.println("\nTime taken for grounding (not printing): " + end + " ms.");	
-			}
-		});
-	}
-	
 	public static void ground(FactorsAndTypes factorsAndTypes, List<Expression> evidence, Listener listener) {
 		if (factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().size() > 0) {
 			throw new IllegalArgumentException("Constants cannot be grounded");
 		}
-		Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants = createRandomVariableNameToTypeSizeAndUnqiueConstantsMap(factorsAndTypes);
+		Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants = createRandomVariableNameToTypeSizeAndUniqueConstantsMap(factorsAndTypes);
 		Map<Expression, Integer> randomVariableIndexes = new LinkedHashMap<>();
 		AtomicInteger atomicVariableIndex = new AtomicInteger(-1);
 		listener.numberGroundVariables(randomVariableNameToTypeSizeAndUniqueConstants.size());
@@ -200,15 +109,9 @@ public class HOGModelGrounding {
 		Map<Expression, List<Expression>> typeToValues = createTypeToValuesMap(factorsAndTypes, randomVariableNameToTypeSizeAndUniqueConstants);
 		Map<String, String> newUniqueConstantToTypeMap = createGroundedUniqueConstantToTypeMap(typeToValues);
 	    
-		ExpressionFactorsAndTypes groundedFactorsAndTypes = new ExpressionFactorsAndTypes(Collections.emptyList(),
-							factorsAndTypes.getMapFromRandomVariableNameToTypeName(),
-							factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName(),
-							newUniqueConstantToTypeMap,
-							factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
-							list());
-
-		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(groundedFactorsAndTypes, false, null, true, null);
-		Context context = inferencer.makeProcessWithTypeInformation();
+		InferenceForFactorGraphAndEvidence inferencer = makeInferencer(factorsAndTypes, newUniqueConstantToTypeMap);
+		
+		Context context = inferencer.makeContextWithTypeInformation();
 		
 		listener.numberFactors(factorsAndTypes.getFactors().size());
 		int factorIndex = 0;
@@ -263,6 +166,25 @@ public class HOGModelGrounding {
 		}
 		
 		listener.groundingComplete();
+	}
+
+	/**
+	 * Provides an appropriate {@link InferenceForFactorGraphAndEvidence} object.
+	 * @param factorsAndTypes
+	 * @param newUniqueConstantToTypeMap
+	 * @return
+	 */
+	private static InferenceForFactorGraphAndEvidence makeInferencer(FactorsAndTypes factorsAndTypes, Map<String, String> newUniqueConstantToTypeMap) {
+		ExpressionFactorsAndTypes groundedFactorsAndTypesInformation = 
+				new ExpressionFactorsAndTypes(
+						Collections.emptyList(), // factors
+						factorsAndTypes.getMapFromRandomVariableNameToTypeName(),
+						factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName(),
+						newUniqueConstantToTypeMap,
+						factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
+						list()); // additional types
+		InferenceForFactorGraphAndEvidence inferencer = new InferenceForFactorGraphAndEvidence(groundedFactorsAndTypesInformation, false, null, true, null);
+		return inferencer;
 	}
 
 	/**
@@ -349,7 +271,7 @@ public class HOGModelGrounding {
 	//
 	// PRIVATE
 	//
-	private static Map<Expression, Triple<Expression, Integer, List<Expression>>> createRandomVariableNameToTypeSizeAndUnqiueConstantsMap(FactorsAndTypes factorsAndTypes) {
+	private static Map<Expression, Triple<Expression, Integer, List<Expression>>> createRandomVariableNameToTypeSizeAndUniqueConstantsMap(FactorsAndTypes factorsAndTypes) {
 		Map<Expression, Triple<Expression, Integer, List<Expression>>> result = new LinkedHashMap<>();
 		factorsAndTypes.getMapFromRandomVariableNameToTypeName().entrySet().forEach(entry -> {
 			Expression       randomVariableName = Expressions.parse(entry.getKey());
@@ -362,12 +284,15 @@ public class HOGModelGrounding {
 			else if (Expressions.hasFunctor(type, HOGMSortDeclaration.IN_BUILT_INTEGER.getName()) && type.numberOfArguments() == 2) {
 				size = (type.get(1).intValueExact() - type.get(0).intValueExact()) + 1;
 			}
+			else if (type.hasFunctor(FunctorConstants.INTEGER_INTERVAL) && type.numberOfArguments() == 2) {
+				size = (type.get(1).intValueExact() - type.get(0).intValueExact()) + 1;
+			}
 			else {
-				String strSize = factorsAndTypes.getMapFromCategoricalTypeNameToSizeString().get(type);
-				if (strSize == null) {
-					throw new IllegalArgumentException("Size of sort, "+type+", is unknown");
+				String sizeString = factorsAndTypes.getMapFromCategoricalTypeNameToSizeString().get(type);
+				if (sizeString == null) {
+					throw new IllegalArgumentException("Size of sort " + type + " is unknown");
 				}
-				size = Integer.parseInt(strSize);
+				size = Integer.parseInt(sizeString);
 				factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName()
 					.entrySet().stream()
 					.filter(uniqueConstantAndTypeEntry -> uniqueConstantAndTypeEntry.getValue().equals(entry.getValue()))
@@ -379,14 +304,14 @@ public class HOGModelGrounding {
 	}
 	
 	private static Map<Expression, List<Expression>> createTypeToValuesMap(FactorsAndTypes factorsAndTypes, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeExpressionTypeSizeAndUniqueConstants) {
-		Map<Expression, List<Expression>> result = new LinkedHashMap<>();
+		Map<Expression, List<Expression>> typeToValuesMap = new LinkedHashMap<>();
 		
 		randomVariableNameToTypeExpressionTypeSizeAndUniqueConstants.values().forEach(typeSizeAndUniqueConstants -> {
 			Expression       type            = typeSizeAndUniqueConstants.first;
 		    Integer          size            = typeSizeAndUniqueConstants.second;
 		    List<Expression> uniqueConstants = typeSizeAndUniqueConstants.third;
 			// random variables can share type information
-			if (!result.containsKey(type)) {
+			if (!typeToValuesMap.containsKey(type)) {
 				List<Expression> values = new ArrayList<>();
 				// Is a numeric range
 				if (Expressions.hasFunctor(type, HOGMSortDeclaration.IN_BUILT_INTEGER.getName()) && type.numberOfArguments() == 2) {
@@ -398,19 +323,33 @@ public class HOGModelGrounding {
 					if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(type)) {
 						values.addAll(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getAssignedConstants());
 					}
+					else if (type.hasFunctor(FunctorConstants.INTEGER_INTERVAL) && type.numberOfArguments() == 2) {
+						int firstValue;
+						int lastValue;
+						try {
+							firstValue = type.get(0).intValue();
+							lastValue = type.get(1).intValue();
+							for (int i = firstValue; i != lastValue + 1; i++) {
+								values.add(makeSymbol(i));
+							}
+						}
+						catch (Error e) {
+							throw new Error("Integer interval can only be grounded if it has fixed bounds, but got " + type);
+						}
+					}
 					else {
 						// Is a sort name
 						values.addAll(uniqueConstants);
-						for (int i = uniqueConstants.size()+1; i <= size; i++) {
-							values.add(Expressions.makeSymbol(type.toString().toLowerCase()+"_"+i));
+						for (int i = uniqueConstants.size() + 1; i <= size; i++) {
+							values.add(Expressions.makeSymbol(type.toString().toLowerCase() + "_" + i));
 						}
 					}
 				}
-				result.put(type, values);
+				typeToValuesMap.put(type, values);
 			}
 		});
 		
-		return result;
+		return typeToValuesMap;
 	}
 	
 	private static Map<String, String> createGroundedUniqueConstantToTypeMap(Map<Expression, List<Expression>> typeToValues) {
