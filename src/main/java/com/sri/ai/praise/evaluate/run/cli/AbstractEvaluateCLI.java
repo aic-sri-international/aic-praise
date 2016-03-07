@@ -24,7 +24,7 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
  * @author braz
  *
  */
-public abstract class EvaluateCLI {
+public abstract class AbstractEvaluateCLI {
 
 	protected static class EvaluationArgs implements AutoCloseable {
 		// Optional
