@@ -68,11 +68,9 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -175,9 +173,6 @@ public class SGSolverDemoController {
 	private PopOver openMenuPopOver          = new PopOver();
 	private PopOver configureSettingsPopOver = new PopOver();
 	//
-	private ToggleGroup perspectiveToggleGroup       = new ToggleGroup();
-	private RadioButton hogmPerspectiveRadioButton   = new RadioButton("HOGM");
-	private RadioButton churchPerspectiveRadioButton = new RadioButton("Church");
 	private Button      importUAIModelButton         = new Button("Import UAI Model...");
 	private Button      exportUAIModelButton         = new Button("Export UAI Model...");
 	//
@@ -455,14 +450,6 @@ public class SGSolverDemoController {
 		}
     }
     
-    private void togglePerspective(ActionEvent ae) { 	
-    	if (perspectiveToggleGroup.getSelectedToggle() == hogmPerspectiveRadioButton) {
-    		setPerspective(new HOGMPerspective());
-    		importUAIModelButton.setDisable(false);
-    		exportUAIModelButton.setDisable(false);
-    	}
-    }
-    
     private void importUAIModel(ActionEvent ae) { 	
 		File uaiModelFile = uaiFileChooser.showOpenDialog(mainStage);
 		if (uaiModelFile != null) {
@@ -630,14 +617,6 @@ public class SGSolverDemoController {
 		
 		Separator hSep = new Separator(Orientation.HORIZONTAL);
 		hSep.setPrefWidth(170);
-	
-		Label perspectiveLabel = new Label("Perspective");
-		
-		hogmPerspectiveRadioButton.setSelected(true); // HOGM perspective by default
-		hogmPerspectiveRadioButton.setToggleGroup(perspectiveToggleGroup);
-		churchPerspectiveRadioButton.setToggleGroup(perspectiveToggleGroup);
-		hogmPerspectiveRadioButton.setOnAction(this::togglePerspective);
-		churchPerspectiveRadioButton.setOnAction(this::togglePerspective);
 		
 		importUAIModelButton.setOnAction(this::importUAIModel);
 		FXUtil.setDefaultButtonIcon(importUAIModelButton, FontAwesomeIcons.PUZZLE_PIECE);
@@ -652,10 +631,6 @@ public class SGSolverDemoController {
 		openMenu.getChildren().addAll(
 				saveAsHBox,
 				hSep,
-				perspectiveLabel,
-				hogmPerspectiveRadioButton,
-				churchPerspectiveRadioButton,
-				new Separator(Orientation.HORIZONTAL),
 				importUAIHBox,
 				exportUAIHBox
 		);

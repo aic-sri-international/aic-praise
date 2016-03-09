@@ -49,21 +49,11 @@ import java.util.List;
  */
 public enum ModelLanguage {
 	//
-	// Internal Languages
-	HOGMv0("Higher Order Graphical Model Version 0",
-			true,
-		  	"HOGMv0",
-		  	"This refers to the HOGM language developed and used by the Lifted Belief Propagation (LBP) Algorithm. ",
-		  	Arrays.asList(
-		  			"https://code.google.com/p/aic-praise/wiki/ProbabilisticModels",
-		  			"https://github.com/aic-sri-international/aic-praise/tree/master/src/main/java/com/sri/ai/praise/model/v0",
-		  			"https://github.com/aic-sri-international/aic-praise/wiki/docs/user%20guide.pdf"),
-			".model"),		  			
+	// Internal Languages	  			
 	HOGMv1("Higher Order Graphical Model Version 1",
 			true,
 		  	"HOGMv1",		  
-		  	"This refers to the HOGM language developed and used by the newer (than LBP algorithm) for use by the SGDPLL class  of algorithms. "+
-		  	"NOTE: This language while sharing many features of HOGMv0 should be considered a separate language. ",		  	
+		  	"This refers to the HOGM language developed and used by the SGDPLL class of algorithms.",		  	
 		  	Arrays.asList(
 		  			"https://github.com/aic-sri-international/aic-praise/tree/master/src/main/java/com/sri/ai/praise/model/v1",
 		  			"https://github.com/aic-sri-international/aic-praise/wiki/docs/user%20guide.pdf"),
