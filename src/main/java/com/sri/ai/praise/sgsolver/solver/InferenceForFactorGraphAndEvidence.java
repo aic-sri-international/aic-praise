@@ -56,7 +56,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.grinder.core.TypeContext;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
@@ -75,7 +74,7 @@ import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalConstraintThe
 import com.sri.ai.util.Util;
 
 /**
- * An example on how to use SGVE(T) to convert table representations to decision tree representations.
+ * A solver for factor graphs using {@link SGVET}.
  * @author braz
  *
  */
@@ -117,7 +116,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 *        an Expression representing the evidence
 	 * @param useFactorization indicates whether to use factorization (as in Variable Elimination)
 	 * @param optionalConstraintTheory the constraint theory to be used; if null, a default one is used (as of January 2016, a compound constraint theory with propositional, equalities on categorical types and inequalities on bounded integers).
-	 * @return the marginal.
 	 */
 	public InferenceForFactorGraphAndEvidence(
 			FactorsAndTypes factorsAndTypes,
@@ -183,6 +181,11 @@ public class InferenceForFactorGraphAndEvidence {
 		return constraintTheory;
 	}
 
+	/**
+	 * Returns the marginal/posterior for the query expression;
+	 * if the query expression is not a random variable,
+	 * the result is expressed in terms of a symbol 'query'.
+	 */
 	public Expression solve(Expression queryExpression) {
 		
 		Expression factorGraphWithEvidence = factorGraph;
@@ -192,18 +195,15 @@ public class InferenceForFactorGraphAndEvidence {
 			factorGraphWithEvidence = Times.make(list(factorGraphWithEvidence, IfThenElse.make(evidence, ONE, ZERO)));
 		}
 
-		boolean queryIsCompoundExpression;
 		Expression queryVariable;
 		Collection<Expression> queryVariables;
 		Collection<Expression> indices; 
 		if (allRandomVariables.contains(queryExpression)) {
-			queryIsCompoundExpression = false;
 			queryVariable = queryExpression;
 			queryVariables = list(queryVariable);
 			indices = setDifference(allRandomVariables, queryVariables);
 		}
 		else {
-			queryIsCompoundExpression = true;
 			queryVariable = makeSymbol("query");
 			queryVariables = list(queryVariable);
 			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
@@ -225,12 +225,6 @@ public class InferenceForFactorGraphAndEvidence {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (evidenceProbability == null) {
 				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
-
-//				System.out.print("Normalization constant ");
-//				if (evidence != null) {
-//					System.out.print("(same as evidence probability P(" + evidence + ") ) ");
-//				}
-//				System.out.print("is " + evidenceProbability + "\n");
 			}
 
 			marginal = Division.make(unnormalizedMarginal, evidenceProbability); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
@@ -238,10 +232,10 @@ public class InferenceForFactorGraphAndEvidence {
 			marginal = evaluate(marginal);
 		}
 
-		if (queryIsCompoundExpression) {
-			// replace the query variable with the query expression
-			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new TypeContext());
-		}
+//		if (queryIsCompoundExpression) {
+//			// replace the query variable with the query expression
+//			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new TypeContext());
+//		}
 
 		return marginal;
 	}
