@@ -1,8 +1,0 @@
-sort People: 10, ann, bob, dave, rodrigo, ciaran;
-
-random friends: People x People -> Boolean;
-
-friends(X,Y) <=> friends(Y,X);
-not friends(X,X);
-
-friends(bob, dave);
