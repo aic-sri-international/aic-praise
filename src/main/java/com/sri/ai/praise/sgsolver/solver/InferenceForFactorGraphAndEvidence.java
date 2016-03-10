@@ -56,6 +56,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.core.TypeContext;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
@@ -195,15 +196,18 @@ public class InferenceForFactorGraphAndEvidence {
 			factorGraphWithEvidence = Times.make(list(factorGraphWithEvidence, IfThenElse.make(evidence, ONE, ZERO)));
 		}
 
+		boolean queryIsCompoundExpression;
 		Expression queryVariable;
 		Collection<Expression> queryVariables;
 		Collection<Expression> indices; 
 		if (allRandomVariables.contains(queryExpression)) {
+			queryIsCompoundExpression = false;
 			queryVariable = queryExpression;
 			queryVariables = list(queryVariable);
 			indices = setDifference(allRandomVariables, queryVariables);
 		}
 		else {
+			queryIsCompoundExpression = true;
 			queryVariable = makeSymbol("query");
 			queryVariables = list(queryVariable);
 			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
@@ -232,10 +236,10 @@ public class InferenceForFactorGraphAndEvidence {
 			marginal = evaluate(marginal);
 		}
 
-//		if (queryIsCompoundExpression) {
-//			// replace the query variable with the query expression
-//			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new TypeContext());
-//		}
+		if (queryIsCompoundExpression) {
+			// replace the query variable with the query expression
+			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new TypeContext());
+		}
 
 		return marginal;
 	}
