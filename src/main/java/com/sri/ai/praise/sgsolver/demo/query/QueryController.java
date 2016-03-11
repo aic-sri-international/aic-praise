@@ -249,10 +249,11 @@ public class QueryController {
 	}
 	
 	private void displayQueryAnswer(String query, Expression result, ParsedHOGModel parseModel, long millisecondsToCompute) {
-		String title = "Query '"+query+duration("' took ", millisecondsToCompute)+" to compute answer '"+result+"'";
+		String answer = "P("+ query + " | ... ) = "+result;
+		String title  = "Query"+duration(" took ", millisecondsToCompute)+" to compute '"+answer+"'";
 		HOGMCodeArea resultCodeArea = new HOGMCodeArea(false);
 		 
-		resultCodeArea.setText("P("+ query + " | ... ) = "+result);
+		resultCodeArea.setText(answer);
 		resultCodeArea.setEditable(false);
 		
 		Node resultContent = null;

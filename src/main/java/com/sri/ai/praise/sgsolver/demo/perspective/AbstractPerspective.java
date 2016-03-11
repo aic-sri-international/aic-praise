@@ -54,6 +54,7 @@ import org.fxmisc.undo.UndoManagerFactory;
 import org.reactfx.EventSource;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Objects;
 import com.google.common.io.Files;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
@@ -63,6 +64,7 @@ import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.util.base.Pair;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.MapProperty;
@@ -193,16 +195,20 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	@Override
 	public void addPage(Integer atPageIndex) {
-		final ModelPageEditor currentPage = modelPageEditors.get(atPageIndex).get();
-		Supplier<ModelPageEditor> addSupplier = new ModelPageEditorSupplier(currentPage.getCurrentPageContents(), currentPage.getCurrentQueries());
-		addPage(atPageIndex, addSupplier);
-		pageChanges.push(new AddPageChange(atPageIndex, addSupplier));
+		Platform.runLater(() -> {
+			final ModelPageEditor currentPage = modelPageEditors.get(atPageIndex).get();
+			Supplier<ModelPageEditor> addSupplier = new ModelPageEditorSupplier(currentPage.getCurrentPageContents(), currentPage.getCurrentQueries());
+			addPage(atPageIndex, addSupplier);
+			pageChanges.emit(new AddPageChange(atPageIndex, addSupplier));
+		});
 	}
 	
 	@Override 
 	public void removePage(Integer pageIndex) {
- 		Supplier<ModelPageEditor> removeSupplier = removePageAt(pageIndex);	
- 		pageChanges.push(new RemovePageChange(pageIndex, removeSupplier));
+		Platform.runLater(() -> {
+	 		Supplier<ModelPageEditor> removeSupplier = removePageAt(pageIndex);	
+	 		pageChanges.emit(new RemovePageChange(pageIndex, removeSupplier));
+		});
 	}
 	
 	@Override
@@ -420,9 +426,9 @@ public abstract class AbstractPerspective implements Perspective {
 			this.pageEditorSupplier = pageEditorSupplier;
 		}
 		
-		abstract void redo();
+		abstract void apply();
 
-		abstract void undo();
+		abstract PageChange invert();
 
 		Optional<PageChange> mergeWith(PageChange other) {
 			// don't merge changes by default
@@ -436,14 +442,24 @@ public abstract class AbstractPerspective implements Perspective {
 		}
 		
 		@Override
-		void redo() {
+		void apply() {
 			addPage(pageIdx, pageEditorSupplier);
+			pageChanges.push(this);
 		}
 
 		@Override
-		void undo() {
-			if (pageEditorSupplier != removePageAt(pageIdx+1)) {
-				throw new IllegalStateException("Page change add undo history appears corrupted.");
+		PageChange invert() {
+			return new RemovePageChange(pageIdx+1, pageEditorSupplier);
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if (other instanceof AddPageChange) {
+				AddPageChange that = (AddPageChange) other;
+				return Objects.equal(this.pageIdx, that.pageIdx) && Objects.equal(this.pageEditorSupplier, that.pageEditorSupplier);
+			}
+			else {
+				return false;
 			}
 		}
 	}
@@ -454,23 +470,35 @@ public abstract class AbstractPerspective implements Perspective {
 		}
 		
 		@Override
-		void redo() {
+		void apply() {
 			if (pageEditorSupplier != removePageAt(pageIdx)) {
 				throw new IllegalStateException("Page change remove redo history appears corrupted.");
 			}
+			pageChanges.push(this);
 		}
 
 		@Override
-		void undo() {
-			addPage(pageIdx-1, pageEditorSupplier);
+		PageChange invert() {
+			return new AddPageChange(pageIdx-1, pageEditorSupplier);
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if (other instanceof RemovePageChange) {
+				RemovePageChange that = (RemovePageChange) other;
+				return Objects.equal(this.pageIdx, that.pageIdx) && Objects.equal(this.pageEditorSupplier, that.pageEditorSupplier);
+			}
+			else {
+				return false;
+			}
 		}
 	}
 	
 	private UndoManager newPageChangeUndoManager() {
 		 UndoManager result = UndoManagerFactory.unlimitedHistoryUndoManager(
 										pageChanges, // stream of changes to observe
-										c -> c.redo(), // function to redo a change
-										c -> c.undo(), // function to undo a change
+										c -> c.invert(), // function to invert a change
+										c -> c.apply(), // function to apply a change
 										(c1, c2) -> c1.mergeWith(c2));
 		 return result;
 	}
