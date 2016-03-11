@@ -46,6 +46,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Parser;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.model.v1.HOGModelException;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
@@ -73,6 +74,7 @@ public class HOGMQueryRunner {
 	
 	public List<HOGMQueryResult> query() {
     	List<HOGMQueryResult> result = new ArrayList<>();
+    	Expression queryExpr = null;
     	//
     	ParsedHOGModel parsedModel = null;
         for (String query : queries) {
@@ -92,7 +94,7 @@ public class HOGMQueryRunner {
 	        		if (parsedModel == null) {
 	        			parsedModel = parser.parseModel(model, new QueryErrorListener(HOGMQueryError.Context.MODEL, errors));
 	        		}
-	        		Expression queryExpr = parser.parseTerm(query, new QueryErrorListener(HOGMQueryError.Context.QUERY, errors));
+	        		queryExpr = parser.parseTerm(query, new QueryErrorListener(HOGMQueryError.Context.QUERY, errors));
 		
 	        		if (errors.size() == 0) {
 	        			FactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
@@ -102,7 +104,7 @@ public class HOGMQueryRunner {
 			    			startQuery = System.currentTimeMillis();
 			    			Expression marginal = inferencer.solve(queryExpr); 			
 			    			
-			    			result.add(new HOGMQueryResult(query, parsedModel, marginal.toString(), System.currentTimeMillis() - startQuery));
+			    			result.add(new HOGMQueryResult(query, queryExpr, parsedModel, marginal, System.currentTimeMillis() - startQuery));
 	        			}
 	        		}
 	    		}
@@ -141,12 +143,20 @@ public class HOGMQueryRunner {
 	    	}
 	    	
 	    	if (errors.size() > 0) {
-				result.add(new HOGMQueryResult(query, parsedModel, errors, System.currentTimeMillis() - startQuery));
+				result.add(new HOGMQueryResult(query, queryExpr, parsedModel, errors, System.currentTimeMillis() - startQuery));
 			}
         }
 
         return result;
     }
+	
+	public Context getQueryContext() {
+		return inferencer.makeContextWithTypeInformation();
+	}
+	
+	public Expression simplifyWithinQueryContext(Expression expr) {
+		return inferencer.simplify(expr);
+	}
 	
 	public void cancelQuery() {
 		canceled = true;

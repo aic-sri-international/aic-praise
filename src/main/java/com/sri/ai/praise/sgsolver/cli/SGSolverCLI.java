@@ -98,7 +98,7 @@ public class SGSolverCLI {
 				List<HOGMQueryResult> hogModelQueryResults = queryRunner.query();
 				hogModelQueryResults.forEach(hogModelQueryResult -> {
 					solverArgs.out.print("QUERY      =");
-					solverArgs.out.println(hogModelQueryResult.getQuery());
+					solverArgs.out.println(hogModelQueryResult.getQueryString());
 					solverArgs.out.print(RESULT_PREFIX);
 					solverArgs.out.println(hogModelQueryResult.toString());
 					solverArgs.out.print("TOOK       =");

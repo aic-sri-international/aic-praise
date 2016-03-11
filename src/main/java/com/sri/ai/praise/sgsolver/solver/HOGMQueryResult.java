@@ -42,25 +42,29 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 
 @Beta
 public class HOGMQueryResult {
-	private String               query                 = null;
+	private String               queryStr              = null;
+	private Expression           queryExpr             = null;
 	private ParsedHOGModel       parsedModel           = null;
-	private String               result                = null;
+	private Expression           result                = null;
 	private List<HOGMQueryError> errors                = new ArrayList<>();
 	private long                 millisecondsToCompute = 0L;
 	
-	public HOGMQueryResult(String query, ParsedHOGModel parsedModel, String result, long millisecondsToCompute) {
-		this.query                 = query;
+	public HOGMQueryResult(String queryStr, Expression queryExpr, ParsedHOGModel parsedModel, Expression result, long millisecondsToCompute) {
+		this.queryStr              = queryStr;
+		this.queryExpr             = queryExpr;
 		this.parsedModel           = parsedModel;
 		this.result                = result;
 		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
-	public HOGMQueryResult(String query, ParsedHOGModel parsedModel, List<HOGMQueryError> errors, long millisecondsToCompute) {
-		this.query       = query;
+	public HOGMQueryResult(String queryStr, Expression queryExpr, ParsedHOGModel parsedModel, List<HOGMQueryError> errors, long millisecondsToCompute) {
+		this.queryStr    = queryStr;
+		this.queryExpr   = queryExpr;
 		this.parsedModel = parsedModel;
 		this.errors.addAll(errors);
 		this.millisecondsToCompute = millisecondsToCompute;
@@ -71,15 +75,19 @@ public class HOGMQueryResult {
 		return result;
 	}
 	
-	public String getQuery() {
-		return query;
+	public String getQueryString() {
+		return queryStr;
+	}
+	
+	public Expression getQueryExpression() {
+		return queryExpr;
 	}
 	
 	public ParsedHOGModel getParsedModel() {
 		return parsedModel;
 	}
 	
-	public String getResult() {
+	public Expression getResult() {
 		return result;
 	}
 	
@@ -101,7 +109,7 @@ public class HOGMQueryResult {
 			result = sj.toString();
 		}
 		else {
-			result = this.result;
+			result = this.result.toString();
 		}
 		
 		return result;

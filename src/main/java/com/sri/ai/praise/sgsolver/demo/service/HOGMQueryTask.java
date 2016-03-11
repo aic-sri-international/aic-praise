@@ -38,9 +38,16 @@
 package com.sri.ai.praise.sgsolver.demo.service;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.solver.HOGMQueryRunner;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
+import com.sri.ai.praise.sgsolver.demo.SGSolverDemoController;
 import com.sri.ai.praise.sgsolver.solver.HOGMQueryResult;
 
 import javafx.concurrent.Task;
@@ -59,16 +66,31 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 	
 	@Override
 	public HOGMQueryResult call() {
-		HOGMQueryResult result = null;
+		final AtomicReference<HOGMQueryResult> result = new AtomicReference<>();
 		
-		hogmQueryRunner = new HOGMQueryRunner(model, query);
-		
-		List<HOGMQueryResult> queryResults = hogmQueryRunner.query();
-		if (queryResults.size() == 1) {
-			result = queryResults.get(0);
-		}
+		SGSolverDemoController.computeExpressionWithDesiredPrecision(() -> {
+			hogmQueryRunner = new HOGMQueryRunner(model, query);
+			List<HOGMQueryResult> queryResults = hogmQueryRunner.query();
+			if (queryResults.size() == 1) {
+				HOGMQueryResult queryResult = queryResults.get(0);
+				if (queryResult.isErrors()) {
+					result.set(queryResult);
+				}
+				else {
+					Expression answer    = queryResult.getResult();
+					Expression queryExpr = queryResult.getQueryExpression();
+					Context    context = hogmQueryRunner.getQueryContext();
+					if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(GrinderUtil.getType(queryExpr, context))) {
+						answer = answer.replaceAllOccurrences(queryExpr, Expressions.TRUE, context);
+						answer = hogmQueryRunner.simplifyWithinQueryContext(answer);
+						answer = Expressions.parse(answer.toString()); // This ensures numeric values have the correct precision
+					}
+					result.set(new HOGMQueryResult(queryResult.getQueryString(), queryResult.getQueryExpression(), queryResult.getParsedModel(), answer, queryResult.getMillisecondsToCompute()));
+				}
+			}		
+		});		
  
-        return result;
+        return result.get();
     }
 	
 	@Override

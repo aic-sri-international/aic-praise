@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.sgsolver.demo.SGSolverDemoController;
@@ -184,10 +185,10 @@ public class QueryController {
     	executeQueryService.valueProperty().addListener((observable, oldResult, newResult) -> {
 			if (newResult != null) { 
 				if (newResult.isErrors()) {
-					displayQueryErrors(newResult.getQuery(), newResult.getErrors(), newResult.getMillisecondsToCompute());			
+					displayQueryErrors(newResult.getQueryString(), newResult.getErrors(), newResult.getMillisecondsToCompute());			
 				}
 				else {
-					displayQueryAnswer(newResult.getQuery(), newResult.getResult(), newResult.getParsedModel(), newResult.getMillisecondsToCompute());	
+					displayQueryAnswer(newResult.getQueryString(), newResult.getResult(), newResult.getParsedModel(), newResult.getMillisecondsToCompute());	
 				}
 			}
     	});
@@ -247,10 +248,11 @@ public class QueryController {
 		errors.getSelectionModel().selectFirst();
 	}
 	
-	private void displayQueryAnswer(String query, String result, ParsedHOGModel parseModel, long millisecondsToCompute) {
+	private void displayQueryAnswer(String query, Expression result, ParsedHOGModel parseModel, long millisecondsToCompute) {
 		String title = "Query '"+query+duration("' took ", millisecondsToCompute)+" to compute answer '"+result+"'";
 		HOGMCodeArea resultCodeArea = new HOGMCodeArea(false);
-		resultCodeArea.setText(SGSolverDemoController.displayResultPrecision(result));
+		 
+		resultCodeArea.setText("P("+ query + " | ... ) = "+result);
 		resultCodeArea.setEditable(false);
 		
 		Node resultContent = null;
