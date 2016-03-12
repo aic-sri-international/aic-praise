@@ -114,6 +114,8 @@ public class QueryController {
 	}
 	
 	public String getCurrentQuery() {
+		queryComboBox.getEditor().commitValue();		
+		queryComboBox.setValue(queryComboBox.getEditor().getText());			
 		return queryComboBox.getEditor().getText();
 	}
 	
@@ -127,9 +129,7 @@ public class QueryController {
 		queryComboBox.getEditor().selectAll();
 	}
 	
-	public void executeQuery() {		
-		queryComboBox.getEditor().commitValue();
-		queryComboBox.setValue(queryComboBox.getEditor().getText());	
+	public void executeQuery() {
 		Platform.runLater(() -> executeButton.fire());
 	}
 	
