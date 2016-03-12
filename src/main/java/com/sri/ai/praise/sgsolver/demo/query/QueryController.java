@@ -72,7 +72,6 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 
 @Beta
 public class QueryController {
@@ -151,23 +150,25 @@ public class QueryController {
     			}
     		}
     	});
-    	// For details - 
+    	// For details on this approach see - 
     	// see: http://stackoverflow.com/questions/26512143/javafx-capture-enter-key-pressed
-    	queryComboBox.getEditor().addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent keyEvent) -> {
-            if (keyEvent.getCode() == KeyCode.ENTER) {
+    	queryComboBox.setOnKeyPressed(keyEvent -> {
+    		if (keyEvent.getCode() == KeyCode.ENTER) {
             	keyEvent.consume();
             	// Run later so that we can ensure the value is set on the combo box before triggering the query.
             	Platform.runLater(() -> {
             		executeButton.fire();
             	});
             }
-            else if (keyEvent.getCode() == KeyCode.DOWN && !queryComboBox.isShowing()) {
+    	});
+    	queryComboBox.getEditor().setOnKeyPressed(keyEvent -> {	
+            if (keyEvent.getCode() == KeyCode.DOWN && !queryComboBox.isShowing()) {
             	//keyEvent.consume(); // NOTE: comment out as we want the default behavior of going to the end of the text to still work
             	Platform.runLater(() -> {
             		queryComboBox.show();
             	});
             }
-        });
+    	});
     	
     	executeQueryService.runningProperty().addListener((observable, previouslyRunning, currentlyRunning) -> {
     		if (currentlyRunning) {
