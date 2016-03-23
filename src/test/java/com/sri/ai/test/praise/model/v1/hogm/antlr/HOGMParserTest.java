@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.sgsolver.hogm.antlr;
+package com.sri.ai.test.praise.model.v1.hogm.antlr;
 
 import java.util.HashSet;
 import java.util.Set;
