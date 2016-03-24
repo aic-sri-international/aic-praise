@@ -69,7 +69,7 @@
 		<target.jdk.version>1.8</target.jdk.version>
 		<targetJdk>1.8</targetJdk>
 		<aic.expresso.version>1.2.0-SNAPSHOT</aic.expresso.version>
-		<antlr.version>4.3</antlr.version>
+		<antlr.version>4.5.2</antlr.version>
 		<fontawesomefx.version>8.3</fontawesomefx.version>
 		<controlsfx.version>8.20.8</controlsfx.version>
 		<richtextfx.version>0.6.10</richtextfx.version>
