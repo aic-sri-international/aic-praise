@@ -452,6 +452,16 @@ public class HOGMParserTest {
 							  Expressions.parse("if lucky then (if winner = rodrigo then 1 else 0) else (if winner = rodrigo then 1 / | People | else 1 - 1 / |People|)")));
 	}
 	
+	@Test
+	public void testConstantNumericRuleTerm() {
+		test("0.1;", expected(null, null, null,
+							  Expressions.parse("0.1")));
+		
+		testExpectedModelError( 
+				"0.3;",
+				HOGModelError.Type.TERM_CONSTANT_NUMERIC_RULE_MUST_GIVE_AN_INTERGER_RESULT_WHEN_DIVIDED_INTO_ONE);
+	}
+	
 	
 	@Test
 	public void testDetectedStatementErrors() {
