@@ -73,7 +73,7 @@ public class SGSolverCLI {
 	public static final String  RESULT_PREFIX = "RESULT     =";
 	
 	static class SGSolverArgs implements AutoCloseable {
-		List<File>    inputFiles      = new ArrayList<>(); // --input    (required)
+		List<File>    inputFiles      = new ArrayList<>(); // non option arguments (required)
 		ModelLanguage inputLanguage   = null;              // --language (optional)
 		PrintStream   out             = System.out;        // --output   (optional)
 		
@@ -100,7 +100,7 @@ public class SGSolverCLI {
 					solverArgs.out.print("QUERY      =");
 					solverArgs.out.println(hogModelQueryResult.getQueryString());
 					solverArgs.out.print(RESULT_PREFIX);
-					solverArgs.out.println(hogModelQueryResult.toString());
+					solverArgs.out.println(queryRunner.simplifyAnswer(hogModelQueryResult.getResult(), hogModelQueryResult.getQueryExpression()));
 					solverArgs.out.print("TOOK       =");
 					solverArgs.out.println(duration(hogModelQueryResult.getMillisecondsToCompute()));
 				});

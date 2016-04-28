@@ -43,10 +43,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.sgsolver.solver.HOGMQueryRunner;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.Context;
-import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.demo.SGSolverDemoController;
 import com.sri.ai.praise.sgsolver.solver.HOGMQueryResult;
 
@@ -77,14 +73,7 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 					result.set(queryResult);
 				}
 				else {
-					Expression answer    = queryResult.getResult();
-					Expression queryExpr = queryResult.getQueryExpression();
-					Context    context = hogmQueryRunner.getQueryContext();
-					if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(GrinderUtil.getType(queryExpr, context))) {
-						answer = answer.replaceAllOccurrences(queryExpr, Expressions.TRUE, context);
-						answer = hogmQueryRunner.simplifyWithinQueryContext(answer);
-						answer = Expressions.parse(answer.toString()); // This ensures numeric values have the correct precision
-					}
+					Expression answer = hogmQueryRunner.simplifyAnswer(queryResult.getResult(), queryResult.getQueryExpression());					
 					result.set(new HOGMQueryResult(queryResult.getQueryString(), queryResult.getQueryExpression(), queryResult.getParsedModel(), answer, queryResult.getMillisecondsToCompute()));
 				}
 			}		

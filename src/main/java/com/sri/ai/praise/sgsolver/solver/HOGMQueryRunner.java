@@ -46,7 +46,10 @@ import org.antlr.v4.runtime.RecognitionException;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Parser;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.HOGModelException;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
@@ -149,6 +152,17 @@ public class HOGMQueryRunner {
 
         return result;
     }
+	
+	public Expression simplifyAnswer(Expression answer, Expression forQuery) {
+		Expression result  = answer;
+		Context    context = getQueryContext();
+		if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(GrinderUtil.getType(forQuery, context))) {
+			result = result.replaceAllOccurrences(forQuery, Expressions.TRUE, context);
+			result = simplifyWithinQueryContext(result);
+			answer = Expressions.parse(result.toString()); // This ensures numeric values have the correct precision
+		}
+		return result;
+	}
 	
 	public Context getQueryContext() {
 		return inferencer.makeContextWithTypeInformation();

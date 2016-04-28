@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -89,7 +88,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 
 	// model : statements+=statement* EOF
 	@Override 
-	public Expression visitModel(@NotNull HOGMParser.ModelContext ctx) { 
+	public Expression visitModel(HOGMParser.ModelContext ctx) { 
 
 		sortDeclarations.clear();
 		constantDeclarations.clear();
@@ -105,13 +104,13 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	
 	// aterm : term EOF
 	@Override 
-	public Expression visitAterm(@NotNull HOGMParser.AtermContext ctx) { 
+	public Expression visitAterm(HOGMParser.AtermContext ctx) { 
 		Expression result = visit(ctx.term());	
 		return result;
 	}
 	
 	@Override 
-	public Expression visitStatement(@NotNull HOGMParser.StatementContext ctx) { 
+	public Expression visitStatement(HOGMParser.StatementContext ctx) { 
 		Expression result;
 		
 		if (ctx.declaration() != null) {
@@ -127,7 +126,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	
 	// sort_decl : SORT name=sort_name (COLON size=(INTEGER | UNKNOWN) (COMMA constants+=constant_name)*)? (SEMICOLON)?
 	@Override 
-	public Expression visitSort_decl(@NotNull HOGMParser.Sort_declContext ctx) { 
+	public Expression visitSort_decl(HOGMParser.Sort_declContext ctx) { 
 		Expression name = newSymbol(ctx.name.getText());
 		Expression size = HOGMSortDeclaration.UNKNOWN_SIZE;
 		if (ctx.size != null) {
@@ -150,7 +149,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// constant_decl 
     // : CONSTANT name=constant_name COLON range=sort_name (SEMICOLON)? #propositionalConstantDeclaration
 	@Override 
-	public Expression visitPropositionalConstantDeclaration(@NotNull HOGMParser.PropositionalConstantDeclarationContext ctx) { 
+	public Expression visitPropositionalConstantDeclaration(HOGMParser.PropositionalConstantDeclarationContext ctx) { 
 		Expression name  = newSymbol(ctx.name.getText());
 		Expression arity = Expressions.ZERO;
 		Expression range = visit(ctx.range );
@@ -172,7 +171,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// constant_decl 
     // | CONSTANT name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)? #relationalConstantDeclaration
 	@Override 
-	public Expression visitRelationalConstantDeclaration(@NotNull HOGMParser.RelationalConstantDeclarationContext ctx) { 
+	public Expression visitRelationalConstantDeclaration(HOGMParser.RelationalConstantDeclarationContext ctx) { 
 		Expression name = newSymbol(ctx.name.getText());
 		List<Expression> parameters = expressionsList(ctx.parameters);
 		Expression arity = Expressions.makeSymbol(parameters.size());
@@ -196,7 +195,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// random_variable_decl 
     // : RANDOM name=constant_name COLON range=sort_name (SEMICOLON)?
 	@Override 
-	public Expression visitPropositionalRandomVariableDeclaration(@NotNull HOGMParser.PropositionalRandomVariableDeclarationContext ctx) { 
+	public Expression visitPropositionalRandomVariableDeclaration(HOGMParser.PropositionalRandomVariableDeclarationContext ctx) { 
 		Expression name  = newSymbol(ctx.name.getText());
 		Expression arity = Expressions.ZERO;
 		Expression range = visit(ctx.range);
@@ -218,7 +217,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// random_variable_decl 
     // | RANDOM name=constant_name COLON parameters+=sort_name (X parameters+=sort_name)* MAPPING_RIGHT_ARROW range=sort_name (SEMICOLON)?
 	@Override 
-	public Expression visitRelationalRandomVariableDeclaration(@NotNull HOGMParser.RelationalRandomVariableDeclarationContext ctx) { 
+	public Expression visitRelationalRandomVariableDeclaration(HOGMParser.RelationalRandomVariableDeclarationContext ctx) { 
 		Expression name = newSymbol(ctx.name.getText());
 		List<Expression> parameters = expressionsList(ctx.parameters);
 		Expression arity = Expressions.makeSymbol(parameters.size());
@@ -242,7 +241,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// term
 	// : OPEN_PAREN term CLOSE_PAREN
 	@Override 
-	public Expression visitParentheses(@NotNull HOGMParser.ParenthesesContext ctx) { 
+	public Expression visitParentheses(HOGMParser.ParenthesesContext ctx) { 
 		Expression result = visit(ctx.term());
 		
 		// Keep track of explicitly bracketed expressions
@@ -259,7 +258,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// function_application
 	// : functor=functor_name OPEN_PAREN ( args+=term (COMMA args+=term)* )? CLOSE_PAREN
  	@Override 
- 	public Expression visitFunction_application(@NotNull HOGMParser.Function_applicationContext ctx) {
+ 	public Expression visitFunction_application(HOGMParser.Function_applicationContext ctx) {
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(visit(ctx.functor), expressions(ctx.args));
 		
 		return result; 
@@ -268,7 +267,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
     // | VERTICAL_BAR constant_name VERTICAL_BAR #typeCardinality
  	@Override 
- 	public Expression visitTypeCardinality(@NotNull HOGMParser.TypeCardinalityContext ctx) { 
+ 	public Expression visitTypeCardinality(HOGMParser.TypeCardinalityContext ctx) { 
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(CARDINALITY, newSymbol(ctx.constant_name().getText()));
  		
  		return result;
@@ -277,7 +276,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | NOT term
  	@Override
-	public Expression visitNot(@NotNull HOGMParser.NotContext ctx) { 
+	public Expression visitNot(HOGMParser.NotContext ctx) { 
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(NOT, visit(ctx.term()));
 		return result; 
  	}
@@ -285,7 +284,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | SUBTRACT term
  	@Override 
- 	public Expression visitUnaryMinus(@NotNull HOGMParser.UnaryMinusContext ctx) { 
+ 	public Expression visitUnaryMinus(HOGMParser.UnaryMinusContext ctx) { 
 		Expression argument = visit(ctx.term());
 		Expression result;
 		if (argument.getValue() instanceof Number) {
@@ -300,7 +299,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// |  <assoc=right> base=term EXPONENTIATION exponent=term
  	@Override 
- 	public Expression visitExponentiation(@NotNull HOGMParser.ExponentiationContext ctx) { 
+ 	public Expression visitExponentiation(HOGMParser.ExponentiationContext ctx) { 
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(EXPONENTIATION, visit(ctx.base), visit(ctx.exponent));
 		return result;
  	}
@@ -308,7 +307,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | leftop=term op=(TIMES | DIVIDE) rightop=term
  	@Override 
- 	public Expression visitMultiplicationOrDivision(@NotNull HOGMParser.MultiplicationOrDivisionContext ctx) { 
+ 	public Expression visitMultiplicationOrDivision(HOGMParser.MultiplicationOrDivisionContext ctx) { 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
 		result = possiblyFlatten(result);
 		return result; 
@@ -317,7 +316,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | leftop=term op=(PLUS | SUBTRACT) rightop=term
  	@Override 
- 	public Expression visitAdditionOrSubtraction(@NotNull HOGMParser.AdditionOrSubtractionContext ctx) { 
+ 	public Expression visitAdditionOrSubtraction(HOGMParser.AdditionOrSubtractionContext ctx) { 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
 		result = possiblyFlatten(result);
 		return result; 
@@ -326,7 +325,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | leftop=term op=(LESS_THAN | LESS_THAN_EQUAL | EQUAL | NOT_EQUAL | GREATER_THAN_EQUAL | GREATER_THAN) rightop=term
  	@Override 
- 	public Expression visitComparison(@NotNull HOGMParser.ComparisonContext ctx) { 
+ 	public Expression visitComparison(HOGMParser.ComparisonContext ctx) { 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(ctx.op.getText(), visit(ctx.leftop), visit(ctx.rightop));
 		result = possiblyFlatten(result);
 		return result; 
@@ -335,7 +334,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | leftconj=term AND rightconj=term
  	@Override 
- 	public Expression visitConjunction(@NotNull HOGMParser.ConjunctionContext ctx) { 
+ 	public Expression visitConjunction(HOGMParser.ConjunctionContext ctx) { 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(And.FUNCTOR, visit(ctx.leftconj), visit(ctx.rightconj));
 		result = possiblyFlatten(result);
 		return result; 
@@ -344,7 +343,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | leftdisj=term OR rightdisj=term
  	@Override 
- 	public Expression visitDisjunction(@NotNull HOGMParser.DisjunctionContext ctx) { 
+ 	public Expression visitDisjunction(HOGMParser.DisjunctionContext ctx) { 
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(Or.FUNCTOR, visit(ctx.leftdisj), visit(ctx.rightdisj));
 		result = possiblyFlatten(result);
 		return result; 
@@ -353,7 +352,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// |<assoc=right> antecedent=term IMPLICATION consequent=term
  	@Override 
- 	public Expression visitImplication(@NotNull HOGMParser.ImplicationContext ctx) { 
+ 	public Expression visitImplication(HOGMParser.ImplicationContext ctx) { 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(IMPLICATION, visit(ctx.antecedent), visit(ctx.consequent));
 		return result; 
  	}
@@ -361,7 +360,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// |<assoc=right> leftop=term BICONDITIONAL rightop=term
  	@Override 
- 	public Expression visitBiconditional(@NotNull HOGMParser.BiconditionalContext ctx) { 
+ 	public Expression visitBiconditional(HOGMParser.BiconditionalContext ctx) { 
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(EQUIVALENCE, visit(ctx.leftop), visit(ctx.rightop));
 		return result; 
  	}
@@ -369,7 +368,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | FOR ALL index=quantifier_index COLON body=term
  	@Override 
- 	public Expression visitForAll(@NotNull HOGMParser.ForAllContext ctx) { 
+ 	public Expression visitForAll(HOGMParser.ForAllContext ctx) { 
  		Expression result = ForAll.make(new ExtensionalIndexExpressionsSet(Tuple.getElements(visit(ctx.index))), visit(ctx.body));
 		return result; 
  	}
@@ -377,7 +376,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | THERE EXISTS index=quantifier_index COLON body=term
  	@Override 
- 	public Expression visitThereExists(@NotNull HOGMParser.ThereExistsContext ctx) { 
+ 	public Expression visitThereExists(HOGMParser.ThereExistsContext ctx) { 
  		Expression result = ThereExists.make(new ExtensionalIndexExpressionsSet(Tuple.getElements(visit(ctx.index))), visit(ctx.body));
 		return result; 
  	}
@@ -385,7 +384,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | term term
  	@Override 
- 	public Expression visitShorthandConditionedPotential(@NotNull HOGMParser.ShorthandConditionedPotentialContext ctx) { 
+ 	public Expression visitShorthandConditionedPotential(HOGMParser.ShorthandConditionedPotentialContext ctx) { 
  		Expression condition = visit(ctx.term(0));
  		Expression potential = visit(ctx.term(1));
  		
@@ -396,7 +395,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | IF condition=term THEN thenbranch=term ELSE elsebranch=term
  	@Override 
- 	public Expression visitConditional(@NotNull HOGMParser.ConditionalContext ctx) { 
+ 	public Expression visitConditional(HOGMParser.ConditionalContext ctx) { 
  		Expression result = IfThenElse.make(visit(ctx.condition), visit(ctx.thenbranch), visit(ctx.elsebranch));
  		return result;
  	}
@@ -404,7 +403,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// term
  	// | IF condition=term THEN thenbranch=term
  	@Override 
- 	public Expression visitConditionalUnknownElseBranch(@NotNull HOGMParser.ConditionalUnknownElseBranchContext ctx) { 
+ 	public Expression visitConditionalUnknownElseBranch(HOGMParser.ConditionalUnknownElseBranchContext ctx) { 
  		Expression result = IfThenElse.make(visit(ctx.condition), visit(ctx.thenbranch), Expressions.ZERO_POINT_FIVE);
  		return result;
  	}
@@ -412,14 +411,14 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// quantifier_index_term
     // : variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
  	@Override 
- 	public Expression visitQuantifier_index(@NotNull HOGMParser.Quantifier_indexContext ctx) { 
+ 	public Expression visitQuantifier_index(HOGMParser.Quantifier_indexContext ctx) { 
  		Expression result = Tuple.make(expressions(ctx.indexes));
  		return result;
  	}
  	
  	// : variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
  	@Override 
- 	public Expression visitQuantifierIndexTermVariableInSort(@NotNull HOGMParser.QuantifierIndexTermVariableInSortContext ctx) {
+ 	public Expression visitQuantifierIndexTermVariableInSort(HOGMParser.QuantifierIndexTermVariableInSortContext ctx) {
  		Expression variable = newSymbol(ctx.variable.getText());
  		Expression sortName = newSymbol(ctx.sort.getText());
  		
@@ -433,7 +432,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
     // | IN_BUILT_SORT_NUMBER
     // | constant_name
  	@Override 
- 	public Expression visitSort_name(@NotNull HOGMParser.Sort_nameContext ctx) { 
+ 	public Expression visitSort_name(HOGMParser.Sort_nameContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
  		
  		return result;
@@ -442,7 +441,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// sort_number_sub_range
     // : start=INTEGER DOUBLE_DOT end=INTEGER
  	@Override 
- 	public Expression visitSort_number_sub_range(@NotNull HOGMParser.Sort_number_sub_rangeContext ctx) { 
+ 	public Expression visitSort_number_sub_range(HOGMParser.Sort_number_sub_rangeContext ctx) { 
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(INTEGER_INTERVAL, newSymbol(ctx.start.getText()), newSymbol(ctx.end.getText()));
  		return result;
  	}
@@ -450,7 +449,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// functor_name
     // : constant_name
  	@Override 
- 	public Expression visitFunctor_name(@NotNull HOGMParser.Functor_nameContext ctx) { 
+ 	public Expression visitFunctor_name(HOGMParser.Functor_nameContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
  		return result;
  	}
@@ -459,7 +458,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// : constant_name
     // | constant_number
  	@Override 
- 	public Expression visitSymbol(@NotNull HOGMParser.SymbolContext ctx) { 
+ 	public Expression visitSymbol(HOGMParser.SymbolContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
  		return result;
  	}
@@ -469,7 +468,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
     // | CONSTANT_STR
     // | QUOTED_CONSTANT_STR
  	@Override 
- 	public Expression visitConstant_name(@NotNull HOGMParser.Constant_nameContext ctx) { 
+ 	public Expression visitConstant_name(HOGMParser.Constant_nameContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
  		return result;
  	}
@@ -478,7 +477,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
     // : INTEGER
     // | RATIONAL
  	@Override 
- 	public Expression visitConstant_number(@NotNull HOGMParser.Constant_numberContext ctx) { 
+ 	public Expression visitConstant_number(HOGMParser.Constant_numberContext ctx) { 
  		Expression result = newSymbol(ctx.getText());
  		return result; 
  	}
