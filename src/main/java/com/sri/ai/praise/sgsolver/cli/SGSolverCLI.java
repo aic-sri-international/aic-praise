@@ -43,10 +43,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
@@ -73,9 +75,10 @@ public class SGSolverCLI {
 	public static final String  RESULT_PREFIX = "RESULT     =";
 	
 	static class SGSolverArgs implements AutoCloseable {
-		List<File>    inputFiles      = new ArrayList<>(); // non option arguments (required)
-		ModelLanguage inputLanguage   = null;              // --language (optional)
-		PrintStream   out             = System.out;        // --output   (optional)
+		List<File>    inputFiles      = new ArrayList<>(); // non option arguments (at least 1 required)
+		ModelLanguage inputLanguage   = null;              // --language (optional - 0 or 1)
+		List<String>  globalQueries   = new ArrayList<>(); // --query    (optional - 0 or more)
+		PrintStream   out             = System.out;        // --output   (optional - 0 or 1)
 		
 		@Override
 		public void close() throws IOException {
@@ -123,11 +126,12 @@ public class SGSolverCLI {
 		OptionParser parser = new OptionParser();		
 		// Optional
 		OptionSpec<String> language   = parser.accepts("language", "input model language (code), allowed values are "+getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
+		OptionSpec<String> query      = parser.accepts("query", "query to run").withRequiredArg().ofType(String.class);
 		OptionSpec<File>   outputFile = parser.accepts("output",   "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 		// Help
 		OptionSpec<Void> help = parser.accepts("help", "command line options help").forHelp();
 		//
-		String commandLine = "java "+SGSolverCLI.class.getName() + " [--help] [--language language_code] [--output output_file_name] inputModelFile ...";
+		String commandLine = "java "+SGSolverCLI.class.getName() + " [--help] [--language language_code] [--query global_query_string] [--output output_file_name] inputModelFile ...";
 		
 		List<String> errors   = new ArrayList<>();
 		List<String> warnings = new ArrayList<>();
@@ -150,6 +154,12 @@ public class SGSolverCLI {
 			}
 			if (result.inputFiles.size() == 0) {
 				errors.add("No input files specified");
+			}
+			
+			if (options.has(query)) {
+				for (String commandLineQuery : options.valuesOf(query)) {
+					result.globalQueries.add(commandLineQuery);
+				}
 			}
 			
 			if (options.has(language)) {
@@ -209,14 +219,42 @@ public class SGSolverCLI {
 		List<File> nonContainerFiles = new ArrayList<>();
 		for (File inputFile : solverArgs.inputFiles) {
 			if (inputFile.getName().endsWith(PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION)) {
-				 result.addAll(PagedModelContainer.getModelPagesFromURI(inputFile.toURI()));
+				if (solverArgs.globalQueries.size() == 0) {
+					// Take the models as is
+					result.addAll(PagedModelContainer.getModelPagesFromURI(inputFile.toURI()));
+				}
+				else {
+					// Global queries have been specified on the command line, need to add to 
+					// each model page
+					for (ModelPage containerModelPage : PagedModelContainer.getModelPagesFromURI(inputFile.toURI())) {
+						List<String> combinedQueries = new ArrayList<>(solverArgs.globalQueries);
+						combinedQueries.addAll(containerModelPage.getDefaultQueriesToRun());
+						result.add(new ModelPage(containerModelPage.getLanguage(), containerModelPage.getName(), containerModelPage.getModel(), combinedQueries));
+					}
+				}
 			}
 			else {
 				nonContainerFiles.add(inputFile);
 			}
 		}
 		
-// TODO - handle non-container files		
+		// Currently, non-container files are treated as model and evidence files and are just concatenated together
+		// to construct a single model file
+		if (nonContainerFiles.size() > 0) {
+			String textModel = nonContainerFiles.stream()
+				.map(file -> {
+					String fileContents = "";
+					try {
+						fileContents = Files.readAllLines(file.toPath()).stream().collect(Collectors.joining("\n"));
+					}
+					catch (IOException ioe) {
+						throw new RuntimeException(ioe);
+					}
+					return fileContents;
+				})
+				.collect(Collectors.joining("\n"));
+			result.add(new ModelPage(solverArgs.inputLanguage, "Model from concatenation of non-container input files", textModel, solverArgs.globalQueries));
+		}
 		
 // TODO - ensure all results are translated to HOGMv1 if needed.
 		
@@ -240,13 +278,13 @@ public class SGSolverCLI {
 	private static ModelLanguage guessLanguageModel(List<File> inputFiles) {
 		ModelLanguage result = Arrays.stream(ModelLanguage.values())
 				.filter(ml -> inputFiles.stream().anyMatch(
-						inputFile -> inputFile.getName().endsWith(ml.getDefaultFileExtension())))
+						inputFile -> inputFile.getName().toLowerCase().endsWith(ml.getDefaultFileExtension().toLowerCase())))
 				.findFirst().orElse(null);
 		
 		if (result == null) {
 			// Check if the input is a container file and if so get the language from it
 			result = inputFiles.stream()
-						.filter(inputFile -> inputFile.getName().endsWith(PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION))
+						.filter(inputFile -> inputFile.getName().toLowerCase().endsWith(PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION.toLowerCase()))
 						.map(containerInputFile -> {
 							ModelLanguage containedLanguage = null;
 							try {
@@ -262,6 +300,10 @@ public class SGSolverCLI {
 							return containedLanguage;
 						})
 						.findFirst().orElse(null);
+		}
+		
+		if (result == null) {
+			result = ModelLanguage.HOGMv1; // For simplicity, defaults to HOGMv1 if nothing specified
 		}
 		
 		return result;
