@@ -70,9 +70,9 @@ import joptsimple.OptionSpec;
  *
  */
 @Beta
-public class SGSolverCLI {
+public class PRAiSE {
 	public static final Charset FILE_CHARSET  = Charsets.UTF_8;
-	public static final String  RESULT_PREFIX = "RESULT     =";
+	public static final String  RESULT_PREFIX = "RESULT     = ";
 	
 	static class SGSolverArgs implements AutoCloseable {
 		List<File>    inputFiles      = new ArrayList<>(); // non option arguments (at least 1 required)
@@ -95,20 +95,20 @@ public class SGSolverCLI {
 			List<ModelPage> hogModelsToQuery = getHOGModelsToQuery(solverArgs);
 
 			for (ModelPage hogModelToQuery : hogModelsToQuery) {
-				solverArgs.out.print("MODEL NAME =");
+				solverArgs.out.print("MODEL NAME = ");
 				solverArgs.out.println(hogModelToQuery.getName());
+				solverArgs.out.println("MODEL      = ");
+				solverArgs.out.println(hogModelToQuery.getModel());
 				HOGMQueryRunner queryRunner = new  HOGMQueryRunner(hogModelToQuery.getModel(), hogModelToQuery.getDefaultQueriesToRun());
 				List<HOGMQueryResult> hogModelQueryResults = queryRunner.query();
 				hogModelQueryResults.forEach(hogModelQueryResult -> {
-					solverArgs.out.print("QUERY      =");
+					solverArgs.out.print("QUERY      = ");
 					solverArgs.out.println(hogModelQueryResult.getQueryString());
 					solverArgs.out.print(RESULT_PREFIX);
 					solverArgs.out.println(queryRunner.simplifyAnswer(hogModelQueryResult.getResult(), hogModelQueryResult.getQueryExpression()));
-					solverArgs.out.print("TOOK       =");
-					solverArgs.out.println(duration(hogModelQueryResult.getMillisecondsToCompute()));
+					solverArgs.out.print("TOOK       = ");
+					solverArgs.out.println(duration(hogModelQueryResult.getMillisecondsToCompute()) + "\n");
 				});
-				solverArgs.out.println("MODEL      =");
-				solverArgs.out.println(hogModelToQuery.getModel());
 			}
 		}
 		catch (Exception ex) {
@@ -126,12 +126,24 @@ public class SGSolverCLI {
 		OptionParser parser = new OptionParser();		
 		// Optional
 		OptionSpec<String> language   = parser.accepts("language", "input model language (code), allowed values are "+getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
-		OptionSpec<String> query      = parser.accepts("query", "query to run").withRequiredArg().ofType(String.class);
+		OptionSpec<String> query      = parser.accepts("query", "query to run over all input models").withRequiredArg().ofType(String.class);
 		OptionSpec<File>   outputFile = parser.accepts("output",   "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 		// Help
 		OptionSpec<Void> help = parser.accepts("help", "command line options help").forHelp();
 		//
-		String commandLine = "java "+SGSolverCLI.class.getName() + " [--help] [--language language_code] [--query global_query_string] [--output output_file_name] inputModelFile ...";
+		String usage = 
+				"java "+PRAiSE.class.getName() + " [--help] [--language language_code] [--query global_query_string] [--output output_file_name] inputModelFile ..."
+				+ "\n\n"
+				+ "This command reads a set of models from input files and executes a set of queries on each of them.\n\n"
+				+ "The models are obtained in the following manner:\n"
+				+ "- input files may be one or more; they can be .praise files (saved from the PRAiSE editor and solver) or plain text files.\n"
+				+ "- each .praise input file contains possibly multiple pages, each with a model and a set of queries for it (see PRAiSE editor and solver).\n"
+				+ "- multiple plain text input files are combined into a single model (not combined with .praise models).\n\n"
+				+ "The queries are obtained in the following manner:\n"
+				+ "- each page in each .praise file contains a list of queries for its specific model\n"
+				+ "- queries specified with --query option will apply to all models from all .praise files and to the model from combined plain text input files.\n\n"
+				+ "Evidence can be encoded as deterministic statements (see examples in PRAiSE editor and solver).\n"
+						;
 		
 		List<String> errors   = new ArrayList<>();
 		List<String> warnings = new ArrayList<>();
@@ -139,7 +151,7 @@ public class SGSolverCLI {
 			OptionSet options = parser.parse(args);
 			
 			if (options.has(help)) {
-				System.out.println(commandLine);
+				System.out.println(usage);
 				parser.printHelpOn(System.out);
 				System.exit(0);
 			}
@@ -203,7 +215,7 @@ public class SGSolverCLI {
 		
 		if (errors.size() > 0) {
 			errors.forEach(error -> System.err.println("ERROR: "+ error));
-			System.err.println(commandLine);
+			System.err.println(usage);
 			parser.printHelpOn(System.err);
 			System.exit(1);
 		}

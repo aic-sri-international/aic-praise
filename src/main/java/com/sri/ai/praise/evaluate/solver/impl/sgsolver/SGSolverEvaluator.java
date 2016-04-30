@@ -52,7 +52,7 @@ import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResul
 import com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
-import com.sri.ai.praise.sgsolver.cli.SGSolverCLI;
+import com.sri.ai.praise.sgsolver.cli.PRAiSE;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;
 
@@ -122,11 +122,11 @@ public class SGSolverEvaluator extends AbstractSolverEvaluator {
 		
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(getConfiguration().getWorkingDirectory());
-// TODO - add option to SGSolverCLI to indicate a timeout.		
+// TODO - add option to PRAiSE to indicate a timeout.		
 		processBuilder.command("java", "-classpath", System.getProperty("java.class.path"), 
 				"-Xms"+getConfiguration().getTotalMemoryLimitInMegabytesPerSolveAttempt()+"M",      
 				"-Xmx"+getConfiguration().getTotalMemoryLimitInMegabytesPerSolveAttempt()+"M",   
-				SGSolverCLI.class.getName(),
+				PRAiSE.class.getName(),
 				tempInput.getAbsolutePath()
 				);
 		processBuilder.redirectError(ProcessBuilder.Redirect.to(tempSTDERR));
@@ -150,9 +150,9 @@ public class SGSolverEvaluator extends AbstractSolverEvaluator {
 		SGSolverCallResult result = new SGSolverCallResult();
 		
 		result.sgSolverProcessTookMS = sgSolverEnd - sgSolverStart;
-		result.resultExpression      = sgsolverOutputs.stream().filter(line -> line.startsWith(SGSolverCLI.RESULT_PREFIX)).findFirst().orElse(null);
+		result.resultExpression      = sgsolverOutputs.stream().filter(line -> line.startsWith(PRAiSE.RESULT_PREFIX)).findFirst().orElse(null);
 		if (result.resultExpression != null) {
-			result.resultExpression = result.resultExpression.substring(SGSolverCLI.RESULT_PREFIX.length());
+			result.resultExpression = result.resultExpression.substring(PRAiSE.RESULT_PREFIX.length());
 		}
 		else {
 			throw new Error("Error launching java process for SGSolver:\n" + sgsolverOutputs);
