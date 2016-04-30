@@ -10,45 +10,44 @@ random attackPerception: Boolean;
 random likeIncumbent  : 0..100000000; // 100M
 random likeChallenger : 0..100000000; // 100M
 
-// P(terrorAttacks) =
-if terrorAttacks = 0 then 1/21 else 1/21; // uniform
-// Note: ideally, the above uniform distribution should be simply represented by the constant 1/21;
-// Due to a bug, we do not recognize numeric-constant rules at this point,
-// hence the artificial distinction used above on terrorAttacks = 0.
-// It is artificial because the probability is the same for every value of terrorAttacks.
+// P(terrorAttacks) = 1/21; // uniform
 
-// P(newJobs) =
-if newJobs = 0 then 1/(100000 + 1) else 1/(100000 + 1); // uniform
-// see comment for P(terrorAttacks) regarding uniform distributions
+// P(newJobs) = 1/(100000 + 1); // uniform
 
-// P(dow) =
-if dow = 0 then 1/(18000 - 11000 + 1) else 1/(18000 - 11000 + 1); // uniform
-// see comment for P(terrorAttacks) regarding uniform distributions
+// P(dow) = 1/(18000 - 11000 + 1); // uniform
 
-economyIsPoor <=> dow < 13000 or newJobs < 30000;
+economyIsPoor <=> dow < 13000 and newJobs < 30000;
 
-economyIsGreat <=> dow > 16000 or newJobs > 70000;
+economyIsGreat <=> dow > 16000 and newJobs > 70000;
 
 attackPerception <=> terrorAttacks > 4;
 
 // P(likeIncumbent) = 
 if economyIsGreat
-   then if likeIncumbent > 700000 then 0.9/(100000000 + 1) else 0.1/(100000000 + 1)
-else
-if economyIsPoor
-   then if likeIncumbent < 50000000 then 0.8/(100000000 + 1) else 0.2/(100000000 + 1)
-   else if terrorAttacks > 4
-        then if likeIncumbent < 60000000 then 0.9/(100000000 + 1) else 0.1/(100000000 + 1)
-        else if likeIncumbent = 0  then 1/(100000000 + 1) else 1/(100000000 + 1); // uniform // see comment for P(terrorAttacks) regarding uniform distributions
+   then if likeIncumbent > 70000000 then 0.9/30000000 else 0.1/(70000000 + 1)
+else if economyIsPoor
+   then if likeIncumbent < 40000000 then 0.8/40000000 else 0.2/(60000000 + 1)
+else if attackPerception
+   then if likeIncumbent < 60000000 then 0.9/60000000 else 0.1/(40000000 + 1)
+else 1/(100000000 + 1); // uniform
 
-// P(likeChallenger) =
-if likeChallenger = 0 then 1/(100000000 + 1) else 1/(100000000 + 1);
-// see comment for P(terrorAttacks) regarding uniform distributions
+// P(likeChallenger) = 1/(100000000 + 1); // uniform
 
-// Evidence:
+// Evidence scenarios:
 
-terrorAttacks = 7;
-dow = 12000;
+// great economy:
+// dow = 18000; newJobs = 80000;
+
+// poor economy:
+// dow = 12000; newJobs = 10000;
+
+// attacks:
+// terrorAttacks = 5;
+
+// great economy and attacks:
+// dow = 18000; newJobs = 80000; terrorAttacks = 5;
+
+// suggestion: change some of variables to parameter by replacing "random" by "constant" and see answers as compiled results in those parameters
 
 @FRAGMENT:query-page-1#1
 likeIncumbent > likeChallenger

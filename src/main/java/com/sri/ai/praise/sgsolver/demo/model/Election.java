@@ -35,54 +35,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.sgsolver.demo.perspective;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javafx.fxml.FXMLLoader;
+package com.sri.ai.praise.sgsolver.demo.model;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.lang.ModelLanguage;
-import com.sri.ai.praise.sgsolver.demo.FXUtil;
-import com.sri.ai.praise.sgsolver.demo.editor.HOGMPageEditorController;
-import com.sri.ai.praise.sgsolver.demo.editor.ModelPageEditor;
-import com.sri.ai.praise.sgsolver.demo.model.EarthquakeBurglaryAlarm;
-import com.sri.ai.praise.sgsolver.demo.model.Election;
-import com.sri.ai.praise.sgsolver.demo.model.ElectionAsInIJCAI2016Paper;
-import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
 
 @Beta
-public class HOGMPerspective extends AbstractPerspective {
-	
-	//
-	// START-Perspective
-	@Override
-	public List<ExamplePages> getExamples() {
-		return Arrays.asList(new EarthquakeBurglaryAlarm(), new Election(), new ElectionAsInIJCAI2016Paper());
+public class Election extends ExamplePages {
+
+	public Election() {
+		super("Election", 
+			   getExamplePagesFromResource("election.praise"));
 	}
-	// END-Perspective
-	//
-	
-	@Override
-	protected ModelLanguage getModelLanguage() {
-		return ModelLanguage.HOGMv1;
-	}
-	
-	@Override
-	protected ModelPageEditor create(String model, List<String> defaultQueries) {
-		ModelPageEditor result = null;
-		FXMLLoader      loader = HOGMPageEditorController.newLoader();
-		try {
-			loader.load();
-			result = loader.getController();
-			result.setPage(model, defaultQueries);
-		}
-		catch (Throwable t) {
-			FXUtil.exception(t);
-		}
-		
-		return result;
-	}
-	
 }
