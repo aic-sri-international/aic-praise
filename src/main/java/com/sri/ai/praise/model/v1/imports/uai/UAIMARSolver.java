@@ -72,8 +72,8 @@ import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
 import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
 import com.sri.ai.grinder.sgdpll.theory.compound.CompoundConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticConstraintTheory;
 import com.sri.ai.grinder.sgdpll.theory.equality.EqualityConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.inequality.InequalityConstraintTheory;
 import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalConstraintTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
@@ -93,7 +93,7 @@ public class UAIMARSolver {
 	public static void main(String[] args) throws IOException {
 		
 		if (args.length != 4) {
-			throw new IllegalArgumentException("Usage: UAIMARSolver <file or directory with UAI-format files> <solution directory> <timeout in ms> equalities|inequalities");
+			throw new IllegalArgumentException("Usage: UAIMARSolver <file or directory with UAI-format files> <solution directory> <timeout in ms> equalities|difference_arithmetic");
 		}
 		
 		File uaiInput = new File(args[0]);
@@ -113,14 +113,14 @@ public class UAIMARSolver {
 							new PropositionalConstraintTheory(),
 							new EqualityConstraintTheory(true, true));
 		}
-		else if (args[3].equals("inequalities")) {
+		else if (args[3].equals("difference_arithmetic")) {
 			constraintTheory = 
 					new CompoundConstraintTheory(
 							new PropositionalConstraintTheory(),
-							new InequalityConstraintTheory(true, true));
+							new DifferenceArithmeticConstraintTheory(true, true));
 		}
 		else {
-			throw new IllegalArgumentException("4-th argument must be either 'equalities' or 'inequalities'");
+			throw new IllegalArgumentException("4-th argument must be either 'equalities' or 'difference_arithmetic'");
 		}
 		
 		List<UAIModel> models           = new ArrayList<>();

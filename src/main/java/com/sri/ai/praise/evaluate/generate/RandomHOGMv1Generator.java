@@ -64,8 +64,8 @@ import com.sri.ai.grinder.core.TypeContext;
 import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
 import com.sri.ai.grinder.sgdpll.tester.RandomConditionalExpressionGenerator;
 import com.sri.ai.grinder.sgdpll.theory.compound.CompoundConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticConstraintTheory;
 import com.sri.ai.grinder.sgdpll.theory.equality.EqualityConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.inequality.InequalityConstraintTheory;
 import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalConstraintTheory;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
@@ -553,14 +553,14 @@ class RandomConditionalPotentialExpressionGenerator {
 			theories.add(equalityConstraintTheory);
 		}
 		if (inequalityTheoryArgs.length > 0) {
-			InequalityConstraintTheory inequalityConstraintTheory;
+			DifferenceArithmeticConstraintTheory inequalityConstraintTheory;
 			if (equalityTheoryArgs.length == 0) {
 				// first flag is 'true' because all equalities are atoms in the final theory; there is no need to check arguments type
-				inequalityConstraintTheory = new InequalityConstraintTheory(true, true);
+				inequalityConstraintTheory = new DifferenceArithmeticConstraintTheory(true, true);
 			}
 			else {
 				// 'false' because not all equalities are atoms in this final theory; need to check arguments type
-				inequalityConstraintTheory = new InequalityConstraintTheory(false, true);
+				inequalityConstraintTheory = new DifferenceArithmeticConstraintTheory(false, true);
 			}
 			theories.add(inequalityConstraintTheory);
 		}

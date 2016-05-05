@@ -69,8 +69,8 @@ import com.sri.ai.grinder.sgdpll.interpreter.SGDPLLT;
 import com.sri.ai.grinder.sgdpll.interpreter.SymbolicCommonInterpreterWithLiteralConditioning;
 import com.sri.ai.grinder.sgdpll.problemtype.SumProduct;
 import com.sri.ai.grinder.sgdpll.theory.compound.CompoundConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticConstraintTheory;
 import com.sri.ai.grinder.sgdpll.theory.equality.EqualityConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.inequality.InequalityConstraintTheory;
 import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalConstraintTheory;
 import com.sri.ai.util.Util;
 
@@ -116,7 +116,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @param evidence 
 	 *        an Expression representing the evidence
 	 * @param useFactorization indicates whether to use factorization (as in Variable Elimination)
-	 * @param optionalConstraintTheory the constraint theory to be used; if null, a default one is used (as of January 2016, a compound constraint theory with propositional, equalities on categorical types and inequalities on bounded integers).
+	 * @param optionalConstraintTheory the constraint theory to be used; if null, a default one is used (as of January 2016, a compound constraint theory with propositional, equalities on categorical types and difference arithmetic).
 	 */
 	public InferenceForFactorGraphAndEvidence(
 			FactorsAndTypes factorsAndTypes,
@@ -157,7 +157,7 @@ public class InferenceForFactorGraphAndEvidence {
 			this.constraintTheory =
 					new CompoundConstraintTheory(
 							new EqualityConstraintTheory(false, true),
-							new InequalityConstraintTheory(false, true),
+							new DifferenceArithmeticConstraintTheory(false, true),
 							new PropositionalConstraintTheory());
 		}
 		

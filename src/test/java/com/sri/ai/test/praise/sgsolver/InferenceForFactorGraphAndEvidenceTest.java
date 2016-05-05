@@ -547,7 +547,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 	}
 
 	@Test
-	public void inequalitiesOnIntervals() {
+	public void differenceArithmeticOnIntervals() {
 		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
@@ -683,7 +683,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 	}
 
 	@Test
-	public void inequalitiesOnIntegers() {
+	public void differenceArithmetic() {
 		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map(
@@ -825,7 +825,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 	}
 
 	@Test
-	public void inequalitiesOnIntervalsWithMultipleVariables() {
+	public void differenceArithmeticOnIntervalsWithMultipleVariables() {
 		
 		// The definitions of types
 		mapFromCategoricalTypeNameToSizeString = Util.map();
