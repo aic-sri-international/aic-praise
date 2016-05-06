@@ -184,7 +184,7 @@ public class RandomHOGMv1Generator {
 				checkForIllegalArguments();
 			}
 			else {
-				throw new IllegalArgumentException("Illegal inequality theory arguments passed: "+args);
+				throw new IllegalArgumentException("Illegal difference arithmetic theory arguments passed: "+args);
 			}
 		}
 		
@@ -388,7 +388,7 @@ public class RandomHOGMv1Generator {
 		// At least one instance of one of the following required
 		OptionSpec<String> propositionalTheoryTypes = parser.accepts("p", "propositional theory type args ('v#' - v)variable #number).").withRequiredArg().ofType(String.class);
 		OptionSpec<String> equalityTheoryTypes      = parser.accepts("e", "equality theory type args ('v#c##u' - v)ariable #number, c)ategorical size #number, u)niquely named constants listed in category #number).").withRequiredArg().ofType(String.class);
-		OptionSpec<String> inequalityTheoryTypes    = parser.accepts("i", "inequality theory type args ('v#s#e#' - v)ariable #number, s)tart integer interval inclusive #number, e)nd integer interval inclusive #number).").withRequiredArg().ofType(String.class);
+		OptionSpec<String> inequalityTheoryTypes    = parser.accepts("i", "difference arithmetic theory type args ('v#s#e#' - v)ariable #number, s)tart integer interval inclusive #number, e)nd integer interval inclusive #number).").withRequiredArg().ofType(String.class);
 		//
 		parser.accepts("help").forHelp();
 		
@@ -433,7 +433,7 @@ public class RandomHOGMv1Generator {
 		}
 		
 		if (result.propositionalTheories.length == 0 && result.equalityTheories.length == 0 && result.inequalityTheories.length == 0) {
-			throw new IllegalArgumentException("At least one set of propositional, equality, or inequality theory type args must be provided.");
+			throw new IllegalArgumentException("At least one set of propositional, equality, or difference arithmetic theory type args must be provided.");
 		}
 						
 		result.potentialExpressionGenerator = new RandomConditionalPotentialExpressionGenerator(
