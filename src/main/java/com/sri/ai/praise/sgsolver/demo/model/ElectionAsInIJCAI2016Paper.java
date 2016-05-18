@@ -44,6 +44,6 @@ public class ElectionAsInIJCAI2016Paper extends ExamplePages {
 
 	public ElectionAsInIJCAI2016Paper() {
 		super("Election as in IJCAI 2016 paper", 
-			   getExamplePagesFromResource("election as in IJCAI 2016 paper.praise"));
+			   getExamplePagesFromResource("electionAsInIJCAI2016paper.praise"));
 	}
 }
