@@ -11,6 +11,7 @@ A Probabilistic Reasoning As Symbolic Evaluation (PRAiSE) library, developed at
 
 ### Getting Started
 * [Introduction](https://github.com/aic-sri-international/aic-praise/wiki/Introduction)
+* [Demo](http://aic-sri-international.github.io/aic-praise/)
 * [User Guide](https://github.com/aic-sri-international/aic-praise/wiki/docs/user%20guide.pdf)
 * Latest Maven Information (for integration as a third party library)
       
