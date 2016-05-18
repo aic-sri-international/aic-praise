@@ -18,7 +18,7 @@ A Probabilistic Reasoning As Symbolic Evaluation (PRAiSE) library, developed at
       <dependency>
           <groupId>com.googlecode.aic-praise</groupId>
           <artifactId>aic-praise</artifactId>
-          <version>1.1.0</version>
+          <version>1.3.0</version>
       </dependency>
       ```
 * [Latest Release](https://github.com/aic-sri-international/aic-praise/releases)
