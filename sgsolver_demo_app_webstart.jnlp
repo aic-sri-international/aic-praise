@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+"
+    codbase="http://aic-sri-international.github.io/aic-praise/"
+    href="http://aic-sri-international.github.io/aic-praise/sgsolver_demo_app_webstart.jnlp">
+    <information>
+        <title>SGSolver Demo App</title>
+        <vendor>AIC SRI International</vendor>
+        <homepage href="http://aic-sri-international.github.io/aic-praise/"/> 
+        <icon href="http://aic-sri-international.github.io/aic-praise/sgsolver-demo-app.png"/>
+        <icon kind="splash" href="http://aic-sri-international.github.io/aic-praise/sgsolver-demo-app.png"/>
+        <offline-allowed/>
+    </information>
+    <resources>
+        <!-- Application Resources -->
+        <j2se version="1.8.0_41+" href="http://java.sun.com/products/autodl/j2se"/>
+        <jar href="http://aic-sri-international.github.io/aic-praise/aic-praise-sgsolver-demo-app.jar" main="true" />
+    </resources>
+    <security>
+        <all-permissions/>
+    </security>
+    <application-desc
+         name="SGSolver Demo App"
+         main-class="com.sri.ai.praise.sgsolver.demo.SGSolverDemoApp">
+     </application-desc>
+     <update check="background"/>
+</jnlp>
