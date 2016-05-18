@@ -37,14 +37,11 @@
  */
 package com.sri.ai.praise.model.common.io;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -173,22 +170,9 @@ public class PagedModelContainer {
 		AtomicReference<ModelLanguage> containerModelLanguage = new AtomicReference<>();
 		List<String> modelSpecifications = new ArrayList<>();
 		Map<String, List<String>> fragments = new HashMap<>();
-		
-		// Need to do this if reading from jar file.
-		if (uri.toString().contains("!")) {
-			final Map<String, String> env = new HashMap<>();
-			final String[] array = uri.toString().split("!");
-			try (FileSystem fs  = FileSystems.newFileSystem(URI.create(array[0]), env)) {
-				Path path = fs.getPath(array[1]);
-				try (Stream<String> lines = Files.lines(path, FILE_CHARSET)) {	
-					getContent(containerModelLanguage, lines, modelSpecifications, fragments);	
-				}
-			}
-		}
-		else {
-			try (Stream<String> lines = Files.lines(Paths.get(uri), FILE_CHARSET)) {	
-				getContent(containerModelLanguage, lines, modelSpecifications, fragments);	
-			}
+				
+		try (BufferedReader in = new BufferedReader(new InputStreamReader(uri.toURL().openStream(), FILE_CHARSET))) {
+	        getContent(containerModelLanguage, in.lines(), modelSpecifications, fragments);
 		}
 		
 		for (String modelSpecification : modelSpecifications) {
