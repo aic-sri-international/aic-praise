@@ -22,16 +22,19 @@
 
 <a id="overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h3>
 
-<p>A Probabilistic Reasoning As Symbolic Evaluation (PRAiSE) library, developed at <a href="http://www.ai.sri.com/">SRI International's Artificial Intelligence Centern</a>, which provides capabilities in the following areas:<br>
-<ul>
-	<li>Lifted First-Order Probabilistic Inference.</li>
-	<li>Support for defining First-Order Probabilistic Models.</li>
-	<li>Support for performing inference on (fragments of) Church probabilistic programs.</li>
-</ul>
+<p>A Probabilistic Reasoning As Symbolic Evaluation (PRAiSE) library, developed at <a href="http://www.ai.sri.com/">SRI International's Artificial Intelligence Centern</a>,
+which implements the ideas present in the following paper:
+<p>
+de Salvo Braz, R., O'Reilly, C., Gogate, V., Dechter, R., "Probabilistic Inference Modulo Theories", International Joint Inference in Artificial Intelligence 2016 (IJCAI-16).
 </p>
 
+The current library and demo (below) is capable of performing probabilistic inference on models defined
+with equality on categorical types, equality and inequalities over integers, and propositional variables.
+In the future, we will also have linear real arithmetic, algebraic data types, and random functions
+(also described as relational variables, or uninterpreted functions).
+
 <h3>
-<a id="sgsolver-demo-app" class="anchor" href="#sgsolver-demo-app" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SGSolver Demo App</h3>
+<a id="sgsolver-demo-app" class="anchor" href="#sgsolver-demo-app" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>PRAiSE Demo App</h3>
 <center>
 <em>
 Note: Requires <a href="http://www.oracle.com/technetwork/java/javase/overview-137531.html">Java Web Start</a> to be supported by your browser. In addition, currently to run this application, 
