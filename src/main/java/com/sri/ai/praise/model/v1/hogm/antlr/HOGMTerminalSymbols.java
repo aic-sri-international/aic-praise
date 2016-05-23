@@ -82,6 +82,9 @@ public class HOGMTerminalSymbols {
 		terminalSymbols.add("!=");
 		terminalSymbols.add(">=");
 		terminalSymbols.add(">");
+		// Real Intervals
+		terminalSymbols.add("[");
+		terminalSymbols.add("]");
 		// Punctuation
 		terminalSymbols.add("(");
 		terminalSymbols.add(")");

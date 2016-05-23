@@ -49,6 +49,10 @@ import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.grinder.library.FunctorConstants.NOT;
 import static com.sri.ai.grinder.library.FunctorConstants.OR;
 import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
+import static com.sri.ai.grinder.library.FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED;
+import static com.sri.ai.grinder.library.FunctorConstants.REAL_INTERVAL_CLOSED_OPEN;
+import static com.sri.ai.grinder.library.FunctorConstants.REAL_INTERVAL_OPEN_CLOSED;
+import static com.sri.ai.grinder.library.FunctorConstants.REAL_INTERVAL_OPEN_OPEN;
 import static com.sri.ai.grinder.library.FunctorConstants.TIMES;
 
 import java.util.ArrayList;
@@ -438,11 +442,43 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  		return result;
  	}
    
- 	// sort_number_sub_range
-    // : start=INTEGER DOUBLE_DOT end=INTEGER
+ 	// sort_number_integer
+    // : start=INTEGER RANGE_SEPARTOR end=INTEGER
  	@Override 
- 	public Expression visitSort_number_sub_range(HOGMParser.Sort_number_sub_rangeContext ctx) { 
+ 	public Expression visitSort_integer_interval(HOGMParser.Sort_integer_intervalContext ctx) {
  		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(INTEGER_INTERVAL, newSymbol(ctx.start.getText()), newSymbol(ctx.end.getText()));
+ 		return result;
+ 	}
+ 	
+ 	// sort_real_interval_closed_closed
+ 	// INTERVAL_LOWER_CLOSED lower=RATIONAL SEMICOLON upper=RATIONAL INTERVAL_UPPER_CLOSED
+ 	@Override 
+ 	public Expression visitSort_real_interval_closed_closed(HOGMParser.Sort_real_interval_closed_closedContext ctx) { 
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(REAL_INTERVAL_CLOSED_CLOSED, newSymbol(ctx.lower.getText()), newSymbol(ctx.upper.getText()));
+ 		return result;
+ 	}
+ 	
+ 	// sort_real_interval_closed_open
+ 	// INTERVAL_LOWER_CLOSED lower=RATIONAL SEMICOLON upper=RATIONAL INTERVAL_UPPER_OPEN
+ 	@Override 
+ 	public Expression visitSort_real_interval_closed_open(HOGMParser.Sort_real_interval_closed_openContext ctx) { 
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(REAL_INTERVAL_CLOSED_OPEN, newSymbol(ctx.lower.getText()), newSymbol(ctx.upper.getText()));
+ 		return result;
+ 	}
+ 	
+ 	// sort_real_interval_open_closed
+ 	// INTERVAL_LOWER_OPEN lower=RATIONAL SEMICOLON upper=RATIONAL INTERVAL_UPPER_CLOSED
+ 	@Override 
+ 	public Expression visitSort_real_interval_open_closed(HOGMParser.Sort_real_interval_open_closedContext ctx) { 
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(REAL_INTERVAL_OPEN_CLOSED, newSymbol(ctx.lower.getText()), newSymbol(ctx.upper.getText()));
+ 		return result;
+ 	}
+ 	
+ 	// sort_real_interval_open_open
+ 	// INTERVAL_LOWER_OPEN lower=RATIONAL SEMICOLON upper=RATIONAL INTERVAL_UPPER_OPEN
+ 	@Override 
+ 	public Expression visitSort_real_interval_open_open(HOGMParser.Sort_real_interval_open_openContext ctx) { 
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(REAL_INTERVAL_OPEN_OPEN, newSymbol(ctx.lower.getText()), newSymbol(ctx.upper.getText()));
  		return result;
  	}
  	

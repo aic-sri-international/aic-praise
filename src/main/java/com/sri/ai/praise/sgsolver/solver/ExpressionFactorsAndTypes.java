@@ -51,6 +51,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.type.IntegerInterval;
+import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
@@ -100,6 +101,15 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 			integerIntervalTypes.addAll(constant.getReferencedIntegerIntervalTypes());
 		});
 		integerIntervalTypes.forEach(integerIntervalName -> additionalTypes.add(new IntegerInterval(integerIntervalName)));
+		
+		Set<String> realIntervalTypes = new LinkedHashSet<>();
+		parsedModel.getRandomVariableDeclarations().forEach(random -> {
+			realIntervalTypes.addAll(random.getReferencedRealIntervalTypes());
+		});
+		parsedModel.getConstatDeclarations().forEach(constant -> {
+			realIntervalTypes.addAll(constant.getReferencedRealIntervalTypes());
+		});
+		realIntervalTypes.forEach(realIntervalName -> additionalTypes.add(new RealInterval(realIntervalName)));
 	}
 	
 	public ExpressionFactorsAndTypes(

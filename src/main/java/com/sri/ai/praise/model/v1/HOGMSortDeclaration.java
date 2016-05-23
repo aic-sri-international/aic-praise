@@ -341,14 +341,15 @@ public class HOGMSortDeclaration {
 		boolean result = false;
 		
 		if ((Expressions.isSymbol(reference) && reference.getValue() instanceof String && !Expressions.isStringLiteral(reference)) ||
-		    isNumberRangeReference(reference)) {
+		    isIntegerIntervalReference(reference) ||
+		    isRealIntervalReference(reference)) {
 			result = true;
 		}
 		
 		return result;
 	}
 	
-	public static boolean isNumberRangeReference(Expression reference) {
+	public static boolean isIntegerIntervalReference(Expression reference) {
 		boolean result = false;
 		try {
 			if (Expressions.hasFunctor(reference, FunctorConstants.INTEGER_INTERVAL)) {
@@ -363,13 +364,54 @@ public class HOGMSortDeclaration {
 		return result;
 	}
 	
+	public static boolean isRealIntervalReference(Expression reference) {
+		boolean result = 
+				isRealIntervalReferenceClosedClosed(reference) ||
+				isRealIntervalReferenceClosedOpen(reference)   ||
+				isRealIntervalReferenceOpenClosed(reference)   ||
+				isRealIntervalReferenceOpenOpen(reference);
+		return result;
+	}
+	
+	public static boolean isRealIntervalReferenceClosedClosed(Expression reference) {
+		boolean result = isRealInterval(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, reference);
+		return result;
+	}
+	
+	public static boolean isRealIntervalReferenceClosedOpen(Expression reference) {
+		boolean result = isRealInterval(FunctorConstants.REAL_INTERVAL_CLOSED_OPEN, reference);
+		return result;
+	}
+	
+	public static boolean isRealIntervalReferenceOpenClosed(Expression reference) {
+		boolean result = isRealInterval(FunctorConstants.REAL_INTERVAL_OPEN_CLOSED, reference);
+		return result;
+	}
+	
+	public static boolean isRealIntervalReferenceOpenOpen(Expression reference) {
+		boolean result = isRealInterval(FunctorConstants.REAL_INTERVAL_OPEN_OPEN, reference);
+		return result;
+	}
+	
 	public static String sortReferenceAsTypeString(Expression reference) {
 		if (!isSortReference(reference)) {
 			throw new IllegalArgumentException("Is not a legal sort reference: "+reference);
 		}
 		String result;
-		if (isNumberRangeReference(reference)) {
+		if (isIntegerIntervalReference(reference)) {
 			result = reference.get(0) + ".." + reference.get(1);
+		}
+		else if (isRealIntervalReferenceClosedClosed(reference)) {
+			result = "[" + reference.get(0) + ";" + reference.get(1) + "]";
+		}
+		else if (isRealIntervalReferenceClosedOpen(reference)) {
+			result = "[" + reference.get(0) + ";" + reference.get(1) + "[";
+		}
+		else if (isRealIntervalReferenceOpenClosed(reference)) {
+			result = "]" + reference.get(0) + ";" + reference.get(1) + "]";
+		}
+		else if (isRealIntervalReferenceOpenOpen(reference)) {
+			result = "]" + reference.get(0) + ";" + reference.get(1) + "[";
 		}
 		else {
 			result = reference.toString();
@@ -551,6 +593,21 @@ public class HOGMSortDeclaration {
 							+ constants
 							+ "] is not of the correct type. must be an extensional uni-set of symbols representing unique constants in the model.");
 		}
+	}
+	
+	private static boolean isRealInterval(String functor, Expression reference) {
+		boolean result = false;
+		try {
+			if (Expressions.hasFunctor(reference, functor)) {
+				if (reference.numberOfArguments() == 2 && reference.get(0).doubleValue() <= reference.get(1).doubleValue()) {
+					result = true;
+				}
+			}
+		} 
+		catch (Throwable t) {
+			// ignore
+		}
+		return result;
 	}
 }
 

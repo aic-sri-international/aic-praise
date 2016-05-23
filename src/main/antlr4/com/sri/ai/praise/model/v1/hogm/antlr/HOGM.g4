@@ -101,12 +101,36 @@ sort_name
     
 sort_reference
     : sort_name
-    | sort_number_sub_range
+    | sort_integer_interval
+    | sort_real_interval
     ;
     
-sort_number_sub_range
+sort_integer_interval
     : start=INTEGER RANGE_SEPARTOR end=INTEGER
     ;
+    
+sort_real_interval
+    : sort_real_interval_closed_closed
+    | sort_real_interval_closed_open
+    | sort_real_interval_open_closed
+    | sort_real_interval_open_open
+    ;
+    
+sort_real_interval_closed_closed
+    : OPEN_SQUARE_BRACKET lower=constant_number SEMICOLON upper=constant_number CLOSE_SQUARE_BRACKET
+    ;       
+    
+sort_real_interval_closed_open
+    : OPEN_SQUARE_BRACKET lower=constant_number SEMICOLON upper=constant_number OPEN_SQUARE_BRACKET
+    ;    
+    
+sort_real_interval_open_closed
+    : CLOSE_SQUARE_BRACKET lower=constant_number SEMICOLON upper=constant_number CLOSE_SQUARE_BRACKET
+    ;  
+    
+sort_real_interval_open_open
+    : CLOSE_SQUARE_BRACKET lower=constant_number SEMICOLON upper=constant_number OPEN_SQUARE_BRACKET
+    ;     
        
 functor_name
     : constant_name
@@ -181,6 +205,8 @@ NOT_EQUAL               : '!=' ;
 GREATER_THAN_EQUAL      : '>=' ;
 GREATER_THAN            : '>' ;
 // Punctuation
+OPEN_SQUARE_BRACKET     : '[' ;
+CLOSE_SQUARE_BRACKET    : ']' ;
 OPEN_PAREN              : '(' ;
 CLOSE_PAREN             : ')' ;
 SEMICOLON               : ';' ; 

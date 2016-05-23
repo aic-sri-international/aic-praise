@@ -178,6 +178,67 @@ public class HOGMParserTest {
 				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "1", "5"),
 				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "10", "15")),
 				              null, null));
+		
+		string = "constant happy: [1;5]";
+		test(string, expected(null, 
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "0", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1", "5")),
+				              null, null));
+		
+		string = "constant happy: Boolean -> [ 1 ; 5 ]";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1", "5")),
+				              null, null));
+		
+		string = "constant happy: Boolean -> [ 1.1 ; 5.1 ]";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1.1", "5.1")),
+				              null, null));
+		
+		string = "constant happy: Boolean -> [ 1 ; 5 [";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_OPEN, "1", "5")),
+				              null, null));
+		
+		string = "constant happy: Boolean -> [ 1.1 ; 5.1 [";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_OPEN, "1.1", "5.1")),
+				              null, null));
+		
+		string = "constant happy: Boolean -> ] 1 ; 5 ]";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_OPEN_CLOSED, "1", "5")),
+				              null, null));
+		
+		string = "constant happy: Boolean -> ] 1.1 ; 5.1 ]";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_OPEN_CLOSED, "1.1", "5.1")),
+				              null, null));
+		
+		string = "constant happy: Boolean -> ] 1 ; 5 [";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_OPEN_OPEN, "1", "5")),
+				              null, null));
+		
+		string = "constant happy: Boolean -> ] 1.1 ; 5.1 [";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_OPEN_OPEN, "1.1", "5.1")),
+				              null, null));
+		
+		string = "constant happy: [1;5] -> [10;15]";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1", "5"),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "10", "15")),
+				              null, null));
 	}
 	
 	@Test
@@ -291,6 +352,67 @@ public class HOGMParserTest {
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", 
 				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "1", "5"),
 				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.INTEGER_INTERVAL, "10", "15")),
+				              null));
+		
+		string = "random happy: [1;5]";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "0", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1", "5")),
+				              null));
+		
+		string = "random happy: Boolean -> [ 1 ; 5 ]";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1", "5")),
+				              null));
+		
+		string = "random happy: Boolean -> [ 1.1 ; 5.1 ]";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1.1", "5.1")),
+				              null));
+		
+		string = "random happy: Boolean -> [ 1 ; 5 [";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_OPEN, "1", "5")),
+				              null));
+		
+		string = "random happy: Boolean -> [ 1.1 ; 5.1 [";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_OPEN, "1.1", "5.1")),
+				              null));
+		
+		string = "random happy: Boolean -> ] 1 ; 5 ]";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_OPEN_CLOSED, "1", "5")),
+				              null));
+		
+		string = "random happy: Boolean -> ] 1.1 ; 5.1 ]";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_OPEN_CLOSED, "1.1", "5.1")),
+				              null));
+		
+		string = "random happy: Boolean -> ] 1 ; 5 [";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_OPEN_OPEN, "1", "5")),
+				              null));
+		
+		string = "random happy: Boolean -> ] 1.1 ; 5.1 [";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", "Boolean", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_OPEN_OPEN, "1.1", "5.1")),
+				              null));
+		
+		string = "random happy: [1;5] -> [10;15]";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1", "5"),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "10", "15")),
 				              null));
 	}
 	

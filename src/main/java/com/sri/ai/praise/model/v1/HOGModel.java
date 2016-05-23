@@ -866,8 +866,11 @@ public class HOGModel {
 		HOGMSortDeclaration getSort(Expression sortName) {
 			HOGMSortDeclaration result = null;
 			
-			if (HOGMSortDeclaration.isNumberRangeReference(sortName)) {
+			if (HOGMSortDeclaration.isIntegerIntervalReference(sortName)) {
 				result = HOGMSortDeclaration.IN_BUILT_INTEGER;
+			}
+			else if (HOGMSortDeclaration.isRealIntervalReference(sortName)) {
+				result = HOGMSortDeclaration.IN_BUILT_REAL;
 			}
 			else {
 				for (HOGMSortDeclaration inbuilt : HOGMSortDeclaration.IN_BUILT_SORTS) {

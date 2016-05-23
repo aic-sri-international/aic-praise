@@ -232,11 +232,30 @@ public class ConstantDeclaration {
 		Set<String> result = new LinkedHashSet<>();
 		
 		getParameterSorts().forEach(paramSort -> {
-			if (HOGMSortDeclaration.isNumberRangeReference(paramSort)) {
+			if (HOGMSortDeclaration.isIntegerIntervalReference(paramSort)) {
 				result.add(HOGMSortDeclaration.sortReferenceAsTypeString(paramSort));
 			}
 		});
-		if (HOGMSortDeclaration.isNumberRangeReference(getRangeSort())) {
+		if (HOGMSortDeclaration.isIntegerIntervalReference(getRangeSort())) {
+			result.add(HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort()));
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @return a set of RealInterval type strings for referenced sorts that are real intervals.
+	 */
+	public Set<String> getReferencedRealIntervalTypes() {
+		Set<String> result = new LinkedHashSet<>();
+		
+		getParameterSorts().forEach(paramSort -> {
+			if (HOGMSortDeclaration.isRealIntervalReference(paramSort)) {
+				result.add(HOGMSortDeclaration.sortReferenceAsTypeString(paramSort));
+			}
+		});
+		if (HOGMSortDeclaration.isRealIntervalReference(getRangeSort())) {
 			result.add(HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort()));
 		}
 		
