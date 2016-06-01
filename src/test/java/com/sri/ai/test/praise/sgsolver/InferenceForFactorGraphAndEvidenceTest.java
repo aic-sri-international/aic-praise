@@ -314,6 +314,8 @@ public class InferenceForFactorGraphAndEvidenceTest {
 
 	@Test
 	public void testAPI() {
+		// IMPORTANT: this test is reproduced in the User Guide as an example,
+		// so it should be kept in sync with it.
 		
 		String modelString = ""
 				+  
@@ -335,9 +337,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 				"not alarm;"
 				+ "";
 		
-		Expression queryExpression = parse("not earthquake");
-		// can be any boolean expression, or any random variable
-		
 		Expression evidence = parse("not alarm");
 		// can be any boolean expression
 
@@ -346,17 +345,27 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		// and the sum of their product over all assignments to random variables is 1.
 		
 		boolean exploitFactorization = true;
-		// exploit factorization (that is, employ Variable Elimination.
+		// exploit factorization (that is, employ Variable Elimination,
+		// as opposed to summing over the entire joint probability distribution).
 		
 		InferenceForFactorGraphAndEvidence inferencer =
 				new InferenceForFactorGraphAndEvidence(
 						new ExpressionFactorsAndTypes(modelString),
 						isBayesianNetwork ,
 						evidence,
-						exploitFactorization, null);
+						exploitFactorization,
+						null /* default constraint theory */);
 
-		Expression marginal = inferencer.solve(queryExpression);
+		Expression queryExpression;
+		Expression marginal;
 		
+		queryExpression = parse("not earthquake");
+		// can be any boolean expression, or any random variable
+		marginal = inferencer.solve(queryExpression);
+		System.out.println("Marginal is " + marginal);
+		
+		queryExpression = parse("earthquake");
+		marginal = inferencer.solve(queryExpression);
 		System.out.println("Marginal is " + marginal);
 	}
 

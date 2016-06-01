@@ -71,6 +71,7 @@ import com.sri.ai.grinder.sgdpll.problemtype.SumProduct;
 import com.sri.ai.grinder.sgdpll.theory.compound.CompoundConstraintTheory;
 import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticConstraintTheory;
 import com.sri.ai.grinder.sgdpll.theory.equality.EqualityConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.linearrealarithmetic.LinearRealArithmeticConstraintTheory;
 import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalConstraintTheory;
 import com.sri.ai.util.Util;
 
@@ -158,6 +159,7 @@ public class InferenceForFactorGraphAndEvidence {
 					new CompoundConstraintTheory(
 							new EqualityConstraintTheory(false, true),
 							new DifferenceArithmeticConstraintTheory(false, true),
+							new LinearRealArithmeticConstraintTheory(false, true),
 							new PropositionalConstraintTheory());
 		}
 		
