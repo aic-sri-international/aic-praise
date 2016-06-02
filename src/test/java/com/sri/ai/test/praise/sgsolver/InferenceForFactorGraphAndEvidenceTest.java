@@ -54,6 +54,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.IntegerInterval;
+import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.core.TypeContext;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
@@ -870,6 +871,61 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		queryExpression = parse("I");
 		evidence = null;
 		expected = parse("if I < 98 then (0.0333333333 * I ^ 4 + 18.01 * I ^ 3 + -1176.08333 * I ^ 2 + 70569.06 * I) / 469273533 else if I < 99 then (-0.16 * I ^ 4 + 23.94 * I ^ 3 + -1212.02 * I ^ 2 + 199067.88 * I) / 469273533 else (0.0933333333 * I ^ 4 + 0.28 * I ^ 3 + 0.186666667 * I ^ 2 + 67914 * I) / 469273533");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+	}
+
+	@Test
+	public void linearRealArithmeticOnIntervalsWithMultipleVariables() {
+		
+		// The definitions of types
+		mapFromCategoricalTypeNameToSizeString = Util.map();
+	
+		additionalTypes = list(new RealInterval("[0;100]"));
+		
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"X",   "[0;100]",
+				"Y",   "[0;100]",
+				"Z",   "[0;100]"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+	
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(
+				"(if X < 50 then 1 else 2)"));
+		
+		queryExpression = parse("X");
+		evidence = null;
+		expected = parse("if X < 50 then 0.00666666667 else 0.0133333333"); // density
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+	
+		queryExpression = parse("X < 50");
+		evidence = null;
+		expected = parse("if X < 50 then 0.333333333 else 0.666666667"); // probability of the random event
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+		
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(
+				"(if Y > X then 0.3 else 0.7) *" + 
+				"(if Z > Y then 0.6 else 0.4)"));
+		
+		queryExpression = parse("X");
+		evidence = null;
+		expected = parse("if X < 100 then (-0.04 * X ^ 2 + 24 * X + 1500) / 256666.667 else (0.14 * X ^ 2 + 2100) / 256666.667");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+	
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(
+				"(if Y > X then 0.3*X else 0.7*X) *" + 
+				"(if Z > Y then 0.6*Y else 0.4*Y)"));
+		
+		queryExpression = parse("X");
+		evidence = null;
+		expected = parse("if X < 100 then (-0.0266666667 * X ^ 4 + 12 * X ^ 3 + 70000 * X) / 596666667 else (0.0933333333 * X ^ 4 + 70000 * X) / 596666667");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 
