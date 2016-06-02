@@ -541,6 +541,20 @@ public class HOGMParserTest {
 							  Expressions.parse("tuple(randomVariable(lung_cancer, 0, Boolean), randomVariable(tB, 0, Boolean), randomVariable(stomach_flu, 0, Boolean), randomVariable(cold, 0, Boolean), randomVariable(other, 0, Boolean), randomVariable(cough, 0, Boolean), randomVariable(fever, 0, Boolean), randomVariable(chest_pain, 0, Boolean), randomVariable(shortness_of_breath, 0, Boolean))"),
 							  Expressions.parse("if other then if tB then if lung_cancer then if cold then if cough then 0.89605 else 0.10395 else if cough then 0.7921 else 0.2079 else if cold then if cough then 0.8515 else 0.1485 else if cough then 0.703 else 0.297 else if lung_cancer then if cold then if cough then 0.6535 else 0.3465 else if cough then 0.307 else 0.693 else if cold then if cough then 0.505 else 0.495 else if cough then 0.01 else 0.99 else if tB then if lung_cancer then if cold then if cough then 0.895 else 0.105 else if cough then 0.79 else 0.21 else if cold then if cough then 0.85 else 0.15 else if cough then 0.7 else 0.3 else if lung_cancer then if cold then if cough then 0.65 else 0.35 else if cough then 0.3 else 0.7 else if cold then 0.5 else if cough then 0 else 1")));
 		
+		// More complex mixed numeric types (i.e. Integer and Real)
+		string = "random X : Real;\n"
+				+"if X = 10 then 1 else 0;";	
+		test(string, expected(null, 
+							  null, 
+							  Expressions.parse("tuple(randomVariable(X, 0, Real))"),
+							  Expressions.parse("if X = 10 then 1 else 0")));
+		
+		string = "random X : Real;\n"
+				+"if X != 10 then 1 else 0;";	
+		test(string, expected(null, 
+							  null, 
+							  Expressions.parse("tuple(randomVariable(X, 0, Real))"),
+							  Expressions.parse("if X != 10 then 1 else 0")));
 
 		// 'else' is to attach to the closest conditional.		
 		string = "sort People : 10000000, rodrigo;\n"
@@ -644,18 +658,18 @@ public class HOGMParserTest {
 		
 		testExpectedModelError(
 				"true = 1;",
-				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE);
+				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_COMPATIBLE_TYPE);
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
 				+"random grade: Integer -> Grade;\n"
 				+"grade(55) = 55;",
-				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE);
+				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_COMPATIBLE_TYPE);
 		testExpectedModelError(
 				"sort Grade: 8, a, b, c, d, e, f, g, ng;\n"
 				+"random grade: Integer -> Grade;\n"
 				+"random president: Boolean;"
 				+"if president then grade(55) else 0.3;",
-				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE,
+				HOGModelError.Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_COMPATIBLE_TYPE,
 				HOGModelError.Type.TERM_CONDITONAL_STATEMENT_MUST_BE_OF_TYPE_NUMERIC);
 		
 		testExpectedModelError(

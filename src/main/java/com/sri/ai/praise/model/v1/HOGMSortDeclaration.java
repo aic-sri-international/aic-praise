@@ -39,6 +39,7 @@ package com.sri.ai.praise.model.v1;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -141,6 +142,16 @@ public class HOGMSortDeclaration {
 	
 	
 	public static final HOGMSortDeclaration[] IN_BUILT_SORTS = new HOGMSortDeclaration[] { IN_BUILT_BOOLEAN, IN_BUILT_INTEGER, IN_BUILT_REAL, IN_BUILT_STRING };
+	
+	public static final Set<HOGMSortDeclaration> IN_BUILT_NUMERIC_SORTS;
+	static {
+		Set<HOGMSortDeclaration> numericSorts = new HashSet<>();
+		numericSorts.add(IN_BUILT_INTEGER);
+		numericSorts.add(IN_BUILT_REAL);
+		
+		IN_BUILT_NUMERIC_SORTS = Collections.unmodifiableSet(numericSorts);
+	}
+	
 	//
 	public static final String FUNCTOR_SORT_DECLARATION = "sort";
 
@@ -256,6 +267,12 @@ public class HOGMSortDeclaration {
 		}
 
 		return sortDeclaration;
+	}
+	
+	@Override
+	public String toString() {
+		String result = getSortDeclaration().toString();
+		return result;
 	}
 
 	//

@@ -622,7 +622,7 @@ public class HOGModel {
 						
 						// The type of arguments must all match in these instances
 						if (IfThenElse.isIfThenElse(nonConstantAndRandomFunction) || Equality.isEquality(nonConstantAndRandomFunction) || Disequality.isDisequality(nonConstantAndRandomFunction)) {
-							if (argSorts.size() != 1) {	
+							if (argSorts.size() != 1 && !HOGMSortDeclaration.IN_BUILT_NUMERIC_SORTS.equals(argSorts)) {	
 								boolean reportError = true;
 								
 								// Is a conditional that can be converted to a rule, so ok for types to mismatch currently
@@ -631,7 +631,7 @@ public class HOGModel {
 								}
 								
 								if (reportError) {
-									newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_TYPE, nonConstantAndRandomFunction, termStatement);
+									newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_COMPATIBLE_TYPE, nonConstantAndRandomFunction.toString() + " which has argument types " + argSorts.toString(), termStatement);
 								}
 							}
 						}
