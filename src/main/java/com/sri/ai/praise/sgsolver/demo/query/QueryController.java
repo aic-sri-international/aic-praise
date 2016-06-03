@@ -306,7 +306,13 @@ public class QueryController {
 	
 	private void showResultPane(TitledPane resultPane) {
 		resultPane.setPrefWidth(outputScrollPane.getViewportBounds().getWidth());
-		outputScrollPane.viewportBoundsProperty().addListener((observer, oldValue, newValue) -> resultPane.setPrefWidth(newValue.getWidth()));
+		resultPane.setMaxWidth(outputScrollPane.getViewportBounds().getWidth());
+		resultPane.setMinWidth(outputScrollPane.getViewportBounds().getWidth());
+		outputScrollPane.viewportBoundsProperty().addListener((observer, oldValue, newValue) -> {			
+			resultPane.setPrefWidth(newValue.getWidth());
+			resultPane.setMinWidth(newValue.getWidth());
+			resultPane.setMaxWidth(newValue.getWidth());
+		});
 		outputAccordion.getPanes().add(0, resultPane);
 		resultPane.setExpanded(true);
 		outputScrollPane.setVvalue(0);
