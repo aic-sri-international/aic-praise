@@ -917,7 +917,8 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		evidence = null;
 		expected = parse("if X < 100 then (-0.04 * X ^ 2 + 24 * X + 1500) / 256666.667 else (0.14 * X ^ 2 + 2100) / 256666.667");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
-	
+
+		
 		isBayesianNetwork = false;
 		factors = Times.getMultiplicands(parse(
 				"(if Y > X then 0.3*X else 0.7*X) *" + 
@@ -926,6 +927,16 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		queryExpression = parse("X");
 		evidence = null;
 		expected = parse("if X < 100 then (-0.0266666667 * X ^ 4 + 12 * X ^ 3 + 70000 * X) / 596666667 else (0.0933333333 * X ^ 4 + 70000 * X) / 596666667");
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+
+	
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(
+				"if X = 10 then 1 else 2"));
+		
+		queryExpression = parse("X");
+		evidence = null;
+		expected = parse("if X = 10 then 0.005 else 0.01");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 
