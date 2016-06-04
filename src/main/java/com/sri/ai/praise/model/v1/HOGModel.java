@@ -311,6 +311,9 @@ public class HOGModel {
 						conditioned.add(statement);
 					}
 				}
+				else if (termType == TermCategoryType.NUMERIC) {
+					conditioned.add(statement);
+				} 
 				else if (termType != TermCategoryType.BOOLEAN) {
 					newError(Type.TERM_NON_CONDITIONAL_STATEMENT_MUST_BE_OF_TYPE_BOOLEAN, "", termStatement);
 				}

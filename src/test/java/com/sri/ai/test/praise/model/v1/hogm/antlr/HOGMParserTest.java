@@ -598,6 +598,33 @@ public class HOGMParserTest {
 				HOGModelError.Type.TERM_CONSTANT_NUMERIC_RULE_MUST_GIVE_AN_INTERGER_RESULT_WHEN_DIVIDED_INTO_ONE);
 	}
 	
+	@Test
+	public void testGeneralNumericRuleTerm() {
+		String string;
+		
+		string = "random X : [0;100];\n"
+				+"X;";					
+		test(string, expected(null, 
+				  null, 
+				  Expressions.parse("tuple(randomVariable(X, 0, [0;100]))"),
+				  Expressions.parse("X")));
+		
+		string = "random X : [0;100];\n"
+				+"X/10;";					
+		test(string, expected(null, 
+				  null, 
+				  Expressions.parse("tuple(randomVariable(X, 0, [0;100]))"),
+				  Expressions.parse("X/10")));
+		
+		string = "random X : [0;100];\n"
+				+"random Y : [0;100];\n"
+				+"X+Y;";					
+		test(string, expected(null, 
+				  null, 
+				  Expressions.parse("tuple(randomVariable(X, 0, [0;100]),randomVariable(Y, 0, [0;100]))"),
+				  Expressions.parse("X+Y")));
+	}
+	
 	
 	@Test
 	public void testDetectedStatementErrors() {
