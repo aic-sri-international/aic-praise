@@ -301,16 +301,7 @@ public class HOGModel {
 					else {
 						conditioned.add(conditionedPotential);
 					}
-				} // A constant numeric rule (e.g. 0.1)
-				else if (termType == TermCategoryType.NUMERIC && Expressions.isNumber(statement)) {
-					if (!Rational.ONE.divide(statement.rationalValue()).isInteger()) {
-						newError(Type.TERM_CONSTANT_NUMERIC_RULE_MUST_GIVE_AN_INTERGER_RESULT_WHEN_DIVIDED_INTO_ONE, "", termStatement);
-					}
-					else {
-						// A trivial conditioned potential (i.e. always true).
-						conditioned.add(statement);
-					}
-				}
+				} // A numeric rule (e.g. 0.1)
 				else if (termType == TermCategoryType.NUMERIC) {
 					conditioned.add(statement);
 				} 

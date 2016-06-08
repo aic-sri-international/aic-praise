@@ -591,11 +591,7 @@ public class HOGMParserTest {
 	@Test
 	public void testConstantNumericRuleTerm() {
 		test("0.1;", expected(null, null, null,
-							  Expressions.parse("0.1")));
-		
-		testExpectedModelError( 
-				"0.3;",
-				HOGModelError.Type.TERM_CONSTANT_NUMERIC_RULE_MUST_GIVE_AN_INTERGER_RESULT_WHEN_DIVIDED_INTO_ONE);
+							  Expressions.parse("0.1")));		
 	}
 	
 	@Test
