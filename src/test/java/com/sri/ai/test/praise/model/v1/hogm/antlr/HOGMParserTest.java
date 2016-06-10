@@ -239,6 +239,13 @@ public class HOGMParserTest {
 				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1", "5"),
 				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "10", "15")),
 				              null, null));
+		
+		string = "constant happy: [-1;5] -> [-20;-15]";
+		test(string, expected(null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("constant", "happy", "1", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, Expressions.parse("-1"), "5"),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, Expressions.parse("-20"), Expressions.parse("-15"))),
+				              null, null));
 	}
 	
 	@Test
@@ -413,6 +420,13 @@ public class HOGMParserTest {
 				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", 
 				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "1", "5"),
 				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, "10", "15")),
+				              null));
+		
+		string = "random happy: [-1;5] -> [-20;-15]";
+		test(string, expected(null, null,
+				              Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees("randomVariable", "happy", "1", 
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, Expressions.parse("-1"), "5"),
+				            		  Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(FunctorConstants.REAL_INTERVAL_CLOSED_CLOSED, Expressions.parse("-20"), Expressions.parse("-15"))),
 				              null));
 	}
 	

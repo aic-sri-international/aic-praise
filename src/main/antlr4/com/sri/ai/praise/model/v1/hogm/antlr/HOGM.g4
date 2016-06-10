@@ -110,26 +110,7 @@ sort_integer_interval
     ;
     
 sort_real_interval
-    : sort_real_interval_closed_closed
-    | sort_real_interval_closed_open
-    | sort_real_interval_open_closed
-    | sort_real_interval_open_open
-    ;
-    
-sort_real_interval_closed_closed
-    : OPEN_SQUARE_BRACKET lower=constant_number SEMICOLON upper=constant_number CLOSE_SQUARE_BRACKET
-    ;       
-    
-sort_real_interval_closed_open
-    : OPEN_SQUARE_BRACKET lower=constant_number SEMICOLON upper=constant_number OPEN_SQUARE_BRACKET
-    ;    
-    
-sort_real_interval_open_closed
-    : CLOSE_SQUARE_BRACKET lower=constant_number SEMICOLON upper=constant_number CLOSE_SQUARE_BRACKET
-    ;  
-    
-sort_real_interval_open_open
-    : CLOSE_SQUARE_BRACKET lower=constant_number SEMICOLON upper=constant_number OPEN_SQUARE_BRACKET
+    : lower_bracket=(OPEN_SQUARE_BRACKET | CLOSE_SQUARE_BRACKET) (negate_lower=SUBTRACT)? lower=constant_number SEMICOLON (negate_upper=SUBTRACT)? upper=constant_number upper_bracket=(OPEN_SQUARE_BRACKET | CLOSE_SQUARE_BRACKET)
     ;     
        
 functor_name

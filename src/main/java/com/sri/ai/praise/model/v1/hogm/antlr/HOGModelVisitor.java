@@ -79,6 +79,7 @@ import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.HOGModel;
 import com.sri.ai.praise.model.v1.StatementInfo;
+import com.sri.ai.util.math.Rational;
 
 @Beta
 public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
@@ -453,32 +454,33 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// sort_real_interval_closed_closed
  	// INTERVAL_LOWER_CLOSED lower=RATIONAL SEMICOLON upper=RATIONAL INTERVAL_UPPER_CLOSED
  	@Override 
- 	public Expression visitSort_real_interval_closed_closed(HOGMParser.Sort_real_interval_closed_closedContext ctx) { 
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(REAL_INTERVAL_CLOSED_CLOSED, newSymbol(ctx.lower.getText()), newSymbol(ctx.upper.getText()));
- 		return result;
- 	}
- 	
- 	// sort_real_interval_closed_open
- 	// INTERVAL_LOWER_CLOSED lower=RATIONAL SEMICOLON upper=RATIONAL INTERVAL_UPPER_OPEN
- 	@Override 
- 	public Expression visitSort_real_interval_closed_open(HOGMParser.Sort_real_interval_closed_openContext ctx) { 
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(REAL_INTERVAL_CLOSED_OPEN, newSymbol(ctx.lower.getText()), newSymbol(ctx.upper.getText()));
- 		return result;
- 	}
- 	
- 	// sort_real_interval_open_closed
- 	// INTERVAL_LOWER_OPEN lower=RATIONAL SEMICOLON upper=RATIONAL INTERVAL_UPPER_CLOSED
- 	@Override 
- 	public Expression visitSort_real_interval_open_closed(HOGMParser.Sort_real_interval_open_closedContext ctx) { 
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(REAL_INTERVAL_OPEN_CLOSED, newSymbol(ctx.lower.getText()), newSymbol(ctx.upper.getText()));
- 		return result;
- 	}
- 	
- 	// sort_real_interval_open_open
- 	// INTERVAL_LOWER_OPEN lower=RATIONAL SEMICOLON upper=RATIONAL INTERVAL_UPPER_OPEN
- 	@Override 
- 	public Expression visitSort_real_interval_open_open(HOGMParser.Sort_real_interval_open_openContext ctx) { 
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(REAL_INTERVAL_OPEN_OPEN, newSymbol(ctx.lower.getText()), newSymbol(ctx.upper.getText()));
+ 	public Expression visitSort_real_interval(HOGMParser.Sort_real_intervalContext ctx) { 
+ 		String intervalType;
+ 		if (ctx.lower_bracket.getText().equals("[")) {
+ 			if (ctx.upper_bracket.getText().equals("]")) {
+ 				intervalType = REAL_INTERVAL_CLOSED_CLOSED;
+ 			}
+ 			else { // upper bracket is open i.e. [
+ 				intervalType = REAL_INTERVAL_CLOSED_OPEN;
+ 			}
+ 		}  		
+ 		else { // Lower bracket is open i.e. ]
+ 			if (ctx.upper_bracket.getText().equals("]")) {
+ 				intervalType = REAL_INTERVAL_OPEN_CLOSED;
+ 			}
+ 			else { // upper bracket is open i.e. [
+ 				intervalType = REAL_INTERVAL_OPEN_OPEN;
+ 			}
+ 		}
+ 		Rational lower = new Rational(ctx.lower.getText());
+ 		if (ctx.negate_lower != null) {
+ 			lower = lower.negate();
+ 		}
+ 		Rational upper = new Rational(ctx.upper.getText());
+ 		if (ctx.negate_upper != null) {
+ 			upper = upper.negate();
+ 		}
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(intervalType, Expressions.makeSymbol(lower), Expressions.makeSymbol(upper));
  		return result;
  	}
  	

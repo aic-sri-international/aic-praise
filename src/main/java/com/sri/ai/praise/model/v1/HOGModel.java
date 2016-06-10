@@ -65,7 +65,6 @@ import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.HOGModelError.Type;
 import com.sri.ai.util.base.Pair;
-import com.sri.ai.util.math.Rational;
 
 @Beta
 public class HOGModel {
