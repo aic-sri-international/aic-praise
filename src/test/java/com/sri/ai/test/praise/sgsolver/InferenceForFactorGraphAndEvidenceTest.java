@@ -940,6 +940,34 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 
+	@Test
+	public void linearRealArithmeticOnPosition() {
+		
+		// The definitions of types
+		mapFromCategoricalTypeNameToSizeString = Util.map();
+	
+		additionalTypes = list(new RealInterval("[0;10]"));
+		
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"position",         "[0;10]",
+				"observedPosition", "Real"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+	
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+	
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(
+				"(position)*(if observedPosition > 4 and observedPosition < 5 then 1 else 0)"));
+		
+		queryExpression = parse("position");
+		evidence = null;
+		expected = parse("position/50"); // density
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+	}
+
 	/**
 	 * @param queryExpression
 	 * @param evidence
