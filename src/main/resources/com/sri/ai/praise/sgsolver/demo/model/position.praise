@@ -1,0 +1,24 @@
+@LANG:HOGMv1
+@MODEL:name=[Page 1]parts=[page-1]queries=[query-page-1#1]
+@FRAGMENT:page-1
+random position         : Real; // real, unobserved position of an object
+random observedPosition : Real; // observed, noisy position of the same object
+random event : Boolean;
+
+// p(position) proportional to inverted parabola around 0 +- 10
+if position > -10 and position < 10
+   then -position^2 + 100
+   else 0;
+
+// p(observedPosition | position) proportional to parabola around position +- 1
+if observedPosition - position > -1 and observedPosition - position < 1
+   then -(observedPosition - position)^2 + 1
+   else 0;
+
+// observed position is between 4 and 5
+observedPosition > 4 and observedPosition < 5;
+
+// event of position being between 3 and 6 has probability 1; anything shorter has probability less than 1
+event <=> position > 3 and position < 6;
+@FRAGMENT:query-page-1#1
+event
