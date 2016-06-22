@@ -156,6 +156,7 @@ public class SGSolverDemoController {
 	@FXML private Button configureButton;
 	//
 	static IntegerProperty     _displayPrecision         = new SimpleIntegerProperty(4);
+	static BooleanProperty     _isDisplayExact           = new SimpleBooleanProperty(true);
 	static DisplayRoundingMode _displayRoundingMode      = DisplayRoundingMode.FLOOR;
 	static IntegerProperty     _displayScientificGreater = new SimpleIntegerProperty(8);
 	static IntegerProperty     _displayScientificAfter   = new SimpleIntegerProperty(6);
@@ -170,6 +171,7 @@ public class SGSolverDemoController {
 	private Button      exportUAIModelButton         = new Button("Export UAI Model...");
 	//
 	private Spinner<Integer> displayPrecisionSpinner  = new Spinner<>();
+	private CheckBox         displayExactCheckBox     = new CheckBox();
 	private Spinner<Integer> displayScientificGreater = new Spinner<>();
 	private Spinner<Integer> displayScientificAfter   = new Spinner<>();
 	private CheckBox         debugModeCheckBox        = new CheckBox();
@@ -211,6 +213,7 @@ public class SGSolverDemoController {
 	public static void computeExpressionWithDesiredPrecision(Runnable computeCallback) {				
 		int oldRoundingMode      = Rational.setToStringDotRoundingMode(_displayRoundingMode.getValue());
 		int oldDisplayPrecision  = SyntaxTrees.setNumericDisplayPrecision(_displayPrecision.get());
+		boolean oldDisplayExact  = SyntaxTrees.setDisplayNumericsExactly(_isDisplayExact.getValue());
 		int oldScientificGreater = SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces(_displayScientificGreater.get());
 		int oldScientificAfter   = SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(_displayScientificAfter.get());
 		
@@ -223,6 +226,7 @@ public class SGSolverDemoController {
 		finally {
 			Rational.setToStringDotRoundingMode(oldRoundingMode);
 			SyntaxTrees.setNumericDisplayPrecision(oldDisplayPrecision);
+			SyntaxTrees.setDisplayNumericsExactly(oldDisplayExact);
 			SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces(oldScientificGreater);
 			SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(oldScientificAfter);
 		}
@@ -634,6 +638,10 @@ public class SGSolverDemoController {
 		_displayPrecision.bind(displayPrecisionSpinner.valueProperty());
 		displayPrecisionHBox.getChildren().addAll(new Label("Display Numeric Precision:"), displayPrecisionSpinner);
 		
+		displayExactCheckBox.setSelected(_isDisplayExact.get());
+		displayExactCheckBox.setText("Display Numerics Exactly");
+		_isDisplayExact.bind(displayExactCheckBox.selectedProperty());
+		
 		HBox displayScientificHBox = newButtonHBox();
 		displayScientificGreater.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 80, _displayScientificGreater.get()));
 		displayScientificGreater.setPrefWidth(60);
@@ -648,8 +656,9 @@ public class SGSolverDemoController {
 		_inDebugMode.bind(debugModeCheckBox.selectedProperty());
 		
 		configureMenu.getChildren().addAll(
-						displayPrecisionHBox,
+						displayPrecisionHBox,						
 						displayScientificHBox,
+						displayExactCheckBox,
 						new Separator(Orientation.HORIZONTAL),
 						debugModeCheckBox
 		);
