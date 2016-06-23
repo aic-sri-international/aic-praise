@@ -79,6 +79,11 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 	
 	private static final String _vecProgramName           = "vec-uai14";
 	private static final String _probabilityEvidenceQuery = "PR";
+	
+	@Override
+	public String getName() {
+		return "VEC";
+	}
 
 	@Override
 	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(String solveRequestId, ModelLanguage modelLanguage, String model, String evidenceQuery) 

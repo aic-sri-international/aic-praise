@@ -116,7 +116,7 @@ public class EvaluationOnElectionModelCLI extends AbstractEvaluateCLI {
 	}
 
 	public static void main(String[] args) throws Exception {
-		AbstractEvaluateCLI evaluator = new EvaluationOnElectionModelCLI();
+		EvaluationOnElectionModelCLI evaluator = new EvaluationOnElectionModelCLI();
 		evaluator.run(args);
 	}
 }

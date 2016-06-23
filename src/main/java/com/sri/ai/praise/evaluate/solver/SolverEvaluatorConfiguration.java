@@ -46,8 +46,6 @@ import java.util.Map;
  * @author oreilly
  */
 public class SolverEvaluatorConfiguration {
-	
-	private String name;
 	private String implementationClassName;
 	private int totalCPURuntimeLimitSecondsPerSolveAttempt;
 	private int totalMemoryLimitInMegabytesPerSolveAttempt;
@@ -55,17 +53,12 @@ public class SolverEvaluatorConfiguration {
 	private Map<String, String> solverSpecificConfiguration;
 	private File workingDirectory;
 	
-	public SolverEvaluatorConfiguration(String name, String implementationClassName, int totalCPURuntimeLimitSecondsPerSolveAttempt, int totalMemoryLimitInMegabytesPerSolveAttempt, boolean cacheTranslations, Map<String, String> solverSpecificConfiguration) {
-		this.name                                       = name;
+	public SolverEvaluatorConfiguration(String implementationClassName, int totalCPURuntimeLimitSecondsPerSolveAttempt, int totalMemoryLimitInMegabytesPerSolveAttempt, boolean cacheTranslations, Map<String, String> solverSpecificConfiguration) {
 		this.implementationClassName                    = implementationClassName;
 		this.totalCPURuntimeLimitSecondsPerSolveAttempt = totalCPURuntimeLimitSecondsPerSolveAttempt;
 		this.totalMemoryLimitInMegabytesPerSolveAttempt = totalMemoryLimitInMegabytesPerSolveAttempt;
 		this.cacheTranslations                          = cacheTranslations;
 		this.solverSpecificConfiguration                = solverSpecificConfiguration;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public String getImplementationClassName() {

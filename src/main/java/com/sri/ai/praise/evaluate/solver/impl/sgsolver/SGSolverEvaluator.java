@@ -60,6 +60,11 @@ import com.sri.ai.util.math.Rational;
 public class SGSolverEvaluator extends AbstractSolverEvaluator {
 
 	@Override
+	public String getName() {
+		return "SGSolver";
+	}
+	
+	@Override
 	public ModelLanguage getExpectedModelLanguage() {
 		return ModelLanguage.HOGMv1;
 	}

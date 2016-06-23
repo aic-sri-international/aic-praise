@@ -106,7 +106,7 @@ public class Evaluation {
 			evaluationListener.notification("Starting solver burn in based on '"+modelsToEvaluateContainer.getName()+" - "+burnInModel.getName() + " : " + burnInQuery+"'");
 			for (SolverEvaluator solver : solvers) {
 				SolverCallResult solverResult =  callSolver(configuration, solver, burnInModel, burnInQuery);
-				evaluationListener.notification("Burn in for "+solver.getConfiguration().getName()+" complete. Average inference time = "+toDurationString(solverResult.averageInferenceTimeInMilliseconds));
+				evaluationListener.notification("Burn in for "+solver.getName()+" complete. Average inference time = "+toDurationString(solverResult.averageInferenceTimeInMilliseconds));
 			}
 			
 			// Output the report header line
@@ -117,10 +117,10 @@ public class Evaluation {
 			csvLine.add("# runs values averaged over");
 			for (SolverEvaluator solver : solvers) {
 				csvLine.add("Solver");
-				csvLine.add("Result for "+solver.getConfiguration().getName());
-				csvLine.add("Inference ms. for "+solver.getConfiguration().getName());
+				csvLine.add("Result for "+solver.getName());
+				csvLine.add("Inference ms. for "+solver.getName());
 				csvLine.add("HH:MM:SS.");
-				csvLine.add("Translation ms. for "+solver.getConfiguration().getName());
+				csvLine.add("Translation ms. for "+solver.getName());
 				csvLine.add("HH:MM:SS.");
 			}
 			evaluationListener.notification("Starting to generate Evaluation Report");
@@ -139,14 +139,14 @@ public class Evaluation {
 					csvLine.add(""+configuration.getNumberRunsToAverageOver());
 					for (SolverEvaluator solver : solvers) {
 						SolverCallResult solverResult = callSolver(configuration, solver, model, query);
-						csvLine.add(solver.getConfiguration().getName());
+						csvLine.add(solver.getName());
 						csvLine.add(solverResult.failed ? "FAILED" : ""+solverResult.answer);
 						csvLine.add(""+solverResult.averageInferenceTimeInMilliseconds);
 						csvLine.add(toDurationString(solverResult.averageInferenceTimeInMilliseconds));
 						csvLine.add(""+solverResult.averagelTranslationTimeInMilliseconds);
 						csvLine.add(toDurationString(solverResult.averagelTranslationTimeInMilliseconds));
 						
-						evaluationListener.notification("Solver "+solver.getConfiguration().getName()+" took an average inference time of "+toDurationString(solverResult.averageInferenceTimeInMilliseconds)+" to solve "+problemName);
+						evaluationListener.notification("Solver "+solver.getName()+" took an average inference time of "+toDurationString(solverResult.averageInferenceTimeInMilliseconds)+" to solve "+problemName);
 					}
 					evaluationListener.csvResultOutput(csvLine.toString());
 				}

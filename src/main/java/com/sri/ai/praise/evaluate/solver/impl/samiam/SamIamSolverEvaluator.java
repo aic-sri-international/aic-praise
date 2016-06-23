@@ -47,6 +47,11 @@ import com.sri.ai.praise.lang.ModelLanguage;
  * @author oreilly
  */
 public class SamIamSolverEvaluator  extends AbstractSolverEvaluator {
+	
+	@Override
+	public String getName() {
+		return "SamIam";
+	}
 
 	@Override
 	public ModelLanguage getExpectedModelLanguage() {

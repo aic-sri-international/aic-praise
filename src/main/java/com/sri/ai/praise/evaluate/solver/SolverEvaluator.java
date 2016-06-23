@@ -40,6 +40,7 @@ package com.sri.ai.praise.evaluate.solver;
 import com.sri.ai.praise.lang.ModelLanguage;
 
 public interface SolverEvaluator {
+	String getName();
 	SolverEvaluatorConfiguration getConfiguration();
 	void setConfiguration(SolverEvaluatorConfiguration configuration);
 	
