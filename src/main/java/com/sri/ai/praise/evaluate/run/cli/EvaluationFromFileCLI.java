@@ -53,9 +53,7 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
  * @author oreilly
  *
  */
-public class EvaluationFromFileCLI extends AbstractEvaluateCLI {
-// TODO - consider using commons-configuration to evaluation input file reading, i.e. https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
-	
+public class EvaluationFromFileCLI extends AbstractEvaluateCLI {	
 	protected static class EvaluationArgsWithPraiseModelsFile extends EvaluationArgs {
 		// Required
 		File praiseModelsFile; // -p
@@ -94,7 +92,7 @@ public class EvaluationFromFileCLI extends AbstractEvaluateCLI {
 	}
 
 	public static void main(String[] args) throws Exception {
-		AbstractEvaluateCLI evaluator = new EvaluationFromFileCLI();
+		EvaluationFromFileCLI evaluator = new EvaluationFromFileCLI();
 		evaluator.run(args);
 	}
 }

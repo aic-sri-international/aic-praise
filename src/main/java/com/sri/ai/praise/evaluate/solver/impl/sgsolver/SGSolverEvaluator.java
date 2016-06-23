@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
@@ -62,107 +63,122 @@ public class SGSolverEvaluator extends AbstractSolverEvaluator {
 	public ModelLanguage getExpectedModelLanguage() {
 		return ModelLanguage.HOGMv1;
 	}
-	
+
 	@Override
-	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(String solveRequestId, ModelLanguage modelLanguage, String model, String evidenceQuery) 
-		throws Exception {
-		
+	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(String solveRequestId,
+			ModelLanguage modelLanguage, String model, String evidenceQuery) throws Exception {
+
 		if (modelLanguage != ModelLanguage.HOGMv1) {
-			throw new UnsupportedOperationException(modelLanguage.name() + " is currently not supported by this solver.");
+			throw new UnsupportedOperationException(
+					modelLanguage.name() + " is currently not supported by this solver.");
 		}
-		
+
 		SGSolverCallResult prResult = prCallSGSolverCLI(model, evidenceQuery);
-		
-		Rational probabilityEvidence = null; // NOTE: null indicates failure to solve/compute.
+
+		Rational probabilityEvidence = null; // NOTE: null indicates failure to
+												// solve/compute.
 		if (prResult.resultExpression != null) {
-			Expression queryExpr  = Expressions.parse(evidenceQuery);
+			Expression queryExpr = Expressions.parse(evidenceQuery);
 			Expression resultExpr = Expressions.parse(prResult.resultExpression);
 			if (IfThenElse.isIfThenElse(resultExpr)) {
 				Expression condition = IfThenElse.condition(resultExpr);
 				if (condition.equals(queryExpr)) {
 					probabilityEvidence = IfThenElse.thenBranch(resultExpr).rationalValue();
-				}
-				else if (Not.isNegation(condition) && condition.get(0).equals(queryExpr)) {
+				} else if (Not.isNegation(condition) && condition.get(0).equals(queryExpr)) {
 					probabilityEvidence = IfThenElse.elseBranch(resultExpr).rationalValue();
 				}
-			}
-			else if (resultExpr.equals(queryExpr)) {
+			} else if (resultExpr.equals(queryExpr)) {
 				probabilityEvidence = Rational.ONE;
-			}
-			else if (Not.isNegation(resultExpr)) {
+			} else if (Not.isNegation(resultExpr)) {
 				if (resultExpr.get(0).equals(queryExpr)) {
 					probabilityEvidence = Rational.ZERO;
 				}
-			}
-			else if (Expressions.isNumber(resultExpr)) {
-				probabilityEvidence = resultExpr.rationalValue();
+			} else {
+				probabilityEvidence = getRationalValue(resultExpr);
 			}
 			
 			if (probabilityEvidence == null) {
-				throw new UnsupportedOperationException("Unable to extract result: "+resultExpr);
+				throw new UnsupportedOperationException("Unable to extract result: " + resultExpr);
 			}
 		}
-		
-		SolverEvaluatorProbabilityEvidenceResult result = new SolverEvaluatorProbabilityEvidenceResult(0, prResult.sgSolverProcessTookMS, probabilityEvidence);
+
+		SolverEvaluatorProbabilityEvidenceResult result = new SolverEvaluatorProbabilityEvidenceResult(0,
+				prResult.sgSolverProcessTookMS, probabilityEvidence);
 		return result;
 	}
-	
+
 	//
 	// PRIVATE
 	private SGSolverCallResult prCallSGSolverCLI(String model, String evidenceQuery) throws Exception {
-		
-		String tempPagedModelContainer = PagedModelContainer.toInternalContainerRepresentation(ModelLanguage.HOGMv1, 
+
+		String tempPagedModelContainer = PagedModelContainer.toInternalContainerRepresentation(ModelLanguage.HOGMv1,
 				Arrays.asList(new Pair<String, List<String>>(model, Arrays.asList(evidenceQuery))));
-		
-		File tempInput = File.createTempFile("sgsolver", PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION, getConfiguration().getWorkingDirectory());
+
+		File tempInput = File.createTempFile("sgsolver", PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION,
+				getConfiguration().getWorkingDirectory());
 		Files.write(tempInput.toPath(), tempPagedModelContainer.getBytes());
 		//
 		File tempSTDERR = File.createTempFile("sgsolver", ".stderr", getConfiguration().getWorkingDirectory());
 		File tempSTDOUT = File.createTempFile("sgsolver", ".stdout", getConfiguration().getWorkingDirectory());
-		
+
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(getConfiguration().getWorkingDirectory());
-// TODO - add option to PRAiSE to indicate a timeout.		
-		processBuilder.command("java", "-classpath", System.getProperty("java.class.path"), 
-				"-Xms"+getConfiguration().getTotalMemoryLimitInMegabytesPerSolveAttempt()+"M",      
-				"-Xmx"+getConfiguration().getTotalMemoryLimitInMegabytesPerSolveAttempt()+"M",   
-				PRAiSE.class.getName(),
-				tempInput.getAbsolutePath()
-				);
+		// TODO - add option to PRAiSE to indicate a timeout.
+		processBuilder.command("java", "-classpath", System.getProperty("java.class.path"),
+				"-Xms" + getConfiguration().getTotalMemoryLimitInMegabytesPerSolveAttempt() + "M",
+				"-Xmx" + getConfiguration().getTotalMemoryLimitInMegabytesPerSolveAttempt() + "M",
+				PRAiSE.class.getName(), tempInput.getAbsolutePath());
 		processBuilder.redirectError(ProcessBuilder.Redirect.to(tempSTDERR));
 		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(tempSTDOUT));
-		
+
 		long sgSolverStart = System.currentTimeMillis();
 		Process sgSolverProcess = processBuilder.start();
-		if (!sgSolverProcess.waitFor(getConfiguration().getTotalCPURuntimeLimitSecondsPerSolveAttempt()+5, TimeUnit.SECONDS)) {
+		if (!sgSolverProcess.waitFor(getConfiguration().getTotalCPURuntimeLimitSecondsPerSolveAttempt() + 5,
+				TimeUnit.SECONDS)) {
 			// waiting time elapsed
 			sgSolverProcess.destroyForcibly();
 		}
 		long sgSolverEnd = System.currentTimeMillis();
-		
+
 		List<String> sgsolverOutputs = Files.readAllLines(tempSTDOUT.toPath(), StandardCharsets.UTF_8);
-		
+
 		tempInput.delete();
 		//
 		tempSTDOUT.delete();
-		tempSTDERR.delete();	
-		
+		tempSTDERR.delete();
+
 		SGSolverCallResult result = new SGSolverCallResult();
-		
+
 		result.sgSolverProcessTookMS = sgSolverEnd - sgSolverStart;
-		result.resultExpression      = sgsolverOutputs.stream().filter(line -> line.startsWith(PRAiSE.RESULT_PREFIX)).findFirst().orElse(null);
+		result.resultExpression = sgsolverOutputs.stream().filter(line -> line.startsWith(PRAiSE.RESULT_PREFIX))
+				.findFirst().orElse(null);
 		if (result.resultExpression != null) {
 			result.resultExpression = result.resultExpression.substring(PRAiSE.RESULT_PREFIX.length());
-		}
-		else {
+		} else {
 			throw new Error("Error launching java process for SGSolver:\n" + sgsolverOutputs);
 		}
-		
+
 		return result;
 	}
-	
+
+	private Rational getRationalValue(Expression expression) {
+		Rational result = null;
+
+		if (Expressions.isNumber(expression)) {
+			result = expression.rationalValue();
+		}
+		// Result may be in exact fractional form
+		else if (Expressions.isFunctionApplicationWithArguments(expression)
+				&& expression.hasFunctor(FunctorConstants.DIVISION) && expression.numberOfArguments() == 2
+				&& Expressions.isNumber(expression.get(0)) && Expressions.isNumber(expression.get(1))) {
+			result = expression.get(0).rationalValue().divide(expression.get(1).rationalValue());
+		}
+
+		return result;
+	}
+
 	class SGSolverCallResult {
-	    public long sgSolverProcessTookMS;
+		public long sgSolverProcessTookMS;
 		public String resultExpression;
 	}
 }
