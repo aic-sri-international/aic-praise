@@ -46,7 +46,6 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.lang.ModelLanguage;
-import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
@@ -60,16 +59,18 @@ import com.sri.ai.util.Util;
  *
  */
 @Beta
-public abstract class AbstractHOGMv1_to_Target_Translator implements Translator {
+public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTranslator {
 	//
 	// START-Translator
 	@Override
 	public ModelLanguage getSource() {
 		return ModelLanguage.HOGMv1;
 	}
+	// END-Translator
+	//
 	
 	@Override
-	public void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
+	protected void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
 		//
 		// 1. Get the HOGM Model Definition and Parse It
 		String hogmv1Model = Util.readAll(inputModelReaders[0]);
@@ -87,8 +88,6 @@ public abstract class AbstractHOGMv1_to_Target_Translator implements Translator 
 		
 		translate(inputIdentifier, factorsAndTypes, evidence, translatedOutputs);
 	}
-	// END-Translator
-	//
 	
 	protected abstract void translate(String identifier, FactorsAndTypes hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception;
 }

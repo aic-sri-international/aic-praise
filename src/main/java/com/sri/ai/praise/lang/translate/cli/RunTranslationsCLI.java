@@ -46,6 +46,7 @@ import com.google.common.base.Stopwatch;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.lang.translate.TranslatorFactory;
+import com.sri.ai.praise.lang.translate.TranslatorOptions;
 import com.sri.ai.praise.lang.translate.util.InputModelReaders;
 import com.sri.ai.praise.lang.translate.util.TranslatedOutputs;
 
@@ -93,7 +94,7 @@ public class RunTranslationsCLI {
 					 TranslatedOutputs translatedOutputs = new TranslatedOutputs(translator, sourceModelFile, sourceModelFileExtension)
 					 ) {
 					
-					translator.translate(sourceModelFileNameWithNoExtension, inputModelReaders.readers, translatedOutputs.writers);
+					translator.translate(sourceModelFileNameWithNoExtension, inputModelReaders.readers, translatedOutputs.writers, new TranslatorOptions());
 				}
 				catch (Exception ex) {
 					System.err.println("Error during translation");

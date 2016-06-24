@@ -42,7 +42,6 @@ import java.io.Reader;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lang.ModelLanguage;
-import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.model.v1.imports.uai.UAIEvidenceReader;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
@@ -54,7 +53,7 @@ import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
  *
  */
 @Beta
-public abstract class AbstractUAI_to_Target_Translator implements Translator {
+public abstract class AbstractUAI_to_Target_Translator extends AbstractTranslator {
 	public static final String[] INPUT_FILE_EXTENSIONS = new String[] {
 			ModelLanguage.UAI.getDefaultFileExtension(),
 			ModelLanguage.UAI.getDefaultFileExtension()+".evid"}; // The associated evidence file (must exist as expected by UAI propositional solvers)
@@ -74,10 +73,12 @@ public abstract class AbstractUAI_to_Target_Translator implements Translator {
 	@Override
 	public String[] getInputFileExtensions() {
 		return INPUT_FILE_EXTENSIONS;
-	}	
+	}		
+	// END-Translator
+	//
 	
 	@Override
-	public void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
+	protected void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
 		Reader uaiModelReader    = inputModelReaders[0];
 		Reader uaiEvidenceReader = inputModelReaders[1];
 		
@@ -96,9 +97,6 @@ public abstract class AbstractUAI_to_Target_Translator implements Translator {
 		
 		translate(inputIdentifier, uaiModel, translatedOutputs);
 	}
-	
-	// END-Translator
-	//
 	
 	protected abstract void translate(String inputIdentifier, UAIModel uaiModel, PrintWriter[] translatedOutputs) throws Exception;
 }

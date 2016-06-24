@@ -48,6 +48,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.lang.translate.TranslatorFactory;
+import com.sri.ai.praise.lang.translate.TranslatorOptions;
 import com.sri.ai.praise.lang.translate.util.InputModelReaders;
 import com.sri.ai.praise.lang.translate.util.TranslatedOutputs;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
@@ -103,7 +104,7 @@ public class CompareSGSolverToUAISolver {
 			Stopwatch translateStopWatch = Stopwatch.createStarted();
 			try (InputModelReaders inputModelReaders = new InputModelReaders(hogmv1ToUAITranslator, sourceModelFile, sourceModelFileExtension);
 				 TranslatedOutputs translatedOutputs = new TranslatedOutputs(hogmv1ToUAITranslator, sourceModelFile, sourceModelFileExtension)) {
-				hogmv1ToUAITranslator.translate(sourceModelFileNameWithNoExtension, inputModelReaders.readers, translatedOutputs.writers);
+				hogmv1ToUAITranslator.translate(sourceModelFileNameWithNoExtension, inputModelReaders.readers, translatedOutputs.writers, new TranslatorOptions());
 			}
 			catch (Exception ex) {
 				System.err.println("Error during translation");

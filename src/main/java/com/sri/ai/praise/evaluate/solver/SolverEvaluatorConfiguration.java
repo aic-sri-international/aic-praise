@@ -40,6 +40,8 @@ package com.sri.ai.praise.evaluate.solver;
 import java.io.File;
 import java.util.Map;
 
+import com.sri.ai.praise.lang.translate.TranslatorOptions;
+
 /**
  * Configuration information for a solver evaluator.
  * 
@@ -87,5 +89,9 @@ public class SolverEvaluatorConfiguration {
 	
 	public void setWorkingDirectory(File workingDirectory) {
 		this.workingDirectory = workingDirectory;
+	}
+	
+	public TranslatorOptions getTranslatorOptions() {
+		return new TranslatorOptions(isCacheTranslations(), getWorkingDirectory());
 	}
 }

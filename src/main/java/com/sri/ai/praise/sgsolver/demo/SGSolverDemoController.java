@@ -85,6 +85,7 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.helper.SyntaxTrees;
 import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.lang.translate.TranslatorOptions;
 import com.sri.ai.praise.lang.translate.impl.HOGMv1_to_UAI_Translator;
 import com.sri.ai.praise.lang.translate.impl.UAI_to_HOGMv1_Using_Equalities_Translator;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
@@ -453,7 +454,8 @@ public class SGSolverDemoController {
 				UAI_to_HOGMv1_Using_Equalities_Translator translator = new UAI_to_HOGMv1_Using_Equalities_Translator();
 				translator.translate(uaiModelFile.getName(), 
 						new Reader[] {uaiModelReader, uaiEvidenceReader}, 
-						new PrintWriter[] {hogmPrintWriter});
+						new PrintWriter[] {hogmPrintWriter}, 
+						new TranslatorOptions());
 				
 				String hogmModel = hogmWriter.toString();
 			
@@ -485,7 +487,8 @@ public class SGSolverDemoController {
 	    				HOGMv1_to_UAI_Translator translator = new HOGMv1_to_UAI_Translator();
 	    				translator.translate(uaiModelFile.getName(), 
 	    						new Reader[] {new StringReader(modelPage.getCurrentPageContents())}, 
-	    						new PrintWriter[] {uaiModelWriter, uaiEvidenceWriter});
+	    						new PrintWriter[] {uaiModelWriter, uaiEvidenceWriter},
+	    						new TranslatorOptions());
 	    			}
 	    			catch (Throwable th) {
 	    				FXUtil.exception(th);

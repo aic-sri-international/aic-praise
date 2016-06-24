@@ -43,9 +43,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -126,45 +123,14 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		//
 		File tempSTDERR = File.createTempFile("vec", ".stderr", getConfiguration().getWorkingDirectory());
 		File tempSTDOUT = File.createTempFile("vec", ".stdout", getConfiguration().getWorkingDirectory());
-		
-		boolean translationRequired = true;
-// TODO - the translator should really handle caching but will need to give it working directory and whether to cache or not information.
-//        TBD best way to do this.
-		File cachedUAI = null, cachedEvid = null;
-		if (getConfiguration().isCacheTranslations()) {
-			String cacheIdentifier = computeCacheIdentifier(
-					inputToUAITranslator.getSource().getCode(), 
-					inputToUAITranslator.getTarget().getCode(),
-					modelQueryIdentifier);
-			
-			cachedUAI  = new File(getConfiguration().getWorkingDirectory(), "vec-"+cacheIdentifier+"-cached.uai");
-			cachedEvid = new File(getConfiguration().getWorkingDirectory(), "vec-"+cacheIdentifier+"-cached.uai.evid"); 
-			if (cachedUAI.isFile() && cachedEvid.isFile()) {
-				tempUAI.delete();
-				tempEvid.delete();
-				Files.copy(cachedUAI.toPath(), tempUAI.toPath());
-				Files.copy(cachedEvid.toPath(), tempEvid.toPath());
-				translationRequired = false;
-				// Don't want to re-cache
-				cachedUAI = null; cachedEvid = null;
-			}
-		}
-		
-		if (translationRequired) {
-			PrintWriter pwUAIModel    = new PrintWriter(tempUAI);
-			PrintWriter pwUAIEvidence = new PrintWriter(tempEvid);
-			inputToUAITranslator.translate(identifier, input, new PrintWriter[] {pwUAIModel, pwUAIEvidence});
-			pwUAIModel.flush();
-			pwUAIEvidence.flush();
-			pwUAIModel.close();
-			pwUAIEvidence.close();
-			
-			if (cachedUAI != null && cachedEvid != null) {
-				// Ensure the translation is cached
-				Files.copy(tempUAI.toPath(), cachedUAI.toPath());
-				Files.copy(tempEvid.toPath(), cachedEvid.toPath());
-			}
-		}
+	
+		PrintWriter pwUAIModel    = new PrintWriter(tempUAI);
+		PrintWriter pwUAIEvidence = new PrintWriter(tempEvid);
+		inputToUAITranslator.translate(identifier, input, new PrintWriter[] {pwUAIModel, pwUAIEvidence}, getConfiguration().getTranslatorOptions());
+		pwUAIModel.flush();
+		pwUAIEvidence.flush();
+		pwUAIModel.close();
+		pwUAIEvidence.close();			
 		
 		long translationEnd = System.currentTimeMillis();
 		
@@ -205,22 +171,6 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 			result.resultLog10 = Double.NaN;
 		}
 		
-		return result;
-	}
-	
-	private String computeCacheIdentifier(String... identifyingInputs) {
-		String result;
-		try {
-			MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-			for (int i = 0; i < identifyingInputs.length; i++) {
-				messageDigest.update(identifyingInputs[i].getBytes());
-			}
-			// NOTE: Use replace calls to ensure only legal filenames are generated from the BASE64 alphabet
-			result = Base64.getEncoder().encodeToString(messageDigest.digest()).replace('+', '-').replace('/', '_');
-		}
-		catch (NoSuchAlgorithmException nsae) {
-			throw new RuntimeException("Unexpected exception", nsae);
-		}
 		return result;
 	}
 	

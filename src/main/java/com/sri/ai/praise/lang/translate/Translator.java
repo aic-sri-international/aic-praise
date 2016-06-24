@@ -134,10 +134,12 @@ public interface Translator {
 	 *        the readers for the input model definitions.
 	 * @param translatedOutputs
 	 *        the outputs to be used for the translated model.
+	 * @param options
+	 *        options to be passed to the translator.       
 	 * @throws Exception
 	 *        exceptions handling to be performed outside of the translator.
 	 */
-	void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception;
+	void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs, TranslatorOptions options) throws Exception;
 	
 	/**
 	 * Utility routine that based on the file name convention for models will return an extension neutral model name
