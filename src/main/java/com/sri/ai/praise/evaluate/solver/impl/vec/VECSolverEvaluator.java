@@ -46,12 +46,12 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
 import com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.lang.translate.TranslatorFactory;
-import com.sri.ai.util.math.Rational;
 
 /**
  * Wrapper around Vibhav's UAI 2014 Solver, available from:<br>
@@ -102,7 +102,7 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		SolverEvaluatorProbabilityEvidenceResult result = new SolverEvaluatorProbabilityEvidenceResult(
 					Math.max(partitionResult.translationTookMS, evidenceResult.translationTookMS),
 					Math.max(partitionResult.vecProcessTookMS, evidenceResult.vecProcessTookMS),
-					probabilityResult.isNaN() ? null : new Rational(probabilityResult)
+					probabilityResult.isNaN() ? null : Expressions.makeSymbol(probabilityResult)
 				);
 		
 		return result;

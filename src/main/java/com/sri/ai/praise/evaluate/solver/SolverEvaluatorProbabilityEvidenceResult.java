@@ -37,19 +37,19 @@
  */
 package com.sri.ai.praise.evaluate.solver;
 
-import com.sri.ai.util.math.Rational;
+import com.sri.ai.expresso.api.Expression;
 
 public class SolverEvaluatorProbabilityEvidenceResult extends SolverEvaluatorResult {
-	private Rational probabilityOfEvidence;
+	private Expression probabilityOfEvidence;
 	
 	public SolverEvaluatorProbabilityEvidenceResult(
 			long totalTranslationTimeInMilliseconds, long totalInferenceTimeInMilliseconds, 
-			Rational probabilityOfEvidence) {
+			Expression probabilityOfEvidence) {
 		super(totalTranslationTimeInMilliseconds, totalInferenceTimeInMilliseconds);
 		this.probabilityOfEvidence = probabilityOfEvidence;
 	}
 	
-	public Rational getProbabilityOfEvidence() {
+	public Expression getProbabilityOfEvidence() {
 		return probabilityOfEvidence;
 	}
 }

@@ -46,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
@@ -55,7 +54,6 @@ import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.praise.sgsolver.cli.PRAiSE;
 import com.sri.ai.util.base.Pair;
-import com.sri.ai.util.math.Rational;
 
 public class SGSolverEvaluator extends AbstractSolverEvaluator {
 
@@ -80,30 +78,28 @@ public class SGSolverEvaluator extends AbstractSolverEvaluator {
 
 		SGSolverCallResult prResult = prCallSGSolverCLI(model, evidenceQuery);
 
-		Rational probabilityEvidence = null; // NOTE: null indicates failure to
-												// solve/compute.
+		Expression probabilityEvidence = null;	
 		if (prResult.resultExpression != null) {
 			Expression queryExpr = Expressions.parse(evidenceQuery);
 			Expression resultExpr = Expressions.parse(prResult.resultExpression);
+			// Simplify if possible
 			if (IfThenElse.isIfThenElse(resultExpr)) {
 				Expression condition = IfThenElse.condition(resultExpr);
 				if (condition.equals(queryExpr)) {
-					probabilityEvidence = IfThenElse.thenBranch(resultExpr).rationalValue();
+					probabilityEvidence = IfThenElse.thenBranch(resultExpr);
 				} else if (Not.isNegation(condition) && condition.get(0).equals(queryExpr)) {
-					probabilityEvidence = IfThenElse.elseBranch(resultExpr).rationalValue();
+					probabilityEvidence = IfThenElse.elseBranch(resultExpr);
 				}
 			} else if (resultExpr.equals(queryExpr)) {
-				probabilityEvidence = Rational.ONE;
+				probabilityEvidence = Expressions.ONE;
 			} else if (Not.isNegation(resultExpr)) {
 				if (resultExpr.get(0).equals(queryExpr)) {
-					probabilityEvidence = Rational.ZERO;
+					probabilityEvidence = Expressions.ZERO;
 				}
-			} else {
-				probabilityEvidence = getRationalValue(resultExpr);
 			}
-			
+			// If unable to simplify just return the result as computed (i.e. likely symbolic).
 			if (probabilityEvidence == null) {
-				throw new UnsupportedOperationException("Unable to extract result: " + resultExpr);
+				probabilityEvidence = resultExpr;
 			}
 		}
 
@@ -161,22 +157,6 @@ public class SGSolverEvaluator extends AbstractSolverEvaluator {
 			result.resultExpression = result.resultExpression.substring(PRAiSE.RESULT_PREFIX.length());
 		} else {
 			throw new Error("Error launching java process for SGSolver:\n" + sgsolverOutputs);
-		}
-
-		return result;
-	}
-
-	private Rational getRationalValue(Expression expression) {
-		Rational result = null;
-
-		if (Expressions.isNumber(expression)) {
-			result = expression.rationalValue();
-		}
-		// Result may be in exact fractional form
-		else if (Expressions.isFunctionApplicationWithArguments(expression)
-				&& expression.hasFunctor(FunctorConstants.DIVISION) && expression.numberOfArguments() == 2
-				&& Expressions.isNumber(expression.get(0)) && Expressions.isNumber(expression.get(1))) {
-			result = expression.get(0).rationalValue().divide(expression.get(1).rationalValue());
 		}
 
 		return result;

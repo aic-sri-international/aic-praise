@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluator;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration;
 import com.sri.ai.praise.evaluate.solver.SolverEvaluatorProbabilityEvidenceResult;
@@ -202,7 +203,7 @@ public class Evaluation {
 					result.failed = true;
 				}
 				else {
-					result.answer = prResult.getProbabilityOfEvidence().doubleValue();
+					result.answer = prResult.getProbabilityOfEvidence();
 				}
 			}
 			else {
@@ -249,7 +250,7 @@ public class Evaluation {
 	}
 	
 	class SolverCallResult {
-		double answer = -1;
+		Expression answer = null;
 		boolean failed = false;
 		long averageInferenceTimeInMilliseconds;
 		long averagelTranslationTimeInMilliseconds;
