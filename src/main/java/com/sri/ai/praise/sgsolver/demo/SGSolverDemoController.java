@@ -157,7 +157,7 @@ public class SGSolverDemoController {
 	@FXML private Button configureButton;
 	//
 	static IntegerProperty     _displayPrecision         = new SimpleIntegerProperty(4);
-	static BooleanProperty     _isDisplayExact           = new SimpleBooleanProperty(true);
+	static BooleanProperty     _isDisplayExact           = new SimpleBooleanProperty(false);
 	static DisplayRoundingMode _displayRoundingMode      = DisplayRoundingMode.FLOOR;
 	static IntegerProperty     _displayScientificGreater = new SimpleIntegerProperty(8);
 	static IntegerProperty     _displayScientificAfter   = new SimpleIntegerProperty(6);
