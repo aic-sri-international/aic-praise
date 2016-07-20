@@ -15,7 +15,7 @@ if observedPosition - position > -1 and observedPosition - position < 1
    then -(observedPosition - position)^2 + 1
    else 0;
 
-// observed position is between 4 and 5
+// observed position is between 4 and 5; note that zero-mass events such as observedPosition = 4 will not work currently
 observedPosition > 4 and observedPosition < 5;
 
 // event of position being between 3 and 6 has probability 1; anything shorter has probability less than 1
