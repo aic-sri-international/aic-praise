@@ -61,12 +61,12 @@ import com.sri.ai.expresso.type.Categorical;
 import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.TypeContext;
-import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
+import com.sri.ai.grinder.sgdpll.api.Theory;
 import com.sri.ai.grinder.sgdpll.tester.RandomConditionalExpressionGenerator;
-import com.sri.ai.grinder.sgdpll.theory.compound.CompoundConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.equality.EqualityConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.compound.CompoundTheory;
+import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticTheory;
+import com.sri.ai.grinder.sgdpll.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.util.Util;
@@ -469,7 +469,7 @@ class RandomConditionalPotentialExpressionGenerator {
 			RandomHOGMv1Generator.TheoryTypeInequalityArgs[] inequalityTheoryArgs,
 			int depth) {
 		
-		ConstraintTheory constraintTheory = newConstraintTheory(propositionTheoryArgs, equalityTheoryArgs, inequalityTheoryArgs);
+		Theory theory = newTheory(propositionTheoryArgs, equalityTheoryArgs, inequalityTheoryArgs);
 		Map<String, Type> varToTypeMap = new LinkedHashMap<>();
 	
 		if (propositionTheoryArgs.length > 0) {
@@ -503,11 +503,11 @@ class RandomConditionalPotentialExpressionGenerator {
 			}
 		}
 		
-		constraintTheory.setVariableNamesAndTypesForTesting(varToTypeMap);
+		theory.setVariableNamesAndTypesForTesting(varToTypeMap);
 		
-		Context context = constraintTheory.makeContextWithTestingInformation();
+		Context context = theory.makeContextWithTestingInformation();
 		
-		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, constraintTheory, depth,
+		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, theory, depth,
 				() -> makeSymbol(random.nextDouble()),
 				context);
 	}
@@ -532,42 +532,42 @@ class RandomConditionalPotentialExpressionGenerator {
 		return randomConditionalGenerator.apply();
 	}
 	
-	private ConstraintTheory newConstraintTheory(
+	private Theory newTheory(
 			RandomHOGMv1Generator.TheoryTypePropositionalArgs[] propositionTheoryArgs, 
 			RandomHOGMv1Generator.TheoryTypeEqualityArgs[] equalityTheoryArgs,
 			RandomHOGMv1Generator.TheoryTypeInequalityArgs[] inequalityTheoryArgs) {
-		List<ConstraintTheory> theories = new ArrayList<>();
+		List<Theory> theories = new ArrayList<>();
 		if (propositionTheoryArgs.length > 0) {
-			theories.add(new PropositionalConstraintTheory());
+			theories.add(new PropositionalTheory());
 		}
 		if (equalityTheoryArgs.length > 0) {
-			EqualityConstraintTheory equalityConstraintTheory;
+			EqualityTheory equalityTheory;
 			if (inequalityTheoryArgs.length == 0) {
 				// first flag is 'true' because all equalities are atoms in the final theory; there is no need to check arguments type
-				equalityConstraintTheory = new EqualityConstraintTheory(true, true);
+				equalityTheory = new EqualityTheory(true, true);
 			}
 			else {
 				// 'false' because not all equalities are atoms in this final theory; need to check arguments type
-				equalityConstraintTheory = new EqualityConstraintTheory(false, true);
+				equalityTheory = new EqualityTheory(false, true);
 			}
-			theories.add(equalityConstraintTheory);
+			theories.add(equalityTheory);
 		}
 		if (inequalityTheoryArgs.length > 0) {
-			DifferenceArithmeticConstraintTheory inequalityConstraintTheory;
+			DifferenceArithmeticTheory differenceArithmeticTheory;
 			if (equalityTheoryArgs.length == 0) {
 				// first flag is 'true' because all equalities are atoms in the final theory; there is no need to check arguments type
-				inequalityConstraintTheory = new DifferenceArithmeticConstraintTheory(true, true);
+				differenceArithmeticTheory = new DifferenceArithmeticTheory(true, true);
 			}
 			else {
 				// 'false' because not all equalities are atoms in this final theory; need to check arguments type
-				inequalityConstraintTheory = new DifferenceArithmeticConstraintTheory(false, true);
+				differenceArithmeticTheory = new DifferenceArithmeticTheory(false, true);
 			}
-			theories.add(inequalityConstraintTheory);
+			theories.add(differenceArithmeticTheory);
 		}
 		
-		ConstraintTheory result;
+		Theory result;
 		if (theories.size() > 1) {
-			result = new CompoundConstraintTheory(theories.toArray(new ConstraintTheory[theories.size()]));
+			result = new CompoundTheory(theories.toArray(new Theory[theories.size()]));
 		}
 		else {
 			result = theories.get(0);

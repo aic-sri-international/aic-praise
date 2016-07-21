@@ -57,7 +57,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
+import com.sri.ai.grinder.sgdpll.api.Theory;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
@@ -385,7 +385,7 @@ public class HOGModelGrounding {
 				randomVariablesInFactor, // variables to be used
 				makeFunctionFromVariableIndexValueIndexToValue(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor, typeToValues),
 				fromVariableIndexToDomainSize,
-				inferencer.getConstraintTheory(),
+				inferencer.getTheory(),
 				true, // first time this variable is being iterated (it happens only once)
 				true, // last time this variable is being iterated (it happens only once)
 				(isFirstValue, isLastValue, value)
@@ -399,7 +399,7 @@ public class HOGModelGrounding {
 			ArrayList<Expression> variables,
 			BinaryFunction<Integer, Integer, Expression> fromVariableIndexAndValueIndexToValue,
 			Function<Integer, Integer> fromVariableIndexToDomainSize,
-			ConstraintTheory constraintTheory,
+			Theory theory,
 			boolean firstIterationForVariable,
 			boolean lastIterationForVariable,
 			TernaryProcedure<Boolean, Boolean, Expression> recordValue,
@@ -414,7 +414,7 @@ public class HOGModelGrounding {
 			boolean thisVariableIsAtItsLastValue = variableValueIndex == numberOfVariableValues - 1;
 			Expression value = fromVariableIndexAndValueIndexToValue.apply(variableIndex, variableValueIndex);
 			Expression expressionWithReplacedValue = expression.replaceAllOccurrences(variable, value, context);
-			Expression simplifiedExpression = constraintTheory.simplify(expressionWithReplacedValue, context);
+			Expression simplifiedExpression = theory.simplify(expressionWithReplacedValue, context);
 			
 			boolean expressionIsSimplifiedToConstant =
 					isLastVariable || simplifiedExpression.getSyntacticFormType().equals("Symbol");
@@ -452,7 +452,7 @@ public class HOGModelGrounding {
 						variables,
 						fromVariableIndexAndValueIndexToValue,
 						fromVariableIndexToDomainSize,
-						constraintTheory,
+						theory,
 						firstIterationForNextVariable,
 						lastIterationForNextVariable,
 						recordValue,

@@ -61,18 +61,18 @@ import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
+import com.sri.ai.grinder.sgdpll.api.Theory;
 import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
 import com.sri.ai.grinder.sgdpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.sgdpll.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpll.interpreter.SGDPLLT;
 import com.sri.ai.grinder.sgdpll.interpreter.SymbolicCommonInterpreterWithLiteralConditioning;
 import com.sri.ai.grinder.sgdpll.problemtype.SumProduct;
-import com.sri.ai.grinder.sgdpll.theory.compound.CompoundConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.equality.EqualityConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.linearrealarithmetic.LinearRealArithmeticConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.compound.CompoundTheory;
+import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticTheory;
+import com.sri.ai.grinder.sgdpll.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.sgdpll.theory.linearrealarithmetic.LinearRealArithmeticTheory;
+import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalTheory;
 import com.sri.ai.util.Util;
 
 /**
@@ -92,7 +92,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Collection<Type> additionalTypes;
 	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
-	private ConstraintTheory constraintTheory;
+	private Theory theory;
 	private SemiRingProblemType problemType;
 	private OldStyleQuantifierEliminator solver;
 
@@ -117,14 +117,14 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @param evidence 
 	 *        an Expression representing the evidence
 	 * @param useFactorization indicates whether to use factorization (as in Variable Elimination)
-	 * @param optionalConstraintTheory the constraint theory to be used; if null, a default one is used (as of January 2016, a compound constraint theory with propositional, equalities on categorical types and difference arithmetic).
+	 * @param optionalTheory the constraint theory to be used; if null, a default one is used (as of January 2016, a compound constraint theory with propositional, equalities on categorical types and difference arithmetic).
 	 */
 	public InferenceForFactorGraphAndEvidence(
 			FactorsAndTypes factorsAndTypes,
 			boolean isBayesianNetwork,
 			Expression evidence,
 			boolean useFactorization,
-			ConstraintTheory optionalConstraintTheory) {
+			Theory optionalTheory) {
 
 		this.factorGraph       = Times.make(factorsAndTypes.getFactors());
 		this.isBayesianNetwork = isBayesianNetwork;
@@ -151,27 +151,27 @@ public class InferenceForFactorGraphAndEvidence {
 
 		problemType = new SumProduct(); // for marginalization
 
-		if (optionalConstraintTheory != null) {
-			this.constraintTheory = optionalConstraintTheory;
+		if (optionalTheory != null) {
+			this.theory = optionalTheory;
 		}
 		else {
-			this.constraintTheory =
-					new CompoundConstraintTheory(
-							new EqualityConstraintTheory(false, true),
-							new DifferenceArithmeticConstraintTheory(false, true),
-							new LinearRealArithmeticConstraintTheory(false, true),
-							new PropositionalConstraintTheory());
+			this.theory =
+					new CompoundTheory(
+							new EqualityTheory(false, true),
+							new DifferenceArithmeticTheory(false, true),
+							new LinearRealArithmeticTheory(false, true),
+							new PropositionalTheory());
 		}
 		
-		this.additionalTypes = new LinkedList<Type>(constraintTheory.getNativeTypes()); // add needed types that may not be the type of any variable
+		this.additionalTypes = new LinkedList<Type>(theory.getNativeTypes()); // add needed types that may not be the type of any variable
 		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
 		
-		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(constraintTheory);
+		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(theory);
 		// TODO: since we are using the top simplifier of the simplifier above,
 		// the "simplify under constraint" setting is irrelevant.
 		// The whole functionality should be eliminated if it is not being used elsewhere.
 		if (useFactorization) {
-			solver = new SGVET(simplifier.getTopSimplifier(), problemType, constraintTheory);
+			solver = new SGVET(simplifier.getTopSimplifier(), problemType, theory);
 		}
 		else {
 			solver = new SGDPLLT(simplifier.getTopSimplifier(), problemType);
@@ -180,8 +180,8 @@ public class InferenceForFactorGraphAndEvidence {
 		evidenceProbability = null;
 	}
 	
-	public ConstraintTheory getConstraintTheory() {
-		return constraintTheory;
+	public Theory getTheory() {
+		return theory;
 	}
 
 	/**
@@ -230,7 +230,7 @@ public class InferenceForFactorGraphAndEvidence {
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (evidenceProbability == null) {
-				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
+				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 			}
 
 			marginal = Division.make(unnormalizedMarginal, evidenceProbability); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
@@ -252,7 +252,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression sum(Collection<Expression> indices, Expression expression) {
-		return solver.solve(expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
+		return solver.solve(expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 
 	/**
@@ -261,7 +261,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
-		return solver.solve(expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
+		return solver.solve(expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 
 	/**
@@ -284,7 +284,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression simplify(Expression expression, Context context) {
-		Expression result = constraintTheory.simplify(expression, context);
+		Expression result = theory.simplify(expression, context);
 		return result;
 	}
 
@@ -293,6 +293,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Context makeContextWithTypeInformation() {
-		return GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, constraintTheory);
+		return GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 }

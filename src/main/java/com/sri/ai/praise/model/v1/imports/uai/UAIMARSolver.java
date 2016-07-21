@@ -69,12 +69,12 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
-import com.sri.ai.grinder.sgdpll.api.ConstraintTheory;
+import com.sri.ai.grinder.sgdpll.api.Theory;
 import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
-import com.sri.ai.grinder.sgdpll.theory.compound.CompoundConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.equality.EqualityConstraintTheory;
-import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalConstraintTheory;
+import com.sri.ai.grinder.sgdpll.theory.compound.CompoundTheory;
+import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticTheory;
+import com.sri.ai.grinder.sgdpll.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
@@ -106,18 +106,18 @@ public class UAIMARSolver {
 		}
 		int maxSolverTimeInSeconds = Integer.parseInt(args[2]);
 		
-		ConstraintTheory constraintTheory;
+		Theory theory;
 		if (args[3].equals("equalities")) {
-			constraintTheory = 
-					new CompoundConstraintTheory(
-							new PropositionalConstraintTheory(),
-							new EqualityConstraintTheory(true, true));
+			theory = 
+					new CompoundTheory(
+							new PropositionalTheory(),
+							new EqualityTheory(true, true));
 		}
 		else if (args[3].equals("difference_arithmetic")) {
-			constraintTheory = 
-					new CompoundConstraintTheory(
-							new PropositionalConstraintTheory(),
-							new DifferenceArithmeticConstraintTheory(true, true));
+			theory = 
+					new CompoundTheory(
+							new PropositionalTheory(),
+							new DifferenceArithmeticTheory(true, true));
 		}
 		else {
 			throw new IllegalArgumentException("4-th argument must be either 'equalities' or 'difference_arithmetic'");
@@ -153,7 +153,7 @@ public class UAIMARSolver {
 		models.stream().forEach(model -> {
 			System.out.println("Starting to Solve: "+modelToFile.get(model).getName()+" ("+cnt.getAndAdd(1)+" of "+models.size()+")");
 			long start = System.currentTimeMillis();
-			boolean solved = solve(model, model.getEvidence(), model.getMARSolution(), maxSolverTimeInSeconds, constraintTheory);
+			boolean solved = solve(model, model.getEvidence(), model.getMARSolution(), maxSolverTimeInSeconds, theory);
 			long took = (System.currentTimeMillis() - start);
 			System.out.println("---- Took "+took+"ms. solved="+solved);
 			
@@ -168,11 +168,11 @@ public class UAIMARSolver {
 		System.out.println("#models unsolved="+modelSolvedStatus.values().stream().filter(status -> status == false).count());
 	}
 	
-	public static boolean solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, int maxSolverTimeInSeconds, ConstraintTheory constraintTheory) {
+	public static boolean solve(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, int maxSolverTimeInSeconds, Theory theory) {
 		boolean result = false;
 		
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		SolverTask      solver   = new SolverTask(model, evidence, solution, constraintTheory);
+		SolverTask      solver   = new SolverTask(model, evidence, solution, theory);
 		Future<Boolean> future   = executor.submit(solver);  
 		
 		try {
@@ -211,17 +211,17 @@ public class UAIMARSolver {
 		private GraphicalNetwork           model;
 		private Map<Integer, Integer>      evidence;
 		private Map<Integer, List<Double>> solution;
-		private ConstraintTheory           constraintTheory;
+		private Theory           theory;
 		//
 		private InferenceForFactorGraphAndEvidence inferencer;
 		boolean interrupted = false;
 		private OldStyleQuantifierEliminator genericTableSolver = null;
 		
-		SolverTask(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, ConstraintTheory constraintTheory) {
+		SolverTask(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, Theory theory) {
 			this.model    = model;
 			this.evidence = evidence;
 			this.solution = solution;
-			this.constraintTheory = constraintTheory;
+			this.theory = theory;
 		}
 		
 		public OldStyleQuantifierEliminator checkInterruption(OldStyleQuantifierEliminator solver) {
@@ -343,7 +343,7 @@ public class UAIMARSolver {
 				return false;
 			}
 			
-			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, evidenceExpr, true, constraintTheory);
+			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, evidenceExpr, true, theory);
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
