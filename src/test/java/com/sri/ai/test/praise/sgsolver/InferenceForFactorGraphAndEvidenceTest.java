@@ -355,7 +355,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 						isBayesianNetwork ,
 						evidence,
 						exploitFactorization,
-						null /* default constraint theory */);
+						null /* default theory */);
 
 		Expression queryExpression;
 		Expression marginal;

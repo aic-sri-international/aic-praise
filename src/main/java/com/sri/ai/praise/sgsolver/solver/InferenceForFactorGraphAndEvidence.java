@@ -117,7 +117,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @param evidence 
 	 *        an Expression representing the evidence
 	 * @param useFactorization indicates whether to use factorization (as in Variable Elimination)
-	 * @param optionalTheory the constraint theory to be used; if null, a default one is used (as of January 2016, a compound constraint theory with propositional, equalities on categorical types and difference arithmetic).
+	 * @param optionalTheory the theory to be used; if null, a default one is used (as of January 2016, a compound theory with propositional, equalities on categorical types and difference arithmetic).
 	 */
 	public InferenceForFactorGraphAndEvidence(
 			FactorsAndTypes factorsAndTypes,
