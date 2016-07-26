@@ -61,12 +61,11 @@ import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.grinder.sgdpll.api.Theory;
 import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
 import com.sri.ai.grinder.sgdpll.api.SemiRingProblemType;
+import com.sri.ai.grinder.sgdpll.api.Theory;
 import com.sri.ai.grinder.sgdpll.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpll.interpreter.SGDPLLT;
-import com.sri.ai.grinder.sgdpll.interpreter.SymbolicCommonInterpreterWithLiteralConditioning;
 import com.sri.ai.grinder.sgdpll.problemtype.SumProduct;
 import com.sri.ai.grinder.sgdpll.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticTheory;
@@ -166,15 +165,11 @@ public class InferenceForFactorGraphAndEvidence {
 		this.additionalTypes = new LinkedList<Type>(theory.getNativeTypes()); // add needed types that may not be the type of any variable
 		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
 		
-		SymbolicCommonInterpreterWithLiteralConditioning simplifier = new SymbolicCommonInterpreterWithLiteralConditioning(theory);
-		// TODO: since we are using the top simplifier of the simplifier above,
-		// the "simplify under constraint" setting is irrelevant.
-		// The whole functionality should be eliminated if it is not being used elsewhere.
 		if (useFactorization) {
-			solver = new SGVET(simplifier.getTopSimplifier(), problemType, theory);
+			solver = new SGVET(problemType, theory);
 		}
 		else {
-			solver = new SGDPLLT(simplifier.getTopSimplifier(), problemType);
+			solver = new SGDPLLT(theory.getTopSimplifier(), problemType);
 		}
 
 		evidenceProbability = null;
