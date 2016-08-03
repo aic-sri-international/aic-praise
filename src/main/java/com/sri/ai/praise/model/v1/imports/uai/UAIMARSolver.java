@@ -70,7 +70,7 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.sgdpll.api.Theory;
-import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
+import com.sri.ai.grinder.sgdpll.api.QuantifierEliminator;
 import com.sri.ai.grinder.sgdpll.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.sgdpll.theory.equality.EqualityTheory;
@@ -215,7 +215,7 @@ public class UAIMARSolver {
 		//
 		private InferenceForFactorGraphAndEvidence inferencer;
 		boolean interrupted = false;
-		private OldStyleQuantifierEliminator genericTableSolver = null;
+		private QuantifierEliminator genericTableSolver = null;
 		
 		SolverTask(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, Theory theory) {
 			this.model    = model;
@@ -224,7 +224,7 @@ public class UAIMARSolver {
 			this.theory = theory;
 		}
 		
-		public OldStyleQuantifierEliminator checkInterruption(OldStyleQuantifierEliminator solver) {
+		public QuantifierEliminator checkInterruption(QuantifierEliminator solver) {
 			this.genericTableSolver = solver;
 			if (interrupted) {
 				interrupt();

@@ -61,7 +61,7 @@ import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
+import com.sri.ai.grinder.sgdpll.api.QuantifierEliminator;
 import com.sri.ai.grinder.sgdpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.sgdpll.api.Theory;
 import com.sri.ai.grinder.sgdpll.core.solver.SGVET;
@@ -93,7 +93,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private Theory theory;
 	private SemiRingProblemType problemType;
-	private OldStyleQuantifierEliminator solver;
+	private QuantifierEliminator solver;
 
 	public Expression getEvidenceProbability() {
 		return evidenceProbability;

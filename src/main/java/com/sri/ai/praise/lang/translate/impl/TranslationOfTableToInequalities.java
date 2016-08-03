@@ -66,7 +66,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
+import com.sri.ai.grinder.sgdpll.api.QuantifierEliminator;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIUtil;
 import com.sri.ai.util.base.Pair;
@@ -324,7 +324,7 @@ public class TranslationOfTableToInequalities {
 	 * @return
 	 */
 	public static Expression constructGenericTableExpressionUsingInequalities(
-			FunctionTable functionTable, Function<OldStyleQuantifierEliminator, OldStyleQuantifierEliminator> solverListener) {
+			FunctionTable functionTable, Function<QuantifierEliminator, QuantifierEliminator> solverListener) {
 	
 		// the strategy in this method is the following:
 		// we collect all the contiguous indices sub-sets of the function table sharing their function value.

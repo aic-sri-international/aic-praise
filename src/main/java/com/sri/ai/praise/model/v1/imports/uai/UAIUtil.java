@@ -53,7 +53,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.TypeContext;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
-import com.sri.ai.grinder.sgdpll.api.OldStyleQuantifierEliminator;
+import com.sri.ai.grinder.sgdpll.api.QuantifierEliminator;
 import com.sri.ai.grinder.sgdpll.application.Compilation;
 import com.sri.ai.grinder.sgdpll.theory.equality.EqualityTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
@@ -100,7 +100,7 @@ public class UAIUtil {
 	 * @param solverListener if not null, invoked on solver used for compilation, before and after compilation is performed; returned solver from "before" invocation is used (it may be the same one used as argument, of course).
 	 * @return
 	 */
-	public static Expression constructGenericTableExpressionUsingEqualities(FunctionTable functionTable, Function<OldStyleQuantifierEliminator, OldStyleQuantifierEliminator> solverListener) {
+	public static Expression constructGenericTableExpressionUsingEqualities(FunctionTable functionTable, Function<QuantifierEliminator, QuantifierEliminator> solverListener) {
 		StringBuilder table = new StringBuilder();
 		CartesianProductEnumeration<Integer> cartesianProduct = new CartesianProductEnumeration<>(cardinalityValues(functionTable));
 		int counter = 0;
