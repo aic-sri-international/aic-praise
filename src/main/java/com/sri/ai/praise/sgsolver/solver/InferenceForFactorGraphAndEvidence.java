@@ -169,7 +169,7 @@ public class InferenceForFactorGraphAndEvidence {
 			solver = new SGVET(problemType, theory);
 		}
 		else {
-			solver = new SGDPLLT(theory.getTopSimplifier(), problemType);
+			solver = new SGDPLLT(problemType, theory.getTopSimplifier());
 		}
 
 		evidenceProbability = null;
