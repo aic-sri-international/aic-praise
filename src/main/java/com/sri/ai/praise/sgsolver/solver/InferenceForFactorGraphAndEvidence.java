@@ -62,9 +62,9 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.sgdpll.api.QuantifierEliminator;
-import com.sri.ai.grinder.sgdpll.api.SemiRingProblemType;
 import com.sri.ai.grinder.sgdpll.api.Theory;
 import com.sri.ai.grinder.sgdpll.core.solver.SGVET;
+import com.sri.ai.grinder.sgdpll.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.sgdpll.group.SumProduct;
 import com.sri.ai.grinder.sgdpll.interpreter.SGDPLLT;
 import com.sri.ai.grinder.sgdpll.theory.compound.CompoundTheory;
@@ -92,7 +92,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Collection<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private Theory theory;
-	private SemiRingProblemType problemType;
+	private AssociativeCommutativeSemiRing semiRing;
 	private QuantifierEliminator solver;
 
 	public Expression getEvidenceProbability() {
@@ -148,7 +148,7 @@ public class InferenceForFactorGraphAndEvidence {
 		else {
 		}
 
-		problemType = new SumProduct(); // for marginalization
+		semiRing = new SumProduct(); // for marginalization
 
 		if (optionalTheory != null) {
 			this.theory = optionalTheory;
@@ -166,10 +166,10 @@ public class InferenceForFactorGraphAndEvidence {
 		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
 		
 		if (useFactorization) {
-			solver = new SGVET(problemType, theory);
+			solver = new SGVET(semiRing, theory);
 		}
 		else {
-			solver = new SGDPLLT(problemType, theory.getTopSimplifier());
+			solver = new SGDPLLT(semiRing, theory.getTopSimplifier());
 		}
 
 		evidenceProbability = null;
