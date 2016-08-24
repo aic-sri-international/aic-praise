@@ -55,23 +55,23 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.number.Division;
-import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.grinder.sgdpll.api.Context;
-import com.sri.ai.grinder.sgdpll.api.QuantifierEliminator;
-import com.sri.ai.grinder.sgdpll.api.Theory;
-import com.sri.ai.grinder.sgdpll.core.TypeContext;
-import com.sri.ai.grinder.sgdpll.core.solver.SGVET;
-import com.sri.ai.grinder.sgdpll.group.AssociativeCommutativeSemiRing;
-import com.sri.ai.grinder.sgdpll.group.SumProduct;
-import com.sri.ai.grinder.sgdpll.interpreter.SGDPLLT;
-import com.sri.ai.grinder.sgdpll.theory.compound.CompoundTheory;
-import com.sri.ai.grinder.sgdpll.theory.differencearithmetic.DifferenceArithmeticTheory;
-import com.sri.ai.grinder.sgdpll.theory.equality.EqualityTheory;
-import com.sri.ai.grinder.sgdpll.theory.linearrealarithmetic.LinearRealArithmeticTheory;
-import com.sri.ai.grinder.sgdpll.theory.propositional.PropositionalTheory;
+import com.sri.ai.grinder.sgdpllt.api.Context;
+import com.sri.ai.grinder.sgdpllt.api.QuantifierEliminator;
+import com.sri.ai.grinder.sgdpllt.api.Theory;
+import com.sri.ai.grinder.sgdpllt.core.SGDPLLTUtil;
+import com.sri.ai.grinder.sgdpllt.core.TypeContext;
+import com.sri.ai.grinder.sgdpllt.core.solver.SGVET;
+import com.sri.ai.grinder.sgdpllt.group.AssociativeCommutativeSemiRing;
+import com.sri.ai.grinder.sgdpllt.group.SumProduct;
+import com.sri.ai.grinder.sgdpllt.interpreter.SGDPLLT;
+import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.sgdpllt.library.number.Division;
+import com.sri.ai.grinder.sgdpllt.library.number.Times;
+import com.sri.ai.grinder.sgdpllt.theory.compound.CompoundTheory;
+import com.sri.ai.grinder.sgdpllt.theory.differencearithmetic.DifferenceArithmeticTheory;
+import com.sri.ai.grinder.sgdpllt.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.sgdpllt.theory.linearrealarithmetic.LinearRealArithmeticTheory;
+import com.sri.ai.grinder.sgdpllt.theory.propositional.PropositionalTheory;
 import com.sri.ai.util.Util;
 
 /**
@@ -288,6 +288,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Context makeContextWithTypeInformation() {
-		return GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		return SGDPLLTUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 }

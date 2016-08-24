@@ -45,7 +45,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;

@@ -48,18 +48,20 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.library.Disequality;
-import com.sri.ai.grinder.library.Equality;
-import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.boole.ForAll;
-import com.sri.ai.grinder.library.boole.ThereExists;
-import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
-import com.sri.ai.grinder.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.library.set.tuple.Tuple;
+import com.sri.ai.grinder.sgdpllt.library.Disequality;
+import com.sri.ai.grinder.sgdpllt.library.Equality;
+import com.sri.ai.grinder.sgdpllt.library.FunctorConstants;
+import com.sri.ai.grinder.sgdpllt.library.boole.ForAll;
+import com.sri.ai.grinder.sgdpllt.library.boole.ThereExists;
+import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.sgdpllt.library.indexexpression.IndexExpressions;
+import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSet;
+import com.sri.ai.grinder.sgdpllt.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
 import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;

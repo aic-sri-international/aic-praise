@@ -42,7 +42,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.sgdpllt.library.FunctorConstants;
 
 @Beta
 public class HOGMModelConstants {
