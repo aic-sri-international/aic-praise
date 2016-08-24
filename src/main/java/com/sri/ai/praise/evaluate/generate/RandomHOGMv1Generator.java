@@ -61,7 +61,7 @@ import com.sri.ai.expresso.type.Categorical;
 import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.grinder.sgdpllt.api.Context;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
-import com.sri.ai.grinder.sgdpllt.core.TypeContext;
+import com.sri.ai.grinder.sgdpllt.core.TrueContext;
 import com.sri.ai.grinder.sgdpllt.tester.RandomConditionalExpressionGenerator;
 import com.sri.ai.grinder.sgdpllt.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.sgdpllt.theory.differencearithmetic.DifferenceArithmeticTheory;
@@ -357,7 +357,7 @@ public class RandomHOGMv1Generator {
 			for (int i = 0; i < genArgs.numberPotentials; i++) {		
 				Expression conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
 				// Ensure we have variables in the conditional
-				while (Expressions.freeVariables(conditional, new TypeContext()).size() == 0) {							
+				while (Expressions.freeVariables(conditional, new TrueContext()).size() == 0) {							
 					conditional = genArgs.potentialExpressionGenerator.nextPotentialExpression();
 				}
 				

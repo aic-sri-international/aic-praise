@@ -59,7 +59,7 @@ import com.sri.ai.grinder.sgdpllt.api.Context;
 import com.sri.ai.grinder.sgdpllt.api.QuantifierEliminator;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
 import com.sri.ai.grinder.sgdpllt.core.SGDPLLTUtil;
-import com.sri.ai.grinder.sgdpllt.core.TypeContext;
+import com.sri.ai.grinder.sgdpllt.core.TrueContext;
 import com.sri.ai.grinder.sgdpllt.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpllt.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.sgdpllt.group.SumProduct;
@@ -235,7 +235,7 @@ public class InferenceForFactorGraphAndEvidence {
 
 		if (queryIsCompoundExpression) {
 			// replace the query variable with the query expression
-			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new TypeContext());
+			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new TrueContext());
 		}
 
 		return marginal;

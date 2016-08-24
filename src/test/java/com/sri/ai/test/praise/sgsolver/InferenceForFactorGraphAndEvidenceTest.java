@@ -55,7 +55,7 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
-import com.sri.ai.grinder.sgdpllt.core.TypeContext;
+import com.sri.ai.grinder.sgdpllt.core.TrueContext;
 import com.sri.ai.grinder.sgdpllt.library.number.Times;
 import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
@@ -1025,7 +1025,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 				evidence,
 				useFactorization, null);
 		marginal = inferencer.solve(queryExpression);
-		TypeContext context = new TypeContext();
+		TrueContext context = new TrueContext();
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, context);
 		expected = Expressions.roundToAGivenPrecision(expected, 9, context);
 		if (expected.equals(marginal)) {

@@ -53,7 +53,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.sgdpllt.api.Context;
 import com.sri.ai.grinder.sgdpllt.api.QuantifierEliminator;
 import com.sri.ai.grinder.sgdpllt.application.Compilation;
-import com.sri.ai.grinder.sgdpllt.core.TypeContext;
+import com.sri.ai.grinder.sgdpllt.core.TrueContext;
 import com.sri.ai.grinder.sgdpllt.library.SyntacticSubstitute;
 import com.sri.ai.grinder.sgdpllt.theory.equality.EqualityTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
@@ -162,7 +162,7 @@ public class UAIUtil {
 
 	public static Expression convertGenericTableToInstance(FunctionTable functionTable, Expression genericFunctionTableExpr, List<Integer> instanceVarIdxs) {
 		Expression result = genericFunctionTableExpr;
-		Context context = new TypeContext();
+		Context context = new TrueContext();
 		for (int i = 0; i < functionTable.numberVariables(); i++) {
 			// Replace the generic variable name with the correct instance name
 			result = SyntacticSubstitute.replace(result, Expressions.makeSymbol(genericVariableName(i)), Expressions.makeSymbol(instanceVariableName(instanceVarIdxs.get(i))), context);
