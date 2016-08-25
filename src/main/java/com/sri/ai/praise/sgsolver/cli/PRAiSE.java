@@ -48,10 +48,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
+import com.sri.ai.grinder.sgdpllt.api.Theory;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -91,6 +93,10 @@ public class PRAiSE {
 	}
 	
 	public static void main(String[] args) {
+		run(args, null);
+	}
+	
+	public static void run(String[] args, Supplier<Theory> theorySupplier) {
 		try (SGSolverArgs solverArgs = getArgs(args)) {
 			List<ModelPage> hogModelsToQuery = getHOGModelsToQuery(solverArgs);
 
@@ -100,6 +106,9 @@ public class PRAiSE {
 				solverArgs.out.println("MODEL      = ");
 				solverArgs.out.println(hogModelToQuery.getModel());
 				HOGMQueryRunner queryRunner = new  HOGMQueryRunner(hogModelToQuery.getModel(), hogModelToQuery.getDefaultQueriesToRun());
+				if (theorySupplier != null) {
+					queryRunner.setOptionTheory(theorySupplier.get());
+				}
 				List<HOGMQueryResult> hogModelQueryResults = queryRunner.query();
 				hogModelQueryResults.forEach(hogModelQueryResult -> {
 					solverArgs.out.print("QUERY      = ");
@@ -117,10 +126,7 @@ public class PRAiSE {
 		}
 	}
 	
-	//
-	// PRIVATE
-	//
-	private static SGSolverArgs getArgs(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
+	public static SGSolverArgs getArgs(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
 		SGSolverArgs result = new SGSolverArgs();
 		
 		OptionParser parser = new OptionParser();		
@@ -223,6 +229,9 @@ public class PRAiSE {
 		return result;
 	}
 	
+	//
+	// PRIVATE
+	//	
 	private static List<ModelPage> getHOGModelsToQuery(SGSolverArgs solverArgs) throws IOException {
 		List<ModelPage> result = new ArrayList<>();
 		

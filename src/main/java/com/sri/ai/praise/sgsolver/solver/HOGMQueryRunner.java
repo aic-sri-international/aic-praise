@@ -49,6 +49,7 @@ import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.sgdpllt.api.Context;
+import com.sri.ai.grinder.sgdpllt.api.Theory;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.HOGModelException;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
@@ -63,6 +64,7 @@ public class HOGMQueryRunner {
 	private String        model;
 	private List<String>  queries  = new ArrayList<>();
 	private boolean       canceled = false;
+	private Theory        optionalTheory = null;
 	//
 	private InferenceForFactorGraphAndEvidence inferencer = null;
 	
@@ -73,6 +75,14 @@ public class HOGMQueryRunner {
 	public HOGMQueryRunner(String model, List<String> queries) {
 		this.model = model;
 		this.queries.addAll(queries);
+	}
+	
+	public Theory getOptionalTheory() {
+		return optionalTheory;
+	}
+	
+	public void setOptionTheory(Theory theory) {
+		this.optionalTheory = theory;
 	}
 	
 	public List<HOGMQueryResult> query() {
@@ -102,7 +112,7 @@ public class HOGMQueryRunner {
 	        		if (errors.size() == 0) {
 	        			FactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
 	        			if (!canceled) {
-			    			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true, null);
+			    			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true, getOptionalTheory());
 			    			
 			    			startQuery = System.currentTimeMillis();
 			    			Expression marginal = inferencer.solve(queryExpr); 			
