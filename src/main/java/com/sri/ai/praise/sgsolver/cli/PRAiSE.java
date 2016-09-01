@@ -117,6 +117,15 @@ public class PRAiSE {
 					solverArgs.out.println(queryRunner.simplifyAnswer(hogModelQueryResult.getResult(), hogModelQueryResult.getQueryExpression()));
 					solverArgs.out.print("TOOK       = ");
 					solverArgs.out.println(duration(hogModelQueryResult.getMillisecondsToCompute()) + "\n");
+					if (hogModelQueryResult.isErrors()) {
+						hogModelQueryResult.getErrors().forEach(error -> {
+							solverArgs.out.println("ERROR ="+error.getErrorMessage());
+							if (error.getThrowable() != null) {
+								solverArgs.out.println("THROWABLE =");
+								error.getThrowable().printStackTrace(solverArgs.out);
+							}
+						});
+					}
 				});
 			}
 		}
