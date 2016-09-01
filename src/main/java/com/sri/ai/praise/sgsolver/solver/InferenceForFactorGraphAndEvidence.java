@@ -45,6 +45,7 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.setDifference;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -140,7 +141,7 @@ public class InferenceForFactorGraphAndEvidence {
 		this.mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(factorsAndTypes.getMapFromCategoricalTypeNameToSizeString());
 
 		Set<Expression> uniquelyNamedConstants = mapIntoSet(factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
-		isUniquelyNamedConstantPredicate = e -> uniquelyNamedConstants.contains(e) || Expressions.isNumber(e) || Expressions.isBooleanSymbol(e);
+		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantPredicate(uniquelyNamedConstants);
 		
 		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
 			factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().values().stream().anyMatch(type -> type.contains("->"))) {
@@ -289,5 +290,22 @@ public class InferenceForFactorGraphAndEvidence {
 	 */
 	public Context makeContextWithTypeInformation() {
 		return SGDPLLTUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+	}
+	
+	public static class UniquelyNamedConstantPredicate implements Predicate<Expression>, Serializable {
+		private static final long serialVersionUID = 1L;
+		
+		private Set<Expression> uniquelyNamedConstants;
+		
+		public UniquelyNamedConstantPredicate(Set<Expression> uniquelyNamedConstants) {
+			this.uniquelyNamedConstants = uniquelyNamedConstants;
+		}
+		
+		@Override
+		public boolean apply(Expression e) {
+			boolean result = uniquelyNamedConstants.contains(e) || Expressions.isNumber(e) || Expressions.isBooleanSymbol(e);
+			return result;
+		}
+		
 	}
 }
