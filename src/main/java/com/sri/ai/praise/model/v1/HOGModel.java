@@ -52,6 +52,9 @@ import java.util.stream.Collectors;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
+import com.sri.ai.expresso.api.QuantifiedExpression;
+import com.sri.ai.expresso.api.QuantifiedExpressionWithABody;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.sgdpllt.library.Disequality;
 import com.sri.ai.grinder.sgdpllt.library.Equality;
@@ -60,6 +63,7 @@ import com.sri.ai.grinder.sgdpllt.library.boole.ForAll;
 import com.sri.ai.grinder.sgdpllt.library.boole.ThereExists;
 import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.sgdpllt.library.indexexpression.IndexExpressions;
+import com.sri.ai.grinder.sgdpllt.library.set.CountingFormulaEquivalentExpressions;
 import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.sgdpllt.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
@@ -375,6 +379,9 @@ public class HOGModel {
 					else if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) { // NOTE: quantifiers are not functions
 						result = HOGMSortDeclaration.IN_BUILT_BOOLEAN;
 					}
+					else if (CountingFormulaEquivalentExpressions.isCountingFormulaEquivalentExpression(expr)) { // NOTE: counting formulas are not functions which is a subset of counting formula equivalent expressions
+						result = HOGMSortDeclaration.IN_BUILT_INTEGER;
+					}
 					else if (Expressions.isNumber(expr)) {
 						if (expr.rationalValue().isInteger()) {
 							result = HOGMSortDeclaration.IN_BUILT_INTEGER;
@@ -643,14 +650,16 @@ public class HOGModel {
 				Expression                           quantifier      = quantifierWithScope.first;
 				Map<Expression, ConstantDeclaration> scopedConstants = quantifierWithScope.second;
 				
-				Expression indexExpression = ForAll.isForAll(quantifier) ? ForAll.getIndexExpression(quantifier) : ThereExists.getIndexExpression(quantifier);
-				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
-				if (getSort(indexAndType.second) == null) {
-					newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, indexAndType.second, termStatement);
-				}
+				IndexExpressionsSet indexExpressionSet = ((QuantifiedExpression)quantifier).getIndexExpressions();
+				IndexExpressions.getIndexToTypeMapWithDefaultNull(indexExpressionSet).forEach((name, type) -> {
+					HOGMSortDeclaration localSort = getSort(type);
+					if (localSort == null) {
+						newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, name, termStatement);
+					}
+				});
 				
-				Expression body = ForAll.isForAll(quantifier) ? ForAll.getBody(quantifier) : ThereExists.getBody(quantifier);
-				if (determineSortType(body, scopedConstants) != HOGMSortDeclaration.IN_BUILT_BOOLEAN) {
+				Expression body = getQuantifiedExpressionBody(quantifier);
+				if (body != null && determineSortType(body, scopedConstants) != HOGMSortDeclaration.IN_BUILT_BOOLEAN) {
 					newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, body, termStatement);
 				}
 			});			
@@ -670,17 +679,14 @@ public class HOGModel {
 			if (Expressions.isFunctionApplicationWithArguments(expr)) {
 				expr.getArguments().forEach(arg -> getRandomFunctions(arg, randomFunctionsWithScope, currentScope));
 			}
-			else if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
+			else if (isQuantifiedExpression(expr)) {
 				Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
+				quantifierScope.putAll(getQuantifiedExpressionScope(expr));
 				
-				Expression indexExpression = ForAll.isForAll(expr) ? ForAll.getIndexExpression(expr) : ThereExists.getIndexExpression(expr);
-				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
-				HOGMSortDeclaration localSort = getSort(indexAndType.second);
-				if (localSort != null) {
-					quantifierScope.put(indexAndType.first, new ConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
+				Expression bodyExpression = getQuantifiedExpressionBody(expr);
+				if (bodyExpression != null) {
+					getRandomFunctions(bodyExpression, randomFunctionsWithScope, quantifierScope);
 				}
-				Expression bodyExpression  = ForAll.isForAll(expr) ? ForAll.getBody(expr) : ThereExists.getBody(expr);
-				getRandomFunctions(bodyExpression, randomFunctionsWithScope, quantifierScope);
 			}
 		}
 		
@@ -698,17 +704,14 @@ public class HOGModel {
 			if (Expressions.isFunctionApplicationWithArguments(expr)) {
 				expr.getArguments().forEach(arg -> getConstantFunctions(arg, constantFunctionsWithScope, currentScope));
 			}
-			else if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
+			else if (isQuantifiedExpression(expr)) {
 				Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
+				quantifierScope.putAll(getQuantifiedExpressionScope(expr));
 				
-				Expression indexExpression = ForAll.isForAll(expr) ? ForAll.getIndexExpression(expr) : ThereExists.getIndexExpression(expr);
-				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
-				HOGMSortDeclaration localSort = getSort(indexAndType.second);
-				if (localSort != null) {
-					quantifierScope.put(indexAndType.first, new ConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
+				Expression bodyExpression = getQuantifiedExpressionBody(expr);
+				if (bodyExpression != null) {
+					getConstantFunctions(bodyExpression, constantFunctionsWithScope, quantifierScope);
 				}
-				Expression bodyExpression  = ForAll.isForAll(expr) ? ForAll.getBody(expr) : ThereExists.getBody(expr);
-				getConstantFunctions(bodyExpression, constantFunctionsWithScope, quantifierScope);
 			}
 		}
 
@@ -728,17 +731,14 @@ public class HOGModel {
 			if (Expressions.isFunctionApplicationWithArguments(expr)) {
 				expr.getArguments().forEach(arg -> getNonConstantRandomFunctions(arg, nonConstantRandomFunctionsWithScope, currentScope));
 			}
-			else if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
+			else if (isQuantifiedExpression(expr)) {
 				Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
+				quantifierScope.putAll(getQuantifiedExpressionScope(expr));
 				
-				Expression indexExpression = ForAll.isForAll(expr) ? ForAll.getIndexExpression(expr) : ThereExists.getIndexExpression(expr);
-				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
-				HOGMSortDeclaration localSort = getSort(indexAndType.second);
-				if (localSort != null) {
-					quantifierScope.put(indexAndType.first, new ConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
+				Expression bodyExpression = getQuantifiedExpressionBody(expr);
+				if (bodyExpression != null) {
+					getNonConstantRandomFunctions(bodyExpression, nonConstantRandomFunctionsWithScope, quantifierScope);
 				}
-				Expression bodyExpression  = ForAll.isForAll(expr) ? ForAll.getBody(expr) : ThereExists.getBody(expr);
-				getNonConstantRandomFunctions(bodyExpression, nonConstantRandomFunctionsWithScope, quantifierScope);
 			}
 		}
 		
@@ -749,33 +749,61 @@ public class HOGModel {
 		}
 		
 		void getQuantifiers(Expression expr, List<Pair<Expression, Map<Expression, ConstantDeclaration>>> quantifiersWithScope, Map<Expression, ConstantDeclaration> currentScope) {
-			if (ForAll.isForAll(expr) || ThereExists.isThereExists(expr)) {
+			if (isQuantifiedExpression(expr)) {
 				Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
-				
-				Expression indexExpression = ForAll.isForAll(expr) ? ForAll.getIndexExpression(expr) : ThereExists.getIndexExpression(expr);
-				Pair<Expression, Expression> indexAndType = IndexExpressions.getIndexAndDomain(indexExpression);
-				HOGMSortDeclaration localSort = getSort(indexAndType.second);
-				if (localSort != null) {
-					quantifierScope.put(indexAndType.first, new ConstantDeclaration(indexAndType.first, Expressions.ZERO, localSort.getName()));
-				}
+				quantifierScope.putAll(getQuantifiedExpressionScope(expr));
 				
 				quantifiersWithScope.add(new Pair<>(expr, quantifierScope));
 				
-				Expression bodyExpression  = ForAll.isForAll(expr) ? ForAll.getBody(expr) : ThereExists.getBody(expr);	
-				getQuantifiers(bodyExpression, quantifiersWithScope, quantifierScope);
+				Expression bodyExpression = getQuantifiedExpressionBody(expr);
+				if (bodyExpression != null) {
+					getQuantifiers(bodyExpression, quantifiersWithScope, quantifierScope);
+				}
 			}
 			
 			if (Expressions.isFunctionApplicationWithArguments(expr)) {
 				expr.getArguments().forEach(arg -> getQuantifiers(arg, quantifiersWithScope, currentScope));
 			}
-
+		}
+		
+		public boolean isQuantifiedExpression(Expression expression) {
+			boolean result = false;
+			
+			if (expression instanceof QuantifiedExpression) {
+				result = true;
+			}
+			
+			return result;
+		}
+		
+		public Map<Expression, ConstantDeclaration> getQuantifiedExpressionScope(Expression quantifiedExpression) {
+			Map<Expression, ConstantDeclaration> result = new LinkedHashMap<>();
+			
+			IndexExpressionsSet indexExpressionSet = ((QuantifiedExpression)quantifiedExpression).getIndexExpressions();
+			IndexExpressions.getIndexToTypeMapWithDefaultNull(indexExpressionSet).forEach((name, type) -> {
+				HOGMSortDeclaration localSort = getSort(type);
+				if (localSort != null) {
+					result.put(name, new ConstantDeclaration(name, Expressions.ZERO, localSort.getName()));
+				}
+			});
+			
+			return result;
+		}
+		
+		public Expression getQuantifiedExpressionBody(Expression quantifiedExpression) {
+			Expression result = null;
+			
+			if (quantifiedExpression instanceof QuantifiedExpressionWithABody) {
+				result = ((QuantifiedExpressionWithABody)quantifiedExpression).getBody();
+			}
+			
+			return result;
 		}
 		
 		boolean isUnknownConstant(Expression expr, Map<Expression, ConstantDeclaration> scopedConstants) {
 			boolean result = Expressions.isSymbol(expr) &&
 							!Expressions.isNumber(expr) &&
-							!ForAll.isForAll(expr) &&
-							!ThereExists.isThereExists(expr) &&
+							!isQuantifiedExpression(expr) &&
 							!scopedConstants.containsKey(expr) &&
 							!randoms.containsKey(expr) &&
 							!sorts.containsKey(expr) &&

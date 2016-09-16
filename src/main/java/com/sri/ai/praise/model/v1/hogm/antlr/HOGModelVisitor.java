@@ -64,6 +64,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultCountingFormula;
 import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.sgdpllt.library.boole.And;
@@ -268,6 +269,15 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		
 		return result; 
 	}
+ 	
+ 	// term
+ 	// | VERTICAL_BAR ( indexes+=expr (',' indexes+=expr)* )? COLON body=expr VERTICAL_BAR #countingFormula
+ 	@Override 
+ 	public Expression visitCountingFormula(HOGMParser.CountingFormulaContext ctx) { 
+ 		Expression result = new DefaultCountingFormula(expressionsList(ctx.indexes), visit(ctx.body));
+ 		
+ 		return result;
+ 	}
  	
  	// term
     // | VERTICAL_BAR constant_name VERTICAL_BAR #typeCardinality

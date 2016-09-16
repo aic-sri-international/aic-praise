@@ -600,6 +600,32 @@ public class HOGMParserTest {
 							  null, 
 							  Expressions.parse("tuple(randomVariable(lucky, 0, Boolean), randomVariable(winner, 0, People))"),
 							  Expressions.parse("if lucky then (if winner = rodrigo then 1 else 0) else (if winner = rodrigo then 1 / | People | else 1 - 1 / |People|)")));
+	
+	}
+	
+	@Test
+	public void testCountingFormulaTerm() {
+		String string;
+		
+		// Add support for counting formulas, i.e. | X in People : X = ann or X = brian or X = dan |
+		string = "sort People : 10000000, ann, brian, con, dan;\n"
+				+"random lucky : Boolean;\n"
+				+"random winner : People;\n"				
+				+"if lucky then winner = con else winner = con 1/| X in People : X = ann or X = brian or X = dan |;";	
+		test(string, expected(Expressions.parse("sort(People, 10000000, {ann, brian, con, dan})"), 
+							  null, 
+							  Expressions.parse("tuple(randomVariable(lucky, 0, Boolean), randomVariable(winner, 0, People))"),
+							  Expressions.parse("if lucky then (if winner = con then 1 else 0) else (if winner = con then 1 / | X in People : X = ann or X = brian or X = dan | else 1 - 1 / | X in People : X = ann or X = brian or X = dan |)")));
+
+		
+		string = "sort People : 10000000, ann, brian, con, dan;\n"
+				+"random lucky : Boolean;\n"
+				+"random winner : People;\n"				
+				+"if lucky then winner = con else winner = con 1/| X in People, Y in People : X = ann or Y = dan |;";	
+		test(string, expected(Expressions.parse("sort(People, 10000000, {ann, brian, con, dan})"), 
+							  null, 
+							  Expressions.parse("tuple(randomVariable(lucky, 0, Boolean), randomVariable(winner, 0, People))"),
+							  Expressions.parse("if lucky then (if winner = con then 1 else 0) else (if winner = con then 1 / | X in People, Y in People : X = ann or Y = dan | else 1 - 1 / | X in People, Y in People : X = ann or Y = dan |)")));		
 	}
 	
 	@Test

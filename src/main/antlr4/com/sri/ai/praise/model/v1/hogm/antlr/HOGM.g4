@@ -42,6 +42,8 @@ term
     : OPEN_PAREN term CLOSE_PAREN #parentheses
       // function application, e.g.: f(X)
     | function_application #functionApplication
+      // counting formula, e.g.: | X in 1..10 : X < 5 |
+    | VERTICAL_BAR ( indexes+=quantifier_index_term (',' indexes+=quantifier_index_term)* )? COLON body=term VERTICAL_BAR #countingFormula
       // type cardinality, e.g. | People |
     | VERTICAL_BAR constant_name VERTICAL_BAR #typeCardinality
       // negative, e.g.: 2 * -1 ---> 2 * (-1)
