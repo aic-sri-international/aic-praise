@@ -63,6 +63,7 @@ import com.sri.ai.grinder.sgdpllt.api.Context;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
 import com.sri.ai.grinder.sgdpllt.core.TrueContext;
 import com.sri.ai.grinder.sgdpllt.tester.RandomConditionalExpressionGenerator;
+import com.sri.ai.grinder.sgdpllt.tester.TheoryTestingSupport;
 import com.sri.ai.grinder.sgdpllt.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.sgdpllt.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.sgdpllt.theory.equality.EqualityTheory;
@@ -469,7 +470,7 @@ class RandomConditionalPotentialExpressionGenerator {
 			RandomHOGMv1Generator.TheoryTypeInequalityArgs[] inequalityTheoryArgs,
 			int depth) {
 		
-		Theory theory = newTheory(propositionTheoryArgs, equalityTheoryArgs, inequalityTheoryArgs);
+		TheoryTestingSupport theoryTestingSupport = newTheoryTestingSupport(propositionTheoryArgs, equalityTheoryArgs, inequalityTheoryArgs);
 		Map<String, Type> varToTypeMap = new LinkedHashMap<>();
 	
 		if (propositionTheoryArgs.length > 0) {
@@ -503,11 +504,11 @@ class RandomConditionalPotentialExpressionGenerator {
 			}
 		}
 		
-		theory.setVariableNamesAndTypesForTesting(varToTypeMap);
+		theoryTestingSupport.setVariableNamesAndTypesForTesting(varToTypeMap);
 		
-		Context context = theory.makeContextWithTestingInformation();
+		Context context = theoryTestingSupport.makeContextWithTestingInformation();
 		
-		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, theory, depth,
+		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, theoryTestingSupport, depth,
 				() -> makeSymbol(random.nextDouble()),
 				context);
 	}
@@ -532,7 +533,7 @@ class RandomConditionalPotentialExpressionGenerator {
 		return randomConditionalGenerator.apply();
 	}
 	
-	private Theory newTheory(
+	private TheoryTestingSupport newTheoryTestingSupport(
 			RandomHOGMv1Generator.TheoryTypePropositionalArgs[] propositionTheoryArgs, 
 			RandomHOGMv1Generator.TheoryTypeEqualityArgs[] equalityTheoryArgs,
 			RandomHOGMv1Generator.TheoryTypeInequalityArgs[] inequalityTheoryArgs) {
@@ -565,12 +566,12 @@ class RandomConditionalPotentialExpressionGenerator {
 			theories.add(differenceArithmeticTheory);
 		}
 		
-		Theory result;
+		TheoryTestingSupport result;
 		if (theories.size() > 1) {
 			result = new CompoundTheory(theories.toArray(new Theory[theories.size()]));
 		}
 		else {
-			result = theories.get(0);
+			result = (TheoryTestingSupport) theories.get(0);
 		}
 		
 		return result;
