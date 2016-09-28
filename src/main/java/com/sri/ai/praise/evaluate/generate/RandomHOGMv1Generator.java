@@ -566,13 +566,15 @@ class RandomConditionalPotentialExpressionGenerator {
 			theories.add(differenceArithmeticTheory);
 		}
 		
-		TheoryTestingSupport result;
+		Theory finalTheory;
 		if (theories.size() > 1) {
-			result = new CompoundTheory(theories.toArray(new Theory[theories.size()]));
+			finalTheory = new CompoundTheory(theories.toArray(new Theory[theories.size()]));
 		}
 		else {
-			result = (TheoryTestingSupport) theories.get(0);
+			finalTheory = theories.get(0);
 		}
+		
+		TheoryTestingSupport result = TheoryTestingSupport.make(finalTheory);
 		
 		return result;
 	}
