@@ -470,7 +470,7 @@ class RandomConditionalPotentialExpressionGenerator {
 			RandomHOGMv1Generator.TheoryTypeInequalityArgs[] inequalityTheoryArgs,
 			int depth) {
 		
-		TheoryTestingSupport theoryTestingSupport = newTheoryTestingSupport(propositionTheoryArgs, equalityTheoryArgs, inequalityTheoryArgs);
+		TheoryTestingSupport theoryTestingSupport = newTheoryTestingSupport(random, propositionTheoryArgs, equalityTheoryArgs, inequalityTheoryArgs);
 		Map<String, Type> varToTypeMap = new LinkedHashMap<>();
 	
 		if (propositionTheoryArgs.length > 0) {
@@ -508,7 +508,7 @@ class RandomConditionalPotentialExpressionGenerator {
 		
 		Context context = theoryTestingSupport.makeContextWithTestingInformation();
 		
-		randomConditionalGenerator = new RandomConditionalExpressionGenerator(random, theoryTestingSupport, depth,
+		randomConditionalGenerator = new RandomConditionalExpressionGenerator(theoryTestingSupport, depth,
 				() -> makeSymbol(random.nextDouble()),
 				context);
 	}
@@ -533,7 +533,7 @@ class RandomConditionalPotentialExpressionGenerator {
 		return randomConditionalGenerator.apply();
 	}
 	
-	private TheoryTestingSupport newTheoryTestingSupport(
+	private TheoryTestingSupport newTheoryTestingSupport(Random random,
 			RandomHOGMv1Generator.TheoryTypePropositionalArgs[] propositionTheoryArgs, 
 			RandomHOGMv1Generator.TheoryTypeEqualityArgs[] equalityTheoryArgs,
 			RandomHOGMv1Generator.TheoryTypeInequalityArgs[] inequalityTheoryArgs) {
@@ -574,7 +574,7 @@ class RandomConditionalPotentialExpressionGenerator {
 			finalTheory = theories.get(0);
 		}
 		
-		TheoryTestingSupport result = TheoryTestingSupport.make(finalTheory);
+		TheoryTestingSupport result = TheoryTestingSupport.make(random, finalTheory);
 		
 		return result;
 	}
