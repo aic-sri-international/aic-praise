@@ -473,7 +473,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 				);
 
 		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
-				"boss",  "->(Folks, Boolean)"
+				"boss",  "->(x(Folks), Boolean)"
 				);
 
 		isBayesianNetwork = true;
