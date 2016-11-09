@@ -51,6 +51,7 @@ import com.sri.ai.praise.sgsolver.demo.model.EarthquakeBurglaryAlarm;
 import com.sri.ai.praise.sgsolver.demo.model.Election;
 import com.sri.ai.praise.sgsolver.demo.model.ElectionAsInIJCAI2016Paper;
 import com.sri.ai.praise.sgsolver.demo.model.ExamplePages;
+import com.sri.ai.praise.sgsolver.demo.model.MontyHallProblem;
 import com.sri.ai.praise.sgsolver.demo.model.Position;
 
 @Beta
@@ -62,6 +63,7 @@ public class HOGMPerspective extends AbstractPerspective {
 	public List<ExamplePages> getExamples() {
 		return Arrays.asList(
 				new EarthquakeBurglaryAlarm(), 
+				new MontyHallProblem(),
 				new Election(), 
 				new ElectionAsInIJCAI2016Paper(),
 				new Position());

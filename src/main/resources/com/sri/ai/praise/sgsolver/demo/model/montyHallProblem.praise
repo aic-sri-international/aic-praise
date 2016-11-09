@@ -1,0 +1,32 @@
+@LANG:HOGMv1
+@MODEL:name=[Page 1]parts=[page-1]queries=[query-page-1#1,query-page-1#2]
+@FRAGMENT:page-1
+// Monty Hall problem (https://en.wikipedia.org/wiki/Monty_Hall_problem)
+random carDoor : 1..3;
+random initiallyChosenDoor : 1..3;
+random doorChosenByHost : 1..3;
+random doorToSwitchTo : 1..3;
+
+// P(initiallyChosenDoor) is uniform,
+// so the next statement is actually unnecessary, but is written down to make it clear.
+if initiallyChosenDoor = 1 then 1/3 else if initiallyChosenDoor = 2 then 1/3 else if initiallyChosenDoor = 3 then 1/3 else 0;
+
+// P(doorChosenByHost | initiallyChosenDoor)
+doorChosenByHost != initiallyChosenDoor;
+doorChosenByHost != carDoor;
+if initiallyChosenDoor = carDoor then 0.5 else 1; // probability of each value of doorChosenByHost is 0.5 if there are two possible choices, 1 otherwise.
+
+// P(doorToSwitchTo | initiallyChosenDoor, doorChosenByHost)
+// Similar to previous one, but we can use the declarative abbreviated version because of determinism (there is always only one choice).
+doorToSwitchTo != initiallyChosenDoor;
+doorToSwitchTo != doorChosenByHost;
+
+// query must be on:
+// doorToSwitchTo = carDoor
+// try also:
+// initiallyChosenDoor = carDoor 
+@FRAGMENT:query-page-1#1
+doorToSwitchTo = carDoor
+
+@FRAGMENT:query-page-1#2
+initiallyChosenDoor = carDoor
