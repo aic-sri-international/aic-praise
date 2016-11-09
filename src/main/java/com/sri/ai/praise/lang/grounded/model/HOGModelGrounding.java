@@ -54,6 +54,7 @@ import java.util.stream.IntStream;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.sgdpllt.api.Context;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
@@ -417,7 +418,7 @@ public class HOGModelGrounding {
 			Expression simplifiedExpression = theory.simplify(expressionWithReplacedValue, context);
 			
 			boolean expressionIsSimplifiedToConstant =
-					isLastVariable || simplifiedExpression.getSyntacticFormType().equals("Symbol");
+					isLastVariable || simplifiedExpression.getSyntacticFormType().equals(Symbol.SYNTACTIC_FORM_TYPE);
 
 			if (expressionIsSimplifiedToConstant) {
 				myAssert( () -> isNumber(simplifiedExpression) , () -> "Expression being grounded has been simplified to a symbol that is not a numerical constant: " + simplifiedExpression);

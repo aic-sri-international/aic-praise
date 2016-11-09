@@ -46,6 +46,7 @@ import java.util.Set;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.sgdpllt.library.FunctorConstants;
 import com.sri.ai.grinder.sgdpllt.library.set.Sets;
@@ -535,7 +536,7 @@ public class HOGMSortDeclaration {
 		if (size.equals(UNKNOWN_SIZE)) {
 			illegal = false;
 		} 
-		else if (size.getSyntacticFormType().equals("Symbol")) {
+		else if (size.getSyntacticFormType().equals(Symbol.SYNTACTIC_FORM_TYPE)) {
 			int ivalue = 0;
 			try {
 				ivalue = size.intValueExact();
@@ -569,7 +570,7 @@ public class HOGMSortDeclaration {
 			Set<Expression> seen = new LinkedHashSet<Expression>();
 			for (Expression arg : ExtensionalSet.getElements(constants)) {
 				// Each constant must be a symbol.
-				if (!(arg.getSyntacticFormType().equals("Symbol"))) {
+				if (!(arg.getSyntacticFormType().equals(Symbol.SYNTACTIC_FORM_TYPE))) {
 					argsOk = false;
 				}
 				// Constants should be declared unique within the set expression

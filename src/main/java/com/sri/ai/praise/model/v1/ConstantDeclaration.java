@@ -46,6 +46,7 @@ import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 
 /**
@@ -358,7 +359,7 @@ public class ConstantDeclaration {
 	private static void assertArityOk(Expression arity) {
 		boolean illegal = true;
 
-		if (arity.getSyntacticFormType().equals("Symbol")) {
+		if (arity.getSyntacticFormType().equals(Symbol.SYNTACTIC_FORM_TYPE)) {
 			Object value = arity.getValue();
 			if (value instanceof Number) {
 				int ivalue = ((Number) value).intValue();
