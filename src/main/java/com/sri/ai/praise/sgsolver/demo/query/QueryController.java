@@ -186,7 +186,7 @@ public class QueryController {
     	executeQueryService.valueProperty().addListener((observable, oldResult, newResult) -> {
 			if (newResult != null) { 
 				if (newResult.isErrors()) {
-					displayQueryErrors(newResult.getQueryString(), newResult.getErrors(), newResult.getMillisecondsToCompute());			
+					displayQueryErrors(newResult.getQueryString(), newResult.getErrors(), newResult.getParsedModel(), newResult.getMillisecondsToCompute());			
 				}
 				else {
 					displayQueryAnswer(newResult.getQueryString(), newResult.getResult(), newResult.getParsedModel(), newResult.getMillisecondsToCompute());	
@@ -209,7 +209,7 @@ public class QueryController {
 			Pair<List<HOGMQueryError>, String> initialModelValidation = modelPageEditor.validateAndGetModel();
 			
 			if (initialModelValidation.first.size() > 0) {
-				displayQueryErrors(getCurrentQuery(), initialModelValidation.first, 0);
+				displayQueryErrors(getCurrentQuery(), initialModelValidation.first, null, 0);
 			}
 			else {
 				executeQueryService.setModel(initialModelValidation.second);
@@ -224,7 +224,7 @@ public class QueryController {
 		outputAccordion.getPanes().clear();
 	}
 	
-	private void displayQueryErrors(String query, List<HOGMQueryError> queryErrors, long millisecondsToCompute) {
+	private void displayQueryErrors(String query, List<HOGMQueryError> queryErrors, ParsedHOGModel parsedModel, long millisecondsToCompute) {
 		String title = "Query '"+query+"' encountered "+queryErrors.size()+" error(s) when attempting to compute answer ("+duration("took ", millisecondsToCompute)+")";
 		ListView<HOGMQueryError> errors = new ListView<>(FXCollections.observableList(queryErrors));
 		//errors.setFixedCellSize(24);
@@ -241,7 +241,20 @@ public class QueryController {
 				}
 			}
 		});
-		TitledPane resultPane = new TitledPane(title, errors);
+		Node resultContent = null;
+		if (SGSolverDemoController.isInDebugMode()) {
+			HOGMCodeArea parsedModelArea = createParsedModelView(parsedModel);
+						
+			TabPane resultTabs = new TabPane();
+			resultTabs.getTabs().add(new Tab("Errors", errors));
+			resultTabs.getTabs().add(new Tab("Parsed As", parsedModelArea));
+			
+			resultContent = resultTabs;
+		}
+		else {
+			resultContent = errors;
+		}
+		TitledPane resultPane = new TitledPane(title, resultContent);
 		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.TIMES);
 		
 		showResultPane(resultPane);
@@ -249,7 +262,7 @@ public class QueryController {
 		errors.getSelectionModel().selectFirst();
 	}
 	
-	private void displayQueryAnswer(String query, Expression result, ParsedHOGModel parseModel, long millisecondsToCompute) {
+	private void displayQueryAnswer(String query, Expression result, ParsedHOGModel parsedModel, long millisecondsToCompute) {
 		String answer = "P("+ query + " | ... ) = "+result;
 		String title  = "Query"+duration(" took ", millisecondsToCompute)+" to compute '"+answer+"'";
 		HOGMCodeArea resultCodeArea = new HOGMCodeArea(false);
@@ -259,35 +272,8 @@ public class QueryController {
 		
 		Node resultContent = null;
 		if (SGSolverDemoController.isInDebugMode()) {
-			HOGMCodeArea parsedModelArea = new HOGMCodeArea();
-			StringJoiner sj = new StringJoiner("\n");
-			if (parseModel == null) {
-				sj.add("// UNABLE TO PARSE");
-			}
-			else {
-				sj.add("// SORT DECLARATIONS:");
-				parseModel.getSortDeclarations().forEach(sd -> {
-					sj.add(sd.getSortDeclaration().toString()+";");
-				});
-				if (parseModel.getConstatDeclarations().size() > 0) {
-					sj.add("// CONSTANT DECLARATIONS:");
-					parseModel.getConstatDeclarations().forEach(cd -> {
-						sj.add(cd.getConstantDeclaration().toString()+";");
-					});
-				}
-				sj.add("// RANDOM VARIABLE DECLARATIONS:");
-				parseModel.getRandomVariableDeclarations().forEach(rd -> {
-					sj.add(rd.getRandomVariableDeclaration().toString()+";");
-				});
-				sj.add("// CONDITIONED POTENTIALS:");
-				parseModel.getConditionedPotentials().forEach(cp -> {
-					sj.add(cp.toString()+";");
-				});
-				parsedModelArea.setText(sj.toString());
-				parsedModelArea.setEditable(false);
-			}
-			
-			
+			HOGMCodeArea parsedModelArea = createParsedModelView(parsedModel);
+						
 			TabPane resultTabs = new TabPane();
 			resultTabs.getTabs().add(new Tab("Answer", resultCodeArea));
 			resultTabs.getTabs().add(new Tab("Parsed As", parsedModelArea));
@@ -302,6 +288,38 @@ public class QueryController {
 		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.CHECK);
 		
 		showResultPane(resultPane);
+	}
+	
+	private HOGMCodeArea createParsedModelView(ParsedHOGModel parseModel) {
+		HOGMCodeArea result = new HOGMCodeArea();
+		StringJoiner sj = new StringJoiner("\n");
+		if (parseModel == null) {
+			sj.add("// UNABLE TO PARSE");
+		}
+		else {
+			sj.add("// SORT DECLARATIONS:");
+			parseModel.getSortDeclarations().forEach(sd -> {
+				sj.add(sd.getSortDeclaration().toString()+";");
+			});
+			if (parseModel.getConstatDeclarations().size() > 0) {
+				sj.add("// CONSTANT DECLARATIONS:");
+				parseModel.getConstatDeclarations().forEach(cd -> {
+					sj.add(cd.getConstantDeclaration().toString()+";");
+				});
+			}
+			sj.add("// RANDOM VARIABLE DECLARATIONS:");
+			parseModel.getRandomVariableDeclarations().forEach(rd -> {
+				sj.add(rd.getRandomVariableDeclaration().toString()+";");
+			});
+			sj.add("// CONDITIONED POTENTIALS:");
+			parseModel.getConditionedPotentials().forEach(cp -> {
+				sj.add(cp.toString()+";");
+			});			
+		}
+		result.setText(sj.toString());
+		result.setEditable(false);
+		
+		return result;
 	}
 	
 	private void showResultPane(TitledPane resultPane) {
