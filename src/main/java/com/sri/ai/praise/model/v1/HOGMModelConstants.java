@@ -73,6 +73,7 @@ public class HOGMModelConstants {
 		knownNumericFunctors.add(FunctorConstants.TIMES);
 		knownNumericFunctors.add(FunctorConstants.PLUS);
 		knownNumericFunctors.add(FunctorConstants.MINUS);
+		knownNumericFunctors.add(FunctorConstants.PRODUCT);
 		
 		KNOWN_NUMERIC_FUNCTORS = Collections.unmodifiableSet(knownNumericFunctors);
 	}
