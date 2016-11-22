@@ -48,10 +48,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
-
-
-
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
@@ -69,7 +65,6 @@ import com.sri.ai.grinder.sgdpllt.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.sgdpllt.library.set.CountingFormulaEquivalentExpressions;
 import com.sri.ai.grinder.sgdpllt.library.set.Sets;
 import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.sgdpllt.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
 import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
@@ -89,11 +84,11 @@ public class HOGModel {
 			throw new HOGModelException("Invalid model", validator.errors);
 		}
 		
-		Expression result = Tuple.make(
-				Tuple.make(validator.sortDeclarations), 
-				Tuple.make(validator.constantDeclarations),
-				Tuple.make(validator.randomVariableDeclarations), 
-				Tuple.make(validator.conditionedPotentials));
+		Expression result = Expressions.makeTuple(
+				Expressions.makeTuple(validator.sortDeclarations), 
+				Expressions.makeTuple(validator.constantDeclarations),
+				Expressions.makeTuple(validator.randomVariableDeclarations), 
+				Expressions.makeTuple(validator.conditionedPotentials));
 		
 		return result;
 	}

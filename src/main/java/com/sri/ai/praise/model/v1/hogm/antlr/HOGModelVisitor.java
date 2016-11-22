@@ -74,7 +74,6 @@ import com.sri.ai.grinder.sgdpllt.library.boole.ThereExists;
 import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.sgdpllt.library.number.Minus;
 import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSet;
-import com.sri.ai.grinder.sgdpllt.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
 import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
@@ -384,7 +383,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// | FOR ALL index=quantifier_index COLON body=term
  	@Override 
  	public Expression visitForAll(HOGMParser.ForAllContext ctx) { 
- 		Expression result = ForAll.make(new ExtensionalIndexExpressionsSet(Tuple.getElements(visit(ctx.index))), visit(ctx.body));
+ 		Expression result = ForAll.make(new ExtensionalIndexExpressionsSet(visit(ctx.index).getArguments()), visit(ctx.body));
 		return result; 
  	}
  	
@@ -392,7 +391,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  	// | THERE EXISTS index=quantifier_index COLON body=term
  	@Override 
  	public Expression visitThereExists(HOGMParser.ThereExistsContext ctx) { 
- 		Expression result = ThereExists.make(new ExtensionalIndexExpressionsSet(Tuple.getElements(visit(ctx.index))), visit(ctx.body));
+ 		Expression result = ThereExists.make(new ExtensionalIndexExpressionsSet(visit(ctx.index).getArguments()), visit(ctx.body));
 		return result; 
  	}
  	
@@ -427,7 +426,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
     // : variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
  	@Override 
  	public Expression visitQuantifier_index(HOGMParser.Quantifier_indexContext ctx) { 
- 		Expression result = Tuple.make(expressions(ctx.indexes));
+ 		Expression result = Expressions.makeTuple(expressions(ctx.indexes));
  		return result;
  	}
  	
@@ -543,8 +542,9 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		return result;
 	}
 	
-	protected Object[] expressions(List<? extends ParserRuleContext> exprContexts) {
-		Object[] result = expressionsList(exprContexts).toArray();
+	protected Expression[] expressions(List<? extends ParserRuleContext> exprContexts) {
+		List<Expression> expressionsList = expressionsList(exprContexts);
+		Expression[] result = expressionsList.toArray(new Expression[expressionsList.size()]);
 		return result;
 	}
 	

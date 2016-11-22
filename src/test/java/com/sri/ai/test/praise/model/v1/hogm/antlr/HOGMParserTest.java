@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Parser;
+import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.sgdpllt.library.FunctorConstants;
-import com.sri.ai.grinder.sgdpllt.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.v1.HOGModelError;
 import com.sri.ai.praise.model.v1.HOGModelException;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
@@ -847,20 +847,20 @@ public class HOGMParserTest {
 	// PROTECTED
 	//
 	protected Expression expected(Expression sortDeclarations, Expression constantDeclarations, Expression randomVariableDeclarations, Expression statements) {
-		Expression result = Tuple.make(new Object[] {ensureTuple(sortDeclarations), ensureTuple(constantDeclarations), ensureTuple(randomVariableDeclarations), ensureTuple(statements)});
+		Expression result = Expressions.makeTuple(new Expression[] {ensureTuple(sortDeclarations), ensureTuple(constantDeclarations), ensureTuple(randomVariableDeclarations), ensureTuple(statements)});
 		return result;
 	}
 	
 	protected Expression ensureTuple(Expression expr) {
 		Expression result = null;
 		if (expr == null) {
-			result = Tuple.make(new Object[0]);
+			result = Expressions.makeTuple(new Expression[0]);
 		}
 		else if (Tuple.isTuple(expr)) {
 			result = expr;
 		}
 		else {
-			result = Tuple.make(expr);
+			result = Expressions.makeTuple(expr);
 		}
 		return result;
 	}

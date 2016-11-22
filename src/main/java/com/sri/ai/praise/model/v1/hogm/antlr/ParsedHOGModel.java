@@ -43,7 +43,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.grinder.sgdpllt.library.set.tuple.Tuple;
+import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
 import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
@@ -115,8 +115,8 @@ public class ParsedHOGModel {
 		List<HOGMSortDeclaration> result = new ArrayList<>();
 		
 		if (isLegalModelTuple(modelTupleExpr)) {
-			Expression sortsTuple = Tuple.get(modelTupleExpr, 0);
-			Tuple.getElements(sortsTuple).forEach(sortExpr -> result.add(HOGMSortDeclaration.makeSortDeclaration(sortExpr)));
+			Expression sortsTuple = modelTupleExpr.get(0);
+			sortsTuple.getArguments().forEach(sortExpr -> result.add(HOGMSortDeclaration.makeSortDeclaration(sortExpr)));
 		}
 		return result;
 	}
@@ -125,8 +125,8 @@ public class ParsedHOGModel {
 		List<ConstantDeclaration> result = new ArrayList<>();
 		
 		if (isLegalModelTuple(modelTupleExpr)) {
-			Expression constantsTuple = Tuple.get(modelTupleExpr, 1);
-			Tuple.getElements(constantsTuple).forEach(constantExpr -> result.add(ConstantDeclaration.makeConstantDeclaration(constantExpr)));
+			Expression constantsTuple = modelTupleExpr.get(1);
+			constantsTuple.getArguments().forEach(constantExpr -> result.add(ConstantDeclaration.makeConstantDeclaration(constantExpr)));
 		}
 		
 		return result;
@@ -136,8 +136,8 @@ public class ParsedHOGModel {
 		List<HOGMRandomVariableDeclaration> result = new ArrayList<>();
 		
 		if (isLegalModelTuple(modelTupleExpr)) {
-			Expression randomsTuple = Tuple.get(modelTupleExpr, 2);
-			Tuple.getElements(randomsTuple).forEach(randomExpr -> result.add(HOGMRandomVariableDeclaration.makeRandomVariableDeclaration(randomExpr)));
+			Expression randomsTuple = modelTupleExpr.get(2);
+			randomsTuple.getArguments().forEach(randomExpr -> result.add(HOGMRandomVariableDeclaration.makeRandomVariableDeclaration(randomExpr)));
 		}
 		
 		return result;
@@ -146,8 +146,8 @@ public class ParsedHOGModel {
 	private static List<Expression> extractConditionedPotentials(Expression modelTupleExpr) {
 		List<Expression> result = new ArrayList<>();
 		if (isLegalModelTuple(modelTupleExpr)) {
-			Expression conditionedPotentialsTuple = Tuple.get(modelTupleExpr, 3);
-			Tuple.getElements(conditionedPotentialsTuple).forEach(conditionedPotential -> result.add(conditionedPotential));
+			Expression conditionedPotentialsTuple = modelTupleExpr.get(3);
+			conditionedPotentialsTuple.getArguments().forEach(conditionedPotential -> result.add(conditionedPotential));
 		}
 		return result;
 	}
