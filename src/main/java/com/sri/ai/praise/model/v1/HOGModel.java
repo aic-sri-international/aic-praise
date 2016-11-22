@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.model.v1;
 
+import static com.sri.ai.util.Util.sameInstancesInSameIterableOrder;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -53,6 +55,7 @@ import java.util.stream.Collectors;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.api.QuantifiedExpression;
 import com.sri.ai.expresso.api.QuantifiedExpressionWithABody;
 import com.sri.ai.expresso.helper.Expressions;
@@ -64,6 +67,7 @@ import com.sri.ai.grinder.sgdpllt.library.boole.ThereExists;
 import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.sgdpllt.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.sgdpllt.library.set.CountingFormulaEquivalentExpressions;
+import com.sri.ai.grinder.sgdpllt.library.set.Sets;
 import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSet;
 import com.sri.ai.grinder.sgdpllt.library.set.tuple.Tuple;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
@@ -288,6 +292,8 @@ public class HOGModel {
 		
 		void validateTermStatements(List<StatementInfo> termStatements) {
 			termStatements.forEach(termStatement -> {
+				termStatement = updateQuantifierExpressionsAsNeeded(termStatement);
+				
 				// Ensure all functors are known and have correct arity
 				validateFunctorsAndArguments(termStatement);
 				
@@ -317,6 +323,69 @@ public class HOGModel {
 					conditioned.add(IfThenElse.make(statement, Expressions.ONE, Expressions.ZERO));
 				}
 			});
+		}
+		
+		StatementInfo updateQuantifierExpressionsAsNeeded(StatementInfo termStatement) {
+			
+			Expression updatedQuantifiers = updateQuantifiers(termStatement.statement, constants);
+			
+			StatementInfo result;
+			if (updatedQuantifiers == termStatement.statement) {
+				result = termStatement;
+			}
+			else {
+				result = new StatementInfo(updatedQuantifiers, termStatement.sourceText, termStatement.line, termStatement.startIndex, termStatement.endIndex);
+			}
+			
+			return result;
+		}
+		
+		Expression updateQuantifiers(Expression expr, Map<Expression, ConstantDeclaration> currentScope) {
+			Expression result = expr;
+			if (isQuantifiedExpression(expr)) {				
+				Expression bodyExpression = getQuantifiedExpressionBody(expr);
+				if (bodyExpression != null) {
+					Map<Expression, ConstantDeclaration> quantifierScope = new LinkedHashMap<>(currentScope);
+					quantifierScope.putAll(getQuantifiedExpressionScope(expr));
+					Expression updatedBodyExpression = updateQuantifiers(bodyExpression, quantifierScope);
+					
+					TermCategoryType updatedBodyTermCategoryType = determineTermCategoryType(updatedBodyExpression);
+					if (updatedBodyTermCategoryType == TermCategoryType.NUMERIC) {
+						Expression intensionalMultiSet = IntensionalSet.intensionalMultiSet(((QuantifiedExpression)expr).getIndexExpressions(), updatedBodyExpression, Expressions.TRUE);
+						result = Expressions.apply(FunctorConstants.PRODUCT, intensionalMultiSet);
+					}					
+					else if (bodyExpression != updatedBodyExpression) 
+					{	
+						if (ForAll.isForAll(expr)) {
+							result = ForAll.make(ForAll.getIndexExpression(expr), updatedBodyExpression);
+						}
+						else { // Otherwise is existential
+							result = ThereExists.make(ThereExists.getIndexExpression(expr), updatedBodyExpression);
+						}
+					}
+				}
+			}
+			else if (Expressions.isFunctionApplicationWithArguments(expr)) {
+				List<Expression> updatedArgs = expr.getArguments().stream()
+						.map(arg -> updateQuantifiers(arg, currentScope))
+						.collect(Collectors.toList());
+				
+				if (!sameInstancesInSameIterableOrder(expr.getArguments(), updatedArgs)) {
+					result = Expressions.apply(expr.getFunctor(), updatedArgs);
+				}
+				
+				TermCategoryType resultTermCategoryType = determineTermCategoryType(result);
+				if (resultTermCategoryType == TermCategoryType.INVALID) {
+					if (IfThenElse.isIfThenElse(result)) {
+						Expression asRule = attemptMakeRule(result);
+						if (asRule != null) {
+							result = asRule;
+						}
+					}
+				}
+			}
+			
+			return result;
 		}
 		
 		TermCategoryType determineTermCategoryType(Expression expr) {
@@ -382,6 +451,11 @@ public class HOGModel {
 					else if (CountingFormulaEquivalentExpressions.isCountingFormulaEquivalentExpression(expr)) { // NOTE: counting formulas are not functions which is a subset of counting formula equivalent expressions
 						result = HOGMSortDeclaration.IN_BUILT_INTEGER;
 					}
+					else if (Sets.isIntensionalMultiSet(expr)) {
+						Map<Expression, ConstantDeclaration> intensionalMultiSetScope = new LinkedHashMap<>(scopedConstants);
+						intensionalMultiSetScope.putAll(getQuantifiedExpressionScope(expr));
+						result = determineSortType(((IntensionalSet)expr).getHead(), intensionalMultiSetScope);
+					}
 					else if (Expressions.isNumber(expr)) {
 						if (expr.rationalValue().isInteger()) {
 							result = HOGMSortDeclaration.IN_BUILT_INTEGER;
@@ -427,22 +501,27 @@ public class HOGModel {
 					else if (numericTypeFunctors.contains(functorName)) {
 						result = HOGMSortDeclaration.IN_BUILT_INTEGER;
 						if (!FunctorConstants.CARDINALITY.equals(functorName)) {
-							for (Expression arg : expr.getArguments()) {
-								if (Expressions.isNumber(arg)) {
-									if (!arg.rationalValue().isInteger()) {
-										result = HOGMSortDeclaration.IN_BUILT_REAL;
-										break;
+							if (FunctorConstants.PRODUCT.equals(functorName)) {
+								result = determineSortType(expr.get(0), scopedConstants);
+							}
+							else {
+								for (Expression arg : expr.getArguments()) {
+									if (Expressions.isNumber(arg)) {
+										if (!arg.rationalValue().isInteger()) {
+											result = HOGMSortDeclaration.IN_BUILT_REAL;
+											break;
+										}
 									}
-								}
-								else {
-									result = determineSortType(arg, scopedConstants);
-									if (result == HOGMSortDeclaration.IN_BUILT_REAL) {
-										break; 
-									}
-									else if (result != HOGMSortDeclaration.IN_BUILT_INTEGER) {
-										// Something wrong as the argument sort is not numeric
-										result = null;
-										break;
+									else {
+										result = determineSortType(arg, scopedConstants);
+										if (result == HOGMSortDeclaration.IN_BUILT_REAL) {
+											break; 
+										}
+										else if (result != HOGMSortDeclaration.IN_BUILT_INTEGER) {
+											// Something wrong as the argument sort is not numeric
+											result = null;
+											break;
+										}
 									}
 								}
 							}

@@ -661,6 +661,21 @@ public class HOGMParserTest {
 				  Expressions.parse("X+Y")));
 	}
 	
+	@Test
+	public void testToProductTerms() {
+		String string;
+
+		// To product()
+		string = "sort Person : 5, ann;\n"
+				+"random mother : Person -> Person;\n"
+				+"random happy : Person -> Boolean;\n"				
+				+"for all X in Person : if happy(X) then happy(mother(X));";	
+		test(string, expected(Expressions.parse("sort(Person, 5, {ann})"), 
+							  null, 
+							  Expressions.parse("tuple(randomVariable(mother, 1, Person, Person), randomVariable(happy, 1, Person, Boolean))"),
+							  Expressions.parse("product({{ ( on X in Person ) if happy(X) then if happy(mother(X)) then 1 else 0 else 0.5 }})")));	
+	}
+	
 	
 	@Test
 	public void testDetectedStatementErrors() {
