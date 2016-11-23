@@ -422,21 +422,21 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  		return result;
  	}
  	
- 	// quantifier_index_term
-    // : variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
+ 	// quantifier_index
+    // : indexes+=quantifier_index_term // (COMMA indexes+=quantifier_index_term)* Not on For All or There Exists
  	@Override 
  	public Expression visitQuantifier_index(HOGMParser.Quantifier_indexContext ctx) { 
  		Expression result = Expressions.makeTuple(expressions(ctx.indexes));
  		return result;
  	}
  	
- 	// : variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
+ 	// : variable=constant_name IN sort=sort_reference #quantifierIndexTermVariableInSort
  	@Override 
  	public Expression visitQuantifierIndexTermVariableInSort(HOGMParser.QuantifierIndexTermVariableInSortContext ctx) {
- 		Expression variable = newSymbol(ctx.variable.getText());
- 		Expression sortName = newSymbol(ctx.sort.getText());
+ 		Expression variable      = newSymbol(ctx.variable.getText());
+ 		Expression sortReference = visit(ctx.sort);
  		
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(IN, variable, sortName);
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(IN, variable, sortReference);
  		
  		return result; 
  	}

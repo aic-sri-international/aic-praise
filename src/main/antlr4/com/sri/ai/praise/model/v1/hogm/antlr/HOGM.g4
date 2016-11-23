@@ -90,7 +90,7 @@ quantifier_index
     ;
     
 quantifier_index_term
-    : variable=constant_name IN sort=sort_name #quantifierIndexTermVariableInSort
+    : variable=constant_name IN sort=sort_reference #quantifierIndexTermVariableInSort
     ;
 
 sort_name
