@@ -64,7 +64,7 @@ import com.sri.ai.grinder.sgdpllt.core.TrueContext;
 import com.sri.ai.grinder.sgdpllt.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpllt.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.sgdpllt.group.SumProduct;
-import com.sri.ai.grinder.sgdpllt.interpreter.SGDPLLT;
+import com.sri.ai.grinder.sgdpllt.core.solver.SGDPLLT;
 import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.sgdpllt.library.number.Division;
 import com.sri.ai.grinder.sgdpllt.library.number.Times;
