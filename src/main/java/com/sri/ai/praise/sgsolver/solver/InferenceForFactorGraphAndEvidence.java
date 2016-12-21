@@ -58,7 +58,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.sgdpllt.api.Context;
-import com.sri.ai.grinder.sgdpllt.api.QuantifierEliminator;
+import com.sri.ai.grinder.sgdpllt.api.MultiIndexQuantifierEliminator;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
 import com.sri.ai.grinder.sgdpllt.core.SGDPLLTUtil;
 import com.sri.ai.grinder.sgdpllt.core.TrueContext;
@@ -95,7 +95,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private Theory theory;
 	private AssociativeCommutativeSemiRing semiRing;
-	private QuantifierEliminator solver;
+	private MultiIndexQuantifierEliminator solver;
 
 	public Expression getEvidenceProbability() {
 		return evidenceProbability;
@@ -227,7 +227,7 @@ public class InferenceForFactorGraphAndEvidence {
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (evidenceProbability == null) {
-				evidenceProbability = solver.solve(unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+				evidenceProbability = solver.solve(semiRing, unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 			}
 
 			marginal = Division.make(unnormalizedMarginal, evidenceProbability); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
@@ -249,7 +249,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression sum(List<Expression> indices, Expression expression) {
-		return solver.solve(expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		return solver.solve(semiRing, expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 
 	/**
@@ -258,7 +258,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
-		return solver.solve(expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		return solver.solve(semiRing, expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 
 	/**
