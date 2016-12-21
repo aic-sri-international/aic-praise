@@ -49,6 +49,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -90,7 +91,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Map<String, String> mapFromSymbolNameToTypeName; // union of the two maps above
 	private Map<String, String> mapFromCategoricalTypeNameToSizeString;
 	private Collection<Type> additionalTypes;
-	private Collection<Expression> allRandomVariables;
+	private List<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private Theory theory;
 	private AssociativeCommutativeSemiRing semiRing;
@@ -196,8 +197,8 @@ public class InferenceForFactorGraphAndEvidence {
 
 		boolean queryIsCompoundExpression;
 		Expression queryVariable;
-		Collection<Expression> queryVariables;
-		Collection<Expression> indices; 
+		List<Expression> queryVariables;
+		List<Expression> indices; 
 		if (allRandomVariables.contains(queryExpression)) {
 			queryIsCompoundExpression = false;
 			queryVariable = queryExpression;
@@ -247,7 +248,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @param expression
 	 * @return
 	 */
-	public Expression sum(Collection<Expression> indices, Expression expression) {
+	public Expression sum(List<Expression> indices, Expression expression) {
 		return solver.solve(expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 
