@@ -168,10 +168,10 @@ public class InferenceForFactorGraphAndEvidence {
 		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
 		
 		if (useFactorization) {
-			solver = new SGVET(semiRing);
+			solver = new SGVET();
 		}
 		else {
-			solver = new SGDPLLT(semiRing);
+			solver = new SGDPLLT();
 		}
 
 		evidenceProbability = null;
