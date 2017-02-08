@@ -166,7 +166,7 @@ public class HOGMQueryRunner {
 	public Expression simplifyAnswer(Expression answer, Expression forQuery) {
 		Expression result  = answer;
 		Context    context = getQueryContext();
-		if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(GrinderUtil.getType(forQuery, context))) {
+		if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(GrinderUtil.getTypeExpression(forQuery, context))) {
 			result = result.replaceAllOccurrences(forQuery, Expressions.TRUE, context);
 			result = simplifyWithinQueryContext(result);
 			answer = Expressions.parse(result.toString()); // This ensures numeric values have the correct precision
