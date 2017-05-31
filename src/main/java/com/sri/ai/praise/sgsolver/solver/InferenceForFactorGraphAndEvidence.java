@@ -45,7 +45,6 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.setDifference;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -57,6 +56,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.helper.UniquelyNamedConstantIncludingBooleansAndNumbersPredicate;
 import com.sri.ai.grinder.sgdpllt.api.Context;
 import com.sri.ai.grinder.sgdpllt.api.MultiIndexQuantifierEliminator;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
@@ -118,7 +118,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @param evidence 
 	 *        an Expression representing the evidence
 	 * @param useFactorization indicates whether to use factorization (as in Variable Elimination)
-	 * @param optionalTheory the theory to be used; if null, a default one is used (as of January 2016, a compound theory with propositional, equalities on categorical types and difference arithmetic).
+	 * @param optionalTheory the theory to be used; if null, a default one is used (as of May 2017, a compound theory with propositional, equalities on categorical types, difference arithmetic, and real linear arithmetic).
 	 */
 	public InferenceForFactorGraphAndEvidence(
 			FactorsAndTypes factorsAndTypes,
@@ -142,7 +142,7 @@ public class InferenceForFactorGraphAndEvidence {
 		this.mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(factorsAndTypes.getMapFromCategoricalTypeNameToSizeString());
 
 		Set<Expression> uniquelyNamedConstants = mapIntoSet(factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
-		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantPredicate(uniquelyNamedConstants);
+		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
 		
 		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
 			factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().values().stream().anyMatch(type -> type.contains("->"))) {
@@ -195,10 +195,10 @@ public class InferenceForFactorGraphAndEvidence {
 			factorGraphWithEvidence = Times.make(list(factorGraphWithEvidence, IfThenElse.make(evidence, ONE, ZERO)));
 		}
 
-		boolean queryIsCompoundExpression;
 		Expression queryVariable;
 		List<Expression> queryVariables;
 		List<Expression> indices; 
+		boolean queryIsCompoundExpression;
 		if (allRandomVariables.contains(queryExpression)) {
 			queryIsCompoundExpression = false;
 			queryVariable = queryExpression;
@@ -291,22 +291,5 @@ public class InferenceForFactorGraphAndEvidence {
 	 */
 	public Context makeContextWithTypeInformation() {
 		return SGDPLLTUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
-	}
-	
-	public static class UniquelyNamedConstantPredicate implements Predicate<Expression>, Serializable {
-		private static final long serialVersionUID = 1L;
-		
-		private Set<Expression> uniquelyNamedConstants;
-		
-		public UniquelyNamedConstantPredicate(Set<Expression> uniquelyNamedConstants) {
-			this.uniquelyNamedConstants = uniquelyNamedConstants;
-		}
-		
-		@Override
-		public boolean apply(Expression e) {
-			boolean result = uniquelyNamedConstants.contains(e) || Expressions.isNumber(e) || Expressions.isBooleanSymbol(e);
-			return result;
-		}
-		
 	}
 }
