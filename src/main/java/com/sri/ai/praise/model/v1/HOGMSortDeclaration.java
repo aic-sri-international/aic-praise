@@ -50,7 +50,7 @@ import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.sgdpllt.library.FunctorConstants;
 import com.sri.ai.grinder.sgdpllt.library.set.Sets;
-import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSet;
+import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSets;
 
 /**
  * Sorts (from <a
@@ -118,28 +118,28 @@ public class HOGMSortDeclaration {
 	 */
 	public static final HOGMSortDeclaration IN_BUILT_BOOLEAN = new HOGMSortDeclaration(
 			false, Expressions.makeSymbol("Boolean"), Expressions.makeSymbol(2),
-			ExtensionalSet.makeUniSetExpression(Arrays.asList(new Expression[] {
+			ExtensionalSets.makeUniSetExpression(Arrays.asList(new Expression[] {
 					Expressions.FALSE, Expressions.TRUE })));
 	/**
 	 * An in-built sort representing integer values.
 	 */
 	public static final HOGMSortDeclaration IN_BUILT_INTEGER = new HOGMSortDeclaration(
 			false, Expressions.makeSymbol("Integer"), UNKNOWN_SIZE,
-			ExtensionalSet.makeUniSetExpression(Collections.emptyList()));
+			ExtensionalSets.makeUniSetExpression(Collections.emptyList()));
 	
 	/**
 	 * An in-built sort representing real values.
 	 */
 	public static final HOGMSortDeclaration IN_BUILT_REAL = new HOGMSortDeclaration(
 			false, Expressions.makeSymbol("Real"), UNKNOWN_SIZE,
-			ExtensionalSet.makeUniSetExpression(Collections.emptyList()));
+			ExtensionalSets.makeUniSetExpression(Collections.emptyList()));
 	
 	/**
 	 * An in-built sort representing 'string' values.
 	 */
 	public static final HOGMSortDeclaration IN_BUILT_STRING = new HOGMSortDeclaration(
 			false, Expressions.makeSymbol("String"), UNKNOWN_SIZE,
-			ExtensionalSet.makeUniSetExpression(Collections.emptyList()));
+			ExtensionalSets.makeUniSetExpression(Collections.emptyList()));
 	
 	
 	public static final HOGMSortDeclaration[] IN_BUILT_SORTS = new HOGMSortDeclaration[] { IN_BUILT_BOOLEAN, IN_BUILT_INTEGER, IN_BUILT_REAL, IN_BUILT_STRING };
@@ -185,7 +185,7 @@ public class HOGMSortDeclaration {
 	 * 
 	 */
 	public HOGMSortDeclaration(Expression name, Expression size) {
-		this(name, size, ExtensionalSet.makeEmptySet());
+		this(name, size, ExtensionalSets.makeEmptySet());
 	}
 
 	/**
@@ -251,7 +251,7 @@ public class HOGMSortDeclaration {
 	 * @return the assigned constants to this sort.
 	 */
 	public List<Expression> getAssignedConstants() {
-		List<Expression> result = ExtensionalSet.getElements(constants);
+		List<Expression> result = ExtensionalSets.getElements(constants);
 
 		return result;
 	}
@@ -480,7 +480,7 @@ public class HOGMSortDeclaration {
 					constants = expression.get(2);
 				} 
 				else {
-					constants = ExtensionalSet.makeEmptySetExpression();
+					constants = ExtensionalSets.makeEmptySetExpression();
 				}
 
 				declaration = new HOGMSortDeclaration(name, size, constants);
@@ -568,7 +568,7 @@ public class HOGMSortDeclaration {
 		if (Sets.isExtensionalUniSet(constants)) {
 			boolean argsOk = true;
 			Set<Expression> seen = new LinkedHashSet<Expression>();
-			for (Expression arg : ExtensionalSet.getElements(constants)) {
+			for (Expression arg : ExtensionalSets.getElements(constants)) {
 				// Each constant must be a symbol.
 				if (!(arg.getSyntacticFormType().equals(Symbol.SYNTACTIC_FORM_TYPE))) {
 					argsOk = false;

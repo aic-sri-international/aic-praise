@@ -73,7 +73,7 @@ import com.sri.ai.grinder.sgdpllt.library.boole.Or;
 import com.sri.ai.grinder.sgdpllt.library.boole.ThereExists;
 import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.sgdpllt.library.number.Minus;
-import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSet;
+import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSets;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
 import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
@@ -144,7 +144,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		
 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
 				HOGMSortDeclaration.FUNCTOR_SORT_DECLARATION, name, size,
-				ExtensionalSet.makeUniSet(constants));
+				ExtensionalSets.makeUniSet(constants));
 		
 		sortDeclarations.add(newStatementInfo(result, ctx));
 		

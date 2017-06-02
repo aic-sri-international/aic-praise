@@ -64,7 +64,7 @@ import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.sgdpllt.library.indexexpression.IndexExpressions;
 import com.sri.ai.grinder.sgdpllt.library.set.CountingFormulaEquivalentExpressions;
 import com.sri.ai.grinder.sgdpllt.library.set.Sets;
-import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSet;
+import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSets;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
 import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
@@ -175,7 +175,7 @@ public class HOGModel {
 		
 		boolean validSortConstants(StatementInfo sortStatement) {
 			boolean result = true;	
-			for (Expression constant : ExtensionalSet.getElements(sortStatement.statement.get(2))) {
+			for (Expression constant : ExtensionalSets.getElements(sortStatement.statement.get(2))) {
 				if (Expressions.isStringLiteral(constant)) {
 					result = false;
 					newError(Type.SORT_CONSTANT_NAME_CANNOT_BE_A_STRING_LITERAL, ""+constant, sortStatement);
@@ -477,7 +477,7 @@ public class HOGModel {
 						else if (sortConstants.contains(expr)){
 							for (HOGMSortDeclaration sort : sorts.values()) {
 								// Have mapped the unique constant sort.
-								if (ExtensionalSet.getElements(sort.getConstants()).contains(expr)) {
+								if (ExtensionalSets.getElements(sort.getConstants()).contains(expr)) {
 									result = sort;
 									break;
 								}
