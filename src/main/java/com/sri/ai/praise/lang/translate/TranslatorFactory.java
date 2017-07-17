@@ -62,7 +62,7 @@ public class TranslatorFactory {
 		_translators.put(new Pair<>(ModelLanguage.UAI, ModelLanguage.HOGMv1),      UAI_to_HOGMv1_Using_Inequalities_Translator.class);
 //		_translators.put(new Pair<>(ModelLanguage.UAI, ModelLanguage.HOGMv1),      UAI_to_HOGMv1_Using_Equalities_Translator.class);
 		_translators.put(new Pair<>(ModelLanguage.UAI, ModelLanguage.HuginDotNet), UAI_to_HuginDotNet_Translator.class);
-//TODO - implementations of:
+// TODO - implementations of:
 // Church -> HOGMv1
 // HOGMv1 -> PMTK3
 // HOGMv1 -> HuginDotNet		

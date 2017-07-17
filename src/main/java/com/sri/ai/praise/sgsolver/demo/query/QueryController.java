@@ -163,7 +163,7 @@ public class QueryController {
     	});
     	queryComboBox.getEditor().setOnKeyPressed(keyEvent -> {	
             if (keyEvent.getCode() == KeyCode.DOWN && !queryComboBox.isShowing()) {
-            	//keyEvent.consume(); // NOTE: comment out as we want the default behavior of going to the end of the text to still work
+            	// keyEvent.consume(); // NOTE: comment out as we want the default behavior of going to the end of the text to still work
             	Platform.runLater(() -> {
             		queryComboBox.show();
             	});
@@ -227,7 +227,7 @@ public class QueryController {
 	private void displayQueryErrors(String query, List<HOGMQueryError> queryErrors, ParsedHOGModel parsedModel, long millisecondsToCompute) {
 		String title = "Query '"+query+"' encountered "+queryErrors.size()+" error(s) when attempting to compute answer ("+duration("took ", millisecondsToCompute)+")";
 		ListView<HOGMQueryError> errors = new ListView<>(FXCollections.observableList(queryErrors));
-		//errors.setFixedCellSize(24);
+		// errors.setFixedCellSize(24);
 		errors.setPrefHeight(24*5);
 		errors.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		errors.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {

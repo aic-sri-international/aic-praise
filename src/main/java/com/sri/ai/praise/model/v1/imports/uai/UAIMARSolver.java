@@ -140,10 +140,10 @@ public class UAIMARSolver {
 		}
 		
 		// Sort based on what we consider to be the simplest to hardest
-		//Collections.sort(models, (model1, model2) -> Double.compare(model1.ratioUniqueTablesToTables(), model2.ratioUniqueTablesToTables()));
-		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.largestNumberOfFunctionTableEntries(), model2.largestNumberOfFunctionTableEntries()));
+		// Collections.sort(models, (model1, model2) -> Double.compare(model1.ratioUniqueTablesToTables(), model2.ratioUniqueTablesToTables()));
+		// Collections.sort(models, (model1, model2) -> Integer.compare(model1.largestNumberOfFunctionTableEntries(), model2.largestNumberOfFunctionTableEntries()));
 		Collections.sort(models, (model1, model2) -> Integer.compare(model1.totalNumberEntriesForAllFunctionTables(), model2.totalNumberEntriesForAllFunctionTables()));
-		//Collections.sort(models, (model1, model2) -> Integer.compare(model1.numberTables(), model2.numberTables()));
+		// Collections.sort(models, (model1, model2) -> Integer.compare(model1.numberTables(), model2.numberTables()));
 		
 		Map<String, Boolean> modelSolvedStatus = new LinkedHashMap<>();
 		Map<String, Long>    modelSolvedTime   = new LinkedHashMap<>();
@@ -334,9 +334,9 @@ public class UAIMARSolver {
 				evidenceExpr = And.make(conjuncts);
 			}
 			
-			//System.out.println("mapFromCategoricalTypeNameToSizeString="+mapFromCategoricalTypeNameToSizeString);
-			//System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
-			//System.out.println("Markov Network=\n"+markovNetwork);
+			// System.out.println("mapFromCategoricalTypeNameToSizeString="+mapFromCategoricalTypeNameToSizeString);
+			// System.out.println("mapFromVariableNameToTypeName="+mapFromVariableNameToTypeName);
+			// System.out.println("Markov Network=\n"+markovNetwork);
 			
 			if (interrupted) {
 				System.out.println("Solver Interrupted (b).");

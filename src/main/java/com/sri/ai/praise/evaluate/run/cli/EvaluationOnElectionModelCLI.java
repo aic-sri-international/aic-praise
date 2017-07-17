@@ -87,7 +87,7 @@ public class EvaluationOnElectionModelCLI extends AbstractEvaluateCLI {
 		"\r\n" + 
 		"terrorAttacks = 1;\r\n" + 
 		"dow = 170;\r\n" + 
-		"//newJobs = 1;\r\n" + 
+		"// newJobs = 1;\r\n" + 
 		"\r\n" + 
 		"// P(newJobs) =\r\n" + 
 		"if newJobs = 0 then 1/101 else 1/101; // uniform\r\n" + 

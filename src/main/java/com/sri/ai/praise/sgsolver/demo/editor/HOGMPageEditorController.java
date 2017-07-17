@@ -93,7 +93,7 @@ public class HOGMPageEditorController implements ModelPageEditor {
 	
 	@Override
 	public Pair<List<HOGMQueryError>, String> validateAndGetModel() {
-		//Nothing to validate up front with the default model
+		// Nothing to validate up front with the default model
 		Pair<List<HOGMQueryError>, String> result = new Pair<>(Collections.emptyList(), getCurrentPageContents());
 		return result;
 	}

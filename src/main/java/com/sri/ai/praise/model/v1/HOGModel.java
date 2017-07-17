@@ -474,7 +474,7 @@ public class HOGModel {
 						else if ((result = getSort(expr)) != null) {
 							// has been assigned.
 						}
-						else if (sortConstants.contains(expr)){
+						else if (sortConstants.contains(expr)) {
 							for (HOGMSortDeclaration sort : sorts.values()) {
 								// Have mapped the unique constant sort.
 								if (ExtensionalSets.getElements(sort.getConstants()).contains(expr)) {
