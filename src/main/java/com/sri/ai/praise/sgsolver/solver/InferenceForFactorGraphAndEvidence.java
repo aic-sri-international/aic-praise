@@ -62,7 +62,7 @@ import com.sri.ai.grinder.sgdpllt.api.MultiIndexQuantifierEliminator;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
 import com.sri.ai.grinder.sgdpllt.core.SGDPLLTUtil;
 import com.sri.ai.grinder.sgdpllt.core.TrueContext;
-import com.sri.ai.grinder.sgdpllt.core.solver.SGDPLLT;
+import com.sri.ai.grinder.sgdpllt.core.solver.MultiIndexQuantifierEliminatorBasedOnTheoryProvidedSingleIndexQuantifierEliminator;
 import com.sri.ai.grinder.sgdpllt.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpllt.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.sgdpllt.group.SumProduct;
@@ -171,7 +171,7 @@ public class InferenceForFactorGraphAndEvidence {
 			solver = new SGVET();
 		}
 		else {
-			solver = new SGDPLLT();
+			solver = new MultiIndexQuantifierEliminatorBasedOnTheoryProvidedSingleIndexQuantifierEliminator();
 		}
 
 		evidenceProbability = null;
