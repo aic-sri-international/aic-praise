@@ -68,9 +68,6 @@ public class EvaluationOnElectionModelCLI extends AbstractEvaluateCLI {
 								list("likeIncumbent > likeChallenger"))));
 	}
 
-	/**
-	 * @return
-	 */
 	private String modelStringForDomainSize(int domainSize, int multiplier) {
 		domainSize *= multiplier;
 		return "random terrorAttacks : 0..20;\r\n" + 
