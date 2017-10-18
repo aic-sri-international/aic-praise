@@ -27,23 +27,63 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
  */
 public abstract class AbstractEvaluateCLI {
 
-	protected static class EvaluationArgs implements AutoCloseable {
+	protected static class DefaultPRAiSEEvaluationArguments implements PRAiSEEvaluationArguments {
 		// Optional
 		//
 		// Defaults to SGSolverEvaluator if not at least 1 specified
-		List<String> solverImplementationClassNames = new ArrayList<>(); // -s
+		protected List<String> solverImplementationClassNames = new ArrayList<>(); // -s
 		//
-		PrintStream notificationOut = System.out; // -n
-		PrintStream resultOut = System.out; // -r
+		protected PrintStream notificationOut = System.out; // -n
+		protected PrintStream resultOut = System.out; // -r
 		//
-		int totalCPURuntimeLimitSecondsPerSolveAttempt = 600; // -c
-		int totalMemoryLimitInMegabytesPerSolveAttempt = 2048; // -m
-		int numberRunsToAverageOver = 10; // -a
+		protected int totalCPURuntimeLimitSecondsPerSolveAttempt = 600; // -c
+		protected int totalMemoryLimitInMegabytesPerSolveAttempt = 2048; // -m
+		protected int numberRunsToAverageOver = 10; // -a
 		//
-		boolean translateAlways = false; // -t
+		protected boolean translateAlways = false; // -t
 
 		// Required
-		File workingDirectory; // -w
+		protected File workingDirectory; // -w
+
+		@Override
+		public List<String> getSolverImplementationClassNames() {
+			return solverImplementationClassNames;
+		}
+
+		@Override
+		public PrintStream getNotificationOut() {
+			return notificationOut;
+		}
+
+		@Override
+		public PrintStream getResultOut() {
+			return resultOut;
+		}
+
+		@Override
+		public int getTotalCPURuntimeLimitSecondsPerSolveAttempt() {
+			return totalCPURuntimeLimitSecondsPerSolveAttempt;
+		}
+
+		@Override
+		public int getTotalMemoryLimitInMegabytesPerSolveAttempt() {
+			return totalMemoryLimitInMegabytesPerSolveAttempt;
+		}
+
+		@Override
+		public int getNumberRunsToAverageOver() {
+			return numberRunsToAverageOver;
+		}
+
+		@Override
+		public boolean isTranslateAlways() {
+			return translateAlways;
+		}
+
+		@Override
+		public File getWorkingDirectory() {
+			return workingDirectory;
+		}
 
 		@Override
 		public void close() throws IOException {
@@ -62,9 +102,9 @@ public abstract class AbstractEvaluateCLI {
 	// TODO - consider using commons-configuration to evaluation input file
 	// reading, i.e:
 	// https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
-	protected static class EvaluationCLIOptions {
+	protected static class PRAiSEEvaluationArgumentsFromCommandLineOptions {
 
-		EvaluationArgs evaluationArgs;
+		DefaultPRAiSEEvaluationArguments evaluationArgs;
 
 		OptionSet options;
 
@@ -77,20 +117,15 @@ public abstract class AbstractEvaluateCLI {
 		OptionSpec<Integer> numberRunsToAverageOver;
 		OptionSpec<File> workingDirectory;
 
-		public EvaluationCLIOptions(String args[]) throws FileNotFoundException, IOException {
+		public PRAiSEEvaluationArgumentsFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
 			evaluationArgs = makeInitialEvaluationArgs();
 			setOptionSpecifications();
 			options = parser.parse(args);
 			setEvaluationArgsFromOptions();
 		}
 
-		/**
-		 * Returns evaluation args object to be used by (possibly extending) class.
-		 * 
-		 * @return
-		 */
-		protected EvaluationArgs makeInitialEvaluationArgs() {
-			return new EvaluationArgs();
+		protected DefaultPRAiSEEvaluationArguments makeInitialEvaluationArgs() {
+			return new DefaultPRAiSEEvaluationArguments();
 		}
 
 		protected void setOptionSpecifications() {
@@ -173,7 +208,7 @@ public abstract class AbstractEvaluateCLI {
 			}
 		}
 
-		public EvaluationArgs getEvaluationArgs() {
+		public DefaultPRAiSEEvaluationArguments getEvaluationArgs() {
 			return evaluationArgs;
 		}
 	}
@@ -185,8 +220,8 @@ public abstract class AbstractEvaluateCLI {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	protected EvaluationCLIOptions makeOptionSpecs(String args[]) throws FileNotFoundException, IOException {
-		return new EvaluationCLIOptions(args);
+	protected PRAiSEEvaluationArgumentsFromCommandLineOptions makeOptionSpecs(String args[]) throws FileNotFoundException, IOException {
+		return new PRAiSEEvaluationArgumentsFromCommandLineOptions(args);
 	}
 
 	/**
@@ -223,7 +258,7 @@ public abstract class AbstractEvaluateCLI {
 	}
 
 	public void run(String[] args) throws Exception {
-		try (EvaluationArgs evaluationArgs = getEvaluationArgs(args)) {
+		try (DefaultPRAiSEEvaluationArguments evaluationArgs = getEvaluationArgs(args)) {
 			PagedModelContainer modelsContainer = makeModelsContainer(evaluationArgs);
 			Evaluation.Configuration configuration = new Evaluation.Configuration(Evaluation.Type.PR,
 					evaluationArgs.workingDirectory, evaluationArgs.numberRunsToAverageOver);
@@ -249,12 +284,12 @@ public abstract class AbstractEvaluateCLI {
 	 * @return
 	 * @throws IOException
 	 */
-	abstract protected PagedModelContainer makeModelsContainer(EvaluationArgs evaluationArgs) throws IOException;
+	abstract protected PagedModelContainer makeModelsContainer(PRAiSEEvaluationArguments evaluationArgs) throws IOException;
 
-	private EvaluationArgs getEvaluationArgs(String[] args)
+	private DefaultPRAiSEEvaluationArguments getEvaluationArgs(String[] args)
 			throws UnsupportedEncodingException, FileNotFoundException, IOException {
 
-		EvaluationCLIOptions optionSpecs = makeOptionSpecs(args);
+		PRAiSEEvaluationArgumentsFromCommandLineOptions optionSpecs = makeOptionSpecs(args);
 		return optionSpecs.getEvaluationArgs();
 	}
 }

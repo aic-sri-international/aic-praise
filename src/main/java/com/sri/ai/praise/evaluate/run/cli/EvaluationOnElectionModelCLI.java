@@ -56,7 +56,7 @@ import com.sri.ai.util.collect.IntegerIterator;
  */
 public class EvaluationOnElectionModelCLI extends AbstractEvaluateCLI {
 	
-	protected PagedModelContainer makeModelsContainer(EvaluationArgs evaluationArgs) throws IOException {
+	protected PagedModelContainer makeModelsContainer(PRAiSEEvaluationArguments evaluationArgs) throws IOException {
 		return 
 				new PagedModelContainer(
 						"election", 

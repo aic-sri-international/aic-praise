@@ -53,12 +53,12 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
  *
  */
 public class EvaluationFromFileCLI extends AbstractEvaluateCLI {	
-	protected static class EvaluationArgsWithPraiseModelsFile extends EvaluationArgs {
+	protected static class EvaluationArgsWithPraiseModelsFile extends DefaultPRAiSEEvaluationArguments {
 		// Required
 		File praiseModelsFile; // -p
 	}
 
-	protected static class OptionSpecsWithPraiseModelsFile extends EvaluationCLIOptions {
+	protected static class OptionSpecsWithPraiseModelsFile extends PRAiSEEvaluationArgumentsFromCommandLineOptions {
 		OptionSpec<File> praiseModelsFile;
 		
 		public OptionSpecsWithPraiseModelsFile(String args[]) throws FileNotFoundException, IOException {
@@ -66,7 +66,7 @@ public class EvaluationFromFileCLI extends AbstractEvaluateCLI {
 		}
 
 		@Override
-		protected EvaluationArgs makeInitialEvaluationArgs() {
+		protected DefaultPRAiSEEvaluationArguments makeInitialEvaluationArgs() {
 			return new EvaluationArgsWithPraiseModelsFile(); 
 		}
 
@@ -89,11 +89,11 @@ public class EvaluationFromFileCLI extends AbstractEvaluateCLI {
 	}
 	
 	@Override
-	protected EvaluationCLIOptions makeOptionSpecs(String args[]) throws FileNotFoundException, IOException {
+	protected PRAiSEEvaluationArgumentsFromCommandLineOptions makeOptionSpecs(String args[]) throws FileNotFoundException, IOException {
 		return new OptionSpecsWithPraiseModelsFile(args);
 	}
 	
-	protected PagedModelContainer makeModelsContainer(EvaluationArgs evaluationArgs) throws IOException {
+	protected PagedModelContainer makeModelsContainer(PRAiSEEvaluationArguments evaluationArgs) throws IOException {
 		EvaluationArgsWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (EvaluationArgsWithPraiseModelsFile)evaluationArgs;
 		return new PagedModelContainer(evaluationArgsWithPraiseModelsFile.praiseModelsFile.getName(), evaluationArgsWithPraiseModelsFile.praiseModelsFile.toURI());
 	}
