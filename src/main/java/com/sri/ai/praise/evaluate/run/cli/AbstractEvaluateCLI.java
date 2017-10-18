@@ -62,7 +62,12 @@ public abstract class AbstractEvaluateCLI {
 	// TODO - consider using commons-configuration to evaluation input file
 	// reading, i.e:
 	// https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
-	protected static class OptionSpecs {
+	protected static class EvaluationCLIOptions {
+
+		EvaluationArgs evaluationArgs;
+
+		OptionSet options;
+
 		OptionParser parser;
 		OptionSpec<String> solverImplementationClasses;
 		OptionSpec<File> notificationFile;
@@ -72,7 +77,23 @@ public abstract class AbstractEvaluateCLI {
 		OptionSpec<Integer> numberRunsToAverageOver;
 		OptionSpec<File> workingDirectory;
 
-		public OptionSpecs(EvaluationArgs evaluationArgs) {
+		public EvaluationCLIOptions(String args[]) throws FileNotFoundException, IOException {
+			evaluationArgs = makeInitialEvaluationArgs();
+			setOptionSpecifications();
+			options = parser.parse(args);
+			setEvaluationArgsFromOptions();
+		}
+
+		/**
+		 * Returns evaluation args object to be used by (possibly extending) class.
+		 * 
+		 * @return
+		 */
+		protected EvaluationArgs makeInitialEvaluationArgs() {
+			return new EvaluationArgs();
+		}
+
+		protected void setOptionSpecifications() {
 			parser = new OptionParser();
 			// Optional
 			solverImplementationClasses = parser.accepts("s", "Solver implementation class name.").withRequiredArg()
@@ -109,75 +130,63 @@ public abstract class AbstractEvaluateCLI {
 			//
 			parser.accepts("help", "For help on command line arguments").forHelp();
 		}
-	}
+		
+		protected void setEvaluationArgsFromOptions()
+				throws IOException, FileNotFoundException {
+			if (options.has("help")) {
+				parser.printHelpOn(System.out);
+				System.exit(0);
+			}
 
-	/**
-	 * Returns evaluation args object to be used by (possibly extending) class.
-	 * 
-	 * @return
-	 */
-	protected EvaluationArgs makeEvaluationArgs() {
-		return new EvaluationArgs();
+			//
+			// Handle optional args
+			if (options.has(solverImplementationClasses)) {
+				evaluationArgs.solverImplementationClassNames
+						.addAll(options.valuesOf(solverImplementationClasses));
+			} else {
+				evaluationArgs.solverImplementationClassNames.add(SGSolverEvaluator.class.getName());
+			}
+			if (options.has(notificationFile)) {
+				evaluationArgs.notificationOut = new PrintStream(options.valueOf(notificationFile));
+			}
+			if (options.has(resultFile)) {
+				evaluationArgs.resultOut = new PrintStream(options.valueOf(resultFile));
+			}
+			if (options.has(totalCPURuntimeLimitSecondsPerSolveAttempt)) {
+				evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt = options
+						.valueOf(totalCPURuntimeLimitSecondsPerSolveAttempt);
+			}
+			if (options.has(totalMemoryLimitInMegabytesPerSolveAttempt)) {
+				evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt = options
+						.valueOf(totalMemoryLimitInMegabytesPerSolveAttempt);
+			}
+			if (options.has(numberRunsToAverageOver)) {
+				evaluationArgs.numberRunsToAverageOver = options.valueOf(numberRunsToAverageOver);
+			}
+			if (options.has("t")) {
+				evaluationArgs.translateAlways = true;
+			}
+
+			evaluationArgs.workingDirectory = options.valueOf(workingDirectory);
+			if (!evaluationArgs.workingDirectory.isDirectory()) {
+				throw new IllegalArgumentException("Working directory does not exist: " + evaluationArgs.workingDirectory);
+			}
+		}
+
+		public EvaluationArgs getEvaluationArgs() {
+			return evaluationArgs;
+		}
 	}
 
 	/**
 	 * Returns options specifications.
 	 * 
 	 * @return
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
 	 */
-	protected OptionSpecs makeOptionSpecs(EvaluationArgs evaluationArgs) {
-		return new OptionSpecs(evaluationArgs);
-	}
-
-	/**
-	 * Validates arguments
-	 * 
-	 * @param evaluationArgs
-	 * @param optionSpecs
-	 * @param options
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	protected void validateArguments(EvaluationArgs evaluationArgs, OptionSpecs optionSpecs, OptionSet options)
-			throws IOException, FileNotFoundException {
-		if (options.has("help")) {
-			optionSpecs.parser.printHelpOn(System.out);
-			System.exit(0);
-		}
-
-		//
-		// Handle optional args
-		if (options.has(optionSpecs.solverImplementationClasses)) {
-			evaluationArgs.solverImplementationClassNames
-					.addAll(options.valuesOf(optionSpecs.solverImplementationClasses));
-		} else {
-			evaluationArgs.solverImplementationClassNames.add(SGSolverEvaluator.class.getName());
-		}
-		if (options.has(optionSpecs.notificationFile)) {
-			evaluationArgs.notificationOut = new PrintStream(options.valueOf(optionSpecs.notificationFile));
-		}
-		if (options.has(optionSpecs.resultFile)) {
-			evaluationArgs.resultOut = new PrintStream(options.valueOf(optionSpecs.resultFile));
-		}
-		if (options.has(optionSpecs.totalCPURuntimeLimitSecondsPerSolveAttempt)) {
-			evaluationArgs.totalCPURuntimeLimitSecondsPerSolveAttempt = options
-					.valueOf(optionSpecs.totalCPURuntimeLimitSecondsPerSolveAttempt);
-		}
-		if (options.has(optionSpecs.totalMemoryLimitInMegabytesPerSolveAttempt)) {
-			evaluationArgs.totalMemoryLimitInMegabytesPerSolveAttempt = options
-					.valueOf(optionSpecs.totalMemoryLimitInMegabytesPerSolveAttempt);
-		}
-		if (options.has(optionSpecs.numberRunsToAverageOver)) {
-			evaluationArgs.numberRunsToAverageOver = options.valueOf(optionSpecs.numberRunsToAverageOver);
-		}
-		if (options.has("t")) {
-			evaluationArgs.translateAlways = true;
-		}
-
-		evaluationArgs.workingDirectory = options.valueOf(optionSpecs.workingDirectory);
-		if (!evaluationArgs.workingDirectory.isDirectory()) {
-			throw new IllegalArgumentException("Working directory does not exist: " + evaluationArgs.workingDirectory);
-		}
+	protected EvaluationCLIOptions makeOptionSpecs(String args[]) throws FileNotFoundException, IOException {
+		return new EvaluationCLIOptions(args);
 	}
 
 	/**
@@ -214,7 +223,7 @@ public abstract class AbstractEvaluateCLI {
 	}
 
 	public void run(String[] args) throws Exception {
-		try (EvaluationArgs evaluationArgs = getArgs(args)) {
+		try (EvaluationArgs evaluationArgs = getEvaluationArgs(args)) {
 			PagedModelContainer modelsContainer = makeModelsContainer(evaluationArgs);
 			Evaluation.Configuration configuration = new Evaluation.Configuration(Evaluation.Type.PR,
 					evaluationArgs.workingDirectory, evaluationArgs.numberRunsToAverageOver);
@@ -242,15 +251,10 @@ public abstract class AbstractEvaluateCLI {
 	 */
 	abstract protected PagedModelContainer makeModelsContainer(EvaluationArgs evaluationArgs) throws IOException;
 
-	private EvaluationArgs getArgs(String[] args)
+	private EvaluationArgs getEvaluationArgs(String[] args)
 			throws UnsupportedEncodingException, FileNotFoundException, IOException {
-		EvaluationArgs evaluationArgs = makeEvaluationArgs();
-		OptionSpecs optionSpecs = makeOptionSpecs(evaluationArgs);
 
-		OptionSet options = optionSpecs.parser.parse(args);
-
-		validateArguments(evaluationArgs, optionSpecs, options);
-
-		return evaluationArgs;
+		EvaluationCLIOptions optionSpecs = makeOptionSpecs(args);
+		return optionSpecs.getEvaluationArgs();
 	}
 }

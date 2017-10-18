@@ -41,7 +41,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -59,33 +58,41 @@ public class EvaluationFromFileCLI extends AbstractEvaluateCLI {
 		File praiseModelsFile; // -p
 	}
 
-	protected static class OptionSpecsWithPraiseModelsFile extends OptionSpecs {
+	protected static class OptionSpecsWithPraiseModelsFile extends EvaluationCLIOptions {
 		OptionSpec<File> praiseModelsFile;
 		
-		public OptionSpecsWithPraiseModelsFile(EvaluationArgs evaluationArgs) {
-			super(evaluationArgs);
+		public OptionSpecsWithPraiseModelsFile(String args[]) throws FileNotFoundException, IOException {
+			super(args);
+		}
+
+		@Override
+		protected EvaluationArgs makeInitialEvaluationArgs() {
+			return new EvaluationArgsWithPraiseModelsFile(); 
+		}
+
+		@Override
+		protected void setOptionSpecifications() {
+			super.setOptionSpecifications();
 			praiseModelsFile  = parser.accepts("p", "The PRAiSE Models file used as input for the evaluations").withRequiredArg().required().ofType(File.class);
 		}
-	}
 
-	protected EvaluationArgs makeEvaluationArgs() {
-		return new EvaluationArgsWithPraiseModelsFile(); 
-	}
-	
-	protected OptionSpecs makeOptionSpecs(EvaluationArgs evaluationArgs) {
-		return new OptionSpecsWithPraiseModelsFile(evaluationArgs);
-	}
-	
-	protected void validateArguments(EvaluationArgs evaluationArgs, OptionSpecs optionSpecs, OptionSet options) throws IOException, FileNotFoundException {
-		super.validateArguments(evaluationArgs, optionSpecs, options);
-		OptionSpecsWithPraiseModelsFile optionSpecsWithPraiseModelsFile = (OptionSpecsWithPraiseModelsFile) optionSpecs;
-		EvaluationArgsWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (EvaluationArgsWithPraiseModelsFile)evaluationArgs;
-		evaluationArgsWithPraiseModelsFile.praiseModelsFile = options.valueOf(optionSpecsWithPraiseModelsFile.praiseModelsFile);
-		if (!evaluationArgsWithPraiseModelsFile.praiseModelsFile.isFile()) {
-			throw new IllegalArgumentException("Input PRAiSE models file does not exist: " + evaluationArgsWithPraiseModelsFile.praiseModelsFile.getAbsolutePath());
+		@Override
+		protected void setEvaluationArgsFromOptions() throws IOException, FileNotFoundException {
+			super.setEvaluationArgsFromOptions();
+			EvaluationArgsWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (EvaluationArgsWithPraiseModelsFile)evaluationArgs;
+			evaluationArgsWithPraiseModelsFile.praiseModelsFile = options.valueOf(praiseModelsFile);
+			if (!evaluationArgsWithPraiseModelsFile.praiseModelsFile.isFile()) {
+				throw new IllegalArgumentException("Input PRAiSE models file does not exist: " + evaluationArgsWithPraiseModelsFile.praiseModelsFile.getAbsolutePath());
+			}
 		}
-	}
 
+	}
+	
+	@Override
+	protected EvaluationCLIOptions makeOptionSpecs(String args[]) throws FileNotFoundException, IOException {
+		return new OptionSpecsWithPraiseModelsFile(args);
+	}
+	
 	protected PagedModelContainer makeModelsContainer(EvaluationArgs evaluationArgs) throws IOException {
 		EvaluationArgsWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (EvaluationArgsWithPraiseModelsFile)evaluationArgs;
 		return new PagedModelContainer(evaluationArgsWithPraiseModelsFile.praiseModelsFile.getName(), evaluationArgsWithPraiseModelsFile.praiseModelsFile.toURI());
