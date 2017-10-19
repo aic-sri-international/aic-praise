@@ -45,7 +45,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.model.v1.export.UAIHOGModelGroundingListener;
-import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
+import com.sri.ai.praise.pimt.FactorsAndTypes;
 
 /**
  * Translator: HOGMv1->UAI

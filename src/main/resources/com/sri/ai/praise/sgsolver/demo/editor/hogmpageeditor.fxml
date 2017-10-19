@@ -6,7 +6,7 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="rootPane" prefHeight="600.0" prefWidth="1024.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.sgsolver.demo.editor.HOGMPageEditorController">
+<BorderPane fx:id="rootPane" prefHeight="600.0" prefWidth="1024.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.application.sgsolver.demo.editor.HOGMPageEditorController">
    <center>
       <SplitPane dividerPositions="0.65" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" styleClass="hiddenSplitter" BorderPane.alignment="CENTER">
         <items>

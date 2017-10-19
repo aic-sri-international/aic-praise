@@ -246,7 +246,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>com.sri.ai.praise.sgsolver.demo.SGSolverDemoApp</mainClass>
+							<mainClass>com.sri.ai.praise.application.sgsolver.demo.SGSolverDemoApp</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

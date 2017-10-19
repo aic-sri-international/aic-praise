@@ -92,7 +92,7 @@ var activeTableTab = "activeTableTab";
 <!-- ========= END OF TOP NAVBAR ========= -->
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="subTitle">com.sri.ai.praise.evaluate.solver.impl.vec</div>
+<div class="subTitle">com.sri.ai.praise.probabilisticsolver.core.vec</div>
 <h2 title="Class VECSolverEvaluator" class="title">Class VECSolverEvaluator</h2>
 </div>
 <div class="contentContainer">
@@ -100,10 +100,10 @@ var activeTableTab = "activeTableTab";
 <li><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
 <li>
 <ul class="inheritance">
-<li><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html" title="class in com.sri.ai.praise.evaluate.solver.impl">com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator</a></li>
+<li><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html" title="class in com.sri.ai.praise.probabilisticsolver.core">com.sri.ai.praise.probabilisticsolver.core.AbstractSolverEvaluator</a></li>
 <li>
 <ul class="inheritance">
-<li>com.sri.ai.praise.evaluate.solver.impl.vec.VECSolverEvaluator</li>
+<li>com.sri.ai.praise.probabilisticsolver.core.vec.VECSolverEvaluator</li>
 </ul>
 </li>
 </ul>
@@ -114,12 +114,12 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/SolverEvaluator.html" title="interface in com.sri.ai.praise.evaluate.solver">SolverEvaluator</a></dd>
+<dd><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/SolverEvaluator.html" title="interface in com.sri.ai.praise.probabilisticsolver">SolverEvaluator</a></dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">VECSolverEvaluator</span>
-extends <a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html" title="class in com.sri.ai.praise.evaluate.solver.impl">AbstractSolverEvaluator</a></pre>
+extends <a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html" title="class in com.sri.ai.praise.probabilisticsolver.core">AbstractSolverEvaluator</a></pre>
 <div class="block">Wrapper around Vibhav's UAI 2014 Solver, available from:<br>
  
  http://www.hlt.utdallas.edu/~vgogate/vec-uai14.tar.gz
@@ -182,7 +182,7 @@ extends <a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/vec/VECSolverEvaluator.html#getName--">getName</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/SolverEvaluatorProbabilityEvidenceResult.html" title="class in com.sri.ai.praise.evaluate.solver">SolverEvaluatorProbabilityEvidenceResult</a></code></td>
+<td class="colFirst"><code><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/SolverEvaluatorProbabilityEvidenceResult.html" title="class in com.sri.ai.praise.probabilisticsolver">SolverEvaluatorProbabilityEvidenceResult</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/vec/VECSolverEvaluator.html#solveProbabilityEvidence-java.lang.String-com.sri.ai.praise.lang.ModelLanguage-java.lang.String-java.lang.String-">solveProbabilityEvidence</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;solveRequestId,
                         <a href="../../../../../../../../com/sri/ai/praise/lang/ModelLanguage.html" title="enum in com.sri.ai.praise.lang">ModelLanguage</a>&nbsp;modelLanguage,
                         <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;model,
@@ -193,8 +193,8 @@ extends <a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/
 <li class="blockList"><a name="methods.inherited.from.class.com.sri.ai.praise.evaluate.solver.impl.AbstractSolverEvaluator">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;com.sri.ai.praise.evaluate.solver.impl.<a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html" title="class in com.sri.ai.praise.evaluate.solver.impl">AbstractSolverEvaluator</a></h3>
-<code><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html#getConfiguration--">getConfiguration</a>, <a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html#setConfiguration-com.sri.ai.praise.evaluate.solver.SolverEvaluatorConfiguration-">setConfiguration</a></code></li>
+<h3>Methods inherited from class&nbsp;com.sri.ai.praise.probabilisticsolver.core.<a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html" title="class in com.sri.ai.praise.probabilisticsolver.core">AbstractSolverEvaluator</a></h3>
+<code><a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html#getConfiguration--">getConfiguration</a>, <a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/AbstractSolverEvaluator.html#setConfiguration-com.sri.ai.praise.probabilisticsolver.SolverEvaluatorConfiguration-">setConfiguration</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -249,7 +249,7 @@ extends <a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/impl/
 <ul class="blockList">
 <li class="blockList">
 <h4>solveProbabilityEvidence</h4>
-<pre>public&nbsp;<a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/SolverEvaluatorProbabilityEvidenceResult.html" title="class in com.sri.ai.praise.evaluate.solver">SolverEvaluatorProbabilityEvidenceResult</a>&nbsp;solveProbabilityEvidence(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;solveRequestId,
+<pre>public&nbsp;<a href="../../../../../../../../com/sri/ai/praise/evaluate/solver/SolverEvaluatorProbabilityEvidenceResult.html" title="class in com.sri.ai.praise.probabilisticsolver">SolverEvaluatorProbabilityEvidenceResult</a>&nbsp;solveProbabilityEvidence(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;solveRequestId,
                                                                          <a href="../../../../../../../../com/sri/ai/praise/lang/ModelLanguage.html" title="enum in com.sri.ai.praise.lang">ModelLanguage</a>&nbsp;modelLanguage,
                                                                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;model,
                                                                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;evidenceQuery)

@@ -48,8 +48,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
-import com.sri.ai.praise.sgsolver.solver.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
+import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.pimt.FactorsAndTypes;
 import com.sri.ai.util.Util;
 
 /**

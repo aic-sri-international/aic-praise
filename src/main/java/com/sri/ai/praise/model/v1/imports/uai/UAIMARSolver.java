@@ -77,8 +77,8 @@ import com.sri.ai.grinder.sgdpllt.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.sgdpllt.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
-import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
-import com.sri.ai.praise.sgsolver.solver.InferenceForFactorGraphAndEvidence;
+import com.sri.ai.praise.pimt.FactorsAndTypes;
+import com.sri.ai.praise.pimt.InferenceForFactorGraphAndEvidence;
 
 /**
  * 

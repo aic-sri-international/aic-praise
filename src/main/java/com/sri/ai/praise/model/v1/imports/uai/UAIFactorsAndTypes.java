@@ -50,7 +50,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
-import com.sri.ai.praise.sgsolver.solver.FactorsAndTypes;
+import com.sri.ai.praise.pimt.FactorsAndTypes;
 
 @Beta
 public class UAIFactorsAndTypes implements FactorsAndTypes {
