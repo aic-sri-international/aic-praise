@@ -27,6 +27,15 @@ import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
 public abstract class AbstractEvaluationExecutable {
 
 	/**
+	 * A method making a {@link PagedModelContainer} from evaluation arguments.
+	 * 
+	 * @param evaluationArgs
+	 * @return
+	 * @throws IOException
+	 */
+	abstract protected PagedModelContainer makeModelsContainer(SetOfSolversEvaluationConfiguration evaluationArgs) throws IOException;
+
+	/**
 	 * Returns options specifications.
 	 * 
 	 * @return
@@ -36,15 +45,6 @@ public abstract class AbstractEvaluationExecutable {
 	protected EvaluationConfigurationFromCommandLineOptions makeEvaluationArgumentsFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
 		return new EvaluationConfigurationFromCommandLineOptions(args);
 	}
-
-	/**
-	 * A method making a {@link PagedModelContainer} from evaluation arguments.
-	 * 
-	 * @param evaluationArgs
-	 * @return
-	 * @throws IOException
-	 */
-	abstract protected PagedModelContainer makeModelsContainer(SetOfSolversEvaluationConfiguration evaluationArgs) throws IOException;
 
 	public void run(String[] args) throws Exception {
 		
@@ -67,6 +67,25 @@ public abstract class AbstractEvaluationExecutable {
 		}
 	}
 
+	/**
+	 * Evaluates given solvers on given models according to given evaluation
+	 * configurations and streams for notifications and results.
+	 * 
+	 * @param configuration
+	 * @param modelsContainer
+	 * @param solverConfigurations
+	 * @param notificationOut
+	 * @param resultOut
+	 */
+	public static void evaluate(SolverEvaluationConfiguration configuration, PagedModelContainer modelsContainer,
+			List<SolverConfiguration> solverConfigurations, PrintStream notificationOut,
+			PrintStream resultOut) {
+	
+		Evaluation evaluation = new Evaluation();
+		OutputListener outputListener = new OutputListener(notificationOut, resultOut);
+		evaluation.evaluate(configuration, solverConfigurations, modelsContainer, outputListener);
+	}
+
 	private List<SolverConfiguration> makeSolverEvaluatorConfigurations(DefaultSetOfSolversEvaluationConfiguration evaluationConfiguration) {
 		List<SolverConfiguration> solverConfigurations = new ArrayList<>();
 		for (String solverImplementationClassName : evaluationConfiguration.getSolverImplementationClassNames()) {
@@ -82,39 +101,6 @@ public abstract class AbstractEvaluationExecutable {
 				new SolverConfiguration(
 						solverImplementationClassName, evaluationConfiguration);
 		return solverConfiguration;
-	}
-
-	/**
-	 * Evaluates given solvers on given models according to given evaluation
-	 * configurations and streams for notifications and results.
-	 * 
-	 * @param configuration
-	 * @param modelsContainer
-	 * @param solverConfigurations
-	 * @param notificationOut
-	 * @param resultOut
-	 */
-	public static void evaluate(SolverEvaluationConfiguration configuration, PagedModelContainer modelsContainer,
-			List<SolverConfiguration> solverConfigurations, PrintStream notificationOut,
-			PrintStream resultOut) {
-
-		Evaluation evaluation = new Evaluation();
-		evaluation.evaluate(configuration, solverConfigurations, modelsContainer, new OutputListener() {
-			@Override
-			public void notification(String notification) {
-				notificationOut.println(notification);
-			}
-
-			@Override
-			public void notificationException(Exception exception) {
-				exception.printStackTrace(notificationOut);
-			}
-
-			@Override
-			public void csvResultOutput(String csvLine) {
-				resultOut.println(csvLine);
-			}
-		});
 	}
 
 	private DefaultSetOfSolversEvaluationConfiguration getEvaluationArgs(String[] args)

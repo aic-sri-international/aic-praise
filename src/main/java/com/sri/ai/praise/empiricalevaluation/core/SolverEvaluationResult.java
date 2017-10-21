@@ -1,7 +1,6 @@
 package com.sri.ai.praise.empiricalevaluation.core;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.empiricalevaluation.api.configuration.SolverEvaluationConfiguration;
 import com.sri.ai.praise.probabilisticsolver.SolverResult;
 
 public class SolverEvaluationResult {
