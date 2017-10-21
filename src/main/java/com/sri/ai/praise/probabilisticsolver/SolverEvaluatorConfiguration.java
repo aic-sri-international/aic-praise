@@ -38,7 +38,6 @@
 package com.sri.ai.praise.probabilisticsolver;
 
 import java.io.File;
-import java.util.Map;
 
 import com.sri.ai.praise.lang.translate.TranslatorOptions;
 
@@ -52,15 +51,13 @@ public class SolverEvaluatorConfiguration {
 	private int totalCPURuntimeLimitSecondsPerSolveAttempt;
 	private int totalMemoryLimitInMegabytesPerSolveAttempt;
 	private boolean cacheTranslations;
-	private Map<String, String> solverSpecificConfiguration;
 	private File workingDirectory;
 	
-	public SolverEvaluatorConfiguration(String implementationClassName, int totalCPURuntimeLimitSecondsPerSolveAttempt, int totalMemoryLimitInMegabytesPerSolveAttempt, boolean cacheTranslations, Map<String, String> solverSpecificConfiguration) {
+	public SolverEvaluatorConfiguration(String implementationClassName, int totalCPURuntimeLimitSecondsPerSolveAttempt, int totalMemoryLimitInMegabytesPerSolveAttempt, boolean cacheTranslations) {
 		this.implementationClassName                    = implementationClassName;
 		this.totalCPURuntimeLimitSecondsPerSolveAttempt = totalCPURuntimeLimitSecondsPerSolveAttempt;
 		this.totalMemoryLimitInMegabytesPerSolveAttempt = totalMemoryLimitInMegabytesPerSolveAttempt;
 		this.cacheTranslations                          = cacheTranslations;
-		this.solverSpecificConfiguration                = solverSpecificConfiguration;
 	}
 
 	public String getImplementationClassName() {
@@ -79,10 +76,6 @@ public class SolverEvaluatorConfiguration {
 		return cacheTranslations;
 	}
 
-	public Map<String, String> getSolverSpecificConfiguration() {
-		return solverSpecificConfiguration;
-	}
-	
 	public File getWorkingDirectory() {
 		return workingDirectory;
 	}

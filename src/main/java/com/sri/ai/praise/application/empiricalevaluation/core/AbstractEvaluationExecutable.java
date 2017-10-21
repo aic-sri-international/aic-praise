@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationFromCommandLineOptions;
@@ -51,24 +50,40 @@ public abstract class AbstractEvaluationExecutable {
 		try (DefaultEvaluationConfiguration evaluationConfiguration = getEvaluationArgs(args)) {
 
 			PagedModelContainer modelsContainer = makeModelsContainer(evaluationConfiguration);
-			SolverConfiguration configuration = new SolverConfiguration(Evaluation.ProblemType.PR,
-					evaluationConfiguration.getWorkingDirectory(), evaluationConfiguration.getNumberOfRunsToAverageOver());
-			List<SolverEvaluatorConfiguration> solverConfigurations = new ArrayList<>();
-			for (String solverImplementationClassName : evaluationConfiguration.getSolverImplementationClassNames()) {
-				solverConfigurations.add(
-						new SolverEvaluatorConfiguration(
-								solverImplementationClassName,
-								evaluationConfiguration.getTotalCPURuntimeLimitSecondsPerSolveAttempt(),
-								evaluationConfiguration.getTotalMemoryLimitInMegabytesPerSolveAttempt(),
-								!evaluationConfiguration.doesNotCacheTranslations(),
-								Collections.emptyMap()));
-			}
+			
+			SolverConfiguration configuration =
+					new SolverConfiguration(
+							Evaluation.ProblemType.PR,
+							evaluationConfiguration.getWorkingDirectory(),
+							evaluationConfiguration.getNumberOfRunsToAverageOver());
+			
+			List<SolverEvaluatorConfiguration> solverConfigurations = makeSolverEvaluatorConfigurations(evaluationConfiguration);
 	
 			PrintStream notificationOut = evaluationConfiguration.getNotificationOut();
 			PrintStream resultOut = evaluationConfiguration.getResultOut();
 	
 			evaluate(configuration, modelsContainer, solverConfigurations, notificationOut, resultOut);
 		}
+	}
+
+	private List<SolverEvaluatorConfiguration> makeSolverEvaluatorConfigurations(DefaultEvaluationConfiguration evaluationConfiguration) {
+		List<SolverEvaluatorConfiguration> solverConfigurations = new ArrayList<>();
+		for (String solverImplementationClassName : evaluationConfiguration.getSolverImplementationClassNames()) {
+			SolverEvaluatorConfiguration solverConfiguration = 
+					makeSolverEvaluatorConfiguration(solverImplementationClassName, evaluationConfiguration);
+			solverConfigurations.add(solverConfiguration);
+		}
+		return solverConfigurations;
+	}
+
+	private SolverEvaluatorConfiguration makeSolverEvaluatorConfiguration(String solverImplementationClassName, DefaultEvaluationConfiguration evaluationConfiguration) {
+		SolverEvaluatorConfiguration solverConfiguration = 
+				new SolverEvaluatorConfiguration(
+						solverImplementationClassName,
+						evaluationConfiguration.getTotalCPURuntimeLimitSecondsPerSolveAttempt(),
+						evaluationConfiguration.getTotalMemoryLimitInMegabytesPerSolveAttempt(),
+						!evaluationConfiguration.doesNotCacheTranslations());
+		return solverConfiguration;
 	}
 
 	/**
@@ -93,8 +108,8 @@ public abstract class AbstractEvaluationExecutable {
 			}
 
 			@Override
-			public void notificationException(Exception ex) {
-				ex.printStackTrace(notificationOut);
+			public void notificationException(Exception exception) {
+				exception.printStackTrace(notificationOut);
 			}
 
 			@Override

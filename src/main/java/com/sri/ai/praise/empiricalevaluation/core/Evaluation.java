@@ -71,7 +71,7 @@ public class Evaluation {
 		// Note, varying domain sizes etc... is achieved by creating variants of a base model in the provided paged model container
 		long evaluationStart = System.currentTimeMillis();	
 		try {
-			evaluateWithoutTiming(solverConfigurations, modelsToEvaluateContainer, configuration, outputListener);
+			evaluateWithoutTiming(configuration, solverConfigurations, modelsToEvaluateContainer, outputListener);
 		}
 		catch (Exception exception) {
 			outputListener.notificationException(exception);
@@ -80,13 +80,13 @@ public class Evaluation {
 		outputListener.notification("Evaluation took " + toDurationString(evaluationEnd - evaluationStart) + " to run to completion.");
 	}
 
-	private void evaluateWithoutTiming(List<SolverEvaluatorConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, SolverConfiguration configuration, OutputListener outputListener) throws Exception {
+	private void evaluateWithoutTiming(SolverConfiguration configuration, List<SolverEvaluatorConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) throws Exception {
 
-		List<SolverEvaluator> solvers = setUp(solverConfigurations, modelsToEvaluateContainer, configuration, outputListener);
+		List<SolverEvaluator> solvers = setUp(configuration, solverConfigurations, modelsToEvaluateContainer, outputListener);
 		evaluateAllModels(solvers, modelsToEvaluateContainer, configuration, outputListener);
 	}
 
-	private List<SolverEvaluator> setUp(List<SolverEvaluatorConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, SolverConfiguration configuration, OutputListener outputListener) throws Exception {
+	private List<SolverEvaluator> setUp(SolverConfiguration configuration, List<SolverEvaluatorConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) throws Exception {
 		
 		List<SolverEvaluator> solvers = makeSolvers(solverConfigurations, configuration.getWorkingDirectory());
 		
