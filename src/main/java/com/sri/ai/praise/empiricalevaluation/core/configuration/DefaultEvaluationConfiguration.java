@@ -9,63 +9,101 @@ import java.util.List;
 import com.sri.ai.praise.empiricalevaluation.api.configuration.EvaluationConfiguration;
 
 public class DefaultEvaluationConfiguration implements EvaluationConfiguration {
-	// Optional
-	//
-	// Defaults to SGSolverEvaluator if not at least 1 specified
-	public List<String> solverImplementationClassNames = new ArrayList<>(); // -s
-	//
-	public PrintStream notificationOut = System.out; // -n
-	public PrintStream resultOut = System.out; // -r
-	//
-	public int totalCPURuntimeLimitSecondsPerSolveAttempt = 600; // -c
-	public int totalMemoryLimitInMegabytesPerSolveAttempt = 2048; // -m
-	public int numberOfRunsToAverageOver = 10; // -a
-	//
-	public boolean translateAlways = false; // -t
 
-	// Required
-	public File workingDirectory; // -w
+	private List<String> solverImplementationClassNames = new ArrayList<>(); // -s
+
+	private PrintStream notificationOut = System.out; // -n
+	private PrintStream resultOut = System.out; // -r
+
+	private int totalCPURuntimeLimitSecondsPerSolveAttempt = 600; // -c
+	private int totalMemoryLimitInMegabytesPerSolveAttempt = 2048; // -m
+	private int numberOfRunsToAverageOver = 10; // -a
+
+	private boolean doesNotCacheTranslations = false; // -t
+
+	private File workingDirectory; // -w
+	
 
 	@Override
 	public List<String> getSolverImplementationClassNames() {
 		return solverImplementationClassNames;
 	}
 
+	public void setSolverImplementationClassNames(List<String> solverImplementationClassNames) {
+		this.solverImplementationClassNames = solverImplementationClassNames;
+	}
+
+	
 	@Override
 	public PrintStream getNotificationOut() {
 		return notificationOut;
 	}
 
+	public void setNotificationOut(PrintStream notificationOut) {
+		this.notificationOut = notificationOut;
+	}
+
+	
 	@Override
 	public PrintStream getResultOut() {
 		return resultOut;
 	}
 
+	public void setResultOut(PrintStream resultOut) {
+		this.resultOut = resultOut;
+	}
+
+	
 	@Override
 	public int getTotalCPURuntimeLimitSecondsPerSolveAttempt() {
 		return totalCPURuntimeLimitSecondsPerSolveAttempt;
 	}
 
+	public void setTotalCPURuntimeLimitSecondsPerSolveAttempt(int totalCPURuntimeLimitSecondsPerSolveAttempt) {
+		this.totalCPURuntimeLimitSecondsPerSolveAttempt = totalCPURuntimeLimitSecondsPerSolveAttempt;
+	}
+
+	
 	@Override
 	public int getTotalMemoryLimitInMegabytesPerSolveAttempt() {
 		return totalMemoryLimitInMegabytesPerSolveAttempt;
 	}
 
+	public void setTotalMemoryLimitInMegabytesPerSolveAttempt(int totalMemoryLimitInMegabytesPerSolveAttempt) {
+		this.totalMemoryLimitInMegabytesPerSolveAttempt = totalMemoryLimitInMegabytesPerSolveAttempt;
+	}
+
+	
 	@Override
 	public int getNumberOfRunsToAverageOver() {
 		return numberOfRunsToAverageOver;
 	}
 
-	@Override
-	public boolean isTranslateAlways() {
-		return translateAlways;
+	public void setNumberOfRunsToAverageOver(int numberOfRunsToAverageOver) {
+		this.numberOfRunsToAverageOver = numberOfRunsToAverageOver;
 	}
 
+	
+	@Override
+	public boolean doesNotCacheTranslations() {
+		return doesNotCacheTranslations;
+	}
+
+	public void setDoesNotCacheTranslations(boolean doesNotCacheTranslations) {
+		this.doesNotCacheTranslations = doesNotCacheTranslations;
+	}
+
+	
 	@Override
 	public File getWorkingDirectory() {
 		return workingDirectory;
 	}
 
+	public void setWorkingDirectory(File workingDirectory) {
+		this.workingDirectory = workingDirectory;
+	}
+
+	
 	@Override
 	public void close() throws IOException {
 		notificationOut.flush();

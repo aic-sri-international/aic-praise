@@ -56,7 +56,7 @@ public class SGSolverDemoApp extends Application {
         controller.setMainStage(primaryStage);
         Scene scene = new Scene(root, 1024, 768);
         primaryStage.setScene(scene);
-        scene.getStylesheets().add("com/sri/ai/praise/sgsolver/demo/sgsolverdemo.css");
+        scene.getStylesheets().add("com/sri/ai/praise/application/sgsolver/demo/sgsolverdemo.css");
         scene.getStylesheets().add(GlyphsStyle.BLUE.getStylePath());
         primaryStage.show();
     }

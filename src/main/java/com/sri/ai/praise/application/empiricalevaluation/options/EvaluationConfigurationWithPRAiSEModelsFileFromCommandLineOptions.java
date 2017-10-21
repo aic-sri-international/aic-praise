@@ -9,10 +9,10 @@ import com.sri.ai.praise.empiricalevaluation.core.configuration.EvaluationConfig
 
 import joptsimple.OptionSpec;
 
-public class EvaluationArgumentsWithPRAiSEModelsFileFromCommandLineOptions extends EvaluationArgumentsFromCommandLineOptions {
+public class EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions extends EvaluationConfigurationFromCommandLineOptions {
 	OptionSpec<File> praiseModelsFile;
 	
-	public EvaluationArgumentsWithPRAiSEModelsFileFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+	public EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
 		super(args);
 	}
 
@@ -24,7 +24,7 @@ public class EvaluationArgumentsWithPRAiSEModelsFileFromCommandLineOptions exten
 	@Override
 	protected void setOptionSpecifications() {
 		super.setOptionSpecifications();
-		praiseModelsFile  = parser.accepts("p", "The PRAiSE Models file used as input for the evaluations").withRequiredArg().required().ofType(File.class);
+		praiseModelsFile  = parser.accepts("p", "The PRAiSE Models file (typically recorded by the PRAiSE demo environment) used as input for the evaluations").withRequiredArg().required().ofType(File.class);
 	}
 
 	@Override
@@ -36,5 +36,4 @@ public class EvaluationArgumentsWithPRAiSEModelsFileFromCommandLineOptions exten
 			throw new IllegalArgumentException("Input PRAiSE models file does not exist: " + evaluationArgsWithPraiseModelsFile.praiseModelsFile.getAbsolutePath());
 		}
 	}
-
 }

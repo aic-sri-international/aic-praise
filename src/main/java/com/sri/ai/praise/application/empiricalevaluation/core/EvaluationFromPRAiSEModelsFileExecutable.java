@@ -40,8 +40,8 @@ package com.sri.ai.praise.application.empiricalevaluation.core;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationArgumentsFromCommandLineOptions;
-import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationArgumentsWithPRAiSEModelsFileFromCommandLineOptions;
+import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationFromCommandLineOptions;
+import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions;
 import com.sri.ai.praise.empiricalevaluation.api.configuration.EvaluationConfiguration;
 import com.sri.ai.praise.empiricalevaluation.core.configuration.EvaluationConfigurationWithPraiseModelsFile;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -56,8 +56,8 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
 public class EvaluationFromPRAiSEModelsFileExecutable extends AbstractEvaluationExecutable {	
 	
 	@Override
-	protected EvaluationArgumentsFromCommandLineOptions makeEvaluationArgumentsFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		return new EvaluationArgumentsWithPRAiSEModelsFileFromCommandLineOptions(args);
+	protected EvaluationConfigurationFromCommandLineOptions makeEvaluationArgumentsFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+		return new EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions(args);
 	}
 	
 	protected PagedModelContainer makeModelsContainer(EvaluationConfiguration evaluationArgs) throws IOException {
