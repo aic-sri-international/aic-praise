@@ -50,8 +50,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.lang.translate.TranslatorFactory;
-import com.sri.ai.praise.probabilisticsolver.SolverEvaluatorProbabilityEvidenceResult;
-import com.sri.ai.praise.probabilisticsolver.core.AbstractSolverEvaluator;
+import com.sri.ai.praise.probabilisticsolver.SolverResult;
+import com.sri.ai.praise.probabilisticsolver.core.AbstractSolver;
 
 /**
  * Wrapper around Vibhav's UAI 2014 Solver, available from:<br>
@@ -72,7 +72,7 @@ import com.sri.ai.praise.probabilisticsolver.core.AbstractSolverEvaluator;
  * @author oreilly
  *
  */
-public class VECSolverEvaluator extends AbstractSolverEvaluator {
+public class VECSolver extends AbstractSolver {
 	
 	private static final String _vecProgramName           = "vec-uai14";
 	private static final String _probabilityEvidenceQuery = "PR";
@@ -83,7 +83,7 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 	}
 
 	@Override
-	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(String solveRequestId, ModelLanguage modelLanguage, String model, String evidenceQuery) 
+	public SolverResult solve(String solveRequestId, ModelLanguage modelLanguage, String model, String evidenceQuery) 
 		throws Exception {
 		
 		if (modelLanguage != ModelLanguage.HOGMv1) {
@@ -99,7 +99,7 @@ public class VECSolverEvaluator extends AbstractSolverEvaluator {
 		VECCallResult evidenceResult  = callVECPR("Evidence "+solveRequestId, inputToUAITranslator, hogmv1Model+"\nUAIQuery;", new Reader[] {new StringReader(hogmv1Model), new StringReader("UAIQuery")});
 		
 		Double probabilityResult = Math.pow(10, evidenceResult.resultLog10) / Math.pow(10, partitionResult.resultLog10);
-		SolverEvaluatorProbabilityEvidenceResult result = new SolverEvaluatorProbabilityEvidenceResult(
+		SolverResult result = new SolverResult(
 					Math.max(partitionResult.translationTookMS, evidenceResult.translationTookMS),
 					Math.max(partitionResult.vecProcessTookMS, evidenceResult.vecProcessTookMS),
 					probabilityResult.isNaN() ? null : Expressions.makeSymbol(probabilityResult)

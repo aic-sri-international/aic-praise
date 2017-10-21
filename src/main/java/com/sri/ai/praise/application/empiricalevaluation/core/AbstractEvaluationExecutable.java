@@ -8,13 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationFromCommandLineOptions;
-import com.sri.ai.praise.empiricalevaluation.api.configuration.EvaluationConfiguration;
+import com.sri.ai.praise.empiricalevaluation.api.configuration.SetOfSolversEvaluationConfiguration;
+import com.sri.ai.praise.empiricalevaluation.api.configuration.SolverEvaluationConfiguration;
 import com.sri.ai.praise.empiricalevaluation.core.Evaluation;
 import com.sri.ai.praise.empiricalevaluation.core.OutputListener;
-import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultEvaluationConfiguration;
-import com.sri.ai.praise.empiricalevaluation.core.configuration.SolverConfiguration;
+import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultSetOfSolversEvaluationConfiguration;
+import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultSolverEvaluationConfiguration;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
-import com.sri.ai.praise.probabilisticsolver.SolverEvaluatorConfiguration;
+import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
 
 /**
  * Provides a static method for outputting evaluation results for given solvers,
@@ -43,21 +44,21 @@ public abstract class AbstractEvaluationExecutable {
 	 * @return
 	 * @throws IOException
 	 */
-	abstract protected PagedModelContainer makeModelsContainer(EvaluationConfiguration evaluationArgs) throws IOException;
+	abstract protected PagedModelContainer makeModelsContainer(SetOfSolversEvaluationConfiguration evaluationArgs) throws IOException;
 
 	public void run(String[] args) throws Exception {
 		
-		try (DefaultEvaluationConfiguration evaluationConfiguration = getEvaluationArgs(args)) {
+		try (DefaultSetOfSolversEvaluationConfiguration evaluationConfiguration = getEvaluationArgs(args)) {
 
 			PagedModelContainer modelsContainer = makeModelsContainer(evaluationConfiguration);
 			
-			SolverConfiguration configuration =
-					new SolverConfiguration(
+			SolverEvaluationConfiguration configuration =
+					new DefaultSolverEvaluationConfiguration(
 							Evaluation.ProblemType.PR,
 							evaluationConfiguration.getWorkingDirectory(),
 							evaluationConfiguration.getNumberOfRunsToAverageOver());
 			
-			List<SolverEvaluatorConfiguration> solverConfigurations = makeSolverEvaluatorConfigurations(evaluationConfiguration);
+			List<SolverConfiguration> solverConfigurations = makeSolverEvaluatorConfigurations(evaluationConfiguration);
 	
 			PrintStream notificationOut = evaluationConfiguration.getNotificationOut();
 			PrintStream resultOut = evaluationConfiguration.getResultOut();
@@ -66,23 +67,20 @@ public abstract class AbstractEvaluationExecutable {
 		}
 	}
 
-	private List<SolverEvaluatorConfiguration> makeSolverEvaluatorConfigurations(DefaultEvaluationConfiguration evaluationConfiguration) {
-		List<SolverEvaluatorConfiguration> solverConfigurations = new ArrayList<>();
+	private List<SolverConfiguration> makeSolverEvaluatorConfigurations(DefaultSetOfSolversEvaluationConfiguration evaluationConfiguration) {
+		List<SolverConfiguration> solverConfigurations = new ArrayList<>();
 		for (String solverImplementationClassName : evaluationConfiguration.getSolverImplementationClassNames()) {
-			SolverEvaluatorConfiguration solverConfiguration = 
+			SolverConfiguration solverConfiguration = 
 					makeSolverEvaluatorConfiguration(solverImplementationClassName, evaluationConfiguration);
 			solverConfigurations.add(solverConfiguration);
 		}
 		return solverConfigurations;
 	}
 
-	private SolverEvaluatorConfiguration makeSolverEvaluatorConfiguration(String solverImplementationClassName, DefaultEvaluationConfiguration evaluationConfiguration) {
-		SolverEvaluatorConfiguration solverConfiguration = 
-				new SolverEvaluatorConfiguration(
-						solverImplementationClassName,
-						evaluationConfiguration.getTotalCPURuntimeLimitSecondsPerSolveAttempt(),
-						evaluationConfiguration.getTotalMemoryLimitInMegabytesPerSolveAttempt(),
-						!evaluationConfiguration.doesNotCacheTranslations());
+	private SolverConfiguration makeSolverEvaluatorConfiguration(String solverImplementationClassName, SetOfSolversEvaluationConfiguration evaluationConfiguration) {
+		SolverConfiguration solverConfiguration = 
+				new SolverConfiguration(
+						solverImplementationClassName, evaluationConfiguration);
 		return solverConfiguration;
 	}
 
@@ -96,8 +94,8 @@ public abstract class AbstractEvaluationExecutable {
 	 * @param notificationOut
 	 * @param resultOut
 	 */
-	public static void evaluate(SolverConfiguration configuration, PagedModelContainer modelsContainer,
-			List<SolverEvaluatorConfiguration> solverConfigurations, PrintStream notificationOut,
+	public static void evaluate(SolverEvaluationConfiguration configuration, PagedModelContainer modelsContainer,
+			List<SolverConfiguration> solverConfigurations, PrintStream notificationOut,
 			PrintStream resultOut) {
 
 		Evaluation evaluation = new Evaluation();
@@ -119,7 +117,7 @@ public abstract class AbstractEvaluationExecutable {
 		});
 	}
 
-	private DefaultEvaluationConfiguration getEvaluationArgs(String[] args)
+	private DefaultSetOfSolversEvaluationConfiguration getEvaluationArgs(String[] args)
 			throws UnsupportedEncodingException, FileNotFoundException, IOException {
 
 		EvaluationConfigurationFromCommandLineOptions optionSpecs = makeEvaluationArgumentsFromCommandLineOptions(args);

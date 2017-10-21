@@ -37,19 +37,19 @@
  */
 package com.sri.ai.praise.probabilisticsolver.core;
 
-import com.sri.ai.praise.probabilisticsolver.SolverEvaluator;
-import com.sri.ai.praise.probabilisticsolver.SolverEvaluatorConfiguration;
+import com.sri.ai.praise.probabilisticsolver.Solver;
+import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
 
-public abstract class AbstractSolverEvaluator implements SolverEvaluator {
-	private SolverEvaluatorConfiguration configuration;
+public abstract class AbstractSolver implements Solver {
+	private SolverConfiguration configuration;
 	
 	@Override
-	public SolverEvaluatorConfiguration getConfiguration() {
+	public SolverConfiguration getConfiguration() {
 		return configuration;
 	}
 	
 	@Override
-	public void setConfiguration(SolverEvaluatorConfiguration configuration) {
+	public void setConfiguration(SolverConfiguration configuration) {
 		this.configuration = configuration;
 	}
 }

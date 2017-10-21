@@ -35,26 +35,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.probabilisticsolver.core.samiam;
+package com.sri.ai.praise.probabilisticsolver;
 
-import com.sri.ai.praise.lang.ModelLanguage;
-import com.sri.ai.praise.probabilisticsolver.core.AbstractSolverEvaluator;
+import com.sri.ai.expresso.api.Expression;
 
-/**
- * Wrapper around the SamIam inference library, available from:<br>
- * http://reasoning.cs.ucla.edu/samiam/
- * 
- * @author oreilly
- */
-public class SamIamSolverEvaluator  extends AbstractSolverEvaluator {
+public class SolverResult extends SolverTiming {
 	
-	@Override
-	public String getName() {
-		return "SamIam";
+	private Expression probabilityOfEvidence;
+	
+	public SolverResult(
+			long totalTranslationTimeInMilliseconds, long totalInferenceTimeInMilliseconds, 
+			Expression probabilityOfEvidence) {
+		super(totalTranslationTimeInMilliseconds, totalInferenceTimeInMilliseconds);
+		this.probabilityOfEvidence = probabilityOfEvidence;
 	}
-
-	@Override
-	public ModelLanguage getExpectedModelLanguage() {
-		return ModelLanguage.HuginDotNet;
+	
+	public Expression getProbabilityOfEvidence() {
+		return probabilityOfEvidence;
 	}
 }

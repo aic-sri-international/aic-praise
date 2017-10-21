@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, SRI International
+ * Copyright (c) 2016, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -35,38 +35,59 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.empiricalevaluation.core;
+package com.sri.ai.praise.probabilisticsolver;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.File;
 
-import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationFromCommandLineOptions;
-import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions;
 import com.sri.ai.praise.empiricalevaluation.api.configuration.SetOfSolversEvaluationConfiguration;
-import com.sri.ai.praise.empiricalevaluation.core.configuration.SetOfSolversEvaluationConfigurationWithPraiseModelsFile;
-import com.sri.ai.praise.model.common.io.PagedModelContainer;
-
+import com.sri.ai.praise.lang.translate.TranslatorOptions;
 
 /**
- * Command line interface for running evaluations on a collection of models in a praise file.
+ * Configuration information for a solver evaluator.
  * 
  * @author oreilly
- *
  */
-public class EvaluationFromPRAiSEModelsFileExecutable extends AbstractEvaluationExecutable {	
+public class SolverConfiguration {
 	
-	@Override
-	protected EvaluationConfigurationFromCommandLineOptions makeEvaluationArgumentsFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		return new EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions(args);
-	}
+	private String implementationClassName;
+	private int totalCPURuntimeLimitSecondsPerSolveAttempt;
+	private int totalMemoryLimitInMegabytesPerSolveAttempt;
+	private boolean cacheTranslations;
+	private File workingDirectory;
 	
-	protected PagedModelContainer makeModelsContainer(SetOfSolversEvaluationConfiguration evaluationArgs) throws IOException {
-		SetOfSolversEvaluationConfigurationWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (SetOfSolversEvaluationConfigurationWithPraiseModelsFile)evaluationArgs;
-		return new PagedModelContainer(evaluationArgsWithPraiseModelsFile.praiseModelsFile.getName(), evaluationArgsWithPraiseModelsFile.praiseModelsFile.toURI());
+	public SolverConfiguration(String implementationClassName, SetOfSolversEvaluationConfiguration evaluationConfiguration) {
+		this.implementationClassName                    = implementationClassName;
+		this.totalCPURuntimeLimitSecondsPerSolveAttempt = evaluationConfiguration.getTotalCPURuntimeLimitSecondsPerSolveAttempt();
+		this.totalMemoryLimitInMegabytesPerSolveAttempt = evaluationConfiguration.getTotalMemoryLimitInMegabytesPerSolveAttempt();
+		this.cacheTranslations                          = !evaluationConfiguration.doesNotCacheTranslations();
+		this.workingDirectory                           = evaluationConfiguration.getWorkingDirectory();
 	}
 
-	public static void main(String[] args) throws Exception {
-		EvaluationFromPRAiSEModelsFileExecutable evaluator = new EvaluationFromPRAiSEModelsFileExecutable();
-		evaluator.run(args);
+	public String getImplementationClassName() {
+		return implementationClassName;
+	}
+
+	public int getTotalCPURuntimeLimitSecondsPerSolveAttempt() {
+		return totalCPURuntimeLimitSecondsPerSolveAttempt;
+	}
+
+	public int getTotalMemoryLimitInMegabytesPerSolveAttempt() {
+		return totalMemoryLimitInMegabytesPerSolveAttempt;
+	}
+	
+	public boolean isCacheTranslations() {
+		return cacheTranslations;
+	}
+
+	public File getWorkingDirectory() {
+		return workingDirectory;
+	}
+	
+	public void setWorkingDirectory(File workingDirectory) {
+		this.workingDirectory = workingDirectory;
+	}
+	
+	public TranslatorOptions getTranslatorOptions() {
+		return new TranslatorOptions(isCacheTranslations(), getWorkingDirectory());
 	}
 }

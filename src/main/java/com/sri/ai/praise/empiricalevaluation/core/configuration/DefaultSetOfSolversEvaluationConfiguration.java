@@ -6,9 +6,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sri.ai.praise.empiricalevaluation.api.configuration.EvaluationConfiguration;
+import com.sri.ai.praise.empiricalevaluation.api.configuration.SetOfSolversEvaluationConfiguration;
 
-public class DefaultEvaluationConfiguration implements EvaluationConfiguration {
+public class DefaultSetOfSolversEvaluationConfiguration implements SetOfSolversEvaluationConfiguration {
 
 	private List<String> solverImplementationClassNames = new ArrayList<>(); // -s
 

@@ -37,11 +37,12 @@
  */
 package com.sri.ai.praise.probabilisticsolver;
 
-public abstract class SolverEvaluatorResult {
+public abstract class SolverTiming {
+	
 	private long totalTranslationTimeInMilliseconds;
 	private long totalInferenceTimeInMilliseconds;
 	
-	public SolverEvaluatorResult(long totalTranslationTimeInMilliseconds, long totalInferenceTimeInMilliseconds) {
+	public SolverTiming(long totalTranslationTimeInMilliseconds, long totalInferenceTimeInMilliseconds) {
 		this.totalTranslationTimeInMilliseconds = totalTranslationTimeInMilliseconds;
 		this.totalInferenceTimeInMilliseconds   = totalInferenceTimeInMilliseconds;
 	}

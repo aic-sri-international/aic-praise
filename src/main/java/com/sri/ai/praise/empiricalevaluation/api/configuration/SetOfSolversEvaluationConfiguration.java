@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
-public interface EvaluationConfiguration extends AutoCloseable {
+public interface SetOfSolversEvaluationConfiguration extends AutoCloseable {
 
 	List<String> getSolverImplementationClassNames();
 	void setSolverImplementationClassNames(List<String> solverImplementationClassNames);

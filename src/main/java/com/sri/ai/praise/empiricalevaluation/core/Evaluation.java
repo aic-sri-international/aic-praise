@@ -39,17 +39,16 @@ package com.sri.ai.praise.empiricalevaluation.core;
 
 import static com.sri.ai.util.Util.mapIntoList;
 
-import java.io.File;
 import java.util.List;
 import java.util.StringJoiner;
 
-import com.sri.ai.praise.empiricalevaluation.core.configuration.SolverConfiguration;
+import com.sri.ai.praise.empiricalevaluation.api.configuration.SolverEvaluationConfiguration;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.probabilisticsolver.SolverEvaluator;
-import com.sri.ai.praise.probabilisticsolver.SolverEvaluatorConfiguration;
-import com.sri.ai.praise.probabilisticsolver.SolverEvaluatorProbabilityEvidenceResult;
+import com.sri.ai.praise.probabilisticsolver.Solver;
+import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
+import com.sri.ai.praise.probabilisticsolver.SolverResult;
 
 /**
  * Class responsible for performing an evaluation of one or more solvers on a given problem set.
@@ -67,8 +66,7 @@ public class Evaluation {
 		MMAP, // Computing the most likely assignment to a subset of variables given evidence (Marginal MAP)
 	};
 	
-	public void evaluate(SolverConfiguration configuration, List<SolverEvaluatorConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) {
-		// Note, varying domain sizes etc... is achieved by creating variants of a base model in the provided paged model container
+	public void evaluate(SolverEvaluationConfiguration configuration, List<SolverConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) {
 		long evaluationStart = System.currentTimeMillis();	
 		try {
 			evaluateWithoutTiming(configuration, solverConfigurations, modelsToEvaluateContainer, outputListener);
@@ -80,15 +78,15 @@ public class Evaluation {
 		outputListener.notification("Evaluation took " + toDurationString(evaluationEnd - evaluationStart) + " to run to completion.");
 	}
 
-	private void evaluateWithoutTiming(SolverConfiguration configuration, List<SolverEvaluatorConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) throws Exception {
+	private void evaluateWithoutTiming(SolverEvaluationConfiguration configuration, List<SolverConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) throws Exception {
 
-		List<SolverEvaluator> solvers = setUp(configuration, solverConfigurations, modelsToEvaluateContainer, outputListener);
+		List<Solver> solvers = initializeSolversAndHeader(configuration, solverConfigurations, modelsToEvaluateContainer, outputListener);
 		evaluateAllModels(solvers, modelsToEvaluateContainer, configuration, outputListener);
 	}
 
-	private List<SolverEvaluator> setUp(SolverConfiguration configuration, List<SolverEvaluatorConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) throws Exception {
+	private List<Solver> initializeSolversAndHeader(SolverEvaluationConfiguration configuration, List<SolverConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) throws Exception {
 		
-		List<SolverEvaluator> solvers = makeSolvers(solverConfigurations, configuration.getWorkingDirectory());
+		List<Solver> solvers = makeSolvers(solverConfigurations);
 		
 		doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance(configuration, solvers, modelsToEvaluateContainer, outputListener);
 		
@@ -97,14 +95,14 @@ public class Evaluation {
 		return solvers;
 	}
 
-	private List<SolverEvaluator> makeSolvers(List<SolverEvaluatorConfiguration> solverConfigurations, File workingDirectory) {
-		List<SolverEvaluator> result = mapIntoList(solverConfigurations, sc -> tryToMakeSolverFromSolverConfiguration(sc, workingDirectory));
+	private List<Solver> makeSolvers(List<SolverConfiguration> solverConfigurations) {
+		List<Solver> result = mapIntoList(solverConfigurations, this::tryToMakeSolver);
 		return result;
 	}
 
-	private SolverEvaluator tryToMakeSolverFromSolverConfiguration(SolverEvaluatorConfiguration solverConfiguration, File workingDirectory) {
+	private Solver tryToMakeSolver(SolverConfiguration solverConfiguration) {
 		try {
-			return makeSolverFromSolverConfiguration(solverConfiguration, workingDirectory);
+			return makeSolverFromSolverConfiguration(solverConfiguration);
 		}
 		catch (ClassNotFoundException exception) {
 			throw makeSolverImplementationNotFoundException(solverConfiguration, exception);
@@ -115,24 +113,23 @@ public class Evaluation {
 	}
 
 	@SuppressWarnings("unchecked")
-	private SolverEvaluator makeSolverFromSolverConfiguration(SolverEvaluatorConfiguration solverConfiguration, File workingDirectory) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		Class<? extends SolverEvaluator> solverImplementationClass = (Class<? extends SolverEvaluator>) Class.forName(solverConfiguration.getImplementationClassName());
-		SolverEvaluator result = makeSolver(solverImplementationClass, workingDirectory, solverConfiguration);
+	private Solver makeSolverFromSolverConfiguration(SolverConfiguration solverConfiguration) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		Class<? extends Solver> solverImplementationClass = (Class<? extends Solver>) Class.forName(solverConfiguration.getImplementationClassName());
+		Solver result = makeSolver(solverImplementationClass, solverConfiguration);
 		return result;
 	}
 
-	private SolverEvaluator makeSolver(Class<? extends SolverEvaluator> clazz, File workingDirectory, SolverEvaluatorConfiguration solverConfiguration) throws InstantiationException, IllegalAccessException {
-		SolverEvaluator solver = clazz.newInstance();
-		solverConfiguration.setWorkingDirectory(workingDirectory);
+	private Solver makeSolver(Class<? extends Solver> solverImplementationClass, SolverConfiguration solverConfiguration) throws InstantiationException, IllegalAccessException {
+		Solver solver = solverImplementationClass.newInstance();
 		solver.setConfiguration(solverConfiguration);
 		return solver;
 	}
 
-	private void doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance(SolverConfiguration configuration, List<SolverEvaluator> solvers, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) throws Exception {
+	private void doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance(SolverEvaluationConfiguration configuration, List<Solver> solvers, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) throws Exception {
 		ModelPage burnInModel = modelsToEvaluateContainer.getPages().get(0);
 		String    burnInQuery = burnInModel.getDefaultQueriesToRun().get(0);  
 		notifyAboutBeginningOfBurnInForAllSolvers(modelsToEvaluateContainer, outputListener, burnInModel, burnInQuery);
-		for (SolverEvaluator solver : solvers) {
+		for (Solver solver : solvers) {
 			performBurnInForSolver(configuration, outputListener, burnInModel, burnInQuery, solver);
 		}
 	}
@@ -141,38 +138,32 @@ public class Evaluation {
 		outputListener.notification("Starting burn in for all solvers based on '" + modelsToEvaluateContainer.getName() + " - " + burnInModel.getName() + " : " + burnInQuery + "'");
 	}
 
-	private void performBurnInForSolver(SolverConfiguration configuration, OutputListener outputListener, ModelPage burnInModel, String burnInQuery, SolverEvaluator solver) throws Exception {
-		SolverEvaluationRunResult result = new SolverEvaluationRunResult();	
+	private void performBurnInForSolver(SolverEvaluationConfiguration configuration, OutputListener outputListener, ModelPage burnInModel, String burnInQuery, Solver solver) throws Exception {
+		SolverEvaluationResult solverEvaluationResult = new SolverEvaluationResult();	
 		for (int i = 0; i < configuration.getNumberRunsToAverageOver(); i++) {
-			performOneRunOfBurnInForSolver(configuration, burnInModel, burnInQuery, solver, result);
+			performOneRunOfBurnInForSolver(solver, configuration.getType(), burnInModel, burnInQuery, solverEvaluationResult);
 		}
-		recordAverageTime(configuration, result);
-		notifyAboutOneRunOfBurnInResult(result, solver, outputListener);
+		solverEvaluationResult.recordAverageTime(configuration.getNumberRunsToAverageOver());
+		notifyAboutOneRunOfBurnInResult(solverEvaluationResult, solver, outputListener);
 	}
 
-	private void performOneRunOfBurnInForSolver(SolverConfiguration configuration, ModelPage burnInModel, String burnInQuery, SolverEvaluator solver, SolverEvaluationRunResult result) throws Exception {
-		if (configuration.type == ProblemType.PR) {
-			performOneRunOfPRBurnIn(burnInModel, burnInQuery, solver, result);
+	private void performOneRunOfBurnInForSolver(Solver solver, ProblemType type, ModelPage burnInModel, String burnInQuery, SolverEvaluationResult result) throws Exception {
+		if (type == ProblemType.PR) {
+			performOneRunOfPRBurnIn(solver, burnInModel, burnInQuery, result);
 		}
 		else {
-			throw new UnsupportedOperationException(configuration.type.name()+" type evaluations are currently not supported");
+			throw new UnsupportedOperationException(type.name() + " type evaluations are currently not supported");
 		}
 	}
 
-	private void performOneRunOfPRBurnIn(ModelPage burnInModel, String burnInQuery, SolverEvaluator solver, SolverEvaluationRunResult result) throws Exception {
-		SolverEvaluatorProbabilityEvidenceResult burnInResult = getBurnInResult(burnInModel, burnInQuery, solver);
-		updateTotalTime(result, burnInResult); 
-		recordAnswerResult(burnInResult, result);
+	private void performOneRunOfPRBurnIn(Solver solver, ModelPage burnInModel, String burnInQuery, SolverEvaluationResult solverEvaluationResult) throws Exception {
+		SolverResult burnInResult = getBurnInResult(solver, burnInModel, burnInQuery);
+		solverEvaluationResult.aggregateSingleRunSolverResult(burnInResult); 
 	}
 
-	private void updateTotalTime(SolverEvaluationRunResult result, SolverEvaluatorProbabilityEvidenceResult burnInResult) {
-		result.sumOfTotalInferenceTimeInMilliseconds   += burnInResult.getTotalInferenceTimeInMilliseconds();
-		result.sumOfTotalTranslationTimeInMilliseconds += burnInResult.getTotalTranslationTimeInMilliseconds();
-	}
-
-	private SolverEvaluatorProbabilityEvidenceResult getBurnInResult(ModelPage burnInModel, String burnInQuery, SolverEvaluator solver) throws Exception {
-		SolverEvaluatorProbabilityEvidenceResult result = 
-				solver.solveProbabilityEvidence(
+	private SolverResult getBurnInResult(Solver solver, ModelPage burnInModel, String burnInQuery) throws Exception {
+		SolverResult result = 
+				solver.solve(
 						burnInModel.getName() + " - " + burnInQuery, 
 						burnInModel.getLanguage(), 
 						burnInModel.getModel(), 
@@ -180,28 +171,14 @@ public class Evaluation {
 		return result;
 	}
 
-	private void recordAnswerResult(SolverEvaluatorProbabilityEvidenceResult prResult, SolverEvaluationRunResult result) {
-		if (prResult.getProbabilityOfEvidence() == null) {
-			result.failed = true;
-		}
-		else {
-			result.answer = prResult.getProbabilityOfEvidence();
-		}
-	}
-
-	private void recordAverageTime(SolverConfiguration configuration, SolverEvaluationRunResult result) {
-		result.averageInferenceTimeInMilliseconds    = result.sumOfTotalInferenceTimeInMilliseconds / configuration.getNumberRunsToAverageOver();
-		result.averagelTranslationTimeInMilliseconds = result.sumOfTotalTranslationTimeInMilliseconds / configuration.getNumberRunsToAverageOver();
-	}
-
-	private void notifyAboutOneRunOfBurnInResult(SolverEvaluationRunResult result, SolverEvaluator solver, OutputListener outputListener) {
+	private void notifyAboutOneRunOfBurnInResult(SolverEvaluationResult result, Solver solver, OutputListener outputListener) {
 		outputListener.notification("Burn in for " + solver.getName() + " complete. Average inference time = " + toDurationString(result.averageInferenceTimeInMilliseconds));
 	}
 
-	private void outputReportHeaderLine(List<SolverEvaluator> solvers, OutputListener outputListener) {
+	private void outputReportHeaderLine(List<Solver> solvers, OutputListener outputListener) {
 		StringJoiner csvLine = new StringJoiner(",");
 		writeInitialHeader(csvLine);
-		for (SolverEvaluator solver : solvers) {
+		for (Solver solver : solvers) {
 			writeHeaderForSolver(csvLine, solver);
 		}
 		outputListener.notification("Starting to generate Evaluation Report");
@@ -215,81 +192,79 @@ public class Evaluation {
 		csvLine.add("# runs values averaged over");
 	}
 
-	private void writeHeaderForSolver(StringJoiner csvLine, SolverEvaluator solver) {
+	private void writeHeaderForSolver(StringJoiner csvLine, Solver solver) {
 		csvLine.add("Solver");
-		csvLine.add("Result for "+solver.getName());
-		csvLine.add("Inference ms. for "+solver.getName());
+		csvLine.add("Result for " + solver.getName());
+		csvLine.add("Inference ms. for " + solver.getName());
 		csvLine.add("HH:MM:SS.");
-		csvLine.add("Translation ms. for "+solver.getName());
+		csvLine.add("Translation ms. for " + solver.getName());
 		csvLine.add("HH:MM:SS.");
 	}
 
-	private void evaluateAllModels(List<SolverEvaluator> solvers, PagedModelContainer modelsToEvaluateContainer, SolverConfiguration configuration, OutputListener outputListener) throws Exception {
+	private void evaluateAllModels(List<Solver> solvers, PagedModelContainer modelsToEvaluateContainer, SolverEvaluationConfiguration configuration, OutputListener outputListener) throws Exception {
 		for (ModelPage model : modelsToEvaluateContainer.getPages()) {
 			evaluateModel(model, modelsToEvaluateContainer, solvers, configuration, outputListener);
 		}
 	}
 
-	private void evaluateModel(ModelPage model, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluator> solvers, SolverConfiguration configuration, OutputListener outputListener) throws Exception {
+	private void evaluateModel(ModelPage model, PagedModelContainer modelsToEvaluateContainer, List<Solver> solvers, SolverEvaluationConfiguration configuration, OutputListener outputListener) throws Exception {
 		String domainSizes = getDomainSizes(model.getModel());
 		for (String query: model.getDefaultQueriesToRun()) {
 			evaluateQuery(query, model, modelsToEvaluateContainer, solvers, domainSizes, configuration, outputListener);
 		}
 	}
 
-	private void evaluateQuery(String query, ModelPage model, PagedModelContainer modelsToEvaluateContainer, List<SolverEvaluator> solvers, String domainSizes, SolverConfiguration configuration, OutputListener outputListener) throws Exception {
+	private void evaluateQuery(String query, ModelPage model, PagedModelContainer modelsToEvaluateContainer, List<Solver> solvers, String domainSizes, SolverEvaluationConfiguration configuration, OutputListener outputListener) throws Exception {
 		String problemName = modelsToEvaluateContainer.getName()+" - "+model.getName() + " : " + query;
 		StringJoiner csvLine = initializeQueryLine(domainSizes, configuration, outputListener, problemName);
-		for (SolverEvaluator solver : solvers) {
+		for (Solver solver : solvers) {
 			evaluateSolver(solver, query, model, configuration, csvLine, problemName, outputListener);
 		}
 		outputListener.csvResultOutput(csvLine.toString());
 	}
 
-	private StringJoiner initializeQueryLine(String domainSizes, SolverConfiguration configuration, OutputListener outputListener, String problemName) {
+	private StringJoiner initializeQueryLine(String domainSizes, SolverEvaluationConfiguration configuration, OutputListener outputListener, String problemName) {
 		outputListener.notification("Starting to evaluate " + problemName);
 		StringJoiner csvLine;
 		csvLine = new StringJoiner(",");
 		csvLine.add(problemName);
-		csvLine.add(configuration.type.name());
+		csvLine.add(configuration.getType().name());
 		csvLine.add(domainSizes);
 		csvLine.add(" " + configuration.getNumberRunsToAverageOver());
 		return csvLine;
 	}
 
-	private void evaluateSolver(SolverEvaluator solver, String query, ModelPage model, SolverConfiguration configuration, StringJoiner csvLine, String problemName, OutputListener outputListener) throws Exception {
-		SolverEvaluationRunResult solverResult = new SolverEvaluationRunResult();	
+	private void evaluateSolver(Solver solver, String query, ModelPage model, SolverEvaluationConfiguration configuration, StringJoiner csvLine, String problemName, OutputListener outputListener) throws Exception {
+		SolverEvaluationResult solverEvaluationResult = new SolverEvaluationResult();	
 		
 		for (int i = 0; i < configuration.getNumberRunsToAverageOver(); i++) {
-			tryToPerformOneRunForConfiguation(solver, query, model, configuration, solverResult);
+			tryToPerformOneRunForConfiguation(solver, query, model, configuration, solverEvaluationResult);
 		}
-		recordAverageTime(configuration, solverResult);
-		outputSolverOutput(problemName, solver, csvLine, solverResult, outputListener);
+		solverEvaluationResult.recordAverageTime(configuration.getNumberRunsToAverageOver());
+		outputSolverOutput(problemName, solver, csvLine, solverEvaluationResult, outputListener);
 	}
 
-	private void tryToPerformOneRunForConfiguation(SolverEvaluator solver, String query, ModelPage model, SolverConfiguration configuration, SolverEvaluationRunResult solverResult) throws Exception {
-		if (configuration.type == ProblemType.PR) {
+	private void tryToPerformOneRunForConfiguation(Solver solver, String query, ModelPage model, SolverEvaluationConfiguration configuration, SolverEvaluationResult solverResult) throws Exception {
+		if (configuration.getType() == ProblemType.PR) {
 			performOneRun(solver, query, model, solverResult);
 		}
 		else {
-			throw new UnsupportedOperationException(configuration.type.name() + " type evaluations are currently not supported");
+			throw new UnsupportedOperationException(configuration.getType().name() + " type evaluations are currently not supported");
 		}
 	}
 
-	private void performOneRun(SolverEvaluator solver, String query, ModelPage model, SolverEvaluationRunResult solverResult) throws Exception {
+	private void performOneRun(Solver solver, String query, ModelPage model, SolverEvaluationResult solverEvaluationResult) throws Exception {
 		String queryName = model.getName() + " - " + query;
-		SolverEvaluatorProbabilityEvidenceResult prResult = solver.solveProbabilityEvidence(queryName, model.getLanguage(), model.getModel(), query);
-		solverResult.sumOfTotalInferenceTimeInMilliseconds   += prResult.getTotalInferenceTimeInMilliseconds();
-		solverResult.sumOfTotalTranslationTimeInMilliseconds += prResult.getTotalTranslationTimeInMilliseconds(); 
-		recordAnswerResult(prResult, solverResult);
+		SolverResult solverResult = solver.solve(queryName, model.getLanguage(), model.getModel(), query);
+		solverEvaluationResult.aggregateSingleRunSolverResult(solverResult);
 	}
 
-	private void outputSolverOutput(String problemName, SolverEvaluator solver, StringJoiner csvLine, SolverEvaluationRunResult solverResult, OutputListener outputListener) {
+	private void outputSolverOutput(String problemName, Solver solver, StringJoiner csvLine, SolverEvaluationResult solverResult, OutputListener outputListener) {
 		csvLine.add(solver.getName());
-		csvLine.add(solverResult.failed ? "FAILED" : ""+solverResult.answer);
-		csvLine.add(""+solverResult.averageInferenceTimeInMilliseconds);
+		csvLine.add(solverResult.failed ? "FAILED" : "" + solverResult.answer);
+		csvLine.add("" + solverResult.averageInferenceTimeInMilliseconds);
 		csvLine.add(toDurationString(solverResult.averageInferenceTimeInMilliseconds));
-		csvLine.add(""+solverResult.averagelTranslationTimeInMilliseconds);
+		csvLine.add("" + solverResult.averagelTranslationTimeInMilliseconds);
 		csvLine.add(toDurationString(solverResult.averagelTranslationTimeInMilliseconds));
 		
 		outputListener.notification("Solver "+solver.getName()+" took an average inference time of "+toDurationString(solverResult.averageInferenceTimeInMilliseconds)+" to solve "+problemName);
@@ -325,11 +300,11 @@ public class Evaluation {
 		return hours + "h" + minutes + "m" + seconds + "." + milliseconds + "s";
 	}
 
-	private IllegalStateException makeUnexpectedSolverImplementationError(SolverEvaluatorConfiguration solverConfiguration, Throwable throwable) {
+	private IllegalStateException makeUnexpectedSolverImplementationError(SolverConfiguration solverConfiguration, Throwable throwable) {
 		return new IllegalStateException("Unable to instantiate instance of " + solverConfiguration.getImplementationClassName(), throwable);
 	}
 
-	private IllegalArgumentException makeSolverImplementationNotFoundException(SolverEvaluatorConfiguration solverConfiguration, ClassNotFoundException exception) {
-		return new IllegalArgumentException("Unable to find " + SolverEvaluator.class.getName() + " implementation class: " + solverConfiguration.getImplementationClassName(), exception);
+	private IllegalArgumentException makeSolverImplementationNotFoundException(SolverConfiguration solverConfiguration, ClassNotFoundException exception) {
+		return new IllegalArgumentException("Unable to find " + Solver.class.getName() + " implementation class: " + solverConfiguration.getImplementationClassName(), exception);
 	}
 }

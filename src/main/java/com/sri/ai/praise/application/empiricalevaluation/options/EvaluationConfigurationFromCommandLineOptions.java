@@ -11,15 +11,15 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultEvaluationConfiguration;
-import com.sri.ai.praise.probabilisticsolver.core.pimt.PIMTSolverEvaluator;
+import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultSetOfSolversEvaluationConfiguration;
+import com.sri.ai.praise.probabilisticsolver.core.pimt.PIMTSolver;
 
 // TODO - consider using commons-configuration to evaluation input file
 // reading, i.e:
 // https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
 public class EvaluationConfigurationFromCommandLineOptions {
 
-	DefaultEvaluationConfiguration evaluationArgs;
+	DefaultSetOfSolversEvaluationConfiguration evaluationArgs;
 
 	OptionSet options;
 
@@ -39,8 +39,8 @@ public class EvaluationConfigurationFromCommandLineOptions {
 		setEvaluationArgsFromOptions();
 	}
 
-	protected DefaultEvaluationConfiguration makeInitialEvaluationArgs() {
-		return new DefaultEvaluationConfiguration();
+	protected DefaultSetOfSolversEvaluationConfiguration makeInitialEvaluationArgs() {
+		return new DefaultSetOfSolversEvaluationConfiguration();
 	}
 
 	protected void setOptionSpecifications() {
@@ -92,7 +92,7 @@ public class EvaluationConfigurationFromCommandLineOptions {
 		if (options.has(solverImplementationClasses)) {
 			currentSolverImplementationClasses.addAll(options.valuesOf(solverImplementationClasses));
 		} else {
-			currentSolverImplementationClasses.add(PIMTSolverEvaluator.class.getName());
+			currentSolverImplementationClasses.add(PIMTSolver.class.getName());
 		}
 		evaluationArgs.setSolverImplementationClassNames(currentSolverImplementationClasses);
 		
@@ -130,7 +130,7 @@ public class EvaluationConfigurationFromCommandLineOptions {
 		}
 	}
 
-	public DefaultEvaluationConfiguration getEvaluationArgs() {
+	public DefaultSetOfSolversEvaluationConfiguration getEvaluationArgs() {
 		return evaluationArgs;
 	}
 }

@@ -51,11 +51,11 @@ import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
 import com.sri.ai.praise.application.sgsolver.commandline.PRAiSE;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
-import com.sri.ai.praise.probabilisticsolver.SolverEvaluatorProbabilityEvidenceResult;
-import com.sri.ai.praise.probabilisticsolver.core.AbstractSolverEvaluator;
+import com.sri.ai.praise.probabilisticsolver.SolverResult;
+import com.sri.ai.praise.probabilisticsolver.core.AbstractSolver;
 import com.sri.ai.util.base.Pair;
 
-public class PIMTSolverEvaluator extends AbstractSolverEvaluator {
+public class PIMTSolver extends AbstractSolver {
 
 	@Override
 	public String getName() {
@@ -68,7 +68,7 @@ public class PIMTSolverEvaluator extends AbstractSolverEvaluator {
 	}
 
 	@Override
-	public SolverEvaluatorProbabilityEvidenceResult solveProbabilityEvidence(String solveRequestId,
+	public SolverResult solve(String solveRequestId,
 			ModelLanguage modelLanguage, String model, String evidenceQuery) throws Exception {
 
 		if (modelLanguage != ModelLanguage.HOGMv1) {
@@ -103,7 +103,7 @@ public class PIMTSolverEvaluator extends AbstractSolverEvaluator {
 			}
 		}
 
-		SolverEvaluatorProbabilityEvidenceResult result = new SolverEvaluatorProbabilityEvidenceResult(0,
+		SolverResult result = new SolverResult(0,
 				prResult.sgSolverProcessTookMS, probabilityEvidence);
 		return result;
 	}

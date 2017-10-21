@@ -2,7 +2,7 @@ package com.sri.ai.praise.empiricalevaluation.core.configuration;
 
 import java.io.File;
 
-public class EvaluationConfigurationWithPraiseModelsFile extends DefaultEvaluationConfiguration {
+public class SetOfSolversEvaluationConfigurationWithPraiseModelsFile extends DefaultSetOfSolversEvaluationConfiguration {
 	// Required
 	public File praiseModelsFile; // -p
 }

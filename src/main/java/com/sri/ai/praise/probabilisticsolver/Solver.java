@@ -37,54 +37,17 @@
  */
 package com.sri.ai.praise.probabilisticsolver;
 
-import java.io.File;
+import com.sri.ai.praise.lang.ModelLanguage;
 
-import com.sri.ai.praise.lang.translate.TranslatorOptions;
-
-/**
- * Configuration information for a solver evaluator.
- * 
- * @author oreilly
- */
-public class SolverEvaluatorConfiguration {
-	private String implementationClassName;
-	private int totalCPURuntimeLimitSecondsPerSolveAttempt;
-	private int totalMemoryLimitInMegabytesPerSolveAttempt;
-	private boolean cacheTranslations;
-	private File workingDirectory;
+public interface Solver {
+	String getName();
+	SolverConfiguration getConfiguration();
+	void setConfiguration(SolverConfiguration configuration);
 	
-	public SolverEvaluatorConfiguration(String implementationClassName, int totalCPURuntimeLimitSecondsPerSolveAttempt, int totalMemoryLimitInMegabytesPerSolveAttempt, boolean cacheTranslations) {
-		this.implementationClassName                    = implementationClassName;
-		this.totalCPURuntimeLimitSecondsPerSolveAttempt = totalCPURuntimeLimitSecondsPerSolveAttempt;
-		this.totalMemoryLimitInMegabytesPerSolveAttempt = totalMemoryLimitInMegabytesPerSolveAttempt;
-		this.cacheTranslations                          = cacheTranslations;
-	}
-
-	public String getImplementationClassName() {
-		return implementationClassName;
-	}
-
-	public int getTotalCPURuntimeLimitSecondsPerSolveAttempt() {
-		return totalCPURuntimeLimitSecondsPerSolveAttempt;
-	}
-
-	public int getTotalMemoryLimitInMegabytesPerSolveAttempt() {
-		return totalMemoryLimitInMegabytesPerSolveAttempt;
-	}
+	ModelLanguage getExpectedModelLanguage();
 	
-	public boolean isCacheTranslations() {
-		return cacheTranslations;
-	}
-
-	public File getWorkingDirectory() {
-		return workingDirectory;
-	}
-	
-	public void setWorkingDirectory(File workingDirectory) {
-		this.workingDirectory = workingDirectory;
-	}
-	
-	public TranslatorOptions getTranslatorOptions() {
-		return new TranslatorOptions(isCacheTranslations(), getWorkingDirectory());
+	default SolverResult solve(String solveRequestId, ModelLanguage modelLanguage, String model, String evidenceQuery) 
+		throws Exception {
+		throw new UnsupportedOperationException(getClass().getName() + " does not support solve probability evidence evaluations");
 	}
 }
