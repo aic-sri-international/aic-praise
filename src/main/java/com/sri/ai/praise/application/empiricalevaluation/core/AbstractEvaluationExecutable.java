@@ -81,9 +81,9 @@ public abstract class AbstractEvaluationExecutable {
 			List<SolverConfiguration> solverConfigurations, PrintStream notificationOut,
 			PrintStream resultOut) {
 	
-		Evaluation evaluation = new Evaluation();
 		OutputListener outputListener = new OutputListener(notificationOut, resultOut);
-		evaluation.evaluate(configuration, solverConfigurations, modelsContainer, outputListener);
+		Evaluation evaluation = new Evaluation(configuration, solverConfigurations, modelsContainer, outputListener);
+		evaluation.evaluate();
 	}
 
 	private List<SolverConfiguration> makeSolverEvaluatorConfigurations(DefaultSetOfSolversEvaluationConfiguration evaluationConfiguration) {

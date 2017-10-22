@@ -55,6 +55,13 @@ public class OutputListener {
 		notification("Burn in for " + solver.getName() + " complete. Average inference time = " + toDurationString(result.averageInferenceTimeInMilliseconds));
 	}
 
+	public void writeInitialHeader(StringJoiner csvLine) {
+		csvLine.add("Problem");
+		csvLine.add("Inference Type");
+		csvLine.add("Domain Size(s)");
+		csvLine.add("# runs values averaged over");
+	}
+
 	public void outputReportHeaderLine(List<Solver> solvers) {
 		StringJoiner csvLine = new StringJoiner(",");
 		writeInitialHeader(csvLine);
@@ -63,13 +70,6 @@ public class OutputListener {
 		}
 		notification("Starting to generate Evaluation Report");
 		csvResultOutput(csvLine.toString());
-	}
-
-	public void writeInitialHeader(StringJoiner csvLine) {
-		csvLine.add("Problem");
-		csvLine.add("Inference Type");
-		csvLine.add("Domain Size(s)");
-		csvLine.add("# runs values averaged over");
 	}
 
 	public void writeHeaderForSolver(StringJoiner csvLine, Solver solver) {
@@ -89,7 +89,7 @@ public class OutputListener {
 		csvLine.add("" + solverResult.averagelTranslationTimeInMilliseconds);
 		csvLine.add(toDurationString(solverResult.averagelTranslationTimeInMilliseconds));
 		
-		notification("Solver "+solver.getName()+" took an average inference time of "+toDurationString(solverResult.averageInferenceTimeInMilliseconds)+" to solve "+problemName);
+		notification("Solver " + solver.getName() + " took an average inference time of " + toDurationString(solverResult.averageInferenceTimeInMilliseconds) + " to solve " + problemName);
 	}
 
 	private String toDurationString(long duration) {
