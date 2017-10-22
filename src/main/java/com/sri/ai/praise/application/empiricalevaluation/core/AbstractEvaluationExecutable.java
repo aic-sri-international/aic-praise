@@ -11,7 +11,6 @@ import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfi
 import com.sri.ai.praise.empiricalevaluation.api.configuration.SetOfSolversEvaluationConfiguration;
 import com.sri.ai.praise.empiricalevaluation.api.configuration.SolverEvaluationConfiguration;
 import com.sri.ai.praise.empiricalevaluation.core.Evaluation;
-import com.sri.ai.praise.empiricalevaluation.core.OutputListener;
 import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultSetOfSolversEvaluationConfiguration;
 import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultSolverEvaluationConfiguration;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -81,8 +80,7 @@ public abstract class AbstractEvaluationExecutable {
 			List<SolverConfiguration> solverConfigurations, PrintStream notificationOut,
 			PrintStream resultOut) {
 	
-		OutputListener outputListener = new OutputListener(notificationOut, resultOut);
-		Evaluation evaluation = new Evaluation(configuration, solverConfigurations, modelsContainer, outputListener);
+		Evaluation evaluation = new Evaluation(configuration, solverConfigurations, modelsContainer, notificationOut, resultOut);
 		evaluation.evaluate();
 	}
 

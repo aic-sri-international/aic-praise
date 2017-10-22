@@ -1,6 +1,9 @@
 package com.sri.ai.praise.empiricalevaluation.core;
 
+import java.util.StringJoiner;
+
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.probabilisticsolver.Solver;
 import com.sri.ai.praise.probabilisticsolver.SolverResult;
 
 public class SolverEvaluationResult {
@@ -34,4 +37,14 @@ public class SolverEvaluationResult {
 		averageInferenceTimeInMilliseconds    = sumOfTotalInferenceTimeInMilliseconds / numberOfRuns;
 		averagelTranslationTimeInMilliseconds = sumOfTotalTranslationTimeInMilliseconds / numberOfRuns;
 	}
+	
+	public void output(String problemName, Solver solver, StringJoiner csvLine) {
+		csvLine.add(solver.getName());
+		csvLine.add(failed ? "FAILED" : "" + answer);
+		csvLine.add("" + averageInferenceTimeInMilliseconds);
+		csvLine.add(Evaluation.toDurationString(averageInferenceTimeInMilliseconds));
+		csvLine.add("" + averagelTranslationTimeInMilliseconds);
+		csvLine.add(Evaluation.toDurationString(averagelTranslationTimeInMilliseconds));
+	}
+
 }

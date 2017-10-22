@@ -40,6 +40,7 @@ package com.sri.ai.praise.empiricalevaluation.core;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -64,15 +65,19 @@ public class Evaluation {
 	private SolverEvaluationConfiguration solverEvaluationConfiguration;
 	private List<SolverConfiguration> solverConfigurations;
 	private PagedModelContainer modelsToEvaluateContainer;
-	private OutputListener outputListener;
 	private List<Solver> solvers;
 	
-	public Evaluation(SolverEvaluationConfiguration solverEvaluationConfiguration, List<SolverConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, OutputListener outputListener) {
+	private PrintStream notificationOut;
+	private PrintStream resultOut;
+
+	public Evaluation(SolverEvaluationConfiguration solverEvaluationConfiguration, List<SolverConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, PrintStream notificationOut, PrintStream resultOut) {
 		super();
 		this.solverEvaluationConfiguration = solverEvaluationConfiguration;
 		this.solverConfigurations = solverConfigurations;
 		this.modelsToEvaluateContainer = modelsToEvaluateContainer;
-		this.outputListener = outputListener;
+		this.notificationOut = notificationOut;
+		this.resultOut = resultOut;
+
 	}
 
 	// Based on http://www.hlt.utdallas.edu/~vgogate/uai14-competition/information.html
@@ -92,13 +97,13 @@ public class Evaluation {
 		evaluateAllModels();
 		long evaluationEnd = System.currentTimeMillis();
 		
-		outputListener.notifyTotalEvaluationTime(evaluationStart, evaluationEnd);
+		notifyTotalEvaluationTime(evaluationStart, evaluationEnd);
 	}
 
 	private void initializeSolversAndHeader() {
 		makeSolvers();
 		doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance();
-		outputListener.outputReportHeaderLine(solvers);
+		outputReportHeaderLine();
 	}
 
 	private void makeSolvers() {
@@ -116,7 +121,7 @@ public class Evaluation {
 	private void doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance() {
 		ModelPage burnInModel = modelsToEvaluateContainer.getPages().get(0);
 		String    burnInQuery = burnInModel.getDefaultQueriesToRun().get(0);  
-		outputListener.notifyAboutBeginningOfBurnInForAllSolvers(modelsToEvaluateContainer, burnInModel, burnInQuery);
+		notifyAboutBeginningOfBurnInForAllSolvers(modelsToEvaluateContainer, burnInModel, burnInQuery);
 		for (Solver solver : solvers) {
 			performBurnInForSolver(solver, burnInQuery, burnInModel);
 		}
@@ -124,7 +129,7 @@ public class Evaluation {
 
 	private void performBurnInForSolver(Solver solver, String query, ModelPage model) {
 		SolverEvaluationResult solverEvaluationResult = runAllRunsForSolver(solver, query, model);
-		outputListener.notifyAboutOneRunOfBurnInResult(solver, solverEvaluationResult);
+		notifyAboutOneRunOfBurnInResult(solver, solverEvaluationResult);
 	}
 
 	private void evaluateAllModels() {
@@ -151,16 +156,16 @@ public class Evaluation {
 
 	private void evaluateQuery(String query, ModelPage model, String domainSizes) {
 		String problemName = modelsToEvaluateContainer.getName() + " - " + model.getName() + " : " + query;
-		StringJoiner csvLine = outputListener.initializeQueryLine(domainSizes, solverEvaluationConfiguration, problemName);
+		StringJoiner csvLine = initializeQueryLine(problemName, domainSizes);
 		for (Solver solver : solvers) {
 			evaluateSolver(solver, model, query, problemName, csvLine);
 		}
-		outputListener.csvResultOutput(csvLine.toString());
+		csvResultOutput(csvLine.toString());
 	}
 
 	private void evaluateSolver(Solver solver, ModelPage model, String query, String problemName, StringJoiner csvLine) {
 		SolverEvaluationResult solverEvaluationResult = runAllRunsForSolver(solver, query, model);
-		outputListener.outputSolverOutput(problemName, solver, csvLine, solverEvaluationResult);
+		outputSolverOutput(problemName, solver, csvLine, solverEvaluationResult);
 	}
 
 	private SolverEvaluationResult runAllRunsForSolver(Solver solver, String query, ModelPage model) {
@@ -217,5 +222,90 @@ public class Evaluation {
 
 	private String unsupported(ProblemType type) {
 		return type + " is current unsupported by " + Evaluation.class;
+	}
+
+	//////// OUTPUT METHODS
+	
+	private void notification(String notification) {
+		notificationOut.println(notification);
+	}
+
+	private StringJoiner initializeQueryLine(String problemName, String domainSizes) {
+		notification("Starting to evaluate " + problemName);
+		StringJoiner csvLine;
+		csvLine = new StringJoiner(",");
+		csvLine.add(problemName);
+		csvLine.add(solverEvaluationConfiguration.getType().name());
+		csvLine.add(domainSizes);
+		csvLine.add(" " + solverEvaluationConfiguration.getNumberRunsToAverageOver());
+		return csvLine;
+	}
+
+	private void csvResultOutput(String csvLine) {
+		resultOut.println(csvLine);
+	}
+
+	private void notifyTotalEvaluationTime(long evaluationStart, long evaluationEnd) {
+		notification("Evaluation took " + toDurationString(evaluationEnd - evaluationStart) + " to run to completion.");
+	}
+
+	private void notifyAboutBeginningOfBurnInForAllSolvers(PagedModelContainer modelsToEvaluateContainer, ModelPage burnInModel, String burnInQuery) {
+		notification("Starting burn in for all solvers based on '" + modelsToEvaluateContainer.getName() + " - " + burnInModel.getName() + " : " + burnInQuery + "'");
+	}
+
+	private void notifyAboutOneRunOfBurnInResult(Solver solver, SolverEvaluationResult result) {
+		notification("Burn in for " + solver.getName() + " complete. Average inference time = " + toDurationString(result.averageInferenceTimeInMilliseconds));
+	}
+
+	private void writeInitialHeader(StringJoiner csvLine) {
+		csvLine.add("Problem");
+		csvLine.add("Inference Type");
+		csvLine.add("Domain Size(s)");
+		csvLine.add("# runs values averaged over");
+	}
+
+	private void outputReportHeaderLine() {
+		StringJoiner csvLine = new StringJoiner(",");
+		writeInitialHeader(csvLine);
+		for (Solver solver : solvers) {
+			writeHeaderForSolver(solver, csvLine);
+		}
+		notification("Starting to generate Evaluation Report");
+		csvResultOutput(csvLine.toString());
+	}
+
+	private void writeHeaderForSolver(Solver solver, StringJoiner csvLine) {
+		csvLine.add("Solver");
+		csvLine.add("Result for " + solver.getName());
+		csvLine.add("Inference ms. for " + solver.getName());
+		csvLine.add("HH:MM:SS.");
+		csvLine.add("Translation ms. for " + solver.getName());
+		csvLine.add("HH:MM:SS.");
+	}
+
+	private void outputSolverOutput(String problemName, Solver solver, StringJoiner csvLine, SolverEvaluationResult solverEvaluationResult) {
+		solverEvaluationResult.output(problemName, solver, csvLine);
+		notification("Solver " + solver.getName() + " took an average inference time of " + toDurationString(solverEvaluationResult.averageInferenceTimeInMilliseconds) + " to solve " + problemName);
+	}
+
+	static String toDurationString(long duration) {
+		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
+		long remainingDuration = duration;
+		
+		if (remainingDuration != 0) {
+			hours    = remainingDuration / 3600000;
+			remainingDuration = remainingDuration % 3600000; 
+		}
+		if (remainingDuration != 0) {
+			minutes  = remainingDuration / 60000;
+			remainingDuration = remainingDuration % 60000;
+		}
+		if (remainingDuration != 0) {
+			seconds  = remainingDuration / 1000;
+			remainingDuration = remainingDuration % 1000;
+		}
+		milliseconds = remainingDuration;
+		
+		return hours + "h" + minutes + "m" + seconds + "." + milliseconds + "s";
 	}
 }
