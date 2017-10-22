@@ -72,7 +72,7 @@ public class ModelPage {
 		return name;
 	}
 
-	public String getModel() {
+	public String getModelString() {
 		return model;
 	}
 

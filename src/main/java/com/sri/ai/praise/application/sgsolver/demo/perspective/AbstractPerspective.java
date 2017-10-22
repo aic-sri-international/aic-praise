@@ -186,7 +186,7 @@ public abstract class AbstractPerspective implements Perspective {
 			Map<Integer, Supplier<ModelPageEditor>> newModelPageIdxs = new HashMap<>();
 			for (int i = 0; i < pages.size(); i++) {
 				ModelPage page = pages.get(i);
-				newModelPageIdxs.put(i, new ModelPageEditorSupplier(page.getModel(), page.getDefaultQueriesToRun()));
+				newModelPageIdxs.put(i, new ModelPageEditorSupplier(page.getModelString(), page.getDefaultQueriesToRun()));
 			}
 			return FXCollections.observableMap(newModelPageIdxs);
 		});

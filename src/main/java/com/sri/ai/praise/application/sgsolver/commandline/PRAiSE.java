@@ -104,8 +104,8 @@ public class PRAiSE {
 				solverArgs.out.print("MODEL NAME = ");
 				solverArgs.out.println(hogModelToQuery.getName());
 				solverArgs.out.println("MODEL      = ");
-				solverArgs.out.println(hogModelToQuery.getModel());
-				HOGMQueryRunner queryRunner = new  HOGMQueryRunner(hogModelToQuery.getModel(), hogModelToQuery.getDefaultQueriesToRun());
+				solverArgs.out.println(hogModelToQuery.getModelString());
+				HOGMQueryRunner queryRunner = new  HOGMQueryRunner(hogModelToQuery.getModelString(), hogModelToQuery.getDefaultQueriesToRun());
 				if (theorySupplier != null) {
 					queryRunner.setOptionTheory(theorySupplier.get());
 				}
@@ -259,7 +259,7 @@ public class PRAiSE {
 					for (ModelPage containerModelPage : PagedModelContainer.getModelPagesFromURI(inputFile.toURI())) {
 						List<String> combinedQueries = new ArrayList<>(solverArgs.globalQueries);
 						combinedQueries.addAll(containerModelPage.getDefaultQueriesToRun());
-						result.add(new ModelPage(containerModelPage.getLanguage(), containerModelPage.getName(), containerModelPage.getModel(), combinedQueries));
+						result.add(new ModelPage(containerModelPage.getLanguage(), containerModelPage.getName(), containerModelPage.getModelString(), combinedQueries));
 					}
 				}
 			}
