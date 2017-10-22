@@ -7,12 +7,19 @@ import com.sri.ai.praise.probabilisticsolver.Solver;
 import com.sri.ai.praise.probabilisticsolver.SolverResult;
 
 public class SolverEvaluationResult {
+	Solver solver;
+	Evaluation.Problem problem;
 	Expression answer = null;
 	boolean failed = false;
 	long averageInferenceTimeInMilliseconds;
 	long averagelTranslationTimeInMilliseconds;
 	long sumOfTotalInferenceTimeInMilliseconds   = 0L;
 	long sumOfTotalTranslationTimeInMilliseconds = 0L;
+	
+	public SolverEvaluationResult(Solver solver, Evaluation.Problem problem) {
+		this.solver = solver;
+		this.problem = problem;
+	}
 	
 	public void aggregateSingleRunSolverResult(SolverResult solverResult) {
 		updateTime(solverResult);
@@ -38,7 +45,7 @@ public class SolverEvaluationResult {
 		averagelTranslationTimeInMilliseconds = sumOfTotalTranslationTimeInMilliseconds / numberOfRuns;
 	}
 	
-	public void output(String problemName, Solver solver, StringJoiner csvLine) {
+	public void addToCSVLine(StringJoiner csvLine) {
 		csvLine.add(solver.getName());
 		csvLine.add(failed ? "FAILED" : "" + answer);
 		csvLine.add("" + averageInferenceTimeInMilliseconds);

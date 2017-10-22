@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultSetOfSolversEvaluationConfiguration;
-import com.sri.ai.praise.empiricalevaluation.core.configuration.SetOfSolversEvaluationConfigurationWithPraiseModelsFile;
+import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultConfiguration;
+import com.sri.ai.praise.empiricalevaluation.core.configuration.ConfigurationWithPraiseModelsFile;
 
 import joptsimple.OptionSpec;
 
@@ -17,8 +17,8 @@ public class EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions e
 	}
 
 	@Override
-	protected DefaultSetOfSolversEvaluationConfiguration makeInitialEvaluationArgs() {
-		return new SetOfSolversEvaluationConfigurationWithPraiseModelsFile(); 
+	protected DefaultConfiguration makeInitialConfiguration() {
+		return new ConfigurationWithPraiseModelsFile(); 
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions e
 	@Override
 	protected void setEvaluationArgsFromOptions() throws IOException, FileNotFoundException {
 		super.setEvaluationArgsFromOptions();
-		SetOfSolversEvaluationConfigurationWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (SetOfSolversEvaluationConfigurationWithPraiseModelsFile)evaluationArgs;
+		ConfigurationWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (ConfigurationWithPraiseModelsFile)configuration;
 		evaluationArgsWithPraiseModelsFile.praiseModelsFile = options.valueOf(praiseModelsFile);
 		if (!evaluationArgsWithPraiseModelsFile.praiseModelsFile.isFile()) {
 			throw new IllegalArgumentException("Input PRAiSE models file does not exist: " + evaluationArgsWithPraiseModelsFile.praiseModelsFile.getAbsolutePath());

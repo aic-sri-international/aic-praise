@@ -6,9 +6,12 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sri.ai.praise.empiricalevaluation.api.configuration.SetOfSolversEvaluationConfiguration;
+import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
+import com.sri.ai.praise.empiricalevaluation.core.Evaluation;
 
-public class DefaultSetOfSolversEvaluationConfiguration implements SetOfSolversEvaluationConfiguration {
+public class DefaultConfiguration implements Configuration {
+
+	private Evaluation.ProblemType type = Evaluation.ProblemType.PR;
 
 	private List<String> solverImplementationClassNames = new ArrayList<>(); // -s
 
@@ -23,6 +26,16 @@ public class DefaultSetOfSolversEvaluationConfiguration implements SetOfSolversE
 
 	private File workingDirectory; // -w
 	
+
+	@Override
+	public Evaluation.ProblemType getType() {
+		return type;
+	}
+
+	@Override
+	public void setType(Evaluation.ProblemType type) {
+		this.type = type;
+	}
 
 	@Override
 	public List<String> getSolverImplementationClassNames() {

@@ -11,7 +11,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultSetOfSolversEvaluationConfiguration;
+import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
+import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultConfiguration;
 import com.sri.ai.praise.probabilisticsolver.core.pimt.PIMTSolver;
 
 // TODO - consider using commons-configuration to evaluation input file
@@ -19,7 +20,7 @@ import com.sri.ai.praise.probabilisticsolver.core.pimt.PIMTSolver;
 // https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
 public class EvaluationConfigurationFromCommandLineOptions {
 
-	DefaultSetOfSolversEvaluationConfiguration evaluationArgs;
+	Configuration configuration;
 
 	OptionSet options;
 
@@ -33,14 +34,14 @@ public class EvaluationConfigurationFromCommandLineOptions {
 	OptionSpec<File> workingDirectory;
 
 	public EvaluationConfigurationFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		evaluationArgs = makeInitialEvaluationArgs();
+		configuration = makeInitialConfiguration();
 		setOptionSpecifications();
 		options = parser.parse(args);
 		setEvaluationArgsFromOptions();
 	}
 
-	protected DefaultSetOfSolversEvaluationConfiguration makeInitialEvaluationArgs() {
-		return new DefaultSetOfSolversEvaluationConfiguration();
+	protected Configuration makeInitialConfiguration() {
+		return new DefaultConfiguration();
 	}
 
 	protected void setOptionSpecifications() {
@@ -58,17 +59,17 @@ public class EvaluationConfigurationFromCommandLineOptions {
 		totalCPURuntimeLimitSecondsPerSolveAttempt = parser
 				.accepts("c",
 						"Total CPU runtime limit seconds per solver attempt (defaults to "
-								+ evaluationArgs.getTotalCPURuntimeLimitSecondsPerSolveAttempt() + ").")
+								+ configuration.getTotalCPURuntimeLimitSecondsPerSolveAttempt() + ").")
 				.withRequiredArg().ofType(Integer.class);
 		totalMemoryLimitInMegabytesPerSolveAttempt = parser
 				.accepts("m",
 						"Total memory limit in MB per solver attempt (defaults to "
-								+ evaluationArgs.getTotalMemoryLimitInMegabytesPerSolveAttempt() + ").")
+								+ configuration.getTotalMemoryLimitInMegabytesPerSolveAttempt() + ").")
 				.withRequiredArg().ofType(Integer.class);
 		numberRunsToAverageOver = parser
 				.accepts("a",
 						"Number of runs to average each result over (defaults to "
-								+ evaluationArgs.getNumberOfRunsToAverageOver() + ").")
+								+ configuration.getNumberOfRunsToAverageOver() + ").")
 				.withRequiredArg().ofType(Integer.class);
 		parser.accepts("t",
 				"Translate models always, instead of caching them between runs (default behavior is caching)");
@@ -88,49 +89,49 @@ public class EvaluationConfigurationFromCommandLineOptions {
 		}
 
 		
-		List<String> currentSolverImplementationClasses = new LinkedList<>(evaluationArgs.getSolverImplementationClassNames());
+		List<String> currentSolverImplementationClasses = new LinkedList<>(configuration.getSolverImplementationClassNames());
 		if (options.has(solverImplementationClasses)) {
 			currentSolverImplementationClasses.addAll(options.valuesOf(solverImplementationClasses));
 		} else {
 			currentSolverImplementationClasses.add(PIMTSolver.class.getName());
 		}
-		evaluationArgs.setSolverImplementationClassNames(currentSolverImplementationClasses);
+		configuration.setSolverImplementationClassNames(currentSolverImplementationClasses);
 		
 		
 		if (options.has(notificationFile)) {
-			evaluationArgs.setNotificationOut(new PrintStream(options.valueOf(notificationFile)));
+			configuration.setNotificationOut(new PrintStream(options.valueOf(notificationFile)));
 		}
 		
 		if (options.has(resultFile)) {
-			evaluationArgs.setResultOut(new PrintStream(options.valueOf(resultFile)));
+			configuration.setResultOut(new PrintStream(options.valueOf(resultFile)));
 		}
 		
 		if (options.has(totalCPURuntimeLimitSecondsPerSolveAttempt)) {
-			evaluationArgs.setTotalCPURuntimeLimitSecondsPerSolveAttempt(options.valueOf(totalCPURuntimeLimitSecondsPerSolveAttempt));
+			configuration.setTotalCPURuntimeLimitSecondsPerSolveAttempt(options.valueOf(totalCPURuntimeLimitSecondsPerSolveAttempt));
 		}
 		
 		if (options.has(totalMemoryLimitInMegabytesPerSolveAttempt)) {
-			evaluationArgs.setTotalMemoryLimitInMegabytesPerSolveAttempt(options.valueOf(totalMemoryLimitInMegabytesPerSolveAttempt));
+			configuration.setTotalMemoryLimitInMegabytesPerSolveAttempt(options.valueOf(totalMemoryLimitInMegabytesPerSolveAttempt));
 		}
 		
 		if (options.has(numberRunsToAverageOver)) {
-			evaluationArgs.setNumberOfRunsToAverageOver(options.valueOf(numberRunsToAverageOver));
+			configuration.setNumberOfRunsToAverageOver(options.valueOf(numberRunsToAverageOver));
 		}
 		
 		if (options.has("t")) {
-			evaluationArgs.setDoesNotCacheTranslations(true);
+			configuration.setDoesNotCacheTranslations(true);
 		}
 
 		File workingDirectoryFile = options.valueOf(workingDirectory);
 		if (workingDirectoryFile.isDirectory()) {
-			evaluationArgs.setWorkingDirectory(workingDirectoryFile);
+			configuration.setWorkingDirectory(workingDirectoryFile);
 		}
 		else {
 			throw new IllegalArgumentException("Working directory does not exist: " + workingDirectoryFile);
 		}
 	}
 
-	public DefaultSetOfSolversEvaluationConfiguration getEvaluationArgs() {
-		return evaluationArgs;
+	public Configuration getConfiguration() {
+		return configuration;
 	}
 }

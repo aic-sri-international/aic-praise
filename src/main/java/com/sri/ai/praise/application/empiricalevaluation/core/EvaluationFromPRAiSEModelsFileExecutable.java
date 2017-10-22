@@ -42,8 +42,8 @@ import java.io.IOException;
 
 import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationFromCommandLineOptions;
 import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions;
-import com.sri.ai.praise.empiricalevaluation.api.configuration.SetOfSolversEvaluationConfiguration;
-import com.sri.ai.praise.empiricalevaluation.core.configuration.SetOfSolversEvaluationConfigurationWithPraiseModelsFile;
+import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
+import com.sri.ai.praise.empiricalevaluation.core.configuration.ConfigurationWithPraiseModelsFile;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
 
@@ -60,8 +60,8 @@ public class EvaluationFromPRAiSEModelsFileExecutable extends AbstractEvaluation
 		return new EvaluationConfigurationWithPRAiSEModelsFileFromCommandLineOptions(args);
 	}
 	
-	protected PagedModelContainer makeModelsContainer(SetOfSolversEvaluationConfiguration evaluationArgs) throws IOException {
-		SetOfSolversEvaluationConfigurationWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (SetOfSolversEvaluationConfigurationWithPraiseModelsFile)evaluationArgs;
+	protected PagedModelContainer makeModelsContainer(Configuration evaluationArgs) throws IOException {
+		ConfigurationWithPraiseModelsFile evaluationArgsWithPraiseModelsFile = (ConfigurationWithPraiseModelsFile)evaluationArgs;
 		return new PagedModelContainer(evaluationArgsWithPraiseModelsFile.praiseModelsFile.getName(), evaluationArgsWithPraiseModelsFile.praiseModelsFile.toURI());
 	}
 
