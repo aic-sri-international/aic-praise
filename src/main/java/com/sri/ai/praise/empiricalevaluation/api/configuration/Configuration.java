@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
-import com.sri.ai.praise.empiricalevaluation.core.Evaluation;
+import com.sri.ai.praise.empiricalevaluation.core.ProblemType;
 
 public interface Configuration extends AutoCloseable {
 
-	Evaluation.ProblemType getType();
-	void setType(Evaluation.ProblemType type);
+	ProblemType getType();
+	void setType(ProblemType type);
 
 	List<String> getSolverImplementationClassNames();
 	void setSolverImplementationClassNames(List<String> solverImplementationClassNames);

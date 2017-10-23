@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
-import com.sri.ai.praise.empiricalevaluation.core.Evaluation;
+import com.sri.ai.praise.empiricalevaluation.core.ProblemType;
 
 public class DefaultConfiguration implements Configuration {
 
-	private Evaluation.ProblemType type = Evaluation.ProblemType.PR;
+	private ProblemType type = ProblemType.PR;
 
 	private List<String> solverImplementationClassNames = new ArrayList<>(); // -s
 
@@ -28,12 +28,12 @@ public class DefaultConfiguration implements Configuration {
 	
 
 	@Override
-	public Evaluation.ProblemType getType() {
+	public ProblemType getType() {
 		return type;
 	}
 
 	@Override
-	public void setType(Evaluation.ProblemType type) {
+	public void setType(ProblemType type) {
 		this.type = type;
 	}
 

@@ -1,18 +1,50 @@
+/*
+ * Copyright (c) 2015, SRI International
+ * All rights reserved.
+ * Licensed under the The BSD 3-Clause License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ * 
+ * http://opensource.org/licenses/BSD-3-Clause
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * 
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * 
+ * Neither the name of the aic-praise nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package com.sri.ai.praise.application.empiricalevaluation.core;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationFromCommandLineOptions;
 import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
 import com.sri.ai.praise.empiricalevaluation.core.Evaluation;
-import com.sri.ai.praise.empiricalevaluation.core.configuration.DefaultConfiguration;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
-import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
 
 /**
  * Provides a static method for outputting evaluation results for given solvers,
@@ -44,59 +76,15 @@ public abstract class AbstractEvaluationExecutable {
 	}
 
 	public void run(String[] args) throws Exception {
-		
 		try (Configuration configuration = getConfiguration(args)) {
-
-			PagedModelContainer modelsContainer = makeModelsContainer(configuration);
-			
-			List<SolverConfiguration> solverConfigurations = makeSolverConfigurations(configuration);
-	
-			PrintStream notificationOut = configuration.getNotificationOut();
-			PrintStream resultOut = configuration.getResultOut();
-	
-			evaluate(configuration, modelsContainer, solverConfigurations, notificationOut, resultOut);
+			evaluate(configuration);
 		}
 	}
 
-	/**
-	 * Evaluates given solvers on given models according to given evaluation
-	 * configurations and streams for notifications and results.
-	 * 
-	 * @param configuration
-	 * @param modelsContainer
-	 * @param solverConfigurations
-	 * @param notificationOut
-	 * @param resultOut
-	 */
-	private static void evaluate(
-			Configuration configuration, 
-			PagedModelContainer modelsContainer,
-			List<SolverConfiguration> solverConfigurations, 
-			PrintStream notificationOut,
-			PrintStream resultOut) {
-	
-		Evaluation evaluation = new Evaluation(configuration, solverConfigurations, modelsContainer, notificationOut, resultOut);
+	private void evaluate(Configuration configuration) throws IOException {
+		PagedModelContainer modelsContainer = makeModelsContainer(configuration);
+		Evaluation evaluation = new Evaluation(configuration, modelsContainer);
 		evaluation.evaluate();
-	}
-
-	private List<SolverConfiguration> makeSolverConfigurations(Configuration configuration) {
-		List<SolverConfiguration> solverConfigurations = new ArrayList<>();
-		for (String solverImplementationClassName : configuration.getSolverImplementationClassNames()) {
-			SolverConfiguration solverConfiguration = makeSolverConfiguration(solverImplementationClassName, configuration);
-			solverConfigurations.add(solverConfiguration);
-		}
-		return solverConfigurations;
-	}
-
-	private SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, Configuration configuration) {
-		SolverConfiguration solverConfiguration = 
-				new SolverConfiguration(
-						solverImplementationClassName,
-						configuration.getTotalCPURuntimeLimitSecondsPerSolveAttempt(),
-						configuration.getTotalMemoryLimitInMegabytesPerSolveAttempt(),
-						!configuration.doesNotCacheTranslations(),
-						configuration.getWorkingDirectory());
-		return solverConfiguration;
 	}
 
 	private Configuration getConfiguration(String[] args)
