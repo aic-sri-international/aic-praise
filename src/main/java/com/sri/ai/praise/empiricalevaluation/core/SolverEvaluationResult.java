@@ -5,18 +5,19 @@ import java.util.StringJoiner;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.probabilisticsolver.Solver;
 import com.sri.ai.praise.probabilisticsolver.SolverResult;
+import com.sri.ai.util.Util;
 
 public class SolverEvaluationResult {
-	Solver solver;
-	Evaluation.Problem problem;
-	Expression answer = null;
-	boolean failed = false;
-	long averageInferenceTimeInMilliseconds;
-	long averagelTranslationTimeInMilliseconds;
-	long sumOfTotalInferenceTimeInMilliseconds   = 0L;
-	long sumOfTotalTranslationTimeInMilliseconds = 0L;
+	public Solver solver;
+	public Problem problem;
+	public Expression answer = null;
+	public boolean failed = false;
+	public long averageInferenceTimeInMilliseconds;
+	public long averagelTranslationTimeInMilliseconds;
+	public long sumOfTotalInferenceTimeInMilliseconds   = 0L;
+	public long sumOfTotalTranslationTimeInMilliseconds = 0L;
 	
-	public SolverEvaluationResult(Solver solver, Evaluation.Problem problem) {
+	public SolverEvaluationResult(Solver solver, Problem problem) {
 		this.solver = solver;
 		this.problem = problem;
 	}
@@ -49,9 +50,9 @@ public class SolverEvaluationResult {
 		csvLine.add(solver.getName());
 		csvLine.add(failed ? "FAILED" : "" + answer);
 		csvLine.add("" + averageInferenceTimeInMilliseconds);
-		csvLine.add(Evaluation.toDurationString(averageInferenceTimeInMilliseconds));
+		csvLine.add(Util.toHoursMinutesAndSecondsString(averageInferenceTimeInMilliseconds));
 		csvLine.add("" + averagelTranslationTimeInMilliseconds);
-		csvLine.add(Evaluation.toDurationString(averagelTranslationTimeInMilliseconds));
+		csvLine.add(Util.toHoursMinutesAndSecondsString(averagelTranslationTimeInMilliseconds));
 	}
 
 }

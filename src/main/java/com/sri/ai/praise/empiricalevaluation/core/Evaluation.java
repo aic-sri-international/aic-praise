@@ -46,6 +46,8 @@ import java.util.StringJoiner;
 
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
+import com.sri.ai.praise.empiricalevaluation.core.output.CSVWriter;
+import com.sri.ai.praise.empiricalevaluation.core.output.Notifier;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
@@ -67,34 +69,25 @@ public class Evaluation {
 	private PagedModelContainer modelsToEvaluateContainer;
 	private List<Solver> solvers;
 
-	String domainSizesOfCurrentModel;
+	private Notifier notifier;
+	private CSVWriter cvsWriter;
+	private String domainSizesOfCurrentModel;
 	
-	private PrintStream notificationOut;
-	private PrintStream resultOut;
-
-	public Evaluation(Configuration configuration, List<SolverConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, PrintStream notificationOut, PrintStream resultOut) {
+	public Evaluation(Configuration configuration, List<SolverConfiguration> solverConfigurations, PagedModelContainer modelsToEvaluateContainer, PrintStream notificationOut, PrintStream csvOut) {
 		super();
 		this.configuration = configuration;
 		this.solverConfigurations = solverConfigurations;
 		this.modelsToEvaluateContainer = modelsToEvaluateContainer;
-		this.notificationOut = notificationOut;
-		this.resultOut = resultOut;
-	}
-	
-	public class Problem {
-		
-		public String query;
-		public ModelPage model;
-		public String name;
-		
-		public Problem(String query, ModelPage model) {
-			super();
-			this.query = query;
-			this.model = model;
-			this.name = modelsToEvaluateContainer.getName() + " - " + model.getName() + " : " + query;
-		}
+		this.notifier = new Notifier(notificationOut);
+		makeCSVWriter(configuration, csvOut);
 	}
 
+	private void makeCSVWriter(Configuration configuration, PrintStream csvOut) {
+		String problemTypeName = configuration.getType().name();
+		int numberOfRunsToAverageOver = configuration.getNumberOfRunsToAverageOver();
+		this.cvsWriter = new CSVWriter(problemTypeName, numberOfRunsToAverageOver, csvOut);
+	}
+	
 	// Based on http://www.hlt.utdallas.edu/~vgogate/uai14-competition/information.html
 	public enum ProblemType {
 		PR,   // Computing the the partition function and probability of evidence
@@ -112,12 +105,12 @@ public class Evaluation {
 		evaluateAllModels();
 		long evaluationEnd = System.currentTimeMillis();
 		
-		notifyAboutTotalEvaluationTime(evaluationStart, evaluationEnd);
+		notifier.notifyAboutTotalEvaluationTime(evaluationStart, evaluationEnd);
 	}
 
 	private void initialize() {
 		initializeSolvers();
-		outputReportHeaderLine();
+		cvsWriter.outputReportHeaderLine(solvers);
 	}
 
 	private void initializeSolvers() {
@@ -149,7 +142,7 @@ public class Evaluation {
 
 	private void doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance() {
 		Problem problem = makeBurnInProblem();
-		notifyAboutBeginningOfBurnInForAllSolvers(modelsToEvaluateContainer, problem);
+		notifier.notifyAboutBeginningOfBurnInForAllSolvers(modelsToEvaluateContainer, problem);
 		for (Solver solver : solvers) {
 			performBurnInForSolver(solver, problem);
 		}
@@ -164,10 +157,11 @@ public class Evaluation {
 
 	private void performBurnInForSolver(Solver solver, Problem problem) {
 		SolverEvaluationResult solverEvaluationResult = getResultsFromAllRunsForSolver(solver, problem);
-		notifyAboutBurnIn(solver, solverEvaluationResult);
+		notifier.notifyAboutBurnIn(solver, solverEvaluationResult);
 	}
 
 	private void evaluateAllModels() {
+		notifier.notify("Starting to generate Evaluation Report");
 		for (ModelPage model : modelsToEvaluateContainer.getPages()) {
 			evaluateModel(model);
 		}
@@ -182,17 +176,18 @@ public class Evaluation {
 	}
 
 	private void evaluateProblem(Problem problem) {
-		initializeQueryLine(problem);
+		notifier.notify("Starting to evaluate " + problem.name);
+		cvsWriter.initializeQueryLine(problem, domainSizesOfCurrentModel);
 		for (Solver solver : solvers) {
 			evaluateSolver(solver, problem);
 		}
-		finalizeQueryLine();
+		cvsWriter.finalizeQueryLine();
 	}
 
 	private void evaluateSolver(Solver solver, Problem problem) {
 		SolverEvaluationResult solverEvaluationResult = getResultsFromAllRunsForSolver(solver, problem);
-		addToQueryLine(solverEvaluationResult);
-		notifyAboutSolverTime(solverEvaluationResult);
+		cvsWriter.addToQueryLine(solverEvaluationResult);
+		notifier.notifyAboutSolverTime(solverEvaluationResult);
 	}
 
 	private SolverEvaluationResult getResultsFromAllRunsForSolver(Solver solver, Problem problem) {
@@ -253,103 +248,5 @@ public class Evaluation {
 
 	private String unsupported(ProblemType type) {
 		return type + " is current unsupported by " + Evaluation.class;
-	}
-
-	//////// OUTPUT METHODS
-
-	// Notifications
-	
-	private void notification(String notification) {
-		notificationOut.println(notification);
-	}
-
-	private void notifyAboutSolverTime(SolverEvaluationResult solverEvaluationResult) {
-		notification("Solver " + solverEvaluationResult.solver.getName() + " took an average inference time of " + toDurationString(solverEvaluationResult.averageInferenceTimeInMilliseconds) + " to solve " + solverEvaluationResult.problem.name);
-	}
-
-	private void notifyAboutTotalEvaluationTime(long evaluationStart, long evaluationEnd) {
-		notification("Evaluation took " + toDurationString(evaluationEnd - evaluationStart) + " to run to completion.");
-	}
-
-	private void notifyAboutBeginningOfBurnInForAllSolvers(PagedModelContainer modelsToEvaluateContainer, Problem problem) {
-		notification("Starting burn in for all solvers based on '" + modelsToEvaluateContainer.getName() + " - " + problem.model.getName() + " : " + problem.query + "'");
-	}
-
-	private void notifyAboutBurnIn(Solver solver, SolverEvaluationResult result) {
-		notification("Burn in for " + solver.getName() + " complete. Average inference time = " + toDurationString(result.averageInferenceTimeInMilliseconds));
-	}
-
-	//// CSV - Header
-	
-	private void writeInitialHeader(StringJoiner csvLine) {
-		csvLine.add("Problem");
-		csvLine.add("Inference Type");
-		csvLine.add("Domain Size(s)");
-		csvLine.add("# runs values averaged over");
-	}
-
-	private void outputReportHeaderLine() {
-		StringJoiner cvsHeaderLine = new StringJoiner(",");
-		writeInitialHeader(cvsHeaderLine);
-		for (Solver solver : solvers) {
-			writeHeaderForSolver(solver, cvsHeaderLine);
-		}
-		notification("Starting to generate Evaluation Report");
-		csvResultOutput(cvsHeaderLine.toString());
-	}
-
-	private void writeHeaderForSolver(Solver solver, StringJoiner cvsHeaderLine) {
-		cvsHeaderLine.add("Solver");
-		cvsHeaderLine.add("Result for " + solver.getName());
-		cvsHeaderLine.add("Inference ms. for " + solver.getName());
-		cvsHeaderLine.add("HH:MM:SS.");
-		cvsHeaderLine.add("Translation ms. for " + solver.getName());
-		cvsHeaderLine.add("HH:MM:SS.");
-	}
-
-	//// CSV - Query line
-	
-	StringJoiner queryCSVLine;
-	
-	private void initializeQueryLine(Problem problem) {
-		notification("Starting to evaluate " + problem.name);
-		queryCSVLine = new StringJoiner(",");
-		queryCSVLine.add(problem.name);
-		queryCSVLine.add(configuration.getType().name());
-		queryCSVLine.add(domainSizesOfCurrentModel);
-		queryCSVLine.add(" " + configuration.getNumberOfRunsToAverageOver());
-	}
-
-	private void addToQueryLine(SolverEvaluationResult solverEvaluationResult) {
-		solverEvaluationResult.addToCSVLine(queryCSVLine);
-	}
-
-	private void finalizeQueryLine() {
-		csvResultOutput(queryCSVLine.toString());
-	}
-
-	private void csvResultOutput(String csvLine) {
-		resultOut.println(csvLine);
-	}
-
-	static String toDurationString(long duration) {
-		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
-		long remainingDuration = duration;
-		
-		if (remainingDuration != 0) {
-			hours    = remainingDuration / 3600000;
-			remainingDuration = remainingDuration % 3600000; 
-		}
-		if (remainingDuration != 0) {
-			minutes  = remainingDuration / 60000;
-			remainingDuration = remainingDuration % 60000;
-		}
-		if (remainingDuration != 0) {
-			seconds  = remainingDuration / 1000;
-			remainingDuration = remainingDuration % 1000;
-		}
-		milliseconds = remainingDuration;
-		
-		return hours + "h" + minutes + "m" + seconds + "." + milliseconds + "s";
 	}
 }
