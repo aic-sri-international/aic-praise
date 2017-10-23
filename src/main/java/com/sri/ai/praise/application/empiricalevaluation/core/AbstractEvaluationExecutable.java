@@ -41,7 +41,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import com.sri.ai.praise.empiricalevaluation.Evaluation;
-import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
+import com.sri.ai.praise.empiricalevaluation.Configuration;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
 /**
@@ -76,18 +76,18 @@ public abstract class AbstractEvaluationExecutable {
 
 	public void run(String[] args) throws Exception {
 		commandLineOptions = makeCommandLineOptions(args);
-		try (EvaluationConfiguration evaluationConfiguration = commandLineOptions.getEvaluationConfiguration()) {
+		try (Configuration evaluationConfiguration = commandLineOptions.getEvaluationConfiguration()) {
 			evaluate(evaluationConfiguration);
 		}
 	}
 
-	private void evaluate(EvaluationConfiguration evaluationConfiguration) throws IOException {
+	private void evaluate(Configuration evaluationConfiguration) throws IOException {
 		setModelsInEvaluationConfiguration(evaluationConfiguration);
 		Evaluation evaluation = new Evaluation(evaluationConfiguration);
 		evaluation.evaluate();
 	}
 
-	private void setModelsInEvaluationConfiguration(EvaluationConfiguration evaluationConfiguration) throws IOException {
+	private void setModelsInEvaluationConfiguration(Configuration evaluationConfiguration) throws IOException {
 		PagedModelContainer modelsContainer = makeModelsContainerFromCommandLineOptions();
 		evaluationConfiguration.setModelsContainer(modelsContainer);
 	}

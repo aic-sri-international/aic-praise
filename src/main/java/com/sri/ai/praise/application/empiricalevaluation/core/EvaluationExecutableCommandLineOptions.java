@@ -11,7 +11,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
+import com.sri.ai.praise.empiricalevaluation.Configuration;
 import com.sri.ai.praise.probabilisticsolver.core.pimt.PIMTSolver;
 
 // TODO - consider using commons-configuration to evaluation input file
@@ -19,7 +19,7 @@ import com.sri.ai.praise.probabilisticsolver.core.pimt.PIMTSolver;
 // https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
 public class EvaluationExecutableCommandLineOptions {
 
-	public EvaluationConfiguration evaluationConfiguration;
+	public Configuration evaluationConfiguration;
 
 	public OptionSet optionSet;
 
@@ -33,7 +33,7 @@ public class EvaluationExecutableCommandLineOptions {
 	public OptionSpec<File> workingDirectory;
 
 	public EvaluationExecutableCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		evaluationConfiguration = new EvaluationConfiguration();
+		evaluationConfiguration = new Configuration();
 		setOptionsSetUsingDefaultEvaluationConfiguration(args);
 		overrideEvaluationConfigurationsFromOptionSet();
 	}
@@ -130,7 +130,7 @@ public class EvaluationExecutableCommandLineOptions {
 		}
 	}
 
-	public EvaluationConfiguration getEvaluationConfiguration() {
+	public Configuration getEvaluationConfiguration() {
 		return evaluationConfiguration;
 	}
 }

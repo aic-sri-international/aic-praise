@@ -52,26 +52,26 @@ import com.sri.ai.util.Util;
  */
 public class SolverEvaluation {	
 	
-	private EvaluationConfiguration configuration;
-	private Solver solver;
+	private Configuration configuration;
+	public Solver solver;
 
 	private Notifier notifier;
 	private CSVWriter csvWriter;
 
-	public SolverEvaluation(String solverImplementationClassName, Notifier notifier, CSVWriter csvWriter, EvaluationConfiguration configuration) {
+	public SolverEvaluation(String solverImplementationClassName, Notifier notifier, CSVWriter csvWriter, Configuration configuration) {
 		this.configuration = configuration;
 		this.solver = makeSolverFromClassName(solverImplementationClassName, configuration);
 		this.notifier = notifier;
 		this.csvWriter = csvWriter;
 	}
 
-	private Solver makeSolverFromClassName(String solverImplementationClassName, EvaluationConfiguration configuration) {
+	private Solver makeSolverFromClassName(String solverImplementationClassName, Configuration configuration) {
 		SolverConfiguration solverConfiguration = makeSolverConfiguration(solverImplementationClassName, configuration);
 		Solver solver = makeSolverFromConfiguration(solverConfiguration);
 		return solver;
 	}
 	
-	private static SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, EvaluationConfiguration configuration) {
+	private static SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, Configuration configuration) {
 		SolverConfiguration solverConfiguration = 
 				new SolverConfiguration(
 						solverImplementationClassName,

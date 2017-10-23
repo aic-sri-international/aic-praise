@@ -42,8 +42,9 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.sri.ai.praise.empiricalevaluation.Problem;
+import com.sri.ai.praise.empiricalevaluation.SolverEvaluation;
 import com.sri.ai.praise.empiricalevaluation.SolverEvaluationResult;
-import com.sri.ai.praise.probabilisticsolver.Solver;
+import com.sri.ai.util.Util;
 
 /**
  * Class responsible for performing an evaluation of one or more solvers on a given problem set.
@@ -66,28 +67,28 @@ public class CSVWriter {
 	
 	// Header methods
 	
-	public void writeInitialHeader(StringJoiner csvLine) {
-		csvLine.add("Problem");
-		csvLine.add("Inference Type");
-		csvLine.add("Domain Size(s)");
-		csvLine.add("# runs values averaged over");
+	public void writeInitialHeader(StringJoiner queryCSVLine) {
+		queryCSVLine.add("Problem");
+		queryCSVLine.add("Inference Type");
+		queryCSVLine.add("Domain Size(s)");
+		queryCSVLine.add("# runs values averaged over");
 	}
 
-	public void outputReportHeaderLine(List<Solver> solvers) {
+	public void outputReportHeaderLine(List<SolverEvaluation> solverEvaluations) {
 		StringJoiner cvsHeaderLine = new StringJoiner(",");
 		writeInitialHeader(cvsHeaderLine);
-		for (Solver solver : solvers) {
-			writeHeaderForSolver(solver, cvsHeaderLine);
+		for (SolverEvaluation solverEvaluation : solverEvaluations) {
+			writeHeaderForSolver(solverEvaluation, cvsHeaderLine);
 		}
 		csvResultOutput(cvsHeaderLine.toString());
 	}
 
-	public void writeHeaderForSolver(Solver solver, StringJoiner cvsHeaderLine) {
+	public void writeHeaderForSolver(SolverEvaluation solverEvaluation, StringJoiner cvsHeaderLine) {
 		cvsHeaderLine.add("Solver");
-		cvsHeaderLine.add("Result for " + solver.getName());
-		cvsHeaderLine.add("Inference ms. for " + solver.getName());
+		cvsHeaderLine.add("Result for " + solverEvaluation.solver.getName());
+		cvsHeaderLine.add("Inference ms. for " + solverEvaluation.solver.getName());
 		cvsHeaderLine.add("HH:MM:SS.");
-		cvsHeaderLine.add("Translation ms. for " + solver.getName());
+		cvsHeaderLine.add("Translation ms. for " + solverEvaluation.solver.getName());
 		cvsHeaderLine.add("HH:MM:SS.");
 	}
 
@@ -104,14 +105,19 @@ public class CSVWriter {
 	}
 
 	public void addToQueryLine(SolverEvaluationResult solverEvaluationResult) {
-		solverEvaluationResult.addToCSVLine(queryCSVLine);
+		queryCSVLine.add(solverEvaluationResult.solver.getName());
+		queryCSVLine.add(solverEvaluationResult.failed ? "FAILED" : "" + solverEvaluationResult.answer);
+		queryCSVLine.add("" + solverEvaluationResult.averageInferenceTimeInMilliseconds);
+		queryCSVLine.add(Util.toHoursMinutesAndSecondsString(solverEvaluationResult.averageInferenceTimeInMilliseconds));
+		queryCSVLine.add("" + solverEvaluationResult.averagelTranslationTimeInMilliseconds);
+		queryCSVLine.add(Util.toHoursMinutesAndSecondsString(solverEvaluationResult.averagelTranslationTimeInMilliseconds));
 	}
 
 	public void finalizeQueryLine() {
 		csvResultOutput(queryCSVLine.toString());
 	}
 
-	public void csvResultOutput(String csvLine) {
-		csvOut.println(csvLine);
+	public void csvResultOutput(String queryCSVLine) {
+		csvOut.println(queryCSVLine);
 	}
 }

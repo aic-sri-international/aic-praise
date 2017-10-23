@@ -49,10 +49,6 @@ import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.empiricalevaluation.output.Notifier;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.probabilisticsolver.Solver;
-import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
-import com.sri.ai.praise.probabilisticsolver.SolverResult;
-import com.sri.ai.util.Util;
 
 /**
  * Class responsible for performing an evaluation of one or more solvers on a given problem set.
@@ -62,38 +58,31 @@ import com.sri.ai.util.Util;
  */
 public class Evaluation {	
 	
-	private EvaluationConfiguration configuration;
-	private List<SolverConfiguration> solverConfigurations;
-	private List<Solver> solvers;
+	private Configuration configuration;
+	private List<SolverEvaluation> solverEvaluations;
 
 	private Notifier notifier;
 	private CSVWriter csvWriter;
 	private String domainSizesOfCurrentModel;
 
-	public Evaluation(EvaluationConfiguration configuration) {
+	public Evaluation(Configuration configuration) {
 		this.configuration = configuration;
-		this.solverConfigurations = mapIntoList(configuration.getSolverImplementationClassNames(), n -> makeSolverConfiguration(n, configuration));
 		this.notifier = new Notifier(configuration.getNotificationOut());
 		makeCSVWriter(configuration, configuration.getCSVOut());
+		this.solverEvaluations = mapIntoList(configuration.getSolverImplementationClassNames(), n -> makeSolverEvaluation(n));
 	}
 	
-	private static SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, EvaluationConfiguration configuration) {
-		SolverConfiguration solverConfiguration = 
-				new SolverConfiguration(
-						solverImplementationClassName,
-						configuration.getTotalCPURuntimeLimitSecondsPerSolveAttempt(),
-						configuration.getTotalMemoryLimitInMegabytesPerSolveAttempt(),
-						!configuration.doesNotCacheTranslations(),
-						configuration.getWorkingDirectory());
-		return solverConfiguration;
-	}
-
-	private void makeCSVWriter(EvaluationConfiguration configuration, PrintStream csvOut) {
+	private void makeCSVWriter(Configuration configuration, PrintStream csvOut) {
 		String problemTypeName = configuration.getType().name();
 		int numberOfRunsToAverageOver = configuration.getNumberOfRunsToAverageOver();
 		this.csvWriter = new CSVWriter(problemTypeName, numberOfRunsToAverageOver, csvOut);
 	}
 	
+	private SolverEvaluation makeSolverEvaluation(String solverImplementationClassName) {
+		SolverEvaluation solverEvaluation = new SolverEvaluation(solverImplementationClassName, notifier, csvWriter, configuration);
+		return solverEvaluation;
+	}
+
 	public void evaluate() {
 	
 		checkType(configuration.getType());
@@ -107,42 +96,15 @@ public class Evaluation {
 	}
 
 	private void initialize() {
-		initializeSolvers();
-		csvWriter.outputReportHeaderLine(solvers);
-	}
-
-	private void initializeSolvers() {
-		makeSolvers();
 		doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance();
-	}
-
-	private void makeSolvers() {
-		solvers = mapIntoList(solverConfigurations, this::makeSolver);
-	}
-
-	private Solver makeSolver(SolverConfiguration solverConfiguration) {
-		Class<Solver> solverClass = getSolverImplementationClass(solverConfiguration);
-		Solver solver = makeSolverInstance(solverConfiguration, solverClass);
-		return solver;
-	}
-
-	private Class<Solver> getSolverImplementationClass(SolverConfiguration solverConfiguration) {
-		String solverClassName = solverConfiguration.getImplementationClassName();
-		Class<Solver> solverClass = getSolverClass(solverClassName);
-		return solverClass;
-	}
-
-	private Solver makeSolverInstance(SolverConfiguration solverConfiguration, Class<Solver> solverClass) {
-		Solver solver = newSolverInstance(solverClass);
-		solver.setConfiguration(solverConfiguration);
-		return solver;
+		csvWriter.outputReportHeaderLine(solverEvaluations);
 	}
 
 	private void doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance() {
 		Problem problem = makeBurnInProblem();
 		notifier.notifyAboutBeginningOfBurnInForAllSolvers(configuration.getModelsContainer(), problem);
-		for (Solver solver : solvers) {
-			performBurnInForSolver(solver, problem);
+		for (SolverEvaluation solverEvaluation : solverEvaluations) {
+			solverEvaluation.performBurnIn(problem);
 		}
 	}
 
@@ -151,11 +113,6 @@ public class Evaluation {
 		String    burnInQuery = burnInModel.getDefaultQueriesToRun().get(0); 
 		Problem problem = new Problem(burnInQuery, burnInModel);
 		return problem;
-	}
-
-	private void performBurnInForSolver(Solver solver, Problem problem) {
-		SolverEvaluationResult solverEvaluationResult = getResultsFromAllRunsForSolver(solver, problem);
-		notifier.notifyAboutBurnIn(solver, solverEvaluationResult);
 	}
 
 	private void evaluateAllModels() {
@@ -176,61 +133,15 @@ public class Evaluation {
 	private void evaluateProblem(Problem problem) {
 		notifier.notify("Starting to evaluate " + problem.name);
 		csvWriter.initializeQueryLine(problem, domainSizesOfCurrentModel);
-		for (Solver solver : solvers) {
-			evaluateSolver(solver, problem);
+		for (SolverEvaluation solverEvaluation : solverEvaluations) {
+			solverEvaluation.evaluate(problem);
 		}
 		csvWriter.finalizeQueryLine();
 	}
 
-	private void evaluateSolver(Solver solver, Problem problem) {
-		SolverEvaluationResult solverEvaluationResult = getResultsFromAllRunsForSolver(solver, problem);
-		csvWriter.addToQueryLine(solverEvaluationResult);
-		notifier.notifyAboutSolverTime(solverEvaluationResult);
-	}
-
-	private SolverEvaluationResult getResultsFromAllRunsForSolver(Solver solver, Problem problem) {
-		SolverEvaluationResult solverEvaluationResult = new SolverEvaluationResult(solver, problem);	
-		for (int i = 0; i != configuration.getNumberOfRunsToAverageOver(); i++) {
-			SolverResult solverResult = solve(solver, problem);
-			solverEvaluationResult.aggregateSingleRunSolverResult(solverResult);
-		}
-		solverEvaluationResult.recordAverageTime(configuration.getNumberOfRunsToAverageOver());
-		return solverEvaluationResult;
-	}
-
-	
-	
-	
 	/////////////// LOW-LEVEL METHODS
 	
 	
-	private SolverResult solve(Solver solver, Problem problem) {
-		try {
-			SolverResult result = 
-					solver.solve(
-							problem.model.getName() + " - " + problem.query, 
-							problem.model.getLanguage(), 
-							problem.model.getModelString(), 
-							problem.query);
-			return result;
-		} catch (Exception exception) {
-			throw new IllegalArgumentException(exception);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private Class<Solver> getSolverClass(String solverClassName) {
-		return (Class<Solver>) Util.getClassOrIllegalArgumentException(solverClassName);
-	}
-
-	private Solver newSolverInstance(Class<? extends Solver> classObject) {
-		try {
-			return classObject.newInstance();
-		} catch (InstantiationException | IllegalAccessException exception) {
-			throw new IllegalArgumentException(exception);
-		}
-	}
-
 	private void checkType(ProblemType type) {
 		myAssert(type == ProblemType.PR, () -> unsupported(type));
 	}

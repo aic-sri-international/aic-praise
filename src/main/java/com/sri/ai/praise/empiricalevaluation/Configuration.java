@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
-public class EvaluationConfiguration implements AutoCloseable {
+public class Configuration implements AutoCloseable {
 
 	private PagedModelContainer modelsContainer = null;
 	
