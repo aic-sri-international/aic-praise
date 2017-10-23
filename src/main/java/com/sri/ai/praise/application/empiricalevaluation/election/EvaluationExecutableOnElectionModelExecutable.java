@@ -35,14 +35,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.empiricalevaluation.core;
+package com.sri.ai.praise.application.empiricalevaluation.election;
 
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
 
 import java.io.IOException;
 
-import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
+import com.sri.ai.praise.application.empiricalevaluation.core.AbstractEvaluationExecutable;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -55,9 +55,9 @@ import com.sri.ai.util.collect.IntegerIterator;
  * @author braz
  *
  */
-public class EvaluationOnElectionModelExecutable extends AbstractEvaluationExecutable {
+public class EvaluationExecutableOnElectionModelExecutable extends AbstractEvaluationExecutable {
 	
-	protected PagedModelContainer makeModelsContainer(Configuration evaluationArgs) throws IOException {
+	protected PagedModelContainer makeModelsContainerFromCommandLineOptions() throws IOException {
 		return 
 				new PagedModelContainer(
 						"election", 
@@ -114,7 +114,7 @@ public class EvaluationOnElectionModelExecutable extends AbstractEvaluationExecu
 	}
 
 	public static void main(String[] args) throws Exception {
-		EvaluationOnElectionModelExecutable evaluator = new EvaluationOnElectionModelExecutable();
+		EvaluationExecutableOnElectionModelExecutable evaluator = new EvaluationExecutableOnElectionModelExecutable();
 		evaluator.run(args);
 	}
 }

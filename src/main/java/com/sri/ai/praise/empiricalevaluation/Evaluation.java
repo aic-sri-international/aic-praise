@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.empiricalevaluation.core;
+package com.sri.ai.praise.empiricalevaluation;
 
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
@@ -45,11 +45,9 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.sri.ai.expresso.api.Type;
-import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
-import com.sri.ai.praise.empiricalevaluation.core.output.CSVWriter;
-import com.sri.ai.praise.empiricalevaluation.core.output.Notifier;
+import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
+import com.sri.ai.praise.empiricalevaluation.output.Notifier;
 import com.sri.ai.praise.model.common.io.ModelPage;
-import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.probabilisticsolver.Solver;
 import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
@@ -64,24 +62,22 @@ import com.sri.ai.util.Util;
  */
 public class Evaluation {	
 	
-	private Configuration configuration;
+	private EvaluationConfiguration configuration;
 	private List<SolverConfiguration> solverConfigurations;
-	private PagedModelContainer modelsToEvaluateContainer;
 	private List<Solver> solvers;
 
 	private Notifier notifier;
 	private CSVWriter cvsWriter;
 	private String domainSizesOfCurrentModel;
 
-	public Evaluation(Configuration configuration, PagedModelContainer modelsToEvaluateContainer) {
+	public Evaluation(EvaluationConfiguration configuration) {
 		this.configuration = configuration;
-		this.modelsToEvaluateContainer = modelsToEvaluateContainer;
 		this.solverConfigurations = mapIntoList(configuration.getSolverImplementationClassNames(), n -> makeSolverConfiguration(n, configuration));
 		this.notifier = new Notifier(configuration.getNotificationOut());
-		makeCSVWriter(configuration, configuration.getResultOut());
+		makeCSVWriter(configuration, configuration.getCSVOut());
 	}
 	
-	private static SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, Configuration configuration) {
+	private static SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, EvaluationConfiguration configuration) {
 		SolverConfiguration solverConfiguration = 
 				new SolverConfiguration(
 						solverImplementationClassName,
@@ -92,7 +88,7 @@ public class Evaluation {
 		return solverConfiguration;
 	}
 
-	private void makeCSVWriter(Configuration configuration, PrintStream csvOut) {
+	private void makeCSVWriter(EvaluationConfiguration configuration, PrintStream csvOut) {
 		String problemTypeName = configuration.getType().name();
 		int numberOfRunsToAverageOver = configuration.getNumberOfRunsToAverageOver();
 		this.cvsWriter = new CSVWriter(problemTypeName, numberOfRunsToAverageOver, csvOut);
@@ -144,14 +140,14 @@ public class Evaluation {
 
 	private void doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance() {
 		Problem problem = makeBurnInProblem();
-		notifier.notifyAboutBeginningOfBurnInForAllSolvers(modelsToEvaluateContainer, problem);
+		notifier.notifyAboutBeginningOfBurnInForAllSolvers(configuration.getModelsContainer(), problem);
 		for (Solver solver : solvers) {
 			performBurnInForSolver(solver, problem);
 		}
 	}
 
 	private Problem makeBurnInProblem() {
-		ModelPage burnInModel = modelsToEvaluateContainer.getPages().get(0);
+		ModelPage burnInModel = configuration.getModelsContainer().getPages().get(0);
 		String    burnInQuery = burnInModel.getDefaultQueriesToRun().get(0); 
 		Problem problem = new Problem(burnInQuery, burnInModel);
 		return problem;
@@ -164,7 +160,7 @@ public class Evaluation {
 
 	private void evaluateAllModels() {
 		notifier.notify("Starting to generate Evaluation Report");
-		for (ModelPage model : modelsToEvaluateContainer.getPages()) {
+		for (ModelPage model : configuration.getModelsContainer().getPages()) {
 			evaluateModel(model);
 		}
 	}

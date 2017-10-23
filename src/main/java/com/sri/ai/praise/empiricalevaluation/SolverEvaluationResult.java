@@ -1,4 +1,4 @@
-package com.sri.ai.praise.empiricalevaluation.core;
+package com.sri.ai.praise.empiricalevaluation;
 
 import java.util.StringJoiner;
 

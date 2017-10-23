@@ -35,14 +35,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.empiricalevaluation.core.output;
+package com.sri.ai.praise.empiricalevaluation.output;
 
 import static com.sri.ai.util.Util.toHoursMinutesAndSecondsString;
 
 import java.io.PrintStream;
 
-import com.sri.ai.praise.empiricalevaluation.core.Problem;
-import com.sri.ai.praise.empiricalevaluation.core.SolverEvaluationResult;
+import com.sri.ai.praise.empiricalevaluation.Problem;
+import com.sri.ai.praise.empiricalevaluation.SolverEvaluationResult;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.praise.probabilisticsolver.Solver;
 

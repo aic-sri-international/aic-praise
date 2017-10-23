@@ -39,11 +39,9 @@ package com.sri.ai.praise.application.empiricalevaluation.core;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
-import com.sri.ai.praise.application.empiricalevaluation.options.EvaluationConfigurationFromCommandLineOptions;
-import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
-import com.sri.ai.praise.empiricalevaluation.core.Evaluation;
+import com.sri.ai.praise.empiricalevaluation.Evaluation;
+import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
 /**
@@ -55,14 +53,15 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
  */
 public abstract class AbstractEvaluationExecutable {
 
+	protected EvaluationExecutableCommandLineOptions commandLineOptions;
+	
 	/**
 	 * A method making a {@link PagedModelContainer} from evaluation arguments.
 	 * 
-	 * @param evaluationArgs
 	 * @return
 	 * @throws IOException
 	 */
-	abstract protected PagedModelContainer makeModelsContainer(Configuration evaluationArgs) throws IOException;
+	abstract protected PagedModelContainer makeModelsContainerFromCommandLineOptions() throws IOException;
 
 	/**
 	 * Returns options specifications.
@@ -71,26 +70,25 @@ public abstract class AbstractEvaluationExecutable {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	protected EvaluationConfigurationFromCommandLineOptions makeEvaluationArgumentsFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		return new EvaluationConfigurationFromCommandLineOptions(args);
+	protected EvaluationExecutableCommandLineOptions makeCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+		return new EvaluationExecutableCommandLineOptions(args);
 	}
 
 	public void run(String[] args) throws Exception {
-		try (Configuration configuration = getConfiguration(args)) {
-			evaluate(configuration);
+		commandLineOptions = makeCommandLineOptions(args);
+		try (EvaluationConfiguration evaluationConfiguration = commandLineOptions.getEvaluationConfiguration()) {
+			evaluate(evaluationConfiguration);
 		}
 	}
 
-	private void evaluate(Configuration configuration) throws IOException {
-		PagedModelContainer modelsContainer = makeModelsContainer(configuration);
-		Evaluation evaluation = new Evaluation(configuration, modelsContainer);
+	private void evaluate(EvaluationConfiguration evaluationConfiguration) throws IOException {
+		setModelsInEvaluationConfiguration(evaluationConfiguration);
+		Evaluation evaluation = new Evaluation(evaluationConfiguration);
 		evaluation.evaluate();
 	}
 
-	private Configuration getConfiguration(String[] args)
-			throws UnsupportedEncodingException, FileNotFoundException, IOException {
-
-		EvaluationConfigurationFromCommandLineOptions optionSpecs = makeEvaluationArgumentsFromCommandLineOptions(args);
-		return optionSpecs.getConfiguration();
+	private void setModelsInEvaluationConfiguration(EvaluationConfiguration evaluationConfiguration) throws IOException {
+		PagedModelContainer modelsContainer = makeModelsContainerFromCommandLineOptions();
+		evaluationConfiguration.setModelsContainer(modelsContainer);
 	}
 }

@@ -1,4 +1,4 @@
-package com.sri.ai.praise.empiricalevaluation.core;
+package com.sri.ai.praise.empiricalevaluation;
 
 // Based on http://www.hlt.utdallas.edu/~vgogate/uai14-competition/information.html
 public enum ProblemType {

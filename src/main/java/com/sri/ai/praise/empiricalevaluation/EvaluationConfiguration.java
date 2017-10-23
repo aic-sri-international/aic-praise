@@ -1,4 +1,4 @@
-package com.sri.ai.praise.empiricalevaluation.core.configuration;
+package com.sri.ai.praise.empiricalevaluation;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,11 +6,12 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sri.ai.praise.empiricalevaluation.api.configuration.Configuration;
-import com.sri.ai.praise.empiricalevaluation.core.ProblemType;
+import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
-public class DefaultConfiguration implements Configuration {
+public class EvaluationConfiguration implements AutoCloseable {
 
+	private PagedModelContainer modelsContainer = null;
+	
 	private ProblemType type = ProblemType.PR;
 
 	private List<String> solverImplementationClassNames = new ArrayList<>(); // -s
@@ -27,17 +28,22 @@ public class DefaultConfiguration implements Configuration {
 	private File workingDirectory; // -w
 	
 
-	@Override
+	public PagedModelContainer getModelsContainer() {
+		return modelsContainer;
+	}
+
+	public void setModelsContainer(PagedModelContainer modelsContainer) {
+		this.modelsContainer = modelsContainer;
+	}
+
 	public ProblemType getType() {
 		return type;
 	}
 
-	@Override
 	public void setType(ProblemType type) {
 		this.type = type;
 	}
 
-	@Override
 	public List<String> getSolverImplementationClassNames() {
 		return solverImplementationClassNames;
 	}
@@ -47,7 +53,6 @@ public class DefaultConfiguration implements Configuration {
 	}
 
 	
-	@Override
 	public PrintStream getNotificationOut() {
 		return notificationOut;
 	}
@@ -57,17 +62,15 @@ public class DefaultConfiguration implements Configuration {
 	}
 
 	
-	@Override
-	public PrintStream getResultOut() {
+	public PrintStream getCSVOut() {
 		return resultOut;
 	}
 
-	public void setResultOut(PrintStream resultOut) {
+	public void setCSVOut(PrintStream resultOut) {
 		this.resultOut = resultOut;
 	}
 
 	
-	@Override
 	public int getTotalCPURuntimeLimitSecondsPerSolveAttempt() {
 		return totalCPURuntimeLimitSecondsPerSolveAttempt;
 	}
@@ -77,7 +80,6 @@ public class DefaultConfiguration implements Configuration {
 	}
 
 	
-	@Override
 	public int getTotalMemoryLimitInMegabytesPerSolveAttempt() {
 		return totalMemoryLimitInMegabytesPerSolveAttempt;
 	}
@@ -87,7 +89,6 @@ public class DefaultConfiguration implements Configuration {
 	}
 
 	
-	@Override
 	public int getNumberOfRunsToAverageOver() {
 		return numberOfRunsToAverageOver;
 	}
@@ -97,7 +98,6 @@ public class DefaultConfiguration implements Configuration {
 	}
 
 	
-	@Override
 	public boolean doesNotCacheTranslations() {
 		return doesNotCacheTranslations;
 	}
@@ -107,7 +107,6 @@ public class DefaultConfiguration implements Configuration {
 	}
 
 	
-	@Override
 	public File getWorkingDirectory() {
 		return workingDirectory;
 	}
@@ -117,7 +116,6 @@ public class DefaultConfiguration implements Configuration {
 	}
 
 	
-	@Override
 	public void close() throws IOException {
 		notificationOut.flush();
 		resultOut.flush();
