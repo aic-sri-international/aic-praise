@@ -37,18 +37,8 @@
  */
 package com.sri.ai.praise.empiricalevaluation;
 
-import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.myAssert;
-
-import java.io.PrintStream;
-import java.util.List;
-import java.util.StringJoiner;
-
-import com.sri.ai.expresso.api.Type;
 import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.empiricalevaluation.output.Notifier;
-import com.sri.ai.praise.model.common.io.ModelPage;
-import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.probabilisticsolver.Solver;
 import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
 import com.sri.ai.praise.probabilisticsolver.SolverResult;
@@ -60,21 +50,25 @@ import com.sri.ai.util.Util;
  * @author oreilly
  *
  */
-public class Evaluation {	
+public class SolverEvaluation {	
 	
 	private EvaluationConfiguration configuration;
-	private List<SolverConfiguration> solverConfigurations;
-	private List<Solver> solvers;
+	private Solver solver;
 
 	private Notifier notifier;
 	private CSVWriter csvWriter;
-	private String domainSizesOfCurrentModel;
 
-	public Evaluation(EvaluationConfiguration configuration) {
+	public SolverEvaluation(String solverImplementationClassName, Notifier notifier, CSVWriter csvWriter, EvaluationConfiguration configuration) {
 		this.configuration = configuration;
-		this.solverConfigurations = mapIntoList(configuration.getSolverImplementationClassNames(), n -> makeSolverConfiguration(n, configuration));
-		this.notifier = new Notifier(configuration.getNotificationOut());
-		makeCSVWriter(configuration, configuration.getCSVOut());
+		this.solver = makeSolverFromClassName(solverImplementationClassName, configuration);
+		this.notifier = notifier;
+		this.csvWriter = csvWriter;
+	}
+
+	private Solver makeSolverFromClassName(String solverImplementationClassName, EvaluationConfiguration configuration) {
+		SolverConfiguration solverConfiguration = makeSolverConfiguration(solverImplementationClassName, configuration);
+		Solver solver = makeSolverFromConfiguration(solverConfiguration);
+		return solver;
 	}
 	
 	private static SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, EvaluationConfiguration configuration) {
@@ -88,39 +82,7 @@ public class Evaluation {
 		return solverConfiguration;
 	}
 
-	private void makeCSVWriter(EvaluationConfiguration configuration, PrintStream csvOut) {
-		String problemTypeName = configuration.getType().name();
-		int numberOfRunsToAverageOver = configuration.getNumberOfRunsToAverageOver();
-		this.csvWriter = new CSVWriter(problemTypeName, numberOfRunsToAverageOver, csvOut);
-	}
-	
-	public void evaluate() {
-	
-		checkType(configuration.getType());
-		
-		long evaluationStart = System.currentTimeMillis();	
-		initialize();
-		evaluateAllModels();
-		long evaluationEnd = System.currentTimeMillis();
-		
-		notifier.notifyAboutTotalEvaluationTime(evaluationStart, evaluationEnd);
-	}
-
-	private void initialize() {
-		initializeSolvers();
-		csvWriter.outputReportHeaderLine(solvers);
-	}
-
-	private void initializeSolvers() {
-		makeSolvers();
-		doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance();
-	}
-
-	private void makeSolvers() {
-		solvers = mapIntoList(solverConfigurations, this::makeSolver);
-	}
-
-	private Solver makeSolver(SolverConfiguration solverConfiguration) {
+	private Solver makeSolverFromConfiguration(SolverConfiguration solverConfiguration) {
 		Class<Solver> solverClass = getSolverImplementationClass(solverConfiguration);
 		Solver solver = makeSolverInstance(solverConfiguration, solverClass);
 		return solver;
@@ -138,73 +100,31 @@ public class Evaluation {
 		return solver;
 	}
 
-	private void doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance() {
-		Problem problem = makeBurnInProblem();
-		notifier.notifyAboutBeginningOfBurnInForAllSolvers(configuration.getModelsContainer(), problem);
-		for (Solver solver : solvers) {
-			performBurnInForSolver(solver, problem);
-		}
-	}
-
-	private Problem makeBurnInProblem() {
-		ModelPage burnInModel = configuration.getModelsContainer().getPages().get(0);
-		String    burnInQuery = burnInModel.getDefaultQueriesToRun().get(0); 
-		Problem problem = new Problem(burnInQuery, burnInModel);
-		return problem;
-	}
-
-	private void performBurnInForSolver(Solver solver, Problem problem) {
-		SolverEvaluationResult solverEvaluationResult = getResultsFromAllRunsForSolver(solver, problem);
+	public void performBurnIn(Problem problem) {
+		SolverEvaluationResult solverEvaluationResult = getResultsFromAllRuns(problem);
 		notifier.notifyAboutBurnIn(solver, solverEvaluationResult);
 	}
 
-	private void evaluateAllModels() {
-		notifier.notify("Starting to generate Evaluation Report");
-		for (ModelPage model : configuration.getModelsContainer().getPages()) {
-			evaluateModel(model);
-		}
-	}
-
-	private void evaluateModel(ModelPage model) {
-		domainSizesOfCurrentModel = getDomainSizes(model.getModelString());
-		for (String query : model.getDefaultQueriesToRun()) {
-			Problem problem = new Problem(query, model);
-			evaluateProblem(problem);
-		}
-	}
-
-	private void evaluateProblem(Problem problem) {
-		notifier.notify("Starting to evaluate " + problem.name);
-		csvWriter.initializeQueryLine(problem, domainSizesOfCurrentModel);
-		for (Solver solver : solvers) {
-			evaluateSolver(solver, problem);
-		}
-		csvWriter.finalizeQueryLine();
-	}
-
-	private void evaluateSolver(Solver solver, Problem problem) {
-		SolverEvaluationResult solverEvaluationResult = getResultsFromAllRunsForSolver(solver, problem);
+	public void evaluate(Problem problem) {
+		SolverEvaluationResult solverEvaluationResult = getResultsFromAllRuns(problem);
 		csvWriter.addToQueryLine(solverEvaluationResult);
 		notifier.notifyAboutSolverTime(solverEvaluationResult);
 	}
 
-	private SolverEvaluationResult getResultsFromAllRunsForSolver(Solver solver, Problem problem) {
+	private SolverEvaluationResult getResultsFromAllRuns(Problem problem) {
 		SolverEvaluationResult solverEvaluationResult = new SolverEvaluationResult(solver, problem);	
 		for (int i = 0; i != configuration.getNumberOfRunsToAverageOver(); i++) {
-			SolverResult solverResult = solve(solver, problem);
+			SolverResult solverResult = solve(problem);
 			solverEvaluationResult.aggregateSingleRunSolverResult(solverResult);
 		}
 		solverEvaluationResult.recordAverageTime(configuration.getNumberOfRunsToAverageOver());
 		return solverEvaluationResult;
 	}
 
-	
-	
-	
 	/////////////// LOW-LEVEL METHODS
 	
 	
-	private SolverResult solve(Solver solver, Problem problem) {
+	private SolverResult solve(Problem problem) {
 		try {
 			SolverResult result = 
 					solver.solve(
@@ -229,22 +149,5 @@ public class Evaluation {
 		} catch (InstantiationException | IllegalAccessException exception) {
 			throw new IllegalArgumentException(exception);
 		}
-	}
-
-	private void checkType(ProblemType type) {
-		myAssert(type == ProblemType.PR, () -> unsupported(type));
-	}
-
-	private String getDomainSizes(String model) {
-		StringJoiner result = new StringJoiner(",");
-		ExpressionFactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(model);
-		for (Type type : factorsAndTypes.getAdditionalTypes()) {
-			result.add(type.cardinality().intValueExact() + "");
-		}
-		return result.toString();
-	}
-
-	private String unsupported(ProblemType type) {
-		return type + " is current unsupported by " + Evaluation.class;
 	}
 }
