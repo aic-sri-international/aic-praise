@@ -42,7 +42,7 @@ import static com.sri.ai.util.Util.toHoursMinutesAndSecondsString;
 import java.io.PrintStream;
 
 import com.sri.ai.praise.empiricalevaluation.Problem;
-import com.sri.ai.praise.empiricalevaluation.solver.SolverEvaluationResult;
+import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluationResult;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
 /**

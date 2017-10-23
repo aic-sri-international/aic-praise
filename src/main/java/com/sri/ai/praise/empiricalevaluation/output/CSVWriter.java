@@ -43,8 +43,8 @@ import java.util.StringJoiner;
 
 import com.sri.ai.praise.empiricalevaluation.Configuration;
 import com.sri.ai.praise.empiricalevaluation.Problem;
-import com.sri.ai.praise.empiricalevaluation.solver.SolverEvaluation;
-import com.sri.ai.praise.empiricalevaluation.solver.SolverEvaluationResult;
+import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluation;
+import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluationResult;
 import com.sri.ai.util.Util;
 
 /**
