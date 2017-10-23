@@ -40,20 +40,21 @@ package com.sri.ai.praise.empiricalevaluation;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 
-import java.io.PrintStream;
+import java.util.Collection;
 import java.util.List;
-import java.util.StringJoiner;
 
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.empiricalevaluation.output.Notifier;
+import com.sri.ai.praise.empiricalevaluation.solver.SolverEvaluation;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
+import com.sri.ai.util.Util;
 
 /**
  * Class responsible for performing an evaluation of one or more solvers on a given problem set.
  * 
- * @author oreilly
+ * @author oreilly, braz
  *
  */
 public class Evaluation {	
@@ -68,14 +69,8 @@ public class Evaluation {
 	public Evaluation(Configuration configuration) {
 		this.configuration = configuration;
 		this.notifier = new Notifier(configuration.getNotificationOut());
-		makeCSVWriter(configuration, configuration.getCSVOut());
+		this.csvWriter = new CSVWriter(configuration);
 		this.solverEvaluations = mapIntoList(configuration.getSolverImplementationClassNames(), n -> makeSolverEvaluation(n));
-	}
-	
-	private void makeCSVWriter(Configuration configuration, PrintStream csvOut) {
-		String problemTypeName = configuration.getType().name();
-		int numberOfRunsToAverageOver = configuration.getNumberOfRunsToAverageOver();
-		this.csvWriter = new CSVWriter(problemTypeName, numberOfRunsToAverageOver, csvOut);
 	}
 	
 	private SolverEvaluation makeSolverEvaluation(String solverImplementationClassName) {
@@ -141,21 +136,15 @@ public class Evaluation {
 
 	/////////////// LOW-LEVEL METHODS
 	
-	
 	private void checkType(ProblemType type) {
-		myAssert(type == ProblemType.PR, () -> unsupported(type));
+		myAssert(type == ProblemType.PR, () -> (type + " is current unsupported by " + Evaluation.class));
 	}
 
 	private String getDomainSizes(String model) {
-		StringJoiner result = new StringJoiner(",");
 		ExpressionFactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(model);
-		for (Type type : factorsAndTypes.getAdditionalTypes()) {
-			result.add(type.cardinality().intValueExact() + "");
-		}
-		return result.toString();
-	}
-
-	private String unsupported(ProblemType type) {
-		return type + " is current unsupported by " + Evaluation.class;
+		Collection<Type> types = factorsAndTypes.getAdditionalTypes();
+		List<Integer> domainSizes = mapIntoList(types, t -> t.cardinality().intValueExact());
+		String result = Util.join(domainSizes);
+		return result;
 	}
 }

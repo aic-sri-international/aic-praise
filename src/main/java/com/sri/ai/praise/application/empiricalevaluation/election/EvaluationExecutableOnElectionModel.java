@@ -55,7 +55,7 @@ import com.sri.ai.util.collect.IntegerIterator;
  * @author braz
  *
  */
-public class EvaluationExecutableOnElectionModelExecutable extends AbstractEvaluationExecutable {
+public class EvaluationExecutableOnElectionModel extends AbstractEvaluationExecutable {
 	
 	protected PagedModelContainer makeModelsContainerFromCommandLineOptions() throws IOException {
 		return 
@@ -114,7 +114,7 @@ public class EvaluationExecutableOnElectionModelExecutable extends AbstractEvalu
 	}
 
 	public static void main(String[] args) throws Exception {
-		EvaluationExecutableOnElectionModelExecutable evaluator = new EvaluationExecutableOnElectionModelExecutable();
+		EvaluationExecutableOnElectionModel evaluator = new EvaluationExecutableOnElectionModel();
 		evaluator.run(args);
 	}
 }

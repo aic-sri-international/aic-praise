@@ -53,7 +53,7 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
  */
 public abstract class AbstractEvaluationExecutable {
 
-	protected EvaluationExecutableCommandLineOptions commandLineOptions;
+	protected CommandLineOptions commandLineOptions;
 	
 	/**
 	 * A method making a {@link PagedModelContainer} from evaluation arguments.
@@ -70,8 +70,8 @@ public abstract class AbstractEvaluationExecutable {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	protected EvaluationExecutableCommandLineOptions makeCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		return new EvaluationExecutableCommandLineOptions(args);
+	protected CommandLineOptions makeCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+		return new CommandLineOptions(args);
 	}
 
 	public void run(String[] args) throws Exception {

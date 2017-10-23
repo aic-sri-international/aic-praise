@@ -35,12 +35,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.empiricalevaluation;
+package com.sri.ai.praise.empiricalevaluation.solver;
 
-// Based on http://www.hlt.utdallas.edu/~vgogate/uai14-competition/information.html
-public enum ProblemType {
-	PR,   // Computing the the partition function and probability of evidence
-	MAR,  // Computing the marginal probability distribution over variable(s) given evidence
-	MAP,  // Computing the most likely assignment to all variables given evidence (also known as MPE, Most Probable Explanation)
-	MMAP, // Computing the most likely assignment to a subset of variables given evidence (Marginal MAP)
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.empiricalevaluation.Problem;
+import com.sri.ai.praise.probabilisticsolver.Solver;
+import com.sri.ai.praise.probabilisticsolver.SolverResult;
+
+public class SolverEvaluationResult {
+	public Solver solver;
+	public Problem problem;
+	public Expression answer = null;
+	public boolean failed = false;
+	public long averageInferenceTimeInMilliseconds;
+	public long averagelTranslationTimeInMilliseconds;
+	public long sumOfTotalInferenceTimeInMilliseconds   = 0L;
+	public long sumOfTotalTranslationTimeInMilliseconds = 0L;
+	
+	public SolverEvaluationResult(Solver solver, Problem problem) {
+		this.solver = solver;
+		this.problem = problem;
+	}
+	
+	public void aggregateSingleRunSolverResult(SolverResult solverResult) {
+		updateTime(solverResult);
+		updateAnswer(solverResult);
+	}
+
+	private void updateTime(SolverResult solverResult) {
+		sumOfTotalInferenceTimeInMilliseconds   += solverResult.getTotalInferenceTimeInMilliseconds();
+		sumOfTotalTranslationTimeInMilliseconds += solverResult.getTotalTranslationTimeInMilliseconds();
+	}
+	
+	private void updateAnswer(SolverResult solverResult) {
+		if (solverResult.getProbabilityOfEvidence() == null) {
+			failed = true;
+		}
+		else {
+			answer = solverResult.getProbabilityOfEvidence();
+		}
+	}
+
+	public void recordAverageTime(int numberOfRuns) {
+		averageInferenceTimeInMilliseconds    = sumOfTotalInferenceTimeInMilliseconds / numberOfRuns;
+		averagelTranslationTimeInMilliseconds = sumOfTotalTranslationTimeInMilliseconds / numberOfRuns;
+	}
 }

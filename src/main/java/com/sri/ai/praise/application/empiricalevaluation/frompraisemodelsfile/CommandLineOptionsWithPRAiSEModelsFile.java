@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.sri.ai.praise.application.empiricalevaluation.core.EvaluationExecutableCommandLineOptions;
+import com.sri.ai.praise.application.empiricalevaluation.core.CommandLineOptions;
 
 import joptsimple.OptionSpec;
 
-public class CommandLineOptionsWithPRAiSEModelsFile extends EvaluationExecutableCommandLineOptions {
+public class CommandLineOptionsWithPRAiSEModelsFile extends CommandLineOptions {
 	public OptionSpec<File> praiseModelsFile;
 	
 	public CommandLineOptionsWithPRAiSEModelsFile(String args[]) throws FileNotFoundException, IOException {

@@ -45,7 +45,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 import com.sri.ai.praise.application.empiricalevaluation.core.AbstractEvaluationExecutable;
-import com.sri.ai.praise.application.empiricalevaluation.core.EvaluationExecutableCommandLineOptions;
+import com.sri.ai.praise.application.empiricalevaluation.core.CommandLineOptions;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
 
@@ -58,7 +58,7 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
 public class EvaluationExecutableFromPRAiSEModelsFile extends AbstractEvaluationExecutable {	
 	
 	@Override
-	protected EvaluationExecutableCommandLineOptions makeCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+	protected CommandLineOptions makeCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
 		return new CommandLineOptionsWithPRAiSEModelsFile(args);
 	}
 	

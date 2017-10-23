@@ -41,15 +41,16 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.StringJoiner;
 
+import com.sri.ai.praise.empiricalevaluation.Configuration;
 import com.sri.ai.praise.empiricalevaluation.Problem;
-import com.sri.ai.praise.empiricalevaluation.SolverEvaluation;
-import com.sri.ai.praise.empiricalevaluation.SolverEvaluationResult;
+import com.sri.ai.praise.empiricalevaluation.solver.SolverEvaluation;
+import com.sri.ai.praise.empiricalevaluation.solver.SolverEvaluationResult;
 import com.sri.ai.util.Util;
 
 /**
  * Class responsible for performing an evaluation of one or more solvers on a given problem set.
  * 
- * @author oreilly
+ * @author oreilly, braz
  *
  */
 public class CSVWriter {	
@@ -58,38 +59,42 @@ public class CSVWriter {
 	private int numberOfRunsToAverageOver;
 	private PrintStream csvOut;
 
-	public CSVWriter(String problemType, int numberOfRunsToAverageOver, PrintStream csvOut) {
-		super();
-		this.problemTypeName = problemType;
-		this.numberOfRunsToAverageOver = numberOfRunsToAverageOver;
-		this.csvOut = csvOut;
+	public CSVWriter(Configuration configuration) {
+		this.problemTypeName = configuration.getType().name();
+		this.numberOfRunsToAverageOver = configuration.getNumberOfRunsToAverageOver();
+		this.csvOut = configuration.getCSVOut();
 	}
 	
 	// Header methods
 	
-	public void writeInitialHeader(StringJoiner queryCSVLine) {
-		queryCSVLine.add("Problem");
-		queryCSVLine.add("Inference Type");
-		queryCSVLine.add("Domain Size(s)");
-		queryCSVLine.add("# runs values averaged over");
-	}
+	private StringJoiner cvsHeaderLine = new StringJoiner(",");
 
 	public void outputReportHeaderLine(List<SolverEvaluation> solverEvaluations) {
-		StringJoiner cvsHeaderLine = new StringJoiner(",");
-		writeInitialHeader(cvsHeaderLine);
+		initializeHeaderLine();
 		for (SolverEvaluation solverEvaluation : solverEvaluations) {
-			writeHeaderForSolver(solverEvaluation, cvsHeaderLine);
+			writeHeaderForSolver(solverEvaluation);
 		}
-		csvResultOutput(cvsHeaderLine.toString());
+		finalizeHeaderLine();
 	}
 
-	public void writeHeaderForSolver(SolverEvaluation solverEvaluation, StringJoiner cvsHeaderLine) {
+	public void initializeHeaderLine() {
+		cvsHeaderLine.add("Problem");
+		cvsHeaderLine.add("Inference Type");
+		cvsHeaderLine.add("Domain Size(s)");
+		cvsHeaderLine.add("# runs values averaged over");
+	}
+
+	public void writeHeaderForSolver(SolverEvaluation solverEvaluation) {
 		cvsHeaderLine.add("Solver");
 		cvsHeaderLine.add("Result for " + solverEvaluation.solver.getName());
 		cvsHeaderLine.add("Inference ms. for " + solverEvaluation.solver.getName());
 		cvsHeaderLine.add("HH:MM:SS.");
 		cvsHeaderLine.add("Translation ms. for " + solverEvaluation.solver.getName());
 		cvsHeaderLine.add("HH:MM:SS.");
+	}
+
+	private void finalizeHeaderLine() {
+		csvResultOutput(cvsHeaderLine.toString());
 	}
 
 	// Query line methods

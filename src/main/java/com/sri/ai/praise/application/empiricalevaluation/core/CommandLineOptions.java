@@ -17,7 +17,7 @@ import com.sri.ai.praise.probabilisticsolver.core.pimt.PIMTSolver;
 // TODO - consider using commons-configuration to evaluation input file
 // reading, i.e:
 // https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
-public class EvaluationExecutableCommandLineOptions {
+public class CommandLineOptions {
 
 	public Configuration evaluationConfiguration;
 
@@ -32,7 +32,7 @@ public class EvaluationExecutableCommandLineOptions {
 	public OptionSpec<Integer> numberRunsToAverageOver;
 	public OptionSpec<File> workingDirectory;
 
-	public EvaluationExecutableCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+	public CommandLineOptions(String args[]) throws FileNotFoundException, IOException {
 		evaluationConfiguration = new Configuration();
 		setOptionsSetUsingDefaultEvaluationConfiguration(args);
 		overrideEvaluationConfigurationsFromOptionSet();

@@ -42,14 +42,13 @@ import static com.sri.ai.util.Util.toHoursMinutesAndSecondsString;
 import java.io.PrintStream;
 
 import com.sri.ai.praise.empiricalevaluation.Problem;
-import com.sri.ai.praise.empiricalevaluation.SolverEvaluationResult;
+import com.sri.ai.praise.empiricalevaluation.solver.SolverEvaluationResult;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
-import com.sri.ai.praise.probabilisticsolver.Solver;
 
 /**
  * Class responsible for performing an evaluation of one or more solvers on a given problem set.
  * 
- * @author oreilly
+ * @author oreilly, braz
  *
  */
 public class Notifier {	
@@ -70,7 +69,8 @@ public class Notifier {
 	public void notifyAboutSolverTime(SolverEvaluationResult solverEvaluationResult) {
 		String duration = toHoursMinutesAndSecondsString(solverEvaluationResult.averageInferenceTimeInMilliseconds);
 		String solverName = solverEvaluationResult.solver.getName();
-		notify("Solver " + solverName + " took an average inference time of " + duration + " to solve " + solverEvaluationResult.problem.name);
+		String problemName = solverEvaluationResult.problem.name;
+		notify("Solver " + solverName + " took an average inference time of " + duration + " to solve " + problemName);
 	}
 
 	public void notifyAboutTotalEvaluationTime(long evaluationStart, long evaluationEnd) {
@@ -80,11 +80,12 @@ public class Notifier {
 
 	public void notifyAboutBeginningOfBurnInForAllSolvers(PagedModelContainer modelsToEvaluateContainer, Problem problem) {
 		String modelContainerName = modelsToEvaluateContainer.getName();
-		notify("Starting burn in for all solvers based on '" + modelContainerName + " - " + problem.model.getName() + " : " + problem.query + "'");
+		String modelName = problem.model.getName();
+		notify("Starting burn in for all solvers based on '" + modelContainerName + " - " + modelName + " : " + problem.query + "'");
 	}
 
-	public void notifyAboutBurnIn(Solver solver, SolverEvaluationResult result) {
+	public void notifyAboutBurnIn(String solverName, SolverEvaluationResult result) {
 		String duration = toHoursMinutesAndSecondsString(result.averageInferenceTimeInMilliseconds);
-		notify("Burn in for " + solver.getName() + " complete. Average inference time = " + duration);
+		notify("Burn in for " + solverName + " complete. Average inference time = " + duration);
 	}
 }

@@ -35,8 +35,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.empiricalevaluation;
+package com.sri.ai.praise.empiricalevaluation.solver;
 
+import com.sri.ai.praise.empiricalevaluation.Configuration;
+import com.sri.ai.praise.empiricalevaluation.Problem;
 import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.empiricalevaluation.output.Notifier;
 import com.sri.ai.praise.probabilisticsolver.Solver;
@@ -47,7 +49,7 @@ import com.sri.ai.util.Util;
 /**
  * Class responsible for performing an evaluation of one or more solvers on a given problem set.
  * 
- * @author oreilly
+ * @author oreilly, braz
  *
  */
 public class SolverEvaluation {	
@@ -71,7 +73,7 @@ public class SolverEvaluation {
 		return solver;
 	}
 	
-	private static SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, Configuration configuration) {
+	private SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, Configuration configuration) {
 		SolverConfiguration solverConfiguration = 
 				new SolverConfiguration(
 						solverImplementationClassName,
@@ -102,7 +104,7 @@ public class SolverEvaluation {
 
 	public void performBurnIn(Problem problem) {
 		SolverEvaluationResult solverEvaluationResult = getResultsFromAllRuns(problem);
-		notifier.notifyAboutBurnIn(solver, solverEvaluationResult);
+		notifier.notifyAboutBurnIn(solver.getName(), solverEvaluationResult);
 	}
 
 	public void evaluate(Problem problem) {
@@ -122,7 +124,6 @@ public class SolverEvaluation {
 	}
 
 	/////////////// LOW-LEVEL METHODS
-	
 	
 	private SolverResult solve(Problem problem) {
 		try {
