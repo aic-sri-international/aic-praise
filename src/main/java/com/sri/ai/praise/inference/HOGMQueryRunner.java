@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.pimt;
+package com.sri.ai.praise.inference;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,14 +50,14 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.sgdpllt.api.Context;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
+import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.inference.FactorsAndTypes;
+import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.HOGModelException;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.model.v1.hogm.antlr.UnableToParseAllTheInputError;
-import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.pimt.FactorsAndTypes;
-import com.sri.ai.praise.pimt.InferenceForFactorGraphAndEvidence;
 
 @Beta
 public class HOGMQueryRunner {

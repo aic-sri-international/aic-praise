@@ -35,61 +35,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.probabilisticsolver;
+package com.sri.ai.praise.probabilisticsolver.core;
 
-import java.io.File;
-
-import com.sri.ai.praise.lang.translate.TranslatorOptions;
-
-/**
- * Configuration information for a solver evaluator.
- * 
- * @author oreilly
- */
-public class SolverConfiguration {
+public abstract class SolverTiming {
 	
-	private String implementationClassName;
-	private int totalCPURuntimeLimitSecondsPerSolveAttempt;
-	private int totalMemoryLimitInMegabytesPerSolveAttempt;
-	private boolean cacheTranslations;
-	private File workingDirectory;
+	private long totalTranslationTimeInMilliseconds;
+	private long totalInferenceTimeInMilliseconds;
 	
-	public SolverConfiguration(
-			String implementationClassName, 
-			int totalCPURuntimeLimitSecondsPerSolveAttempt, 
-			int totalMemoryLimitInMegabytesPerSolveAttempt, 
-			boolean cacheTranslations, 
-			File workingDirectory) {
-		
-		super();
-		this.implementationClassName = implementationClassName;
-		this.totalCPURuntimeLimitSecondsPerSolveAttempt = totalCPURuntimeLimitSecondsPerSolveAttempt;
-		this.totalMemoryLimitInMegabytesPerSolveAttempt = totalMemoryLimitInMegabytesPerSolveAttempt;
-		this.cacheTranslations = cacheTranslations;
-		this.workingDirectory = workingDirectory;
-	}
-
-	public String getImplementationClassName() {
-		return implementationClassName;
-	}
-
-	public int getTotalCPURuntimeLimitSecondsPerSolveAttempt() {
-		return totalCPURuntimeLimitSecondsPerSolveAttempt;
-	}
-
-	public int getTotalMemoryLimitInMegabytesPerSolveAttempt() {
-		return totalMemoryLimitInMegabytesPerSolveAttempt;
+	public SolverTiming(long totalTranslationTimeInMilliseconds, long totalInferenceTimeInMilliseconds) {
+		this.totalTranslationTimeInMilliseconds = totalTranslationTimeInMilliseconds;
+		this.totalInferenceTimeInMilliseconds   = totalInferenceTimeInMilliseconds;
 	}
 	
-	public boolean isCacheTranslations() {
-		return cacheTranslations;
+	public long getTotalTranslationTimeInMilliseconds() {
+		return totalTranslationTimeInMilliseconds;
 	}
 
-	public File getWorkingDirectory() {
-		return workingDirectory;
-	}
-	
-	public TranslatorOptions getTranslatorOptions() {
-		return new TranslatorOptions(isCacheTranslations(), getWorkingDirectory());
+	public long getTotalInferenceTimeInMilliseconds() {
+		return totalInferenceTimeInMilliseconds;
 	}
 }

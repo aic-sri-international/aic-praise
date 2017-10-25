@@ -88,14 +88,14 @@ import com.sri.ai.praise.application.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.application.sgsolver.demo.model.ExamplePages;
 import com.sri.ai.praise.application.sgsolver.demo.perspective.HOGMPerspective;
 import com.sri.ai.praise.application.sgsolver.demo.perspective.Perspective;
+import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.inference.FactorsAndTypes;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.TranslatorOptions;
 import com.sri.ai.praise.lang.translate.impl.HOGMv1_to_UAI_Translator;
 import com.sri.ai.praise.lang.translate.impl.UAI_to_HOGMv1_Using_Equalities_Translator;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
-import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.pimt.FactorsAndTypes;
 import com.sri.ai.util.math.Rational;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;

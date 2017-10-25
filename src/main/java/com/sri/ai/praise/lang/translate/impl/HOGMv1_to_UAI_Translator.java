@@ -42,10 +42,10 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.inference.FactorsAndTypes;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.model.v1.export.UAIHOGModelGroundingListener;
-import com.sri.ai.praise.pimt.FactorsAndTypes;
 
 /**
  * Translator: HOGMv1->UAI

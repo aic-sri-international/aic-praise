@@ -50,8 +50,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.lang.translate.Translator;
 import com.sri.ai.praise.lang.translate.TranslatorFactory;
-import com.sri.ai.praise.probabilisticsolver.SolverResult;
 import com.sri.ai.praise.probabilisticsolver.core.AbstractSolver;
+import com.sri.ai.praise.probabilisticsolver.core.SolverResult;
 
 /**
  * Wrapper around Vibhav's UAI 2014 Solver, available from:<br>

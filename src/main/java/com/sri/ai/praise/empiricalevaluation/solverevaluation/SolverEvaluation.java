@@ -41,9 +41,9 @@ import com.sri.ai.praise.empiricalevaluation.Configuration;
 import com.sri.ai.praise.empiricalevaluation.Problem;
 import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.empiricalevaluation.output.Notifier;
-import com.sri.ai.praise.probabilisticsolver.Solver;
-import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
-import com.sri.ai.praise.probabilisticsolver.SolverResult;
+import com.sri.ai.praise.probabilisticsolver.api.Solver;
+import com.sri.ai.praise.probabilisticsolver.core.SolverConfiguration;
+import com.sri.ai.praise.probabilisticsolver.core.SolverResult;
 import com.sri.ai.util.Util;
 
 /**

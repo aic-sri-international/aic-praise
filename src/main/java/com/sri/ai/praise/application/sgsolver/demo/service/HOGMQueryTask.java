@@ -42,8 +42,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.application.sgsolver.demo.SGSolverDemoController;
-import com.sri.ai.praise.pimt.HOGMQueryResult;
-import com.sri.ai.praise.pimt.HOGMQueryRunner;
+import com.sri.ai.praise.inference.HOGMQueryResult;
+import com.sri.ai.praise.inference.HOGMQueryRunner;
 import com.sri.ai.expresso.api.Expression;
 
 import javafx.concurrent.Task;

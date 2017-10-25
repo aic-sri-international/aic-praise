@@ -35,19 +35,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.probabilisticsolver;
+package com.sri.ai.praise.probabilisticsolver.core;
 
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.expresso.api.Expression;
 
-public interface Solver {
-	String getName();
-	SolverConfiguration getConfiguration();
-	void setConfiguration(SolverConfiguration configuration);
+public class SolverResult extends SolverTiming {
 	
-	ModelLanguage getExpectedModelLanguage();
+	private Expression probabilityOfEvidence;
 	
-	default SolverResult solve(String solveRequestId, ModelLanguage modelLanguage, String model, String query) 
-		throws Exception {
-		throw new UnsupportedOperationException(getClass().getName() + " does not support solve probability evidence evaluations");
+	public SolverResult(
+			long totalTranslationTimeInMilliseconds, long totalInferenceTimeInMilliseconds, 
+			Expression probabilityOfEvidence) {
+		super(totalTranslationTimeInMilliseconds, totalInferenceTimeInMilliseconds);
+		this.probabilityOfEvidence = probabilityOfEvidence;
+	}
+	
+	public Expression getProbabilityOfEvidence() {
+		return probabilityOfEvidence;
 	}
 }

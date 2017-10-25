@@ -48,9 +48,9 @@ import java.util.Map;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
+import com.sri.ai.praise.inference.FactorsAndTypes;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
-import com.sri.ai.praise.pimt.FactorsAndTypes;
 
 @Beta
 public class UAIFactorsAndTypes implements FactorsAndTypes {

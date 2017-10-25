@@ -51,7 +51,7 @@ import javafx.scene.layout.Pane;
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.application.sgsolver.demo.FXUtil;
 import com.sri.ai.praise.application.sgsolver.demo.query.QueryController;
-import com.sri.ai.praise.pimt.HOGMQueryError;
+import com.sri.ai.praise.inference.HOGMQueryError;
 import com.sri.ai.util.base.Pair;
 
 @Beta

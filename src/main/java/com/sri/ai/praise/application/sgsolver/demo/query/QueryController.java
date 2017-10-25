@@ -48,8 +48,8 @@ import com.sri.ai.praise.application.sgsolver.demo.SGSolverDemoController;
 import com.sri.ai.praise.application.sgsolver.demo.editor.HOGMCodeArea;
 import com.sri.ai.praise.application.sgsolver.demo.editor.ModelPageEditor;
 import com.sri.ai.praise.application.sgsolver.demo.service.ExecuteHOGMQueryService;
+import com.sri.ai.praise.inference.HOGMQueryError;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
-import com.sri.ai.praise.pimt.HOGMQueryError;
 import com.sri.ai.util.base.Pair;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;

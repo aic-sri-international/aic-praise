@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, SRI International
+ * Copyright (c) 2016, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -35,27 +35,61 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.pimt;
+package com.sri.ai.praise.probabilisticsolver.core;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
 
-import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Type;
+import com.sri.ai.praise.lang.translate.TranslatorOptions;
 
-@Beta
-public interface FactorsAndTypes {
-	List<Expression> getFactors();
+/**
+ * Configuration information for a solver evaluator.
+ * 
+ * @author oreilly
+ */
+public class SolverConfiguration {
 	
-	Map<String, String> getMapFromRandomVariableNameToTypeName();
+	private String implementationClassName;
+	private int totalCPURuntimeLimitSecondsPerSolveAttempt;
+	private int totalMemoryLimitInMegabytesPerSolveAttempt;
+	private boolean cacheTranslations;
+	private File workingDirectory;
 	
-	Map<String, String> getMapFromNonUniquelyNamedConstantNameToTypeName();
+	public SolverConfiguration(
+			String implementationClassName, 
+			int totalCPURuntimeLimitSecondsPerSolveAttempt, 
+			int totalMemoryLimitInMegabytesPerSolveAttempt, 
+			boolean cacheTranslations, 
+			File workingDirectory) {
+		
+		super();
+		this.implementationClassName = implementationClassName;
+		this.totalCPURuntimeLimitSecondsPerSolveAttempt = totalCPURuntimeLimitSecondsPerSolveAttempt;
+		this.totalMemoryLimitInMegabytesPerSolveAttempt = totalMemoryLimitInMegabytesPerSolveAttempt;
+		this.cacheTranslations = cacheTranslations;
+		this.workingDirectory = workingDirectory;
+	}
+
+	public String getImplementationClassName() {
+		return implementationClassName;
+	}
+
+	public int getTotalCPURuntimeLimitSecondsPerSolveAttempt() {
+		return totalCPURuntimeLimitSecondsPerSolveAttempt;
+	}
+
+	public int getTotalMemoryLimitInMegabytesPerSolveAttempt() {
+		return totalMemoryLimitInMegabytesPerSolveAttempt;
+	}
 	
-	Map<String, String> getMapFromUniquelyNamedConstantNameToTypeName();
+	public boolean isCacheTranslations() {
+		return cacheTranslations;
+	}
+
+	public File getWorkingDirectory() {
+		return workingDirectory;
+	}
 	
-	Map<String, String> getMapFromCategoricalTypeNameToSizeString();
-	
-	Collection<Type> getAdditionalTypes();
+	public TranslatorOptions getTranslatorOptions() {
+		return new TranslatorOptions(isCacheTranslations(), getWorkingDirectory());
+	}
 }

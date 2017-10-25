@@ -28,4 +28,4 @@ com.sri.ai.praise.application.sgsolver.demo.model
 com.sri.ai.praise.application.sgsolver.demo.perspective
 com.sri.ai.praise.application.sgsolver.demo.query
 com.sri.ai.praise.application.sgsolver.demo.service
-com.sri.ai.praise.pimt
+com.sri.ai.praise.inference

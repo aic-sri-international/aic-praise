@@ -54,11 +54,11 @@ import java.util.stream.Collectors;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
+import com.sri.ai.praise.inference.HOGMQueryResult;
+import com.sri.ai.praise.inference.HOGMQueryRunner;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
-import com.sri.ai.praise.pimt.HOGMQueryResult;
-import com.sri.ai.praise.pimt.HOGMQueryRunner;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;

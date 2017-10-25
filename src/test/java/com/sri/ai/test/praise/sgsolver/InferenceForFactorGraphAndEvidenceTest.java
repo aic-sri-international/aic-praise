@@ -57,8 +57,8 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.sgdpllt.core.TrueContext;
 import com.sri.ai.grinder.sgdpllt.library.number.Times;
-import com.sri.ai.praise.pimt.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.pimt.InferenceForFactorGraphAndEvidence;
+import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.util.Util;
 
 public class InferenceForFactorGraphAndEvidenceTest {

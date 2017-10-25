@@ -39,8 +39,8 @@ package com.sri.ai.praise.empiricalevaluation.solverevaluation;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.empiricalevaluation.Problem;
-import com.sri.ai.praise.probabilisticsolver.Solver;
-import com.sri.ai.praise.probabilisticsolver.SolverResult;
+import com.sri.ai.praise.probabilisticsolver.api.Solver;
+import com.sri.ai.praise.probabilisticsolver.core.SolverResult;
 
 public class SolverEvaluationResult {
 	public Solver solver;

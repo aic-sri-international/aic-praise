@@ -75,10 +75,10 @@ import com.sri.ai.grinder.sgdpllt.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.sgdpllt.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.sgdpllt.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.sgdpllt.theory.propositional.PropositionalTheory;
+import com.sri.ai.praise.inference.FactorsAndTypes;
+import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
-import com.sri.ai.praise.pimt.FactorsAndTypes;
-import com.sri.ai.praise.pimt.InferenceForFactorGraphAndEvidence;
 
 /**
  * 

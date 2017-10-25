@@ -51,8 +51,8 @@ import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
 import com.sri.ai.praise.application.sgsolver.commandline.PRAiSE;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
-import com.sri.ai.praise.probabilisticsolver.SolverResult;
 import com.sri.ai.praise.probabilisticsolver.core.AbstractSolver;
+import com.sri.ai.praise.probabilisticsolver.core.SolverResult;
 import com.sri.ai.util.base.Pair;
 
 public class PIMTSolver extends AbstractSolver {

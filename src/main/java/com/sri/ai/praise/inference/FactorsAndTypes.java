@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, SRI International
+ * Copyright (c) 2015, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -35,23 +35,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.probabilisticsolver;
+package com.sri.ai.praise.inference;
 
-public abstract class SolverTiming {
-	
-	private long totalTranslationTimeInMilliseconds;
-	private long totalInferenceTimeInMilliseconds;
-	
-	public SolverTiming(long totalTranslationTimeInMilliseconds, long totalInferenceTimeInMilliseconds) {
-		this.totalTranslationTimeInMilliseconds = totalTranslationTimeInMilliseconds;
-		this.totalInferenceTimeInMilliseconds   = totalInferenceTimeInMilliseconds;
-	}
-	
-	public long getTotalTranslationTimeInMilliseconds() {
-		return totalTranslationTimeInMilliseconds;
-	}
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-	public long getTotalInferenceTimeInMilliseconds() {
-		return totalInferenceTimeInMilliseconds;
-	}
+import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Type;
+
+@Beta
+public interface FactorsAndTypes {
+	List<Expression> getFactors();
+	
+	Map<String, String> getMapFromRandomVariableNameToTypeName();
+	
+	Map<String, String> getMapFromNonUniquelyNamedConstantNameToTypeName();
+	
+	Map<String, String> getMapFromUniquelyNamedConstantNameToTypeName();
+	
+	Map<String, String> getMapFromCategoricalTypeNameToSizeString();
+	
+	Collection<Type> getAdditionalTypes();
 }

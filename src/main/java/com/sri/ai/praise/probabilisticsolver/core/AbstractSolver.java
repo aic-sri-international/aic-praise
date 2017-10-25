@@ -37,8 +37,7 @@
  */
 package com.sri.ai.praise.probabilisticsolver.core;
 
-import com.sri.ai.praise.probabilisticsolver.Solver;
-import com.sri.ai.praise.probabilisticsolver.SolverConfiguration;
+import com.sri.ai.praise.probabilisticsolver.api.Solver;
 
 public abstract class AbstractSolver implements Solver {
 	private SolverConfiguration configuration;
