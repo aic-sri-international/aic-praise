@@ -40,6 +40,8 @@ package com.sri.ai.praise.application.praise.commandline;
 import static com.sri.ai.praise.model.common.io.PagedModelContainer.getModelPagesFromURI;
 import static com.sri.ai.util.Util.getFirstNonNullResultOrNull;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
+import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.thereExists;
 import static com.sri.ai.util.Util.toHoursMinutesAndSecondsString;
 
@@ -53,7 +55,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -304,14 +305,18 @@ public class PRAiSE {
 	}
 	
 	private static String getLegalModelLanguageCodesDescription() {
-		StringJoiner result = new StringJoiner(", ");
-		Arrays.stream(ModelLanguage.values()).forEach(ml -> result.add(ml.getCode()));
-		return result.toString();
+		String result = join(mapIntoList(ModelLanguage.values(), ModelLanguage::getCode));
+		return result;
 	}
 	
 	private static ModelLanguage findLanguageModel(String languageCode) {
-		ModelLanguage result = Arrays.stream(ModelLanguage.values()).filter(ml -> ml.getCode().toLowerCase().equals(languageCode.toLowerCase())).findFirst().orElse(null);
-		
+		List<ModelLanguage> modelLanguages = Arrays.asList(ModelLanguage.values());
+		ModelLanguage result = getFirstSatisfyingPredicateOrNull(modelLanguages, ml -> isLanguageCodeForModelLanguage(languageCode, ml));
+		return result;
+	}
+
+	private static boolean isLanguageCodeForModelLanguage(String languageCode, ModelLanguage modeLanguage) {
+		boolean result = modeLanguage.getCode().toLowerCase().equals(languageCode.toLowerCase());
 		return result;
 	}
 	
