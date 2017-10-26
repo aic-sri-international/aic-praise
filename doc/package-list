@@ -4,7 +4,7 @@ com.sri.ai.praise.application.empiricalevaluation
 com.sri.ai.praise.probabilisticsolver
 com.sri.ai.praise.probabilisticsolver.core
 com.sri.ai.praise.probabilisticsolver.core.samiam
-com.sri.ai.praise.probabilisticsolver.core.pimt
+com.sri.ai.praise.probabilisticsolver.core.praise
 com.sri.ai.praise.probabilisticsolver.core.vec
 com.sri.ai.praise.lang
 com.sri.ai.praise.lang.grounded.bayes
@@ -21,11 +21,11 @@ com.sri.ai.praise.model.v1
 com.sri.ai.praise.model.v1.export
 com.sri.ai.praise.model.v1.hogm.antlr
 com.sri.ai.praise.model.v1.imports.uai
-com.sri.ai.praise.application.sgsolver.commandline
-com.sri.ai.praise.application.sgsolver.demo
-com.sri.ai.praise.application.sgsolver.demo.editor
-com.sri.ai.praise.application.sgsolver.demo.model
-com.sri.ai.praise.application.sgsolver.demo.perspective
-com.sri.ai.praise.application.sgsolver.demo.query
-com.sri.ai.praise.application.sgsolver.demo.service
+com.sri.ai.praise.application.praise.commandline
+com.sri.ai.praise.application.praise.app
+com.sri.ai.praise.application.praise.app.editor
+com.sri.ai.praise.application.praise.app.model
+com.sri.ai.praise.application.praise.app.perspective
+com.sri.ai.praise.application.praise.app.query
+com.sri.ai.praise.application.praise.app.service
 com.sri.ai.praise.inference

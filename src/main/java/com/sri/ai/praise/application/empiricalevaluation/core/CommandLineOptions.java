@@ -12,7 +12,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 import com.sri.ai.praise.empiricalevaluation.Configuration;
-import com.sri.ai.praise.probabilisticsolver.core.pimt.PIMTSolver;
+import com.sri.ai.praise.probabilisticsolver.core.praise.PRAiSESolver;
 
 // TODO - consider using commons-configuration to evaluation input file
 // reading, i.e:
@@ -92,7 +92,7 @@ public class CommandLineOptions {
 		if (optionSet.has(solverImplementationClasses)) {
 			currentSolverImplementationClasses.addAll(optionSet.valuesOf(solverImplementationClasses));
 		} else {
-			currentSolverImplementationClasses.add(PIMTSolver.class.getName());
+			currentSolverImplementationClasses.add(PRAiSESolver.class.getName());
 		}
 		evaluationConfiguration.setSolverImplementationClassNames(currentSolverImplementationClasses);
 		

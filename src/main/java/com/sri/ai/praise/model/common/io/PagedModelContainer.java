@@ -164,26 +164,31 @@ public class PagedModelContainer {
 		return result.toString();
 	}
 	
-	public static List<ModelPage> getModelPagesFromURI(URI uri) throws IOException {	
-		List<ModelPage> result = new ArrayList<>();
-		
-		AtomicReference<ModelLanguage> containerModelLanguage = new AtomicReference<>();
-		List<String> modelSpecifications = new ArrayList<>();
-		Map<String, List<String>> fragments = new HashMap<>();
-				
-		try (BufferedReader in = new BufferedReader(new InputStreamReader(uri.toURL().openStream(), FILE_CHARSET))) {
-	        getContent(containerModelLanguage, in.lines(), modelSpecifications, fragments);
+	public static List<ModelPage> getModelPagesFromURI(URI uri) {	
+		try {
+			List<ModelPage> result = new ArrayList<>();
+
+			AtomicReference<ModelLanguage> containerModelLanguage = new AtomicReference<>();
+			List<String> modelSpecifications = new ArrayList<>();
+			Map<String, List<String>> fragments = new HashMap<>();
+
+			try (BufferedReader in = new BufferedReader(new InputStreamReader(uri.toURL().openStream(), FILE_CHARSET))) {
+				getContent(containerModelLanguage, in.lines(), modelSpecifications, fragments);
+			}
+
+			for (String modelSpecification : modelSpecifications) {
+				String name          = extractField(MODEL_FIELD_NAME, modelSpecification);
+				String model         = extractModel(MODEL_FIELD_PARTS, modelSpecification, fragments);
+				List<String> queries = extractQueries(MODEL_FIELD_QUERIES, modelSpecification, fragments);
+
+				result.add(new ModelPage(containerModelLanguage.get(), name, model, queries));
+			}
+
+			return result;
 		}
-		
-		for (String modelSpecification : modelSpecifications) {
-			String name          = extractField(MODEL_FIELD_NAME, modelSpecification);
-			String model         = extractModel(MODEL_FIELD_PARTS, modelSpecification, fragments);
-			List<String> queries = extractQueries(MODEL_FIELD_QUERIES, modelSpecification, fragments);
-			
-			result.add(new ModelPage(containerModelLanguage.get(), name, model, queries));
+		catch (IOException ioe) {
+			throw new Error(ioe);
 		}
-		
-		return result;
 	}
 	
 	//
