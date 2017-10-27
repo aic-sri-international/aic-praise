@@ -92,31 +92,39 @@ public class PRAiSE {
 	public static final ModelLanguage DEFAULT_LANGUAGE = ModelLanguage.HOGMv1;
 	
 	
-	public static void main(String[] args) {
-		try (PRAiSEArguments solverArgs = makePRAiSEArguments(args)) {
+	List<String> errors   = new ArrayList<>();
+	List<String> warnings = new ArrayList<>();
+
+	public static void main (String[] args) {
+		PRAiSE praise = new PRAiSE();
+		praise.run(args);
+	}
+
+	public void run (String[] args) {
+		try (PRAiSEArguments arguments = makePRAiSEArguments(args)) {
 			
-			List<ModelPage> hogModelsToQuery = getHOGModelsToQuery(solverArgs);
+			List<ModelPage> hogModelsToQuery = getHOGModelsToQuery(arguments);
 		
 			for (ModelPage hogModelToQuery : hogModelsToQuery) {
-				solverArgs.out.print("MODEL NAME = ");
-				solverArgs.out.println(hogModelToQuery.getName());
-				solverArgs.out.println("MODEL      = ");
-				solverArgs.out.println(hogModelToQuery.getModelString());
+				arguments.out.print("MODEL NAME = ");
+				arguments.out.println(hogModelToQuery.getName());
+				arguments.out.println("MODEL      = ");
+				arguments.out.println(hogModelToQuery.getModelString());
 				HOGMQueryRunner queryRunner = new  HOGMQueryRunner(hogModelToQuery.getModelString(), hogModelToQuery.getDefaultQueriesToRun());
 				List<HOGMQueryResult> hogModelQueryResults = queryRunner.query();
 				hogModelQueryResults.forEach(hogModelQueryResult -> {
-					solverArgs.out.print("QUERY      = ");
-					solverArgs.out.println(hogModelQueryResult.getQueryString());
-					solverArgs.out.print(RESULT_PREFIX);
-					solverArgs.out.println(queryRunner.simplifyAnswer(hogModelQueryResult.getResult(), hogModelQueryResult.getQueryExpression()));
-					solverArgs.out.print("TOOK       = ");
-					solverArgs.out.println(toHoursMinutesAndSecondsString(hogModelQueryResult.getMillisecondsToCompute()) + "\n");
+					arguments.out.print("QUERY      = ");
+					arguments.out.println(hogModelQueryResult.getQueryString());
+					arguments.out.print(RESULT_PREFIX);
+					arguments.out.println(queryRunner.simplifyAnswer(hogModelQueryResult.getResult(), hogModelQueryResult.getQueryExpression()));
+					arguments.out.print("TOOK       = ");
+					arguments.out.println(toHoursMinutesAndSecondsString(hogModelQueryResult.getMillisecondsToCompute()) + "\n");
 					if (hogModelQueryResult.isErrors()) {
 						hogModelQueryResult.getErrors().forEach(error -> {
-							solverArgs.out.println("ERROR ="+error.getErrorMessage());
+							arguments.out.println("ERROR ="+error.getErrorMessage());
 							if (error.getThrowable() != null) {
-								solverArgs.out.println("THROWABLE =");
-								error.getThrowable().printStackTrace(solverArgs.out);
+								arguments.out.println("THROWABLE =");
+								error.getThrowable().printStackTrace(arguments.out);
 							}
 						});
 					}
@@ -129,7 +137,7 @@ public class PRAiSE {
 		}
 	}
 	
-	public static PRAiSEArguments makePRAiSEArguments(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
+	public PRAiSEArguments makePRAiSEArguments(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
 		
 		PRAiSEArguments result = new PRAiSEArguments();
 		
@@ -155,9 +163,6 @@ public class PRAiSE {
 				+ "Evidence can be encoded as deterministic statements (see examples in PRAiSE editor and solver).\n"
 						;
 		
-		List<String> errors   = new ArrayList<>();
-		List<String> warnings = new ArrayList<>();
-
 		setupParameters(args, result, parser, language, query, outputFile, help, usage, errors, warnings);
 		
 		outputWarningsAndErrors(parser, usage, errors, warnings);
@@ -165,7 +170,7 @@ public class PRAiSE {
 		return result;
 	}
 
-	private static void setupParameters(String[] args, PRAiSEArguments result, OptionParser parser, OptionSpec<String> language, OptionSpec<String> query, OptionSpec<File> outputFile, OptionSpec<Void> help, String usage, List<String> errors, List<String> warnings) throws IOException, FileNotFoundException, UnsupportedEncodingException {
+	private void setupParameters(String[] args, PRAiSEArguments result, OptionParser parser, OptionSpec<String> language, OptionSpec<String> query, OptionSpec<File> outputFile, OptionSpec<Void> help, String usage, List<String> errors, List<String> warnings) throws IOException, FileNotFoundException, UnsupportedEncodingException {
 		try {
 			OptionSet options = parser.parse(args);
 			
@@ -273,7 +278,7 @@ public class PRAiSE {
 		}
 	}
 	
-	private static void outputWarningsAndErrors(OptionParser parser, String usage, List<String> errors, List<String> warnings) throws IOException {
+	private void outputWarningsAndErrors(OptionParser parser, String usage, List<String> errors, List<String> warnings) throws IOException {
 		
 		if (warnings.size() > 0) {
 			warnings.forEach(warning -> System.err.println("WARNING: "+ warning));
