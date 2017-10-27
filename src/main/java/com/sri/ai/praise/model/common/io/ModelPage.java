@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.model.common.io;
 
+import static com.sri.ai.util.Util.unionArrayList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +64,23 @@ public class ModelPage {
 		this.name                = name;
 		this.model               = model;
 		this.defaultQueriesToRun = Collections.unmodifiableList(new ArrayList<>(defaultQueriesToRun));
+	}
+	
+	public ModelPage makeCopyWithNewQueries(List<String> newQueries) {
+		ModelPage result = new ModelPage(language, name, model, newQueries);
+		return result;
+	}
+	
+	public ModelPage makeCopyWithExtraQueries(List<String> extraQueries) {
+		ModelPage modelPageWithExtraQueries;
+		if (extraQueries.size() == 0) {
+			modelPageWithExtraQueries = this;
+		}
+		else {
+			List<String> combinedQueries = unionArrayList(extraQueries, getDefaultQueriesToRun());
+			modelPageWithExtraQueries = makeCopyWithNewQueries(combinedQueries);
+		}
+		return modelPageWithExtraQueries;
 	}
 
 	public ModelLanguage getLanguage() {

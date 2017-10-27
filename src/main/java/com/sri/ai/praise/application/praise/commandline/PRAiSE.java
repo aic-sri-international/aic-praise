@@ -44,6 +44,7 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.thereExists;
 import static com.sri.ai.util.Util.toHoursMinutesAndSecondsString;
+import static java.util.stream.Collectors.joining;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -56,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import joptsimple.OptionException;
@@ -67,59 +67,42 @@ import joptsimple.OptionSpec;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
-import com.sri.ai.grinder.sgdpllt.api.Theory;
 import com.sri.ai.praise.inference.HOGMQueryResult;
 import com.sri.ai.praise.inference.HOGMQueryRunner;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
+import com.sri.ai.praise.probabilisticsolver.core.praise.PRAiSESolver;
 
 /**
- * Command line interface for running the SGSolver.
+ * Command line interface for running {@link PRAiSESolver}.
  * 
  * @author oreilly
  *
  */
 @Beta
 public class PRAiSE {
+	
 	private static final String LOWER_CASE_PRAISE_FILE_DEFAULT_EXTENSION = PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION.toLowerCase();
+	
 	public static final Charset FILE_CHARSET  = Charsets.UTF_8;
+	
 	public static final String  RESULT_PREFIX = "RESULT     = ";
+	
 	public static final ModelLanguage DEFAULT_LANGUAGE = ModelLanguage.HOGMv1;
 	
-	static class PRAiSECommandLineArguments implements AutoCloseable {
-		List<File>    inputFiles      = new ArrayList<>(); // non option arguments (at least 1 required)
-		ModelLanguage inputLanguage   = null;              // --language (optional - 0 or 1)
-		List<String>  globalQueries   = new ArrayList<>(); // --query    (optional - 0 or more)
-		PrintStream   out             = System.out;        // --output   (optional - 0 or 1)
-		
-		@Override
-		public void close() throws IOException {
-			out.flush();
-			// Only close if not System.out
-			if (out != System.out) {				
-				out.close();
-			}
-		}
-	}
 	
 	public static void main(String[] args) {
-		run(args, null);
-	}
-	
-	public static void run(String[] args, Supplier<Theory> theorySupplier) {
-		try (PRAiSECommandLineArguments solverArgs = getArgs(args)) {
+		try (PRAiSEArguments solverArgs = makePRAiSEArguments(args)) {
+			
 			List<ModelPage> hogModelsToQuery = getHOGModelsToQuery(solverArgs);
-
+		
 			for (ModelPage hogModelToQuery : hogModelsToQuery) {
 				solverArgs.out.print("MODEL NAME = ");
 				solverArgs.out.println(hogModelToQuery.getName());
 				solverArgs.out.println("MODEL      = ");
 				solverArgs.out.println(hogModelToQuery.getModelString());
 				HOGMQueryRunner queryRunner = new  HOGMQueryRunner(hogModelToQuery.getModelString(), hogModelToQuery.getDefaultQueriesToRun());
-				if (theorySupplier != null) {
-					queryRunner.setOptionTheory(theorySupplier.get());
-				}
 				List<HOGMQueryResult> hogModelQueryResults = queryRunner.query();
 				hogModelQueryResults.forEach(hogModelQueryResult -> {
 					solverArgs.out.print("QUERY      = ");
@@ -146,19 +129,20 @@ public class PRAiSE {
 		}
 	}
 	
-	public static PRAiSECommandLineArguments getArgs(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
-		PRAiSECommandLineArguments result = new PRAiSECommandLineArguments();
+	public static PRAiSEArguments makePRAiSEArguments(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
+		
+		PRAiSEArguments result = new PRAiSEArguments();
 		
 		OptionParser parser = new OptionParser();		
-		// Optional
+
 		OptionSpec<String> language   = parser.accepts("language", "input model language (code), allowed values are "+getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
 		OptionSpec<String> query      = parser.accepts("query", "query to run over all input models").withRequiredArg().ofType(String.class);
 		OptionSpec<File>   outputFile = parser.accepts("output",   "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
-		// Help
+		
 		OptionSpec<Void> help = parser.accepts("help", "command line options help").forHelp();
-		//
+
 		String usage = 
-				"java "+PRAiSE.class.getName() + " [--help] [--language language_code] [--query global_query_string] [--output output_file_name] inputModelFile ..."
+				"java " + PRAiSE.class.getName() + " [--help] [--language language_code] [--query global_query_string] [--output output_file_name] inputModelFile ..."
 				+ "\n\n"
 				+ "This command reads a set of models from input files and executes a set of queries on each of them.\n\n"
 				+ "The models are obtained in the following manner:\n"
@@ -173,67 +157,123 @@ public class PRAiSE {
 		
 		List<String> errors   = new ArrayList<>();
 		List<String> warnings = new ArrayList<>();
+
+		setupParameters(args, result, parser, language, query, outputFile, help, usage, errors, warnings);
+		
+		outputWarningsAndErrors(parser, usage, errors, warnings);
+		
+		return result;
+	}
+
+	private static void setupParameters(String[] args, PRAiSEArguments result, OptionParser parser, OptionSpec<String> language, OptionSpec<String> query, OptionSpec<File> outputFile, OptionSpec<Void> help, String usage, List<String> errors, List<String> warnings) throws IOException, FileNotFoundException, UnsupportedEncodingException {
 		try {
 			OptionSet options = parser.parse(args);
 			
-			if (options.has(help)) {
-				System.out.println(usage);
-				parser.printHelpOn(System.out);
-				System.exit(0);
-			}
-			for (Object inputFileName : options.nonOptionArguments()) {
-				File inputFile = new File(inputFileName.toString());
-				if (inputFile.exists()) {
-					result.inputFiles.add(inputFile);
-				}
-				else {
-					errors.add("Input file ["+inputFileName+"] is not a file or does not exist.");
-				}
-			}
-			if (result.inputFiles.size() == 0) {
-				errors.add("No input files specified");
-			}
+			showHelpMessageAndExitIfRequested(help, options, usage, parser);
 			
-			if (options.has(query)) {
-				for (String commandLineQuery : options.valuesOf(query)) {
-					result.globalQueries.add(commandLineQuery);
-				}
-			}
+			collectInputFiles(options, errors, result);
 			
-			if (options.has(language)) {
-				String languageCode = options.valueOf(language);
-				result.inputLanguage = findLanguageModel(languageCode);
-				if (result.inputLanguage == null) {
-					errors.add("Input language code, "+languageCode+", is not legal. Legal values are "+getLegalModelLanguageCodesDescription()+".");
-				}
-			}
-			else {
-				// Guess the language from the input file names
-				result.inputLanguage = guessLanguageModel(result.inputFiles);
-				if (result.inputLanguage == null) {
-					errors.add("Unable to guess the input language from the given input file name extensions. Legal input language codes are "+getLegalModelLanguageCodesDescription()+".");
-				}
-			}
+			setGlobalQueries(query, options, result);
 			
-			if (options.has(outputFile)) {
-				File outFile = options.valueOf(outputFile);
-				if (outFile.exists()) {
-					if (outFile.isDirectory()) {
-						errors.add("Output file specified ["+outFile.getAbsolutePath()+"] is a directory, must be a legal file name.");
-					}
-					else {
-						warnings.add("Warning output file ["+outFile.getAbsolutePath()+"] already exists, will be overwritten.");
-					}
-				}
-				// Only setup file output if there are no errors.
-				if (errors.size() == 0) {
-					result.out = new PrintStream(outFile, FILE_CHARSET.name());
-				}
-			}
+			setInputLanguage(result, language, errors, options);
+			
+			setupOutputFile(options, outputFile, errors, warnings, result);
 		}
 		catch (OptionException oe) {
 			errors.add(oe.getMessage());
 		}
+	}
+
+	private static void showHelpMessageAndExitIfRequested(OptionSpec<Void> help, OptionSet options, String usage, OptionParser parser) throws IOException {
+		if (options.has(help)) {
+			System.out.println(usage);
+			parser.printHelpOn(System.out);
+			System.exit(0);
+		}
+	}
+
+	private static void collectInputFiles(OptionSet options, List<String> errors, PRAiSEArguments result) {
+		for (Object inputFileName : options.nonOptionArguments()) {
+			collectInputFileWithName(inputFileName, errors, result);
+		}
+		checkIfThereAreInputFiles(errors, result);
+	}
+
+	private static void collectInputFileWithName(Object inputFileName, List<String> errors, PRAiSEArguments result) {
+		File inputFile = new File(inputFileName.toString());
+		if (inputFile.exists()) {
+			result.inputFiles.add(inputFile);
+		}
+		else {
+			errors.add("Input file [" + inputFileName + "] is not a file or does not exist.");
+		}
+	}
+
+	private static void checkIfThereAreInputFiles(List<String> errors, PRAiSEArguments result) {
+		if (result.inputFiles.size() == 0) {
+			errors.add("No input files specified");
+		}
+	}
+
+	private static void setGlobalQueries(OptionSpec<String> query, OptionSet options, PRAiSEArguments result) {
+		if (options.has(query)) {
+			for (String commandLineQuery : options.valuesOf(query)) {
+				result.globalQueries.add(commandLineQuery);
+			}
+		}
+	}
+
+	private static void setInputLanguage(PRAiSEArguments result, OptionSpec<String> language, List<String> errors, OptionSet options) {
+		if (options.has(language)) {
+			setOptionsProvidedLanguage(language, options, errors, result);
+		}
+		else {
+			guessLanguageModel(result, errors);
+		}
+	}
+
+	private static void setOptionsProvidedLanguage(OptionSpec<String> language, OptionSet options, List<String> errors, PRAiSEArguments result) {
+		String languageCode = options.valueOf(language);
+		result.inputLanguage = findLanguageModel(languageCode);
+		if (result.inputLanguage == null) {
+			errors.add("Input language code " + languageCode + " is not legal. Legal values are " + getLegalModelLanguageCodesDescription() + ".");
+		}
+	}
+
+	private static void guessLanguageModel(PRAiSEArguments result, List<String> errors) {
+		result.inputLanguage = guessLanguageModel(result.inputFiles);
+		if (result.inputLanguage == null) {
+			errors.add("Unable to guess the input language from the given input file name extensions. Legal input language codes are "+getLegalModelLanguageCodesDescription()+".");
+		}
+	}
+
+	private static void setupOutputFile(OptionSet options, OptionSpec<File> outputFile, List<String> errors, List<String> warnings, PRAiSEArguments result) throws FileNotFoundException, UnsupportedEncodingException {
+		if (options.has(outputFile)) {
+			File outFile = collectOutputFile(outputFile, options, errors, warnings);
+			openOutfileFileIfThereAreNoErrorsSoFar(errors, result, outFile);
+		}
+	}
+
+	private static File collectOutputFile(OptionSpec<File> outputFile, OptionSet options, List<String> errors, List<String> warnings) {
+		File outFile = options.valueOf(outputFile);
+		if (outFile.exists()) {
+			if (outFile.isDirectory()) {
+				errors.add("Output file specified [" + outFile.getAbsolutePath() + "] is a directory, must be a legal file name.");
+			}
+			else {
+				warnings.add("Warning output file [" + outFile.getAbsolutePath() + "] already exists, will be overwritten.");
+			}
+		}
+		return outFile;
+	}
+
+	private static void openOutfileFileIfThereAreNoErrorsSoFar(List<String> errors, PRAiSEArguments result, File outFile) throws FileNotFoundException, UnsupportedEncodingException {
+		if (errors.size() == 0) {
+			result.out = new PrintStream(outFile, FILE_CHARSET.name());
+		}
+	}
+	
+	private static void outputWarningsAndErrors(OptionParser parser, String usage, List<String> errors, List<String> warnings) throws IOException {
 		
 		if (warnings.size() > 0) {
 			warnings.forEach(warning -> System.err.println("WARNING: "+ warning));
@@ -245,63 +285,79 @@ public class PRAiSE {
 			parser.printHelpOn(System.err);
 			System.exit(1);
 		}
+	}
+
+	private static List<ModelPage> getHOGModelsToQuery(PRAiSEArguments solverArguments) throws IOException {
+		
+		List<ModelPage> result = new ArrayList<>();
+		
+		List<File> nonContainerFiles = 
+				collectModelPagesFromContainerFilesAndNonContainerFiles(
+						solverArguments, solverArguments.globalQueries, result);
+		
+		addModelPageFromNonContainerFilesIfAny(
+				nonContainerFiles, solverArguments.inputLanguage, solverArguments.globalQueries, result);
 		
 		return result;
 	}
-	
-	//
-	// PRIVATE
-	//	
-	private static List<ModelPage> getHOGModelsToQuery(PRAiSECommandLineArguments solverArgs) throws IOException {
-		List<ModelPage> result = new ArrayList<>();
+
+	private static List<File> collectModelPagesFromContainerFilesAndNonContainerFiles(
+			PRAiSEArguments solverArguments, List<String> globalQueries, List<ModelPage> result) {
 		
-		
-		// First handle container files and track non-container files
 		List<File> nonContainerFiles = new ArrayList<>();
-		for (File inputFile : solverArgs.inputFiles) {
-			if (inputFile.getName().endsWith(PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION)) {
-				if (solverArgs.globalQueries.size() == 0) {
-					// Take the models as is
-					result.addAll(PagedModelContainer.getModelPagesFromURI(inputFile.toURI()));
-				}
-				else {
-					// Global queries have been specified on the command line, need to add to 
-					// each model page
-					for (ModelPage containerModelPage : PagedModelContainer.getModelPagesFromURI(inputFile.toURI())) {
-						List<String> combinedQueries = new ArrayList<>(solverArgs.globalQueries);
-						combinedQueries.addAll(containerModelPage.getDefaultQueriesToRun());
-						result.add(new ModelPage(containerModelPage.getLanguage(), containerModelPage.getName(), containerModelPage.getModelString(), combinedQueries));
-					}
-				}
-			}
-			else {
-				nonContainerFiles.add(inputFile);
-			}
+		for (File inputFile : solverArguments.inputFiles) {
+			collectModelPageFromContainerFileOrCollectNonContainerFile(inputFile, globalQueries, result, nonContainerFiles);
 		}
-		
-		// Currently, non-container files are treated as model and evidence files and are just concatenated together
-		// to construct a single model file
+		return nonContainerFiles;
+	}
+
+	private static void collectModelPageFromContainerFileOrCollectNonContainerFile(File inputFile, List<String> globalQueries, List<ModelPage> result, List<File> nonContainerFiles) {
+		if (isContainerFile(inputFile)) {
+			addModelPagesFromFileWithAddedGlobalQueries(inputFile, globalQueries, result);
+		}
+		else {
+			nonContainerFiles.add(inputFile);
+		}
+	}
+
+	private static void addModelPagesFromFileWithAddedGlobalQueries(File inputFile, List<String> globalQueries, List<ModelPage> result) {
+		List<ModelPage> modelPagesFromFile = getModelPagesFromURI(inputFile.toURI());
+		mapIntoList(modelPagesFromFile, m -> m.makeCopyWithExtraQueries(globalQueries), result);
+	}
+
+	private static boolean isContainerFile(File inputFile) {
+		return inputFile.getName().endsWith(PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION);
+	}
+
+	private static void addModelPageFromNonContainerFilesIfAny(List<File> nonContainerFiles, ModelLanguage inputLanguage, List<String> globalQueries, List<ModelPage> result) {
 		if (nonContainerFiles.size() > 0) {
-			String textModel = nonContainerFiles.stream()
-				.map(file -> {
-					String fileContents = "";
-					try {
-						fileContents = Files.readAllLines(file.toPath()).stream().collect(Collectors.joining("\n"));
-					}
-					catch (IOException ioe) {
-						throw new RuntimeException(ioe);
-					}
-					return fileContents;
-				})
-				.collect(Collectors.joining("\n"));
-			result.add(new ModelPage(solverArgs.inputLanguage, "Model from concatenation of non-container input files", textModel, solverArgs.globalQueries));
+			ModelPage modelPage = makeModelPageFromNonContainerFiles(nonContainerFiles, inputLanguage, globalQueries);
+			result.add(modelPage);
 		}
-		
-// TODO - ensure all results are translated to HOGMv1 if needed.
-		
-// TODO - if no queries specified, specify them	by taking all the constants and random variables in the model	
-		
-		return result;
+	}
+
+	private static ModelPage makeModelPageFromNonContainerFiles(List<File> nonContainerFiles, ModelLanguage inputLanguage, List<String> globalQueries) {
+		String unionModel = 
+				nonContainerFiles
+				.stream()
+				.map(file -> getFileContent(file))
+				.collect(joining("\n"));
+		ModelPage modelPage = makeModelPage(unionModel, inputLanguage, globalQueries);
+		return modelPage;
+	}
+
+	private static ModelPage makeModelPage(String unionModel, ModelLanguage inputLanguage, List<String> globalQueries) {
+		return new ModelPage(inputLanguage, "Model from concatenation of non-container input files", unionModel, globalQueries);
+	}
+
+	private static String getFileContent(File file) {
+		try {
+			String fileContents = Files.readAllLines(file.toPath()).stream().collect(Collectors.joining("\n"));
+			return fileContents;
+		}
+		catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
 	}
 	
 	private static String getLegalModelLanguageCodesDescription() {
