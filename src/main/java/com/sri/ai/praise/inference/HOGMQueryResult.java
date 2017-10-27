@@ -47,24 +47,24 @@ import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 
 @Beta
 public class HOGMQueryResult {
-	private String               queryStr              = null;
-	private Expression           queryExpr             = null;
+	private String               queryString           = null;
+	private Expression           queryExpression       = null;
 	private ParsedHOGModel       parsedModel           = null;
 	private Expression           result                = null;
 	private List<HOGMQueryError> errors                = new ArrayList<>();
 	private long                 millisecondsToCompute = 0L;
 	
 	public HOGMQueryResult(String queryStr, Expression queryExpr, ParsedHOGModel parsedModel, Expression result, long millisecondsToCompute) {
-		this.queryStr              = queryStr;
-		this.queryExpr             = queryExpr;
+		this.queryString           = queryStr;
+		this.queryExpression       = queryExpr;
 		this.parsedModel           = parsedModel;
 		this.result                = result;
 		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
 	public HOGMQueryResult(String queryStr, Expression queryExpr, ParsedHOGModel parsedModel, List<HOGMQueryError> errors, long millisecondsToCompute) {
-		this.queryStr    = queryStr;
-		this.queryExpr   = queryExpr;
+		this.queryString    = queryStr;
+		this.queryExpression   = queryExpr;
 		this.parsedModel = parsedModel;
 		this.errors.addAll(errors);
 		this.millisecondsToCompute = millisecondsToCompute;
@@ -76,11 +76,11 @@ public class HOGMQueryResult {
 	}
 	
 	public String getQueryString() {
-		return queryStr;
+		return queryString;
 	}
 	
 	public Expression getQueryExpression() {
-		return queryExpr;
+		return queryExpression;
 	}
 	
 	public ParsedHOGModel getParsedModel() {
