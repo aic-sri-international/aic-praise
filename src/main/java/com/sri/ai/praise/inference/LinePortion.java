@@ -35,57 +35,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.praise.app.service;
+package com.sri.ai.praise.inference;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import org.antlr.v4.runtime.RecognitionException;
 
-import com.google.common.annotations.Beta;
-import com.sri.ai.praise.application.praise.app.PRAiSEController;
-import com.sri.ai.praise.inference.HOGMQueryResult;
-import com.sri.ai.praise.inference.HOGMQueryRunner;
-import com.sri.ai.expresso.api.Expression;
-
-import javafx.concurrent.Task;
-
-@Beta
-public class HOGMQueryTask extends Task<HOGMQueryResult> {
-	private String query;
-	private String model;
-	//
-	private HOGMQueryRunner hogmQueryRunner = null;
+public class LinePortion {
+	int start = 0;
+	int end = 0;
 	
-	public HOGMQueryTask(String query, String model) {
-		this.query = query;
-		this.model = model;
+	public LinePortion() {
 	}
 	
-	@Override
-	public HOGMQueryResult call() {
-		final AtomicReference<HOGMQueryResult> result = new AtomicReference<>();
-		
-		PRAiSEController.computeExpressionWithDesiredPrecision(() -> {
-			hogmQueryRunner = new HOGMQueryRunner(model, query);
-			List<HOGMQueryResult> queryResults = hogmQueryRunner.getResults();
-			if (queryResults.size() == 1) {
-				HOGMQueryResult queryResult = queryResults.get(0);
-				if (queryResult.isErrors()) {
-					result.set(queryResult);
-				}
-				else {
-					Expression answer = hogmQueryRunner.simplifyAnswer(queryResult.getResult(), queryResult.getQueryExpression());					
-					result.set(new HOGMQueryResult(queryResult.getQueryString(), queryResult.getQueryExpression(), queryResult.getParsedModel(), answer, queryResult.getMillisecondsToCompute()));
-				}
-			}		
-		});		
- 
-        return result.get();
-    }
+	public LinePortion(int start, int end) {
+		this.start = start;
+		this.end = end;
+	}
 	
-	@Override
-	protected void cancelled() {
-		if (hogmQueryRunner != null) {
-			hogmQueryRunner.cancelQuery();
+	public LinePortion(Exception exception) {
+		if (exception != null && exception instanceof RecognitionException) {
+			RecognitionException recognitionException = (RecognitionException) exception;
+			if (recognitionException.getOffendingToken() != null) {
+				start = recognitionException.getOffendingToken().getStartIndex();
+				end   = recognitionException.getOffendingToken().getStopIndex();
+				if (start > end) {
+					start = end;
+				}
+			}
 		}
 	}
 }

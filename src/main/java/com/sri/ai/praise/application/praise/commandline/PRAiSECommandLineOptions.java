@@ -81,25 +81,24 @@ import com.sri.ai.util.Util;
 public class PRAiSECommandLineOptions {
 	
 	private static final String LOWER_CASE_PRAISE_FILE_DEFAULT_EXTENSION = PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION.toLowerCase();
+	private static final Charset FILE_CHARSET  = Charsets.UTF_8;
+	private static final ModelLanguage DEFAULT_LANGUAGE = ModelLanguage.HOGMv1;
 	
-	public static final Charset FILE_CHARSET  = Charsets.UTF_8;
-	
-	public static final ModelLanguage DEFAULT_LANGUAGE = ModelLanguage.HOGMv1;
+	public List<ModelPage> modelPages;
+	public PrintStream   out = System.out;        // --output   (optional - 0 or 1)
+	public boolean countSummations = false;
 	
 	private List<File>    inputFiles      = new ArrayList<>(); // non option arguments (at least 1 required)
 	private ModelLanguage inputLanguage   = null;              // --language (optional - 0 or 1)
 	private List<String>  globalQueries   = new ArrayList<>(); // --query    (optional - 0 or more)
-	List<File> nonContainerFiles = new ArrayList<>();
+	private List<File> nonContainerFiles = new ArrayList<>();
 
-	public List<ModelPage> modelPages;
-	public PrintStream   out = System.out;        // --output   (optional - 0 or 1)
-	
 	private OptionParser parser;
 	private OptionSet options;
-	private OptionSpec<String> languageOptionSpec;
-	private OptionSpec<String> queryOptionSpec;
-	private OptionSpec<File>   outputFileOptionSpec;
-	private OptionSpec<Void>   helpOptionSpec;
+	private OptionSpec<String>  languageOptionSpec;
+	private OptionSpec<String>  queryOptionSpec;
+	private OptionSpec<File>    outputFileOptionSpec;
+	private OptionSpec<Void>    helpOptionSpec;
 	private String usage;
 	
 	private List<String> errors   = new ArrayList<>();
@@ -111,6 +110,7 @@ public class PRAiSECommandLineOptions {
 	
 		languageOptionSpec   = parser.accepts("language", "input model language (code), allowed values are " + getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
 		queryOptionSpec      = parser.accepts("query",    "query to run over all input models").withRequiredArg().ofType(String.class);
+		                       parser.accepts("count",    "inform how many summations have been performed for each query");
 		outputFileOptionSpec = parser.accepts("output",   "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 		
 		helpOptionSpec = parser.accepts("help", "command line options help").forHelp();
@@ -137,11 +137,12 @@ public class PRAiSECommandLineOptions {
 	private void setupParameters(String[] args) throws IOException, FileNotFoundException, UnsupportedEncodingException {
 		try {
 			parseArguments(args);
+			setCountSummations();
 			showHelpMessageAndExitIfRequested();
-			collectInputFiles();
 			setGlobalQueries();
+			collectInputFiles();
 			setInputLanguage();
-			setupOutputFile();
+			setOutputFile();
 			collectModelPages();
 		}
 		catch (OptionException optionException) {
@@ -151,6 +152,10 @@ public class PRAiSECommandLineOptions {
 
 	private void parseArguments(String[] args) {
 		options = parser.parse(args);
+	}
+	
+	private void setCountSummations() {
+		countSummations = options.has("count");
 	}
 
 	private void showHelpMessageAndExitIfRequested() throws IOException {
@@ -217,10 +222,10 @@ public class PRAiSECommandLineOptions {
 		}
 	}
 
-	private void setupOutputFile() throws FileNotFoundException, UnsupportedEncodingException {
+	private void setOutputFile() throws FileNotFoundException, UnsupportedEncodingException {
 		if (options.has(outputFileOptionSpec)) {
 			File outFile = collectOutputFile();
-			openOutfileFileIfThereAreNoErrorsSoFar(outFile);
+			openOutputFileIfThereAreNoErrorsSoFar(outFile);
 		}
 	}
 
@@ -237,7 +242,7 @@ public class PRAiSECommandLineOptions {
 		return outFile;
 	}
 
-	private void openOutfileFileIfThereAreNoErrorsSoFar(File outFile) throws FileNotFoundException, UnsupportedEncodingException {
+	private void openOutputFileIfThereAreNoErrorsSoFar(File outFile) throws FileNotFoundException, UnsupportedEncodingException {
 		if (errors.size() == 0) {
 			out = new PrintStream(outFile, FILE_CHARSET.name());
 		}
@@ -331,10 +336,11 @@ public class PRAiSECommandLineOptions {
 	}
 	
 	private ModelLanguage guessLanguageModel() {
-		ModelLanguage result = getFirstNonNullResultOrNull(
-				() -> getLanguageMatchingExtensionOfSomeInputFile(),
-				() -> getLanguageFromInputFilesWithDefaultPRAiSEFileExtension(),
-				() -> DEFAULT_LANGUAGE);
+		ModelLanguage result = 
+				getFirstNonNullResultOrNull(
+						() -> getLanguageMatchingExtensionOfSomeInputFile(),
+						() -> getLanguageFromInputFilesWithDefaultPRAiSEFileExtension(),
+						() -> DEFAULT_LANGUAGE);
 		return result;
 	}
 

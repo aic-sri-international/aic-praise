@@ -39,20 +39,21 @@ package com.sri.ai.praise.inference;
 
 import java.util.StringJoiner;
 
+import org.antlr.v4.runtime.RecognitionException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.google.common.annotations.Beta;
 
 @Beta
 public class HOGMQueryError {
+	
 	public enum Context {
 		MODEL, QUERY, UNKNOWN
 	}
 	
 	private Context   context         = Context.UNKNOWN;
 	private int       line            = -1;
-	private int       startContextIdx = -1;
-	private int       endContextIdx   = -1;
+	private LinePortion   portion;
 	private String    errorMessage    = "";
 	private Throwable throwable       = null;
 	
@@ -61,21 +62,25 @@ public class HOGMQueryError {
 		this.throwable    = t;
 	}
 	
-	public HOGMQueryError(Context context, String errorMessage, int line, int startContextIdx, int endContextIdx) {
-		this(context, errorMessage, line, startContextIdx, endContextIdx, null);
+	public HOGMQueryError(Context context, RecognitionException recognitionException) {
+		this(context, recognitionException.getMessage(), recognitionException.getOffendingToken().getLine(), new LinePortion(recognitionException));
+	}
+
+	public HOGMQueryError(Context context, String errorMessage) {
+		this(context, errorMessage, 0, new LinePortion(), null);
 	}
 	
-	public HOGMQueryError(Context context, String errorMessage, int line, int startContextIdx, int endContextIdx, Throwable t) {
+	public HOGMQueryError(Context context, String errorMessage, int line, LinePortion linePortion) {
+		this(context, errorMessage, line, linePortion, null);
+	}
+	
+	public HOGMQueryError(Context context, String errorMessage, int line, LinePortion linePortion, Throwable t) {
 		if (context == Context.UNKNOWN) {
 			throw new IllegalArgumentException("Context cannot be set to UNKNOWN when providing context start and end infofrmation.");
 		}
-		if (startContextIdx < 0 || endContextIdx < 0 || endContextIdx < startContextIdx) {
-			throw new IllegalArgumentException("Start and end context information is invalid: start="+startContextIdx+", end="+endContextIdx);
-		}
 		this.context         = context;
 		this.line            = line;
-		this.startContextIdx = startContextIdx;
-		this.endContextIdx   = endContextIdx;
+		this.portion         = linePortion;
 		this.errorMessage    = errorMessage;
 		this.throwable       = t;
 	}
@@ -85,11 +90,11 @@ public class HOGMQueryError {
 	}
 	
 	public int getStartContextIndex() {
-		return startContextIdx;
+		return portion.start;
 	}
 	
 	public int getEndContextIndex() {
-		return endContextIdx;
+		return portion.end;
 	}
 	
 	public String getErrorMessage() {
@@ -115,7 +120,7 @@ public class HOGMQueryError {
 		}
 		
 		if (context != Context.UNKNOWN) {
-			sj.add("at Line "+line+": ");
+			sj.add("at Line " + line + ": ");
 		}
 		sj.add(errorMessage);
 		

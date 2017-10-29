@@ -44,6 +44,7 @@ import java.util.StringJoiner;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.util.base.Pair;
 
 @Beta
 public class HOGMQueryResult {
@@ -54,17 +55,21 @@ public class HOGMQueryResult {
 	private List<HOGMQueryError> errors                = new ArrayList<>();
 	private long                 millisecondsToCompute = 0L;
 	
-	public HOGMQueryResult(String queryStr, Expression queryExpr, ParsedHOGModel parsedModel, Expression result, long millisecondsToCompute) {
-		this.queryString           = queryStr;
-		this.queryExpression       = queryExpr;
+	public HOGMQueryResult(String queryString, Expression queryExpression, ParsedHOGModel parsedModel, Pair<Expression, Long> resultAndTime) {
+		this(queryString, queryExpression, parsedModel, resultAndTime.first, resultAndTime.second);
+	}
+
+	public HOGMQueryResult(String queryString, Expression queryExpression, ParsedHOGModel parsedModel, Expression result, long millisecondsToCompute) {
+		this.queryString           = queryString;
+		this.queryExpression       = queryExpression;
 		this.parsedModel           = parsedModel;
 		this.result                = result;
 		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
-	public HOGMQueryResult(String queryStr, Expression queryExpr, ParsedHOGModel parsedModel, List<HOGMQueryError> errors, long millisecondsToCompute) {
-		this.queryString    = queryStr;
-		this.queryExpression   = queryExpr;
+	public HOGMQueryResult(String queryString, ParsedHOGModel parsedModel, List<HOGMQueryError> errors, long millisecondsToCompute) {
+		this.queryString = queryString;
+		this.queryExpression = null;
 		this.parsedModel = parsedModel;
 		this.errors.addAll(errors);
 		this.millisecondsToCompute = millisecondsToCompute;

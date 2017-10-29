@@ -126,7 +126,7 @@ public class HOGModelError {
 		return message;
 	}
 	
-	public StatementInfo getInStatementInfo() {
+	public StatementInfo getStatementInfo() {
 		return inStatement;
 	}
 	

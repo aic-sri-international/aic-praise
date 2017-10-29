@@ -151,10 +151,10 @@ public class PRAiSESolver extends AbstractSolver {
 		SGSolverCallResult result = new SGSolverCallResult();
 
 		result.sgSolverProcessTookMS = sgSolverEnd - sgSolverStart;
-		result.resultExpression = sgsolverOutputs.stream().filter(line -> line.startsWith("RESULT     = "))
+		result.resultExpression = sgsolverOutputs.stream().filter(line -> line.startsWith(PRAiSE.RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT))
 				.findFirst().orElse(null);
 		if (result.resultExpression != null) {
-			result.resultExpression = result.resultExpression.substring("RESULT     = ".length());
+			result.resultExpression = result.resultExpression.substring(PRAiSE.RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT.length());
 		} else {
 			throw new Error("Error launching java process for SGSolver:\n" + sgsolverOutputs);
 		}
