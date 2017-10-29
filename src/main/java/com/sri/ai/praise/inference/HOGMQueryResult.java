@@ -37,12 +37,17 @@
  */
 package com.sri.ai.praise.inference;
 
+import static com.sri.ai.grinder.sgdpllt.core.solver.AbstractQuantifierEliminationStepSolver.getNumberOfIntegrationsOverGroup;
+import static com.sri.ai.grinder.sgdpllt.core.solver.AbstractQuantifierEliminationStepSolver.isCountingIntegrationsOverGroups;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.sgdpllt.group.Sum;
+import com.sri.ai.grinder.sgdpllt.group.SumProduct;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.base.Pair;
 
@@ -54,6 +59,7 @@ public class HOGMQueryResult {
 	private Expression           result                = null;
 	private List<HOGMQueryError> errors                = new ArrayList<>();
 	private long                 millisecondsToCompute = 0L;
+	private int                  numberOfSummations    = -1;
 	
 	public HOGMQueryResult(String queryString, Expression queryExpression, ParsedHOGModel parsedModel, Pair<Expression, Long> resultAndTime) {
 		this(queryString, queryExpression, parsedModel, resultAndTime.first, resultAndTime.second);
@@ -75,6 +81,16 @@ public class HOGMQueryResult {
 		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
+	public int getNumberOfSummations() {
+		return numberOfSummations;
+	}
+
+	public void recordNumberOfSummations() {
+		if (isCountingIntegrationsOverGroups()) {
+			this.numberOfSummations = getNumberOfIntegrationsOverGroup(new Sum()) + getNumberOfIntegrationsOverGroup(new SumProduct());
+		}
+	}
+
 	public boolean isErrors() {
 		boolean result = errors.size() > 0;
 		return result;

@@ -37,8 +37,6 @@
  */
 package com.sri.ai.praise.application.praise.commandline;
 
-import static com.sri.ai.grinder.sgdpllt.core.solver.AbstractQuantifierEliminationStepSolver.getNumberOfIntegrationsOverGroup;
-import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.toHoursMinutesAndSecondsString;
 
 import java.io.FileNotFoundException;
@@ -48,8 +46,6 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.grinder.sgdpllt.core.solver.AbstractQuantifierEliminationStepSolver;
-import com.sri.ai.grinder.sgdpllt.group.Sum;
-import com.sri.ai.grinder.sgdpllt.group.SumProduct;
 import com.sri.ai.praise.inference.HOGMQueryError;
 import com.sri.ai.praise.inference.HOGMQueryResult;
 import com.sri.ai.praise.inference.HOGMQueryRunner;
@@ -66,9 +62,6 @@ import com.sri.ai.praise.probabilisticsolver.core.praise.PRAiSESolver;
 public class PRAiSE {
 
 	public static final String RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT = "Result: ";
-	
-	private static final Sum SUM_GROUP = new Sum();
-	private static final Sum SUM_PRODUCT_GROUP = new SumProduct();
 	
 	PRAiSECommandLineOptions options;
 	
@@ -102,11 +95,10 @@ public class PRAiSE {
 
 	private void solveModel(ModelPage modelPage) {
 		outputModel(modelPage);
-		setSummationCounting();
+		startSummationCounting();
 		HOGMQueryRunner queryRunner = new HOGMQueryRunner(modelPage.getModelString(), modelPage.getDefaultQueriesToRun());
 		List<HOGMQueryResult> modelPageResults = queryRunner.getResults();
-		int numberOfSummations = getNumberOfSummations();
-		outputModelResults(queryRunner, modelPageResults, numberOfSummations);
+		outputModelResults(queryRunner, modelPageResults);
 	}
 
 	private void outputModel(ModelPage modelPage) {
@@ -116,34 +108,28 @@ public class PRAiSE {
 		options.out.println(modelPage.getModelString());
 	}
 
-	private void setSummationCounting() {
+	private void startSummationCounting() {
 		if (options.countSummations) {
-			AbstractQuantifierEliminationStepSolver.setGroupsToCountIntegrationsOver(list(SUM_GROUP, SUM_PRODUCT_GROUP));
+			AbstractQuantifierEliminationStepSolver.startCountingOfIntegrationsOverGroups();
 		}
 	}
 
-	private int getNumberOfSummations() {
-		return options.countSummations? 
-				getNumberOfIntegrationsOverGroup().get(SUM_GROUP) + getNumberOfIntegrationsOverGroup().get(SUM_PRODUCT_GROUP) 
-				: 0;
+	private void outputModelResults(HOGMQueryRunner queryRunner, List<HOGMQueryResult> modelPageResults) {
+		modelPageResults.forEach(hogModelQueryResult -> output(queryRunner, hogModelQueryResult));
 	}
 
-	private void outputModelResults(HOGMQueryRunner queryRunner, List<HOGMQueryResult> modelPageResults, int numberOfSummations) {
-		modelPageResults.forEach(hogModelQueryResult -> output(queryRunner, hogModelQueryResult, numberOfSummations));
-	}
-
-	private void output(HOGMQueryRunner queryRunner, HOGMQueryResult modelPageResult, int numberOfSummations) {
+	private void output(HOGMQueryRunner queryRunner, HOGMQueryResult modelQueryResult) {
 		options.out.print("Query : ");
-		options.out.println(modelPageResult.getQueryString());
+		options.out.println(modelQueryResult.getQueryString());
 		options.out.print(RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT);
-		options.out.println(queryRunner.simplifyAnswer(modelPageResult.getResult(), modelPageResult.getQueryExpression()));
+		options.out.println(queryRunner.simplifyAnswer(modelQueryResult.getResult(), modelQueryResult.getQueryExpression()));
 		options.out.print("Took  : ");
-		options.out.println(toHoursMinutesAndSecondsString(modelPageResult.getMillisecondsToCompute()));
+		options.out.println(toHoursMinutesAndSecondsString(modelQueryResult.getMillisecondsToCompute()));
 		if (options.countSummations) {
 			options.out.print("Took  : ");
-			options.out.println(numberOfSummations + " summations\n");
+			options.out.println(modelQueryResult.getNumberOfSummations() + " summations\n");
 		}
-		modelPageResult.getErrors().forEach(error -> outputError(error));
+		modelQueryResult.getErrors().forEach(error -> outputError(error));
 	}
 
 	private void outputError(HOGMQueryError error) {
