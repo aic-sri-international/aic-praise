@@ -37,7 +37,6 @@
  */
 package com.sri.ai.praise.inference;
 
-import static com.sri.ai.grinder.sgdpllt.core.solver.AbstractQuantifierEliminationStepSolver.startCountingOfIntegrationsOverGroups;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.time;
 
@@ -53,6 +52,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.sgdpllt.api.Context;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
+import com.sri.ai.grinder.sgdpllt.core.solver.IntegrationRecording;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.HOGModelError;
 import com.sri.ai.praise.model.v1.HOGModelException;
@@ -159,7 +159,7 @@ public class HOGMQueryRunner {
 
 	private void runInference(String query, Expression queryExpression, ParsedHOGModel parsedModel) {
 		if (!canceled) {
-			startCountingOfIntegrationsOverGroups();
+			IntegrationRecording.startRecordingIntegrationsOverGroups();
 			FactorsAndTypes factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
 			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true, getOptionalTheory());
 			Pair<Expression, Long> inferenceResultAndTime = time(inference(queryExpression)); 			

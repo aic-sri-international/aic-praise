@@ -86,7 +86,9 @@ public class PRAiSECommandLineOptions {
 	
 	public List<ModelPage> modelPages;
 	public PrintStream   out = System.out;        // --output   (optional - 0 or 1)
+	public boolean showModel = false;
 	public boolean countSummations = false;
+	public boolean showSummations = false;
 	
 	private List<File>    inputFiles      = new ArrayList<>(); // non option arguments (at least 1 required)
 	private ModelLanguage inputLanguage   = null;              // --language (optional - 0 or 1)
@@ -108,10 +110,12 @@ public class PRAiSECommandLineOptions {
 		
 		parser = new OptionParser();		
 	
-		languageOptionSpec   = parser.accepts("language", "input model language (code), allowed values are " + getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
-		queryOptionSpec      = parser.accepts("query",    "query to run over all input models").withRequiredArg().ofType(String.class);
-		                       parser.accepts("count",    "inform how many summations have been performed for each query");
-		outputFileOptionSpec = parser.accepts("output",   "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
+		languageOptionSpec   = parser.accepts("language",   "input model language (code), allowed values are " + getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
+		queryOptionSpec      = parser.accepts("query",      "query to run over all input models").withRequiredArg().ofType(String.class);
+							   parser.accepts("model",      "show solved model in output");	
+		                       parser.accepts("count",      "inform how many summations have been performed for each query");
+		                       parser.accepts("summations", "shows summations if being counted (option --count)");
+		outputFileOptionSpec = parser.accepts("output",     "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 		
 		helpOptionSpec = parser.accepts("help", "command line options help").forHelp();
 	
@@ -137,7 +141,7 @@ public class PRAiSECommandLineOptions {
 	private void setupParameters(String[] args) throws IOException, FileNotFoundException, UnsupportedEncodingException {
 		try {
 			parseArguments(args);
-			setCountSummations();
+			setRecordingOfSummations();
 			showHelpMessageAndExitIfRequested();
 			setGlobalQueries();
 			collectInputFiles();
@@ -154,8 +158,13 @@ public class PRAiSECommandLineOptions {
 		options = parser.parse(args);
 	}
 	
-	private void setCountSummations() {
+	private void setRecordingOfSummations() {
+		showModel = options.has("model");
 		countSummations = options.has("count");
+		showSummations = options.has("summations");
+		if (showSummations && !countSummations) {
+			errors.add("Cannot show summations (option --summations) if not counting them (optiion --count)");
+		}
 	}
 
 	private void showHelpMessageAndExitIfRequested() throws IOException {

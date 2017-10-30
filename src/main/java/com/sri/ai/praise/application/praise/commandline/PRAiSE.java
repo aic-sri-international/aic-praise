@@ -45,7 +45,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.grinder.sgdpllt.core.solver.AbstractQuantifierEliminationStepSolver;
+import com.sri.ai.grinder.sgdpllt.core.solver.Integration;
+import com.sri.ai.grinder.sgdpllt.core.solver.IntegrationRecording;
 import com.sri.ai.praise.inference.HOGMQueryError;
 import com.sri.ai.praise.inference.HOGMQueryResult;
 import com.sri.ai.praise.inference.HOGMQueryRunner;
@@ -102,15 +103,20 @@ public class PRAiSE {
 	}
 
 	private void outputModel(ModelPage modelPage) {
-		options.out.print  ("Model name: ");
-		options.out.println(modelPage.getName());
-		options.out.println("Model     : ");
-		options.out.println(modelPage.getModelString());
+		if (options.showModel) {
+			options.out.print  ("Model name: ");
+			options.out.println(modelPage.getName());
+			options.out.println("Model     : ");
+			options.out.println(modelPage.getModelString());
+		}
 	}
 
 	private void startSummationCounting() {
 		if (options.countSummations) {
-			AbstractQuantifierEliminationStepSolver.startCountingOfIntegrationsOverGroups();
+			IntegrationRecording.startRecordingIntegrationsOverGroups();
+			if (options.showSummations) {
+				IntegrationRecording.turnStoringIntegrationsOverGroupsOn();
+			}
 		}
 	}
 
@@ -127,9 +133,15 @@ public class PRAiSE {
 		options.out.println(toHoursMinutesAndSecondsString(modelQueryResult.getMillisecondsToCompute()));
 		if (options.countSummations) {
 			options.out.print("Took  : ");
-			options.out.println(modelQueryResult.getNumberOfSummations() + " summations\n");
+			options.out.println(modelQueryResult.getNumberOfSummations() + " summations");
+			if (options.showSummations) {
+				for (Integration summation : modelQueryResult.getSummations()) {
+					options.out.println(summation);
+				}
+			}
 		}
 		modelQueryResult.getErrors().forEach(error -> outputError(error));
+		options.out.println();
 	}
 
 	private void outputError(HOGMQueryError error) {

@@ -37,15 +37,17 @@
  */
 package com.sri.ai.praise.inference;
 
-import static com.sri.ai.grinder.sgdpllt.core.solver.AbstractQuantifierEliminationStepSolver.getNumberOfIntegrationsOverGroup;
-import static com.sri.ai.grinder.sgdpllt.core.solver.AbstractQuantifierEliminationStepSolver.isCountingIntegrationsOverGroups;
+import static com.sri.ai.grinder.sgdpllt.core.solver.IntegrationRecording.getNumberOfIntegrationsOverGroup;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.sgdpllt.core.solver.Integration;
+import com.sri.ai.grinder.sgdpllt.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.sgdpllt.group.Sum;
 import com.sri.ai.grinder.sgdpllt.group.SumProduct;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
@@ -60,6 +62,7 @@ public class HOGMQueryResult {
 	private List<HOGMQueryError> errors                = new ArrayList<>();
 	private long                 millisecondsToCompute = 0L;
 	private int                  numberOfSummations    = -1;
+	private List<Integration>    summations            = null;
 	
 	public HOGMQueryResult(String queryString, Expression queryExpression, ParsedHOGModel parsedModel, Pair<Expression, Long> resultAndTime) {
 		this(queryString, queryExpression, parsedModel, resultAndTime.first, resultAndTime.second);
@@ -84,10 +87,19 @@ public class HOGMQueryResult {
 	public int getNumberOfSummations() {
 		return numberOfSummations;
 	}
+	
+	public List<Integration> getSummations() {
+		return summations;
+	}
 
 	public void recordNumberOfSummations() {
-		if (isCountingIntegrationsOverGroups()) {
+		if (IntegrationRecording.isRecordingIntegrationsOverGroups()) {
 			this.numberOfSummations = getNumberOfIntegrationsOverGroup(new Sum()) + getNumberOfIntegrationsOverGroup(new SumProduct());
+			if (IntegrationRecording.isStoringIntegrationsOverGroups()) {
+				this.summations = new LinkedList<>();
+				this.summations.addAll(IntegrationRecording.getIntegrationsOverGroup(new Sum()));
+				this.summations.addAll(IntegrationRecording.getIntegrationsOverGroup(new SumProduct()));
+			}
 		}
 	}
 
