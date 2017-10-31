@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+"
     codbase="http://aic-sri-international.github.io/aic-praise/"
-    href="http://aic-sri-international.github.io/aic-praise/sgsolver_demo_app_webstart.jnlp">
+    href="http://aic-sri-international.github.io/aic-praise/praise-gui.jnlp">
     <information>
-        <title>SGSolver Demo App</title>
+        <title>PRAiSE GUI Demo</title>
         <vendor>AIC SRI International</vendor>
         <homepage href="http://aic-sri-international.github.io/aic-praise/"/> 
         <icon href="http://aic-sri-international.github.io/aic-praise/sgsolver-demo-app.png"/>
@@ -13,14 +13,14 @@
     <resources>
         <!-- Application Resources -->
         <j2se version="1.8.0_41+" href="http://java.sun.com/products/autodl/j2se"/>
-        <jar href="http://aic-sri-international.github.io/aic-praise/aic-praise-sgsolver-demo-app.jar" main="true" />
+        <jar href="http://aic-sri-international.github.io/aic-praise/praise-gui.jar" main="true" />
     </resources>
     <security>
         <all-permissions/>
     </security>
     <application-desc
-         name="SGSolver Demo App"
-         main-class="com.sri.ai.praise.sgsolver.demo.SGSolverDemoApp">
+         name="PRAiSE GUI Demo"
+         main-class="com.sri.ai.praise.application.praise.app.PRAiSE">
      </application-desc>
      <update check="background"/>
 </jnlp>
