@@ -103,7 +103,7 @@ public class HOGMQueryResult {
 		}
 	}
 
-	public boolean isErrors() {
+	public boolean hasErrors() {
 		boolean result = errors.size() > 0;
 		return result;
 	}
@@ -136,7 +136,7 @@ public class HOGMQueryResult {
 	public String toString() {
 		String result = null;
 		
-		if (isErrors()) {
+		if (hasErrors()) {
 			StringJoiner sj = new StringJoiner("\n", "Query Errors:\n", "\n");
 			errors.forEach(error -> sj.add(error.toString()));
 			result = sj.toString();

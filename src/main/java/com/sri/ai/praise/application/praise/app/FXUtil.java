@@ -131,7 +131,9 @@ public class FXUtil {
         return confirmed.get();
 	}
 	
-	public static void exception(Throwable th) {
+	public static void exception(Throwable throwable) {
+		System.err.println("Exception being directed to FXUtil.exception, which is not showing anything at this point because it is not being invoked by the JavaFX thread: " + throwable);
+
 		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
 
 		dialog.setTitle("Program exception");
@@ -139,13 +141,13 @@ public class FXUtil {
 		final DialogPane dialogPane = dialog.getDialogPane();
 		dialogPane.setContentText("Details of the problem:");
 		dialogPane.getButtonTypes().addAll(ButtonType.OK);
-		dialogPane.setContentText(th.getMessage());
+		dialogPane.setContentText(throwable.getMessage());
 		dialog.initModality(Modality.APPLICATION_MODAL);
 
 		Label label = new Label("Exception stacktrace:");
 		StringWriter sw = new StringWriter();
 		PrintWriter  pw = new PrintWriter(sw);
-		th.printStackTrace(pw);
+		throwable.printStackTrace(pw);
 		pw.close();
 
 		TextArea textArea = new TextArea(sw.toString());

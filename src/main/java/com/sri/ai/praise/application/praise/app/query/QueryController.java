@@ -50,6 +50,7 @@ import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
 import com.sri.ai.praise.application.praise.app.service.ExecuteHOGMQueryService;
 import com.sri.ai.praise.inference.HOGMQueryError;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
@@ -185,7 +186,7 @@ public class QueryController {
     	
     	executeQueryService.valueProperty().addListener((observable, oldResult, newResult) -> {
 			if (newResult != null) { 
-				if (newResult.isErrors()) {
+				if (newResult.hasErrors()) {
 					displayQueryErrors(newResult.getQueryString(), newResult.getErrors(), newResult.getParsedModel(), newResult.getMillisecondsToCompute());			
 				}
 				else {
@@ -225,7 +226,7 @@ public class QueryController {
 	}
 	
 	private void displayQueryErrors(String query, List<HOGMQueryError> queryErrors, ParsedHOGModel parsedModel, long millisecondsToCompute) {
-		String title = "Query '"+query+"' encountered "+queryErrors.size()+" error(s) when attempting to compute answer ("+duration("took ", millisecondsToCompute)+")";
+		String title = "Query '" + query + "' encountered " + queryErrors.size() + " error(s) when attempting to compute answer (took " + Util.toHoursMinutesAndSecondsString(millisecondsToCompute) + ")";
 		ListView<HOGMQueryError> errors = new ListView<>(FXCollections.observableList(queryErrors));
 		// errors.setFixedCellSize(24);
 		errors.setPrefHeight(24*5);
@@ -264,7 +265,7 @@ public class QueryController {
 	
 	private void displayQueryAnswer(String query, Expression result, ParsedHOGModel parsedModel, long millisecondsToCompute) {
 		String answer = "P("+ query + " | ... ) = "+result;
-		String title  = "Query"+duration(" took ", millisecondsToCompute)+" to compute '"+answer+"'";
+		String title  = "Query took " + Util.toHoursMinutesAndSecondsString(millisecondsToCompute) + " to compute '" + answer + "'";
 		HOGMCodeArea resultCodeArea = new HOGMCodeArea(false);
 		 
 		resultCodeArea.setText(answer);
@@ -334,27 +335,5 @@ public class QueryController {
 		outputAccordion.getPanes().add(0, resultPane);
 		resultPane.setExpanded(true);
 		outputScrollPane.setVvalue(0);
-	}
-	
-	private String duration(String prefix, long duration) {
-		long hours = 0L, minutes = 0L, seconds = 0L, milliseconds = 0L;
-		
-		if (duration != 0) {
-			hours    = duration / 3600000;
-			duration = duration % 3600000; 
-		}
-		if (duration != 0) {
-			minutes  = duration / 60000;
-			duration = duration % 60000;
-		}
-		if (duration != 0) {
-			seconds  = duration / 1000;
-			duration = duration % 1000;
-		}
-		milliseconds = duration;
-		
-		String result = prefix + hours + "h" + minutes + "m" + seconds + "." + milliseconds+"s";
-		
-		return result;
 	}
 }

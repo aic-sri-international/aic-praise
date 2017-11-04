@@ -44,8 +44,10 @@ import javafx.concurrent.Task;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.inference.HOGMQueryResult;
+
 @Beta
 public class ExecuteHOGMQueryService extends Service<HOGMQueryResult> {
+
 	private StringProperty model = new SimpleStringProperty(this, "model");
 	private StringProperty query = new SimpleStringProperty(this, "query");
 

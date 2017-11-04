@@ -69,7 +69,7 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 			List<HOGMQueryResult> queryResults = hogmQueryRunner.getResults();
 			if (queryResults.size() == 1) {
 				HOGMQueryResult queryResult = queryResults.get(0);
-				if (queryResult.isErrors()) {
+				if (queryResult.hasErrors()) {
 					result.set(queryResult);
 				}
 				else {

@@ -232,7 +232,7 @@ public class PRAiSEController {
 			SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(oldScientificAfter);
 		}
 	}
-	
+
 	public static boolean isInDebugMode() {
 		return _inDebugMode.get();
 	}

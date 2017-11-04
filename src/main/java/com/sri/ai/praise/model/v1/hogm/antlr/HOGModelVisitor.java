@@ -79,6 +79,7 @@ import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.praise.model.v1.HOGModel;
 import com.sri.ai.praise.model.v1.StatementInfo;
+import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParser.TermContext;
 import com.sri.ai.util.math.Rational;
 
 @Beta
@@ -122,7 +123,8 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 			result = visit(ctx.declaration());
 		}
 		else {
-			result = visit(ctx.term());
+			TermContext term = ctx.term();
+			result = visit(term);
 			terms.add(newStatementInfo(result, ctx));
 		}
 		

@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.model.v1;
 
+import static com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse.isIfThenElse;
+import static com.sri.ai.grinder.sgdpllt.library.indexexpression.IndexExpressions.getIndexToTypeMapWithDefaultNull;
 import static com.sri.ai.util.Util.sameInstancesInSameIterableOrder;
 
 import java.util.ArrayList;
@@ -77,8 +79,8 @@ public class HOGModel {
 		BOOLEAN, NUMERIC, STRING, OTHER, INVALID
 	}
 
-	public static Expression validateAndConstruct(List<StatementInfo> sortDecs, List<StatementInfo> constantDecs, List<StatementInfo> randomVarDecs, List<StatementInfo> terms) {
-		HOGMModelValidator validator = new HOGMModelValidator(sortDecs, constantDecs, randomVarDecs, terms);
+	public static Expression validateAndConstruct(List<StatementInfo> sortDeclarations, List<StatementInfo> constantDeclarations, List<StatementInfo> randomVarDeclarations, List<StatementInfo> terms) {
+		HOGMModelValidator validator = new HOGMModelValidator(sortDeclarations, constantDeclarations, randomVarDeclarations, terms);
 		
 		if (!validator.isValid()) {
 			throw new HOGModelException("Invalid model", validator.errors);
@@ -627,116 +629,182 @@ public class HOGModel {
 			// All of these should belong to the known set of functors			
 			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> nonConstantAndRandomFunctionsWithScope = getNonConstantRandomFunctionsWithScope(termStatement.statement);
 			
-			nonConstantAndRandomFunctionsWithScope.forEach(nonConstantAndRandomFunctionWithScope -> {
-				Expression                           nonConstantAndRandomFunction = nonConstantAndRandomFunctionWithScope.first;
-				Map<Expression, ConstantDeclaration> scopedConstants              = nonConstantAndRandomFunctionWithScope.second;
-				
-				if (isKnownFunctor(nonConstantAndRandomFunction.getFunctor())) {
-					String functorName = functorName(nonConstantAndRandomFunction.getFunctor());
-					if (!isValidKnownFunctorArity(nonConstantAndRandomFunction)) {
-						newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+nonConstantAndRandomFunction+"'", termStatement);
-					}
-					else {
-						Set<HOGMSortDeclaration> argSorts = new HashSet<>();
-						for (int i = 0; i < nonConstantAndRandomFunction.numberOfArguments(); i++) {
-							Expression arg = nonConstantAndRandomFunction.get(i);
-							if (!isDeclaredConstantFunctor(arg.getFunctorOrSymbol(), scopedConstants) &&
-								!isDeclaredRandomFunctor(arg.getFunctorOrSymbol()) &&
-								isUnknownConstant(arg, scopedConstants)) {									
-								newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
-							}
-							else {
-								// All arguments must be of the same type
-								HOGMSortDeclaration sortType = determineSortType(arg, scopedConstants);
-								if (sortType == null) {
-									newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, arg, termStatement);
-								}
-								if (IfThenElse.isIfThenElse(nonConstantAndRandomFunction)) {
-									if (i == 0) {
-										// The conditional must be boolean
-										if (sortType != HOGMSortDeclaration.IN_BUILT_BOOLEAN) {
-											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
-										}
-									}
-									else {
-										// otherwise the branches sorts must match
-										argSorts.add(sortType);
-									}
-							    }    // For equalities the types must match up
-								else if (Equality.isEquality(nonConstantAndRandomFunction) || Disequality.isDisequality(nonConstantAndRandomFunction)) {
-									if (sortType != null) {
-										argSorts.add(sortType);
-									}
-								}
-								else if (functorName.equals(FunctorConstants.LESS_THAN) ||
-										 functorName.equals(FunctorConstants.LESS_THAN_OR_EQUAL_TO) ||
-										 functorName.equals(FunctorConstants.GREATER_THAN) ||
-										 functorName.equals(FunctorConstants.GREATER_THAN_OR_EQUAL_TO)) {
-									if (sortType != HOGMSortDeclaration.IN_BUILT_INTEGER && sortType != HOGMSortDeclaration.IN_BUILT_REAL) {
-										newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
-									}	
-								}
-								else {
-									if (booleanTypeFunctors.contains(functorName)) {
-										if (sortType != HOGMSortDeclaration.IN_BUILT_BOOLEAN) {
-											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
-										}
-									}
-									else if (numericTypeFunctors.contains(functorName)) {
-										if (sortType != HOGMSortDeclaration.IN_BUILT_INTEGER && sortType != HOGMSortDeclaration.IN_BUILT_REAL 
-										    && !FunctorConstants.CARDINALITY.equals(functorName) // Cardinality functor takes any sort name
-										) {
-											newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
-										}
-									}
-									else {
-										newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
-									}
-								}
-							}
-						}
-						
-						// The type of arguments must all match in these instances
-						if (IfThenElse.isIfThenElse(nonConstantAndRandomFunction) || Equality.isEquality(nonConstantAndRandomFunction) || Disequality.isDisequality(nonConstantAndRandomFunction)) {
-							if (argSorts.size() != 1 && !HOGMSortDeclaration.IN_BUILT_NUMERIC_SORTS.equals(argSorts)) {	
-								boolean reportError = true;
-								
-								// Is a conditional that can be converted to a rule, so ok for types to mismatch currently
-								if (IfThenElse.isIfThenElse(nonConstantAndRandomFunction) && attemptMakeRule(nonConstantAndRandomFunction) != null) {
-									reportError = false;
-								}
-								
-								if (reportError) {
-									newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_COMPATIBLE_TYPE, nonConstantAndRandomFunction.toString() + " which has argument types " + argSorts.toString(), termStatement);
-								}
-							}
-						}
-					}
-				}
-				else {					
-					newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, nonConstantAndRandomFunction.getFunctor(), termStatement);
-				}
-			});
+			nonConstantAndRandomFunctionsWithScope.forEach(x -> checkNonConstantAndRandomFunctionWithScope(x, termStatement));
 			
-			// NOTE: quantifiers are not functions so need to be handled separately
-			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> quantifiersWithScope = getQuantifiersWithScope(termStatement.statement);
-			quantifiersWithScope.forEach(quantifierWithScope -> {
-				Expression                           quantifier      = quantifierWithScope.first;
-				Map<Expression, ConstantDeclaration> scopedConstants = quantifierWithScope.second;
-				
-				IndexExpressionsSet indexExpressionSet = ((QuantifiedExpression)quantifier).getIndexExpressions();
-				IndexExpressions.getIndexToTypeMapWithDefaultNull(indexExpressionSet).forEach((name, type) -> {
-					HOGMSortDeclaration localSort = getSort(type);
-					if (localSort == null) {
-						newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, name, termStatement);
+			checkQuantifiedExpressions(termStatement);			
+		}
+
+		private void checkNonConstantAndRandomFunctionWithScope(Pair<Expression, Map<Expression, ConstantDeclaration>> nonConstantAndRandomFunctionWithScope, StatementInfo termStatement) {
+			Expression                           nonConstantAndRandomFunction = nonConstantAndRandomFunctionWithScope.first;
+			Map<Expression, ConstantDeclaration> scopedConstants              = nonConstantAndRandomFunctionWithScope.second;
+			
+			if (isKnownFunctor(nonConstantAndRandomFunction.getFunctor())) {
+				checkDeclaredNonConstantAndRandomFunction(termStatement, nonConstantAndRandomFunction, scopedConstants);
+			}
+			else {					
+				newError(Type.TERM_TYPE_OF_FUNCTOR_NOT_DECLARED, nonConstantAndRandomFunction.getFunctor(), termStatement);
+			}
+		}
+
+		private void checkDeclaredNonConstantAndRandomFunction(StatementInfo termStatement, Expression nonConstantAndRandomFunction, Map<Expression, ConstantDeclaration> scopedConstants) {
+			String functorName = functorName(nonConstantAndRandomFunction.getFunctor());
+			if (!isValidKnownFunctorArity(nonConstantAndRandomFunction)) {
+				newError(Type.TERM_ARITY_OF_FUNCTOR_DOES_NOT_MATCH_DECLARATION, "'"+nonConstantAndRandomFunction+"'", termStatement);
+			}
+			else {
+				checkNonConstantAndRandomFunctionWithCorrectArity(termStatement, nonConstantAndRandomFunction, scopedConstants, functorName);
+			}
+		}
+
+		private void checkNonConstantAndRandomFunctionWithCorrectArity(StatementInfo termStatement, Expression nonConstantAndRandomFunction, Map<Expression, ConstantDeclaration> scopedConstants, String functorName) {
+			Set<HOGMSortDeclaration> argSorts = new HashSet<>();
+			for (int i = 0; i < nonConstantAndRandomFunction.numberOfArguments(); i++) {
+				Expression arg = nonConstantAndRandomFunction.get(i);
+				checkAndCollectArgSorts(arg, i, termStatement, nonConstantAndRandomFunction, scopedConstants, functorName, argSorts);
+			}
+			checkThatTypesOfArgumentsAllMatch(argSorts, termStatement, nonConstantAndRandomFunction);
+		}
+
+		private void checkAndCollectArgSorts(Expression arg, int i, StatementInfo termStatement, Expression nonConstantAndRandomFunction, Map<Expression, ConstantDeclaration> scopedConstants, String functorName, Set<HOGMSortDeclaration> argSorts) {
+			if (isUndefinedConstantTerm(arg, scopedConstants)) {									
+				newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
+			}
+			else {
+				checkThatAllArgumentsAreOfTheSameType(arg, termStatement, nonConstantAndRandomFunction, scopedConstants, functorName, argSorts, i);
+			}
+		}
+
+		private void checkThatAllArgumentsAreOfTheSameType(Expression arg, StatementInfo termStatement, Expression nonConstantAndRandomFunction, Map<Expression, ConstantDeclaration> scopedConstants, String functorName, Set<HOGMSortDeclaration> argSorts, int i) {
+			HOGMSortDeclaration sortType = determineSortType(arg, scopedConstants);
+			if (sortType == null) {
+				newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, arg, termStatement);
+			}
+			if (IfThenElse.isIfThenElse(nonConstantAndRandomFunction)) {
+				checkSortAgreementForIfThenElse(termStatement, argSorts, i, arg, sortType);
+			}
+			else if (isEqualityOrDisequality(nonConstantAndRandomFunction)) {
+				checkSortAgreementForEqualityOrDisequalityFunctor(argSorts, sortType);
+			}
+			else if (isNumericComparisonFunctor(functorName)) {
+				checkSortAgreementForNumericComparisonFunctor(termStatement, arg, sortType);	
+			}
+			else if (booleanTypeFunctors.contains(functorName)) {
+				checkSortAgreementForBooleanFunctor(termStatement, arg, sortType);
+			}
+			else if (numericTypeFunctors.contains(functorName)) {
+				checkSortAgreementForNumericFunctor(termStatement, functorName, arg, sortType);
+			}
+			else {
+				newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
+			}
+		}
+
+		private boolean isUndefinedConstantTerm(Expression arg, Map<Expression, ConstantDeclaration> scopedConstants) {
+			return !isDeclaredConstantFunctor(arg.getFunctorOrSymbol(), scopedConstants) &&
+				!isDeclaredRandomFunctor(arg.getFunctorOrSymbol()) &&
+				isUnknownConstant(arg, scopedConstants);
+		}
+
+		private void checkSortAgreementForIfThenElse(StatementInfo termStatement, Set<HOGMSortDeclaration> argSorts, int i, Expression arg, HOGMSortDeclaration sortType) {
+			if (i == 0) {
+				checkSortAgreementForBooleanFunctor(termStatement, arg, sortType);
+			}
+			else {
+				// otherwise the branches sorts must match
+				argSorts.add(sortType);
+			}
+		}
+
+		private boolean isEqualityOrDisequality(Expression nonConstantAndRandomFunction) {
+			return Equality.isEquality(nonConstantAndRandomFunction) || Disequality.isDisequality(nonConstantAndRandomFunction);
+		}
+
+		private void checkSortAgreementForEqualityOrDisequalityFunctor(Set<HOGMSortDeclaration> argSorts, HOGMSortDeclaration sortType) {
+			// For equalities the types must match up
+			if (sortType != null) {
+				argSorts.add(sortType);
+			}
+		}
+
+		private void checkSortAgreementForNumericComparisonFunctor(StatementInfo termStatement, Expression arg, HOGMSortDeclaration sortType) {
+			if (sortType != HOGMSortDeclaration.IN_BUILT_INTEGER && sortType != HOGMSortDeclaration.IN_BUILT_REAL) {
+				newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
+			}
+		}
+
+		private boolean isNumericComparisonFunctor(String functorName) {
+			return functorName.equals(FunctorConstants.LESS_THAN) ||
+					 functorName.equals(FunctorConstants.LESS_THAN_OR_EQUAL_TO) ||
+					 functorName.equals(FunctorConstants.GREATER_THAN) ||
+					 functorName.equals(FunctorConstants.GREATER_THAN_OR_EQUAL_TO);
+		}
+
+		private void checkSortAgreementForBooleanFunctor(StatementInfo termStatement, Expression arg, HOGMSortDeclaration sortType) {
+			if (sortType != HOGMSortDeclaration.IN_BUILT_BOOLEAN) {
+				newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
+			}
+		}
+
+		private void checkSortAgreementForNumericFunctor(StatementInfo termStatement, String functorName, Expression arg, HOGMSortDeclaration sortType) {
+			boolean sortTypeIsNonNumeric = sortType != HOGMSortDeclaration.IN_BUILT_INTEGER && sortType != HOGMSortDeclaration.IN_BUILT_REAL;
+			boolean functionIsNotCardinality = !functorName.equals(FunctorConstants.CARDINALITY);
+			if (sortTypeIsNonNumeric && functionIsNotCardinality) {
+				newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
+			}
+		}
+
+		private void checkThatTypesOfArgumentsAllMatch(Set<HOGMSortDeclaration> argSorts, StatementInfo termStatement, Expression nonConstantAndRandomFunction) {
+			if (IfThenElse.isIfThenElse(nonConstantAndRandomFunction) || Equality.isEquality(nonConstantAndRandomFunction) || Disequality.isDisequality(nonConstantAndRandomFunction)) {
+				boolean thereAreMultipleSortsAndNotAllAreNumeric = argSorts.size() != 1 && !argSorts.equals(HOGMSortDeclaration.IN_BUILT_NUMERIC_SORTS);
+				if (thereAreMultipleSortsAndNotAllAreNumeric) {	
+					if (isNotAConditionalRule(nonConstantAndRandomFunction)) {
+						newError(Type.TERM_ARGUMENTS_MUST_ALL_BE_OF_THE_SAME_COMPATIBLE_TYPE, nonConstantAndRandomFunction.toString() + " which has argument types " + argSorts.toString(), termStatement);
 					}
-				});
-				
-				Expression body = getQuantifiedExpressionBody(quantifier);
-				if (body != null && determineSortType(body, scopedConstants) != HOGMSortDeclaration.IN_BUILT_BOOLEAN) {
-					newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, body, termStatement);
 				}
-			});			
+			}
+		}
+
+		private boolean isNotAConditionalRule(Expression nonConstantAndRandomFunction) {
+			boolean isAConditionalRule = isIfThenElse(nonConstantAndRandomFunction) && attemptMakeRule(nonConstantAndRandomFunction) != null;
+			boolean result = !isAConditionalRule;
+			return result;
+		}
+
+		private void checkQuantifiedExpressions(StatementInfo termStatement) {
+			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> quantifiedExpressionsWithScope = getQuantifiedExpressionsWithScope(termStatement.statement);
+			quantifiedExpressionsWithScope.forEach(qAndS -> checkQuantifiedExpressionWithScope(termStatement, qAndS));
+		}
+
+		private void checkQuantifiedExpressionWithScope(StatementInfo termStatement, Pair<Expression, Map<Expression, ConstantDeclaration>> quantifiedExpressionWithScope) {
+			QuantifiedExpression quantifiedExpression = (QuantifiedExpression) quantifiedExpressionWithScope.first;
+			Map<Expression, ConstantDeclaration> scopedConstants = quantifiedExpressionWithScope.second;
+			checkIfIndexSortsAreDefined(termStatement, quantifiedExpression);
+			checkIfBodyIsBoolean(termStatement, quantifiedExpression, scopedConstants);
+		}
+
+		private void checkIfIndexSortsAreDefined(StatementInfo termStatement, QuantifiedExpression quantifiedExpression) {
+			Map<Expression, Expression> indexToTypeMap = getIndexToTypeMap(quantifiedExpression);
+			indexToTypeMap.forEach((name, type) -> checkIfIndexSortIsDefined(termStatement, name, type));
+		}
+
+		private Map<Expression, Expression> getIndexToTypeMap(QuantifiedExpression quantifiedExpression) {
+			IndexExpressionsSet indexExpressionSet = quantifiedExpression.getIndexExpressions();
+			Map<Expression, Expression> indexToTypeMap = getIndexToTypeMapWithDefaultNull(indexExpressionSet);
+			return indexToTypeMap;
+		}
+
+		private void checkIfIndexSortIsDefined(StatementInfo termStatement, Expression name, Expression type) {
+			HOGMSortDeclaration localSort = getSort(type);
+			if (localSort == null) {
+				newError(Type.TERM_SORT_CANNOT_BE_DETERMINED, name, termStatement);
+			}
+		}
+
+		private void checkIfBodyIsBoolean(StatementInfo termStatement, QuantifiedExpression quantifiedExpression, Map<Expression, ConstantDeclaration> scopedConstants) {
+			Expression body = getQuantifiedExpressionBody(quantifiedExpression);
+			if (body != null && determineSortType(body, scopedConstants) != HOGMSortDeclaration.IN_BUILT_BOOLEAN) {
+				newError(Type.TERM_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, body, termStatement);
+			}
 		}
 		
 		List<Pair<Expression, Map<Expression, ConstantDeclaration>>> getRandomFunctionsWithScope(Expression expr) {
@@ -816,7 +884,7 @@ public class HOGModel {
 			}
 		}
 		
-		List<Pair<Expression, Map<Expression, ConstantDeclaration>>> getQuantifiersWithScope(Expression expr) {
+		List<Pair<Expression, Map<Expression, ConstantDeclaration>>> getQuantifiedExpressionsWithScope(Expression expr) {
 			List<Pair<Expression, Map<Expression, ConstantDeclaration>>> result = new ArrayList<>();
 			getQuantifiers(expr, result, constants);
 			return result;
