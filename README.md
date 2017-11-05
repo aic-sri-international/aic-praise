@@ -9,7 +9,7 @@ SRI International's AIC PRAiSE (Probabilistic Reasoning As Symbolic Evaluation) 
       <dependency>
           <groupId>com.googlecode.aic-praise</groupId>
           <artifactId>aic-praise</artifactId>
-          <version>1.3.0</version>
+          <version>1.3.3</version>
       </dependency>
       ```
 * [Latest Release](https://github.com/aic-sri-international/aic-praise/releases)
