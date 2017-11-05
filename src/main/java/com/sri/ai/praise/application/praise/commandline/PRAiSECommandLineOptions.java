@@ -114,7 +114,7 @@ public class PRAiSECommandLineOptions {
 		queryOptionSpec      = parser.accepts("query",      "query to run over all input models").withRequiredArg().ofType(String.class);
 							   parser.accepts("model",      "show solved model in output");	
 		                       parser.accepts("count",      "inform how many summations have been performed for each query");
-		                       parser.accepts("summations", "shows summations if being counted (option --count)");
+		                       parser.accepts("summations", "shows number of summations and integrations performed, if they are being counted (with --count)");
 		outputFileOptionSpec = parser.accepts("output",     "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 		
 		helpOptionSpec = parser.accepts("help", "command line options help").forHelp();

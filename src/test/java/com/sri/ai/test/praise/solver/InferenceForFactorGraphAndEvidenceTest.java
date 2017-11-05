@@ -41,11 +41,8 @@ import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.sgdpllt.library.FunctorConstants.MINUS;
-import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.myAssert;
-import static com.sri.ai.util.Util.println;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
 import java.util.List;
@@ -61,8 +58,6 @@ import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.sgdpllt.core.TrueContext;
 import com.sri.ai.grinder.sgdpllt.library.number.Times;
 import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.inference.HOGMQueryResult;
-import com.sri.ai.praise.inference.HOGMQueryRunner;
 import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.util.Util;
 
@@ -964,40 +959,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 	
-	//@Test
-	public void linearRealArithmeticOnPositionSimpleLonger() {
-		String model = 
-				"random position         : Real; // real, unobserved position of an object\n" + 
-				"random observedPosition : Real; // observed, noisy position of the same object\n" + 
-				"random event : Boolean;\n" + 
-				"\n" + 
-				"// p(position) proportional to inverted parabola around 0 + 10\n" + 
-				"if position > -10 and position < 10\n" + 
-				"   then -position^2 + 100\n" + 
-				"   else 0;\n" + 
-				"\n" + 
-				"// p(observedPosition | position) proportional to parabola around position + 1\n" + 
-				"if observedPosition - position > -1 and observedPosition - position < 1\n" + 
-				"   then -(observedPosition - position)^2 + 1\n" + 
-				"   else 0;\n" + 
-				"\n" + 
-				"// observed position is between 4 and 5; note that zero-mass events such as observedPosition = 4 will not work currently\n" + 
-				"observedPosition > 4 and observedPosition < 5;\n" + 
-				"\n" + 
-				"// event of position being between 3 and 6 has probability 1; anything shorter has probability less than 1\n" + 
-				"event <=> position > 3 and position < 6;\n" + 
-				"";
-		String query = "event";
-		HOGMQueryRunner runner = new HOGMQueryRunner(model, query);
-		List<HOGMQueryResult> results = runner.getResults();
-		myAssert(results.size() == 1, () -> "Query is returning more than one result.");
-		HOGMQueryResult result = getFirst(results);
-		result.getErrors().stream().forEach(e -> println(e));
-		assertFalse(result.hasErrors());
-		Expression resultValue = result.getResult();
-		println(resultValue);
-	}
-
 	/**
 	 * @param queryExpression
 	 * @param evidence
