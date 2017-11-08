@@ -72,7 +72,7 @@ import com.sri.ai.grinder.sgdpllt.library.boole.ForAll;
 import com.sri.ai.grinder.sgdpllt.library.boole.Or;
 import com.sri.ai.grinder.sgdpllt.library.boole.ThereExists;
 import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.sgdpllt.library.number.Minus;
+import com.sri.ai.grinder.sgdpllt.library.number.BinaryMinus;
 import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSets;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
 import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
@@ -404,7 +404,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
  		Expression condition = visit(ctx.term(0));
  		Expression potential = visit(ctx.term(1));
  		
- 		Expression result = IfThenElse.make(condition, potential, Minus.make(Expressions.ONE, potential));
+ 		Expression result = IfThenElse.make(condition, potential, BinaryMinus.make(Expressions.ONE, potential));
  		return result;
  	}
  	
