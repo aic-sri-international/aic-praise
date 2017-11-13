@@ -861,7 +861,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		
 		queryExpression = parse("I");
 		evidence = null;
-		expected = parse("if I < 98 then (-0.04 * I ^ 2 + 23.88 * I + 1520.92) / 257164 else if I < 99 then (-0.06 * I ^ 2 + -0.18 * I + 4070.88) / 257164 else (0.14 * I ^ 2 + 0.42 * I + 2079.28) / 257164");
+		expected = parse("if I < 98 then (-(0.04 * I ^ 2) + 23.88 * I + 1520.92) / 257164 else if I < 99 then (-(0.06 * I ^ 2) -(0.18 * I) + 4070.88) / 257164 else (0.14 * I ^ 2 + 0.42 * I + 2079.28) / 257164");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 
@@ -906,7 +906,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		
 		queryExpression = parse("X");
 		evidence = null;
-		expected = parse("if X < 100 then (-0.04 * X ^ 2 + 24 * X + 1500) / 256666.667 else (0.14 * X ^ 2 + 2100) / 256666.667");
+		expected = parse("if X < 100 then (-(0.04 * X ^ 2) + 24 * X + 1500) / 256666.667 else (0.14 * X ^ 2 + 2100) / 256666.667");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 
 		
@@ -917,7 +917,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		
 		queryExpression = parse("X");
 		evidence = null;
-		expected = parse("if X < 100 then (-0.0266666667 * X ^ 4 + 12 * X ^ 3 + 70000 * X) / 596666667 else (0.0933333333 * X ^ 4 + 70000 * X) / 596666667");
+		expected = parse("if X < 100 then (-(0.0266666667 * X ^ 4) + 12 * X ^ 3 + 70000 * X) / 596666667 else (0.0933333333 * X ^ 4 + 70000 * X) / 596666667");
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 
 	
