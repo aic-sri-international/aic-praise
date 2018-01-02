@@ -58,11 +58,11 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.helper.UniquelyNamedConstantIncludingBooleansAndNumbersPredicate;
 import com.sri.ai.grinder.sgdpllt.api.Context;
-import com.sri.ai.grinder.sgdpllt.api.MultiIndexQuantifierEliminator;
+import com.sri.ai.grinder.sgdpllt.api.MultiQuantifierEliminator;
 import com.sri.ai.grinder.sgdpllt.api.Theory;
 import com.sri.ai.grinder.sgdpllt.core.SGDPLLTUtil;
 import com.sri.ai.grinder.sgdpllt.core.TrueContext;
-import com.sri.ai.grinder.sgdpllt.core.solver.DefaultMultiIndexQuantifierEliminator;
+import com.sri.ai.grinder.sgdpllt.core.solver.DefaultMultiQuantifierEliminator;
 import com.sri.ai.grinder.sgdpllt.core.solver.SGVET;
 import com.sri.ai.grinder.sgdpllt.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.sgdpllt.group.SumProduct;
@@ -95,7 +95,7 @@ public class InferenceForFactorGraphAndEvidence {
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private Theory theory;
 	private AssociativeCommutativeSemiRing semiRing;
-	private MultiIndexQuantifierEliminator solver;
+	private MultiQuantifierEliminator solver;
 
 	public Expression getEvidenceProbability() {
 		return evidenceProbability;
@@ -171,7 +171,7 @@ public class InferenceForFactorGraphAndEvidence {
 			solver = new SGVET();
 		}
 		else {
-			solver = new DefaultMultiIndexQuantifierEliminator();
+			solver = new DefaultMultiQuantifierEliminator();
 		}
 
 		evidenceProbability = null;
