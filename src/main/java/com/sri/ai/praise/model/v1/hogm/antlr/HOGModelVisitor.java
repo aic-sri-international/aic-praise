@@ -266,7 +266,7 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 	// : functor=functor_name OPEN_PAREN ( args+=term (COMMA args+=term)* )? CLOSE_PAREN
  	@Override 
  	public Expression visitFunction_application(HOGMParser.Function_applicationContext ctx) {
- 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(visit(ctx.functor), expressions(ctx.args));
+ 		Expression result = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(visit(ctx.functor), (Object[]) expressions(ctx.args));
 		
 		return result; 
 	}
