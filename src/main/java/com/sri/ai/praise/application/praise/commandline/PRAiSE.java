@@ -45,8 +45,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.grinder.sgdpllt.core.solver.Integration;
-import com.sri.ai.grinder.sgdpllt.core.solver.IntegrationRecording;
+import com.sri.ai.grinder.core.solver.Integration;
+import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.praise.inference.HOGMQueryError;
 import com.sri.ai.praise.inference.HOGMQueryResult;
 import com.sri.ai.praise.inference.HOGMQueryRunner;

@@ -37,8 +37,8 @@
  */
 package com.sri.ai.praise.model.v1;
 
-import static com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse.isIfThenElse;
-import static com.sri.ai.grinder.sgdpllt.library.indexexpression.IndexExpressions.getIndexToTypeMapWithDefaultNull;
+import static com.sri.ai.grinder.library.controlflow.IfThenElse.isIfThenElse;
+import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.getIndexToTypeMapWithDefaultNull;
 import static com.sri.ai.util.Util.sameInstancesInSameIterableOrder;
 
 import java.util.ArrayList;
@@ -57,16 +57,16 @@ import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.api.QuantifiedExpression;
 import com.sri.ai.expresso.api.QuantifiedExpressionWithABody;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.sgdpllt.library.Disequality;
-import com.sri.ai.grinder.sgdpllt.library.Equality;
-import com.sri.ai.grinder.sgdpllt.library.FunctorConstants;
-import com.sri.ai.grinder.sgdpllt.library.boole.ForAll;
-import com.sri.ai.grinder.sgdpllt.library.boole.ThereExists;
-import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.sgdpllt.library.indexexpression.IndexExpressions;
-import com.sri.ai.grinder.sgdpllt.library.set.CountingFormulaEquivalentExpressions;
-import com.sri.ai.grinder.sgdpllt.library.set.Sets;
-import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSets;
+import com.sri.ai.grinder.library.Disequality;
+import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.boole.ForAll;
+import com.sri.ai.grinder.library.boole.ThereExists;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.indexexpression.IndexExpressions;
+import com.sri.ai.grinder.library.set.CountingFormulaEquivalentExpressions;
+import com.sri.ai.grinder.library.set.Sets;
+import com.sri.ai.grinder.library.set.extensional.ExtensionalSets;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
 import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;

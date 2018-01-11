@@ -50,12 +50,12 @@ import java.util.function.Function;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.sgdpllt.api.Context;
-import com.sri.ai.grinder.sgdpllt.api.MultiQuantifierEliminator;
-import com.sri.ai.grinder.sgdpllt.application.Compilation;
-import com.sri.ai.grinder.sgdpllt.core.TrueContext;
-import com.sri.ai.grinder.sgdpllt.library.SyntacticSubstitute;
-import com.sri.ai.grinder.sgdpllt.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.api.MultiQuantifierEliminator;
+import com.sri.ai.grinder.application.Compilation;
+import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.grinder.library.SyntacticSubstitute;
+import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
@@ -153,7 +153,7 @@ public class UAIUtil {
 			}
 		}
 		
-		com.sri.ai.grinder.sgdpllt.api.Theory theory = new EqualityTheory(true, true);
+		com.sri.ai.grinder.api.Theory theory = new EqualityTheory(true, true);
 
 		Expression result = Compilation.compile(inputExpression, theory, mapFromVariableNameToTypeName, mapFromUniquelyNamedConstantToTypeName, mapFromCategoricalTypeNameToSizeString, list(), solverListener);
 		

@@ -134,11 +134,11 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#InferenceForFactorGraphAndEvidence-com.sri.ai.praise.inference.FactorsAndTypes-boolean-com.sri.ai.expresso.api.Expression-boolean-com.sri.ai.grinder.sgdpllt.api.Theory-">InferenceForFactorGraphAndEvidence</a></span>(<a href="../../../../../../com/sri/ai/praise/sgsolver/solver/FactorsAndTypes.html" title="interface in com.sri.ai.praise.inference">FactorsAndTypes</a>&nbsp;factorsAndTypes,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#InferenceForFactorGraphAndEvidence-com.sri.ai.praise.inference.FactorsAndTypes-boolean-com.sri.ai.expresso.api.Expression-boolean-com.sri.ai.grinder.api.Theory-">InferenceForFactorGraphAndEvidence</a></span>(<a href="../../../../../../com/sri/ai/praise/sgsolver/solver/FactorsAndTypes.html" title="interface in com.sri.ai.praise.inference">FactorsAndTypes</a>&nbsp;factorsAndTypes,
                                   boolean&nbsp;isBayesianNetwork,
                                   com.sri.ai.expresso.api.Expression&nbsp;evidence,
                                   boolean&nbsp;useFactorization,
-                                  com.sri.ai.grinder.sgdpllt.api.Theory&nbsp;optionalTheory)</code>
+                                  com.sri.ai.grinder.api.Theory&nbsp;optionalTheory)</code>
 <div class="block">Constructs a solver for a factor graph and an evidence expression.</div>
 </td>
 </tr>
@@ -172,7 +172,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#getMapFromRandomVariableNameToTypeName--">getMapFromRandomVariableNameToTypeName</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><code>com.sri.ai.grinder.sgdpllt.api.Theory</code></td>
+<td class="colFirst"><code>com.sri.ai.grinder.api.Theory</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#getTheory--">getTheory</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i4" class="altColor">
@@ -180,7 +180,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#interrupt--">interrupt</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i5" class="rowColor">
-<td class="colFirst"><code>com.sri.ai.grinder.sgdpllt.api.Context</code></td>
+<td class="colFirst"><code>com.sri.ai.grinder.api.Context</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#makeContextWithTypeInformation--">makeContextWithTypeInformation</a></span>()</code>
 <div class="block">Makes context with all the type information on this inferencer.</div>
 </td>
@@ -189,14 +189,14 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colFirst"><code>com.sri.ai.expresso.api.Expression</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#simplify-com.sri.ai.expresso.api.Expression-">simplify</a></span>(com.sri.ai.expresso.api.Expression&nbsp;expression)</code>
 <div class="block">Simplifies an expression without requiring a context with all the type information (creating it from scratch);
- use <a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#simplify-com.sri.ai.expresso.api.Expression-com.sri.ai.grinder.sgdpllt.api.Context-"><code>simplify(Expression, Context)</code></a> instead for greater efficient if you already have such a context,
+ use <a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#simplify-com.sri.ai.expresso.api.Expression-com.sri.ai.grinder.api.Context-"><code>simplify(Expression, Context)</code></a> instead for greater efficient if you already have such a context,
  or if you are invoking this method multiple times (you can make the context only once with <a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#makeContextWithTypeInformation--"><code>makeContextWithTypeInformation()</code></a>.</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>com.sri.ai.expresso.api.Expression</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#simplify-com.sri.ai.expresso.api.Expression-com.sri.ai.grinder.sgdpllt.api.Context-">simplify</a></span>(com.sri.ai.expresso.api.Expression&nbsp;expression,
-        com.sri.ai.grinder.sgdpllt.api.Context&nbsp;context)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#simplify-com.sri.ai.expresso.api.Expression-com.sri.ai.grinder.api.Context-">simplify</a></span>(com.sri.ai.expresso.api.Expression&nbsp;expression,
+        com.sri.ai.grinder.api.Context&nbsp;context)</code>
 <div class="block">Simplifies an expression given context with all the type information already built-in
  (one can be built with <a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#makeContextWithTypeInformation--"><code>makeContextWithTypeInformation()</code></a>.</div>
 </td>
@@ -236,7 +236,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="InferenceForFactorGraphAndEvidence-com.sri.ai.praise.inference.FactorsAndTypes-boolean-com.sri.ai.expresso.api.Expression-boolean-com.sri.ai.grinder.sgdpllt.api.Theory-">
+<a name="InferenceForFactorGraphAndEvidence-com.sri.ai.praise.inference.FactorsAndTypes-boolean-com.sri.ai.expresso.api.Expression-boolean-com.sri.ai.grinder.api.Theory-">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -246,7 +246,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
                                           boolean&nbsp;isBayesianNetwork,
                                           com.sri.ai.expresso.api.Expression&nbsp;evidence,
                                           boolean&nbsp;useFactorization,
-                                          com.sri.ai.grinder.sgdpllt.api.Theory&nbsp;optionalTheory)</pre>
+                                          com.sri.ai.grinder.api.Theory&nbsp;optionalTheory)</pre>
 <div class="block">Constructs a solver for a factor graph and an evidence expression.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -299,7 +299,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>getTheory</h4>
-<pre>public&nbsp;com.sri.ai.grinder.sgdpllt.api.Theory&nbsp;getTheory()</pre>
+<pre>public&nbsp;com.sri.ai.grinder.api.Theory&nbsp;getTheory()</pre>
 </li>
 </ul>
 <a name="solve-com.sri.ai.expresso.api.Expression-">
@@ -353,7 +353,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <h4>simplify</h4>
 <pre>public&nbsp;com.sri.ai.expresso.api.Expression&nbsp;simplify(com.sri.ai.expresso.api.Expression&nbsp;expression)</pre>
 <div class="block">Simplifies an expression without requiring a context with all the type information (creating it from scratch);
- use <a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#simplify-com.sri.ai.expresso.api.Expression-com.sri.ai.grinder.sgdpllt.api.Context-"><code>simplify(Expression, Context)</code></a> instead for greater efficient if you already have such a context,
+ use <a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#simplify-com.sri.ai.expresso.api.Expression-com.sri.ai.grinder.api.Context-"><code>simplify(Expression, Context)</code></a> instead for greater efficient if you already have such a context,
  or if you are invoking this method multiple times (you can make the context only once with <a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#makeContextWithTypeInformation--"><code>makeContextWithTypeInformation()</code></a>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -362,14 +362,14 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="simplify-com.sri.ai.expresso.api.Expression-com.sri.ai.grinder.sgdpllt.api.Context-">
+<a name="simplify-com.sri.ai.expresso.api.Expression-com.sri.ai.grinder.api.Context-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>simplify</h4>
 <pre>public&nbsp;com.sri.ai.expresso.api.Expression&nbsp;simplify(com.sri.ai.expresso.api.Expression&nbsp;expression,
-                                                   com.sri.ai.grinder.sgdpllt.api.Context&nbsp;context)</pre>
+                                                   com.sri.ai.grinder.api.Context&nbsp;context)</pre>
 <div class="block">Simplifies an expression given context with all the type information already built-in
  (one can be built with <a href="../../../../../../com/sri/ai/praise/sgsolver/solver/InferenceForFactorGraphAndEvidence.html#makeContextWithTypeInformation--"><code>makeContextWithTypeInformation()</code></a>.</div>
 <dl>
@@ -386,7 +386,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockListLast">
 <li class="blockList">
 <h4>makeContextWithTypeInformation</h4>
-<pre>public&nbsp;com.sri.ai.grinder.sgdpllt.api.Context&nbsp;makeContextWithTypeInformation()</pre>
+<pre>public&nbsp;com.sri.ai.grinder.api.Context&nbsp;makeContextWithTypeInformation()</pre>
 <div class="block">Makes context with all the type information on this inferencer.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
