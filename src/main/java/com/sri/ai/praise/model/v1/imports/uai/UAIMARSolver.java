@@ -63,18 +63,18 @@ import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.sgdpllt.api.MultiIndexQuantifierEliminator;
-import com.sri.ai.grinder.sgdpllt.api.Theory;
-import com.sri.ai.grinder.sgdpllt.library.Equality;
-import com.sri.ai.grinder.sgdpllt.library.FunctorConstants;
-import com.sri.ai.grinder.sgdpllt.library.boole.And;
-import com.sri.ai.grinder.sgdpllt.library.boole.Not;
-import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
-import com.sri.ai.grinder.sgdpllt.library.number.Division;
-import com.sri.ai.grinder.sgdpllt.theory.compound.CompoundTheory;
-import com.sri.ai.grinder.sgdpllt.theory.differencearithmetic.DifferenceArithmeticTheory;
-import com.sri.ai.grinder.sgdpllt.theory.equality.EqualityTheory;
-import com.sri.ai.grinder.sgdpllt.theory.propositional.PropositionalTheory;
+import com.sri.ai.grinder.api.MultiQuantifierEliminator;
+import com.sri.ai.grinder.api.Theory;
+import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.boole.And;
+import com.sri.ai.grinder.library.boole.Not;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.number.Division;
+import com.sri.ai.grinder.theory.compound.CompoundTheory;
+import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
+import com.sri.ai.grinder.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.inference.FactorsAndTypes;
 import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
@@ -215,7 +215,7 @@ public class UAIMARSolver {
 		//
 		private InferenceForFactorGraphAndEvidence inferencer;
 		boolean interrupted = false;
-		private MultiIndexQuantifierEliminator genericTableSolver = null;
+		private MultiQuantifierEliminator genericTableSolver = null;
 		
 		SolverTask(GraphicalNetwork model, Map<Integer, Integer> evidence,  Map<Integer, List<Double>> solution, Theory theory) {
 			this.model    = model;
@@ -224,7 +224,7 @@ public class UAIMARSolver {
 			this.theory = theory;
 		}
 		
-		public MultiIndexQuantifierEliminator checkInterruption(MultiIndexQuantifierEliminator solver) {
+		public MultiQuantifierEliminator checkInterruption(MultiQuantifierEliminator solver) {
 			this.genericTableSolver = solver;
 			if (interrupted) {
 				interrupt();

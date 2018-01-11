@@ -48,9 +48,9 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.sgdpllt.library.FunctorConstants;
-import com.sri.ai.grinder.sgdpllt.library.set.Sets;
-import com.sri.ai.grinder.sgdpllt.library.set.extensional.ExtensionalSets;
+import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.set.Sets;
+import com.sri.ai.grinder.library.set.extensional.ExtensionalSets;
 
 /**
  * Sorts (from <a

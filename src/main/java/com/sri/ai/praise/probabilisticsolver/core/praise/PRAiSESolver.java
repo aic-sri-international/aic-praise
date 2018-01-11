@@ -46,8 +46,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.sgdpllt.library.boole.Not;
-import com.sri.ai.grinder.sgdpllt.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.library.boole.Not;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.application.praise.commandline.PRAiSE;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;

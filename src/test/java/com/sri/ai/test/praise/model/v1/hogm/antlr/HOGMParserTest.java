@@ -10,7 +10,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.sgdpllt.library.FunctorConstants;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.model.v1.HOGModelError;
 import com.sri.ai.praise.model.v1.HOGModelException;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
