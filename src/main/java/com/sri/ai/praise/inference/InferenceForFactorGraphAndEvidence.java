@@ -59,12 +59,12 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.MultiQuantifierEliminator;
 import com.sri.ai.grinder.api.Theory;
-import com.sri.ai.grinder.core.SGDPLLTUtil;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.core.solver.DefaultMultiQuantifierEliminator;
 import com.sri.ai.grinder.core.solver.SGVET;
 import com.sri.ai.grinder.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.group.SumProduct;
+import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.UniquelyNamedConstantIncludingBooleansAndNumbersPredicate;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
@@ -290,6 +290,6 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Context makeContextWithTypeInformation() {
-		return SGDPLLTUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		return GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 }
