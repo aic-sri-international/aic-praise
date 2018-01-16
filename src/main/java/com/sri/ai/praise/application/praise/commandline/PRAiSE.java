@@ -148,15 +148,20 @@ public class PRAiSE {
 
 	private void outputError(HOGMQueryError error) {
 		options.out.println("ERROR = " + error.getErrorMessage());
-		if (error.getThrowable() != null) {
+		if (options.showDebugOutput && error.getThrowable() != null) {
 			options.out.println("THROWABLE = ");
 			error.getThrowable().printStackTrace(options.out);
 		}
 	}
 
 	private void showUnexpectedException(Exception exception) {
-		System.err.println("Unexpected error:");
-		exception.printStackTrace();
+		if (options.showDebugOutput) {
+			System.err.println("Unexpected error:");
+			exception.printStackTrace();
+		}
+		else {
+			System.err.println(exception.getLocalizedMessage());
+		}
 	}
 
 	private void runAtTheEnd() {

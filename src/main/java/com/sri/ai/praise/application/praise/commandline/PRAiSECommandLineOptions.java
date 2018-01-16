@@ -4,34 +4,34 @@
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at:
- * 
+ *
  * http://opensource.org/licenses/BSD-3-Clause
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * 
+ *
  * Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * Neither the name of the aic-praise nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
@@ -73,23 +73,24 @@ import com.sri.ai.util.Util;
 
 /**
  * Command line interface for running {@link PRAiSESolver}.
- * 
+ *
  * @author oreilly, braz
  *
  */
 @Beta
 public class PRAiSECommandLineOptions {
-	
+
 	private static final String LOWER_CASE_PRAISE_FILE_DEFAULT_EXTENSION = PagedModelContainer.DEFAULT_CONTAINER_FILE_EXTENSION.toLowerCase();
 	private static final Charset FILE_CHARSET  = Charsets.UTF_8;
 	private static final ModelLanguage DEFAULT_LANGUAGE = ModelLanguage.HOGMv1;
-	
+
 	public List<ModelPage> modelPages;
 	public PrintStream   out = System.out;        // --output   (optional - 0 or 1)
 	public boolean showModel = false;
 	public boolean countSummations = false;
 	public boolean showSummations = false;
-	
+	public boolean showDebugOutput = false;
+
 	private List<File>    inputFiles      = new ArrayList<>(); // non option arguments (at least 1 required)
 	private ModelLanguage inputLanguage   = null;              // --language (optional - 0 or 1)
 	private List<String>  globalQueries   = new ArrayList<>(); // --query    (optional - 0 or more)
@@ -100,27 +101,29 @@ public class PRAiSECommandLineOptions {
 	private OptionSpec<String>  languageOptionSpec;
 	private OptionSpec<String>  queryOptionSpec;
 	private OptionSpec<File>    outputFileOptionSpec;
+	private OptionSpec<Void>    debugOptionSpec;
 	private OptionSpec<Void>    helpOptionSpec;
 	private String usage;
-	
+
 	private List<String> errors   = new ArrayList<>();
 	private List<String> warnings = new ArrayList<>();
 
 	public PRAiSECommandLineOptions(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
-		
-		parser = new OptionParser();		
-	
+
+		parser = new OptionParser();
+
 		languageOptionSpec   = parser.accepts("language",   "input model language (code), allowed values are " + getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
 		queryOptionSpec      = parser.accepts("query",      "query to run over all input models").withRequiredArg().ofType(String.class);
-							   parser.accepts("model",      "show solved model in output");	
+							   parser.accepts("model",      "show solved model in output");
 		                       parser.accepts("count",      "inform how many summations have been performed for each query");
 		                       parser.accepts("summations", "shows number of summations and integrations performed, if they are being counted (with --count)");
 		outputFileOptionSpec = parser.accepts("output",     "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
-		
+
+		debugOptionSpec = parser.accepts("debug", "Output detailed error messaages with stack traces when available");
 		helpOptionSpec = parser.accepts("help", "command line options help").forHelp();
-	
-		usage = 
-				"java " + PRAiSECommandLineOptions.class.getName() + " [--help] [--language language_code] [--query global_query_string] [--output output_file_name] inputModelFile ..."
+
+		usage =
+				"java " + PRAiSECommandLineOptions.class.getName() + " [--help] [--language language_code] [--query global_query_string] [--output output_file_name] [--debug] inputModelFile ..."
 				+ "\n\n"
 				+ "This command reads a set of models from input files and executes a set of queries on each of them.\n\n"
 				+ "The models are obtained in the following manner:\n"
@@ -132,15 +135,16 @@ public class PRAiSECommandLineOptions {
 				+ "- queries specified with --query option will apply to all models from all .praise files and to the model from combined plain text input files.\n\n"
 				+ "Evidence can be encoded as deterministic statements (see examples in PRAiSE editor and solver).\n"
 						;
-		
+
 		setupParameters(args);
-		
+
 		outputWarningsAndErrors();
 	}
 
 	private void setupParameters(String[] args) throws IOException, FileNotFoundException, UnsupportedEncodingException {
 		try {
 			parseArguments(args);
+			setDebugOutput();
 			setRecordingOfSummations();
 			showHelpMessageAndExitIfRequested();
 			setGlobalQueries();
@@ -157,7 +161,11 @@ public class PRAiSECommandLineOptions {
 	private void parseArguments(String[] args) {
 		options = parser.parse(args);
 	}
-	
+
+	private void setDebugOutput() {
+		showDebugOutput = options.has(debugOptionSpec);
+	}
+
 	private void setRecordingOfSummations() {
 		showModel = options.has("model");
 		countSummations = options.has("count");
@@ -256,13 +264,13 @@ public class PRAiSECommandLineOptions {
 			out = new PrintStream(outFile, FILE_CHARSET.name());
 		}
 	}
-	
+
 	private void outputWarningsAndErrors() throws IOException {
-		
+
 		if (warnings.size() > 0) {
 			warnings.forEach(warning -> System.err.println("WARNING: "+ warning));
 		}
-		
+
 		if (errors.size() > 0) {
 			errors.forEach(error -> System.err.println("ERROR: "+ error));
 			System.err.println(usage);
@@ -311,7 +319,7 @@ public class PRAiSECommandLineOptions {
 	}
 
 	private ModelPage makeModelPageFromNonContainerFiles(List<File> nonContainerFiles) {
-		String unionModel = 
+		String unionModel =
 				nonContainerFiles
 				.stream()
 				.map(file -> Util.getFileContent(file))
@@ -328,7 +336,7 @@ public class PRAiSECommandLineOptions {
 		String result = join(mapIntoList(ModelLanguage.values(), ModelLanguage::getCode));
 		return result;
 	}
-	
+
 	private static ModelLanguage findLanguageModel(String languageCode) {
 		List<ModelLanguage> modelLanguages = Arrays.asList(ModelLanguage.values());
 		ModelLanguage result = getFirstSatisfyingPredicateOrNull(modelLanguages, hasLanguageCode(languageCode));
@@ -343,9 +351,9 @@ public class PRAiSECommandLineOptions {
 		boolean result = modelLanguage.getCode().toLowerCase().equals(languageCode.toLowerCase());
 		return result;
 	}
-	
+
 	private ModelLanguage guessLanguageModel() {
-		ModelLanguage result = 
+		ModelLanguage result =
 				getFirstNonNullResultOrNull(
 						() -> getLanguageMatchingExtensionOfSomeInputFile(),
 						() -> getLanguageFromInputFilesWithDefaultPRAiSEFileExtension(),
@@ -386,10 +394,10 @@ public class PRAiSECommandLineOptions {
 		return result;
 	}
 
-	private static java.util.function.Predicate<? super File> fileHasPRAiSEFileDefaultExtension = 
+	private static java.util.function.Predicate<? super File> fileHasPRAiSEFileDefaultExtension =
 			file -> lowerCaseName(file).endsWith(LOWER_CASE_PRAISE_FILE_DEFAULT_EXTENSION);
-			
-	private static Function<? super File, ? extends ModelLanguage> fromPRAiSEFileToLanguage = 
+
+	private static Function<? super File, ? extends ModelLanguage> fromPRAiSEFileToLanguage =
 			praiseFile -> getLanguageFromPRAiSEFile(praiseFile);
 
 	private static ModelLanguage getLanguageFromPRAiSEFile(File praiseFile) {
