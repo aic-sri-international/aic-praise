@@ -155,7 +155,7 @@ public class PRAiSE {
 	}
 
 	private void showUnexpectedException(Exception exception) {
-		if (options.showDebugOutput) {
+		if (options != null && options.showDebugOutput) {
 			System.err.println("Unexpected error:");
 			exception.printStackTrace();
 		}
@@ -165,9 +165,11 @@ public class PRAiSE {
 	}
 
 	private void runAtTheEnd() {
-		options.out.flush();
-		if (options.out != System.out) {
-			options.out.close();
+		if (options != null && options.out != null) {
+			options.out.flush();
+			if (options.out != System.out) {
+				options.out.close();
+			}
 		}
 	}
 }
