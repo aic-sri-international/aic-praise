@@ -78,6 +78,7 @@ import com.sri.ai.util.Util;
 
 /**
  * A solver for factor graphs using {@link SGVET}.
+ * 
  * @author braz
  *
  */
