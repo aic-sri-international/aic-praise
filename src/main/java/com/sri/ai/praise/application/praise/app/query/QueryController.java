@@ -264,8 +264,9 @@ public class QueryController {
 	}
 	
 	private void displayQueryAnswer(String query, Expression result, ParsedHOGModel parsedModel, long millisecondsToCompute) {
-		String answer = "P("+ query + " | ... ) = "+result;
-		String title  = "Query took " + Util.toHoursMinutesAndSecondsString(millisecondsToCompute) + " to compute '" + answer + "'";
+		String answer = "P(" + query + " | ... ) = " + result;
+		String timeTaken = Util.toHoursMinutesAndSecondsString(millisecondsToCompute);
+		String title  = "Query took " + timeTaken + " to compute '" + answer + "'";
 		HOGMCodeArea resultCodeArea = new HOGMCodeArea(false);
 		 
 		resultCodeArea.setText(answer);

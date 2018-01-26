@@ -215,8 +215,8 @@ public class PRAiSEController {
 		int oldRoundingMode      = Rational.setToStringDotRoundingMode(_displayRoundingMode.getValue());
 		int oldDisplayPrecision  = SyntaxTrees.setNumericDisplayPrecision(_displayPrecision.get());
 		boolean oldDisplayExact  = SyntaxTrees.setDisplayNumericsExactly(_isDisplayExact.getValue());
-		int oldScientificGreater = SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces(_displayScientificGreater.get());
-		int oldScientificAfter   = SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(_displayScientificAfter.get());
+		int oldScientificGreater = SyntaxTrees.setDisplayScientificIfNumberOfIntegerPlacesIsGreaterThan(_displayScientificGreater.get());
+		int oldScientificAfter   = SyntaxTrees.setDisplayScientificIfNumberOfDecimalPlacesIsGreaterThan(_displayScientificAfter.get());
 		
 		try {
 			computeCallback.run();
@@ -228,8 +228,8 @@ public class PRAiSEController {
 			Rational.setToStringDotRoundingMode(oldRoundingMode);
 			SyntaxTrees.setNumericDisplayPrecision(oldDisplayPrecision);
 			SyntaxTrees.setDisplayNumericsExactly(oldDisplayExact);
-			SyntaxTrees.setDisplayScientificGreaterNIntegerPlaces(oldScientificGreater);
-			SyntaxTrees.setDisplayScientificAfterNDecimalPlaces(oldScientificAfter);
+			SyntaxTrees.setDisplayScientificIfNumberOfIntegerPlacesIsGreaterThan(oldScientificGreater);
+			SyntaxTrees.setDisplayScientificIfNumberOfDecimalPlacesIsGreaterThan(oldScientificAfter);
 		}
 	}
 
