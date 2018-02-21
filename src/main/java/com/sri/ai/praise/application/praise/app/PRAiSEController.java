@@ -213,10 +213,10 @@ public class PRAiSEController {
 	
 	public static void computeExpressionWithDesiredPrecision(Runnable computeCallback) {				
 		int oldRoundingMode      = Rational.setToStringDotRoundingMode(_displayRoundingMode.getValue());
-		int oldDisplayPrecision  = ExpressoConfiguration.setDisplayNumericApproximationPrecisionForSymbols(_displayPrecision.get());
+		int oldDisplayPrecision  = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(_displayPrecision.get());
 		boolean oldDisplayExact  = ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(_isDisplayExact.getValue());
-		int oldScientificGreater = ExpressoConfiguration.setDisplayScientificGreaterNIntegerPlaces(_displayScientificGreater.get());
-		int oldScientificAfter   = ExpressoConfiguration.setDisplayScientificAfterNDecimalPlaces(_displayScientificAfter.get());
+		int oldScientificGreater = ExpressoConfiguration.setDisplayNumericsMostIntegerPlacesBeforeSwitchingToScientificNotation(_displayScientificGreater.get());
+		int oldScientificAfter   = ExpressoConfiguration.setDisplayNumericsGreatestInitialNonZeroDecimalPlacePositionBeforeSwitchingToScientificNotation(_displayScientificAfter.get());
 		
 		try {
 			computeCallback.run();
@@ -226,10 +226,10 @@ public class PRAiSEController {
 		}
 		finally {
 			Rational.setToStringDotRoundingMode(oldRoundingMode);
-			ExpressoConfiguration.setDisplayNumericApproximationPrecisionForSymbols(oldDisplayPrecision);
+			ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(oldDisplayPrecision);
 			ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(oldDisplayExact);
-			ExpressoConfiguration.setDisplayScientificGreaterNIntegerPlaces(oldScientificGreater);
-			ExpressoConfiguration.setDisplayScientificAfterNDecimalPlaces(oldScientificAfter);
+			ExpressoConfiguration.setDisplayNumericsMostIntegerPlacesBeforeSwitchingToScientificNotation(oldScientificGreater);
+			ExpressoConfiguration.setDisplayNumericsGreatestInitialNonZeroDecimalPlacePositionBeforeSwitchingToScientificNotation(oldScientificAfter);
 		}
 	}
 
@@ -635,15 +635,15 @@ public class PRAiSEController {
 		VBox configureMenu = new VBox(2);
 		configureMenu.setPadding(new Insets(3,3,3,3));
 		
+		displayExactCheckBox.setSelected(_isDisplayExact.get());
+		displayExactCheckBox.setText("Display numbers exactly (using fractions if needed).");
+		_isDisplayExact.bind(displayExactCheckBox.selectedProperty());
+		
 		HBox displayPrecisionHBox = newButtonHBox();
 		displayPrecisionSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 80, _displayPrecision.get()));
 		displayPrecisionSpinner.setPrefWidth(60);
 		_displayPrecision.bind(displayPrecisionSpinner.valueProperty());
-		displayPrecisionHBox.getChildren().addAll(new Label("Display Numeric Precision:"), displayPrecisionSpinner);
-		
-		displayExactCheckBox.setSelected(_isDisplayExact.get());
-		displayExactCheckBox.setText("Display Numerics Exactly");
-		_isDisplayExact.bind(displayExactCheckBox.selectedProperty());
+		displayPrecisionHBox.getChildren().addAll(new Label("If approximating, use up to "), displayPrecisionSpinner, new Label(" decimal places; otherwise, resort to scientific notation."));
 		
 		HBox displayScientificHBox = newButtonHBox();
 		displayScientificGreater.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 80, _displayScientificGreater.get()));
@@ -652,18 +652,18 @@ public class PRAiSEController {
 		displayScientificAfter.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 80, _displayScientificAfter.get()));
 		displayScientificAfter.setPrefWidth(60);
 		_displayScientificAfter.bind(displayScientificAfter.valueProperty());
-		displayScientificHBox.getChildren().addAll(new Label("Use Scientific When Outside Range:"), displayScientificGreater, new Label("."), displayScientificAfter);
+		displayScientificHBox.getChildren().addAll(new Label("Also use scientific notation if number has more than "), displayScientificGreater, new Label(" integer places or first non-zero decimal place occurs after the "), displayScientificAfter, new Label("-th position."));
 
 		debugModeCheckBox.setSelected(_inDebugMode.get());
-		debugModeCheckBox.setText("In Debug Mode");
+		debugModeCheckBox.setText("Run in debug mode.");
 		_inDebugMode.bind(debugModeCheckBox.selectedProperty());
 		
 		configureMenu.getChildren().addAll(
-						displayPrecisionHBox,						
-						displayScientificHBox,
-						displayExactCheckBox,
-						new Separator(Orientation.HORIZONTAL),
-						debugModeCheckBox
+				displayExactCheckBox,
+				displayPrecisionHBox,						
+				displayScientificHBox,
+				new Separator(Orientation.HORIZONTAL),
+				debugModeCheckBox
 		);
 		
 		return configureMenu;

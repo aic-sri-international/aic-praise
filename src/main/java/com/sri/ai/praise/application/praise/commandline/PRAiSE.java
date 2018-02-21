@@ -74,7 +74,7 @@ public class PRAiSE {
 
 	public void run(String[] args) {
 		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
-		ExpressoConfiguration.setDisplayNumericApproximationPrecisionForSymbols(3);
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
 		try {
 			parseArguments(args);
 			solveAllModels();
