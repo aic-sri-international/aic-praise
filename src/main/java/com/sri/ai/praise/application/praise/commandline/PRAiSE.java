@@ -45,7 +45,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.helper.SyntaxTrees;
+import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.grinder.core.solver.Integration;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.praise.inference.HOGMQueryError;
@@ -73,8 +73,8 @@ public class PRAiSE {
 	}
 
 	public void run(String[] args) {
-		SyntaxTrees.setDisplayNumericsExactly(false);
-		SyntaxTrees.setNumericDisplayPrecision(3);
+		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
+		ExpressoConfiguration.setDisplayNumericApproximationPrecisionForSymbols(3);
 		try {
 			parseArguments(args);
 			solveAllModels();

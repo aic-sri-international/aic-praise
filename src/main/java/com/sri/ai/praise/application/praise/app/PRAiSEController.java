@@ -83,7 +83,7 @@ import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.helper.SyntaxTrees;
+import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
 import com.sri.ai.praise.application.praise.app.model.ExamplePages;
 import com.sri.ai.praise.application.praise.app.perspective.HOGMPerspective;
@@ -213,10 +213,10 @@ public class PRAiSEController {
 	
 	public static void computeExpressionWithDesiredPrecision(Runnable computeCallback) {				
 		int oldRoundingMode      = Rational.setToStringDotRoundingMode(_displayRoundingMode.getValue());
-		int oldDisplayPrecision  = SyntaxTrees.setNumericDisplayPrecision(_displayPrecision.get());
-		boolean oldDisplayExact  = SyntaxTrees.setDisplayNumericsExactly(_isDisplayExact.getValue());
-		int oldScientificGreater = SyntaxTrees.setDisplayScientificIfNumberOfIntegerPlacesIsGreaterThan(_displayScientificGreater.get());
-		int oldScientificAfter   = SyntaxTrees.setDisplayScientificIfNumberOfDecimalPlacesIsGreaterThan(_displayScientificAfter.get());
+		int oldDisplayPrecision  = ExpressoConfiguration.setDisplayNumericApproximationPrecisionForSymbols(_displayPrecision.get());
+		boolean oldDisplayExact  = ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(_isDisplayExact.getValue());
+		int oldScientificGreater = ExpressoConfiguration.setDisplayScientificGreaterNIntegerPlaces(_displayScientificGreater.get());
+		int oldScientificAfter   = ExpressoConfiguration.setDisplayScientificAfterNDecimalPlaces(_displayScientificAfter.get());
 		
 		try {
 			computeCallback.run();
@@ -226,10 +226,10 @@ public class PRAiSEController {
 		}
 		finally {
 			Rational.setToStringDotRoundingMode(oldRoundingMode);
-			SyntaxTrees.setNumericDisplayPrecision(oldDisplayPrecision);
-			SyntaxTrees.setDisplayNumericsExactly(oldDisplayExact);
-			SyntaxTrees.setDisplayScientificIfNumberOfIntegerPlacesIsGreaterThan(oldScientificGreater);
-			SyntaxTrees.setDisplayScientificIfNumberOfDecimalPlacesIsGreaterThan(oldScientificAfter);
+			ExpressoConfiguration.setDisplayNumericApproximationPrecisionForSymbols(oldDisplayPrecision);
+			ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(oldDisplayExact);
+			ExpressoConfiguration.setDisplayScientificGreaterNIntegerPlaces(oldScientificGreater);
+			ExpressoConfiguration.setDisplayScientificAfterNDecimalPlaces(oldScientificAfter);
 		}
 	}
 
