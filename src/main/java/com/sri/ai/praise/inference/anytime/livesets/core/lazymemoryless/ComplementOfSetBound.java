@@ -35,12 +35,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime;
+package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
-import java.util.Iterator;
+import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
-import com.sri.ai.grinder.library.bounds.Bound;
 
-public interface BoundedMessageIterator extends Iterator<Bound> {
-	Bound getBound();
+public class ComplementOfSetBound<T> implements LiveSet<T> {
+	
+	private LiveSet<T> setBound;
+	
+	public ComplementOfSetBound(LiveSet<T> setBound) {
+		this.setBound = setBound;
+	}
+	
+	public boolean contains(T element) {
+		boolean result = ! setBound.contains(element);
+		return result;
+	}
+	
+	public static <T> LiveSet<T> complement(LiveSet<T> setBound) {
+		return new ComplementOfSetBound<>(setBound); 
+	}
 }

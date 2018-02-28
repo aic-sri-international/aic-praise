@@ -37,5 +37,8 @@
  */
 package com.sri.ai.praise.inference.anytime;
 
-public interface Factor {
+public interface Factor extends Node {
+	
+	boolean contains(Variable variable);
+	
 }

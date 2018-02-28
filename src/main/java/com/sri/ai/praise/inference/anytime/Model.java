@@ -35,35 +35,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.setbound;
+package com.sri.ai.praise.inference.anytime;
 
-import static com.sri.ai.util.Util.list;
+import java.util.Collection;
 
-import java.util.List;
-
-
-public class IntersectionOfSetBounds<T> implements SetBound<T> {
-	
-	private List<SetBound<T>> setBounds;
-	
-	public IntersectionOfSetBounds(List<SetBound<T>> setBounds) {
-		this.setBounds = setBounds;
-	}
-	
-	public boolean contains(T element) {
-		for (SetBound<T> setBound : setBounds) {
-			if ( ! setBound.contains(element)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	public static <T> SetBound<T> intersection(List<SetBound<T>> setBounds) {
-		return new IntersectionOfSetBounds<>(setBounds); 
-	}
-	
-	public static <T> SetBound<T> intersection(SetBound<T> setBound1, SetBound<T> setBound2) {
-		return new IntersectionOfSetBounds<>(list(setBound1, setBound2)); 
-	}
+public interface Model extends Collection<Factor> {
 }

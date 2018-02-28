@@ -35,24 +35,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.setbound;
+package com.sri.ai.praise.inference.anytime;
 
-import java.util.Collection;
+import java.util.List;
 
-public class ExtensionalSetBound<T> implements SetBound<T> {
+public interface ExactBP extends BoundedMessageIterator {
 	
-	private Collection<T> boundElements;
+	Node getRoot();
 	
-	public ExtensionalSetBound(Collection<T> boundElements) {
-		this.boundElements = boundElements;
-	}
+	List<Factor> getFactors();
 	
-	public boolean contains(T element) {
-		boolean result = boundElements.contains(element);
-		return result;
-	}
-	
-	public static <T> ExtensionalSetBound<T> setBound(Collection<T> elements) {
-		return new ExtensionalSetBound<>(elements);
-	}
 }

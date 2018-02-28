@@ -35,14 +35,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.setbound;
+package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
-public class SubtractionOfSetBounds<T> implements SetBound<T> {
+import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
+
+public class SubtractionOfSetBounds<T> implements LiveSet<T> {
 	
-	private SetBound<T> setBound1;
-	private SetBound<T> setBound2;
+	private LiveSet<T> setBound1;
+	private LiveSet<T> setBound2;
 	
-	public SubtractionOfSetBounds(SetBound<T> setBound1, SetBound<T> setBound2) {
+	public SubtractionOfSetBounds(LiveSet<T> setBound1, LiveSet<T> setBound2) {
 		this.setBound1 = setBound1;
 		this.setBound2 = setBound2;
 	}
@@ -55,7 +57,7 @@ public class SubtractionOfSetBounds<T> implements SetBound<T> {
 		return result;
 	}
 	
-	public static <T> SetBound<T> minus(SetBound<T> setBound1, SetBound<T> setBound2) {
+	public static <T> LiveSet<T> minus(LiveSet<T> setBound1, LiveSet<T> setBound2) {
 		return new SubtractionOfSetBounds<>(setBound1, setBound2); 
 	}
 }

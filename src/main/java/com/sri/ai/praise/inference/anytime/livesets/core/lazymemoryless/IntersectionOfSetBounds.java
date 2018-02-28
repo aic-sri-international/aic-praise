@@ -35,12 +35,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime;
+package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
-import java.util.Iterator;
+import static com.sri.ai.util.Util.list;
 
-import com.sri.ai.grinder.library.bounds.Bound;
+import java.util.List;
 
-public interface BoundedMessageIterator extends Iterator<Bound> {
-	Bound getBound();
+import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
+
+
+public class IntersectionOfSetBounds<T> implements LiveSet<T> {
+	
+	private List<? extends LiveSet<T>> setBounds;
+	
+	public IntersectionOfSetBounds(List<? extends LiveSet<T>> setBounds) {
+		this.setBounds = setBounds;
+	}
+	
+	public boolean contains(T element) {
+		for (LiveSet<T> setBound : setBounds) {
+			if ( ! setBound.contains(element)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public static <T> LiveSet<T> intersection(List<? extends LiveSet<T>> setBounds) {
+		return new IntersectionOfSetBounds<>(setBounds); 
+	}
+	
+	public static <T> LiveSet<T> intersection(LiveSet<T> setBound1, LiveSet<T> setBound2) {
+		return new IntersectionOfSetBounds<>(list(setBound1, setBound2)); 
+	}
 }

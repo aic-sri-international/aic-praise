@@ -35,37 +35,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.setbound;
+package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
-import static com.sri.ai.praise.inference.anytime.setbound.ExtensionalSetBound.setBound;
+import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.ExtensionalSetBound.liveSet;
 
-import java.util.Collection;
+import java.util.List;
 
-public interface SetBound<T> {
+import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
+
+
+public class RedirectingLiveSet<T> implements LiveSet<T> {
 	
-	boolean contains(T element);
+	private LiveSet<T> setBound;
 	
-	default SetBound<T> minus(SetBound<T> another) {
-		return SubtractionOfSetBounds.minus(this, another);
+	public RedirectingLiveSet(LiveSet<T> setBound) {
+		this.setBound = setBound;
 	}
 	
-	default SetBound<T> minus(Collection<T> elements) {
-		return SubtractionOfSetBounds.minus(this, setBound(elements));
+	public RedirectingLiveSet(List<T> elements) {
+		this(liveSet(elements));
 	}
 	
-	default SetBound<T> union(SetBound<T> another) {
-		return UnionOfSetBounds.union(this, another);
+	public void redirectTo(LiveSet<T> setBound) {
+		this.setBound = setBound;
 	}
 	
-	default SetBound<T> union(Collection<T> elements) {
-		return UnionOfSetBounds.union(this, setBound(elements));
+	public boolean contains(T element) {
+		boolean result = setBound.contains(element);
+		return result;
 	}
 	
-	default SetBound<T> intersection(SetBound<T> another) {
-		return IntersectionOfSetBounds.intersection(this, another);
-	}
-	
-	default SetBound<T> intersection(Collection<T> elements) {
-		return IntersectionOfSetBounds.intersection(this, setBound(elements));
+	public static <T> RedirectingLiveSet<T> redirectingTo(LiveSet<T> liveSet) {
+		return new RedirectingLiveSet<T>(liveSet); 
 	}
 }

@@ -35,27 +35,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.setbound;
+package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
+import static com.sri.ai.util.Util.list;
 
-public class RedirectingSetBound<T> implements SetBound<T> {
+import java.util.Collection;
+
+import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
+
+public class ExtensionalSetBound<T> implements LiveSet<T> {
 	
-	private SetBound<T> setBound;
+	private Collection<T> boundElements;
 	
-	public RedirectingSetBound(SetBound<T> setBound) {
-		this.setBound = setBound;
-	}
-	
-	public void redirectTo(SetBound<T> setBound) {
-		this.setBound = setBound;
+	public ExtensionalSetBound(Collection<T> boundElements) {
+		this.boundElements = boundElements;
 	}
 	
 	public boolean contains(T element) {
-		boolean result = setBound.contains(element);
+		boolean result = boundElements.contains(element);
 		return result;
 	}
 	
-	public static <T> SetBound<T> redirectingTo(SetBound<T> setBound) {
-		return new RedirectingSetBound<>(setBound); 
+	public static <T> ExtensionalSetBound<T> liveSet(Collection<T> elements) {
+		return new ExtensionalSetBound<>(elements);
+	}
+	
+	public static <T> ExtensionalSetBound<T> liveSet(T element) {
+		return new ExtensionalSetBound<>(list(element));
 	}
 }

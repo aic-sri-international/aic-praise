@@ -37,42 +37,56 @@
  */
 package com.sri.ai.praise.inference.anytime;
 
-import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.collectToList;
+import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.grinder.library.bounds.Bound;
-import com.sri.ai.praise.inference.anytime.setbound.RedirectingSetBound;
+import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.RedirectingLiveSet;
 
 public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	
-	private Factor factor;
-	
-	public ExactBPFromFactorToVariable() {
-		super();
-	}
-
-	@Override
-	protected List<Factor> factorsAtRoot() {
-		return list(factor);
+	public ExactBPFromFactorToVariable(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors) {
+		super(root, parent, excludedFactors, includedFactors);
 	}
 
 	@Override
 	public Bound recomputeValueAfterHavingRefinedArgument(Iterator<Bound> argumentIterator) {
-		// sum_{Var(phi) \ V} phi prod_sub bound_sub
-		return null;
+		List<Variable> subsVariables = getSubsVariables();
+		List<Variable> variablesToBeSummedOut = determineVariablesToBeSummedOut(subsVariables);
+		List<Bound> subsBounds = getSubsBounds();
+		Bound result = sumOut(variablesToBeSummedOut, getFactors(), subsVariables, subsBounds);
+		return result;
 	}
 
-	@Override
-	protected RedirectingSetBound<Factor> makeInitialFactorsLowerBound() {
+	private List<Variable> getSubsVariables() {
+		return mapIntoList(getSubs(), sub -> (Variable) sub.getRoot());
+	}
+
+	private List<Bound> getSubsBounds() {
+		return mapIntoList(subs, ExactBP::getBound);
+	}
+
+	private List<Variable> determineVariablesToBeSummedOut(List<Variable> subsVariables) {
+		List<Variable> result = collectToList(subsVariables, v -> notInExcludedFactors(v));
+		return result;
+	}
+
+	private boolean notInExcludedFactors(Variable variable) {
+		boolean result = ! excludedFactors.thereIsElementSatisfying(f -> f.contains(variable));
+		return result;
+	}
+
+	private Bound sumOut(List<Variable> variablesToBeSummedOut, List<Factor> factors, List<Variable> subsVariables, List<Bound> subsBounds) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	protected RedirectingSetBound<Factor> makeInitialFactorsUpperBound() {
-		// TODO Auto-generated method stub
-		return null;
+	protected AbstractExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
+		return new ExactBPFromVariableToFactor(subRoot, this.root, subExcludedFactors, subIncludedFactors);
 	}
 }

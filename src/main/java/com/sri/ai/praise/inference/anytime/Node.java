@@ -35,23 +35,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.setbound;
+package com.sri.ai.praise.inference.anytime;
 
+import java.util.Iterator;
+import java.util.List;
 
-public class ComplementOfSetBound<T> implements SetBound<T> {
+import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.RedirectingLiveSet;
+
+public interface Node {
+
+	Iterator<Node> getNeighbors();
 	
-	private SetBound<T> setBound;
+	List<Factor> getFactors();
 	
-	public ComplementOfSetBound(SetBound<T> setBound) {
-		this.setBound = setBound;
-	}
-	
-	public boolean contains(T element) {
-		boolean result = ! setBound.contains(element);
-		return result;
-	}
-	
-	public static <T> SetBound<T> complement(SetBound<T> setBound) {
-		return new ComplementOfSetBound<>(setBound); 
-	}
+	RedirectingLiveSet<Factor> makeInitialIncludedFactors();
 }

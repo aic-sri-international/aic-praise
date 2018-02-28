@@ -35,44 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.setbound;
+package com.sri.ai.praise.inference.anytime;
 
-import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.listWithoutElementAt;
-
-import java.util.List;
-
-import com.sri.ai.praise.inference.anytime.Factor;
-
-
-public class UnionOfSetBounds<T> implements SetBound<T> {
-	
-	private List<SetBound<T>> setBounds;
-	
-	public UnionOfSetBounds(List<SetBound<T>> setBounds) {
-		this.setBounds = setBounds;
-	}
-	
-	public boolean contains(T element) {
-		for (SetBound<T> setBound : setBounds) {
-			if (setBound.contains(element)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public static SetBound<Factor> unionOfAllButTheOneAt(List<SetBound<Factor>> bounds, int indexOfExcluded) {
-		List<SetBound<Factor>> siblingsLowerBounds = listWithoutElementAt(bounds, indexOfExcluded);
-		SetBound<Factor> union = union(siblingsLowerBounds);
-		return union;
-	}
-
-	public static <T> SetBound<T> union(List<SetBound<T>> setBounds) {
-		return new UnionOfSetBounds<>(setBounds); 
-	}
-	
-	public static <T> SetBound<T> union(SetBound<T> setBound1, SetBound<T> setBound2) {
-		return new UnionOfSetBounds<>(list(setBound1, setBound2)); 
-	}
+public interface Variable extends Node {
 }

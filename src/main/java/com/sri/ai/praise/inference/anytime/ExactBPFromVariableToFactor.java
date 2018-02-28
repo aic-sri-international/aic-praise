@@ -37,23 +37,16 @@
  */
 package com.sri.ai.praise.inference.anytime;
 
-import static java.util.Collections.emptyList;
-
 import java.util.Iterator;
-import java.util.List;
 
 import com.sri.ai.grinder.library.bounds.Bound;
-import com.sri.ai.praise.inference.anytime.setbound.RedirectingSetBound;
+import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.RedirectingLiveSet;
 
 public class ExactBPFromVariableToFactor extends AbstractExactBP {
 	
-	public ExactBPFromVariableToFactor() {
-		super();
-	}
-
-	@Override
-	protected List<Factor> factorsAtRoot() {
-		return emptyList();
+	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors) {
+		super(root, parent, excludedFactors, includedFactors);
 	}
 
 	@Override
@@ -63,14 +56,12 @@ public class ExactBPFromVariableToFactor extends AbstractExactBP {
 	}
 
 	@Override
-	protected RedirectingSetBound<Factor> makeInitialFactorsLowerBound() {
-		// TODO Auto-generated method stub
-		return null;
+	protected AbstractExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
+		return new ExactBPFromFactorToVariable(subRoot, this.root, subExcludedFactors, subIncludedFactors);
 	}
-
+	
 	@Override
-	protected RedirectingSetBound<Factor> makeInitialFactorsUpperBound() {
-		// TODO Auto-generated method stub
-		return null;
+	public Variable getRoot() {
+		return (Variable) super.getRoot();
 	}
 }
