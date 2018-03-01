@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.inference.anytime.treecomputation.anytime.api;
 
+import com.sri.ai.praise.inference.anytime.anytime.api.Anytime;
+import com.sri.ai.praise.inference.anytime.anytime.api.Approximation;
 import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
 
 
@@ -45,5 +47,12 @@ import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
  *
  * @param <T>
  */
-public interface AnytimeTreeComputation<T> extends Anytime<T>, TreeComputation<Bound<T>> {
+public interface AnytimeTreeComputation<T> extends Anytime<T>, TreeComputation<Approximation<T>> {
+
+	default Approximation<T> apply() {
+		// We can perform apply in the {@link Anytime} way, or the {@link TreeComputation} way,
+		// so we have to define it here in order to eliminate the ambiguity, or the compiler will complain.
+		// The latter is more efficient if all we want is the final result.
+		return TreeComputation.super.apply();
+	}
 }

@@ -41,12 +41,14 @@ import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import com.google.common.base.Function;
-import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.Anytime;
+import com.sri.ai.praise.inference.anytime.anytime.api.Anytime;
+import com.sri.ai.praise.inference.anytime.anytime.api.Approximation;
 import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.AnytimeTreeComputation;
-import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.Bound;
+import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.ApproximationScheme;
 import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
+import com.sri.ai.util.base.NullaryFunction;
 
 /**
  * @author braz
@@ -55,45 +57,33 @@ import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
  */
 public abstract class AbstractAnytimeTreeComputation<T> implements AnytimeTreeComputation<T> {
 	
-	protected abstract Bound<T> makeInitialBound();
-
-	protected abstract AnytimeTreeComputation<T> makeAnytimeVersionOfBaseSub(TreeComputation<T> baseSub);
+	protected abstract Anytime<T> makeAnytimeVersion(NullaryFunction<T> baseSub);
 
 	protected abstract Anytime<T> pickNextSubWithNext();
 
-	protected abstract Bound<T> computeBoundFromSubsBoundsUsingBaseComputation(
-			ArrayList<? extends Bound<T>> subsBounds, 
-			Function<ArrayList<? extends T>, T> computeBaseValueFromBaseSubsValues);
-
 	private TreeComputation<T> base;
-	private ArrayList<? extends AnytimeTreeComputation<T>> subs;
-	private Bound<T> currentBound;
+	private ApproximationScheme<T> approximationScheme;
+	private ArrayList<? extends Anytime<T>> subs;
+	private Approximation<T> currentApproximation;
 	
-	public AbstractAnytimeTreeComputation(TreeComputation<T> base) {
+	public AbstractAnytimeTreeComputation(TreeComputation<T> base, ApproximationScheme<T> approximationScheme) {
 		this.base = base;
+		this.approximationScheme = approximationScheme;
 		this.subs = null;
-		this.currentBound = makeInitialBound();
+		this.currentApproximation = approximationScheme.totalIgnorance();
 	}
 	
 	public TreeComputation<T> getBase() {
 		return base;
 	}
 
-	public Bound<T> getCurrentBound() {
-		return currentBound;
+	public Approximation<T> getCurrentApproximation() {
+		return currentApproximation;
 	}
 
-	public Bound<T> apply() {
-		while (hasNext()) {
-			next();
-		}
-		return getCurrentBound();
-	}
-	
 	@Override
-	public ArrayList<AnytimeTreeComputation<T>> getSubs() {
-		ArrayList<AnytimeTreeComputation<T>> result = 
-				mapIntoArrayList(base.getSubs(), s -> makeAnytimeVersionOfBaseSub(s));
+	public ArrayList<Anytime<T>> getSubs() {
+		ArrayList<Anytime<T>> result = mapIntoArrayList(base.getSubs(), this::makeAnytimeVersion);
 		return result;
 	}
 
@@ -104,20 +94,18 @@ public abstract class AbstractAnytimeTreeComputation<T> implements AnytimeTreeCo
 	}
 	
 	@Override
-	public Bound<T> next() {
+	public Approximation<T> next() {
 		Anytime<T> nextSub = pickNextSubWithNext();
 		myAssert(nextSub != null, () -> this.getClass() + ": next invoked when hasNext is false");
 		nextSub.next();
-		ArrayList<Bound<T>> subsBounds = mapIntoArrayList(subs, AnytimeTreeComputation::getCurrentBound); 
-		currentBound = computeValueFromSubsValues(subsBounds);
-		return currentBound;
+		List<Approximation<T>> subsApproximations = mapIntoArrayList(subs, Anytime::getCurrentApproximation); 
+		currentApproximation = function(subsApproximations);
+		return currentApproximation;
 	}
 
 	@Override
-	public Bound<T> computeValueFromSubsValues(ArrayList<? extends Bound<T>> subsBounds) {
-		Function<ArrayList<? extends T>, T>
-		computeBaseValueFromBaseSubsValues = baseSubsValues -> base.computeValueFromSubsValues(baseSubsValues);
-		Bound<T> bound = computeBoundFromSubsBoundsUsingBaseComputation(subsBounds, computeBaseValueFromBaseSubsValues);
-		return bound;
+	public Approximation<T> function(List<Approximation<T>> subsApproximations) {
+		Approximation<T> approximation = approximationScheme.apply(base::function, subsApproximations);
+		return approximation;
 	}
 }

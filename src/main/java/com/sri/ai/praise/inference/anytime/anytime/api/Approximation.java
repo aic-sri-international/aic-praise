@@ -35,9 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.treecomputation.anytime.api;
-
-import java.util.Iterator;
+package com.sri.ai.praise.inference.anytime.anytime.api;
 
 
 /**
@@ -45,8 +43,6 @@ import java.util.Iterator;
  *
  * @param <T>
  */
-public interface Anytime<T> extends Iterator<Bound<T>> {
+public interface Approximation<T> {
 	
-	Bound<T> getCurrentBound();
-
 }

@@ -35,46 +35,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.treecomputation.anytime.core;
+package com.sri.ai.praise.inference.anytime.anytime.api;
 
-import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import com.sri.ai.praise.inference.anytime.anytime.api.Anytime;
-import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.AnytimeTreeComputation;
-import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.ApproximationScheme;
-import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
 import com.sri.ai.util.base.NullaryFunction;
+
 
 /**
  * @author braz
  *
  * @param <T>
  */
-public class DefaultAnytimeTreeComputation<T> extends AbstractAnytimeTreeComputation<T> {
+public interface Anytime<T> extends Iterator<Approximation<T>>, NullaryFunction<Approximation<T>> {
 	
-	public DefaultAnytimeTreeComputation(TreeComputation<T> base, ApproximationScheme<T> approximationScheme) {
-		super(base, approximationScheme);
-	}
-	
-	@Override
-	protected Anytime<T> makeAnytimeVersion(NullaryFunction<T> sub) {
-		Constructor<?> constructor = getClass().getConstructors()[0];
-		try {
-			@SuppressWarnings("unchecked")
-			AnytimeTreeComputation<T> result = (AnytimeTreeComputation<T>) constructor.newInstance(sub);
-			return result;
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new Error(e);
-		}
-	}
+	Approximation<T> getCurrentApproximation();
 
-	@Override
-	protected Anytime<T> pickNextSubWithNext() {
-		Anytime<T> result = getFirstSatisfyingPredicateOrNull(getSubs(), Iterator::hasNext);
-		return result;
+	default Approximation<T> apply() {
+		while (hasNext()) {
+			next();
+		}
+		return getCurrentApproximation();
 	}
 }

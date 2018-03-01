@@ -37,12 +37,19 @@
  */
 package com.sri.ai.praise.inference.anytime.treecomputation.anytime.api;
 
+import java.util.List;
+
+import com.google.common.base.Function;
+import com.sri.ai.praise.inference.anytime.anytime.api.Approximation;
 
 /**
  * @author braz
  *
  * @param <T>
  */
-public interface Bound<T> {
+public interface ApproximationScheme<T>{
+
+	Approximation<T> totalIgnorance();
 	
+	Approximation<T> apply(Function<List<T>, T> function, List<Approximation<T>> argumentApproximations);
 }

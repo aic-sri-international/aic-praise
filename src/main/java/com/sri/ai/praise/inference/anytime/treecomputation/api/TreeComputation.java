@@ -40,6 +40,7 @@ package com.sri.ai.praise.inference.anytime.treecomputation.api;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.sri.ai.util.base.NullaryFunction;
 
@@ -50,13 +51,13 @@ import com.sri.ai.util.base.NullaryFunction;
  */
 public interface TreeComputation<T> extends NullaryFunction<T> {
 
-	ArrayList<? extends TreeComputation<T>> getSubs();
+	ArrayList<? extends NullaryFunction<T>> getSubs();
 
-	T computeValueFromSubsValues(ArrayList<? extends T> subsValues);
+	T function(List<T> subsValues);
 
 	default T apply() {
-		ArrayList<T> subResults = mapIntoArrayList(getSubs(), TreeComputation::apply);
-		T result = computeValueFromSubsValues(subResults);
+		List<T> subResults = mapIntoArrayList(getSubs(), NullaryFunction::apply);
+		T result = function(subResults);
 		return result;
 	}
 }
