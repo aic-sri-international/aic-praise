@@ -39,6 +39,7 @@ package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listWithoutElementAt;
+import static com.sri.ai.util.Util.thereExists;
 
 import java.util.List;
 
@@ -55,12 +56,8 @@ public class Union<T> implements LiveSet<T> {
 	}
 	
 	public boolean contains(T element) {
-		for (LiveSet<T> liveSet : liveSets) {
-			if (liveSet.contains(element)) {
-				return true;
-			}
-		}
-		return false;
+		boolean result = thereExists(liveSets, s -> s.contains(element));
+		return result;
 	}
 	
 	public static LiveSet<Factor> unionOfAllButTheOneAt(List<? extends LiveSet<Factor>> sets, int indexOfExcluded) {

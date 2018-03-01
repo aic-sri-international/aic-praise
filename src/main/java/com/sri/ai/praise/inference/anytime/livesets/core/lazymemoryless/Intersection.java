@@ -37,12 +37,12 @@
  */
 package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
+import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.list;
 
 import java.util.List;
 
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
-
 
 public class Intersection<T> implements LiveSet<T> {
 	
@@ -53,12 +53,8 @@ public class Intersection<T> implements LiveSet<T> {
 	}
 	
 	public boolean contains(T element) {
-		for (LiveSet<T> liveSet : liveSets) {
-			if ( ! liveSet.contains(element)) {
-				return false;
-			}
-		}
-		return true;
+		boolean result = forAll(liveSets, s -> s.contains(element));
+		return result;
 	}
 	
 	public static <T> LiveSet<T> intersection(List<? extends LiveSet<T>> liveSets) {
