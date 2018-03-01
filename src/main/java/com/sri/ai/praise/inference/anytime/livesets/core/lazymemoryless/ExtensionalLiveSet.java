@@ -47,8 +47,8 @@ public class ExtensionalLiveSet<T> implements LiveSet<T> {
 	
 	private Collection<T> elements;
 	
-	public ExtensionalLiveSet(Collection<T> boundElements) {
-		this.elements = boundElements;
+	public ExtensionalLiveSet(Collection<T> elements) {
+		this.elements = elements;
 	}
 	
 	public boolean contains(T element) {

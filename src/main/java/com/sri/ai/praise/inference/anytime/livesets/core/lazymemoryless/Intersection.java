@@ -48,8 +48,8 @@ public class Intersection<T> implements LiveSet<T> {
 	
 	private List<? extends LiveSet<T>> liveSets;
 	
-	public Intersection(List<? extends LiveSet<T>> liveSet) {
-		this.liveSets = liveSet;
+	public Intersection(List<? extends LiveSet<T>> liveSets) {
+		this.liveSets = liveSets;
 	}
 	
 	public boolean contains(T element) {
