@@ -39,25 +39,25 @@ package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
-public class SubtractionOfSetBounds<T> implements LiveSet<T> {
+public class Subtraction<T> implements LiveSet<T> {
 	
-	private LiveSet<T> setBound1;
-	private LiveSet<T> setBound2;
+	private LiveSet<T> liveSet1;
+	private LiveSet<T> liveSet2;
 	
-	public SubtractionOfSetBounds(LiveSet<T> setBound1, LiveSet<T> setBound2) {
-		this.setBound1 = setBound1;
-		this.setBound2 = setBound2;
+	public Subtraction(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
+		this.liveSet1 = liveSet1;
+		this.liveSet2 = liveSet2;
 	}
 	
 	public boolean contains(T element) {
 		boolean result = 
-				setBound1.contains(element) 
+				liveSet1.contains(element) 
 				&& 
-				setBound2.contains(element);
+				liveSet2.contains(element);
 		return result;
 	}
 	
-	public static <T> LiveSet<T> minus(LiveSet<T> setBound1, LiveSet<T> setBound2) {
-		return new SubtractionOfSetBounds<>(setBound1, setBound2); 
+	public static <T> LiveSet<T> minus(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
+		return new Subtraction<>(liveSet1, liveSet2); 
 	}
 }

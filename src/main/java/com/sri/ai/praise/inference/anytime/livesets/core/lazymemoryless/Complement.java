@@ -37,35 +37,23 @@
  */
 package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
-import static com.sri.ai.util.Util.list;
-
-import java.util.List;
-
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
 
-public class IntersectionOfSetBounds<T> implements LiveSet<T> {
+public class Complement<T> implements LiveSet<T> {
 	
-	private List<? extends LiveSet<T>> setBounds;
+	private LiveSet<T> liveSet;
 	
-	public IntersectionOfSetBounds(List<? extends LiveSet<T>> setBounds) {
-		this.setBounds = setBounds;
+	public Complement(LiveSet<T> liveSet) {
+		this.liveSet = liveSet;
 	}
 	
 	public boolean contains(T element) {
-		for (LiveSet<T> setBound : setBounds) {
-			if ( ! setBound.contains(element)) {
-				return false;
-			}
-		}
-		return true;
+		boolean result = ! liveSet.contains(element);
+		return result;
 	}
 	
-	public static <T> LiveSet<T> intersection(List<? extends LiveSet<T>> setBounds) {
-		return new IntersectionOfSetBounds<>(setBounds); 
-	}
-	
-	public static <T> LiveSet<T> intersection(LiveSet<T> setBound1, LiveSet<T> setBound2) {
-		return new IntersectionOfSetBounds<>(list(setBound1, setBound2)); 
+	public static <T> LiveSet<T> complement(LiveSet<T> liveSet) {
+		return new Complement<>(liveSet); 
 	}
 }

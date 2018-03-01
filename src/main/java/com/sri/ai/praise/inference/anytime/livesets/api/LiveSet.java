@@ -37,15 +37,15 @@
  */
 package com.sri.ai.praise.inference.anytime.livesets.api;
 
-import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.ExtensionalSetBound.liveSet;
+import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.ExtensionalLiveSet.liveSet;
 
 import java.util.Collection;
 
 import com.google.common.base.Predicate;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.ComplementOfSetBound;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.IntersectionOfSetBounds;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.SubtractionOfSetBounds;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.UnionOfSetBounds;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Complement;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Intersection;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Subtraction;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Union;
 
 /**
  * A live set is a simple interface for deciding whether an element belong to a set
@@ -72,30 +72,30 @@ public interface LiveSet<T> {
 	}
 	
 	default LiveSet<T> complement() {
-		return ComplementOfSetBound.complement(this);
+		return Complement.complement(this);
 	}
 	
 	default LiveSet<T> minus(LiveSet<T> another) {
-		return SubtractionOfSetBounds.minus(this, another);
+		return Subtraction.minus(this, another);
 	}
 	
 	default LiveSet<T> minus(Collection<T> elements) {
-		return SubtractionOfSetBounds.minus(this, liveSet(elements));
+		return Subtraction.minus(this, liveSet(elements));
 	}
 	
 	default LiveSet<T> union(LiveSet<T> another) {
-		return UnionOfSetBounds.union(this, another);
+		return Union.union(this, another);
 	}
 	
 	default LiveSet<T> union(Collection<T> elements) {
-		return UnionOfSetBounds.union(this, liveSet(elements));
+		return Union.union(this, liveSet(elements));
 	}
 	
 	default LiveSet<T> intersection(LiveSet<T> another) {
-		return IntersectionOfSetBounds.intersection(this, another);
+		return Intersection.intersection(this, another);
 	}
 	
 	default LiveSet<T> intersection(Collection<T> elements) {
-		return IntersectionOfSetBounds.intersection(this, liveSet(elements));
+		return Intersection.intersection(this, liveSet(elements));
 	}
 }

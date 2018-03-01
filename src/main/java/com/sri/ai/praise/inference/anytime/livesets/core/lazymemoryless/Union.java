@@ -37,23 +37,43 @@
  */
 package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
+import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.listWithoutElementAt;
+
+import java.util.List;
+
+import com.sri.ai.praise.inference.anytime.Factor;
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
 
-public class ComplementOfSetBound<T> implements LiveSet<T> {
+public class Union<T> implements LiveSet<T> {
 	
-	private LiveSet<T> setBound;
+	private List<? extends LiveSet<T>> liveSets;
 	
-	public ComplementOfSetBound(LiveSet<T> setBound) {
-		this.setBound = setBound;
+	public Union(List<? extends LiveSet<T>> liveSets) {
+		this.liveSets = liveSets;
 	}
 	
 	public boolean contains(T element) {
-		boolean result = ! setBound.contains(element);
-		return result;
+		for (LiveSet<T> liveSet : liveSets) {
+			if (liveSet.contains(element)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
-	public static <T> LiveSet<T> complement(LiveSet<T> setBound) {
-		return new ComplementOfSetBound<>(setBound); 
+	public static LiveSet<Factor> unionOfAllButTheOneAt(List<? extends LiveSet<Factor>> sets, int indexOfExcluded) {
+		List<LiveSet<Factor>> siblingsLiveSets = listWithoutElementAt(sets, indexOfExcluded);
+		LiveSet<Factor> union = union(siblingsLiveSets);
+		return union;
+	}
+
+	public static <T> LiveSet<T> union(List<? extends LiveSet<T>> liveSets) {
+		return new Union<>(liveSets); 
+	}
+	
+	public static <T> LiveSet<T> union(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
+		return new Union<>(list(liveSet1, liveSet2)); 
 	}
 }

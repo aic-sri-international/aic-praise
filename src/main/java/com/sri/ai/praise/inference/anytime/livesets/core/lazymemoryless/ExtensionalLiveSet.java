@@ -38,42 +38,29 @@
 package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.listWithoutElementAt;
 
-import java.util.List;
+import java.util.Collection;
 
-import com.sri.ai.praise.inference.anytime.Factor;
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
-
-public class UnionOfSetBounds<T> implements LiveSet<T> {
+public class ExtensionalLiveSet<T> implements LiveSet<T> {
 	
-	private List<? extends LiveSet<T>> setBounds;
+	private Collection<T> elements;
 	
-	public UnionOfSetBounds(List<? extends LiveSet<T>> setBounds) {
-		this.setBounds = setBounds;
+	public ExtensionalLiveSet(Collection<T> boundElements) {
+		this.elements = boundElements;
 	}
 	
 	public boolean contains(T element) {
-		for (LiveSet<T> setBound : setBounds) {
-			if (setBound.contains(element)) {
-				return true;
-			}
-		}
-		return false;
+		boolean result = elements.contains(element);
+		return result;
 	}
 	
-	public static LiveSet<Factor> unionOfAllButTheOneAt(List<? extends LiveSet<Factor>> bounds, int indexOfExcluded) {
-		List<LiveSet<Factor>> siblingsLowerBounds = listWithoutElementAt(bounds, indexOfExcluded);
-		LiveSet<Factor> union = union(siblingsLowerBounds);
-		return union;
-	}
-
-	public static <T> LiveSet<T> union(List<? extends LiveSet<T>> setBounds) {
-		return new UnionOfSetBounds<>(setBounds); 
+	public static <T> ExtensionalLiveSet<T> liveSet(Collection<T> elements) {
+		return new ExtensionalLiveSet<>(elements);
 	}
 	
-	public static <T> LiveSet<T> union(LiveSet<T> setBound1, LiveSet<T> setBound2) {
-		return new UnionOfSetBounds<>(list(setBound1, setBound2)); 
+	public static <T> ExtensionalLiveSet<T> liveSet(T element) {
+		return new ExtensionalLiveSet<>(list(element));
 	}
 }

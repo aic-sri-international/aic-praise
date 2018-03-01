@@ -39,28 +39,33 @@ package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
 import static com.sri.ai.util.Util.list;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
-public class ExtensionalSetBound<T> implements LiveSet<T> {
+
+public class Intersection<T> implements LiveSet<T> {
 	
-	private Collection<T> boundElements;
+	private List<? extends LiveSet<T>> liveSets;
 	
-	public ExtensionalSetBound(Collection<T> boundElements) {
-		this.boundElements = boundElements;
+	public Intersection(List<? extends LiveSet<T>> liveSet) {
+		this.liveSets = liveSet;
 	}
 	
 	public boolean contains(T element) {
-		boolean result = boundElements.contains(element);
-		return result;
+		for (LiveSet<T> liveSet : liveSets) {
+			if ( ! liveSet.contains(element)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
-	public static <T> ExtensionalSetBound<T> liveSet(Collection<T> elements) {
-		return new ExtensionalSetBound<>(elements);
+	public static <T> LiveSet<T> intersection(List<? extends LiveSet<T>> liveSets) {
+		return new Intersection<>(liveSets); 
 	}
 	
-	public static <T> ExtensionalSetBound<T> liveSet(T element) {
-		return new ExtensionalSetBound<>(list(element));
+	public static <T> LiveSet<T> intersection(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
+		return new Intersection<>(list(liveSet1, liveSet2)); 
 	}
 }

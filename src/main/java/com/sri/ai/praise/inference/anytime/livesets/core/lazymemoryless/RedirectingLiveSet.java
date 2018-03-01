@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
 
-import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.ExtensionalSetBound.liveSet;
+import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.ExtensionalLiveSet.liveSet;
 
 import java.util.List;
 
@@ -46,22 +46,22 @@ import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
 public class RedirectingLiveSet<T> implements LiveSet<T> {
 	
-	private LiveSet<T> setBound;
+	private LiveSet<T> liveSet;
 	
-	public RedirectingLiveSet(LiveSet<T> setBound) {
-		this.setBound = setBound;
+	public RedirectingLiveSet(LiveSet<T> liveSet) {
+		this.liveSet = liveSet;
 	}
 	
 	public RedirectingLiveSet(List<T> elements) {
 		this(liveSet(elements));
 	}
 	
-	public void redirectTo(LiveSet<T> setBound) {
-		this.setBound = setBound;
+	public void redirectTo(LiveSet<T> liveSet) {
+		this.liveSet = liveSet;
 	}
 	
 	public boolean contains(T element) {
-		boolean result = setBound.contains(element);
+		boolean result = liveSet.contains(element);
 		return result;
 	}
 	

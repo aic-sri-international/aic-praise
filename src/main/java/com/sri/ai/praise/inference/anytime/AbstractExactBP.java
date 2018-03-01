@@ -37,8 +37,8 @@
  */
 package com.sri.ai.praise.inference.anytime;
 
-import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.UnionOfSetBounds.union;
-import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.UnionOfSetBounds.unionOfAllButTheOneAt;
+import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Union.union;
+import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Union.unionOfAllButTheOneAt;
 import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.mapIntoArrayList;
