@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.google.common.base.Function;
+import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.Anytime;
 import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.AnytimeTreeComputation;
 import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.Bound;
 import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
@@ -78,8 +79,8 @@ public class DefaultAnytimeTreeComputation<T> extends AbstractAnytimeTreeComputa
 	}
 
 	@Override
-	protected AnytimeTreeComputation<T> pickNextSubWithNext() {
-		AnytimeTreeComputation<T> result = getFirstSatisfyingPredicateOrNull(getSubs(), Iterator<Bound<T>>::hasNext);
+	protected Anytime<T> pickNextSubWithNext() {
+		Anytime<T> result = getFirstSatisfyingPredicateOrNull(getSubs(), Iterator<Bound<T>>::hasNext);
 		return result;
 	}
 

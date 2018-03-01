@@ -43,6 +43,7 @@ import static com.sri.ai.util.Util.myAssert;
 import java.util.ArrayList;
 
 import com.google.common.base.Function;
+import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.Anytime;
 import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.AnytimeTreeComputation;
 import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.Bound;
 import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
@@ -58,7 +59,7 @@ public abstract class AbstractAnytimeTreeComputation<T> implements AnytimeTreeCo
 
 	protected abstract AnytimeTreeComputation<T> makeAnytimeVersionOfBaseSub(TreeComputation<T> baseSub);
 
-	protected abstract AnytimeTreeComputation<T> pickNextSubWithNext();
+	protected abstract Anytime<T> pickNextSubWithNext();
 
 	protected abstract Bound<T> computeBoundFromSubsBoundsUsingBaseComputation(
 			ArrayList<? extends Bound<T>> subsBounds, 
@@ -104,7 +105,7 @@ public abstract class AbstractAnytimeTreeComputation<T> implements AnytimeTreeCo
 	
 	@Override
 	public Bound<T> next() {
-		AnytimeTreeComputation<T> nextSub = pickNextSubWithNext();
+		Anytime<T> nextSub = pickNextSubWithNext();
 		myAssert(nextSub != null, () -> this.getClass() + ": next invoked when hasNext is false");
 		nextSub.next();
 		ArrayList<Bound<T>> subsBounds = mapIntoArrayList(subs, AnytimeTreeComputation::getCurrentBound); 
