@@ -37,8 +37,8 @@
  */
 package com.sri.ai.praise.inference.anytime;
 
-import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Union.union;
-import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Union.unionOfAllButTheOneAt;
+import static com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.Union.union;
+import static com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.Union.unionOfAllButTheOneAt;
 import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.mapIntoArrayList;
@@ -49,7 +49,7 @@ import java.util.List;
 
 import com.sri.ai.grinder.library.bounds.Bound;
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.RedirectingLiveSet;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public abstract class AbstractExactBP
 	extends AbstractFunctionOnIterators<Bound>

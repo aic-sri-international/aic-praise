@@ -45,7 +45,7 @@ import java.util.List;
 
 import com.sri.ai.grinder.library.bounds.Bound;
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.RedirectingLiveSet;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	

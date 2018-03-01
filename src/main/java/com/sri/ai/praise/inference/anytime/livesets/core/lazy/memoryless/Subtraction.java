@@ -35,32 +35,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
-
-import static com.sri.ai.util.Util.list;
-
-import java.util.Collection;
+package com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless;
 
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
-public class ExtensionalLiveSet<T> implements LiveSet<T> {
+public class Subtraction<T> implements LiveSet<T> {
 	
-	private Collection<T> elements;
+	private LiveSet<T> liveSet1;
+	private LiveSet<T> liveSet2;
 	
-	public ExtensionalLiveSet(Collection<T> elements) {
-		this.elements = elements;
+	public Subtraction(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
+		this.liveSet1 = liveSet1;
+		this.liveSet2 = liveSet2;
 	}
 	
 	public boolean contains(T element) {
-		boolean result = elements.contains(element);
+		boolean result = 
+				liveSet1.contains(element) 
+				&& 
+				liveSet2.contains(element);
 		return result;
 	}
 	
-	public static <T> ExtensionalLiveSet<T> liveSet(Collection<T> elements) {
-		return new ExtensionalLiveSet<>(elements);
-	}
-	
-	public static <T> ExtensionalLiveSet<T> liveSet(T element) {
-		return new ExtensionalLiveSet<>(list(element));
+	public static <T> LiveSet<T> minus(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
+		return new Subtraction<>(liveSet1, liveSet2); 
 	}
 }

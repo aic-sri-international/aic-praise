@@ -35,29 +35,56 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
+package com.sri.ai.praise.inference.anytime.treecomputation.anytime.core;
 
-import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
+import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 
-public class Subtraction<T> implements LiveSet<T> {
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import com.google.common.base.Function;
+import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.AnytimeTreeComputation;
+import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.Bound;
+import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
+
+/**
+ * @author braz
+ *
+ * @param <T>
+ */
+public class DefaultAnytimeTreeComputation<T> extends AbstractAnytimeTreeComputation<T> {
 	
-	private LiveSet<T> liveSet1;
-	private LiveSet<T> liveSet2;
-	
-	public Subtraction(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
-		this.liveSet1 = liveSet1;
-		this.liveSet2 = liveSet2;
+	public DefaultAnytimeTreeComputation(TreeComputation<T> base) {
+		super(base);
 	}
 	
-	public boolean contains(T element) {
-		boolean result = 
-				liveSet1.contains(element) 
-				&& 
-				liveSet2.contains(element);
+	@Override
+	protected Bound<T> makeInitialBound() {
+		return null; // TODO
+	}
+
+	@Override
+	protected AnytimeTreeComputation<T> makeAnytimeVersionOfBaseSub(TreeComputation<T> sub) {
+		Constructor<?> constructor = getClass().getConstructors()[0];
+		try {
+			@SuppressWarnings("unchecked")
+			AnytimeTreeComputation<T> result = (AnytimeTreeComputation<T>) constructor.newInstance(sub);
+			return result;
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new Error(e);
+		}
+	}
+
+	@Override
+	protected AnytimeTreeComputation<T> pickNextSubWithNext() {
+		AnytimeTreeComputation<T> result = getFirstSatisfyingPredicateOrNull(getSubs(), Iterator<Bound<T>>::hasNext);
 		return result;
 	}
-	
-	public static <T> LiveSet<T> minus(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
-		return new Subtraction<>(liveSet1, liveSet2); 
+
+	@Override
+	protected Bound<T> computeBoundFromSubsBoundsUsingBaseComputation(ArrayList<? extends Bound<T>> subsBounds, Function<ArrayList<? extends T>, T> computeValueFromSubsValues) {
+		return null; // TODO
 	}
 }

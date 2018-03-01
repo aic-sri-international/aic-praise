@@ -35,52 +35,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.treecomputation.core;
+package com.sri.ai.praise.inference.anytime.treecomputation.anytime.api;
 
-import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import com.google.common.base.Function;
-import com.sri.ai.praise.inference.anytime.treecomputation.api.AnytimeTreeComputation;
-import com.sri.ai.praise.inference.anytime.treecomputation.api.Bound;
-import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
 
 /**
  * @author braz
  *
  * @param <T>
  */
-public class DefaultAnytimeTreeComputation<T> extends AbstractAnytimeTreeComputation<T> {
+public interface Bound<T> {
 	
-	public DefaultAnytimeTreeComputation(TreeComputation<T> base) {
-		super(base);
-	}
-	
-	protected Bound<T> makeInitialBound() {
-		return null; // TODO
-	}
-
-	protected AnytimeTreeComputation<T> makeAnytimeVersionOfBaseSub(TreeComputation<T> sub) {
-		Constructor<?> constructor = getClass().getConstructors()[0];
-		try {
-			@SuppressWarnings("unchecked")
-			AnytimeTreeComputation<T> result = (AnytimeTreeComputation<T>) constructor.newInstance(sub);
-			return result;
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new Error(e);
-		}
-	}
-
-	protected AnytimeTreeComputation<T> pickNextSubWithNext() {
-		AnytimeTreeComputation<T> result = getFirstSatisfyingPredicateOrNull(getSubs(), Iterator<Bound<T>>::hasNext);
-		return result;
-	}
-
-	protected Bound<T> computeBoundFromSubsBoundsUsingBaseComputation(ArrayList<? extends Bound<T>> subsBounds, Function<ArrayList<? extends T>, T> computeValueFromSubsValues) {
-		return null; // TODO
-	}
 }

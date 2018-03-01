@@ -35,7 +35,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.treecomputation.api;
+package com.sri.ai.praise.inference.anytime.treecomputation.anytime.api;
+
+import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
 
 
 /**
@@ -43,6 +45,5 @@ package com.sri.ai.praise.inference.anytime.treecomputation.api;
  *
  * @param <T>
  */
-public interface Bound<T> {
-	
+public interface AnytimeTreeComputation<T> extends Anytime<T>, TreeComputation<Bound<T>> {
 }

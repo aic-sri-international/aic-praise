@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.treecomputation.core;
+package com.sri.ai.praise.inference.anytime.treecomputation.anytime.core;
 
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
@@ -43,8 +43,8 @@ import static com.sri.ai.util.Util.myAssert;
 import java.util.ArrayList;
 
 import com.google.common.base.Function;
-import com.sri.ai.praise.inference.anytime.treecomputation.api.AnytimeTreeComputation;
-import com.sri.ai.praise.inference.anytime.treecomputation.api.Bound;
+import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.AnytimeTreeComputation;
+import com.sri.ai.praise.inference.anytime.treecomputation.anytime.api.Bound;
 import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
 
 /**

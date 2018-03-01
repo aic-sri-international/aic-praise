@@ -35,25 +35,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless;
+package com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless;
+
+import static com.sri.ai.util.Util.list;
+
+import java.util.Collection;
 
 import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
-
-public class Complement<T> implements LiveSet<T> {
+public class ExtensionalLiveSet<T> implements LiveSet<T> {
 	
-	private LiveSet<T> liveSet;
+	private Collection<T> elements;
 	
-	public Complement(LiveSet<T> liveSet) {
-		this.liveSet = liveSet;
+	public ExtensionalLiveSet(Collection<T> elements) {
+		this.elements = elements;
 	}
 	
 	public boolean contains(T element) {
-		boolean result = ! liveSet.contains(element);
+		boolean result = elements.contains(element);
 		return result;
 	}
 	
-	public static <T> LiveSet<T> complement(LiveSet<T> liveSet) {
-		return new Complement<>(liveSet); 
+	public static <T> ExtensionalLiveSet<T> liveSet(Collection<T> elements) {
+		return new ExtensionalLiveSet<>(elements);
+	}
+	
+	public static <T> ExtensionalLiveSet<T> liveSet(T element) {
+		return new ExtensionalLiveSet<>(list(element));
 	}
 }

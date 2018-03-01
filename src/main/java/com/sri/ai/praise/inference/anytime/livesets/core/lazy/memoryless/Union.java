@@ -35,18 +35,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.treecomputation.api;
+package com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless;
 
-import java.util.Iterator;
+import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.listWithoutElementAt;
+import static com.sri.ai.util.Util.thereExists;
+
+import java.util.List;
+
+import com.sri.ai.praise.inference.anytime.Factor;
+import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
 
 
-/**
- * @author braz
- *
- * @param <T>
- */
-public interface AnytimeTreeComputation<T> extends TreeComputation<Bound<T>>, Iterator<Bound<T>> {
+public class Union<T> implements LiveSet<T> {
 	
-	Bound<T> getCurrentBound();
+	private List<? extends LiveSet<T>> liveSets;
+	
+	public Union(List<? extends LiveSet<T>> liveSets) {
+		this.liveSets = liveSets;
+	}
+	
+	public boolean contains(T element) {
+		boolean result = thereExists(liveSets, s -> s.contains(element));
+		return result;
+	}
+	
+	public static LiveSet<Factor> unionOfAllButTheOneAt(List<? extends LiveSet<Factor>> sets, int indexOfExcluded) {
+		List<LiveSet<Factor>> siblingsLiveSets = listWithoutElementAt(sets, indexOfExcluded);
+		LiveSet<Factor> union = union(siblingsLiveSets);
+		return union;
+	}
 
+	public static <T> LiveSet<T> union(List<? extends LiveSet<T>> liveSets) {
+		return new Union<>(liveSets); 
+	}
+	
+	public static <T> LiveSet<T> union(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
+		return new Union<>(list(liveSet1, liveSet2)); 
+	}
 }

@@ -40,7 +40,7 @@ package com.sri.ai.praise.inference.anytime;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.RedirectingLiveSet;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public interface Node {
 

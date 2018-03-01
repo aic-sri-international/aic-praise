@@ -37,15 +37,15 @@
  */
 package com.sri.ai.praise.inference.anytime.livesets.api;
 
-import static com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.ExtensionalLiveSet.liveSet;
+import static com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 
 import java.util.Collection;
 
 import com.google.common.base.Predicate;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Complement;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Intersection;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Subtraction;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazymemoryless.Union;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.Complement;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.Intersection;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.Subtraction;
+import com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.Union;
 
 /**
  * A live set is a simple interface for deciding whether an element belong to a set

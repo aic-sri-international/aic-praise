@@ -35,33 +35,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime;
+package com.sri.ai.praise.inference.anytime.treecomputation.anytime.api;
 
 import java.util.Iterator;
 
-import com.sri.ai.grinder.library.bounds.Bound;
-import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
-public class ExactBPFromVariableToFactor extends AbstractExactBP {
+/**
+ * @author braz
+ *
+ * @param <T>
+ */
+public interface Anytime<T> extends Iterator<Bound<T>> {
 	
-	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors) {
-		super(root, parent, excludedFactors, includedFactors);
-	}
+	Bound<T> getCurrentBound();
 
-	@Override
-	public Bound recomputeValueAfterHavingRefinedArgument(Iterator<Bound> argumentIterator) {
-		/* bounds product */
-		return null;
-	}
-
-	@Override
-	protected AbstractExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromFactorToVariable(subRoot, this.root, subExcludedFactors, subIncludedFactors);
-	}
-	
-	@Override
-	public Variable getRoot() {
-		return (Variable) super.getRoot();
-	}
 }
