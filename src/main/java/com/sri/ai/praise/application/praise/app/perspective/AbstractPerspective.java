@@ -65,6 +65,8 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.util.base.Pair;
 
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.MapProperty;
@@ -75,12 +77,11 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
 @Beta
-public abstract class AbstractPerspective implements Perspective {
+public abstract class AbstractPerspective implements Perspective, InvalidationListener {
 	
 	private IntegerProperty currentModelPageIndexProperty;
 	//
@@ -91,7 +92,7 @@ public abstract class AbstractPerspective implements Perspective {
 	private BooleanProperty canUndoPageChange   = new SimpleBooleanProperty(false);
 	private BooleanProperty canRedoPageChange   = new SimpleBooleanProperty(false);
 	private EventSource<PageChange> pageChanges = new EventSource<>();
-	private UndoManager pageChangeUndoManager   = newPageChangeUndoManager(); // NOTE: must be after pageChanges declaration.
+	private UndoManager<PageChange> pageChangeUndoManager   = newPageChangeUndoManager(); // NOTE: must be after pageChanges declaration.
 	//
 	private ObjectProperty<File> modelFile = new SimpleObjectProperty<>();
 	private BooleanProperty saveRequired   = new SimpleBooleanProperty(false);
@@ -302,7 +303,7 @@ public abstract class AbstractPerspective implements Perspective {
 	
 	protected void newModel(Supplier<ObservableMap<Integer, Supplier<ModelPageEditor>>> initialModelPagesSupplier) {
 		undoManagersForgetHistory();
-		callUndoManagers(um -> um.undoAvailableProperty().removeListener(this::checkGlobalUndoState));
+		callUndoManagers(um -> um.undoAvailableProperty().removeListener(this));
 		
 		modelPageEditors.set(initialModelPagesSupplier.get());
 		
@@ -318,14 +319,15 @@ public abstract class AbstractPerspective implements Perspective {
 		bindModelPageEditorUndoManager(0);
 		currentModelPageIndexProperty.set(0);
 		
-		callUndoManagers(um -> um.undoAvailableProperty().addListener(this::checkGlobalUndoState));
+		callUndoManagers(um -> um.undoAvailableProperty().addListener((InvalidationListener)this));
 	}
 	
 	protected void undoManagersForgetHistory() {
 		callUndoManagers(um -> um.forgetHistory());
 	}
-	
-	protected void checkGlobalUndoState(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+
+	@Override
+	public void invalidated(Observable obs) {
 		AtomicBoolean isASaveRequired = new AtomicBoolean(false);	
 		callUndoManagers(um -> {
 			if (um.isUndoAvailable()) {
@@ -366,7 +368,7 @@ public abstract class AbstractPerspective implements Perspective {
  			}
  		});
  		newModelPageIdxs.put(atPageIndex+1, modelPageEditorSupplier);
- 		modelPageEditorSupplier.get().getUndoManager().undoAvailableProperty().addListener(this::checkGlobalUndoState);
+ 		modelPageEditorSupplier.get().getUndoManager().undoAvailableProperty().addListener((InvalidationListener)this);
  		modelPageEditors.set(FXCollections.observableMap(newModelPageIdxs));
  		currentModelPageIndexProperty.set(atPageIndex+1);
 	}
@@ -385,7 +387,7 @@ public abstract class AbstractPerspective implements Perspective {
 	 			}
  			}
  		});
- 		result.get().getUndoManager().undoAvailableProperty().removeListener(this::checkGlobalUndoState);
+ 		result.get().getUndoManager().undoAvailableProperty().removeListener((InvalidationListener)this);
  		modelPageEditors.set(FXCollections.observableMap(newModelPageIdxs));
  		
  		if (pageIndex >= modelPageEditors.size()) {
@@ -411,7 +413,7 @@ public abstract class AbstractPerspective implements Perspective {
 		public ModelPageEditor get() {
 			if (modelPageEditor == null) {
 				modelPageEditor = create(modelPage, defaultQueries);
-				modelPageEditor.getUndoManager().undoAvailableProperty().addListener(AbstractPerspective.this::checkGlobalUndoState);
+				modelPageEditor.getUndoManager().undoAvailableProperty().addListener((InvalidationListener)this);
 			}
 			return modelPageEditor;
 		}
@@ -494,8 +496,8 @@ public abstract class AbstractPerspective implements Perspective {
 		}
 	}
 	
-	private UndoManager newPageChangeUndoManager() {
-		 UndoManager result = UndoManagerFactory.unlimitedHistoryUndoManager(
+	private UndoManager<PageChange> newPageChangeUndoManager() {
+		 UndoManager<PageChange> result = UndoManagerFactory.unlimitedHistoryUndoManager(
 										pageChanges, // stream of changes to observe
 										c -> c.invert(), // function to invert a change
 										c -> c.apply(), // function to apply a change

@@ -63,11 +63,10 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.GlyphsBuilder;
-import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.GlyphsStack;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 
 @Beta
 public class FXUtil {
@@ -86,20 +85,21 @@ public class FXUtil {
     }
     
     public static void setDefaultButtonIcon(Button button, GlyphIcons icon) {
-    	GlyphsDude.setIcon(button, icon, iconSize(_buttonDefaultIconSize), ContentDisplay.GRAPHIC_ONLY);
+    	FontAwesomeIconFactory.get().setIcon(button, icon, iconSize(_buttonDefaultIconSize), ContentDisplay.GRAPHIC_ONLY);
     	fixButtonSize(button, _buttonDefaultIconSize);
     }
     
     public static void setPaginationButtonIcon(Button button, GlyphIcons icon) {
-    	GlyphsDude.setIcon(button, icon, iconSize(_buttonPaginationIconSize), ContentDisplay.GRAPHIC_ONLY);
+    	FontAwesomeIconFactory.get().setIcon(button, icon, iconSize(_buttonPaginationIconSize), ContentDisplay.GRAPHIC_ONLY);
     	fixButtonSize(button, _buttonPaginationIconSize);
     }
     
     public static void setButtonStackedIcons(Button button, GlyphIcons icon1, GlyphIcons icon2) {
-    	Region saveAsImg = GlyphsStack.create()
-    			.add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(icon1).size(iconSize(_buttonDefaultIconSize)).build())
-    			.add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(icon2).size(iconSize(_iconSmallSize)).build());
-    			
+		Region saveAsImg = GlyphsStack.create()
+				.add(new FontAwesomeIconView((FontAwesomeIcon)icon1, iconSize(_buttonDefaultIconSize)))
+				.add(new FontAwesomeIconView((FontAwesomeIcon)icon2, iconSize(_iconSmallSize)));
+				
+		
     	button.setGraphic(saveAsImg);
     	button.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     	
@@ -107,14 +107,14 @@ public class FXUtil {
     }
     
     public static void setTitledPaneIcon(TitledPane titledPane, GlyphIcons icon) {
-    	GlyphsDude.setIcon(titledPane, icon, iconSize(_titledPaneDefaultIconSize), ContentDisplay.LEFT);
+    	FontAwesomeIconFactory.get().setIcon(titledPane, icon, iconSize(_titledPaneDefaultIconSize), ContentDisplay.LEFT);
     }
     
 	public static Node configMenuIcon() {
 		HBox node = new HBox();
 		
-		node.getChildren().add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(FontAwesomeIcons.COG).size("12px").build());
-		node.getChildren().add(GlyphsBuilder.create(FontAwesomeIcon.class).glyph(FontAwesomeIcons.CARET_DOWN).size("10px").build());
+		node.getChildren().add(new FontAwesomeIconView(FontAwesomeIcon.COG, "12px"));
+		node.getChildren().add(new FontAwesomeIconView(FontAwesomeIcon.CARET_DOWN, "10px"));
 		
 		return node;
 	}

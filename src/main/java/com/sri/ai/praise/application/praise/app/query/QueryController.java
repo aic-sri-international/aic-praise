@@ -53,7 +53,7 @@ import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -137,8 +137,8 @@ public class QueryController {
 	@FXML
 	private void initialize() {
 		//
-    	FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.PLAY);
-    	FXUtil.setDefaultButtonIcon(clearOutputButton, FontAwesomeIcons.ERASER);
+    	FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcon.PLAY);
+    	FXUtil.setDefaultButtonIcon(clearOutputButton, FontAwesomeIcon.ERASER);
     	
     	queryComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
     		if (newValue != null) {
@@ -173,12 +173,12 @@ public class QueryController {
     	
     	executeQueryService.runningProperty().addListener((observable, previouslyRunning, currentlyRunning) -> {
     		if (currentlyRunning) {
-    			FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.STOP);
+    			FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcon.STOP);
     			executeTooltip.setText("Stop query");
     			queryProgressBar.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
     		}
     		else {
-    			FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcons.PLAY);
+    			FXUtil.setDefaultButtonIcon(executeButton, FontAwesomeIcon.PLAY);
     			executeTooltip.setText("Run query");
     			queryProgressBar.setProgress(0);
     		}
@@ -256,7 +256,7 @@ public class QueryController {
 			resultContent = errors;
 		}
 		TitledPane resultPane = new TitledPane(title, resultContent);
-		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.TIMES);
+		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcon.TIMES);
 		
 		showResultPane(resultPane);
 		
@@ -287,7 +287,7 @@ public class QueryController {
 		}
 		
 		TitledPane resultPane = new TitledPane(title, resultContent);
-		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcons.CHECK);
+		FXUtil.setTitledPaneIcon(resultPane, FontAwesomeIcon.CHECK);
 		
 		showResultPane(resultPane);
 	}

@@ -98,7 +98,7 @@ import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.math.Rational;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 
 @Beta
 public class PRAiSEController {
@@ -242,24 +242,24 @@ public class PRAiSEController {
 	//
 	@FXML
     private void initialize() throws IOException {
-    	FXUtil.setDefaultButtonIcon(openMenuButton, FontAwesomeIcons.BARS);
+    	FXUtil.setDefaultButtonIcon(openMenuButton, FontAwesomeIcon.BARS);
     	//
-    	FXUtil.setDefaultButtonIcon(newButton, FontAwesomeIcons.FILE_ALT);
-    	FXUtil.setDefaultButtonIcon(openFileButton, FontAwesomeIcons.FOLDER_OPEN);
-    	FXUtil.setDefaultButtonIcon(saveButton, FontAwesomeIcons.SAVE);
+    	FXUtil.setDefaultButtonIcon(newButton, FontAwesomeIcon.FILE_ALT);
+    	FXUtil.setDefaultButtonIcon(openFileButton, FontAwesomeIcon.FOLDER_OPEN);
+    	FXUtil.setDefaultButtonIcon(saveButton, FontAwesomeIcon.SAVE);
 		//
-    	FXUtil.setDefaultButtonIcon(undoModelEditButton, FontAwesomeIcons.ROTATE_LEFT);
-    	FXUtil.setDefaultButtonIcon(redoModelEditButton, FontAwesomeIcons.ROTATE_RIGHT);
+    	FXUtil.setDefaultButtonIcon(undoModelEditButton, FontAwesomeIcon.ROTATE_LEFT);
+    	FXUtil.setDefaultButtonIcon(redoModelEditButton, FontAwesomeIcon.ROTATE_RIGHT);
     	//
-    	FXUtil.setButtonStackedIcons(undoPagesChangeButton, FontAwesomeIcons.ROTATE_LEFT, FontAwesomeIcons.SQUARE_ALT);
-    	FXUtil.setButtonStackedIcons(redoPagesChangeButton, FontAwesomeIcons.ROTATE_RIGHT, FontAwesomeIcons.SQUARE_ALT);
+    	FXUtil.setButtonStackedIcons(undoPagesChangeButton, FontAwesomeIcon.ROTATE_LEFT, FontAwesomeIcon.SQUARE_ALT);
+    	FXUtil.setButtonStackedIcons(redoPagesChangeButton, FontAwesomeIcon.ROTATE_RIGHT, FontAwesomeIcon.SQUARE_ALT);
     	//
-    	FXUtil.setPaginationButtonIcon(removePageButton, FontAwesomeIcons.MINUS);
-    	FXUtil.setPaginationButtonIcon(previousPageButton, FontAwesomeIcons.CARET_LEFT);
-    	FXUtil.setPaginationButtonIcon(nextPageButton, FontAwesomeIcons.CARET_RIGHT);
-    	FXUtil.setPaginationButtonIcon(addPageButton, FontAwesomeIcons.PLUS);
+    	FXUtil.setPaginationButtonIcon(removePageButton, FontAwesomeIcon.MINUS);
+    	FXUtil.setPaginationButtonIcon(previousPageButton, FontAwesomeIcon.CARET_LEFT);
+    	FXUtil.setPaginationButtonIcon(nextPageButton, FontAwesomeIcon.CARET_RIGHT);
+    	FXUtil.setPaginationButtonIcon(addPageButton, FontAwesomeIcon.PLUS);
     	//
-    	FXUtil.setDefaultButtonIcon(configureButton, FontAwesomeIcons.WRENCH);
+    	FXUtil.setDefaultButtonIcon(configureButton, FontAwesomeIcon.WRENCH);
     	//
     	praiseFileChooser = new FileChooser();
     	praiseFileChooser.getExtensionFilters().addAll(
@@ -604,7 +604,7 @@ public class PRAiSEController {
 		
 		Button saveAsButton = new Button("Save As...");
 		saveAsButton.setOnAction(this::saveModelAs);
-    	FXUtil.setButtonStackedIcons(saveAsButton, FontAwesomeIcons.SAVE, FontAwesomeIcons.PENCIL);
+    	FXUtil.setButtonStackedIcons(saveAsButton, FontAwesomeIcon.SAVE, FontAwesomeIcon.PENCIL);
     	HBox saveAsHBox = newButtonHBox();
     	saveAsHBox.getChildren().addAll(saveAsButton, new Label("Save As..."));
 		
@@ -612,12 +612,12 @@ public class PRAiSEController {
 		hSep.setPrefWidth(170);
 		
 		importUAIModelButton.setOnAction(this::importUAIModel);
-		FXUtil.setDefaultButtonIcon(importUAIModelButton, FontAwesomeIcons.PUZZLE_PIECE);
+		FXUtil.setDefaultButtonIcon(importUAIModelButton, FontAwesomeIcon.PUZZLE_PIECE);
 		HBox importUAIHBox = newButtonHBox();
 		importUAIHBox.getChildren().addAll(importUAIModelButton, new Label("Import UAI Model..."));
 		
 		exportUAIModelButton.setOnAction(this::exportUAIModel);
-		FXUtil.setDefaultButtonIcon(exportUAIModelButton, FontAwesomeIcons.ARCHIVE);
+		FXUtil.setDefaultButtonIcon(exportUAIModelButton, FontAwesomeIcon.ARCHIVE);
 		HBox exportUAIHBox = newButtonHBox();
 		exportUAIHBox.getChildren().addAll(exportUAIModelButton, new Label("Export to UAI Model..."));
 		
