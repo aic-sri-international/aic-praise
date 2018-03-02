@@ -39,7 +39,7 @@
 
 	<packaging>jar</packaging>
 	<description>SRI International's AIC PRAiSE (Probabilistic Reasoning As Symbolic Evaluation) Library (for Java 1.8+)</description>
-	<url>http://code.google.com/p/aic-praise/</url>
+	<url>https://www.github.com/aic-sri-international/aic-praise</url>
 	<licenses>
 		<license>
 			<name>New BSD License</name>
@@ -48,9 +48,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>http://aic-praise.googlecode.com/svn/trunk</url>
-		<connection>scm:svn:http://aic-praise.googlecode.com/svn/trunk</connection>
-		<developerConnection>scm:svn:https://aic-praise.googlecode.com/svn/trunk</developerConnection>
+		<url>https://www.github.com/aic-sri-international/aic-praise</url>
+		<connection>scm:git:https://www.github.com/aic-sri-international/aic-praise.git</connection>
+		<developerConnection>scm:git:https://www.github.com/aic-sri-international/aic-praise.git</developerConnection>
 	</scm>
 	<developers>
 		<developer>
