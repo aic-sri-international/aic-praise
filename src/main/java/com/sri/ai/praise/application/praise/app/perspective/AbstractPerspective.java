@@ -303,7 +303,7 @@ public abstract class AbstractPerspective implements Perspective, InvalidationLi
 	
 	protected void newModel(Supplier<ObservableMap<Integer, Supplier<ModelPageEditor>>> initialModelPagesSupplier) {
 		undoManagersForgetHistory();
-		callUndoManagers(um -> um.undoAvailableProperty().removeListener(this));
+		callUndoManagers(um -> um.undoAvailableProperty().removeListener(this::checkGlobalUndoState));
 		
 		modelPageEditors.set(initialModelPagesSupplier.get());
 		
@@ -319,7 +319,7 @@ public abstract class AbstractPerspective implements Perspective, InvalidationLi
 		bindModelPageEditorUndoManager(0);
 		currentModelPageIndexProperty.set(0);
 		
-		callUndoManagers(um -> um.undoAvailableProperty().addListener((InvalidationListener)this));
+		callUndoManagers(um -> um.undoAvailableProperty().addListener(this::checkGlobalUndoState));
 	}
 	
 	protected void undoManagersForgetHistory() {
@@ -328,6 +328,10 @@ public abstract class AbstractPerspective implements Perspective, InvalidationLi
 
 	@Override
 	public void invalidated(Observable obs) {
+		this.checkGlobalUndoState(obs);
+	}
+
+	protected void checkGlobalUndoState(Observable obs) {
 		AtomicBoolean isASaveRequired = new AtomicBoolean(false);	
 		callUndoManagers(um -> {
 			if (um.isUndoAvailable()) {
@@ -368,7 +372,7 @@ public abstract class AbstractPerspective implements Perspective, InvalidationLi
  			}
  		});
  		newModelPageIdxs.put(atPageIndex+1, modelPageEditorSupplier);
- 		modelPageEditorSupplier.get().getUndoManager().undoAvailableProperty().addListener((InvalidationListener)this);
+ 		modelPageEditorSupplier.get().getUndoManager().undoAvailableProperty().addListener(this::checkGlobalUndoState);
  		modelPageEditors.set(FXCollections.observableMap(newModelPageIdxs));
  		currentModelPageIndexProperty.set(atPageIndex+1);
 	}
@@ -387,7 +391,7 @@ public abstract class AbstractPerspective implements Perspective, InvalidationLi
 	 			}
  			}
  		});
- 		result.get().getUndoManager().undoAvailableProperty().removeListener((InvalidationListener)this);
+ 		result.get().getUndoManager().undoAvailableProperty().removeListener(this::checkGlobalUndoState);
  		modelPageEditors.set(FXCollections.observableMap(newModelPageIdxs));
  		
  		if (pageIndex >= modelPageEditors.size()) {
@@ -413,7 +417,7 @@ public abstract class AbstractPerspective implements Perspective, InvalidationLi
 		public ModelPageEditor get() {
 			if (modelPageEditor == null) {
 				modelPageEditor = create(modelPage, defaultQueries);
-				modelPageEditor.getUndoManager().undoAvailableProperty().addListener((InvalidationListener)this);
+				modelPageEditor.getUndoManager().undoAvailableProperty().addListener(AbstractPerspective.this::checkGlobalUndoState);
 			}
 			return modelPageEditor;
 		}
