@@ -35,24 +35,61 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.treecomputation.anytime.api;
+package com.sri.ai.test.praise.inference.anytime.treecomputation.api;
 
-import com.sri.ai.praise.inference.anytime.anytime.api.Anytime;
-import com.sri.ai.praise.inference.anytime.anytime.api.Approximation;
+import static com.sri.ai.util.Util.arrayList;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
-
+import com.sri.ai.util.Util;
+import com.sri.ai.util.base.NullaryFunction;
 
 /**
  * @author braz
  *
- * @param <T>
  */
-public interface AnytimeTreeComputation<T> extends Anytime<T>, TreeComputation<Approximation<T>> {
+public class TreeComputationTest {
+	
+	static class OneTwoTreeComputation implements TreeComputation<Integer> {
+		
+		private int depth;
+		
+		public OneTwoTreeComputation(int depth) {
+			this.depth = depth;
+		}
 
-	default Approximation<T> apply() {
-		// We can perform apply in the {@link Anytime} way, or the {@link TreeComputationTest} way,
-		// so we have to define it here in order to eliminate the ambiguity, or the compiler will complain.
-		// The latter is more efficient since all we want is the final result.
-		return TreeComputation.super.apply();
+		@Override
+		public ArrayList<? extends NullaryFunction<Integer>> getSubs() {
+			if (depth == 0) {
+				return arrayList(
+						() -> 1,
+						() -> 2,
+						() -> 3
+						);
+			}
+			else {
+				return arrayList(
+						new OneTwoTreeComputation(depth - 1),
+						new OneTwoTreeComputation(depth - 1),
+						new OneTwoTreeComputation(depth - 1)
+						);
+			}
+		}
+
+		@Override
+		public Integer function(List<Integer> subsValues) {
+			return (Integer) Util.sum(subsValues);
+		}
+	}
+
+	@Test
+	public void test() {
+		Assert.assertEquals(6,  new OneTwoTreeComputation(0).apply().intValue());
+		Assert.assertEquals(18, new OneTwoTreeComputation(1).apply().intValue());
 	}
 }
