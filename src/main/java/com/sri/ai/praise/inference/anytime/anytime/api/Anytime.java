@@ -43,6 +43,20 @@ import com.sri.ai.util.base.NullaryFunction;
 
 
 /**
+ * An anytime computation is a computation that returns an approximation to some
+ * other, exact, computation.
+ * 
+ * It extends the interface of an iterator to approximations of a value.
+ * Ideally, the values of the iterator are better and better approximations,
+ * hopefully converging to the exact value although that is not required at this level.
+ * <p>
+ * The current value of the iterator is avaiable at {@link #getCurrentApproximation()},
+ * which does not iterate to the next value.
+ * <p>
+ * It extends the interface of nullary function of an approximation.
+ * When invoked as a nullary function, it returns the final approximation
+ * (that is, the final element of the iterator's range). 
+ * 
  * @author braz
  *
  * @param <T>

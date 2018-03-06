@@ -48,7 +48,7 @@ import com.sri.ai.util.base.NullaryFunction;
  * An interface for a tree-based computation.
  * A tree-based computation consists of a function applied to the results
  * of a list of sub-computations (which are typically tree-based computations themselves).
- * 
+ * <p>
  * Implementations must provide a method that provides the sub-computations,
  * and the function to be applied to them.
  * The result of the tree computation is the result returned by the function.
