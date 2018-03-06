@@ -51,6 +51,39 @@ import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
 import com.sri.ai.util.base.NullaryFunction;
 
 /**
+ * An abstract implementation of {@link AnytimeTreeComputation}
+ * that borrows most functionality based on a given base {@link TreeComputation}
+ * and an {@link ApproximationScheme}.
+ * <p>
+ * Essentially, this creates an anytime tree computation by
+ * lazily expanding, node by node, the base tree computation, and creating
+ * anytime versions of them that are used to compute the next approximation
+ * to the final root value.
+ * <p>
+ * Initially, the value of the anytime root computation is
+ * the approximation provided by the approximation scheme's
+ * {@link ApproximationScheme#totalIgnorance()} method.
+ * <p>
+ * Then, in order to create the next approximation,
+ * this class creates sub-anytime approximations
+ * by requesting the base tree computation's children
+ * and computing their anytime versions with
+ * {@link #makeAnytimeVersion(NullaryFunction)}
+ * (which must be implemented by extending classes).
+ * The sub-anytime tree computations's approximations
+ * are then used by the approximation scheme to compute the new
+ * approximation to the root, by also using the base tree computation's function.
+ * <p>
+ * To update an even better next approximation,
+ * the class picks the next anytime sub-computation
+ * by using the abstract method {@link #pickNextSubWithNext()},
+ * which is also to be specified by extensions.
+ * <p>
+ * It then iterates the picked next anytime sub-computation,
+ * obtaining a new approximation to the corresponding argument,
+ * and delegates the computation of the new approximation
+ * of the root anytime tree computation to the approximation scheme.
+ *
  * @author braz
  *
  * @param <T>

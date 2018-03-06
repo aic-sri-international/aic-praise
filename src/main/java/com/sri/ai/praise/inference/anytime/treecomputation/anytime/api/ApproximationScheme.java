@@ -43,6 +43,19 @@ import com.google.common.base.Function;
 import com.sri.ai.praise.inference.anytime.anytime.api.Approximation;
 
 /**
+ * An interface for schemes for approximation.
+ * <p>
+ * Approximation schemes represent the design choices made for a particular type of approximation.
+ * It defines what approximation to use when there is total ignorance about the true value,
+ * and defines how to use a function on the approximated values in order
+ * to obtain an approximation to the result of this function
+ * given approximations to its arguments.
+ * <p>
+ * Some examples of approximation schemes are guaranteed bounds on real numbers,
+ * probabilistic bounds (with a guaranteed probability delta of being in a given bound),
+ * confidence intervals, or even values expected to be close to the real ones but without
+ * any guarantees.
+ * 
  * @author braz
  *
  * @param <T>
