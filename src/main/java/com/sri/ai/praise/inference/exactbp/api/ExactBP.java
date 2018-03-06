@@ -35,12 +35,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime;
+package com.sri.ai.praise.inference.exactbp.api;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 
-import com.sri.ai.grinder.library.bounds.Bound;
+import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
-public interface BoundedMessageIterator extends Iterator<Bound> {
-	Bound getBound();
+public interface ExactBP extends TreeComputation<Factor> {
+	
+	Node getRoot();
+	
+	@Override
+	ArrayList<ExactBP> getSubs();
 }

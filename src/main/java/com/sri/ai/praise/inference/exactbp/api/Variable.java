@@ -35,33 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless;
+package com.sri.ai.praise.inference.exactbp.api;
 
-import static com.sri.ai.util.Util.forAll;
-import static com.sri.ai.util.Util.list;
-
-import java.util.List;
-
-import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
-
-public class Intersection<T> implements LiveSet<T> {
-	
-	private List<? extends LiveSet<T>> liveSets;
-	
-	public Intersection(List<? extends LiveSet<T>> liveSets) {
-		this.liveSets = liveSets;
-	}
-	
-	public boolean contains(T element) {
-		boolean result = forAll(liveSets, s -> s.contains(element));
-		return result;
-	}
-	
-	public static <T> LiveSet<T> intersection(List<? extends LiveSet<T>> liveSets) {
-		return new Intersection<>(liveSets); 
-	}
-	
-	public static <T> LiveSet<T> intersection(LiveSet<T> liveSet1, LiveSet<T> liveSet2) {
-		return new Intersection<>(list(liveSet1, liveSet2)); 
-	}
+public interface Variable extends Node {
 }

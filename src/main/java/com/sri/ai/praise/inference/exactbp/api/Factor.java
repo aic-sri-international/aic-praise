@@ -35,61 +35,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.test.praise.inference.anytime.treecomputation.api;
+package com.sri.ai.praise.inference.exactbp.api;
 
-import static com.sri.ai.util.Util.arrayList;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
-import com.sri.ai.util.Util;
-import com.sri.ai.util.base.NullaryFunction;
-
-/**
- * @author braz
- *
- */
-public class TreeComputationTest {
+public interface Factor extends Node {
 	
-	static class OneTwoTreeComputation implements TreeComputation<Integer> {
-		
-		private int depth;
-		
-		public OneTwoTreeComputation(int depth) {
-			this.depth = depth;
-		}
-
-		@Override
-		public ArrayList<? extends NullaryFunction<Integer>> getSubs() {
-			if (depth == 0) {
-				return arrayList(
-						() -> 1,
-						() -> 2,
-						() -> 3
-						);
-			}
-			else {
-				return arrayList(
-						new OneTwoTreeComputation(depth - 1),
-						new OneTwoTreeComputation(depth - 1),
-						new OneTwoTreeComputation(depth - 1)
-						);
-			}
-		}
-
-		@Override
-		public Integer function(List<Integer> subsValues) {
-			return (Integer) Util.sum(subsValues);
-		}
-	}
-
-	@Test
-	public void test() {
-		Assert.assertEquals(6,  new OneTwoTreeComputation(0).apply().intValue());
-		Assert.assertEquals(18, new OneTwoTreeComputation(1).apply().intValue());
-	}
+	boolean contains(Variable variable);
+	
 }

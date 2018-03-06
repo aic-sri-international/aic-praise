@@ -35,37 +35,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime.treecomputation.api;
+package com.sri.ai.praise.inference.exactbp.api;
 
-import static com.sri.ai.util.Util.mapIntoArrayList;
-
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import com.sri.ai.util.base.NullaryFunction;
-
 /**
- * An interface for a tree-based computation.
- * A tree-based computation consists of a function applied to the results
- * of a list of sub-computations (which are typically tree-based computations themselves).
- * <p>
- * Implementations must provide a method that provides the sub-computations,
- * and the function to be applied to them.
- * The result of the tree computation is the result returned by the function.
+ * A node in {@link ExactBP}; either a {@link Variable} or a {@link Factor}.
  * 
  * @author braz
  *
- * @param <T>
  */
-public interface TreeComputation<T> extends NullaryFunction<T> {
+public interface Node {
 
-	ArrayList<? extends NullaryFunction<T>> getSubs();
-
-	T function(List<T> subsValues);
-
-	default T apply() {
-		List<T> subResults = mapIntoArrayList(getSubs(), NullaryFunction::apply);
-		T result = function(subResults);
-		return result;
-	}
+	Iterator<Node> getNeighbors();
+	
+	/**
+	 * Indicates what set of factors is at this node;
+	 * typically, the empty list for variables and a singleton set of a itself for a factor
+	 * (although the algorithm should work with nodes gathering multiple factors as well.
+	 */
+	List<Factor> getFactorsAtThisNode();
 }

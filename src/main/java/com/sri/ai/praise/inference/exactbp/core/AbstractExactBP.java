@@ -35,34 +35,55 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytime;
+package com.sri.ai.praise.inference.exactbp.core;
 
-import static com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.Union.union;
-import static com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.Union.unionOfAllButTheOneAt;
 import static com.sri.ai.util.Util.collectToArrayList;
-import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
+import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
+import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
+import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.union;
+import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.unionOfAllButTheOneAt;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import com.sri.ai.grinder.library.bounds.Bound;
-import com.sri.ai.praise.inference.anytime.livesets.api.LiveSet;
-import com.sri.ai.praise.inference.anytime.livesets.core.lazy.memoryless.RedirectingLiveSet;
+import com.sri.ai.praise.inference.exactbp.api.ExactBP;
+import com.sri.ai.praise.inference.exactbp.api.Factor;
+import com.sri.ai.praise.inference.exactbp.api.Node;
+import com.sri.ai.util.livesets.api.LiveSet;
+import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
-public abstract class AbstractExactBP
-	extends AbstractFunctionOnIterators<Bound>
-	implements ExactBP {
+/**
+ * Abstract implementation of Exact BP gathering the common functionality
+ * of Exact BP rooted in variables and in factors.
+ * <p>
+ * Each node of Exact BP must provide its sub-Exact BPs.
+ * This is done with the method {@link #makeSubExactBP(Node, LiveSet, RedirectingLiveSet)},
+ * which is left abstract since variable-rooted Exact BPs will want to create
+ * subs which are factor-rooted Exact BPs and vice-versa,
+ * so it is not a common functionality.
+ * <p>
+ * Method {@link #function(List)} is also left unspecified at this level
+ * because variable-rooted Exact BPs will multiple messages
+ * while factor-rooted ones will sum out certain variables of its factor times incoming messages.
+ * <p>
+ * Other than that, both types must keep track of
+ * included factors (those already assigned to be in its branch)
+ * and excluded factors (those in their siblings or parent),
+ * so this is implemented at this level.
+ * 
+ * @author braz
+ *
+ */
+public abstract class AbstractExactBP implements ExactBP {
 	
-	protected abstract AbstractExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
+	protected abstract ExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
 
 	protected Node root;
 	protected Node parent;
 	
-	protected Bound bound;
-
-	protected List<ExactBP> subs;
+	protected ArrayList<ExactBP> subs;
 
 	final protected LiveSet<Factor> excludedFactors;
 	final protected RedirectingLiveSet<Factor> includedFactors;
@@ -75,13 +96,13 @@ public abstract class AbstractExactBP
 	public AbstractExactBP(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors) {
 		this.root = root;
 		this.parent = parent;
-		this.bound = null; // TODO: replace by simplex
 		this.subs = null;
 		this.excludedFactors = excludedFactors;
 		this.includedFactors = includedFactors;
 	}
 	
-	protected List<ExactBP> getSubs() {
+	@Override
+	public ArrayList<ExactBP> getSubs() {
 		if (subs == null) {
 			makeSubs();
 		}
@@ -91,25 +112,9 @@ public abstract class AbstractExactBP
 	private void makeSubs() {
 		ArrayList<Node> subsRoots = makeSubsRoots();
 		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = 
-				mapIntoArrayList(subsRoots, Node::makeInitialIncludedFactors);
+				mapIntoArrayList(subsRoots, n -> makeRedirectingLiveSetReferringToEmptySet());
 		makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
 		setIncludedFactorsToUnionOfSubsIncludedFactors(subsIncludedFactors);
-	}
-
-	private void makeSubsFromTheirIncludedFactors(ArrayList<Node> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
-		int subIndex = 0;
-		for (Node subRoot : subsRoots) {
-			AbstractExactBP sub = makeSubFromTheirIncludedFactors(subRoot, subIndex, subsIncludedFactors);
-			subs.add(sub);
-			subIndex++;
-		}
-	}
-
-	private AbstractExactBP makeSubFromTheirIncludedFactors(Node subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
-		RedirectingLiveSet<Factor> subIncludedFactors = subsIncludedFactors.get(subIndex);
-		LiveSet<Factor> subExcludedFactors = excludedFactorsForSubAt(subIndex, subsIncludedFactors);
-		AbstractExactBP sub = makeSubExactBP(subRoot, subExcludedFactors, subIncludedFactors);
-		return sub;
 	}
 
 	private ArrayList<Node> makeSubsRoots() {
@@ -117,32 +122,42 @@ public abstract class AbstractExactBP
 		return result;
 	}
 
+	private RedirectingLiveSet<Factor> makeRedirectingLiveSetReferringToEmptySet() {
+		return redirectingTo(liveSet(list()));
+	}
+
+	private void makeSubsFromTheirIncludedFactors(ArrayList<Node> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+		int subIndex = 0;
+		for (Node subRoot : subsRoots) {
+			ExactBP sub = makeSubFromTheirIncludedFactors(subRoot, subIndex, subsIncludedFactors);
+			subs.add(sub);
+			subIndex++;
+		}
+	}
+
+	private ExactBP makeSubFromTheirIncludedFactors(Node subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+		RedirectingLiveSet<Factor> subIncludedFactors = subsIncludedFactors.get(subIndex);
+		LiveSet<Factor> subExcludedFactors = excludedFactorsForSubAt(subIndex, subsIncludedFactors);
+		ExactBP sub = makeSubExactBP(subRoot, subExcludedFactors, subIncludedFactors);
+		return sub;
+	}
+
 	private LiveSet<Factor> excludedFactorsForSubAt(int subIndex, List<RedirectingLiveSet<Factor>> subsIncludedFactors) {
 		LiveSet<Factor> unionOfSiblingsExcludedFactors = unionOfAllButTheOneAt(subsIncludedFactors, subIndex);
 		LiveSet<Factor> excludedFactorsUnionSiblingsExcludedFactors = excludedFactors.union(unionOfSiblingsExcludedFactors);
-		LiveSet<Factor> result = excludedFactorsUnionSiblingsExcludedFactors.union(root.getFactors());
+		LiveSet<Factor> result = excludedFactorsUnionSiblingsExcludedFactors.union(root.getFactorsAtThisNode());
 		return result;
 	}
 
 	private void setIncludedFactorsToUnionOfSubsIncludedFactors(List<RedirectingLiveSet<Factor>> subsIncludedFactors) {
-		includedFactors.redirectTo(union(subsIncludedFactors).union(root.getFactors()));
-	}
-
-	@Override
-	public ExactBP pickNextArgumentIterator() {
-		ExactBP result = getFirstSatisfyingPredicateOrNull(getSubs(), Iterator::hasNext);
-		return result;
-	}
-
-	public Bound getBound() {
-		return bound;
+		includedFactors.redirectTo(union(subsIncludedFactors).union(root.getFactorsAtThisNode()));
 	}
 
 	public Node getRoot() {
 		return root;
 	}
 
-	public List<Factor> getFactors() {
-		return getRoot().getFactors();
+	public List<Factor> getFactorsAtRoot() {
+		return getRoot().getFactorsAtThisNode();
 	}
 }
