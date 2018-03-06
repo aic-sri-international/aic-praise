@@ -43,6 +43,8 @@ import com.sri.ai.praise.inference.anytime.treecomputation.api.TreeComputation;
 
 
 /**
+ * An {@link Anytime} version of a {@link TreeComputation}.
+ * 
  * @author braz
  *
  * @param <T>
