@@ -47,4 +47,6 @@ public interface ExactBP extends TreeComputation<Factor> {
 	
 	@Override
 	ArrayList<ExactBP> getSubs();
+
+	Node getParent();
 }

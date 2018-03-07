@@ -37,7 +37,6 @@
  */
 package com.sri.ai.praise.inference.exactbp.api;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -48,7 +47,7 @@ import java.util.List;
  */
 public interface Node {
 
-	Iterator<Node> getNeighbors();
+	List<? extends Node> getNeighbors();
 	
 	/**
 	 * Indicates what set of factors is at this node;

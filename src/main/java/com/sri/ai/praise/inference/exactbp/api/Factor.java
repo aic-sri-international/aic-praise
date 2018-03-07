@@ -41,6 +41,9 @@ import java.util.List;
 
 public interface Factor extends Node {
 
+	@Override
+	List<Variable> getNeighbors();
+	
 	boolean contains(Variable variable);
 	
 	Factor multiply(Factor another);

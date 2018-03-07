@@ -80,7 +80,7 @@ public abstract class AbstractExactBP implements ExactBP {
 	
 	protected abstract ExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
 
-	protected abstract ArrayList<Node> makeSubsRoots();
+	protected abstract ArrayList<? extends Node> makeSubsRoots();
 
 	protected Node root;
 	protected Node parent;
@@ -118,7 +118,7 @@ public abstract class AbstractExactBP implements ExactBP {
 		// This method creates the sub-ExactBPs.
 		// First, it needs to create the included factor live sets for these subs,
 		// because that is required in the constructor of ExactBPs.
-		ArrayList<Node> subsRoots = makeSubsRoots();
+		ArrayList<? extends Node> subsRoots = makeSubsRoots();
 		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeSubsIncludedFactors(subsRoots.size());
 		makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
 	}
@@ -139,7 +139,7 @@ public abstract class AbstractExactBP implements ExactBP {
 		includedFactors.redirectTo(unionOfSubsIncludedFactorsAndFactorsAtRoot);
 	}
 
-	private void makeSubsFromTheirIncludedFactors(ArrayList<Node> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+	private void makeSubsFromTheirIncludedFactors(ArrayList<? extends Node> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
 		int subIndex = 0;
 		for (Node subRoot : subsRoots) {
 			ExactBP sub = makeSubFromTheirIncludedFactors(subRoot, subIndex, subsIncludedFactors);
@@ -162,8 +162,14 @@ public abstract class AbstractExactBP implements ExactBP {
 		return result;
 	}
 
+	@Override
 	public Node getRoot() {
 		return root;
+	}
+
+	@Override
+	public Node getParent() {
+		return parent;
 	}
 
 	public List<Factor> getFactorsAtRoot() {

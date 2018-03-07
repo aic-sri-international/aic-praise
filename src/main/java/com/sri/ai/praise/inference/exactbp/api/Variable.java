@@ -37,5 +37,11 @@
  */
 package com.sri.ai.praise.inference.exactbp.api;
 
+import java.util.List;
+
 public interface Variable extends Node {
+	
+	@Override
+	List<Factor> getNeighbors();
+
 }

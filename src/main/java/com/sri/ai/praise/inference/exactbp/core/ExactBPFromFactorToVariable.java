@@ -38,12 +38,14 @@
 package com.sri.ai.praise.inference.exactbp.core;
 
 import static com.sri.ai.util.Util.collectToArrayList;
+import static com.sri.ai.util.Util.notNullAndEquals;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.base.Predicate;
 import com.sri.ai.praise.inference.exactbp.api.Factor;
 import com.sri.ai.praise.inference.exactbp.api.Node;
 import com.sri.ai.praise.inference.exactbp.api.Representation;
@@ -59,19 +61,37 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 
 	@Override
 	protected AbstractExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromVariableToFactor(subRoot, root, subExcludedFactors, subIncludedFactors, representation);
+		return new ExactBPFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation);
 	}
 
 	@Override
-	protected ArrayList<Node> makeSubsRoots() {
-		ArrayList<Node> result = collectToArrayList(root.getNeighbors(), n -> n != parent);
+	public Factor getRoot() {
+		return (Factor) super.getRoot();
+	}
+	
+	@Override
+	protected ArrayList<Variable> makeSubsRoots() {
+		ArrayList<Variable> result = collectToArrayList(getRoot().getNeighbors(), n -> n != parent);
 		return result;
 	}
 
 	@Override
 	public Factor function(List<Factor> incomingMessages) {
-		List<Variable> variablesToBeSummedOut = null; // TODO: factor's variables minus free variables
+		List<Variable> neighbors = getRoot().getNeighbors();
+		List<Variable> variablesToBeSummedOut = collectToArrayList(neighbors, isNotFreeVariable());
 		Factor result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), incomingMessages);
+		return result;
+	}
+
+	private Predicate<Variable> isNotFreeVariable() {
+		return n -> ! isFreeVariable((Variable) n);
+	}
+
+	private boolean isFreeVariable(Variable variable) {
+		boolean result = 
+				notNullAndEquals(getParent(), variable)
+				||
+				excludedFactors.thereIsAnElementSatisfying(f -> f.getNeighbors().contains(variable));
 		return result;
 	}
 
