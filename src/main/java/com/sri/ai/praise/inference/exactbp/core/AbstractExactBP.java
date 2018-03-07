@@ -37,7 +37,6 @@
  */
 package com.sri.ai.praise.inference.exactbp.core;
 
-import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
@@ -81,6 +80,8 @@ public abstract class AbstractExactBP implements ExactBP {
 	
 	protected abstract ExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
 
+	protected abstract ArrayList<Node> makeSubsRoots();
+
 	protected Node root;
 	protected Node parent;
 	
@@ -120,11 +121,6 @@ public abstract class AbstractExactBP implements ExactBP {
 		ArrayList<Node> subsRoots = makeSubsRoots();
 		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeSubsIncludedFactors(subsRoots.size());
 		makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
-	}
-
-	private ArrayList<Node> makeSubsRoots() {
-		ArrayList<Node> result = collectToArrayList(root.getNeighbors(), n -> n != parent);
-		return result;
 	}
 
 	private ArrayList<RedirectingLiveSet<Factor>> makeSubsIncludedFactors(int numberOfSubs) {

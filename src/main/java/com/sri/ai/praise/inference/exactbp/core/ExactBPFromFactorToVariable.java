@@ -37,10 +37,10 @@
  */
 package com.sri.ai.praise.inference.exactbp.core;
 
-import static com.sri.ai.util.Util.collectToList;
-import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -63,26 +63,15 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	}
 
 	@Override
+	protected ArrayList<Node> makeSubsRoots() {
+		ArrayList<Node> result = collectToArrayList(root.getNeighbors(), n -> n != parent);
+		return result;
+	}
+
+	@Override
 	public Factor function(List<Factor> incomingMessages) {
-		List<Variable> subsVariables = getSubsVariables();
-		List<Variable> variablesToBeSummedOut = determineVariablesToBeSummedOut(subsVariables);
+		List<Variable> variablesToBeSummedOut = null; // TODO: factor's variables minus free variables
 		Factor result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), incomingMessages);
-		return result;
-	}
-
-	private List<Variable> getSubsVariables() {
-		List<Variable> result = mapIntoList(getSubs(), sub -> (Variable) sub.getRoot());
-		return result;
-	}
-
-	private List<Variable> determineVariablesToBeSummedOut(List<Variable> subsVariables) {
-		List<Variable> result = collectToList(subsVariables, v -> notInExcludedFactors(v));
-		return result;
-	}
-
-	private boolean notInExcludedFactors(Variable variable) {
-		boolean inExcludedFactors = excludedFactors.thereIsAnElementSatisfying(f -> f.contains(variable));
-		boolean result = ! inExcludedFactors;
 		return result;
 	}
 

@@ -37,6 +37,9 @@
  */
 package com.sri.ai.praise.inference.exactbp.core;
 
+import static com.sri.ai.util.Util.collectToArrayList;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
@@ -57,6 +60,12 @@ public class ExactBPFromVariableToFactor extends AbstractExactBP {
 		return new ExactBPFromFactorToVariable(subRoot, root, subExcludedFactors, subIncludedFactors, representation);
 	}
 	
+	@Override
+	protected ArrayList<Node> makeSubsRoots() {
+		ArrayList<Node> result = collectToArrayList(root.getNeighbors(), n -> ! excludedFactors.contains((Factor)n));
+		return result;
+	}
+
 	@Override
 	public Factor function(List<Factor> incomingMessages) {
 		return representation.multiply(incomingMessages);
