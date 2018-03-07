@@ -39,36 +39,40 @@ package com.sri.ai.praise.inference.exactbp.core;
 
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.Factor;
 import com.sri.ai.praise.inference.exactbp.api.Node;
+import com.sri.ai.praise.inference.exactbp.api.Representation;
 import com.sri.ai.praise.inference.exactbp.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	
-	public ExactBPFromFactorToVariable(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors) {
-		super(root, parent, excludedFactors, includedFactors);
+	public ExactBPFromFactorToVariable(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation) {
+		super(root, parent, excludedFactors, includedFactors, representation);
 	}
 
 	@Override
 	protected AbstractExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromVariableToFactor(subRoot, this.root, subExcludedFactors, subIncludedFactors);
+		return new ExactBPFromVariableToFactor(subRoot, root, subExcludedFactors, subIncludedFactors, representation);
 	}
 
 	@Override
-	public Factor function(List<Factor> subsValues) {
+	public Factor function(List<Factor> incomingMessages) {
 		List<Variable> subsVariables = getSubsVariables();
 		List<Variable> variablesToBeSummedOut = determineVariablesToBeSummedOut(subsVariables);
-		Factor result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), subsVariables, subsValues);
+		Factor result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), incomingMessages);
 		return result;
 	}
 
 	private List<Variable> getSubsVariables() {
-		return mapIntoList(getSubs(), sub -> (Variable) sub.getRoot());
+		List<Variable> result = mapIntoList(getSubs(), sub -> (Variable) sub.getRoot());
+		return result;
 	}
 
 	private List<Variable> determineVariablesToBeSummedOut(List<Variable> subsVariables) {
@@ -77,12 +81,14 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	}
 
 	private boolean notInExcludedFactors(Variable variable) {
-		boolean result = ! excludedFactors.thereIsAnElementSatisfying(f -> f.contains(variable));
+		boolean inExcludedFactors = excludedFactors.thereIsAnElementSatisfying(f -> f.contains(variable));
+		boolean result = ! inExcludedFactors;
 		return result;
 	}
 
-	private Factor sumOut(List<Variable> variablesToBeSummedOut, List<Factor> factors, List<Variable> subsVariables, List<Factor> subsValues) {
-		// TODO Auto-generated method stub
-		return null;
+	private Factor sumOut(List<Variable> variablesToBeSummedOut, List<Factor> factorsAtRoot, List<Factor> incomingMessages) {
+		Iterator<Factor> allFactors = nestedIterator(factorsAtRoot, incomingMessages);
+		Factor result = representation.multiply(allFactors).sumOut(variablesToBeSummedOut);
+		return result;
 	}
 }

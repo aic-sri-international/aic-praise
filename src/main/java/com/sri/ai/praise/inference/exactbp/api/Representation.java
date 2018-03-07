@@ -37,7 +37,28 @@
  */
 package com.sri.ai.praise.inference.exactbp.api;
 
-import java.util.Collection;
+import static com.sri.ai.util.Util.accumulate;
 
-public interface Model extends Collection<Factor> {
+import java.util.Collection;
+import java.util.Iterator;
+
+/**
+ * A class encapsulating knowledge about the type of factor and variable representation used by {@link ExactBP}.
+ * 
+ * @author braz
+ *
+ */
+public interface Representation {
+
+	Factor makeIdentityFactor();
+	
+	default Factor multiply(Iterator<Factor> factors) {
+		Factor result = accumulate(factors, Factor::multiply, makeIdentityFactor());
+		return result;
+	}
+
+	default Factor multiply(Collection<Factor> factors) {
+		Factor result = multiply(factors.iterator());
+		return result;
+	}
 }

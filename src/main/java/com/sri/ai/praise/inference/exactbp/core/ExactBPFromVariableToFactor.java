@@ -42,30 +42,23 @@ import java.util.List;
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.exactbp.api.Factor;
 import com.sri.ai.praise.inference.exactbp.api.Node;
-import com.sri.ai.praise.inference.exactbp.api.Variable;
+import com.sri.ai.praise.inference.exactbp.api.Representation;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromVariableToFactor extends AbstractExactBP {
 	
-	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors) {
-		super(root, parent, excludedFactors, includedFactors);
+	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation) {
+		super(root, parent, excludedFactors, includedFactors, representation);
 	}
 
 	@Override
 	protected ExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromFactorToVariable(subRoot, this.root, subExcludedFactors, subIncludedFactors);
+		return new ExactBPFromFactorToVariable(subRoot, root, subExcludedFactors, subIncludedFactors, representation);
 	}
 	
 	@Override
-	public Variable getRoot() {
-		return (Variable) super.getRoot();
-	}
-
-	@Override
-	public Factor function(List<Factor> subsValues) {
-		// TODO Auto-generated method stub
-		// Implement product of incoming messages
-		return null;
+	public Factor function(List<Factor> incomingMessages) {
+		return representation.multiply(incomingMessages);
 	}
 }

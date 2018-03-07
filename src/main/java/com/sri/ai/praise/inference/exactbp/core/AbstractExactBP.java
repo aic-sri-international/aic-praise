@@ -38,8 +38,8 @@
 package com.sri.ai.praise.inference.exactbp.core;
 
 import static com.sri.ai.util.Util.collectToArrayList;
+import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.union;
@@ -51,6 +51,7 @@ import java.util.List;
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.exactbp.api.Factor;
 import com.sri.ai.praise.inference.exactbp.api.Node;
+import com.sri.ai.praise.inference.exactbp.api.Representation;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -93,12 +94,15 @@ public abstract class AbstractExactBP implements ExactBP {
 	// are wired to it.
 	// The solution is to have a redirecting live set instance that can be redirected.
 	
-	public AbstractExactBP(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors) {
+	protected Representation representation;
+	
+	public AbstractExactBP(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation) {
 		this.root = root;
 		this.parent = parent;
 		this.subs = null;
 		this.excludedFactors = excludedFactors;
 		this.includedFactors = includedFactors;
+		this.representation = representation;
 	}
 	
 	@Override
@@ -110,11 +114,12 @@ public abstract class AbstractExactBP implements ExactBP {
 	}
 	
 	private void makeSubs() {
+		// This method creates the sub-ExactBPs.
+		// First, it needs to create the included factor live sets for these subs,
+		// because that is required in the constructor of ExactBPs.
 		ArrayList<Node> subsRoots = makeSubsRoots();
-		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = 
-				mapIntoArrayList(subsRoots, n -> makeRedirectingLiveSetReferringToEmptySet());
+		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeSubsIncludedFactors(subsRoots.size());
 		makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
-		setIncludedFactorsToUnionOfSubsIncludedFactors(subsIncludedFactors);
 	}
 
 	private ArrayList<Node> makeSubsRoots() {
@@ -122,8 +127,20 @@ public abstract class AbstractExactBP implements ExactBP {
 		return result;
 	}
 
-	private RedirectingLiveSet<Factor> makeRedirectingLiveSetReferringToEmptySet() {
+	private ArrayList<RedirectingLiveSet<Factor>> makeSubsIncludedFactors(int numberOfSubs) {
+		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors =
+				fill(numberOfSubs, () -> makeInitialSubIncludedFactors());
+		redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(subsIncludedFactors);
+		return subsIncludedFactors;
+	}
+
+	private RedirectingLiveSet<Factor> makeInitialSubIncludedFactors() {
 		return redirectingTo(liveSet(list()));
+	}
+
+	private void redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(List<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+		LiveSet<Factor> unionOfSubsIncludedFactorsAndFactorsAtRoot = union(subsIncludedFactors).union(root.getFactorsAtThisNode());
+		includedFactors.redirectTo(unionOfSubsIncludedFactorsAndFactorsAtRoot);
 	}
 
 	private void makeSubsFromTheirIncludedFactors(ArrayList<Node> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
@@ -147,10 +164,6 @@ public abstract class AbstractExactBP implements ExactBP {
 		LiveSet<Factor> excludedFactorsUnionSiblingsExcludedFactors = excludedFactors.union(unionOfSiblingsExcludedFactors);
 		LiveSet<Factor> result = excludedFactorsUnionSiblingsExcludedFactors.union(root.getFactorsAtThisNode());
 		return result;
-	}
-
-	private void setIncludedFactorsToUnionOfSubsIncludedFactors(List<RedirectingLiveSet<Factor>> subsIncludedFactors) {
-		includedFactors.redirectTo(union(subsIncludedFactors).union(root.getFactorsAtThisNode()));
 	}
 
 	public Node getRoot() {
