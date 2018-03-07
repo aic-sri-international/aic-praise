@@ -11,4 +11,4 @@ install:
   - mvn install -DskipTests=true -DskipUnitTests=true
 
 script:
-  - mvn test -Dgrinder.display.tree.util.ui=false -Dtrace.level=off -Djustification.level=off
+  - mvn verify -Dgrinder.display.tree.util.ui=false -Dtrace.level=off -Djustification.level=off
