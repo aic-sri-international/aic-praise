@@ -40,7 +40,6 @@ package com.sri.ai.praise.inference.representation.expression.core;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
-import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,6 +52,7 @@ import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.expression.api.ExpressionFactor;
 import com.sri.ai.praise.inference.representation.expression.api.ExpressionModel;
+import com.sri.ai.praise.inference.representation.expression.api.ExpressionVariable;
 
 public class DefaultExpressionFactor extends AbstractExpressionNode implements ExpressionFactor {
 
@@ -76,27 +76,37 @@ public class DefaultExpressionFactor extends AbstractExpressionNode implements E
 
 	@Override
 	public Factor multiply(Factor another) {
-		Factor result = evaluate(Times.make(this, (Expression) another));
+		Factor result = evaluateAsFactor(Times.make(this, (Expression) another));
 		return result;
 	}
 
 	@Override
-	public Factor sumOut(List<Variable> variablesToSumOut) {
-		// TODO: quite unfortunate need to cast each variable; find better solution
-		List<Expression> variableExpressions = mapIntoList(variablesToSumOut, v -> (Expression) v);
-		Expression set = intensionalMultiSet(variableExpressions, this, getModel().getContext());
-		Expression sum = apply(SUM, set);
-		Factor result = evaluate(sum);
+	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
+		Expression sum = makeSum(variablesToSumOut);
+		Factor result = evaluateAsFactor(sum);
 		return result;
 	}
 
-	private Factor evaluate(Expression expression) {
-		Expression resultFactorExpression = evaluateToExpression(expression);
+	private Expression makeSum(List<? extends Variable> variablesToSumOut) {
+		Expression set = makeIntensionalMultiSet(variablesToSumOut);
+		Expression sum = apply(SUM, set);
+		return sum;
+	}
+
+	private Expression makeIntensionalMultiSet(List<? extends Variable> variablesToSumOut) {
+		@SuppressWarnings("unchecked") // is there a better way to do this?
+		List<ExpressionVariable> variableExpressionsToSumOut = (List<ExpressionVariable>) variablesToSumOut;
+		Expression set = intensionalMultiSet(variableExpressionsToSumOut, this, getModel().getContext());
+		return set;
+	}
+
+	private Factor evaluateAsFactor(Expression expression) {
+		Expression resultFactorExpression = evaluate(expression);
 		Factor result = makeFactor(resultFactorExpression);
 		return result;
 	}
 
-	private Expression evaluateToExpression(Expression expression) {
+	private Expression evaluate(Expression expression) {
 		Context context = getModel().getContext();
 		Expression result = context.getTheory().evaluate(expression, context);
 		return result;

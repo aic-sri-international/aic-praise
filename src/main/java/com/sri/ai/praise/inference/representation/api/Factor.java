@@ -52,7 +52,7 @@ public interface Factor extends Node {
 	
 	Factor multiply(Factor another);
 	
-	Factor sumOut(List<Variable> variablesToSumOut);
+	Factor sumOut(List<? extends Variable> variablesToSumOut);
 	
 	@Override
 	default List<Factor> getFactorsAtThisNode() {
