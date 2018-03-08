@@ -60,7 +60,7 @@ public enum ModelLanguage {
 		  	".hogm"),		  	
 	// 
 	// External Languages
-	PMTK3FactorGraph("PMTK3 Factor Graph Format",
+	PMTK3FactorGraph("PMTK3 ExpressionFactor Graph Format",
 			false,
 		  	"PMTK3",
 		  	"PMTK is a collection of Matlab/Octave functions, which includes support for probabilisitc inference.",

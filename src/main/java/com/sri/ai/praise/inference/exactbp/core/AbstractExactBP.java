@@ -48,9 +48,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.exactbp.api.Factor;
-import com.sri.ai.praise.inference.exactbp.api.Node;
-import com.sri.ai.praise.inference.exactbp.api.Representation;
+import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Node;
+import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -59,7 +59,7 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * of Exact BP rooted in variables and in factors.
  * <p>
  * Each node of Exact BP must provide its sub-Exact BPs.
- * This is done with the method {@link #makeSubExactBP(Node, LiveSet, RedirectingLiveSet)},
+ * This is done with the method {@link #makeSubExactBP(AbstractExpressionNode, LiveSet, RedirectingLiveSet)},
  * which is left abstract since variable-rooted Exact BPs will want to create
  * subs which are factor-rooted Exact BPs and vice-versa,
  * so it is not a common functionality.
@@ -119,11 +119,11 @@ public abstract class AbstractExactBP implements ExactBP {
 		// First, it needs to create the included factor live sets for these subs,
 		// because that is required in the constructor of ExactBPs.
 		ArrayList<? extends Node> subsRoots = makeSubsRoots();
-		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeSubsIncludedFactors(subsRoots.size());
+		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeInitialSubsIncludedFactors(subsRoots.size());
 		makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
 	}
 
-	private ArrayList<RedirectingLiveSet<Factor>> makeSubsIncludedFactors(int numberOfSubs) {
+	private ArrayList<RedirectingLiveSet<Factor>> makeInitialSubsIncludedFactors(int numberOfSubs) {
 		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors =
 				fill(numberOfSubs, () -> makeInitialSubIncludedFactors());
 		redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(subsIncludedFactors);
@@ -142,13 +142,13 @@ public abstract class AbstractExactBP implements ExactBP {
 	private void makeSubsFromTheirIncludedFactors(ArrayList<? extends Node> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
 		int subIndex = 0;
 		for (Node subRoot : subsRoots) {
-			ExactBP sub = makeSubFromTheirIncludedFactors(subRoot, subIndex, subsIncludedFactors);
+			ExactBP sub = makeSubFromItsIncludedFactors(subRoot, subIndex, subsIncludedFactors);
 			subs.add(sub);
 			subIndex++;
 		}
 	}
 
-	private ExactBP makeSubFromTheirIncludedFactors(Node subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+	private ExactBP makeSubFromItsIncludedFactors(Node subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
 		RedirectingLiveSet<Factor> subIncludedFactors = subsIncludedFactors.get(subIndex);
 		LiveSet<Factor> subExcludedFactors = excludedFactorsForSubAt(subIndex, subsIncludedFactors);
 		ExactBP sub = makeSubExactBP(subRoot, subExcludedFactors, subIncludedFactors);

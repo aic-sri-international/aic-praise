@@ -35,18 +35,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.exactbp.api;
+package com.sri.ai.praise.inference.representation.expression.api;
 
-import java.util.List;
+import com.sri.ai.praise.inference.representation.api.Factor;
 
-public interface Factor extends Node {
+/**
+ * 
+ * @author braz
+ *
+ */
+public interface ExpressionFactor extends ExpressionNode, Factor {
 
-	@Override
-	List<Variable> getNeighbors();
-	
-	boolean contains(Variable variable);
-	
-	Factor multiply(Factor another);
-	
-	Factor sumOut(List<Variable> variablesToSumOut);
 }

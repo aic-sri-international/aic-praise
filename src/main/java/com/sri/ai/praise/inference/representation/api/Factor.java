@@ -35,72 +35,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.common.io;
+package com.sri.ai.praise.inference.representation.api;
 
-import static com.sri.ai.util.Util.unionArrayList;
+import static com.sri.ai.util.Util.list;
+import static java.util.Collections.unmodifiableList;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
-import com.google.common.annotations.Beta;
-import com.sri.ai.praise.lang.ModelLanguage;
+public interface Factor extends Node {
 
-/**
- * DefaultExpressionRepresentation of a Model Page (i.e. a complete model) within a PagedModelContainer.
- * 
- * @author oreilly
- *
- */
-@Beta
-public class ModelPage {
-	private final ModelLanguage language;
-	private final String        name;
-	private final String        model;
-	private final List<String>  defaultQueriesToRun;
+	@Override
+	Collection<Variable> getNeighbors();
 	
-	public ModelPage(ModelLanguage language, String name, String model, List<String> defaultQueriesToRun) {
-		this.language            = language;
-		this.name                = name;
-		this.model               = model;
-		this.defaultQueriesToRun = Collections.unmodifiableList(new ArrayList<>(defaultQueriesToRun));
-	}
+	boolean contains(Variable variable);
 	
-	public ModelPage makeCopyWithNewQueries(List<String> newQueries) {
-		ModelPage result = new ModelPage(language, name, model, newQueries);
-		return result;
-	}
+	Factor multiply(Factor another);
 	
-	public ModelPage makeCopyWithExtraQueries(List<String> extraQueries) {
-		ModelPage modelPageWithExtraQueries;
-		if (extraQueries.size() == 0) {
-			modelPageWithExtraQueries = this;
-		}
-		else {
-			List<String> combinedQueries = unionArrayList(extraQueries, getDefaultQueriesToRun());
-			modelPageWithExtraQueries = makeCopyWithNewQueries(combinedQueries);
-		}
-		return modelPageWithExtraQueries;
-	}
-
-	public ModelLanguage getLanguage() {
-		return language;
-	}
-	
-	public String getName() {
-		return name;
-	}
-
-	public String getModelString() {
-		return model;
-	}
-
-	public List<String> getDefaultQueriesToRun() {
-		return defaultQueriesToRun;
-	}
+	Factor sumOut(List<Variable> variablesToSumOut);
 	
 	@Override
-	public String toString() {
-		return name;
+	default List<Factor> getFactorsAtThisNode() {
+		return unmodifiableList(list(this));
 	}
 }

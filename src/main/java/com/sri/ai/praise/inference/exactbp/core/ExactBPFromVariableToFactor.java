@@ -43,10 +43,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.exactbp.api.Factor;
-import com.sri.ai.praise.inference.exactbp.api.Node;
-import com.sri.ai.praise.inference.exactbp.api.Representation;
-import com.sri.ai.praise.inference.exactbp.api.Variable;
+import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Node;
+import com.sri.ai.praise.inference.representation.api.Representation;
+import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -67,8 +67,8 @@ public class ExactBPFromVariableToFactor extends AbstractExactBP {
 	}
 	
 	@Override
-	protected ArrayList<Factor> makeSubsRoots() {
-		ArrayList<Factor> result = collectToArrayList(getRoot().getNeighbors(), n -> ! excludedFactors.contains((Factor)n));
+	protected ArrayList<? extends Factor> makeSubsRoots() {
+		ArrayList<? extends Factor> result = collectToArrayList(getRoot().getNeighbors(), n -> ! excludedFactors.contains((Factor)n));
 		return result;
 	}
 

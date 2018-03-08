@@ -35,72 +35,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.common.io;
+package com.sri.ai.praise.inference.representation.api;
 
-import static com.sri.ai.util.Util.unionArrayList;
-
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
-import com.google.common.annotations.Beta;
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.inference.exactbp.api.ExactBP;
+import com.sri.ai.praise.inference.representation.expression.core.DefaultExpressionFactor;
+import com.sri.ai.praise.inference.representation.expression.core.DefaultExpressionVariable;
 
 /**
- * DefaultExpressionRepresentation of a Model Page (i.e. a complete model) within a PagedModelContainer.
+ * A node in {@link ExactBP}; either a {@link DefaultExpressionVariable} or a {@link DefaultExpressionFactor}.
  * 
- * @author oreilly
+ * @author braz
  *
  */
-@Beta
-public class ModelPage {
-	private final ModelLanguage language;
-	private final String        name;
-	private final String        model;
-	private final List<String>  defaultQueriesToRun;
-	
-	public ModelPage(ModelLanguage language, String name, String model, List<String> defaultQueriesToRun) {
-		this.language            = language;
-		this.name                = name;
-		this.model               = model;
-		this.defaultQueriesToRun = Collections.unmodifiableList(new ArrayList<>(defaultQueriesToRun));
-	}
-	
-	public ModelPage makeCopyWithNewQueries(List<String> newQueries) {
-		ModelPage result = new ModelPage(language, name, model, newQueries);
-		return result;
-	}
-	
-	public ModelPage makeCopyWithExtraQueries(List<String> extraQueries) {
-		ModelPage modelPageWithExtraQueries;
-		if (extraQueries.size() == 0) {
-			modelPageWithExtraQueries = this;
-		}
-		else {
-			List<String> combinedQueries = unionArrayList(extraQueries, getDefaultQueriesToRun());
-			modelPageWithExtraQueries = makeCopyWithNewQueries(combinedQueries);
-		}
-		return modelPageWithExtraQueries;
-	}
+public interface Node {
 
-	public ModelLanguage getLanguage() {
-		return language;
-	}
+	Collection<? extends Node> getNeighbors();
 	
-	public String getName() {
-		return name;
-	}
-
-	public String getModelString() {
-		return model;
-	}
-
-	public List<String> getDefaultQueriesToRun() {
-		return defaultQueriesToRun;
-	}
-	
-	@Override
-	public String toString() {
-		return name;
-	}
+	/**
+	 * Indicates what set of factors is at this node;
+	 * typically, the empty list for variables and a singleton set of a itself for a factor
+	 * (although the algorithm should work with nodes gathering multiple factors as well).
+	 */
+	List<Factor> getFactorsAtThisNode();
 }

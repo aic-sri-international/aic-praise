@@ -35,72 +35,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.common.io;
+package com.sri.ai.praise.inference.representation.expression.api;
 
-import static com.sri.ai.util.Util.unionArrayList;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import com.google.common.annotations.Beta;
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.inference.representation.api.Node;
 
 /**
- * DefaultExpressionRepresentation of a Model Page (i.e. a complete model) within a PagedModelContainer.
  * 
- * @author oreilly
+ * @author braz
  *
  */
-@Beta
-public class ModelPage {
-	private final ModelLanguage language;
-	private final String        name;
-	private final String        model;
-	private final List<String>  defaultQueriesToRun;
+public interface ExpressionNode extends Expression, Node {
 	
-	public ModelPage(ModelLanguage language, String name, String model, List<String> defaultQueriesToRun) {
-		this.language            = language;
-		this.name                = name;
-		this.model               = model;
-		this.defaultQueriesToRun = Collections.unmodifiableList(new ArrayList<>(defaultQueriesToRun));
-	}
-	
-	public ModelPage makeCopyWithNewQueries(List<String> newQueries) {
-		ModelPage result = new ModelPage(language, name, model, newQueries);
-		return result;
-	}
-	
-	public ModelPage makeCopyWithExtraQueries(List<String> extraQueries) {
-		ModelPage modelPageWithExtraQueries;
-		if (extraQueries.size() == 0) {
-			modelPageWithExtraQueries = this;
-		}
-		else {
-			List<String> combinedQueries = unionArrayList(extraQueries, getDefaultQueriesToRun());
-			modelPageWithExtraQueries = makeCopyWithNewQueries(combinedQueries);
-		}
-		return modelPageWithExtraQueries;
-	}
+	ExpressionModel getModel();
 
-	public ModelLanguage getLanguage() {
-		return language;
-	}
-	
-	public String getName() {
-		return name;
-	}
-
-	public String getModelString() {
-		return model;
-	}
-
-	public List<String> getDefaultQueriesToRun() {
-		return defaultQueriesToRun;
-	}
-	
-	@Override
-	public String toString() {
-		return name;
-	}
 }

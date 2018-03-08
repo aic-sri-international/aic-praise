@@ -42,14 +42,15 @@ import static com.sri.ai.util.Util.notNullAndEquals;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.base.Predicate;
-import com.sri.ai.praise.inference.exactbp.api.Factor;
-import com.sri.ai.praise.inference.exactbp.api.Node;
-import com.sri.ai.praise.inference.exactbp.api.Representation;
-import com.sri.ai.praise.inference.exactbp.api.Variable;
+import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Node;
+import com.sri.ai.praise.inference.representation.api.Representation;
+import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -77,7 +78,7 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 
 	@Override
 	public Factor function(List<Factor> incomingMessages) {
-		List<Variable> neighbors = getRoot().getNeighbors();
+		Collection<Variable> neighbors = getRoot().getNeighbors();
 		List<Variable> variablesToBeSummedOut = collectToArrayList(neighbors, isNotFreeVariable());
 		Factor result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), incomingMessages);
 		return result;

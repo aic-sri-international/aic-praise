@@ -184,7 +184,7 @@ public class UAIModel implements MarkovNetwork {
 	public void addMARSolution(Integer varIdx, List<Double> values) {
 		Integer cardinality = varIdxToCardinality.get(varIdx);
 		if (cardinality == null) {
-			throw new IllegalArgumentException("Variable Index is invalid, give "+ varIdx +" must be in interval [0, "+numberVariables()+")");
+			throw new IllegalArgumentException("ExpressionVariable Index is invalid, give "+ varIdx +" must be in interval [0, "+numberVariables()+")");
 		}
 		if (cardinality != values.size()) {
 			throw new IllegalArgumentException("Size of values given, "+values.size()+", does not match variables cardinality, which is "+cardinality);

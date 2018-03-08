@@ -35,24 +35,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.exactbp.api;
+package com.sri.ai.praise.inference.representation.api;
 
+import static com.sri.ai.util.Util.list;
+
+import java.util.Collection;
 import java.util.List;
 
-/**
- * A node in {@link ExactBP}; either a {@link Variable} or a {@link Factor}.
- * 
- * @author braz
- *
- */
-public interface Node {
-
-	List<? extends Node> getNeighbors();
+public interface Variable extends Node {
 	
+	@Override
+	Collection<Factor> getNeighbors();
+
 	/**
-	 * Indicates what set of factors is at this node;
-	 * typically, the empty list for variables and a singleton set of a itself for a factor
-	 * (although the algorithm should work with nodes gathering multiple factors as well.
+	 * Default implementation returning a list empty of factors.
 	 */
-	List<Factor> getFactorsAtThisNode();
+	@Override
+	default List<Factor> getFactorsAtThisNode() {
+		return list();
+	}
 }

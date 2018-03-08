@@ -35,12 +35,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.exactbp.api;
+package com.sri.ai.praise.inference.representation.api;
 
 import static com.sri.ai.util.Util.accumulate;
 
 import java.util.Collection;
 import java.util.Iterator;
+
+import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 
 /**
  * A class encapsulating knowledge about the type of factor and variable representation used by {@link ExactBP}.
