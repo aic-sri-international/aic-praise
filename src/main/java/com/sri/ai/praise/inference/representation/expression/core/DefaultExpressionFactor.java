@@ -46,7 +46,6 @@ import java.util.List;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -94,7 +93,7 @@ public class DefaultExpressionFactor extends AbstractExpressionNode implements E
 	}
 
 	private Expression makeIntensionalMultiSet(List<? extends Variable> variablesToSumOut) {
-		@SuppressWarnings("unchecked") // is there a better way to do this?
+		@SuppressWarnings("unchecked")
 		List<ExpressionVariable> variableExpressionsToSumOut = (List<ExpressionVariable>) variablesToSumOut;
 		Expression set = intensionalMultiSet(variableExpressionsToSumOut, this, getModel().getContext());
 		return set;
@@ -107,8 +106,7 @@ public class DefaultExpressionFactor extends AbstractExpressionNode implements E
 	}
 
 	private Expression evaluate(Expression expression) {
-		Context context = getModel().getContext();
-		Expression result = context.getTheory().evaluate(expression, context);
+		Expression result = getModel().getContext().evaluate(expression);
 		return result;
 	}
 
