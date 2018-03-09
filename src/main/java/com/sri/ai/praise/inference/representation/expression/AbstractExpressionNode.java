@@ -35,12 +35,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.expression.core;
+package com.sri.ai.praise.inference.representation.expression;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.WrappedExpression;
-import com.sri.ai.praise.inference.representation.expression.api.ExpressionModel;
-import com.sri.ai.praise.inference.representation.expression.api.ExpressionNode;
+import com.sri.ai.praise.inference.representation.api.Node;
 
 /**
  * An abstract implementation of {@link ExpressionNode} taking a model as constructor argument
@@ -49,7 +48,7 @@ import com.sri.ai.praise.inference.representation.expression.api.ExpressionNode;
  * @author braz
  *
  */
-public abstract class AbstractExpressionNode extends WrappedExpression implements ExpressionNode {
+public abstract class AbstractExpressionNode extends WrappedExpression implements Node {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -60,7 +59,6 @@ public abstract class AbstractExpressionNode extends WrappedExpression implement
 		this.model = model;
 	}
 
-	@Override
 	public ExpressionModel getModel() {
 		return model;
 	}

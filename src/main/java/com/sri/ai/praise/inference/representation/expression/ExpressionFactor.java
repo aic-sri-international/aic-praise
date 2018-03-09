@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.expression.core;
+package com.sri.ai.praise.inference.representation.expression;
 
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
@@ -49,15 +49,12 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.praise.inference.representation.expression.api.ExpressionFactor;
-import com.sri.ai.praise.inference.representation.expression.api.ExpressionModel;
-import com.sri.ai.praise.inference.representation.expression.api.ExpressionVariable;
 
-public class DefaultExpressionFactor extends AbstractExpressionNode implements ExpressionFactor {
+public class ExpressionFactor extends AbstractExpressionNode implements Factor {
 
 	private static final long serialVersionUID = 1L;
 
-	public DefaultExpressionFactor(Expression expression, ExpressionModel model) {
+	public ExpressionFactor(Expression expression, ExpressionModel model) {
 		super(expression, model);
 	}
 
@@ -110,8 +107,8 @@ public class DefaultExpressionFactor extends AbstractExpressionNode implements E
 		return result;
 	}
 
-	private DefaultExpressionFactor makeFactor(Expression expression) {
-		DefaultExpressionFactor result = new DefaultExpressionFactor(expression, getModel());
+	private ExpressionFactor makeFactor(Expression expression) {
+		ExpressionFactor result = new ExpressionFactor(expression, getModel());
 		return result;
 	}
 }

@@ -48,7 +48,7 @@ import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**
- * DefaultExpressionRepresentation of a Bayesian Network Conditional Probability Table - P(C | P1,...,Pn).
+ * ExpressionRepresentation of a Bayesian Network Conditional Probability Table - P(C | P1,...,Pn).
  * 
  * @author oreilly
  *

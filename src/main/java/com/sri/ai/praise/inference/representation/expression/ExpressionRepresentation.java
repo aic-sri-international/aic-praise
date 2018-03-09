@@ -35,15 +35,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.expression.api;
+package com.sri.ai.praise.inference.representation.expression;
 
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Representation;
 
 /**
+ * An implementation of {@link Representation} using {@link Expression}s
+ * to represent {@link ExpressionVariable}s and {@link ExpressionFactor}s.
  * 
  * @author braz
  *
  */
-public interface ExpressionRepresentation extends Representation {
+public class ExpressionRepresentation implements Representation {
+
+	@Override
+	public Factor makeIdentityFactor() {
+		return null;
+	}
 
 }

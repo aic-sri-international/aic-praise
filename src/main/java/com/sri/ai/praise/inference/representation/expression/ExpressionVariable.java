@@ -35,15 +35,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.expression.api;
+package com.sri.ai.praise.inference.representation.expression;
 
+import java.util.Collection;
+
+import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Variable;
 
-/**
- * 
- * @author braz
- *
- */
-public interface ExpressionFactor extends ExpressionNode, Factor {
+public class ExpressionVariable extends AbstractExpressionNode implements Variable {
+
+	private static final long serialVersionUID = 1L;
+
+	public ExpressionVariable(Expression expression, ExpressionModel model) {
+		super(expression, model);
+	}
+
+	@Override
+	public Collection<Factor> getNeighbors() {
+		return getModel().getAsOfB(this);
+	}
 
 }

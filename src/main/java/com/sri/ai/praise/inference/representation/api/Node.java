@@ -41,11 +41,11 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.representation.expression.core.DefaultExpressionFactor;
-import com.sri.ai.praise.inference.representation.expression.core.DefaultExpressionVariable;
+import com.sri.ai.praise.inference.representation.expression.ExpressionFactor;
+import com.sri.ai.praise.inference.representation.expression.ExpressionVariable;
 
 /**
- * A node in {@link ExactBP}; either a {@link DefaultExpressionVariable} or a {@link DefaultExpressionFactor}.
+ * A node in {@link ExactBP}; either a {@link ExpressionVariable} or a {@link ExpressionFactor}.
  * 
  * @author braz
  *
