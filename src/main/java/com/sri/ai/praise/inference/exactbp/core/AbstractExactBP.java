@@ -135,7 +135,7 @@ public abstract class AbstractExactBP implements ExactBP {
 	}
 
 	private void redirectRootIncludedFactorNodesToUnionOfSubsIncludedFactorNodesAndFactorNodesAtRoot(List<RedirectingLiveSet<FactorNode>> subsIncludedFactorNodes) {
-		LiveSet<FactorNode> unionOfSubsIncludedFactorNodesAndFactorsAtRoot = union(subsIncludedFactorNodes).union(root.getFactorNodesAtThisNode());
+		LiveSet<FactorNode> unionOfSubsIncludedFactorNodesAndFactorsAtRoot = union(subsIncludedFactorNodes).union(root.getFactorNodes());
 		includedFactorNodes.redirectTo(unionOfSubsIncludedFactorNodesAndFactorsAtRoot);
 	}
 
@@ -158,7 +158,7 @@ public abstract class AbstractExactBP implements ExactBP {
 	private LiveSet<FactorNode> excludedFactorNodesForSubAt(int subIndex, List<RedirectingLiveSet<FactorNode>> subsIncludedFactorNodes) {
 		LiveSet<FactorNode> unionOfSiblingsExcludedFactorNodes = unionOfAllButTheOneAt(subsIncludedFactorNodes, subIndex);
 		LiveSet<FactorNode> excludedFactorNodesUnionSiblingsExcludedFactorNodes = excludedFactorNodes.union(unionOfSiblingsExcludedFactorNodes);
-		LiveSet<FactorNode> result = excludedFactorNodesUnionSiblingsExcludedFactorNodes.union(root.getFactorNodesAtThisNode());
+		LiveSet<FactorNode> result = excludedFactorNodesUnionSiblingsExcludedFactorNodes.union(root.getFactorNodes());
 		return result;
 	}
 
@@ -173,6 +173,6 @@ public abstract class AbstractExactBP implements ExactBP {
 	}
 
 	public List<FactorNode> getFactorNodesAtRoot() {
-		return getRoot().getFactorNodesAtThisNode();
+		return getRoot().getFactorNodes();
 	}
 }

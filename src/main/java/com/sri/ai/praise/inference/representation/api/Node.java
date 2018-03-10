@@ -55,9 +55,9 @@ public interface Node {
 	Collection<? extends Node> getNeighbors();
 	
 	/**
-	 * Indicates what set of factors is at this node;
+	 * Indicates what set of factor nodes is at this node;
 	 * typically, the empty list for variables and a singleton set of a itself for a factor
 	 * (although the algorithm should work with nodes gathering multiple factors as well).
 	 */
-	List<FactorNode> getFactorNodesAtThisNode();
+	List<FactorNode> getFactorNodes();
 }

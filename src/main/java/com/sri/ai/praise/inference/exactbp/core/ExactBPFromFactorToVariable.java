@@ -38,6 +38,7 @@
 package com.sri.ai.praise.inference.exactbp.core;
 
 import static com.sri.ai.util.Util.collectToArrayList;
+import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.notNullAndEquals;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
@@ -98,7 +99,8 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	}
 
 	private Factor sumOut(List<Variable> variablesToBeSummedOut, List<FactorNode> factorNodesAtRoot, List<Factor> incomingMessages) {
-		Iterator<Factor> allFactors = nestedIterator(factorNodesAtRoot, incomingMessages);
+		List<Factor> factors = mapIntoList(factorNodesAtRoot, n -> n.getFactor());
+		Iterator<Factor> allFactors = nestedIterator(factors, incomingMessages);
 		Factor result = representation.multiply(allFactors).sumOut(variablesToBeSummedOut);
 		return result;
 	}

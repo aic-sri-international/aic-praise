@@ -39,8 +39,7 @@ package com.sri.ai.praise.inference.representation.expression;
 
 import java.util.Collection;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.FactorNode;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
@@ -48,19 +47,21 @@ public class ExpressionFactorNode extends AbstractExpressionNode implements Fact
 
 	private static final long serialVersionUID = 1L;
 
-	public ExpressionFactorNode(Expression expression, ExpressionModel model) {
-		super(expression, model);
+	private ExpressionFactor factor;
+	
+	public ExpressionFactorNode(ExpressionFactor factor, ExpressionModel model) {
+		super(null, model); // TODO: need to remove expression wrapping from AbstractExpressionNode
+		this.factor = factor;
+	}
+
+	@Override
+	public Factor getFactor() {
+		return factor;
 	}
 
 	@Override
 	public Collection<Variable> getNeighbors() {
 		Collection<Variable> result = getModel().getBsOfA(this);
-		return result;
-	}
-
-	@Override
-	public boolean contains(Variable variable) {
-		boolean result = Expressions.contains(this, (Expression) variable);
 		return result;
 	}
 }

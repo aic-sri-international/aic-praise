@@ -85,20 +85,21 @@ public class ExpressionModel extends DefaultManyToManyRelation<FactorNode, Varia
 	}
 
 	private void indexFactorsAndVariables(Expression factorExpression, Context context) {
-		FactorNode factor = new ExpressionFactorNode(factorExpression, this);
-		indexFactorAndItsVariables(factor, factorExpression, context);
+		ExpressionFactor factor = new ExpressionFactor(factorExpression, context);
+		FactorNode factorNode = new ExpressionFactorNode(factor, this);
+		indexFactorNodeAndItsVariables(factorNode, factorExpression, context);
 	}
 
-	private void indexFactorAndItsVariables(FactorNode factor, Expression factorExpression, Context context) {
+	private void indexFactorNodeAndItsVariables(FactorNode factorNode, Expression factorExpression, Context context) {
 		Set<Expression> freeVariables = freeVariables(factorExpression, context);
 		for (Expression variableExpression : freeVariables) {
-			indexFactorAndVariable(factor, variableExpression);
+			indexFactorNodeAndVariable(factorNode, variableExpression);
 		}
 	}
 
-	private void indexFactorAndVariable(FactorNode factor, Expression variableExpression) {
+	private void indexFactorNodeAndVariable(FactorNode factorNode, Expression variableExpression) {
 		Variable variable = new ExpressionVariable(variableExpression, this);
-		this.add(factor, variable);
+		this.add(factorNode, variable);
 	}
 
 	public Context getContext() {
