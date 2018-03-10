@@ -47,7 +47,7 @@ import java.util.Set;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.FactorNode;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.collect.DefaultManyToManyRelation;
 
@@ -57,7 +57,7 @@ import com.sri.ai.util.collect.DefaultManyToManyRelation;
  * @author braz
  *
  */
-public class ExpressionModel extends DefaultManyToManyRelation<Factor, Variable> {
+public class ExpressionModel extends DefaultManyToManyRelation<FactorNode, Variable> {
 	
 	private Context context;
 
@@ -85,18 +85,18 @@ public class ExpressionModel extends DefaultManyToManyRelation<Factor, Variable>
 	}
 
 	private void indexFactorsAndVariables(Expression factorExpression, Context context) {
-		Factor factor = new ExpressionFactor(factorExpression, this);
+		FactorNode factor = new ExpressionFactor(factorExpression, this);
 		indexFactorAndItsVariables(factor, factorExpression, context);
 	}
 
-	private void indexFactorAndItsVariables(Factor factor, Expression factorExpression, Context context) {
+	private void indexFactorAndItsVariables(FactorNode factor, Expression factorExpression, Context context) {
 		Set<Expression> freeVariables = freeVariables(factorExpression, context);
 		for (Expression variableExpression : freeVariables) {
 			indexFactorAndVariable(factor, variableExpression);
 		}
 	}
 
-	private void indexFactorAndVariable(Factor factor, Expression variableExpression) {
+	private void indexFactorAndVariable(FactorNode factor, Expression variableExpression) {
 		Variable variable = new ExpressionVariable(variableExpression, this);
 		this.add(factor, variable);
 	}

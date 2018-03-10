@@ -35,20 +35,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.exactbp.api;
+package com.sri.ai.praise.inference.representation.api;
 
-import java.util.ArrayList;
+import static com.sri.ai.util.Util.list;
 
-import com.sri.ai.praise.inference.representation.api.Factor2;
-import com.sri.ai.praise.inference.representation.api.Node;
-import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
-public interface ExactBP extends TreeComputation<Factor2> {
-	
-	Node getRoot();
-	
+public interface FactorNode extends Node {
+
 	@Override
-	ArrayList<ExactBP> getSubs();
+	Collection<Variable> getNeighbors();
+	
+	boolean contains(Variable variable);
 
-	Node getParent();
+	@Override
+	default List<FactorNode> getFactorsAtThisNode() {
+		return Collections.unmodifiableList(list(this));
+	}
 }

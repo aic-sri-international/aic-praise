@@ -47,7 +47,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.base.Predicate;
-import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.FactorNode;
+import com.sri.ai.praise.inference.representation.api.Factor2;
 import com.sri.ai.praise.inference.representation.api.Node;
 import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -56,18 +57,18 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	
-	public ExactBPFromFactorToVariable(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation) {
+	public ExactBPFromFactorToVariable(Node root, Node parent, LiveSet<FactorNode> excludedFactors, RedirectingLiveSet<FactorNode> includedFactors, Representation representation) {
 		super(root, parent, excludedFactors, includedFactors, representation);
 	}
 
 	@Override
-	protected AbstractExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
+	protected AbstractExactBP makeSubExactBP(Node subRoot, LiveSet<FactorNode> subExcludedFactors, RedirectingLiveSet<FactorNode> subIncludedFactors) {
 		return new ExactBPFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation);
 	}
 
 	@Override
-	public Factor getRoot() {
-		return (Factor) super.getRoot();
+	public FactorNode getRoot() {
+		return (FactorNode) super.getRoot();
 	}
 	
 	@Override
@@ -77,10 +78,10 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	}
 
 	@Override
-	public Factor function(List<Factor> incomingMessages) {
+	public Factor2 function(List<Factor2> incomingMessages) {
 		Collection<Variable> neighbors = getRoot().getNeighbors();
 		List<Variable> variablesToBeSummedOut = collectToArrayList(neighbors, isNotFreeVariable());
-		Factor result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), incomingMessages);
+		Factor2 result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), incomingMessages);
 		return result;
 	}
 
@@ -96,9 +97,9 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 		return result;
 	}
 
-	private Factor sumOut(List<Variable> variablesToBeSummedOut, List<Factor> factorsAtRoot, List<Factor> incomingMessages) {
-		Iterator<Factor> allFactors = nestedIterator(factorsAtRoot, incomingMessages);
-		Factor result = representation.multiply(allFactors).sumOut(variablesToBeSummedOut);
+	private Factor2 sumOut(List<Variable> variablesToBeSummedOut, List<FactorNode> factorsAtRoot, List<Factor2> incomingMessages) {
+		Iterator<Factor2> allFactors = nestedIterator(factorsAtRoot, incomingMessages);
+		Factor2 result = representation.multiply(allFactors).sumOut(variablesToBeSummedOut);
 		return result;
 	}
 }

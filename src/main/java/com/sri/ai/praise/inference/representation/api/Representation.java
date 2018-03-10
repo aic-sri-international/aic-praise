@@ -52,15 +52,15 @@ import com.sri.ai.praise.inference.exactbp.api.ExactBP;
  */
 public interface Representation {
 
-	Factor makeIdentityFactor();
+	Factor2 makeIdentityFactor();
 	
-	default Factor multiply(Iterator<Factor> factors) {
-		Factor result = accumulate(factors, Factor::multiply, makeIdentityFactor());
+	default Factor2 multiply(Iterator<Factor2> factors) {
+		Factor2 result = accumulate(factors, Factor2::multiply, makeIdentityFactor());
 		return result;
 	}
 
-	default Factor multiply(Collection<Factor> factors) {
-		Factor result = multiply(factors.iterator());
+	default Factor2 multiply(Collection<Factor2> factors) {
+		Factor2 result = multiply(factors.iterator());
 		return result;
 	}
 }

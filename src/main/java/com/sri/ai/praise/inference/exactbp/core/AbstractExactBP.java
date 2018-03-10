@@ -48,7 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.FactorNode;
 import com.sri.ai.praise.inference.representation.api.Node;
 import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.util.livesets.api.LiveSet;
@@ -78,7 +78,7 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  */
 public abstract class AbstractExactBP implements ExactBP {
 	
-	protected abstract ExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
+	protected abstract ExactBP makeSubExactBP(Node subRoot, LiveSet<FactorNode> subExcludedFactors, RedirectingLiveSet<FactorNode> subIncludedFactors);
 
 	protected abstract ArrayList<? extends Node> makeSubsRoots();
 
@@ -87,8 +87,8 @@ public abstract class AbstractExactBP implements ExactBP {
 	
 	protected ArrayList<ExactBP> subs;
 
-	final protected LiveSet<Factor> excludedFactors;
-	final protected RedirectingLiveSet<Factor> includedFactors;
+	final protected LiveSet<FactorNode> excludedFactors;
+	final protected RedirectingLiveSet<FactorNode> includedFactors;
 	// we must use redirecting live sets for included factors because they initially are just the root factor (if the root is a factor),
 	// but then later must be changed to include the union of sub-ExactBPs.
 	// However, the same instance must be kept because the parent's included and excluded factors live sets
@@ -97,7 +97,7 @@ public abstract class AbstractExactBP implements ExactBP {
 	
 	protected Representation representation;
 	
-	public AbstractExactBP(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation) {
+	public AbstractExactBP(Node root, Node parent, LiveSet<FactorNode> excludedFactors, RedirectingLiveSet<FactorNode> includedFactors, Representation representation) {
 		this.root = root;
 		this.parent = parent;
 		this.subs = null;
@@ -119,27 +119,27 @@ public abstract class AbstractExactBP implements ExactBP {
 		// First, it needs to create the included factor live sets for these subs,
 		// because that is required in the constructor of ExactBPs.
 		ArrayList<? extends Node> subsRoots = makeSubsRoots();
-		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeInitialSubsIncludedFactors(subsRoots.size());
+		ArrayList<RedirectingLiveSet<FactorNode>> subsIncludedFactors = makeInitialSubsIncludedFactors(subsRoots.size());
 		makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
 	}
 
-	private ArrayList<RedirectingLiveSet<Factor>> makeInitialSubsIncludedFactors(int numberOfSubs) {
-		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors =
+	private ArrayList<RedirectingLiveSet<FactorNode>> makeInitialSubsIncludedFactors(int numberOfSubs) {
+		ArrayList<RedirectingLiveSet<FactorNode>> subsIncludedFactors =
 				fill(numberOfSubs, () -> makeInitialSubIncludedFactors());
 		redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(subsIncludedFactors);
 		return subsIncludedFactors;
 	}
 
-	private RedirectingLiveSet<Factor> makeInitialSubIncludedFactors() {
+	private RedirectingLiveSet<FactorNode> makeInitialSubIncludedFactors() {
 		return redirectingTo(liveSet(list()));
 	}
 
-	private void redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(List<RedirectingLiveSet<Factor>> subsIncludedFactors) {
-		LiveSet<Factor> unionOfSubsIncludedFactorsAndFactorsAtRoot = union(subsIncludedFactors).union(root.getFactorsAtThisNode());
+	private void redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(List<RedirectingLiveSet<FactorNode>> subsIncludedFactors) {
+		LiveSet<FactorNode> unionOfSubsIncludedFactorsAndFactorsAtRoot = union(subsIncludedFactors).union(root.getFactorsAtThisNode());
 		includedFactors.redirectTo(unionOfSubsIncludedFactorsAndFactorsAtRoot);
 	}
 
-	private void makeSubsFromTheirIncludedFactors(ArrayList<? extends Node> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+	private void makeSubsFromTheirIncludedFactors(ArrayList<? extends Node> subsRoots, ArrayList<RedirectingLiveSet<FactorNode>> subsIncludedFactors) {
 		int subIndex = 0;
 		for (Node subRoot : subsRoots) {
 			ExactBP sub = makeSubFromItsIncludedFactors(subRoot, subIndex, subsIncludedFactors);
@@ -148,17 +148,17 @@ public abstract class AbstractExactBP implements ExactBP {
 		}
 	}
 
-	private ExactBP makeSubFromItsIncludedFactors(Node subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
-		RedirectingLiveSet<Factor> subIncludedFactors = subsIncludedFactors.get(subIndex);
-		LiveSet<Factor> subExcludedFactors = excludedFactorsForSubAt(subIndex, subsIncludedFactors);
+	private ExactBP makeSubFromItsIncludedFactors(Node subRoot, int subIndex, ArrayList<RedirectingLiveSet<FactorNode>> subsIncludedFactors) {
+		RedirectingLiveSet<FactorNode> subIncludedFactors = subsIncludedFactors.get(subIndex);
+		LiveSet<FactorNode> subExcludedFactors = excludedFactorsForSubAt(subIndex, subsIncludedFactors);
 		ExactBP sub = makeSubExactBP(subRoot, subExcludedFactors, subIncludedFactors);
 		return sub;
 	}
 
-	private LiveSet<Factor> excludedFactorsForSubAt(int subIndex, List<RedirectingLiveSet<Factor>> subsIncludedFactors) {
-		LiveSet<Factor> unionOfSiblingsExcludedFactors = unionOfAllButTheOneAt(subsIncludedFactors, subIndex);
-		LiveSet<Factor> excludedFactorsUnionSiblingsExcludedFactors = excludedFactors.union(unionOfSiblingsExcludedFactors);
-		LiveSet<Factor> result = excludedFactorsUnionSiblingsExcludedFactors.union(root.getFactorsAtThisNode());
+	private LiveSet<FactorNode> excludedFactorsForSubAt(int subIndex, List<RedirectingLiveSet<FactorNode>> subsIncludedFactors) {
+		LiveSet<FactorNode> unionOfSiblingsExcludedFactors = unionOfAllButTheOneAt(subsIncludedFactors, subIndex);
+		LiveSet<FactorNode> excludedFactorsUnionSiblingsExcludedFactors = excludedFactors.union(unionOfSiblingsExcludedFactors);
+		LiveSet<FactorNode> result = excludedFactorsUnionSiblingsExcludedFactors.union(root.getFactorsAtThisNode());
 		return result;
 	}
 
@@ -172,7 +172,7 @@ public abstract class AbstractExactBP implements ExactBP {
 		return parent;
 	}
 
-	public List<Factor> getFactorsAtRoot() {
+	public List<FactorNode> getFactorsAtRoot() {
 		return getRoot().getFactorsAtThisNode();
 	}
 }

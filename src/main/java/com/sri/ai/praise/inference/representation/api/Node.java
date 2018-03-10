@@ -59,5 +59,5 @@ public interface Node {
 	 * typically, the empty list for variables and a singleton set of a itself for a factor
 	 * (although the algorithm should work with nodes gathering multiple factors as well).
 	 */
-	List<Factor> getFactorsAtThisNode();
+	List<FactorNode> getFactorsAtThisNode();
 }

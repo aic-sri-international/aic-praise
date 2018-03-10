@@ -37,25 +37,13 @@
  */
 package com.sri.ai.praise.inference.representation.api;
 
-import static com.sri.ai.util.Util.list;
-import static java.util.Collections.unmodifiableList;
-
-import java.util.Collection;
 import java.util.List;
 
-public interface Factor extends Node {
+public interface Factor2 {
 
-	@Override
-	Collection<Variable> getNeighbors();
-	
 	boolean contains(Variable variable);
 	
-	Factor multiply(Factor another);
+	Factor2 multiply(Factor2 another);
 	
-	Factor sumOut(List<? extends Variable> variablesToSumOut);
-	
-	@Override
-	default List<Factor> getFactorsAtThisNode() {
-		return unmodifiableList(list(this));
-	}
+	Factor2 sumOut(List<? extends Variable> variablesToSumOut);
 }

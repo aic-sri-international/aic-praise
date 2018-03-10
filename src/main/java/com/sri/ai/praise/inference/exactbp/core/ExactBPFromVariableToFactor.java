@@ -43,7 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.FactorNode;
+import com.sri.ai.praise.inference.representation.api.Factor2;
 import com.sri.ai.praise.inference.representation.api.Node;
 import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -52,12 +53,12 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromVariableToFactor extends AbstractExactBP {
 	
-	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation) {
+	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<FactorNode> excludedFactors, RedirectingLiveSet<FactorNode> includedFactors, Representation representation) {
 		super(root, parent, excludedFactors, includedFactors, representation);
 	}
 
 	@Override
-	protected ExactBP makeSubExactBP(Node subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
+	protected ExactBP makeSubExactBP(Node subRoot, LiveSet<FactorNode> subExcludedFactors, RedirectingLiveSet<FactorNode> subIncludedFactors) {
 		return new ExactBPFromFactorToVariable(subRoot, root, subExcludedFactors, subIncludedFactors, representation);
 	}
 	
@@ -67,13 +68,13 @@ public class ExactBPFromVariableToFactor extends AbstractExactBP {
 	}
 	
 	@Override
-	protected ArrayList<? extends Factor> makeSubsRoots() {
-		ArrayList<? extends Factor> result = collectToArrayList(getRoot().getNeighbors(), n -> ! excludedFactors.contains((Factor)n));
+	protected ArrayList<? extends FactorNode> makeSubsRoots() {
+		ArrayList<? extends FactorNode> result = collectToArrayList(getRoot().getNeighbors(), n -> ! excludedFactors.contains((FactorNode)n));
 		return result;
 	}
 
 	@Override
-	public Factor function(List<Factor> incomingMessages) {
+	public Factor2 function(List<Factor2> incomingMessages) {
 		return representation.multiply(incomingMessages);
 	}
 }

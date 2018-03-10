@@ -38,7 +38,7 @@
 package com.sri.ai.praise.inference.representation.expression;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Factor2;
 import com.sri.ai.praise.inference.representation.api.Representation;
 
 /**
@@ -51,7 +51,7 @@ import com.sri.ai.praise.inference.representation.api.Representation;
 public class ExpressionRepresentation implements Representation {
 
 	@Override
-	public Factor makeIdentityFactor() {
+	public Factor2 makeIdentityFactor() {
 		return null;
 	}
 

@@ -45,13 +45,13 @@ import java.util.List;
 public interface Variable extends Node {
 	
 	@Override
-	Collection<Factor> getNeighbors();
+	Collection<FactorNode> getNeighbors();
 
 	/**
 	 * Default implementation returning a list empty of factors.
 	 */
 	@Override
-	default List<Factor> getFactorsAtThisNode() {
+	default List<FactorNode> getFactorsAtThisNode() {
 		return list();
 	}
 }
