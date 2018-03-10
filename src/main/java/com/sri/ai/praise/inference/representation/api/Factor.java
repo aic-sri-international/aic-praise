@@ -39,11 +39,11 @@ package com.sri.ai.praise.inference.representation.api;
 
 import java.util.List;
 
-public interface Factor2 {
+public interface Factor {
 
 	boolean contains(Variable variable);
 	
-	Factor2 multiply(Factor2 another);
+	Factor multiply(Factor another);
 	
-	Factor2 sumOut(List<? extends Variable> variablesToSumOut);
+	Factor sumOut(List<? extends Variable> variablesToSumOut);
 }

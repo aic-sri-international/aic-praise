@@ -85,7 +85,7 @@ public class ExpressionModel extends DefaultManyToManyRelation<FactorNode, Varia
 	}
 
 	private void indexFactorsAndVariables(Expression factorExpression, Context context) {
-		FactorNode factor = new ExpressionFactor(factorExpression, this);
+		FactorNode factor = new ExpressionFactorNode(factorExpression, this);
 		indexFactorAndItsVariables(factor, factorExpression, context);
 	}
 

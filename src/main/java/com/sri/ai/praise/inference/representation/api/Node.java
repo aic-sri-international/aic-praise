@@ -41,11 +41,11 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.representation.expression.ExpressionFactor;
+import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNode;
 import com.sri.ai.praise.inference.representation.expression.ExpressionVariable;
 
 /**
- * A node in {@link ExactBP}; either a {@link ExpressionVariable} or a {@link ExpressionFactor}.
+ * A node in {@link ExactBP}; either a {@link ExpressionVariable} or a {@link ExpressionFactorNode}.
  * 
  * @author braz
  *
@@ -59,5 +59,5 @@ public interface Node {
 	 * typically, the empty list for variables and a singleton set of a itself for a factor
 	 * (although the algorithm should work with nodes gathering multiple factors as well).
 	 */
-	List<FactorNode> getFactorsAtThisNode();
+	List<FactorNode> getFactorNodesAtThisNode();
 }

@@ -39,11 +39,11 @@ package com.sri.ai.praise.inference.exactbp.api;
 
 import java.util.ArrayList;
 
-import com.sri.ai.praise.inference.representation.api.Factor2;
+import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Node;
 import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
-public interface ExactBP extends TreeComputation<Factor2> {
+public interface ExactBP extends TreeComputation<Factor> {
 	
 	Node getRoot();
 	

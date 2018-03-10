@@ -48,7 +48,7 @@ import java.util.List;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.inference.representation.api.FactorNode;
-import com.sri.ai.praise.inference.representation.api.Factor2;
+import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Node;
 import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -78,10 +78,10 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	}
 
 	@Override
-	public Factor2 function(List<Factor2> incomingMessages) {
+	public Factor function(List<Factor> incomingMessages) {
 		Collection<Variable> neighbors = getRoot().getNeighbors();
 		List<Variable> variablesToBeSummedOut = collectToArrayList(neighbors, isNotFreeVariable());
-		Factor2 result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), incomingMessages);
+		Factor result = sumOut(variablesToBeSummedOut, getFactorNodesAtRoot(), incomingMessages);
 		return result;
 	}
 
@@ -93,13 +93,13 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 		boolean result = 
 				notNullAndEquals(getParent(), variable)
 				||
-				excludedFactors.thereIsAnElementSatisfying(f -> f.getNeighbors().contains(variable));
+				excludedFactorNodes.thereIsAnElementSatisfying(f -> f.getNeighbors().contains(variable));
 		return result;
 	}
 
-	private Factor2 sumOut(List<Variable> variablesToBeSummedOut, List<FactorNode> factorsAtRoot, List<Factor2> incomingMessages) {
-		Iterator<Factor2> allFactors = nestedIterator(factorsAtRoot, incomingMessages);
-		Factor2 result = representation.multiply(allFactors).sumOut(variablesToBeSummedOut);
+	private Factor sumOut(List<Variable> variablesToBeSummedOut, List<FactorNode> factorNodesAtRoot, List<Factor> incomingMessages) {
+		Iterator<Factor> allFactors = nestedIterator(factorNodesAtRoot, incomingMessages);
+		Factor result = representation.multiply(allFactors).sumOut(variablesToBeSummedOut);
 		return result;
 	}
 }

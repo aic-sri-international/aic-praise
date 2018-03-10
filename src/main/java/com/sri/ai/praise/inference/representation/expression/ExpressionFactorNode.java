@@ -35,46 +35,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.exactbp.core;
+package com.sri.ai.praise.inference.representation.expression;
 
-import static com.sri.ai.util.Util.collectToArrayList;
+import java.util.Collection;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.sri.ai.praise.inference.exactbp.api.ExactBP;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.inference.representation.api.FactorNode;
-import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.Node;
-import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.util.livesets.api.LiveSet;
-import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
-public class ExactBPFromVariableToFactor extends AbstractExactBP {
-	
-	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<FactorNode> excludedFactors, RedirectingLiveSet<FactorNode> includedFactors, Representation representation) {
-		super(root, parent, excludedFactors, includedFactors, representation);
+public class ExpressionFactorNode extends AbstractExpressionNode implements FactorNode {
+
+	private static final long serialVersionUID = 1L;
+
+	public ExpressionFactorNode(Expression expression, ExpressionModel model) {
+		super(expression, model);
 	}
 
 	@Override
-	protected ExactBP makeSubExactBP(Node subRoot, LiveSet<FactorNode> subExcludedFactors, RedirectingLiveSet<FactorNode> subIncludedFactors) {
-		return new ExactBPFromFactorToVariable(subRoot, root, subExcludedFactors, subIncludedFactors, representation);
-	}
-	
-	@Override
-	public Variable getRoot() {
-		return (Variable) super.getRoot();
-	}
-	
-	@Override
-	protected ArrayList<? extends FactorNode> makeSubsRoots() {
-		ArrayList<? extends FactorNode> result = collectToArrayList(getRoot().getNeighbors(), n -> ! excludedFactorNodes.contains((FactorNode)n));
+	public Collection<Variable> getNeighbors() {
+		Collection<Variable> result = getModel().getBsOfA(this);
 		return result;
 	}
 
 	@Override
-	public Factor function(List<Factor> incomingMessages) {
-		return representation.multiply(incomingMessages);
+	public boolean contains(Variable variable) {
+		boolean result = Expressions.contains(this, (Expression) variable);
+		return result;
 	}
 }

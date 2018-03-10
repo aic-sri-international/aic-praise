@@ -51,7 +51,7 @@ public interface FactorNode extends Node {
 	boolean contains(Variable variable);
 
 	@Override
-	default List<FactorNode> getFactorsAtThisNode() {
+	default List<FactorNode> getFactorNodesAtThisNode() {
 		return Collections.unmodifiableList(list(this));
 	}
 }

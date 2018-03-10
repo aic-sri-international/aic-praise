@@ -38,12 +38,12 @@
 package com.sri.ai.praise.inference.representation.expression;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.representation.api.Factor2;
+import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Representation;
 
 /**
  * An implementation of {@link Representation} using {@link Expression}s
- * to represent {@link ExpressionVariable}s and {@link ExpressionFactor}s.
+ * to represent {@link ExpressionVariable}s and {@link ExpressionFactorNode}s.
  * 
  * @author braz
  *
@@ -51,7 +51,7 @@ import com.sri.ai.praise.inference.representation.api.Representation;
 public class ExpressionRepresentation implements Representation {
 
 	@Override
-	public Factor2 makeIdentityFactor() {
+	public Factor makeIdentityFactor() {
 		return null;
 	}
 

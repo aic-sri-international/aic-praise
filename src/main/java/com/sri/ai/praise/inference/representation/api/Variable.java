@@ -51,7 +51,7 @@ public interface Variable extends Node {
 	 * Default implementation returning a list empty of factors.
 	 */
 	@Override
-	default List<FactorNode> getFactorsAtThisNode() {
+	default List<FactorNode> getFactorNodesAtThisNode() {
 		return list();
 	}
 }

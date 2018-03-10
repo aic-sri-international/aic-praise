@@ -119,7 +119,7 @@ public class HOGModelGrounding {
 		for (Expression factor : factorsAndTypes.getFactors()) {
 	    	ArrayList<Expression> randomVariablesInFactor = new ArrayList<>(Expressions.getSubExpressionsSatisfying(factor, randomVariableNameToTypeSizeAndUniqueConstants::containsKey));
 	    	if (randomVariablesInFactor.size() == 0) {
-	    		throw new IllegalArgumentException("ExpressionFactor contains no random variables: "+factor);
+	    		throw new IllegalArgumentException("ExpressionFactorNode contains no random variables: "+factor);
 	    	}
 	    	
 	    	int[] participantVariableIndexes = new int[randomVariablesInFactor.size()];
