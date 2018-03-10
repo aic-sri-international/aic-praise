@@ -37,8 +37,6 @@
  */
 package com.sri.ai.praise.inference.representation.api;
 
-import java.util.Collection;
-
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNode;
 import com.sri.ai.praise.inference.representation.expression.ExpressionVariable;
@@ -51,5 +49,4 @@ import com.sri.ai.praise.inference.representation.expression.ExpressionVariable;
  */
 public interface Node {
 
-	Collection<? extends Node> getNeighbors();
 }

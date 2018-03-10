@@ -37,10 +37,7 @@
  */
 package com.sri.ai.praise.inference.representation.expression;
 
-import java.util.Collection;
-
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.representation.api.FactorNode;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
 public class ExpressionVariable extends AbstractExpressionNode implements Variable {
@@ -49,11 +46,6 @@ public class ExpressionVariable extends AbstractExpressionNode implements Variab
 
 	public ExpressionVariable(Expression expression, ExpressionModel model) {
 		super(expression, model);
-	}
-
-	@Override
-	public Collection<FactorNode> getNeighbors() {
-		return getModel().getAsOfB(this);
 	}
 
 }

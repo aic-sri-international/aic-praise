@@ -38,7 +38,7 @@
 package com.sri.ai.praise.inference.representation.api;
 
 
-public interface FactorNode extends Node {
+public interface FactorNode extends Factor, Node {
 
 	Factor getFactor();
 }
