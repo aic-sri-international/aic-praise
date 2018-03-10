@@ -35,17 +35,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.exactbp.api;
+package com.sri.ai.praise.inference.representation.core;
 
-import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNode;
-import com.sri.ai.praise.inference.representation.expression.ExpressionVariable;
+import java.util.Collection;
+
+import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.FactorNetwork;
+import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.util.collect.DefaultManyToManyRelation;
 
 /**
- * A node in {@link ExactBP}; either a {@link ExpressionVariable} or a {@link ExpressionFactorNode}.
- * 
+ * An abstract {@link FactorNetwork} indexing factors and variables with a {@link DefaultManyToManyRelation}.
  * @author braz
  *
  */
-public interface Node {
+public abstract class AbstractFactorNetwork extends DefaultManyToManyRelation<Factor, Variable> implements FactorNetwork {
+
+	public AbstractFactorNetwork() {
+		super();
+	}
+
+	@Override
+	public Collection<? extends Variable> getNeighbors(Factor factor) {
+		return getBsOfA(factor);
+	}
+
+	@Override
+	public Collection<? extends Factor> getNeighbors(Variable variable) {
+		return getAsOfB(variable);
+	}
 
 }

@@ -116,7 +116,7 @@ public class HOGMQueryError {
 			sj.add("Error in Query ");
 		}
 		else if (context == Context.MODEL) {
-			sj.add("Error in Model ");
+			sj.add("Error in FactorNetwork ");
 		}
 		
 		if (context != Context.UNKNOWN) {

@@ -39,13 +39,11 @@ package com.sri.ai.praise.inference.representation.api;
 
 import java.util.List;
 
-import com.sri.ai.praise.inference.exactbp.api.VariableNode;
-
 public interface Factor {
 
-	boolean contains(VariableNode variable);
+	boolean contains(Variable variable);
 	
 	Factor multiply(Factor another);
 	
-	Factor sumOut(List<? extends VariableNode> variablesToSumOut);
+	Factor sumOut(List<? extends Variable> variablesToSumOut);
 }

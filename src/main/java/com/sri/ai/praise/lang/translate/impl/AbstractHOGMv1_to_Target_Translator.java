@@ -72,7 +72,7 @@ public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTransl
 	@Override
 	protected void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
 		//
-		// 1. Get the HOGM Model Definition and Parse It
+		// 1. Get the HOGM FactorNetwork Definition and Parse It
 		String hogmv1Model = Util.readAll(inputModelReaders[0]);
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
 		ParsedHOGModel    parsedModel     = parser.parseModel(hogmv1Model);

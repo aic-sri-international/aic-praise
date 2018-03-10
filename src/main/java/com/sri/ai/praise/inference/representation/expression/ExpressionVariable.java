@@ -38,14 +38,15 @@
 package com.sri.ai.praise.inference.representation.expression;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.exactbp.api.VariableNode;
+import com.sri.ai.expresso.helper.WrappedExpression;
+import com.sri.ai.praise.inference.representation.api.Variable;
 
-public class ExpressionVariable extends AbstractExpressionNode implements VariableNode {
+public class ExpressionVariable extends WrappedExpression implements Variable {
 
 	private static final long serialVersionUID = 1L;
 
-	public ExpressionVariable(Expression expression, ExpressionModel model) {
-		super(expression, model);
+	public ExpressionVariable(Expression expression) {
+		super(expression);
 	}
 
 }

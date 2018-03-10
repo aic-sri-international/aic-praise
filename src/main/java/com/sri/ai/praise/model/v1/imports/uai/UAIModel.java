@@ -50,7 +50,7 @@ import com.sri.ai.praise.lang.grounded.markov.MarkovNetwork;
 
 /**
  * In memory representation of an Uncertainty in Artificial Intelligence (UAI) 
- * <a href="http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html">Inference Competition Model</a>.
+ * <a href="http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html">Inference Competition FactorNetwork</a>.
  * 
  * @author oreilly
  */

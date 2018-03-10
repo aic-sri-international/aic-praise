@@ -35,31 +35,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.expression;
+package com.sri.ai.praise.inference.representation.api;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.WrappedExpression;
-import com.sri.ai.praise.inference.exactbp.api.Node;
+import java.util.Collection;
 
 /**
- * An abstract implementation of {@link ExpressionNode} taking a model as constructor argument
- * and keeping it available.
+ * 
  * 
  * @author braz
  *
  */
-public abstract class AbstractExpressionNode extends WrappedExpression implements Node {
-	
-	private static final long serialVersionUID = 1L;
+public interface FactorNetwork {
 
-	private ExpressionModel model;
+	Collection<? extends Variable> getNeighbors(Factor factor);
 
-	public AbstractExpressionNode(Expression expression, ExpressionModel model) {
-		super(expression);
-		this.model = model;
-	}
-
-	public ExpressionModel getModel() {
-		return model;
-	}
+	Collection<? extends Factor> getNeighbors(Variable variable);
 }

@@ -35,9 +35,50 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.exactbp.api;
+package com.sri.ai.praise.inference.representation.expression;
 
+import static com.sri.ai.expresso.helper.Expressions.ONE;
 
-public interface VariableNode extends Node {
-	
+import java.util.List;
+
+import com.sri.ai.expresso.helper.WrappedExpression;
+import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Representation;
+import com.sri.ai.praise.inference.representation.api.Variable;
+
+/**
+ * A class representing an {@link ExpressionFactor} that is an identity factor.
+ * The reason we have a class for this are the following:
+ * {@link Representation} is required to provide identity factors without receiving any extra information.
+ * {@link ExpressionFactors} require a {@link Context} during construction, so we cannot create an identity {@link ExpressionFactors}
+ * without any extra information (the contexts comes from the model).
+ * However, for identity factors we do not need a context because we already know how to perform its operations
+ * without any evaluation, since it is a trivial factor.
+ * We therefore implement it separately, with the trivial operations implemented without requiring a context.
+ * 
+ * @author braz
+ *
+ */
+public class ExpressionIdentityFactor extends WrappedExpression implements Factor {
+
+	private static final long serialVersionUID = 1L;
+
+	public ExpressionIdentityFactor() {
+		super(ONE);
+	}
+
+	@Override
+	public boolean contains(Variable variable) {
+		return false;
+	}
+
+	@Override
+	public Factor multiply(Factor another) {
+		return another;
+	}
+
+	@Override
+	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
+		return this;
+	}
 }

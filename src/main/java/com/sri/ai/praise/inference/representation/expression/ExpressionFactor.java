@@ -48,8 +48,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.WrappedExpression;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.praise.inference.exactbp.api.VariableNode;
 import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Variable;
 
 public class ExpressionFactor extends WrappedExpression implements Factor {
 
@@ -67,7 +67,7 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	}
 
 	@Override
-	public boolean contains(VariableNode variable) {
+	public boolean contains(Variable variable) {
 		boolean result = Expressions.contains(this, (Expression) variable);
 		return result;
 	}
@@ -79,19 +79,19 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	}
 
 	@Override
-	public Factor sumOut(List<? extends VariableNode> variablesToSumOut) {
+	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
 		Expression sum = makeSum(variablesToSumOut);
 		Factor result = evaluateAsFactor(sum);
 		return result;
 	}
 
-	private Expression makeSum(List<? extends VariableNode> variablesToSumOut) {
+	private Expression makeSum(List<? extends Variable> variablesToSumOut) {
 		Expression set = makeIntensionalMultiSet(variablesToSumOut);
 		Expression sum = apply(SUM, set);
 		return sum;
 	}
 
-	private Expression makeIntensionalMultiSet(List<? extends VariableNode> variablesToSumOut) {
+	private Expression makeIntensionalMultiSet(List<? extends Variable> variablesToSumOut) {
 		@SuppressWarnings("unchecked")
 		List<ExpressionVariable> variableExpressionsToSumOut = (List<ExpressionVariable>) variablesToSumOut;
 		Expression set = intensionalMultiSet(variableExpressionsToSumOut, this, getContext());

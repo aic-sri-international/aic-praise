@@ -55,7 +55,7 @@ import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.split;
 
 /**
  * Utility file for reading in Uncertainty in Artificial Intelligence (UAI) 
- * <a href="http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html">Inference Competition Model Format files</a>.
+ * <a href="http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html">Inference Competition FactorNetwork Format files</a>.
  * 
  * @author oreilly
  */

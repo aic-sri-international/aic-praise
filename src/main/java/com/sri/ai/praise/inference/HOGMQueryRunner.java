@@ -129,7 +129,7 @@ public class HOGMQueryRunner {
 	private ParsedHOGModel parseModel() {
 		ParsedHOGModel parsedModel = null;
     	if (isEmpty(model)) {
-			HOGMQueryError error = new HOGMQueryError(HOGMQueryError.Context.MODEL, "Model not specified");
+			HOGMQueryError error = new HOGMQueryError(HOGMQueryError.Context.MODEL, "FactorNetwork not specified");
 			errors.add(error);
 		}
     	else {

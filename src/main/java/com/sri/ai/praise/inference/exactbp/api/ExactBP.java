@@ -44,10 +44,11 @@ import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
 public interface ExactBP extends TreeComputation<Factor> {
 	
-	Node getRoot();
+	Object getParent();
+
+	Object getRoot();
 	
 	@Override
 	ArrayList<ExactBP> getSubs();
 
-	Node getParent();
 }

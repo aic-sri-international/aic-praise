@@ -329,7 +329,7 @@ public class PRAiSECommandLineOptions {
 	}
 
 	private ModelPage makeModelPage(String unionModel) {
-		return new ModelPage(inputLanguage, "Model from concatenation of non-container input files", unionModel, globalQueries);
+		return new ModelPage(inputLanguage, "FactorNetwork from concatenation of non-container input files", unionModel, globalQueries);
 	}
 
 	private static String getLegalModelLanguageCodesDescription() {

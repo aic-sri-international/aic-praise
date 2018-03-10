@@ -219,7 +219,7 @@ public class PagedModelContainer {
 		});
 		
 		if (containerModelLanguage.get() == null) {
-			throw new RuntimeException("Container Model Language Code is not specified: "+MODEL_LANGUAGE_PREFIX);
+			throw new RuntimeException("Container FactorNetwork Language Code is not specified: "+MODEL_LANGUAGE_PREFIX);
 		}
 	}
 	

@@ -39,7 +39,6 @@ package com.sri.ai.praise.inference.exactbp.core;
 
 import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.notNullAndEquals;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
@@ -47,66 +46,62 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sri.ai.praise.inference.exactbp.api.FactorNode;
-import com.sri.ai.praise.inference.exactbp.api.Node;
-import com.sri.ai.praise.inference.exactbp.api.VariableNode;
 import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.Model;
+import com.sri.ai.praise.inference.representation.api.FactorNetwork;
 import com.sri.ai.praise.inference.representation.api.Representation;
+import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	
-	public ExactBPFromFactorToVariable(Node root, Node parent, LiveSet<FactorNode> excludedFactors, RedirectingLiveSet<FactorNode> includedFactors, Representation representation, Model model) {
+	public ExactBPFromFactorToVariable(Object root, Object parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
 		super(root, parent, excludedFactors, includedFactors, representation, model);
 	}
 
 	@Override
-	protected AbstractExactBP makeSubExactBP(Node subRoot, LiveSet<FactorNode> subExcludedFactors, RedirectingLiveSet<FactorNode> subIncludedFactors) {
+	protected AbstractExactBP makeSubExactBP(Object subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
 		return new ExactBPFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation, model);
 	}
 
 	@Override
-	public FactorNode getRoot() {
-		return (FactorNode) super.getRoot();
+	public Factor getRoot() {
+		return (Factor) super.getRoot();
 	}
 	
 	@Override
-	protected ArrayList<? extends VariableNode> makeSubsRoots() {
-		ArrayList<? extends VariableNode> result = collectToArrayList(getRootNeighbors(), n -> n != parent);
+	protected ArrayList<? extends Variable> makeSubsRoots() {
+		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> n != parent);
 		return result;
 	}
 
 	@Override
 	public Factor function(List<Factor> incomingMessages) {
-		List<? extends VariableNode> variablesToBeSummedOut = collectToArrayList(getRootNeighbors(), n -> ! isFreeVariable((VariableNode) n));
-		Factor result = sumOut(variablesToBeSummedOut, getFactorNodesAtRoot(), incomingMessages);
+		List<? extends Variable> variablesToBeSummedOut = collectToArrayList(getRootNeighbors(), n -> ! isFreeVariable((Variable) n));
+		Factor result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), incomingMessages);
 		return result;
 	}
 
-	private boolean isFreeVariable(VariableNode variable) {
+	private boolean isFreeVariable(Variable variable) {
 		boolean result = 
 				notNullAndEquals(getParent(), variable)
 				||
-				excludedFactorNodes.thereIsAnElementSatisfying(f -> getModel().getNeighbors(f).contains(variable));
+				excludedFactors.thereIsAnElementSatisfying(f -> getModel().getNeighbors(f).contains(variable));
 		return result;
 	}
 
-	private Factor sumOut(List<? extends VariableNode> variablesToBeSummedOut, List<FactorNode> factorNodesAtRoot, List<Factor> incomingMessages) {
-		List<Factor> factors = mapIntoList(factorNodesAtRoot, n -> n.getFactor());
-		Iterator<Factor> allFactors = nestedIterator(factors, incomingMessages);
+	private Factor sumOut(List<? extends Variable> variablesToBeSummedOut, List<Factor> factorsAtRoot, List<Factor> incomingMessages) {
+		Iterator<Factor> allFactors = nestedIterator(factorsAtRoot, incomingMessages);
 		Factor result = representation.multiply(allFactors).sumOut(variablesToBeSummedOut);
 		return result;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private ArrayList<? extends VariableNode> getRootNeighbors() {
-		return (ArrayList<? extends VariableNode>) getModel().getNeighbors(getRoot());
+	private ArrayList<? extends Variable> getRootNeighbors() {
+		return (ArrayList<? extends Variable>) getModel().getNeighbors(getRoot());
 	}
 
 	@Override
-	protected List<FactorNode> getFactorNodesAtRoot() {
+	protected List<Factor> getFactorsAtRoot() {
 		return list(getRoot());
 	}
 }

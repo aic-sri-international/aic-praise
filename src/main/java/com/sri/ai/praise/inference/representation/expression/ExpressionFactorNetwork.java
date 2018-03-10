@@ -47,9 +47,9 @@ import java.util.Set;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.inference.exactbp.api.FactorNode;
-import com.sri.ai.praise.inference.exactbp.api.VariableNode;
-import com.sri.ai.util.collect.DefaultManyToManyRelation;
+import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
 
 
 /**
@@ -57,23 +57,23 @@ import com.sri.ai.util.collect.DefaultManyToManyRelation;
  * @author braz
  *
  */
-public class ExpressionModel extends DefaultManyToManyRelation<FactorNode, VariableNode> {
+public class ExpressionFactorNetwork extends AbstractFactorNetwork {
 	
 	private Context context;
 
-	public ExpressionModel(String tupleOfFactorExpressions, Context context) {
+	public ExpressionFactorNetwork(String tupleOfFactorExpressions, Context context) {
 		this(fromTupleOfExpressionsStringToListOfExpressions(tupleOfFactorExpressions), context);
 	}
 
 	private static List<Expression> fromTupleOfExpressionsStringToListOfExpressions(String tupleOfFactorExpressions) {
 		Expression parsed = parse(tupleOfFactorExpressions);
-		myAssert(parsed instanceof Tuple, () -> ExpressionModel.class + " constructor taking String should receive string of tuple of factors, but got something that is not a tuple: " + tupleOfFactorExpressions);
+		myAssert(parsed instanceof Tuple, () -> ExpressionFactorNetwork.class + " constructor taking String should receive string of tuple of factors, but got something that is not a tuple: " + tupleOfFactorExpressions);
 		Tuple tuple = (Tuple) parsed;
 		List<Expression> result = tuple.getArguments();
 		return result;
 	}
 
-	public ExpressionModel(List<Expression> factorExpressions, Context context) {
+	public ExpressionFactorNetwork(List<Expression> factorExpressions, Context context) {
 		indexFactorsAndVariables(factorExpressions, context);
 		this.context = context;
 	}
@@ -86,20 +86,19 @@ public class ExpressionModel extends DefaultManyToManyRelation<FactorNode, Varia
 
 	private void indexFactorsAndVariables(Expression factorExpression, Context context) {
 		ExpressionFactor factor = new ExpressionFactor(factorExpression, context);
-		FactorNode factorNode = new ExpressionFactorNode(factor, this);
-		indexFactorNodeAndItsVariables(factorNode, factorExpression, context);
+		indexFactorAndItsVariables(factor, factorExpression, context);
 	}
 
-	private void indexFactorNodeAndItsVariables(FactorNode factorNode, Expression factorExpression, Context context) {
+	private void indexFactorAndItsVariables(Factor factor, Expression factorExpression, Context context) {
 		Set<Expression> freeVariables = freeVariables(factorExpression, context);
 		for (Expression variableExpression : freeVariables) {
-			indexFactorNodeAndVariable(factorNode, variableExpression);
+			indexFactorAndVariable(factor, variableExpression);
 		}
 	}
 
-	private void indexFactorNodeAndVariable(FactorNode factorNode, Expression variableExpression) {
-		VariableNode variable = new ExpressionVariable(variableExpression, this);
-		this.add(factorNode, variable);
+	private void indexFactorAndVariable(Factor factor, Expression variableExpression) {
+		Variable variable = new ExpressionVariable(variableExpression);
+		this.add(factor, variable);
 	}
 
 	public Context getContext() {

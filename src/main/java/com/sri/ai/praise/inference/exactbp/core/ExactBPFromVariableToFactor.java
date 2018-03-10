@@ -44,34 +44,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.exactbp.api.FactorNode;
-import com.sri.ai.praise.inference.exactbp.api.Node;
-import com.sri.ai.praise.inference.exactbp.api.VariableNode;
 import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.Model;
+import com.sri.ai.praise.inference.representation.api.FactorNetwork;
 import com.sri.ai.praise.inference.representation.api.Representation;
+import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromVariableToFactor extends AbstractExactBP {
 	
-	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<FactorNode> excludedFactors, RedirectingLiveSet<FactorNode> includedFactors, Representation representation, Model model) {
+	public ExactBPFromVariableToFactor(Object root, Object parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
 		super(root, parent, excludedFactors, includedFactors, representation, model);
 	}
 
 	@Override
-	protected ExactBP makeSubExactBP(Node subRoot, LiveSet<FactorNode> subExcludedFactors, RedirectingLiveSet<FactorNode> subIncludedFactors) {
+	protected ExactBP makeSubExactBP(Object subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
 		return new ExactBPFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation, model);
 	}
 	
 	@Override
-	public VariableNode getRoot() {
-		return (VariableNode) super.getRoot();
+	public Variable getRoot() {
+		return (Variable) super.getRoot();
 	}
 	
 	@Override
-	protected ArrayList<? extends FactorNode> makeSubsRoots() {
-		ArrayList<? extends FactorNode> result = collectToArrayList(getRootNeighbors(), n -> ! excludedFactorNodes.contains((FactorNode)n));
+	protected ArrayList<? extends Factor> makeSubsRoots() {
+		ArrayList<? extends Factor> result = collectToArrayList(getRootNeighbors(), n -> ! excludedFactors.contains((Factor)n));
 		return result;
 	}
 
@@ -80,13 +78,12 @@ public class ExactBPFromVariableToFactor extends AbstractExactBP {
 		return representation.multiply(incomingMessages);
 	}
 	
-	@SuppressWarnings("unchecked")
-	private ArrayList<? extends FactorNode> getRootNeighbors() {
-		return (ArrayList<? extends FactorNode>) getModel().getNeighbors(getRoot());
+	private ArrayList<? extends Factor> getRootNeighbors() {
+		return (ArrayList<? extends Factor>) getModel().getNeighbors(getRoot());
 	}
 
 	@Override
-	protected List<FactorNode> getFactorNodesAtRoot() {
+	protected List<Factor> getFactorsAtRoot() {
 		return list();
 	}
 }

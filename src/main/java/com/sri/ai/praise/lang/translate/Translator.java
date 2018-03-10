@@ -154,7 +154,7 @@ public interface Translator {
 		String result    = sourceModelFile.getName();
 		
 		if (!result.endsWith(extension)) {
-			throw new IllegalArgumentException("Source Model File: "+sourceModelFile.getName()+" does not have the expected extension: "+extension);
+			throw new IllegalArgumentException("Source FactorNetwork File: "+sourceModelFile.getName()+" does not have the expected extension: "+extension);
 		}
 		
 		result = result.substring(0, result.length()-extension.length());

@@ -47,7 +47,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.praise.lang.ModelLanguage;
 
 /**
- * ExpressionRepresentation of a Model Page (i.e. a complete model) within a PagedModelContainer.
+ * ExpressionRepresentation of a FactorNetwork Page (i.e. a complete model) within a PagedModelContainer.
  * 
  * @author oreilly
  *

@@ -62,7 +62,7 @@ public class UAIEvidenceReader {
 		// file but with an added .evid suffix. For instance, problem.uai will have evidence in problem.uai.evid. 
 		File evidenceFile = new File(modelFile.getAbsolutePath()+".evid");
 		if (!evidenceFile.exists()) {
-			System.err.println("Model "+modelFile.getName()+" does not have a default evidence file associated with it.");
+			System.err.println("FactorNetwork "+modelFile.getName()+" does not have a default evidence file associated with it.");
 		}
 		else {
 			read(new FileReader(evidenceFile), modelFromFile);

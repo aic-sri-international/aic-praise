@@ -52,7 +52,7 @@ public class ExpressionRepresentation implements Representation {
 
 	@Override
 	public Factor makeIdentityFactor() {
-		return null;
+		return new ExpressionIdentityFactor();
 	}
 
 }
