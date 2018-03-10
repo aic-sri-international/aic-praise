@@ -35,10 +35,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.api;
+package com.sri.ai.praise.inference.exactbp.api;
 
+import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNode;
+import com.sri.ai.praise.inference.representation.expression.ExpressionVariable;
 
-public interface FactorNode extends Factor, Node {
+/**
+ * A node in {@link ExactBP}; either a {@link ExpressionVariable} or a {@link ExpressionFactorNode}.
+ * 
+ * @author braz
+ *
+ */
+public interface Node {
 
-	Factor getFactor();
 }

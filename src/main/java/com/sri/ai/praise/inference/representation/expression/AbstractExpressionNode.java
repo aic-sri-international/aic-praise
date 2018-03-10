@@ -39,7 +39,7 @@ package com.sri.ai.praise.inference.representation.expression;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.WrappedExpression;
-import com.sri.ai.praise.inference.representation.api.Node;
+import com.sri.ai.praise.inference.exactbp.api.Node;
 
 /**
  * An abstract implementation of {@link ExpressionNode} taking a model as constructor argument

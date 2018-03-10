@@ -38,9 +38,9 @@
 package com.sri.ai.praise.inference.representation.expression;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.praise.inference.exactbp.api.VariableNode;
 
-public class ExpressionVariable extends AbstractExpressionNode implements Variable {
+public class ExpressionVariable extends AbstractExpressionNode implements VariableNode {
 
 	private static final long serialVersionUID = 1L;
 

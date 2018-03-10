@@ -47,8 +47,8 @@ import java.util.Set;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.inference.representation.api.FactorNode;
-import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.praise.inference.exactbp.api.FactorNode;
+import com.sri.ai.praise.inference.exactbp.api.VariableNode;
 import com.sri.ai.util.collect.DefaultManyToManyRelation;
 
 
@@ -57,7 +57,7 @@ import com.sri.ai.util.collect.DefaultManyToManyRelation;
  * @author braz
  *
  */
-public class ExpressionModel extends DefaultManyToManyRelation<FactorNode, Variable> {
+public class ExpressionModel extends DefaultManyToManyRelation<FactorNode, VariableNode> {
 	
 	private Context context;
 
@@ -98,7 +98,7 @@ public class ExpressionModel extends DefaultManyToManyRelation<FactorNode, Varia
 	}
 
 	private void indexFactorNodeAndVariable(FactorNode factorNode, Expression variableExpression) {
-		Variable variable = new ExpressionVariable(variableExpression, this);
+		VariableNode variable = new ExpressionVariable(variableExpression, this);
 		this.add(factorNode, variable);
 	}
 

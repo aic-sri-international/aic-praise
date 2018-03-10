@@ -48,9 +48,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.representation.api.FactorNode;
+import com.sri.ai.praise.inference.exactbp.api.FactorNode;
+import com.sri.ai.praise.inference.exactbp.api.Node;
 import com.sri.ai.praise.inference.representation.api.Model;
-import com.sri.ai.praise.inference.representation.api.Node;
 import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.expression.AbstractExpressionNode;
 import com.sri.ai.util.livesets.api.LiveSet;

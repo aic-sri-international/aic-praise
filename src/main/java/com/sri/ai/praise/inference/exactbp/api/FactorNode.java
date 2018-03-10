@@ -35,9 +35,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.api;
+package com.sri.ai.praise.inference.exactbp.api;
+
+import com.sri.ai.praise.inference.representation.api.Factor;
 
 
-public interface Variable {
-	
+public interface FactorNode extends Node {
+
+	Factor getFactor();
 }

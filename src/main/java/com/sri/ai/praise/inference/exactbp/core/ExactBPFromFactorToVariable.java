@@ -47,12 +47,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.sri.ai.praise.inference.exactbp.api.FactorNode;
+import com.sri.ai.praise.inference.exactbp.api.Node;
+import com.sri.ai.praise.inference.exactbp.api.VariableNode;
 import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.FactorNode;
 import com.sri.ai.praise.inference.representation.api.Model;
-import com.sri.ai.praise.inference.representation.api.Node;
 import com.sri.ai.praise.inference.representation.api.Representation;
-import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -73,19 +73,19 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	}
 	
 	@Override
-	protected ArrayList<? extends Variable> makeSubsRoots() {
-		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> n != parent);
+	protected ArrayList<? extends VariableNode> makeSubsRoots() {
+		ArrayList<? extends VariableNode> result = collectToArrayList(getRootNeighbors(), n -> n != parent);
 		return result;
 	}
 
 	@Override
 	public Factor function(List<Factor> incomingMessages) {
-		List<? extends Variable> variablesToBeSummedOut = collectToArrayList(getRootNeighbors(), n -> ! isFreeVariable((Variable) n));
+		List<? extends VariableNode> variablesToBeSummedOut = collectToArrayList(getRootNeighbors(), n -> ! isFreeVariable((VariableNode) n));
 		Factor result = sumOut(variablesToBeSummedOut, getFactorNodesAtRoot(), incomingMessages);
 		return result;
 	}
 
-	private boolean isFreeVariable(Variable variable) {
+	private boolean isFreeVariable(VariableNode variable) {
 		boolean result = 
 				notNullAndEquals(getParent(), variable)
 				||
@@ -93,7 +93,7 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 		return result;
 	}
 
-	private Factor sumOut(List<? extends Variable> variablesToBeSummedOut, List<FactorNode> factorNodesAtRoot, List<Factor> incomingMessages) {
+	private Factor sumOut(List<? extends VariableNode> variablesToBeSummedOut, List<FactorNode> factorNodesAtRoot, List<Factor> incomingMessages) {
 		List<Factor> factors = mapIntoList(factorNodesAtRoot, n -> n.getFactor());
 		Iterator<Factor> allFactors = nestedIterator(factors, incomingMessages);
 		Factor result = representation.multiply(allFactors).sumOut(variablesToBeSummedOut);
@@ -101,8 +101,8 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private ArrayList<? extends Variable> getRootNeighbors() {
-		return (ArrayList<? extends Variable>) getModel().getNeighbors(getRoot());
+	private ArrayList<? extends VariableNode> getRootNeighbors() {
+		return (ArrayList<? extends VariableNode>) getModel().getNeighbors(getRoot());
 	}
 
 	@Override

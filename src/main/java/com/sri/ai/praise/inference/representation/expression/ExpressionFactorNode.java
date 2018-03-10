@@ -37,11 +37,8 @@
  */
 package com.sri.ai.praise.inference.representation.expression;
 
-import java.util.List;
-
+import com.sri.ai.praise.inference.exactbp.api.FactorNode;
 import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.FactorNode;
-import com.sri.ai.praise.inference.representation.api.Variable;
 
 public class ExpressionFactorNode extends AbstractExpressionNode implements FactorNode {
 
@@ -57,20 +54,5 @@ public class ExpressionFactorNode extends AbstractExpressionNode implements Fact
 	@Override
 	public Factor getFactor() {
 		return factor;
-	}
-
-	@Override
-	public boolean contains(Variable variable) {
-		return getFactor().contains(variable);
-	}
-
-	@Override
-	public Factor multiply(Factor another) {
-		return getFactor().multiply(another);
-	}
-
-	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
-		return getFactor().sumOut(variablesToSumOut);
 	}
 }
