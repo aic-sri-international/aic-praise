@@ -37,7 +37,16 @@
  */
 package com.sri.ai.praise.inference.representation.api;
 
+import java.util.List;
 
-public interface Variable extends Node {
-	
+/**
+ * 
+ * 
+ * @author braz
+ *
+ */
+public interface Model {
+
+	List<? extends Node> getNeighbors(Node node);
+
 }

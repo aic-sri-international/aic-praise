@@ -49,8 +49,10 @@ import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.api.FactorNode;
+import com.sri.ai.praise.inference.representation.api.Model;
 import com.sri.ai.praise.inference.representation.api.Node;
 import com.sri.ai.praise.inference.representation.api.Representation;
+import com.sri.ai.praise.inference.representation.expression.AbstractExpressionNode;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -78,6 +80,8 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  */
 public abstract class AbstractExactBP implements ExactBP {
 	
+	protected abstract List<FactorNode> getFactorNodesAtRoot();
+
 	protected abstract ExactBP makeSubExactBP(Node subRoot, LiveSet<FactorNode> subExcludedFactorNodes, RedirectingLiveSet<FactorNode> subIncludedFactorNodes);
 
 	protected abstract ArrayList<? extends Node> makeSubsRoots();
@@ -96,14 +100,16 @@ public abstract class AbstractExactBP implements ExactBP {
 	// The solution is to have a redirecting live set instance that can be redirected.
 	
 	protected Representation representation;
+	protected Model model;
 	
-	public AbstractExactBP(Node root, Node parent, LiveSet<FactorNode> excludedFactorNodes, RedirectingLiveSet<FactorNode> includedFactorNodes, Representation representation) {
+	public AbstractExactBP(Node root, Node parent, LiveSet<FactorNode> excludedFactorNodes, RedirectingLiveSet<FactorNode> includedFactorNodes, Representation representation, Model model) {
 		this.root = root;
 		this.parent = parent;
 		this.subs = null;
 		this.excludedFactorNodes = excludedFactorNodes;
 		this.includedFactorNodes = includedFactorNodes;
 		this.representation = representation;
+		this.model = model;
 	}
 	
 	@Override
@@ -135,7 +141,7 @@ public abstract class AbstractExactBP implements ExactBP {
 	}
 
 	private void redirectRootIncludedFactorNodesToUnionOfSubsIncludedFactorNodesAndFactorNodesAtRoot(List<RedirectingLiveSet<FactorNode>> subsIncludedFactorNodes) {
-		LiveSet<FactorNode> unionOfSubsIncludedFactorNodesAndFactorsAtRoot = union(subsIncludedFactorNodes).union(root.getFactorNodes());
+		LiveSet<FactorNode> unionOfSubsIncludedFactorNodesAndFactorsAtRoot = union(subsIncludedFactorNodes).union(getFactorNodesAtRoot());
 		includedFactorNodes.redirectTo(unionOfSubsIncludedFactorNodesAndFactorsAtRoot);
 	}
 
@@ -158,7 +164,7 @@ public abstract class AbstractExactBP implements ExactBP {
 	private LiveSet<FactorNode> excludedFactorNodesForSubAt(int subIndex, List<RedirectingLiveSet<FactorNode>> subsIncludedFactorNodes) {
 		LiveSet<FactorNode> unionOfSiblingsExcludedFactorNodes = unionOfAllButTheOneAt(subsIncludedFactorNodes, subIndex);
 		LiveSet<FactorNode> excludedFactorNodesUnionSiblingsExcludedFactorNodes = excludedFactorNodes.union(unionOfSiblingsExcludedFactorNodes);
-		LiveSet<FactorNode> result = excludedFactorNodesUnionSiblingsExcludedFactorNodes.union(root.getFactorNodes());
+		LiveSet<FactorNode> result = excludedFactorNodesUnionSiblingsExcludedFactorNodes.union(getFactorNodesAtRoot());
 		return result;
 	}
 
@@ -172,7 +178,7 @@ public abstract class AbstractExactBP implements ExactBP {
 		return parent;
 	}
 
-	public List<FactorNode> getFactorNodesAtRoot() {
-		return getRoot().getFactorNodes();
+	public Model getModel() {
+		return model;
 	}
 }

@@ -37,21 +37,8 @@
  */
 package com.sri.ai.praise.inference.representation.api;
 
-import static com.sri.ai.util.Util.list;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public interface FactorNode extends Node {
 
 	Factor getFactor();
-
-	@Override
-	Collection<Variable> getNeighbors();
-	
-	@Override
-	default List<FactorNode> getFactorNodes() {
-		return Collections.unmodifiableList(list(this));
-	}
 }

@@ -38,7 +38,6 @@
 package com.sri.ai.praise.inference.representation.api;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNode;
@@ -53,11 +52,4 @@ import com.sri.ai.praise.inference.representation.expression.ExpressionVariable;
 public interface Node {
 
 	Collection<? extends Node> getNeighbors();
-	
-	/**
-	 * Indicates what set of factor nodes is at this node;
-	 * typically, the empty list for variables and a singleton set of a itself for a factor
-	 * (although the algorithm should work with nodes gathering multiple factors as well).
-	 */
-	List<FactorNode> getFactorNodes();
 }

@@ -38,13 +38,15 @@
 package com.sri.ai.praise.inference.exactbp.core;
 
 import static com.sri.ai.util.Util.collectToArrayList;
+import static com.sri.ai.util.Util.list;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.representation.api.FactorNode;
 import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.FactorNode;
+import com.sri.ai.praise.inference.representation.api.Model;
 import com.sri.ai.praise.inference.representation.api.Node;
 import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -53,13 +55,13 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromVariableToFactor extends AbstractExactBP {
 	
-	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<FactorNode> excludedFactors, RedirectingLiveSet<FactorNode> includedFactors, Representation representation) {
-		super(root, parent, excludedFactors, includedFactors, representation);
+	public ExactBPFromVariableToFactor(Node root, Node parent, LiveSet<FactorNode> excludedFactors, RedirectingLiveSet<FactorNode> includedFactors, Representation representation, Model model) {
+		super(root, parent, excludedFactors, includedFactors, representation, model);
 	}
 
 	@Override
 	protected ExactBP makeSubExactBP(Node subRoot, LiveSet<FactorNode> subExcludedFactors, RedirectingLiveSet<FactorNode> subIncludedFactors) {
-		return new ExactBPFromFactorToVariable(subRoot, root, subExcludedFactors, subIncludedFactors, representation);
+		return new ExactBPFromFactorToVariable(subRoot, root, subExcludedFactors, subIncludedFactors, representation, model);
 	}
 	
 	@Override
@@ -69,12 +71,22 @@ public class ExactBPFromVariableToFactor extends AbstractExactBP {
 	
 	@Override
 	protected ArrayList<? extends FactorNode> makeSubsRoots() {
-		ArrayList<? extends FactorNode> result = collectToArrayList(getRoot().getNeighbors(), n -> ! excludedFactorNodes.contains((FactorNode)n));
+		ArrayList<? extends FactorNode> result = collectToArrayList(getRootNeighbors(), n -> ! excludedFactorNodes.contains((FactorNode)n));
 		return result;
 	}
 
 	@Override
 	public Factor function(List<Factor> incomingMessages) {
 		return representation.multiply(incomingMessages);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private ArrayList<? extends FactorNode> getRootNeighbors() {
+		return (ArrayList<? extends FactorNode>) getModel().getNeighbors(getRoot());
+	}
+
+	@Override
+	protected List<FactorNode> getFactorNodesAtRoot() {
+		return list();
 	}
 }
