@@ -57,15 +57,15 @@ public class ExactBPTest {
 		expected = parse("if I = 1 then 0.01 else 0.81");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
 
-		//             -------J-------
-        //            /               \
-		//           /       phi_2     \
-		//          /       /     \     \
+		//              -------J-------
+        //             /               \
+		//            /      phi_2      \
+		//           /      /     \      \
 		//   I -- phi_1 -- L       M   phi_4 -- N
-		//          \       \     /     /
-		//           \       phi_3     /
-		//            \               /
-		//             -------K-------
+		//           \      \     /      /
+		//            \      phi_3      /
+		//             \               /
+		//              -------K-------
 		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "K", "1..10", "L", "1..10", "M", "1..10", "N", "1..10"};
 		factorNetworkString = "("
 				+ "if I = J and I = L and I = K then 1 else 0, "
@@ -80,15 +80,15 @@ public class ExactBPTest {
 		expected = parse("if I = 2 then 1 else 0");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
 
-		//             -------J-------
-        //            /               \
-		//           /       phi_2     \
-		//          /       /     \     \
+		//              -------J-------
+        //             /               \
+		//            /      phi_2      \
+		//           /      /     \      \
 		//   I -- phi_1 -- L       M   phi_4 -- N
-		//          \       \     /     /
-		//           \       phi_3     /
-		//            \               /
-		//             -------K-------
+		//           \      \     /      /
+		//            \      phi_3      /
+		//             \               /
+		//              -------K-------
 		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "K", "1..10", "L", "1..10", "M", "1..10", "N", "1..10"};
 		factorNetworkString = "("
 				+ "if I = J and I = L and I = K then 1 else 0, "
@@ -103,15 +103,15 @@ public class ExactBPTest {
 		expected = parse("if I = 2 then 0.25 else if I = 3 then 0.25 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
 
-		//             -------J-------
-        //            /               \
-		//           /       phi_2     \
-		//          /       /     \     \
+		//              -------J-------
+        //             /               \
+		//            /      phi_2      \
+		//           /      /     \      \
 		//   I -- phi_1 -- L       M   phi_4 -- N
-		//          \       \     /     /
-		//           \       phi_3     /
-		//            \               /
-		//             -------K-------
+		//           \      \     /      /
+		//            \      phi_3      /
+		//             \               /
+		//              -------K-------
 		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "K", "1..10", "L", "1..10", "M", "1..10", "N", "1..10"};
 		factorNetworkString = "("
 				+ "if I = J and I = L and I = K then 1 else 0, "
@@ -124,6 +124,30 @@ public class ExactBPTest {
 				+ ")";
 		queryVariableString = "I";
 		expected = parse("if I = 3 then 0.25 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+
+		//              -------J-------
+        //             /               \
+		//            /      phi_2      \
+		//           /      /     \      \
+		//   I -- phi_1 -- L       M   phi_4 -- N
+		//           \      \     /      /
+		//            \      phi_3      /
+		//             \               /
+		//              -------K-------
+		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "K", "1..10", "L", "1..10", "M", "1..10", "N", "1..10"};
+		factorNetworkString = "("
+				+ "if I = J and I = L and I = K then 1 else 0, "
+				+ "if L = M then 1 else 0, "
+				+ "if L = M then 1 else 0, "
+				+ "if N = J and N = K then 1 else 0, "
+				// Evidence: M can be 2 or 3 with probabilities 1/4 and 3/4, N can be also 2 or 3 but with flipped probabilities
+				// this will lead to I being 2 or 3 with uniform probability
+				+ "if M = 2 then 0.25 else if M = 3 then 0.75 else 0, "
+				+ "if N = 2 then 0.75 else if N = 3 then 0.25 else 0 "
+				+ ")";
+		queryVariableString = "I";
+		expected = parse("if I = 2 then 0.1875 else if I = 3 then 0.1875 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
 	}
 
