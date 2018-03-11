@@ -42,7 +42,7 @@ import com.sri.ai.praise.inference.exactbp.core.ExactBPFromVariable;
 
 
 /**
- * 
+ * A convenience class for creating a {@link ExactBPFromVariable} based on expressions.
  * @author braz
  *
  */

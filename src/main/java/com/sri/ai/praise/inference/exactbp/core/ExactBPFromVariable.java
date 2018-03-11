@@ -45,7 +45,16 @@ import com.sri.ai.praise.inference.representation.api.FactorNetwork;
 import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
-
+/**
+ * A class for an {@link ExactBP} roots in a query {@link Variable},
+ * and therefore without a parent.
+ * <p>
+ * This is necessary because the constructor of {@link ExactBPFromVariableToFactor}
+ * is meant for internal use and requires parameters that would be hard for a user to understand and use.
+ * 
+ * @author braz
+ *
+ */
 public class ExactBPFromVariable extends ExactBPFromVariableToFactor {
 
 	public ExactBPFromVariable(Variable root, Representation representation, FactorNetwork factorNetwork) {

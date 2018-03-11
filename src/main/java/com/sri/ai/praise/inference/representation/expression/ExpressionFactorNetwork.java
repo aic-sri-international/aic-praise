@@ -87,7 +87,7 @@ public class ExpressionFactorNetwork extends AbstractFactorNetwork {
 	}
 
 	private void indexFactorsAndVariables(Expression factorExpression, Context context) {
-		ExpressionFactor factor = new ExpressionFactor(factorExpression, context);
+		ExpressionWithVariablesFactor factor = new ExpressionWithVariablesFactor(factorExpression, context);
 		indexFactorAndItsVariables(factor, factorExpression, context);
 	}
 

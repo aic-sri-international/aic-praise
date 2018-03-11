@@ -40,7 +40,7 @@ package com.sri.ai.praise.inference.representation.api;
 import java.util.Collection;
 
 /**
- * 
+ * A bipartite graph of {@link Factor}s and {@link Variable}s.
  * 
  * @author braz
  *

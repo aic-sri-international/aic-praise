@@ -54,7 +54,7 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromFactorToVariable extends AbstractExactBP<Factor,Variable> {
 	
-	public ExactBPFromFactorToVariable(Factor root, Variable parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
+	protected ExactBPFromFactorToVariable(Factor root, Variable parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
 		super(root, parent, excludedFactors, includedFactors, representation, model);
 	}
 

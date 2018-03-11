@@ -66,7 +66,7 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * of Exact BP rooted in variables and in factors.
  * <p>
  * Each node of Exact BP must provide its sub-Exact BPs.
- * This is done with the method {@link #makeSubExactBP(Object, LiveSet, RedirectingLiveSet)},
+ * This is done with the method {@link #makeSubExactBP(SubRootType, LiveSet, RedirectingLiveSet)},
  * which is left abstract since variable-rooted Exact BPs will want to create
  * subs which are factor-rooted Exact BPs and vice-versa,
  * so it is not a common functionality.
@@ -80,15 +80,31 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * and excluded factor nodes (those in their siblings or parent),
  * so this is implemented at this level.
  * 
+ * @param <RootType> the type ({@link Fator} or {@link Variable}) of the root node of the tree.
+ * @param <SubRootType> the type ({@link Fator} or {@link Variable}) of the root node of the subs. Must be the opposite of RootType.
+ *
  * @author braz
  *
  */
 public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<RootType,SubRootType> {
 	
+	/**
+	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
+	 */
 	protected abstract List<Factor> getFactorsAtRoot();
 
+	/**
+	 * An abstract method for extensions to define how to create their subs.
+	 * @param subRoot
+	 * @param subExcludedFactors
+	 * @param subIncludedFactors
+	 * @return
+	 */
 	protected abstract ExactBP<SubRootType,RootType> makeSubExactBP(SubRootType subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
 
+	/**
+	 * An abstract method for extensions to define what are their sub's roots.
+	 */
 	protected abstract ArrayList<? extends SubRootType> makeSubsRoots();
 
 	protected RootType root;
@@ -107,7 +123,7 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	protected Representation representation;
 	protected FactorNetwork factorNetwork;
 	
-	public AbstractExactBP(RootType root, SubRootType parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork factorNetwork) {
+	protected AbstractExactBP(RootType root, SubRootType parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork factorNetwork) {
 		this.root = root;
 		this.parent = parent;
 		this.subs = null;
@@ -142,14 +158,14 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	}
 	
 	private RedirectingLiveSet<Factor> makeInitialSubIncludedFactors(SubRootType subRoot) {
-		RedirectingLiveSet<Factor> result;
+		List<Factor> subIncludedFactors;
 		if (subRoot instanceof Factor) {
-			Factor rootFactor = (Factor) subRoot;
-			result = redirectingTo(liveSet(list(rootFactor)));
+			subIncludedFactors = list((Factor) subRoot);
 		}
 		else {
-			result = redirectingTo(liveSet(list()));
+			subIncludedFactors = list();
 		}
+		RedirectingLiveSet<Factor> result = redirectingTo(liveSet(subIncludedFactors));
 		return result;
 	}
 
@@ -198,18 +214,29 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	private Factor keepOnlyFreeVariablesInResultFactor(Factor factor) {
 		List<? extends Variable> variablesToBeSummedOut = getNonFreeVariables(factor);
 		Factor result = factor.sumOut(variablesToBeSummedOut);
+		printTracingInformation(factor, variablesToBeSummedOut, result);
+		return result;
+	}
+
+	private void printTracingInformation(Factor factor, List<? extends Variable> variablesToBeSummedOut, Factor result) {
+		printTracingInformationHeader();
+		printTracingInformationBody(factor, variablesToBeSummedOut, result);
+	}
+
+	private void printTracingInformationHeader() {
 		if (getParent() == null) {
 			println("Final message on " + getRoot());
 		}
 		else {
 			println("Message from " + getRoot() + " to " + getParent());
 		}
+	}
+
+	private void printTracingInformationBody(Factor factor, List<? extends Variable> variablesToBeSummedOut, Factor result) {
 		println("Received total product " + factor);
 		String eliminatedString = variablesToBeSummedOut.isEmpty()? "no variables" : join(variablesToBeSummedOut);
 		println("Eliminating " + eliminatedString + " from " + factor + " ---> " + result);
 		println("Sending " + result);
-
-		return result;
 	}
 
 	private List<? extends Variable> getNonFreeVariables(Factor factor) {

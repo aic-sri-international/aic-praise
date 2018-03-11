@@ -50,7 +50,8 @@ import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
 /**
- * A class representing an {@link ExpressionFactor} that is an identity factor.
+ * A class representing an {@link ExpressionWithVariablesFactor} that is an identity factor.
+ * <p>
  * The reason we have a class for this are the following:
  * {@link Representation} is required to provide identity factors without receiving any extra information.
  * {@link ExpressionFactors} require a {@link Context} during construction, so we cannot create an identity {@link ExpressionFactors}
@@ -62,7 +63,7 @@ import com.sri.ai.praise.inference.representation.api.Variable;
  * @author braz
  *
  */
-public class ExpressionIdentityFactor extends WrappedExpression implements Factor {
+public class ExpressionIdentityFactor extends WrappedExpression implements ExpressionFactor {
 
 	private static final long serialVersionUID = 1L;
 

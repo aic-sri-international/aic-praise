@@ -10,7 +10,6 @@ import org.junit.Test;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.expresso.helper.WrappedExpression;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
@@ -18,6 +17,7 @@ import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.expression.ExpressionExactBP;
+import com.sri.ai.praise.inference.representation.expression.ExpressionFactor;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNetwork;
 
 public class ExactBPTest {
@@ -128,19 +128,23 @@ public class ExactBPTest {
 	}
 
 	private void runTest(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected) {
-		Context context;
-		context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(variableAndTypes);
+		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(variableAndTypes);
 		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(factorNetworkString, context);
 		Expression query = Expressions.parse(queryVariableString);
 
 		printQuestion(factorNetworkString, queryVariableString, expected);
 		
-		ExactBP<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
-		WrappedExpression result = (WrappedExpression) exactBP.apply();
+		ExpressionFactor result = solve(query, factorNetwork);
 		
 		printResults(expected, result);
 		
 		assertEquals(expected, result.getInnerExpression());
+	}
+
+	private ExpressionFactor solve(Expression query, ExpressionFactorNetwork factorNetwork) {
+		ExactBP<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
+		ExpressionFactor result = (ExpressionFactor) exactBP.apply();
+		return result;
 	}
 
 	private void printQuestion(String factorNetworkString, String queryVariableString, Expression expected) {
@@ -152,7 +156,7 @@ public class ExactBPTest {
 		println("...");
 	}
 
-	private void printResults(Expression expected, WrappedExpression result) {
+	private void printResults(Expression expected, ExpressionFactor result) {
 		println("Result: " + result);
 		println("Expected: " + expected);
 		println(expected.equals(result.getInnerExpression())? "Correct!" : "Error!");
