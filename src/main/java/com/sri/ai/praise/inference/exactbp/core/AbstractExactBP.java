@@ -37,20 +37,27 @@
  */
 package com.sri.ai.praise.inference.exactbp.core;
 
-import static com.sri.ai.util.Util.fill;
+import static com.sri.ai.util.Util.collectToList;
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoArrayList;
+import static com.sri.ai.util.Util.notNullAndEquals;
+import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.union;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.unionOfAllButTheOneAt;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.FactorNetwork;
 import com.sri.ai.praise.inference.representation.api.Representation;
+import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -98,16 +105,16 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	// The solution is to have a redirecting live set instance that can be redirected.
 	
 	protected Representation representation;
-	protected FactorNetwork model;
+	protected FactorNetwork factorNetwork;
 	
-	public AbstractExactBP(RootType root, SubRootType parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
+	public AbstractExactBP(RootType root, SubRootType parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork factorNetwork) {
 		this.root = root;
 		this.parent = parent;
 		this.subs = null;
 		this.excludedFactors = excludedFactors;
 		this.includedFactors = includedFactors;
 		this.representation = representation;
-		this.model = model;
+		this.factorNetwork = factorNetwork;
 	}
 	
 	@Override
@@ -123,19 +130,27 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 		// First, it needs to create the included factor live sets for these subs,
 		// because that is required in the constructor of ExactBPs.
 		ArrayList<? extends SubRootType> subsRoots = makeSubsRoots();
-		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeInitialSubsIncludedFactors(subsRoots.size());
+		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeInitialSubsIncludedFactors(subsRoots);
 		makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
 	}
 
-	private ArrayList<RedirectingLiveSet<Factor>> makeInitialSubsIncludedFactors(int numberOfSubs) {
+	private ArrayList<RedirectingLiveSet<Factor>> makeInitialSubsIncludedFactors(ArrayList<? extends SubRootType> subsRoots) {
 		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors =
-				fill(numberOfSubs, () -> makeInitialSubIncludedFactors());
+				mapIntoArrayList(subsRoots, s -> makeInitialSubIncludedFactors(s));
 		redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(subsIncludedFactors);
 		return subsIncludedFactors;
 	}
-
-	private RedirectingLiveSet<Factor> makeInitialSubIncludedFactors() {
-		return redirectingTo(liveSet(list()));
+	
+	private RedirectingLiveSet<Factor> makeInitialSubIncludedFactors(SubRootType subRoot) {
+		RedirectingLiveSet<Factor> result;
+		if (subRoot instanceof Factor) {
+			Factor rootFactor = (Factor) subRoot;
+			result = redirectingTo(liveSet(list(rootFactor)));
+		}
+		else {
+			result = redirectingTo(liveSet(list()));
+		}
+		return result;
 	}
 
 	private void redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(List<RedirectingLiveSet<Factor>> subsIncludedFactors) {
@@ -144,6 +159,7 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	}
 
 	private void makeSubsFromTheirIncludedFactors(ArrayList<? extends SubRootType> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+		subs = new ArrayList<>(subsRoots.size());
 		int subIndex = 0;
 		for (SubRootType subRoot : subsRoots) {
 			ExactBP<SubRootType,RootType> sub = makeSubFromItsIncludedFactors(subRoot, subIndex, subsIncludedFactors);
@@ -167,6 +183,67 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	}
 
 	@Override
+	public Factor function(List<Factor> incomingMessages) {
+		Factor product = computeProductOfFactorsAtRootAndIncomingMessages(incomingMessages);
+		Factor result = keepOnlyFreeVariablesInResultFactor(product);
+		return result;
+	}
+
+	private Factor computeProductOfFactorsAtRootAndIncomingMessages(List<Factor> incomingMessages) {
+		Iterator<Factor> allFactors = nestedIterator(getFactorsAtRoot(), incomingMessages);
+		Factor product = representation.multiply(allFactors);
+		return product;
+	}
+
+	private Factor keepOnlyFreeVariablesInResultFactor(Factor factor) {
+		List<? extends Variable> variablesToBeSummedOut = getNonFreeVariables(factor);
+		Factor result = factor.sumOut(variablesToBeSummedOut);
+		if (getParent() == null) {
+			println("Final message on " + getRoot());
+		}
+		else {
+			println("Message from " + getRoot() + " to " + getParent());
+		}
+		println("Received total product " + factor);
+		String eliminatedString = variablesToBeSummedOut.isEmpty()? "no variables" : join(variablesToBeSummedOut);
+		println("Eliminating " + eliminatedString + " from " + factor + " ---> " + result);
+		println("Sending " + result);
+
+		return result;
+	}
+
+	private List<? extends Variable> getNonFreeVariables(Factor factor) {
+		List<? extends Variable> allVariablesInFactors = factor.getVariables();
+		List<? extends Variable> variablesToBeSummedOut = collectToList(allVariablesInFactors, n -> ! isFreeVariable((Variable) n));
+		return variablesToBeSummedOut;
+	}
+
+	private boolean isFreeVariable(Variable variable) {
+		boolean result = 
+				isEqualToRoot(variable)
+				||
+				isEqualToParentIfThereIsOne(variable)
+				||
+				isInExternalFactors(variable);
+		return result;
+	}
+
+	private boolean isEqualToRoot(Variable variable) {
+		boolean result = getRoot().equals(variable);
+		return result;
+	}
+
+	private boolean isEqualToParentIfThereIsOne(Variable variable) {
+		boolean result = notNullAndEquals(getParent(), variable);
+		return result;
+	}
+
+	private boolean isInExternalFactors(Variable variable) {
+		boolean result = excludedFactors.thereIsAnElementSatisfying(f -> f.contains(variable));
+		return result;
+	}
+
+	@Override
 	public RootType getRoot() {
 		return root;
 	}
@@ -176,7 +253,7 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 		return parent;
 	}
 
-	public FactorNetwork getModel() {
-		return model;
+	public FactorNetwork getFactorNetwork() {
+		return factorNetwork;
 	}
 }

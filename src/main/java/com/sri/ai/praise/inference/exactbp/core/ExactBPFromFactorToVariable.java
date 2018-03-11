@@ -38,14 +38,10 @@
 package com.sri.ai.praise.inference.exactbp.core;
 
 import static com.sri.ai.util.Util.collectToArrayList;
-import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.notNullAndEquals;
-import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
@@ -64,38 +60,17 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP<Factor,Variable
 
 	@Override
 	protected ExactBP<Variable,Factor> makeSubExactBP(Variable subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation, model);
+		return new ExactBPFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation, factorNetwork);
 	}
 
 	@Override
 	protected ArrayList<? extends Variable> makeSubsRoots() {
-		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> n != parent);
+		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> ! n.equals(parent));
 		return result;
 	}
 
-	@Override
-	public Factor function(List<Factor> incomingMessages) {
-		List<? extends Variable> variablesToBeSummedOut = collectToList(getRootNeighbors(), n -> ! isFreeVariable((Variable) n));
-		Factor result = sumOut(variablesToBeSummedOut, getFactorsAtRoot(), incomingMessages);
-		return result;
-	}
-
-	private boolean isFreeVariable(Variable variable) {
-		boolean result = 
-				notNullAndEquals(getParent(), variable)
-				||
-				excludedFactors.thereIsAnElementSatisfying(f -> getModel().getNeighbors(f).contains(variable));
-		return result;
-	}
-
-	private Factor sumOut(List<? extends Variable> variablesToBeSummedOut, List<Factor> factorsAtRoot, List<Factor> incomingMessages) {
-		Iterator<Factor> allFactors = nestedIterator(factorsAtRoot, incomingMessages);
-		Factor result = representation.multiply(allFactors).sumOut(variablesToBeSummedOut);
-		return result;
-	}
-	
 	protected Collection<? extends Variable> getRootNeighbors() {
-		return getModel().getNeighbors(getRoot());
+		return getFactorNetwork().getNeighbors(getRoot());
 	}
 
 	@Override

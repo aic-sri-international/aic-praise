@@ -43,7 +43,7 @@ import com.sri.ai.praise.inference.representation.api.Representation;
 
 /**
  * An implementation of {@link Representation} using {@link Expression}s
- * to represent {@link ExpressionVariable}s and {@link ExpressionFactorNode}s.
+ * to represent {@link ExpressionVariable}s and {@link ExpressionFactor}s.
  * 
  * @author braz
  *

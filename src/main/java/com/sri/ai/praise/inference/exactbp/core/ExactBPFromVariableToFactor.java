@@ -54,13 +54,13 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromVariableToFactor extends AbstractExactBP<Variable,Factor> {
 	
-	public ExactBPFromVariableToFactor(Variable root, Factor parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
-		super(root, parent, excludedFactors, includedFactors, representation, model);
+	public ExactBPFromVariableToFactor(Variable root, Factor parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork factorNetwork) {
+		super(root, parent, excludedFactors, includedFactors, representation, factorNetwork);
 	}
 
 	@Override
 	protected ExactBP<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation, model);
+		return new ExactBPFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation, factorNetwork);
 	}
 	
 	@Override
@@ -69,13 +69,8 @@ public class ExactBPFromVariableToFactor extends AbstractExactBP<Variable,Factor
 		return result;
 	}
 
-	@Override
-	public Factor function(List<Factor> incomingMessages) {
-		return representation.multiply(incomingMessages);
-	}
-	
 	private Collection<? extends Factor> getRootNeighbors() {
-		return getModel().getNeighbors(getRoot());
+		return getFactorNetwork().getNeighbors(getRoot());
 	}
 
 	@Override

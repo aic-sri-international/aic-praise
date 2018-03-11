@@ -40,8 +40,10 @@ package com.sri.ai.praise.inference.representation.expression;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
+import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.List;
+import java.util.Set;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
@@ -51,6 +53,15 @@ import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
+/**
+ * A {@link Factor} represented by an {@link Expression}.
+ * Note that even though {@link Expression#equals(Object)} considers two different instances representing the same expression equal,
+ * here <code>equals</code> is reverted to instance comparison because one may have multiple factors in a factor network with
+ * the same potential expression.
+ * 
+ * @author braz
+ *
+ */
 public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	private static final long serialVersionUID = 1L;
@@ -69,6 +80,13 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	@Override
 	public boolean contains(Variable variable) {
 		boolean result = Expressions.contains(this, (Expression) variable);
+		return result;
+	}
+
+	@Override
+	public List<? extends Variable> getVariables() {
+		Set<Expression> freeVariableExpressions = Expressions.freeVariables(getInnerExpression(), context);
+		List<? extends Variable> result = mapIntoList(freeVariableExpressions, e -> new ExpressionVariable(e));
 		return result;
 	}
 
@@ -92,8 +110,9 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	}
 
 	private Expression makeIntensionalMultiSet(List<? extends Variable> variablesToSumOut) {
-		@SuppressWarnings("unchecked")
-		List<ExpressionVariable> variableExpressionsToSumOut = (List<ExpressionVariable>) variablesToSumOut;
+		List<Expression> variableExpressionsToSumOut = mapIntoList(variablesToSumOut, v -> ((ExpressionVariable)v).getInnerExpression());
+		// TODO: should have been able to just cast variablesToSumOut to List<ExpressionVariable>, but expresso incorrectly assumes them to be Symbols
+		// We should be able to correct that and have expresso accept any expression of syntactic form "Symbol".
 		Expression set = intensionalMultiSet(variableExpressionsToSumOut, this, getContext());
 		return set;
 	}
@@ -111,6 +130,23 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	private ExpressionFactor makeFactor(Expression expression) {
 		ExpressionFactor result = new ExpressionFactor(expression, getContext());
+		return result;
+	}
+	
+	/**
+	 * {@link Expression#equals(Object)} is overridden to be instance comparison <code>==</code>
+	 * because two different instances of factor with the same expression are to be considered distinct factors.
+	 */
+	public boolean equals(Object another) {
+		boolean result = this == another;
+		return result;
+	}
+	
+	/**
+	 * Reverting to {@link System#identityHashCode(Object)} to match instance comparison performed by {@link #equals(Object)Object)}.
+	 */
+	public int hashCode() {
+		int result = System.identityHashCode(this);
 		return result;
 	}
 }

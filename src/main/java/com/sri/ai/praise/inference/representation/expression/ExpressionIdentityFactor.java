@@ -38,10 +38,13 @@
 package com.sri.ai.praise.inference.representation.expression;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
+import static com.sri.ai.util.Util.list;
+import static java.util.Collections.unmodifiableList;
 
 import java.util.List;
 
 import com.sri.ai.expresso.helper.WrappedExpression;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -70,6 +73,11 @@ public class ExpressionIdentityFactor extends WrappedExpression implements Facto
 	@Override
 	public boolean contains(Variable variable) {
 		return false;
+	}
+
+	@Override
+	public List<? extends Variable> getVariables() {
+		return unmodifiableList(list());
 	}
 
 	@Override

@@ -35,17 +35,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.api;
+package com.sri.ai.praise.inference.exactbp.core;
 
-import java.util.List;
+import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
+import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 
-public interface Factor {
+import com.sri.ai.praise.inference.representation.api.FactorNetwork;
+import com.sri.ai.praise.inference.representation.api.Representation;
+import com.sri.ai.praise.inference.representation.api.Variable;
 
-	boolean contains(Variable variable);
 
-	List<? extends Variable> getVariables();
-	
-	Factor multiply(Factor another);
-	
-	Factor sumOut(List<? extends Variable> variablesToSumOut);
+public class ExactBPFromVariable extends ExactBPFromVariableToFactor {
+
+	public ExactBPFromVariable(Variable root, Representation representation, FactorNetwork factorNetwork) {
+		super(root, null, liveSet(list()), redirectingTo(liveSet(list())), representation, factorNetwork);
+	}
+
 }

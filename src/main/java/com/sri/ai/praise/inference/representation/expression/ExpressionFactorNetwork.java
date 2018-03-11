@@ -53,6 +53,8 @@ import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
 
 
 /**
+ * A factor network in which factors and variables are represented as {@link Expression}s 
+ * encoding potential functions.
  * 
  * @author braz
  *

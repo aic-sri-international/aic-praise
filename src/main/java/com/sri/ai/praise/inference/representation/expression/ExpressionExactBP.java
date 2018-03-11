@@ -35,17 +35,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.api;
+package com.sri.ai.praise.inference.representation.expression;
 
-import java.util.List;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.inference.exactbp.core.ExactBPFromVariable;
 
-public interface Factor {
 
-	boolean contains(Variable variable);
+/**
+ * 
+ * @author braz
+ *
+ */
+public class ExpressionExactBP extends ExactBPFromVariable {
 
-	List<? extends Variable> getVariables();
+	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
+		
+		super(new ExpressionVariable(query), new ExpressionRepresentation(), factorNetwork);
+		
+	}
 	
-	Factor multiply(Factor another);
-	
-	Factor sumOut(List<? extends Variable> variablesToSumOut);
 }
