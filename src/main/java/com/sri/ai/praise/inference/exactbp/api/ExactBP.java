@@ -42,13 +42,13 @@ import java.util.ArrayList;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
-public interface ExactBP extends TreeComputation<Factor> {
+public interface ExactBP<RootType,SubRootType> extends TreeComputation<Factor> {
 	
-	Object getParent();
+	SubRootType getParent();
 
-	Object getRoot();
+	RootType getRoot();
 	
 	@Override
-	ArrayList<ExactBP> getSubs();
+	ArrayList<ExactBP<SubRootType,RootType>> getSubs();
 
 }

@@ -76,18 +76,18 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * @author braz
  *
  */
-public abstract class AbstractExactBP implements ExactBP {
+public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<RootType,SubRootType> {
 	
 	protected abstract List<Factor> getFactorsAtRoot();
 
-	protected abstract ExactBP makeSubExactBP(Object subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
+	protected abstract ExactBP<SubRootType,RootType> makeSubExactBP(SubRootType subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
 
-	protected abstract ArrayList<? extends Object> makeSubsRoots();
+	protected abstract ArrayList<? extends SubRootType> makeSubsRoots();
 
-	protected Object root;
-	protected Object parent;
+	protected RootType root;
+	protected SubRootType parent;
 	
-	protected ArrayList<ExactBP> subs;
+	protected ArrayList<ExactBP<SubRootType,RootType>> subs;
 
 	final protected LiveSet<Factor> excludedFactors;
 	final protected RedirectingLiveSet<Factor> includedFactors;
@@ -100,7 +100,7 @@ public abstract class AbstractExactBP implements ExactBP {
 	protected Representation representation;
 	protected FactorNetwork model;
 	
-	public AbstractExactBP(Object root, Object parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
+	public AbstractExactBP(RootType root, SubRootType parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
 		this.root = root;
 		this.parent = parent;
 		this.subs = null;
@@ -111,7 +111,7 @@ public abstract class AbstractExactBP implements ExactBP {
 	}
 	
 	@Override
-	public ArrayList<ExactBP> getSubs() {
+	public ArrayList<ExactBP<SubRootType,RootType>> getSubs() {
 		if (subs == null) {
 			makeSubs();
 		}
@@ -122,7 +122,7 @@ public abstract class AbstractExactBP implements ExactBP {
 		// This method creates the sub-ExactBPs.
 		// First, it needs to create the included factor live sets for these subs,
 		// because that is required in the constructor of ExactBPs.
-		ArrayList<? extends Object> subsRoots = makeSubsRoots();
+		ArrayList<? extends SubRootType> subsRoots = makeSubsRoots();
 		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeInitialSubsIncludedFactors(subsRoots.size());
 		makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
 	}
@@ -143,19 +143,19 @@ public abstract class AbstractExactBP implements ExactBP {
 		includedFactors.redirectTo(unionOfSubsIncludedFactorsAndFactorsAtRoot);
 	}
 
-	private void makeSubsFromTheirIncludedFactors(ArrayList<? extends Object> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+	private void makeSubsFromTheirIncludedFactors(ArrayList<? extends SubRootType> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
 		int subIndex = 0;
-		for (Object subRoot : subsRoots) {
-			ExactBP sub = makeSubFromItsIncludedFactors(subRoot, subIndex, subsIncludedFactors);
+		for (SubRootType subRoot : subsRoots) {
+			ExactBP<SubRootType,RootType> sub = makeSubFromItsIncludedFactors(subRoot, subIndex, subsIncludedFactors);
 			subs.add(sub);
 			subIndex++;
 		}
 	}
 
-	private ExactBP makeSubFromItsIncludedFactors(Object subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+	private ExactBP<SubRootType,RootType> makeSubFromItsIncludedFactors(SubRootType subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
 		RedirectingLiveSet<Factor> subIncludedFactors = subsIncludedFactors.get(subIndex);
 		LiveSet<Factor> subExcludedFactors = excludedFactorsForSubAt(subIndex, subsIncludedFactors);
-		ExactBP sub = makeSubExactBP(subRoot, subExcludedFactors, subIncludedFactors);
+		ExactBP<SubRootType,RootType> sub = makeSubExactBP(subRoot, subExcludedFactors, subIncludedFactors);
 		return sub;
 	}
 
@@ -167,12 +167,12 @@ public abstract class AbstractExactBP implements ExactBP {
 	}
 
 	@Override
-	public Object getRoot() {
+	public RootType getRoot() {
 		return root;
 	}
 
 	@Override
-	public Object getParent() {
+	public SubRootType getParent() {
 		return parent;
 	}
 

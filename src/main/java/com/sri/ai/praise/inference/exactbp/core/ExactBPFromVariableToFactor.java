@@ -41,6 +41,7 @@ import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.list;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
@@ -51,20 +52,15 @@ import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
-public class ExactBPFromVariableToFactor extends AbstractExactBP {
+public class ExactBPFromVariableToFactor extends AbstractExactBP<Variable,Factor> {
 	
-	public ExactBPFromVariableToFactor(Object root, Object parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
+	public ExactBPFromVariableToFactor(Variable root, Factor parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
 		super(root, parent, excludedFactors, includedFactors, representation, model);
 	}
 
 	@Override
-	protected ExactBP makeSubExactBP(Object subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
+	protected ExactBP<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
 		return new ExactBPFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation, model);
-	}
-	
-	@Override
-	public Variable getRoot() {
-		return (Variable) super.getRoot();
 	}
 	
 	@Override
@@ -78,8 +74,8 @@ public class ExactBPFromVariableToFactor extends AbstractExactBP {
 		return representation.multiply(incomingMessages);
 	}
 	
-	private ArrayList<? extends Factor> getRootNeighbors() {
-		return (ArrayList<? extends Factor>) getModel().getNeighbors(getRoot());
+	private Collection<? extends Factor> getRootNeighbors() {
+		return getModel().getNeighbors(getRoot());
 	}
 
 	@Override
