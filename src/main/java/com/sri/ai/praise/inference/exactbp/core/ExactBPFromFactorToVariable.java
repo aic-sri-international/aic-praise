@@ -47,20 +47,19 @@ import java.util.List;
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.FactorNetwork;
-import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromFactorToVariable extends AbstractExactBP<Factor,Variable> {
 	
-	protected ExactBPFromFactorToVariable(Factor root, Variable parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork model) {
-		super(root, parent, excludedFactors, includedFactors, representation, model);
+	protected ExactBPFromFactorToVariable(Factor root, Variable parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, FactorNetwork model) {
+		super(root, parent, excludedFactors, includedFactors, model);
 	}
 
 	@Override
 	protected ExactBP<Variable,Factor> makeSubExactBP(Variable subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, representation, factorNetwork);
+		return new ExactBPFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork);
 	}
 
 	@Override
@@ -74,7 +73,12 @@ public class ExactBPFromFactorToVariable extends AbstractExactBP<Factor,Variable
 	}
 
 	@Override
-	protected List<Factor> getFactorsAtRoot() {
+	public List<Factor> getFactorsAtRoot() {
 		return list(getRoot());
+	}
+
+	@Override
+	public Variable getMessageVariable() {
+		return getParent();
 	}
 }

@@ -35,29 +35,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytimeexactbp.core;
+package com.sri.ai.praise.inference.representation.core;
 
-import java.util.ArrayList;
+import static com.sri.ai.util.Util.list;
+import static java.util.Collections.unmodifiableList;
 
-import com.sri.ai.praise.inference.anytimeexactbp.api.PolytopeOfFactors;
+import java.util.List;
+
 import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Variable;
 
 /**
- * An implementation of {@link PolytopeOfFactors} that corresponds to the convex hull of a set of factors (its <i>vertices</i>).
+ * A class representing an {@link Factor} that is an identity factor.
+ * This can be defined independently of the {@link Representation} used.
+ * <p>
  * 
- * @author gabriel
+ * @author braz
  *
  */
+public class IdentityFactor implements Factor {
 
-public class ConvexHullOfSomeFactors implements PolytopeOfFactors {
-	
-	private ArrayList<Factor> vertices;
-	
-	public ConvexHullOfSomeFactors(ArrayList<Factor> vertices) {
-		this.vertices = vertices;
+	@Override
+	public boolean contains(Variable variable) {
+		return false;
+	}
+
+	@Override
+	public List<? extends Variable> getVariables() {
+		return unmodifiableList(list());
+	}
+
+	@Override
+	public Factor multiply(Factor another) {
+		return another;
+	}
+
+	@Override
+	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
+		return this;
 	}
 	
-	public ArrayList<Factor> getVertices() {
-		return vertices;
+	@Override
+	public boolean isUnit() {
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "1";
 	}
 }

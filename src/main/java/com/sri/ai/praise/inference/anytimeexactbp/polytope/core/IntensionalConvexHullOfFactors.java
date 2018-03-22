@@ -35,18 +35,63 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytimeexactbp.api;
+package com.sri.ai.praise.inference.anytimeexactbp.polytope.core;
 
+import static com.sri.ai.util.Util.intersection;
+import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.subtract;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.util.computation.anytime.api.Approximation;
+import com.sri.ai.praise.inference.representation.api.Variable;
 
 /**
- * An interface for approximations to factors consisting of a
- * polytope set of factors to which the true factor is guaranteed to belong. 
- * 
- * @author gabriel
+ * @author braz
  *
  */
-public interface PolytopeOfFactors extends Approximation<Factor> {
+public class IntensionalConvexHullOfFactors implements Polytope {
+	
+	private Collection<? extends Variable> indices;
 
+	private Factor factor;
+	
+	public IntensionalConvexHullOfFactors(Collection<? extends Variable> indices, Factor factor) {
+		Set<Variable> indicesAppearingInFactor = intersection(indices, factor.getVariables());
+		this.indices = indicesAppearingInFactor;
+		this.factor = factor;
+	}
+
+	public Collection<? extends Variable> getIndices() {
+		return indices;
+	}
+
+
+	@Override
+	public Collection<? extends Variable> getFreeVariables() {
+		List<? extends Variable> all = factor.getVariables();
+		List<Variable> free = subtract(all, getIndices());
+		return free;
+	}
+
+	public Factor getFactor() {
+		return factor;
+	}
+	
+	@Override
+	public boolean isUnit() {
+		boolean result = 
+				indices.isEmpty()
+				&&
+				factor.isUnit();
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "{(on " + join(indices) + ")" + factor + "}";
+	}
 }

@@ -53,7 +53,7 @@ import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
 
 
 /**
- * A factor network in which factors and variables are represented as {@link Expression}s 
+ * A factor network in which factors and indices are represented as {@link Expression}s 
  * encoding potential functions.
  * 
  * @author braz
@@ -87,7 +87,7 @@ public class ExpressionFactorNetwork extends AbstractFactorNetwork {
 	}
 
 	private void indexFactorsAndVariables(Expression factorExpression, Context context) {
-		ExpressionWithVariablesFactor factor = new ExpressionWithVariablesFactor(factorExpression, context);
+		ExpressionFactor factor = new ExpressionFactor(factorExpression, context);
 		indexFactorAndItsVariables(factor, factorExpression, context);
 	}
 

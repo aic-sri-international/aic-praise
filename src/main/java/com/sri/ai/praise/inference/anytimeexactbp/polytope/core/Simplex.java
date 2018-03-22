@@ -35,24 +35,43 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.representation.expression;
+package com.sri.ai.praise.inference.anytimeexactbp.polytope.core;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.Representation;
+import static com.sri.ai.util.Util.list;
+
+import java.util.Collection;
+
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
+import com.sri.ai.praise.inference.representation.api.Variable;
 
 /**
- * An implementation of {@link Representation} using {@link Expression}s
- * to represent {@link ExpressionVariable}s and {@link ExpressionFactor}s.
- * 
  * @author braz
  *
  */
-public class ExpressionRepresentation implements Representation {
-
-	@Override
-	public Factor makeIdentityFactor() {
-		return new ExpressionIdentityFactor();
+public class Simplex implements Polytope {
+	
+	private Variable variable;
+	
+	public Simplex(Variable variable) {
+		this.variable = variable;
+	}
+	
+	public Variable getVariable() {
+		return variable;
 	}
 
+	@Override
+	public Collection<? extends Variable> getFreeVariables() {
+		return list(variable);
+	}
+	
+	@Override
+	public boolean isUnit() {
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		return "Simplex(" + variable + ")";
+	}
 }

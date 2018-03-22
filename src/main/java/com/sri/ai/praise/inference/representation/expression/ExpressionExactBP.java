@@ -50,7 +50,7 @@ public class ExpressionExactBP extends ExactBPFromVariable {
 
 	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
 		
-		super(new ExpressionVariable(query), new ExpressionRepresentation(), factorNetwork);
+		super(new ExpressionVariable(query), factorNetwork);
 		
 	}
 	

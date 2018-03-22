@@ -41,8 +41,8 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 
+import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.api.FactorNetwork;
-import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
 /**
@@ -57,8 +57,8 @@ import com.sri.ai.praise.inference.representation.api.Variable;
  */
 public class ExactBPFromVariable extends ExactBPFromVariableToFactor {
 
-	public ExactBPFromVariable(Variable root, Representation representation, FactorNetwork factorNetwork) {
-		super(root, null, liveSet(list()), redirectingTo(liveSet(list())), representation, factorNetwork);
+	public ExactBPFromVariable(Variable root, FactorNetwork factorNetwork) {
+		super(root, null, liveSet(list()), redirectingTo(liveSet(list())), factorNetwork);
 	}
 
 }

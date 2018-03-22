@@ -37,7 +37,13 @@
  */
 package com.sri.ai.praise.inference.representation.api;
 
+import static com.sri.ai.util.Util.accumulate;
+
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+
+import com.sri.ai.praise.inference.representation.core.IdentityFactor;
 
 public interface Factor {
 
@@ -48,4 +54,17 @@ public interface Factor {
 	Factor multiply(Factor another);
 	
 	Factor sumOut(List<? extends Variable> variablesToSumOut);
+	
+	boolean isUnit();
+	
+	static Factor multiply(Iterator<? extends Factor> factors) {
+		Factor result = accumulate(factors, Factor::multiply, new IdentityFactor());
+		return result;
+	}
+
+	static Factor multiply(Collection<? extends Factor> factors) {
+		Factor result = multiply(factors.iterator());
+		return result;
+	}
+
 }

@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.inference.exactbp.core;
 
+import static com.sri.ai.praise.inference.representation.api.Factor.multiply;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
@@ -50,20 +51,20 @@ import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.union;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.unionOfAllButTheOneAt;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.FactorNetwork;
-import com.sri.ai.praise.inference.representation.api.Representation;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 /**
  * Abstract implementation of Exact BP gathering the common functionality
- * of Exact BP rooted in variables and in factors.
+ * of Exact BP rooted in indices and in factors.
  * <p>
  * Each node of Exact BP must provide its sub-Exact BPs.
  * This is done with the method {@link #makeSubExactBP(SubRootType, LiveSet, RedirectingLiveSet)},
@@ -73,7 +74,7 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * <p>
  * Method {@link #function(List)} is also left unspecified at this level
  * because variable-rooted Exact BPs will multiple messages
- * while factor-rooted ones will sum out certain variables of its factor times incoming messages.
+ * while factor-rooted ones will sum out certain indices of its factor times incoming messages.
  * <p>
  * Other than that, both types must keep track of
  * included factor nodes (those already assigned to be in its branch)
@@ -87,11 +88,9 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  *
  */
 public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<RootType,SubRootType> {
-	
-	/**
-	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
-	 */
-	protected abstract List<Factor> getFactorsAtRoot();
+
+	@Override
+	public abstract List<? extends Factor> getFactorsAtRoot();
 
 	/**
 	 * An abstract method for extensions to define how to create their subs.
@@ -120,16 +119,14 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	// are wired to it.
 	// The solution is to have a redirecting live set instance that can be redirected.
 	
-	protected Representation representation;
 	protected FactorNetwork factorNetwork;
 	
-	protected AbstractExactBP(RootType root, SubRootType parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, Representation representation, FactorNetwork factorNetwork) {
+	protected AbstractExactBP(RootType root, SubRootType parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, FactorNetwork factorNetwork) {
 		this.root = root;
 		this.parent = parent;
 		this.subs = null;
 		this.excludedFactors = excludedFactors;
 		this.includedFactors = includedFactors;
-		this.representation = representation;
 		this.factorNetwork = factorNetwork;
 	}
 	
@@ -201,18 +198,32 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	@Override
 	public Factor function(List<Factor> incomingMessages) {
 		Factor product = computeProductOfFactorsAtRootAndIncomingMessages(incomingMessages);
-		Factor result = keepOnlyFreeVariablesInResultFactor(product);
+		List<? extends Variable> allFreeVariablesInProduct = product.getVariables();
+		List<? extends Variable> variablesToBeSummedOut = getSummedOutVariables(allFreeVariablesInProduct);
+		Factor result = sumOut(variablesToBeSummedOut, product);
 		return result;
 	}
 
-	private Factor computeProductOfFactorsAtRootAndIncomingMessages(List<Factor> incomingMessages) {
+	/**
+	 * Returns the product of given incoming messages and the factor at root, if there is any. 
+	 * @param incomingMessages
+	 * @return
+	 */
+	public Factor computeProductOfFactorsAtRootAndIncomingMessages(List<Factor> incomingMessages) {
 		Iterator<Factor> allFactors = nestedIterator(getFactorsAtRoot(), incomingMessages);
-		Factor product = representation.multiply(allFactors);
+		Factor product = multiply(allFactors);
 		return product;
 	}
 
-	private Factor keepOnlyFreeVariablesInResultFactor(Factor factor) {
-		List<? extends Variable> variablesToBeSummedOut = getNonFreeVariables(factor);
+	/**
+	 * Returns the result of eliminating given indices from given factor, plus whatever bookkeeping such as printing information or recording size of computation
+	 * (since this is one of the most expensive steps). 
+	 * @param variablesToBeSummedOut
+	 * @param factor
+	 * @return
+	 */
+	@Override
+	public Factor sumOut(List<? extends Variable> variablesToBeSummedOut, Factor factor) {
 		Factor result = factor.sumOut(variablesToBeSummedOut);
 		printTracingInformation(factor, variablesToBeSummedOut, result);
 		return result;
@@ -234,14 +245,14 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 
 	private void printTracingInformationBody(Factor factor, List<? extends Variable> variablesToBeSummedOut, Factor result) {
 		println("Received total product " + factor);
-		String eliminatedString = variablesToBeSummedOut.isEmpty()? "no variables" : join(variablesToBeSummedOut);
+		String eliminatedString = variablesToBeSummedOut.isEmpty()? "no indices" : join(variablesToBeSummedOut);
 		println("Eliminating " + eliminatedString + " from " + factor + " ---> " + result);
 		println("Sending " + result);
 	}
 
-	private List<? extends Variable> getNonFreeVariables(Factor factor) {
-		List<? extends Variable> allVariablesInFactors = factor.getVariables();
-		List<? extends Variable> variablesToBeSummedOut = collectToList(allVariablesInFactors, n -> ! isFreeVariable((Variable) n));
+	@Override
+	public List<? extends Variable> getSummedOutVariables(Collection<? extends Variable> allFreeVariablesInSummand) {
+		List<? extends Variable> variablesToBeSummedOut = collectToList(allFreeVariablesInSummand, n -> ! isFreeVariable((Variable) n));
 		return variablesToBeSummedOut;
 	}
 
@@ -282,5 +293,10 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 
 	public FactorNetwork getFactorNetwork() {
 		return factorNetwork;
+	}
+	
+	@Override
+	public String toString() {
+		return "Exact BP on " + getRoot();
 	}
 }

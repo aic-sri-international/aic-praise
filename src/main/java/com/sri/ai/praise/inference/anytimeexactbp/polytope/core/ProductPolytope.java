@@ -35,50 +35,78 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.exactbp.core;
+package com.sri.ai.praise.inference.anytimeexactbp.polytope.core;
 
-import static com.sri.ai.util.Util.collectToArrayList;
+import static com.sri.ai.util.Util.collectToList;
+import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.unionOfCollections;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
-import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.FactorNetwork;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.util.livesets.api.LiveSet;
-import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
+import com.sri.ai.praise.inference.representation.core.IdentityFactor;
 
-public class ExactBPFromVariableToFactor extends AbstractExactBP<Variable,Factor> {
+/**
+ * @author braz
+ *
+ */
+public class ProductPolytope implements Polytope {
 	
-	protected ExactBPFromVariableToFactor(Variable root, Factor parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, FactorNetwork factorNetwork) {
-		super(root, parent, excludedFactors, includedFactors, factorNetwork);
+	private Collection<? extends Polytope> nonUnitPolytopes;
+
+	private ProductPolytope(Collection<? extends Polytope> nonUnitPolytopes) {
+		super();
+		this.nonUnitPolytopes = nonUnitPolytopes;
+	}
+	
+	@Override
+	public Collection<? extends Variable> getFreeVariables() {
+		
+		Collection<Collection<? extends Variable>> listOfFreeVariablesCollections = 
+				mapIntoList(nonUnitPolytopes, Polytope::getFreeVariables);
+		
+		Set<? extends Variable> allFreeVariables = unionOfCollections(listOfFreeVariablesCollections);
+		
+		return allFreeVariables;
+	}
+
+	public Collection<? extends Polytope> getPolytopes() {
+		return nonUnitPolytopes;
 	}
 
 	@Override
-	protected ExactBP<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork);
-	}
-	
-	@Override
-	protected ArrayList<? extends Factor> makeSubsRoots() {
-		ArrayList<? extends Factor> result = collectToArrayList(getRootNeighbors(), n -> ! excludedFactors.contains((Factor)n));
+	public String toString() {
+		String result = nonUnitPolytopes.isEmpty()? "{(on ) 1}" : join(nonUnitPolytopes, "*");
 		return result;
 	}
 
-	private Collection<? extends Factor> getRootNeighbors() {
-		return getFactorNetwork().getNeighbors(getRoot());
+	@Override
+	public boolean isUnit() {
+		boolean result = 
+				nonUnitPolytopes.size() == 0 
+				|| 
+				(
+						nonUnitPolytopes.size() == 1 
+						&& 
+						getFirst(nonUnitPolytopes).isUnit());
+		return result;
 	}
 
-	@Override
-	public List<Factor> getFactorsAtRoot() {
-		return list();
-	}
-
-	@Override
-	public Variable getMessageVariable() {
-		return getRoot();
+	public static Polytope multiply(Collection<? extends Polytope> polytopes) {
+		Polytope result;
+		List<? extends Polytope> nonUnitPolytopes = collectToList(polytopes, p -> !p.isUnit());
+		if (nonUnitPolytopes.isEmpty()) {
+			result = new IntensionalConvexHullOfFactors(list(), new IdentityFactor());
+		}
+		else {
+			result = new ProductPolytope(nonUnitPolytopes);
+		}
+		return result;
 	}
 }

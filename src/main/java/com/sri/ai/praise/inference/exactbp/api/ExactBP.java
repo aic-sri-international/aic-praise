@@ -38,8 +38,11 @@
 package com.sri.ai.praise.inference.exactbp.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
 public interface ExactBP<RootType,SubRootType> extends TreeComputation<Factor> {
@@ -48,6 +51,30 @@ public interface ExactBP<RootType,SubRootType> extends TreeComputation<Factor> {
 
 	RootType getRoot();
 	
+	/**
+	 * Returns the {@link Variable} over which the message coming from this algorithm is defined;
+	 * effectively, this is the root if this is rooted on a variable, and the parent, if any, otherwise.
+	 * @return
+	 */
+	Variable getMessageVariable();
+	
+	/**
+	 * Given the product of incoming messages and factor at root,
+	 * returns a list of indices being summed out at the root level,
+	 * based on the overall tree computation constructed so far
+	 * (this determines which indices are external cutset indices and which ones are internal ones,
+	 * which in turn determines which ones must be summed out).
+	 * @return
+	 */
+	List<? extends Variable> getSummedOutVariables(Collection<? extends Variable> allFreeVariablesInSummand);
+	
+	/**
+	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
+	 */
+	List<? extends Factor> getFactorsAtRoot();
+
+	Factor sumOut(List<? extends Variable> variablesToBeSummedOut, Factor factor);
+
 	@Override
 	ArrayList<ExactBP<SubRootType,RootType>> getSubs();
 

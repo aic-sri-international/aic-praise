@@ -45,7 +45,7 @@ import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.collect.DefaultManyToManyRelation;
 
 /**
- * An abstract {@link FactorNetwork} indexing factors and variables with a {@link DefaultManyToManyRelation}.
+ * An abstract {@link FactorNetwork} indexing factors and indices with a {@link DefaultManyToManyRelation}.
  * @author braz
  *
  */

@@ -13,12 +13,15 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.praise.inference.anytimeexactbp.AnytimeExactBP;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.expression.ExpressionExactBP;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactor;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNetwork;
+import com.sri.ai.util.computation.anytime.api.Approximation;
 
 public class ExactBPTest {
 
@@ -30,32 +33,32 @@ public class ExactBPTest {
 		String queryVariableString;
 		Expression expected;
 
-		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
-		factorNetworkString = "tuple("
-				+ "if P then if I = 1 then 2 else 3 else if I = 1 then 1 else 2"
-				+ ")";
-		queryVariableString = "I";
-		expected = parse("if I = 1 then 3 else 5");
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-
-		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
-		factorNetworkString = "("
-				+ "if (P or not P) and I = 1 then 0.1 else 0.9, "
-				+ "if (P or not P) and I = 1 then 0.1 else 0.9"
-				+ ")";
-		queryVariableString = "I";
-		expected = parse("if I = 1 then 0.01 else 0.81");
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-
-		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "P", "Boolean"};
-		factorNetworkString = "("
-				+ "if J = I then 1 else 0, "
-				+ "if (P or not P) and J = 1 then 0.1 else 0.9, "
-				+ "if (P or not P) and I = 1 then 0.1 else 0.9"
-				+ ")";
-		queryVariableString = "I";
-		expected = parse("if I = 1 then 0.01 else 0.81");
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+//		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
+//		factorNetworkString = "tuple("
+//				+ "if P then if I = 1 then 2 else 3 else if I = 1 then 1 else 2"
+//				+ ")";
+//		queryVariableString = "I";
+//		expected = parse("if I = 1 then 3 else 5");
+//		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+//
+//		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
+//		factorNetworkString = "("
+//				+ "if (P or not P) and I = 1 then 0.1 else 0.9, "
+//				+ "if (P or not P) and I = 1 then 0.1 else 0.9"
+//				+ ")";
+//		queryVariableString = "I";
+//		expected = parse("if I = 1 then 0.01 else 0.81");
+//		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+//
+//		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "P", "Boolean"};
+//		factorNetworkString = "("
+//				+ "if J = I then 1 else 0, "
+//				+ "if (P or not P) and J = 1 then 0.1 else 0.9, "
+//				+ "if (P or not P) and I = 1 then 0.1 else 0.9"
+//				+ ")";
+//		queryVariableString = "I";
+//		expected = parse("if I = 1 then 0.01 else 0.81");
+//		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
 
 		//              -------J-------
         //             /               \
@@ -210,11 +213,33 @@ public class ExactBPTest {
 		printResults(expected, result);
 		
 		assertEquals(expected, result.getInnerExpression());
+		
+//		ExpressionFactor anytimeResult = solveAnytime(query, factorNetwork);
+		
+//		assertEquals(result.getInnerExpression(), anytimeResult.getInnerExpression());
 	}
 
 	private ExpressionFactor solve(Expression query, ExpressionFactorNetwork factorNetwork) {
 		ExactBP<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
 		ExpressionFactor result = (ExpressionFactor) exactBP.apply();
+		return result;
+	}
+
+	private ExpressionFactor solveAnytime(Expression query, ExpressionFactorNetwork factorNetwork) {
+		ExactBP<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
+		AnytimeExactBP<Variable,Factor> anytimeExactBP = new AnytimeExactBP<>(exactBP);
+		Approximation<Factor> current = null;
+		while (anytimeExactBP.hasNext()) {
+			current = anytimeExactBP.next();
+			println(current);
+		}
+		ExpressionFactor result;
+		if (current == null) {
+			result = null;
+		}
+		else {
+			result = (ExpressionFactor) ((IntensionalConvexHullOfFactors) current).getFactor();
+		}
 		return result;
 	}
 
