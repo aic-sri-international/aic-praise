@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
@@ -93,7 +92,10 @@ public class IntensionalConvexHullOfFactors extends AbstractAtomicPolytope {
 	@Override
 	public AtomicPolytope nonIdentityAtomicProductOrNull(AtomicPolytope nonIdentityAtomicAnother) {
 		AtomicPolytope result;
-		if (nonIdentityAtomicAnother instanceof IntensionalConvexHullOfFactors) {
+		if (isIdentity()) {
+			result = nonIdentityAtomicAnother;
+		}
+		else if (nonIdentityAtomicAnother instanceof IntensionalConvexHullOfFactors) {
 			result = multiplyByConvexHull(nonIdentityAtomicAnother);
 		}
 		else {
@@ -102,7 +104,7 @@ public class IntensionalConvexHullOfFactors extends AbstractAtomicPolytope {
 		return result;
 	}
 
-	private AtomicPolytope multiplyByConvexHull(Polytope another) {
+	private AtomicPolytope multiplyByConvexHull(AtomicPolytope another) {
 		AtomicPolytope result;
 		IntensionalConvexHullOfFactors anotherConvexHull = (IntensionalConvexHullOfFactors) another;
 		if (indices.equals(anotherConvexHull.getIndices())) {
@@ -117,7 +119,9 @@ public class IntensionalConvexHullOfFactors extends AbstractAtomicPolytope {
 
 	@Override
 	public String toString() {
-		return "{(on " + join(indices) + ") " + factor + "}";
+		String indicesString = indices.isEmpty()? "" : "(on " + join(indices) + ") ";
+		String result = "{" + indicesString + factor + "}";
+		return result;
 	}
 	
 	@Override

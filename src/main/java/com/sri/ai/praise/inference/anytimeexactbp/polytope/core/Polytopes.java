@@ -42,6 +42,8 @@ import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.subtract;
+import static com.sri.ai.util.Util.union;
 
 import java.util.Collection;
 import java.util.List;
@@ -80,11 +82,11 @@ import com.sri.ai.praise.inference.representation.api.Variable;
  * 
  * \propto (this is equality if V = Union_i U_i)
  * 
- * Union_{W_1,...,W_n, U_1...U_m} { sum_{V \ {W_1,...,W_n} \ Union_I U_i} phi_1...phi_m }
+ * Union_{W_1,...,W_n, U_1...U_m} { sum_{V \ ({W_1,...,W_n} union Union_I U_i)} phi_1...phi_m }
  *  
  * =
  * 
- * {(on W_1,...,W_n, U_1...U_m) sum_{V \ {W_1,...,W_n} \ Union_I U_i} phi_1...phi_m } 
+ * {(on W_1,...,W_n, U_1...U_m) sum_{V \ ({W_1,...,W_n} union Union_I U_i)} phi_1...phi_m } 
  *  
  * =
  * 
@@ -176,35 +178,48 @@ public class Polytopes {
 	
 	private static Polytope makeProjectedPolytope(List<? extends Variable> variablesToBeSummedOut, List<Polytope> dependentOfVariablesToBeSummedOut) {
 
-		List<Variable> indices = collectIndicesFromSimplexAndIntensionalPolytopes(dependentOfVariablesToBeSummedOut);
+		List<Variable> simplexVariables = collectSimplexVariables(dependentOfVariablesToBeSummedOut);
+		
+		List<Variable> indicesFromConvexHulls = collectIndicesFromIntensionalPolytopes(dependentOfVariablesToBeSummedOut);
 		
 		List<Factor> factors = collectFactorsFromIntensionalPolytopes(dependentOfVariablesToBeSummedOut);
 		
 		Factor productOfFactors = Factor.multiply(factors);
 		
-		Factor projectedFactor = productOfFactors.sumOut(variablesToBeSummedOut);
+		List<? extends Variable> variablesToBeSummedOutOnceSimplexesAreDealtWith = 
+				subtract(variablesToBeSummedOut, simplexVariables);
 		
-		Polytope projectedPolytope = new IntensionalConvexHullOfFactors(indices, projectedFactor);
+		Factor projectedFactor = productOfFactors.sumOut(variablesToBeSummedOutOnceSimplexesAreDealtWith);
+		
+		List<Variable> finalIndices = union(indicesFromConvexHulls, simplexVariables);
+		
+		Polytope projectedPolytope = new IntensionalConvexHullOfFactors(finalIndices, projectedFactor);
 		
 		return projectedPolytope;
 	}
 
-	private static List<Variable> collectIndicesFromSimplexAndIntensionalPolytopes(List<Polytope> dependentOfVariablesToBeSummedOut) {
+	private static List<Variable> collectSimplexVariables(List<Polytope> dependentOfVariablesToBeSummedOut) {
 		List<Variable> indices = list();
 		for (Polytope polytope : dependentOfVariablesToBeSummedOut) {
 			if (polytope instanceof Simplex) {
-				collectIndicesFromSimplex(indices, polytope);
+				collectVariableFromSimplex(indices, polytope);
 			}
-			else if (polytope instanceof AbstractAtomicPolytope) {
+		}
+		return indices;
+	}
+
+	private static List<Variable> collectIndicesFromIntensionalPolytopes(List<Polytope> dependentOfVariablesToBeSummedOut) {
+		List<Variable> indices = list();
+		for (Polytope polytope : dependentOfVariablesToBeSummedOut) {
+			if (polytope instanceof IntensionalConvexHullOfFactors) {
 				collectIndicesFromIntensionalPolytope(indices, polytope);
 			}
 		}
 		return indices;
 	}
 
-	private static void collectIndicesFromSimplex(List<Variable> indices, Polytope polytope) {
+	private static void collectVariableFromSimplex(List<Variable> indices, Polytope polytope) {
 		indices.addAll(polytope.getFreeVariables());
-		// note that the free variable of a simplex becomes an index of the projected polytope!
 	}
 
 	private static void collectIndicesFromIntensionalPolytope(List<Variable> indices, Polytope polytope) {

@@ -48,7 +48,7 @@ import com.sri.ai.praise.inference.representation.api.Variable;
  * @author braz
  *
  */
-public class Simplex  extends AbstractAtomicPolytope {
+public class Simplex extends AbstractAtomicPolytope {
 	
 	private Variable variable;
 	

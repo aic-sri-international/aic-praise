@@ -43,7 +43,6 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.notNullAndEquals;
-import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
@@ -59,6 +58,7 @@ import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.FactorNetwork;
 import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -88,6 +88,8 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  *
  */
 public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<RootType,SubRootType> {
+
+	public static boolean debug = false;
 
 	@Override
 	public abstract List<? extends Factor> getFactorsAtRoot();
@@ -248,6 +250,12 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 		String eliminatedString = variablesToBeSummedOut.isEmpty()? "no indices" : join(variablesToBeSummedOut);
 		println("Eliminating " + eliminatedString + " from " + factor + " ---> " + result);
 		println("Sending " + result);
+	}
+	
+	private void println(String string) {
+		if (debug) {
+			Util.println(string);
+		}
 	}
 
 	@Override

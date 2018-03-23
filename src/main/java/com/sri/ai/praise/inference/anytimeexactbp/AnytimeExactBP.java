@@ -128,6 +128,6 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 
 	@Override
 	public String toString() {
-		return "Anytime Exact BP on " + getBase();
+		return "Anytime " + getBase();
 	}
 }

@@ -23,6 +23,7 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.inference.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
+import com.sri.ai.praise.inference.exactbp.core.AbstractExactBP;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.expression.ExpressionExactBP;
@@ -37,6 +38,8 @@ public class AnytimeExactBPTest {
 		
 		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
 		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
+
+		AbstractExactBP.debug = false;
 		
 		String[] variableAndTypes;
 		String factorNetworkString;
@@ -232,13 +235,12 @@ public class AnytimeExactBPTest {
 		
 		Expression normalizedAnytimeResult = solveAnytime(query, factorNetwork, context);
 		
-//		Expression test = parse("there exists C in Real : C*(" + result + ") = " + anytimeResult);
+//		Expression test = parse("there exists C in Real : ((C*(" + resultFactor.getInnerExpression() + ")) = " + normalizedAnytimeResult + ")");
 //		println("Solving " + test);
 //		Expression testResult = context.evaluate(test);
 //		assertEquals(TRUE, testResult);
 
 		Expression test = parse("(" + normalizedResult + ") = (" + normalizedAnytimeResult + ")");
-		println("Solving " + test);
 		Expression testResult = context.evaluate(test);
 		assertEquals(TRUE, testResult);
 
