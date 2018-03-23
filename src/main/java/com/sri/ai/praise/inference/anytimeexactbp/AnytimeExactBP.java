@@ -45,6 +45,7 @@ import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
@@ -56,7 +57,7 @@ import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
-import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeTreeComputationWithDefaultPickingOfSubs;
+import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeTreeComputation;
 
 /**
  * An anytime version of {@link ExactBP} algorithms.
@@ -70,10 +71,54 @@ import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeT
  * @author braz
  *
  */
-public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeComputationWithDefaultPickingOfSubs<Factor> {
+public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeComputation<Factor> {
 
 	public AnytimeExactBP(ExactBP<RootType,SubRootType> base) {
 		super(base, new Simplex(base.getMessageVariable()));
+	}
+
+	private Iterator<? extends AnytimeExactBP<SubRootType,RootType>> subIteratorForRefinement;
+
+	@Override
+	protected void makeSubs() {
+		super.makeSubs();
+		subIteratorForRefinement = getSubs().iterator();
+	}
+
+	@Override
+	protected AnytimeExactBP<SubRootType,RootType> pickNextSubWithNext() {
+		
+		if (getSubs().isEmpty()) {
+			return null;
+		}
+		
+		AnytimeExactBP<SubRootType,RootType> selected = null; 
+
+		boolean hitTheInitialOneAgain = false;
+		AnytimeExactBP<SubRootType,RootType> initialSub = getNextSubCircularly(); 
+		AnytimeExactBP<SubRootType,RootType> currentSub = initialSub; 
+		
+		do {
+			if (currentSub.hasNext()) {
+				selected = currentSub;
+			}
+			else {
+				currentSub = getNextSubCircularly();
+				if (currentSub == initialSub) {
+					hitTheInitialOneAgain = true;
+				}
+			}
+		} while (selected == null && !hitTheInitialOneAgain);
+		
+		return selected;
+	}
+
+	private AnytimeExactBP<SubRootType, RootType> getNextSubCircularly() {
+		if (!subIteratorForRefinement.hasNext()) {
+			subIteratorForRefinement = getSubs().iterator();
+		}
+		AnytimeExactBP<SubRootType, RootType> result = subIteratorForRefinement.next();
+		return result;
 	}
 
 	@Override
