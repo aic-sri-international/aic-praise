@@ -31,6 +31,26 @@ import com.sri.ai.praise.inference.representation.expression.ExpressionFactor;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNetwork;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
+import IncrementalAnytimeExactBeliefPropagation.IncrementalAnytimeBeliefPropagationWithSeparatorConditioning;
+import IncrementalAnytimeExactBeliefPropagation.PartitionTree;
+import IncrementalAnytimeExactBeliefPropagation.Model.BFS;
+import IncrementalAnytimeExactBeliefPropagation.Model.Model;
+
+import com.sri.ai.grinder.api.Theory;
+import com.sri.ai.grinder.library.bounds.Bound;
+import com.sri.ai.grinder.theory.compound.CompoundTheory;
+import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
+import com.sri.ai.grinder.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
+import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
+import com.sri.ai.grinder.theory.tuple.TupleTheory;
+import com.sri.ai.util.base.IdentityWrapper;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+
 public class AnytimeExactBPTest {
 
 	@Test
@@ -53,6 +73,7 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 1 then 3 else 5");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 
 		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
 		factorNetworkString = "("
@@ -62,7 +83,8 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 1 then 0.01 else 0.81");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-
+		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		
 		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "P", "Boolean"};
 		factorNetworkString = "("
 				+ "if J = I then 1 else 0, "
@@ -72,7 +94,8 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 1 then 0.01 else 0.81");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-
+		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		
 		//              -------J-------
         //             /               \
 		//            /      phi_2      \
@@ -95,7 +118,8 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 1 else 0");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-
+		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		
 		//              -------J-------
         //             /               \
 		//            /      phi_2      \
@@ -118,7 +142,7 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 0.25 else if I = 3 then 0.25 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-
+		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 		//              -------J-------
         //             /               \
 		//            /      phi_2      \
@@ -141,7 +165,7 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 3 then 0.25 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-
+		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 		//              -------J-------
         //             /               \
 		//            /      phi_2      \
@@ -165,7 +189,7 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 0.1875 else if I = 3 then 0.1875 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		
+		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 
 		//
 		// A00 -- A01 -- ... -- A04
@@ -212,6 +236,7 @@ public class AnytimeExactBPTest {
 		queryVariableString = "A_0_0";
 		expected = parse("if not A_0_0 then 2515404149056770048 else 857920100616142848"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 	}
 	
 	private void runTest(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected) {
@@ -308,4 +333,62 @@ public class AnytimeExactBPTest {
 		println(expected.equals(resultFactor.getInnerExpression())? "Correct!" : "Error!");
 	}
 
+
+	private void runGabriels( String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected) {
+		Theory theory = new CompoundTheory(
+				new EqualityTheory(false, true),
+				new DifferenceArithmeticTheory(false, false),
+				new LinearRealArithmeticTheory(false, false),
+				new TupleTheory(),
+				new PropositionalTheory());
+		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(variableAndTypes);
+		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(factorNetworkString, context);
+		Expression query = Expressions.parse(queryVariableString);
+		
+		Set<Expression> setOfFactors = new HashSet<>(); // not sure it will work
+		for(IdentityWrapper iw:factorNetwork.getAs()) {
+			ExpressionFactor f = (ExpressionFactor) iw.getObject();
+			Expression expressionFactor = f.getInnerExpression();
+			boolean successfullyAdded = setOfFactors.add(expressionFactor);
+			if (!successfullyAdded) {
+				setOfFactors.remove(expressionFactor);
+				Expression squareFactor = apply("*", expressionFactor,expressionFactor);
+				squareFactor = theory.evaluate(squareFactor, context);
+				setOfFactors.add(squareFactor);
+			}
+		}
+		
+		// create model
+		Model m = new Model(setOfFactors, theory, context,true, query);
+		
+		// do all iterations until the end, storing time
+		Iterator<PartitionTree> bfsExpander = new BFS(m);
+		IncrementalAnytimeBeliefPropagationWithSeparatorConditioning sbp = 
+				new IncrementalAnytimeBeliefPropagationWithSeparatorConditioning(m, bfsExpander);
+	
+		long initialTime = System.currentTimeMillis();
+		Bound inferenceResult = null;
+		println("----------------solving with Gabriels----------------");
+		while (bfsExpander.hasNext()) {
+			inferenceResult = sbp.expandAndComputeInference();
+			
+			println("Current bound on "+ query + ": " +inferenceResult);//.normalize(theory, context));
+		}
+		long finalTime = System.currentTimeMillis();
+		
+		Expression normalizedResult = inferenceResult.normalize(theory, context).get(0);
+		Expression normalizedexpected = normalize(query,expected,context);
+		
+		println("Result factor: " + inferenceResult.get(0));
+		println("Normalized   : " + normalizedResult);
+		//print the way it is done above
+		println("Time: " + (finalTime - initialTime) + " ms.");	
+
+		println(normalizedexpected.equals(inferenceResult.normalize(theory, context).get(0))? "Correct!" : "Error!");
+		
+		
+		Expression test = parse("(" + normalizedResult + ") = (" + normalizedexpected + ")");
+		Expression testResult = context.evaluate(test);
+		assertEquals(TRUE, testResult);
+	}	
 }
