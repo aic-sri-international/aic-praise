@@ -37,7 +37,9 @@
  */
 package com.sri.ai.praise.inference.anytimeexactbp;
 
+import static com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes.identityPolytope;
 import static com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes.sumOut;
+import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
 
@@ -47,7 +49,6 @@ import java.util.List;
 
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.ProductPolytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Simplex;
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.representation.api.Factor;
@@ -104,7 +105,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 
 	private Polytope getProductOfAllIncomingPolytopesAndFactorAtRoot(List<Approximation<Factor>> subsApproximations) {
 		List<Polytope> polytopesToMultiply = getAllPolytopes(subsApproximations);
-		Polytope result = ProductPolytope.multiply(polytopesToMultiply);
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
 		return result;
 	}
 

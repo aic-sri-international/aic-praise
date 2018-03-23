@@ -37,13 +37,12 @@
  */
 package com.sri.ai.praise.inference.representation.api;
 
+import static com.sri.ai.praise.inference.representation.core.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import com.sri.ai.praise.inference.representation.core.IdentityFactor;
 
 public interface Factor {
 
@@ -55,10 +54,10 @@ public interface Factor {
 	
 	Factor sumOut(List<? extends Variable> variablesToSumOut);
 	
-	boolean isUnit();
+	boolean isIdentity();
 	
 	static Factor multiply(Iterator<? extends Factor> factors) {
-		Factor result = accumulate(factors, Factor::multiply, new IdentityFactor());
+		Factor result = accumulate(factors, Factor::multiply, IDENTITY_FACTOR);
 		return result;
 	}
 

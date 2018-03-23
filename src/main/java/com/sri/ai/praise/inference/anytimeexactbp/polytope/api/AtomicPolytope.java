@@ -35,75 +35,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.inference.anytimeexactbp.polytope.core;
+package com.sri.ai.praise.inference.anytimeexactbp.polytope.api;
 
-import static com.sri.ai.util.Util.list;
-
-import java.util.Collection;
-
-import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.inference.representation.api.Variable;
 
 /**
  * @author braz
  *
  */
-public class Simplex  extends AbstractAtomicPolytope {
+public interface AtomicPolytope extends Polytope {
 	
-	private Variable variable;
-	
-	public Simplex(Variable variable) {
-		this.variable = variable;
-	}
-	
-	public Variable getVariable() {
-		return variable;
-	}
-
-	@Override
-	public Collection<? extends Variable> getFreeVariables() {
-		return list(variable);
-	}
-	
-	@Override
-	public boolean isIdentity() {
-		return false;
-	}
-
-	@Override
-	public String toString() {
-		return "Simplex(" + variable + ")";
-	}
-
-	@Override
-	public AtomicPolytope nonIdentityAtomicProductOrNull(AtomicPolytope another) {
-		AtomicPolytope result;
-		if (another instanceof Simplex) {
-			Simplex anotherSimplex = (Simplex) another;
-			if (getVariable().equals(anotherSimplex.getVariable())) {
-				result = this;
-			}
-			else {
-				result = null;
-			}
-		}
-		else { 
-			result = null;
-		}
-		return result;
-	}
-	
-	@Override
-	public boolean equals(Object another) {
-		boolean result =
-				another instanceof Simplex
-				&&
-				((Simplex) another).getVariable().equals(getVariable());
-		return result;
-	}
-	
-	@Override
-	public int hashCode() {
-		return getVariable().hashCode();
-	}
+	AtomicPolytope nonIdentityAtomicProductOrNull(AtomicPolytope nonIdentityAtomicAnother);
 }

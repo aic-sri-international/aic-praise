@@ -45,6 +45,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -53,9 +54,9 @@ import com.sri.ai.praise.inference.representation.api.Variable;
  * @author braz
  *
  */
-public class IntensionalConvexHullOfFactors implements Polytope {
+public class IntensionalConvexHullOfFactors extends AbstractAtomicPolytope {
 	
-	private Collection<? extends Variable> indices;
+	private Set<? extends Variable> indices;
 
 	private Factor factor;
 	
@@ -69,7 +70,6 @@ public class IntensionalConvexHullOfFactors implements Polytope {
 		return indices;
 	}
 
-
 	@Override
 	public Collection<? extends Variable> getFreeVariables() {
 		List<? extends Variable> all = factor.getVariables();
@@ -82,16 +82,57 @@ public class IntensionalConvexHullOfFactors implements Polytope {
 	}
 	
 	@Override
-	public boolean isUnit() {
+	public boolean isIdentity() {
 		boolean result = 
 				indices.isEmpty()
 				&&
-				factor.isUnit();
+				factor.isIdentity();
+		return result;
+	}
+
+	@Override
+	public AtomicPolytope nonIdentityAtomicProductOrNull(AtomicPolytope nonIdentityAtomicAnother) {
+		AtomicPolytope result;
+		if (nonIdentityAtomicAnother instanceof IntensionalConvexHullOfFactors) {
+			result = multiplyByConvexHull(nonIdentityAtomicAnother);
+		}
+		else {
+			result = null;
+		}
+		return result;
+	}
+
+	private AtomicPolytope multiplyByConvexHull(Polytope another) {
+		AtomicPolytope result;
+		IntensionalConvexHullOfFactors anotherConvexHull = (IntensionalConvexHullOfFactors) another;
+		if (indices.equals(anotherConvexHull.getIndices())) {
+			Factor productFactor = factor.multiply(anotherConvexHull.getFactor());
+			result = new IntensionalConvexHullOfFactors(indices, productFactor);
+		}
+		else {
+			result = null;
+		}
 		return result;
 	}
 
 	@Override
 	public String toString() {
-		return "{(on " + join(indices) + ")" + factor + "}";
+		return "{(on " + join(indices) + ") " + factor + "}";
+	}
+	
+	@Override
+	public boolean equals(Object another) {
+		boolean result =
+				another instanceof IntensionalConvexHullOfFactors
+				&&
+				((IntensionalConvexHullOfFactors) another).getIndices().equals(getIndices())
+				&&
+				((IntensionalConvexHullOfFactors) another).getFactor().equals(getFactor());
+		return result;
+	}
+	
+	@Override
+	public int hashCode() {
+		return getIndices().hashCode() + getFactor().hashCode();
 	}
 }

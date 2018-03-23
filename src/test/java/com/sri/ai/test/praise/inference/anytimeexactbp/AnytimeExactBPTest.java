@@ -1,5 +1,7 @@
-package com.sri.ai.test.praise.inference.exactbp;
+package com.sri.ai.test.praise.inference.anytimeexactbp;
 
+import static com.sri.ai.expresso.helper.Expressions.TRUE;
+import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.println;
@@ -7,12 +9,17 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.Tuple;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.inference.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
@@ -23,42 +30,45 @@ import com.sri.ai.praise.inference.representation.expression.ExpressionFactor;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNetwork;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
-public class ExactBPTest {
+public class AnytimeExactBPTest {
 
 	@Test
 	public void test() {
+		
+		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
 		
 		String[] variableAndTypes;
 		String factorNetworkString;
 		String queryVariableString;
 		Expression expected;
 
-//		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
-//		factorNetworkString = "tuple("
-//				+ "if P then if I = 1 then 2 else 3 else if I = 1 then 1 else 2"
-//				+ ")";
-//		queryVariableString = "I";
-//		expected = parse("if I = 1 then 3 else 5");
-//		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-//
-//		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
-//		factorNetworkString = "("
-//				+ "if (P or not P) and I = 1 then 0.1 else 0.9, "
-//				+ "if (P or not P) and I = 1 then 0.1 else 0.9"
-//				+ ")";
-//		queryVariableString = "I";
-//		expected = parse("if I = 1 then 0.01 else 0.81");
-//		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-//
-//		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "P", "Boolean"};
-//		factorNetworkString = "("
-//				+ "if J = I then 1 else 0, "
-//				+ "if (P or not P) and J = 1 then 0.1 else 0.9, "
-//				+ "if (P or not P) and I = 1 then 0.1 else 0.9"
-//				+ ")";
-//		queryVariableString = "I";
-//		expected = parse("if I = 1 then 0.01 else 0.81");
-//		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
+		factorNetworkString = "tuple("
+				+ "if P then if I = 1 then 2 else 3 else if I = 1 then 1 else 2"
+				+ ")";
+		queryVariableString = "I";
+		expected = parse("if I = 1 then 3 else 5");
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+
+		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
+		factorNetworkString = "("
+				+ "if (P or not P) and I = 1 then 0.1 else 0.9, "
+				+ "if (P or not P) and I = 1 then 0.1 else 0.9"
+				+ ")";
+		queryVariableString = "I";
+		expected = parse("if I = 1 then 0.01 else 0.81");
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+
+		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "P", "Boolean"};
+		factorNetworkString = "("
+				+ "if J = I then 1 else 0, "
+				+ "if (P or not P) and J = 1 then 0.1 else 0.9, "
+				+ "if (P or not P) and I = 1 then 0.1 else 0.9"
+				+ ")";
+		queryVariableString = "I";
+		expected = parse("if I = 1 then 0.01 else 0.81");
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
 
 		//              -------J-------
         //             /               \
@@ -207,38 +217,75 @@ public class ExactBPTest {
 		Expression query = Expressions.parse(queryVariableString);
 
 		printQuestion(factorNetworkString, queryVariableString, expected);
+
+		println("Solving P(" + queryVariableString + ") given " + factorNetworkString);
+		long initialTime = System.currentTimeMillis();
+		ExpressionFactor resultFactor = solve(query, factorNetwork);
+		Expression normalizedResult = normalize(query, resultFactor.getInnerExpression(), context);
+		long finalTime = System.currentTimeMillis();
+		println("ExactBP: " + normalizedResult);
+		println("Time: " + (finalTime - initialTime) + " ms.");
 		
-		ExpressionFactor result = solve(query, factorNetwork);
+		printResults(expected, resultFactor, normalizedResult);
 		
-		printResults(expected, result);
+		assertEquals(expected, resultFactor.getInnerExpression());
 		
-		assertEquals(expected, result.getInnerExpression());
+		Expression normalizedAnytimeResult = solveAnytime(query, factorNetwork, context);
 		
-//		ExpressionFactor anytimeResult = solveAnytime(query, factorNetwork);
-		
-//		assertEquals(result.getInnerExpression(), anytimeResult.getInnerExpression());
+//		Expression test = parse("there exists C in Real : C*(" + result + ") = " + anytimeResult);
+//		println("Solving " + test);
+//		Expression testResult = context.evaluate(test);
+//		assertEquals(TRUE, testResult);
+
+		Expression test = parse("(" + normalizedResult + ") = (" + normalizedAnytimeResult + ")");
+		println("Solving " + test);
+		Expression testResult = context.evaluate(test);
+		assertEquals(TRUE, testResult);
+
+//		assertEquals(normalizedResult, normalizedAnytimeResult);
 	}
 
+	private Expression normalize(Expression variable, Expression expression, Context context) {
+		Expression type = context.getTypeExpressionOfRegisteredSymbol(variable);
+		Expression indexExpression = apply(FunctorConstants.IN, variable, type);
+		IndexExpressionsSet indexExpressions = new ExtensionalIndexExpressionsSet(indexExpression);
+		Expression set = new DefaultIntensionalMultiSet(indexExpressions, expression, TRUE);
+		Expression sum = apply(FunctorConstants.SUM, set);
+		Expression normalizedDefinition = apply(FunctorConstants.DIVISION, expression, sum);
+		Expression result = context.evaluate(normalizedDefinition);
+		return result;
+	}
+	
 	private ExpressionFactor solve(Expression query, ExpressionFactorNetwork factorNetwork) {
 		ExactBP<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
 		ExpressionFactor result = (ExpressionFactor) exactBP.apply();
 		return result;
 	}
 
-	private ExpressionFactor solveAnytime(Expression query, ExpressionFactorNetwork factorNetwork) {
+	private Expression solveAnytime(Expression query, ExpressionFactorNetwork factorNetwork, Context context) {
+		
+		Expression result;
+		
+		println("\nSolving with Anytime\n");
+		
+		long initialTime = System.currentTimeMillis();
 		ExactBP<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
 		AnytimeExactBP<Variable,Factor> anytimeExactBP = new AnytimeExactBP<>(exactBP);
 		Approximation<Factor> current = null;
 		while (anytimeExactBP.hasNext()) {
 			current = anytimeExactBP.next();
-			println(current);
+			println("Current bound on " + exactBP.getMessageVariable() + ": " + current);
 		}
-		ExpressionFactor result;
+		long finalTime = System.currentTimeMillis();
+
 		if (current == null) {
-			result = null;
+			throw new Error("Anytime BP should have at least one approximation, but had none.");
 		}
 		else {
-			result = (ExpressionFactor) ((IntensionalConvexHullOfFactors) current).getFactor();
+			ExpressionFactor resultFactor = (ExpressionFactor) ((IntensionalConvexHullOfFactors) current).getFactor();
+			result = normalize(query, resultFactor.getInnerExpression(), context);
+			println("P(" + exactBP.getMessageVariable() + "): " + result);
+			println("Time: " + (finalTime - initialTime) + " ms.");
 		}
 		return result;
 	}
@@ -252,10 +299,11 @@ public class ExactBPTest {
 		println("...");
 	}
 
-	private void printResults(Expression expected, ExpressionFactor result) {
-		println("Result: " + result);
-		println("Expected: " + expected);
-		println(expected.equals(result.getInnerExpression())? "Correct!" : "Error!");
+	private void printResults(Expression expected, ExpressionFactor resultFactor, Expression result) {
+		println("Result factor: " + resultFactor);
+		println("Normalized   : " + result);
+		println("Expected     : " + expected);
+		println(expected.equals(resultFactor.getInnerExpression())? "Correct!" : "Error!");
 	}
 
 }

@@ -39,71 +39,49 @@ package com.sri.ai.praise.inference.anytimeexactbp.polytope.core;
 
 import static com.sri.ai.util.Util.list;
 
-import java.util.Collection;
-
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 
-/**
- * @author braz
- *
- */
-public class Simplex  extends AbstractAtomicPolytope {
-	
-	private Variable variable;
-	
-	public Simplex(Variable variable) {
-		this.variable = variable;
-	}
-	
-	public Variable getVariable() {
-		return variable;
+public abstract class AbstractAtomicPolytope implements AtomicPolytope {
+
+	public AbstractAtomicPolytope() {
+		super();
 	}
 
 	@Override
-	public Collection<? extends Variable> getFreeVariables() {
-		return list(variable);
-	}
-	
-	@Override
-	public boolean isIdentity() {
-		return false;
-	}
-
-	@Override
-	public String toString() {
-		return "Simplex(" + variable + ")";
-	}
-
-	@Override
-	public AtomicPolytope nonIdentityAtomicProductOrNull(AtomicPolytope another) {
-		AtomicPolytope result;
-		if (another instanceof Simplex) {
-			Simplex anotherSimplex = (Simplex) another;
-			if (getVariable().equals(anotherSimplex.getVariable())) {
-				result = this;
-			}
-			else {
-				result = null;
-			}
+	public Polytope multiply(Polytope another) {
+		Polytope result;
+		if (another.isIdentity()) {
+			result = this;
 		}
-		else { 
-			result = null;
+		else if (this.isIdentity()) {
+			result = another;
+		}
+		else if (another instanceof AtomicPolytope) {
+			result = multiplyByAnotherAtomicPolytope(another);
+		}
+		else if (another instanceof ProductPolytope) {
+			result = another.multiply(this);
+		}
+		else {
+			throw unrecognizedCase(another);
 		}
 		return result;
 	}
-	
-	@Override
-	public boolean equals(Object another) {
-		boolean result =
-				another instanceof Simplex
-				&&
-				((Simplex) another).getVariable().equals(getVariable());
+
+	private Polytope multiplyByAnotherAtomicPolytope(Polytope another) {
+		Polytope result;
+		AtomicPolytope attempt = this.nonIdentityAtomicProductOrNull((AtomicPolytope) another);
+		if (attempt == null) {
+			result = new ProductPolytope(list(this, (AtomicPolytope) another));
+		}
+		else {
+			result = attempt;
+		}
 		return result;
 	}
-	
-	@Override
-	public int hashCode() {
-		return getVariable().hashCode();
+
+	private Error unrecognizedCase(Polytope another) {
+		return new Error("Multiplying " + this + " by " + another + " but the latter's class is not recognized.");
 	}
 }

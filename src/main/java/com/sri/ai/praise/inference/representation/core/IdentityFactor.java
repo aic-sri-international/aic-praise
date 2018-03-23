@@ -54,6 +54,11 @@ import com.sri.ai.praise.inference.representation.api.Variable;
  *
  */
 public class IdentityFactor implements Factor {
+	
+	public final static IdentityFactor IDENTITY_FACTOR = new IdentityFactor();
+	
+	private IdentityFactor() {
+	}
 
 	@Override
 	public boolean contains(Variable variable) {
@@ -76,7 +81,7 @@ public class IdentityFactor implements Factor {
 	}
 	
 	@Override
-	public boolean isUnit() {
+	public boolean isIdentity() {
 		return true;
 	}
 

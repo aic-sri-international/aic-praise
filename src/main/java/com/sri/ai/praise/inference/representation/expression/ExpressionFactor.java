@@ -117,7 +117,7 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	}
 
 	@Override
-	public boolean isUnit() {
+	public boolean isIdentity() {
 		boolean result = getInnerExpression().equals(ONE);
 		return result;
 	}
@@ -149,23 +149,6 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	private ExpressionFactor makeFactor(Expression expression) {
 		ExpressionFactor result = new ExpressionFactor(expression, getContext());
-		return result;
-	}
-	
-	/**
-	 * {@link Expression#equals(Object)} is overridden to be instance comparison <code>==</code>
-	 * because two different instances of factor with the same expression are to be considered distinct factors.
-	 */
-	public boolean equals(Object another) {
-		boolean result = this == another;
-		return result;
-	}
-	
-	/**
-	 * Reverting to {@link System#identityHashCode(Object)} to match instance comparison performed by {@link #equals(Object)Object)}.
-	 */
-	public int hashCode() {
-		int result = System.identityHashCode(this);
 		return result;
 	}
 }

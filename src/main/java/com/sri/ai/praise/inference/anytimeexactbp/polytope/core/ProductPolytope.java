@@ -37,20 +37,21 @@
  */
 package com.sri.ai.praise.inference.anytimeexactbp.polytope.core;
 
-import static com.sri.ai.util.Util.collectToList;
-import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes.multiplyListOfAlreadyMultipledNonIdentityAtomicPolytopesWithANewOne;
+import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.join;
-import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.unionOfCollections;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.praise.inference.representation.core.IdentityFactor;
 
 /**
  * @author braz
@@ -58,55 +59,69 @@ import com.sri.ai.praise.inference.representation.core.IdentityFactor;
  */
 public class ProductPolytope implements Polytope {
 	
-	private Collection<? extends Polytope> nonUnitPolytopes;
+	private List<? extends AtomicPolytope> nonIdentityAtomicPolytopes;
 
-	private ProductPolytope(Collection<? extends Polytope> nonUnitPolytopes) {
+	ProductPolytope(Collection<? extends AtomicPolytope> nonIdentityAtomicPolytopes) {
 		super();
-		this.nonUnitPolytopes = nonUnitPolytopes;
+		myAssert(nonIdentityAtomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Create an IdentityPolytope instead.");
+		myAssert(nonIdentityAtomicPolytopes.size() != 1, () -> "Cannot define product on a single element. Use the single element instead.");
+		this.nonIdentityAtomicPolytopes = new LinkedList<>(nonIdentityAtomicPolytopes);
 	}
 	
+	public Collection<? extends Polytope> getPolytopes() {
+		return nonIdentityAtomicPolytopes;
+	}
+
+	@Override
+	public Polytope multiply(Polytope another) {
+		Polytope result;
+		if (another.isIdentity()) {
+			result = this;
+		}
+		if (another instanceof ProductPolytope) {
+			Collection<? extends Polytope> anotherSubPolytopes = ((ProductPolytope)another).getPolytopes();
+			result = accumulate(anotherSubPolytopes, Polytope::multiply, this);
+		}
+		else {
+			AtomicPolytope nonIdentityAtomicAnother = (AtomicPolytope) another;
+			result = multiplyListOfAlreadyMultipledNonIdentityAtomicPolytopesWithANewOne(nonIdentityAtomicPolytopes, nonIdentityAtomicAnother);
+		}
+		return result;
+	}
+
+	@Override
+	public boolean isIdentity() {
+		return false;
+	}
+
 	@Override
 	public Collection<? extends Variable> getFreeVariables() {
 		
 		Collection<Collection<? extends Variable>> listOfFreeVariablesCollections = 
-				mapIntoList(nonUnitPolytopes, Polytope::getFreeVariables);
+				mapIntoList(nonIdentityAtomicPolytopes, Polytope::getFreeVariables);
 		
 		Set<? extends Variable> allFreeVariables = unionOfCollections(listOfFreeVariablesCollections);
 		
 		return allFreeVariables;
 	}
 
-	public Collection<? extends Polytope> getPolytopes() {
-		return nonUnitPolytopes;
-	}
-
 	@Override
 	public String toString() {
-		String result = nonUnitPolytopes.isEmpty()? "{(on ) 1}" : join(nonUnitPolytopes, "*");
+		String result = join(nonIdentityAtomicPolytopes, "*");
 		return result;
 	}
-
+	
 	@Override
-	public boolean isUnit() {
-		boolean result = 
-				nonUnitPolytopes.size() == 0 
-				|| 
-				(
-						nonUnitPolytopes.size() == 1 
-						&& 
-						getFirst(nonUnitPolytopes).isUnit());
+	public boolean equals(Object another) {
+		boolean result =
+				another instanceof ProductPolytope
+				&&
+				((ProductPolytope) another).getPolytopes().equals(getPolytopes());
 		return result;
 	}
-
-	public static Polytope multiply(Collection<? extends Polytope> polytopes) {
-		Polytope result;
-		List<? extends Polytope> nonUnitPolytopes = collectToList(polytopes, p -> !p.isUnit());
-		if (nonUnitPolytopes.isEmpty()) {
-			result = new IntensionalConvexHullOfFactors(list(), new IdentityFactor());
-		}
-		else {
-			result = new ProductPolytope(nonUnitPolytopes);
-		}
-		return result;
+	
+	@Override
+	public int hashCode() {
+		return getPolytopes().hashCode();
 	}
 }

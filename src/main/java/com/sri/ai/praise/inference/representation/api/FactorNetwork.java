@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.inference.representation.api;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * A bipartite graph of {@link Factor}s and {@link Variable}s.
@@ -47,7 +47,7 @@ import java.util.Collection;
  */
 public interface FactorNetwork {
 
-	Collection<? extends Variable> getNeighbors(Factor factor);
+	List<? extends Variable> getNeighbors(Factor factor);
 
-	Collection<? extends Factor> getNeighbors(Variable variable);
+	List<? extends Factor> getNeighbors(Variable variable);
 }

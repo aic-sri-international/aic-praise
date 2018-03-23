@@ -37,8 +37,11 @@
  */
 package com.sri.ai.praise.inference.anytimeexactbp.polytope.api;
 
+import static com.sri.ai.util.Util.accumulate;
+
 import java.util.Collection;
 
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -47,13 +50,19 @@ import com.sri.ai.util.computation.anytime.api.Approximation;
  * An interface for approximations to factors consisting of a
  * polytope set of factors to which the true factor is guaranteed to belong. 
  * 
- * @author gabriel
+ * @author braz
  *
  */
 public interface Polytope extends Approximation<Factor> {
 	
 	Collection<? extends Variable> getFreeVariables();
 	
-	boolean isUnit();
+	boolean isIdentity();
 
+	Polytope multiply(Polytope another);
+
+	public static Polytope multiply(Collection<? extends Polytope> polytopes) {
+		Polytope result = accumulate(polytopes, Polytope::multiply, Polytopes.identityPolytope());
+		return result;
+	}
 }

@@ -50,6 +50,7 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
+import com.sri.ai.util.base.IdentityWrapper;
 
 
 /**
@@ -100,7 +101,7 @@ public class ExpressionFactorNetwork extends AbstractFactorNetwork {
 
 	private void indexFactorAndVariable(Factor factor, Expression variableExpression) {
 		Variable variable = new ExpressionVariable(variableExpression);
-		this.add(factor, variable);
+		this.add(new IdentityWrapper(factor), variable);
 	}
 
 	public Context getContext() {
