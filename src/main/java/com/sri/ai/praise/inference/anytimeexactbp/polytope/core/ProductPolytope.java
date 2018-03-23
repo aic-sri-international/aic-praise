@@ -78,7 +78,7 @@ public class ProductPolytope implements Polytope {
 		if (another.isIdentity()) {
 			result = this;
 		}
-		if (another instanceof ProductPolytope) {
+		else if (another instanceof ProductPolytope) {
 			Collection<? extends Polytope> anotherSubPolytopes = ((ProductPolytope)another).getPolytopes();
 			result = accumulate(anotherSubPolytopes, Polytope::multiply, this);
 		}
