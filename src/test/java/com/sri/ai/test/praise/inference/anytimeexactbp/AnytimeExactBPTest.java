@@ -12,6 +12,7 @@ import org.junit.Test;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
@@ -359,7 +360,7 @@ public class AnytimeExactBPTest {
 		}
 		
 		// create model
-		Model m = new Model(setOfFactors, theory, context,true, query);
+		Model m = new Model(setOfFactors, theory, context,false, query);
 		
 		// do all iterations until the end, storing time
 		Iterator<PartitionTree> bfsExpander = new BFS(m);
@@ -376,15 +377,16 @@ public class AnytimeExactBPTest {
 		}
 		long finalTime = System.currentTimeMillis();
 		
-		Expression normalizedResult = inferenceResult.normalize(theory, context).get(0);
+		Expression normalizedResult = inferenceResult.normalize(theory, context);
+		normalizedResult = ((IntensionalSet)normalizedResult).getHead();
 		Expression normalizedexpected = normalize(query,expected,context);
 		
-		println("Result factor: " + inferenceResult.get(0));
+		println("Result factor: " + ((IntensionalSet)inferenceResult).getHead());
 		println("Normalized   : " + normalizedResult);
 		//print the way it is done above
 		println("Time: " + (finalTime - initialTime) + " ms.");	
 
-		println(normalizedexpected.equals(inferenceResult.normalize(theory, context).get(0))? "Correct!" : "Error!");
+		println(normalizedexpected.equals(normalizedResult)? "Correct!" : "Error!");
 		
 		
 		Expression test = parse("(" + normalizedResult + ") = (" + normalizedexpected + ")");
