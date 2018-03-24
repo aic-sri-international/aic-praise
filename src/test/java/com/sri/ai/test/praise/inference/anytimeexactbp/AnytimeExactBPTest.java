@@ -74,7 +74,6 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 1 then 3 else 5");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 
 		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
 		factorNetworkString = "("
@@ -84,7 +83,6 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 1 then 0.01 else 0.81");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 		
 		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "P", "Boolean"};
 		factorNetworkString = "("
@@ -95,7 +93,6 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 1 then 0.01 else 0.81");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 		
 		//              -------J-------
         //             /               \
@@ -119,7 +116,6 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 1 else 0");
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 		
 		//              -------J-------
         //             /               \
@@ -143,7 +139,7 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 0.25 else if I = 3 then 0.25 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
+
 		//              -------J-------
         //             /               \
 		//            /      phi_2      \
@@ -166,7 +162,7 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 3 then 0.25 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
+
 		//              -------J-------
         //             /               \
 		//            /      phi_2      \
@@ -190,7 +186,6 @@ public class AnytimeExactBPTest {
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 0.1875 else if I = 3 then 0.1875 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 
 		//
 		// A00 -- A01 -- ... -- A04
@@ -237,19 +232,23 @@ public class AnytimeExactBPTest {
 		queryVariableString = "A_0_0";
 		expected = parse("if not A_0_0 then 2515404149056770048 else 857920100616142848"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
 	}
 	
 	private void runTest(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected) {
+		runRodrigos(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
+	}
+
+	private void runRodrigos(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected) {
 		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(variableAndTypes);
 		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(factorNetworkString, context);
 		Expression query = Expressions.parse(queryVariableString);
 
-		printQuestion(factorNetworkString, queryVariableString, expected);
+		printProblem(factorNetworkString, queryVariableString, expected);
 
 		println("Solving P(" + queryVariableString + ") given " + factorNetworkString);
 		long initialTime = System.currentTimeMillis();
-		ExpressionFactor resultFactor = solve(query, factorNetwork);
+		ExpressionFactor resultFactor = solveWithExactBP(query, factorNetwork);
 		Expression normalizedResult = normalize(query, resultFactor.getInnerExpression(), context);
 		long finalTime = System.currentTimeMillis();
 		println("ExactBP: " + normalizedResult);
@@ -259,7 +258,7 @@ public class AnytimeExactBPTest {
 		
 		assertEquals(expected, resultFactor.getInnerExpression());
 		
-		Expression normalizedAnytimeResult = solveAnytime(query, factorNetwork, context);
+		Expression normalizedAnytimeResult = solveWithAnytimeExactBP(query, factorNetwork, context);
 		
 //		Expression test = parse("there exists C in Real : ((C*(" + resultFactor.getInnerExpression() + ")) = " + normalizedAnytimeResult + ")");
 //		println("Solving " + test);
@@ -273,24 +272,13 @@ public class AnytimeExactBPTest {
 //		assertEquals(normalizedResult, normalizedAnytimeResult);
 	}
 
-	private Expression normalize(Expression variable, Expression expression, Context context) {
-		Expression type = context.getTypeExpressionOfRegisteredSymbol(variable);
-		Expression indexExpression = apply(FunctorConstants.IN, variable, type);
-		IndexExpressionsSet indexExpressions = new ExtensionalIndexExpressionsSet(indexExpression);
-		Expression set = new DefaultIntensionalMultiSet(indexExpressions, expression, TRUE);
-		Expression sum = apply(FunctorConstants.SUM, set);
-		Expression normalizedDefinition = apply(FunctorConstants.DIVISION, expression, sum);
-		Expression result = context.evaluate(normalizedDefinition);
-		return result;
-	}
-	
-	private ExpressionFactor solve(Expression query, ExpressionFactorNetwork factorNetwork) {
+	private ExpressionFactor solveWithExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
 		ExactBP<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
 		ExpressionFactor result = (ExpressionFactor) exactBP.apply();
 		return result;
 	}
 
-	private Expression solveAnytime(Expression query, ExpressionFactorNetwork factorNetwork, Context context) {
+	private Expression solveWithAnytimeExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Context context) {
 		
 		Expression result;
 		
@@ -318,7 +306,7 @@ public class AnytimeExactBPTest {
 		return result;
 	}
 
-	private void printQuestion(String factorNetworkString, String queryVariableString, Expression expected) {
+	private void printProblem(String factorNetworkString, String queryVariableString, Expression expected) {
 		println("\nSolving:\n");
 		println(join(((Tuple)parse(factorNetworkString)).getArguments(), "\n"));
 		println();
@@ -392,5 +380,16 @@ public class AnytimeExactBPTest {
 		Expression test = parse("(" + normalizedResult + ") = (" + normalizedexpected + ")");
 		Expression testResult = context.evaluate(test);
 		assertEquals(TRUE, testResult);
+	}
+
+	private Expression normalize(Expression variable, Expression expression, Context context) {
+		Expression type = context.getTypeExpressionOfRegisteredSymbol(variable);
+		Expression indexExpression = apply(FunctorConstants.IN, variable, type);
+		IndexExpressionsSet indexExpressions = new ExtensionalIndexExpressionsSet(indexExpression);
+		Expression set = new DefaultIntensionalMultiSet(indexExpressions, expression, TRUE);
+		Expression sum = apply(FunctorConstants.SUM, set);
+		Expression normalizedDefinition = apply(FunctorConstants.DIVISION, expression, sum);
+		Expression result = context.evaluate(normalizedDefinition);
+		return result;
 	}	
 }

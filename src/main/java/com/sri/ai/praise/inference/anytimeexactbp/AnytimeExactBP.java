@@ -73,6 +73,12 @@ import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeT
  */
 public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeComputation<Factor> {
 
+	@Override
+	protected boolean evenOneSubWithTotalIgnoranceRendersApproximationEqualToTotalIgnorance() {
+		boolean result = getBase().getRoot() instanceof Variable;
+		return result;
+	}
+
 	public AnytimeExactBP(ExactBP<RootType,SubRootType> base) {
 		super(base, new Simplex(base.getMessageVariable()));
 	}
@@ -80,13 +86,13 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	private Iterator<? extends AnytimeExactBP<SubRootType,RootType>> subIteratorForRefinement;
 
 	@Override
-	protected void makeSubsAndIterateThemToTheirInitialApproximation() {
-		super.makeSubsAndIterateThemToTheirInitialApproximation();
+	protected void makeSubsAndIterateThemToTheirFirstApproximation() {
+		super.makeSubsAndIterateThemToTheirFirstApproximation();
 		subIteratorForRefinement = getSubs().iterator();
 	}
 
 	@Override
-	protected AnytimeExactBP<SubRootType,RootType> pickNextSubWithNext() {
+	protected AnytimeExactBP<SubRootType,RootType> pickNextSubToIterate() {
 		
 		if (getSubs().isEmpty()) {
 			return null;
