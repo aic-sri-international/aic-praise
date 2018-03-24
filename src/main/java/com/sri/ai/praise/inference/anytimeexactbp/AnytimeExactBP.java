@@ -80,8 +80,8 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	private Iterator<? extends AnytimeExactBP<SubRootType,RootType>> subIteratorForRefinement;
 
 	@Override
-	protected void makeSubs() {
-		super.makeSubs();
+	protected void makeSubsAndIterateThemToTheirInitialApproximation() {
+		super.makeSubsAndIterateThemToTheirInitialApproximation();
 		subIteratorForRefinement = getSubs().iterator();
 	}
 
