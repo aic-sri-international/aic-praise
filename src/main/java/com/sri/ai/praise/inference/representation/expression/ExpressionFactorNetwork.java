@@ -40,6 +40,7 @@ package com.sri.ai.praise.inference.representation.expression;
 import static com.sri.ai.expresso.helper.Expressions.freeVariables;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.List;
 import java.util.Set;
@@ -50,7 +51,6 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
-import com.sri.ai.util.base.IdentityWrapper;
 
 
 /**
@@ -101,7 +101,7 @@ public class ExpressionFactorNetwork extends AbstractFactorNetwork {
 
 	private void indexFactorAndVariable(Factor factor, Expression variableExpression) {
 		Variable variable = new ExpressionVariable(variableExpression);
-		this.add(new IdentityWrapper(factor), variable);
+		this.add(identityWrapper(factor), variable);
 	}
 
 	public Context getContext() {

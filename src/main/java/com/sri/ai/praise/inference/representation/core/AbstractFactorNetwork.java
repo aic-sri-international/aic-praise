@@ -38,6 +38,7 @@
 package com.sri.ai.praise.inference.representation.core;
 
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.List;
 
@@ -53,7 +54,7 @@ import com.sri.ai.util.collect.DefaultManyToManyRelation;
  *
  */
 public abstract class AbstractFactorNetwork 
-extends DefaultManyToManyRelation<IdentityWrapper, Variable> implements FactorNetwork {
+extends DefaultManyToManyRelation<IdentityWrapper<Factor>, Variable> implements FactorNetwork {
 
 	public AbstractFactorNetwork() {
 		super();
@@ -61,12 +62,12 @@ extends DefaultManyToManyRelation<IdentityWrapper, Variable> implements FactorNe
 
 	@Override
 	public List<? extends Variable> getNeighbors(Factor factor) {
-		return mapIntoList(getBsOfA(new IdentityWrapper(factor)), v -> v);
+		return mapIntoList(getBsOfA(identityWrapper(factor)), v -> v);
 	}
 
 	@Override
 	public List<? extends Factor> getNeighbors(Variable variable) {
-		List<Factor> result = mapIntoList(getAsOfB(variable), id -> (Factor) id.getObject());
+		List<Factor> result = mapIntoList(getAsOfB(variable), IdentityWrapper::getObject);
 		return result;
 	}
 
