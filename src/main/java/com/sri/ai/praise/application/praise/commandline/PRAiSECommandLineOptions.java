@@ -299,7 +299,7 @@ public class PRAiSECommandLineOptions {
 	}
 
 	private void collectNonContainerFiles() {
-		collect(inputFiles, nonContainerFiles, f -> !isContainerFile(f));
+		collect(inputFiles, f -> !isContainerFile(f), nonContainerFiles);
 	}
 
 	private void collectModelPagesFromFileWithAddedGlobalQueries(File containerFile) {

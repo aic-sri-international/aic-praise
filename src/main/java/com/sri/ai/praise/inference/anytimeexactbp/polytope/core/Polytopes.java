@@ -165,8 +165,8 @@ public class Polytopes {
 
 		collect(
 				getNonIdentityAtomicPolytopes(polytopes), 
-				independentOfVariablesToBeSummedOut, 
 				isIndependentOf(variablesToBeSummedOut), 
+				independentOfVariablesToBeSummedOut, 
 				dependentOfVariablesToBeSummedOut);
 
 		Polytope projectedPolytope = makeProjectedPolytope(variablesToBeSummedOut, dependentOfVariablesToBeSummedOut);
