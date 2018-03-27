@@ -11,16 +11,13 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.api.Tuple;
-import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
-import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
-import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.praise.inference.PRAiSEUtil;
 import com.sri.ai.praise.inference.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
@@ -249,7 +246,7 @@ public class AnytimeExactBPTest {
 		println("Solving P(" + queryVariableString + ") given " + factorNetworkString);
 		long initialTime = System.currentTimeMillis();
 		ExpressionFactor resultFactor = solveWithExactBP(query, factorNetwork);
-		Expression normalizedResult = normalize(query, resultFactor.getInnerExpression(), context);
+		Expression normalizedResult = PRAiSEUtil.normalize(query, resultFactor.getInnerExpression(), context);
 		long finalTime = System.currentTimeMillis();
 		println("ExactBP: " + normalizedResult);
 		println("Time: " + (finalTime - initialTime) + " ms.");
@@ -299,7 +296,7 @@ public class AnytimeExactBPTest {
 		}
 		else {
 			ExpressionFactor resultFactor = (ExpressionFactor) ((IntensionalConvexHullOfFactors) current).getFactor();
-			result = normalize(query, resultFactor.getInnerExpression(), context);
+			result = PRAiSEUtil.normalize(query, resultFactor.getInnerExpression(), context);
 			println("P(" + exactBP.getMessageVariable() + "): " + result);
 			println("Time: " + (finalTime - initialTime) + " ms.");
 		}
@@ -367,7 +364,7 @@ public class AnytimeExactBPTest {
 		
 		Expression normalizedResult = inferenceResult.normalize(theory, context);
 		normalizedResult = ((IntensionalSet)normalizedResult).getHead();
-		Expression normalizedexpected = normalize(query,expected,context);
+		Expression normalizedexpected = PRAiSEUtil.normalize(query,expected,context);
 		
 		println("Result factor: " + ((IntensionalSet)inferenceResult).getHead());
 		println("Normalized   : " + normalizedResult);
@@ -380,16 +377,5 @@ public class AnytimeExactBPTest {
 		Expression test = parse("(" + normalizedResult + ") = (" + normalizedexpected + ")");
 		Expression testResult = context.evaluate(test);
 		assertEquals(TRUE, testResult);
-	}
-
-	private Expression normalize(Expression variable, Expression expression, Context context) {
-		Expression type = context.getTypeExpressionOfRegisteredSymbol(variable);
-		Expression indexExpression = apply(FunctorConstants.IN, variable, type);
-		IndexExpressionsSet indexExpressions = new ExtensionalIndexExpressionsSet(indexExpression);
-		Expression set = new DefaultIntensionalMultiSet(indexExpressions, expression, TRUE);
-		Expression sum = apply(FunctorConstants.SUM, set);
-		Expression normalizedDefinition = apply(FunctorConstants.DIVISION, expression, sum);
-		Expression result = context.evaluate(normalizedDefinition);
-		return result;
 	}	
 }
