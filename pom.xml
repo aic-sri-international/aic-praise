@@ -119,6 +119,19 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- April 2018: The following dependencies added as a response to a bug in Eclipse Oxygen.2 and Oxygen.3 according to https://stackoverflow.com/a/47101722/3358488 -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+			<version>1.1.0</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- Runtime Dependencies -->
 	</dependencies>
 
