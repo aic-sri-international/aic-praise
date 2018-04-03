@@ -43,44 +43,52 @@ public class TableFactor implements Factor{
 		}
 		
 		TableFactor anotherTable = (TableFactor)another;
+		//Conventions: 
+		//	A = Var(this)      \ Var(another)  
+		//	B = Var(another)   \ Var(this)
+		//  C = Var(another) cap Var(this)
+		//
+		// Var(this) = AC; Var(another) = BC
 		
-		// Add the variables not there...
 		
-		// Maybe create a new factor. 
-		
-		//criar uma nova lista de variaveis. achar a intercessao entra as posicoes da main e da nova
-		List<TableVariable> newVariables = new ArrayList<>(listOfVariables);
-		List<Integer> newVariablesCardialities = new ArrayList<>(table.getVariableCardinalities());
-		
-		List<Variable> intersection = new ArrayList<>();
-		List<Variable> onlyInNew = new ArrayList<>();
+		List<TableVariable> ABC = new ArrayList<>(listOfVariables);
+		List<Integer> ABCCardialities = new ArrayList<>(table.getVariableCardinalities());
+
+		List<Variable> A = new ArrayList<>();
+		List<Variable> B = new ArrayList<>();
+		List<Variable> C = new ArrayList<>();
+
+		List<Integer> PositionOfAInVarThis = new ArrayList<>();
+		List<Integer> PositionOfAInVarABC = new ArrayList<>();
+		List<Integer> PositionOfBInVarAnother = new ArrayList<>();
+		List<Integer> PositionOfBInVarABC = new ArrayList<>();
+
+		List<Integer> PositionOfCInVarABC = new ArrayList<>();
 		
 		int i = 0;
-		for(Variable v : anotherTable.getVariables()) {
+		for(TableVariable v : anotherTable.getVariables()) {
 			if(this.setOfVariables.contains(v)) {
 				//v is in the intersection
-				intersection.add(v);
+				
+				C.add(v);
 			}
 			else {
-				newVariables.add((TableVariable)v);
-				newVariablesCardialities.add(anotherTable.getCardinality(i));
-				onlyInNew.add(v);
+				ABC.add(v);
+				ABCCardialities.add(anotherTable.table.getVariableCardinalities().get(i));
+				B.add(v);
 			}
 			i++;
 		}
-		
-		//for each instantiation at only in new
-		//	for each instantiation of old
-		//		preencher a entrada la 
+		for(TableVariable v : this.getVariables()) {
+			if(!anotherTable.setOfVariables.contains(v)) {
+				A.add(v);
+			}
+		}
+		 
 		return null;
-	}
+	}	
 	
-	
-	public Integer getCardinality(int i) {
-		return this.table.getVariableCardinalities().get(i);
-	}
-	
-	
+
 	@Override
 	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
 		// TODO Auto-generated method stub
