@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
 import com.sri.ai.praise.lang.grounded.markov.FactorTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
@@ -104,23 +105,31 @@ public class TableFactorNetwork extends AbstractFactorNetwork{
 			//}
 			
 			//Now we test Product and sum out
+			//product
 			List<IdentityWrapper<Factor>> factors = new ArrayList<>(network.getAs());
 
 			Factor f1 = factors.get(2).getObject();
 			Factor f2 = factors.get(2).getObject();
 			
 //			Util.println(f1.multiply(f2)); // OK!
-
-			f1 = factors.get(1).getObject();
-			f2 = factors.get(2).getObject();
-			
-			Util.println(f1.multiply(f2)); 
-			
-			
-			
-			
-			
-			//producto
+			int nFactors = network.getAs().size();
+			/*for (int i = 0; i < nFactors; i++) {
+				for (int j = 0; j < nFactors; j++) {
+					f1 = factors.get(i).getObject();
+					f2 = factors.get(j).getObject();
+					
+					Util.println(f1.multiply(f2)); 
+							
+				}
+			}//Seems to be ok!
+			*/
+			//sumOut
+			f1 = factors.get(2).getObject();
+			Util.println(f1.getVariables());
+			List<? extends Variable> a = f1.getVariables();
+			a.remove(0);
+			a.remove(0);
+			Util.println(f1.sumOut(a));
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

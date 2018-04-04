@@ -197,7 +197,7 @@ public class TableFactor implements Factor{
 
 	@Override
 	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
-		// redo this function using value "for"
+		// redo this function using "valuefor"
 		//remove var not in set of variables...
 		//Check if is Table Variable
 		if(variablesToSumOut == null || variablesToSumOut.isEmpty()) {
@@ -214,17 +214,17 @@ public class TableFactor implements Factor{
 		List<List<Integer>> listOfInstantiationsForTheVariablesToSumOut = getListOfListOfInstantiations(variablesToSumOut);
 		//List<Integer> cardinalitiesOfVariablesToSumOut = getCardinalitiesOfVarToSumOut(variablesToSumOut);
 		List<Integer> positionOfEachVariableOnTheListOfVariablesToSumOut = getPositionOfEachVar(variablesToSumOut);		
-		Iterator<ArrayList<Integer>> cartesianProductOfVariablesToSumOut = getCartesianProductWithValuesOfVariablesToSum(listOfInstantiationsForTheVariablesToSumOut);		
 		//
 		ArrayList<TableVariable> variablesNotToSumOut = getVariablesNotToSumOut(variablesToSumOut);
 		List<List<Integer>> listOfInstantiationsForTheVariablesNotToSumOut = getListOfListOfInstantiations(variablesNotToSumOut);
 		List<Integer> cardinalitiesOfVariablesNotToSumOut = getCardinalitiesOfVarToSumOut(variablesNotToSumOut);
-		List<Integer> positionOfEachVariableOnTheListOfVariablesNotToSumOut = getPositionOfEachVar(variablesToSumOut);		
+		List<Integer> positionOfEachVariableOnTheListOfVariablesNotToSumOut = getPositionOfEachVar(variablesNotToSumOut);		
 		Iterator<ArrayList<Integer>> cartesianProductOfVariablesNotToSumOut = getCartesianProductWithValuesOfVariablesToSum(listOfInstantiationsForTheVariablesNotToSumOut);		
 		
 		List<Double> entries = new ArrayList<>();
 		for(List<Integer> instantiationOfVariablesNotToSumOut : in(cartesianProductOfVariablesNotToSumOut)) {
 			Double summedEntry = 0.;
+			Iterator<ArrayList<Integer>> cartesianProductOfVariablesToSumOut = getCartesianProductWithValuesOfVariablesToSum(listOfInstantiationsForTheVariablesToSumOut);
 			for(List<Integer> instantiationOfVariablesToSumOut : in(cartesianProductOfVariablesToSumOut)) {
 				
 				List<Integer> instantiationOnListOfAllValues = mappingInstantiationsIntoOneInstantiationAtTheWholeListOfVariables(
@@ -232,7 +232,7 @@ public class TableFactor implements Factor{
 						positionOfEachVariableOnTheListOfVariablesNotToSumOut, 
 						instantiationOfVariablesNotToSumOut,
 						instantiationOfVariablesToSumOut);
-				
+				  
 				Double entry = this.table.entryFor(instantiationOnListOfAllValues);
 				summedEntry = summedEntry + entry;
 			}
@@ -339,7 +339,7 @@ public class TableFactor implements Factor{
 			int nCols = listOfVariables.size();
 			String s = "";
 			for (int i = 0; i < nCols; i++) {
-				s = radix.getCurrentNumeralValue(i) +" "+ s;
+				s = s + " " + radix.getCurrentNumeralValue(i);
 			}
 			radix.increment();
 			result = result + s + " : " + table.getEntries().get(j);
