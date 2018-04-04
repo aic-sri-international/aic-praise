@@ -291,6 +291,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Context makeContextWithTypeInformation() {
-		return GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		Context context = GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		return context;
 	}
 }
