@@ -99,10 +99,28 @@ public class TableFactorNetwork extends AbstractFactorNetwork{
 			// Converting the network
 			TableFactorNetwork network = new TableFactorNetwork(model);
 			// Printing the factors
+			//for(IdentityWrapper<Factor> IWf : network.getAs()) {
+			//	Util.println(IWf.getObject());
+			//}
 			
-			for(IdentityWrapper<Factor> IWf : network.getAs()) {
-				Util.println(IWf.getObject());
-			}
+			//Now we test Product and sum out
+			List<IdentityWrapper<Factor>> factors = new ArrayList<>(network.getAs());
+
+			Factor f1 = factors.get(2).getObject();
+			Factor f2 = factors.get(2).getObject();
+			
+//			Util.println(f1.multiply(f2)); // OK!
+
+			f1 = factors.get(1).getObject();
+			f2 = factors.get(2).getObject();
+			
+			Util.println(f1.multiply(f2)); 
+			
+			
+			
+			
+			
+			//producto
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

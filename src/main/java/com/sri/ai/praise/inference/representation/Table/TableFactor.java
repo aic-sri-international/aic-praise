@@ -94,46 +94,67 @@ public class TableFactor implements Factor{
 		C.removeAll(B);
 		List<TableVariable> listC = new ArrayList<>(C);
 		List<Integer> cardC = fillWithCardinality(listC);
+		
+		//DefiningABC
+		ArrayList<TableVariable> listABC = new ArrayList<>();
+		listABC.addAll(listA);
+		listABC.addAll(listB);
+		listABC.addAll(listC);
+		
+		List<Integer> cardABC = fillWithCardinality(listABC);
+		
 		LinkedHashMap<TableVariable, Integer> mapFromVariablesAtABCToItsIdxs = new LinkedHashMap<>();
-		for(int i = 0;i<listC.size();i++) {
-			mapFromVariablesAtABCToItsIdxs.put(listC.get(i), i);
+		for(int i = 0;i<listABC.size();i++) {
+			mapFromVariablesAtABCToItsIdxs.put(listABC.get(i), i);
 		}
 		
 		//Entry index allows to a find the entry (probability) for a specific instance
 		//It is tricky without it because the entries are stored as a list
+		if(cardA.isEmpty()) {
+			cardA.add(1);
+		}
+		if(cardB.isEmpty()) {
+			cardB.add(1);
+		}
+		if(cardC.isEmpty()) {
+			cardC.add(1);
+		}
+		
 		MixedRadixNumber entryIndexA = new MixedRadixNumber(BigInteger.ZERO, cardA);
 		MixedRadixNumber entryIndexB = new MixedRadixNumber(BigInteger.ZERO, cardB);
 		MixedRadixNumber entryIndexC = new MixedRadixNumber(BigInteger.ZERO, cardC);
+		MixedRadixNumber entryIndexABC = new MixedRadixNumber(BigInteger.ZERO, cardABC);
 		
 		//Initializing entryC with an empty array
-		Integer nEntriesC =1;
-		for(Integer card : cardC) {
-			nEntriesC = nEntriesC * card;
+		Integer nEntriesABC =1;
+		for(Integer card : cardABC) {
+			nEntriesABC = nEntriesABC * card;
 		}
-		Double[] entryC = new Double[nEntriesC];
+		Double[] entryABC = new Double[nEntriesABC];
 		
 		// For each instance of A,B,C (noted as iA,iB,iC) we do \phi(iA,iB,iC) = \phi(iB,iC) * \phi(iA,iC)
-		while(entryIndexA.increment()) {
-			while(entryIndexB.increment()) {
-				while(entryIndexC.increment()) {
-					ArrayList<Integer> instantiationAtAC = new ArrayList<>(this.listOfVariables.size());
+		do{
+			do {
+				do {
+					int[] instantiationAtAC = new int[this.listOfVariables.size()];
 					
+					//Getting the entry at "this"
 					transferInstantiationsAtOneSubListToAFullList(this.mapFromVariableToItsIndexOnTheList,
 							listA, entryIndexA, instantiationAtAC);
 					transferInstantiationsAtOneSubListToAFullList(this.mapFromVariableToItsIndexOnTheList,
 							listC, entryIndexC, instantiationAtAC);
 					
 					Double entryAtThis = this.table.entryFor(instantiationAtAC);
-					
-					ArrayList<Integer> instantiationAtBC = new ArrayList<>(anotherTable.listOfVariables.size());
+					//Getting the entry at "another"					
+					int[] instantiationAtBC = new int[anotherTable.listOfVariables.size()];
 					transferInstantiationsAtOneSubListToAFullList(anotherTable.mapFromVariableToItsIndexOnTheList,
 							listB, entryIndexB, instantiationAtBC);
 					
 					transferInstantiationsAtOneSubListToAFullList(anotherTable.mapFromVariableToItsIndexOnTheList,
 							listC, entryIndexC, instantiationAtBC);
 					Double entryAtAnother = anotherTable.table.entryFor(instantiationAtBC);
-					
-					ArrayList<Integer> instantiationAtABC = new ArrayList<>(listC.size());
+					//putting the product of those 2 entries at the right place at ABC
+					int[] instantiationAtABC = new int[listABC.size()];
 					transferInstantiationsAtOneSubListToAFullList(mapFromVariablesAtABCToItsIdxs,
 							listA, entryIndexA, instantiationAtABC);
 					transferInstantiationsAtOneSubListToAFullList(mapFromVariablesAtABCToItsIdxs,
@@ -143,29 +164,26 @@ public class TableFactor implements Factor{
 					
 					Double product = entryAtThis * entryAtAnother;
 					
-					int[] instantiationABCArray = new int[listC.size()];
-					for (int i = 0; i < instantiationABCArray.length; i++) {
-						instantiationABCArray[i] = instantiationAtABC.get(i);
-					}
-					
-					entryC[entryIndexC.getValueFor(instantiationABCArray).intValue()] = product;
-				}
+					entryABC[entryIndexABC.getValueFor(instantiationAtABC).intValue()] = product;
+				}while(entryIndexC.increment());
 				entryIndexC = new MixedRadixNumber(BigInteger.ZERO, cardC);
-			}
+			}while(entryIndexB.increment());
 			entryIndexB = new MixedRadixNumber(BigInteger.ZERO, cardB);
-		}
-		
-		return null;
+		}while(entryIndexA.increment());
+		//TODO return
+		FunctionTable tableABC = new FunctionTable(cardABC, Arrays.asList(entryABC));
+		TableFactor result = new TableFactor(listABC, tableABC);
+		return result;
 	}
 
 	private void transferInstantiationsAtOneSubListToAFullList(Map<TableVariable,Integer> mapFromVariableToItsIndexOnTheList,
 			List<TableVariable> partialListOfVariables, MixedRadixNumber entryIndexAtPartialList,
-			ArrayList<Integer> listOfInstantiationsAtFullList) {
+			int[] instantiationsAtFullList) {
 		for (int i = 0; i < partialListOfVariables.size(); i++) {
 			Integer valueAtI = entryIndexAtPartialList.getCurrentNumeralValue(i);
 			Variable varAtI = partialListOfVariables.get(i);
 			Integer indexOfVarAtI = mapFromVariableToItsIndexOnTheList.get(varAtI);
-			listOfInstantiationsAtFullList.add(indexOfVarAtI,valueAtI);
+			instantiationsAtFullList[indexOfVarAtI] = valueAtI;
 		}
 	}
 
