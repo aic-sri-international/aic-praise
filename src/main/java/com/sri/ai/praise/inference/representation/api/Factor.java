@@ -44,7 +44,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public interface Factor {
+public interface Factor{
 
 	boolean contains(Variable variable);
 

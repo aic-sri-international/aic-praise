@@ -27,6 +27,9 @@ import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.expression.ExpressionExactBP;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactor;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNetwork;
+import com.sri.ai.praise.inference.representation.expression.UAIModelToExpressionFactorNetwork;
+import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
+import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 import IncrementalAnytimeExactBeliefPropagation.IncrementalAnytimeBeliefPropagationWithSeparatorConditioning;
@@ -44,6 +47,10 @@ import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.util.base.IdentityWrapper;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -229,6 +236,28 @@ public class AnytimeExactBPTest {
 		queryVariableString = "A_0_0";
 		expected = parse("if not A_0_0 then 2515404149056770048 else 857920100616142848"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		
+		
+		// Importing the file and reading it
+		FileReader modelFile;
+		try {
+		modelFile = new FileReader(new File("").getAbsolutePath()+"/UAITests/BN_0.uai" );
+		
+		UAIModel model = UAIModelReader.read(modelFile);
+					
+		// Converting the network
+		ExpressionFactorNetwork network = UAIModelToExpressionFactorNetwork.convert(model, null);
+		
+		solveWithAnytimeExactBP(parse("v66"), network, network.getContext());
+		
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}			
+		
 	}
 	
 	private void runTest(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected) {
@@ -242,8 +271,13 @@ public class AnytimeExactBPTest {
 		Expression query = Expressions.parse(queryVariableString);
 
 		printProblem(factorNetworkString, queryVariableString, expected);
-
 		println("Solving P(" + queryVariableString + ") given " + factorNetworkString);
+		
+		runRodrigos(factorNetwork, query,expected);
+	}
+
+	private void runRodrigos(ExpressionFactorNetwork factorNetwork, Expression query,Expression expected) {
+		Context context = factorNetwork.getContext();
 		long initialTime = System.currentTimeMillis();
 		ExpressionFactor resultFactor = solveWithExactBP(query, factorNetwork);
 		Expression normalizedResult = PRAiSEUtil.normalize(query, resultFactor.getInnerExpression(), context);

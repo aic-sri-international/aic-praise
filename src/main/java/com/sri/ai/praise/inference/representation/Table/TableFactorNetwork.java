@@ -3,22 +3,13 @@ package com.sri.ai.praise.inference.representation.Table;
 import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.genericVariableName;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
 import com.sri.ai.praise.lang.grounded.markov.FactorTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
-import com.sri.ai.util.Util;
-import com.sri.ai.util.base.IdentityWrapper;
 /**
  * 
  * 
@@ -90,54 +81,52 @@ public class TableFactorNetwork extends AbstractFactorNetwork{
 	}
 	
 	
-	public static void main(String[] args) {
-		
-		try {
-			// Importing the file and reading it
-			FileReader modelFile = new FileReader(new File("").getAbsolutePath()+"/UAITests/BN_0.uai" );
-			UAIModel model = UAIModelReader.read(modelFile);
-			
-			// Converting the network
-			TableFactorNetwork network = new TableFactorNetwork(model);
-			// Printing the factors
-			//for(IdentityWrapper<Factor> IWf : network.getAs()) {
-			//	Util.println(IWf.getObject());
-			//}
-			
-			//Now we test Product and sum out
-			//product
-			List<IdentityWrapper<Factor>> factors = new ArrayList<>(network.getAs());
-
-			Factor f1 = factors.get(2).getObject();
-			Factor f2 = factors.get(2).getObject();
-			
-//			Util.println(f1.multiply(f2)); // OK!
-			int nFactors = network.getAs().size();
-			/*for (int i = 0; i < nFactors; i++) {
-				for (int j = 0; j < nFactors; j++) {
-					f1 = factors.get(i).getObject();
-					f2 = factors.get(j).getObject();
-					
-					Util.println(f1.multiply(f2)); 
-							
-				}
-			}//Seems to be ok!
-			*/
-			//sumOut
-			f1 = factors.get(2).getObject();
-			Util.println(f1.getVariables());
-			List<? extends Variable> a = f1.getVariables();
-			a.remove(0);
-			a.remove(0);
-			Util.println(f1.sumOut(a));
-			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	public static void main(String[] args) {
+//		
+//		try {
+//			// Importing the file and reading it
+//			FileReader modelFile = new FileReader(new File("").getAbsolutePath()+"/UAITests/BN_0.uai" );
+//			UAIModel model = UAIModelReader.read(modelFile);
+//			
+//			// Converting the network
+//			TableFactorNetwork network = new TableFactorNetwork(model);
+//			// Printing the factors
+//			//for(IdentityWrapper<Factor> IWf : network.getAs()) {
+//			//	Util.println(IWf.getObject());
+//			//}
+//			
+//			//Now we test Product and sum out
+//			//product
+//			List<IdentityWrapper<Factor>> factors = new ArrayList<>(network.getAs());
+//
+//			Factor f1 = factors.get(2).getObject();
+//			Factor f2 = factors.get(2).getObject();
+//			
+////			Util.println(f1.multiply(f2)); // OK!
+//			int nFactors = network.getAs().size();
+//			/*for (int i = 0; i < nFactors; i++) {
+//				for (int j = 0; j < nFactors; j++) {
+//					f1 = factors.get(i).getObject();
+//					f2 = factors.get(j).getObject();
+//					
+//					Util.println(f1.multiply(f2)); 
+//							
+//				}
+//			}//Seems to be ok!
+//			*/
+//			//sumOut
+//			f1 = factors.get(2).getObject();
+//			Util.println(f1.getVariables());
+//			List<? extends Variable> a = f1.getVariables();
+//			a.remove(0);
+//			a.remove(0);
+//			Util.println(f1.sumOut(a));
+//			
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 	
 }
