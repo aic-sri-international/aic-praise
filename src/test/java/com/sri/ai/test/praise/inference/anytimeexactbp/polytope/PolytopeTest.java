@@ -42,6 +42,7 @@ import static com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope.m
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -58,39 +59,51 @@ import com.sri.ai.praise.inference.representation.expression.ExpressionVariable;
 
 public class PolytopeTest {
 
+	Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(
+			"U", "Boolean",
+			"V", "Boolean",
+			"W", "Boolean");
+
+	ExpressionVariable u = new ExpressionVariable(parse("U"));
+	ExpressionVariable v = new ExpressionVariable(parse("V"));
+	ExpressionVariable w = new ExpressionVariable(parse("W"));
+	
+	Polytope identity = Polytopes.identityPolytope();
+	
+	AtomicPolytope simplexU = new Simplex(u);
+	AtomicPolytope simplexV = new Simplex(v);
+	AtomicPolytope simplexW = new Simplex(w);
+	
+	ExpressionFactor factorU = new ExpressionFactor(parse("if U then 2 else 3"), context);
+	ExpressionFactor factorV = new ExpressionFactor(parse("if V then 2 else 3"), context);
+	ExpressionFactor factorUV = new ExpressionFactor(parse("if U and V then 2 else 3"), context);
+	ExpressionFactor factorVW = new ExpressionFactor(parse("if V and W then 4 else 5"), context);
+	
+	ExpressionFactor factorU2 = new ExpressionFactor(parse("if U then 20 else 30"), context);
+	ExpressionFactor factorV2 = new ExpressionFactor(parse("if V then 20 else 30"), context);
+	ExpressionFactor factorUV2 = new ExpressionFactor(parse("if U and V then 20 else 30"), context);
+	
+	AtomicPolytope convexHullU = new IntensionalConvexHullOfFactors(list(u), factorU);
+	AtomicPolytope convexHullV = new IntensionalConvexHullOfFactors(list(v), factorV);
+	AtomicPolytope convexHullUV = new IntensionalConvexHullOfFactors(list(u, v), factorUV);
+	AtomicPolytope convexHullVW = new IntensionalConvexHullOfFactors(list(v, w), factorVW);
+	
+	AtomicPolytope convexHullU2 = new IntensionalConvexHullOfFactors(list(u), factorU2);
+	AtomicPolytope convexHullV2 = new IntensionalConvexHullOfFactors(list(v), factorV2);
+	AtomicPolytope convexHullUV2 = new IntensionalConvexHullOfFactors(list(u, v), factorUV2);
+	
+	AtomicPolytope convexHullUFreeVBound = new IntensionalConvexHullOfFactors(list(v), factorUV);
+	AtomicPolytope convexHullUBoundVFree = new IntensionalConvexHullOfFactors(list(u), factorUV);
+	AtomicPolytope convexHullUFreeVBound2 = new IntensionalConvexHullOfFactors(list(v), factorUV);
+	AtomicPolytope convexHullUBoundVFree2 = new IntensionalConvexHullOfFactors(list(u), factorUV);
+	
+	Polytope product;
+
+	Polytope expected;
+	Polytope actual;
+	
 	@Test
 	public void test() {
-		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(
-				"U", "Boolean",
-				"V", "Boolean");
-
-		ExpressionVariable u = new ExpressionVariable(parse("U"));
-		ExpressionVariable v = new ExpressionVariable(parse("V"));
-		
-		Polytope identity = Polytopes.identityPolytope();
-		
-		AtomicPolytope simplexU = new Simplex(u);
-		AtomicPolytope simplexV = new Simplex(v);
-		
-		ExpressionFactor factorU = new ExpressionFactor(parse("if U then 2 else 3"), context);
-		ExpressionFactor factorV = new ExpressionFactor(parse("if V then 2 else 3"), context);
-		ExpressionFactor factorUV = new ExpressionFactor(parse("if U and V then 2 else 3"), context);
-		
-		ExpressionFactor factorU2 = new ExpressionFactor(parse("if U then 20 else 30"), context);
-		ExpressionFactor factorV2 = new ExpressionFactor(parse("if V then 20 else 30"), context);
-		ExpressionFactor factorUV2 = new ExpressionFactor(parse("if U and V then 20 else 30"), context);
-		
-		AtomicPolytope convexHullU = new IntensionalConvexHullOfFactors(list(u), factorU);
-		AtomicPolytope convexHullV = new IntensionalConvexHullOfFactors(list(v), factorV);
-		AtomicPolytope convexHullUV = new IntensionalConvexHullOfFactors(list(u, v), factorUV);
-		
-		AtomicPolytope convexHullU2 = new IntensionalConvexHullOfFactors(list(u), factorU2);
-		AtomicPolytope convexHullV2 = new IntensionalConvexHullOfFactors(list(v), factorV2);
-		AtomicPolytope convexHullUV2 = new IntensionalConvexHullOfFactors(list(u, v), factorUV2);
-		
-		Polytope expected;
-		Polytope actual;
-
 		actual = identity.multiply(identity);
 		expected = multiply(list(identity));
 		runTest(expected, actual);
@@ -145,6 +158,60 @@ public class PolytopeTest {
 		println("expected: " + expected);
 		println("actual  : " + actual);
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testGetEquivalentAtomicPolytope() {
+		
+		product = Polytope.multiply(list(simplexU));
+		actual = Polytopes.getEquivalentAtomicPolytopeOn(u, product);
+		println("Atomic polytope on u equivalent to " + product + ": " + actual);
+		expected = simplexU;
+		assertEquals(expected, actual);
+		
+		product = Polytope.multiply(list(simplexU, convexHullUV));
+		actual = Polytopes.getEquivalentAtomicPolytopeOn(u, product);
+		println("Atomic polytope on u equivalent to " + product + ": " + actual);
+		expected = simplexU;
+		assertEquals(expected, actual);
+		
+		product = Polytope.multiply(list(simplexU, convexHullUFreeVBound, convexHullVW));
+		actual = Polytopes.getEquivalentAtomicPolytopeOn(u, product);
+		println("Atomic polytope on u equivalent to " + product + ": " + actual);
+		expected = simplexU;
+		assertEquals(expected, actual);
+		
+		product = Polytope.multiply(list(simplexU, convexHullUV));
+		actual = Polytopes.getEquivalentAtomicPolytopeOn(u, product);
+		println("Atomic polytope on u equivalent to " + product + ": " + actual);
+		expected = simplexU;
+		assertEquals(expected, actual);
+		
+		product = Polytope.multiply(list(simplexU, convexHullUFreeVBound));
+		actual = Polytopes.getEquivalentAtomicPolytopeOn(u, product);
+		println("Atomic polytope on u equivalent to " + product + ": " + actual);
+		expected = simplexU;
+		assertEquals(expected, actual);
+		
+		try {
+			product = Polytope.multiply(list(simplexU, convexHullUBoundVFree));
+			actual = Polytopes.getEquivalentAtomicPolytopeOn(u, product);
+			fail("Should have failed because V is free in polytope but query is U");
+		}
+		catch (AssertionError e) {
+			if ( ! e.getMessage().contains("free variables")) {
+				fail("Should have complained about free variables");
+			}
+		}
+
+		product = Polytope.multiply(list(convexHullUFreeVBound, convexHullVW));
+		actual = Polytopes.getEquivalentAtomicPolytopeOn(u, product);
+		println("Atomic polytope on u equivalent to " + product + ": " + actual);
+		ExpressionFactor expectedExpressionFactor = new ExpressionFactor(parse("if U then if V then if W then 8 else 10 else 15 else if V then if W then 12 else 15 else 15"), context);
+		expected = new IntensionalConvexHullOfFactors(list(v,w), expectedExpressionFactor);
+		println(expected.toString());
+		println(actual.toString());
+		assertEquals(expected.toString(), actual.toString()); // factor are compared by reference, not value
 	}
 
 }

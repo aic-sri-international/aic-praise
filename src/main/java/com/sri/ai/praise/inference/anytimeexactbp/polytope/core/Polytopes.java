@@ -40,21 +40,23 @@ package com.sri.ai.praise.inference.anytimeexactbp.polytope.core;
 import static com.sri.ai.praise.inference.representation.core.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.union;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.util.Util;
 
 /**
  * <pre>
@@ -155,16 +157,53 @@ import com.sri.ai.praise.inference.representation.api.Variable;
 public class Polytopes {
 	
 	/**
-	 * Returns an {@link IntensionalConvexHullOfFactors}
-	 * representing the same set of factors as this polytope,
-	 * but which does not represent the independences involved.
+	 * Takes a polytope in which the only free variable is a given query variable,
+	 * and returns a single equivalent {@link AtomicPolytope}.
 	 * 
 	 * @return
 	 */
-	public static IntensionalConvexHullOfFactors getEquivalentIntensionalConvexHullOfFactorsOn(Set<Variable> variables, Polytope polytope) {
-		List<Variable> freeVariablesMinusQuery = new LinkedList<>(polytope.getFreeVariables());
-		freeVariablesMinusQuery.removeAll(variables);
-		IntensionalConvexHullOfFactors result = (IntensionalConvexHullOfFactors) sumOut(freeVariablesMinusQuery, polytope);
+	public static AtomicPolytope getEquivalentAtomicPolytopeOn(Variable query, Polytope polytope) {
+		
+		myAssert(polytope.getFreeVariables().size() == 1 && polytope.getFreeVariables().contains(query), () -> "getEquivalentIntensionalConvexHullOfFactorsOn must receive polytope whose only free variable is " + query + ", but instead got <" + polytope + "> with free variables " + polytope.getFreeVariables());
+		
+		AtomicPolytope result;
+		
+		final List<? extends AtomicPolytope> nonIdentityAtomicPolytopes = getNonIdentityAtomicPolytopes(list(polytope));
+
+		Simplex simplexOnVariableIfAny = (Simplex) getFirstSatisfyingPredicateOrNull(nonIdentityAtomicPolytopes, p -> isSimplexOn(p, query));
+		
+		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
+		
+		if (thereIsSimplexOnQuerySoItDominates) {
+			result = simplexOnVariableIfAny;
+		}
+		else {
+			// all nonIdentityAtomicPolytopes are intensional convex hulls, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
+			result = mergeIntensionalConvexHulls(nonIdentityAtomicPolytopes);
+		}
+		
+		return result;
+	}
+
+	private static IntensionalConvexHullOfFactors mergeIntensionalConvexHulls(List<? extends AtomicPolytope> convexHulls) {
+		
+		List<Variable> indicesFromConvexHulls = collectIndicesFromIntensionalPolytopes(convexHulls);
+		Factor productOfFactors = makeProductOfFactors(convexHulls);
+		IntensionalConvexHullOfFactors result = new IntensionalConvexHullOfFactors(indicesFromConvexHulls, productOfFactors);
+		return result;
+	}
+
+	private static Factor makeProductOfFactors(List<? extends AtomicPolytope> convexHulls) {
+		List<Factor> factors = collectFactorsFromIntensionalPolytopes(convexHulls);
+		Factor productOfFactors = Factor.multiply(factors);
+		return productOfFactors;
+	}
+
+	private static boolean isSimplexOn(AtomicPolytope atomicPolytope, Variable variable) {
+		boolean result = 
+				atomicPolytope instanceof Simplex
+				&&
+				((Simplex)atomicPolytope).getVariable().equals(variable);
 		return result;
 	}
 	
@@ -224,7 +263,7 @@ public class Polytopes {
 		return indices;
 	}
 
-	private static List<Variable> collectIndicesFromIntensionalPolytopes(List<Polytope> dependentOfVariablesToBeSummedOut) {
+	private static List<Variable> collectIndicesFromIntensionalPolytopes(List<? extends Polytope> dependentOfVariablesToBeSummedOut) {
 		List<Variable> indices = list();
 		for (Polytope polytope : dependentOfVariablesToBeSummedOut) {
 			if (polytope instanceof IntensionalConvexHullOfFactors) {
@@ -243,7 +282,7 @@ public class Polytopes {
 		indices.addAll(intensionalPolytope.getIndices());
 	}
 
-	private static List<Factor> collectFactorsFromIntensionalPolytopes(List<Polytope> dependentOfVariablesToBeSummedOut) {
+	private static List<Factor> collectFactorsFromIntensionalPolytopes(List<? extends Polytope> dependentOfVariablesToBeSummedOut) {
 		List<Factor> factors = list();
 		for (Polytope polytope : dependentOfVariablesToBeSummedOut) {
 			collectFactorIfIntensionalConvexHull(polytope, factors);

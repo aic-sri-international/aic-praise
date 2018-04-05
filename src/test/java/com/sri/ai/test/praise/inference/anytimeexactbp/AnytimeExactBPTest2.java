@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import com.sri.ai.grinder.helper.AssignmentsIterator;
 import com.sri.ai.praise.inference.anytimeexactbp.AnytimeExactBP;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.ProductPolytope;
 import com.sri.ai.praise.inference.exactbp.api.ExactBP;
@@ -48,7 +49,9 @@ public class AnytimeExactBPTest2 {
 			println("p:   " + p);
 			println("var: " + p.getFreeVariables());
 			println("pol: " + p.getPolytopes());
-			println("pol: " + Polytopes.getEquivalentIntensionalConvexHullOfFactorsOn(Util.set(query), p));
+			AtomicPolytope equivalentAtomicPolytopeOnQuery = Polytopes.getEquivalentAtomicPolytopeOn(query, p);
+			println("Computed equivalent atomic polytope on query, now generating its string to show it.");
+			println("single intensional convex hull: " + equivalentAtomicPolytopeOnQuery);
 		}
 	}
 
