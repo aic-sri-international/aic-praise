@@ -201,12 +201,7 @@ public class TableFactor implements Factor{
 		//remove var not in set of variables...
 		//Check if is Table Variable
 		if(variablesToSumOut == null || variablesToSumOut.isEmpty()) {
-			try {
-				return (Factor) this.clone();
-			} catch (CloneNotSupportedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				return this; 
 		}
 		if(!(variablesToSumOut.get(0) instanceof TableVariable)){
 			//TODO error message
