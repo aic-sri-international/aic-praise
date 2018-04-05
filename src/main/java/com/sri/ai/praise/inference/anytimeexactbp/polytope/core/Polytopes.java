@@ -46,7 +46,9 @@ import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.union;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
@@ -151,6 +153,20 @@ import com.sri.ai.praise.inference.representation.api.Variable;
  *
  */
 public class Polytopes {
+	
+	/**
+	 * Returns an {@link IntensionalConvexHullOfFactors}
+	 * representing the same set of factors as this polytope,
+	 * but which does not represent the independences involved.
+	 * 
+	 * @return
+	 */
+	public static IntensionalConvexHullOfFactors sumAllBut(Set<Variable> variables, Polytope polytope) {
+		List<Variable> freeVariablesMinusQuery = new LinkedList<>(polytope.getFreeVariables());
+		freeVariablesMinusQuery.removeAll(variables);
+		IntensionalConvexHullOfFactors result = (IntensionalConvexHullOfFactors) sumOut(freeVariablesMinusQuery, polytope);
+		return result;
+	}
 	
 	public static Polytope sumOut(List<? extends Variable> variablesSummedOut, Polytope polytope) {
 		return sumOut(variablesSummedOut, list(polytope));
@@ -321,7 +337,7 @@ public class Polytopes {
 
 	private static boolean tryNextPolytopeInList(AtomicPolytope nonIdentityAtomicPolytope, AtomicPolytope nonIdentityAtomicAnother, List<AtomicPolytope> resultNonIdentityAtomicPolytopes, boolean anotherAlreadyIncorporated) {
 		AtomicPolytope nonIdentityAtomicProductWithAnother = 
-				nonIdentityAtomicPolytope.nonIdentityAtomicProductOrNull(nonIdentityAtomicAnother);
+				nonIdentityAtomicPolytope.getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise(nonIdentityAtomicAnother);
 		if (nonIdentityAtomicProductWithAnother == null) {
 			resultNonIdentityAtomicPolytopes.add(nonIdentityAtomicPolytope);
 		}

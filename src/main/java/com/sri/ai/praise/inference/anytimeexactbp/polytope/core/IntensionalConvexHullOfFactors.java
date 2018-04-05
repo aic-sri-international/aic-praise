@@ -90,7 +90,7 @@ public class IntensionalConvexHullOfFactors extends AbstractAtomicPolytope {
 	}
 
 	@Override
-	public AtomicPolytope nonIdentityAtomicProductOrNull(AtomicPolytope nonIdentityAtomicAnother) {
+	public AtomicPolytope getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise(AtomicPolytope nonIdentityAtomicAnother) {
 		AtomicPolytope result;
 		if (nonIdentityAtomicAnother instanceof IntensionalConvexHullOfFactors) {
 			result = multiplyByConvexHull(nonIdentityAtomicAnother);

@@ -71,7 +71,7 @@ public abstract class AbstractAtomicPolytope implements AtomicPolytope {
 
 	private Polytope multiplyByAnotherAtomicPolytope(Polytope another) {
 		Polytope result;
-		AtomicPolytope attempt = this.nonIdentityAtomicProductOrNull((AtomicPolytope) another);
+		AtomicPolytope attempt = this.getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise((AtomicPolytope) another);
 		if (attempt == null) {
 			result = new ProductPolytope(list(this, (AtomicPolytope) another));
 		}

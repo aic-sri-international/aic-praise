@@ -44,5 +44,5 @@ package com.sri.ai.praise.inference.anytimeexactbp.polytope.api;
  */
 public interface AtomicPolytope extends Polytope {
 	
-	AtomicPolytope nonIdentityAtomicProductOrNull(AtomicPolytope nonIdentityAtomicAnother);
+	AtomicPolytope getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise(AtomicPolytope nonIdentityAtomicAnother);
 }
