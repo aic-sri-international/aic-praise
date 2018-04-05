@@ -161,7 +161,7 @@ public class Polytopes {
 	 * 
 	 * @return
 	 */
-	public static IntensionalConvexHullOfFactors sumAllBut(Set<Variable> variables, Polytope polytope) {
+	public static IntensionalConvexHullOfFactors getEquivalentIntensionalConvexHullOfFactorsOn(Set<Variable> variables, Polytope polytope) {
 		List<Variable> freeVariablesMinusQuery = new LinkedList<>(polytope.getFreeVariables());
 		freeVariablesMinusQuery.removeAll(variables);
 		IntensionalConvexHullOfFactors result = (IntensionalConvexHullOfFactors) sumOut(freeVariablesMinusQuery, polytope);
