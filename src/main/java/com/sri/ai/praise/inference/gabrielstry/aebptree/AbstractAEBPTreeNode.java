@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.Function;
 import com.sri.ai.praise.inference.gabrielstry.Approximations.api.Approximation;
+import com.sri.ai.praise.inference.gabrielstry.Approximations.core.Simplex;
 import com.sri.ai.praise.inference.gabrielstry.factors.Factors;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -92,7 +93,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 			aux = (Factor) this.root;
 		}
 		else if(isExhausted.apply((Variable) this.root)){
-			aux = null;//SIMPLEX_APPROXIMATION((Variable) this.root)
+			aux = new Simplex((Variable) this.root);
 		}
 		messagesToMultiply = nestedIterator(aux, childrenMessages);
 		Factor result = Factors.multiply(messagesToMultiply);
