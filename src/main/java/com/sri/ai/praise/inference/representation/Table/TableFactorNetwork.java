@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
+import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
+import com.sri.ai.praise.inference.gabrielstry.representation.core.AbstractEditableFactorNetwrok;
 import com.sri.ai.praise.lang.grounded.markov.FactorTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 /**
@@ -16,7 +17,7 @@ import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
  * @author gabriel
  *
  */
-public class TableFactorNetwork extends AbstractFactorNetwork{
+public class TableFactorNetwork extends AbstractEditableFactorNetwrok{
 	
 	public TableFactorNetwork(List<TableFactor> factors) {
 		for(TableFactor f:factors) {
@@ -78,6 +79,11 @@ public class TableFactorNetwork extends AbstractFactorNetwork{
 		
 		TableFactor res = new TableFactor(listOfVariables, factor.getTable());
 		return res;
+	}
+
+	@Override
+	public EditableFactorNetwork makeEmptyNetwork() {
+		return new TableFactorNetwork(new ArrayList<>());
 	}
 	
 	

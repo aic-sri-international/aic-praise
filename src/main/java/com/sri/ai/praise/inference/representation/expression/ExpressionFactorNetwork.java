@@ -42,15 +42,17 @@ import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
+import com.sri.ai.praise.inference.gabrielstry.representation.core.AbstractEditableFactorNetwrok;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
 
 
 /**
@@ -60,7 +62,7 @@ import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
  * @author braz
  *
  */
-public class ExpressionFactorNetwork extends AbstractFactorNetwork {
+public class ExpressionFactorNetwork extends AbstractEditableFactorNetwrok {
 	
 	private Context context;
 
@@ -106,5 +108,10 @@ public class ExpressionFactorNetwork extends AbstractFactorNetwork {
 
 	public Context getContext() {
 		return context;
+	}
+
+	@Override
+	public EditableFactorNetwork makeEmptyNetwork() {
+		return new ExpressionFactorNetwork(new ArrayList<>(), context);
 	}
 }
