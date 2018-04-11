@@ -7,5 +7,5 @@ import com.sri.ai.praise.inference.representation.api.Variable;
  * @author gabriel
  */
 public interface Approximation extends Factor{
-	public Approximation totalIgnoreance(Variable variable, Class<? extends Factor> typeOfFactor);	
+	//public Approximation totalIgnoreance(Variable variable, Class<? extends Factor> typeOfFactor);	
 }

@@ -1,18 +1,23 @@
 package com.sri.ai.praise.inference.gabrielstry.aebptree;
 
+import static com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes.identityPolytope;
 import static com.sri.ai.praise.inference.representation.core.IdentityFactor.IDENTITY_FACTOR;
+import static com.sri.ai.util.Util.accumulate;
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Function;
-import com.sri.ai.praise.inference.gabrielstry.Approximations.api.Approximation;
-import com.sri.ai.praise.inference.gabrielstry.Approximations.core.Simplex;
-import com.sri.ai.praise.inference.gabrielstry.factors.Factors;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Simplex;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
@@ -24,7 +29,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	
 	//Info about the approximation
 	boolean needToUpdateTheApproximation;
-	Approximation currentApproximation;
+	Polytope currentApproximation;
 	
 	//Oracle capable of telling if a variable is exhausted or not...
 	Function<Variable, Boolean> isExhausted;
@@ -60,49 +65,52 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	// Message
 	
 	@Override
-	public Approximation messageSent() {
+	public Polytope messageSent() {
 		if(!needToUpdateTheApproximation) {
 			return currentApproximation;
 		}
 		
 		needToUpdateTheApproximation = false;
 		
-		Factor product = computeProductOfFactorAtRootTimesTheIncomingMessages();
-		List<? extends Variable> allFreeVariablesInProduct = product.getVariables();
+		Polytope product = computeProductOfFactorAtRootTimesTheIncomingMessages();
+		Collection<? extends Variable> allFreeVariablesInProduct = product.getFreeVariables();
 		List<? extends Variable> variablesToBeSummedOut = getVariablesToBeSummedOut(allFreeVariablesInProduct);
-		Approximation result = (Approximation) product.sumOut(variablesToBeSummedOut);
+		Polytope result = Polytopes.sumOut(variablesToBeSummedOut, product);
 		return result;
 	}
 
 	
-	private List<? extends Variable> getVariablesToBeSummedOut(List<? extends Variable> allFreeVariablesInProduct) {
-		// TODO Auto-generated method stub
-		return null;
+	private List<? extends Variable> getVariablesToBeSummedOut(Collection<? extends Variable> allFreeVariablesInProduct) {
+		List<Variable> variablesToBeSummedOut = new ArrayList<>(this.separator);
+		variablesToBeSummedOut.removeAll(this.notToSum);
+		return variablesToBeSummedOut;
 	}
 
 
-	private Factor computeProductOfFactorAtRootTimesTheIncomingMessages() {
-		List<Factor> childrenMessages = new ArrayList<>(children.size());
+	private Polytope computeProductOfFactorAtRootTimesTheIncomingMessages() {
+		List<Polytope> polytopesToMultiply= new ArrayList<>(children.size());
 		//for(AEBPTreeNode<ParentNode, RootNode> child : children) {childrenMessages.add(child.messageSent());}
-		childrenMessages = children.stream().map(AEBPTreeNode::messageSent).collect(Collectors.toList());
+		polytopesToMultiply = children.stream().map(AEBPTreeNode::messageSent).collect(Collectors.toList());
 
-		Iterator<Factor> messagesToMultiply;
+		//P.S: if the root is a factor: add {(on:) root} to the list; if is a non exhausted variable, add a Simplex(root)
+		addSimplexOrFactortoTheListOfProducts(polytopesToMultiply);
 		
-		Factor aux = IDENTITY_FACTOR;
-		if(isRootAFactor()) {
-			aux = (Factor) this.root;
-		}
-		else if(isExhausted.apply((Variable) this.root)){
-			aux = new Simplex((Variable) this.root);
-		}
-		messagesToMultiply = nestedIterator(aux, childrenMessages);
-		Factor result = Factors.multiply(messagesToMultiply);
-		
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
 		return result;
+	}
+
+	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply) {
+		IntensionalConvexHullOfFactors singletonConvexHullOfFactorAtRoot = 
+				new IntensionalConvexHullOfFactors(list(),(Factor) this.getRoot());
+		if(isRootAFactor()) {
+			polytopesToMultiply.add(singletonConvexHullOfFactorAtRoot);
+		}
+		else if (!isExhausted.apply((Variable) this.getRoot())) {
+			polytopesToMultiply.add(new Simplex((Variable) this.getRoot()));
+		}
 	}
 	
 	//Update variables
-
 
 	//Basic Functions
 	public AEBPTreeNode<ParentNode, RootNode> getParent() {

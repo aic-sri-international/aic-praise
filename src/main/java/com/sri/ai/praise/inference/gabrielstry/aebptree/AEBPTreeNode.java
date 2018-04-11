@@ -2,12 +2,12 @@ package com.sri.ai.praise.inference.gabrielstry.aebptree;
 
 import java.util.List;
 
-import com.sri.ai.praise.inference.gabrielstry.Approximations.api.Approximation;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
 public interface AEBPTreeNode<RootNode,ParentNode> {
-	public Factor messageSent();
+	public Polytope messageSent();
 	
 	RootNode getRoot();
 	AEBPTreeNode<ParentNode,RootNode> getParent();
