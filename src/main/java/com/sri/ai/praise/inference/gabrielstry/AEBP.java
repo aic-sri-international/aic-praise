@@ -3,6 +3,7 @@ package com.sri.ai.praise.inference.gabrielstry;
 import com.google.common.base.Function;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.gabrielstry.aebpmodel.AEBPModel;
+import com.sri.ai.praise.inference.gabrielstry.aebpmodel.aebpmodeliterator.BFS;
 import com.sri.ai.praise.inference.gabrielstry.aebpmodel.aebpmodeliterator.api.AEBPTreeIterator;
 import com.sri.ai.praise.inference.gabrielstry.aebptree.AEBPFactorTreeNode;
 import com.sri.ai.praise.inference.gabrielstry.aebptree.AEBPQueryTreeNode;
@@ -30,7 +31,7 @@ public class AEBP extends EZIterator<Polytope> {
 	
 	public AEBP(EditableFactorNetwork network, 
 			Variable query) {
-		this(network, query, model ->)
+		this(network, query, model -> new BFS(model));
 	}
 
 	@Override
