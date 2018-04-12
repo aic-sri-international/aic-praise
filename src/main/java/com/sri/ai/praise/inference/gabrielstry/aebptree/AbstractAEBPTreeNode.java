@@ -1,14 +1,11 @@
 package com.sri.ai.praise.inference.gabrielstry.aebptree;
 
 import static com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes.identityPolytope;
-import static com.sri.ai.praise.inference.representation.core.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,8 +21,8 @@ import com.sri.ai.praise.inference.representation.api.Variable;
 public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBPTreeNode<RootNode, ParentNode>{
 	//Node information
 	RootNode root;
-	AEBPTreeNode<ParentNode,RootNode> parent;
-	List<AEBPTreeNode<ParentNode,RootNode>> children;
+	AbstractAEBPTreeNode<ParentNode,RootNode> parent;
+	ArrayList<AbstractAEBPTreeNode<ParentNode,RootNode>> children;
 	
 	//Info about the approximation
 	boolean needToUpdateTheApproximation;
@@ -39,17 +36,17 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	LinkedHashSet<Variable> notToSum;//Noted as "N" set on the paper
 	
 	//Variables that make the computations and updates faster
-	LinkedHashSet<Variable> setOfVariables;
+	LinkedHashSet<Variable> setOfVariables;//those are not the variables on the tree, but Var(setOfFactors)
 	LinkedHashSet<Factor> setOfFactors;
 
-	public AbstractAEBPTreeNode(RootNode root,AEBPTreeNode<ParentNode,RootNode> parent, 
+	public AbstractAEBPTreeNode(RootNode root, AbstractAEBPTreeNode<ParentNode,RootNode> parent, 
 			Function<Variable, Boolean> isExhausted) {
 		this(root,parent,isExhausted,new ArrayList<>());
 	}
 	
-	public AbstractAEBPTreeNode(RootNode root,AEBPTreeNode<ParentNode,RootNode> parent,
+	public AbstractAEBPTreeNode(RootNode root, AbstractAEBPTreeNode<ParentNode,RootNode> parent,
 			Function<Variable, Boolean> isExhausted,
-			List<AEBPTreeNode<ParentNode,RootNode>> children) {
+			ArrayList<AbstractAEBPTreeNode<ParentNode,RootNode>> children) {
 		needToUpdateTheApproximation = true;
 		currentApproximation = null;
 		
@@ -58,11 +55,90 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		this.children = children;
 		this.isExhausted = isExhausted;
 
-		setOfVariables = new LinkedHashSet<>();
-		setOfFactors   = new LinkedHashSet<>();
+		this.separator = null;
+		this.notToSum = null;
+		this.setOfVariables = null;
+		this.setOfFactors = null;
 	}
 	
-	// Message
+	// ----- Compute set Of Factors / set of Variables -------
+	
+	protected void computeSetOfFactorsAndVariables() {
+		for(AbstractAEBPTreeNode<ParentNode, RootNode> ch:children) {
+			ch.computeSetOfFactorsAndVariables();
+		}
+		this.needToUpdateTheApproximation = true;
+		this.computeSetOfFactorsAndVariablesAtThisNode();
+	}
+
+	private void computeSetOfFactorsAndVariablesAtThisNode() {
+		this.setOfFactors = computeSetOfFactors();
+		this.setOfVariables = computeSetOfVariables();
+	}
+
+	private LinkedHashSet<Factor> computeSetOfFactors() {
+		LinkedHashSet<Factor> result = new LinkedHashSet<Factor>();
+		if(isRootAFactor()) {
+			result.add((Factor) this.root);
+		}
+		for(AbstractAEBPTreeNode<ParentNode, RootNode> ch : children) {
+			result.addAll(ch.setOfFactors);
+		}
+		return result;
+	}
+
+	private LinkedHashSet<Variable> computeSetOfVariables() {
+		LinkedHashSet<Variable> result = new LinkedHashSet<>();
+		for(Factor f : setOfFactors) {
+			if(!f.equals(this.root)) {
+				result.addAll(f.getVariables());
+			}
+		}
+		return result;
+	}
+
+	// ----- Compute separators and N -----
+	
+	protected void computeSeparatorsAndN() {
+		for(AbstractAEBPTreeNode<ParentNode, RootNode> ch:children) {
+			ch.computeSeparatorsAndN();
+		}
+		this.computeSeparatorsAndNAtThisNode();
+
+	}
+
+	private void computeSeparatorsAndNAtThisNode() {
+		this.separator = this.computeSeparator();
+		this.notToSum = this.computeN();
+	}
+
+	private LinkedHashSet<Variable> computeSeparator() {
+
+		LinkedHashSet<Variable> separator = new LinkedHashSet<>();
+		
+		for(int i = 0; i < children.size();i++) {
+			for(int j = i+1; j < children.size();j++) {
+				LinkedHashSet<Variable> aux = new LinkedHashSet<>(children.get(i).setOfVariables);
+				aux.retainAll(children.get(j).setOfVariables);
+				separator.addAll(aux);
+			}
+		}
+		
+		return separator;
+	}
+
+	private LinkedHashSet<Variable> computeN() {
+		LinkedHashSet<Variable> result = new LinkedHashSet<>();
+		if(this.parent != null) {
+			result.addAll(this.parent.notToSum);
+			if(this.parent.isRootAVariable()) {
+				result.add((Variable) this.parent);
+			}
+		}
+		return result;
+	}
+	
+	//----------- Message -----------
 	
 	@Override
 	public Polytope messageSent() {
@@ -78,14 +154,12 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		Polytope result = Polytopes.sumOut(variablesToBeSummedOut, product);
 		return result;
 	}
-
 	
 	private List<? extends Variable> getVariablesToBeSummedOut(Collection<? extends Variable> allFreeVariablesInProduct) {
 		List<Variable> variablesToBeSummedOut = new ArrayList<>(this.separator);
 		variablesToBeSummedOut.removeAll(this.notToSum);
 		return variablesToBeSummedOut;
 	}
-
 
 	private Polytope computeProductOfFactorAtRootTimesTheIncomingMessages() {
 		List<Polytope> polytopesToMultiply= new ArrayList<>(children.size());
@@ -110,19 +184,18 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		}
 	}
 	
-	//Update variables
 
-	//Basic Functions
+	//----------- Basic Functions ----------- 
 	public AEBPTreeNode<ParentNode, RootNode> getParent() {
 		return this.parent;
 	}
 	
 	public List<AEBPTreeNode<ParentNode,RootNode>> getChildren(){
-		return this.children;
+		return null;//TODO this.children;
 	}
 	
 	public void addChild(AEBPTreeNode<ParentNode, RootNode> node) {
-		this.children.add(node);
+		this.children.add((AbstractAEBPTreeNode<ParentNode, RootNode>) node);
 	}
 	
 	public RootNode getRoot() {

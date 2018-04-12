@@ -1,5 +1,8 @@
 package com.sri.ai.praise.inference.representation.Table;
 
+import java.util.List;
+
+import com.sri.ai.praise.inference.representation.api.Instantiation;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
 public class TableVariable implements Variable {
@@ -17,4 +20,13 @@ public class TableVariable implements Variable {
 	public String toString() {
 		return "{name: " + this.name + ", card: " + this.cardinality + "}";
 	}
+	@Override
+	public List<Instantiation> getInstantiations() {
+		// TODO Auto-generated method stub
+		//List of integer from 0 to n-1
+		return null;
+	}
+	
+	
+	
 }

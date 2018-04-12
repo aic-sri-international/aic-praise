@@ -37,8 +37,11 @@
  */
 package com.sri.ai.praise.inference.representation.expression;
 
+import java.util.List;
+
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.WrappedExpression;
+import com.sri.ai.praise.inference.representation.api.Instantiation;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
 public class ExpressionVariable extends WrappedExpression implements Variable {
@@ -47,6 +50,13 @@ public class ExpressionVariable extends WrappedExpression implements Variable {
 
 	public ExpressionVariable(Expression expression) {
 		super(expression);
+	}
+
+	@Override
+	public List<Instantiation> getInstantiations() {
+		// TODO Auto-generated method stub
+ 
+		return null;
 	}
 
 }

@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.inference.representation.api;
 
+import java.util.List;
+
 public interface Variable{
-	
+	List<Instantiation> getInstantiations();
 }

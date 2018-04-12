@@ -62,6 +62,7 @@ public class AnytimeExactBPTest2 {
 
 
 	public static void main(String[] args) {
+
 		FileReader modelFile;
 		try {
 			modelFile = new FileReader(new File("").getAbsolutePath()+"/UAITests/BN_0.uai" );

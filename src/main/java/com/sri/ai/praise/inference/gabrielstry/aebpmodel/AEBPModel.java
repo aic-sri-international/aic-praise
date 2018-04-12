@@ -1,4 +1,4 @@
-package com.sri.ai.praise.inference.gabrielstry;
+package com.sri.ai.praise.inference.gabrielstry.aebpmodel;
 
 import java.util.Iterator;
 
@@ -50,6 +50,10 @@ public class AEBPModel {
 	}
 	public void setQuery(Variable query) {
 		this.query = query;
+	}
+	
+	public EditableFactorNetwork getEntireGraph() {
+		return this.entrireNetwork;
 	}
 	
 }
