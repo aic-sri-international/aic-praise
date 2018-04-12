@@ -62,7 +62,7 @@ public class BFS extends AbstractAEBPTreeIterator{
 				if(!visited.contains(factorNeighbour)) {
 					AEBPFactorTreeNode factorTreeNode =
 							new AEBPFactorTreeNode(factorNeighbour, variableTreeNode, isExhausted);
-					variableTreeNode.addChild(factorTreeNode);
+					//variableTreeNode.addChild(factorTreeNode);
 					
 					visited.add(factorNeighbour);
 					queue.add(factorTreeNode);

@@ -1,5 +1,8 @@
 package com.sri.ai.praise.inference.gabrielstry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.common.base.Function;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.gabrielstry.aebpmodel.AEBPModel;
@@ -8,7 +11,11 @@ import com.sri.ai.praise.inference.gabrielstry.aebpmodel.aebpmodeliterator.api.A
 import com.sri.ai.praise.inference.gabrielstry.aebptree.AEBPFactorTreeNode;
 import com.sri.ai.praise.inference.gabrielstry.aebptree.AEBPQueryTreeNode;
 import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
+import com.sri.ai.praise.inference.representation.Table.TableFactor;
+import com.sri.ai.praise.inference.representation.Table.TableFactorNetwork;
+import com.sri.ai.praise.inference.representation.api.FactorNetwork;
 import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.EZIterator;
 
 public class AEBP extends EZIterator<Polytope> {
@@ -21,16 +28,11 @@ public class AEBP extends EZIterator<Polytope> {
 			Variable query,
 			Function<AEBPModel,AEBPTreeIterator> getNextNodeToPutOnTheTree) {
 		this.model = new AEBPModel(network, query);
-				
-		//Function<Variable,Boolean> isExhausted = (v) -> this.model.isExhausted(v);
-		
 		this.getNextNodeToPutOnTheTree = getNextNodeToPutOnTheTree.apply(model);
-
-		tree = this.getNextNodeToPutOnTheTree.getRootOfTree();//new AEBPQueryTreeNode(query, null, isExhausted);
+		tree = this.getNextNodeToPutOnTheTree.getRootOfTree();
 	}
 	
-	public AEBP(EditableFactorNetwork network, 
-			Variable query) {
+	public AEBP(EditableFactorNetwork network, Variable query) {
 		this(network, query, model -> new BFS(model));
 	}
 
@@ -43,6 +45,7 @@ public class AEBP extends EZIterator<Polytope> {
 
 	private Polytope computeInference() {
 		return tree.messageSent();
+		// Normalize ? TODO
 	}
 
 	private void expand() {
@@ -52,5 +55,10 @@ public class AEBP extends EZIterator<Polytope> {
 		model.ExpandModel(nextTreeNodeToAddToTheTree.getRoot());
 		//Add new factor to the tree
 		tree.addNodeToTheTree(nextTreeNodeToAddToTheTree);
+	}
+	
+	public static void main(String[] args) {
+		List<TableFactor> factors = new ArrayList<>();
+		TableFactorNetwork tfn = new TableFactorNetwork(factors );
 	}
 }

@@ -1,9 +1,16 @@
 package com.sri.ai.test.praise.inference.anytimeexactbp.testcases;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
+import com.sri.ai.praise.inference.representation.Table.TableFactor;
+import com.sri.ai.praise.inference.representation.Table.TableVariable;
 import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
+import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 
 /**
  * 
@@ -93,13 +100,33 @@ public class TestCases {
 	 * @param beta
 	 */
 	public static List<Factor> isingModelGridWithRandomWeigthsAndPotetial(int gridSize,double beta) {
-		//TODO	return a set of Factors
-		for(int i = 0;i < gridSize;i++){
-			for(int j = 0; j < gridSize; j++) {
-				//Create factors
+
+		ArrayList<ArrayList<TableVariable>> variables = new ArrayList<>();
+		for (int i = 0; i < gridSize; i++) {
+			ArrayList<TableVariable> col = new ArrayList<>();
+			variables.add(col);
+			for (int j = 0; j < gridSize; j++) {
+				col.add(j,new TableVariable(i+"_"+j, 2));
+			}
+		}	
+		
+		FunctionTable table = new FunctionTable(Arrays.asList(2,2), Arrays.asList(.3,.01,.01,.3));
+		
+		ArrayList<Factor> result = new ArrayList<>();
+		for(int i = 0; i < gridSize-1; i++) {
+			for (int j = 0; j < gridSize -1; j++) {
+				result.add(new TableFactor(
+						new ArrayList<>(
+								Arrays.asList(
+										variables.get(i).get(j),
+										variables.get(i+1).get(j)
+										)
+								),
+						 table));
+				//...
 			}
 		}
-		return null;
+		return  result;
 	}
 	
 	public static void ALARM() {
