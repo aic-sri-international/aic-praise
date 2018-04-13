@@ -38,6 +38,9 @@ public class AEBP extends EZIterator<Polytope> {
 
 	@Override
 	protected Polytope calculateNext() {
+		if(!getNextNodeToPutOnTheTree.hasNext()) {
+			return null;
+		}
 		expand();
 		Polytope result = computeInference();
 		return result;
@@ -72,12 +75,12 @@ public class AEBP extends EZIterator<Polytope> {
 		}
 		TableFactorNetwork tfn = new TableFactorNetwork(factors);
 		
-		BFS bfs = new BFS(new AEBPModel(tfn, query));
+		/*BFS bfs = new BFS(new AEBPModel(tfn, query));
 		
 		println(bfs.getRootOfTree());
 		while(bfs.hasNext()) {
 			println(bfs.next().getRoot().getVariables());
-		}
+		}*/
 		
 		AEBP aebp = new AEBP(tfn, query);
 		while(aebp.hasNext()) {

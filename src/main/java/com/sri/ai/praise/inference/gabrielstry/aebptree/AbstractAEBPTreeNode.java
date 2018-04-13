@@ -153,6 +153,10 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	
 	private List<? extends Variable> getVariablesToBeSummedOut(Collection<? extends Variable> allFreeVariablesInProduct) {
 		List<Variable> variablesToBeSummedOut = new ArrayList<>(this.separator);
+		if(this.isRootAFactor()) {
+			variablesToBeSummedOut.addAll(((Factor)this.getRoot()).getVariables());//TODO add get variables less parents
+			variablesToBeSummedOut.remove((Variable) this.parent.getRoot());
+		}
 		variablesToBeSummedOut.removeAll(this.notToSum);
 		return variablesToBeSummedOut;
 	}

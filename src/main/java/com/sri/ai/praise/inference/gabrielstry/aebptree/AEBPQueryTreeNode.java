@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.google.common.base.Function;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
@@ -24,8 +25,9 @@ public class AEBPQueryTreeNode extends AEBPVariableTreeNode{
 	@Override
 	public Polytope messageSent() {
 		// TODO Auto-generated method stub
-		//TODO : update and call super
-		return super.messageSent();
+		Polytope message = super.messageSent();
+		Polytope result = Polytopes.getEquivalentAtomicPolytopeOn(this.root, message);
+		return result;
 	}
 	//----------- Add Node -----------
 	
