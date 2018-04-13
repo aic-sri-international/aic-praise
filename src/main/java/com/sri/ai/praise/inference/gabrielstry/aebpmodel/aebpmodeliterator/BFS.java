@@ -28,7 +28,7 @@ public class BFS extends AbstractAEBPTreeIterator{
 		//for each query neighbor
 		for(Factor factor : model.getEntireGraph().getNeighbors(getRootOfTree().getRoot())) {
 			AEBPFactorTreeNode factorNode = new AEBPFactorTreeNode(factor, getRootOfTree(), isExhausted);
-			getRootOfTree().addChild(factorNode);
+			//getRootOfTree().addChild(factorNode);
 			visited.add(factor);
 			queue.add(factorNode);
 			fromNodeToPartition.put(factor, factorNode);

@@ -324,7 +324,22 @@ public class TableFactor implements Factor{
 	
 	@Override
 	public String toString() {
-		String result = "";
+	
+		String result = "phi(";
+		
+		boolean first = true;
+		for(TableVariable v : this.getVariables()) {
+			if(first) {
+				first = false;
+			}
+			else {
+				result = result + ", ";
+			}
+			result = result + v.getName();
+		}
+		result = result + ")";
+		
+	/*	String result = "";
 		MixedRadixNumber radix = new MixedRadixNumber(BigInteger.ZERO,fillWithCardinality(listOfVariables));
 		
 		for(int j = 0; j < table.numberEntries();j++) {
@@ -338,7 +353,7 @@ public class TableFactor implements Factor{
 			}
 			radix.increment();
 			result = result + s + " : " + table.getEntries().get(j);
-		}
+		}*/
 		return result;
 	}
 	

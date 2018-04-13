@@ -1,6 +1,7 @@
 package com.sri.ai.praise.inference.gabrielstry;
 
-import java.util.ArrayList;
+import static com.sri.ai.util.Util.println;
+
 import java.util.List;
 
 import com.google.common.base.Function;
@@ -13,9 +14,8 @@ import com.sri.ai.praise.inference.gabrielstry.aebptree.AEBPQueryTreeNode;
 import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.inference.representation.Table.TableFactor;
 import com.sri.ai.praise.inference.representation.Table.TableFactorNetwork;
-import com.sri.ai.praise.inference.representation.api.FactorNetwork;
+import com.sri.ai.praise.inference.representation.Table.TableVariable;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.EZIterator;
 
 public class AEBP extends EZIterator<Polytope> {
@@ -58,7 +58,31 @@ public class AEBP extends EZIterator<Polytope> {
 	}
 	
 	public static void main(String[] args) {
-		List<TableFactor> factors = new ArrayList<>();
-		TableFactorNetwork tfn = new TableFactorNetwork(factors );
+		List<TableFactor> factors = TestCases.isingModelGridWithRandomWeigthsAndPotetial(3, 2);
+		
+		Variable query = null;
+		for(TableFactor f : factors) {
+			for(TableVariable v : f.getVariables()) {
+				if(v.getName().equals("1_1") ){
+					query = v;
+					//Util.println("Query not null");
+				}
+			}
+			//Util.println(f.getVariables());	
+		}
+		TableFactorNetwork tfn = new TableFactorNetwork(factors);
+		
+		BFS bfs = new BFS(new AEBPModel(tfn, query));
+		
+		println(bfs.getRootOfTree());
+		while(bfs.hasNext()) {
+			println(bfs.next().getRoot().getVariables());
+		}
+		
+		AEBP aebp = new AEBP(tfn, query);
+		while(aebp.hasNext()) {
+			Polytope result = aebp.next();
+			println(result);
+		}
 	}
 }

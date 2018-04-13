@@ -1,15 +1,12 @@
-package com.sri.ai.test.praise.inference.anytimeexactbp.testcases;
+package com.sri.ai.praise.inference.gabrielstry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.inference.representation.Table.TableFactor;
 import com.sri.ai.praise.inference.representation.Table.TableVariable;
 import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.praise.inference.representation.core.AbstractFactorNetwork;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 
 /**
@@ -68,7 +65,7 @@ public class TestCases {
 	 * 
 	 * If we don't consider the simplification, the network correspond to a markov random field  grid with arbitrary factors   
 	 * 
-	 * -----------------------------------------------------------------------------------<p>
+	 * <p>-----------------------------------------------------------------------------------<p>
 	 * Important results about the Ising model:<p>
 	 * 
 	 * - Suppose we take as evidence that all the nodes in the frontier of the lattice (surface of the hypercube) 
@@ -99,7 +96,7 @@ public class TestCases {
 	 * where \sigma_i \in \{+1,-1\}, J_{i,j},\theta{i} ~ N(0,\beta^2)  
 	 * @param beta
 	 */
-	public static List<Factor> isingModelGridWithRandomWeigthsAndPotetial(int gridSize,double beta) {
+	public static List<TableFactor> isingModelGridWithRandomWeigthsAndPotetial(int gridSize,double beta) {
 
 		ArrayList<ArrayList<TableVariable>> variables = new ArrayList<>();
 		for (int i = 0; i < gridSize; i++) {
@@ -110,20 +107,27 @@ public class TestCases {
 			}
 		}	
 		
-		FunctionTable table = new FunctionTable(Arrays.asList(2,2), Arrays.asList(.3,.01,.01,.3));
+		FunctionTable table = new FunctionTable(Arrays.asList(2,2), Arrays.asList(Math.exp(beta),Math.exp(-beta),Math.exp(-beta),Math.exp(beta)));
 		
-		ArrayList<Factor> result = new ArrayList<>();
+		ArrayList<TableFactor> result = new ArrayList<>();
 		for(int i = 0; i < gridSize-1; i++) {
-			for (int j = 0; j < gridSize -1; j++) {
+			for (int j = 0; j < gridSize; j++) {
 				result.add(new TableFactor(
 						new ArrayList<>(
 								Arrays.asList(
 										variables.get(i).get(j),
 										variables.get(i+1).get(j)
-										)
-								),
-						 table));
-				//...
+										) ),table));
+			}
+		}
+		for(int i = 0; i < gridSize; i++) {
+			for (int j = 0; j < gridSize-1; j++) {
+				result.add(new TableFactor(
+						new ArrayList<>(
+								Arrays.asList(
+										variables.get(i).get(j),
+										variables.get(i).get(j+1)
+										) ),table));
 			}
 		}
 		return  result;
@@ -153,4 +157,5 @@ public class TestCases {
 	public static void boltzmanMachineRing() {
 		//TODO	return a set of Factors
 	}
+	
 }

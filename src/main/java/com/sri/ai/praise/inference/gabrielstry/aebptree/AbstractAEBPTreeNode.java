@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.common.base.Function;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
@@ -100,22 +99,19 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	// ----- Compute separators and N -----
 	
 	protected void computeSeparatorsAndN() {
+		this.computeSeparatorsAndNAtThisNode();
 		for(AbstractAEBPTreeNode<ParentNode, RootNode> ch:children) {
 			ch.computeSeparatorsAndN();
 		}
-		this.computeSeparatorsAndNAtThisNode();
-
 	}
 
 	private void computeSeparatorsAndNAtThisNode() {
-		this.separator = this.computeSeparator();
-		this.notToSum = this.computeN();
+		this.separator = this.computeSeparatorAtThisNode();
+		this.notToSum = this.computeNAtThisNode();
 	}
 
-	private LinkedHashSet<Variable> computeSeparator() {
-
+	private LinkedHashSet<Variable> computeSeparatorAtThisNode() {
 		LinkedHashSet<Variable> separator = new LinkedHashSet<>();
-		
 		for(int i = 0; i < children.size();i++) {
 			for(int j = i+1; j < children.size();j++) {
 				LinkedHashSet<Variable> aux = new LinkedHashSet<>(children.get(i).setOfVariables);
@@ -123,16 +119,16 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 				separator.addAll(aux);
 			}
 		}
-		
 		return separator;
 	}
 
-	private LinkedHashSet<Variable> computeN() {
+	private LinkedHashSet<Variable> computeNAtThisNode() {
 		LinkedHashSet<Variable> result = new LinkedHashSet<>();
 		if(this.parent != null) {
 			result.addAll(this.parent.notToSum);
+			result.addAll(this.parent.separator);
 			if(this.parent.isRootAVariable()) {
-				result.add((Variable) this.parent);
+				result.add((Variable) this.parent.getRoot());
 			}
 		}
 		return result;
@@ -163,8 +159,9 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 
 	private Polytope computeProductOfFactorAtRootTimesTheIncomingMessages() {
 		List<Polytope> polytopesToMultiply= new ArrayList<>(children.size());
-		//for(AEBPTreeNode<ParentNode, RootNode> child : children) {childrenMessages.add(child.messageSent());}
-		polytopesToMultiply = children.stream().map(AEBPTreeNode::messageSent).collect(Collectors.toList());
+		for(AEBPTreeNode<ParentNode, RootNode> child : children) {
+			polytopesToMultiply.add(child.messageSent());	
+		}//polytopesToMultiply = children.stream().map(AEBPTreeNode::messageSent).collect(Collectors.toList());
 
 		//P.S: if the root is a factor: add {(on:) root} to the list; if is a non exhausted variable, add a Simplex(root)
 		addSimplexOrFactortoTheListOfProducts(polytopesToMultiply);
@@ -174,9 +171,9 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	}
 
 	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply) {
-		IntensionalConvexHullOfFactors singletonConvexHullOfFactorAtRoot = 
-				new IntensionalConvexHullOfFactors(list(),(Factor) this.getRoot());
 		if(isRootAFactor()) {
+			IntensionalConvexHullOfFactors singletonConvexHullOfFactorAtRoot = 
+					new IntensionalConvexHullOfFactors(list(),(Factor) this.getRoot());
 			polytopesToMultiply.add(singletonConvexHullOfFactorAtRoot);
 		}
 		else if (!isExhausted.apply((Variable) this.getRoot())) {
@@ -184,7 +181,6 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		}
 	}
 	
-
 	//----------- Basic Functions ----------- 
 	public AEBPTreeNode<ParentNode, RootNode> getParent() {
 		return this.parent;
