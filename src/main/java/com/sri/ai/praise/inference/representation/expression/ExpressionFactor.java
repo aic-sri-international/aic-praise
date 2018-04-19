@@ -44,6 +44,7 @@ import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
 import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sri.ai.expresso.api.Expression;
@@ -150,5 +151,18 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	private ExpressionFactor makeFactor(Expression expression) {
 		ExpressionFactor result = new ExpressionFactor(expression, getContext());
 		return result;
+	}
+
+	@Override
+	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
+		// TODO Auto-generated method stub
+		//TODO replace variables by it's value and evaluate
+		return null;
+	}
+
+	@Override
+	public Factor normalize() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

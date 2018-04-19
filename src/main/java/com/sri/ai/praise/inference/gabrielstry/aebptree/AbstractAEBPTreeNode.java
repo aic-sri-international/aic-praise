@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.google.common.base.Function;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Box;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Simplex;
@@ -146,13 +147,13 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		needToUpdateTheApproximation = false;
 		
 		Polytope product = computeProductOfFactorAtRootTimesTheIncomingMessages(propagateBoxes);
-		Collection<? extends Variable> allFreeVariablesInProduct = product.getFreeVariables();
-		List<? extends Variable> variablesToBeSummedOut = getVariablesToBeSummedOut(allFreeVariablesInProduct);
+		//Collection<? extends Variable> allFreeVariablesInProduct = product.getFreeVariables();
+		List<? extends Variable> variablesToBeSummedOut = getVariablesToBeSummedOut();
 		Polytope result = Polytopes.sumOut(variablesToBeSummedOut, product);
 		return result;
 	}
 	
-	private List<? extends Variable> getVariablesToBeSummedOut(Collection<? extends Variable> allFreeVariablesInProduct) {
+	private List<? extends Variable> getVariablesToBeSummedOut(){//(Collection<? extends Variable> allFreeVariablesInProduct) {
 		List<Variable> variablesToBeSummedOut = new ArrayList<>(this.separator);
 		if(this.isRootAFactor()) {
 			variablesToBeSummedOut.addAll(((Factor)this.getRoot()).getVariables());//TODO add get variables less parents
@@ -166,23 +167,26 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		List<Polytope> polytopesToMultiply= new ArrayList<>(children.size());
 		for(AEBPTreeNode<ParentNode, RootNode> child : children) {
 			polytopesToMultiply.add(child.messageSent(propagateBoxes));	
-		}//polytopesToMultiply = children.stream().map(AEBPTreeNode::messageSent).collect(Collectors.toList());
-
+		}
+		
 		//P.S: if the root is a factor: add {(on:) root} to the list; if is a non exhausted variable, add a Simplex(root)
-		addSimplexOrFactortoTheListOfProducts(polytopesToMultiply);
+		addSimplexOrFactortoTheListOfProducts(polytopesToMultiply,propagateBoxes);
 		
 		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
-		if(propagateBoxes.apply()) {
-			//result = Polytopes.toBox(result);
-		}
+		
 		return result;
 	}
 
-	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply) {
+	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply, NullaryFunction<Boolean> propagateBoxes) {
 		if(isRootAFactor()) {
-			IntensionalConvexHullOfFactors singletonConvexHullOfFactorAtRoot = 
-					new IntensionalConvexHullOfFactors(list(),(Factor) this.getRoot());
-			polytopesToMultiply.add(singletonConvexHullOfFactorAtRoot);
+			if(propagateBoxes.apply()) {
+				polytopesToMultiply.add(new Box((Factor) this.getRoot(),(Factor) this.getRoot()));
+			}
+			else {
+				IntensionalConvexHullOfFactors singletonConvexHullOfFactorAtRoot = 
+						new IntensionalConvexHullOfFactors(list(),(Factor) this.getRoot());
+				polytopesToMultiply.add(singletonConvexHullOfFactorAtRoot);
+			}
 		}
 		else if (!isExhausted.apply((Variable) this.getRoot())) {
 			polytopesToMultiply.add(new Simplex((Variable) this.getRoot()));

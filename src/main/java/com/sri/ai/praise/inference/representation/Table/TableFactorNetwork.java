@@ -77,7 +77,7 @@ public class TableFactorNetwork extends AbstractEditableFactorNetwrok{
 			listOfVariables.add(mapFromVariableIndexToVariable.get(variableIndex));
 		}
 		
-		TableFactor res = new TableFactor(listOfVariables, factor.getTable());
+		TableFactor res = new TableFactor(listOfVariables, new ArrayList<>(factor.getTable().getEntries()));
 		return res;
 	}
 

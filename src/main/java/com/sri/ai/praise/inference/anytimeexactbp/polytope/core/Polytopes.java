@@ -44,7 +44,6 @@ import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.myAssert;
-import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.union;
 
@@ -56,7 +55,6 @@ import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.util.Util;
 
 /**
  * <pre>
@@ -406,5 +404,5 @@ public class Polytopes {
 		}
 		return result;
 	}
-	
+
 }

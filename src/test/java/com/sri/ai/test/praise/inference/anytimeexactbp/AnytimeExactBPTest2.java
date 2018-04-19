@@ -163,7 +163,7 @@ public class AnytimeExactBPTest2 {
 			ArrayList<Double> nonNormalizedProbabilitiesForThisInstantiation = new ArrayList<>(query.getCardinality());
 			for(int i = 0; i< query.getCardinality();i++) {
 				mapOfInstantiations.put(query, i);
-				nonNormalizedProbabilitiesForThisInstantiation.add(factor.getInstantiation(mapOfInstantiations));
+				nonNormalizedProbabilitiesForThisInstantiation.add(factor.getEntryFor(mapOfInstantiations));
 			}
 			
 			Double[] normalizedProba = nomalize(nonNormalizedProbabilitiesForThisInstantiation);
@@ -280,7 +280,7 @@ public class AnytimeExactBPTest2 {
 		
 		String[] fileNames= {
 		//"1a2j.uai",
-		"1a1x.uai",
+		//"1a1x.uai",
 		"grid40x40.f5.wrap.uai",
 		"or_chain_10.fg.uai",
 		"1a2j.uai","grid80x80.f10.uai",

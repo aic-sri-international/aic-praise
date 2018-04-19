@@ -41,7 +41,6 @@ import java.util.List;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.WrappedExpression;
-import com.sri.ai.praise.inference.representation.api.Instantiation;
 import com.sri.ai.praise.inference.representation.api.Variable;
 
 public class ExpressionVariable extends WrappedExpression implements Variable {
@@ -53,10 +52,9 @@ public class ExpressionVariable extends WrappedExpression implements Variable {
 	}
 
 	@Override
-	public List<Instantiation> getInstantiations() {
+	public List<? extends Object> getValues() {
 		// TODO Auto-generated method stub
- 
+		//TODO maybe we should store a string like "1..5" or "Boolean" to indicate it
 		return null;
 	}
-
 }

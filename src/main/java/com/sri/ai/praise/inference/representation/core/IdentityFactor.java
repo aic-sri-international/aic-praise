@@ -41,6 +41,7 @@ import static com.sri.ai.util.Util.list;
 import static java.util.Collections.unmodifiableList;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -88,5 +89,16 @@ public class IdentityFactor implements Factor {
 	@Override
 	public String toString() {
 		return "1";
+	}
+
+	@Override
+	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
+		return 1.;
+	}
+
+	@Override
+	public Factor normalize() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

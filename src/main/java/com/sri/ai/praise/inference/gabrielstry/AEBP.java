@@ -9,6 +9,7 @@ import com.sri.ai.praise.inference.gabrielstry.aebptree.AEBPFactorTreeNode;
 import com.sri.ai.praise.inference.gabrielstry.aebptree.AEBPQueryTreeNode;
 import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.EZIterator;
 
 /**
@@ -26,19 +27,22 @@ public class AEBP extends EZIterator<Polytope> {
 	AEBPModel model;
 	AEBPQueryTreeNode tree;
 	
+	NullaryFunction<Boolean> propagateBoxes;
+	
 	AEBPTreeIterator getNextNodeToPutOnTheTree;// This iterator determines the expansion of the tree:
 									// getNextNodeToPutOnTheTree.next() gives a treeNode pointing to the parent it has to be attached to
 	
 	public AEBP(EditableFactorNetwork network, 
 			Variable query,
-			Function<AEBPModel,AEBPTreeIterator> getNextNodeToPutOnTheTree,boolean boxes) {
+			Function<AEBPModel,AEBPTreeIterator> getNextNodeToPutOnTheTree,boolean useBoxes) {
 		this.model = new AEBPModel(network, query);
 		this.getNextNodeToPutOnTheTree = getNextNodeToPutOnTheTree.apply(model);
 		tree = this.getNextNodeToPutOnTheTree.getRootOfTree();
+		propagateBoxes = () -> useBoxes;
 	}
 	
-	public AEBP(EditableFactorNetwork network, Variable query,boolean boxes) {
-		this(network, query, model -> new BFS(model), boxes);
+	public AEBP(EditableFactorNetwork network, Variable query,boolean useBoxes) {
+		this(network, query, model -> new BFS(model), useBoxes);
 	}
 	public AEBP(EditableFactorNetwork network, Variable query) {
 		this(network, query, model -> new BFS(model), false);
@@ -55,7 +59,7 @@ public class AEBP extends EZIterator<Polytope> {
 	}
 
 	private Polytope computeInference() {
-		return tree.messageSent();
+		return tree.messageSent(propagateBoxes);
 		// Normalize ? TODO
 	}
 

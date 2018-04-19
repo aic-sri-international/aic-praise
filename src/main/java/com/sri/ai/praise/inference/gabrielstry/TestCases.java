@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.sri.ai.praise.inference.representation.Table.TableFactor;
 import com.sri.ai.praise.inference.representation.Table.TableVariable;
-import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 
 /**
@@ -90,9 +89,9 @@ public class TestCases {
 			}
 		}	
 		
-		FunctionTable table = new FunctionTable(Arrays.asList(2,2), Arrays.asList(Math.exp(beta),Math.exp(-beta),Math.exp(-beta),Math.exp(beta)));
+		//FunctionTable table = new FunctionTable(Arrays.asList(2,2), Arrays.asList(Math.exp(beta),Math.exp(-beta),Math.exp(-beta),Math.exp(beta)));
 		
-		ArrayList<TableFactor> result = new ArrayList<>();
+		/*rrayList<TableFactor> result = new ArrayList<>();
 		for(int i = 0; i < gridSize-1; i++) {
 			for (int j = 0; j < gridSize; j++) {
 				result.add(new TableFactor(
@@ -126,7 +125,8 @@ public class TestCases {
 				}
 			}
 		}
-		return  result;
+		return  result;*/
+		return null;
 	}
 	
 	/**
@@ -148,7 +148,7 @@ public class TestCases {
 		
 		FunctionTable table = new FunctionTable(Arrays.asList(2,2), Arrays.asList(Math.exp(beta),Math.exp(-beta),Math.exp(-beta),Math.exp(beta)));
 		
-		ArrayList<TableFactor> result = new ArrayList<>();
+	/*	ArrayList<TableFactor> result = new ArrayList<>();
 		for(int i = 0; i < gridSize-1; i++) {
 			for (int j = 0; j < gridSize; j++) {
 				result.add(new TableFactor(
@@ -169,7 +169,7 @@ public class TestCases {
 										) ),table));
 			}
 		}
-		return  result;
+		return  result;*/ return null;
 	}
 	
 	public static void ALARM() {
