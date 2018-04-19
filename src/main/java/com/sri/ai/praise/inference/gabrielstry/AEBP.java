@@ -1,9 +1,5 @@
 package com.sri.ai.praise.inference.gabrielstry;
 
-import static com.sri.ai.util.Util.println;
-
-import java.util.List;
-
 import com.google.common.base.Function;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.gabrielstry.aebpmodel.AEBPModel;
@@ -12,28 +8,40 @@ import com.sri.ai.praise.inference.gabrielstry.aebpmodel.aebpmodeliterator.api.A
 import com.sri.ai.praise.inference.gabrielstry.aebptree.AEBPFactorTreeNode;
 import com.sri.ai.praise.inference.gabrielstry.aebptree.AEBPQueryTreeNode;
 import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.inference.representation.Table.TableFactor;
-import com.sri.ai.praise.inference.representation.Table.TableFactorNetwork;
-import com.sri.ai.praise.inference.representation.Table.TableVariable;
 import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.util.collect.EZIterator;
 
+/**
+ * A AEBP (anytime exact belief propagation) is an iterator of polytopes.
+ * 
+ * It contains a model (which expands a network and provides a "isExhausted" function).
+ * 
+ * It also contains a tree, over which the messages are stored.
+ * 
+ * @author gabriel
+ *
+ */
+
 public class AEBP extends EZIterator<Polytope> {
 	AEBPModel model;
-	AEBPQueryTreeNode tree;//Tree built from the query
+	AEBPQueryTreeNode tree;
 	
-	AEBPTreeIterator getNextNodeToPutOnTheTree;
+	AEBPTreeIterator getNextNodeToPutOnTheTree;// This iterator determines the expansion of the tree:
+									// getNextNodeToPutOnTheTree.next() gives a treeNode pointing to the parent it has to be attached to
 	
 	public AEBP(EditableFactorNetwork network, 
 			Variable query,
-			Function<AEBPModel,AEBPTreeIterator> getNextNodeToPutOnTheTree) {
+			Function<AEBPModel,AEBPTreeIterator> getNextNodeToPutOnTheTree,boolean boxes) {
 		this.model = new AEBPModel(network, query);
 		this.getNextNodeToPutOnTheTree = getNextNodeToPutOnTheTree.apply(model);
 		tree = this.getNextNodeToPutOnTheTree.getRootOfTree();
 	}
 	
+	public AEBP(EditableFactorNetwork network, Variable query,boolean boxes) {
+		this(network, query, model -> new BFS(model), boxes);
+	}
 	public AEBP(EditableFactorNetwork network, Variable query) {
-		this(network, query, model -> new BFS(model));
+		this(network, query, model -> new BFS(model), false);
 	}
 
 	@Override
@@ -58,34 +66,5 @@ public class AEBP extends EZIterator<Polytope> {
 		model.ExpandModel(nextTreeNodeToAddToTheTree.getRoot());
 		//Add new factor to the tree
 		tree.addNodeToTheTree(nextTreeNodeToAddToTheTree);
-	}
-	
-	public static void main(String[] args) {
-		List<TableFactor> factors = TestCases.isingModelGridWithRandomWeigthsAndPotetial(3, 2);
-		
-		Variable query = null;
-		for(TableFactor f : factors) {
-			for(TableVariable v : f.getVariables()) {
-				if(v.getName().equals("1_1") ){
-					query = v;
-					//Util.println("Query not null");
-				}
-			}
-			//Util.println(f.getVariables());	
-		}
-		TableFactorNetwork tfn = new TableFactorNetwork(factors);
-		
-		/*BFS bfs = new BFS(new AEBPModel(tfn, query));
-		
-		println(bfs.getRootOfTree());
-		while(bfs.hasNext()) {
-			println(bfs.next().getRoot().getVariables());
-		}*/
-		
-		AEBP aebp = new AEBP(tfn, query);
-		while(aebp.hasNext()) {
-			Polytope result = aebp.next();
-			println(result);
-		}
 	}
 }

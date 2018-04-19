@@ -3,9 +3,11 @@ package com.sri.ai.praise.inference.gabrielstry.aebptree;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.util.base.NullaryFunction;
 
 public interface AEBPTreeNode<RootNode,ParentNode> {
-	public Polytope messageSent();
+	
+	Polytope messageSent(NullaryFunction<Boolean> propagateBoxes);
 	
 	RootNode getRoot();
 	AEBPTreeNode<ParentNode,RootNode> getParent();
@@ -20,4 +22,5 @@ public interface AEBPTreeNode<RootNode,ParentNode> {
 	default boolean isRootAVariable() {
 		return getRoot() instanceof Variable;
 	}
+
 }

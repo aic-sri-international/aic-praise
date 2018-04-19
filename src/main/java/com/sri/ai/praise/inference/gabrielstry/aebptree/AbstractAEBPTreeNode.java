@@ -16,6 +16,7 @@ import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Simplex;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.util.base.NullaryFunction;
 
 public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBPTreeNode<RootNode, ParentNode>{
 	//Node information
@@ -137,14 +138,14 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	//----------- Message -----------
 	
 	@Override
-	public Polytope messageSent() {
+	public Polytope messageSent(NullaryFunction<Boolean> propagateBoxes) {
 		if(!needToUpdateTheApproximation) {
 			return currentApproximation;
 		}
 		
 		needToUpdateTheApproximation = false;
 		
-		Polytope product = computeProductOfFactorAtRootTimesTheIncomingMessages();
+		Polytope product = computeProductOfFactorAtRootTimesTheIncomingMessages(propagateBoxes);
 		Collection<? extends Variable> allFreeVariablesInProduct = product.getFreeVariables();
 		List<? extends Variable> variablesToBeSummedOut = getVariablesToBeSummedOut(allFreeVariablesInProduct);
 		Polytope result = Polytopes.sumOut(variablesToBeSummedOut, product);
@@ -161,16 +162,19 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		return variablesToBeSummedOut;
 	}
 
-	private Polytope computeProductOfFactorAtRootTimesTheIncomingMessages() {
+	private Polytope computeProductOfFactorAtRootTimesTheIncomingMessages(NullaryFunction<Boolean> propagateBoxes) {
 		List<Polytope> polytopesToMultiply= new ArrayList<>(children.size());
 		for(AEBPTreeNode<ParentNode, RootNode> child : children) {
-			polytopesToMultiply.add(child.messageSent());	
+			polytopesToMultiply.add(child.messageSent(propagateBoxes));	
 		}//polytopesToMultiply = children.stream().map(AEBPTreeNode::messageSent).collect(Collectors.toList());
 
 		//P.S: if the root is a factor: add {(on:) root} to the list; if is a non exhausted variable, add a Simplex(root)
 		addSimplexOrFactortoTheListOfProducts(polytopesToMultiply);
 		
 		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
+		if(propagateBoxes.apply()) {
+			//result = Polytopes.toBox(result);
+		}
 		return result;
 	}
 

@@ -79,15 +79,54 @@ public class TestCases {
 	 * @param weight: Theta
 	 * @return 
 	 */
-	public static List<Factor> isingModelGrid(int gridSize,double potential, double weight) {
+	public static List<TableFactor> TableFactorIsingModelGrid(int gridSize,double beta, double h) {
 		
-		for(int i = 0;i < gridSize;i++){
-			for(int j = 0; j < gridSize; j++) {
-				//Create factors
+		ArrayList<ArrayList<TableVariable>> variables = new ArrayList<>();
+		for (int i = 0; i < gridSize; i++) {
+			ArrayList<TableVariable> col = new ArrayList<>();
+			variables.add(col);
+			for (int j = 0; j < gridSize; j++) {
+				col.add(j,new TableVariable(i+"_"+j, 2));
+			}
+		}	
+		
+		FunctionTable table = new FunctionTable(Arrays.asList(2,2), Arrays.asList(Math.exp(beta),Math.exp(-beta),Math.exp(-beta),Math.exp(beta)));
+		
+		ArrayList<TableFactor> result = new ArrayList<>();
+		for(int i = 0; i < gridSize-1; i++) {
+			for (int j = 0; j < gridSize; j++) {
+				result.add(new TableFactor(
+						new ArrayList<>(
+								Arrays.asList(
+										variables.get(i).get(j),
+										variables.get(i+1).get(j)
+										) ),table));
+			}
+		}
+		for(int i = 0; i < gridSize; i++) {
+			for (int j = 0; j < gridSize-1; j++) {
+				result.add(new TableFactor(
+						new ArrayList<>(
+								Arrays.asList(
+										variables.get(i).get(j),
+										variables.get(i).get(j+1)
+										) ),table));
 			}
 		}
 		
-		return null;
+		if(h != 0) {
+			FunctionTable table2  = new FunctionTable(Arrays.asList(2), Arrays.asList(Math.exp(h),Math.exp(-beta)));
+			for(int i = 0; i < gridSize; i++) {
+				for (int j = 0; j < gridSize; j++) {
+					result.add(
+							new TableFactor(
+								new ArrayList<>(Arrays.asList(variables.get(i).get(j))),
+								table2)
+							);
+				}
+			}
+		}
+		return  result;
 	}
 	
 	/**

@@ -15,6 +15,7 @@ import java.util.Set;
 
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.praise.inference.representation.core.IdentityFactor;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
@@ -27,11 +28,11 @@ import com.sri.ai.util.math.MixedRadixNumber;
  */
 
 public class TableFactor implements Factor{
-	List<TableVariable> listOfVariables;
+	ArrayList<TableVariable> listOfVariables;
 	LinkedHashSet<TableVariable> setOfVariables;
 	FunctionTable table;
 	//
-	Map<TableVariable, Integer> mapFromVariableToItsIndexOnTheList;//TODO initialize	
+	LinkedHashMap<TableVariable, Integer> mapFromVariableToItsIndexOnTheList;//TODO initialize	
 	
 	public TableFactor(ArrayList<TableVariable> listOfVariables, FunctionTable table) {
 		this.listOfVariables =listOfVariables;
@@ -65,9 +66,14 @@ public class TableFactor implements Factor{
 	@Override
 	public Factor multiply(Factor another) {
 		//Check if the class is the same
+		if(another.getClass() == IdentityFactor.class) {
+			return this;
+		}
+		
 		if(another.getClass() != this.getClass()) {
 			Util.println("Trying to multiply different types of factors: this is a " +
 							this.getClass() + "and another is a " + another.getClass());
+			return null;
 		}
 		
 		TableFactor anotherTable = (TableFactor)another;
@@ -197,22 +203,23 @@ public class TableFactor implements Factor{
 
 	@Override
 	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
-		// redo this function using "valuefor"
-		//remove var not in set of variables...
+		
+		variablesToSumOut = retainOnlyTheVariablesInSetOfFactors(variablesToSumOut);
+		
 		//Check if is Table Variable
 		if(variablesToSumOut == null || variablesToSumOut.isEmpty()) {
 				return this; 
 		}
 		if(!(variablesToSumOut.get(0) instanceof TableVariable)){
-			//TODO error message
+			Util.println("variables must be" +this.getClass());
+			return null;
 		}
-		List<List<Integer>> listOfInstantiationsForTheVariablesToSumOut = getListOfListOfInstantiations(variablesToSumOut);
-		//List<Integer> cardinalitiesOfVariablesToSumOut = getCardinalitiesOfVarToSumOut(variablesToSumOut);
-		List<Integer> positionOfEachVariableOnTheListOfVariablesToSumOut = getPositionOfEachVar(variablesToSumOut);		
+		List<List<Integer>>     listOfInstantiationsForTheVariablesToSumOut = getListOfListOfInstantiations(variablesToSumOut);
+		List<Integer>    positionOfEachVariableOnTheListOfVariablesToSumOut = getPositionOfEachVar(variablesToSumOut);		
 		//
-		ArrayList<TableVariable> variablesNotToSumOut = getVariablesNotToSumOut(variablesToSumOut);
-		List<List<Integer>> listOfInstantiationsForTheVariablesNotToSumOut = getListOfListOfInstantiations(variablesNotToSumOut);
-		List<Integer> cardinalitiesOfVariablesNotToSumOut = getCardinalitiesOfVarToSumOut(variablesNotToSumOut);
+		ArrayList<TableVariable>                       variablesNotToSumOut = getVariablesNotToSumOut(variablesToSumOut);
+		List<List<Integer>>  listOfInstantiationsForTheVariablesNotToSumOut = getListOfListOfInstantiations(variablesNotToSumOut);
+		List<Integer>                   cardinalitiesOfVariablesNotToSumOut = getCardinalitiesOfVarToSumOut(variablesNotToSumOut);
 		List<Integer> positionOfEachVariableOnTheListOfVariablesNotToSumOut = getPositionOfEachVar(variablesNotToSumOut);		
 		Iterator<ArrayList<Integer>> cartesianProductOfVariablesNotToSumOut = getCartesianProductWithValuesOfVariablesToSum(listOfInstantiationsForTheVariablesNotToSumOut);		
 		
@@ -238,6 +245,17 @@ public class TableFactor implements Factor{
 		
 		Factor result = new TableFactor(variablesNotToSumOut, resultTable);
 		return result;
+	}
+
+	public List<? extends Variable> retainOnlyTheVariablesInSetOfFactors(List<? extends Variable> variablesToSumOut) {
+		ArrayList<Variable> variablesToSumOutThatAreInSetOfVariables = new ArrayList<>();
+		for(Variable var : variablesToSumOut) {
+			if(setOfVariables.contains(var)) {
+				variablesToSumOutThatAreInSetOfVariables.add(var);
+			}
+		}
+		variablesToSumOut = variablesToSumOutThatAreInSetOfVariables;
+		return variablesToSumOut;
 	}
 
 	private List<Integer> mappingInstantiationsIntoOneInstantiationAtTheWholeListOfVariables(
@@ -337,7 +355,11 @@ public class TableFactor implements Factor{
 			}
 			result = result + v.getName();
 		}
-		result = result + ")";
+		result = result + ") = ";
+		
+		for(Double entry :table.getEntries()) {
+			result = result + entry + " ";
+		}
 		
 	/*	String result = "";
 		MixedRadixNumber radix = new MixedRadixNumber(BigInteger.ZERO,fillWithCardinality(listOfVariables));
@@ -354,6 +376,39 @@ public class TableFactor implements Factor{
 			radix.increment();
 			result = result + s + " : " + table.getEntries().get(j);
 		}*/
+		return result;
+	}
+
+	public TableFactor normalize() {
+		
+		List<Double> entries = table.getEntries();
+		Double sum = 0.;
+		for(Double entry : entries) {
+			sum = sum + entry;
+		}
+		if(sum == 0.) {
+			return this;
+		}
+		
+		List<Double> newEntries = new ArrayList<>(entries.size());
+		for (Double entry :entries) {
+			newEntries.add(entry/sum);
+		}
+		FunctionTable newTable = new FunctionTable(table.getVariableCardinalities(), newEntries);
+		TableFactor result = new TableFactor(this.listOfVariables, newTable, mapFromVariableToItsIndexOnTheList);
+		return result;
+	}
+	
+	public double getInstantiation(Map<Variable,Integer> instantiations) {
+		
+		int[] varValues = new int[instantiations.size()];
+		for(Variable v : instantiations.keySet()) {
+			Integer indexOfVariable = mapFromVariableToItsIndexOnTheList.get(v);
+			Integer instantiation = instantiations.get(v);
+			varValues[indexOfVariable] = instantiation;
+		}
+		
+		Double result = table.entryFor(varValues);
 		return result;
 	}
 	
