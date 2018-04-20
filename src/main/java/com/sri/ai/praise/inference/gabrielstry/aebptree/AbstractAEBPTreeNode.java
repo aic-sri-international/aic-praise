@@ -5,13 +5,11 @@ import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.common.base.Function;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
-import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Box;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Simplex;
@@ -166,7 +164,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	private Polytope computeProductOfFactorAtRootTimesTheIncomingMessages(NullaryFunction<Boolean> propagateBoxes) {
 		List<Polytope> polytopesToMultiply= new ArrayList<>(children.size());
 		for(AEBPTreeNode<ParentNode, RootNode> child : children) {
-			polytopesToMultiply.add(child.messageSent(propagateBoxes));	
+			polytopesToMultiply.add(child.messageSent(propagateBoxes));
 		}
 		
 		//P.S: if the root is a factor: add {(on:) root} to the list; if is a non exhausted variable, add a Simplex(root)
@@ -180,7 +178,8 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply, NullaryFunction<Boolean> propagateBoxes) {
 		if(isRootAFactor()) {
 			if(propagateBoxes.apply()) {
-				polytopesToMultiply.add(new Box((Factor) this.getRoot(),(Factor) this.getRoot()));
+				//Add n
+				//polytopesToMultiply.add(new Box((Factor) this.getRoot(),(Factor) this.getRoot()));
 			}
 			else {
 				IntensionalConvexHullOfFactors singletonConvexHullOfFactorAtRoot = 

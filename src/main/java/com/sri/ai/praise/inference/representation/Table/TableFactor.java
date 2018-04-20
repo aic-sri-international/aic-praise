@@ -2,6 +2,7 @@ package com.sri.ai.praise.inference.representation.Table;
 
 import static com.sri.ai.praise.inference.representation.core.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
+import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -52,6 +53,18 @@ public class TableFactor implements Factor{
 		entryIndex = new MixedRadixNumber(BigInteger.ZERO, listOfVariableCardinalities);
 	}
 	
+	public TableFactor(ArrayList<TableVariable> listOfVariables) {
+		this(listOfVariables,arrayListFilledWith(-1., numEntries(listOfVariables)));
+	}
+	
+	public static int numEntries(ArrayList<TableVariable> listOfVariables2) {
+		int result = 1;
+		for(TableVariable v:listOfVariables2) {
+			result*=v.getCardinality();
+		}
+		return result;
+	}
+
 	@Override
 	public boolean contains(Variable variable) {
 		boolean res = setOfVariables.contains(variable);
@@ -200,10 +213,10 @@ public class TableFactor implements Factor{
 	}
 
 
-	private Iterator<ArrayList<Integer>> getCartesianProduct(ArrayList<TableVariable> listOfVariables) {
+	public static Iterator<ArrayList<Integer>> getCartesianProduct(ArrayList<TableVariable> listOfVariables) {
 		
 		ArrayList<ArrayList<Integer>> listOfValuesForTheVariables = mapIntoArrayList(listOfVariables, 
-																	v -> this.makeArrayWithValuesFromZeroToNMinusOne(v.getCardinality()));
+																	v -> makeArrayWithValuesFromZeroToNMinusOne(v.getCardinality()));
 		ArrayList<NullaryFunction<Iterator<Integer>>> iteratorForListOfVariableValues = 
 				mapIntoArrayList(listOfValuesForTheVariables, element -> () -> element.iterator());
 		
@@ -211,7 +224,7 @@ public class TableFactor implements Factor{
 		return cartesianProduct;
 	}
 
-	private ArrayList<Integer> makeArrayWithValuesFromZeroToNMinusOne(int cardinality) {
+	private static ArrayList<Integer> makeArrayWithValuesFromZeroToNMinusOne(int cardinality) {
 		ArrayList<Integer> result = new ArrayList<>(cardinality);
 		for (int i = 0; i < cardinality; i++) {
 			result.add(i);
@@ -256,5 +269,9 @@ public class TableFactor implements Factor{
 			result.setEntryFor(mapFromVariableToValue, currentValue + addedValue);
 		}
 		return result;
+	}
+	
+	public ArrayList<Double> getEntries() {
+		return this.entries;
 	}
 }

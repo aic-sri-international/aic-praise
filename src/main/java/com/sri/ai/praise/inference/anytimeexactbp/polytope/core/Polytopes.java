@@ -222,14 +222,14 @@ public class Polytopes {
 				independentOfVariablesToBeSummedOut, 
 				dependentOfVariablesToBeSummedOut);
 
-		Polytope projectedPolytope = makeProjectedPolytope(variablesToBeSummedOut, dependentOfVariablesToBeSummedOut);
+		Polytope projectedPolytope = makeProjectedPolytopeOfIntensionalConvexHull(variablesToBeSummedOut, dependentOfVariablesToBeSummedOut);
 
 		Polytope result = makeProductOfPolytopes(independentOfVariablesToBeSummedOut, projectedPolytope);
 
 		return result;
 	}
 	
-	private static Polytope makeProjectedPolytope(List<? extends Variable> variablesToBeSummedOut, List<Polytope> dependentOfVariablesToBeSummedOut) {
+	private static Polytope makeProjectedPolytopeOfIntensionalConvexHull(List<? extends Variable> variablesToBeSummedOut, List<Polytope> dependentOfVariablesToBeSummedOut) {
 
 		List<Variable> simplexVariables = collectSimplexVariables(dependentOfVariablesToBeSummedOut);
 		
@@ -333,6 +333,7 @@ public class Polytopes {
 	public static IntensionalConvexHullOfFactors identityPolytope() {
 		return new IntensionalConvexHullOfFactors(list(), IDENTITY_FACTOR);
 	}
+	
 
 	public static Polytope multiplyListOfAlreadyMultipledNonIdentityAtomicPolytopesWithANewOne(
 			Collection<? extends AtomicPolytope> nonIdentityAtomicPolytopes, 
