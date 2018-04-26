@@ -53,6 +53,7 @@ public interface Factor{
 	
 	Factor multiply(Factor another);
 	
+	/** Sums a variable out of factor up to a constant. */
 	Factor sumOut(List<? extends Variable> variablesToSumOut);
 	
 	boolean isIdentity();
