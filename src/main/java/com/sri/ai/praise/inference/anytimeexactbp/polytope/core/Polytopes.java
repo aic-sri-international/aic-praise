@@ -88,13 +88,13 @@ import com.sri.ai.util.collect.CartesianProductIterator;
  * and assume the form above in which free variables always intersect with V.
  * Then we have:
  * 
- * sum_V { phi_1 }_U_1...{ phi_m }_U_m   S_1 ... S_n
+* sum_V { (on U_1) phi_1 }...{ (on U_m) phi_m }   S_1 ... S_n
  * 
- * \propto (this is equality if V = {W_1,...,W_n})
+ * =
  * 
  * Union_{W_1,...,W_n} sum_{V \ {W_1,...,W_n}} {(on U_1) phi_1 }...{(on U_m) phi_m } 
  * 
- * \propto (this is equality if V = Union_i U_i)
+ * =
  * 
  * Union_{W_1,...,W_n, U_1...U_m} { sum_{V \ ({W_1,...,W_n} union Union_I U_i)} phi_1...phi_m }
  *  
@@ -115,33 +115,33 @@ import com.sri.ai.util.collect.CartesianProductIterator;
  *
  * Example 1:
  * 
- * sum_{I,J,K} {(on J) if I = K and I = M then 1 else 0} S_K S_M
- * \propto
- * S_M * sum_{I,J,K} {(on J) if I = K and I = M then 1 else 0} S_K
- * \propto
- * S_M * Union_K sum_{I,J} {(on J) if I = K and I = M then 1 else 0}
- * \propto
+ * sum_{I,K} {(on J) if I = K and I = M then 1 else 0} S_K S_M
+ * =
+ * S_M * sum_{I,K} {(on J) if I = K and I = M then 1 else 0} S_K
+ * =
+ * S_M * Union_K sum_I {(on J) if I = K and I = M then 1 else 0}
+ * =
  * S_M * Union_{J,K} { sum_I if I = K and I = M then 1 else 0 }
- * \propto
+ * =
  * S_M * Union_{J,K} { phi(K,M) }  for some phi
  * =
  * S_M * {(on J,K) phi(K,M) }
- * \propto
+ * =
  * S_M * {(on K) phi(K,M) }
  * 
  * 
  * Example 2: m = 0.
  * 
  * sum_{I,J,K} S_K S_M
- * \propto
+ * =
  * S_M * sum_{I,J,K} S_K
- * \propto
+ * =
  * S_M * Union_K { sum_{I,J} 1 }
- * \propto
+ * =
  * S_M * Union_K { 1 }
- * \propto
+ * =
  * S_M * {(on K) 1 }
- * \propto
+ * =
  * S_M
  * </pre>
  *
@@ -149,15 +149,15 @@ import com.sri.ai.util.collect.CartesianProductIterator;
  * Example 3:
  * 
  * sum_{I,J,K} phi(I,K) S_K S_M
- * \propto
+ * =
  * sum_{I,J,K} {(on ) phi(I,K)} S_K S_M
- * \propto
+ * =
  * S_M * sum_{I,J,K} {(on ) phi(I,K)} S_K
- * \propto
+ * =
  * S_M * Union_K { sum_{I,J} phi(I,K) }
- * \propto
+ * =
  * S_M * Union_K { phi'(K) }
- * \propto
+ * =
  * S_M * {(on K) phi'(K) }
  * </pre>
 
