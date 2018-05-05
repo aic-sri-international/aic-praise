@@ -9,13 +9,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Simplex;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.util.base.NullaryFunction;
 
 public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBPTreeNode<RootNode, ParentNode>{
 	//Node information
@@ -37,7 +37,8 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	//Variables that make the computations and updates faster
 	LinkedHashSet<Variable> setOfVariables;//those are not the variables on the tree, but Var(setOfFactors)
 	LinkedHashSet<Factor> setOfFactors;
-
+	
+	
 	public AbstractAEBPTreeNode(RootNode root, AbstractAEBPTreeNode<ParentNode,RootNode> parent, 
 			Function<Variable, Boolean> isExhausted) {
 		this(root,parent,isExhausted,new ArrayList<>());
@@ -58,6 +59,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		this.notToSum = null;
 		this.setOfVariables = null;
 		this.setOfFactors = null;
+		
 	}
 	
 	// ----- Compute set Of Factors / set of Variables -------
@@ -137,20 +139,25 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	//----------- Message -----------
 	
 	@Override
-	public Polytope messageSent(NullaryFunction<Boolean> propagateBoxes) {
+	public Polytope messageSent(Predicate<Polytope> boxIt) {
 		if(!needToUpdateTheApproximation) {
 			return currentApproximation;
 		}
 		
 		needToUpdateTheApproximation = false;
 		
-		Polytope product = computeProductOfFactorAtRootTimesTheIncomingMessages(propagateBoxes);
+		Polytope product = computeProductOfFactorAtRootTimesTheIncomingMessages(boxIt);
 		//Collection<? extends Variable> allFreeVariablesInProduct = product.getFreeVariables();
 		List<? extends Variable> variablesToBeSummedOut = getVariablesToBeSummedOut();
-		Polytope result = Polytopes.sumOut(variablesToBeSummedOut, product);
+		Polytope summedOutPolytope = Polytopes.sumOut(variablesToBeSummedOut, product);
+		
+		Polytope result = 
+						Polytopes.BoxAPolytope(summedOutPolytope,boxIt);//= Polytopes.BoxAPolytopeAccordingToCriteria(summedOutPolytope, criteriaToBoxAPolytope);
+		currentApproximation = result;
 		return result;
 	}
 	
+
 	private List<? extends Variable> getVariablesToBeSummedOut(){//(Collection<? extends Variable> allFreeVariablesInProduct) {
 		List<Variable> variablesToBeSummedOut = new ArrayList<>(this.separator);
 		if(this.isRootAFactor()) {
@@ -161,31 +168,25 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		return variablesToBeSummedOut;
 	}
 
-	private Polytope computeProductOfFactorAtRootTimesTheIncomingMessages(NullaryFunction<Boolean> propagateBoxes) {
+	private Polytope computeProductOfFactorAtRootTimesTheIncomingMessages(Predicate<Polytope> boxIt) {
 		List<Polytope> polytopesToMultiply= new ArrayList<>(children.size());
 		for(AEBPTreeNode<ParentNode, RootNode> child : children) {
-			polytopesToMultiply.add(child.messageSent(propagateBoxes));
+			polytopesToMultiply.add(child.messageSent(boxIt));
 		}
 		
 		//P.S: if the root is a factor: add {(on:) root} to the list; if is a non exhausted variable, add a Simplex(root)
-		addSimplexOrFactortoTheListOfProducts(polytopesToMultiply,propagateBoxes);
+		this.addSimplexOrFactortoTheListOfProducts(polytopesToMultiply);
 		
 		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
 		
 		return result;
 	}
 
-	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply, NullaryFunction<Boolean> propagateBoxes) {
+	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply) {
 		if(isRootAFactor()) {
-			if(propagateBoxes.apply()) {
-				//Add n
-				//polytopesToMultiply.add(new Box((Factor) this.getRoot(),(Factor) this.getRoot()));
-			}
-			else {
-				IntensionalConvexHullOfFactors singletonConvexHullOfFactorAtRoot = 
-						new IntensionalConvexHullOfFactors(list(),(Factor) this.getRoot());
-				polytopesToMultiply.add(singletonConvexHullOfFactorAtRoot);
-			}
+			IntensionalConvexHullOfFactors singletonConvexHullOfFactorAtRoot = 
+					new IntensionalConvexHullOfFactors(list(),(Factor) this.getRoot());
+			polytopesToMultiply.add(singletonConvexHullOfFactorAtRoot);
 		}
 		else if (!isExhausted.apply((Variable) this.getRoot())) {
 			polytopesToMultiply.add(new Simplex((Variable) this.getRoot()));
@@ -197,8 +198,8 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		return this.parent;
 	}
 	
-	public List<AEBPTreeNode<ParentNode,RootNode>> getChildren(){
-		return null;//TODO this.children;
+	public ArrayList<AbstractAEBPTreeNode<ParentNode, RootNode>> getChildren(){
+		return this.children;
 	}
 	
 	public void addChild(AEBPTreeNode<ParentNode, RootNode> node) {

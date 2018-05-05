@@ -37,6 +37,9 @@ import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 import com.sri.ai.util.base.IdentityWrapper;
 
 public class UAIModelToExpressionFactorNetwork {
+	public static ExpressionFactorNetwork convert(UAIModel uaiModel) {
+		return convert(uaiModel,null);
+	}
 	
 	public static ExpressionFactorNetwork convert(UAIModel uaiModel,Theory theory) {
 		List<Expression> factorsRepresentedAsExpressions = 

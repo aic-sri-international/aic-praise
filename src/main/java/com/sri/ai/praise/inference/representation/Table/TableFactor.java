@@ -14,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
@@ -71,7 +70,7 @@ public class TableFactor implements Factor{
 		return res;
 	}
 	@Override
-	public List<TableVariable> getVariables() {
+	public ArrayList<TableVariable> getVariables() {
 		return this.listOfVariables;
 	}
 
@@ -152,6 +151,11 @@ public class TableFactor implements Factor{
 		return entries.get(entryPosition);
 	}
 	
+	public <T extends Variable, U extends Object> Double getEntryFor(List<T> variables, List<U> variableValues ) {
+		Map<T, U> map = Util.mapFromListOfKeysAndListOfValues(variables, variableValues);
+		return getEntryFor(map);
+	}
+	
 	public void setEntryFor(Map<? extends Variable, ? extends Object> variableValues, Double newEntryValue) {
 		int entryPosition = fromMapOfVariableValuesToEntryPosition(variableValues);
 		entries.set(entryPosition, newEntryValue);
@@ -159,12 +163,16 @@ public class TableFactor implements Factor{
 	
 	public int fromMapOfVariableValuesToEntryPosition(Map<? extends Variable, ? extends Object> variableValues) {
 		int[] varValues = new int[listOfVariables.size()];
-		for(Entry<? extends Variable, ? extends Object> entry : variableValues.entrySet()) {
+		/*for(Entry<? extends Variable, ? extends Object> entry : variableValues.entrySet()) {//iterate over listOfVariavles:moreEfficient
 			Integer indexOnTheList = mapFromVariableToItsIndexOnTheList.get(entry.getKey());
 			if(indexOnTheList != null) {
 				varValues[indexOnTheList] = (Integer) entry.getValue();
 			}
+		}*/
+		for (int i = 0; i < varValues.length; i++) {
+			varValues[i] = (Integer) variableValues.get(listOfVariables.get(i));
 		}
+		
 		int entryPosition = this.entryIndex.getValueFor(varValues).intValue();
 		return entryPosition;
 	}
@@ -273,5 +281,44 @@ public class TableFactor implements Factor{
 	
 	public ArrayList<Double> getEntries() {
 		return this.entries;
+	}
+	
+	
+	public static TableFactor copyToSubTableFactor(TableFactor factor,
+			List<TableVariable> variablesPredetermined,List<Integer> valuesPredetermined) {
+		
+		Map<TableVariable, Integer> mapOfvaluesPredetermined = Util.mapFromListOfKeysAndListOfValues(variablesPredetermined, valuesPredetermined);
+		TableFactor result = copyToSubTableFactorWithoutRecreatingANewMap(factor, mapOfvaluesPredetermined);
+		return result;
+	}
+	
+	public static TableFactor copyToSubTableFactor(TableFactor factor,
+			Map<TableVariable, Integer> mapOfvaluesPredetermined) {
+
+		Map<TableVariable, Integer> map2= new LinkedHashMap<>(mapOfvaluesPredetermined);
+		TableFactor result = copyToSubTableFactorWithoutRecreatingANewMap(factor, map2);
+		
+		return result;
+	}
+	
+	private static TableFactor copyToSubTableFactorWithoutRecreatingANewMap(TableFactor factor,
+			Map<TableVariable, Integer> mapOfvaluesPredetermined) {
+		ArrayList<TableVariable> newVariables = new ArrayList<>(factor.getVariables());
+		
+		newVariables.removeAll(mapOfvaluesPredetermined.keySet());
+		if(newVariables.size() == 0) {
+			return null;
+		}
+		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(newVariables);
+		
+		TableFactor result = new TableFactor(newVariables);
+		for(ArrayList<Integer> instantiations: in(cartesianProduct)) {
+			for (int i = 0; i < newVariables.size(); i++) {
+				mapOfvaluesPredetermined.put(newVariables.get(i), instantiations.get(i));
+			}
+			Double newEntryValue =  factor.getEntryFor(mapOfvaluesPredetermined);
+			result.setEntryFor(mapOfvaluesPredetermined, newEntryValue);
+		}
+		return result;
 	}
 }

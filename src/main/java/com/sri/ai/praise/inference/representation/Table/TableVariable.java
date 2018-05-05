@@ -29,4 +29,25 @@ public class TableVariable implements Variable {
 		}
 		return result;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) return true;
+        if (!(obj instanceof TableVariable)) {
+            return false;
+        }
+        
+        TableVariable v = (TableVariable) obj;
+        
+		return 	this.name.equals(v.name)
+				&& 
+				this.cardinality.equals(v.cardinality);
+	}
+	@Override
+	public int hashCode() {
+		int result = 17;
+		result = 31 * result + name.hashCode();
+		result = 31 * result + cardinality.hashCode();
+		return result;
+	}
 }

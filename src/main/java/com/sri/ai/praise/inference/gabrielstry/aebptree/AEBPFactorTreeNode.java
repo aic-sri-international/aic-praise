@@ -12,7 +12,8 @@ public class AEBPFactorTreeNode extends AbstractAEBPTreeNode<Factor, Variable> {
 			ArrayList<AbstractAEBPTreeNode<Variable, Factor>> children) {
 		super(root, parent,isExhausted, children);
 	}
-	public AEBPFactorTreeNode(Factor root, AbstractAEBPTreeNode<Variable, Factor> parent,Function<Variable, Boolean> isExhausted) {
+	public AEBPFactorTreeNode(Factor root, AbstractAEBPTreeNode<Variable, Factor> parent,
+			Function<Variable, Boolean> isExhausted) {
 		super(root, parent,isExhausted);
 	}
 

@@ -258,7 +258,7 @@ public class AnytimeExactBPTest2 {
 
 	public static Pair<TableVariable, TableFactorNetwork> isingModel(String queryName, int gridSize,double potential) {
 		Pair<TableVariable, TableFactorNetwork> pairQueryNet;
-		List<TableFactor> factors = TestCases.isingModelGridWithRandomWeigthsAndPotetial(gridSize, potential);
+		List<TableFactor> factors = null;//TestCases.isingModelGridWithRandomWeigthsAndPotetial(gridSize, potential);
 		
 		TableVariable query = null;
 		for(TableFactor f : factors) {

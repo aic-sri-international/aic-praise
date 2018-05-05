@@ -41,20 +41,32 @@ import static com.sri.ai.praise.inference.representation.core.IdentityFactor.IDE
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
+import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoArrayList;
+import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.union;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.box.Box;
+import com.sri.ai.praise.inference.anytimeexactbp.polytope.box.TableBoxVariable;
+import com.sri.ai.praise.inference.representation.Table.TableFactor;
+import com.sri.ai.praise.inference.representation.Table.TableVariable;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
+import com.sri.ai.util.base.NullaryFunction;
+import com.sri.ai.util.collect.CartesianProductIterator;
 
 /**
  * <pre>
@@ -334,7 +346,6 @@ public class Polytopes {
 		return new IntensionalConvexHullOfFactors(list(), IDENTITY_FACTOR);
 	}
 	
-
 	public static Polytope multiplyListOfAlreadyMultipledNonIdentityAtomicPolytopesWithANewOne(
 			Collection<? extends AtomicPolytope> nonIdentityAtomicPolytopes, 
 			AtomicPolytope nonIdentityAtomicAnother) {
@@ -405,5 +416,66 @@ public class Polytopes {
 		}
 		return result;
 	}
+	
+	public static Polytope BoxAPolytope(Polytope polytope, Predicate<Polytope> criteria) {
 
+		List<Polytope> toBeBoxed = list();
+		List<Polytope> notToBeBoxed= list();
+
+		collect(
+				getNonIdentityAtomicPolytopes(list(polytope)), 
+				p -> p instanceof IntensionalConvexHullOfFactors && criteria.apply(p), 
+				toBeBoxed, 
+				notToBeBoxed);
+
+		Polytope boxedPolytopes = boxPolytopes(toBeBoxed);
+		Polytope result = makeProductOfPolytopes(notToBeBoxed, boxedPolytopes);
+
+		return result;
+	}
+
+	private static Polytope boxPolytopes(List<Polytope> toBeBoxed) {
+		LinkedList<Polytope> boxedPolytopes = list();
+		for(Polytope p : toBeBoxed) {
+			if(p instanceof IntensionalConvexHullOfFactors && 
+					!((IntensionalConvexHullOfFactors)p).getIndices().isEmpty() &&
+					((IntensionalConvexHullOfFactors)p).getFactor() instanceof TableFactor){
+				
+					//Box boxedP = TableFactorBoxBuilder.makeTableBox((IntensionalConvexHullOfFactors) p);
+				Box boxedP = Box.boxIt((IntensionalConvexHullOfFactors) p);	
+				boxedPolytopes.add(boxedP);
+			}
+			else {
+				boxedPolytopes.add(p);
+			}
+		}
+		Polytope result = Polytope.multiply(boxedPolytopes);
+		return result;
+	}
+	
+	public static List<TableFactor> IntensionalConvexHullToListOfFactors(IntensionalConvexHullOfFactors polytope) {
+		TableFactor factor = (TableFactor) polytope.getFactor();
+		List<TableVariable> indexes = mapIntoArrayList(polytope.getIndices(),v -> (TableVariable) v);
+		List<List<Integer>> listOfListOfValues = mapIntoList(indexes, v -> mapIntoList(v.getValues(), o -> (Integer) o));
+		
+		List<NullaryFunction<Iterator<Integer>>> iteratorForListOfVariableValues = 
+				mapIntoList(listOfListOfValues, element -> () -> element.iterator());
+		
+		Iterator<ArrayList<Integer>> cartesianProduct = new CartesianProductIterator<Integer>(iteratorForListOfVariableValues);
+		
+		List<TableFactor> result = new LinkedList<>();
+		for(List<Integer> instantiations : in(cartesianProduct)) {
+			result.add(TableFactor.copyToSubTableFactor(factor, indexes, instantiations));
+		}
+		return result;
+	}
+	
+	public static boolean isABox(Polytope polytope) {
+		if(!(polytope instanceof Box)) {
+			return false;
+		}
+		Collection<? extends Variable> indexes = ((IntensionalConvexHullOfFactors) polytope).getIndices();
+		boolean result = indexes.size() == 1 && indexes.iterator().next() instanceof TableBoxVariable;
+		return result;
+	}
 }

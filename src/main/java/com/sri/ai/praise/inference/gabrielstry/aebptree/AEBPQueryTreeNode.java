@@ -3,11 +3,11 @@ package com.sri.ai.praise.inference.gabrielstry.aebptree;
 import java.util.ArrayList;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.util.base.NullaryFunction;
 
 public class AEBPQueryTreeNode extends AEBPVariableTreeNode{
 
@@ -24,9 +24,9 @@ public class AEBPQueryTreeNode extends AEBPVariableTreeNode{
 
 	
 	@Override
-	public Polytope messageSent(NullaryFunction<Boolean> propagateBoxes) {
+	public Polytope messageSent(Predicate<Polytope> boxIt) {
 		// TODO Auto-generated method stub
-		Polytope message = super.messageSent(propagateBoxes);
+		Polytope message = super.messageSent(boxIt);
 		Polytope result = Polytopes.getEquivalentAtomicPolytopeOn(this.root, message);
 		return result;
 	}

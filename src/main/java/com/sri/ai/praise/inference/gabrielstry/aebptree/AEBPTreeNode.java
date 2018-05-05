@@ -1,13 +1,13 @@
 package com.sri.ai.praise.inference.gabrielstry.aebptree;
 
+import com.google.common.base.Predicate;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.util.base.NullaryFunction;
 
 public interface AEBPTreeNode<RootNode,ParentNode> {
 	
-	Polytope messageSent(NullaryFunction<Boolean> propagateBoxes);
+	Polytope messageSent(Predicate<Polytope> boxIt);
 	
 	RootNode getRoot();
 	AEBPTreeNode<ParentNode,RootNode> getParent();

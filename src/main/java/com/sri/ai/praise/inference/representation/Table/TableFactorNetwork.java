@@ -1,16 +1,20 @@
 package com.sri.ai.praise.inference.representation.Table;
 
+import static com.sri.ai.praise.inference.representation.Table.TableFactor.copyToSubTableFactor;
 import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.genericVariableName;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.inference.gabrielstry.representation.core.AbstractEditableFactorNetwrok;
 import com.sri.ai.praise.lang.grounded.markov.FactorTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
+import com.sri.ai.util.Util;
 /**
  * 
  * 
@@ -40,7 +44,54 @@ public class TableFactorNetwork extends AbstractEditableFactorNetwrok{
 			TableFactor f = convertUAIToTableFactor(model.getFactor(i),mapFromVariableIndexToVariable);
 			factors.add(f);
 		}
-		return factors;
+		
+		LinkedHashMap<TableVariable, Integer> mapOfEvidences = makeMapOfEvidences(model.getEvidence(),mapFromVariableIndexToVariable);
+		List<TableFactor> result = incorporateEvidencesAndSimplifyFactors(factors,mapOfEvidences);
+		
+		
+		return result;
+	}
+
+	private static List<TableFactor> incorporateEvidencesAndSimplifyFactors(List<TableFactor> factors,
+			LinkedHashMap<TableVariable, Integer> mapOfEvidences) {
+		List<TableFactor> result = Util.mapIntoList(factors, (f)->copyToSubTableFactor(f, mapOfEvidences));
+		result = Util.filter(result, v->v!=null);
+		return result;
+	}
+	
+	/*public static TableFactor copyToSubTableFactor(TableFactor factor,
+			LinkedHashMap<TableVariable, Integer> mapOfvaluesPredetermined) {
+		ArrayList<TableVariable> newVariables = new ArrayList<>(factor.getVariables());
+		newVariables.removeAll(mapOfvaluesPredetermined.keySet());
+		LinkedHashMap<TableVariable, Integer> predeterminedValuesCopy = new LinkedHashMap<>(mapOfvaluesPredetermined);
+		
+		if(newVariables.size() == 0) {
+			return null;
+		}
+		
+		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(newVariables);
+		
+		TableFactor result = new TableFactor(newVariables);
+		for(ArrayList<Integer> instantiations: in(cartesianProduct)) {
+			for (int i = 0; i < newVariables.size(); i++) {
+				predeterminedValuesCopy.put(newVariables.get(i), instantiations.get(i));
+			}
+			Double newEntryValue =  factor.getEntryFor(predeterminedValuesCopy);
+			result.setEntryFor(predeterminedValuesCopy, newEntryValue);
+		}
+		return result;
+	}*/
+
+	private static LinkedHashMap<TableVariable, Integer> makeMapOfEvidences(Map<Integer, Integer> evidenceMapIndexVarToValue,
+			LinkedHashMap<Integer, TableVariable> mapFromVariableIndexToVariable) {
+		LinkedHashMap<TableVariable, Integer> result = new LinkedHashMap<TableVariable,Integer>();
+		for(Entry<Integer, Integer> entry : evidenceMapIndexVarToValue.entrySet()) {
+			TableVariable var = mapFromVariableIndexToVariable.get(entry.getKey());
+			Integer val = entry.getValue();
+			result.put(var, val);
+		}
+		
+		return result;
 	}
 
 	private static LinkedHashMap<Integer,TableVariable> addVariablesToMap(UAIModel model) {
