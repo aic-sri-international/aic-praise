@@ -171,7 +171,7 @@ public class PRAiSECommandLineOptions {
 		countSummations = options.has("count");
 		showSummations = options.has("summations");
 		if (showSummations && !countSummations) {
-			errors.add("Cannot show summations (option --summations) if not counting them (optiion --count)");
+			errors.add("Cannot show summations (option --summations) if not counting them (option --count)");
 		}
 	}
 

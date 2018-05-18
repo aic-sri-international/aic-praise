@@ -7,6 +7,10 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.junit.Test;
 
 import com.sri.ai.expresso.ExpressoConfiguration;
@@ -15,8 +19,16 @@ import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.grinder.library.bounds.Bound;
+import com.sri.ai.grinder.theory.compound.CompoundTheory;
+import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
+import com.sri.ai.grinder.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
+import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
+import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.praise.inference.PRAiSEUtil;
 import com.sri.ai.praise.inference.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
@@ -27,33 +39,13 @@ import com.sri.ai.praise.inference.representation.api.Variable;
 import com.sri.ai.praise.inference.representation.expression.ExpressionExactBP;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactor;
 import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNetwork;
-import com.sri.ai.praise.inference.representation.expression.UAIModelToExpressionFactorNetwork;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
+import com.sri.ai.util.base.IdentityWrapper;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 import IncrementalAnytimeExactBeliefPropagation.IncrementalAnytimeBeliefPropagationWithSeparatorConditioning;
 import IncrementalAnytimeExactBeliefPropagation.PartitionTree;
 import IncrementalAnytimeExactBeliefPropagation.Model.BFS;
 import IncrementalAnytimeExactBeliefPropagation.Model.Model;
-
-import com.sri.ai.grinder.api.Theory;
-import com.sri.ai.grinder.library.bounds.Bound;
-import com.sri.ai.grinder.theory.compound.CompoundTheory;
-import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
-import com.sri.ai.grinder.theory.equality.EqualityTheory;
-import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
-import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.grinder.theory.tuple.TupleTheory;
-import com.sri.ai.util.base.IdentityWrapper;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 
 public class AnytimeExactBPTest {
@@ -237,26 +229,27 @@ public class AnytimeExactBPTest {
 		expected = parse("if not A_0_0 then 2515404149056770048 else 857920100616142848"); // Note: ExactBP returns an arbitrary unnormalized message
 		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
 		
+		// Commented out for testing time purposes 
 		
-		// Importing the file and reading it
-		FileReader modelFile;
-		try {
-		modelFile = new FileReader(new File("").getAbsolutePath()+"/UAITests/BN_0.uai" );
-		
-		UAIModel model = UAIModelReader.read(modelFile);
-					
-		// Converting the network
-		ExpressionFactorNetwork network = UAIModelToExpressionFactorNetwork.convert(model, null);
-		
-		solveWithAnytimeExactBP(parse("v66"), network, network.getContext());
-		
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}			
+//		// Importing the file and reading it
+//		FileReader modelFile;
+//		try {
+//		modelFile = new FileReader(new File("").getAbsolutePath()+"/UAITests/BN_0.uai" );
+//		
+//		UAIModel model = UAIModelReader.read(modelFile);
+//					
+//		// Converting the network
+//		ExpressionFactorNetwork network = UAIModelToExpressionFactorNetwork.convert(model, null);
+//		
+//		solveWithAnytimeExactBP(parse("v66"), network, network.getContext());
+//		
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}			
 		
 	}
 	

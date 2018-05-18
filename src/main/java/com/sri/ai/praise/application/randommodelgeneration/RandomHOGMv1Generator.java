@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.application.randommodelgeneration;
 
+import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -55,6 +57,7 @@ import java.util.stream.IntStream;
 
 import com.google.common.base.Charsets;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.Categorical;
@@ -71,11 +74,11 @@ import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.util.Util;
+import com.sri.ai.util.math.Rational;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 
 /**
  * Utility class for generating Random HOGMv1 models.
@@ -509,7 +512,10 @@ class RandomConditionalPotentialExpressionGenerator {
 		Context context = theoryTestingSupport.makeContextWithTestingInformation();
 		
 		randomConditionalGenerator = new RandomConditionalExpressionGenerator(theoryTestingSupport, depth,
-				() -> makeSymbol(random.nextDouble()),
+				() -> {
+					Symbol lowPrecisionProbability = makeSymbol(new Rational(random.nextInt(100), 100));
+					return lowPrecisionProbability;
+				},
 				context);
 	}
 	

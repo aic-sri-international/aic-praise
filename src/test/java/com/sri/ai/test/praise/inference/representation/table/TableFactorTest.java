@@ -9,8 +9,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.junit.Test;
-
 import com.sri.ai.praise.inference.representation.Table.TableFactor;
 import com.sri.ai.praise.inference.representation.Table.TableFactorNetwork;
 import com.sri.ai.praise.inference.representation.Table.TableVariable;
@@ -23,7 +21,7 @@ import com.sri.ai.util.base.IdentityWrapper;
 
 //TODO improve tests...
 public class TableFactorTest {
-	@Test
+
 	public static void test1() {
 		TableVariable v1 = new TableVariable("v1", 5);
 		TableVariable v2 = new TableVariable("v2", 5);
