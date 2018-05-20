@@ -351,6 +351,7 @@
 					</execution>
 					<execution>
 						<id>make-command-line-evaluator</id> <!-- this is used for inheritance merges -->
+						<!-- TODO: currently not working as an executable jar if one wishes to use the SGSolver (regular PRAiSE solver) because evaluator uses ProcessBuilder to run SGSolver as a separate process, but when running evaluator as a jar, the classpath is the jar itself and it does not contain the PRAiSE class used by SGSolver. We need to figure out how to include the PRAiSE class in the evaluator jar -->
 						<configuration>
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
