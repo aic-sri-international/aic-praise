@@ -42,7 +42,7 @@ import java.io.File;
 import com.sri.ai.praise.lang.translate.TranslatorOptions;
 
 /**
- * Configuration information for a solver evaluator.
+ * EvaluationConfiguration information for a solver evaluator.
  * 
  * @author oreilly
  */

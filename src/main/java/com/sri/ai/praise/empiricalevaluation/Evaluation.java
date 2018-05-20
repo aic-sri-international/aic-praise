@@ -59,14 +59,14 @@ import com.sri.ai.util.Util;
  */
 public class Evaluation {	
 	
-	private Configuration configuration;
+	private EvaluationConfiguration configuration;
 	private List<SolverEvaluation> solverEvaluations;
 
 	private Notifier notifier;
 	private CSVWriter csvWriter;
 	private String domainSizesOfCurrentModel;
 
-	public Evaluation(Configuration configuration) {
+	public Evaluation(EvaluationConfiguration configuration) {
 		this.configuration = configuration;
 		this.notifier = new Notifier(configuration.getNotificationOut());
 		this.csvWriter = new CSVWriter(configuration);

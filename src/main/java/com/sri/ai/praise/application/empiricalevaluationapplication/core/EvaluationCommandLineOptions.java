@@ -1,4 +1,4 @@
-package com.sri.ai.praise.application.empiricalevaluation.core;
+package com.sri.ai.praise.application.empiricalevaluationapplication.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,15 +11,15 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import com.sri.ai.praise.empiricalevaluation.Configuration;
+import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
 import com.sri.ai.praise.probabilisticsolver.core.praise.PRAiSESolver;
 
-// TODO - consider using commons-configuration to evaluation input file
-// reading, i.e:
+// TODO - consider using commons-configuration to evaluation input file reading, i.e:
 // https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
-public class CommandLineOptions {
 
-	public Configuration evaluationConfiguration;
+public class EvaluationCommandLineOptions {
+
+	public EvaluationConfiguration evaluationConfiguration;
 
 	public OptionSet optionSet;
 
@@ -32,13 +32,13 @@ public class CommandLineOptions {
 	public OptionSpec<Integer> numberRunsToAverageOver;
 	public OptionSpec<File> workingDirectory;
 
-	public CommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		evaluationConfiguration = new Configuration();
-		setOptionsSetUsingDefaultEvaluationConfiguration(args);
+	public EvaluationCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+		evaluationConfiguration = new EvaluationConfiguration();
+		setOptionsSetUsingDefaultEvaluationConfigurationAndCommandLineArguments(args);
 		overrideEvaluationConfigurationsFromOptionSet();
 	}
 
-	private void setOptionsSetUsingDefaultEvaluationConfiguration(String[] args) {
+	private void setOptionsSetUsingDefaultEvaluationConfigurationAndCommandLineArguments(String[] args) {
 		setOptionSpecificationsUsingDefaultEvaluationConfiguration();
 		optionSet = parser.parse(args);
 	}
@@ -130,7 +130,7 @@ public class CommandLineOptions {
 		}
 	}
 
-	public Configuration getEvaluationConfiguration() {
+	public EvaluationConfiguration getEvaluationConfiguration() {
 		return evaluationConfiguration;
 	}
 }

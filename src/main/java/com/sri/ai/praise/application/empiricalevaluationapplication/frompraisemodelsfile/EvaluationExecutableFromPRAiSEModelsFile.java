@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.empiricalevaluation.frompraisemodelsfile;
+package com.sri.ai.praise.application.empiricalevaluationapplication.frompraisemodelsfile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,8 +44,8 @@ import java.io.IOException;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import com.sri.ai.praise.application.empiricalevaluation.core.AbstractEvaluationExecutable;
-import com.sri.ai.praise.application.empiricalevaluation.core.CommandLineOptions;
+import com.sri.ai.praise.application.empiricalevaluationapplication.core.AbstractEvaluationExecutable;
+import com.sri.ai.praise.application.empiricalevaluationapplication.core.EvaluationCommandLineOptions;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
 
@@ -58,12 +58,12 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
 public class EvaluationExecutableFromPRAiSEModelsFile extends AbstractEvaluationExecutable {	
 	
 	@Override
-	protected CommandLineOptions makeCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+	protected EvaluationCommandLineOptions makeEvaluationCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
 		return new CommandLineOptionsWithPRAiSEModelsFile(args);
 	}
 	
-	protected PagedModelContainer makeModelsContainerFromCommandLineOptions() throws IOException {
-		CommandLineOptionsWithPRAiSEModelsFile commandLineOptionsWithPRAiSEModelsFile = (CommandLineOptionsWithPRAiSEModelsFile) commandLineOptions;
+	protected PagedModelContainer makeModelsContainerFromEvaluationCommandLineOptions() throws IOException {
+		CommandLineOptionsWithPRAiSEModelsFile commandLineOptionsWithPRAiSEModelsFile = (CommandLineOptionsWithPRAiSEModelsFile) evaluationCommandLineOptions;
 		OptionSet optionSet = commandLineOptionsWithPRAiSEModelsFile.optionSet;
 		OptionSpec<File> praiseModelsFileOptionSpec = commandLineOptionsWithPRAiSEModelsFile.praiseModelsFile;
 		File praiseModelsFile = optionSet.valueOf(praiseModelsFileOptionSpec);

@@ -1,14 +1,14 @@
-package com.sri.ai.praise.application.empiricalevaluation.frompraisemodelsfile;
+package com.sri.ai.praise.application.empiricalevaluationapplication.frompraisemodelsfile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.sri.ai.praise.application.empiricalevaluation.core.CommandLineOptions;
+import com.sri.ai.praise.application.empiricalevaluationapplication.core.EvaluationCommandLineOptions;
 
 import joptsimple.OptionSpec;
 
-public class CommandLineOptionsWithPRAiSEModelsFile extends CommandLineOptions {
+public class CommandLineOptionsWithPRAiSEModelsFile extends EvaluationCommandLineOptions {
 	public OptionSpec<File> praiseModelsFile;
 	
 	public CommandLineOptionsWithPRAiSEModelsFile(String args[]) throws FileNotFoundException, IOException {

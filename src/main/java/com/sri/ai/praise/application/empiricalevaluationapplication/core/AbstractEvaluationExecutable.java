@@ -35,25 +35,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.empiricalevaluation.core;
+package com.sri.ai.praise.application.empiricalevaluationapplication.core;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import com.sri.ai.praise.empiricalevaluation.Evaluation;
-import com.sri.ai.praise.empiricalevaluation.Configuration;
+import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
 /**
- * Provides a static method for outputting evaluation results for given solvers,
- * models and configurations.
+ * An abstract class for Java applications 
+ * that offers a static method {@link #run(String[]) taking command line arguments,
+ * getting an empirical evaluation {@link EvaluationConfiguration}
+ * and the containers of models to be evaluated from them,
+ * and executes a {@link Evaluation} based on the {@link EvaluationConfiguration} and models in the container.
  * 
  * @author braz
  *
+ *
+ * ISSUES: Why aren't the models in the EvaluationConfiguration?
+ * What is the difference between EvaluationConfiguration and EvaluationCommandLineOptions?
+ * 
  */
 public abstract class AbstractEvaluationExecutable {
 
-	protected CommandLineOptions commandLineOptions;
+	protected EvaluationCommandLineOptions evaluationCommandLineOptions;
 	
 	/**
 	 * A method making a {@link PagedModelContainer} from evaluation arguments.
@@ -61,7 +68,7 @@ public abstract class AbstractEvaluationExecutable {
 	 * @return
 	 * @throws IOException
 	 */
-	abstract protected PagedModelContainer makeModelsContainerFromCommandLineOptions() throws IOException;
+	abstract protected PagedModelContainer makeModelsContainerFromEvaluationCommandLineOptions() throws IOException;
 
 	/**
 	 * Returns options specifications.
@@ -70,25 +77,25 @@ public abstract class AbstractEvaluationExecutable {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	protected CommandLineOptions makeCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		return new CommandLineOptions(args);
+	protected EvaluationCommandLineOptions makeEvaluationCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+		return new EvaluationCommandLineOptions(args);
 	}
 
 	public void run(String[] args) throws Exception {
-		commandLineOptions = makeCommandLineOptions(args);
-		try (Configuration evaluationConfiguration = commandLineOptions.getEvaluationConfiguration()) {
+		evaluationCommandLineOptions = makeEvaluationCommandLineOptions(args);
+		try (EvaluationConfiguration evaluationConfiguration = evaluationCommandLineOptions.getEvaluationConfiguration()) {
 			evaluate(evaluationConfiguration);
 		}
 	}
 
-	private void evaluate(Configuration evaluationConfiguration) throws IOException {
+	private void evaluate(EvaluationConfiguration evaluationConfiguration) throws IOException {
 		setModelsInEvaluationConfiguration(evaluationConfiguration);
 		Evaluation evaluation = new Evaluation(evaluationConfiguration);
 		evaluation.evaluate();
 	}
 
-	private void setModelsInEvaluationConfiguration(Configuration evaluationConfiguration) throws IOException {
-		PagedModelContainer modelsContainer = makeModelsContainerFromCommandLineOptions();
+	private void setModelsInEvaluationConfiguration(EvaluationConfiguration evaluationConfiguration) throws IOException {
+		PagedModelContainer modelsContainer = makeModelsContainerFromEvaluationCommandLineOptions();
 		evaluationConfiguration.setModelsContainer(modelsContainer);
 	}
 }

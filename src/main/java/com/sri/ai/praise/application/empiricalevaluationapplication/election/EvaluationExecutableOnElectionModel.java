@@ -35,14 +35,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.empiricalevaluation.election;
+package com.sri.ai.praise.application.empiricalevaluationapplication.election;
 
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
 
 import java.io.IOException;
 
-import com.sri.ai.praise.application.empiricalevaluation.core.AbstractEvaluationExecutable;
+import com.sri.ai.praise.application.empiricalevaluationapplication.core.AbstractEvaluationExecutable;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -57,7 +57,7 @@ import com.sri.ai.util.collect.IntegerIterator;
  */
 public class EvaluationExecutableOnElectionModel extends AbstractEvaluationExecutable {
 	
-	protected PagedModelContainer makeModelsContainerFromCommandLineOptions() throws IOException {
+	protected PagedModelContainer makeModelsContainerFromEvaluationCommandLineOptions() throws IOException {
 		return 
 				new PagedModelContainer(
 						"election", 

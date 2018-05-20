@@ -41,7 +41,7 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.StringJoiner;
 
-import com.sri.ai.praise.empiricalevaluation.Configuration;
+import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
 import com.sri.ai.praise.empiricalevaluation.Problem;
 import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluation;
 import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluationResult;
@@ -59,7 +59,7 @@ public class CSVWriter {
 	private int numberOfRunsToAverageOver;
 	private PrintStream csvOut;
 
-	public CSVWriter(Configuration configuration) {
+	public CSVWriter(EvaluationConfiguration configuration) {
 		this.problemTypeName = configuration.getType().name();
 		this.numberOfRunsToAverageOver = configuration.getNumberOfRunsToAverageOver();
 		this.csvOut = configuration.getCSVOut();
