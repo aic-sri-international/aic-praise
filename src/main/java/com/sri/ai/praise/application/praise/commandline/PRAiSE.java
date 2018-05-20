@@ -107,9 +107,9 @@ public class PRAiSE {
 
 	private void outputModel(ModelPage modelPage) {
 		if (options.showModel) {
-			options.out.print  ("Model name: ");
+			options.out.print  ("FactorNetwork name: ");
 			options.out.println(modelPage.getName());
-			options.out.println("Model     : ");
+			options.out.println("FactorNetwork     : ");
 			options.out.println(modelPage.getModelString());
 		}
 	}

@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.probabilisticsolver.core.praise;
 
+import static com.sri.ai.util.Util.join;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -125,7 +127,8 @@ public class PRAiSESolver extends AbstractSolver {
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(getConfiguration().getWorkingDirectory());
 		// TODO - add option to PRAiSE to indicate a timeout.
-		processBuilder.command("java", "-classpath", System.getProperty("java.class.path"),
+		String javaClassPath = System.getProperty("java.class.path");
+		processBuilder.command("java", "-classpath", javaClassPath,
 				"-Xms" + getConfiguration().getTotalMemoryLimitInMegabytesPerSolveAttempt() + "M",
 				"-Xmx" + getConfiguration().getTotalMemoryLimitInMegabytesPerSolveAttempt() + "M",
 				PRAiSE.class.getName(), tempInput.getAbsolutePath());
@@ -142,6 +145,7 @@ public class PRAiSESolver extends AbstractSolver {
 		long sgSolverEnd = System.currentTimeMillis();
 
 		List<String> sgsolverOutputs = Files.readAllLines(tempSTDOUT.toPath(), StandardCharsets.UTF_8);
+		List<String> sgsolverErrors = Files.readAllLines(tempSTDERR.toPath(), StandardCharsets.UTF_8);
 
 		tempInput.delete();
 		//
@@ -156,7 +160,7 @@ public class PRAiSESolver extends AbstractSolver {
 		if (result.resultExpression != null) {
 			result.resultExpression = result.resultExpression.substring(PRAiSE.RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT.length());
 		} else {
-			throw new Error("Error launching java process for SGSolver:\n" + sgsolverOutputs);
+			throw new Error("Error launching java process for SGSolver:\n" + join(sgsolverOutputs) + "\n" + join(sgsolverErrors) + "\nJava class path used was " + javaClassPath + "\n");
 		}
 
 		return result;

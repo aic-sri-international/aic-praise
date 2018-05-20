@@ -119,7 +119,7 @@ public class HOGModelGrounding {
 		for (Expression factor : factorsAndTypes.getFactors()) {
 	    	ArrayList<Expression> randomVariablesInFactor = new ArrayList<>(Expressions.getSubExpressionsSatisfying(factor, randomVariableNameToTypeSizeAndUniqueConstants::containsKey));
 	    	if (randomVariablesInFactor.size() == 0) {
-	    		throw new IllegalArgumentException("Factor contains no random variables: "+factor);
+	    		throw new IllegalArgumentException("ExpressionFactorNode contains no random variables: "+factor);
 	    	}
 	    	
 	    	int[] participantVariableIndexes = new int[randomVariablesInFactor.size()];
@@ -470,7 +470,7 @@ public class HOGModelGrounding {
 			int result = 1;
 			for (int i = variableIndex; i != numberOfVariables; i++) {
 				Integer variableDomainSize = domainSize.apply(i);
-				myAssert( () -> variableDomainSize != 0, () -> "Variable domain size cannot be zero");
+				myAssert( () -> variableDomainSize != 0, () -> "ExpressionVariable domain size cannot be zero");
 				result *= variableDomainSize;
 			}
 			return result;

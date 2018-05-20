@@ -1,0 +1,73 @@
+@LANG:HOGMv1
+@MODEL:name=[Page 1]parts=[page-1]queries=[query-page-1#1,query-page-1#2,query-page-1#3,query-page-1#4,query-page-1#5,query-page-1#6]
+@FRAGMENT:page-1
+random SSP_Depreciation : Boolean;
+random oilPriceDecline : Boolean;
+random economicCrisis : Boolean;
+constant conflict : Boolean;
+random cropsDestroyed : Boolean;
+random livestockDestroyed : Boolean;
+random foodSourcesCompromised : Boolean;
+
+random highFoodPrices : Boolean;
+
+random hunger : Boolean;
+
+SSP_Depreciation 0.3;
+oilPriceDecline 0.25;
+conflict 0.6;
+
+// P(economicCrisis | ... ) =
+if SSP_Depreciation
+   then if oilPriceDecline
+           then economicCrisis 0.9
+           else economicCrisis 0.8
+   else if oilPriceDecline
+           then economicCrisis 0.6
+           else economicCrisis 0.3;
+
+
+if conflict then livestockDestroyed 0.75 else livestockDestroyed 0.01;
+
+if conflict then cropsDestroyed 0.6 else cropsDestroyed 0.01;
+
+foodSourcesCompromised <=> livestockDestroyed or cropsDestroyed;
+
+if economicCrisis 
+   then if foodSourcesCompromised
+           then highFoodPrices 0.95
+           else highFoodPrices 0.7
+   else if foodSourcesCompromised
+           then highFoodPrices 0.8
+           else highFoodPrices 0.2;
+
+if highFoodPrices then hunger 0.9 else hunger 0.1;
+
+// Facts:
+
+SSP_Depreciation 0.99;
+
+//conflict;
+//not conflict;
+//not economicCrisis;
+//not foodSourcesCompromised;
+
+
+
+@FRAGMENT:query-page-1#1
+economicCrisis
+
+@FRAGMENT:query-page-1#2
+highFoodPrices
+
+@FRAGMENT:query-page-1#3
+hunger
+
+@FRAGMENT:query-page-1#4
+foodSourcesCompromised
+
+@FRAGMENT:query-page-1#5
+SSP_Depreciation
+
+@FRAGMENT:query-page-1#6
+oilPriceDecline

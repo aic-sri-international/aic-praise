@@ -1,0 +1,23 @@
+{
+  "@context" : {
+    "Corpus" : "https://github.com/clulab/eidos/wiki/JSON-LD#Corpus",
+    "Dependency" : "https://github.com/clulab/eidos/wiki/JSON-LD#Dependency",
+    "DirectedRelation" : "https://github.com/clulab/eidos/wiki/JSON-LD#DirectedRelation",
+    "Document" : "https://github.com/clulab/eidos/wiki/JSON-LD#Document",
+    "Documents" : "https://github.com/clulab/eidos/wiki/JSON-LD#Documents",
+    "Entity" : "https://github.com/clulab/eidos/wiki/JSON-LD#Entity",
+    "Grounding" : "https://github.com/clulab/eidos/wiki/JSON-LD#Grounding",
+    "Interval" : "https://github.com/clulab/eidos/wiki/JSON-LD#Interval",
+    "Modifier" : "https://github.com/clulab/eidos/wiki/JSON-LD#Modifier",
+    "Provenance" : "https://github.com/clulab/eidos/wiki/JSON-LD#Provenance",
+    "Sentence" : "https://github.com/clulab/eidos/wiki/JSON-LD#Sentence",
+    "State" : "https://github.com/clulab/eidos/wiki/JSON-LD#State",
+    "Trigger" : "https://github.com/clulab/eidos/wiki/JSON-LD#Trigger",
+    "Word" : "https://github.com/clulab/eidos/wiki/JSON-LD#Word"
+  },
+  "@type" : "Corpus",
+  "Documents" : [ {
+    "@type" : "Document",
+    "@id" : "_:Document_1"
+    } ]
+}

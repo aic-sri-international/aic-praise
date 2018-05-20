@@ -171,7 +171,7 @@ public class PRAiSECommandLineOptions {
 		countSummations = options.has("count");
 		showSummations = options.has("summations");
 		if (showSummations && !countSummations) {
-			errors.add("Cannot show summations (option --summations) if not counting them (optiion --count)");
+			errors.add("Cannot show summations (option --summations) if not counting them (option --count)");
 		}
 	}
 
@@ -299,7 +299,7 @@ public class PRAiSECommandLineOptions {
 	}
 
 	private void collectNonContainerFiles() {
-		collect(inputFiles, nonContainerFiles, f -> !isContainerFile(f));
+		collect(inputFiles, f -> !isContainerFile(f), nonContainerFiles);
 	}
 
 	private void collectModelPagesFromFileWithAddedGlobalQueries(File containerFile) {
@@ -329,7 +329,7 @@ public class PRAiSECommandLineOptions {
 	}
 
 	private ModelPage makeModelPage(String unionModel) {
-		return new ModelPage(inputLanguage, "Model from concatenation of non-container input files", unionModel, globalQueries);
+		return new ModelPage(inputLanguage, "FactorNetwork from concatenation of non-container input files", unionModel, globalQueries);
 	}
 
 	private static String getLegalModelLanguageCodesDescription() {

@@ -102,8 +102,13 @@ public class FunctionTable {
 		for (int i = 0; i < radixValues.length; i++) {
 			radixValues[i] = varValues.get(i);
 		}
-		result = entries.get(this.entryIndex.getValueFor(radixValues).intValue());
-		
+		result = entryFor(radixValues);
+		return result;
+	}
+
+	public Double entryFor(int[] varValues) {
+		Double result;
+		result = entries.get(this.entryIndex.getValueFor(varValues).intValue());
 		return result;
 	}
 	

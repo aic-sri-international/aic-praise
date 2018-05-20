@@ -346,7 +346,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		// and the sum of their product over all assignments to random variables is 1.
 		
 		boolean exploitFactorization = true;
-		// exploit factorization (that is, employ Variable Elimination,
+		// exploit factorization (that is, employ ExpressionVariable Elimination,
 		// as opposed to summing over the entire joint probability distribution).
 		
 		InferenceForFactorGraphAndEvidence inferencer =

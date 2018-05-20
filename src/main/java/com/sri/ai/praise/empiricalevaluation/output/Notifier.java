@@ -46,9 +46,10 @@ import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluationRe
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
 /**
- * Class responsible for performing an evaluation of one or more solvers on a given problem set.
+ * A class encapsulating evaluation notification messages.
  * 
- * @author oreilly, braz
+ * @author oreilly
+ * @author braz
  *
  */
 public class Notifier {	

@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.empiricalevaluation.solverevaluation;
 
-import com.sri.ai.praise.empiricalevaluation.Configuration;
+import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
 import com.sri.ai.praise.empiricalevaluation.Problem;
 import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.empiricalevaluation.output.Notifier;
@@ -47,33 +47,34 @@ import com.sri.ai.praise.probabilisticsolver.core.SolverResult;
 import com.sri.ai.util.Util;
 
 /**
- * Class responsible for performing an evaluation of one or more solvers on a given problem set.
+ * The evaluation of a specific {@link Solver}.
  * 
- * @author oreilly, braz
+ * @author oreilly
+ * @author braz
  *
  */
 public class SolverEvaluation {	
 	
-	private Configuration configuration;
+	private EvaluationConfiguration configuration;
 	public Solver solver;
 
 	private Notifier notifier;
 	private CSVWriter csvWriter;
 
-	public SolverEvaluation(String solverImplementationClassName, Notifier notifier, CSVWriter csvWriter, Configuration configuration) {
+	public SolverEvaluation(String solverImplementationClassName, Notifier notifier, CSVWriter csvWriter, EvaluationConfiguration configuration) {
 		this.configuration = configuration;
 		this.solver = makeSolverFromClassName(solverImplementationClassName, configuration);
 		this.notifier = notifier;
 		this.csvWriter = csvWriter;
 	}
 
-	private Solver makeSolverFromClassName(String solverImplementationClassName, Configuration configuration) {
+	private Solver makeSolverFromClassName(String solverImplementationClassName, EvaluationConfiguration configuration) {
 		SolverConfiguration solverConfiguration = makeSolverConfiguration(solverImplementationClassName, configuration);
 		Solver solver = makeSolverFromConfiguration(solverConfiguration);
 		return solver;
 	}
 	
-	private SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, Configuration configuration) {
+	private SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, EvaluationConfiguration configuration) {
 		SolverConfiguration solverConfiguration = 
 				new SolverConfiguration(
 						solverImplementationClassName,

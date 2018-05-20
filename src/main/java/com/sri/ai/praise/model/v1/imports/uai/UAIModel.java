@@ -50,7 +50,7 @@ import com.sri.ai.praise.lang.grounded.markov.MarkovNetwork;
 
 /**
  * In memory representation of an Uncertainty in Artificial Intelligence (UAI) 
- * <a href="http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html">Inference Competition Model</a>.
+ * <a href="http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html">Inference Competition FactorNetwork</a>.
  * 
  * @author oreilly
  */
@@ -184,7 +184,7 @@ public class UAIModel implements MarkovNetwork {
 	public void addMARSolution(Integer varIdx, List<Double> values) {
 		Integer cardinality = varIdxToCardinality.get(varIdx);
 		if (cardinality == null) {
-			throw new IllegalArgumentException("Variable Index is invalid, give "+ varIdx +" must be in interval [0, "+numberVariables()+")");
+			throw new IllegalArgumentException("ExpressionVariable Index is invalid, give "+ varIdx +" must be in interval [0, "+numberVariables()+")");
 		}
 		if (cardinality != values.size()) {
 			throw new IllegalArgumentException("Size of values given, "+values.size()+", does not match variables cardinality, which is "+cardinality);

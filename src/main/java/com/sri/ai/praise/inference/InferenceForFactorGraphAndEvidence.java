@@ -118,7 +118,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 *        indicates if the factor graph is a bayesian network (each potential function in normalized for one of its variables, forms a DAG).
 	 * @param evidence 
 	 *        an Expression representing the evidence
-	 * @param useFactorization indicates whether to use factorization (as in Variable Elimination)
+	 * @param useFactorization indicates whether to use factorization (as in ExpressionVariable Elimination)
 	 * @param optionalTheory the theory to be used; if null, a default one is used (as of May 2017, a compound theory with propositional, equalities on categorical types, difference arithmetic, and real linear arithmetic).
 	 */
 	public InferenceForFactorGraphAndEvidence(
@@ -291,6 +291,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @return
 	 */
 	public Context makeContextWithTypeInformation() {
-		return GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		Context context = GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		return context;
 	}
 }

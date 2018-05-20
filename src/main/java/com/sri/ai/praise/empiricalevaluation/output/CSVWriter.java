@@ -41,16 +41,17 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.StringJoiner;
 
-import com.sri.ai.praise.empiricalevaluation.Configuration;
+import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
 import com.sri.ai.praise.empiricalevaluation.Problem;
 import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluation;
 import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluationResult;
 import com.sri.ai.util.Util;
 
 /**
- * Class responsible for performing an evaluation of one or more solvers on a given problem set.
+ * A class for writing to a CSV (comma-separated values) file during evaluation.
  * 
- * @author oreilly, braz
+ * @author oreilly
+ * @author braz
  *
  */
 public class CSVWriter {	
@@ -59,8 +60,8 @@ public class CSVWriter {
 	private int numberOfRunsToAverageOver;
 	private PrintStream csvOut;
 
-	public CSVWriter(Configuration configuration) {
-		this.problemTypeName = configuration.getType().name();
+	public CSVWriter(EvaluationConfiguration configuration) {
+		this.problemTypeName = configuration.getProblemType().name();
 		this.numberOfRunsToAverageOver = configuration.getNumberOfRunsToAverageOver();
 		this.csvOut = configuration.getCSVOut();
 	}

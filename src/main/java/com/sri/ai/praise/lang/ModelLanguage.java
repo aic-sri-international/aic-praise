@@ -50,7 +50,7 @@ import java.util.List;
 public enum ModelLanguage {
 	//
 	// Internal Languages	  			
-	HOGMv1("Higher Order Graphical Model Version 1",
+	HOGMv1("Higher Order Graphical FactorNetwork Version 1",
 			true,
 		  	"HOGMv1",		  
 		  	"This refers to the HOGM language developed and used by the SGDPLL class of algorithms.",		  	
@@ -60,7 +60,7 @@ public enum ModelLanguage {
 		  	".hogm"),		  	
 	// 
 	// External Languages
-	PMTK3FactorGraph("PMTK3 Factor Graph Format",
+	PMTK3FactorGraph("PMTK3 ExpressionFactorNode Graph Format",
 			false,
 		  	"PMTK3",
 		  	"PMTK is a collection of Matlab/Octave functions, which includes support for probabilisitc inference.",
@@ -87,7 +87,7 @@ public enum ModelLanguage {
 					"https://probmods.org/index.html", 
 					"https://github.com/probmods"),
 			".church"),
-	UAI("UAI Inference Competition Model Format", 
+	UAI("UAI Inference Competition FactorNetwork Format", 
 			false,
 			"UAI",
 			"A simple propositional text file format to describe UAI Inference Competition problem instances (Markov or Bayesian networks). "  +

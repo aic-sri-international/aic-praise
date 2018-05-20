@@ -525,7 +525,7 @@ public class HOGMSortDeclaration {
 		}
 		if (illegal) {
 			throw new IllegalArgumentException(
-					"Model sort name '"
+					"FactorNetwork sort name '"
 							+ name
 							+ "' is not of the correct type. It must be a string-valued symbol.");
 		}

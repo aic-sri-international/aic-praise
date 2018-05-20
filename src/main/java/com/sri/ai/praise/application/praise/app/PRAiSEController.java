@@ -168,8 +168,8 @@ public class PRAiSEController {
 	private PopOver openMenuPopOver          = new PopOver();
 	private PopOver configureSettingsPopOver = new PopOver();
 	//
-	private Button      importUAIModelButton         = new Button("Import UAI Model...");
-	private Button      exportUAIModelButton         = new Button("Export UAI Model...");
+	private Button      importUAIModelButton         = new Button("Import UAI FactorNetwork...");
+	private Button      exportUAIModelButton         = new Button("Export UAI FactorNetwork...");
 	//
 	private Spinner<Integer> displayPrecisionSpinner  = new Spinner<>();
 	private CheckBox         displayExactCheckBox     = new CheckBox();
@@ -263,7 +263,7 @@ public class PRAiSEController {
     	//
     	praiseFileChooser = new FileChooser();
     	praiseFileChooser.getExtensionFilters().addAll(
-    	         		new FileChooser.ExtensionFilter("Model Files", "*.praise"));
+    	         		new FileChooser.ExtensionFilter("FactorNetwork Files", "*.praise"));
     	
     	uaiFileChooser = new FileChooser();
     	uaiFileChooser.getExtensionFilters().addAll(
@@ -614,12 +614,12 @@ public class PRAiSEController {
 		importUAIModelButton.setOnAction(this::importUAIModel);
 		FXUtil.setDefaultButtonIcon(importUAIModelButton, FontAwesomeIcons.PUZZLE_PIECE);
 		HBox importUAIHBox = newButtonHBox();
-		importUAIHBox.getChildren().addAll(importUAIModelButton, new Label("Import UAI Model..."));
+		importUAIHBox.getChildren().addAll(importUAIModelButton, new Label("Import UAI FactorNetwork..."));
 		
 		exportUAIModelButton.setOnAction(this::exportUAIModel);
 		FXUtil.setDefaultButtonIcon(exportUAIModelButton, FontAwesomeIcons.ARCHIVE);
 		HBox exportUAIHBox = newButtonHBox();
-		exportUAIHBox.getChildren().addAll(exportUAIModelButton, new Label("Export to UAI Model..."));
+		exportUAIHBox.getChildren().addAll(exportUAIModelButton, new Label("Export to UAI FactorNetwork..."));
 		
 		openMenu.getChildren().addAll(
 				saveAsHBox,
