@@ -52,15 +52,10 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
  * and executes a {@link Evaluation} based on the {@link EvaluationConfiguration} and models in the container.
  * 
  * @author braz
- *
- *
- * ISSUES: Why aren't the models in the EvaluationConfiguration?
- * What is the difference between EvaluationConfiguration and EvaluationCommandLineOptions?
- * 
  */
-public abstract class AbstractEvaluationExecutable {
+public abstract class AbstractEvaluationApplication {
 
-	protected EvaluationCommandLineOptions evaluationCommandLineOptions;
+	protected EvaluationConfigurationFromCommandLineOptions evaluationConfigurationFromCommandLineOptions;
 	
 	/**
 	 * A method making a {@link PagedModelContainer} from evaluation arguments.
@@ -68,22 +63,27 @@ public abstract class AbstractEvaluationExecutable {
 	 * @return
 	 * @throws IOException
 	 */
-	abstract protected PagedModelContainer makeModelsContainerFromEvaluationCommandLineOptions() throws IOException;
+	abstract protected PagedModelContainer getModelsContainer() throws IOException;
 
 	/**
-	 * Returns options specifications.
+	 * Make a {@link EvaluationConfigurationFromCommandLineOptions} from command-line options.
 	 * 
-	 * @return
+	 * @return the {@link EvaluationConfigurationFromCommandLineOptions} from command-line options.
 	 * @throws IOException 
-	 * @throws FileNotFoundException 
 	 */
-	protected EvaluationCommandLineOptions makeEvaluationCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		return new EvaluationCommandLineOptions(args);
+	protected EvaluationConfigurationFromCommandLineOptions makeEvaluationConfigurationFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+		return new EvaluationConfigurationFromCommandLineOptions(args);
 	}
 
+	/**
+	 * Executes an evaluation according to configuration provided in command line options;
+	 * typically, extensions will have a static main method directly invoking this method.
+	 * @param args arguments as provided in static main
+	 * @throws Exception
+	 */
 	public void run(String[] args) throws Exception {
-		evaluationCommandLineOptions = makeEvaluationCommandLineOptions(args);
-		try (EvaluationConfiguration evaluationConfiguration = evaluationCommandLineOptions.getEvaluationConfiguration()) {
+		evaluationConfigurationFromCommandLineOptions = makeEvaluationConfigurationFromCommandLineOptions(args);
+		try (EvaluationConfiguration evaluationConfiguration = evaluationConfigurationFromCommandLineOptions) {
 			evaluate(evaluationConfiguration);
 		}
 	}
@@ -95,7 +95,7 @@ public abstract class AbstractEvaluationExecutable {
 	}
 
 	private void setModelsInEvaluationConfiguration(EvaluationConfiguration evaluationConfiguration) throws IOException {
-		PagedModelContainer modelsContainer = makeModelsContainerFromEvaluationCommandLineOptions();
+		PagedModelContainer modelsContainer = getModelsContainer();
 		evaluationConfiguration.setModelsContainer(modelsContainer);
 	}
 }

@@ -1,0 +1,91 @@
+@LANG:HOGMv1
+@MODEL:name=[Page 1]parts=[page-1]queries=[query-page-1#1,query-page-1#2]
+@MODEL:name=[Page 2]parts=[page-2]queries=[query-page-2#1,query-page-2#2]
+@MODEL:name=[Page 3]parts=[page-3]queries=[query-page-3#1,query-page-3#2]
+@FRAGMENT:page-1
+/**
+ * Classic earthquake, burglary and alarm network with explaining away effect;
+ * Try the given scenarios and query 'earthquake' and 'burglary' for each of them.
+ */
+// RANDOM VARIABLE DECLARATIONS:
+random earthquake: Boolean;
+random burglary: Boolean;
+random alarm: Boolean;
+
+// RULES:
+earthquake 0.01;
+burglary 0.1;
+
+if earthquake
+   then if burglary
+      then alarm 0.95
+      else alarm 0.6
+   else if burglary
+      then alarm 0.9
+      else alarm 0.01;
+     
+not alarm;
+
+@FRAGMENT:query-page-1#1
+earthquake
+
+@FRAGMENT:query-page-1#2
+burglary
+@FRAGMENT:page-2
+/**
+ * Classic earthquake, burglary and alarm network with explaining away effect;
+ * Try the given scenarios and query 'earthquake' and 'burglary' for each of them.
+ */
+// RANDOM VARIABLE DECLARATIONS:
+random earthquake: Boolean;
+random burglary: Boolean;
+random alarm: Boolean;
+
+// RULES:
+earthquake 0.01;
+burglary 0.1;
+
+if earthquake
+   then if burglary
+      then alarm 0.95
+      else alarm 0.6
+   else if burglary
+      then alarm 0.9
+      else alarm 0.01;
+     
+alarm;
+
+@FRAGMENT:query-page-2#1
+burglary
+
+@FRAGMENT:query-page-2#2
+earthquake
+@FRAGMENT:page-3
+/**
+ * Classic earthquake, burglary and alarm network with explaining away effect;
+ * Try the given scenarios and query 'earthquake' and 'burglary' for each of them.
+ */
+// RANDOM VARIABLE DECLARATIONS:
+random earthquake: Boolean;
+random burglary: Boolean;
+random alarm: Boolean;
+
+// RULES:
+earthquake 0.01;
+burglary 0.1;
+
+if earthquake
+   then if burglary
+      then alarm 0.95
+      else alarm 0.6
+   else if burglary
+      then alarm 0.9
+      else alarm 0.01;
+     
+alarm and not burglary;
+
+@FRAGMENT:query-page-3#1
+earthquake
+
+@FRAGMENT:query-page-3#2
+burglary

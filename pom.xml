@@ -349,6 +349,24 @@
 							<goal>single</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>make-command-line-evaluator</id> <!-- this is used for inheritance merges -->
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>com.sri.ai.praise.application.empiricalevaluationapplication.fromfile.EvaluationApplication</mainClass>
+								</manifest>
+							</archive>
+			                <finalName>PRAiSE-Evaluate-${version}</finalName>
+						</configuration>
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 

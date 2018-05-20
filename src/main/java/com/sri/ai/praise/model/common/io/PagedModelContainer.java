@@ -38,6 +38,7 @@
 package com.sri.ai.praise.model.common.io;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -93,7 +94,11 @@ public class PagedModelContainer {
 		this.name  = name;
 		this.pages = getModelPagesFromURI(uri);
 	}
-	
+
+	public PagedModelContainer(File file) throws IOException {
+		this(file.getName(), file.toURI());
+	}
+
 	public String getName() {
 		return name;
 	}

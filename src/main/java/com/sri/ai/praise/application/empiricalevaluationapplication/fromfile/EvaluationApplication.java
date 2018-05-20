@@ -35,47 +35,56 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.empiricalevaluationapplication.frompraisemodelsfile;
+package com.sri.ai.praise.application.empiricalevaluationapplication.fromfile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import com.sri.ai.praise.application.empiricalevaluationapplication.core.AbstractEvaluationApplication;
+import com.sri.ai.praise.application.empiricalevaluationapplication.core.EvaluationConfigurationFromCommandLineOptions;
+import com.sri.ai.praise.model.common.io.PagedModelContainer;
+
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import com.sri.ai.praise.application.empiricalevaluationapplication.core.AbstractEvaluationExecutable;
-import com.sri.ai.praise.application.empiricalevaluationapplication.core.EvaluationCommandLineOptions;
-import com.sri.ai.praise.model.common.io.PagedModelContainer;
-
 
 /**
- * Command line interface for running evaluations on a collection of models in a praise file.
+ * Command line interface for running evaluations on a collection of models in a file (typically a .praise one).
  * 
  * @author oreilly
+ * @author braz
  *
  */
-public class EvaluationExecutableFromPRAiSEModelsFile extends AbstractEvaluationExecutable {	
+public class EvaluationApplication extends AbstractEvaluationApplication {	
 	
 	@Override
-	protected EvaluationCommandLineOptions makeEvaluationCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		return new CommandLineOptionsWithPRAiSEModelsFile(args);
+	protected EvaluationConfigurationFromCommandLineOptions makeEvaluationConfigurationFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+		return new EvaluationConfigurationFromCommandLineOptionsAddingFileOption(args);
 	}
 	
-	protected PagedModelContainer makeModelsContainerFromEvaluationCommandLineOptions() throws IOException {
-		CommandLineOptionsWithPRAiSEModelsFile commandLineOptionsWithPRAiSEModelsFile = (CommandLineOptionsWithPRAiSEModelsFile) evaluationCommandLineOptions;
-		OptionSet optionSet = commandLineOptionsWithPRAiSEModelsFile.optionSet;
-		OptionSpec<File> praiseModelsFileOptionSpec = commandLineOptionsWithPRAiSEModelsFile.praiseModelsFile;
-		File praiseModelsFile = optionSet.valueOf(praiseModelsFileOptionSpec);
-		if (!praiseModelsFile.isFile()) {
-			throw new IllegalArgumentException("Input PRAiSE models file does not exist: " + praiseModelsFile.getAbsolutePath());
-		}
-		PagedModelContainer result = new PagedModelContainer(praiseModelsFile.getName(), praiseModelsFile.toURI());
+	protected PagedModelContainer getModelsContainer() throws IOException {
+		File file = getModelsFileFromEvaluationConfiguration();
+		PagedModelContainer result = new PagedModelContainer(file);
 		return result;
 	}
 
+	private File getModelsFileFromEvaluationConfiguration() {
+		EvaluationConfigurationFromCommandLineOptionsAddingFileOption evaluationConfiguration =
+				(EvaluationConfigurationFromCommandLineOptionsAddingFileOption) evaluationConfigurationFromCommandLineOptions;
+		OptionSet optionSet = evaluationConfiguration.optionSet;
+		OptionSpec<File> praiseModelsFileOptionSpec = evaluationConfiguration.file;
+		File file = optionSet.valueOf(praiseModelsFileOptionSpec);
+		return file;
+	}
+
 	public static void main(String[] args) throws Exception {
-		EvaluationExecutableFromPRAiSEModelsFile evaluator = new EvaluationExecutableFromPRAiSEModelsFile();
-		evaluator.run(args);
+		try {
+			EvaluationApplication evaluator = new EvaluationApplication();
+			evaluator.run(args);
+		}
+		catch (Throwable e){
+			System.err.println(e);
+		}
 	}
 }

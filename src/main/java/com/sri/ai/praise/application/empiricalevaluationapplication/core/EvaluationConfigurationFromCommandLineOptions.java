@@ -17,9 +17,9 @@ import com.sri.ai.praise.probabilisticsolver.core.praise.PRAiSESolver;
 // TODO - consider using commons-configuration to evaluation input file reading, i.e:
 // https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
 
-public class EvaluationCommandLineOptions {
+public class EvaluationConfigurationFromCommandLineOptions extends EvaluationConfiguration {
 
-	public EvaluationConfiguration evaluationConfiguration;
+//	public EvaluationConfiguration evaluationConfiguration;
 
 	public OptionSet optionSet;
 
@@ -32,8 +32,8 @@ public class EvaluationCommandLineOptions {
 	public OptionSpec<Integer> numberRunsToAverageOver;
 	public OptionSpec<File> workingDirectory;
 
-	public EvaluationCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
-		evaluationConfiguration = new EvaluationConfiguration();
+	public EvaluationConfigurationFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
+		super();
 		setOptionsSetUsingDefaultEvaluationConfigurationAndCommandLineArguments(args);
 		overrideEvaluationConfigurationsFromOptionSet();
 	}
@@ -58,17 +58,17 @@ public class EvaluationCommandLineOptions {
 		totalCPURuntimeLimitSecondsPerSolveAttempt = parser
 				.accepts("c",
 						"Total CPU runtime limit seconds per solver attempt (defaults to "
-								+ evaluationConfiguration.getTotalCPURuntimeLimitSecondsPerSolveAttempt() + ").")
+								+ getTotalCPURuntimeLimitSecondsPerSolveAttempt() + ").")
 				.withRequiredArg().ofType(Integer.class);
 		totalMemoryLimitInMegabytesPerSolveAttempt = parser
 				.accepts("m",
 						"Total memory limit in MB per solver attempt (defaults to "
-								+ evaluationConfiguration.getTotalMemoryLimitInMegabytesPerSolveAttempt() + ").")
+								+ getTotalMemoryLimitInMegabytesPerSolveAttempt() + ").")
 				.withRequiredArg().ofType(Integer.class);
 		numberRunsToAverageOver = parser
 				.accepts("a",
 						"Number of runs to average each result over (defaults to "
-								+ evaluationConfiguration.getNumberOfRunsToAverageOver() + ").")
+								+ getNumberOfRunsToAverageOver() + ").")
 				.withRequiredArg().ofType(Integer.class);
 		parser.accepts("t",
 				"Translate models always, instead of caching them between runs (default behavior is caching)");
@@ -88,49 +88,45 @@ public class EvaluationCommandLineOptions {
 		}
 
 		
-		List<String> currentSolverImplementationClasses = new LinkedList<>(evaluationConfiguration.getSolverImplementationClassNames());
+		List<String> currentSolverImplementationClasses = new LinkedList<>(getSolverImplementationClassNames());
 		if (optionSet.has(solverImplementationClasses)) {
 			currentSolverImplementationClasses.addAll(optionSet.valuesOf(solverImplementationClasses));
 		} else {
 			currentSolverImplementationClasses.add(PRAiSESolver.class.getName());
 		}
-		evaluationConfiguration.setSolverImplementationClassNames(currentSolverImplementationClasses);
+		setSolverImplementationClassNames(currentSolverImplementationClasses);
 		
 		
 		if (optionSet.has(notificationFile)) {
-			evaluationConfiguration.setNotificationOut(new PrintStream(optionSet.valueOf(notificationFile)));
+			setNotificationOut(new PrintStream(optionSet.valueOf(notificationFile)));
 		}
 		
 		if (optionSet.has(resultFile)) {
-			evaluationConfiguration.setCSVOut(new PrintStream(optionSet.valueOf(resultFile)));
+			setCSVOut(new PrintStream(optionSet.valueOf(resultFile)));
 		}
 		
 		if (optionSet.has(totalCPURuntimeLimitSecondsPerSolveAttempt)) {
-			evaluationConfiguration.setTotalCPURuntimeLimitSecondsPerSolveAttempt(optionSet.valueOf(totalCPURuntimeLimitSecondsPerSolveAttempt));
+			setTotalCPURuntimeLimitSecondsPerSolveAttempt(optionSet.valueOf(totalCPURuntimeLimitSecondsPerSolveAttempt));
 		}
 		
 		if (optionSet.has(totalMemoryLimitInMegabytesPerSolveAttempt)) {
-			evaluationConfiguration.setTotalMemoryLimitInMegabytesPerSolveAttempt(optionSet.valueOf(totalMemoryLimitInMegabytesPerSolveAttempt));
+			setTotalMemoryLimitInMegabytesPerSolveAttempt(optionSet.valueOf(totalMemoryLimitInMegabytesPerSolveAttempt));
 		}
 		
 		if (optionSet.has(numberRunsToAverageOver)) {
-			evaluationConfiguration.setNumberOfRunsToAverageOver(optionSet.valueOf(numberRunsToAverageOver));
+			setNumberOfRunsToAverageOver(optionSet.valueOf(numberRunsToAverageOver));
 		}
 		
 		if (optionSet.has("t")) {
-			evaluationConfiguration.setDoesNotCacheTranslations(true);
+			setDoesNotCacheTranslations(true);
 		}
 
 		File workingDirectoryFile = optionSet.valueOf(workingDirectory);
 		if (workingDirectoryFile.isDirectory()) {
-			evaluationConfiguration.setWorkingDirectory(workingDirectoryFile);
+			setWorkingDirectory(workingDirectoryFile);
 		}
 		else {
 			throw new IllegalArgumentException("Working directory does not exist: " + workingDirectoryFile);
 		}
-	}
-
-	public EvaluationConfiguration getEvaluationConfiguration() {
-		return evaluationConfiguration;
 	}
 }
