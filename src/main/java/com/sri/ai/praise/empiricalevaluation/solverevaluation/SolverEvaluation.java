@@ -47,9 +47,10 @@ import com.sri.ai.praise.probabilisticsolver.core.SolverResult;
 import com.sri.ai.util.Util;
 
 /**
- * Class responsible for performing an evaluation of one or more solvers on a given problem set.
+ * The evaluation of a specific {@link Solver}.
  * 
- * @author oreilly, braz
+ * @author oreilly
+ * @author braz
  *
  */
 public class SolverEvaluation {	

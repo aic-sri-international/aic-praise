@@ -42,7 +42,15 @@ import com.sri.ai.praise.empiricalevaluation.Problem;
 import com.sri.ai.praise.probabilisticsolver.api.Solver;
 import com.sri.ai.praise.probabilisticsolver.core.SolverResult;
 
+/**
+ * The results of a {@link SolverEvaluation}.
+ * 
+ * @author oreilly
+ * @author braz
+ *
+ */
 public class SolverEvaluationResult {
+	
 	public Solver solver;
 	public Problem problem;
 	public Expression answer = null;

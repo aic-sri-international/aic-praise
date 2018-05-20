@@ -55,15 +55,14 @@ import com.sri.ai.praise.model.common.io.PagedModelContainer;
  */
 public abstract class AbstractEvaluationApplication {
 
-	protected EvaluationConfigurationFromCommandLineOptions evaluationConfigurationFromCommandLineOptions;
-	
 	/**
 	 * A method making a {@link PagedModelContainer} from evaluation arguments.
+	 * @param evaluationConfiguration TODO
 	 * 
 	 * @return
 	 * @throws IOException
 	 */
-	abstract protected PagedModelContainer getModelsContainer() throws IOException;
+	abstract protected PagedModelContainer getModelsContainer(EvaluationConfigurationFromCommandLineOptions evaluationConfiguration) throws IOException;
 
 	/**
 	 * Make a {@link EvaluationConfigurationFromCommandLineOptions} from command-line options.
@@ -82,20 +81,19 @@ public abstract class AbstractEvaluationApplication {
 	 * @throws Exception
 	 */
 	public void run(String[] args) throws Exception {
-		evaluationConfigurationFromCommandLineOptions = makeEvaluationConfigurationFromCommandLineOptions(args);
-		try (EvaluationConfiguration evaluationConfiguration = evaluationConfigurationFromCommandLineOptions) {
+		try (EvaluationConfigurationFromCommandLineOptions evaluationConfiguration = makeEvaluationConfigurationFromCommandLineOptions(args)) {
 			evaluate(evaluationConfiguration);
 		}
 	}
 
-	private void evaluate(EvaluationConfiguration evaluationConfiguration) throws IOException {
+	private void evaluate(EvaluationConfigurationFromCommandLineOptions evaluationConfiguration) throws IOException {
 		setModelsInEvaluationConfiguration(evaluationConfiguration);
 		Evaluation evaluation = new Evaluation(evaluationConfiguration);
 		evaluation.evaluate();
 	}
 
-	private void setModelsInEvaluationConfiguration(EvaluationConfiguration evaluationConfiguration) throws IOException {
-		PagedModelContainer modelsContainer = getModelsContainer();
+	private void setModelsInEvaluationConfiguration(EvaluationConfigurationFromCommandLineOptions evaluationConfiguration) throws IOException {
+		PagedModelContainer modelsContainer = getModelsContainer(evaluationConfiguration);
 		evaluationConfiguration.setModelsContainer(modelsContainer);
 	}
 }

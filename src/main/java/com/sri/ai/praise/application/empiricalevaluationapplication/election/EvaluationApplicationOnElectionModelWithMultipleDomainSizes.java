@@ -43,6 +43,7 @@ import static com.sri.ai.util.Util.mapIntoList;
 import java.io.IOException;
 
 import com.sri.ai.praise.application.empiricalevaluationapplication.core.AbstractEvaluationApplication;
+import com.sri.ai.praise.application.empiricalevaluationapplication.core.EvaluationConfigurationFromCommandLineOptions;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
@@ -57,7 +58,7 @@ import com.sri.ai.util.collect.IntegerIterator;
  */
 public class EvaluationApplicationOnElectionModelWithMultipleDomainSizes extends AbstractEvaluationApplication {
 	
-	protected PagedModelContainer getModelsContainer() throws IOException {
+	protected PagedModelContainer getModelsContainer(EvaluationConfigurationFromCommandLineOptions evaluationConfiguration) throws IOException {
 		return 
 				new PagedModelContainer(
 						"election", 

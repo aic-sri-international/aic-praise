@@ -52,9 +52,10 @@ import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.util.Util;
 
 /**
- * Class responsible for performing an evaluation of one or more solvers on a given problem set.
+ * Evaluation of one or more solvers on a given problem set.
  * 
- * @author oreilly, braz
+ * @author oreilly
+ * @author braz
  *
  */
 public class Evaluation {	

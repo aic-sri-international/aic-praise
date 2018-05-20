@@ -38,31 +38,36 @@
 package com.sri.ai.praise.empiricalevaluation;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 
-public class EvaluationConfiguration implements AutoCloseable {
+/**
+ * Configuration information for an {@link Evaluation}.
+ *
+ * @author braz
+ *
+ */
+public class EvaluationConfiguration {
 
 	private PagedModelContainer modelsContainer = null;
 	
 	private ProblemType type = ProblemType.PR;
 
-	private List<String> solverImplementationClassNames = new ArrayList<>(); // -s
+	private List<String> solverImplementationClassNames = new ArrayList<>();
 
-	private PrintStream notificationOut = System.out; // -n
-	private PrintStream resultOut = System.out; // -r
+	private PrintStream notificationOut = System.out;
+	private PrintStream resultOut = System.out;
 
-	private int totalCPURuntimeLimitSecondsPerSolveAttempt = 600; // -c
-	private int totalMemoryLimitInMegabytesPerSolveAttempt = 2048; // -m
-	private int numberOfRunsToAverageOver = 10; // -a
+	private int totalCPURuntimeLimitSecondsPerSolveAttempt = 600;
+	private int totalMemoryLimitInMegabytesPerSolveAttempt = 2048;
+	private int numberOfRunsToAverageOver = 10;
 
-	private boolean doesNotCacheTranslations = false; // -t
+	private boolean doesNotCacheTranslations = false;
 
-	private File workingDirectory; // -w
+	private File workingDirectory;
 	
 
 	public PagedModelContainer getModelsContainer() {
@@ -96,6 +101,15 @@ public class EvaluationConfiguration implements AutoCloseable {
 
 	public void setNotificationOut(PrintStream notificationOut) {
 		this.notificationOut = notificationOut;
+	}
+
+	
+	public PrintStream getResultOut() {
+		return resultOut;
+	}
+
+	public void setResultOut(PrintStream resultOut) {
+		this.resultOut = resultOut;
 	}
 
 	
@@ -150,18 +164,5 @@ public class EvaluationConfiguration implements AutoCloseable {
 
 	public void setWorkingDirectory(File workingDirectory) {
 		this.workingDirectory = workingDirectory;
-	}
-
-	
-	public void close() throws IOException {
-		notificationOut.flush();
-		resultOut.flush();
-		// Only close if not System.out
-		if (notificationOut != System.out) {
-			notificationOut.close();
-		}
-		if (resultOut != System.out) {
-			resultOut.close();
-		}
 	}
 }

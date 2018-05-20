@@ -48,9 +48,10 @@ import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluationRe
 import com.sri.ai.util.Util;
 
 /**
- * Class responsible for performing an evaluation of one or more solvers on a given problem set.
+ * A class for writing to a CSV (comma-separated values) file during evaluation.
  * 
- * @author oreilly, braz
+ * @author oreilly
+ * @author braz
  *
  */
 public class CSVWriter {	

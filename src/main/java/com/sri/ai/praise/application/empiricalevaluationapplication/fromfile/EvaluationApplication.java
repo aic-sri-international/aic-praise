@@ -62,16 +62,15 @@ public class EvaluationApplication extends AbstractEvaluationApplication {
 	protected EvaluationConfigurationFromCommandLineOptions makeEvaluationConfigurationFromCommandLineOptions(String args[]) throws FileNotFoundException, IOException {
 		return new EvaluationConfigurationFromCommandLineOptionsAddingFileOption(args);
 	}
-	
-	protected PagedModelContainer getModelsContainer() throws IOException {
-		File file = getModelsFileFromEvaluationConfiguration();
+
+	@Override
+	protected PagedModelContainer getModelsContainer(EvaluationConfigurationFromCommandLineOptions evaluationConfiguration) throws IOException {
+		File file = getModelsFileFromEvaluationConfiguration((EvaluationConfigurationFromCommandLineOptionsAddingFileOption) evaluationConfiguration);
 		PagedModelContainer result = new PagedModelContainer(file);
 		return result;
 	}
 
-	private File getModelsFileFromEvaluationConfiguration() {
-		EvaluationConfigurationFromCommandLineOptionsAddingFileOption evaluationConfiguration =
-				(EvaluationConfigurationFromCommandLineOptionsAddingFileOption) evaluationConfigurationFromCommandLineOptions;
+	private File getModelsFileFromEvaluationConfiguration(EvaluationConfigurationFromCommandLineOptionsAddingFileOption evaluationConfiguration) {
 		OptionSet optionSet = evaluationConfiguration.optionSet;
 		OptionSpec<File> praiseModelsFileOptionSpec = evaluationConfiguration.file;
 		File file = optionSet.valueOf(praiseModelsFileOptionSpec);

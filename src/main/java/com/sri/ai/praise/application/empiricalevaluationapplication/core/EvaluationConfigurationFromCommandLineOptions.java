@@ -7,19 +7,23 @@ import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
+import com.sri.ai.praise.probabilisticsolver.core.praise.PRAiSESolver;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
-import com.sri.ai.praise.probabilisticsolver.core.praise.PRAiSESolver;
-
 // TODO - consider using commons-configuration to evaluation input file reading, i.e:
 // https://commons.apache.org/proper/commons-configuration/userguide_v1.10/user_guide.html
 
-public class EvaluationConfigurationFromCommandLineOptions extends EvaluationConfiguration {
-
-//	public EvaluationConfiguration evaluationConfiguration;
+/**
+ * An {@link EvaluationConfiguration} initializaed from command line options.
+ * 
+ * @author braz
+ *
+ */
+public class EvaluationConfigurationFromCommandLineOptions extends EvaluationConfiguration implements AutoCloseable {
 
 	public OptionSet optionSet;
 
@@ -127,6 +131,20 @@ public class EvaluationConfigurationFromCommandLineOptions extends EvaluationCon
 		}
 		else {
 			throw new IllegalArgumentException("Working directory does not exist: " + workingDirectoryFile);
+		}
+	}
+
+	public void close() throws IOException {
+		closePrintStream(getNotificationOut());
+		closePrintStream(getResultOut());
+	}
+
+	private void closePrintStream(PrintStream printStream) {
+		if (printStream != null) {
+			printStream.flush();
+			if (printStream != System.out) {
+				printStream.close();
+			}
 		}
 	}
 }
