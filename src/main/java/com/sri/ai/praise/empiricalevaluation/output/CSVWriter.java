@@ -61,7 +61,7 @@ public class CSVWriter {
 	private PrintStream csvOut;
 
 	public CSVWriter(EvaluationConfiguration configuration) {
-		this.problemTypeName = configuration.getType().name();
+		this.problemTypeName = configuration.getProblemType().name();
 		this.numberOfRunsToAverageOver = configuration.getNumberOfRunsToAverageOver();
 		this.csvOut = configuration.getCSVOut();
 	}

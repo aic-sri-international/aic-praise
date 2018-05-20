@@ -60,28 +60,28 @@ import com.sri.ai.util.Util;
  */
 public class Evaluation {	
 	
-	private EvaluationConfiguration configuration;
+	private EvaluationConfiguration evaluationConfiguration;
 	private List<SolverEvaluation> solverEvaluations;
 
 	private Notifier notifier;
 	private CSVWriter csvWriter;
 	private String domainSizesOfCurrentModel;
 
-	public Evaluation(EvaluationConfiguration configuration) {
-		this.configuration = configuration;
-		this.notifier = new Notifier(configuration.getNotificationOut());
-		this.csvWriter = new CSVWriter(configuration);
-		this.solverEvaluations = mapIntoList(configuration.getSolverImplementationClassNames(), n -> makeSolverEvaluation(n));
+	public Evaluation(EvaluationConfiguration evaluationConfiguration) {
+		this.evaluationConfiguration = evaluationConfiguration;
+		this.notifier = new Notifier(evaluationConfiguration.getNotificationOut());
+		this.csvWriter = new CSVWriter(evaluationConfiguration);
+		this.solverEvaluations = mapIntoList(evaluationConfiguration.getSolverImplementationClassNames(), n -> makeSolverEvaluation(n));
 	}
 	
 	private SolverEvaluation makeSolverEvaluation(String solverImplementationClassName) {
-		SolverEvaluation solverEvaluation = new SolverEvaluation(solverImplementationClassName, notifier, csvWriter, configuration);
+		SolverEvaluation solverEvaluation = new SolverEvaluation(solverImplementationClassName, notifier, csvWriter, evaluationConfiguration);
 		return solverEvaluation;
 	}
 
 	public void evaluate() {
 	
-		checkType(configuration.getType());
+		checkType(evaluationConfiguration.getProblemType());
 		
 		long evaluationStart = System.currentTimeMillis();	
 		initialize();
@@ -98,22 +98,22 @@ public class Evaluation {
 
 	private void doInitialBurnInToEnsureOSCachingEtcOccurBeforeMeasuringPerformance() {
 		Problem problem = makeBurnInProblem();
-		notifier.notifyAboutBeginningOfBurnInForAllSolvers(configuration.getModelsContainer(), problem);
+		notifier.notifyAboutBeginningOfBurnInForAllSolvers(evaluationConfiguration.getModelsContainer(), problem);
 		for (SolverEvaluation solverEvaluation : solverEvaluations) {
 			solverEvaluation.performBurnIn(problem);
 		}
 	}
 
 	private Problem makeBurnInProblem() {
-		ModelPage burnInModel = configuration.getModelsContainer().getPages().get(0);
-		String    burnInQuery = burnInModel.getDefaultQueriesToRun().get(0); 
-		Problem problem = new Problem(burnInQuery, burnInModel);
+		ModelPage burnInModel = evaluationConfiguration.getModelsContainer().getPages().get(0);
+		String burnInQuery = burnInModel.getDefaultQueriesToRun().get(0); 
+		Problem problem = new Problem(evaluationConfiguration.getProblemType(), burnInQuery, burnInModel);
 		return problem;
 	}
 
 	private void evaluateAllModels() {
 		notifier.notify("Starting to generate Evaluation Report");
-		for (ModelPage model : configuration.getModelsContainer().getPages()) {
+		for (ModelPage model : evaluationConfiguration.getModelsContainer().getPages()) {
 			evaluateModel(model);
 		}
 	}
@@ -121,7 +121,7 @@ public class Evaluation {
 	private void evaluateModel(ModelPage model) {
 		domainSizesOfCurrentModel = getDomainSizes(model.getModelString());
 		for (String query : model.getDefaultQueriesToRun()) {
-			Problem problem = new Problem(query, model);
+			Problem problem = new Problem(evaluationConfiguration.getProblemType(), query, model);
 			evaluateProblem(problem);
 		}
 	}

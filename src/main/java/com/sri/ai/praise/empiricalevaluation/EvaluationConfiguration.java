@@ -54,7 +54,7 @@ public class EvaluationConfiguration {
 
 	private PagedModelContainer modelsContainer = null;
 	
-	private ProblemType type = ProblemType.PR;
+	private ProblemType problemType = ProblemType.PR;
 
 	private List<String> solverImplementationClassNames = new ArrayList<>();
 
@@ -78,12 +78,12 @@ public class EvaluationConfiguration {
 		this.modelsContainer = modelsContainer;
 	}
 
-	public ProblemType getType() {
-		return type;
+	public ProblemType getProblemType() {
+		return problemType;
 	}
 
-	public void setType(ProblemType type) {
-		this.type = type;
+	public void setProblemType(ProblemType type) {
+		this.problemType = type;
 	}
 
 	public List<String> getSolverImplementationClassNames() {

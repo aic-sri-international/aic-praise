@@ -39,16 +39,24 @@ package com.sri.ai.praise.empiricalevaluation;
 
 import com.sri.ai.praise.model.common.io.ModelPage;
 
+/**
+ * A problem solved by {@link Evaluation}.
+ * 
+ * @author braz
+ *
+ */
 public class Problem {
 	
+	public ProblemType problemType;
 	public String query;
 	public ModelPage model;
 	public String name;
 	
-	public Problem(String query, ModelPage model) {
+	public Problem(ProblemType problemType, String query, ModelPage model) {
 		super();
+		this.problemType = problemType;
 		this.query = query;
 		this.model = model;
-		this.name = model.getName() + " : " + query;
+		this.name = problemType + " on " + model.getName() + " : " + query;
 	}
 }

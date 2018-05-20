@@ -37,7 +37,12 @@
  */
 package com.sri.ai.praise.empiricalevaluation;
 
-// Based on http://www.hlt.utdallas.edu/~vgogate/uai14-competition/information.html
+/**
+ * An enumeration of problem types based on <a href=http://www.hlt.utdallas.edu/~vgogate/uai14-competition/information.html>the UAI 2014 competition</a>.
+ *
+ * @author braz
+ *
+ */
 public enum ProblemType {
 	PR,   // Computing the the partition function and probability of evidence
 	MAR,  // Computing the marginal probability distribution over variable(s) given evidence
