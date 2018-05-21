@@ -21,9 +21,9 @@ import com.sri.ai.praise.inference.generic.anytime.polytope.core.IntensionalConv
 import com.sri.ai.praise.inference.generic.anytime.polytope.core.Polytopes;
 import com.sri.ai.praise.inference.generic.anytime.polytope.core.ProductPolytope;
 import com.sri.ai.praise.inference.generic.anytime.polytope.core.Simplex;
-import com.sri.ai.praise.inference.generic.representation.Table.TableFactor;
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
+import com.sri.ai.praise.inference.generic.representation.table.TableFactor;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.computation.anytime.api.Approximation;

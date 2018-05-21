@@ -29,7 +29,7 @@ import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.grinder.theory.tuple.TupleTheory;
-import com.sri.ai.praise.inference.PRAiSEUtil;
+import com.sri.ai.praise.PRAiSEUtil;
 import com.sri.ai.praise.inference.generic.anytime.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.inference.generic.anytime.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.generic.exactbp.api.ExactBP;

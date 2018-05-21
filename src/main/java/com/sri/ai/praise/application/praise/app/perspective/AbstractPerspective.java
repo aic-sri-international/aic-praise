@@ -59,7 +59,7 @@ import com.google.common.io.Files;
 import com.sri.ai.praise.application.praise.app.FXUtil;
 import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
 import com.sri.ai.praise.application.praise.app.model.ExamplePages;
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.language.ModelLanguage;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.praise.model.common.io.PagedModelContainer;
 import com.sri.ai.util.base.Pair;

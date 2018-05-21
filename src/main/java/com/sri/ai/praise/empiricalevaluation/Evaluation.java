@@ -47,7 +47,7 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.empiricalevaluation.output.Notifier;
 import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluation;
-import com.sri.ai.praise.inference.HOGMFactorsAndTypes;
+import com.sri.ai.praise.inference.hogm.HOGMFactorsAndTypes;
 import com.sri.ai.praise.model.common.io.ModelPage;
 import com.sri.ai.util.Util;
 

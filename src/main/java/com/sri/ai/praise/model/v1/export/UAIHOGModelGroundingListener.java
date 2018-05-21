@@ -49,7 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.language.grounded.hogm.HOGModelGrounding;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;
 

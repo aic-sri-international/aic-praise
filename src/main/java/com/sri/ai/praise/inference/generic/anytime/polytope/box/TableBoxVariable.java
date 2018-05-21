@@ -1,6 +1,6 @@
 package com.sri.ai.praise.inference.generic.anytime.polytope.box;
 
-import com.sri.ai.praise.inference.generic.representation.Table.TableVariable;
+import com.sri.ai.praise.inference.generic.representation.table.TableVariable;
 
 public class TableBoxVariable extends TableVariable implements BoxVariable{
 

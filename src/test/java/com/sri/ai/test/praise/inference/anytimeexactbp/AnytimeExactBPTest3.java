@@ -18,11 +18,11 @@ import com.sri.ai.praise.inference.generic.anytime.polytope.api.Polytope;
 import com.sri.ai.praise.inference.generic.anytime.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.generic.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.generic.exactbp.core.ExactBPFromVariable;
-import com.sri.ai.praise.inference.generic.representation.Table.TableFactor;
-import com.sri.ai.praise.inference.generic.representation.Table.TableFactorNetwork;
-import com.sri.ai.praise.inference.generic.representation.Table.TableVariable;
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
+import com.sri.ai.praise.inference.generic.representation.table.TableFactor;
+import com.sri.ai.praise.inference.generic.representation.table.TableFactorNetwork;
+import com.sri.ai.praise.inference.generic.representation.table.TableVariable;
 import com.sri.ai.util.rplot.AEBPRPlotting;
 import com.sri.ai.util.rplot.dataframe.AEBPTestingDataFrame;
 /**

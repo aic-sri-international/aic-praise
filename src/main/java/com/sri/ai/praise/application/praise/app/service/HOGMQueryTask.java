@@ -42,8 +42,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.application.praise.app.PRAiSEController;
-import com.sri.ai.praise.inference.HOGMQueryResult;
-import com.sri.ai.praise.inference.HOGMQueryRunner;
+import com.sri.ai.praise.inference.hogm.HOGMQueryResult;
+import com.sri.ai.praise.inference.hogm.HOGMQueryRunner;
 import com.sri.ai.expresso.api.Expression;
 
 import javafx.concurrent.Task;

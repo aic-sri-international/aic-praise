@@ -44,8 +44,8 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.lang.grounded.bayes.ConditionalProbabilityTable;
-import com.sri.ai.praise.lang.grounded.transform.XFormMarkovToBayes;
+import com.sri.ai.praise.language.grounded.bayes.ConditionalProbabilityTable;
+import com.sri.ai.praise.language.grounded.markov.MarkovToBayes;
 
 /**
  * Utility class for generating a Hugin dot net bayesian network output file based on a general purpose 
@@ -55,7 +55,7 @@ import com.sri.ai.praise.lang.grounded.transform.XFormMarkovToBayes;
  *
  */
 @Beta
-public class HuginOutput implements XFormMarkovToBayes.BayesOutputListener {
+public class HuginOutput implements MarkovToBayes.BayesOutputListener {
 	private Writer writer;
 	private Map<Integer, String> varIdxToName;
 	private Map<Integer, List<String>> varIdxToRangeValues;
@@ -69,7 +69,7 @@ public class HuginOutput implements XFormMarkovToBayes.BayesOutputListener {
 	}
 	
 	//
-	// START-XFormMarkovToBayes.BayesOutputListener
+	// START-MarkovToBayes.BayesOutputListener
 	@Override
 	public void newCPT(ConditionalProbabilityTable cpt) {
 		StringJoiner sj = new StringJoiner("\n");
@@ -80,7 +80,7 @@ public class HuginOutput implements XFormMarkovToBayes.BayesOutputListener {
 		
 		output(sj.toString());
 	}
-	// END-XFormMarkovToBayes.BayesOutputListener
+	// END-MarkovToBayes.BayesOutputListener
 	//
 	
 	//

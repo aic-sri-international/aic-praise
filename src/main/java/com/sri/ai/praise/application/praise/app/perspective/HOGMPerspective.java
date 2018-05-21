@@ -52,7 +52,7 @@ import com.sri.ai.praise.application.praise.app.model.ElectionAsInIJCAI2016Paper
 import com.sri.ai.praise.application.praise.app.model.ExamplePages;
 import com.sri.ai.praise.application.praise.app.model.MontyHallProblem;
 import com.sri.ai.praise.application.praise.app.model.Position;
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.language.ModelLanguage;
 
 @Beta
 public class HOGMPerspective extends AbstractPerspective {

@@ -54,7 +54,7 @@ import java.util.stream.Stream;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.language.ModelLanguage;
 import com.sri.ai.util.base.Pair;
 
 /**

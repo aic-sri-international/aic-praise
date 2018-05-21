@@ -25,11 +25,11 @@ import com.sri.ai.praise.inference.generic.anytime.polytope.core.ProductPolytope
 import com.sri.ai.praise.inference.generic.anytime.polytope.core.Simplex;
 import com.sri.ai.praise.inference.generic.exactbp.api.ExactBP;
 import com.sri.ai.praise.inference.generic.exactbp.core.ExactBPFromVariable;
-import com.sri.ai.praise.inference.generic.representation.Table.TableFactor;
-import com.sri.ai.praise.inference.generic.representation.Table.TableFactorNetwork;
-import com.sri.ai.praise.inference.generic.representation.Table.TableVariable;
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
+import com.sri.ai.praise.inference.generic.representation.table.TableFactor;
+import com.sri.ai.praise.inference.generic.representation.table.TableFactorNetwork;
+import com.sri.ai.praise.inference.generic.representation.table.TableVariable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 import com.sri.ai.util.base.NullaryFunction;

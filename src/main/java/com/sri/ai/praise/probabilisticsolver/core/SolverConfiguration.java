@@ -39,7 +39,7 @@ package com.sri.ai.praise.probabilisticsolver.core;
 
 import java.io.File;
 
-import com.sri.ai.praise.lang.translate.TranslatorOptions;
+import com.sri.ai.praise.language.translate.TranslatorOptions;
 
 /**
  * EvaluationConfiguration information for a solver evaluator.

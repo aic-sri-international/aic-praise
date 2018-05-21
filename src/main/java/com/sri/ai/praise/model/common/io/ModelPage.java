@@ -44,7 +44,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.language.ModelLanguage;
 
 /**
  * ExpressionRepresentation of a FactorNetwork Page (i.e. a complete model) within a PagedModelContainer.
