@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.test.praise.inference;
+package com.sri.ai.test.praise.inference.hogm;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.getFirst;

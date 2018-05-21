@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.inference.anytimeexactbp;
+package com.sri.ai.test.praise.inference.generic.anytime.anytimeexactbp;
 
 import static com.sri.ai.expresso.helper.Expressions.TRUE;
 import static com.sri.ai.expresso.helper.Expressions.apply;

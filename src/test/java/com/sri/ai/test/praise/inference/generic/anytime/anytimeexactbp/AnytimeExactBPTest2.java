@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.inference.anytimeexactbp;
+package com.sri.ai.test.praise.inference.generic.anytime.anytimeexactbp;
 
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.list;
@@ -17,7 +17,6 @@ import java.util.List;
 import com.sri.ai.grinder.helper.AssignmentsIterator;
 import com.sri.ai.praise.inference.generic.anytime.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.inference.generic.anytime.gabrielstry.AEBP;
-import com.sri.ai.praise.inference.generic.anytime.gabrielstry.TestCases;
 import com.sri.ai.praise.inference.generic.anytime.polytope.api.Polytope;
 import com.sri.ai.praise.inference.generic.anytime.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.inference.generic.anytime.polytope.core.Polytopes;

@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.inference.representation.table;
+package com.sri.ai.test.praise.inference.generic.representation.table;
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.println;

@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.inference.anytimeexactbp.testcases;
+package com.sri.ai.test.praise.inference.generic.anytime.anytimeexactbp.testcases;
 
 import java.util.Collection;
 import java.util.Iterator;

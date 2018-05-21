@@ -48,8 +48,7 @@ public interface Solver {
 	
 	ModelLanguage getExpectedModelLanguage();
 	
-	default SolverResult solve(String solveRequestId, ModelLanguage modelLanguage, String model, String query) 
-		throws Exception {
+	default SolverResult solve(String solveRequestId, ModelLanguage modelLanguage, String model, String query) throws Exception {
 		throw new UnsupportedOperationException(getClass().getName() + " does not support solve probability evidence evaluations");
 	}
 }

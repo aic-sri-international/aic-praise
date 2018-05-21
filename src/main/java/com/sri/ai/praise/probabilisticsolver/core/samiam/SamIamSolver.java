@@ -46,7 +46,7 @@ import com.sri.ai.praise.probabilisticsolver.core.AbstractSolver;
  * 
  * @author oreilly
  */
-public class SamIamSolver  extends AbstractSolver {
+public class SamIamSolver extends AbstractSolver {
 	
 	@Override
 	public String getName() {
