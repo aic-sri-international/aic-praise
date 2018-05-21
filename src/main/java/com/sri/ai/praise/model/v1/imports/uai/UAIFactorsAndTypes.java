@@ -48,12 +48,12 @@ import java.util.Map;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
-import com.sri.ai.praise.inference.FactorsAndTypes;
+import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 
 @Beta
-public class UAIFactorsAndTypes implements FactorsAndTypes {
+public class UAIFactorsAndTypes implements ExpressionFactorsAndTypes {
 	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
 	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Collections.emptyMap(); // Not used for Graphical Networks
 	private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
@@ -77,7 +77,7 @@ public class UAIFactorsAndTypes implements FactorsAndTypes {
 	}
 	
 	//
-	// START-FactorsAndTypes
+	// START-ExpressionFactorsAndTypes
 	@Override
 	public List<Expression> getFactors() {
 		return factors;
@@ -107,6 +107,6 @@ public class UAIFactorsAndTypes implements FactorsAndTypes {
 	public Collection<Type> getAdditionalTypes() {
 		return additionalTypes;
 	}	
-	// END-FactorsAndTypes
+	// END-ExpressionFactorsAndTypes
 	//
 }

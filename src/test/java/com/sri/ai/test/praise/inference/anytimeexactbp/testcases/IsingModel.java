@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import com.sri.ai.praise.inference.representation.api.Factor;
+import com.sri.ai.praise.inference.generic.representation.api.Factor;
 
 public class IsingModel implements List<Factor> {
 

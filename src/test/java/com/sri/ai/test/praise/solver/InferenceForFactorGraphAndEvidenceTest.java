@@ -57,7 +57,7 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.inference.HOGMFactorsAndTypes;
 import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.util.Util;
 
@@ -351,7 +351,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		
 		InferenceForFactorGraphAndEvidence inferencer =
 				new InferenceForFactorGraphAndEvidence(
-						new ExpressionFactorsAndTypes(modelString),
+						new HOGMFactorsAndTypes(modelString),
 						isBayesianNetwork ,
 						evidence,
 						exploitFactorization,
@@ -398,7 +398,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 
 		InferenceForFactorGraphAndEvidence inferencer;
 		inferencer = new InferenceForFactorGraphAndEvidence(
-				new ExpressionFactorsAndTypes(factors, 
+				new HOGMFactorsAndTypes(factors, 
 						mapFromRandomVariableNameToTypeName,
 						mapFromNonUniquelyNamedConstantNameToTypeName,
 						mapFromUniquelyNamedConstantNameToTypeName,
@@ -1005,7 +1005,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		InferenceForFactorGraphAndEvidence inferencer;
 		Expression marginal;
 		inferencer = new InferenceForFactorGraphAndEvidence(
-				new ExpressionFactorsAndTypes(
+				new HOGMFactorsAndTypes(
 						factors,
 						mapFromRandomVariableNameToTypeName,
 						mapFromNonUniquelyNamedConstantNameToTypeName,
@@ -1077,7 +1077,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		InferenceForFactorGraphAndEvidence inferencer;
 		Expression simplification;
 		inferencer = new InferenceForFactorGraphAndEvidence(
-				new ExpressionFactorsAndTypes(
+				new HOGMFactorsAndTypes(
 						factors,
 						mapFromRandomVariableNameToTypeName,
 						mapFromNonUniquelyNamedConstantNameToTypeName,

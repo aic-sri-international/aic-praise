@@ -59,8 +59,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.praise.inference.HOGMFactorsAndTypes;
 import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.inference.FactorsAndTypes;
 import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 import com.sri.ai.util.base.BinaryFunction;
@@ -94,7 +94,7 @@ public class HOGModelGrounding {
 		void groundingComplete();
 	}
 	
-	public static void ground(FactorsAndTypes factorsAndTypes, List<Expression> evidence, Listener listener) {
+	public static void ground(ExpressionFactorsAndTypes factorsAndTypes, List<Expression> evidence, Listener listener) {
 		if (factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().size() > 0) {
 			throw new IllegalArgumentException("Constants cannot be grounded");
 		}
@@ -175,9 +175,9 @@ public class HOGModelGrounding {
 	 * @param newUniqueConstantToTypeMap
 	 * @return
 	 */
-	private static InferenceForFactorGraphAndEvidence makeInferencer(FactorsAndTypes factorsAndTypes, Map<String, String> newUniqueConstantToTypeMap) {
-		ExpressionFactorsAndTypes groundedFactorsAndTypesInformation = 
-				new ExpressionFactorsAndTypes(
+	private static InferenceForFactorGraphAndEvidence makeInferencer(ExpressionFactorsAndTypes factorsAndTypes, Map<String, String> newUniqueConstantToTypeMap) {
+		HOGMFactorsAndTypes groundedFactorsAndTypesInformation = 
+				new HOGMFactorsAndTypes(
 						Collections.emptyList(), // factors
 						factorsAndTypes.getMapFromRandomVariableNameToTypeName(),
 						factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName(),
@@ -272,7 +272,7 @@ public class HOGModelGrounding {
 	//
 	// PRIVATE
 	//
-	private static Map<Expression, Triple<Expression, Integer, List<Expression>>> createRandomVariableNameToTypeSizeAndUniqueConstantsMap(FactorsAndTypes factorsAndTypes) {
+	private static Map<Expression, Triple<Expression, Integer, List<Expression>>> createRandomVariableNameToTypeSizeAndUniqueConstantsMap(ExpressionFactorsAndTypes factorsAndTypes) {
 		Map<Expression, Triple<Expression, Integer, List<Expression>>> result = new LinkedHashMap<>();
 		factorsAndTypes.getMapFromRandomVariableNameToTypeName().entrySet().forEach(entry -> {
 			Expression       randomVariableName = Expressions.parse(entry.getKey());
@@ -304,7 +304,7 @@ public class HOGModelGrounding {
 		return result;
 	}
 	
-	private static Map<Expression, List<Expression>> createTypeToValuesMap(FactorsAndTypes factorsAndTypes, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeExpressionTypeSizeAndUniqueConstants) {
+	private static Map<Expression, List<Expression>> createTypeToValuesMap(ExpressionFactorsAndTypes factorsAndTypes, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeExpressionTypeSizeAndUniqueConstants) {
 		Map<Expression, List<Expression>> typeToValuesMap = new LinkedHashMap<>();
 		
 		randomVariableNameToTypeExpressionTypeSizeAndUniqueConstants.values().forEach(typeSizeAndUniqueConstants -> {

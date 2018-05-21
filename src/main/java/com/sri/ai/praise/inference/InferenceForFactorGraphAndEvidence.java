@@ -122,7 +122,7 @@ public class InferenceForFactorGraphAndEvidence {
 	 * @param optionalTheory the theory to be used; if null, a default one is used (as of May 2017, a compound theory with propositional, equalities on categorical types, difference arithmetic, and real linear arithmetic).
 	 */
 	public InferenceForFactorGraphAndEvidence(
-			FactorsAndTypes factorsAndTypes,
+			ExpressionFactorsAndTypes factorsAndTypes,
 			boolean isBayesianNetwork,
 			Expression evidence,
 			boolean useFactorization,

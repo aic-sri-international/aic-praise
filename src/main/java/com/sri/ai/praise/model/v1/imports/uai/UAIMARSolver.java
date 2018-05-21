@@ -75,7 +75,7 @@ import com.sri.ai.grinder.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.inference.FactorsAndTypes;
+import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.lang.grounded.common.FunctionTable;
 import com.sri.ai.praise.lang.grounded.common.GraphicalNetwork;
@@ -311,7 +311,7 @@ public class UAIMARSolver {
 				return false;
 			}
 			
-			FactorsAndTypes factorsAndTypes = new UAIFactorsAndTypes(tables, model);
+			ExpressionFactorsAndTypes factorsAndTypes = new UAIFactorsAndTypes(tables, model);
 
 			Expression evidenceExpr = null; 
 			List<Expression> conjuncts = new ArrayList<Expression>();

@@ -37,144 +37,34 @@
  */
 package com.sri.ai.praise.inference;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
-import com.sri.ai.expresso.type.IntegerInterval;
-import com.sri.ai.expresso.type.RealInterval;
-import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 
 @Beta
-public class ExpressionFactorsAndTypes implements FactorsAndTypes {
-
-	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
-	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
-	private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
-	private Map<String, String> mapFromCategoricalTypeNameToSizeString        = new LinkedHashMap<>();
-	private Collection<Type>    additionalTypes                               = new LinkedList<>();
-	private List<Expression>    factors                                       = new ArrayList<>(); 	
+/**
+ * A description of a graphical model in terms of expressions representing factors,
+ * random variables and their types, constants (both uniquely and non-uniquely named) and their types,
+ * and categorical types and their sizes.
+ * 
+ * @author oreilly
+ *
+ */
+public interface ExpressionFactorsAndTypes {
 	
-	public ExpressionFactorsAndTypes(String modelString) {
-		this(new HOGMParserWrapper().parseModel(modelString));
-	}
+	List<Expression> getFactors();
 	
-	public ExpressionFactorsAndTypes(ParsedHOGModel parsedModel) {
-		factors.addAll(parsedModel.getConditionedPotentials());
-		
-		parsedModel.getRandomVariableDeclarations().forEach(random -> {
-			mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.toTypeRepresentation());
-		});
-		
-		parsedModel.getConstatDeclarations().forEach(constant -> {
-			mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.toTypeRepresentation());
-		});
-		
-		parsedModel.getSortDeclarations().forEach(sortDeclaration -> {
-			sortDeclaration.getAssignedConstants().forEach(constant -> {
-				mapFromUniquelyNamedConstantNameToTypeName.put(constant.toString(), sortDeclaration.getName().toString());
-			});
-		});
-		
-		parsedModel.getSortDeclarations().forEach(sort -> {
-			if (!sort.getSize().equals(HOGMSortDeclaration.UNKNOWN_SIZE)) {
-				mapFromCategoricalTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
-			}
-		});
-		
-		Set<String> integerIntervalTypes = new LinkedHashSet<>();
-		parsedModel.getRandomVariableDeclarations().forEach(random -> {
-			integerIntervalTypes.addAll(random.getReferencedIntegerIntervalTypes());
-		});
-		parsedModel.getConstatDeclarations().forEach(constant -> {
-			integerIntervalTypes.addAll(constant.getReferencedIntegerIntervalTypes());
-		});
-		integerIntervalTypes.forEach(integerIntervalName -> additionalTypes.add(new IntegerInterval(integerIntervalName)));
-		
-		Set<String> realIntervalTypes = new LinkedHashSet<>();
-		parsedModel.getRandomVariableDeclarations().forEach(random -> {
-			realIntervalTypes.addAll(random.getReferencedRealIntervalTypes());
-		});
-		parsedModel.getConstatDeclarations().forEach(constant -> {
-			realIntervalTypes.addAll(constant.getReferencedRealIntervalTypes());
-		});
-		realIntervalTypes.forEach(realIntervalName -> additionalTypes.add(new RealInterval(realIntervalName)));
-	}
+	Map<String, String> getMapFromRandomVariableNameToTypeName();
 	
-	public ExpressionFactorsAndTypes(
-			List<Expression> factors,
-			Map<String, String> mapFromRandomVariableNameToTypeName,
-			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
-			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
-			Map<String, String> mapFromCategoricalTypeNameToSizeString,
-			Collection<Type> additionalTypes) {
-		
-		this.factors.addAll(factors);
-		this.mapFromRandomVariableNameToTypeName.putAll(mapFromRandomVariableNameToTypeName);
-		this.mapFromNonUniquelyNamedConstantNameToTypeName.putAll(mapFromNonUniquelyNamedConstantNameToTypeName);
-		this.mapFromUniquelyNamedConstantNameToTypeName.putAll(mapFromUniquelyNamedConstantNameToTypeName);
-		this.mapFromCategoricalTypeNameToSizeString.putAll(mapFromCategoricalTypeNameToSizeString);
-		this.additionalTypes = additionalTypes;
-	}
-				
+	Map<String, String> getMapFromNonUniquelyNamedConstantNameToTypeName();
 	
-	//
-	// START-FactorsAndTypes
-	@Override
-	public List<Expression> getFactors() {
-		return factors;
-	}
+	Map<String, String> getMapFromUniquelyNamedConstantNameToTypeName();
 	
-	@Override
-	public Map<String, String> getMapFromRandomVariableNameToTypeName() {
-		return mapFromRandomVariableNameToTypeName;
-	}
+	Map<String, String> getMapFromCategoricalTypeNameToSizeString();
 	
-	@Override
-	public Map<String, String> getMapFromNonUniquelyNamedConstantNameToTypeName() {
-		return mapFromNonUniquelyNamedConstantNameToTypeName;
-	}
-	
-	@Override
-	public Map<String, String> getMapFromUniquelyNamedConstantNameToTypeName() {
-		return mapFromUniquelyNamedConstantNameToTypeName;
-	}
-	
-	@Override
-	public Map<String, String> getMapFromCategoricalTypeNameToSizeString() {
-		return mapFromCategoricalTypeNameToSizeString;
-	}	
-
-	@Override
-	public Collection<Type> getAdditionalTypes() {
-		return additionalTypes;
-	}	
-
-	// END-FactorsAndTypes
-	//
-	
-	@Override
-	public String toString() {
-		StringJoiner sj = new StringJoiner("\n");
-		
-		sj.add("factors                                      ="+factors);
-		sj.add("mapFromRandomVariableNameToTypeName          ="+mapFromRandomVariableNameToTypeName);
-		sj.add("mapFromNonUniquelyNamedConstantNameToTypeName="+mapFromNonUniquelyNamedConstantNameToTypeName);
-		sj.add("mapFromUniquelyNamedConstantNameToTypeName   ="+mapFromUniquelyNamedConstantNameToTypeName);
-		sj.add("mapFromCategoricalTypeNameToSizeString       ="+mapFromCategoricalTypeNameToSizeString);
-		sj.add("additionalTypes                              ="+additionalTypes);
-		
-		return sj.toString();
-	}
+	Collection<Type> getAdditionalTypes();
 }

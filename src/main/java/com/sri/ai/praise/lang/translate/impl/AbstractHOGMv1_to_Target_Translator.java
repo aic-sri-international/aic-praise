@@ -45,8 +45,8 @@ import java.util.List;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.praise.inference.HOGMFactorsAndTypes;
 import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
-import com.sri.ai.praise.inference.FactorsAndTypes;
 import com.sri.ai.praise.lang.ModelLanguage;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
@@ -76,7 +76,7 @@ public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTransl
 		String hogmv1Model = Util.readAll(inputModelReaders[0]);
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
 		ParsedHOGModel    parsedModel     = parser.parseModel(hogmv1Model);
-		FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
+		ExpressionFactorsAndTypes   factorsAndTypes = new HOGMFactorsAndTypes(parsedModel);
 		
 		// Each additional input is treated as an evidence expression
 		List<Expression> evidence = new ArrayList<>();
@@ -89,5 +89,5 @@ public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTransl
 		translate(inputIdentifier, factorsAndTypes, evidence, translatedOutputs);
 	}
 	
-	protected abstract void translate(String identifier, FactorsAndTypes hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception;
+	protected abstract void translate(String identifier, ExpressionFactorsAndTypes hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception;
 }
