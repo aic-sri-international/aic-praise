@@ -165,4 +165,28 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Factor add(Factor another) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Factor multiplyByConstant(Number constant) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isZero() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Factor invert() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
