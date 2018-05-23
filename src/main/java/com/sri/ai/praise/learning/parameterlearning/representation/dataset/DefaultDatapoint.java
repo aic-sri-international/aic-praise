@@ -1,4 +1,4 @@
-package com.sri.ai.praise.learning.parameterlearning.representation.Dataset;
+package com.sri.ai.praise.learning.parameterlearning.representation.dataset;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.praise.learning.parameterlearning.Datapoint;
-import com.sri.ai.praise.learning.parameterlearning.Variable;
+import com.sri.ai.praise.inference.generic.representation.api.Variable;
 
 public class DefaultDatapoint implements Datapoint {
 	

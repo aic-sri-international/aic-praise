@@ -1,32 +1,33 @@
 package com.sri.ai.praise.learning.parameterlearning;
 
 import java.util.List;
+import com.sri.ai.praise.inference.generic.representation.api.Variable;
+import com.sri.ai.praise.inference.generic.representation.api.Factor;
 
-// Would be the equivalent of Factor
 public interface BayesianNode {
 	
-	public Variable getVariable();
+	public Variable getChild();
 	
 	public List<? extends Variable> getParents();
 	
-	// "Parameter" bellow is understood as the conditional probability P (thisNodeVariable = thisNodeValue | parents = parentsValues)
+	// "Parameter" bellow is understood as the conditional probability P (childVariable = childValue | parentsVariables = parentsValues)
 	
 	default public void setParametersGivenCompleteData(Dataset dataset) {
-		Variable nodeVariable = this.getVariable();
+		Variable childVariable = this.getChild();
 		List<? extends Variable> parentsVariables = this.getParents();
 		
-		this.setInitialCountsForAllPossibleNodeAndParentsAssignments();
+		this.setInitialCountsForAllPossibleChildAndParentsAssignments();
 		for(Datapoint datapoint : dataset.getDatapoints()) {
-			Object nodeValue = datapoint.getValueOfVariable(nodeVariable);
+			Object childValue = datapoint.getValueOfVariable(childVariable);
 			List<? extends Object> parentsValues = datapoint.getValueOfVariables(parentsVariables);
-			this.incrementCountForNodeAndParentsAssignment(nodeValue, parentsValues);
+			this.incrementCountForChildAndParentsAssignment(childValue, parentsValues);
 		}
 		this.normalizeParameters();
 	}
 	
-	public void setInitialCountsForAllPossibleNodeAndParentsAssignments();
+	public void setInitialCountsForAllPossibleChildAndParentsAssignments();
 	
-	public void incrementCountForNodeAndParentsAssignment(Object nodeValue, List<? extends Object> parentsValues);
+	public void incrementCountForChildAndParentsAssignment(Object childValue, List<? extends Object> parentsValues);
 	
 	public void normalizeParameters();
 	

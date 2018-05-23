@@ -1,4 +1,4 @@
-package com.sri.ai.praise.learning.parameterlearning.representation.Table;
+package com.sri.ai.praise.learning.parameterlearning.representation.table;
 
 import java.util.List;
 

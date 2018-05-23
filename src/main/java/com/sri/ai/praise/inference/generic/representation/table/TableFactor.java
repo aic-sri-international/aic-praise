@@ -2,6 +2,7 @@ package com.sri.ai.praise.inference.generic.representation.table;
 
 import static com.sri.ai.praise.inference.generic.representation.core.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
+import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.mapIntoArrayList;
@@ -28,7 +29,7 @@ import com.sri.ai.util.math.MixedRadixNumber;
  *
  */
 
-public class TableFactor implements Factor{
+public class TableFactor implements Factor {
 	ArrayList<TableVariable> listOfVariables;
 	ArrayList<Integer> listOfVariableCardinalities;
 	LinkedHashSet<TableVariable> setOfVariables;
@@ -36,10 +37,10 @@ public class TableFactor implements Factor{
 	ArrayList<Double> entries;
 	MixedRadixNumber entryIndex;
 	//
-	LinkedHashMap<TableVariable, Integer> mapFromVariableToItsIndexOnTheList;//TODO initialize	
+	LinkedHashMap<TableVariable, Integer> mapFromVariableToItsIndexOnTheList; // TODO initialize	
 	
-	public TableFactor(ArrayList<TableVariable> listOfVariables,ArrayList<Double> entries) {
-		this.listOfVariables =listOfVariables;
+	public TableFactor(ArrayList<TableVariable> listOfVariables, ArrayList<Double> entries) {
+		this.listOfVariables = listOfVariables;
 		this.setOfVariables = new LinkedHashSet<>(listOfVariables);
 		
 		this.mapFromVariableToItsIndexOnTheList = new LinkedHashMap<>();
@@ -53,13 +54,21 @@ public class TableFactor implements Factor{
 	}
 	
 	public TableFactor(ArrayList<TableVariable> listOfVariables) {
-		this(listOfVariables,arrayListFilledWith(-1., numEntries(listOfVariables)));
+		this(listOfVariables, -1.);
+	}
+	     
+	public TableFactor(ArrayList<TableVariable> listOfVariables, Double defaultValue) {
+		this(listOfVariables, arrayListFilledWith(defaultValue, numEntries(listOfVariables)));
+	}
+	
+	public void reinitializeEntries(Double defaultValue) {
+		this.entries = arrayListFilledWith(defaultValue, numEntries(listOfVariables));
 	}
 	
 	public static int numEntries(ArrayList<TableVariable> listOfVariables2) {
 		int result = 1;
-		for(TableVariable v:listOfVariables2) {
-			result*=v.getCardinality();
+		for(TableVariable v : listOfVariables2) {
+			result *= v.getCardinality();
 		}
 		return result;
 	}
@@ -69,6 +78,7 @@ public class TableFactor implements Factor{
 		boolean res = setOfVariables.contains(variable);
 		return res;
 	}
+	
 	@Override
 	public ArrayList<TableVariable> getVariables() {
 		return this.listOfVariables;
@@ -190,7 +200,7 @@ public class TableFactor implements Factor{
 			return null;
 		}
 
-		TableFactor anotherTable = (TableFactor)another;
+		TableFactor anotherTable = (TableFactor) another;
 		
 		ArrayList<TableVariable> newListOfVariables = new ArrayList<>(this.listOfVariables);
 		for(TableVariable v : anotherTable.getVariables()) {
@@ -199,7 +209,7 @@ public class TableFactor implements Factor{
 			}
 		}
 
-		Integer numberOfEntries= accumulate(mapIntoList(newListOfVariables, v->v.getCardinality()),
+		Integer numberOfEntries = accumulate(mapIntoList(newListOfVariables, v->v.getCardinality()),
 												(i,j)->i*j, 1);
 		ArrayList<Double> newEntries = new ArrayList<>(numberOfEntries);
 		for (int i = 0; i < numberOfEntries; i++) {
@@ -285,7 +295,7 @@ public class TableFactor implements Factor{
 	
 	
 	public static TableFactor copyToSubTableFactor(TableFactor factor,
-			List<TableVariable> variablesPredetermined,List<Integer> valuesPredetermined) {
+			List<TableVariable> variablesPredetermined, List<Integer> valuesPredetermined) {
 		
 		Map<TableVariable, Integer> mapOfvaluesPredetermined = Util.mapFromListOfKeysAndListOfValues(variablesPredetermined, valuesPredetermined);
 		TableFactor result = copyToSubTableFactorWithoutRecreatingANewMap(factor, mapOfvaluesPredetermined);

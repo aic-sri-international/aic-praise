@@ -1,4 +1,4 @@
-package com.sri.ai.praise.learning.parameterlearning.representation.Dataset;
+package com.sri.ai.praise.learning.parameterlearning.representation.dataset;
 
 import java.util.ArrayList;
 import java.util.List;

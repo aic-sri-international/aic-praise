@@ -6,11 +6,11 @@ import static com.sri.ai.util.Util.list;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sri.ai.praise.learning.parameterlearning.representation.Dataset.DefaultDatapoint;
-import com.sri.ai.praise.learning.parameterlearning.representation.Dataset.DefaultDataset;
-import com.sri.ai.praise.learning.parameterlearning.representation.Table.TableBayesianModel;
-import com.sri.ai.praise.learning.parameterlearning.representation.Table.TableBayesianNode;
-import com.sri.ai.praise.learning.parameterlearning.representation.Table.TableBayesianVariable;
+import com.sri.ai.praise.learning.parameterlearning.representation.dataset.DefaultDatapoint;
+import com.sri.ai.praise.learning.parameterlearning.representation.dataset.DefaultDataset;
+import com.sri.ai.praise.learning.parameterlearning.representation.table.TableBayesianModel;
+import com.sri.ai.praise.learning.parameterlearning.representation.table.TableBayesianNode;
+import com.sri.ai.praise.inference.generic.representation.table.TableVariable;
 
 // Would be the equivalent of FactorNetwork
 public interface BayesianModel {
@@ -26,10 +26,10 @@ public interface BayesianModel {
 
 	public static void main(String[] args) {
 		// Model
-		TableBayesianVariable sickVariable = new TableBayesianVariable("sick", 2);
-	    TableBayesianVariable sunVariable = new TableBayesianVariable("sun", 2);
+		TableVariable sickVariable = new TableVariable("sick", 2);
+		TableVariable sunVariable = new TableVariable("sun", 2);
 	    
-	    ArrayList<TableBayesianVariable> parentsOfSick = arrayList();
+	    ArrayList<TableVariable> parentsOfSick = arrayList();
 	    parentsOfSick.add(sunVariable);
 	    
 	    TableBayesianNode sickNode = new TableBayesianNode(sickVariable, parentsOfSick);
@@ -38,7 +38,7 @@ public interface BayesianModel {
 	    TableBayesianModel model = new TableBayesianModel(nodes);
 	    
 	    // Dataset
-	    List<TableBayesianVariable> variables = list(sickVariable);
+	    List<TableVariable> variables = list(sickVariable);
 	    List<Integer> variableValues = list(1);
 	    
 	    // With sun:
