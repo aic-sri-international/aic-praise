@@ -38,6 +38,7 @@
 package com.sri.ai.praise.inference.generic.representation.api;
 
 import static com.sri.ai.praise.inference.generic.representation.core.IdentityFactor.IDENTITY_FACTOR;
+import static com.sri.ai.praise.inference.generic.representation.core.ZeroFactor.ZERO_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
 
 import java.util.Collection;
@@ -58,6 +59,8 @@ public interface Factor{
 	
 	boolean isIdentity();
 	
+	boolean isZero();
+	
 	static Factor multiply(Iterator<? extends Factor> factors) {
 		Factor result = accumulate(factors, Factor::multiply, IDENTITY_FACTOR);
 		return result;
@@ -71,4 +74,28 @@ public interface Factor{
 	Double getEntryFor(Map<? extends Variable,? extends Object> variableInstantiations);
 	
 	Factor normalize();
+	
+	Factor add(Factor another);
+	
+	static Factor add(Iterator<? extends Factor> factors) {
+		Factor result = accumulate(factors, Factor::add, ZERO_FACTOR);
+		return result;
+	}
+
+	static Factor add(Collection<? extends Factor> factors) {
+		Factor result = add(factors.iterator());
+		return result;
+	}
+	
+	Factor multiplyByConstant(Number constant);
+	
+	Factor invert();
+	
+	static Factor invertIfNotNull(Factor factor) {
+		if(!factor.isZero()) {
+			return factor.invert();
+		}
+		return factor;
+	}
+	
 }
