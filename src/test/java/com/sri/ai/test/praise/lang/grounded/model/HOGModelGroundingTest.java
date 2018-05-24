@@ -49,7 +49,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
 import com.sri.ai.praise.inference.FactorsAndTypes;
-import com.sri.ai.praise.lang.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.language.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.base.Pair;

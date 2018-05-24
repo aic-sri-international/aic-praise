@@ -56,7 +56,7 @@ import com.sri.ai.grinder.application.Compilation;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
-import com.sri.ai.praise.lang.grounded.common.FunctionTable;
+import com.sri.ai.praise.language.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**

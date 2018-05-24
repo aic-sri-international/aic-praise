@@ -51,7 +51,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.application.praise.commandline.PRAiSE;
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.language.ModelLanguage;
 import com.sri.ai.praise.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.probabilisticsolver.core.AbstractSolver;
 import com.sri.ai.praise.probabilisticsolver.core.SolverResult;

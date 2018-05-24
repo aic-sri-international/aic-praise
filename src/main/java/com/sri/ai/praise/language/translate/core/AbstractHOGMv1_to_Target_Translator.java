@@ -35,61 +35,59 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.praise.app.perspective;
+package com.sri.ai.praise.language.translate.core;
 
-import java.util.Arrays;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 
-import javafx.fxml.FXMLLoader;
-
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.application.praise.app.FXUtil;
-import com.sri.ai.praise.application.praise.app.editor.HOGMPageEditorController;
-import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
-import com.sri.ai.praise.application.praise.app.model.EarthquakeBurglaryAlarm;
-import com.sri.ai.praise.application.praise.app.model.Election;
-import com.sri.ai.praise.application.praise.app.model.ElectionAsInIJCAI2016Paper;
-import com.sri.ai.praise.application.praise.app.model.ExamplePages;
-import com.sri.ai.praise.application.praise.app.model.MontyHallProblem;
-import com.sri.ai.praise.application.praise.app.model.Position;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.praise.inference.ExpressionFactorsAndTypes;
+import com.sri.ai.praise.inference.FactorsAndTypes;
 import com.sri.ai.praise.language.ModelLanguage;
+import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.util.Util;
 
+/**
+ * Abstract base class for HOGMv1->[some target] translations.
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
-public class HOGMPerspective extends AbstractPerspective {
-	
+public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTranslator {
 	//
-	// START-Perspective
+	// START-Translator
 	@Override
-	public List<ExamplePages> getExamples() {
-		return Arrays.asList(
-				new EarthquakeBurglaryAlarm(), 
-				new MontyHallProblem(),
-				new Election(), 
-				new ElectionAsInIJCAI2016Paper(),
-				new Position());
-	}
-	// END-Perspective
-	//
-	
-	@Override
-	protected ModelLanguage getModelLanguage() {
+	public ModelLanguage getSource() {
 		return ModelLanguage.HOGMv1;
 	}
+	// END-Translator
+	//
 	
 	@Override
-	protected ModelPageEditor create(String model, List<String> defaultQueries) {
-		ModelPageEditor result = null;
-		FXMLLoader      loader = HOGMPageEditorController.newLoader();
-		try {
-			loader.load();
-			result = loader.getController();
-			result.setPage(model, defaultQueries);
-		}
-		catch (Throwable t) {
-			FXUtil.exception(t);
+	protected void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
+		//
+		// 1. Get the HOGM FactorNetwork Definition and Parse It
+		String hogmv1Model = Util.readAll(inputModelReaders[0]);
+		HOGMParserWrapper parser          = new HOGMParserWrapper();
+		ParsedHOGModel    parsedModel     = parser.parseModel(hogmv1Model);
+		FactorsAndTypes   factorsAndTypes = new ExpressionFactorsAndTypes(parsedModel);
+		
+		// Each additional input is treated as an evidence expression
+		List<Expression> evidence = new ArrayList<>();
+		if (inputModelReaders.length > 1) {
+			for (int i = 1; i < inputModelReaders.length; i++) {
+				evidence.add(Expressions.parse(Util.readAll(inputModelReaders[i])));
+			}
 		}
 		
-		return result;
+		translate(inputIdentifier, factorsAndTypes, evidence, translatedOutputs);
 	}
 	
+	protected abstract void translate(String identifier, FactorsAndTypes hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception;
 }

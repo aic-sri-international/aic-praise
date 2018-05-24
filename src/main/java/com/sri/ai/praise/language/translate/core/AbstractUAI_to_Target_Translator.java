@@ -35,61 +35,68 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.praise.app.perspective;
+package com.sri.ai.praise.language.translate.core;
 
-import java.util.Arrays;
-import java.util.List;
-
-import javafx.fxml.FXMLLoader;
+import java.io.PrintWriter;
+import java.io.Reader;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.application.praise.app.FXUtil;
-import com.sri.ai.praise.application.praise.app.editor.HOGMPageEditorController;
-import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
-import com.sri.ai.praise.application.praise.app.model.EarthquakeBurglaryAlarm;
-import com.sri.ai.praise.application.praise.app.model.Election;
-import com.sri.ai.praise.application.praise.app.model.ElectionAsInIJCAI2016Paper;
-import com.sri.ai.praise.application.praise.app.model.ExamplePages;
-import com.sri.ai.praise.application.praise.app.model.MontyHallProblem;
-import com.sri.ai.praise.application.praise.app.model.Position;
 import com.sri.ai.praise.language.ModelLanguage;
+import com.sri.ai.praise.model.v1.imports.uai.UAIEvidenceReader;
+import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
+import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 
+/**
+ * Abstract base class for UAI->[some target] translations.
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
-public class HOGMPerspective extends AbstractPerspective {
+public abstract class AbstractUAI_to_Target_Translator extends AbstractTranslator {
+	public static final String[] INPUT_FILE_EXTENSIONS = new String[] {
+			ModelLanguage.UAI.getDefaultFileExtension(),
+			ModelLanguage.UAI.getDefaultFileExtension()+".evid"}; // The associated evidence file (must exist as expected by UAI propositional solvers)
 	
 	//
-	// START-Perspective
+	// START-Translator
 	@Override
-	public List<ExamplePages> getExamples() {
-		return Arrays.asList(
-				new EarthquakeBurglaryAlarm(), 
-				new MontyHallProblem(),
-				new Election(), 
-				new ElectionAsInIJCAI2016Paper(),
-				new Position());
-	}
-	// END-Perspective
-	//
-	
-	@Override
-	protected ModelLanguage getModelLanguage() {
-		return ModelLanguage.HOGMv1;
+	public ModelLanguage getSource() {
+		return ModelLanguage.UAI;
 	}
 	
 	@Override
-	protected ModelPageEditor create(String model, List<String> defaultQueries) {
-		ModelPageEditor result = null;
-		FXMLLoader      loader = HOGMPageEditorController.newLoader();
-		try {
-			loader.load();
-			result = loader.getController();
-			result.setPage(model, defaultQueries);
-		}
-		catch (Throwable t) {
-			FXUtil.exception(t);
-		}
+	public int getNumberOfInputs() {
+		return INPUT_FILE_EXTENSIONS.length;
+	}
+	
+	@Override
+	public String[] getInputFileExtensions() {
+		return INPUT_FILE_EXTENSIONS;
+	}		
+	// END-Translator
+	//
+	
+	@Override
+	protected void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
+		Reader uaiModelReader    = inputModelReaders[0];
+		Reader uaiEvidenceReader = inputModelReaders[1];
 		
-		return result;
+		//
+		// Instantiate the source UAI model
+		UAIModel uaiModel = UAIModelReader.read(uaiModelReader);
+		
+		//
+		// Read the corresponding evidence and merge into the model
+		// This is required as the UAI solvers all take the evidence
+		// when they are searching for solutions, so other solvers
+		// need to have this information contained in their models 
+		// as well.
+		UAIEvidenceReader.read(uaiEvidenceReader, uaiModel);
+		uaiModel.mergeEvidenceIntoModel();
+		
+		translate(inputIdentifier, uaiModel, translatedOutputs);
 	}
 	
+	protected abstract void translate(String inputIdentifier, UAIModel uaiModel, PrintWriter[] translatedOutputs) throws Exception;
 }

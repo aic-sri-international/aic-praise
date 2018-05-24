@@ -35,61 +35,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.praise.app.perspective;
+package com.sri.ai.praise.language.translate.util;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
 
-import javafx.fxml.FXMLLoader;
+import com.sri.ai.praise.language.translate.Translator;
 
-import com.google.common.annotations.Beta;
-import com.sri.ai.praise.application.praise.app.FXUtil;
-import com.sri.ai.praise.application.praise.app.editor.HOGMPageEditorController;
-import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
-import com.sri.ai.praise.application.praise.app.model.EarthquakeBurglaryAlarm;
-import com.sri.ai.praise.application.praise.app.model.Election;
-import com.sri.ai.praise.application.praise.app.model.ElectionAsInIJCAI2016Paper;
-import com.sri.ai.praise.application.praise.app.model.ExamplePages;
-import com.sri.ai.praise.application.praise.app.model.MontyHallProblem;
-import com.sri.ai.praise.application.praise.app.model.Position;
-import com.sri.ai.praise.language.ModelLanguage;
-
-@Beta
-public class HOGMPerspective extends AbstractPerspective {
+public class TranslatedOutputs implements AutoCloseable {
+	public PrintWriter[] writers;
 	
-	//
-	// START-Perspective
-	@Override
-	public List<ExamplePages> getExamples() {
-		return Arrays.asList(
-				new EarthquakeBurglaryAlarm(), 
-				new MontyHallProblem(),
-				new Election(), 
-				new ElectionAsInIJCAI2016Paper(),
-				new Position());
-	}
-	// END-Perspective
-	//
-	
-	@Override
-	protected ModelLanguage getModelLanguage() {
-		return ModelLanguage.HOGMv1;
-	}
-	
-	@Override
-	protected ModelPageEditor create(String model, List<String> defaultQueries) {
-		ModelPageEditor result = null;
-		FXMLLoader      loader = HOGMPageEditorController.newLoader();
-		try {
-			loader.load();
-			result = loader.getController();
-			result.setPage(model, defaultQueries);
-		}
-		catch (Throwable t) {
-			FXUtil.exception(t);
-		}
+	public TranslatedOutputs(Translator translator, File sourceModelFile, String sourceModelFileExtension) throws Exception {
+		writers = new PrintWriter[translator.getNumberOfOutputs()];
 		
-		return result;
+		String modelName = translator.getInputModelFileNameWithNoExtension(sourceModelFile);
+		File outputDir = new File(sourceModelFile.getParentFile().getParent(), translator.getTarget().getCode());
+		for (int i = 0; i < writers.length; i++) {
+			writers[i] = new PrintWriter(Files.newBufferedWriter(new File(outputDir, modelName+translator.getOutputFileExtensions()[i]).toPath(),
+										 						 translator.getTargetCharset()));
+		}
 	}
 	
+	@Override
+	public void close() throws IOException {
+		for (PrintWriter writer : writers) {
+			writer.flush();
+			writer.close();
+		}
+	}
 }

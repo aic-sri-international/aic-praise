@@ -2,12 +2,10 @@ package com.sri.ai.praise.inference.anytimeexactbp.polytope.box;
 
 import static com.sri.ai.praise.inference.anytimeexactbp.polytope.box.TableBoxVariable.TABLE_BOX_VARIABLE;
 import static com.sri.ai.praise.inference.representation.Table.TableFactor.getCartesianProduct;
-import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.println;
 
 import java.util.ArrayList;
 import java.util.Collections;

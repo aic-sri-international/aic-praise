@@ -35,61 +35,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.praise.app.perspective;
+package com.sri.ai.praise.language.translate.core;
 
-import java.util.Arrays;
 import java.util.List;
-
-import javafx.fxml.FXMLLoader;
+import java.util.StringJoiner;
+import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.application.praise.app.FXUtil;
-import com.sri.ai.praise.application.praise.app.editor.HOGMPageEditorController;
-import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
-import com.sri.ai.praise.application.praise.app.model.EarthquakeBurglaryAlarm;
-import com.sri.ai.praise.application.praise.app.model.Election;
-import com.sri.ai.praise.application.praise.app.model.ElectionAsInIJCAI2016Paper;
-import com.sri.ai.praise.application.praise.app.model.ExamplePages;
-import com.sri.ai.praise.application.praise.app.model.MontyHallProblem;
-import com.sri.ai.praise.application.praise.app.model.Position;
-import com.sri.ai.praise.language.ModelLanguage;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.language.grounded.common.FunctionTable;
+import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
+import com.sri.ai.praise.model.v1.imports.uai.UAIUtil;
 
+/**
+ * Translator: UAI->HOGMv1 using equalities
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
-public class HOGMPerspective extends AbstractPerspective {
-	
-	//
-	// START-Perspective
+public class UAI_to_HOGMv1_Using_Equalities_Translator extends AbstractUAI_to_HOGMv1_Translator {
+
 	@Override
-	public List<ExamplePages> getExamples() {
-		return Arrays.asList(
-				new EarthquakeBurglaryAlarm(), 
-				new MontyHallProblem(),
-				new Election(), 
-				new ElectionAsInIJCAI2016Paper(),
-				new Position());
-	}
-	// END-Perspective
-	//
-	
-	@Override
-	protected ModelLanguage getModelLanguage() {
-		return ModelLanguage.HOGMv1;
-	}
-	
-	@Override
-	protected ModelPageEditor create(String model, List<String> defaultQueries) {
-		ModelPageEditor result = null;
-		FXMLLoader      loader = HOGMPageEditorController.newLoader();
-		try {
-			loader.load();
-			result = loader.getController();
-			result.setPage(model, defaultQueries);
-		}
-		catch (Throwable t) {
-			FXUtil.exception(t);
-		}
+	public void addSortAndRandomVariableDeclarationsRegarding(int varIdx, int varCardinality, List<String> sorts, List<String> randoms) {
+		String varName     = UAIUtil.instanceVariableName(varIdx);
+		String varTypeName = UAIUtil.instanceTypeNameForVariable(varIdx, varCardinality);
 		
+		StringJoiner sortConstants = new StringJoiner(", ", ", ", ";");
+		final int innerVarIdx = varIdx;
+		IntStream.range(0, varCardinality).forEach(valIdx -> {
+			sortConstants.add(UAIUtil.instanceConstantValueForVariable(valIdx, innerVarIdx, varCardinality));
+		});
+		if (!HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(varTypeName)) {
+			sorts.add("sort "+varTypeName+": "+varCardinality+sortConstants.toString());
+		}
+		randoms.add("random "+varName+": "+varTypeName+";");
+	}
+
+	@Override
+	public Expression convertToHOGMv1Expression(FunctionTable table) {
+		Expression result = UAIUtil.constructGenericTableExpressionUsingEqualities(table);
 		return result;
 	}
-	
 }

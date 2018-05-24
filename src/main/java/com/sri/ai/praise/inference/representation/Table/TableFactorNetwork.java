@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 
 import com.sri.ai.praise.inference.gabrielstry.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.inference.gabrielstry.representation.core.AbstractEditableFactorNetwrok;
-import com.sri.ai.praise.lang.grounded.markov.FactorTable;
+import com.sri.ai.praise.language.grounded.markov.FactorTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.util.Util;
 /**

@@ -30,7 +30,7 @@ import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.inference.FactorsAndTypes;
 import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.lang.grounded.common.FunctionTable;
+import com.sri.ai.praise.language.grounded.common.FunctionTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIFactorsAndTypes;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;

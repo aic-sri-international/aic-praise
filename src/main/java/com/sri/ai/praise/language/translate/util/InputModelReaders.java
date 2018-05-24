@@ -35,61 +35,31 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.praise.app.perspective;
+package com.sri.ai.praise.language.translate.util;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
 
-import javafx.fxml.FXMLLoader;
+import com.sri.ai.praise.language.translate.Translator;
 
-import com.google.common.annotations.Beta;
-import com.sri.ai.praise.application.praise.app.FXUtil;
-import com.sri.ai.praise.application.praise.app.editor.HOGMPageEditorController;
-import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
-import com.sri.ai.praise.application.praise.app.model.EarthquakeBurglaryAlarm;
-import com.sri.ai.praise.application.praise.app.model.Election;
-import com.sri.ai.praise.application.praise.app.model.ElectionAsInIJCAI2016Paper;
-import com.sri.ai.praise.application.praise.app.model.ExamplePages;
-import com.sri.ai.praise.application.praise.app.model.MontyHallProblem;
-import com.sri.ai.praise.application.praise.app.model.Position;
-import com.sri.ai.praise.language.ModelLanguage;
-
-@Beta
-public class HOGMPerspective extends AbstractPerspective {
+public class InputModelReaders implements AutoCloseable {
+	public Reader[] readers;
 	
-	//
-	// START-Perspective
-	@Override
-	public List<ExamplePages> getExamples() {
-		return Arrays.asList(
-				new EarthquakeBurglaryAlarm(), 
-				new MontyHallProblem(),
-				new Election(), 
-				new ElectionAsInIJCAI2016Paper(),
-				new Position());
-	}
-	// END-Perspective
-	//
-	
-	@Override
-	protected ModelLanguage getModelLanguage() {
-		return ModelLanguage.HOGMv1;
-	}
-	
-	@Override
-	protected ModelPageEditor create(String model, List<String> defaultQueries) {
-		ModelPageEditor result = null;
-		FXMLLoader      loader = HOGMPageEditorController.newLoader();
-		try {
-			loader.load();
-			result = loader.getController();
-			result.setPage(model, defaultQueries);
+	public InputModelReaders(Translator translator, File sourceModelFile, String sourceModelFileExtension) throws Exception {
+		readers = new Reader[translator.getNumberOfInputs()];
+		String modelName = translator.getInputModelFileNameWithNoExtension(sourceModelFile);
+		for (int i = 0; i < readers.length; i++) {
+			readers[i] = Files.newBufferedReader(new File(sourceModelFile.getParent(), modelName+translator.getInputFileExtensions()[i]).toPath(), 
+													translator.getSourceCharset());
 		}
-		catch (Throwable t) {
-			FXUtil.exception(t);
-		}
+	}
 		
-		return result;
+	@Override
+	public void close() throws IOException {
+		for (Reader r : readers) {
+			r.close();
+		}
 	}
-	
 }

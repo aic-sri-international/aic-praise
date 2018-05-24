@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.probabilisticsolver.api;
 
-import com.sri.ai.praise.lang.ModelLanguage;
+import com.sri.ai.praise.language.ModelLanguage;
 import com.sri.ai.praise.probabilisticsolver.core.SolverConfiguration;
 import com.sri.ai.praise.probabilisticsolver.core.SolverResult;
 

@@ -35,61 +35,50 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.application.praise.app.perspective;
+package com.sri.ai.praise.language.translate.core;
 
-import java.util.Arrays;
+import java.io.PrintWriter;
 import java.util.List;
 
-import javafx.fxml.FXMLLoader;
-
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.application.praise.app.FXUtil;
-import com.sri.ai.praise.application.praise.app.editor.HOGMPageEditorController;
-import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
-import com.sri.ai.praise.application.praise.app.model.EarthquakeBurglaryAlarm;
-import com.sri.ai.praise.application.praise.app.model.Election;
-import com.sri.ai.praise.application.praise.app.model.ElectionAsInIJCAI2016Paper;
-import com.sri.ai.praise.application.praise.app.model.ExamplePages;
-import com.sri.ai.praise.application.praise.app.model.MontyHallProblem;
-import com.sri.ai.praise.application.praise.app.model.Position;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.inference.FactorsAndTypes;
 import com.sri.ai.praise.language.ModelLanguage;
+import com.sri.ai.praise.language.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.model.v1.export.UAIHOGModelGroundingListener;
 
+/**
+ * Translator: HOGMv1->UAI
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
-public class HOGMPerspective extends AbstractPerspective {
-	
+public class HOGMv1_to_UAI_Translator extends AbstractHOGMv1_to_Target_Translator {
+	private static final String[] _outputFileExtensions = AbstractUAI_to_Target_Translator.INPUT_FILE_EXTENSIONS;
 	//
-	// START-Perspective
-	@Override
-	public List<ExamplePages> getExamples() {
-		return Arrays.asList(
-				new EarthquakeBurglaryAlarm(), 
-				new MontyHallProblem(),
-				new Election(), 
-				new ElectionAsInIJCAI2016Paper(),
-				new Position());
+	// START-Translator	
+	@Override 
+	public ModelLanguage getTarget() {
+		return ModelLanguage.UAI;
 	}
-	// END-Perspective
+	
+	@Override
+	public int getNumberOfOutputs() {
+		return _outputFileExtensions.length;
+	}
+	
+	@Override
+	public String[] getOutputFileExtensions() {
+		return _outputFileExtensions;
+	}
+	// END-Translator
 	//
 	
 	@Override
-	protected ModelLanguage getModelLanguage() {
-		return ModelLanguage.HOGMv1;
+	protected void translate(String identifier, FactorsAndTypes hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
+		//
+		// Ground out the HOGM FactorNetwork and translate it to the UAI model format
+		HOGModelGrounding.ground(hogmv1FactorsAndTypes, evidence, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
 	}
-	
-	@Override
-	protected ModelPageEditor create(String model, List<String> defaultQueries) {
-		ModelPageEditor result = null;
-		FXMLLoader      loader = HOGMPageEditorController.newLoader();
-		try {
-			loader.load();
-			result = loader.getController();
-			result.setPage(model, defaultQueries);
-		}
-		catch (Throwable t) {
-			FXUtil.exception(t);
-		}
-		
-		return result;
-	}
-	
 }
