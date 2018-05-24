@@ -46,7 +46,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 
 @Beta
-public interface FactorsAndTypes {
+public interface ExpressionBasedModel {
 	List<Expression> getFactors();
 	
 	Map<String, String> getMapFromRandomVariableNameToTypeName();

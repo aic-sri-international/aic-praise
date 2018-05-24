@@ -42,7 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.FactorsAndTypes;
+import com.sri.ai.praise.inference.ExpressionBasedModel;
 import com.sri.ai.praise.language.ModelLanguage;
 import com.sri.ai.praise.language.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.model.v1.export.UAIHOGModelGroundingListener;
@@ -76,7 +76,7 @@ public class HOGMv1_to_UAI_Translator extends AbstractHOGMv1_to_Target_Translato
 	//
 	
 	@Override
-	protected void translate(String identifier, FactorsAndTypes hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
+	protected void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
 		//
 		// Ground out the HOGM FactorNetwork and translate it to the UAI model format
 		HOGModelGrounding.ground(hogmv1FactorsAndTypes, evidence, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));

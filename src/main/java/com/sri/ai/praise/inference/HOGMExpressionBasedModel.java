@@ -57,7 +57,7 @@ import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 
 @Beta
-public class ExpressionFactorsAndTypes implements FactorsAndTypes {
+public class HOGMExpressionBasedModel implements ExpressionBasedModel {
 
 	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
 	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
@@ -66,11 +66,11 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 	private Collection<Type>    additionalTypes                               = new LinkedList<>();
 	private List<Expression>    factors                                       = new ArrayList<>(); 	
 	
-	public ExpressionFactorsAndTypes(String modelString) {
+	public HOGMExpressionBasedModel(String modelString) {
 		this(new HOGMParserWrapper().parseModel(modelString));
 	}
 	
-	public ExpressionFactorsAndTypes(ParsedHOGModel parsedModel) {
+	public HOGMExpressionBasedModel(ParsedHOGModel parsedModel) {
 		factors.addAll(parsedModel.getConditionedPotentials());
 		
 		parsedModel.getRandomVariableDeclarations().forEach(random -> {
@@ -112,7 +112,7 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 		realIntervalTypes.forEach(realIntervalName -> additionalTypes.add(new RealInterval(realIntervalName)));
 	}
 	
-	public ExpressionFactorsAndTypes(
+	public HOGMExpressionBasedModel(
 			List<Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
@@ -130,7 +130,7 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 				
 	
 	//
-	// START-FactorsAndTypes
+	// START-ExpressionBasedModel
 	@Override
 	public List<Expression> getFactors() {
 		return factors;
@@ -161,7 +161,7 @@ public class ExpressionFactorsAndTypes implements FactorsAndTypes {
 		return additionalTypes;
 	}	
 
-	// END-FactorsAndTypes
+	// END-ExpressionBasedModel
 	//
 	
 	@Override

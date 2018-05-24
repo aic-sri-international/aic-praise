@@ -48,12 +48,12 @@ import java.util.Map;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
-import com.sri.ai.praise.inference.FactorsAndTypes;
+import com.sri.ai.praise.inference.ExpressionBasedModel;
 import com.sri.ai.praise.language.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 
 @Beta
-public class UAIFactorsAndTypes implements FactorsAndTypes {
+public class UAIExpressionBasedModel implements ExpressionBasedModel {
 	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
 	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Collections.emptyMap(); // Not used for Graphical Networks
 	private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
@@ -61,7 +61,7 @@ public class UAIFactorsAndTypes implements FactorsAndTypes {
 	private Collection<Type>    additionalTypes                               = new LinkedList<>();
 	private List<Expression>    factors                                       = new ArrayList<>(); 
 	
-	public UAIFactorsAndTypes(List<Expression> tables, GraphicalNetwork network) {
+	public UAIExpressionBasedModel(List<Expression> tables, GraphicalNetwork network) {
 		factors.addAll(tables);
 		for (int varIdx = 0; varIdx < network.numberVariables(); varIdx++) {
 			int varCardinality = network.cardinality(varIdx);
@@ -77,7 +77,7 @@ public class UAIFactorsAndTypes implements FactorsAndTypes {
 	}
 	
 	//
-	// START-FactorsAndTypes
+	// START-ExpressionBasedModel
 	@Override
 	public List<Expression> getFactors() {
 		return factors;
@@ -107,6 +107,6 @@ public class UAIFactorsAndTypes implements FactorsAndTypes {
 	public Collection<Type> getAdditionalTypes() {
 		return additionalTypes;
 	}	
-	// END-FactorsAndTypes
+	// END-ExpressionBasedModel
 	//
 }

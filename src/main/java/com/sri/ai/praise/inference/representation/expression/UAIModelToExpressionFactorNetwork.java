@@ -28,10 +28,10 @@ import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.inference.FactorsAndTypes;
+import com.sri.ai.praise.inference.ExpressionBasedModel;
 import com.sri.ai.praise.inference.representation.api.Factor;
 import com.sri.ai.praise.language.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.v1.imports.uai.UAIFactorsAndTypes;
+import com.sri.ai.praise.model.v1.imports.uai.UAIExpressionBasedModel;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 import com.sri.ai.util.base.IdentityWrapper;
@@ -55,7 +55,7 @@ public class UAIModelToExpressionFactorNetwork {
 		}
 		
 		//Add variables in the factors to the context...
-		FactorsAndTypes factorsAndTypes = new UAIFactorsAndTypes(factorsRepresentedAsExpressions, uaiModel);
+		ExpressionBasedModel factorsAndTypes = new UAIExpressionBasedModel(factorsRepresentedAsExpressions, uaiModel);
 		//Context 
 		Context context = fillingContext(theory, factorsAndTypes);
 		
@@ -63,7 +63,7 @@ public class UAIModelToExpressionFactorNetwork {
 		return result;
 	}
 
-	private static Context fillingContext(Theory theory, FactorsAndTypes factorsAndTypes) {
+	private static Context fillingContext(Theory theory, ExpressionBasedModel factorsAndTypes) {
 		LinkedHashMap<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>(factorsAndTypes.getMapFromRandomVariableNameToTypeName());
 		
 		Map<String, String> mapFromSymbolNameToTypeName= new LinkedHashMap<>(mapFromRandomVariableNameToTypeName);
