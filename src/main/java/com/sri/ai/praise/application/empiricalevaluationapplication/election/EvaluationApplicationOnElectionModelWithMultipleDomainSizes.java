@@ -45,8 +45,8 @@ import java.io.IOException;
 import com.sri.ai.praise.application.empiricalevaluationapplication.core.AbstractEvaluationApplication;
 import com.sri.ai.praise.application.empiricalevaluationapplication.core.EvaluationConfigurationFromCommandLineOptions;
 import com.sri.ai.praise.lang.ModelLanguage;
-import com.sri.ai.praise.model.common.io.ModelPage;
-import com.sri.ai.praise.model.common.io.PagedModelContainer;
+import com.sri.ai.praise.modelscontainer.ModelPage;
+import com.sri.ai.praise.modelscontainer.PagedModelContainer;
 import com.sri.ai.util.collect.IntegerIterator;
 
 

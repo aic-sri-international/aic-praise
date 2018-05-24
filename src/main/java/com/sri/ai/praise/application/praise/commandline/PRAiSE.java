@@ -51,7 +51,7 @@ import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.praise.inference.HOGMQueryError;
 import com.sri.ai.praise.inference.HOGMQueryResult;
 import com.sri.ai.praise.inference.HOGMQueryRunner;
-import com.sri.ai.praise.model.common.io.ModelPage;
+import com.sri.ai.praise.modelscontainer.ModelPage;
 import com.sri.ai.praise.probabilisticsolver.core.praise.PRAiSESolver;
 
 /**

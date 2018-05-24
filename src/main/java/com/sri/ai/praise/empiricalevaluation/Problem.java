@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.empiricalevaluation;
 
-import com.sri.ai.praise.model.common.io.ModelPage;
+import com.sri.ai.praise.modelscontainer.ModelPage;
 
 /**
  * A problem solved by {@link Evaluation}.

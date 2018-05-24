@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.application.praise.commandline;
 
-import static com.sri.ai.praise.model.common.io.PagedModelContainer.getModelPagesFromURI;
+import static com.sri.ai.praise.modelscontainer.PagedModelContainer.getModelPagesFromURI;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirstNonNullResultOrNull;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
@@ -66,8 +66,8 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.lang.ModelLanguage;
-import com.sri.ai.praise.model.common.io.ModelPage;
-import com.sri.ai.praise.model.common.io.PagedModelContainer;
+import com.sri.ai.praise.modelscontainer.ModelPage;
+import com.sri.ai.praise.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.probabilisticsolver.core.praise.PRAiSESolver;
 import com.sri.ai.util.Util;
 

@@ -42,8 +42,8 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.application.praise.app.FXUtil;
-import com.sri.ai.praise.model.common.io.ModelPage;
-import com.sri.ai.praise.model.common.io.PagedModelContainer;
+import com.sri.ai.praise.modelscontainer.ModelPage;
+import com.sri.ai.praise.modelscontainer.PagedModelContainer;
 
 /**
  * Simple utility for getting example model pages for the UI, with default handling of exceptions in place.

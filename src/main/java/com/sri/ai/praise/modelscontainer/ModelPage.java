@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.model.common.io;
+package com.sri.ai.praise.modelscontainer;
 
 import static com.sri.ai.util.Util.unionArrayList;
 

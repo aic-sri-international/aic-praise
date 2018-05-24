@@ -42,7 +42,7 @@ import java.io.IOException;
 
 import com.sri.ai.praise.empiricalevaluation.Evaluation;
 import com.sri.ai.praise.empiricalevaluation.EvaluationConfiguration;
-import com.sri.ai.praise.model.common.io.PagedModelContainer;
+import com.sri.ai.praise.modelscontainer.PagedModelContainer;
 
 /**
  * An abstract class for Java applications 

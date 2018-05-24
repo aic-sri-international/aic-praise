@@ -43,7 +43,7 @@ import java.io.PrintStream;
 
 import com.sri.ai.praise.empiricalevaluation.Problem;
 import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluationResult;
-import com.sri.ai.praise.model.common.io.PagedModelContainer;
+import com.sri.ai.praise.modelscontainer.PagedModelContainer;
 
 /**
  * A class encapsulating evaluation notification messages.

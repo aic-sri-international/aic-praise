@@ -43,7 +43,7 @@ import java.io.IOException;
 
 import com.sri.ai.praise.application.empiricalevaluationapplication.core.AbstractEvaluationApplication;
 import com.sri.ai.praise.application.empiricalevaluationapplication.core.EvaluationConfigurationFromCommandLineOptions;
-import com.sri.ai.praise.model.common.io.PagedModelContainer;
+import com.sri.ai.praise.modelscontainer.PagedModelContainer;
 
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
