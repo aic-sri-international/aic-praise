@@ -45,7 +45,7 @@ import java.util.List;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.praise.inference.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.DefaultExpressionBasedModel;
 import com.sri.ai.praise.inference.ExpressionBasedModel;
 import com.sri.ai.praise.language.ModelLanguage;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
@@ -76,7 +76,7 @@ public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTransl
 		String hogmv1Model = Util.readAll(inputModelReaders[0]);
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
 		ParsedHOGModel    parsedModel     = parser.parseModel(hogmv1Model);
-		ExpressionBasedModel   factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
+		ExpressionBasedModel   factorsAndTypes = new DefaultExpressionBasedModel(parsedModel);
 		
 		// Each additional input is treated as an evidence expression
 		List<Expression> evidence = new ArrayList<>();

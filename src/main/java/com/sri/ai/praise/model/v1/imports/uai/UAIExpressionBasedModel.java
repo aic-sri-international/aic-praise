@@ -48,65 +48,51 @@ import java.util.Map;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
-import com.sri.ai.praise.inference.ExpressionBasedModel;
+import com.sri.ai.praise.inference.DefaultExpressionBasedModel;
 import com.sri.ai.praise.language.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 
 @Beta
-public class UAIExpressionBasedModel implements ExpressionBasedModel {
-	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
-	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Collections.emptyMap(); // Not used for Graphical Networks
-	private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
-	private Map<String, String> mapFromCategoricalTypeNameToSizeString        = new LinkedHashMap<>();
-	private Collection<Type>    additionalTypes                               = new LinkedList<>();
-	private List<Expression>    factors                                       = new ArrayList<>(); 
-	
+public class UAIExpressionBasedModel extends DefaultExpressionBasedModel {
+
 	public UAIExpressionBasedModel(List<Expression> tables, GraphicalNetwork network) {
-		factors.addAll(tables);
+		this(makeParameters(tables, network));
+	}
+
+	private static class Parameters {
+		private List<Expression>    factors                                       = new ArrayList<>(); 
+		private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
+		private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Collections.emptyMap(); // Not used for Graphical Networks
+		private Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
+		private Map<String, String> mapFromCategoricalTypeNameToSizeString        = new LinkedHashMap<>();
+		private Collection<Type>    additionalTypes                               = new LinkedList<>();
+	}
+
+	private UAIExpressionBasedModel(Parameters parameters) {
+		super(
+				parameters.factors, 
+				parameters.mapFromRandomVariableNameToTypeName,
+				parameters.mapFromNonUniquelyNamedConstantNameToTypeName,
+				parameters.mapFromUniquelyNamedConstantNameToTypeName,
+				parameters.mapFromCategoricalTypeNameToSizeString,
+				parameters.additionalTypes
+				);
+	}
+
+	private static Parameters makeParameters(List<Expression> tables, GraphicalNetwork network) {
+		Parameters parameters = new Parameters();
+		parameters.factors.addAll(tables);
 		for (int varIdx = 0; varIdx < network.numberVariables(); varIdx++) {
 			int varCardinality = network.cardinality(varIdx);
 			String varTypeName = UAIUtil.instanceTypeNameForVariable(varIdx, varCardinality);
-			mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(varIdx), varTypeName);
+			parameters.mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(varIdx), varTypeName);
 			if (!varTypeName.equals(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().toString())) {
 				for (int valIdx = 0; valIdx < varCardinality; valIdx++) {
-					mapFromUniquelyNamedConstantNameToTypeName.put(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, varCardinality), varTypeName);
+					parameters.mapFromUniquelyNamedConstantNameToTypeName.put(UAIUtil.instanceConstantValueForVariable(valIdx, varIdx, varCardinality), varTypeName);
 				}
 			}
-			mapFromCategoricalTypeNameToSizeString.put(varTypeName, Integer.toString(varCardinality));
+			parameters.mapFromCategoricalTypeNameToSizeString.put(varTypeName, Integer.toString(varCardinality));
 		}
+		return parameters;
 	}
-	
-	//
-	// START-ExpressionBasedModel
-	@Override
-	public List<Expression> getFactors() {
-		return factors;
-	}
-	
-	@Override
-	public Map<String, String> getMapFromRandomVariableNameToTypeName() {
-		return mapFromRandomVariableNameToTypeName;
-	}
-	
-	@Override
-	public Map<String, String> getMapFromNonUniquelyNamedConstantNameToTypeName() {
-		return mapFromNonUniquelyNamedConstantNameToTypeName;
-	}
-	
-	@Override
-	public Map<String, String> getMapFromUniquelyNamedConstantNameToTypeName() {
-		return mapFromUniquelyNamedConstantNameToTypeName;
-	}
-	
-	@Override
-	public Map<String, String> getMapFromCategoricalTypeNameToSizeString() {
-		return mapFromCategoricalTypeNameToSizeString;
-	}	
-
-	@Override
-	public Collection<Type> getAdditionalTypes() {
-		return additionalTypes;
-	}	
-	// END-ExpressionBasedModel
-	//
 }

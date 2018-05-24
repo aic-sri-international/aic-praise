@@ -57,7 +57,7 @@ import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 
 @Beta
-public class HOGMExpressionBasedModel implements ExpressionBasedModel {
+public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 
 	private Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
 	private Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
@@ -66,11 +66,11 @@ public class HOGMExpressionBasedModel implements ExpressionBasedModel {
 	private Collection<Type>    additionalTypes                               = new LinkedList<>();
 	private List<Expression>    factors                                       = new ArrayList<>(); 	
 	
-	public HOGMExpressionBasedModel(String modelString) {
+	public DefaultExpressionBasedModel(String modelString) {
 		this(new HOGMParserWrapper().parseModel(modelString));
 	}
 	
-	public HOGMExpressionBasedModel(ParsedHOGModel parsedModel) {
+	public DefaultExpressionBasedModel(ParsedHOGModel parsedModel) {
 		factors.addAll(parsedModel.getConditionedPotentials());
 		
 		parsedModel.getRandomVariableDeclarations().forEach(random -> {
@@ -112,7 +112,7 @@ public class HOGMExpressionBasedModel implements ExpressionBasedModel {
 		realIntervalTypes.forEach(realIntervalName -> additionalTypes.add(new RealInterval(realIntervalName)));
 	}
 	
-	public HOGMExpressionBasedModel(
+	public DefaultExpressionBasedModel(
 			List<Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,

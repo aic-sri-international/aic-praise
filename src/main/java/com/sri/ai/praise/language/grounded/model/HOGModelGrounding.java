@@ -59,7 +59,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.praise.inference.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.DefaultExpressionBasedModel;
 import com.sri.ai.praise.inference.ExpressionBasedModel;
 import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
@@ -176,8 +176,8 @@ public class HOGModelGrounding {
 	 * @return
 	 */
 	private static InferenceForFactorGraphAndEvidence makeInferencer(ExpressionBasedModel factorsAndTypes, Map<String, String> newUniqueConstantToTypeMap) {
-		HOGMExpressionBasedModel groundedFactorsAndTypesInformation = 
-				new HOGMExpressionBasedModel(
+		DefaultExpressionBasedModel groundedFactorsAndTypesInformation = 
+				new DefaultExpressionBasedModel(
 						Collections.emptyList(), // factors
 						factorsAndTypes.getMapFromRandomVariableNameToTypeName(),
 						factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName(),

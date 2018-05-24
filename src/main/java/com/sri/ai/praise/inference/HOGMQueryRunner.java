@@ -160,7 +160,7 @@ public class HOGMQueryRunner {
 	private void runInference(String query, Expression queryExpression, ParsedHOGModel parsedModel) {
 		if (!canceled) {
 			IntegrationRecording.startRecordingIntegrationsOverGroups();
-			ExpressionBasedModel factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
+			ExpressionBasedModel factorsAndTypes = new DefaultExpressionBasedModel(parsedModel);
 			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, null, true, getOptionalTheory());
 			Pair<Expression, Long> inferenceResultAndTime = time(inference(queryExpression)); 			
 			HOGMQueryResult queryResult = new HOGMQueryResult(query, queryExpression, parsedModel, inferenceResultAndTime);

@@ -47,7 +47,7 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.praise.inference.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.DefaultExpressionBasedModel;
 import com.sri.ai.praise.inference.ExpressionBasedModel;
 import com.sri.ai.praise.language.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
@@ -82,7 +82,7 @@ public class HOGModelGroundingTest {
 		
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
 		ParsedHOGModel    parsedModel     = parser.parseModel(sj.toString());
-		ExpressionBasedModel   factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
+		ExpressionBasedModel   factorsAndTypes = new DefaultExpressionBasedModel(parsedModel);
 		List<Expression>  evidence        = new ArrayList<>();
 		evidence.add(Expressions.parse("communism"));
 		
