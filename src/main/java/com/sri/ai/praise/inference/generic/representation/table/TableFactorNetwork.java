@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sri.ai.praise.inference.generic.anytime.gabrielstry.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.inference.generic.anytime.gabrielstry.representation.core.AbstractEditableFactorNetwrok;
+import com.sri.ai.praise.inference.generic.anytime.gabrielstry.representation.core.AbstractEditableFactorNetwork;
 import com.sri.ai.praise.language.grounded.markov.FactorTable;
 import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.util.Util;
@@ -21,9 +21,9 @@ import com.sri.ai.util.Util;
  * @author gabriel
  *
  */
-public class TableFactorNetwork extends AbstractEditableFactorNetwrok{
+public class TableFactorNetwork extends AbstractEditableFactorNetwork {
 	
-	public TableFactorNetwork(List<TableFactor> factors) {
+	public TableFactorNetwork(List<? extends TableFactor> factors) {
 		for(TableFactor f:factors) {
 			for(TableVariable v: f.getVariables()) {
 				this.add(identityWrapper(f), v);
