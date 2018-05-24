@@ -53,15 +53,15 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 
 	@Override
 	public void setInitialCountsForAllPossibleChildAndParentsAssignments() {
-		ArrayList<Integer> allPossibleNodeAssignments = (ArrayList<Integer>) child.getValues();
+		ArrayList<Integer> allPossibleChildAssignments = (ArrayList<Integer>) child.getValues();
 		ArrayList<ArrayList<Integer>> allPossibleParentsAssignments = getAllPossibleParentsAssignments(parents);
 		
 		for(ArrayList<Integer> parentsAssignment : allPossibleParentsAssignments) {
-			for(int nodeAssignment : allPossibleNodeAssignments) {
+			for(int nodeAssignment : allPossibleChildAssignments) {
 				Pair<Integer, ArrayList<Integer>> nodeAndParentsAssignement = new Pair<Integer, ArrayList<Integer>>(nodeAssignment,  parentsAssignment);
 				parametersForChildAndParentsAssignment.put(nodeAndParentsAssignement, 1.0);
 			}
-			countsForParentsAssignment.put(parentsAssignment, (double) allPossibleNodeAssignments.size());
+			countsForParentsAssignment.put(parentsAssignment, (double) allPossibleChildAssignments.size());
 		}
 	}
 	
@@ -155,8 +155,10 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 	    variablesAndTheirValues.put(sick, 1);
 	    variablesAndTheirValues.put(sun, 0);
 	    variablesAndTheirValues.put(cold, 1);
-	    System.out.println("entryFor(" + variablesAndTheirValues.get(sick) + ", [" + variablesAndTheirValues.get(sun) + ", " + variablesAndTheirValues.get(cold) + "]) = " + node.getEntryFor(variablesAndTheirValues));
 	    
+	    System.out.println("Testing entries:");
+	    System.out.println("entryFor(" + variablesAndTheirValues.get(sick) + ", [" + variablesAndTheirValues.get(sun) + ", " + variablesAndTheirValues.get(cold) + "]) = " + node.getEntryFor(variablesAndTheirValues));
+	    System.out.println("all entries: " + node.getEntries());
 	}
 
 }

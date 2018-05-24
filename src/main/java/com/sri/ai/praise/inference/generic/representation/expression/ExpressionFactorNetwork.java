@@ -50,7 +50,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.inference.generic.anytime.gabrielstry.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.inference.generic.anytime.gabrielstry.representation.core.AbstractEditableFactorNetwrok;
+import com.sri.ai.praise.inference.generic.anytime.gabrielstry.representation.core.AbstractEditableFactorNetwork;
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
 
@@ -62,7 +62,7 @@ import com.sri.ai.praise.inference.generic.representation.api.Variable;
  * @author braz
  *
  */
-public class ExpressionFactorNetwork extends AbstractEditableFactorNetwrok {
+public class ExpressionFactorNetwork extends AbstractEditableFactorNetwork {
 	
 	private Context context;
 

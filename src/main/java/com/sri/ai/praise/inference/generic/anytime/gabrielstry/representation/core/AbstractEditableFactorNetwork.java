@@ -7,9 +7,9 @@ import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
 import com.sri.ai.praise.inference.generic.representation.core.AbstractFactorNetwork;
 
-public abstract class AbstractEditableFactorNetwrok extends AbstractFactorNetwork implements EditableFactorNetwork{
+public abstract class AbstractEditableFactorNetwork extends AbstractFactorNetwork implements EditableFactorNetwork{
 	
-	public AbstractEditableFactorNetwrok() {
+	public AbstractEditableFactorNetwork() {
 		super();
 	}
 	

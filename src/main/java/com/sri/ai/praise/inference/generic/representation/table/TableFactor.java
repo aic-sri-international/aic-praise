@@ -2,7 +2,6 @@ package com.sri.ai.praise.inference.generic.representation.table;
 
 import static com.sri.ai.praise.inference.generic.representation.core.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
-import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.mapIntoArrayList;
