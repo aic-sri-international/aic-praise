@@ -4,7 +4,7 @@ import java.util.List;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 
-public interface BayesianNode {
+public interface BayesianNode extends Factor {
 	
 	public Variable getChild();
 	
@@ -22,13 +22,13 @@ public interface BayesianNode {
 			List<? extends Object> parentsValues = datapoint.getValueOfVariables(parentsVariables);
 			this.incrementCountForChildAndParentsAssignment(childValue, parentsValues);
 		}
-		this.normalizeParameters();
+		this.normalizeParametersAndFillEntries();
 	}
 	
 	public void setInitialCountsForAllPossibleChildAndParentsAssignments();
 	
 	public void incrementCountForChildAndParentsAssignment(Object childValue, List<? extends Object> parentsValues);
 	
-	public void normalizeParameters();
+	public void normalizeParametersAndFillEntries();
 	
 }

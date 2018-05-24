@@ -2,22 +2,27 @@
 
 package com.sri.ai.praise.learning.parameterlearning.representation.table;
 
+import static com.sri.ai.util.Util.arrayList;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
+import com.sri.ai.praise.inference.generic.representation.table.TableFactor;
 import com.sri.ai.praise.inference.generic.representation.table.TableVariable;
 import com.sri.ai.util.base.Pair;
 
-public class TableBayesianNode implements BayesianNode {
+public class TableBayesianNode extends TableFactor implements BayesianNode {
 	
 	private TableVariable child;
 	private ArrayList<TableVariable> parents;
 	private LinkedHashMap<Pair<Integer, ArrayList<Integer>>, Double> parametersForChildAndParentsAssignment; 
 	private LinkedHashMap<ArrayList<Integer>, Double> countsForParentsAssignment; 
-	 
+	
 	public TableBayesianNode(TableVariable child) {
+		super(arrayList(child));
 		this.child = child;
 		this.parents = new ArrayList<TableVariable>();
 		parametersForChildAndParentsAssignment = new LinkedHashMap<Pair<Integer, ArrayList<Integer>>, Double>();
@@ -25,6 +30,7 @@ public class TableBayesianNode implements BayesianNode {
 	}
 	
 	public TableBayesianNode(TableVariable child, ArrayList<TableVariable> parents) {
+		super(mergeVariablesToOneList(child, parents));
 		this.child = child;
 		this.parents = parents;
 		parametersForChildAndParentsAssignment = new LinkedHashMap<Pair<Integer, ArrayList<Integer>>, Double>();
@@ -75,34 +81,53 @@ public class TableBayesianNode implements BayesianNode {
 		parametersForChildAndParentsAssignment.put(nodeAndParentsAssignement, newParameterValue);
 	}
 	
-	private ArrayList<ArrayList<Integer>> getAllPossibleParentsAssignments(List<TableVariable> parents) {
-		ArrayList<ArrayList<Integer>> allPossibleParentsAssignments = new ArrayList<ArrayList<Integer>>();
-		if(parents.isEmpty()) {
-			allPossibleParentsAssignments.add(new ArrayList<Integer>());
-		}
-		else {
-			TableVariable lastVariable = parents.get(parents.size()-1);
-			List<ArrayList<Integer>> allPossibleParentsAssignmentsWithoutLastVariable = getAllPossibleParentsAssignments(parents.subList(0, parents.size()-1));
-			for(ArrayList<Integer> parentsAssignment : allPossibleParentsAssignmentsWithoutLastVariable) {
-				for(int lastVariableAssignment : (ArrayList<Integer>) lastVariable.getValues()) {
-					parentsAssignment.add(lastVariableAssignment);
-					allPossibleParentsAssignments.add((ArrayList<Integer>) parentsAssignment.clone());
-					parentsAssignment.remove(parentsAssignment.size()-1);
-				}
-			}
-		}
-			
-		return allPossibleParentsAssignments;
-	}
-	
 	@Override
-	public void normalizeParameters() {
+	public void normalizeParametersAndFillEntries() {
 		for(Pair<Integer, ArrayList<Integer>> key : parametersForChildAndParentsAssignment.keySet()) {
 			double currentParameterValue = parametersForChildAndParentsAssignment.get(key);
 			double countForThatParentsAssignment = countsForParentsAssignment.get(key.second);
 			double newParameterValue = currentParameterValue / countForThatParentsAssignment;
 			parametersForChildAndParentsAssignment.put(key, newParameterValue);
 		}
+		
+		fillEntriesWithTheParameterValues();
+	}
+	
+	private void fillEntriesWithTheParameterValues() {
+		for(Pair<Integer, ArrayList<Integer>> childAndParentsAssignment : parametersForChildAndParentsAssignment.keySet()) {
+			LinkedHashMap<TableVariable, Integer> variablesAndTheirValues = new LinkedHashMap<TableVariable, Integer>();
+			variablesAndTheirValues.put(child, childAndParentsAssignment.first);
+			
+			ArrayList<Integer> parentsValues = childAndParentsAssignment.second;
+			for(int i = 0; i < parents.size(); i++) {
+				variablesAndTheirValues.put(parents.get(i), parentsValues.get(i));
+			}
+			
+			double parameterValue = parametersForChildAndParentsAssignment.get(childAndParentsAssignment);
+			this.setEntryFor(variablesAndTheirValues, parameterValue);
+		}
+	}
+	
+	private static ArrayList<TableVariable> mergeVariablesToOneList(TableVariable firstVariable, ArrayList<TableVariable> otherVariables) {
+		ArrayList<TableVariable> allVariables = new ArrayList<TableVariable>(otherVariables.size() + 1);
+		allVariables.add(firstVariable);
+		allVariables.addAll(otherVariables);
+		return allVariables;
+	}
+	
+	private ArrayList<ArrayList<Integer>> getAllPossibleParentsAssignments(ArrayList<TableVariable> parents) {
+		ArrayList<ArrayList<Integer>> allPossibleParentsAssignments = new ArrayList<ArrayList<Integer>>();
+		if(parents.isEmpty()) {
+			allPossibleParentsAssignments.add(new ArrayList<Integer>());
+		}
+		else {
+			Iterator<ArrayList<Integer>> iteratorForParentsAssignments = this.getCartesianProduct(parents);
+			while(iteratorForParentsAssignments.hasNext()) {
+				allPossibleParentsAssignments.add(iteratorForParentsAssignments.next());
+			}
+		}
+			
+		return allPossibleParentsAssignments;
 	}
 	
 	public static void main(String[] args) {
@@ -123,8 +148,15 @@ public class TableBayesianNode implements BayesianNode {
 	    parentsValues.add(1);
 	    
 	    node.incrementCountForChildAndParentsAssignment(nodeValue, parentsValues);
-	    node.normalizeParameters();
+	    node.normalizeParametersAndFillEntries();
 	    System.out.println(node.getParameters());
+	    
+	    LinkedHashMap<TableVariable, Integer> variablesAndTheirValues = new LinkedHashMap<TableVariable, Integer>();
+	    variablesAndTheirValues.put(sick, 1);
+	    variablesAndTheirValues.put(sun, 0);
+	    variablesAndTheirValues.put(cold, 1);
+	    System.out.println("entryFor(" + variablesAndTheirValues.get(sick) + ", [" + variablesAndTheirValues.get(sun) + ", " + variablesAndTheirValues.get(cold) + "]) = " + node.getEntryFor(variablesAndTheirValues));
+	    
 	}
 
 }
