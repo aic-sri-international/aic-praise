@@ -75,9 +75,9 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.BinaryMinus;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSets;
 import com.sri.ai.praise.model.v1.ConstantDeclaration;
+import com.sri.ai.praise.model.v1.HOGMModelValidator;
 import com.sri.ai.praise.model.v1.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
-import com.sri.ai.praise.model.v1.HOGModel;
 import com.sri.ai.praise.model.v1.StatementInfo;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParser.TermContext;
 import com.sri.ai.util.math.Rational;
@@ -102,8 +102,9 @@ public class HOGModelVisitor extends HOGMBaseVisitor<Expression> {
 		terms.clear();
 		
 		ctx.statements.forEach(s -> visit(s));
+		HOGMModelValidator validator = new HOGMModelValidator(sortDeclarations, constantDeclarations, randomVariableDeclarations, terms);
 		
-		Expression result = HOGModel.validateAndConstruct(sortDeclarations, constantDeclarations, randomVariableDeclarations, terms);
+		Expression result = validator.getHOGMModelComponents();
 
 		return result;
 	}

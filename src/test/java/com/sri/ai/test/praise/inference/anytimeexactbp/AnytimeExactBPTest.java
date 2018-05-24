@@ -69,7 +69,7 @@ public class AnytimeExactBPTest {
 				+ ")";
 		queryVariableString = "I";
 		expected = parse("if I = 1 then 3 else 5");
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
 
 		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
 		factorNetworkString = "("
@@ -78,7 +78,7 @@ public class AnytimeExactBPTest {
 				+ ")";
 		queryVariableString = "I";
 		expected = parse("if I = 1 then 0.01 else 0.81");
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
 		
 		variableAndTypes = new String[]{"I", "1..10", "J", "1..10", "P", "Boolean"};
 		factorNetworkString = "("
@@ -88,7 +88,7 @@ public class AnytimeExactBPTest {
 				+ ")";
 		queryVariableString = "I";
 		expected = parse("if I = 1 then 0.01 else 0.81");
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
 		
 		//              -------J-------
         //             /               \
@@ -111,7 +111,7 @@ public class AnytimeExactBPTest {
 				+ ")";
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 1 else 0");
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
 		
 		//              -------J-------
         //             /               \
@@ -134,7 +134,7 @@ public class AnytimeExactBPTest {
 				+ ")";
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 0.25 else if I = 3 then 0.25 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
 
 		//              -------J-------
         //             /               \
@@ -157,7 +157,7 @@ public class AnytimeExactBPTest {
 				+ ")";
 		queryVariableString = "I";
 		expected = parse("if I = 3 then 0.25 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
 
 		//              -------J-------
         //             /               \
@@ -181,7 +181,7 @@ public class AnytimeExactBPTest {
 				+ ")";
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 0.1875 else if I = 3 then 0.1875 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
 
 		//
 		// A00 -- A01 -- ... -- A04
@@ -227,7 +227,7 @@ public class AnytimeExactBPTest {
 		
 		queryVariableString = "A_0_0";
 		expected = parse("if not A_0_0 then 2515404149056770048 else 857920100616142848"); // Note: ExactBP returns an arbitrary unnormalized message
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, false /* takes too long */);
 		
 		// Commented out for testing time purposes 
 		
@@ -253,9 +253,13 @@ public class AnytimeExactBPTest {
 		
 	}
 	
-	private void runTest(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected) {
-		runRodrigos(variableAndTypes, factorNetworkString, queryVariableString, expected);
-		runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
+	private void runTest(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected, boolean rodrigo, boolean gabriel) {
+		if (rodrigo) {
+			runRodrigos(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		}
+		if (gabriel) {
+			runGabriels(variableAndTypes, factorNetworkString, queryVariableString, expected);
+		}
 	}
 
 	private void runRodrigos(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected) {
