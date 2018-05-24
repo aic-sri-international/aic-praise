@@ -336,7 +336,6 @@ public class TableFactor implements Factor{
 
 	@Override
 	public boolean isZero() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

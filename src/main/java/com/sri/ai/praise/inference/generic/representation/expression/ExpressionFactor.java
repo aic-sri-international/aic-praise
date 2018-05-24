@@ -38,10 +38,12 @@
 package com.sri.ai.praise.inference.generic.representation.expression;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
+import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.praise.inference.generic.representation.core.IdentityFactor.IDENTITY_FACTOR;
 
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,8 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.WrappedExpression;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.library.number.Division;
+import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
@@ -137,7 +141,7 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 		return set;
 	}
 
-	private Factor evaluateAsFactor(Expression expression) {
+	public Factor evaluateAsFactor(Expression expression) {
 		Expression resultFactorExpression = evaluate(expression);
 		Factor result = makeFactor(resultFactorExpression);
 		return result;
@@ -162,31 +166,41 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	@Override
 	public Factor normalize() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error("An Expression factor cannot be normalized");
 	}
 
 	@Override
 	public Factor add(Factor another) {
-		// TODO Auto-generated method stub
-		return null;
+		Factor result;
+		if (another instanceof IdentityFactor) {
+			result = this;
+		}
+		else {
+			result = evaluateAsFactor(Plus.make(this, (Expression) another));
+		}
+		return result;
 	}
 
 	@Override
 	public Factor multiplyByConstant(Number constant) {
-		// TODO Auto-generated method stub
-		return null;
+		return multiply(IDENTITY_FACTOR.multiplyByConstant(constant));
 	}
 
 	@Override
 	public boolean isZero() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public Factor invert() {
-		// TODO Auto-generated method stub
-		return null;
+		Factor result;
+		Expression thisExpression = (Expression) this;
+		if(thisExpression.equals(ZERO)) {
+			throw new Error("Division by zero impossible.");
+		}
+		else {
+			result = evaluateAsFactor(Division.make(ONE, (Expression) this));
+		}
+		return result;
 	}
 }

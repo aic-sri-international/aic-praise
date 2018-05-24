@@ -91,11 +91,4 @@ public interface Factor{
 	
 	Factor invert();
 	
-	static Factor invertIfNotNull(Factor factor) {
-		if(!factor.isZero()) {
-			return factor.invert();
-		}
-		return factor;
-	}
-	
 }

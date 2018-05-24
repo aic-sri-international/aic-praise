@@ -39,12 +39,17 @@ package com.sri.ai.praise.inference.generic.representation.core;
 
 import static com.sri.ai.util.Util.list;
 import static java.util.Collections.unmodifiableList;
+import static com.sri.ai.expresso.helper.Expressions.ONE;
 
 import java.util.List;
 import java.util.Map;
 
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
+import com.sri.ai.praise.inference.generic.representation.expression.ExpressionFactor;
+import com.sri.ai.praise.inference.generic.representation.table.TableFactor;
 
 /**
  * A class representing an {@link Factor} that is an identity factor.
@@ -98,19 +103,26 @@ public class IdentityFactor implements Factor {
 
 	@Override
 	public Factor normalize() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error("Identity factor cannot be normalized.");
 	}
 
+	// does not scale well, if we add other factors..
 	@Override
 	public Factor add(Factor another) {
-		// TODO Auto-generated method stub
-		return null;
+		Factor result = this; // will not change if another is ZeroFactor
+		if (another instanceof ExpressionFactor){
+			ExpressionFactor anotherExpression = (ExpressionFactor) another;
+			result = anotherExpression.evaluateAsFactor(Plus.make(ONE, (Expression) anotherExpression));
+		}
+		else if (another instanceof TableFactor){
+			TableFactor anotherTable = (TableFactor) another;
+			// TODO
+		}
+		return result;
 	}
 
 	@Override
 	public Factor multiplyByConstant(Number constant) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -121,6 +133,6 @@ public class IdentityFactor implements Factor {
 
 	@Override
 	public Factor invert() {
-		return IDENTITY_FACTOR;
+		return this;
 	}
 }
