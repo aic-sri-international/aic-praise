@@ -271,7 +271,7 @@
 							</descriptorRefs>
 							<archive>
 								<manifest>
-									<mainClass>com.sri.ai.praise.application.praise.app.PRAiSE</mainClass>
+									<mainClass>com.sri.ai.praise.other.application.praise.app.PRAiSE</mainClass>
 								</manifest>
 							</archive>
 			                <finalName>PRAiSE-GUI-${version}</finalName>
@@ -289,7 +289,7 @@
 							</descriptorRefs>
 							<archive>
 								<manifest>
-									<mainClass>com.sri.ai.praise.application.praise.commandline.PRAiSE</mainClass>
+									<mainClass>com.sri.ai.praise.other.application.praise.commandline.PRAiSE</mainClass>
 								</manifest>
 							</archive>
 			                <finalName>PRAiSE-${version}</finalName>
@@ -308,7 +308,7 @@
 							</descriptorRefs>
 							<archive>
 								<manifest>
-									<mainClass>com.sri.ai.praise.application.empiricalevaluationapplication.fromfile.EvaluationApplication</mainClass>
+									<mainClass>com.sri.ai.praise.other.application.empiricalevaluationapplication.fromfile.EvaluationApplication</mainClass>
 								</manifest>
 							</archive>
 			                <finalName>PRAiSE-Evaluate-${version}</finalName>

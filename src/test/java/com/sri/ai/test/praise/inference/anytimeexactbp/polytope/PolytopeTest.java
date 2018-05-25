@@ -38,7 +38,7 @@
 package com.sri.ai.test.praise.inference.anytimeexactbp.polytope;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.praise.inference.treebased.anytimeexactbp.polytope.api.Polytope.multiply;
+import static com.sri.ai.praise.core.model.core.treebased.anytimeexactbp.polytope.api.Polytope.multiply;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
@@ -49,13 +49,13 @@ import org.junit.Test;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
-import com.sri.ai.praise.inference.treebased.anytimeexactbp.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.inference.treebased.anytimeexactbp.polytope.api.Polytope;
-import com.sri.ai.praise.inference.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.inference.treebased.anytimeexactbp.polytope.core.Polytopes;
-import com.sri.ai.praise.inference.treebased.anytimeexactbp.polytope.core.Simplex;
-import com.sri.ai.praise.inference.treebased.representation.expression.ExpressionFactor;
-import com.sri.ai.praise.inference.treebased.representation.expression.ExpressionVariable;
+import com.sri.ai.praise.core.model.core.treebased.anytimeexactbp.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.model.core.treebased.anytimeexactbp.polytope.api.Polytope;
+import com.sri.ai.praise.core.model.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
+import com.sri.ai.praise.core.model.core.treebased.anytimeexactbp.polytope.core.Polytopes;
+import com.sri.ai.praise.core.model.core.treebased.anytimeexactbp.polytope.core.Simplex;
+import com.sri.ai.praise.core.model.core.treebased.representation.expression.ExpressionFactor;
+import com.sri.ai.praise.core.model.core.treebased.representation.expression.ExpressionVariable;
 
 public class PolytopeTest {
 

@@ -48,8 +48,8 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.hogm.HOGMQueryResult;
-import com.sri.ai.praise.inference.hogm.HOGMQueryRunner;
+import com.sri.ai.praise.core.inference.core.hogm.HOGMQueryResult;
+import com.sri.ai.praise.core.inference.core.hogm.HOGMSolver;
 
 public class HOGMQueryRunnerTest {
 	
@@ -78,7 +78,7 @@ public class HOGMQueryRunnerTest {
 				"";
 		
 		String query = "event";
-		HOGMQueryRunner runner = new HOGMQueryRunner(model, query);
+		HOGMSolver runner = new HOGMSolver(model, query);
 		List<HOGMQueryResult> results = runner.getResults();
 	
 		assertEquals(1, results.size());

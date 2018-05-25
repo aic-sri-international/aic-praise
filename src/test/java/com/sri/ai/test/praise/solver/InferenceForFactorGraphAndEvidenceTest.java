@@ -57,8 +57,8 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.praise.inference.expressionbased.InferenceForFactorGraphAndEvidence;
-import com.sri.ai.praise.inference.hogm.representation.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
+import com.sri.ai.praise.core.model.core.hogm.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;
 
 public class InferenceForFactorGraphAndEvidenceTest {
@@ -349,8 +349,8 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		// exploit factorization (that is, employ ExpressionVariable Elimination,
 		// as opposed to summing over the entire joint probability distribution).
 		
-		InferenceForFactorGraphAndEvidence inferencer =
-				new InferenceForFactorGraphAndEvidence(
+		ExpressionBasedSolver inferencer =
+				new ExpressionBasedSolver(
 						new HOGMExpressionBasedModel(modelString),
 						isBayesianNetwork ,
 						evidence,
@@ -396,8 +396,8 @@ public class InferenceForFactorGraphAndEvidenceTest {
 				+ "(if burglary then if alarm then 0.9 else 0.1 else if alarm then 0.01 else 0.99)*"
 				+ "(if burglary then 0.1 else 0.9)"));
 
-		InferenceForFactorGraphAndEvidence inferencer;
-		inferencer = new InferenceForFactorGraphAndEvidence(
+		ExpressionBasedSolver inferencer;
+		inferencer = new ExpressionBasedSolver(
 				new HOGMExpressionBasedModel(factors, 
 						mapFromRandomVariableNameToTypeName,
 						mapFromNonUniquelyNamedConstantNameToTypeName,
@@ -1002,9 +1002,9 @@ public class InferenceForFactorGraphAndEvidenceTest {
 			Map<String, String> mapFromCategoricalTypeNameToSizeString,
 			Collection<Type> additionalTypes) {
 		
-		InferenceForFactorGraphAndEvidence inferencer;
+		ExpressionBasedSolver inferencer;
 		Expression marginal;
-		inferencer = new InferenceForFactorGraphAndEvidence(
+		inferencer = new ExpressionBasedSolver(
 				new HOGMExpressionBasedModel(
 						factors,
 						mapFromRandomVariableNameToTypeName,
@@ -1074,9 +1074,9 @@ public class InferenceForFactorGraphAndEvidenceTest {
 	}
 
 	private void runSimplifyTest() {
-		InferenceForFactorGraphAndEvidence inferencer;
+		ExpressionBasedSolver inferencer;
 		Expression simplification;
-		inferencer = new InferenceForFactorGraphAndEvidence(
+		inferencer = new ExpressionBasedSolver(
 				new HOGMExpressionBasedModel(
 						factors,
 						mapFromRandomVariableNameToTypeName,
