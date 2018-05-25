@@ -35,54 +35,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.language.translate.core;
-
-import java.io.PrintWriter;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+package com.sri.ai.praise.inference.hogm.representation.imports.uai;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.inference.hogm.representation.export.HuginOutput;
-import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModel;
-import com.sri.ai.praise.language.ModelLanguage;
-import com.sri.ai.praise.language.grounded.transform.XFormMarkovToBayes;
 
 /**
- * Translator: UAI->HuginDotNet
+ * Represents the possible types of UAI models.
  * 
  * @author oreilly
  *
  */
 @Beta
-public class UAI_to_HuginDotNet_Translator extends AbstractUAI_to_Target_Translator {
-	//
-	// START-Translator	
-	@Override 
-	public ModelLanguage getTarget() {
-		return ModelLanguage.HuginDotNet;
-	}
-	// END-Translator
-	//
-	
-	@Override
-	protected void translate(String inputIdentifier, UAIModel uaiModel, PrintWriter[] translatedOutputs) throws Exception {	
-		PrintWriter huginDotNetModelWriter = translatedOutputs[0];
-		
-		// 
-		// 1. Collect the data required by the Hugin Output utility.
-		Map<Integer, String>       varIdxToName        = new LinkedHashMap<>();
-		Map<Integer, List<String>> varIdxToRangeValues = new LinkedHashMap<>();
-		for (int i = 0; i < uaiModel.numberVariables(); i++) {
-			final String varName = "v"+i;
-			varIdxToName.put(i, varName);
-			varIdxToRangeValues.put(i, IntStream.range(0, uaiModel.cardinality(i)).boxed().map(cValue -> varName+"c"+cValue).collect(Collectors.toList()));
-		}
-		
-		//
-		// 2. Transform the UAI Markov Network representation to the Hugin dot Net Bayesian Network format.
-		XFormMarkovToBayes.transform(uaiModel, new HuginOutput(huginDotNetModelWriter, varIdxToName, varIdxToRangeValues));
-	}
+public enum UAIModelType {
+	MARKOV, BAYES
 }

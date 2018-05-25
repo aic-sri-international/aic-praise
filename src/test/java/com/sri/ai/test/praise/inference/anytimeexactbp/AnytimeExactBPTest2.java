@@ -15,6 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.sri.ai.grinder.helper.AssignmentsIterator;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModel;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModelReader;
 import com.sri.ai.praise.inference.treebased.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.inference.treebased.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.inference.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
@@ -30,8 +32,6 @@ import com.sri.ai.praise.inference.treebased.representation.Table.TableFactorNet
 import com.sri.ai.praise.inference.treebased.representation.Table.TableVariable;
 import com.sri.ai.praise.inference.treebased.representation.api.Factor;
 import com.sri.ai.praise.inference.treebased.representation.api.Variable;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductIterator;

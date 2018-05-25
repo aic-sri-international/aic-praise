@@ -1,7 +1,7 @@
 package com.sri.ai.praise.inference.treebased.representation.Table;
 
+import static com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIUtil.genericVariableName;
 import static com.sri.ai.praise.inference.treebased.representation.Table.TableFactor.copyToSubTableFactor;
-import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.genericVariableName;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.ArrayList;
@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModel;
 import com.sri.ai.praise.inference.treebased.gabrielstry.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.inference.treebased.gabrielstry.representation.core.AbstractEditableFactorNetwrok;
 import com.sri.ai.praise.language.grounded.markov.FactorTable;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
 import com.sri.ai.util.Util;
 /**
  * 

@@ -46,10 +46,10 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.inference.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.inference.hogm.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.inference.hogm.representation.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.language.ModelLanguage;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.Util;
 
 /**

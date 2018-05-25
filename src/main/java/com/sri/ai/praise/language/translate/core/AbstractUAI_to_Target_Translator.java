@@ -41,10 +41,10 @@ import java.io.PrintWriter;
 import java.io.Reader;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIEvidenceReader;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModel;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModelReader;
 import com.sri.ai.praise.language.ModelLanguage;
-import com.sri.ai.praise.model.v1.imports.uai.UAIEvidenceReader;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 
 /**
  * Abstract base class for UAI->[some target] translations.

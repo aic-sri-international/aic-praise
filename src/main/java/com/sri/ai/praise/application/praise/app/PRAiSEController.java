@@ -89,13 +89,13 @@ import com.sri.ai.praise.application.praise.app.model.ExamplePages;
 import com.sri.ai.praise.application.praise.app.perspective.HOGMPerspective;
 import com.sri.ai.praise.application.praise.app.perspective.Perspective;
 import com.sri.ai.praise.inference.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.inference.hogm.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.inference.hogm.representation.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.language.ModelLanguage;
 import com.sri.ai.praise.language.translate.TranslatorOptions;
 import com.sri.ai.praise.language.translate.core.HOGMv1_to_UAI_Translator;
 import com.sri.ai.praise.language.translate.core.UAI_to_HOGMv1_Using_Equalities_Translator;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.math.Rational;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;

@@ -35,54 +35,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.language.translate.core;
+package com.sri.ai.praise.inference.hogm.representation;
 
-import java.io.PrintWriter;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.inference.hogm.representation.export.HuginOutput;
-import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModel;
-import com.sri.ai.praise.language.ModelLanguage;
-import com.sri.ai.praise.language.grounded.transform.XFormMarkovToBayes;
 
-/**
- * Translator: UAI->HuginDotNet
- * 
- * @author oreilly
- *
- */
 @Beta
-public class UAI_to_HuginDotNet_Translator extends AbstractUAI_to_Target_Translator {
+public class HOGModelException extends RuntimeException {
+	private static final long serialVersionUID = 1L;
 	//
-	// START-Translator	
-	@Override 
-	public ModelLanguage getTarget() {
-		return ModelLanguage.HuginDotNet;
+	private List<HOGModelError> errors = new ArrayList<>();
+	
+	public HOGModelException(String message, List<HOGModelError> errors) {
+		super(message);
+		this.errors.addAll(errors);
 	}
-	// END-Translator
-	//
+	
+	public List<HOGModelError> getErrors() {
+		return errors;
+	}
 	
 	@Override
-	protected void translate(String inputIdentifier, UAIModel uaiModel, PrintWriter[] translatedOutputs) throws Exception {	
-		PrintWriter huginDotNetModelWriter = translatedOutputs[0];
+	public String getMessage() {
+		StringJoiner sj = new StringJoiner("\n", "\n", "\n");
 		
-		// 
-		// 1. Collect the data required by the Hugin Output utility.
-		Map<Integer, String>       varIdxToName        = new LinkedHashMap<>();
-		Map<Integer, List<String>> varIdxToRangeValues = new LinkedHashMap<>();
-		for (int i = 0; i < uaiModel.numberVariables(); i++) {
-			final String varName = "v"+i;
-			varIdxToName.put(i, varName);
-			varIdxToRangeValues.put(i, IntStream.range(0, uaiModel.cardinality(i)).boxed().map(cValue -> varName+"c"+cValue).collect(Collectors.toList()));
-		}
+		errors.forEach(e -> sj.add(e.toString()));
 		
-		//
-		// 2. Transform the UAI Markov Network representation to the Hugin dot Net Bayesian Network format.
-		XFormMarkovToBayes.transform(uaiModel, new HuginOutput(huginDotNetModelWriter, varIdxToName, varIdxToRangeValues));
+		return super.getMessage() + sj.toString(); 
 	}
 }

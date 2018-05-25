@@ -35,50 +35,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.language.translate.core;
-
-import java.io.PrintWriter;
-import java.util.List;
+package com.sri.ai.praise.inference.hogm.representation.hogm.antlr;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.inference.hogm.representation.export.UAIHOGModelGroundingListener;
-import com.sri.ai.praise.language.ModelLanguage;
-import com.sri.ai.praise.language.grounded.model.HOGModelGrounding;
 
-/**
- * Translator: HOGMv1->UAI
- * 
- * @author oreilly
- *
- */
 @Beta
-public class HOGMv1_to_UAI_Translator extends AbstractHOGMv1_to_Target_Translator {
-	private static final String[] _outputFileExtensions = AbstractUAI_to_Target_Translator.INPUT_FILE_EXTENSIONS;
+public class UnableToParseAllTheInputError extends RuntimeException {
 	//
-	// START-Translator	
-	@Override 
-	public ModelLanguage getTarget() {
-		return ModelLanguage.UAI;
-	}
-	
-	@Override
-	public int getNumberOfOutputs() {
-		return _outputFileExtensions.length;
-	}
-	
-	@Override
-	public String[] getOutputFileExtensions() {
-		return _outputFileExtensions;
-	}
-	// END-Translator
-	//
-	
-	@Override
-	protected void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
-		//
-		// Ground out the HOGM FactorNetwork and translate it to the UAI model format
-		HOGModelGrounding.ground(hogmv1FactorsAndTypes, evidence, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
+	private static final long serialVersionUID = 1L;
+
+	public UnableToParseAllTheInputError() {
+		super("Unable to parse the complete input");
 	}
 }

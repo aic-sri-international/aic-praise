@@ -50,7 +50,7 @@ import com.sri.ai.grinder.core.solver.Integration;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.group.Sum;
 import com.sri.ai.grinder.group.SumProduct;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.inference.hogm.representation.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.base.Pair;
 
 @Beta

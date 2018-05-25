@@ -48,10 +48,10 @@ import org.junit.Test;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.inference.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.inference.hogm.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.hogm.antlr.HOGMParserWrapper;
+import com.sri.ai.praise.inference.hogm.representation.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.praise.language.grounded.model.HOGModelGrounding;
-import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;
 

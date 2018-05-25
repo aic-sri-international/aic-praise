@@ -1,8 +1,8 @@
 package com.sri.ai.praise.inference.treebased.representation.expression;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
-import static com.sri.ai.praise.model.v1.imports.uai.UAIUtil.convertGenericTableToInstance;
+import static com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
+import static com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIUtil.convertGenericTableToInstance;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.println;
 
@@ -29,11 +29,11 @@ import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.inference.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModel;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModelReader;
 import com.sri.ai.praise.inference.treebased.representation.api.Factor;
 import com.sri.ai.praise.language.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.v1.imports.uai.UAIExpressionBasedModel;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 import com.sri.ai.util.base.IdentityWrapper;
 
 public class UAIModelToExpressionFactorNetwork {

@@ -35,50 +35,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.language.translate.core;
+package com.sri.ai.praise.inference.hogm.representation.imports.uai;
 
-import java.io.PrintWriter;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.inference.hogm.representation.export.UAIHOGModelGroundingListener;
-import com.sri.ai.praise.language.ModelLanguage;
-import com.sri.ai.praise.language.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.inference.expressionbased.DefaultExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.HOGMSortDeclaration;
+import com.sri.ai.praise.language.grounded.common.GraphicalNetwork;
 
-/**
- * Translator: HOGMv1->UAI
- * 
- * @author oreilly
- *
- */
 @Beta
-public class HOGMv1_to_UAI_Translator extends AbstractHOGMv1_to_Target_Translator {
-	private static final String[] _outputFileExtensions = AbstractUAI_to_Target_Translator.INPUT_FILE_EXTENSIONS;
-	//
-	// START-Translator	
-	@Override 
-	public ModelLanguage getTarget() {
-		return ModelLanguage.UAI;
+public class UAIExpressionBasedModel extends DefaultExpressionBasedModel {
+
+	public UAIExpressionBasedModel(List<Expression> tables, GraphicalNetwork network) {
+		this(makeParameters(tables, network));
 	}
-	
-	@Override
-	public int getNumberOfOutputs() {
-		return _outputFileExtensions.length;
+
+	private UAIExpressionBasedModel(Parameters parameters) {
+		super(parameters);
 	}
-	
-	@Override
-	public String[] getOutputFileExtensions() {
-		return _outputFileExtensions;
-	}
-	// END-Translator
-	//
-	
-	@Override
-	protected void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
-		//
-		// Ground out the HOGM FactorNetwork and translate it to the UAI model format
-		HOGModelGrounding.ground(hogmv1FactorsAndTypes, evidence, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
+
+	private static Parameters makeParameters(List<Expression> tables, GraphicalNetwork network) {
+		Parameters parameters = new Parameters();
+		parameters.factors.addAll(tables);
+		for (int variableIndex = 0; variableIndex < network.numberVariables(); variableIndex++) {
+			int variableCardinality = network.cardinality(variableIndex);
+			String variableTypeName = UAIUtil.instanceTypeNameForVariable(variableIndex, variableCardinality);
+			parameters.mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(variableIndex), variableTypeName);
+			if (!variableTypeName.equals(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().toString())) {
+				for (int valueIndex = 0; valueIndex < variableCardinality; valueIndex++) {
+					parameters.mapFromUniquelyNamedConstantNameToTypeName.put(
+							UAIUtil.instanceConstantValueForVariable(valueIndex, variableIndex, variableCardinality), variableTypeName);
+				}
+			}
+			parameters.mapFromCategoricalTypeNameToSizeString.put(variableTypeName, Integer.toString(variableCardinality));
+		}
+		return parameters;
 	}
 }

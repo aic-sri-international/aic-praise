@@ -28,6 +28,9 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIEvidenceReader;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModel;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIModelReader;
 import com.sri.ai.praise.inference.treebased.representation.Table.TableFactor;
 import com.sri.ai.praise.inference.treebased.representation.Table.TableFactorNetwork;
 import com.sri.ai.praise.inference.treebased.representation.Table.TableVariable;
@@ -36,9 +39,6 @@ import com.sri.ai.praise.inference.treebased.representation.expression.Expressio
 import com.sri.ai.praise.inference.treebased.representation.expression.ExpressionFactorNetwork;
 import com.sri.ai.praise.inference.treebased.representation.expression.ExpressionVariable;
 import com.sri.ai.praise.inference.treebased.representation.expression.UAIModelToExpressionFactorNetwork;
-import com.sri.ai.praise.model.v1.imports.uai.UAIEvidenceReader;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModel;
-import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 

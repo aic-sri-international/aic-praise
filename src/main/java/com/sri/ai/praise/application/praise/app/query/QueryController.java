@@ -49,7 +49,7 @@ import com.sri.ai.praise.application.praise.app.editor.HOGMCodeArea;
 import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
 import com.sri.ai.praise.application.praise.app.service.ExecuteHOGMQueryService;
 import com.sri.ai.praise.inference.hogm.HOGMQueryError;
-import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.inference.hogm.representation.hogm.antlr.ParsedHOGModel;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 

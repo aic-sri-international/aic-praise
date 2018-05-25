@@ -58,7 +58,7 @@ import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.inference.expressionbased.InferenceForFactorGraphAndEvidence;
-import com.sri.ai.praise.inference.hogm.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.representation.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;
 
 public class InferenceForFactorGraphAndEvidenceTest {

@@ -41,8 +41,8 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.inference.hogm.representation.imports.uai.UAIUtil;
 import com.sri.ai.praise.language.grounded.common.FunctionTable;
-import com.sri.ai.praise.model.v1.imports.uai.UAIUtil;
 
 /**
  * Translator: UAI->HOGMv1 using equalities
