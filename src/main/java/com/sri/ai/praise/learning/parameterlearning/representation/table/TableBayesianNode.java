@@ -57,28 +57,28 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		ArrayList<ArrayList<Integer>> allPossibleParentsAssignments = getAllPossibleParentsAssignments(parents);
 		
 		for(ArrayList<Integer> parentsAssignment : allPossibleParentsAssignments) {
-			for(int nodeAssignment : allPossibleChildAssignments) {
-				Pair<Integer, ArrayList<Integer>> nodeAndParentsAssignement = new Pair<Integer, ArrayList<Integer>>(nodeAssignment,  parentsAssignment);
-				parametersForChildAndParentsAssignment.put(nodeAndParentsAssignement, 1.0);
+			for(int childAssignment : allPossibleChildAssignments) {
+				Pair<Integer, ArrayList<Integer>> childAndParentsAssignement = new Pair<Integer, ArrayList<Integer>>(childAssignment,  parentsAssignment);
+				parametersForChildAndParentsAssignment.put(childAndParentsAssignement, 1.0);
 			}
 			countsForParentsAssignment.put(parentsAssignment, (double) allPossibleChildAssignments.size());
 		}
 	}
 	
 	@Override
-	public void incrementCountForChildAndParentsAssignment(Object nodeValue, List<? extends Object> parentsValues) {
-		boolean nodeValueIsInteger = nodeValue instanceof Integer;
+	public void incrementCountForChildAndParentsAssignment(Object childValue, List<? extends Object> parentsValues) {
+		boolean childValueIsInteger = childValue instanceof Integer;
 		boolean parentsValuesAreIntegers = parentsValues.isEmpty() || parentsValues.get(0) instanceof Integer;
-		if(!nodeValueIsInteger || !parentsValuesAreIntegers) {
+		if(!childValueIsInteger || !parentsValuesAreIntegers) {
 			throw new Error("Values must be Integers.");
 		}
 		
 		double countForThatParentsAssignment = countsForParentsAssignment.get(parentsValues);
 		countsForParentsAssignment.put((ArrayList<Integer>) parentsValues, countForThatParentsAssignment + 1);
 		
-		Pair<Integer, ArrayList<Integer>> nodeAndParentsAssignement = new Pair(nodeValue, parentsValues);
-		double newParameterValue = parametersForChildAndParentsAssignment.get(nodeAndParentsAssignement) + 1;
-		parametersForChildAndParentsAssignment.put(nodeAndParentsAssignement, newParameterValue);
+		Pair<Integer, ArrayList<Integer>> childAndParentsAssignement = new Pair(childValue, parentsValues);
+		double newParameterValue = parametersForChildAndParentsAssignment.get(childAndParentsAssignement) + 1;
+		parametersForChildAndParentsAssignment.put(childAndParentsAssignement, newParameterValue);
 	}
 	
 	@Override
@@ -90,10 +90,10 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 			parametersForChildAndParentsAssignment.put(key, newParameterValue);
 		}
 		
-		fillEntriesWithTheParameterValues();
+		fillEntriesWithParameterValues();
 	}
 	
-	private void fillEntriesWithTheParameterValues() {
+	private void fillEntriesWithParameterValues() {
 		for(Pair<Integer, ArrayList<Integer>> childAndParentsAssignment : parametersForChildAndParentsAssignment.keySet()) {
 			LinkedHashMap<TableVariable, Integer> variablesAndTheirValues = new LinkedHashMap<TableVariable, Integer>();
 			variablesAndTheirValues.put(child, childAndParentsAssignment.first);
