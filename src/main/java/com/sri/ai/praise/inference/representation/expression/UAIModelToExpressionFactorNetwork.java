@@ -37,6 +37,7 @@ import com.sri.ai.praise.model.v1.imports.uai.UAIModelReader;
 import com.sri.ai.util.base.IdentityWrapper;
 
 public class UAIModelToExpressionFactorNetwork {
+	
 	public static ExpressionFactorNetwork convert(UAIModel uaiModel) {
 		return convert(uaiModel,null);
 	}
@@ -45,7 +46,7 @@ public class UAIModelToExpressionFactorNetwork {
 		List<Expression> factorsRepresentedAsExpressions = 
 				createListOfExpressionsrepresentingTheFactorsFromAUAIModel(uaiModel);
 		
-		if (theory ==null) {
+		if (theory == null) {
 			theory =
 					new CompoundTheory(
 							new EqualityTheory(false, true),

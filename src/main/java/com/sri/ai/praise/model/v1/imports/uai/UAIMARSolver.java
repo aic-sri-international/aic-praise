@@ -311,7 +311,7 @@ public class UAIMARSolver {
 				return false;
 			}
 			
-			ExpressionBasedModel factorsAndTypes = new UAIExpressionBasedModel(tables, model);
+			ExpressionBasedModel expressionBasedModel = new UAIExpressionBasedModel(tables, model);
 
 			Expression evidenceExpr = null; 
 			List<Expression> conjuncts = new ArrayList<Expression>();
@@ -343,7 +343,7 @@ public class UAIMARSolver {
 				return false;
 			}
 			
-			inferencer = new InferenceForFactorGraphAndEvidence(factorsAndTypes, false, evidenceExpr, true, theory);
+			inferencer = new InferenceForFactorGraphAndEvidence(expressionBasedModel, false, evidenceExpr, true, theory);
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {

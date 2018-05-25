@@ -47,7 +47,8 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.empiricalevaluation.output.Notifier;
 import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluation;
-import com.sri.ai.praise.inference.DefaultExpressionBasedModel;
+import com.sri.ai.praise.inference.HOGMExpressionBasedModel;
+import com.sri.ai.praise.inference.ExpressionBasedModel;
 import com.sri.ai.praise.modelscontainer.ModelPage;
 import com.sri.ai.util.Util;
 
@@ -142,7 +143,7 @@ public class Evaluation {
 	}
 
 	private String getDomainSizes(String model) {
-		DefaultExpressionBasedModel factorsAndTypes = new DefaultExpressionBasedModel(model);
+		ExpressionBasedModel factorsAndTypes = new HOGMExpressionBasedModel(model);
 		Collection<Type> types = factorsAndTypes.getAdditionalTypes();
 		List<Integer> domainSizes = mapIntoList(types, t -> t.cardinality().intValueExact());
 		String result = Util.join(domainSizes);

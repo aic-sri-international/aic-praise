@@ -88,7 +88,7 @@ import com.sri.ai.praise.application.praise.app.editor.ModelPageEditor;
 import com.sri.ai.praise.application.praise.app.model.ExamplePages;
 import com.sri.ai.praise.application.praise.app.perspective.HOGMPerspective;
 import com.sri.ai.praise.application.praise.app.perspective.Perspective;
-import com.sri.ai.praise.inference.DefaultExpressionBasedModel;
+import com.sri.ai.praise.inference.HOGMExpressionBasedModel;
 import com.sri.ai.praise.inference.ExpressionBasedModel;
 import com.sri.ai.praise.language.ModelLanguage;
 import com.sri.ai.praise.language.translate.TranslatorOptions;
@@ -462,7 +462,7 @@ public class PRAiSEController {
 				// For convenience, pull out all possible queries
 				HOGMParserWrapper parser          = new HOGMParserWrapper();
 				ParsedHOGModel    parsedModel     = parser.parseModel(hogmModel);
-				ExpressionBasedModel   factorsAndTypes = new DefaultExpressionBasedModel(parsedModel);
+				ExpressionBasedModel   factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
 				List<String>      queries         = new ArrayList<>(factorsAndTypes.getMapFromRandomVariableNameToTypeName().keySet());
 				
 				newModel(hogmModel, queries);
