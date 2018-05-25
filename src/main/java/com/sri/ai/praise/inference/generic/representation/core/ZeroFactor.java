@@ -36,7 +36,7 @@ public class ZeroFactor implements Factor {
 
 	@Override
 	public Factor multiply(Factor another) {
-		return ZERO_FACTOR;
+		return this;
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class ZeroFactor implements Factor {
 
 	@Override
 	public Factor normalize() {
-		return this;
+		throw new Error("Zero factor cannot be normalized");
 	}
 
 	@Override
@@ -81,7 +81,6 @@ public class ZeroFactor implements Factor {
 
 	@Override
 	public Factor invert() {
-		// TODO Unsure how to handle this
-		return null;
+		throw new Error("Zero factor cannot be inverted");
 	}
 }
