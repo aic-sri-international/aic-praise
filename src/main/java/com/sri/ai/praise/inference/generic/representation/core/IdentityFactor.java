@@ -37,19 +37,10 @@
  */
 package com.sri.ai.praise.inference.generic.representation.core;
 
-import static com.sri.ai.util.Util.list;
-import static java.util.Collections.unmodifiableList;
-import static com.sri.ai.expresso.helper.Expressions.ONE;
-
-import java.util.List;
 import java.util.Map;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
-import com.sri.ai.praise.inference.generic.representation.expression.ExpressionFactor;
-import com.sri.ai.praise.inference.generic.representation.table.TableFactor;
 
 /**
  * A class representing an {@link Factor} that is an identity factor.
@@ -59,31 +50,17 @@ import com.sri.ai.praise.inference.generic.representation.table.TableFactor;
  * @author braz
  *
  */
-public class IdentityFactor implements Factor {
+public class IdentityFactor extends ConstantFactor {
 	
 	public final static IdentityFactor IDENTITY_FACTOR = new IdentityFactor();
 	
 	private IdentityFactor() {
-	}
-
-	@Override
-	public boolean contains(Variable variable) {
-		return false;
-	}
-
-	@Override
-	public List<? extends Variable> getVariables() {
-		return unmodifiableList(list());
+		super(1.);
 	}
 
 	@Override
 	public Factor multiply(Factor another) {
 		return another;
-	}
-
-	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
-		return this;
 	}
 	
 	@Override
@@ -99,31 +76,6 @@ public class IdentityFactor implements Factor {
 	@Override
 	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
 		return 1.;
-	}
-
-	@Override
-	public Factor normalize() {
-		throw new Error("Identity factor cannot be normalized.");
-	}
-
-	// does not scale well, if we add other factors..
-	@Override
-	public Factor add(Factor another) {
-		Factor result = this; // will not change if another is ZeroFactor
-		if (another instanceof ExpressionFactor){
-			ExpressionFactor anotherExpression = (ExpressionFactor) another;
-			result = anotherExpression.evaluateAsFactor(Plus.make(ONE, (Expression) anotherExpression));
-		}
-		else if (another instanceof TableFactor){
-			TableFactor anotherTable = (TableFactor) another;
-			// TODO
-		}
-		return result;
-	}
-
-	@Override
-	public Factor multiplyByConstant(Number constant) {
-		return null;
 	}
 
 	@Override

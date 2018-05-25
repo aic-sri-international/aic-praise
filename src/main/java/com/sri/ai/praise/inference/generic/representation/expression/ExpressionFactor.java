@@ -43,7 +43,6 @@ import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.praise.inference.generic.representation.core.IdentityFactor.IDENTITY_FACTOR;
 
 import java.util.List;
 import java.util.Map;
@@ -58,7 +57,9 @@ import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
+import com.sri.ai.praise.inference.generic.representation.core.ConstantFactor;
 import com.sri.ai.praise.inference.generic.representation.core.IdentityFactor;
+import com.sri.ai.praise.inference.generic.representation.core.ZeroFactor;
 
 /**
  * A {@link Factor} represented by an {@link Expression}.
@@ -105,11 +106,21 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	@Override
 	public Factor multiply(Factor another) {
 		Factor result;
-		if (another instanceof IdentityFactor) {
-			result = this;
+		if (another instanceof ConstantFactor) {
+			if(another instanceof IdentityFactor) {
+				result = this;
+			}
+			if(another instanceof ZeroFactor) {
+				result = another;
+			}
+			result = ((ConstantFactor) another).multiply(this);
+		}
+		else if (another instanceof ExpressionFactor){
+			result = evaluateAsFactor(Times.make(this, (Expression) another));
 		}
 		else {
-			result = evaluateAsFactor(Times.make(this, (Expression) another));
+			throw new Error("Trying to multiply factors that belong to incompatible classes : classes are "
+					+ "respectively " + this.getClass() + " and " + another.getClass());
 		}
 		return result;
 	}
@@ -159,21 +170,24 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	@Override
 	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
-		// TODO Auto-generated method stub
 		//TODO replace variables by it's value and evaluate
 		return null;
 	}
 
 	@Override
 	public Factor normalize() {
-		throw new Error("An Expression factor cannot be normalized");
+		throw new Error("An Expression factor cannot be normalized.");
 	}
 
 	@Override
 	public Factor add(Factor another) {
 		Factor result;
-		if (another instanceof IdentityFactor) {
-			result = this;
+		if (another instanceof ConstantFactor) {
+			result = ((ConstantFactor) another).add(this);
+		}
+		else if(another.getClass() != this.getClass()) {
+			throw new Error("Trying to add different types of factors: this is a " +
+							this.getClass() + "and another is a " + another.getClass());
 		}
 		else {
 			result = evaluateAsFactor(Plus.make(this, (Expression) another));
@@ -182,20 +196,15 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	}
 
 	@Override
-	public Factor multiplyByConstant(Number constant) {
-		return multiply(IDENTITY_FACTOR.multiplyByConstant(constant));
-	}
-
-	@Override
 	public boolean isZero() {
-		return false;
+		boolean result = getInnerExpression().equals(ZERO);
+		return result;
 	}
 
 	@Override
 	public Factor invert() {
 		Factor result;
-		Expression thisExpression = (Expression) this;
-		if(thisExpression.equals(ZERO)) {
+		if(isZero()) {
 			throw new Error("Division by zero impossible.");
 		}
 		else {
