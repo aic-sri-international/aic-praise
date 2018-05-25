@@ -41,7 +41,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.DefaultExpressionBasedModel;
+import com.sri.ai.praise.inference.expressionbased.DefaultExpressionBasedModel;
 import com.sri.ai.praise.language.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.model.v1.HOGMSortDeclaration;
 

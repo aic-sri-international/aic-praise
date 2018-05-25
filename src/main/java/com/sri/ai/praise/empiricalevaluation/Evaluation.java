@@ -47,8 +47,8 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.praise.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.empiricalevaluation.output.Notifier;
 import com.sri.ai.praise.empiricalevaluation.solverevaluation.SolverEvaluation;
-import com.sri.ai.praise.inference.HOGMExpressionBasedModel;
-import com.sri.ai.praise.inference.ExpressionBasedModel;
+import com.sri.ai.praise.inference.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.HOGMExpressionBasedModel;
 import com.sri.ai.praise.modelscontainer.ModelPage;
 import com.sri.ai.util.Util;
 

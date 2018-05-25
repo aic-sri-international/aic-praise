@@ -48,8 +48,8 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.inference.HOGMQueryResult;
-import com.sri.ai.praise.inference.HOGMQueryRunner;
+import com.sri.ai.praise.inference.hogm.HOGMQueryResult;
+import com.sri.ai.praise.inference.hogm.HOGMQueryRunner;
 
 public class HOGMQueryRunnerTest {
 	

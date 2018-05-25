@@ -75,8 +75,8 @@ import com.sri.ai.grinder.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.inference.ExpressionBasedModel;
-import com.sri.ai.praise.inference.InferenceForFactorGraphAndEvidence;
+import com.sri.ai.praise.inference.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.inference.expressionbased.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.language.grounded.common.FunctionTable;
 import com.sri.ai.praise.language.grounded.common.GraphicalNetwork;
 

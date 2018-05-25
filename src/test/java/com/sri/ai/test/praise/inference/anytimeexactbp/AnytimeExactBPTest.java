@@ -30,15 +30,15 @@ import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.praise.PRAiSEUtil;
-import com.sri.ai.praise.inference.anytimeexactbp.AnytimeExactBP;
-import com.sri.ai.praise.inference.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.inference.exactbp.api.ExactBP;
-import com.sri.ai.praise.inference.exactbp.core.AbstractExactBP;
-import com.sri.ai.praise.inference.representation.api.Factor;
-import com.sri.ai.praise.inference.representation.api.Variable;
-import com.sri.ai.praise.inference.representation.expression.ExpressionExactBP;
-import com.sri.ai.praise.inference.representation.expression.ExpressionFactor;
-import com.sri.ai.praise.inference.representation.expression.ExpressionFactorNetwork;
+import com.sri.ai.praise.inference.treebased.anytimeexactbp.AnytimeExactBP;
+import com.sri.ai.praise.inference.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
+import com.sri.ai.praise.inference.treebased.exactbp.api.ExactBP;
+import com.sri.ai.praise.inference.treebased.exactbp.core.AbstractExactBP;
+import com.sri.ai.praise.inference.treebased.representation.api.Factor;
+import com.sri.ai.praise.inference.treebased.representation.api.Variable;
+import com.sri.ai.praise.inference.treebased.representation.expression.ExpressionExactBP;
+import com.sri.ai.praise.inference.treebased.representation.expression.ExpressionFactor;
+import com.sri.ai.praise.inference.treebased.representation.expression.ExpressionFactorNetwork;
 import com.sri.ai.util.base.IdentityWrapper;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 

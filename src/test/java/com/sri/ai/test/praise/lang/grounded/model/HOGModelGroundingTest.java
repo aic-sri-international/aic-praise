@@ -47,8 +47,8 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.praise.inference.HOGMExpressionBasedModel;
-import com.sri.ai.praise.inference.ExpressionBasedModel;
+import com.sri.ai.praise.inference.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.inference.hogm.HOGMExpressionBasedModel;
 import com.sri.ai.praise.language.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMParserWrapper;
 import com.sri.ai.praise.model.v1.hogm.antlr.ParsedHOGModel;
