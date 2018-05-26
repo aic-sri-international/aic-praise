@@ -161,12 +161,18 @@ public class TableFactor implements Factor {
 	}
 	
 	public <T extends Variable, U extends Object> Double getEntryFor(List<T> variables, List<U> variableValues ) {
-		Map<T, U> map = Util.mapFromListOfKeysAndListOfValues(variables, variableValues);
-		return getEntryFor(map);
+		Map<T, U> variablesAndTheirValues = Util.mapFromListOfKeysAndListOfValues(variables, variableValues);
+		return getEntryFor(variablesAndTheirValues);
 	}
 	
 	public void setEntryFor(Map<? extends Variable, ? extends Object> variableValues, Double newEntryValue) {
 		int entryPosition = fromMapOfVariableValuesToEntryPosition(variableValues);
+		entries.set(entryPosition, newEntryValue);
+	}
+	
+	public <T extends Variable, U extends Object> void setEntryFor(List<T> variables, List<U> variableValues, Double newEntryValue) {
+		Map<T, U> variablesAndTheirValues = Util.mapFromListOfKeysAndListOfValues(variables, variableValues);
+		int entryPosition = fromMapOfVariableValuesToEntryPosition(variablesAndTheirValues);
 		entries.set(entryPosition, newEntryValue);
 	}
 	

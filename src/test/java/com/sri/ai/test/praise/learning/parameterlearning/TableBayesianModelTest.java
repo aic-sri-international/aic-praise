@@ -22,7 +22,7 @@ public class TableBayesianModelTest {
 	static final TableVariable coldVariable = new TableVariable("cold", 2);
 	
 	// Simple model with 3 nodes: Sick as child and [Sun, Cold] as parents 
-	static final TableBayesianModel sickSunColdModel = generateSickSunColdModel();
+	static TableBayesianModel sickSunColdModel = generateSickSunColdModel();
 	
 	static TableBayesianModel generateSickSunColdModel() {
 		ArrayList<TableVariable> parentsOfSick = arrayList(sunVariable, coldVariable);

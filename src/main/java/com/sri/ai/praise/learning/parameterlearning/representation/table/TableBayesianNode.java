@@ -3,6 +3,7 @@
 package com.sri.ai.praise.learning.parameterlearning.representation.table;
 
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.list;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -54,7 +55,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 	@Override
 	public void setInitialCountsForAllPossibleChildAndParentsAssignments() {
 		ArrayList<Integer> allPossibleChildAssignments = (ArrayList<Integer>) child.getValues();
-		ArrayList<ArrayList<Integer>> allPossibleParentsAssignments = getAllPossibleParentsAssignments(parents);
+		List<ArrayList<Integer>> allPossibleParentsAssignments = getAllPossibleVariablesAssignments(parents);
 		
 		for(ArrayList<Integer> parentsAssignment : allPossibleParentsAssignments) {
 			for(int childAssignment : allPossibleChildAssignments) {
@@ -115,19 +116,19 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		return allVariables;
 	}
 	
-	private ArrayList<ArrayList<Integer>> getAllPossibleParentsAssignments(ArrayList<TableVariable> parents) {
-		ArrayList<ArrayList<Integer>> allPossibleParentsAssignments = new ArrayList<ArrayList<Integer>>();
-		if(parents.isEmpty()) {
-			allPossibleParentsAssignments.add(new ArrayList<Integer>());
+	private List<ArrayList<Integer>> getAllPossibleVariablesAssignments(ArrayList<TableVariable> variables) {
+		List<ArrayList<Integer>> allPossibleVariablesAssignments = list();
+		if(variables.isEmpty()) {
+			allPossibleVariablesAssignments.add(new ArrayList<Integer>());
 		}
 		else {
-			Iterator<ArrayList<Integer>> iteratorForParentsAssignments = this.getCartesianProduct(parents);
+			Iterator<ArrayList<Integer>> iteratorForParentsAssignments = TableFactor.getCartesianProduct(variables);
 			while(iteratorForParentsAssignments.hasNext()) {
-				allPossibleParentsAssignments.add(iteratorForParentsAssignments.next());
+				allPossibleVariablesAssignments.add(iteratorForParentsAssignments.next());
 			}
 		}
 			
-		return allPossibleParentsAssignments;
+		return allPossibleVariablesAssignments;
 	}
 	
 	public static void main(String[] args) {
@@ -135,19 +136,19 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		TableVariable sun = new TableVariable("sun", 2);
 		TableVariable cold = new TableVariable("cold", 2);
 	    
-	    ArrayList<TableVariable> parents = new ArrayList<TableVariable>();
-	    parents.add(sun);
-	    parents.add(cold);
+	    ArrayList<TableVariable> parentsOfSick = new ArrayList<TableVariable>();
+	    parentsOfSick.add(sun);
+	    parentsOfSick.add(cold);
 	    
-	    TableBayesianNode node = new TableBayesianNode(sick, parents);
+	    TableBayesianNode node = new TableBayesianNode(sick, parentsOfSick);
 	    node.setInitialCountsForAllPossibleChildAndParentsAssignments();
 	    
-	    int nodeValue = 1;
+	    int childValue = 1;
 	    ArrayList<Integer> parentsValues = new ArrayList<Integer>();
 	    parentsValues.add(0);
 	    parentsValues.add(1);
 	    
-	    node.incrementCountForChildAndParentsAssignment(nodeValue, parentsValues);
+	    node.incrementCountForChildAndParentsAssignment(childValue, parentsValues);
 	    node.normalizeParametersAndFillEntries();
 	    System.out.println(node.getParameters());
 	    
@@ -158,7 +159,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 	    
 	    System.out.println("Testing entries:");
 	    System.out.println("entryFor(" + variablesAndTheirValues.get(sick) + ", [" + variablesAndTheirValues.get(sun) + ", " + variablesAndTheirValues.get(cold) + "]) = " + node.getEntryFor(variablesAndTheirValues));
-	    System.out.println("all entries: " + node.getEntries());
+	    // System.out.println("all entries: " + node.getEntries());
 	}
 
 }
