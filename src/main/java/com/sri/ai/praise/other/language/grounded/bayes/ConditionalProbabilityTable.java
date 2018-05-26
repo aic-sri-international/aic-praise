@@ -48,7 +48,7 @@ import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**
- * ExpressionRepresentation of a Bayesian Network Conditional Probability Table - P(C | P1,...,Pn).
+ * Expression representation of a Bayesian Network Conditional Probability Table - P(C | P1,...,Pn ).
  * 
  * @author oreilly
  *
@@ -57,41 +57,41 @@ import com.sri.ai.util.collect.CartesianProductEnumeration;
 public class ConditionalProbabilityTable {
 	public final double DEFAULT_ROUNDING_THRESHOLD = 1e-8;
 	
-	private List<Integer> parentVarIdxs = new ArrayList<>();
-	private Integer childVarIdx;
+	private List<Integer> parentVariableIndices = new ArrayList<>();
+	private Integer childVariableIndex;
 	private FunctionTable functionTable;
 	
 	/**
 	 * Constructor.
-	 * @param parentVarIdxs
+	 * @param parentVariableIndices
 	 *        the parent variable indexes (must match up with the first n cardinality positions
 	 *        in the passed in table).
-	 * @param childVarIdx
+	 * @param childVariableIndex
 	 *        the child variable index (i.e. P(C | P1,...,Pn))
 	 * @param table
 	 *        a function table representation of the CPT. Note: The child index should correspond to the
 	 *        last cardinality value position on the function table provided.
 	 */
-	public ConditionalProbabilityTable(List<Integer> parentVarIdxs, int childVarIdx, FunctionTable table) {
-		if (parentVarIdxs.contains(childVarIdx)) {
-			throw new IllegalArgumentException("Child variable index, "+childVarIdx+", is also listed as a parent idx "+parentVarIdxs);
+	public ConditionalProbabilityTable(List<Integer> parentVariableIndices, int childVariableIndex, FunctionTable table) {
+		if (parentVariableIndices.contains(childVariableIndex)) {
+			throw new IllegalArgumentException("Child variable index, "+childVariableIndex+", is also listed as a parent idx "+parentVariableIndices);
 		}
 		
-		this.parentVarIdxs.addAll(parentVarIdxs);
-		this.childVarIdx   = childVarIdx;
+		this.parentVariableIndices.addAll(parentVariableIndices);
+		this.childVariableIndex   = childVariableIndex;
 		this.functionTable = table;
 	}
 	
 	public int numberParentVariables() {
-		return parentVarIdxs.size();
+		return parentVariableIndices.size();
 	}
 	
 	public List<Integer> getParentVariableIndexes() {
-		return parentVarIdxs;
+		return parentVariableIndices;
 	}
 	
 	public Integer getChildVariableIndex() {
-		return childVarIdx;
+		return childVariableIndex;
 	}
 	
 	/**
@@ -140,13 +140,13 @@ public class ConditionalProbabilityTable {
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof ConditionalProbabilityTable) {
 			ConditionalProbabilityTable other = (ConditionalProbabilityTable) obj;
-			return this.childVarIdx.equals(other.childVarIdx) && this.parentVarIdxs.equals(other.parentVarIdxs) && this.functionTable.equals(other.functionTable);
+			return this.childVariableIndex.equals(other.childVariableIndex) && this.parentVariableIndices.equals(other.parentVariableIndices) && this.functionTable.equals(other.functionTable);
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return this.childVarIdx.hashCode() + this.parentVarIdxs.hashCode() + this.functionTable.hashCode();
+		return this.childVariableIndex.hashCode() + this.parentVariableIndices.hashCode() + this.functionTable.hashCode();
 	}
 }

@@ -48,7 +48,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.praise.core.model.core.hogm.export.HuginOutput;
 import com.sri.ai.praise.core.model.core.uai.UAIModel;
 import com.sri.ai.praise.other.language.ModelLanguage;
-import com.sri.ai.praise.other.language.grounded.transform.XFormMarkovToBayes;
+import com.sri.ai.praise.other.language.grounded.transform.TransformMarkovToBayes;
 
 /**
  * Translator: UAI->HuginDotNet
@@ -83,6 +83,6 @@ public class UAI_to_HuginDotNet_Translator extends AbstractUAI_to_Target_Transla
 		
 		//
 		// 2. Transform the UAI Markov Network representation to the Hugin dot Net Bayesian Network format.
-		XFormMarkovToBayes.transform(uaiModel, new HuginOutput(huginDotNetModelWriter, varIdxToName, varIdxToRangeValues));
+		TransformMarkovToBayes.transform(uaiModel, new HuginOutput(huginDotNetModelWriter, varIdxToName, varIdxToRangeValues));
 	}
 }

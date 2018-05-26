@@ -51,22 +51,22 @@ import com.sri.ai.praise.core.model.core.hogm.components.HOGMSortDeclaration;
 
 @Beta
 public class HOGModel implements Model {
-	private String                              inputModel            = null;
+	private String                              modelString            = null;
 	private List<HOGMSortDeclaration>           sorts                 = new ArrayList<>();
 	private List<HOGMConstantDeclaration>       constants             = new ArrayList<>();
 	private List<HOGMRandomVariableDeclaration> randoms               = new ArrayList<>();
 	private List<Expression>                    conditionedPotentials = new ArrayList<>();
 	
-	public HOGModel(String inputModel, Expression modelTupleExpr) {
-		this(inputModel, 
-				extractSorts(modelTupleExpr), 
-				extractConstants(modelTupleExpr), 
-				extractRandom(modelTupleExpr),
-				extractConditionedPotentials(modelTupleExpr));
+	public HOGModel(String modelString, Expression modelTupleExpression) {
+		this(modelString, 
+				extractSorts(modelTupleExpression), 
+				extractConstants(modelTupleExpression), 
+				extractRandom(modelTupleExpression),
+				extractConditionedPotentials(modelTupleExpression));
 	}
 	
-	public HOGModel(String inputModel, List<HOGMSortDeclaration> sorts, List<HOGMConstantDeclaration> constants, List<HOGMRandomVariableDeclaration> randoms, List<Expression> conditionedPotentials) {
-		this.inputModel = inputModel;
+	public HOGModel(String modelString, List<HOGMSortDeclaration> sorts, List<HOGMConstantDeclaration> constants, List<HOGMRandomVariableDeclaration> randoms, List<Expression> conditionedPotentials) {
+		this.modelString = modelString;
 		// Ensure the in-built sorts are included.
 		for (HOGMSortDeclaration inBuiltSort : HOGMSortDeclaration.IN_BUILT_SORTS) {
 			if (!sorts.contains(inBuiltSort)) {
@@ -85,8 +85,8 @@ public class HOGModel implements Model {
 		this.conditionedPotentials = Collections.unmodifiableList(this.conditionedPotentials);
 	}
 
-	public String getInputModel() {
-		return inputModel;
+	public String modelString() {
+		return modelString;
 	}
 
 	public List<HOGMSortDeclaration> getSortDeclarations() {

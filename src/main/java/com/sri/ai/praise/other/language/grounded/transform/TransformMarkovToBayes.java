@@ -61,7 +61,7 @@ import com.sri.ai.util.collect.CartesianProductEnumeration;
  *
  */
 @Beta
-public class XFormMarkovToBayes {
+public class TransformMarkovToBayes {
 	public static final int MAX_NUM_ALLOWED_PARENTS_IN_CPT = 15;
 	
 	public static interface BayesOutputListener {

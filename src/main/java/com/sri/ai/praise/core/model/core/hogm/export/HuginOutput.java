@@ -45,7 +45,7 @@ import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.other.language.grounded.bayes.ConditionalProbabilityTable;
-import com.sri.ai.praise.other.language.grounded.transform.XFormMarkovToBayes;
+import com.sri.ai.praise.other.language.grounded.transform.TransformMarkovToBayes;
 
 /**
  * Utility class for generating a Hugin dot net bayesian network output file based on a general purpose 
@@ -55,21 +55,21 @@ import com.sri.ai.praise.other.language.grounded.transform.XFormMarkovToBayes;
  *
  */
 @Beta
-public class HuginOutput implements XFormMarkovToBayes.BayesOutputListener {
+public class HuginOutput implements TransformMarkovToBayes.BayesOutputListener {
 	private Writer writer;
-	private Map<Integer, String> varIdxToName;
-	private Map<Integer, List<String>> varIdxToRangeValues;
+	private Map<Integer, String> variableIndexToName;
+	private Map<Integer, List<String>> variableIndexToRangeValues;
 	
-	public HuginOutput(Writer writer, Map<Integer, String> varIdxToName, Map<Integer, List<String>> varIdxToRangeValues) {
+	public HuginOutput(Writer writer, Map<Integer, String> variableIndexToName, Map<Integer, List<String>> variableIndexToRangeValues) {
 		this.writer              = writer;
-		this.varIdxToName        = varIdxToName;
-		this.varIdxToRangeValues = varIdxToRangeValues;
+		this.variableIndexToName        = variableIndexToName;
+		this.variableIndexToRangeValues = variableIndexToRangeValues;
 		
 		outputVariables();
 	}
 	
 	//
-	// START-XFormMarkovToBayes.BayesOutputListener
+	// START-TransformMarkovToBayes.BayesOutputListener
 	@Override
 	public void newCPT(ConditionalProbabilityTable cpt) {
 		StringJoiner sj = new StringJoiner("\n");
@@ -80,7 +80,7 @@ public class HuginOutput implements XFormMarkovToBayes.BayesOutputListener {
 		
 		output(sj.toString());
 	}
-	// END-XFormMarkovToBayes.BayesOutputListener
+	// END-TransformMarkovToBayes.BayesOutputListener
 	//
 	
 	//
@@ -88,8 +88,8 @@ public class HuginOutput implements XFormMarkovToBayes.BayesOutputListener {
 	//
 	
 	private void outputVariables() {
-		for (int i = 0; i < varIdxToName.size(); i++) {
-			String rv = varIdxToName.get(i);
+		for (int i = 0; i < variableIndexToName.size(); i++) {
+			String rv = variableIndexToName.get(i);
 			
 			StringJoiner sj = new StringJoiner("\n");
 			
@@ -122,7 +122,7 @@ public class HuginOutput implements XFormMarkovToBayes.BayesOutputListener {
 	private String getRange(Integer rvIdx) {
 		// (\"false\" \"true\");
 		StringJoiner sj = new StringJoiner(" ", "(", ");");
-		for (String rangeValue : this.varIdxToRangeValues.get(rvIdx)) {
+		for (String rangeValue : this.variableIndexToRangeValues.get(rvIdx)) {
 			sj.add("\""+rangeValue.toString()+"\"");
 		}
 		return sj.toString();
@@ -131,10 +131,10 @@ public class HuginOutput implements XFormMarkovToBayes.BayesOutputListener {
 	private String getPotentialSignature(ConditionalProbabilityTable cpt) {
 		StringJoiner sj = new StringJoiner(" ", "(", ")");
 		
-		sj.add(getLegalHuginId(varIdxToName.get(cpt.getChildVariableIndex())));
+		sj.add(getLegalHuginId(variableIndexToName.get(cpt.getChildVariableIndex())));
 		sj.add("|");
 		for (Integer p : cpt.getParentVariableIndexes()) {
-			sj.add(getLegalHuginId(varIdxToName.get(p)));
+			sj.add(getLegalHuginId(variableIndexToName.get(p)));
 		}
 		
 		return sj.toString();
