@@ -84,8 +84,13 @@ public class TableBayesianModelTest {
 		DefaultDataset dataset = new DefaultDataset(datapoints);
 		
 		// Learning
+		long startTime = System.currentTimeMillis();
 		sickSunColdModel.learnModelParametersFromCompleteData(dataset);
-		List<TableBayesianNode> learnedNodes = (List<TableBayesianNode>) sickSunColdModel.getNodes();
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+	    System.out.println("Elapsed time for learning with " + numberOfDatapoints + " datapoints: " + elapsedTime + " miliseconds");
+		
+	    List<TableBayesianNode> learnedNodes = (List<TableBayesianNode>) sickSunColdModel.getNodes();
 		
 		for (TableBayesianNode node : learnedNodes) {
 			System.out.println("Parameters for node: " + node.getChild().getName());

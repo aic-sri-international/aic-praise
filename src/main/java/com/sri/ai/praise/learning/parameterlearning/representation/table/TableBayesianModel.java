@@ -27,6 +27,7 @@ public class TableBayesianModel extends TableFactorNetwork implements BayesianMo
 	}
 	
 	public static void main(String[] args) {
+		/*
 		// Model
 		TableVariable sickVariable = new TableVariable("sick", 2);
 		TableVariable sunVariable = new TableVariable("sun", 2);
@@ -59,6 +60,7 @@ public class TableBayesianModel extends TableFactorNetwork implements BayesianMo
 	    for(TableBayesianNode node : learnedNodes) {
 	    	System.out.println(node.getParameters());
 	    }
+	    */
 	}
 	
 }
