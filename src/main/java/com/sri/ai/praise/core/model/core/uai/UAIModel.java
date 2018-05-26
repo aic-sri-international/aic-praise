@@ -46,7 +46,6 @@ import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
-import com.sri.ai.praise.other.language.grounded.markov.MarkovNetwork;
 
 /**
  * In memory representation of an Uncertainty in Artificial Intelligence (UAI) 

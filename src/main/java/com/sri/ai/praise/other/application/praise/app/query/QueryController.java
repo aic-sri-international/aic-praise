@@ -44,7 +44,7 @@ import java.util.StringJoiner;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.core.hogm.HOGMQueryError;
-import com.sri.ai.praise.core.model.core.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.core.model.core.hogm.HOGModel;
 import com.sri.ai.praise.other.application.praise.app.FXUtil;
 import com.sri.ai.praise.other.application.praise.app.PRAiSEController;
 import com.sri.ai.praise.other.application.praise.app.editor.HOGMCodeArea;
@@ -225,7 +225,7 @@ public class QueryController {
 		outputAccordion.getPanes().clear();
 	}
 	
-	private void displayQueryErrors(String query, List<HOGMQueryError> queryErrors, ParsedHOGModel parsedModel, long millisecondsToCompute) {
+	private void displayQueryErrors(String query, List<HOGMQueryError> queryErrors, HOGModel parsedModel, long millisecondsToCompute) {
 		String title = "Query '" + query + "' encountered " + queryErrors.size() + " error(s) when attempting to compute answer (took " + Util.toHoursMinutesAndSecondsString(millisecondsToCompute) + ")";
 		ListView<HOGMQueryError> errors = new ListView<>(FXCollections.observableList(queryErrors));
 		// errors.setFixedCellSize(24);
@@ -263,7 +263,7 @@ public class QueryController {
 		errors.getSelectionModel().selectFirst();
 	}
 	
-	private void displayQueryAnswer(String query, Expression result, ParsedHOGModel parsedModel, long millisecondsToCompute) {
+	private void displayQueryAnswer(String query, Expression result, HOGModel parsedModel, long millisecondsToCompute) {
 		String answer = "P(" + query + " | ... ) = " + result;
 		String timeTaken = Util.toHoursMinutesAndSecondsString(millisecondsToCompute);
 		String title  = "Query took " + timeTaken + " to compute '" + answer + "'";
@@ -292,7 +292,7 @@ public class QueryController {
 		showResultPane(resultPane);
 	}
 	
-	private HOGMCodeArea createParsedModelView(ParsedHOGModel parseModel) {
+	private HOGMCodeArea createParsedModelView(HOGModel parseModel) {
 		HOGMCodeArea result = new HOGMCodeArea();
 		StringJoiner sj = new StringJoiner("\n");
 		if (parseModel == null) {

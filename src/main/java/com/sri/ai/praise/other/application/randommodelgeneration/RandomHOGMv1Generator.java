@@ -71,7 +71,7 @@ import com.sri.ai.grinder.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.core.model.core.hogm.HOGMSortDeclaration;
+import com.sri.ai.praise.core.model.core.hogm.components.HOGMSortDeclaration;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.math.Rational;

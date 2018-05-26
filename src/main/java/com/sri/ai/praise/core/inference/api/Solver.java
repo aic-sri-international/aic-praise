@@ -37,19 +37,6 @@
  */
 package com.sri.ai.praise.core.inference.api;
 
-import com.sri.ai.praise.core.model.core.common.SolverConfiguration;
-import com.sri.ai.praise.core.model.core.common.SolverResult;
-import com.sri.ai.praise.other.language.ModelLanguage;
-
 public interface Solver {
-	String getName();
-	SolverConfiguration getConfiguration();
-	void setConfiguration(SolverConfiguration configuration);
-	
-	ModelLanguage getExpectedModelLanguage();
-	
-	default SolverResult solve(String solveRequestId, ModelLanguage modelLanguage, String model, String query) 
-		throws Exception {
-		throw new UnsupportedOperationException(getClass().getName() + " does not support solve probability evidence evaluations");
-	}
+
 }

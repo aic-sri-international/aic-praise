@@ -9,10 +9,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.sri.ai.praise.core.model.core.treebased.representation.Table.TableFactor;
-import com.sri.ai.praise.core.model.core.treebased.representation.Table.TableFactorNetwork;
-import com.sri.ai.praise.core.model.core.treebased.representation.Table.TableVariable;
-import com.sri.ai.praise.core.model.core.treebased.representation.api.Factor;
+import com.sri.ai.praise.core.model.core.treebased.Table.TableFactor;
+import com.sri.ai.praise.core.model.core.treebased.Table.TableFactorNetwork;
+import com.sri.ai.praise.core.model.core.treebased.Table.TableVariable;
+import com.sri.ai.praise.core.model.core.treebased.api.Factor;
 import com.sri.ai.praise.core.model.core.uai.UAIModel;
 import com.sri.ai.praise.core.model.core.uai.UAIModelReader;
 import com.sri.ai.util.Util;

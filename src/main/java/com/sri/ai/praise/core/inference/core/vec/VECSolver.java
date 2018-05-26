@@ -47,14 +47,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.praise.core.model.core.common.AbstractSolver;
-import com.sri.ai.praise.core.model.core.common.SolverResult;
+import com.sri.ai.praise.core.inference.core.common.AbstractSolver;
+import com.sri.ai.praise.core.inference.core.common.SolverResult;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.praise.other.language.translate.Translator;
 import com.sri.ai.praise.other.language.translate.TranslatorFactory;
 
 /**
- * Wrapper around Vibhav's UAI 2014 Solver, available from:<br>
+ * Wrapper around Vibhav's UAI 2014 ExternalProcessSolver, available from:<br>
  * 
  * http://www.hlt.utdallas.edu/~vgogate/vec-uai14.tar.gz
  * 

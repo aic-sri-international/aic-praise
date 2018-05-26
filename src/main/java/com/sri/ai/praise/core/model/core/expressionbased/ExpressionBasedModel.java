@@ -11,8 +11,9 @@ import java.util.StringJoiner;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
+import com.sri.ai.praise.core.model.api.Model;
 
-public class ExpressionBasedModel {
+public class ExpressionBasedModel implements Model {
 
 	protected Map<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>();
 	protected Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();

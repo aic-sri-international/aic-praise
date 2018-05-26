@@ -38,7 +38,7 @@
 package com.sri.ai.praise.other.language.grounded.bayes;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.other.language.grounded.common.GraphicalNetwork;
+import com.sri.ai.praise.core.model.core.uai.GraphicalNetwork;
 
 /**
  * Basic representation of a Bayesian Network.

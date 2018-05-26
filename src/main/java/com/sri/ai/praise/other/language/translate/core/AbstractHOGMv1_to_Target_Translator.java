@@ -46,9 +46,9 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.core.model.core.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.core.model.core.hogm.HOGModel;
+import com.sri.ai.praise.core.model.core.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.model.core.hogm.syntax.HOGMParserWrapper;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.util.Util;
 
@@ -75,7 +75,7 @@ public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTransl
 		// 1. Get the HOGM FactorNetwork Definition and Parse It
 		String hogmv1Model = Util.readAll(inputModelReaders[0]);
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
-		ParsedHOGModel    parsedModel     = parser.parseModel(hogmv1Model);
+		HOGModel    parsedModel     = parser.parseModel(hogmv1Model);
 		ExpressionBasedModel   factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
 		
 		// Each additional input is treated as an evidence expression

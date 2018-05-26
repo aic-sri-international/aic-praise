@@ -47,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.core.uai.UAIResultReading;
 
 /**
  * Utility routine for comparing different UAI results.

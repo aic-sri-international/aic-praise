@@ -50,25 +50,25 @@ import com.sri.ai.grinder.core.solver.Integration;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.group.Sum;
 import com.sri.ai.grinder.group.SumProduct;
-import com.sri.ai.praise.core.model.core.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.core.model.core.hogm.HOGModel;
 import com.sri.ai.util.base.Pair;
 
 @Beta
 public class HOGMQueryResult {
 	private String               queryString           = null;
 	private Expression           queryExpression       = null;
-	private ParsedHOGModel       parsedModel           = null;
+	private HOGModel       parsedModel           = null;
 	private Expression           result                = null;
 	private List<HOGMQueryError> errors                = new ArrayList<>();
 	private long                 millisecondsToCompute = 0L;
 	private int                  numberOfSummations    = -1;
 	private List<Integration>    summations            = null;
 	
-	public HOGMQueryResult(String queryString, Expression queryExpression, ParsedHOGModel parsedModel, Pair<Expression, Long> resultAndTime) {
+	public HOGMQueryResult(String queryString, Expression queryExpression, HOGModel parsedModel, Pair<Expression, Long> resultAndTime) {
 		this(queryString, queryExpression, parsedModel, resultAndTime.first, resultAndTime.second);
 	}
 
-	public HOGMQueryResult(String queryString, Expression queryExpression, ParsedHOGModel parsedModel, Expression result, long millisecondsToCompute) {
+	public HOGMQueryResult(String queryString, Expression queryExpression, HOGModel parsedModel, Expression result, long millisecondsToCompute) {
 		this.queryString           = queryString;
 		this.queryExpression       = queryExpression;
 		this.parsedModel           = parsedModel;
@@ -76,7 +76,7 @@ public class HOGMQueryResult {
 		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
-	public HOGMQueryResult(String queryString, ParsedHOGModel parsedModel, List<HOGMQueryError> errors, long millisecondsToCompute) {
+	public HOGMQueryResult(String queryString, HOGModel parsedModel, List<HOGMQueryError> errors, long millisecondsToCompute) {
 		this.queryString = queryString;
 		this.queryExpression = null;
 		this.parsedModel = parsedModel;
@@ -116,7 +116,7 @@ public class HOGMQueryResult {
 		return queryExpression;
 	}
 	
-	public ParsedHOGModel getParsedModel() {
+	public HOGModel getParsedModel() {
 		return parsedModel;
 	}
 	

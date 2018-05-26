@@ -42,9 +42,9 @@ import java.util.List;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.HOGMSortDeclaration;
+import com.sri.ai.praise.core.model.core.hogm.components.HOGMSortDeclaration;
+import com.sri.ai.praise.core.model.core.uai.GraphicalNetwork;
 import com.sri.ai.praise.core.model.core.uai.UAIUtil;
-import com.sri.ai.praise.other.language.grounded.common.GraphicalNetwork;
 
 @Beta
 public class UAI_to_ExpressionBased_Translator extends ExpressionBasedModel {

@@ -71,7 +71,7 @@ public class Notifier {
 		String duration = toHoursMinutesAndSecondsString(solverEvaluationResult.averageInferenceTimeInMilliseconds);
 		String solverName = solverEvaluationResult.solver.getName();
 		String problemName = solverEvaluationResult.problem.name;
-		notify("Solver " + solverName + " took an average inference time of " + duration + " to solve " + problemName);
+		notify("ExternalProcessSolver " + solverName + " took an average inference time of " + duration + " to solve " + problemName);
 	}
 
 	public void notifyAboutTotalEvaluationTime(long evaluationStart, long evaluationEnd) {

@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.inference.core.samiam;
 
-import com.sri.ai.praise.core.model.core.common.AbstractSolver;
+import com.sri.ai.praise.core.inference.core.common.AbstractSolver;
 import com.sri.ai.praise.other.language.ModelLanguage;
 
 /**

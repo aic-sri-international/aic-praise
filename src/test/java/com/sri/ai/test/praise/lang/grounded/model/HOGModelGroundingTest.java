@@ -48,9 +48,9 @@ import org.junit.Test;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.core.model.core.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.core.model.core.hogm.HOGModel;
+import com.sri.ai.praise.core.model.core.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.model.core.hogm.syntax.HOGMParserWrapper;
 import com.sri.ai.praise.other.language.grounded.model.HOGModelGrounding;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;
@@ -81,7 +81,7 @@ public class HOGModelGroundingTest {
 		sj.add("if country = Russia then if votePutin > 5 then president = Putin else not president = Putin;");
 		
 		HOGMParserWrapper parser          = new HOGMParserWrapper();
-		ParsedHOGModel    parsedModel     = parser.parseModel(sj.toString());
+		HOGModel    parsedModel     = parser.parseModel(sj.toString());
 		ExpressionBasedModel   factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
 		List<Expression>  evidence        = new ArrayList<>();
 		evidence.add(Expressions.parse("communism"));

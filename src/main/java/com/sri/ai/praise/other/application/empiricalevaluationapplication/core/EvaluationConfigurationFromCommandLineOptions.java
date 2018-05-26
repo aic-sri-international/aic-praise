@@ -51,7 +51,7 @@ public class EvaluationConfigurationFromCommandLineOptions extends EvaluationCon
 		
 		parser = new OptionParser();
 
-		solverImplementationClasses = parser.accepts("s", "Solver implementation class name.").withRequiredArg()
+		solverImplementationClasses = parser.accepts("s", "ExternalProcessSolver implementation class name.").withRequiredArg()
 				.ofType(String.class);
 
 		notificationFile = parser.accepts("n", "Notification output file name (default to stdout).")
@@ -78,7 +78,7 @@ public class EvaluationConfigurationFromCommandLineOptions extends EvaluationCon
 				"Translate models always, instead of caching them between runs (default behavior is caching)");
 
 		workingDirectory = parser
-				.accepts("w", "Solver Working Directory (temp directories and files will be created under here)")
+				.accepts("w", "ExternalProcessSolver Working Directory (temp directories and files will be created under here)")
 				.withRequiredArg().required().ofType(File.class);
 
 		parser.accepts("help", "For help on command line arguments").forHelp();

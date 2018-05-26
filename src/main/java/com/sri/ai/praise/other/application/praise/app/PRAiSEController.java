@@ -85,9 +85,9 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.core.model.core.hogm.antlr.ParsedHOGModel;
+import com.sri.ai.praise.core.model.core.hogm.HOGModel;
+import com.sri.ai.praise.core.model.core.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.model.core.hogm.syntax.HOGMParserWrapper;
 import com.sri.ai.praise.other.application.praise.app.editor.ModelPageEditor;
 import com.sri.ai.praise.other.application.praise.app.model.ExamplePages;
 import com.sri.ai.praise.other.application.praise.app.perspective.HOGMPerspective;
@@ -461,7 +461,7 @@ public class PRAiSEController {
 			
 				// For convenience, pull out all possible queries
 				HOGMParserWrapper parser          = new HOGMParserWrapper();
-				ParsedHOGModel    parsedModel     = parser.parseModel(hogmModel);
+				HOGModel    parsedModel     = parser.parseModel(hogmModel);
 				ExpressionBasedModel   factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
 				List<String>      queries         = new ArrayList<>(factorsAndTypes.getMapFromRandomVariableNameToTypeName().keySet());
 				

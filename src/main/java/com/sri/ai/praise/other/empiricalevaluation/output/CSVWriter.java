@@ -86,7 +86,7 @@ public class CSVWriter {
 	}
 
 	public void writeHeaderForSolver(SolverEvaluation solverEvaluation) {
-		cvsHeaderLine.add("Solver");
+		cvsHeaderLine.add("ExternalProcessSolver");
 		cvsHeaderLine.add("Result for " + solverEvaluation.solver.getName());
 		cvsHeaderLine.add("Inference ms. for " + solverEvaluation.solver.getName());
 		cvsHeaderLine.add("HH:MM:SS.");

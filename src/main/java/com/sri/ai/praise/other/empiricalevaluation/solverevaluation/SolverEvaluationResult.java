@@ -38,8 +38,8 @@
 package com.sri.ai.praise.other.empiricalevaluation.solverevaluation;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.api.Solver;
-import com.sri.ai.praise.core.model.core.common.SolverResult;
+import com.sri.ai.praise.core.inference.api.ExternalProcessSolver;
+import com.sri.ai.praise.core.inference.core.common.SolverResult;
 import com.sri.ai.praise.other.empiricalevaluation.Problem;
 
 /**
@@ -51,7 +51,7 @@ import com.sri.ai.praise.other.empiricalevaluation.Problem;
  */
 public class SolverEvaluationResult {
 	
-	public Solver solver;
+	public ExternalProcessSolver solver;
 	public Problem problem;
 	public Expression answer = null;
 	public boolean failed = false;
@@ -60,7 +60,7 @@ public class SolverEvaluationResult {
 	public long sumOfTotalInferenceTimeInMilliseconds   = 0L;
 	public long sumOfTotalTranslationTimeInMilliseconds = 0L;
 	
-	public SolverEvaluationResult(Solver solver, Problem problem) {
+	public SolverEvaluationResult(ExternalProcessSolver solver, Problem problem) {
 		this.solver = solver;
 		this.problem = problem;
 	}

@@ -77,13 +77,12 @@ import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.core.uai.GraphicalNetwork;
 import com.sri.ai.praise.core.model.core.uai.UAIEvidenceReading;
 import com.sri.ai.praise.core.model.core.uai.UAIModel;
 import com.sri.ai.praise.core.model.core.uai.UAIModelReader;
-import com.sri.ai.praise.core.model.core.uai.UAIResultReading;
 import com.sri.ai.praise.core.model.core.uai.UAIUtil;
 import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
-import com.sri.ai.praise.other.language.grounded.common.GraphicalNetwork;
 import com.sri.ai.praise.other.language.translate.core.UAI_to_ExpressionBased_Translator;
 
 /**
@@ -244,20 +243,20 @@ public class UAIMARSolver {
 			if (genericTableSolver != null) {
 				try {
 					genericTableSolver.interrupt();
-					System.out.println("Generic Table Compression Solver interrupted (c).");
+					System.out.println("Generic Table Compression ExternalProcessSolver interrupted (c).");
 				}
 				catch (Throwable t) {
-					System.out.println("Generic Table Compression Solver interrupted (e) : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));
+					System.out.println("Generic Table Compression ExternalProcessSolver interrupted (e) : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));
 				}
 			}
 			
 			if (inferencer != null) {
 				try {
 					inferencer.interrupt();
-					System.out.println("Solver interrupted (c).");
+					System.out.println("ExternalProcessSolver interrupted (c).");
 				}
 				catch (Throwable t) {
-					System.out.println("Solver interrupted (e) : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));					
+					System.out.println("ExternalProcessSolver interrupted (e) : "+(t.getMessage() == null ? t.getClass().getName() : t.getMessage()));					
 				}
 			}	
 		}
@@ -282,7 +281,7 @@ public class UAIMARSolver {
 				totalNumberUniqueEntries += table.numberEntries();
 				
 				if (interrupted) {
-					System.out.println("Solver Interrupted (t).");
+					System.out.println("ExternalProcessSolver Interrupted (t).");
 					return false;
 				}
 				
@@ -345,7 +344,7 @@ public class UAIMARSolver {
 			// System.out.println("Markov Network=\n"+markovNetwork);
 			
 			if (interrupted) {
-				System.out.println("Solver Interrupted (b).");
+				System.out.println("ExternalProcessSolver Interrupted (b).");
 				return false;
 			}
 			
@@ -363,7 +362,7 @@ public class UAIMARSolver {
 					Expression queryExpression = Equality.make(varExpr, valueExpr);	
 					Expression marginal;
 					if (interrupted) {
-						System.out.println("Solver Interrupted (l).");
+						System.out.println("ExternalProcessSolver Interrupted (l).");
 						return false;
 					}
 					marginal = inferencer.solve(queryExpression);

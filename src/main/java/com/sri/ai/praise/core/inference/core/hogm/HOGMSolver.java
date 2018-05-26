@@ -55,13 +55,13 @@ import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.HOGMSortDeclaration;
-import com.sri.ai.praise.core.model.core.hogm.HOGModelError;
-import com.sri.ai.praise.core.model.core.hogm.HOGModelException;
-import com.sri.ai.praise.core.model.core.hogm.antlr.HOGMParserWrapper;
-import com.sri.ai.praise.core.model.core.hogm.antlr.ParsedHOGModel;
-import com.sri.ai.praise.core.model.core.hogm.antlr.UnableToParseAllTheInputError;
+import com.sri.ai.praise.core.model.core.hogm.HOGModel;
+import com.sri.ai.praise.core.model.core.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.model.core.hogm.components.HOGMSortDeclaration;
+import com.sri.ai.praise.core.model.core.hogm.syntax.HOGMParserWrapper;
+import com.sri.ai.praise.core.model.core.hogm.syntax.UnableToParseAllTheInputError;
+import com.sri.ai.praise.core.model.core.hogm.validation.HOGModelError;
+import com.sri.ai.praise.core.model.core.hogm.validation.HOGModelException;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 
@@ -70,7 +70,7 @@ public class HOGMSolver {
 	
 	private String model;
 	private HOGMParserWrapper parser = new HOGMParserWrapper();
-	private ParsedHOGModel parsedModel = null;
+	private HOGModel parsedModel = null;
 	private List<HOGMQueryResult> results = new ArrayList<>();
 	private List<HOGMQueryError> errors = new ArrayList<>();
 	private boolean canceled = false;
@@ -129,8 +129,8 @@ public class HOGMSolver {
 		collectQueryResultBasedInErrors(query, parsedModel, queryProcessingStartingTime);
 	}
 
-	private ParsedHOGModel parseModel() {
-		ParsedHOGModel parsedModel = null;
+	private HOGModel parseModel() {
+		HOGModel parsedModel = null;
     	if (isEmpty(model)) {
 			HOGMQueryError error = new HOGMQueryError(HOGMQueryError.Context.MODEL, "FactorNetwork not specified");
 			errors.add(error);
@@ -141,7 +141,7 @@ public class HOGMSolver {
 		return parsedModel;
 	}
 
-	private void collectQueryResults(String query, ParsedHOGModel parsedModel) {
+	private void collectQueryResults(String query, HOGModel parsedModel) {
 		
 		collectErrorIfQueryIsEmpty(query);
 		   		
@@ -160,7 +160,7 @@ public class HOGMSolver {
 		}
 	}
 
-	private void runInference(String query, Expression queryExpression, ParsedHOGModel parsedModel) {
+	private void runInference(String query, Expression queryExpression, HOGModel parsedModel) {
 		if (!canceled) {
 			IntegrationRecording.startRecordingIntegrationsOverGroups();
 			ExpressionBasedModel factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
@@ -252,7 +252,7 @@ public class HOGMSolver {
 		errors.add(error);
 	}
 
-	private void collectQueryResultBasedInErrors(String query, ParsedHOGModel parsedModel, long queryProcessingStartingTime) {
+	private void collectQueryResultBasedInErrors(String query, HOGModel parsedModel, long queryProcessingStartingTime) {
 		if (errors.size() > 0) {
 			long queryProcessingEndingTime = System.currentTimeMillis();
 			long time = queryProcessingEndingTime - queryProcessingStartingTime;
