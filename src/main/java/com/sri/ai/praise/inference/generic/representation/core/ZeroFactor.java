@@ -1,9 +1,5 @@
 package com.sri.ai.praise.inference.generic.representation.core;
 
-import static com.sri.ai.util.Util.list;
-import static java.util.Collections.unmodifiableList;
-
-import java.util.List;
 import java.util.Map;
 
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
@@ -17,21 +13,12 @@ import com.sri.ai.praise.inference.generic.representation.api.Variable;
  * @author redouane
  *
  */
-public class ZeroFactor implements Factor {
+public class ZeroFactor extends ConstantFactor {
 	
 	public final static ZeroFactor ZERO_FACTOR = new ZeroFactor();
 	
 	private ZeroFactor() {
-	}
-
-	@Override
-	public boolean contains(Variable variable) {
-		return false;
-	}
-
-	@Override
-	public List<? extends Variable> getVariables() {
-		return unmodifiableList(list());
+		super(0.);
 	}
 
 	@Override
@@ -39,11 +26,6 @@ public class ZeroFactor implements Factor {
 		return this;
 	}
 
-	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
-		return this;
-	}
-	
 	@Override
 	public boolean isIdentity() {
 		return false;
@@ -60,18 +42,8 @@ public class ZeroFactor implements Factor {
 	}
 
 	@Override
-	public Factor normalize() {
-		throw new Error("Zero factor cannot be normalized");
-	}
-
-	@Override
 	public Factor add(Factor another) {
 		return another;
-	}
-
-	@Override
-	public Factor multiplyByConstant(Number constant) {
-		return this;
 	}
 
 	@Override
@@ -83,4 +55,5 @@ public class ZeroFactor implements Factor {
 	public Factor invert() {
 		throw new Error("Zero factor cannot be inverted");
 	}
+	
 }

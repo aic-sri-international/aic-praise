@@ -46,6 +46,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A factor is defined up to a non-zero multiplicative constant
+ */
 public interface Factor{
 
 	boolean contains(Variable variable);
@@ -87,8 +90,7 @@ public interface Factor{
 		return result;
 	}
 	
-	Factor multiplyByConstant(Number constant);
-	
+	/** if f is a factor, returns 1/f */
 	Factor invert();
 	
 }

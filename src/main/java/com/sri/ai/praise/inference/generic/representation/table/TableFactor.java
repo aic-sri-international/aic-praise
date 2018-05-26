@@ -344,12 +344,6 @@ public class TableFactor implements Factor {
 	}
 
 	@Override
-	public Factor multiplyByConstant(Number constant) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public boolean isZero() {
 		return false;
 	}
