@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.model.interfacebased.core.table;
 
-import static com.sri.ai.praise.core.model.classbased.core.uai.core.UAIUtil.genericVariableName;
+import static com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil.genericVariableName;
 import static com.sri.ai.praise.core.model.interfacebased.core.table.TableFactor.copyToSubTableFactor;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
@@ -12,8 +12,8 @@ import java.util.Map.Entry;
 
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.core.AbstractEditableFactorNetwrok;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.UAIModel;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.data.markov.FactorTable;
+import com.sri.ai.praise.core.model.classbased.core.table.core.data.markov.FactorTable;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIModel;
 import com.sri.ai.util.Util;
 /**
  * 

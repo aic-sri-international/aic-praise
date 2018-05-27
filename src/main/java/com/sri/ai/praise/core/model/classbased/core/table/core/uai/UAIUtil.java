@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.classbased.core.uai.core;
+package com.sri.ai.praise.core.model.classbased.core.table.core.uai;
 
 import static com.sri.ai.util.Util.list;
 
@@ -56,7 +56,7 @@ import com.sri.ai.grinder.application.Compilation;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.data.FunctionTable;
+import com.sri.ai.praise.core.model.classbased.core.table.core.data.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**

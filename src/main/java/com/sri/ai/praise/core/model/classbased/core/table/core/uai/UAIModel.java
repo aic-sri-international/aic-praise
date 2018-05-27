@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.classbased.core.uai.core;
+package com.sri.ai.praise.core.model.classbased.core.table.core.uai;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,8 +45,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.classbased.core.uai.api.MarkovNetwork;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.data.FunctionTable;
+import com.sri.ai.praise.core.model.classbased.core.table.api.MarkovNetwork;
+import com.sri.ai.praise.core.model.classbased.core.table.core.data.FunctionTable;
 
 /**
  * In memory representation of an Uncertainty in Artificial Intelligence (UAI) 

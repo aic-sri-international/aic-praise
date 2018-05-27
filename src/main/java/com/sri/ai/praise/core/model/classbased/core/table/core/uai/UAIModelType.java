@@ -35,63 +35,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.classbased.core.uai.api;
-
-import java.util.List;
+package com.sri.ai.praise.core.model.classbased.core.table.core.uai;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.classbased.api.Model;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.data.FunctionTable;
 
 /**
- * Basic representation of a Graphical Network. Contains representations common to both Markov and Bayes networks.
+ * Represents the possible types of UAI models.
  * 
  * @author oreilly
  *
  */
 @Beta
-public interface GraphicalNetwork extends Model {
-	int numberVariables();
-	int cardinality(int variableIndex);
-	int numberUniqueFunctionTables();
-	FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx);
-	
-	int numberTables();
-	FunctionTable getTable(int tableIdx);
-	List<Integer> getVariableIndexesForTable(int tableIdx);
-	List<Integer> getTableIndexes(int uniqueFunctionTableIdx);
-	
-	default double ratioUniqueTablesToTables() {
-		return ((double) numberUniqueFunctionTables()) / ((double) numberTables());
-	}
-	
-	default int largestCardinality() {
-		int result = 0;
-		for (int i = 0; i < numberVariables(); i++) {
-			int card = cardinality(i);
-			if (card > result) {
-				result = card;
-			}
-		}
-		return result;
-	}
-	
-	default int largestNumberOfFunctionTableEntries() {		
-		int result = 0;
-		for (int i = 0; i < numberUniqueFunctionTables(); i++) {
-			int numEntries = getUniqueFunctionTable(i).numberEntries();
-			if (numEntries > result) {
-				result = numEntries;
-			}
-		}
- 		return result;
-	}
-	
-	default int totalNumberEntriesForAllFunctionTables() {
-		int result = 0;
-		for (int i = 0; i < numberTables(); i++) {
-			result += getTable(i).numberEntries();
-		}		
-		return result;
-	}
+public enum UAIModelType {
+	MARKOV, BAYES
 }

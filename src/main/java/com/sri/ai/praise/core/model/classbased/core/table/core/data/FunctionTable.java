@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.classbased.core.uai.core.data;
+package com.sri.ai.praise.core.model.classbased.core.table.core.data;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

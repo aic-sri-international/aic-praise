@@ -35,53 +35,63 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.classbased.core.uai.core.data.markov;
+package com.sri.ai.praise.core.model.classbased.core.table.api;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.data.FunctionTable;
+import com.sri.ai.praise.core.model.classbased.api.Model;
+import com.sri.ai.praise.core.model.classbased.core.table.core.data.FunctionTable;
 
 /**
- * A table representation of a factor for use in a Markov Network.
+ * Basic representation of a Graphical Network. Contains representations common to both Markov and Bayes networks.
  * 
  * @author oreilly
  *
  */
 @Beta
-public class FactorTable {
-	private List<Integer> variableIndexes;
-	private FunctionTable functionTable;
+public interface GraphicalNetwork extends Model {
+	int numberVariables();
+	int cardinality(int variableIndex);
+	int numberUniqueFunctionTables();
+	FunctionTable getUniqueFunctionTable(int uniqueFunctionTableIdx);
 	
-	public FactorTable(List<Integer> variableIndexes, FunctionTable table) {
-		this.variableIndexes = new ArrayList<>(variableIndexes);
-		this.functionTable   = table;
-		
-		if (functionTable.numberVariables() != this.variableIndexes.size()) {
-			throw new IllegalArgumentException("Function table's # vars "+functionTable.numberVariables()+" does not match # of variable indexes "+this.variableIndexes.size());
+	int numberTables();
+	FunctionTable getTable(int tableIdx);
+	List<Integer> getVariableIndexesForTable(int tableIdx);
+	List<Integer> getTableIndexes(int uniqueFunctionTableIdx);
+	
+	default double ratioUniqueTablesToTables() {
+		return ((double) numberUniqueFunctionTables()) / ((double) numberTables());
+	}
+	
+	default int largestCardinality() {
+		int result = 0;
+		for (int i = 0; i < numberVariables(); i++) {
+			int card = cardinality(i);
+			if (card > result) {
+				result = card;
+			}
 		}
+		return result;
 	}
 	
-	public List<Integer> getVariableIndexes() {
-		return variableIndexes;
-	}
-	
-	public FunctionTable getTable() {
-		return functionTable;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof FactorTable) {
-			FactorTable other = (FactorTable) obj;
-			return this.variableIndexes.equals(other.variableIndexes) && this.functionTable.equals(other.functionTable);
+	default int largestNumberOfFunctionTableEntries() {		
+		int result = 0;
+		for (int i = 0; i < numberUniqueFunctionTables(); i++) {
+			int numEntries = getUniqueFunctionTable(i).numberEntries();
+			if (numEntries > result) {
+				result = numEntries;
+			}
 		}
-		return false;
+ 		return result;
 	}
 	
-	@Override
-	public int hashCode() {
-		return this.variableIndexes.hashCode() + this.functionTable.hashCode();
+	default int totalNumberEntriesForAllFunctionTables() {
+		int result = 0;
+		for (int i = 0; i < numberTables(); i++) {
+			result += getTable(i).numberEntries();
+		}		
+		return result;
 	}
 }

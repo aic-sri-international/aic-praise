@@ -35,24 +35,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.classbased.core.uai.api;
+package com.sri.ai.praise.core.model.classbased.core.table.core.data.markov;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.data.markov.FactorTable;
+import com.sri.ai.praise.core.model.classbased.core.table.core.data.FunctionTable;
 
 /**
- * Basic representation of a Markov Network.
+ * A table representation of a factor for use in a Markov Network.
  * 
  * @author oreilly
  *
  */
 @Beta
-public interface MarkovNetwork extends GraphicalNetwork {
-	default int numberFactors() {
-		return numberTables();
+public class FactorTable {
+	private List<Integer> variableIndexes;
+	private FunctionTable functionTable;
+	
+	public FactorTable(List<Integer> variableIndexes, FunctionTable table) {
+		this.variableIndexes = new ArrayList<>(variableIndexes);
+		this.functionTable   = table;
+		
+		if (functionTable.numberVariables() != this.variableIndexes.size()) {
+			throw new IllegalArgumentException("Function table's # vars "+functionTable.numberVariables()+" does not match # of variable indexes "+this.variableIndexes.size());
+		}
 	}
 	
-	default FactorTable getFactor(int factorIdx) {
-		return new FactorTable(getVariableIndexesForTable(factorIdx), getTable(factorIdx));
+	public List<Integer> getVariableIndexes() {
+		return variableIndexes;
+	}
+	
+	public FunctionTable getTable() {
+		return functionTable;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof FactorTable) {
+			FactorTable other = (FactorTable) obj;
+			return this.variableIndexes.equals(other.variableIndexes) && this.functionTable.equals(other.functionTable);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.variableIndexes.hashCode() + this.functionTable.hashCode();
 	}
 }

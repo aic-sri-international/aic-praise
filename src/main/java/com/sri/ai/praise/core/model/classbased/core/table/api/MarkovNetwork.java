@@ -35,17 +35,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.classbased.core.uai.core;
+package com.sri.ai.praise.core.model.classbased.core.table.api;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.core.model.classbased.core.table.core.data.markov.FactorTable;
 
 /**
- * Represents the possible types of UAI models.
+ * Basic representation of a Markov Network.
  * 
  * @author oreilly
  *
  */
 @Beta
-public enum UAIModelType {
-	MARKOV, BAYES
+public interface MarkovNetwork extends GraphicalNetwork {
+	default int numberFactors() {
+		return numberTables();
+	}
+	
+	default FactorTable getFactor(int factorIdx) {
+		return new FactorTable(getVariableIndexesForTable(factorIdx), getTable(factorIdx));
+	}
 }

@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.data.bayes.ConditionalProbabilityTable;
+import com.sri.ai.praise.core.model.classbased.core.table.core.data.bayes.ConditionalProbabilityTable;
 import com.sri.ai.praise.other.language.grounded.transform.TransformMarkovToBayes;
 
 /**

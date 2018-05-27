@@ -35,10 +35,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.classbased.core.uai.api;
+package com.sri.ai.praise.core.model.classbased.core.table.api;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.data.bayes.ConditionalProbabilityTable;
+import com.sri.ai.praise.core.model.classbased.core.table.core.data.bayes.ConditionalProbabilityTable;
 
 /**
  * Basic representation of a Bayesian Network.

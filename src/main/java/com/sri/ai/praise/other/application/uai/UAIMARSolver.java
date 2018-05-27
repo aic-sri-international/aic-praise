@@ -37,8 +37,8 @@
  */
 package com.sri.ai.praise.other.application.uai;
 
-import static com.sri.ai.praise.core.model.classbased.core.uai.core.UAIUtil.constructGenericTableExpressionUsingEqualities;
-import static com.sri.ai.praise.core.model.classbased.core.uai.core.UAIUtil.convertGenericTableToInstance;
+import static com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
+import static com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil.convertGenericTableToInstance;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,12 +77,12 @@ import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
 import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.uai.api.GraphicalNetwork;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.UAIModel;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.UAIUtil;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.data.FunctionTable;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.parsing.UAIEvidenceReading;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.parsing.UAIModelReader;
+import com.sri.ai.praise.core.model.classbased.core.table.api.GraphicalNetwork;
+import com.sri.ai.praise.core.model.classbased.core.table.core.data.FunctionTable;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIModel;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.parsing.UAIEvidenceReading;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.other.language.translate.core.uai.UAI_to_ExpressionBased_Translator;
 
 /**

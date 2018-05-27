@@ -9,8 +9,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.sri.ai.praise.core.model.classbased.core.uai.core.UAIModel;
-import com.sri.ai.praise.core.model.classbased.core.uai.core.parsing.UAIModelReader;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIModel;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.model.interfacebased.api.Factor;
 import com.sri.ai.praise.core.model.interfacebased.core.table.TableFactor;
 import com.sri.ai.praise.core.model.interfacebased.core.table.TableFactorNetwork;
