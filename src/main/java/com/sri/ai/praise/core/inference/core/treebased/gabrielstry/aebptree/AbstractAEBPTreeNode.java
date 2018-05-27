@@ -14,8 +14,8 @@ import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.a
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Simplex;
-import com.sri.ai.praise.core.model.core.treebased.api.Factor;
-import com.sri.ai.praise.core.model.core.treebased.api.Variable;
+import com.sri.ai.praise.core.model.pure.api.Factor;
+import com.sri.ai.praise.core.model.pure.api.Variable;
 
 public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBPTreeNode<RootNode, ParentNode>{
 	//Node information

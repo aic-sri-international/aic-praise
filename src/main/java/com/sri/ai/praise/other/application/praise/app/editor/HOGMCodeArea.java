@@ -47,7 +47,7 @@ import org.fxmisc.richtext.StyleSpansBuilder;
 import org.fxmisc.undo.UndoManager;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.core.hogm.parsing.HOGMTerminalSymbols;
+import com.sri.ai.praise.core.model.impure.core.hogm.parsing.HOGMTerminalSymbols;
 import com.sri.ai.praise.model.v1.hogm.antlr.HOGMLexer;
 import com.sri.ai.praise.other.application.praise.app.FXUtil;
 

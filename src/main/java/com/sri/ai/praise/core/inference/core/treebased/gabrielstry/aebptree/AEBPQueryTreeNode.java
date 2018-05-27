@@ -6,8 +6,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Polytopes;
-import com.sri.ai.praise.core.model.core.treebased.api.Factor;
-import com.sri.ai.praise.core.model.core.treebased.api.Variable;
+import com.sri.ai.praise.core.model.pure.api.Factor;
+import com.sri.ai.praise.core.model.pure.api.Variable;
 
 public class AEBPQueryTreeNode extends AEBPVariableTreeNode{
 

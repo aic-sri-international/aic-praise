@@ -12,8 +12,8 @@ import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebpmodel.AEB
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebptree.AEBPFactorTreeNode;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebptree.AEBPTreeNode;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebptree.AEBPVariableTreeNode;
-import com.sri.ai.praise.core.model.core.treebased.api.Factor;
-import com.sri.ai.praise.core.model.core.treebased.api.Variable;
+import com.sri.ai.praise.core.model.pure.api.Factor;
+import com.sri.ai.praise.core.model.pure.api.Variable;
 
 public class BFS extends AbstractAEBPTreeIterator{
 	private Set<Factor> visited = new LinkedHashSet<>();

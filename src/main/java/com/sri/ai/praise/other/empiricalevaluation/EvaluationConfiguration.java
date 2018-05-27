@@ -42,7 +42,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sri.ai.praise.core.model.modelscontainer.PagedModelContainer;
+import com.sri.ai.praise.core.model.impure.modelscontainer.PagedModelContainer;
 
 /**
  * Configuration information for an {@link Evaluation}.

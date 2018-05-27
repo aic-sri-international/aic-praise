@@ -74,7 +74,7 @@ import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.impure.core.expressionbased.ExpressionBasedModel;
 import com.sri.ai.util.Util;
 
 /**

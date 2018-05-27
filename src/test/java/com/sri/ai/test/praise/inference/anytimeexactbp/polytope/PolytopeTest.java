@@ -54,8 +54,8 @@ import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.a
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Simplex;
-import com.sri.ai.praise.core.model.core.treebased.expression.ExpressionFactor;
-import com.sri.ai.praise.core.model.core.treebased.expression.ExpressionVariable;
+import com.sri.ai.praise.core.model.pure.core.expression.ExpressionFactor;
+import com.sri.ai.praise.core.model.pure.core.expression.ExpressionVariable;
 
 public class PolytopeTest {
 

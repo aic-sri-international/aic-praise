@@ -41,9 +41,9 @@ import java.io.PrintWriter;
 import java.io.Reader;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.core.uai.core.UAIModel;
-import com.sri.ai.praise.core.model.core.uai.core.parsing.UAIEvidenceReading;
-import com.sri.ai.praise.core.model.core.uai.core.parsing.UAIModelReader;
+import com.sri.ai.praise.core.model.impure.core.uai.core.UAIModel;
+import com.sri.ai.praise.core.model.impure.core.uai.core.parsing.UAIEvidenceReading;
+import com.sri.ai.praise.core.model.impure.core.uai.core.parsing.UAIModelReader;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.praise.other.language.translate.core.AbstractTranslator;
 

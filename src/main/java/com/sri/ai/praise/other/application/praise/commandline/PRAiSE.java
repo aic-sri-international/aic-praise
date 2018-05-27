@@ -52,7 +52,7 @@ import com.sri.ai.praise.core.inference.core.hogm.HOGMQueryError;
 import com.sri.ai.praise.core.inference.core.hogm.HOGMQueryResult;
 import com.sri.ai.praise.core.inference.core.hogm.HOGMSolver;
 import com.sri.ai.praise.core.inference.core.praiseprocess.PRAiSESolver;
-import com.sri.ai.praise.core.model.modelscontainer.ModelPage;
+import com.sri.ai.praise.core.model.impure.modelscontainer.ModelPage;
 
 /**
  * Command line interface for running {@link PRAiSESolver}.

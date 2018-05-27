@@ -3,9 +3,9 @@ package com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representati
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.model.core.treebased.api.Factor;
-import com.sri.ai.praise.core.model.core.treebased.api.Variable;
-import com.sri.ai.praise.core.model.core.treebased.core.AbstractFactorNetwork;
+import com.sri.ai.praise.core.model.pure.api.Factor;
+import com.sri.ai.praise.core.model.pure.api.Variable;
+import com.sri.ai.praise.core.model.pure.core.AbstractFactorNetwork;
 
 public abstract class AbstractEditableFactorNetwrok extends AbstractFactorNetwork implements EditableFactorNetwork{
 	

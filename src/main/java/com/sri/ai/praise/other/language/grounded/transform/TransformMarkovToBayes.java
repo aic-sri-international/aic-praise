@@ -46,10 +46,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.core.uai.api.MarkovNetwork;
-import com.sri.ai.praise.core.model.core.uai.core.data.FunctionTable;
-import com.sri.ai.praise.core.model.core.uai.core.data.bayes.ConditionalProbabilityTable;
-import com.sri.ai.praise.core.model.core.uai.core.data.markov.FactorTable;
+import com.sri.ai.praise.core.model.impure.core.uai.api.MarkovNetwork;
+import com.sri.ai.praise.core.model.impure.core.uai.core.data.FunctionTable;
+import com.sri.ai.praise.core.model.impure.core.uai.core.data.bayes.ConditionalProbabilityTable;
+import com.sri.ai.praise.core.model.impure.core.uai.core.data.markov.FactorTable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductEnumeration;

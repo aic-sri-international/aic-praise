@@ -52,7 +52,7 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.inference.core.common.AbstractSolver;
 import com.sri.ai.praise.core.inference.core.common.SolverResult;
-import com.sri.ai.praise.core.model.modelscontainer.PagedModelContainer;
+import com.sri.ai.praise.core.model.impure.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.other.application.praise.commandline.PRAiSE;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.util.base.Pair;

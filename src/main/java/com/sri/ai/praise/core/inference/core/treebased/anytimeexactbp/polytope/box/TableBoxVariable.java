@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.box;
 
-import com.sri.ai.praise.core.model.core.treebased.table.TableVariable;
+import com.sri.ai.praise.core.model.pure.core.table.TableVariable;
 
 public class TableBoxVariable extends TableVariable implements BoxVariable{
 

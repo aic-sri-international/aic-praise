@@ -4,7 +4,7 @@ import com.google.common.base.Function;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebpmodel.AEBPModel;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebpmodel.aebpmodeliterator.api.AEBPTreeIterator;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebptree.AEBPQueryTreeNode;
-import com.sri.ai.praise.core.model.core.treebased.api.Variable;
+import com.sri.ai.praise.core.model.pure.api.Variable;
 
 public abstract	class AbstractAEBPTreeIterator implements AEBPTreeIterator{
 	 AEBPModel model;

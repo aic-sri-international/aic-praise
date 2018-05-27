@@ -42,8 +42,8 @@ import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.l
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
-import com.sri.ai.praise.core.model.core.treebased.api.FactorNetwork;
-import com.sri.ai.praise.core.model.core.treebased.api.Variable;
+import com.sri.ai.praise.core.model.pure.api.FactorNetwork;
+import com.sri.ai.praise.core.model.pure.api.Variable;
 
 /**
  * A class for an {@link ExactBP} roots in a query {@link Variable},
