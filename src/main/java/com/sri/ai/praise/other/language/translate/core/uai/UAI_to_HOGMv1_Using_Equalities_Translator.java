@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core;
+package com.sri.ai.praise.other.language.translate.core.uai;
 
 import java.util.List;
 import java.util.StringJoiner;

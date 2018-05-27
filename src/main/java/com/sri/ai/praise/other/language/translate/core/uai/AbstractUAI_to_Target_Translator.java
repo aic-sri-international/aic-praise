@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core;
+package com.sri.ai.praise.other.language.translate.core.uai;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -45,6 +45,7 @@ import com.sri.ai.praise.core.model.core.uai.UAIEvidenceReading;
 import com.sri.ai.praise.core.model.core.uai.UAIModel;
 import com.sri.ai.praise.core.model.core.uai.UAIModelReader;
 import com.sri.ai.praise.other.language.ModelLanguage;
+import com.sri.ai.praise.other.language.translate.core.AbstractTranslator;
 
 /**
  * Abstract base class for UAI->[some target] translations.

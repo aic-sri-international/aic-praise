@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.core.hogm.export;
+package com.sri.ai.praise.other.language.translate.core.uai;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -55,6 +55,7 @@ import com.sri.ai.util.math.Rational;
 
 @Beta
 public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener {
+	
 	private PrintWriter uaiModelOutput    = null;
 	private PrintWriter uaiEvidenceOutput = null;
 	private File tempPreambleFile         = null;
@@ -78,7 +79,6 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 		catch (IOException ioe) {
 			throw new RuntimeException(ioe);
 		}
-		
 	}
 	
 	//
@@ -87,13 +87,13 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 	public void numberGroundVariables(int number) { 
 		this.numberVariables = number;
 		writePreamble("MARKOV\n");
-		writePreamble(""+number+"\n");
+		writePreamble("" + number + "\n");
 	}	
 	
 	@Override
 	public void groundVariableCardinality(int variableIndex, int cardinality) {
-		writePreamble(""+cardinality);
-		if (variableIndex == (numberVariables-1)) {
+		writePreamble("" + cardinality);
+		if (variableIndex == (numberVariables - 1)) {
 			writePreamble("\n");
 		}
 		else {
@@ -103,14 +103,14 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 	
 	@Override
 	public void numberFactors(int number) {
-		writePreamble(""+number+"\n");
+		writePreamble("" + number + "\n");
 	}
 	
 	@Override
 	public void factorParticipants(int factorIndex, int[] variableIndexes) {
-		writePreamble(""+variableIndexes.length);
+		writePreamble("" + variableIndexes.length);
 		for (int i = 0; i < variableIndexes.length; i++) {
-			writePreamble(" "+variableIndexes[i]);
+			writePreamble(" " + variableIndexes[i]);
 		}
 		writePreamble("\n");
 	}
@@ -118,13 +118,13 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 	@Override
 	public void factorValue(int numberFactorValues, boolean isFirstValue, boolean isLastValue, Rational value) {
 		if (isFirstValue) {
-			writeFunctionTables("\n"+numberFactorValues+"\n");
+			writeFunctionTables("\n" + numberFactorValues + "\n");
 		}
 		else {
 			writeFunctionTables(" ");
 		}
 		
-		writeFunctionTables(""+value.doubleValue());
+		writeFunctionTables("" + value.doubleValue());
 	
 		if (isLastValue) {
 			writeFunctionTables("\n");
@@ -139,8 +139,10 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 	@Override
 	public void groundingComplete() {
 		try {
-			preamble.flush();preamble.close();
-			functionTables.flush();functionTables.close();
+			preamble.flush();
+			preamble.close();
+			functionTables.flush();
+			functionTables.close();
 			
 			try (Reader fisPreamble       = new FileReader(tempPreambleFile);
 				 Reader fisFunctionTables = new FileReader(tempFunctionTablesFile);) {
@@ -156,13 +158,13 @@ public class UAIHOGModelGroundingListener implements HOGModelGrounding.Listener 
 				uaiModelOutput.flush();
 				
 				// Indicate number of observed variables in the evidence file
-				uaiEvidenceOutput.write(""+evidence.size());
+				uaiEvidenceOutput.write("" + evidence.size());
 				// and their variable and value indexes
 				for (Pair<Integer, Integer> evidenceAssignment : evidence) {
 					uaiEvidenceOutput.write(" ");
-					uaiEvidenceOutput.write(""+evidenceAssignment.first);
+					uaiEvidenceOutput.write("" + evidenceAssignment.first);
 					uaiEvidenceOutput.write(" ");
-					uaiEvidenceOutput.write(""+evidenceAssignment.second);
+					uaiEvidenceOutput.write("" + evidenceAssignment.second);
 				}
 				uaiEvidenceOutput.flush();
 			}

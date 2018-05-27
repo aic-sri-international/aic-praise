@@ -42,9 +42,9 @@ import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.other.language.ModelLanguage;
-import com.sri.ai.praise.other.language.translate.core.HOGMv1_to_UAI_Translator;
-import com.sri.ai.praise.other.language.translate.core.UAI_to_HOGMv1_Using_Inequalities_Translator;
-import com.sri.ai.praise.other.language.translate.core.UAI_to_HuginDotNet_Translator;
+import com.sri.ai.praise.other.language.translate.core.hugin.UAI_to_HuginDotNet_Translator;
+import com.sri.ai.praise.other.language.translate.core.uai.HOGMv1_to_UAI_Translator;
+import com.sri.ai.praise.other.language.translate.core.uai.UAI_to_HOGMv1_Using_Inequalities_Translator;
 import com.sri.ai.util.base.Pair;
 
 /**

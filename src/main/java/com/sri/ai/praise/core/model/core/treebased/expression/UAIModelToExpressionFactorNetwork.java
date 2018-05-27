@@ -33,7 +33,7 @@ import com.sri.ai.praise.core.model.core.treebased.api.Factor;
 import com.sri.ai.praise.core.model.core.uai.UAIModel;
 import com.sri.ai.praise.core.model.core.uai.UAIModelReader;
 import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
-import com.sri.ai.praise.other.language.translate.core.UAI_to_ExpressionBased_Translator;
+import com.sri.ai.praise.other.language.translate.core.uai.UAI_to_ExpressionBased_Translator;
 import com.sri.ai.util.base.IdentityWrapper;
 
 public class UAIModelToExpressionFactorNetwork {

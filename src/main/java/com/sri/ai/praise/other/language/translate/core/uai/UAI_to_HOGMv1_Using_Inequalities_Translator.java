@@ -35,50 +35,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core;
+package com.sri.ai.praise.other.language.translate.core.uai;
 
-import java.io.PrintWriter;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.export.UAIHOGModelGroundingListener;
-import com.sri.ai.praise.other.language.ModelLanguage;
-import com.sri.ai.praise.other.language.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.core.model.core.uai.UAIUtil;
+import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
+import com.sri.ai.praise.other.language.translate.core.TranslationOfTableToInequalities;
 
 /**
- * Translator: HOGMv1->UAI
+ * Translator: UAI->HOGMv1 using equalities
  * 
  * @author oreilly
  *
  */
 @Beta
-public class HOGMv1_to_UAI_Translator extends AbstractHOGMv1_to_Target_Translator {
-	private static final String[] _outputFileExtensions = AbstractUAI_to_Target_Translator.INPUT_FILE_EXTENSIONS;
-	//
-	// START-Translator	
-	@Override 
-	public ModelLanguage getTarget() {
-		return ModelLanguage.UAI;
-	}
-	
+public class UAI_to_HOGMv1_Using_Inequalities_Translator extends AbstractUAI_to_HOGMv1_Translator {
+
 	@Override
-	public int getNumberOfOutputs() {
-		return _outputFileExtensions.length;
+	public void addSortAndRandomVariableDeclarationsRegarding(int varIdx, int varCardinality, List<String> sorts, List<String> randoms) {
+		String varName     = UAIUtil.instanceVariableName(varIdx);
+		String varTypeName = "0.." + (varCardinality - 1);
+		randoms.add("random " + varName + ": " + varTypeName + ";");
 	}
-	
+
 	@Override
-	public String[] getOutputFileExtensions() {
-		return _outputFileExtensions;
-	}
-	// END-Translator
-	//
-	
-	@Override
-	protected void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
-		//
-		// Ground out the HOGM FactorNetwork and translate it to the UAI model format
-		HOGModelGrounding.ground(hogmv1FactorsAndTypes, evidence, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
+	public Expression convertToHOGMv1Expression(FunctionTable table) {
+		Expression result = TranslationOfTableToInequalities.constructGenericTableExpressionUsingInequalities(table);
+		return result;
 	}
 }

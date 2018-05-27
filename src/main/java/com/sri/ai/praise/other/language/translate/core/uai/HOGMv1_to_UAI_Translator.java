@@ -35,43 +35,50 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core;
+package com.sri.ai.praise.other.language.translate.core.uai;
 
+import java.io.PrintWriter;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.components.HOGMSortDeclaration;
-import com.sri.ai.praise.core.model.core.uai.GraphicalNetwork;
-import com.sri.ai.praise.core.model.core.uai.UAIUtil;
+import com.sri.ai.praise.other.language.ModelLanguage;
+import com.sri.ai.praise.other.language.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.other.language.translate.core.AbstractHOGMv1_to_Target_Translator;
 
+/**
+ * Translator: HOGMv1->UAI
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
-public class UAI_to_ExpressionBased_Translator extends ExpressionBasedModel {
-
-	public UAI_to_ExpressionBased_Translator(List<Expression> tables, GraphicalNetwork network) {
-		this(makeParameters(tables, network));
+public class HOGMv1_to_UAI_Translator extends AbstractHOGMv1_to_Target_Translator {
+	private static final String[] _outputFileExtensions = AbstractUAI_to_Target_Translator.INPUT_FILE_EXTENSIONS;
+	//
+	// START-Translator	
+	@Override 
+	public ModelLanguage getTarget() {
+		return ModelLanguage.UAI;
 	}
-
-	private UAI_to_ExpressionBased_Translator(Parameters parameters) {
-		super(parameters);
+	
+	@Override
+	public int getNumberOfOutputs() {
+		return _outputFileExtensions.length;
 	}
-
-	private static Parameters makeParameters(List<Expression> tables, GraphicalNetwork network) {
-		Parameters parameters = new Parameters();
-		parameters.factors.addAll(tables);
-		for (int variableIndex = 0; variableIndex < network.numberVariables(); variableIndex++) {
-			int variableCardinality = network.cardinality(variableIndex);
-			String variableTypeName = UAIUtil.instanceTypeNameForVariable(variableIndex, variableCardinality);
-			parameters.mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(variableIndex), variableTypeName);
-			if (!variableTypeName.equals(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().toString())) {
-				for (int valueIndex = 0; valueIndex < variableCardinality; valueIndex++) {
-					parameters.mapFromUniquelyNamedConstantNameToTypeName.put(
-							UAIUtil.instanceConstantValueForVariable(valueIndex, variableIndex, variableCardinality), variableTypeName);
-				}
-			}
-			parameters.mapFromCategoricalTypeNameToSizeString.put(variableTypeName, Integer.toString(variableCardinality));
-		}
-		return parameters;
+	
+	@Override
+	public String[] getOutputFileExtensions() {
+		return _outputFileExtensions;
+	}
+	// END-Translator
+	//
+	
+	@Override
+	protected void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
+		//
+		// Ground out the HOGM FactorNetwork and translate it to the UAI model format
+		HOGModelGrounding.ground(hogmv1FactorsAndTypes, evidence, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
 	}
 }

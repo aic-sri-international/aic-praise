@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core;
+package com.sri.ai.praise.other.language.translate.core.hugin;
 
 import java.io.PrintWriter;
 import java.util.LinkedHashMap;
@@ -45,10 +45,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.core.hogm.export.HuginOutput;
 import com.sri.ai.praise.core.model.core.uai.UAIModel;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.praise.other.language.grounded.transform.TransformMarkovToBayes;
+import com.sri.ai.praise.other.language.translate.core.uai.AbstractUAI_to_Target_Translator;
 
 /**
  * Translator: UAI->HuginDotNet

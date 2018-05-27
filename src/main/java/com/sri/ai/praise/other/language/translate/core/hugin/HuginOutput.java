@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.core.hogm.export;
+package com.sri.ai.praise.other.language.translate.core.hugin;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -73,9 +73,9 @@ public class HuginOutput implements TransformMarkovToBayes.BayesOutputListener {
 	@Override
 	public void newCPT(ConditionalProbabilityTable cpt) {
 		StringJoiner sj = new StringJoiner("\n");
-		sj.add("potential "+getPotentialSignature(cpt));
+		sj.add("potential " + getPotentialSignature(cpt));
 		sj.add("{");
-		sj.add("    data = "+getPotentialData(cpt));
+		sj.add("    data = " + getPotentialData(cpt));
 		sj.add("}");
 		
 		output(sj.toString());

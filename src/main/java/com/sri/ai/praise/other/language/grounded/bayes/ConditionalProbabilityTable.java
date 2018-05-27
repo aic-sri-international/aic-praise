@@ -55,6 +55,7 @@ import com.sri.ai.util.collect.CartesianProductEnumeration;
  */
 @Beta
 public class ConditionalProbabilityTable {
+	
 	public final double DEFAULT_ROUNDING_THRESHOLD = 1e-8;
 	
 	private List<Integer> parentVariableIndices = new ArrayList<>();
@@ -74,7 +75,7 @@ public class ConditionalProbabilityTable {
 	 */
 	public ConditionalProbabilityTable(List<Integer> parentVariableIndices, int childVariableIndex, FunctionTable table) {
 		if (parentVariableIndices.contains(childVariableIndex)) {
-			throw new IllegalArgumentException("Child variable index, "+childVariableIndex+", is also listed as a parent idx "+parentVariableIndices);
+			throw new IllegalArgumentException("Child variable index, " + childVariableIndex + ", is also listed as a parent index " + parentVariableIndices);
 		}
 		
 		this.parentVariableIndices.addAll(parentVariableIndices);

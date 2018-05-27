@@ -94,8 +94,8 @@ import com.sri.ai.praise.other.application.praise.app.perspective.HOGMPerspectiv
 import com.sri.ai.praise.other.application.praise.app.perspective.Perspective;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.praise.other.language.translate.TranslatorOptions;
-import com.sri.ai.praise.other.language.translate.core.HOGMv1_to_UAI_Translator;
-import com.sri.ai.praise.other.language.translate.core.UAI_to_HOGMv1_Using_Equalities_Translator;
+import com.sri.ai.praise.other.language.translate.core.uai.HOGMv1_to_UAI_Translator;
+import com.sri.ai.praise.other.language.translate.core.uai.UAI_to_HOGMv1_Using_Equalities_Translator;
 import com.sri.ai.util.math.Rational;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
