@@ -50,7 +50,7 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.core.hogm.HOGModel;
-import com.sri.ai.praise.core.model.core.hogm.syntax.HOGMParserWrapper;
+import com.sri.ai.praise.core.model.core.hogm.parsing.HOGMParserWrapper;
 
 @Beta
 public class HOGMExpressionBasedModel extends ExpressionBasedModel {

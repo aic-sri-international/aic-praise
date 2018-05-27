@@ -50,7 +50,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.core.hogm.HOGModel;
 import com.sri.ai.praise.core.model.core.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.syntax.HOGMParserWrapper;
+import com.sri.ai.praise.core.model.core.hogm.parsing.HOGMParserWrapper;
 import com.sri.ai.praise.other.language.grounded.model.HOGModelGrounding;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;

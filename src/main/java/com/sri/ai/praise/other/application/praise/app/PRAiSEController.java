@@ -87,7 +87,7 @@ import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.core.hogm.HOGModel;
 import com.sri.ai.praise.core.model.core.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.core.hogm.syntax.HOGMParserWrapper;
+import com.sri.ai.praise.core.model.core.hogm.parsing.HOGMParserWrapper;
 import com.sri.ai.praise.other.application.praise.app.editor.ModelPageEditor;
 import com.sri.ai.praise.other.application.praise.app.model.ExamplePages;
 import com.sri.ai.praise.other.application.praise.app.perspective.HOGMPerspective;
