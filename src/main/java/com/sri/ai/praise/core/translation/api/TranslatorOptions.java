@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, SRI International
+ * Copyright (c) 2016, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -35,54 +35,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.translation.core.hugin;
+package com.sri.ai.praise.core.translation.api;
 
-import java.io.PrintWriter;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.io.File;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
-import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIModel;
-import com.sri.ai.praise.other.translation.core.common.TransformMarkovToBayes;
-import com.sri.ai.praise.other.translation.core.uai.AbstractUAI_to_Target_Translator;
 
-/**
- * Translator: UAI->HuginDotNet
- * 
- * @author oreilly
- *
- */
 @Beta
-public class UAI_to_HuginDotNet_Translator extends AbstractUAI_to_Target_Translator {
-	//
-	// START-Translator	
-	@Override 
-	public ModelLanguage getTarget() {
-		return ModelLanguage.HuginDotNet;
-	}
-	// END-Translator
-	//
+public class TranslatorOptions {
 	
-	@Override
-	protected void translate(String inputIdentifier, UAIModel uaiModel, PrintWriter[] translatedOutputs) throws Exception {	
-		PrintWriter huginDotNetModelWriter = translatedOutputs[0];
-		
-		// 
-		// 1. Collect the data required by the Hugin Output utility.
-		Map<Integer, String>       varIdxToName        = new LinkedHashMap<>();
-		Map<Integer, List<String>> varIdxToRangeValues = new LinkedHashMap<>();
-		for (int i = 0; i < uaiModel.numberVariables(); i++) {
-			final String varName = "v"+i;
-			varIdxToName.put(i, varName);
-			varIdxToRangeValues.put(i, IntStream.range(0, uaiModel.cardinality(i)).boxed().map(cValue -> varName+"c"+cValue).collect(Collectors.toList()));
-		}
-		
-		//
-		// 2. Transform the UAI Markov Network representation to the Hugin dot Net Bayesian Network format.
-		TransformMarkovToBayes.transform(uaiModel, new HuginOutput(huginDotNetModelWriter, varIdxToName, varIdxToRangeValues));
+	private boolean cacheTranslations = false; 
+	private File cacheDirectory = null;
+
+	public TranslatorOptions() {		
+	}
+	
+	public TranslatorOptions(boolean cacheTranslations, File cacheDirectory) {
+		setCacheTranslations(cacheTranslations);
+		setCacheDirectory(cacheDirectory);
+	}
+	
+	public boolean isCacheTranslations() {
+		return cacheTranslations;
+	}
+
+	public void setCacheTranslations(boolean cacheTranslations) {
+		this.cacheTranslations = cacheTranslations;
+	}
+
+	public File getCacheDirectory() {
+		return cacheDirectory;
+	}
+
+	public void setCacheDirectory(File cacheDirectory) {
+		this.cacheDirectory = cacheDirectory;
 	}
 }

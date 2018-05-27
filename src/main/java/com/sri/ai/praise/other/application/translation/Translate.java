@@ -44,9 +44,9 @@ import java.util.List;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Stopwatch;
 import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
-import com.sri.ai.praise.other.translation.api.Translator;
-import com.sri.ai.praise.other.translation.api.TranslatorOptions;
-import com.sri.ai.praise.other.translation.core.TranslatorFactory;
+import com.sri.ai.praise.core.translation.api.Translator;
+import com.sri.ai.praise.core.translation.api.TranslatorOptions;
+import com.sri.ai.praise.core.translation.core.TranslatorFactory;
 
 /**
  * Command Line Interface (CLI) for performing a set of translations.

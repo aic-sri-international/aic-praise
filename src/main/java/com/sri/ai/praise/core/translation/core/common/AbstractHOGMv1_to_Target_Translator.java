@@ -35,43 +35,59 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.translation.core.uai;
+package com.sri.ai.praise.core.translation.core.common;
 
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
 import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMSortDeclaration;
-import com.sri.ai.praise.core.model.classbased.core.table.api.GraphicalNetwork;
-import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil;
+import com.sri.ai.praise.core.model.classbased.core.hogm.HOGModel;
+import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.core.hogm.parsing.HOGMParserWrapper;
+import com.sri.ai.util.Util;
 
+/**
+ * Abstract base class for HOGMv1->[some target] translations.
+ * 
+ * @author oreilly
+ *
+ */
 @Beta
-public class UAI_to_ExpressionBased_Translator extends ExpressionBasedModel {
-
-	public UAI_to_ExpressionBased_Translator(List<Expression> tables, GraphicalNetwork network) {
-		this(makeParameters(tables, network));
+public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTranslator {
+	//
+	// START-Translator
+	@Override
+	public ModelLanguage getSource() {
+		return ModelLanguage.HOGMv1;
 	}
-
-	private UAI_to_ExpressionBased_Translator(Parameters parameters) {
-		super(parameters);
-	}
-
-	private static Parameters makeParameters(List<Expression> tables, GraphicalNetwork network) {
-		Parameters parameters = new Parameters();
-		parameters.factors.addAll(tables);
-		for (int variableIndex = 0; variableIndex < network.numberVariables(); variableIndex++) {
-			int variableCardinality = network.cardinality(variableIndex);
-			String variableTypeName = UAIUtil.instanceTypeNameForVariable(variableIndex, variableCardinality);
-			parameters.mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(variableIndex), variableTypeName);
-			if (!variableTypeName.equals(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().toString())) {
-				for (int valueIndex = 0; valueIndex < variableCardinality; valueIndex++) {
-					parameters.mapFromUniquelyNamedConstantNameToTypeName.put(
-							UAIUtil.instanceConstantValueForVariable(valueIndex, variableIndex, variableCardinality), variableTypeName);
-				}
+	// END-Translator
+	//
+	
+	@Override
+	protected void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
+		//
+		// 1. Get the HOGM FactorNetwork Definition and Parse It
+		String hogmv1Model = Util.readAll(inputModelReaders[0]);
+		HOGMParserWrapper parser          = new HOGMParserWrapper();
+		HOGModel    parsedModel     = parser.parseModel(hogmv1Model);
+		ExpressionBasedModel   factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
+		
+		// Each additional input is treated as an evidence expression
+		List<Expression> evidence = new ArrayList<>();
+		if (inputModelReaders.length > 1) {
+			for (int i = 1; i < inputModelReaders.length; i++) {
+				evidence.add(Expressions.parse(Util.readAll(inputModelReaders[i])));
 			}
-			parameters.mapFromCategoricalTypeNameToSizeString.put(variableTypeName, Integer.toString(variableCardinality));
 		}
-		return parameters;
+		
+		translate(inputIdentifier, factorsAndTypes, evidence, translatedOutputs);
 	}
+	
+	protected abstract void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception;
 }

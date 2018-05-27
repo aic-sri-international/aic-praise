@@ -35,59 +35,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.translation.core.common;
+package com.sri.ai.praise.core.translation.core.uai;
 
 import java.io.PrintWriter;
-import java.io.Reader;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
 import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.HOGModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.parsing.HOGMParserWrapper;
-import com.sri.ai.util.Util;
+import com.sri.ai.praise.core.translation.core.common.AbstractHOGMv1_to_Target_Translator;
 
 /**
- * Abstract base class for HOGMv1->[some target] translations.
+ * Translator: HOGMv1->UAI
  * 
  * @author oreilly
  *
  */
 @Beta
-public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTranslator {
+public class HOGMv1_to_UAI_Translator extends AbstractHOGMv1_to_Target_Translator {
+	private static final String[] _outputFileExtensions = AbstractUAI_to_Target_Translator.INPUT_FILE_EXTENSIONS;
 	//
-	// START-Translator
+	// START-Translator	
+	@Override 
+	public ModelLanguage getTarget() {
+		return ModelLanguage.UAI;
+	}
+	
 	@Override
-	public ModelLanguage getSource() {
-		return ModelLanguage.HOGMv1;
+	public int getNumberOfOutputs() {
+		return _outputFileExtensions.length;
+	}
+	
+	@Override
+	public String[] getOutputFileExtensions() {
+		return _outputFileExtensions;
 	}
 	// END-Translator
 	//
 	
 	@Override
-	protected void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
+	protected void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
 		//
-		// 1. Get the HOGM FactorNetwork Definition and Parse It
-		String hogmv1Model = Util.readAll(inputModelReaders[0]);
-		HOGMParserWrapper parser          = new HOGMParserWrapper();
-		HOGModel    parsedModel     = parser.parseModel(hogmv1Model);
-		ExpressionBasedModel   factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
-		
-		// Each additional input is treated as an evidence expression
-		List<Expression> evidence = new ArrayList<>();
-		if (inputModelReaders.length > 1) {
-			for (int i = 1; i < inputModelReaders.length; i++) {
-				evidence.add(Expressions.parse(Util.readAll(inputModelReaders[i])));
-			}
-		}
-		
-		translate(inputIdentifier, factorsAndTypes, evidence, translatedOutputs);
+		// Ground out the HOGM FactorNetwork and translate it to the UAI model format
+		HOGModelGrounding.ground(hogmv1FactorsAndTypes, evidence, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
 	}
-	
-	protected abstract void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception;
 }

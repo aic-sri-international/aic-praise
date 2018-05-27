@@ -45,7 +45,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.sri.ai.praise.other.translation.api.Translator;
+import com.sri.ai.praise.core.translation.api.Translator;
 
 public class OutputModelWriters implements AutoCloseable {
 	
