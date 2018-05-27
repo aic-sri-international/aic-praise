@@ -45,10 +45,10 @@ import java.util.List;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.praise.core.model.impure.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.impure.core.hogm.HOGModel;
-import com.sri.ai.praise.core.model.impure.core.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.impure.core.hogm.parsing.HOGMParserWrapper;
+import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.core.hogm.HOGModel;
+import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.core.hogm.parsing.HOGMParserWrapper;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.util.Util;
 

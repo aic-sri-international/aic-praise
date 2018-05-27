@@ -33,11 +33,11 @@ import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.AnytimeExa
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.AbstractExactBP;
-import com.sri.ai.praise.core.model.pure.api.Factor;
-import com.sri.ai.praise.core.model.pure.api.Variable;
-import com.sri.ai.praise.core.model.pure.core.expression.ExpressionExactBP;
-import com.sri.ai.praise.core.model.pure.core.expression.ExpressionFactor;
-import com.sri.ai.praise.core.model.pure.core.expression.ExpressionFactorNetwork;
+import com.sri.ai.praise.core.model.interfacebased.api.Factor;
+import com.sri.ai.praise.core.model.interfacebased.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.core.expression.ExpressionExactBP;
+import com.sri.ai.praise.core.model.interfacebased.core.expression.ExpressionFactor;
+import com.sri.ai.praise.core.model.interfacebased.core.expression.ExpressionFactorNetwork;
 import com.sri.ai.praise.other.PRAiSEUtil;
 import com.sri.ai.util.base.IdentityWrapper;
 import com.sri.ai.util.computation.anytime.api.Approximation;

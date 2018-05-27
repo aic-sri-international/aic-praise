@@ -3,8 +3,8 @@ package com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebpmodel;
 import java.util.Iterator;
 
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.model.pure.api.Factor;
-import com.sri.ai.praise.core.model.pure.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.api.Factor;
+import com.sri.ai.praise.core.model.interfacebased.api.Variable;
 
 public class AEBPModel {
 

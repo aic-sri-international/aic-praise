@@ -7,7 +7,7 @@ import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.sri.ai.praise.core.inference.core.praiseprocess.PRAiSESolver;
+import com.sri.ai.praise.core.inference.externalprocesssolver.core.praise.PRAiSESolver;
 import com.sri.ai.praise.other.empiricalevaluation.EvaluationConfiguration;
 
 import joptsimple.OptionParser;

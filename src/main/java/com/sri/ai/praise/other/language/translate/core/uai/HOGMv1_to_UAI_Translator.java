@@ -42,7 +42,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.model.impure.core.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.praise.other.language.grounded.model.HOGModelGrounding;
 import com.sri.ai.praise.other.language.translate.core.AbstractHOGMv1_to_Target_Translator;

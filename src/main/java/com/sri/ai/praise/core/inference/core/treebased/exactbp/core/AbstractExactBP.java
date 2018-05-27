@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.inference.core.treebased.exactbp.core;
 
-import static com.sri.ai.praise.core.model.pure.api.Factor.multiply;
+import static com.sri.ai.praise.core.model.interfacebased.api.Factor.multiply;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
@@ -55,9 +55,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
-import com.sri.ai.praise.core.model.pure.api.Factor;
-import com.sri.ai.praise.core.model.pure.api.FactorNetwork;
-import com.sri.ai.praise.core.model.pure.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.api.Factor;
+import com.sri.ai.praise.core.model.interfacebased.api.FactorNetwork;
+import com.sri.ai.praise.core.model.interfacebased.api.Variable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;

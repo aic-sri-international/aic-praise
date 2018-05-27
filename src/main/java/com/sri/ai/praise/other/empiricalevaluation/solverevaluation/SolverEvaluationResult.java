@@ -38,8 +38,8 @@
 package com.sri.ai.praise.other.empiricalevaluation.solverevaluation;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.api.ExternalProcessSolver;
-import com.sri.ai.praise.core.inference.core.common.SolverResult;
+import com.sri.ai.praise.core.inference.externalprocesssolver.api.ExternalProcessSolver;
+import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverResult;
 import com.sri.ai.praise.other.empiricalevaluation.Problem;
 
 /**
@@ -65,17 +65,17 @@ public class SolverEvaluationResult {
 		this.problem = problem;
 	}
 	
-	public void aggregateSingleRunSolverResult(SolverResult solverResult) {
+	public void aggregateSingleRunSolverResult(ExternalProcessSolverResult solverResult) {
 		updateTime(solverResult);
 		updateAnswer(solverResult);
 	}
 
-	private void updateTime(SolverResult solverResult) {
+	private void updateTime(ExternalProcessSolverResult solverResult) {
 		sumOfTotalInferenceTimeInMilliseconds   += solverResult.getTotalInferenceTimeInMilliseconds();
 		sumOfTotalTranslationTimeInMilliseconds += solverResult.getTotalTranslationTimeInMilliseconds();
 	}
 	
-	private void updateAnswer(SolverResult solverResult) {
+	private void updateAnswer(ExternalProcessSolverResult solverResult) {
 		if (solverResult.getProbabilityOfEvidence() == null) {
 			failed = true;
 		}

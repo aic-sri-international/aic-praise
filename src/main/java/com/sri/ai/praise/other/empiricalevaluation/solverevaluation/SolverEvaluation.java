@@ -37,9 +37,9 @@
  */
 package com.sri.ai.praise.other.empiricalevaluation.solverevaluation;
 
-import com.sri.ai.praise.core.inference.api.ExternalProcessSolver;
-import com.sri.ai.praise.core.inference.core.common.SolverConfiguration;
-import com.sri.ai.praise.core.inference.core.common.SolverResult;
+import com.sri.ai.praise.core.inference.externalprocesssolver.api.ExternalProcessSolver;
+import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverConfiguration;
+import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverResult;
 import com.sri.ai.praise.other.empiricalevaluation.EvaluationConfiguration;
 import com.sri.ai.praise.other.empiricalevaluation.Problem;
 import com.sri.ai.praise.other.empiricalevaluation.output.CSVWriter;
@@ -69,14 +69,14 @@ public class SolverEvaluation {
 	}
 
 	private ExternalProcessSolver makeSolverFromClassName(String solverImplementationClassName, EvaluationConfiguration configuration) {
-		SolverConfiguration solverConfiguration = makeSolverConfiguration(solverImplementationClassName, configuration);
+		ExternalProcessSolverConfiguration solverConfiguration = makeSolverConfiguration(solverImplementationClassName, configuration);
 		ExternalProcessSolver solver = makeSolverFromConfiguration(solverConfiguration);
 		return solver;
 	}
 	
-	private SolverConfiguration makeSolverConfiguration(String solverImplementationClassName, EvaluationConfiguration configuration) {
-		SolverConfiguration solverConfiguration = 
-				new SolverConfiguration(
+	private ExternalProcessSolverConfiguration makeSolverConfiguration(String solverImplementationClassName, EvaluationConfiguration configuration) {
+		ExternalProcessSolverConfiguration solverConfiguration = 
+				new ExternalProcessSolverConfiguration(
 						solverImplementationClassName,
 						configuration.getTotalCPURuntimeLimitSecondsPerSolveAttempt(),
 						configuration.getTotalMemoryLimitInMegabytesPerSolveAttempt(),
@@ -85,19 +85,19 @@ public class SolverEvaluation {
 		return solverConfiguration;
 	}
 
-	private ExternalProcessSolver makeSolverFromConfiguration(SolverConfiguration solverConfiguration) {
+	private ExternalProcessSolver makeSolverFromConfiguration(ExternalProcessSolverConfiguration solverConfiguration) {
 		Class<ExternalProcessSolver> solverClass = getSolverImplementationClass(solverConfiguration);
 		ExternalProcessSolver solver = makeSolverInstance(solverConfiguration, solverClass);
 		return solver;
 	}
 
-	private Class<ExternalProcessSolver> getSolverImplementationClass(SolverConfiguration solverConfiguration) {
+	private Class<ExternalProcessSolver> getSolverImplementationClass(ExternalProcessSolverConfiguration solverConfiguration) {
 		String solverClassName = solverConfiguration.getImplementationClassName();
 		Class<ExternalProcessSolver> solverClass = getSolverClass(solverClassName);
 		return solverClass;
 	}
 
-	private ExternalProcessSolver makeSolverInstance(SolverConfiguration solverConfiguration, Class<ExternalProcessSolver> solverClass) {
+	private ExternalProcessSolver makeSolverInstance(ExternalProcessSolverConfiguration solverConfiguration, Class<ExternalProcessSolver> solverClass) {
 		ExternalProcessSolver solver = newSolverInstance(solverClass);
 		solver.setConfiguration(solverConfiguration);
 		return solver;
@@ -117,7 +117,7 @@ public class SolverEvaluation {
 	private SolverEvaluationResult getResultsFromAllRuns(Problem problem) {
 		SolverEvaluationResult solverEvaluationResult = new SolverEvaluationResult(solver, problem);	
 		for (int i = 0; i != configuration.getNumberOfRunsToAverageOver(); i++) {
-			SolverResult solverResult = solve(problem);
+			ExternalProcessSolverResult solverResult = solve(problem);
 			solverEvaluationResult.aggregateSingleRunSolverResult(solverResult);
 		}
 		solverEvaluationResult.recordAverageTime(configuration.getNumberOfRunsToAverageOver());
@@ -126,9 +126,9 @@ public class SolverEvaluation {
 
 	/////////////// LOW-LEVEL METHODS
 	
-	private SolverResult solve(Problem problem) {
+	private ExternalProcessSolverResult solve(Problem problem) {
 		try {
-			SolverResult result = 
+			ExternalProcessSolverResult result = 
 					solver.solve(
 							problem.model.getName() + " - " + problem.query, 
 							problem.model.getLanguage(), 

@@ -42,7 +42,7 @@ import static com.sri.ai.util.Util.list;
 import java.util.Collection;
 
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.core.model.pure.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.api.Variable;
 
 /**
  * @author braz

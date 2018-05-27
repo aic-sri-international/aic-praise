@@ -2,8 +2,8 @@ package com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebptree;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.api.Polytope;
-import com.sri.ai.praise.core.model.pure.api.Factor;
-import com.sri.ai.praise.core.model.pure.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.api.Factor;
+import com.sri.ai.praise.core.model.interfacebased.api.Variable;
 
 public interface AEBPTreeNode<RootNode,ParentNode> {
 	

@@ -40,7 +40,7 @@ package com.sri.ai.praise.other.application.empiricalevaluationapplication.core;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.sri.ai.praise.core.model.impure.modelscontainer.PagedModelContainer;
+import com.sri.ai.praise.core.model.classbased.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.other.empiricalevaluation.Evaluation;
 import com.sri.ai.praise.other.empiricalevaluation.EvaluationConfiguration;
 

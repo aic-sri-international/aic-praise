@@ -41,8 +41,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.sri.ai.praise.core.model.pure.api.Factor;
-import com.sri.ai.praise.core.model.pure.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.api.Factor;
+import com.sri.ai.praise.core.model.interfacebased.api.Variable;
 import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
 public interface ExactBP<RootType,SubRootType> extends TreeComputation<Factor> {

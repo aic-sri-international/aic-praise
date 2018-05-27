@@ -9,7 +9,7 @@ import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebpmodel.aeb
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebptree.AEBPFactorTreeNode;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebptree.AEBPQueryTreeNode;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.model.pure.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.api.Variable;
 import com.sri.ai.util.collect.EZIterator;
 
 /**

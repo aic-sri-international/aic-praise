@@ -51,7 +51,7 @@ import java.util.Set;
 
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.api.Polytope;
-import com.sri.ai.praise.core.model.pure.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.api.Variable;
 
 /**
  * @author braz

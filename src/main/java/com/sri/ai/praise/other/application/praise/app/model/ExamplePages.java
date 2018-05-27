@@ -41,8 +41,8 @@ import java.io.File;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.impure.modelscontainer.ModelPage;
-import com.sri.ai.praise.core.model.impure.modelscontainer.PagedModelContainer;
+import com.sri.ai.praise.core.model.classbased.modelscontainer.ModelPage;
+import com.sri.ai.praise.core.model.classbased.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.other.application.praise.app.FXUtil;
 
 /**
