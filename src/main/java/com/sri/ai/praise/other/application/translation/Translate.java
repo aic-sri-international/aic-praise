@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.cli;
+package com.sri.ai.praise.other.application.translation;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,12 +43,10 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Stopwatch;
-import com.sri.ai.praise.other.language.ModelLanguage;
-import com.sri.ai.praise.other.language.translate.Translator;
-import com.sri.ai.praise.other.language.translate.TranslatorFactory;
-import com.sri.ai.praise.other.language.translate.TranslatorOptions;
-import com.sri.ai.praise.other.language.translate.util.InputModelReaders;
-import com.sri.ai.praise.other.language.translate.util.TranslatedOutputs;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
+import com.sri.ai.praise.other.translation.api.Translator;
+import com.sri.ai.praise.other.translation.api.TranslatorOptions;
+import com.sri.ai.praise.other.translation.core.TranslatorFactory;
 
 /**
  * Command Line Interface (CLI) for performing a set of translations.
@@ -57,7 +55,7 @@ import com.sri.ai.praise.other.language.translate.util.TranslatedOutputs;
  *
  */
 @Beta
-public class RunTranslationsCLI {
+public class Translate {
 	
 	static class TranslationArgs {
 		File             rootModelOutputDirectory;
@@ -91,7 +89,7 @@ public class RunTranslationsCLI {
 				String sourceModelFileNameWithNoExtension = translator.getInputModelFileNameWithNoExtension(sourceModelFile);
 				Stopwatch sw = Stopwatch.createStarted();
 				try (InputModelReaders inputModelReaders = new InputModelReaders(translator, sourceModelFile, sourceModelFileExtension);
-					 TranslatedOutputs translatedOutputs = new TranslatedOutputs(translator, sourceModelFile, sourceModelFileExtension)
+					 OutputModelWriters translatedOutputs = new OutputModelWriters(translator, sourceModelFile, sourceModelFileExtension)
 					 ) {
 					
 					translator.translate(sourceModelFileNameWithNoExtension, inputModelReaders.readers, translatedOutputs.writers, new TranslatorOptions());

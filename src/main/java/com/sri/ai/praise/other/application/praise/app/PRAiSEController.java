@@ -84,6 +84,7 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
 import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.core.hogm.HOGModel;
 import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMExpressionBasedModel;
@@ -92,10 +93,9 @@ import com.sri.ai.praise.other.application.praise.app.editor.ModelPageEditor;
 import com.sri.ai.praise.other.application.praise.app.model.ExamplePages;
 import com.sri.ai.praise.other.application.praise.app.perspective.HOGMPerspective;
 import com.sri.ai.praise.other.application.praise.app.perspective.Perspective;
-import com.sri.ai.praise.other.language.ModelLanguage;
-import com.sri.ai.praise.other.language.translate.TranslatorOptions;
-import com.sri.ai.praise.other.language.translate.core.uai.HOGMv1_to_UAI_Translator;
-import com.sri.ai.praise.other.language.translate.core.uai.UAI_to_HOGMv1_Using_Equalities_Translator;
+import com.sri.ai.praise.other.translation.api.TranslatorOptions;
+import com.sri.ai.praise.other.translation.core.uai.HOGMv1_to_UAI_Translator;
+import com.sri.ai.praise.other.translation.core.uai.UAI_to_HOGMv1_Using_Equalities_Translator;
 import com.sri.ai.util.math.Rational;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;

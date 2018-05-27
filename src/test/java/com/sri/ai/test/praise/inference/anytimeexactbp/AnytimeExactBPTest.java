@@ -29,6 +29,7 @@ import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.grinder.theory.tuple.TupleTheory;
+import com.sri.ai.praise.core.PRAiSEUtil;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
@@ -38,7 +39,6 @@ import com.sri.ai.praise.core.model.interfacebased.api.Variable;
 import com.sri.ai.praise.core.model.interfacebased.core.expression.ExpressionExactBP;
 import com.sri.ai.praise.core.model.interfacebased.core.expression.ExpressionFactor;
 import com.sri.ai.praise.core.model.interfacebased.core.expression.ExpressionFactorNetwork;
-import com.sri.ai.praise.other.PRAiSEUtil;
 import com.sri.ai.util.base.IdentityWrapper;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
@@ -181,7 +181,7 @@ public class AnytimeExactBPTest {
 				+ ")";
 		queryVariableString = "I";
 		expected = parse("if I = 2 then 0.1875 else if I = 3 then 0.1875 else 0"); // Note: ExactBP returns an arbitrary unnormalized message
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, false /* taking long for regular tests */);
 
 		//
 		// A00 -- A01 -- ... -- A04
@@ -227,7 +227,7 @@ public class AnytimeExactBPTest {
 		
 		queryVariableString = "A_0_0";
 		expected = parse("if not A_0_0 then 2515404149056770048 else 857920100616142848"); // Note: ExactBP returns an arbitrary unnormalized message
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, false /* takes too long */);
+		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, false /* taking long for regular tests */);
 		
 		// Commented out for testing time purposes 
 		

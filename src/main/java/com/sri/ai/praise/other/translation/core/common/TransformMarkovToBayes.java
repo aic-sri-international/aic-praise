@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.grounded.transform;
+package com.sri.ai.praise.other.translation.core.common;
 
 import java.util.ArrayList;
 import java.util.Arrays;

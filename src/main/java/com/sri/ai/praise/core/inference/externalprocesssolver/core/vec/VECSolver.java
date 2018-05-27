@@ -49,9 +49,9 @@ import java.util.concurrent.TimeUnit;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.AbstractExternalProcessSolver;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverResult;
-import com.sri.ai.praise.other.language.ModelLanguage;
-import com.sri.ai.praise.other.language.translate.Translator;
-import com.sri.ai.praise.other.language.translate.TranslatorFactory;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
+import com.sri.ai.praise.other.translation.api.Translator;
+import com.sri.ai.praise.other.translation.core.TranslatorFactory;
 
 /**
  * Wrapper around Vibhav's UAI 2014 ExternalProcessSolver, available from:<br>

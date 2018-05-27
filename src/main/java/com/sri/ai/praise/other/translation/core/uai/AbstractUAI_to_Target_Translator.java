@@ -35,59 +35,69 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core;
+package com.sri.ai.praise.other.translation.core.uai;
 
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.HOGModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.parsing.HOGMParserWrapper;
-import com.sri.ai.praise.other.language.ModelLanguage;
-import com.sri.ai.util.Util;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIModel;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.parsing.UAIEvidenceReading;
+import com.sri.ai.praise.core.model.classbased.core.table.core.uai.parsing.UAIModelReader;
+import com.sri.ai.praise.other.translation.core.common.AbstractTranslator;
 
 /**
- * Abstract base class for HOGMv1->[some target] translations.
+ * Abstract base class for UAI->[some target] translations.
  * 
  * @author oreilly
  *
  */
 @Beta
-public abstract class AbstractHOGMv1_to_Target_Translator extends AbstractTranslator {
+public abstract class AbstractUAI_to_Target_Translator extends AbstractTranslator {
+	public static final String[] INPUT_FILE_EXTENSIONS = new String[] {
+			ModelLanguage.UAI.getDefaultFileExtension(),
+			ModelLanguage.UAI.getDefaultFileExtension()+".evid"}; // The associated evidence file (must exist as expected by UAI propositional solvers)
+	
 	//
 	// START-Translator
 	@Override
 	public ModelLanguage getSource() {
-		return ModelLanguage.HOGMv1;
+		return ModelLanguage.UAI;
 	}
+	
+	@Override
+	public int getNumberOfInputs() {
+		return INPUT_FILE_EXTENSIONS.length;
+	}
+	
+	@Override
+	public String[] getInputFileExtensions() {
+		return INPUT_FILE_EXTENSIONS;
+	}		
 	// END-Translator
 	//
 	
 	@Override
 	protected void translate(String inputIdentifier, Reader[] inputModelReaders, PrintWriter[] translatedOutputs) throws Exception {	
+		Reader uaiModelReader    = inputModelReaders[0];
+		Reader uaiEvidenceReader = inputModelReaders[1];
+		
 		//
-		// 1. Get the HOGM FactorNetwork Definition and Parse It
-		String hogmv1Model = Util.readAll(inputModelReaders[0]);
-		HOGMParserWrapper parser          = new HOGMParserWrapper();
-		HOGModel    parsedModel     = parser.parseModel(hogmv1Model);
-		ExpressionBasedModel   factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
+		// Instantiate the source UAI model
+		UAIModel uaiModel = UAIModelReader.read(uaiModelReader);
 		
-		// Each additional input is treated as an evidence expression
-		List<Expression> evidence = new ArrayList<>();
-		if (inputModelReaders.length > 1) {
-			for (int i = 1; i < inputModelReaders.length; i++) {
-				evidence.add(Expressions.parse(Util.readAll(inputModelReaders[i])));
-			}
-		}
+		//
+		// Read the corresponding evidence and merge into the model
+		// This is required as the UAI solvers all take the evidence
+		// when they are searching for solutions, so other solvers
+		// need to have this information contained in their models 
+		// as well.
+		UAIEvidenceReading.read(uaiEvidenceReader, uaiModel);
+		uaiModel.mergeEvidenceIntoModel();
 		
-		translate(inputIdentifier, factorsAndTypes, evidence, translatedOutputs);
+		translate(inputIdentifier, uaiModel, translatedOutputs);
 	}
 	
-	protected abstract void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception;
+	protected abstract void translate(String inputIdentifier, UAIModel uaiModel, PrintWriter[] translatedOutputs) throws Exception;
 }

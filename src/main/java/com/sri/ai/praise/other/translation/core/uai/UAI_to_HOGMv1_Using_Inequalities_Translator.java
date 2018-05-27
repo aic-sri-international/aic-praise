@@ -35,15 +35,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core.uai;
+package com.sri.ai.praise.other.translation.core.uai;
 
 import java.util.List;
-import java.util.StringJoiner;
-import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMSortDeclaration;
 import com.sri.ai.praise.core.model.classbased.core.table.core.data.FunctionTable;
 import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil;
 
@@ -54,27 +51,18 @@ import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil;
  *
  */
 @Beta
-public class UAI_to_HOGMv1_Using_Equalities_Translator extends AbstractUAI_to_HOGMv1_Translator {
+public class UAI_to_HOGMv1_Using_Inequalities_Translator extends AbstractUAI_to_HOGMv1_Translator {
 
 	@Override
 	public void addSortAndRandomVariableDeclarationsRegarding(int varIdx, int varCardinality, List<String> sorts, List<String> randoms) {
 		String varName     = UAIUtil.instanceVariableName(varIdx);
-		String varTypeName = UAIUtil.instanceTypeNameForVariable(varIdx, varCardinality);
-		
-		StringJoiner sortConstants = new StringJoiner(", ", ", ", ";");
-		final int innerVarIdx = varIdx;
-		IntStream.range(0, varCardinality).forEach(valIdx -> {
-			sortConstants.add(UAIUtil.instanceConstantValueForVariable(valIdx, innerVarIdx, varCardinality));
-		});
-		if (!HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(varTypeName)) {
-			sorts.add("sort "+varTypeName+": "+varCardinality+sortConstants.toString());
-		}
-		randoms.add("random "+varName+": "+varTypeName+";");
+		String varTypeName = "0.." + (varCardinality - 1);
+		randoms.add("random " + varName + ": " + varTypeName + ";");
 	}
 
 	@Override
 	public Expression convertToHOGMv1Expression(FunctionTable table) {
-		Expression result = UAIUtil.constructGenericTableExpressionUsingEqualities(table);
+		Expression result = TranslationOfTableToInequalities.constructGenericTableExpressionUsingInequalities(table);
 		return result;
 	}
 }

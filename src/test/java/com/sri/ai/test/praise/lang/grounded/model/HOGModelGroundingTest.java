@@ -51,7 +51,7 @@ import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBa
 import com.sri.ai.praise.core.model.classbased.core.hogm.HOGModel;
 import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.core.hogm.parsing.HOGMParserWrapper;
-import com.sri.ai.praise.other.language.grounded.model.HOGModelGrounding;
+import com.sri.ai.praise.other.translation.core.uai.HOGModelGrounding;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;
 

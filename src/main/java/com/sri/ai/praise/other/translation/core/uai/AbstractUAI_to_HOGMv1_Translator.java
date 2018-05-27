@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core.uai;
+package com.sri.ai.praise.other.translation.core.uai;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -46,10 +46,10 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
 import com.sri.ai.praise.core.model.classbased.core.table.core.data.FunctionTable;
 import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil;
-import com.sri.ai.praise.other.language.ModelLanguage;
 
 /**
  * Translator: UAI->HOGMv1 using equalities

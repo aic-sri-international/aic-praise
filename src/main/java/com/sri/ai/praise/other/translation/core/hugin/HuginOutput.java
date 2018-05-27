@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core.hugin;
+package com.sri.ai.praise.other.translation.core.hugin;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -45,7 +45,7 @@ import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.core.model.classbased.core.table.core.data.bayes.ConditionalProbabilityTable;
-import com.sri.ai.praise.other.language.grounded.transform.TransformMarkovToBayes;
+import com.sri.ai.praise.other.translation.core.common.TransformMarkovToBayes;
 
 /**
  * Utility class for generating a Hugin dot net bayesian network output file based on a general purpose 

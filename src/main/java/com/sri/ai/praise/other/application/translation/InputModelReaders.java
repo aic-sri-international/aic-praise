@@ -35,34 +35,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.util;
+package com.sri.ai.praise.other.application.translation;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Reader;
 import java.nio.file.Files;
 
-import com.sri.ai.praise.other.language.translate.Translator;
+import com.sri.ai.praise.other.translation.api.Translator;
 
-public class TranslatedOutputs implements AutoCloseable {
-	public PrintWriter[] writers;
+public class InputModelReaders implements AutoCloseable {
 	
-	public TranslatedOutputs(Translator translator, File sourceModelFile, String sourceModelFileExtension) throws Exception {
-		writers = new PrintWriter[translator.getNumberOfOutputs()];
-		
+	public Reader[] readers;
+	
+	public InputModelReaders(Translator translator, File sourceModelFile, String sourceModelFileExtension) throws Exception {
+		readers = new Reader[translator.getNumberOfInputs()];
 		String modelName = translator.getInputModelFileNameWithNoExtension(sourceModelFile);
-		File outputDir = new File(sourceModelFile.getParentFile().getParent(), translator.getTarget().getCode());
-		for (int i = 0; i < writers.length; i++) {
-			writers[i] = new PrintWriter(Files.newBufferedWriter(new File(outputDir, modelName+translator.getOutputFileExtensions()[i]).toPath(),
-										 						 translator.getTargetCharset()));
+		for (int i = 0; i < readers.length; i++) {
+			readers[i] = Files.newBufferedReader(new File(sourceModelFile.getParent(), modelName+translator.getInputFileExtensions()[i]).toPath(), 
+													translator.getSourceCharset());
 		}
 	}
-	
+		
 	@Override
 	public void close() throws IOException {
-		for (PrintWriter writer : writers) {
-			writer.flush();
-			writer.close();
+		for (Reader r : readers) {
+			r.close();
 		}
 	}
 }

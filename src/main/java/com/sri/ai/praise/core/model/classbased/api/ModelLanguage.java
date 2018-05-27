@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language;
+package com.sri.ai.praise.core.model.classbased.api;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -39,7 +39,7 @@ package com.sri.ai.praise.core.inference.externalprocesssolver.api;
 
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverConfiguration;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverResult;
-import com.sri.ai.praise.other.language.ModelLanguage;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
 
 public interface ExternalProcessSolver {
 	String getName();

@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.core.uai;
+package com.sri.ai.praise.other.translation.core.uai;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,7 +49,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.other.language.grounded.model.HOGModelGrounding;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.math.Rational;
 

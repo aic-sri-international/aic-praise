@@ -35,31 +35,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate.util;
+package com.sri.ai.praise.other.translation.core.uai;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
+import java.io.PrintWriter;
+import java.util.List;
 
-import com.sri.ai.praise.other.language.translate.Translator;
+import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
+import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.other.translation.core.common.AbstractHOGMv1_to_Target_Translator;
 
-public class InputModelReaders implements AutoCloseable {
-	public Reader[] readers;
-	
-	public InputModelReaders(Translator translator, File sourceModelFile, String sourceModelFileExtension) throws Exception {
-		readers = new Reader[translator.getNumberOfInputs()];
-		String modelName = translator.getInputModelFileNameWithNoExtension(sourceModelFile);
-		for (int i = 0; i < readers.length; i++) {
-			readers[i] = Files.newBufferedReader(new File(sourceModelFile.getParent(), modelName+translator.getInputFileExtensions()[i]).toPath(), 
-													translator.getSourceCharset());
-		}
+/**
+ * Translator: HOGMv1->UAI
+ * 
+ * @author oreilly
+ *
+ */
+@Beta
+public class HOGMv1_to_UAI_Translator extends AbstractHOGMv1_to_Target_Translator {
+	private static final String[] _outputFileExtensions = AbstractUAI_to_Target_Translator.INPUT_FILE_EXTENSIONS;
+	//
+	// START-Translator	
+	@Override 
+	public ModelLanguage getTarget() {
+		return ModelLanguage.UAI;
 	}
-		
+	
 	@Override
-	public void close() throws IOException {
-		for (Reader r : readers) {
-			r.close();
-		}
+	public int getNumberOfOutputs() {
+		return _outputFileExtensions.length;
+	}
+	
+	@Override
+	public String[] getOutputFileExtensions() {
+		return _outputFileExtensions;
+	}
+	// END-Translator
+	//
+	
+	@Override
+	protected void translate(String identifier, ExpressionBasedModel hogmv1FactorsAndTypes, List<Expression> evidence, PrintWriter[] translatedOutputs) throws Exception {			
+		//
+		// Ground out the HOGM FactorNetwork and translate it to the UAI model format
+		HOGModelGrounding.ground(hogmv1FactorsAndTypes, evidence, new UAIHOGModelGroundingListener(translatedOutputs[0], translatedOutputs[1]));
 	}
 }

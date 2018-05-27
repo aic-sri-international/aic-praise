@@ -52,9 +52,9 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.AbstractExternalProcessSolver;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverResult;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
 import com.sri.ai.praise.core.model.classbased.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.other.application.praise.commandline.PRAiSE;
-import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.util.base.Pair;
 
 public class PRAiSESolver extends AbstractExternalProcessSolver {

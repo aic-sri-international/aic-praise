@@ -4,13 +4,8 @@ import static com.sri.ai.util.Util.println;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.github.jsonldjava.core.JsonLdOptions;
-import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
-import com.sri.ai.praise.other.integration.linkeddata.api.LinkedDataList;
 import com.sri.ai.praise.other.integration.linkeddata.api.LinkedDataMap;
 import com.sri.ai.praise.other.integration.linkeddata.api.LinkedDataObject;
 import com.sri.ai.praise.other.integration.linkeddata.jsonld.JSONLDJavaUtil;
@@ -26,9 +21,9 @@ public class ReadWorldModelersJSONLD {
 		// Number or null depending on the root object in the file).
 		Object jsonObject = JsonUtils.fromInputStream(inputStream);
 
-		JsonLdOptions options = new JsonLdOptions();
-		Object expanded = JsonLdProcessor.expand(jsonObject, options);
-		Object flattened = JsonLdProcessor.flatten(jsonObject, options);
+		//JsonLdOptions options = new JsonLdOptions();
+		//Object expanded = JsonLdProcessor.expand(jsonObject, options);
+		//Object flattened = JsonLdProcessor.flatten(jsonObject, options);
 		println("Flattened:");
 		println(JsonUtils.toPrettyString(jsonObject));
 		

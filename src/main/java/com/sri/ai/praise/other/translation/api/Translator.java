@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate;
+package com.sri.ai.praise.other.translation.api;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -44,7 +44,7 @@ import java.nio.charset.Charset;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
-import com.sri.ai.praise.other.language.ModelLanguage;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
 
 /**
  * Interface to be implemented by all Language Translators.

@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.translate;
+package com.sri.ai.praise.other.translation.api;
 
 import java.io.File;
 
@@ -43,6 +43,7 @@ import com.google.common.annotations.Beta;
 
 @Beta
 public class TranslatorOptions {
+	
 	private boolean cacheTranslations = false; 
 	private File cacheDirectory = null;
 

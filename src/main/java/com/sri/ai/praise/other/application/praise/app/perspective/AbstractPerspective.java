@@ -56,12 +56,12 @@ import org.reactfx.EventSource;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.common.io.Files;
+import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
 import com.sri.ai.praise.core.model.classbased.modelscontainer.ModelPage;
 import com.sri.ai.praise.core.model.classbased.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.other.application.praise.app.FXUtil;
 import com.sri.ai.praise.other.application.praise.app.editor.ModelPageEditor;
 import com.sri.ai.praise.other.application.praise.app.model.ExamplePages;
-import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.util.base.Pair;
 
 import javafx.application.Platform;
