@@ -37,8 +37,8 @@
  */
 package com.sri.ai.praise.other.application.uai;
 
-import static com.sri.ai.praise.core.model.core.uai.UAIUtil.readLine;
-import static com.sri.ai.praise.core.model.core.uai.UAIUtil.split;
+import static com.sri.ai.praise.core.model.core.uai.core.UAIUtil.readLine;
+import static com.sri.ai.praise.core.model.core.uai.core.UAIUtil.split;
 
 import java.io.BufferedReader;
 import java.io.File;

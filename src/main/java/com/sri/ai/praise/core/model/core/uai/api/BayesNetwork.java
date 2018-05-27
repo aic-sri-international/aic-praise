@@ -35,17 +35,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.core.uai;
+package com.sri.ai.praise.core.model.core.uai.api;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.core.model.core.uai.core.data.bayes.ConditionalProbabilityTable;
 
 /**
- * Represents the possible types of UAI models.
+ * Basic representation of a Bayesian Network.
  * 
  * @author oreilly
  *
  */
 @Beta
-public enum UAIModelType {
-	MARKOV, BAYES
+public interface BayesNetwork extends GraphicalNetwork {
+	
+	/**
+	 * 
+	 * @return the # of Conditional Probability Tables (CPTs) in the network.
+	 */
+	default int numberCPTs() {
+		return numberTables();
+	}
+	
+	ConditionalProbabilityTable getCPT(int cptIdx);
 }

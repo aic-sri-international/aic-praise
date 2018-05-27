@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.model.core.treebased.Table;
+package com.sri.ai.praise.core.model.core.treebased.table;
 
 import static com.sri.ai.praise.core.model.core.treebased.core.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.accumulate;

@@ -35,10 +35,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.core.uai;
+package com.sri.ai.praise.core.model.core.uai.api;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.other.language.grounded.markov.FactorTable;
+import com.sri.ai.praise.core.model.core.uai.core.data.markov.FactorTable;
 
 /**
  * Basic representation of a Markov Network.

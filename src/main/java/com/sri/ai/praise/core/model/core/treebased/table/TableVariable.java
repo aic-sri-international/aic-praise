@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.model.core.treebased.Table;
+package com.sri.ai.praise.core.model.core.treebased.table;
 
 import java.util.ArrayList;
 import java.util.List;

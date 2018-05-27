@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.core.uai;
+package com.sri.ai.praise.core.model.core.uai.core;
 
 import static com.sri.ai.util.Util.list;
 
@@ -56,7 +56,7 @@ import com.sri.ai.grinder.application.Compilation;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.SyntacticSubstitute;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
-import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
+import com.sri.ai.praise.core.model.core.uai.core.data.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**
@@ -66,6 +66,7 @@ import com.sri.ai.util.collect.CartesianProductEnumeration;
  */
 @Beta
 public class UAIUtil {
+	
 	public static String readLine(BufferedReader br) throws IOException {
 		String result = "";
 		// This ensures empty lines are removed

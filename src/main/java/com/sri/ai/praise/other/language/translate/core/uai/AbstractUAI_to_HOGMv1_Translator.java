@@ -46,10 +46,10 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.praise.core.model.core.uai.UAIModel;
-import com.sri.ai.praise.core.model.core.uai.UAIUtil;
+import com.sri.ai.praise.core.model.core.uai.core.UAIModel;
+import com.sri.ai.praise.core.model.core.uai.core.UAIUtil;
+import com.sri.ai.praise.core.model.core.uai.core.data.FunctionTable;
 import com.sri.ai.praise.other.language.ModelLanguage;
-import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
 
 /**
  * Translator: UAI->HOGMv1 using equalities

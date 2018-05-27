@@ -2,9 +2,9 @@ package com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.
 
 
 import static com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.box.TableBoxVariable.TABLE_BOX_VARIABLE;
-import static com.sri.ai.praise.core.model.core.treebased.Table.TableFactor.copyToSubTableFactor;
-import static com.sri.ai.praise.core.model.core.treebased.Table.TableFactor.getCartesianProduct;
-import static com.sri.ai.praise.core.model.core.treebased.Table.TableFactor.numEntries;
+import static com.sri.ai.praise.core.model.core.treebased.table.TableFactor.copyToSubTableFactor;
+import static com.sri.ai.praise.core.model.core.treebased.table.TableFactor.getCartesianProduct;
+import static com.sri.ai.praise.core.model.core.treebased.table.TableFactor.numEntries;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.in;
@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.model.core.treebased.Table.TableFactor;
-import com.sri.ai.praise.core.model.core.treebased.Table.TableVariable;
 import com.sri.ai.praise.core.model.core.treebased.api.Variable;
+import com.sri.ai.praise.core.model.core.treebased.table.TableFactor;
+import com.sri.ai.praise.core.model.core.treebased.table.TableVariable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 

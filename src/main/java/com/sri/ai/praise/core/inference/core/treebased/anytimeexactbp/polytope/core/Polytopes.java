@@ -61,10 +61,10 @@ import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.a
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.box.Box;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.box.TableBoxVariable;
-import com.sri.ai.praise.core.model.core.treebased.Table.TableFactor;
-import com.sri.ai.praise.core.model.core.treebased.Table.TableVariable;
 import com.sri.ai.praise.core.model.core.treebased.api.Factor;
 import com.sri.ai.praise.core.model.core.treebased.api.Variable;
+import com.sri.ai.praise.core.model.core.treebased.table.TableFactor;
+import com.sri.ai.praise.core.model.core.treebased.table.TableVariable;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
 

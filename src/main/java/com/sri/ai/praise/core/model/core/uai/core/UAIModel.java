@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.core.uai;
+package com.sri.ai.praise.core.model.core.uai.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +45,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
+import com.sri.ai.praise.core.model.core.uai.api.MarkovNetwork;
+import com.sri.ai.praise.core.model.core.uai.core.data.FunctionTable;
 
 /**
  * In memory representation of an Uncertainty in Artificial Intelligence (UAI) 
@@ -54,11 +55,12 @@ import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
  * @author oreilly
  */
 @Beta
-public class UAIModel implements MarkovNetwork {	
+public class UAIModel implements MarkovNetwork {
+	
 	private UAIModelType type;
-	private Map<Integer, Integer> varIdxToCardinality                        = new LinkedHashMap<>();
+	private Map<Integer, Integer> variableIndexToCardinality                 = new LinkedHashMap<>();
 	private List<List<Integer>> tableInstanceVariableIndexes                 = new ArrayList<>();
-	private Map<Integer, FunctionTable> tableInstanceIdxToTable              = new LinkedHashMap<>();
+	private Map<Integer, FunctionTable> tableInstanceIndexToTable            = new LinkedHashMap<>();
 	//
 	private Map<Integer, Integer> evidence                                   = new LinkedHashMap<>();
 	//
@@ -68,13 +70,14 @@ public class UAIModel implements MarkovNetwork {
 	private Map<Integer, List<Double>> marSolution                           = new LinkedHashMap<>();
 	
 	public UAIModel(UAIModelType type, 
-			Map<Integer, Integer> varIdxToCardinality,
+			Map<Integer, Integer> variableIndexToCardinality,
 			List<List<Integer>> tableInstanceVariableIndexes,
-			Map<Integer, FunctionTable> tableIdxToTable) {
+			Map<Integer, FunctionTable> tableInstanceIndexToTable) {
+		
 		this.type = type;
-		this.varIdxToCardinality.putAll(varIdxToCardinality);
+		this.variableIndexToCardinality.putAll(variableIndexToCardinality);
 		this.tableInstanceVariableIndexes.addAll(tableInstanceVariableIndexes);
-		this.tableInstanceIdxToTable.putAll(tableIdxToTable);
+		this.tableInstanceIndexToTable.putAll(tableInstanceIndexToTable);
 		
 		computeUniqueMappings();	
 	}
@@ -87,12 +90,12 @@ public class UAIModel implements MarkovNetwork {
 	// START-GraphicalNetwork
 	@Override
 	public int numberVariables() {
-		return varIdxToCardinality.size();
+		return variableIndexToCardinality.size();
 	}
 	
 	@Override
 	public int cardinality(int varIdx) {
-		return varIdxToCardinality.get(varIdx);
+		return variableIndexToCardinality.get(varIdx);
 	}
 	
 	@Override
@@ -112,7 +115,7 @@ public class UAIModel implements MarkovNetwork {
 	
 	@Override
 	public FunctionTable getTable(int tableIdx) {
-		return tableInstanceIdxToTable.get(tableIdx);
+		return tableInstanceIndexToTable.get(tableIdx);
 	}
 	
 	@Override
@@ -154,7 +157,7 @@ public class UAIModel implements MarkovNetwork {
 				Integer evidenceVarIndex = evidenceAssignment.getKey();
 				int     evidenceValue    = evidenceAssignment.getValue();
 				
-				int varCardinality = varIdxToCardinality.get(evidenceVarIndex);
+				int varCardinality = variableIndexToCardinality.get(evidenceVarIndex);
 				List<Double> entries   = new ArrayList<>();
 				for (int i = 0; i < varCardinality; i++) {
 					if (i == evidenceValue) {
@@ -168,7 +171,7 @@ public class UAIModel implements MarkovNetwork {
 				//
 				// Merge in with the other factor information
 				tableInstanceVariableIndexes.add(Arrays.asList(evidenceVarIndex));
-				tableInstanceIdxToTable.put(tableInstanceVariableIndexes.size()-1, evidenceFactor);
+				tableInstanceIndexToTable.put(tableInstanceVariableIndexes.size()-1, evidenceFactor);
 			}
 			
 			// Ensure the unique mapping information is re-created.
@@ -181,7 +184,7 @@ public class UAIModel implements MarkovNetwork {
 	}
 	
 	public void addMARSolution(Integer varIdx, List<Double> values) {
-		Integer cardinality = varIdxToCardinality.get(varIdx);
+		Integer cardinality = variableIndexToCardinality.get(varIdx);
 		if (cardinality == null) {
 			throw new IllegalArgumentException("ExpressionVariable Index is invalid, give "+ varIdx +" must be in interval [0, "+numberVariables()+")");
 		}
@@ -203,7 +206,7 @@ public class UAIModel implements MarkovNetwork {
 	private void computeUniqueMappings() {
 		uniqueTableIdxToUniqueTable.clear();
 		uniqueTableToTableInstanceIdxs.clear();
-		for (Map.Entry<Integer, FunctionTable> entry : this.tableInstanceIdxToTable.entrySet()) {
+		for (Map.Entry<Integer, FunctionTable> entry : this.tableInstanceIndexToTable.entrySet()) {
 			List<Integer> tableInstanceIndexesForUniqueTable = this.uniqueTableToTableInstanceIdxs.get(entry.getValue());
 			if (tableInstanceIndexesForUniqueTable == null) {
 				tableInstanceIndexesForUniqueTable = new ArrayList<>();

@@ -21,9 +21,9 @@ import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.c
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.ProductPolytope;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Simplex;
-import com.sri.ai.praise.core.model.core.treebased.Table.TableFactor;
 import com.sri.ai.praise.core.model.core.treebased.api.Factor;
 import com.sri.ai.praise.core.model.core.treebased.api.Variable;
+import com.sri.ai.praise.core.model.core.treebased.table.TableFactor;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.computation.anytime.api.Approximation;

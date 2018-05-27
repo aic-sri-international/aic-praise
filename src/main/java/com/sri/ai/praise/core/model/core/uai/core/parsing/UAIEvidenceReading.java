@@ -35,10 +35,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.core.uai;
+package com.sri.ai.praise.core.model.core.uai.core.parsing;
 
-import static com.sri.ai.praise.core.model.core.uai.UAIUtil.readLine;
-import static com.sri.ai.praise.core.model.core.uai.UAIUtil.split;
+import static com.sri.ai.praise.core.model.core.uai.core.UAIUtil.readLine;
+import static com.sri.ai.praise.core.model.core.uai.core.UAIUtil.split;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import com.google.common.annotations.Beta;
+import com.sri.ai.praise.core.model.core.uai.core.UAIModel;
 
 /**
  * Utility file for reading in Uncertainty in Artificial Intelligence (UAI) 

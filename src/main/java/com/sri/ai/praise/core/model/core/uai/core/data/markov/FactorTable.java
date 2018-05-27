@@ -35,27 +35,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.grounded.bayes;
+package com.sri.ai.praise.core.model.core.uai.core.data.markov;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.core.uai.GraphicalNetwork;
+import com.sri.ai.praise.core.model.core.uai.core.data.FunctionTable;
 
 /**
- * Basic representation of a Bayesian Network.
+ * A table representation of a factor for use in a Markov Network.
  * 
  * @author oreilly
  *
  */
 @Beta
-public interface BayesNetwork extends GraphicalNetwork {
+public class FactorTable {
+	private List<Integer> variableIndexes;
+	private FunctionTable functionTable;
 	
-	/**
-	 * 
-	 * @return the # of Conditional Probability Tables (CPTs) in the network.
-	 */
-	default int numberCPTs() {
-		return numberTables();
+	public FactorTable(List<Integer> variableIndexes, FunctionTable table) {
+		this.variableIndexes = new ArrayList<>(variableIndexes);
+		this.functionTable   = table;
+		
+		if (functionTable.numberVariables() != this.variableIndexes.size()) {
+			throw new IllegalArgumentException("Function table's # vars "+functionTable.numberVariables()+" does not match # of variable indexes "+this.variableIndexes.size());
+		}
 	}
 	
-	ConditionalProbabilityTable getCPT(int cptIdx);
+	public List<Integer> getVariableIndexes() {
+		return variableIndexes;
+	}
+	
+	public FunctionTable getTable() {
+		return functionTable;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof FactorTable) {
+			FactorTable other = (FactorTable) obj;
+			return this.variableIndexes.equals(other.variableIndexes) && this.functionTable.equals(other.functionTable);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.variableIndexes.hashCode() + this.functionTable.hashCode();
+	}
 }

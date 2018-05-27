@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.core.uai.UAIModel;
+import com.sri.ai.praise.core.model.core.uai.core.UAIModel;
 import com.sri.ai.praise.other.language.ModelLanguage;
 import com.sri.ai.praise.other.language.grounded.transform.TransformMarkovToBayes;
 import com.sri.ai.praise.other.language.translate.core.uai.AbstractUAI_to_Target_Translator;

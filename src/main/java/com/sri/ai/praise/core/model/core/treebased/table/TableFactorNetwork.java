@@ -1,7 +1,7 @@
-package com.sri.ai.praise.core.model.core.treebased.Table;
+package com.sri.ai.praise.core.model.core.treebased.table;
 
-import static com.sri.ai.praise.core.model.core.treebased.Table.TableFactor.copyToSubTableFactor;
-import static com.sri.ai.praise.core.model.core.uai.UAIUtil.genericVariableName;
+import static com.sri.ai.praise.core.model.core.treebased.table.TableFactor.copyToSubTableFactor;
+import static com.sri.ai.praise.core.model.core.uai.core.UAIUtil.genericVariableName;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.ArrayList;
@@ -12,8 +12,8 @@ import java.util.Map.Entry;
 
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.core.AbstractEditableFactorNetwrok;
-import com.sri.ai.praise.core.model.core.uai.UAIModel;
-import com.sri.ai.praise.other.language.grounded.markov.FactorTable;
+import com.sri.ai.praise.core.model.core.uai.core.UAIModel;
+import com.sri.ai.praise.core.model.core.uai.core.data.markov.FactorTable;
 import com.sri.ai.util.Util;
 /**
  * 

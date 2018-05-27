@@ -1,8 +1,8 @@
 package com.sri.ai.praise.core.model.core.treebased.expression;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.praise.core.model.core.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
-import static com.sri.ai.praise.core.model.core.uai.UAIUtil.convertGenericTableToInstance;
+import static com.sri.ai.praise.core.model.core.uai.core.UAIUtil.constructGenericTableExpressionUsingEqualities;
+import static com.sri.ai.praise.core.model.core.uai.core.UAIUtil.convertGenericTableToInstance;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.println;
 
@@ -30,9 +30,9 @@ import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.model.core.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.core.treebased.api.Factor;
-import com.sri.ai.praise.core.model.core.uai.UAIModel;
-import com.sri.ai.praise.core.model.core.uai.UAIModelReader;
-import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
+import com.sri.ai.praise.core.model.core.uai.core.UAIModel;
+import com.sri.ai.praise.core.model.core.uai.core.data.FunctionTable;
+import com.sri.ai.praise.core.model.core.uai.core.parsing.UAIModelReader;
 import com.sri.ai.praise.other.language.translate.core.uai.UAI_to_ExpressionBased_Translator;
 import com.sri.ai.util.base.IdentityWrapper;
 

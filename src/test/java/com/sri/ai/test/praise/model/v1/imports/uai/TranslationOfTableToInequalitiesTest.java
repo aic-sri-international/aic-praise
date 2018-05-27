@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
+import com.sri.ai.praise.core.model.core.uai.core.data.FunctionTable;
 import com.sri.ai.praise.other.language.translate.core.TranslationOfTableToInequalities;
 
 public class TranslationOfTableToInequalitiesTest {

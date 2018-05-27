@@ -1,7 +1,7 @@
 package com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.box;
 
 import static com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.box.TableBoxVariable.TABLE_BOX_VARIABLE;
-import static com.sri.ai.praise.core.model.core.treebased.Table.TableFactor.getCartesianProduct;
+import static com.sri.ai.praise.core.model.core.treebased.table.TableFactor.getCartesianProduct;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.model.core.treebased.Table.TableFactor;
-import com.sri.ai.praise.core.model.core.treebased.Table.TableVariable;
 import com.sri.ai.praise.core.model.core.treebased.api.Factor;
 import com.sri.ai.praise.core.model.core.treebased.api.Variable;
+import com.sri.ai.praise.core.model.core.treebased.table.TableFactor;
+import com.sri.ai.praise.core.model.core.treebased.table.TableVariable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;

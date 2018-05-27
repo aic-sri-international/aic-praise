@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.language.grounded.bayes;
+package com.sri.ai.praise.core.model.core.uai.core.data.bayes;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -44,11 +44,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.other.language.grounded.common.FunctionTable;
+import com.sri.ai.praise.core.model.core.uai.core.data.FunctionTable;
 import com.sri.ai.util.collect.CartesianProductEnumeration;
 
 /**
- * Expression representation of a Bayesian Network Conditional Probability Table - P(C | P1,...,Pn ).
+ * Representation of a Bayesian Network Conditional Probability Table - P(C | P1,...,Pn ).
  * 
  * @author oreilly
  *
