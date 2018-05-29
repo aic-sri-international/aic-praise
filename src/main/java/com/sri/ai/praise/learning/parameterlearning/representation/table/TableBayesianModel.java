@@ -15,9 +15,9 @@ import com.sri.ai.praise.learning.parameterlearning.representation.dataset.Defau
 
 public class TableBayesianModel extends TableFactorNetwork implements BayesianModel {
 	
-	private List<TableBayesianNode> nodes;
+	private List<NewTableBayesianNode> nodes;
 	
-	public TableBayesianModel(List<TableBayesianNode> nodes) {
+	public TableBayesianModel(List<NewTableBayesianNode> nodes) {
 		super(nodes);
 		this.nodes = nodes;
 	}

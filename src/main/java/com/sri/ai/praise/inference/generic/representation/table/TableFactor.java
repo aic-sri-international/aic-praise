@@ -188,6 +188,11 @@ public class TableFactor implements Factor {
 			varValues[i] = (Integer) variableValues.get(listOfVariables.get(i));
 		}
 		
+		int entryPosition = getEntryPosition(varValues);
+		return entryPosition;
+	}
+
+	private int getEntryPosition(int[] varValues) {
 		int entryPosition = this.entryIndex.getValueFor(varValues).intValue();
 		return entryPosition;
 	}

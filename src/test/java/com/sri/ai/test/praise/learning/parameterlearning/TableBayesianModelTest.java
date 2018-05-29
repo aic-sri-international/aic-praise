@@ -33,7 +33,7 @@ public class TableBayesianModelTest {
 		
 		List<TableBayesianNode> nodes = list(sickNode, sunNode, coldNode);
 
-		TableBayesianModel sickSunColdModel = new TableBayesianModel(nodes);
+		// TableBayesianModel sickSunColdModel = new TableBayesianModel(nodes);
 		
 		return sickSunColdModel;
 	}
