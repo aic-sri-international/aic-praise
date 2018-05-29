@@ -17,6 +17,7 @@ import java.util.Map;
 
 import com.sri.ai.praise.inference.generic.representation.api.Factor;
 import com.sri.ai.praise.inference.generic.representation.api.Variable;
+import com.sri.ai.praise.inference.generic.representation.core.ConstantFactor;
 import com.sri.ai.praise.inference.generic.representation.core.IdentityFactor;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
@@ -29,6 +30,7 @@ import com.sri.ai.util.math.MixedRadixNumber;
  */
 
 public class TableFactor implements Factor {
+	
 	ArrayList<TableVariable> listOfVariables;
 	ArrayList<Integer> listOfVariableCardinalities;
 	LinkedHashSet<TableVariable> setOfVariables;
@@ -344,8 +346,46 @@ public class TableFactor implements Factor {
 
 	@Override
 	public Factor add(Factor another) {
-		// TODO Auto-generated method stub
-		return null;
+
+		if(another instanceof ConstantFactor) {
+			return another.add(this);
+		}
+				
+		if(another.getClass() != this.getClass()) {
+			throw new Error("Trying to multiply different types of factors: this is a " +
+						this.getClass() + "and another is a " + another.getClass());
+		}
+
+		TableFactor anotherTable = (TableFactor) another;
+				
+		ArrayList<TableVariable> newListOfVariables = new ArrayList<>(this.listOfVariables);
+		for(TableVariable v : anotherTable.getVariables()) {
+			if(!this.setOfVariables.contains(v)) {
+				newListOfVariables.add(v);
+			}
+		}
+
+		Integer numberOfEntries = accumulate(mapIntoList(newListOfVariables, v->v.getCardinality()),
+											(i,j)->i*j, 1);
+		ArrayList<Double> newEntries = new ArrayList<>(numberOfEntries);
+		for (int i = 0; i < numberOfEntries; i++) {
+			newEntries.add(-1.);
+		}
+				
+		TableFactor result = new TableFactor(newListOfVariables, newEntries);
+		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(newListOfVariables);
+				
+		LinkedHashMap<Variable, Integer> mapFromVariableToValue = new LinkedHashMap<>();
+		for(ArrayList<Integer> values: in(cartesianProduct)) {
+			for (int i = 0; i < values.size(); i++) {
+				mapFromVariableToValue.put(newListOfVariables.get(i), values.get(i));
+			}
+			Double sum = this.getEntryFor(mapFromVariableToValue) * anotherTable.getEntryFor(mapFromVariableToValue);
+			result.setEntryFor(mapFromVariableToValue, sum);
+		}
+		
+		return result;
+		
 	}
 
 	@Override
@@ -355,7 +395,15 @@ public class TableFactor implements Factor {
 
 	@Override
 	public Factor invert() {
-		// TODO Auto-generated method stub
-		return null;
+		TableFactor result;
+		ArrayList<Double> newEntries = new ArrayList<>(getEntries().size());
+		for (Double entry : getEntries()) {
+			if(Math.abs(entry) < 0.00000001) {
+				throw new Error("Can't invert : 0 value in the table factor.");
+			}
+			newEntries.add(1/entry);
+		}
+		result = new TableFactor(getVariables(), newEntries);
+		return result;
 	}
 }
