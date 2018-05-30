@@ -88,7 +88,7 @@ public class ExpressionBasedSolver {
 	private Expression factorGraph;
 	private boolean isBayesianNetwork;
 	private Expression evidence;
-	private Expression evidenceProbability;
+	private Expression partitionFunction;
 	private Map<String, String> mapFromRandomVariableNameToTypeName;
 	private Map<String, String> mapFromSymbolNameToTypeName; // union of the two maps above
 	private Map<String, String> mapFromCategoricalTypeNameToSizeString;
@@ -100,7 +100,7 @@ public class ExpressionBasedSolver {
 	private MultiQuantifierEliminator solver;
 
 	public Expression getEvidenceProbability() {
-		return evidenceProbability;
+		return partitionFunction;
 	}
 
 	public Map<String, String> getMapFromRandomVariableNameToTypeName() {
@@ -173,7 +173,7 @@ public class ExpressionBasedSolver {
 			solver = new DefaultMultiQuantifierEliminator();
 		}
 
-		evidenceProbability = null;
+		partitionFunction = null;
 	}
 	
 	public Theory getTheory() {
@@ -225,11 +225,11 @@ public class ExpressionBasedSolver {
 		}
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
-			if (evidenceProbability == null) {
-				evidenceProbability = solver.solve(semiRing, unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+			if (partitionFunction == null) {
+				partitionFunction = solver.solve(semiRing, unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 			}
 
-			marginal = Division.make(unnormalizedMarginal, evidenceProbability); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
+			marginal = Division.make(unnormalizedMarginal, partitionFunction); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
 			// now we use the algorithm again for simplifying the above division; this is a lazy way of doing this, as it performs search on the query variable again -- we could instead write an ad hoc function to divide all numerical constants by the normalization constant, but the code would be uglier and the gain very small, since this is a search on a single variable anyway.
 			marginal = evaluate(marginal);
 		}

@@ -2,7 +2,6 @@ package com.sri.ai.praise.core.model.classbased.expressionbased;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +20,7 @@ public class ExpressionBasedModel implements Model {
 	protected Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
 	protected Map<String, String> mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>();
 	protected Collection<Type> additionalTypes = new LinkedList<>();
-	protected boolean isKnownToBeBayesianNetwork;
+	protected boolean isKnownToBeBayesianNetwork = false;
 	
 	public ExpressionBasedModel(
 			List<Expression> factors,
@@ -41,28 +40,6 @@ public class ExpressionBasedModel implements Model {
 		this.additionalTypes = additionalTypes;
 		this.isKnownToBeBayesianNetwork = isKnownToBeBayesianNetwork;
 	}	
-
-	public static class Parameters {
-		public List<Expression>    factors                                       = new ArrayList<>(); 
-		public Map<String, String> mapFromRandomVariableNameToTypeName           = new LinkedHashMap<>();
-		public Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Collections.emptyMap(); // Not used for Graphical Networks
-		public Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
-		public Map<String, String> mapFromCategoricalTypeNameToSizeString        = new LinkedHashMap<>();
-		public Collection<Type>    additionalTypes                               = new LinkedList<>();
-		public boolean             isKnownToBeBayesianNetwork                    = false;
-	}
-
-	public ExpressionBasedModel(Parameters parameters) {
-		this(
-				parameters.factors, 
-				parameters.mapFromRandomVariableNameToTypeName,
-				parameters.mapFromNonUniquelyNamedConstantNameToTypeName,
-				parameters.mapFromUniquelyNamedConstantNameToTypeName,
-				parameters.mapFromCategoricalTypeNameToSizeString,
-				parameters.additionalTypes,
-				parameters.isKnownToBeBayesianNetwork
-				);
-	}
 
 	public ExpressionBasedModel() {
 		super();
