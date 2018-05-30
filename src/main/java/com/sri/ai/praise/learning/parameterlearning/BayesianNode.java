@@ -10,27 +10,31 @@ public interface BayesianNode extends Factor {
 	
 	public List<? extends Variable> getParents();
 	
+	public List<? extends Variable> getAllVariables();
+	
 	// "Parameter" bellow is understood as the conditional probability P (childVariable = childValue | parentsVariables = parentsValues)
 	
 	default public void setParametersGivenCompleteData(Dataset dataset) {
-		Variable childVariable = this.getChild();
-		List<? extends Variable> parentsVariables = this.getParents();
+		List<? extends Variable> childAndParentsVariables = this.getAllVariables();
 		
 		this.setInitialCountsForAllPossibleChildAndParentsAssignments();
 		
+		long startTime = System.currentTimeMillis();
 		for(Datapoint datapoint : dataset.getDatapoints()) {
-			Object childValue = datapoint.getValueOfVariable(childVariable);
-			List<? extends Object> parentsValues = datapoint.getValuesOfVariables(parentsVariables);
-			this.incrementCountForChildAndParentsAssignment(childValue, parentsValues);
+			List<? extends Object> childAndParentsValues = datapoint.getValuesOfVariables(childAndParentsVariables);
+			this.incrementCountForChildAndParentsAssignment(childAndParentsValues);
 		}
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+	    System.out.println("Elapsed time for incrementing: " + elapsedTime + " miliseconds");
 		
-		this.normalizeParametersAndFillEntries();
+		this.normalizeParameters();
 	}
 	
 	public void setInitialCountsForAllPossibleChildAndParentsAssignments();
 	
-	public void incrementCountForChildAndParentsAssignment(Object childValue, List<? extends Object> parentsValues);
+	public void incrementCountForChildAndParentsAssignment(List<? extends Object> childAndParentsValues);
 	
-	public void normalizeParametersAndFillEntries();
+	public void normalizeParameters();
 	
 }

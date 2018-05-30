@@ -39,7 +39,6 @@ public class TableBayesianModelTest {
 		return sickSunColdModel;
 	}
 	
-	@Test
 	public static void testSickSunColdModelPrinting() {
 		// Dataset
 		List<TableVariable> variables = list(sickVariable, sunVariable, coldVariable);
