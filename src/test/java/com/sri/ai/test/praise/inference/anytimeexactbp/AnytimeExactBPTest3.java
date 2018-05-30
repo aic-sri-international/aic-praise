@@ -20,9 +20,9 @@ import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.TestCases;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
-import com.sri.ai.praise.core.model.interfacebased.table.TableFactor;
-import com.sri.ai.praise.core.model.interfacebased.table.TableFactorNetwork;
-import com.sri.ai.praise.core.model.interfacebased.table.TableVariable;
+import com.sri.ai.praise.core.model.encapsulatedoperations.table.TableFactor;
+import com.sri.ai.praise.core.model.encapsulatedoperations.table.TableFactorNetwork;
+import com.sri.ai.praise.core.model.encapsulatedoperations.table.TableVariable;
 import com.sri.ai.util.rplot.AEBPRPlotting;
 import com.sri.ai.util.rplot.dataframe.AEBPTestingDataFrame;
 /**

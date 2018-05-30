@@ -1,6 +1,6 @@
-package com.sri.ai.praise.core.model.interfacebased.table;
+package com.sri.ai.praise.core.model.encapsulatedoperations.table;
 
-import static com.sri.ai.praise.core.model.interfacebased.IdentityFactor.IDENTITY_FACTOR;
+import static com.sri.ai.praise.core.model.encapsulatedoperations.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.in;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
-import com.sri.ai.praise.core.model.interfacebased.IdentityFactor;
+import com.sri.ai.praise.core.model.encapsulatedoperations.IdentityFactor;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;

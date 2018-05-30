@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.model.api;
 
-import static com.sri.ai.praise.core.model.interfacebased.IdentityFactor.IDENTITY_FACTOR;
+import static com.sri.ai.praise.core.model.encapsulatedoperations.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
 
 import java.util.Collection;

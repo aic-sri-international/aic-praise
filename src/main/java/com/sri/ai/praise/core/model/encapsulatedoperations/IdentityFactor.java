@@ -35,23 +35,70 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.interfacebased.expression;
+package com.sri.ai.praise.core.model.encapsulatedoperations;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBPFromVariable;
+import static com.sri.ai.util.Util.list;
+import static java.util.Collections.unmodifiableList;
 
+import java.util.List;
+import java.util.Map;
+
+import com.sri.ai.praise.core.model.api.Factor;
+import com.sri.ai.praise.core.model.api.Variable;
 
 /**
- * A convenience class for creating a {@link ExactBPFromVariable} based on expressions.
+ * A class representing an {@link Factor} that is an identity factor.
+ * This can be defined independently of the {@link Representation} used.
+ * <p>
+ * 
  * @author braz
  *
  */
-public class ExpressionExactBP extends ExactBPFromVariable {
+public class IdentityFactor implements Factor {
+	
+	public final static IdentityFactor IDENTITY_FACTOR = new IdentityFactor();
+	
+	private IdentityFactor() {
+	}
 
-	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
-		
-		super(new ExpressionVariable(query), factorNetwork);
-		
+	@Override
+	public boolean contains(Variable variable) {
+		return false;
+	}
+
+	@Override
+	public List<? extends Variable> getVariables() {
+		return unmodifiableList(list());
+	}
+
+	@Override
+	public Factor multiply(Factor another) {
+		return another;
+	}
+
+	@Override
+	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
+		return this;
 	}
 	
+	@Override
+	public boolean isIdentity() {
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "1";
+	}
+
+	@Override
+	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
+		return 1.;
+	}
+
+	@Override
+	public Factor normalize() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -1,7 +1,7 @@
-package com.sri.ai.praise.core.model.interfacebased.table;
+package com.sri.ai.praise.core.model.encapsulatedoperations.table;
 
 import static com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil.genericVariableName;
-import static com.sri.ai.praise.core.model.interfacebased.table.TableFactor.copyToSubTableFactor;
+import static com.sri.ai.praise.core.model.encapsulatedoperations.table.TableFactor.copyToSubTableFactor;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.ArrayList;

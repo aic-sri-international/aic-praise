@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.model.interfacebased.expression;
+package com.sri.ai.praise.core.model.encapsulatedoperations.expression;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;

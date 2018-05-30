@@ -352,8 +352,7 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		ExpressionBasedSolver inferencer =
 				new ExpressionBasedSolver(
 						new HOGMExpressionBasedModel(modelString),
-						isBayesianNetwork ,
-						evidence,
+						evidence ,
 						exploitFactorization,
 						null /* default theory */);
 
@@ -405,9 +404,9 @@ public class InferenceForFactorGraphAndEvidenceTest {
 						mapFromCategoricalTypeNameToSizeString,
 						list(),
 						isBayesianNetwork),
-				isBayesianNetwork,
 				evidence,
-				false, null);
+				false,
+				null);
 		Expression result = inferencer.sum(list(parse("alarm")), Times.make(factors));
 		System.out.println(result);
 	}
@@ -1014,9 +1013,9 @@ public class InferenceForFactorGraphAndEvidenceTest {
 						mapFromCategoricalTypeNameToSizeString,
 						additionalTypes,
 						isBayesianNetwork),
-				isBayesianNetwork,
 				evidence,
-				useFactorization, null);
+				useFactorization,
+				null);
 		marginal = inferencer.solve(queryExpression);
 		TrueContext context = new TrueContext();
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, context);
@@ -1087,9 +1086,9 @@ public class InferenceForFactorGraphAndEvidenceTest {
 						mapFromCategoricalTypeNameToSizeString,
 						list(),
 						isBayesianNetwork),
-				isBayesianNetwork,
 				evidence,
-				true, null);
+				true,
+				null);
 	
 		simplification = inferencer.simplify(queryExpression);
 		assertEquals(expected, simplification);

@@ -113,41 +113,38 @@ public class ExpressionBasedSolver {
 	
 	/**
 	 * Constructs a solver for a factor graph and an evidence expression.
-	 * @param factorsAndTypes 
+	 * @param model 
 	 *        the factors and their type information over which inference is to be performed.
-	 * @param isBayesianNetwork 
-	 *        indicates if the factor graph is a bayesian network (each potential function in normalized for one of its variables, forms a DAG).
 	 * @param evidence 
 	 *        an Expression representing the evidence
 	 * @param useFactorization indicates whether to use factorization (as in ExpressionVariable Elimination)
 	 * @param optionalTheory the theory to be used; if null, a default one is used (as of May 2017, a compound theory with propositional, equalities on categorical types, difference arithmetic, and real linear arithmetic).
 	 */
 	public ExpressionBasedSolver(
-			ExpressionBasedModel factorsAndTypes,
-			boolean isBayesianNetwork,
+			ExpressionBasedModel model,
 			Expression evidence,
 			boolean useFactorization,
 			Theory optionalTheory) {
 
-		this.factorGraph       = Times.make(factorsAndTypes.getFactors());
-		this.isBayesianNetwork = isBayesianNetwork;
+		this.factorGraph       = Times.make(model.getFactors());
+		this.isBayesianNetwork = model.isKnownToBeBayesianNetwork();
 		this.evidence          = evidence;
 
-		this.mapFromRandomVariableNameToTypeName = new LinkedHashMap<>(factorsAndTypes.getMapFromRandomVariableNameToTypeName());
+		this.mapFromRandomVariableNameToTypeName = new LinkedHashMap<>(model.getMapFromRandomVariableNameToTypeName());
 		
 		this.mapFromSymbolNameToTypeName = new LinkedHashMap<>(mapFromRandomVariableNameToTypeName);
-		this.mapFromSymbolNameToTypeName.putAll(factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName());
-		this.mapFromSymbolNameToTypeName.putAll(factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName());
+		this.mapFromSymbolNameToTypeName.putAll(model.getMapFromNonUniquelyNamedConstantNameToTypeName());
+		this.mapFromSymbolNameToTypeName.putAll(model.getMapFromUniquelyNamedConstantNameToTypeName());
 		
 		allRandomVariables = Util.mapIntoList(this.mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
 		                       
-		this.mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(factorsAndTypes.getMapFromCategoricalTypeNameToSizeString());
+		this.mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(model.getMapFromCategoricalTypeNameToSizeString());
 
-		Set<Expression> uniquelyNamedConstants = mapIntoSet(factorsAndTypes.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
+		Set<Expression> uniquelyNamedConstants = mapIntoSet(model.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
 		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
 		
 		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
-			factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName().values().stream().anyMatch(type -> type.contains("->"))) {
+			model.getMapFromNonUniquelyNamedConstantNameToTypeName().values().stream().anyMatch(type -> type.contains("->"))) {
 		}
 		else {
 		}
@@ -167,7 +164,7 @@ public class ExpressionBasedSolver {
 		}
 		
 		this.additionalTypes = new LinkedList<Type>(theory.getNativeTypes()); // add needed types that may not be the type of any variable
-		this.additionalTypes.addAll(factorsAndTypes.getAdditionalTypes());
+		this.additionalTypes.addAll(model.getAdditionalTypes());
 		
 		if (useFactorization) {
 			solver = new SGVET();

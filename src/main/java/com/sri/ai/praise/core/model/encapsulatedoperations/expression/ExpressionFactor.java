@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.interfacebased.expression;
+package com.sri.ai.praise.core.model.encapsulatedoperations.expression;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.apply;
@@ -54,7 +54,7 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
-import com.sri.ai.praise.core.model.interfacebased.IdentityFactor;
+import com.sri.ai.praise.core.model.encapsulatedoperations.IdentityFactor;
 
 /**
  * A {@link Factor} represented by an {@link Expression}.

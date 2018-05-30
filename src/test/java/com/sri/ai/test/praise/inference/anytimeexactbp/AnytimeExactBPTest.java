@@ -36,9 +36,9 @@ import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.AbstractExactBP;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
-import com.sri.ai.praise.core.model.interfacebased.expression.ExpressionExactBP;
-import com.sri.ai.praise.core.model.interfacebased.expression.ExpressionFactor;
-import com.sri.ai.praise.core.model.interfacebased.expression.ExpressionFactorNetwork;
+import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionExactBP;
+import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactor;
+import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactorNetwork;
 import com.sri.ai.util.base.IdentityWrapper;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 

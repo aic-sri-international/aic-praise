@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.interfacebased;
+package com.sri.ai.praise.core.model.encapsulatedoperations;
 
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;

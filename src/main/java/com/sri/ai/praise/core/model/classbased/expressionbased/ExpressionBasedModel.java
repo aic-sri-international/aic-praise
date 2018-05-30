@@ -91,6 +91,10 @@ public class ExpressionBasedModel implements Model {
 	public Collection<Type> getAdditionalTypes() {
 		return additionalTypes;
 	}
+	
+	public boolean isKnownToBeBayesianNetwork() {
+		return isKnownToBeBayesianNetwork;
+	}
 
 	public String toString() {
 		StringJoiner stringJoiner = new StringJoiner("\n");

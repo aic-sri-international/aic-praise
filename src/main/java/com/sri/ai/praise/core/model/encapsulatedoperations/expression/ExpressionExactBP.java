@@ -35,26 +35,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.model.interfacebased.expression;
-
-import java.util.List;
+package com.sri.ai.praise.core.model.encapsulatedoperations.expression;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.WrappedExpression;
-import com.sri.ai.praise.core.model.api.Variable;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBPFromVariable;
 
-public class ExpressionVariable extends WrappedExpression implements Variable {
 
-	private static final long serialVersionUID = 1L;
+/**
+ * A convenience class for creating a {@link ExactBPFromVariable} based on expressions.
+ * @author braz
+ *
+ */
+public class ExpressionExactBP extends ExactBPFromVariable {
 
-	public ExpressionVariable(Expression expression) {
-		super(expression);
+	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
+		
+		super(new ExpressionVariable(query), factorNetwork);
+		
 	}
-
-	@Override
-	public List<? extends Object> getValues() {
-		// TODO Auto-generated method stub
-		//TODO maybe we should store a string like "1..5" or "Boolean" to indicate it
-		return null;
-	}
+	
 }

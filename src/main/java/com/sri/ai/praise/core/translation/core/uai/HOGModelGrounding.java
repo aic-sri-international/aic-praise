@@ -186,7 +186,7 @@ public class HOGModelGrounding {
 						factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
 						list(),
 						isBayesianNetwork); // additional types
-		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(groundedFactorsAndTypesInformation, isBayesianNetwork, null, true, null);
+		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(groundedFactorsAndTypesInformation, null, true, null);
 		return inferencer;
 	}
 

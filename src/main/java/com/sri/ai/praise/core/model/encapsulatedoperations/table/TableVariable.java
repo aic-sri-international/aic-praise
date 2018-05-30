@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.model.interfacebased.table;
+package com.sri.ai.praise.core.model.encapsulatedoperations.table;
 
 import java.util.ArrayList;
 import java.util.List;
