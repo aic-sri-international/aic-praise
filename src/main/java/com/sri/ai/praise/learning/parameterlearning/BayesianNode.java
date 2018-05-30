@@ -18,15 +18,11 @@ public interface BayesianNode extends Factor {
 		
 		this.setInitialCountsForAllPossibleChildAndParentsAssignments();
 		
-		long startTime = System.currentTimeMillis();
 		for(Datapoint datapoint : dataset.getDatapoints()) {
 			Object childValue = datapoint.getValueOfVariable(childVariable);
 			List<? extends Object> parentsValues = datapoint.getValuesOfVariables(parentsVariables);
 			this.incrementCountForChildAndParentsAssignment(childValue, parentsValues);
 		}
-		long stopTime = System.currentTimeMillis();
-	    long elapsedTime = stopTime - startTime;
-	    System.out.println("Elapsed time for incrementing: " + elapsedTime + " miliseconds");
 		
 		this.normalizeParametersAndFillEntries();
 	}
