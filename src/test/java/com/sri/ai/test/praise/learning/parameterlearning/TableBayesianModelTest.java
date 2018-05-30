@@ -32,21 +32,111 @@ public class TableBayesianModelTest {
 		TableBayesianNode sunNode = new TableBayesianNode(sunVariable, arrayList());
 		TableBayesianNode coldNode = new TableBayesianNode(coldVariable, arrayList());
 		
-		List<TableBayesianNode> nodes = list(sickNode, sickNode, sickNode, sickNode, sickNode, sickNode, sunNode, coldNode);
+		List<TableBayesianNode> nodes = list(sickNode, sunNode, coldNode);
 
 		TableBayesianModel sickSunColdModel = new TableBayesianModel(nodes);
 		
 		return sickSunColdModel;
 	}
 	
-	public static void testSickSunColdModelPrinting() {
+	@Test
+	public static void testSickSunColdModel() {
 		// Dataset
 		List<TableVariable> variables = list(sickVariable, sunVariable, coldVariable);
 		List<Integer> variableValues = list(1, 0, 1);
 		DefaultDatapoint datapoint = new DefaultDatapoint(variables, variableValues);
 
 		List<DefaultDatapoint> datapoints = list();
-		int numberOfDatapoints = 2000000;
+		int numberOfDatapoints = 2;
+		for(int i = 1; i <= numberOfDatapoints; i++) {
+			datapoints.add(datapoint);
+		}
+
+		DefaultDataset dataset = new DefaultDataset(datapoints);
+		
+		// Learning
+		sickSunColdModel.learnModelParametersFromCompleteData(dataset);
+	    
+		List<TableBayesianNode> learnedNodes = (List<TableBayesianNode>) sickSunColdModel.getNodes();
+		
+		// Testing
+		
+		// For the sickNode first:
+		// Expected parameters (2 datapoints): {(0, [0, 0])=0.5, (1, [0, 0])=0.5, (1, [1, 0])=0.5, (1, [1, 1])=0.5, (0, [1, 1])=0.5, (0, [1, 0])=0.5, (0, [0, 1])=0.25, (1, [0, 1])=0.75}
+		TableBayesianNode learnedSickNode = learnedNodes.get(0); 
+		LinkedHashMap<TableVariable, Integer> variablesAndTheirValues = new LinkedHashMap<TableVariable, Integer>();
+	    variablesAndTheirValues.put(sickVariable, 0);
+	    variablesAndTheirValues.put(sunVariable, 0);
+	    variablesAndTheirValues.put(coldVariable, 0);
+		
+	    // Parameter for (0, [0, 0]):
+	    Assert.assertEquals(Double.valueOf(0.5), learnedSickNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // Parameter for (1, [0, 0]):
+	    variablesAndTheirValues.put(sickVariable, 1);
+	    Assert.assertEquals(Double.valueOf(0.5), learnedSickNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // Parameter for (1, [1, 0]):
+	    variablesAndTheirValues.put(sunVariable, 1);
+	    Assert.assertEquals(Double.valueOf(0.5), learnedSickNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // Parameter for (1, [1, 1]):
+	    variablesAndTheirValues.put(coldVariable, 1);
+	    Assert.assertEquals(Double.valueOf(0.5), learnedSickNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // Parameter for (0, [1, 1]):
+	    variablesAndTheirValues.put(sickVariable, 0);
+	    Assert.assertEquals(Double.valueOf(0.5), learnedSickNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // Parameter for (0, [1, 0]):
+	    variablesAndTheirValues.put(coldVariable, 0);
+	    Assert.assertEquals(Double.valueOf(0.5), learnedSickNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // Parameter for (0, [0, 1]):
+	    variablesAndTheirValues.put(sunVariable, 0);
+	    variablesAndTheirValues.put(coldVariable, 1);
+	    Assert.assertEquals(Double.valueOf(1.0 / (2 + numberOfDatapoints)), learnedSickNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // Parameter for (1, [0, 1]):
+	    variablesAndTheirValues.put(sickVariable, 1);
+	    Assert.assertEquals(Double.valueOf((1.0 + numberOfDatapoints) / (2 + numberOfDatapoints)), learnedSickNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // For the sunNode:
+	 	// Expected parameters (2 datapoints): {(0, [])=0.75, (1, [])=0.25}
+	    TableBayesianNode learnedSunNode = learnedNodes.get(1); 
+		variablesAndTheirValues = new LinkedHashMap<TableVariable, Integer>();
+	    variablesAndTheirValues.put(sunVariable, 0);
+	    
+	    // Parameter for (0, []):
+	    Assert.assertEquals(Double.valueOf((1.0 + numberOfDatapoints) / (2 + numberOfDatapoints)), learnedSunNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // Parameter for (1, []):
+	    variablesAndTheirValues.put(sunVariable, 1);
+	    Assert.assertEquals(Double.valueOf(1.0 / (2 + numberOfDatapoints)), learnedSunNode.getEntryFor(variablesAndTheirValues));
+	    
+	    // For the sunNode:
+ 	 	// Expected parameters (2 datapoints): {(0, [])=0.25, (1, [])=0.75}
+ 	    TableBayesianNode learnedColdNode = learnedNodes.get(2); 
+ 		variablesAndTheirValues = new LinkedHashMap<TableVariable, Integer>();
+ 	    variablesAndTheirValues.put(coldVariable, 0);
+ 	    
+ 	    // Parameter for (0, []):
+ 	    Assert.assertEquals(Double.valueOf(1.0 / (2 + numberOfDatapoints)), learnedColdNode.getEntryFor(variablesAndTheirValues));
+ 	    
+ 	    // Parameter for (1, []):
+ 	    variablesAndTheirValues.put(coldVariable, 1);
+ 	    Assert.assertEquals(Double.valueOf((1.0 + numberOfDatapoints) / (2 + numberOfDatapoints)), learnedColdNode.getEntryFor(variablesAndTheirValues));
+ 	    
+}
+	
+	public static void printSickSunColdModelTest() {
+		// Dataset
+		List<TableVariable> variables = list(sickVariable, sunVariable, coldVariable);
+		List<Integer> variableValues = list(1, 0, 1);
+		DefaultDatapoint datapoint = new DefaultDatapoint(variables, variableValues);
+
+		List<DefaultDatapoint> datapoints = list();
+		int numberOfDatapoints = 2;
 		for(int i = 1; i <= numberOfDatapoints; i++) {
 			datapoints.add(datapoint);
 		}
@@ -58,7 +148,7 @@ public class TableBayesianModelTest {
 		sickSunColdModel.learnModelParametersFromCompleteData(dataset);
 		long stopTime = System.currentTimeMillis();
 	    long elapsedTime = stopTime - startTime;
-	    System.out.println("Elapsed time for learning with " + numberOfDatapoints + " datapoints: " + elapsedTime + " miliseconds");
+	    System.out.println("Elapsed time for learning with " + numberOfDatapoints + " datapoints: " + elapsedTime + " miliseconds \n");
 	    
 		List<TableBayesianNode> learnedNodes = (List<TableBayesianNode>) sickSunColdModel.getNodes();
 		
@@ -83,7 +173,8 @@ public class TableBayesianModelTest {
 	}
 
 	public static void main(String[] args) {
-		testSickSunColdModelPrinting();
+		// printSickSunColdModelTest();
+		testSickSunColdModel();
 	}
 
 }

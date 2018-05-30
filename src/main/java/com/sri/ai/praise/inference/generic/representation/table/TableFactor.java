@@ -202,17 +202,17 @@ public class TableFactor implements Factor {
 	}
 	
 	private int[] getVariableValues(Map<? extends Variable, ? extends Object> variablesAndTheirValues) {
-		int[] varValues = new int[listOfVariables.size()];
+		int[] variableValues = new int[listOfVariables.size()];
 		/*for(Entry<? extends Variable, ? extends Object> entry : variableValues.entrySet()) {//iterate over listOfVariavles:moreEfficient
 			Integer indexOnTheList = mapFromVariableToItsIndexOnTheList.get(entry.getKey());
 			if(indexOnTheList != null) {
 				varValues[indexOnTheList] = (Integer) entry.getValue();
 			}
 		}*/
-		for (int i = 0; i < varValues.length; i++) {
-			varValues[i] = (Integer) variablesAndTheirValues.get(listOfVariables.get(i));
+		for (int i = 0; i < variableValues.length; i++) {
+			variableValues[i] = (Integer) variablesAndTheirValues.get(listOfVariables.get(i));
 		}
-		return varValues;
+		return variableValues;
 	}
 	
 	private int getEntryPosition(List<? extends Integer> variableValuesInTheRightOrder) {
