@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core;
 
-import static com.sri.ai.praise.core.model.interfacebased.core.IdentityFactor.IDENTITY_FACTOR;
+import static com.sri.ai.praise.core.model.interfacebased.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
@@ -61,10 +61,10 @@ import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.a
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.box.Box;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.box.TableBoxVariable;
-import com.sri.ai.praise.core.model.interfacebased.api.Factor;
-import com.sri.ai.praise.core.model.interfacebased.api.Variable;
-import com.sri.ai.praise.core.model.interfacebased.core.table.TableFactor;
-import com.sri.ai.praise.core.model.interfacebased.core.table.TableVariable;
+import com.sri.ai.praise.core.model.api.Factor;
+import com.sri.ai.praise.core.model.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.table.TableFactor;
+import com.sri.ai.praise.core.model.interfacebased.table.TableVariable;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
 

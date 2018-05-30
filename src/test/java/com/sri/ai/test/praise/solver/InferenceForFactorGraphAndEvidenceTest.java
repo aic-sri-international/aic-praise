@@ -58,7 +58,7 @@ import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
-import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;
 
 public class InferenceForFactorGraphAndEvidenceTest {
@@ -363,11 +363,11 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		queryExpression = parse("not earthquake");
 		// can be any boolean expression, or any random variable
 		marginal = inferencer.solve(queryExpression);
-		System.out.println("Marginal is " + marginal);
+		System.out.println("MarginalProblem is " + marginal);
 		
 		queryExpression = parse("earthquake");
 		marginal = inferencer.solve(queryExpression);
-		System.out.println("Marginal is " + marginal);
+		System.out.println("MarginalProblem is " + marginal);
 	}
 
 	@Test

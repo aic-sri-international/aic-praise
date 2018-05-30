@@ -44,8 +44,8 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sri.ai.expresso.api.Type;
-import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.modelscontainer.ModelPage;
 import com.sri.ai.praise.other.empiricalevaluation.output.CSVWriter;
 import com.sri.ai.praise.other.empiricalevaluation.output.Notifier;

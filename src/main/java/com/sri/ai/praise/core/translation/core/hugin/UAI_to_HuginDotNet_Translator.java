@@ -45,8 +45,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
-import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIModel;
+import com.sri.ai.praise.core.model.api.ModelLanguage;
+import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.translation.core.common.TransformMarkovToBayes;
 import com.sri.ai.praise.core.translation.core.uai.AbstractUAI_to_Target_Translator;
 

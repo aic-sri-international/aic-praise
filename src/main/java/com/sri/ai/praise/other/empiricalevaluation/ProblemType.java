@@ -47,5 +47,5 @@ public enum ProblemType {
 	PR,   // Computing the the partition function and probability of evidence
 	MAR,  // Computing the marginal probability distribution over variable(s) given evidence
 	MAP,  // Computing the most likely assignment to all variables given evidence (also known as MPE, Most Probable Explanation)
-	MMAP, // Computing the most likely assignment to a subset of variables given evidence (Marginal MAP)
+	MMAP, // Computing the most likely assignment to a subset of variables given evidence (MarginalProblem MAP)
 }

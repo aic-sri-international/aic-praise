@@ -52,8 +52,8 @@ import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.a
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Simplex;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
-import com.sri.ai.praise.core.model.interfacebased.api.Factor;
-import com.sri.ai.praise.core.model.interfacebased.api.Variable;
+import com.sri.ai.praise.core.model.api.Factor;
+import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;

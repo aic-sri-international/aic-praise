@@ -3,8 +3,8 @@ package com.sri.ai.praise.core.inference.core.treebased.gabrielstry.aebptree;
 import java.util.ArrayList;
 
 import com.google.common.base.Function;
-import com.sri.ai.praise.core.model.interfacebased.api.Factor;
-import com.sri.ai.praise.core.model.interfacebased.api.Variable;
+import com.sri.ai.praise.core.model.api.Factor;
+import com.sri.ai.praise.core.model.api.Variable;
 
 public class AEBPFactorTreeNode extends AbstractAEBPTreeNode<Factor, Variable> {
 

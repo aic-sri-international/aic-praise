@@ -66,7 +66,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.praise.PRAiSESolver;
-import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
+import com.sri.ai.praise.core.model.api.ModelLanguage;
 import com.sri.ai.praise.core.model.classbased.modelscontainer.ModelPage;
 import com.sri.ai.praise.core.model.classbased.modelscontainer.PagedModelContainer;
 import com.sri.ai.util.Util;

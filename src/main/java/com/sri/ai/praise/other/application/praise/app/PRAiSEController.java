@@ -84,11 +84,11 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
-import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
-import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.HOGModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.hogm.parsing.HOGMParserWrapper;
+import com.sri.ai.praise.core.model.api.ModelLanguage;
+import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.hogm.HOGModel;
+import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.hogm.parsing.HOGMParserWrapper;
 import com.sri.ai.praise.core.translation.api.TranslatorOptions;
 import com.sri.ai.praise.core.translation.core.uai.HOGMv1_to_UAI_Translator;
 import com.sri.ai.praise.core.translation.core.uai.UAI_to_HOGMv1_Using_Equalities_Translator;

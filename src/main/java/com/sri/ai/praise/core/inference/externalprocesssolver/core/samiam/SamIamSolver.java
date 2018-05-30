@@ -38,7 +38,7 @@
 package com.sri.ai.praise.core.inference.externalprocesssolver.core.samiam;
 
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.AbstractExternalProcessSolver;
-import com.sri.ai.praise.core.model.classbased.api.ModelLanguage;
+import com.sri.ai.praise.core.model.api.ModelLanguage;
 
 /**
  * Wrapper around the SamIam inference library, available from:<br>

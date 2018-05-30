@@ -37,8 +37,8 @@
  */
 package com.sri.ai.praise.other.application.uai;
 
-import static com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
-import static com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil.convertGenericTableToInstance;
+import static com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
+import static com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil.convertGenericTableToInstance;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,13 +76,13 @@ import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
-import com.sri.ai.praise.core.model.classbased.core.expressionbased.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.core.table.api.GraphicalNetwork;
-import com.sri.ai.praise.core.model.classbased.core.table.core.data.FunctionTable;
-import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIModel;
-import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIUtil;
-import com.sri.ai.praise.core.model.classbased.core.table.core.uai.parsing.UAIEvidenceReading;
-import com.sri.ai.praise.core.model.classbased.core.table.core.uai.parsing.UAIModelReader;
+import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.table.api.GraphicalNetwork;
+import com.sri.ai.praise.core.model.classbased.table.core.data.FunctionTable;
+import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIModel;
+import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil;
+import com.sri.ai.praise.core.model.classbased.table.core.uai.parsing.UAIEvidenceReading;
+import com.sri.ai.praise.core.model.classbased.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.translation.core.uai.UAI_to_ExpressionBased_Translator;
 
 /**

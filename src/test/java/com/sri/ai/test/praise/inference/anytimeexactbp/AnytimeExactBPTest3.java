@@ -18,11 +18,11 @@ import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBPFromV
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.AEBP;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.TestCases;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.model.interfacebased.api.Factor;
-import com.sri.ai.praise.core.model.interfacebased.api.Variable;
-import com.sri.ai.praise.core.model.interfacebased.core.table.TableFactor;
-import com.sri.ai.praise.core.model.interfacebased.core.table.TableFactorNetwork;
-import com.sri.ai.praise.core.model.interfacebased.core.table.TableVariable;
+import com.sri.ai.praise.core.model.api.Factor;
+import com.sri.ai.praise.core.model.api.Variable;
+import com.sri.ai.praise.core.model.interfacebased.table.TableFactor;
+import com.sri.ai.praise.core.model.interfacebased.table.TableFactorNetwork;
+import com.sri.ai.praise.core.model.interfacebased.table.TableVariable;
 import com.sri.ai.util.rplot.AEBPRPlotting;
 import com.sri.ai.util.rplot.dataframe.AEBPTestingDataFrame;
 /**

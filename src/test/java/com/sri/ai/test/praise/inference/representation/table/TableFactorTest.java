@@ -9,12 +9,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.sri.ai.praise.core.model.classbased.core.table.core.uai.UAIModel;
-import com.sri.ai.praise.core.model.classbased.core.table.core.uai.parsing.UAIModelReader;
-import com.sri.ai.praise.core.model.interfacebased.api.Factor;
-import com.sri.ai.praise.core.model.interfacebased.core.table.TableFactor;
-import com.sri.ai.praise.core.model.interfacebased.core.table.TableFactorNetwork;
-import com.sri.ai.praise.core.model.interfacebased.core.table.TableVariable;
+import com.sri.ai.praise.core.model.api.Factor;
+import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIModel;
+import com.sri.ai.praise.core.model.classbased.table.core.uai.parsing.UAIModelReader;
+import com.sri.ai.praise.core.model.interfacebased.table.TableFactor;
+import com.sri.ai.praise.core.model.interfacebased.table.TableFactorNetwork;
+import com.sri.ai.praise.core.model.interfacebased.table.TableVariable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.IdentityWrapper;
 

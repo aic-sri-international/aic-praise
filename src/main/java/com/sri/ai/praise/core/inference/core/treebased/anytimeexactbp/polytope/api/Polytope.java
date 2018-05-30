@@ -42,8 +42,8 @@ import static com.sri.ai.util.Util.accumulate;
 import java.util.Collection;
 
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Polytopes;
-import com.sri.ai.praise.core.model.interfacebased.api.Factor;
-import com.sri.ai.praise.core.model.interfacebased.api.Variable;
+import com.sri.ai.praise.core.model.api.Factor;
+import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 /**
