@@ -403,7 +403,8 @@ public class InferenceForFactorGraphAndEvidenceTest {
 						mapFromNonUniquelyNamedConstantNameToTypeName,
 						mapFromUniquelyNamedConstantNameToTypeName,
 						mapFromCategoricalTypeNameToSizeString,
-						list()),
+						list(),
+						isBayesianNetwork),
 				isBayesianNetwork,
 				evidence,
 				false, null);
@@ -1011,7 +1012,8 @@ public class InferenceForFactorGraphAndEvidenceTest {
 						mapFromNonUniquelyNamedConstantNameToTypeName,
 						mapFromUniquelyNamedConstantNameToTypeName,
 						mapFromCategoricalTypeNameToSizeString,
-						additionalTypes),
+						additionalTypes,
+						isBayesianNetwork),
 				isBayesianNetwork,
 				evidence,
 				useFactorization, null);
@@ -1083,7 +1085,8 @@ public class InferenceForFactorGraphAndEvidenceTest {
 						mapFromNonUniquelyNamedConstantNameToTypeName,
 						mapFromUniquelyNamedConstantNameToTypeName,
 						mapFromCategoricalTypeNameToSizeString,
-						list()),
+						list(),
+						isBayesianNetwork),
 				isBayesianNetwork,
 				evidence,
 				true, null);

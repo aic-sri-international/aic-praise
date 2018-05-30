@@ -107,7 +107,8 @@ public class HOGMExpressionBasedModel extends ExpressionBasedModel {
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromCategoricalTypeNameToSizeString,
-			Collection<Type> additionalTypes) {
+			Collection<Type> additionalTypes,
+			boolean isKnownToBeBayesianNetwork) {
 
 		super(
 				factors,
@@ -115,7 +116,8 @@ public class HOGMExpressionBasedModel extends ExpressionBasedModel {
 				mapFromNonUniquelyNamedConstantNameToTypeName,
 				mapFromUniquelyNamedConstantNameToTypeName,
 				mapFromCategoricalTypeNameToSizeString,
-				additionalTypes
+				additionalTypes,
+				isKnownToBeBayesianNetwork
 				);
 	}	
 }

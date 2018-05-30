@@ -15,20 +15,23 @@ import com.sri.ai.praise.core.model.api.Model;
 
 public class ExpressionBasedModel implements Model {
 
+	protected List<Expression> factors = new ArrayList<>();
 	protected Map<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>();
 	protected Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
 	protected Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
 	protected Map<String, String> mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>();
 	protected Collection<Type> additionalTypes = new LinkedList<>();
-	protected List<Expression> factors = new ArrayList<>();
-
+	protected boolean isKnownToBeBayesianNetwork;
+	
 	public ExpressionBasedModel(
 			List<Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromCategoricalTypeNameToSizeString,
-			Collection<Type> additionalTypes) {
+			Collection<Type> additionalTypes,
+			boolean isKnownToBeBayesianNetwork
+			) {
 		
 		this.factors.addAll(factors);
 		this.mapFromRandomVariableNameToTypeName.putAll(mapFromRandomVariableNameToTypeName);
@@ -36,6 +39,7 @@ public class ExpressionBasedModel implements Model {
 		this.mapFromUniquelyNamedConstantNameToTypeName.putAll(mapFromUniquelyNamedConstantNameToTypeName);
 		this.mapFromCategoricalTypeNameToSizeString.putAll(mapFromCategoricalTypeNameToSizeString);
 		this.additionalTypes = additionalTypes;
+		this.isKnownToBeBayesianNetwork = isKnownToBeBayesianNetwork;
 	}	
 
 	public static class Parameters {
@@ -45,6 +49,7 @@ public class ExpressionBasedModel implements Model {
 		public Map<String, String> mapFromUniquelyNamedConstantNameToTypeName    = new LinkedHashMap<>();
 		public Map<String, String> mapFromCategoricalTypeNameToSizeString        = new LinkedHashMap<>();
 		public Collection<Type>    additionalTypes                               = new LinkedList<>();
+		public boolean             isKnownToBeBayesianNetwork                    = false;
 	}
 
 	public ExpressionBasedModel(Parameters parameters) {
@@ -54,7 +59,8 @@ public class ExpressionBasedModel implements Model {
 				parameters.mapFromNonUniquelyNamedConstantNameToTypeName,
 				parameters.mapFromUniquelyNamedConstantNameToTypeName,
 				parameters.mapFromCategoricalTypeNameToSizeString,
-				parameters.additionalTypes
+				parameters.additionalTypes,
+				parameters.isKnownToBeBayesianNetwork
 				);
 	}
 
@@ -87,16 +93,17 @@ public class ExpressionBasedModel implements Model {
 	}
 
 	public String toString() {
-		StringJoiner sj = new StringJoiner("\n");
+		StringJoiner stringJoiner = new StringJoiner("\n");
 		
-		sj.add("factors                                      ="+factors);
-		sj.add("mapFromRandomVariableNameToTypeName          ="+mapFromRandomVariableNameToTypeName);
-		sj.add("mapFromNonUniquelyNamedConstantNameToTypeName="+mapFromNonUniquelyNamedConstantNameToTypeName);
-		sj.add("mapFromUniquelyNamedConstantNameToTypeName   ="+mapFromUniquelyNamedConstantNameToTypeName);
-		sj.add("mapFromCategoricalTypeNameToSizeString       ="+mapFromCategoricalTypeNameToSizeString);
-		sj.add("additionalTypes                              ="+additionalTypes);
+		stringJoiner.add("factors                                       = " + factors);
+		stringJoiner.add("mapFromRandomVariableNameToTypeName           = " + mapFromRandomVariableNameToTypeName);
+		stringJoiner.add("mapFromNonUniquelyNamedConstantNameToTypeName = " + mapFromNonUniquelyNamedConstantNameToTypeName);
+		stringJoiner.add("mapFromUniquelyNamedConstantNameToTypeName    = " + mapFromUniquelyNamedConstantNameToTypeName);
+		stringJoiner.add("mapFromCategoricalTypeNameToSizeString        = " + mapFromCategoricalTypeNameToSizeString);
+		stringJoiner.add("additionalTypes                               = " + additionalTypes);
+		stringJoiner.add("isKnownToBeBayesianNetwork                    = " + isKnownToBeBayesianNetwork);
 		
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 }

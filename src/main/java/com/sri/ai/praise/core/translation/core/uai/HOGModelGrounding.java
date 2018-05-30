@@ -176,6 +176,7 @@ public class HOGModelGrounding {
 	 * @return
 	 */
 	private static ExpressionBasedSolver makeInferencer(ExpressionBasedModel factorsAndTypes, Map<String, String> newUniqueConstantToTypeMap) {
+		boolean isBayesianNetwork = false;
 		ExpressionBasedModel groundedFactorsAndTypesInformation = 
 				new HOGMExpressionBasedModel(
 						Collections.emptyList(), // factors
@@ -183,8 +184,9 @@ public class HOGModelGrounding {
 						factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName(),
 						newUniqueConstantToTypeMap,
 						factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
-						list()); // additional types
-		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(groundedFactorsAndTypesInformation, false, null, true, null);
+						list(),
+						isBayesianNetwork); // additional types
+		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(groundedFactorsAndTypesInformation, isBayesianNetwork, null, true, null);
 		return inferencer;
 	}
 
