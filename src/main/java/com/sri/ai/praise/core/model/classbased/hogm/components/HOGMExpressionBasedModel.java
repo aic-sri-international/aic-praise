@@ -120,4 +120,14 @@ public class HOGMExpressionBasedModel extends ExpressionBasedModel {
 				isKnownToBeBayesianNetwork
 				);
 	}	
+	
+	@Override
+	public HOGMExpressionBasedModel clone() {
+		return (HOGMExpressionBasedModel) super.clone();
+	}
+	
+	@Override
+	public HOGMExpressionBasedModel getConditionedModel(Expression evidence) {
+		return (HOGMExpressionBasedModel) super.getConditionedModel(evidence);
+	}
 }

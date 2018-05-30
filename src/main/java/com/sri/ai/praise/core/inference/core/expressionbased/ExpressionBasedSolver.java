@@ -37,8 +37,6 @@
  */
 package com.sri.ai.praise.core.inference.core.expressionbased;
 
-import static com.sri.ai.expresso.helper.Expressions.ONE;
-import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
@@ -66,7 +64,6 @@ import com.sri.ai.grinder.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.group.SumProduct;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.helper.UniquelyNamedConstantIncludingBooleansAndNumbersPredicate;
-import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.grinder.theory.compound.CompoundTheory;
@@ -87,7 +84,6 @@ public class ExpressionBasedSolver {
 
 	private Expression factorGraph;
 	private boolean isBayesianNetwork;
-	private Expression evidence;
 	private Expression partitionFunction;
 	private Map<String, String> mapFromRandomVariableNameToTypeName;
 	private Map<String, String> mapFromSymbolNameToTypeName; // union of the two maps above
@@ -99,7 +95,7 @@ public class ExpressionBasedSolver {
 	private AssociativeCommutativeSemiRing semiRing;
 	private MultiQuantifierEliminator solver;
 
-	public Expression getEvidenceProbability() {
+	public Expression getPartitionFunction() {
 		return partitionFunction;
 	}
 
@@ -112,23 +108,19 @@ public class ExpressionBasedSolver {
 	}
 	
 	/**
-	 * Constructs a solver for a factor graph and an evidence expression.
+	 * Constructs a solver for a factor graph .
 	 * @param model 
 	 *        the factors and their type information over which inference is to be performed.
-	 * @param evidence 
-	 *        an Expression representing the evidence
 	 * @param useFactorization indicates whether to use factorization (as in ExpressionVariable Elimination)
 	 * @param optionalTheory the theory to be used; if null, a default one is used (as of May 2017, a compound theory with propositional, equalities on categorical types, difference arithmetic, and real linear arithmetic).
 	 */
 	public ExpressionBasedSolver(
 			ExpressionBasedModel model,
-			Expression evidence,
 			boolean useFactorization,
 			Theory optionalTheory) {
 
 		this.factorGraph       = Times.make(model.getFactors());
 		this.isBayesianNetwork = model.isKnownToBeBayesianNetwork();
-		this.evidence          = evidence;
 
 		this.mapFromRandomVariableNameToTypeName = new LinkedHashMap<>(model.getMapFromRandomVariableNameToTypeName());
 		
@@ -187,13 +179,6 @@ public class ExpressionBasedSolver {
 	 */
 	public Expression solve(Expression queryExpression) {
 		
-		Expression factorGraphWithEvidence = factorGraph;
-
-		if (evidence != null) {
-			// add evidence factor
-			factorGraphWithEvidence = Times.make(list(factorGraphWithEvidence, IfThenElse.make(evidence, ONE, ZERO)));
-		}
-
 		Expression queryVariable;
 		List<Expression> queryVariables;
 		List<Expression> indices; 
@@ -209,19 +194,19 @@ public class ExpressionBasedSolver {
 			queryVariable = makeSymbol("query");
 			queryVariables = list(queryVariable);
 			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
-			factorGraphWithEvidence = Times.make(list(factorGraphWithEvidence, parse("if query <=> " + queryExpression + " then 1 else 0")));
+			factorGraph = Times.make(list(factorGraph, parse("if query <=> " + queryExpression + " then 1 else 0")));
 			indices = allRandomVariables; // 'query' is not in 'allRandomVariables' 
 			mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
 			mapFromCategoricalTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
 		}
 		
 		// Solve the problem.
-		Expression unnormalizedMarginal = sum(indices, factorGraphWithEvidence);
+		Expression unnormalizedMarginal = sum(indices, factorGraph);
 //		System.out.println("Unnormalized marginal: " + unnormalizedMarginal);
 
 		Expression marginal;
-		if (evidence == null && isBayesianNetwork) {
-			marginal = unnormalizedMarginal; // model was a Bayesian network with no evidence, so marginal is equal to unnormalized marginal.
+		if (isBayesianNetwork) {
+			marginal = unnormalizedMarginal; // model was a Bayesian network, so marginal is equal to unnormalized marginal.
 		}
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.

@@ -341,19 +341,16 @@ public class InferenceForFactorGraphAndEvidenceTest {
 		Expression evidence = parse("not alarm");
 		// can be any boolean expression
 
-		boolean isBayesianNetwork = true;
-		// is a Bayesian network, that is, factors are normalized
-		// and the sum of their product over all assignments to random variables is 1.
-		
 		boolean exploitFactorization = true;
 		// exploit factorization (that is, employ ExpressionVariable Elimination,
 		// as opposed to summing over the entire joint probability distribution).
 		
+		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
+		model = model.getConditionedModel(evidence);
 		ExpressionBasedSolver inferencer =
 				new ExpressionBasedSolver(
-						new HOGMExpressionBasedModel(modelString),
-						evidence ,
-						exploitFactorization,
+						model,
+						exploitFactorization ,
 						null /* default theory */);
 
 		Expression queryExpression;
@@ -396,15 +393,16 @@ public class InferenceForFactorGraphAndEvidenceTest {
 				+ "(if burglary then 0.1 else 0.9)"));
 
 		ExpressionBasedSolver inferencer;
+		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(factors, 
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				list(),
+				isBayesianNetwork);
+		model = model.getConditionedModel(evidence);
 		inferencer = new ExpressionBasedSolver(
-				new HOGMExpressionBasedModel(factors, 
-						mapFromRandomVariableNameToTypeName,
-						mapFromNonUniquelyNamedConstantNameToTypeName,
-						mapFromUniquelyNamedConstantNameToTypeName,
-						mapFromCategoricalTypeNameToSizeString,
-						list(),
-						isBayesianNetwork),
-				evidence,
+				model,
 				false,
 				null);
 		Expression result = inferencer.sum(list(parse("alarm")), Times.make(factors));
@@ -1002,21 +1000,24 @@ public class InferenceForFactorGraphAndEvidenceTest {
 			Map<String, String> mapFromCategoricalTypeNameToSizeString,
 			Collection<Type> additionalTypes) {
 		
-		ExpressionBasedSolver inferencer;
-		Expression marginal;
-		inferencer = new ExpressionBasedSolver(
-				new HOGMExpressionBasedModel(
-						factors,
-						mapFromRandomVariableNameToTypeName,
-						mapFromNonUniquelyNamedConstantNameToTypeName,
-						mapFromUniquelyNamedConstantNameToTypeName,
-						mapFromCategoricalTypeNameToSizeString,
-						additionalTypes,
-						isBayesianNetwork),
-				evidence,
+		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				additionalTypes,
+				isBayesianNetwork);
+		
+		model = model.getConditionedModel(evidence);
+		
+		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(
+				model,
 				useFactorization,
 				null);
-		marginal = inferencer.solve(queryExpression);
+		
+		Expression marginal = inferencer.solve(queryExpression);
+		
 		TrueContext context = new TrueContext();
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, context);
 		expected = Expressions.roundToAGivenPrecision(expected, 9, context);
@@ -1077,16 +1078,17 @@ public class InferenceForFactorGraphAndEvidenceTest {
 	private void runSimplifyTest() {
 		ExpressionBasedSolver inferencer;
 		Expression simplification;
+		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				list(),
+				isBayesianNetwork);
+		model = model.getConditionedModel(evidence);
 		inferencer = new ExpressionBasedSolver(
-				new HOGMExpressionBasedModel(
-						factors,
-						mapFromRandomVariableNameToTypeName,
-						mapFromNonUniquelyNamedConstantNameToTypeName,
-						mapFromUniquelyNamedConstantNameToTypeName,
-						mapFromCategoricalTypeNameToSizeString,
-						list(),
-						isBayesianNetwork),
-				evidence,
+				model,
 				true,
 				null);
 	

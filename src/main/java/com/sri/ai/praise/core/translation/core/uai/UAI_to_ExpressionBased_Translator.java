@@ -65,4 +65,15 @@ public class UAI_to_ExpressionBased_Translator extends ExpressionBasedModel {
 			mapFromCategoricalTypeNameToSizeString.put(variableTypeName, Integer.toString(variableCardinality));
 		}
 	}
+	
+	
+	@Override
+	public UAI_to_ExpressionBased_Translator clone() {
+		return (UAI_to_ExpressionBased_Translator) super.clone();
+	}
+
+	@Override
+	public UAI_to_ExpressionBased_Translator getConditionedModel(Expression evidence) {
+		return (UAI_to_ExpressionBased_Translator) super.getConditionedModel(evidence);
+	}
 }

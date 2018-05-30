@@ -164,7 +164,7 @@ public class HOGMSolver {
 		if (!canceled) {
 			IntegrationRecording.startRecordingIntegrationsOverGroups();
 			ExpressionBasedModel factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
-			inferencer = new ExpressionBasedSolver(factorsAndTypes, null, true, getOptionalTheory());
+			inferencer = new ExpressionBasedSolver(factorsAndTypes, true, getOptionalTheory());
 			Pair<Expression, Long> inferenceResultAndTime = time(inference(queryExpression)); 			
 			HOGMQueryResult queryResult = new HOGMQueryResult(query, queryExpression, parsedModel, inferenceResultAndTime);
 			queryResult.recordNumberOfSummations();

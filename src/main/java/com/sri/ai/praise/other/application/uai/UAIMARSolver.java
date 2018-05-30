@@ -348,7 +348,8 @@ public class UAIMARSolver {
 				return false;
 			}
 			
-			inferencer = new ExpressionBasedSolver(expressionBasedModel, evidenceExpr, true, theory);
+			expressionBasedModel = expressionBasedModel.getConditionedModel(evidenceExpr);
+			inferencer = new ExpressionBasedSolver(expressionBasedModel, true, theory);
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
