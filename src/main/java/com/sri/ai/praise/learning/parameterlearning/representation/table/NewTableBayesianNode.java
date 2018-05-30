@@ -8,6 +8,7 @@ import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -65,16 +66,9 @@ public class NewTableBayesianNode extends TableFactor implements BayesianNode {
 	public void incrementCountForChildAndParentsAssignment(Object childValue, List<? extends Object> parentsValues) {
 		verifyIfParametersHaveExpectedType(childValue, parentsValues);
 		
-		Map<TableVariable, Integer> variablesAndTheirValues = getMapOfVariablesAndValues((Integer) childValue, (ArrayList<Integer>) parentsValues);
-		
 		incrementCountForThatParentsAssignment(parentsValues);
-		incrementCountForThatParameter(variablesAndTheirValues);
-	}
-	
-	private Map<TableVariable, Integer> getMapOfVariablesAndValues(Integer childValue, ArrayList<Integer> parentsValues) {
-		ArrayList<Integer> allVariablesValues = mergeElementsIntoOneList(childValue, parentsValues);
-		Map<TableVariable, Integer> variablesAndTheirValues = mapFromListOfKeysAndListOfValues(allVariables, allVariablesValues);
-		return variablesAndTheirValues;
+		
+		incrementCountForThatParameter(mergeElementsIntoOneList((Integer) childValue, (List<Integer>) parentsValues));
 	}
 	
 	@Override
@@ -82,15 +76,15 @@ public class NewTableBayesianNode extends TableFactor implements BayesianNode {
 		for(ArrayList<Integer> parentsAssignment : allPossibleParentsAssignments) {
 			double countForThatParentsAssignment = countsForParentsAssignment.get(parentsAssignment);
 			for(int childAssignment : (List<Integer>) child.getValues()) {
-				Map<TableVariable, Integer> variablesAndTheirValues = getMapOfVariablesAndValues(childAssignment, parentsAssignment);
-				double currentParamenterValue = this.getEntryFor(variablesAndTheirValues);
+				List<Integer> childAndParentsAssignment = mergeElementsIntoOneList(childAssignment, parentsAssignment);
+				double currentParamenterValue = this.getEntryFor(childAndParentsAssignment);
 				double newParameterValue = currentParamenterValue/countForThatParentsAssignment;
-				this.setEntryFor(variablesAndTheirValues, newParameterValue);
+				this.setEntryFor(childAndParentsAssignment, newParameterValue);
 			}
 		}
 	}
 	
-	private static <T> ArrayList<T> mergeElementsIntoOneList(T firstElement, ArrayList<T> otherElements) {
+	private static <T> ArrayList<T> mergeElementsIntoOneList(T firstElement, List<T> otherElements) {
 		ArrayList<T> allElements = new ArrayList<>(otherElements.size() + 1);
 		allElements.add(firstElement);
 		allElements.addAll(otherElements);
@@ -119,9 +113,9 @@ public class NewTableBayesianNode extends TableFactor implements BayesianNode {
 		return allPossibleVariablesAssignments;
 	}
 	
-	private void incrementCountForThatParameter(Map<TableVariable, Integer> variablesAndTheirValues) {
-		double newParameterValue = this.getEntryFor(variablesAndTheirValues) + 1;
-		this.setEntryFor(variablesAndTheirValues, newParameterValue);
+	private void incrementCountForThatParameter(List<Integer> childAndParentsAssignment) {
+		double newParameterValue = this.getEntryFor(childAndParentsAssignment) + 1;
+		this.setEntryFor(childAndParentsAssignment, newParameterValue);
 	}
 
 	private void incrementCountForThatParentsAssignment(List<? extends Object> parentsValues) {

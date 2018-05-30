@@ -31,7 +31,7 @@ public class TableBayesianModelTest {
 		TableBayesianNode sunNode = new TableBayesianNode(sunVariable, arrayList());
 		TableBayesianNode coldNode = new TableBayesianNode(coldVariable, arrayList());
 		
-		List<TableBayesianNode> nodes = list(sickNode, sunNode, coldNode);
+		List<TableBayesianNode> nodes = list(sickNode, sickNode, sickNode, sickNode, sickNode, sickNode, sunNode, coldNode);
 
 		// TableBayesianModel sickSunColdModel = new TableBayesianModel(nodes);
 		
@@ -76,7 +76,7 @@ public class TableBayesianModelTest {
 		DefaultDatapoint datapoint = new DefaultDatapoint(variables, variableValues);
 
 		List<DefaultDatapoint> datapoints = list();
-		int numberOfDatapoints = 2;
+		int numberOfDatapoints = 2000000;
 		for(int i = 1; i <= numberOfDatapoints; i++) {
 			datapoints.add(datapoint);
 		}

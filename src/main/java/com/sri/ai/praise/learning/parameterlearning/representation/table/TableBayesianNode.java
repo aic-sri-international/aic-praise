@@ -68,18 +68,26 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 	
 	@Override
 	public void incrementCountForChildAndParentsAssignment(Object childValue, List<? extends Object> parentsValues) {
-		boolean childValueIsInteger = childValue instanceof Integer;
-		boolean parentsValuesAreIntegers = parentsValues.isEmpty() || parentsValues.get(0) instanceof Integer;
-		if(!childValueIsInteger || !parentsValuesAreIntegers) {
-			throw new Error("Values must be Integers.");
-		}
+		verifyIfParametersHaveExpectedType(childValue, parentsValues);
 		
-		double countForThatParentsAssignment = countsForParentsAssignment.get(parentsValues);
-		countsForParentsAssignment.put((ArrayList<Integer>) parentsValues, countForThatParentsAssignment + 1);
+		incrementCountForThatParentsAssignment(parentsValues);
 		
 		Pair<Integer, ArrayList<Integer>> childAndParentsAssignement = new Pair(childValue, parentsValues);
 		double newParameterValue = parametersForChildAndParentsAssignment.get(childAndParentsAssignement) + 1;
 		parametersForChildAndParentsAssignment.put(childAndParentsAssignement, newParameterValue);
+	}
+	
+	private void verifyIfParametersHaveExpectedType(Object childValue, List<? extends Object> parentsValues) throws Error {
+		boolean childValueIsInteger = childValue instanceof Integer;
+		boolean parentsValuesAreIntegers = parentsValues.isEmpty() || parentsValues.get(0) instanceof Integer;
+		if(!childValueIsInteger || !parentsValuesAreIntegers) {
+			throw new Error("Values for BayesianVariables must be Integers.");
+		}
+	}
+	
+	private void incrementCountForThatParentsAssignment(List<? extends Object> parentsValues) {
+		double countForThatParentsAssignment = countsForParentsAssignment.get(parentsValues);
+		countsForParentsAssignment.put((ArrayList<Integer>) parentsValues, countForThatParentsAssignment + 1);
 	}
 	
 	@Override
