@@ -7,5 +7,5 @@ public interface Datapoint {
 	
 	public Object getValueOfVariable(Variable variable);
 	
-	public List<? extends Object> getValueOfVariables(List<? extends Variable> variables);
+	public List<? extends Object> getValuesOfVariables(List<? extends Variable> variables);
 }

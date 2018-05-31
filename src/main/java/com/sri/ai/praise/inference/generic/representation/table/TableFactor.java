@@ -160,18 +160,24 @@ public class TableFactor implements Factor {
 	}
 
 	@Override
-	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableValues) {
-		int entryPosition = fromMapOfVariableValuesToEntryPosition(variableValues);
-		return entries.get(entryPosition);
+	public Double getEntryFor(Map<? extends Variable, ? extends Object> variablesAndTheirValues) {
+		int[] variableValues = getVariableValues(variablesAndTheirValues);
+		Double result = getEntryFor(variableValues);
+		return result;
 	}
 	
-	public <T extends Variable, U extends Object> Double getEntryFor(List<T> variables, List<U> variableValues ) {
+	public <T extends Variable, U extends Object> Double getEntryFor(List<T> variables, List<U> variableValues) {
 		Map<T, U> variablesAndTheirValues = Util.mapFromListOfKeysAndListOfValues(variables, variableValues);
 		return getEntryFor(variablesAndTheirValues);
 	}
 	
-	public void setEntryFor(Map<? extends Variable, ? extends Object> variableValues, Double newEntryValue) {
-		int entryPosition = fromMapOfVariableValuesToEntryPosition(variableValues);
+	public Double getEntryFor(List<? extends Integer> variableValuesInTheRightOrder) {
+		int entryPosition = getEntryPosition(variableValuesInTheRightOrder);
+		return entries.get(entryPosition);
+	}
+	
+	public void setEntryFor(Map<? extends Variable, ? extends Object> variablesAndTheirValues, Double newEntryValue) {
+		int entryPosition = fromMapOfVariableValuesToEntryPosition(variablesAndTheirValues);
 		entries.set(entryPosition, newEntryValue);
 	}
 	
@@ -181,19 +187,51 @@ public class TableFactor implements Factor {
 		entries.set(entryPosition, newEntryValue);
 	}
 	
+	public void setEntryFor(List<? extends Integer> variableValuesInTheRightOrder, Double newEntryValue) {
+		int entryPosition = getEntryPosition(variableValuesInTheRightOrder);
+		entries.set(entryPosition, newEntryValue);
+	}
+	
 	public int fromMapOfVariableValuesToEntryPosition(Map<? extends Variable, ? extends Object> variableValues) {
-		int[] varValues = new int[listOfVariables.size()];
+		int[] varValues = getVariableValues(variableValues);
+		
+		int entryPosition = getEntryPosition(varValues);
+		return entryPosition;
+	}
+	
+	private Double getEntryFor(int[] varValues) {
+		int entryPosition = getEntryPosition(varValues);
+		return entries.get(entryPosition);
+	}
+	
+	private int[] getVariableValues(Map<? extends Variable, ? extends Object> variablesAndTheirValues) {
+		int[] variableValues = new int[listOfVariables.size()];
 		/*for(Entry<? extends Variable, ? extends Object> entry : variableValues.entrySet()) {//iterate over listOfVariavles:moreEfficient
 			Integer indexOnTheList = mapFromVariableToItsIndexOnTheList.get(entry.getKey());
 			if(indexOnTheList != null) {
 				varValues[indexOnTheList] = (Integer) entry.getValue();
 			}
 		}*/
-		for (int i = 0; i < varValues.length; i++) {
-			varValues[i] = (Integer) variableValues.get(listOfVariables.get(i));
+		for (int i = 0; i < variableValues.length; i++) {
+			variableValues[i] = (Integer) variablesAndTheirValues.get(listOfVariables.get(i));
+		}
+		return variableValues;
+	}
+	
+	private int getEntryPosition(List<? extends Integer> variableValuesInTheRightOrder) {
+		int[] variableValuesArray = new int[variableValuesInTheRightOrder.size()];
+		int i = 0;
+		for(int variableValue : variableValuesInTheRightOrder) {
+			variableValuesArray[i] = variableValue;
+			i++;
 		}
 		
-		int entryPosition = this.entryIndex.getValueFor(varValues).intValue();
+		int entryPosition = getEntryPosition(variableValuesArray);
+		return entryPosition;
+	}
+	
+	private int getEntryPosition(int[] variableValues) {
+		int entryPosition = this.entryIndex.getValueFor(variableValues).intValue();
 		return entryPosition;
 	}
 

@@ -35,7 +35,7 @@ public class DefaultDatapoint implements Datapoint {
 	}
 
 	@Override
-	public List<? extends Object> getValueOfVariables(List<? extends Variable> variables) {
+	public List<? extends Object> getValuesOfVariables(List<? extends Variable> variables) {
 		ArrayList<Object> valueOfVariables = new ArrayList<Object>();
 		for(Variable variable : variables) {
 			Object valueOfCurrentVariable = getValueOfVariable(variable);
