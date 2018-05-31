@@ -105,7 +105,9 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	@Override
 	public Factor multiply(Factor another) {
+		
 		Factor result;
+		
 		if (another instanceof ConstantFactor) {
 			if(another instanceof IdentityFactor) {
 				result = this;
@@ -115,14 +117,18 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 			}
 			result = ((ConstantFactor) another).multiply(this);
 		}
+		
 		else if (another instanceof ExpressionFactor){
 			result = evaluateAsFactor(Times.make(this, (Expression) another));
 		}
+		
 		else {
 			throw new Error("Trying to multiply factors that belong to incompatible classes : classes are "
 					+ "respectively " + this.getClass() + " and " + another.getClass());
 		}
+		
 		return result;
+		
 	}
 
 	@Override
@@ -181,18 +187,24 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	@Override
 	public Factor add(Factor another) {
+		
 		Factor result;
+		
 		if (another instanceof ConstantFactor) {
 			result = ((ConstantFactor) another).add(this);
 		}
+		
 		else if(another.getClass() != this.getClass()) {
 			throw new Error("Trying to add different types of factors: this is a " +
 							this.getClass() + "and another is a " + another.getClass());
 		}
+		
 		else {
 			result = evaluateAsFactor(Plus.make(this, (Expression) another));
 		}
+		
 		return result;
+		
 	}
 
 	@Override

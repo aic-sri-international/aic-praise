@@ -45,23 +45,30 @@ public class ConstantFactor implements Factor {
 
 	@Override
 	public Factor multiply(Factor another) {
+		
 		Factor result = null;
+		
 		if (another instanceof ConstantFactor) {
 			ConstantFactor anotherConstant = (ConstantFactor) another;
 			result = multiplyTwoConstantFactors(anotherConstant);
 		}
+		
 		else if (another instanceof ExpressionFactor) {
 			ExpressionFactor anotherExpression = (ExpressionFactor) another;
 			result = evaluateAsFactor(Times.make(makeSymbol(getConstant()), (Expression) another),anotherExpression.getContext());
 		}
+		
 		else if (another instanceof TableFactor) {
 			TableFactor anotherTable = (TableFactor) another;
 			result = multiplyWithTableFactor(anotherTable);
 		}
+		
 		else {
 			throw new Error("Unknown class for another : class was " + another.getClass());
 		}
+		
 		return result;
+		
 	}
 	
 	private ConstantFactor multiplyTwoConstantFactors(ConstantFactor another) {
@@ -148,23 +155,30 @@ public class ConstantFactor implements Factor {
 
 	@Override
 	public Factor add(Factor another) {
+		
 		Factor result = null;
+		
 		if (another instanceof ConstantFactor) {
 			ConstantFactor anotherConstant = (ConstantFactor) another;
 			result = addTwoConstantFactors(anotherConstant);
 		}
+		
 		else if (another instanceof ExpressionFactor) {
 			ExpressionFactor anotherExpression = (ExpressionFactor) another;
 			result = evaluateAsFactor(Plus.make(makeSymbol(getConstant()), (Expression) another),anotherExpression.getContext());
 		}
+		
 		else if (another instanceof TableFactor) {
 			TableFactor anotherTable = (TableFactor) another;
 			result = addATableFactor(anotherTable);
 		}
+		
 		else {
 			throw new Error("Unknown class for another : class was " + another.getClass());
 		}
+		
 		return result;
+		
 	}
 	
 	private ConstantFactor addTwoConstantFactors(ConstantFactor another) {

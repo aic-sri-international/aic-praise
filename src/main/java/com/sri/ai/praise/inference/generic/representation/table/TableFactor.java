@@ -32,25 +32,28 @@ import com.sri.ai.util.math.MixedRadixNumber;
 public class TableFactor implements Factor {
 	
 	ArrayList<TableVariable> listOfVariables;
+	
 	ArrayList<Integer> listOfVariableCardinalities;
+	
 	LinkedHashSet<TableVariable> setOfVariables;
+	
 	//
 	ArrayList<Double> entries;
+	
 	MixedRadixNumber entryIndex;
+	
 	//
 	LinkedHashMap<TableVariable, Integer> mapFromVariableToItsIndexOnTheList; // TODO initialize	
 	
 	public TableFactor(ArrayList<TableVariable> listOfVariables, ArrayList<Double> entries) {
 		this.listOfVariables = listOfVariables;
 		this.setOfVariables = new LinkedHashSet<>(listOfVariables);
-		
 		this.mapFromVariableToItsIndexOnTheList = new LinkedHashMap<>();
 		for (int i = 0; i < listOfVariables.size(); i++) {
 			this.mapFromVariableToItsIndexOnTheList.put(listOfVariables.get(i),i);
 		}
 		this.listOfVariableCardinalities = Util.mapIntoArrayList(listOfVariables, v->v.getCardinality());
 		this.entries = entries;
-		
 		entryIndex = new MixedRadixNumber(BigInteger.ZERO, listOfVariableCardinalities);
 	}
 	
@@ -196,9 +199,9 @@ public class TableFactor implements Factor {
 
 	@Override
 	public Factor multiply(Factor another) {
-		//Check if the class is the same
-		if(another.getClass() == IdentityFactor.class) {
-			return this;
+
+		if(another instanceof ConstantFactor) {
+			return another.multiply(this);
 		}
 		
 		if(another.getClass() != this.getClass()) {
@@ -234,7 +237,9 @@ public class TableFactor implements Factor {
 			Double product = this.getEntryFor(mapFromVariableToValue) * anotherTable.getEntryFor(mapFromVariableToValue);
 			result.setEntryFor(mapFromVariableToValue, product);
 		}
+		
 		return result;
+		
 	}
 
 
