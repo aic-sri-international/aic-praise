@@ -17,6 +17,13 @@ import com.sri.ai.praise.inference.generic.representation.table.TableFactor;
 import com.sri.ai.praise.inference.generic.representation.table.TableVariable;
 import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
 
+/**
+ * Implementation of Bayesian nodes based on tables
+ * 
+ * @author Roger Leite Lucena
+ *
+ */
+
 public class TableBayesianNode extends TableFactor implements BayesianNode {
 	
 	private TableVariable child;
