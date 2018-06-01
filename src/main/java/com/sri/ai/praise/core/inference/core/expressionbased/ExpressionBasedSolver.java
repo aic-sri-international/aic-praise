@@ -75,7 +75,7 @@ import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedMo
 import com.sri.ai.util.Util;
 
 /**
- * A solver for factor graphs using {@link SGVET}.
+ * A multiQuantifierEliminator for factor graphs using {@link SGVET}.
  * 
  * @author braz
  *
@@ -86,14 +86,14 @@ public class ExpressionBasedSolver {
 	private boolean isBayesianNetwork;
 	private Expression partitionFunction;
 	private Map<String, String> mapFromRandomVariableNameToTypeName;
-	private Map<String, String> mapFromSymbolNameToTypeName; // union of the two maps above
+	private Map<String, String> mapFromSymbolNameToTypeName;
 	private Map<String, String> mapFromCategoricalTypeNameToSizeString;
 	private Collection<Type> additionalTypes;
 	private List<Expression> allRandomVariables;
 	private Predicate<Expression> isUniquelyNamedConstantPredicate;
 	private Theory theory;
 	private AssociativeCommutativeSemiRing semiRing;
-	private MultiQuantifierEliminator solver;
+	private MultiQuantifierEliminator multiQuantifierEliminator;
 
 	public Expression getPartitionFunction() {
 		return partitionFunction;
@@ -104,20 +104,17 @@ public class ExpressionBasedSolver {
 	}
 
 	public void interrupt() {
-		solver.interrupt();
+		multiQuantifierEliminator.interrupt();
 	}
 	
 	/**
-	 * Constructs a solver for a factor graph .
+	 * Constructs a multiQuantifierEliminator for a factor graph .
 	 * @param model 
 	 *        the factors and their type information over which inference is to be performed.
 	 * @param useFactorization indicates whether to use factorization (as in ExpressionVariable Elimination)
 	 * @param optionalTheory the theory to be used; if null, a default one is used (as of May 2017, a compound theory with propositional, equalities on categorical types, difference arithmetic, and real linear arithmetic).
 	 */
-	public ExpressionBasedSolver(
-			ExpressionBasedModel model,
-			boolean useFactorization,
-			Theory optionalTheory) {
+	public ExpressionBasedSolver(ExpressionBasedModel model, boolean useFactorization, Theory optionalTheory) {
 
 		this.factorGraph       = Times.make(model.getFactors());
 		this.isBayesianNetwork = model.isKnownToBeBayesianNetwork();
@@ -135,12 +132,6 @@ public class ExpressionBasedSolver {
 		Set<Expression> uniquelyNamedConstants = mapIntoSet(model.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
 		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
 		
-		if (mapFromRandomVariableNameToTypeName.values().stream().anyMatch(type -> type.contains("->")) ||
-			model.getMapFromNonUniquelyNamedConstantNameToTypeName().values().stream().anyMatch(type -> type.contains("->"))) {
-		}
-		else {
-		}
-
 		semiRing = new SumProduct(); // for marginalization
 
 		if (optionalTheory != null) {
@@ -159,10 +150,10 @@ public class ExpressionBasedSolver {
 		this.additionalTypes.addAll(model.getAdditionalTypes());
 		
 		if (useFactorization) {
-			solver = new SGVET();
+			multiQuantifierEliminator = new SGVET();
 		}
 		else {
-			solver = new DefaultMultiQuantifierEliminator();
+			multiQuantifierEliminator = new DefaultMultiQuantifierEliminator();
 		}
 
 		partitionFunction = null;
@@ -211,7 +202,16 @@ public class ExpressionBasedSolver {
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (partitionFunction == null) {
-				partitionFunction = solver.solve(semiRing, unnormalizedMarginal, queryVariables, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+				partitionFunction = 
+						multiQuantifierEliminator.solve(
+								semiRing, 
+								unnormalizedMarginal, 
+								queryVariables, 
+								mapFromSymbolNameToTypeName, 
+								mapFromCategoricalTypeNameToSizeString, 
+								additionalTypes, 
+								isUniquelyNamedConstantPredicate, 
+								theory);
 			}
 
 			marginal = Division.make(unnormalizedMarginal, partitionFunction); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
@@ -233,7 +233,7 @@ public class ExpressionBasedSolver {
 	 * @return
 	 */
 	public Expression sum(List<Expression> indices, Expression expression) {
-		return solver.solve(semiRing, expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		return multiQuantifierEliminator.solve(semiRing, expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 
 	/**
@@ -242,7 +242,7 @@ public class ExpressionBasedSolver {
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
-		return solver.solve(semiRing, expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		return multiQuantifierEliminator.solve(semiRing, expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
 	}
 
 	/**
