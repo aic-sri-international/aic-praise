@@ -73,7 +73,7 @@ import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 
 /**
- * A multiQuantifierEliminator for factor graphs using {@link SGVET}.
+ * A probabilistic solver for an {@link ExpressionBasedModel} (currently, marginalization only).
  * 
  * @author braz
  *
@@ -84,16 +84,8 @@ public class ExpressionBasedSolver {
 	private Expression partitionFunction;
 	private AssociativeCommutativeSemiRing semiRing;
 	private MultiQuantifierEliminator multiQuantifierEliminator;
-	private Theory theory;
+	private Theory optionalTheory;
 
-	public Expression getPartitionFunction() {
-		return partitionFunction;
-	}
-
-	public void interrupt() {
-		multiQuantifierEliminator.interrupt();
-	}
-	
 	/**
 	 * Constructs a multiQuantifierEliminator for a factor graph .
 	 * @param model 
@@ -102,20 +94,9 @@ public class ExpressionBasedSolver {
 	 * @param optionalTheory the theory to be used; if null, a default one is used (as of May 2017, a compound theory with propositional, equalities on categorical types, difference arithmetic, and real linear arithmetic).
 	 */
 	public ExpressionBasedSolver(ExpressionBasedModel model, boolean useFactorization, Theory optionalTheory) {
-
+	
 		this.model = model;
-		
-		if (optionalTheory != null) {
-			this.theory = optionalTheory;
-		}
-		else {
-			this.theory =
-					new CompoundTheory(
-							new EqualityTheory(false, true),
-							new DifferenceArithmeticTheory(false, true),
-							new LinearRealArithmeticTheory(false, true),
-							new PropositionalTheory());
-		}
+		this.optionalTheory = optionalTheory;
 		
 		if (useFactorization) {
 			multiQuantifierEliminator = new SGVET();
@@ -123,16 +104,20 @@ public class ExpressionBasedSolver {
 		else {
 			multiQuantifierEliminator = new DefaultMultiQuantifierEliminator();
 		}
-
+	
 		partitionFunction = null;
 		semiRing = new SumProduct(); // for marginalization
 	}
 
+	public void interrupt() {
+		multiQuantifierEliminator.interrupt();
+	}
+	
 	private Context contextWithQuery = null;
 	
 	public Context getContextWithQuery() {
 		if (contextWithQuery == null) {
-			contextWithQuery = makeContext(model, theory, true);
+			contextWithQuery = makeContext(model, optionalTheory, true);
 		}
 		return contextWithQuery;
 	}
@@ -141,7 +126,7 @@ public class ExpressionBasedSolver {
 	
 	public Context getContext() {
 		if (context == null) {
-			context = makeContext(model, theory, false);
+			context = makeContext(model, optionalTheory, false);
 		}
 		return context;
 	}
@@ -241,6 +226,10 @@ public class ExpressionBasedSolver {
 		}
 
 		return marginal;
+	}
+
+	public Expression getPartitionFunction() {
+		return partitionFunction;
 	}
 
 	/**
