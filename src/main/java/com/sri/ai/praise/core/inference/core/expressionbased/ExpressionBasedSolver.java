@@ -82,10 +82,8 @@ import com.sri.ai.util.Util;
  */
 public class ExpressionBasedSolver {
 
-	private Expression factorGraph;
-	private boolean isBayesianNetwork;
+	private ExpressionBasedModel model;
 	private Expression partitionFunction;
-	private Map<String, String> mapFromRandomVariableNameToTypeName;
 	private Map<String, String> mapFromSymbolNameToTypeName;
 	private Map<String, String> mapFromCategoricalTypeNameToSizeString;
 	private Collection<Type> additionalTypes;
@@ -100,7 +98,7 @@ public class ExpressionBasedSolver {
 	}
 
 	public Map<String, String> getMapFromRandomVariableNameToTypeName() {
-		return mapFromRandomVariableNameToTypeName;
+		return model.getMapFromRandomVariableNameToTypeName();
 	}
 
 	public void interrupt() {
@@ -116,18 +114,18 @@ public class ExpressionBasedSolver {
 	 */
 	public ExpressionBasedSolver(ExpressionBasedModel model, boolean useFactorization, Theory optionalTheory) {
 
-		this.factorGraph       = Times.make(model.getFactors());
-		this.isBayesianNetwork = model.isKnownToBeBayesianNetwork();
-
-		this.mapFromRandomVariableNameToTypeName = new LinkedHashMap<>(model.getMapFromRandomVariableNameToTypeName());
+		this.model = model;
 		
-		this.mapFromSymbolNameToTypeName = new LinkedHashMap<>(mapFromRandomVariableNameToTypeName);
+		this.mapFromSymbolNameToTypeName = new LinkedHashMap<>(getMapFromRandomVariableNameToTypeName());
 		this.mapFromSymbolNameToTypeName.putAll(model.getMapFromNonUniquelyNamedConstantNameToTypeName());
 		this.mapFromSymbolNameToTypeName.putAll(model.getMapFromUniquelyNamedConstantNameToTypeName());
 		
-		allRandomVariables = Util.mapIntoList(this.mapFromRandomVariableNameToTypeName.keySet(), Expressions::parse);
+		allRandomVariables = Util.mapIntoList(model.getMapFromRandomVariableNameToTypeName().keySet(), Expressions::parse);
 		                       
 		this.mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(model.getMapFromCategoricalTypeNameToSizeString());
+
+		mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
+		mapFromCategoricalTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
 
 		Set<Expression> uniquelyNamedConstants = mapIntoSet(model.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
 		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
@@ -170,11 +168,13 @@ public class ExpressionBasedSolver {
 	 */
 	public Expression solve(Expression queryExpression) {
 		
+		Expression factorGraphToUse;
 		Expression queryVariable;
 		List<Expression> queryVariables;
 		List<Expression> indices; 
 		boolean queryIsCompoundExpression;
 		if (allRandomVariables.contains(queryExpression)) {
+			factorGraphToUse = Times.make(model.getFactors());
 			queryIsCompoundExpression = false;
 			queryVariable = queryExpression;
 			queryVariables = list(queryVariable);
@@ -185,33 +185,22 @@ public class ExpressionBasedSolver {
 			queryVariable = makeSymbol("query");
 			queryVariables = list(queryVariable);
 			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
-			factorGraph = Times.make(list(factorGraph, parse("if query <=> " + queryExpression + " then 1 else 0")));
+			factorGraphToUse = Times.make(list(Times.make(model.getFactors()), parse("if query <=> " + queryExpression + " then 1 else 0")));
 			indices = allRandomVariables; // 'query' is not in 'allRandomVariables' 
-			mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
-			mapFromCategoricalTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
 		}
 		
 		// Solve the problem.
-		Expression unnormalizedMarginal = sum(indices, factorGraph);
-//		System.out.println("Unnormalized marginal: " + unnormalizedMarginal);
+		Expression unnormalizedMarginal = sum(indices, factorGraphToUse);
 
 		Expression marginal;
-		if (isBayesianNetwork) {
+		if (model.isKnownToBeBayesianNetwork()) {
 			marginal = unnormalizedMarginal; // model was a Bayesian network, so marginal is equal to unnormalized marginal.
 		}
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (partitionFunction == null) {
-				partitionFunction = 
-						multiQuantifierEliminator.solve(
-								semiRing, 
-								unnormalizedMarginal, 
-								queryVariables, 
-								mapFromSymbolNameToTypeName, 
-								mapFromCategoricalTypeNameToSizeString, 
-								additionalTypes, 
-								isUniquelyNamedConstantPredicate, 
-								theory);
+				Context context = makeContextWithTypeInformation();
+				partitionFunction = multiQuantifierEliminator.extendContextAndSolve(semiRing, queryVariables, unnormalizedMarginal, context);
 			}
 
 			marginal = Division.make(unnormalizedMarginal, partitionFunction); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
@@ -233,7 +222,9 @@ public class ExpressionBasedSolver {
 	 * @return
 	 */
 	public Expression sum(List<Expression> indices, Expression expression) {
-		return multiQuantifierEliminator.solve(semiRing, expression, indices, mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		Context context = makeContextWithTypeInformation();
+		Expression result = multiQuantifierEliminator.extendContextAndSolve(semiRing, indices, expression, context);
+		return result;
 	}
 
 	/**
@@ -242,7 +233,9 @@ public class ExpressionBasedSolver {
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
-		return multiQuantifierEliminator.solve(semiRing, expression, list(), mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		Context context = makeContextWithTypeInformation();
+		Expression result = multiQuantifierEliminator.extendContextAndSolve(semiRing, list(), expression, context);
+		return result;
 	}
 
 	/**

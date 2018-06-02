@@ -61,7 +61,7 @@ import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolv
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;
 
-public class InferenceForFactorGraphAndEvidenceTest {
+public class ExpressionBasedSolverTest {
 	
 	// The definitions of categorical types
 	Map<String, String> mapFromCategoricalTypeNameToSizeString;
@@ -392,7 +392,6 @@ public class InferenceForFactorGraphAndEvidenceTest {
 				+ "(if burglary then if alarm then 0.9 else 0.1 else if alarm then 0.01 else 0.99)*"
 				+ "(if burglary then 0.1 else 0.9)"));
 
-		ExpressionBasedSolver inferencer;
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(factors, 
 				mapFromRandomVariableNameToTypeName,
 				mapFromNonUniquelyNamedConstantNameToTypeName,
@@ -400,11 +399,8 @@ public class InferenceForFactorGraphAndEvidenceTest {
 				mapFromCategoricalTypeNameToSizeString,
 				list(),
 				isBayesianNetwork);
-		model = model.getConditionedModel(evidence);
-		inferencer = new ExpressionBasedSolver(
-				model,
-				false,
-				null);
+		HOGMExpressionBasedModel conditionedModel = model.getConditionedModel(evidence);
+		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(conditionedModel, false, null);
 		Expression result = inferencer.sum(list(parse("alarm")), Times.make(factors));
 		System.out.println(result);
 	}
