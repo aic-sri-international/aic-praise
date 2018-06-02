@@ -58,27 +58,33 @@ public class HOGMExpressionBasedModel extends ExpressionBasedModel {
 	public HOGMExpressionBasedModel(String hogmodelString) {
 		this(new HOGMParserWrapper().parseModel(hogmodelString));
 	}
-	
+
 	public HOGMExpressionBasedModel(HOGModel parsedModel) {
-		factors.addAll(parsedModel.getConditionedPotentials());
+		super(makeParameters(parsedModel));
+	}
+	
+	private static Parameters makeParameters(HOGModel parsedModel) {
+		Parameters parameters = new Parameters();
+		
+		parameters.factors.addAll(parsedModel.getConditionedPotentials());
 		
 		parsedModel.getRandomVariableDeclarations().forEach(random -> {
-			mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.toTypeRepresentation());
+			parameters.mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.toTypeRepresentation());
 		});
 		
 		parsedModel.getConstatDeclarations().forEach(constant -> {
-			mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.toTypeRepresentation());
+			parameters.mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.toTypeRepresentation());
 		});
 		
 		parsedModel.getSortDeclarations().forEach(sortDeclaration -> {
 			sortDeclaration.getAssignedConstants().forEach(constant -> {
-				mapFromUniquelyNamedConstantNameToTypeName.put(constant.toString(), sortDeclaration.getName().toString());
+				parameters.mapFromUniquelyNamedConstantNameToTypeName.put(constant.toString(), sortDeclaration.getName().toString());
 			});
 		});
 		
 		parsedModel.getSortDeclarations().forEach(sort -> {
 			if (!sort.getSize().equals(HOGMSortDeclaration.UNKNOWN_SIZE)) {
-				mapFromCategoricalTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
+				parameters.mapFromCategoricalTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
 			}
 		});
 		
@@ -89,7 +95,7 @@ public class HOGMExpressionBasedModel extends ExpressionBasedModel {
 		parsedModel.getConstatDeclarations().forEach(constant -> {
 			integerIntervalTypes.addAll(constant.getReferencedIntegerIntervalTypes());
 		});
-		integerIntervalTypes.forEach(integerIntervalName -> additionalTypes.add(new IntegerInterval(integerIntervalName)));
+		integerIntervalTypes.forEach(integerIntervalName -> parameters.additionalTypes.add(new IntegerInterval(integerIntervalName)));
 		
 		Set<String> realIntervalTypes = new LinkedHashSet<>();
 		parsedModel.getRandomVariableDeclarations().forEach(random -> {
@@ -98,7 +104,9 @@ public class HOGMExpressionBasedModel extends ExpressionBasedModel {
 		parsedModel.getConstatDeclarations().forEach(constant -> {
 			realIntervalTypes.addAll(constant.getReferencedRealIntervalTypes());
 		});
-		realIntervalTypes.forEach(realIntervalName -> additionalTypes.add(new RealInterval(realIntervalName)));
+		realIntervalTypes.forEach(realIntervalName -> parameters.additionalTypes.add(new RealInterval(realIntervalName)));
+		
+		return parameters;
 	}
 	
 	public HOGMExpressionBasedModel(

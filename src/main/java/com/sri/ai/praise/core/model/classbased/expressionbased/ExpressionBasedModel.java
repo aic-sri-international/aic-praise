@@ -17,6 +17,7 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.model.api.Model;
+import com.sri.ai.util.Util;
 
 public class ExpressionBasedModel implements Model, Cloneable {
 
@@ -27,11 +28,34 @@ public class ExpressionBasedModel implements Model, Cloneable {
 	protected Map<String, String> mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>();
 	protected Collection<Type> additionalTypes = new LinkedList<>();
 	protected boolean isKnownToBeBayesianNetwork = false;
-	
-	public ExpressionBasedModel() {
-		super();
+
+	private List<Expression> randomVariables;
+
+	protected static class Parameters {
+		public Parameters() {
+		}
+		public List<Expression> factors = new ArrayList<>();
+		public List<Expression> randomVariables;
+		public Map<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>();
+		public Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
+		public Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
+		public Map<String, String> mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>();
+		public Collection<Type> additionalTypes = new LinkedList<>();
+		public boolean isKnownToBeBayesianNetwork = false;
 	}
 
+	protected ExpressionBasedModel(Parameters parameters) {
+		this(
+				parameters.factors,
+				parameters.mapFromRandomVariableNameToTypeName,
+				parameters.mapFromNonUniquelyNamedConstantNameToTypeName,
+				parameters.mapFromUniquelyNamedConstantNameToTypeName,
+				parameters.mapFromCategoricalTypeNameToSizeString,
+				parameters.additionalTypes,
+				parameters.isKnownToBeBayesianNetwork
+				);
+	}
+	
 	public ExpressionBasedModel(
 			List<Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
@@ -49,10 +73,16 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		this.mapFromCategoricalTypeNameToSizeString.putAll(mapFromCategoricalTypeNameToSizeString);
 		this.additionalTypes = additionalTypes;
 		this.isKnownToBeBayesianNetwork = isKnownToBeBayesianNetwork;
+		
+		this.randomVariables = Util.mapIntoList(getMapFromRandomVariableNameToTypeName().keySet(), Expressions::parse);		
 	}	
 
 	public List<Expression> getFactors() {
 		return Collections.unmodifiableList(factors);
+	}
+
+	public List<Expression> getRandomVariables() {
+		return Collections.unmodifiableList(randomVariables);
 	}
 
 	@Override

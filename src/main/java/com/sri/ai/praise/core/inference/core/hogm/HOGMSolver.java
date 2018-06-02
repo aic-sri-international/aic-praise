@@ -286,7 +286,7 @@ public class HOGMSolver {
 	}
 	
 	public Context getQueryContext() {
-		return inferencer.makeContextWithTypeInformation();
+		return inferencer.getContextWithQuery();
 	}
 	
 	public Expression simplifyWithinQueryContext(Expression expr) {

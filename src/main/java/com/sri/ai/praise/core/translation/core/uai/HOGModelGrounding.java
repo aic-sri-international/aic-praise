@@ -112,7 +112,7 @@ public class HOGModelGrounding {
 	    
 		ExpressionBasedSolver inferencer = makeInferencer(factorsAndTypes, newUniqueConstantToTypeMap);
 		
-		Context context = inferencer.makeContextWithTypeInformation();
+		Context context = inferencer.getContext();
 		
 		listener.numberFactors(factorsAndTypes.getFactors().size());
 		int factorIndex = 0;
@@ -255,7 +255,7 @@ public class HOGModelGrounding {
 				int valueIndex = mrn.getCurrentNumeralValue(i);
 				groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), factorRandomVariableTypeValues.get(i).get(valueIndex), context);
 			}  		
-			Expression value = inferencer.simplify(groundedFactor, context);
+			Expression value = inferencer.evaluate(groundedFactor);
 			//				Expression value = inferencer.evaluate(groundedFactor);
 			if (!Expressions.isNumber(value)) {
 				throw new IllegalStateException("Unable to compute a number for the grounded factor ["+groundedFactor+"], instead got:"+value);
@@ -388,7 +388,7 @@ public class HOGModelGrounding {
 				randomVariablesInFactor, // variables to be used
 				makeFunctionFromVariableIndexValueIndexToValue(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor, typeToValues),
 				fromVariableIndexToDomainSize,
-				inferencer.getTheory(),
+				inferencer.getContext().getTheory(),
 				true, // first time this variable is being iterated (it happens only once)
 				true, // last time this variable is being iterated (it happens only once)
 				(isFirstValue, isLastValue, value)

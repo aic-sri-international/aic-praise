@@ -57,7 +57,6 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.MultiQuantifierEliminator;
 import com.sri.ai.grinder.api.Theory;
-import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.core.solver.DefaultMultiQuantifierEliminator;
 import com.sri.ai.grinder.core.solver.SGVET;
 import com.sri.ai.grinder.group.AssociativeCommutativeSemiRing;
@@ -72,7 +71,6 @@ import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
-import com.sri.ai.util.Util;
 
 /**
  * A multiQuantifierEliminator for factor graphs using {@link SGVET}.
@@ -84,21 +82,12 @@ public class ExpressionBasedSolver {
 
 	private ExpressionBasedModel model;
 	private Expression partitionFunction;
-	private Map<String, String> mapFromSymbolNameToTypeName;
-	private Map<String, String> mapFromCategoricalTypeNameToSizeString;
-	private Collection<Type> additionalTypes;
-	private List<Expression> allRandomVariables;
-	private Predicate<Expression> isUniquelyNamedConstantPredicate;
-	private Theory theory;
 	private AssociativeCommutativeSemiRing semiRing;
 	private MultiQuantifierEliminator multiQuantifierEliminator;
+	private Theory theory;
 
 	public Expression getPartitionFunction() {
 		return partitionFunction;
-	}
-
-	public Map<String, String> getMapFromRandomVariableNameToTypeName() {
-		return model.getMapFromRandomVariableNameToTypeName();
 	}
 
 	public void interrupt() {
@@ -116,22 +105,6 @@ public class ExpressionBasedSolver {
 
 		this.model = model;
 		
-		this.mapFromSymbolNameToTypeName = new LinkedHashMap<>(getMapFromRandomVariableNameToTypeName());
-		this.mapFromSymbolNameToTypeName.putAll(model.getMapFromNonUniquelyNamedConstantNameToTypeName());
-		this.mapFromSymbolNameToTypeName.putAll(model.getMapFromUniquelyNamedConstantNameToTypeName());
-		
-		allRandomVariables = Util.mapIntoList(model.getMapFromRandomVariableNameToTypeName().keySet(), Expressions::parse);
-		                       
-		this.mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(model.getMapFromCategoricalTypeNameToSizeString());
-
-		mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
-		mapFromCategoricalTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
-
-		Set<Expression> uniquelyNamedConstants = mapIntoSet(model.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
-		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
-		
-		semiRing = new SumProduct(); // for marginalization
-
 		if (optionalTheory != null) {
 			this.theory = optionalTheory;
 		}
@@ -144,9 +117,6 @@ public class ExpressionBasedSolver {
 							new PropositionalTheory());
 		}
 		
-		this.additionalTypes = new LinkedList<Type>(theory.getNativeTypes()); // add needed types that may not be the type of any variable
-		this.additionalTypes.addAll(model.getAdditionalTypes());
-		
 		if (useFactorization) {
 			multiQuantifierEliminator = new SGVET();
 		}
@@ -155,12 +125,66 @@ public class ExpressionBasedSolver {
 		}
 
 		partitionFunction = null;
-	}
-	
-	public Theory getTheory() {
-		return theory;
+		semiRing = new SumProduct(); // for marginalization
 	}
 
+	private Context contextWithQuery = null;
+	
+	public Context getContextWithQuery() {
+		if (contextWithQuery == null) {
+			contextWithQuery = makeContext(model, theory, true);
+		}
+		return contextWithQuery;
+	}
+
+	private Context context = null;
+	
+	public Context getContext() {
+		if (context == null) {
+			context = makeContext(model, theory, false);
+		}
+		return context;
+	}
+
+	private static Context makeContext(ExpressionBasedModel model, Theory optionalTheory, boolean withQuery) {
+		Map<String, String> mapFromSymbolNameToTypeName;
+		Map<String, String> mapFromCategoricalTypeNameToSizeString;
+		Collection<Type> additionalTypes;
+		Predicate<Expression> isUniquelyNamedConstantPredicate;
+		Theory theory;
+
+		mapFromSymbolNameToTypeName = new LinkedHashMap<>(model.getMapFromRandomVariableNameToTypeName());
+		mapFromSymbolNameToTypeName.putAll(model.getMapFromNonUniquelyNamedConstantNameToTypeName());
+		mapFromSymbolNameToTypeName.putAll(model.getMapFromUniquelyNamedConstantNameToTypeName());
+
+		mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(model.getMapFromCategoricalTypeNameToSizeString());
+
+		mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
+		mapFromCategoricalTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
+
+		Set<Expression> uniquelyNamedConstants = mapIntoSet(model.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
+		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
+
+		if (optionalTheory != null) {
+			theory = optionalTheory;
+		}
+		else {
+			theory =
+					new CompoundTheory(
+							new EqualityTheory(false, true),
+							new DifferenceArithmeticTheory(false, true),
+							new LinearRealArithmeticTheory(false, true),
+							new PropositionalTheory());
+		}
+
+		additionalTypes = new LinkedList<Type>(theory.getNativeTypes()); // add needed types that may not be the type of any variable
+		additionalTypes.addAll(model.getAdditionalTypes());
+
+		Context contextWithQuery = GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
+		
+		return contextWithQuery;
+	}
+	
 	/**
 	 * Returns the marginal/posterior for the query expression;
 	 * if the query expression is not a random variable,
@@ -173,12 +197,14 @@ public class ExpressionBasedSolver {
 		List<Expression> queryVariables;
 		List<Expression> indices; 
 		boolean queryIsCompoundExpression;
-		if (allRandomVariables.contains(queryExpression)) {
+		Context contextToBeUsed;
+		if (model.getRandomVariables().contains(queryExpression)) {
 			factorGraphToUse = Times.make(model.getFactors());
 			queryIsCompoundExpression = false;
 			queryVariable = queryExpression;
 			queryVariables = list(queryVariable);
-			indices = setDifference(allRandomVariables, queryVariables);
+			indices = setDifference(model.getRandomVariables(), queryVariables);
+			contextToBeUsed = getContext();
 		}
 		else {
 			queryIsCompoundExpression = true;
@@ -186,11 +212,12 @@ public class ExpressionBasedSolver {
 			queryVariables = list(queryVariable);
 			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
 			factorGraphToUse = Times.make(list(Times.make(model.getFactors()), parse("if query <=> " + queryExpression + " then 1 else 0")));
-			indices = allRandomVariables; // 'query' is not in 'allRandomVariables' 
+			indices = model.getRandomVariables(); // 'query' is not in model's random variables 
+			contextToBeUsed = getContextWithQuery();
 		}
-		
+
 		// Solve the problem.
-		Expression unnormalizedMarginal = sum(indices, factorGraphToUse);
+		Expression unnormalizedMarginal = multiQuantifierEliminator.extendContextAndSolve(semiRing, indices, factorGraphToUse, contextToBeUsed);
 
 		Expression marginal;
 		if (model.isKnownToBeBayesianNetwork()) {
@@ -199,18 +226,18 @@ public class ExpressionBasedSolver {
 		else {
 			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
 			if (partitionFunction == null) {
-				Context context = makeContextWithTypeInformation();
-				partitionFunction = multiQuantifierEliminator.extendContextAndSolve(semiRing, queryVariables, unnormalizedMarginal, context);
+				partitionFunction = multiQuantifierEliminator.extendContextAndSolve(semiRing, queryVariables, unnormalizedMarginal, contextToBeUsed);
 			}
 
-			marginal = Division.make(unnormalizedMarginal, partitionFunction); // Bayes theorem: P(Q | E) = P(Q and E)/P(E)
+     		// Bayes theorem: P(Q | E) = P(Q and E)/P(E)
+			marginal = Division.make(unnormalizedMarginal, partitionFunction);
 			// now we use the algorithm again for simplifying the above division; this is a lazy way of doing this, as it performs search on the query variable again -- we could instead write an ad hoc function to divide all numerical constants by the normalization constant, but the code would be uglier and the gain very small, since this is a search on a single variable anyway.
-			marginal = evaluate(marginal);
+			marginal = contextToBeUsed.evaluate(marginal);
 		}
 
 		if (queryIsCompoundExpression) {
 			// replace the query variable with the query expression
-			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, new TrueContext());
+			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, contextToBeUsed);
 		}
 
 		return marginal;
@@ -222,7 +249,7 @@ public class ExpressionBasedSolver {
 	 * @return
 	 */
 	public Expression sum(List<Expression> indices, Expression expression) {
-		Context context = makeContextWithTypeInformation();
+		Context context = getContext();
 		Expression result = multiQuantifierEliminator.extendContextAndSolve(semiRing, indices, expression, context);
 		return result;
 	}
@@ -233,41 +260,25 @@ public class ExpressionBasedSolver {
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
-		Context context = makeContextWithTypeInformation();
-		Expression result = multiQuantifierEliminator.extendContextAndSolve(semiRing, list(), expression, context);
+		Context context = getContext();
+		Expression result = context.evaluate(expression);
 		return result;
 	}
 
 	/**
 	 * Simplifies an expression without requiring a context with all the type information (creating it from scratch);
 	 * use {@link #simplify(Expression, Context)} instead for greater efficient if you already have such a context,
-	 * or if you are invoking this method multiple times (you can make the context only once with {@link #makeContextWithTypeInformation()}.
+	 * or if you are invoking this method multiple times.
 	 * @param expression
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		Context context = makeContextWithTypeInformation();
+		Context context = getContext();
 		return simplify(expression, context);
 	}
 
-	/**
-	 * Simplifies an expression given context with all the type information already built-in
-	 * (one can be built with {@link #makeContextWithTypeInformation()}.
-	 * @param expression
-	 * @param context
-	 * @return
-	 */
 	public Expression simplify(Expression expression, Context context) {
-		Expression result = theory.simplify(expression, context);
+		Expression result = getContext().getTheory().simplify(expression, context);
 		return result;
-	}
-
-	/**
-	 * Makes context with all the type information on this inferencer.
-	 * @return
-	 */
-	public Context makeContextWithTypeInformation() {
-		Context context = GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
-		return context;
 	}
 }

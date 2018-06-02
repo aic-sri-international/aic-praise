@@ -50,20 +50,25 @@ import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil;
 public class UAI_to_ExpressionBased_Translator extends ExpressionBasedModel {
 
 	public UAI_to_ExpressionBased_Translator(List<Expression> tables, GraphicalNetwork network) {
-		super();
-		factors.addAll(tables);
+		super(makeParameters(tables, network));
+	}
+	
+	private static Parameters makeParameters(List<Expression> tables, GraphicalNetwork network) {
+		Parameters parameters = new Parameters();
+		parameters.factors.addAll(tables);
 		for (int variableIndex = 0; variableIndex < network.numberVariables(); variableIndex++) {
 			int variableCardinality = network.cardinality(variableIndex);
 			String variableTypeName = UAIUtil.instanceTypeNameForVariable(variableIndex, variableCardinality);
-			mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(variableIndex), variableTypeName);
+			parameters.mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(variableIndex), variableTypeName);
 			if (!variableTypeName.equals(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().toString())) {
 				for (int valueIndex = 0; valueIndex < variableCardinality; valueIndex++) {
-					mapFromUniquelyNamedConstantNameToTypeName.put(
+					parameters.mapFromUniquelyNamedConstantNameToTypeName.put(
 							UAIUtil.instanceConstantValueForVariable(valueIndex, variableIndex, variableCardinality), variableTypeName);
 				}
 			}
-			mapFromCategoricalTypeNameToSizeString.put(variableTypeName, Integer.toString(variableCardinality));
+			parameters.mapFromCategoricalTypeNameToSizeString.put(variableTypeName, Integer.toString(variableCardinality));
 		}
+		return parameters;
 	}
 	
 	
