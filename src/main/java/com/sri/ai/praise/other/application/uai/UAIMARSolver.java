@@ -317,6 +317,7 @@ public class UAIMARSolver {
 			}
 			
 			ExpressionBasedModel expressionBasedModel = new UAI_to_ExpressionBased_Translator(tables, model);
+			expressionBasedModel.setTheory(theory);
 
 			Expression evidenceExpr = null; 
 			List<Expression> conjuncts = new ArrayList<Expression>();
@@ -349,7 +350,7 @@ public class UAIMARSolver {
 			}
 			
 			expressionBasedModel = expressionBasedModel.getConditionedModel(evidenceExpr);
-			inferencer = new ExpressionBasedSolver(expressionBasedModel, true, theory);
+			inferencer = new ExpressionBasedSolver(expressionBasedModel);
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {

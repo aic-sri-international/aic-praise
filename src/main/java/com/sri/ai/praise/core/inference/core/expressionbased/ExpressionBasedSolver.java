@@ -40,40 +40,24 @@ package com.sri.ai.praise.core.inference.core.expressionbased;
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.setDifference;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Type;
-import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.MultiQuantifierEliminator;
-import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.core.solver.DefaultMultiQuantifierEliminator;
 import com.sri.ai.grinder.core.solver.SGVET;
 import com.sri.ai.grinder.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.group.SumProduct;
-import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.grinder.helper.UniquelyNamedConstantIncludingBooleansAndNumbersPredicate;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.grinder.theory.compound.CompoundTheory;
-import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
-import com.sri.ai.grinder.theory.equality.EqualityTheory;
-import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
-import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 
 /**
- * A probabilistic solver for an {@link ExpressionBasedModel} (currently, marginalization only).
+ * A probabilistic solver for an {@link ExpressionBasedModel}
+ * that applies multi-quantifier elimination to marginalizing summations.
  * 
  * @author braz
  *
@@ -84,19 +68,23 @@ public class ExpressionBasedSolver {
 	private Expression partitionFunction;
 	private AssociativeCommutativeSemiRing semiRing;
 	private MultiQuantifierEliminator multiQuantifierEliminator;
-	private Theory optionalTheory;
 
 	/**
-	 * Constructs a multiQuantifierEliminator for a factor graph .
-	 * @param model 
-	 *        the factors and their type information over which inference is to be performed.
-	 * @param useFactorization indicates whether to use factorization (as in ExpressionVariable Elimination)
-	 * @param optionalTheory the theory to be used; if null, a default one is used (as of May 2017, a compound theory with propositional, equalities on categorical types, difference arithmetic, and real linear arithmetic).
+	 * Constructs a quantifier elimination-based variable elimination solver for a factor graph.
+	 * @param model a {@link ExpressionBasedModel} to be solved.
 	 */
-	public ExpressionBasedSolver(ExpressionBasedModel model, boolean useFactorization, Theory optionalTheory) {
+	public ExpressionBasedSolver(ExpressionBasedModel model) {
+		this(model, true);
+	}
+
+	/**
+	 * Constructs a quantifier elimination-based solver for a factor graph.
+	 * @param model a {@link ExpressionBasedModel} to be solved.
+	 * @param useFactorization indicates whether to use factorization (that is, factor factors out as in variable elimination)
+	 */
+	public ExpressionBasedSolver(ExpressionBasedModel model, boolean useFactorization) {
 	
 		this.model = model;
-		this.optionalTheory = optionalTheory;
 		
 		if (useFactorization) {
 			multiQuantifierEliminator = new SGVET();
@@ -113,61 +101,12 @@ public class ExpressionBasedSolver {
 		multiQuantifierEliminator.interrupt();
 	}
 	
-	private Context contextWithQuery = null;
+	public Context getContext() {
+		return model.getContext();
+	}
 	
 	public Context getContextWithQuery() {
-		if (contextWithQuery == null) {
-			contextWithQuery = makeContext(model, optionalTheory, true);
-		}
-		return contextWithQuery;
-	}
-
-	private Context context = null;
-	
-	public Context getContext() {
-		if (context == null) {
-			context = makeContext(model, optionalTheory, false);
-		}
-		return context;
-	}
-
-	private static Context makeContext(ExpressionBasedModel model, Theory optionalTheory, boolean withQuery) {
-		Map<String, String> mapFromSymbolNameToTypeName;
-		Map<String, String> mapFromCategoricalTypeNameToSizeString;
-		Collection<Type> additionalTypes;
-		Predicate<Expression> isUniquelyNamedConstantPredicate;
-		Theory theory;
-
-		mapFromSymbolNameToTypeName = new LinkedHashMap<>(model.getMapFromRandomVariableNameToTypeName());
-		mapFromSymbolNameToTypeName.putAll(model.getMapFromNonUniquelyNamedConstantNameToTypeName());
-		mapFromSymbolNameToTypeName.putAll(model.getMapFromUniquelyNamedConstantNameToTypeName());
-
-		mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(model.getMapFromCategoricalTypeNameToSizeString());
-
-		mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
-		mapFromCategoricalTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
-
-		Set<Expression> uniquelyNamedConstants = mapIntoSet(model.getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
-		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
-
-		if (optionalTheory != null) {
-			theory = optionalTheory;
-		}
-		else {
-			theory =
-					new CompoundTheory(
-							new EqualityTheory(false, true),
-							new DifferenceArithmeticTheory(false, true),
-							new LinearRealArithmeticTheory(false, true),
-							new PropositionalTheory());
-		}
-
-		additionalTypes = new LinkedList<Type>(theory.getNativeTypes()); // add needed types that may not be the type of any variable
-		additionalTypes.addAll(model.getAdditionalTypes());
-
-		Context contextWithQuery = GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, theory);
-		
-		return contextWithQuery;
+		return model.getContextWithQuery();
 	}
 	
 	/**
@@ -189,7 +128,7 @@ public class ExpressionBasedSolver {
 			queryVariable = queryExpression;
 			queryVariables = list(queryVariable);
 			indices = setDifference(model.getRandomVariables(), queryVariables);
-			contextToBeUsed = getContext();
+			contextToBeUsed = model.getContext();
 		}
 		else {
 			queryIsCompoundExpression = true;
@@ -198,7 +137,7 @@ public class ExpressionBasedSolver {
 			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
 			factorGraphToUse = Times.make(list(Times.make(model.getFactors()), parse("if query <=> " + queryExpression + " then 1 else 0")));
 			indices = model.getRandomVariables(); // 'query' is not in model's random variables 
-			contextToBeUsed = getContextWithQuery();
+			contextToBeUsed = model.getContextWithQuery();
 		}
 
 		// Solve the problem.
@@ -238,7 +177,7 @@ public class ExpressionBasedSolver {
 	 * @return
 	 */
 	public Expression sum(List<Expression> indices, Expression expression) {
-		Context context = getContext();
+		Context context = model.getContext();
 		Expression result = multiQuantifierEliminator.extendContextAndSolve(semiRing, indices, expression, context);
 		return result;
 	}
@@ -249,7 +188,7 @@ public class ExpressionBasedSolver {
 	 * @return
 	 */
 	public Expression evaluate(Expression expression) {
-		Context context = getContext();
+		Context context = model.getContext();
 		Expression result = context.evaluate(expression);
 		return result;
 	}
@@ -262,12 +201,12 @@ public class ExpressionBasedSolver {
 	 * @return
 	 */
 	public Expression simplify(Expression expression) {
-		Context context = getContext();
+		Context context = model.getContext();
 		return simplify(expression, context);
 	}
 
 	public Expression simplify(Expression expression, Context context) {
-		Expression result = getContext().getTheory().simplify(expression, context);
+		Expression result = model.getContext().getTheory().simplify(expression, context);
 		return result;
 	}
 }

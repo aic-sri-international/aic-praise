@@ -347,11 +347,7 @@ public class ExpressionBasedSolverTest {
 		
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
 		model = model.getConditionedModel(evidence);
-		ExpressionBasedSolver inferencer =
-				new ExpressionBasedSolver(
-						model,
-						exploitFactorization ,
-						null /* default theory */);
+		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(model, exploitFactorization);
 
 		Expression queryExpression;
 		Expression marginal;
@@ -400,7 +396,7 @@ public class ExpressionBasedSolverTest {
 				list(),
 				isBayesianNetwork);
 		HOGMExpressionBasedModel conditionedModel = model.getConditionedModel(evidence);
-		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(conditionedModel, false, null);
+		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(conditionedModel, false);
 		Expression result = inferencer.sum(list(parse("alarm")), Times.make(factors));
 		System.out.println(result);
 	}
@@ -1007,10 +1003,7 @@ public class ExpressionBasedSolverTest {
 		
 		model = model.getConditionedModel(evidence);
 		
-		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(
-				model,
-				useFactorization,
-				null);
+		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(model, useFactorization);
 		
 		Expression marginal = inferencer.solve(queryExpression);
 		
@@ -1083,10 +1076,7 @@ public class ExpressionBasedSolverTest {
 				list(),
 				isBayesianNetwork);
 		model = model.getConditionedModel(evidence);
-		inferencer = new ExpressionBasedSolver(
-				model,
-				true,
-				null);
+		inferencer = new ExpressionBasedSolver(model);
 	
 		simplification = inferencer.simplify(queryExpression);
 		assertEquals(expected, simplification);

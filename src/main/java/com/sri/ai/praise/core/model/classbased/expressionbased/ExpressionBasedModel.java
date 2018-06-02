@@ -2,6 +2,7 @@ package com.sri.ai.praise.core.model.classbased.expressionbased;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
+import static com.sri.ai.util.Util.mapIntoSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,12 +11,23 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 
+import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.api.Theory;
+import com.sri.ai.grinder.helper.GrinderUtil;
+import com.sri.ai.grinder.helper.UniquelyNamedConstantIncludingBooleansAndNumbersPredicate;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.grinder.theory.compound.CompoundTheory;
+import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
+import com.sri.ai.grinder.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
+import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.model.api.Model;
 import com.sri.ai.util.Util;
 
@@ -28,7 +40,8 @@ public class ExpressionBasedModel implements Model, Cloneable {
 	protected Map<String, String> mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>();
 	protected Collection<Type> additionalTypes = new LinkedList<>();
 	protected boolean isKnownToBeBayesianNetwork = false;
-
+	protected Theory theory = null;
+	
 	private List<Expression> randomVariables;
 
 	protected static class Parameters {
@@ -42,6 +55,7 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		public Map<String, String> mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>();
 		public Collection<Type> additionalTypes = new LinkedList<>();
 		public boolean isKnownToBeBayesianNetwork = false;
+		public Theory optionalTheory = null;
 	}
 
 	protected ExpressionBasedModel(Parameters parameters) {
@@ -52,7 +66,8 @@ public class ExpressionBasedModel implements Model, Cloneable {
 				parameters.mapFromUniquelyNamedConstantNameToTypeName,
 				parameters.mapFromCategoricalTypeNameToSizeString,
 				parameters.additionalTypes,
-				parameters.isKnownToBeBayesianNetwork
+				parameters.isKnownToBeBayesianNetwork,
+				parameters.optionalTheory
 				);
 	}
 	
@@ -65,6 +80,28 @@ public class ExpressionBasedModel implements Model, Cloneable {
 			Collection<Type> additionalTypes,
 			boolean isKnownToBeBayesianNetwork
 			) {
+		this(
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				additionalTypes,
+				isKnownToBeBayesianNetwork,
+				null
+				);
+	}
+	
+	public ExpressionBasedModel(
+			List<Expression> factors,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromCategoricalTypeNameToSizeString,
+			Collection<Type> additionalTypes,
+			boolean isKnownToBeBayesianNetwork,
+			Theory optionalTheory
+			) {
 		
 		this.factors.addAll(factors);
 		this.mapFromRandomVariableNameToTypeName.putAll(mapFromRandomVariableNameToTypeName);
@@ -73,8 +110,10 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		this.mapFromCategoricalTypeNameToSizeString.putAll(mapFromCategoricalTypeNameToSizeString);
 		this.additionalTypes = additionalTypes;
 		this.isKnownToBeBayesianNetwork = isKnownToBeBayesianNetwork;
+		this.theory = optionalTheory;
 		
-		this.randomVariables = Util.mapIntoList(getMapFromRandomVariableNameToTypeName().keySet(), Expressions::parse);		
+		this.randomVariables = Util.mapIntoList(getMapFromRandomVariableNameToTypeName().keySet(), Expressions::parse);
+		this.theory = getTheoryToBeUsed(optionalTheory);
 	}	
 
 	public List<Expression> getFactors() {
@@ -148,5 +187,76 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		
 		return stringJoiner.toString();
 	}
+	
+	public Theory getTheory() {
+		return theory;
+	}
+	
+	public void setTheory(Theory newTheory) {
+		theory = newTheory;
+		context = null;
+		contextWithQuery = null;
+	}
 
+	private Context contextWithQuery = null;
+	
+	public Context getContextWithQuery() {
+		if (contextWithQuery == null) {
+			contextWithQuery = makeContext(true);
+		}
+		return contextWithQuery;
+	}
+
+	private Context context = null;
+	
+	public Context getContext() {
+		if (context == null) {
+			context = makeContext(false);
+		}
+		return context;
+	}
+
+	private Context makeContext(boolean withQuery) {
+		Map<String, String> mapFromSymbolNameToTypeName;
+		Map<String, String> mapFromCategoricalTypeNameToSizeString;
+		Collection<Type> additionalTypes;
+		Predicate<Expression> isUniquelyNamedConstantPredicate;
+
+		mapFromSymbolNameToTypeName = new LinkedHashMap<>(getMapFromRandomVariableNameToTypeName());
+		mapFromSymbolNameToTypeName.putAll(getMapFromNonUniquelyNamedConstantNameToTypeName());
+		mapFromSymbolNameToTypeName.putAll(getMapFromUniquelyNamedConstantNameToTypeName());
+
+		mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(getMapFromCategoricalTypeNameToSizeString());
+
+		if (withQuery) {
+			mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
+			mapFromCategoricalTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
+		}
+
+		Set<Expression> uniquelyNamedConstants = mapIntoSet(getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
+		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
+
+		additionalTypes = new LinkedList<Type>(getTheory().getNativeTypes()); // add needed types that may not be the type of any variable
+		additionalTypes.addAll(getAdditionalTypes());
+
+		Context contextWithQuery = GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, getTheory());
+		
+		return contextWithQuery;
+	}
+
+	private Theory getTheoryToBeUsed(Theory optionalTheory) {
+		Theory theory;
+		if (optionalTheory != null) {
+			theory = optionalTheory;
+		}
+		else {
+			theory =
+					new CompoundTheory(
+							new EqualityTheory(false, true),
+							new DifferenceArithmeticTheory(false, true),
+							new LinearRealArithmeticTheory(false, true),
+							new PropositionalTheory());
+		}
+		return theory;
+	}
 }
