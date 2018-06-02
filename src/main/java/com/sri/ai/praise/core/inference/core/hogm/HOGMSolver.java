@@ -290,7 +290,7 @@ public class HOGMSolver {
 	}
 	
 	public Expression simplifyWithinQueryContext(Expression expr) {
-		return inferencer.simplify(expr);
+		return inferencer.getContextWithQuery().evaluate(expr);
 	}
 	
 	protected class ParserErrorListener implements Parser.ErrorListener {

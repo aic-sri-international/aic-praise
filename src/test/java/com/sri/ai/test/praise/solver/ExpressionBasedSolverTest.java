@@ -363,45 +363,6 @@ public class ExpressionBasedSolverTest {
 	}
 
 	@Test
-	public void testBurglary() {
-		
-		// The definitions of types
-		mapFromCategoricalTypeNameToSizeString = Util.map(
-				"Boolean", "2");
-
-		// The definitions of variables
-		mapFromRandomVariableNameToTypeName = Util.map(
-				"burglary",   "Boolean",
-				"alarm",      "Boolean",
-				"call",       "Boolean"
-				);
-
-		// The definitions of non-uniquely named constants
-		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
-
-		// The definitions of non-uniquely named constants
-		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
-
-		isBayesianNetwork = false;
-		factors = Times.getMultiplicands(parse(""
-				+ "(if alarm then if call then 0.7 else 0.3 else if call then 0 else 1)*"
-				+ "(if burglary then if alarm then 0.9 else 0.1 else if alarm then 0.01 else 0.99)*"
-				+ "(if burglary then 0.1 else 0.9)"));
-
-		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(factors, 
-				mapFromRandomVariableNameToTypeName,
-				mapFromNonUniquelyNamedConstantNameToTypeName,
-				mapFromUniquelyNamedConstantNameToTypeName,
-				mapFromCategoricalTypeNameToSizeString,
-				list(),
-				isBayesianNetwork);
-		HOGMExpressionBasedModel conditionedModel = model.getConditionedModel(evidence);
-		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(conditionedModel, false);
-		Expression result = inferencer.sum(list(parse("alarm")), Times.make(factors));
-		System.out.println(result);
-	}
-
-	@Test
 	public void relationalConstants() {
 
 		// The definitions of types
@@ -1014,7 +975,7 @@ public class ExpressionBasedSolverTest {
 			// Ok!
 		}
 		// check if they are not identical, but equivalent expressions
-		else if (inferencer.evaluate(apply(MINUS, expected, marginal)).equals(ZERO)) { // first attempt was to compare with equality, but this requires a more complete test of equality theory literals to exclude such a complex equality from being considered a literal, which is much more expensive
+		else if (inferencer.getContext().evaluate(apply(MINUS, expected, marginal)).equals(ZERO)) { // first attempt was to compare with equality, but this requires a more complete test of equality theory literals to exclude such a complex equality from being considered a literal, which is much more expensive
 			// Ok!
 		}
 		else {
@@ -1078,7 +1039,7 @@ public class ExpressionBasedSolverTest {
 		model = model.getConditionedModel(evidence);
 		inferencer = new ExpressionBasedSolver(model);
 	
-		simplification = inferencer.simplify(queryExpression);
+		simplification = inferencer.getContext().evaluate(queryExpression);
 		assertEquals(expected, simplification);
 	}
 }

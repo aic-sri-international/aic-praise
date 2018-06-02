@@ -255,7 +255,7 @@ public class HOGModelGrounding {
 				int valueIndex = mrn.getCurrentNumeralValue(i);
 				groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), factorRandomVariableTypeValues.get(i).get(valueIndex), context);
 			}  		
-			Expression value = inferencer.evaluate(groundedFactor);
+			Expression value = inferencer.getContext().evaluate(groundedFactor);
 			//				Expression value = inferencer.evaluate(groundedFactor);
 			if (!Expressions.isNumber(value)) {
 				throw new IllegalStateException("Unable to compute a number for the grounded factor ["+groundedFactor+"], instead got:"+value);

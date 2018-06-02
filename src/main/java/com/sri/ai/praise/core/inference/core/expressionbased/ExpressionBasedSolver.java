@@ -109,104 +109,97 @@ public class ExpressionBasedSolver {
 		return model.getContextWithQuery();
 	}
 	
-	/**
-	 * Returns the marginal/posterior for the query expression;
-	 * if the query expression is not a random variable,
-	 * the result is expressed in terms of a symbol 'query'.
-	 */
-	public Expression solve(Expression queryExpression) {
-		
-		Expression factorGraphToUse;
+	private static class InferenceData {
+		Expression originalQuery;
+		Expression productOfPotentials;
 		Expression queryVariable;
 		List<Expression> queryVariables;
-		List<Expression> indices; 
+		List<Expression> variablesToBeEliminated; 
 		boolean queryIsCompoundExpression;
-		Context contextToBeUsed;
+		Context context;
+	}
+	
+	private InferenceData setUpInferenceData(Expression queryExpression) {
+		InferenceData data;
 		if (model.getRandomVariables().contains(queryExpression)) {
-			factorGraphToUse = Times.make(model.getFactors());
-			queryIsCompoundExpression = false;
-			queryVariable = queryExpression;
-			queryVariables = list(queryVariable);
-			indices = setDifference(model.getRandomVariables(), queryVariables);
-			contextToBeUsed = model.getContext();
+			data = setUpInferenceDataForSimpleQuery(queryExpression);
 		}
 		else {
-			queryIsCompoundExpression = true;
-			queryVariable = makeSymbol("query");
-			queryVariables = list(queryVariable);
-			// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
-			factorGraphToUse = Times.make(list(Times.make(model.getFactors()), parse("if query <=> " + queryExpression + " then 1 else 0")));
-			indices = model.getRandomVariables(); // 'query' is not in model's random variables 
-			contextToBeUsed = model.getContextWithQuery();
+			data = setUpInferenceDataForCompoundQuery(queryExpression);
 		}
+		return data;
+	}
 
-		// Solve the problem.
-		Expression unnormalizedMarginal = multiQuantifierEliminator.extendContextAndSolve(semiRing, indices, factorGraphToUse, contextToBeUsed);
+	private InferenceData setUpInferenceDataForSimpleQuery(Expression queryExpression) {
+		InferenceData data = new InferenceData();
+		data.originalQuery = queryExpression;
+		data.productOfPotentials = Times.make(model.getFactors());
+		data.queryIsCompoundExpression = false;
+		data.queryVariable = queryExpression;
+		data.queryVariables = list(data.queryVariable);
+		data.variablesToBeEliminated = setDifference(model.getRandomVariables(), data.queryVariables);
+		data.context = model.getContext();
+		return data;
+	}
 
-		Expression marginal;
+	private InferenceData setUpInferenceDataForCompoundQuery(Expression queryExpression) {
+		// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
+		InferenceData data = new InferenceData();
+		data.originalQuery = queryExpression;
+		data.queryIsCompoundExpression = true;
+		data.queryVariable = makeSymbol("query");
+		data.queryVariables = list(data.queryVariable);
+		data.productOfPotentials = Times.make(list(Times.make(model.getFactors()), parse("if query <=> " + queryExpression + " then 1 else 0")));
+		data.variablesToBeEliminated = model.getRandomVariables(); 
+		data.context = model.getContextWithQuery();
+		return data;
+	}
+
+	public Expression solve(Expression queryExpression) {
+		InferenceData data = setUpInferenceData(queryExpression);
+		Expression unnormalizedMarginal = marginalize(data.variablesToBeEliminated, data.productOfPotentials, data);
+		Expression normalizedMarginal = getNormalizedMarginal(unnormalizedMarginal, data);
+		Expression result = makeResultInTermsOfOriginalQuery(normalizedMarginal, data);
+		return result;
+	}
+
+	private Expression getNormalizedMarginal(Expression unnormalizedMarginal, InferenceData data) {
+		Expression normalizedMarginal;
 		if (model.isKnownToBeBayesianNetwork()) {
-			marginal = unnormalizedMarginal; // model was a Bayesian network, so marginal is equal to unnormalized marginal.
+			normalizedMarginal = unnormalizedMarginal;
 		}
 		else {
-			// We now marginalize on all variables. Since unnormalizedMarginal is the marginal on all variables but the query, we simply take that and marginalize on the query alone.
-			if (partitionFunction == null) {
-				partitionFunction = multiQuantifierEliminator.extendContextAndSolve(semiRing, queryVariables, unnormalizedMarginal, contextToBeUsed);
-			}
-
-     		// Bayes theorem: P(Q | E) = P(Q and E)/P(E)
-			marginal = Division.make(unnormalizedMarginal, partitionFunction);
-			// now we use the algorithm again for simplifying the above division; this is a lazy way of doing this, as it performs search on the query variable again -- we could instead write an ad hoc function to divide all numerical constants by the normalization constant, but the code would be uglier and the gain very small, since this is a search on a single variable anyway.
-			marginal = contextToBeUsed.evaluate(marginal);
+			normalizedMarginal = normalize(unnormalizedMarginal, data);
 		}
+		return normalizedMarginal;
+	}
 
-		if (queryIsCompoundExpression) {
-			// replace the query variable with the query expression
-			marginal = marginal.replaceAllOccurrences(queryVariable, queryExpression, contextToBeUsed);
+	private Expression normalize(Expression unnormalizedMarginal, InferenceData data) {
+		computePartitionFunction(unnormalizedMarginal, data);
+		Expression normalizedMarginal = divideByPartitionFunction(unnormalizedMarginal, data);
+		return normalizedMarginal;
+	}
+
+	private void computePartitionFunction(Expression unnormalizedMarginal, InferenceData data) {
+		if (partitionFunction == null) {
+			partitionFunction = marginalize(data.queryVariables, unnormalizedMarginal, data);
 		}
+	}
 
+	private Expression divideByPartitionFunction(Expression unnormalizedMarginal, InferenceData data) {
+		Expression normalizedMarginalDefinition = Division.make(unnormalizedMarginal, partitionFunction);
+		Expression normalizedMarginal = data.context.evaluate(normalizedMarginalDefinition);
+		return normalizedMarginal;
+	}
+
+	private Expression makeResultInTermsOfOriginalQuery(Expression marginal, InferenceData data) {
+		if (data.queryIsCompoundExpression) {
+			marginal = marginal.replaceAllOccurrences(data.queryVariable, data.originalQuery, data.context);
+		}
 		return marginal;
 	}
 
-	public Expression getPartitionFunction() {
-		return partitionFunction;
-	}
-
-	/**
-	 * @param indices
-	 * @param expression
-	 * @return
-	 */
-	public Expression sum(List<Expression> indices, Expression expression) {
-		Context context = model.getContext();
-		Expression result = multiQuantifierEliminator.extendContextAndSolve(semiRing, indices, expression, context);
-		return result;
-	}
-
-	/**
-	 * Symbolically evaluates an expression into a solution (possibly nested if then else expression).
-	 * @param expression
-	 * @return
-	 */
-	public Expression evaluate(Expression expression) {
-		Context context = model.getContext();
-		Expression result = context.evaluate(expression);
-		return result;
-	}
-
-	/**
-	 * Simplifies an expression without requiring a context with all the type information (creating it from scratch);
-	 * use {@link #simplify(Expression, Context)} instead for greater efficient if you already have such a context,
-	 * or if you are invoking this method multiple times.
-	 * @param expression
-	 * @return
-	 */
-	public Expression simplify(Expression expression) {
-		Context context = model.getContext();
-		return simplify(expression, context);
-	}
-
-	public Expression simplify(Expression expression, Context context) {
-		Expression result = model.getContext().getTheory().simplify(expression, context);
-		return result;
+	private Expression marginalize(List<Expression> variablesToBeEliminated, Expression expression, InferenceData data) {
+		return multiQuantifierEliminator.extendContextAndSolve(semiRing, variablesToBeEliminated, expression, data.context);
 	}
 }
