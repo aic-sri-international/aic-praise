@@ -53,7 +53,8 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.core.expressionbased.DefaultExpressionBasedSolver;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
@@ -164,7 +165,7 @@ public class HOGMSolver {
 		if (!canceled) {
 			IntegrationRecording.startRecordingIntegrationsOverGroups();
 			ExpressionBasedModel factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
-			inferencer = new ExpressionBasedSolver(factorsAndTypes);
+			inferencer = new DefaultExpressionBasedSolver(factorsAndTypes);
 			Pair<Expression, Long> inferenceResultAndTime = time(inference(queryExpression)); 			
 			HOGMQueryResult queryResult = new HOGMQueryResult(query, queryExpression, parsedModel, inferenceResultAndTime);
 			queryResult.recordNumberOfSummations();
@@ -279,18 +280,18 @@ public class HOGMSolver {
 		Context    context = getQueryContext();
 		if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(GrinderUtil.getTypeExpressionOfExpression(forQuery, context))) {
 			result = result.replaceAllOccurrences(forQuery, Expressions.TRUE, context);
-			result = simplifyWithinQueryContext(result);
+			result = simplify(result);
 			answer = Expressions.parse(result.toString()); // This ensures numeric values have the correct precision
 		}
 		return result;
 	}
 	
 	public Context getQueryContext() {
-		return inferencer.getContextWithQuery();
+		return inferencer.getContext();
 	}
 	
-	public Expression simplifyWithinQueryContext(Expression expr) {
-		return inferencer.getContextWithQuery().evaluate(expr);
+	public Expression simplify(Expression expression) {
+		return inferencer.getContext().evaluate(expression);
 	}
 	
 	protected class ParserErrorListener implements Parser.ErrorListener {

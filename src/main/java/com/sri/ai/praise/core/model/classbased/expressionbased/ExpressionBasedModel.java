@@ -116,6 +116,54 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		this.theory = getTheoryToBeUsed(optionalTheory);
 	}	
 
+	private Theory getTheoryToBeUsed(Theory optionalTheory) {
+		Theory theory;
+		if (optionalTheory != null) {
+			theory = optionalTheory;
+		}
+		else {
+			theory =
+					new CompoundTheory(
+							new EqualityTheory(false, true),
+							new DifferenceArithmeticTheory(false, true),
+							new LinearRealArithmeticTheory(false, true),
+							new PropositionalTheory());
+		}
+		return theory;
+	}
+
+	private Context context = null;
+
+	public Context getContext() {
+		if (context == null) {
+			context = makeContext();
+		}
+		return context;
+	}
+
+	private Context makeContext() {
+		Map<String, String> mapFromSymbolNameToTypeName;
+		Map<String, String> mapFromCategoricalTypeNameToSizeString;
+		Collection<Type> additionalTypes;
+		Predicate<Expression> isUniquelyNamedConstantPredicate;
+	
+		mapFromSymbolNameToTypeName = new LinkedHashMap<>(getMapFromRandomVariableNameToTypeName());
+		mapFromSymbolNameToTypeName.putAll(getMapFromNonUniquelyNamedConstantNameToTypeName());
+		mapFromSymbolNameToTypeName.putAll(getMapFromUniquelyNamedConstantNameToTypeName());
+	
+		mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(getMapFromCategoricalTypeNameToSizeString());
+	
+		Set<Expression> uniquelyNamedConstants = mapIntoSet(getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
+		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
+	
+		additionalTypes = new LinkedList<Type>(getTheory().getNativeTypes()); // add needed types that may not be the type of any variable
+		additionalTypes.addAll(getAdditionalTypes());
+	
+		Context contextWithQuery = GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, getTheory());
+		
+		return contextWithQuery;
+	}
+
 	public List<Expression> getFactors() {
 		return Collections.unmodifiableList(factors);
 	}
@@ -124,18 +172,6 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		return Collections.unmodifiableList(randomVariables);
 	}
 
-	@Override
-	public ExpressionBasedModel clone() {
-		ExpressionBasedModel result;
-		try {
-			result = (ExpressionBasedModel) super.clone();
-		}
-		catch (CloneNotSupportedException exception) {
-			throw new RuntimeException(exception);
-		}
-		return result;
-	}
-	
 	public ExpressionBasedModel getConditionedModel(Expression evidence) {
 		ExpressionBasedModel result;
 		if (evidence != null && !Expressions.isNumber(evidence)) {
@@ -174,6 +210,15 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		return isKnownToBeBayesianNetwork;
 	}
 
+	public Theory getTheory() {
+		return theory;
+	}
+
+	public void setTheory(Theory newTheory) {
+		theory = newTheory;
+		context = null;
+	}
+
 	public String toString() {
 		StringJoiner stringJoiner = new StringJoiner("\n");
 		
@@ -184,64 +229,20 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		stringJoiner.add("mapFromCategoricalTypeNameToSizeString        = " + mapFromCategoricalTypeNameToSizeString);
 		stringJoiner.add("additionalTypes                               = " + additionalTypes);
 		stringJoiner.add("isKnownToBeBayesianNetwork                    = " + isKnownToBeBayesianNetwork);
+		stringJoiner.add("theory                                        = " + theory);
 		
 		return stringJoiner.toString();
 	}
 	
-	public Theory getTheory() {
-		return theory;
-	}
-	
-	public void setTheory(Theory newTheory) {
-		theory = newTheory;
-		context = null;
-	}
-
-	private Context context = null;
-	
-	public Context getContext() {
-		if (context == null) {
-			context = makeContext();
+	@Override
+	public ExpressionBasedModel clone() {
+		ExpressionBasedModel result;
+		try {
+			result = (ExpressionBasedModel) super.clone();
 		}
-		return context;
-	}
-
-	private Context makeContext() {
-		Map<String, String> mapFromSymbolNameToTypeName;
-		Map<String, String> mapFromCategoricalTypeNameToSizeString;
-		Collection<Type> additionalTypes;
-		Predicate<Expression> isUniquelyNamedConstantPredicate;
-
-		mapFromSymbolNameToTypeName = new LinkedHashMap<>(getMapFromRandomVariableNameToTypeName());
-		mapFromSymbolNameToTypeName.putAll(getMapFromNonUniquelyNamedConstantNameToTypeName());
-		mapFromSymbolNameToTypeName.putAll(getMapFromUniquelyNamedConstantNameToTypeName());
-
-		mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(getMapFromCategoricalTypeNameToSizeString());
-
-		Set<Expression> uniquelyNamedConstants = mapIntoSet(getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
-		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
-
-		additionalTypes = new LinkedList<Type>(getTheory().getNativeTypes()); // add needed types that may not be the type of any variable
-		additionalTypes.addAll(getAdditionalTypes());
-
-		Context contextWithQuery = GrinderUtil.makeContext(mapFromSymbolNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes, isUniquelyNamedConstantPredicate, getTheory());
-		
-		return contextWithQuery;
-	}
-
-	private Theory getTheoryToBeUsed(Theory optionalTheory) {
-		Theory theory;
-		if (optionalTheory != null) {
-			theory = optionalTheory;
+		catch (CloneNotSupportedException exception) {
+			throw new RuntimeException(exception);
 		}
-		else {
-			theory =
-					new CompoundTheory(
-							new EqualityTheory(false, true),
-							new DifferenceArithmeticTheory(false, true),
-							new LinearRealArithmeticTheory(false, true),
-							new PropositionalTheory());
-		}
-		return theory;
+		return result;
 	}
 }

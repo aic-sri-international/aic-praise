@@ -57,7 +57,9 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.core.expressionbased.DefaultExpressionBasedSolver;
+import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;
 
@@ -347,7 +349,7 @@ public class ExpressionBasedSolverTest {
 		
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
 		model = model.getConditionedModel(evidence);
-		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(model, exploitFactorization);
+		ExpressionBasedSolver inferencer = new DefaultExpressionBasedSolver(model, exploitFactorization);
 
 		Expression queryExpression;
 		Expression marginal;
@@ -964,7 +966,17 @@ public class ExpressionBasedSolverTest {
 		
 		model = model.getConditionedModel(evidence);
 		
-		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(model, useFactorization);
+		runTest(queryExpression, model, expected, useFactorization);
+	}
+
+	private void runTest(
+			Expression queryExpression, 
+			ExpressionBasedModel model, 
+			Expression expected,
+			boolean useFactorization) throws AssertionError {
+		
+		
+		ExpressionBasedSolver inferencer = new DefaultExpressionBasedSolver(model, useFactorization);
 		
 		Expression marginal = inferencer.solve(queryExpression);
 		
@@ -1037,7 +1049,7 @@ public class ExpressionBasedSolverTest {
 				list(),
 				isBayesianNetwork);
 		model = model.getConditionedModel(evidence);
-		inferencer = new ExpressionBasedSolver(model);
+		inferencer = new DefaultExpressionBasedSolver(model);
 	
 		simplification = inferencer.getContext().evaluate(queryExpression);
 		assertEquals(expected, simplification);

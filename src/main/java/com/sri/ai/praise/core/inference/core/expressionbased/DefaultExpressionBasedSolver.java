@@ -54,6 +54,7 @@ import com.sri.ai.grinder.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.group.SumProduct;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
 import com.sri.ai.praise.core.inference.core.helper.AddBooleanQueryToContext;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 
@@ -64,7 +65,7 @@ import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedMo
  * @author braz
  *
  */
-public class ExpressionBasedSolver {
+public class DefaultExpressionBasedSolver implements ExpressionBasedSolver {
 
 	private ExpressionBasedModel model;
 	private Expression partitionFunction;
@@ -75,7 +76,7 @@ public class ExpressionBasedSolver {
 	 * Constructs a quantifier elimination-based variable elimination solver for a factor graph.
 	 * @param model a {@link AddBooleanQueryToContext} to be solved.
 	 */
-	public ExpressionBasedSolver(ExpressionBasedModel model) {
+	public DefaultExpressionBasedSolver(ExpressionBasedModel model) {
 		this(model, true);
 	}
 
@@ -84,7 +85,7 @@ public class ExpressionBasedSolver {
 	 * @param model a {@link AddBooleanQueryToContext} to be solved.
 	 * @param useFactorization indicates whether to use factorization (that is, factor factors out as in variable elimination)
 	 */
-	public ExpressionBasedSolver(ExpressionBasedModel model, boolean useFactorization) {
+	public DefaultExpressionBasedSolver(ExpressionBasedModel model, boolean useFactorization) {
 	
 		this.model = model;
 		
@@ -99,10 +100,12 @@ public class ExpressionBasedSolver {
 		semiRing = new SumProduct(); // for marginalization
 	}
 
+	@Override
 	public void interrupt() {
 		multiQuantifierEliminator.interrupt();
 	}
 	
+	@Override
 	public Context getContext() {
 		return model.getContext();
 	}
@@ -110,7 +113,7 @@ public class ExpressionBasedSolver {
 	private Context contextWithBooleanQuery = null;
 	private Context contextUsedToComputeContextWithQuery = null;
 	
-	public Context getContextWithQuery() {
+	private Context getContextWithQuery() {
 		Context currentContext = getContext();
 		if (contextWithBooleanQuery == null || currentContext != contextUsedToComputeContextWithQuery) {
 			contextUsedToComputeContextWithQuery = currentContext;
@@ -165,6 +168,7 @@ public class ExpressionBasedSolver {
 		return data;
 	}
 
+	@Override
 	public Expression solve(Expression queryExpression) {
 		InferenceData data = setUpInferenceData(queryExpression);
 		Expression unnormalizedMarginal = marginalize(data.variablesToBeEliminated, data.productOfPotentials, data);

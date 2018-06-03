@@ -75,7 +75,8 @@ import com.sri.ai.grinder.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.core.expressionbased.DefaultExpressionBasedSolver;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.table.api.GraphicalNetwork;
 import com.sri.ai.praise.core.model.classbased.table.core.data.FunctionTable;
@@ -350,7 +351,7 @@ public class UAIMARSolver {
 			}
 			
 			expressionBasedModel = expressionBasedModel.getConditionedModel(evidenceExpr);
-			inferencer = new ExpressionBasedSolver(expressionBasedModel);
+			inferencer = new DefaultExpressionBasedSolver(expressionBasedModel);
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {

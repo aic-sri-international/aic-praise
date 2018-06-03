@@ -59,7 +59,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.praise.core.inference.core.expressionbased.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.core.expressionbased.DefaultExpressionBasedSolver;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMSortDeclaration;
@@ -186,7 +187,7 @@ public class HOGModelGrounding {
 						factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
 						list(),
 						isBayesianNetwork); // additional types
-		ExpressionBasedSolver inferencer = new ExpressionBasedSolver(groundedFactorsAndTypesInformation);
+		ExpressionBasedSolver inferencer = new DefaultExpressionBasedSolver(groundedFactorsAndTypesInformation);
 		return inferencer;
 	}
 
