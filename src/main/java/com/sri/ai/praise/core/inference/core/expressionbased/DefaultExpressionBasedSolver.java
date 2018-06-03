@@ -61,9 +61,8 @@ import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedMo
  * @author braz
  *
  */
-public class DefaultExpressionBasedSolver implements ExpressionBasedSolver {
+public class DefaultExpressionBasedSolver extends AbstractExpressionBasedSolver implements ExpressionBasedSolver {
 
-	private ExpressionBasedModel model;
 	private Expression partitionFunction;
 	private AssociativeCommutativeSemiRing semiRing;
 	private MultiQuantifierEliminator multiQuantifierEliminator;
@@ -82,8 +81,8 @@ public class DefaultExpressionBasedSolver implements ExpressionBasedSolver {
 	 * @param useFactorization indicates whether to use factorization (that is, factor factors out as in variable elimination)
 	 */
 	public DefaultExpressionBasedSolver(ExpressionBasedModel model, boolean useFactorization) {
-	
-		this.model = model;
+		
+		super(model);
 		
 		if (useFactorization) {
 			multiQuantifierEliminator = new SGVET();
@@ -102,30 +101,22 @@ public class DefaultExpressionBasedSolver implements ExpressionBasedSolver {
 	}
 	
 	@Override
-	public Context getContext() {
-		return model.getContext();
-	}
-	
-	@Override
-	public Expression solve(Expression queryExpression) {
-		
-		QueryInformation queryInformation = new QueryInformation(model, queryExpression);
+	protected Expression computeNormalizedMarginal(QueryInformation queryInformation) {
 		Context context = queryInformation.context;
 		Expression productOfPotentials = Times.make(queryInformation.factorExpressionsIncludingQueryDefinitionIfAny);
 		Expression queryVariable = queryInformation.querySymbol;
 		List<Expression> queryVariables = list(queryVariable);
 		boolean queryIsCompound = queryInformation.queryIsCompound;
-		List<Expression> variablesToBeEliminated = queryIsCompound? model.getRandomVariables() : setDifference(model.getRandomVariables(), queryVariables);
+		List<Expression> variablesToBeEliminated = queryIsCompound? getModel().getRandomVariables() : setDifference(getModel().getRandomVariables(), queryVariables);
 		
 		Expression unnormalizedMarginal = marginalize(variablesToBeEliminated, productOfPotentials, context);
 		Expression normalizedMarginal = getNormalizedMarginal(unnormalizedMarginal, queryVariables, context);
-		Expression result = queryInformation.replaceQuerySymbolByQueryExpressionIfNeeded(normalizedMarginal);//
-		return result;
+		return normalizedMarginal;
 	}
 
 	private Expression getNormalizedMarginal(Expression unnormalizedMarginal, List<Expression> queryVariables, Context context) {
 		Expression normalizedMarginal;
-		if (model.isKnownToBeBayesianNetwork()) {
+		if (getModel().isKnownToBeBayesianNetwork()) {
 			normalizedMarginal = unnormalizedMarginal;
 		}
 		else {

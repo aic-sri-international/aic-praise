@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, SRI International
+ * Copyright (c) 2013, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-praise nor the names of its
+ * Neither the name of the aic-expresso nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,19 +35,52 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.api;
+package com.sri.ai.praise.core.inference.core.expressionbased;
 
-import com.sri.ai.praise.core.model.api.Factor;
-import com.sri.ai.praise.core.model.api.Variable;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.api.Context;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
+import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 
 /**
- * Interface for a solver that answers multiple posterior probability queries given a model.
+ * An abstract basis for {@link ExpressionBasedSolver} implementations takes care of processing queries.
  * 
  * @author braz
  *
  */
-public interface PosteriorSolverGivenModel {
+public abstract class AbstractExpressionBasedSolver implements ExpressionBasedSolver {
 
-	Factor solve(Variable query);
+	private ExpressionBasedModel model;
+
+	/**
+	 * A methods for returning a normalized marginal of {@link QueryInformation#querySymbol}.
+	 * @param queryInformation
+	 * @return
+	 */
+	protected abstract Expression computeNormalizedMarginal(QueryInformation queryInformation);
+
+	@Override
+	public abstract void interrupt();
+
+	public AbstractExpressionBasedSolver(ExpressionBasedModel model) {
+		this.model = model;
+	}
+
+	@Override
+	public ExpressionBasedModel getModel() {
+		return model;
+	}
 	
+	@Override
+	public Context getContext() {
+		return model.getContext();
+	}
+
+	@Override
+	public Expression solve(Expression queryExpression) {
+		QueryInformation queryInformation = new QueryInformation(model, queryExpression);
+		Expression normalizedMarginal = computeNormalizedMarginal(queryInformation);
+		Expression result = queryInformation.replaceQuerySymbolByQueryExpressionIfNeeded(normalizedMarginal);//
+		return result;
+	}
 }
