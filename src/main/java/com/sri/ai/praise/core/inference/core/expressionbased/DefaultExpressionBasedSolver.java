@@ -37,9 +37,6 @@
  */
 package com.sri.ai.praise.core.inference.core.expressionbased;
 
-import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
-import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.praise.core.inference.core.helper.AddBooleanQueryToContext.addBooleanQuery;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.setDifference;
 
@@ -55,7 +52,6 @@ import com.sri.ai.grinder.group.SumProduct;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.core.helper.AddBooleanQueryToContext;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 
 /**
@@ -110,110 +106,54 @@ public class DefaultExpressionBasedSolver implements ExpressionBasedSolver {
 		return model.getContext();
 	}
 	
-	private Context contextWithBooleanQuery = null;
-	private Context contextUsedToComputeContextWithQuery = null;
-	
-	private Context getContextWithQuery() {
-		Context currentContext = getContext();
-		if (contextWithBooleanQuery == null || currentContext != contextUsedToComputeContextWithQuery) {
-			contextUsedToComputeContextWithQuery = currentContext;
-			contextWithBooleanQuery = addBooleanQuery(contextUsedToComputeContextWithQuery);
-		}
-		return contextWithBooleanQuery;
-	}
-
-	private static class InferenceData {
-		Expression originalQuery;
-		Expression productOfPotentials;
-		Expression queryVariable;
-		List<Expression> queryVariables;
-		List<Expression> variablesToBeEliminated; 
-		boolean queryIsCompoundExpression;
-		Context context;
-	}
-	
-	private InferenceData setUpInferenceData(Expression queryExpression) {
-		InferenceData data;
-		if (model.getRandomVariables().contains(queryExpression)) {
-			data = setUpInferenceDataForSimpleQuery(queryExpression);
-		}
-		else {
-			data = setUpInferenceDataForCompoundQuery(queryExpression);
-		}
-		return data;
-	}
-
-	private InferenceData setUpInferenceDataForSimpleQuery(Expression queryExpression) {
-		InferenceData data = new InferenceData();
-		data.originalQuery = queryExpression;
-		data.productOfPotentials = Times.make(model.getFactors());
-		data.queryIsCompoundExpression = false;
-		data.queryVariable = queryExpression;
-		data.queryVariables = list(data.queryVariable);
-		data.variablesToBeEliminated = setDifference(model.getRandomVariables(), data.queryVariables);
-		data.context = getContext();
-		return data;
-	}
-
-	private InferenceData setUpInferenceDataForCompoundQuery(Expression queryExpression) {
-		// Add a query variable equivalent to query expression; this introduces no cycles and the model remains a Bayesian network
-		InferenceData data = new InferenceData();
-		data.originalQuery = queryExpression;
-		data.queryIsCompoundExpression = true;
-		data.queryVariable = makeSymbol("query");
-		data.queryVariables = list(data.queryVariable);
-		data.productOfPotentials = Times.make(list(Times.make(model.getFactors()), parse("if query <=> " + queryExpression + " then 1 else 0")));
-		data.variablesToBeEliminated = model.getRandomVariables(); 
-		data.context = getContextWithQuery();
-		return data;
-	}
-
 	@Override
 	public Expression solve(Expression queryExpression) {
-		InferenceData data = setUpInferenceData(queryExpression);
-		Expression unnormalizedMarginal = marginalize(data.variablesToBeEliminated, data.productOfPotentials, data);
-		Expression normalizedMarginal = getNormalizedMarginal(unnormalizedMarginal, data);
-		Expression result = makeResultInTermsOfOriginalQuery(normalizedMarginal, data);
+		
+		QueryInformation queryInformation = new QueryInformation(model, queryExpression);
+		Context context = queryInformation.context;
+		Expression productOfPotentials = Times.make(queryInformation.factorExpressionsIncludingQueryDefinitionIfAny);
+		Expression queryVariable = queryInformation.querySymbol;
+		List<Expression> queryVariables = list(queryVariable);
+		boolean queryIsCompound = queryInformation.queryIsCompound;
+		List<Expression> variablesToBeEliminated = queryIsCompound? model.getRandomVariables() : setDifference(model.getRandomVariables(), queryVariables);
+		
+		Expression unnormalizedMarginal = marginalize(variablesToBeEliminated, productOfPotentials, context);
+		Expression normalizedMarginal = getNormalizedMarginal(unnormalizedMarginal, queryVariables, context);
+		Expression result = queryInformation.replaceQuerySymbolByQueryExpressionIfNeeded(normalizedMarginal);//
 		return result;
 	}
 
-	private Expression getNormalizedMarginal(Expression unnormalizedMarginal, InferenceData data) {
+	private Expression getNormalizedMarginal(Expression unnormalizedMarginal, List<Expression> queryVariables, Context context) {
 		Expression normalizedMarginal;
 		if (model.isKnownToBeBayesianNetwork()) {
 			normalizedMarginal = unnormalizedMarginal;
 		}
 		else {
-			normalizedMarginal = normalize(unnormalizedMarginal, data);
+			normalizedMarginal = normalize(unnormalizedMarginal, queryVariables, context);
 		}
 		return normalizedMarginal;
 	}
 
-	private Expression normalize(Expression unnormalizedMarginal, InferenceData data) {
-		computePartitionFunction(unnormalizedMarginal, data);
-		Expression normalizedMarginal = divideByPartitionFunction(unnormalizedMarginal, data);
+	private Expression normalize(Expression unnormalizedMarginal, List<Expression> queryVariables, Context context) {
+		computePartitionFunction(unnormalizedMarginal, queryVariables, context);
+		Expression normalizedMarginal = divideByPartitionFunction(unnormalizedMarginal, context);
 		return normalizedMarginal;
 	}
 
-	private void computePartitionFunction(Expression unnormalizedMarginal, InferenceData data) {
+	private void computePartitionFunction(Expression unnormalizedMarginal, List<Expression> queryVariables, Context context) {
 		if (partitionFunction == null) {
-			partitionFunction = marginalize(data.queryVariables, unnormalizedMarginal, data);
+			partitionFunction = marginalize(queryVariables, unnormalizedMarginal, context);
 		}
 	}
 
-	private Expression divideByPartitionFunction(Expression unnormalizedMarginal, InferenceData data) {
+	private Expression divideByPartitionFunction(Expression unnormalizedMarginal, Context context) {
 		Expression normalizedMarginalDefinition = Division.make(unnormalizedMarginal, partitionFunction);
-		Expression normalizedMarginal = data.context.evaluate(normalizedMarginalDefinition);
+		Expression normalizedMarginal = context.evaluate(normalizedMarginalDefinition);
 		return normalizedMarginal;
 	}
 
-	private Expression makeResultInTermsOfOriginalQuery(Expression marginal, InferenceData data) {
-		if (data.queryIsCompoundExpression) {
-			marginal = marginal.replaceAllOccurrences(data.queryVariable, data.originalQuery, data.context);
-		}
-		return marginal;
-	}
-
-	private Expression marginalize(List<Expression> variablesToBeEliminated, Expression expression, InferenceData data) {
-		return multiQuantifierEliminator.extendContextAndSolve(semiRing, variablesToBeEliminated, expression, data.context);
+	private Expression marginalize(List<Expression> variablesToBeEliminated, Expression expression, Context context) {
+		Expression result = multiQuantifierEliminator.extendContextAndSolve(semiRing, variablesToBeEliminated, expression, context);
+		return result;
 	}
 }
