@@ -39,6 +39,7 @@ package com.sri.ai.praise.core.inference.core.expressionbased;
 
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.expresso.helper.Expressions.parse;
+import static com.sri.ai.praise.core.inference.core.helper.AddBooleanQueryToContext.addBooleanQuery;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.setDifference;
 
@@ -53,10 +54,11 @@ import com.sri.ai.grinder.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.group.SumProduct;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
+import com.sri.ai.praise.core.inference.core.helper.AddBooleanQueryToContext;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 
 /**
- * A probabilistic solver for an {@link ExpressionBasedModel}
+ * A probabilistic solver for an {@link AddBooleanQueryToContext}
  * that applies multi-quantifier elimination to marginalizing summations.
  * 
  * @author braz
@@ -71,7 +73,7 @@ public class ExpressionBasedSolver {
 
 	/**
 	 * Constructs a quantifier elimination-based variable elimination solver for a factor graph.
-	 * @param model a {@link ExpressionBasedModel} to be solved.
+	 * @param model a {@link AddBooleanQueryToContext} to be solved.
 	 */
 	public ExpressionBasedSolver(ExpressionBasedModel model) {
 		this(model, true);
@@ -79,7 +81,7 @@ public class ExpressionBasedSolver {
 
 	/**
 	 * Constructs a quantifier elimination-based solver for a factor graph.
-	 * @param model a {@link ExpressionBasedModel} to be solved.
+	 * @param model a {@link AddBooleanQueryToContext} to be solved.
 	 * @param useFactorization indicates whether to use factorization (that is, factor factors out as in variable elimination)
 	 */
 	public ExpressionBasedSolver(ExpressionBasedModel model, boolean useFactorization) {
@@ -105,10 +107,18 @@ public class ExpressionBasedSolver {
 		return model.getContext();
 	}
 	
-	public Context getContextWithQuery() {
-		return model.getContextWithQuery();
-	}
+	private Context contextWithBooleanQuery = null;
+	private Context contextUsedToComputeContextWithQuery = null;
 	
+	public Context getContextWithQuery() {
+		Context currentContext = getContext();
+		if (contextWithBooleanQuery == null || currentContext != contextUsedToComputeContextWithQuery) {
+			contextUsedToComputeContextWithQuery = currentContext;
+			contextWithBooleanQuery = addBooleanQuery(contextUsedToComputeContextWithQuery);
+		}
+		return contextWithBooleanQuery;
+	}
+
 	private static class InferenceData {
 		Expression originalQuery;
 		Expression productOfPotentials;
@@ -138,7 +148,7 @@ public class ExpressionBasedSolver {
 		data.queryVariable = queryExpression;
 		data.queryVariables = list(data.queryVariable);
 		data.variablesToBeEliminated = setDifference(model.getRandomVariables(), data.queryVariables);
-		data.context = model.getContext();
+		data.context = getContext();
 		return data;
 	}
 
@@ -151,7 +161,7 @@ public class ExpressionBasedSolver {
 		data.queryVariables = list(data.queryVariable);
 		data.productOfPotentials = Times.make(list(Times.make(model.getFactors()), parse("if query <=> " + queryExpression + " then 1 else 0")));
 		data.variablesToBeEliminated = model.getRandomVariables(); 
-		data.context = model.getContextWithQuery();
+		data.context = getContextWithQuery();
 		return data;
 	}
 

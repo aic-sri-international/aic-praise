@@ -195,28 +195,18 @@ public class ExpressionBasedModel implements Model, Cloneable {
 	public void setTheory(Theory newTheory) {
 		theory = newTheory;
 		context = null;
-		contextWithQuery = null;
-	}
-
-	private Context contextWithQuery = null;
-	
-	public Context getContextWithQuery() {
-		if (contextWithQuery == null) {
-			contextWithQuery = makeContext(true);
-		}
-		return contextWithQuery;
 	}
 
 	private Context context = null;
 	
 	public Context getContext() {
 		if (context == null) {
-			context = makeContext(false);
+			context = makeContext();
 		}
 		return context;
 	}
 
-	private Context makeContext(boolean withQuery) {
+	private Context makeContext() {
 		Map<String, String> mapFromSymbolNameToTypeName;
 		Map<String, String> mapFromCategoricalTypeNameToSizeString;
 		Collection<Type> additionalTypes;
@@ -227,11 +217,6 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		mapFromSymbolNameToTypeName.putAll(getMapFromUniquelyNamedConstantNameToTypeName());
 
 		mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>(getMapFromCategoricalTypeNameToSizeString());
-
-		if (withQuery) {
-			mapFromSymbolNameToTypeName.put("query", "Boolean"); // in case it was not there before -- it is ok to leave it there for other queries
-			mapFromCategoricalTypeNameToSizeString.put("Boolean", "2"); // in case it was not there before
-		}
 
 		Set<Expression> uniquelyNamedConstants = mapIntoSet(getMapFromUniquelyNamedConstantNameToTypeName().keySet(), Expressions::parse);
 		isUniquelyNamedConstantPredicate = new UniquelyNamedConstantIncludingBooleansAndNumbersPredicate(uniquelyNamedConstants);
