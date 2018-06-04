@@ -42,6 +42,7 @@ import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
@@ -349,19 +350,19 @@ public class ExpressionBasedSolverTest {
 		
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
 		model = model.getConditionedModel(evidence);
-		ExpressionBasedSolver inferencer = new DefaultExpressionBasedSolver(model, exploitFactorization);
+		ExpressionBasedSolver solver = new DefaultExpressionBasedSolver(model, exploitFactorization);
 
 		Expression queryExpression;
 		Expression marginal;
 		
 		queryExpression = parse("not earthquake");
 		// can be any boolean expression, or any random variable
-		marginal = inferencer.solve(queryExpression);
-		System.out.println("MarginalProblem is " + marginal);
+		marginal = solver.solve(queryExpression);
+		System.out.println("Marginal is " + marginal);
 		
 		queryExpression = parse("earthquake");
-		marginal = inferencer.solve(queryExpression);
-		System.out.println("MarginalProblem is " + marginal);
+		marginal = solver.solve(queryExpression);
+		System.out.println("Marginal is " + marginal);
 	}
 
 	@Test
@@ -976,30 +977,33 @@ public class ExpressionBasedSolverTest {
 			boolean useFactorization) throws AssertionError {
 		
 		
-		ExpressionBasedSolver inferencer = new DefaultExpressionBasedSolver(model, useFactorization);
+		ExpressionBasedSolver[] solvers = new ExpressionBasedSolver[] { 
+				new DefaultExpressionBasedSolver(model, useFactorization)
+//				,
+//				new ExactBPExpressionBasedSolver(model)
+		};
 		
-		Expression marginal = inferencer.solve(queryExpression);
-		
+		for (ExpressionBasedSolver solver : solvers) {
+			Expression marginal = solver.solve(queryExpression);
+			checkResult(queryExpression, expected, marginal, solver);
+		}
+	}
+
+	private void checkResult(Expression queryExpression, Expression expected, Expression marginal, ExpressionBasedSolver solver)
+			throws AssertionError {
 		TrueContext context = new TrueContext();
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, context);
 		expected = Expressions.roundToAGivenPrecision(expected, 9, context);
 		if (expected.equals(marginal)) {
-			// Ok!
+			println(solver + " on " + queryExpression + ": passed");
 		}
 		// check if they are not identical, but equivalent expressions
-		else if (inferencer.getContext().evaluate(apply(MINUS, expected, marginal)).equals(ZERO)) { // first attempt was to compare with equality, but this requires a more complete test of equality theory literals to exclude such a complex equality from being considered a literal, which is much more expensive
+		else if (solver.getContext().evaluate(apply(MINUS, expected, marginal)).equals(ZERO)) { // first attempt was to compare with equality, but this requires a more complete test of equality theory literals to exclude such a complex equality from being considered a literal, which is much more expensive
 			// Ok!
 		}
 		else {
-			throw new AssertionError("expected:<" + expected + "> but was:<" + marginal + ">, which is not even equivalent.");
+			throw new AssertionError(solver + ": expected:<" + expected + "> but was:<" + marginal + ">, which is not even equivalent.");
 		}
-
-// Not working yet, need to debug		
-//		Expression negationMarginal;
-//		negationMarginal = inferencer.solve(Not.make(queryExpression));
-//		negationMarginal = Expressions.roundToAGivenPrecision(negationMarginal, 9, context);
-//		expected = inferencer.evaluate(parse(negationMarginal + " = 1 - " + marginal));
-//		assertEquals(expected, TRUE);
 	}
 
 	@Test
@@ -1038,7 +1042,7 @@ public class ExpressionBasedSolverTest {
 	}
 
 	private void runSimplifyTest() {
-		ExpressionBasedSolver inferencer;
+		ExpressionBasedSolver solver;
 		Expression simplification;
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(
 				factors,
@@ -1049,9 +1053,9 @@ public class ExpressionBasedSolverTest {
 				list(),
 				isBayesianNetwork);
 		model = model.getConditionedModel(evidence);
-		inferencer = new DefaultExpressionBasedSolver(model);
+		solver = new DefaultExpressionBasedSolver(model);
 	
-		simplification = inferencer.getContext().evaluate(queryExpression);
+		simplification = solver.getContext().evaluate(queryExpression);
 		assertEquals(expected, simplification);
 	}
 }

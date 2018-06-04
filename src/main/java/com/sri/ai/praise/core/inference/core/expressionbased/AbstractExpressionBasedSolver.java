@@ -83,4 +83,9 @@ public abstract class AbstractExpressionBasedSolver implements ExpressionBasedSo
 		Expression result = queryInformation.replaceQuerySymbolByQueryExpressionIfNeeded(normalizedMarginal);//
 		return result;
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
+	}
 }

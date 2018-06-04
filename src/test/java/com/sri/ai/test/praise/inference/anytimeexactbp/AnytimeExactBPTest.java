@@ -270,7 +270,7 @@ public class AnytimeExactBPTest {
 		printProblem(factorNetworkString, queryVariableString, expected);
 		println("Solving P(" + queryVariableString + ") given " + factorNetworkString);
 		
-		runRodrigos(factorNetwork, query,expected);
+		runRodrigos(factorNetwork, query, expected);
 	}
 
 	private void runRodrigos(ExpressionFactorNetwork factorNetwork, Expression query,Expression expected) {
