@@ -13,8 +13,8 @@ import com.sri.ai.grinder.helper.AssignmentsIterator;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBPFromVariable;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.AEBP;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.TestCases;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.representation.api.EditableFactorNetwork;
@@ -64,7 +64,7 @@ public class AnytimeExactBPTest3 {
 	public static AEBPTestingDataFrame solveRodrigoWithoutBoxing(Variable query, EditableFactorNetwork factorNetwork, long maximunTimeInSeconds,
 			String PGMName) {
 		println("\nSolving with Rodrigo's Anytime - no boxing\n");
-		ExactBP<Variable,Factor> exactBP = new ExactBPFromVariable(query, factorNetwork);
+		ExactBPNode<Variable,Factor> exactBP = new ExactBP(query, factorNetwork);
 		AnytimeExactBP<Variable,Factor> anytimeExactBP = new AnytimeExactBP<>(exactBP);
 		return AEBPSolver.solve(anytimeExactBP,query,maximunTimeInSeconds,0,PGMName,"Rodrigo");
 	}

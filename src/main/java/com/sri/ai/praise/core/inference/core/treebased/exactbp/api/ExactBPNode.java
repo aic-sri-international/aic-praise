@@ -45,7 +45,7 @@ import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
-public interface ExactBP<RootType,SubRootType> extends TreeComputation<Factor> {
+public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Factor> {
 	
 	SubRootType getParent();
 
@@ -76,6 +76,6 @@ public interface ExactBP<RootType,SubRootType> extends TreeComputation<Factor> {
 	Factor sumOut(List<? extends Variable> variablesToBeSummedOut, Factor factor);
 
 	@Override
-	ArrayList<ExactBP<SubRootType,RootType>> getSubs();
+	ArrayList<ExactBPNode<SubRootType,RootType>> getSubs();
 
 }

@@ -60,6 +60,7 @@ import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
 import com.sri.ai.praise.core.inference.core.expressionbased.DefaultExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.core.expressionbased.ExactBPExpressionBasedSolver;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;

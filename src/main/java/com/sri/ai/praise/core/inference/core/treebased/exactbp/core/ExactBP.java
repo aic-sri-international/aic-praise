@@ -41,24 +41,18 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
 import com.sri.ai.praise.core.model.api.FactorNetwork;
 import com.sri.ai.praise.core.model.api.Variable;
 
 /**
- * A class for an {@link ExactBP} roots in a query {@link Variable},
- * and therefore without a parent.
- * <p>
- * This is necessary because the constructor of {@link ExactBPFromVariableToFactor}
- * is meant for internal use and requires parameters that would be hard for a user to understand and use.
+ * A solver that returns the normalized marginal of a query given a factor network, using the Exact BP algorithm.
  * 
  * @author braz
  *
  */
-public class ExactBPFromVariable extends ExactBPFromVariableToFactor {
+public class ExactBP extends ExactBPFromVariableToFactor {
 
-	public ExactBPFromVariable(Variable root, FactorNetwork factorNetwork) {
-		super(root, null, liveSet(list()), redirectingTo(liveSet(list())), factorNetwork);
+	public ExactBP(Variable query, FactorNetwork factorNetwork) {
+		super(query, null, liveSet(list()), redirectingTo(liveSet(list())), factorNetwork);
 	}
-
 }

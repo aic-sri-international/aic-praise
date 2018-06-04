@@ -21,8 +21,8 @@ import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.c
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Polytopes;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.ProductPolytope;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Simplex;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBPFromVariable;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.AEBP;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.TestCases;
 import com.sri.ai.praise.core.model.api.Factor;
@@ -66,7 +66,7 @@ public class AnytimeExactBPTest2 {
 	private static AEBPTestingDataFrame solveWithRodrigos(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
 			String PGMName) {
 		println("\nSolving with Rodrigo's Anytime\n");
-		ExactBP<Variable,Factor> exactBP = new ExactBPFromVariable(query, factorNetwork);
+		ExactBPNode<Variable,Factor> exactBP = new ExactBP(query, factorNetwork);
 		AnytimeExactBP<Variable,Factor> anytimeExactBP = new AnytimeExactBP<>(exactBP);
 		return solveAndStoreInDataFrame(anytimeExactBP,query,maximunTimeInSeconds,0,PGMName,"Rodrigo's");		
 	}

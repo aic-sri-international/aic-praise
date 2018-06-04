@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.FactorNetwork;
 import com.sri.ai.praise.core.model.api.Variable;
@@ -87,7 +87,7 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * @author braz
  *
  */
-public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<RootType,SubRootType> {
+public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBPNode<RootType,SubRootType> {
 
 	public static boolean debug = false;
 
@@ -101,7 +101,7 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	 * @param subIncludedFactors
 	 * @return
 	 */
-	protected abstract ExactBP<SubRootType,RootType> makeSubExactBP(SubRootType subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
+	protected abstract ExactBPNode<SubRootType,RootType> makeSubExactBP(SubRootType subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
 
 	/**
 	 * An abstract method for extensions to define what are their sub's roots.
@@ -111,7 +111,7 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	protected RootType root;
 	protected SubRootType parent;
 	
-	protected ArrayList<ExactBP<SubRootType,RootType>> subs;
+	protected ArrayList<ExactBPNode<SubRootType,RootType>> subs;
 
 	final protected LiveSet<Factor> excludedFactors;
 	final protected RedirectingLiveSet<Factor> includedFactors;
@@ -133,7 +133,7 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 	}
 	
 	@Override
-	public ArrayList<ExactBP<SubRootType,RootType>> getSubs() {
+	public ArrayList<ExactBPNode<SubRootType,RootType>> getSubs() {
 		if (subs == null) {
 			makeSubs();
 		}
@@ -177,16 +177,16 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBP<R
 		subs = new ArrayList<>(subsRoots.size());
 		int subIndex = 0;
 		for (SubRootType subRoot : subsRoots) {
-			ExactBP<SubRootType,RootType> sub = makeSubFromItsIncludedFactors(subRoot, subIndex, subsIncludedFactors);
+			ExactBPNode<SubRootType,RootType> sub = makeSubFromItsIncludedFactors(subRoot, subIndex, subsIncludedFactors);
 			subs.add(sub);
 			subIndex++;
 		}
 	}
 
-	private ExactBP<SubRootType,RootType> makeSubFromItsIncludedFactors(SubRootType subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+	private ExactBPNode<SubRootType,RootType> makeSubFromItsIncludedFactors(SubRootType subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
 		RedirectingLiveSet<Factor> subIncludedFactors = subsIncludedFactors.get(subIndex);
 		LiveSet<Factor> subExcludedFactors = excludedFactorsForSubAt(subIndex, subsIncludedFactors);
-		ExactBP<SubRootType,RootType> sub = makeSubExactBP(subRoot, subExcludedFactors, subIncludedFactors);
+		ExactBPNode<SubRootType,RootType> sub = makeSubExactBP(subRoot, subExcludedFactors, subIncludedFactors);
 		return sub;
 	}
 

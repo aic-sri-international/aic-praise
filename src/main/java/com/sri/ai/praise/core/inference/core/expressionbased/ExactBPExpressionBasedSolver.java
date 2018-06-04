@@ -37,11 +37,13 @@
  */
 package com.sri.ai.praise.core.inference.core.expressionbased;
 
+import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
+
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBPFromVariable;
-import com.sri.ai.praise.core.model.api.FactorNetwork;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
 import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactor;
 import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactorNetwork;
 import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionVariable;
 
@@ -60,10 +62,16 @@ public class ExactBPExpressionBasedSolver extends AbstractExpressionBasedSolver 
 	
 	@Override
 	protected Expression computeNormalizedMarginal(QueryInformation queryInformation) {
-		FactorNetwork factorNetwork = new ExpressionFactorNetwork(queryInformation.factorExpressionsIncludingQueryDefinitionIfAny, queryInformation.context);
+		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(queryInformation.factorExpressionsIncludingQueryDefinitionIfAny, queryInformation.context);
 		ExpressionVariable queryVariable = new ExpressionVariable(queryInformation.querySymbol);
-		ExactBPFromVariable exactBP = new ExactBPFromVariable(queryVariable, factorNetwork);
-		Expression result = (Expression) exactBP.apply();
+		Expression result = computeNormalizedMarginal(queryVariable, factorNetwork);
+		return result;
+	}
+
+	private Expression computeNormalizedMarginal(ExpressionVariable queryVariable, ExpressionFactorNetwork factorNetwork) {
+		ExactBP exactBP = new ExactBP(queryVariable, factorNetwork);
+		Expression unnormalized = (ExpressionFactor) exactBP.apply();
+		Expression result = normalize(queryVariable, unnormalized, factorNetwork.getContext());
 		return result;
 	}
 

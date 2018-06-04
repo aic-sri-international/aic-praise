@@ -38,15 +38,15 @@
 package com.sri.ai.praise.core.model.encapsulatedoperations.expression;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBPFromVariable;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
 
 
 /**
- * A convenience class for creating a {@link ExactBPFromVariable} based on expressions.
+ * A convenience class for creating a {@link ExactBP} based on expressions.
  * @author braz
  *
  */
-public class ExpressionExactBP extends ExactBPFromVariable {
+public class ExpressionExactBP extends ExactBP {
 
 	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
 		

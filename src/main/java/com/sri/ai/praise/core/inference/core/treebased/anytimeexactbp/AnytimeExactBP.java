@@ -51,7 +51,7 @@ import java.util.List;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.api.Polytope;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.Simplex;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.util.base.NullaryFunction;
@@ -60,9 +60,9 @@ import com.sri.ai.util.computation.anytime.api.Approximation;
 import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeTreeComputation;
 
 /**
- * An anytime version of {@link ExactBP} algorithms.
+ * An anytime version of {@link ExactBPNode} algorithms.
  * This is implemented as a {@link AbstractAnytimeTreeComputationWithDefaultPickingOfSubs}
- * based on an {@link ExactBP}, which is gradually expanded.
+ * based on an {@link ExactBPNode}, which is gradually expanded.
  * <p>
  * It uses {@link Simplex} as an initial approximation,
  * and computes an approximation to the base's answer by not summing out the indices whose sub-messages
@@ -79,7 +79,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		return result;
 	}
 
-	public AnytimeExactBP(ExactBP<RootType,SubRootType> base) {
+	public AnytimeExactBP(ExactBPNode<RootType,SubRootType> base) {
 		super(base, new Simplex(base.getMessageVariable()));
 	}
 
@@ -130,14 +130,14 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	@Override
 	protected Anytime<Factor> makeAnytimeVersion(NullaryFunction<Factor> baseSub) {
 		@SuppressWarnings("unchecked")
-		ExactBP<SubRootType, RootType> baseExactBP = (ExactBP<SubRootType, RootType>) baseSub;
+		ExactBPNode<SubRootType, RootType> baseExactBP = (ExactBPNode<SubRootType, RootType>) baseSub;
 		AnytimeExactBP<SubRootType, RootType> result = new AnytimeExactBP<SubRootType,RootType>(baseExactBP);
 		return result;
 	}
 
 	@SuppressWarnings("unchecked")
-	public ExactBP<RootType,SubRootType> getBase() {
-		return (ExactBP<RootType,SubRootType>) super.getBase();
+	public ExactBPNode<RootType,SubRootType> getBase() {
+		return (ExactBPNode<RootType,SubRootType>) super.getBase();
 	}
 	
 	@SuppressWarnings("unchecked")

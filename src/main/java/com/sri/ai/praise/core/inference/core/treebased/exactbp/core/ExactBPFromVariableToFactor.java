@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.FactorNetwork;
 import com.sri.ai.praise.core.model.api.Variable;
@@ -58,7 +58,7 @@ public class ExactBPFromVariableToFactor extends AbstractExactBP<Variable,Factor
 	}
 
 	@Override
-	protected ExactBP<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
+	protected ExactBPNode<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
 		return new ExactBPFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork);
 	}
 	

@@ -32,7 +32,7 @@ import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.praise.core.PRAiSEUtil;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBP;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.AbstractExactBP;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
@@ -301,7 +301,7 @@ public class AnytimeExactBPTest {
 	}
 
 	private ExpressionFactor solveWithExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
-		ExactBP<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
+		ExactBPNode<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
 		ExpressionFactor result = (ExpressionFactor) exactBP.apply();
 		return result;
 	}
@@ -313,7 +313,7 @@ public class AnytimeExactBPTest {
 		println("\nSolving with Anytime\n");
 		
 		long initialTime = System.currentTimeMillis();
-		ExactBP<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
+		ExactBPNode<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
 		AnytimeExactBP<Variable,Factor> anytimeExactBP = new AnytimeExactBP<>(exactBP);
 		Approximation<Factor> current = null;
 		while (anytimeExactBP.hasNext()) {
