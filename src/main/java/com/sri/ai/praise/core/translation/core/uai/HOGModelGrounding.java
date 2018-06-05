@@ -59,9 +59,9 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.core.expressionbased.DefaultExpressionBasedSolver;
-import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.core.expressionbased.model.DefaultExpressionBasedModelSolver;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMSortDeclaration;
 import com.sri.ai.util.base.BinaryFunction;
@@ -111,7 +111,7 @@ public class HOGModelGrounding {
 		Map<Expression, List<Expression>> typeToValues = createTypeToValuesMap(factorsAndTypes, randomVariableNameToTypeSizeAndUniqueConstants);
 		Map<String, String> newUniqueConstantToTypeMap = createGroundedUniqueConstantToTypeMap(typeToValues);
 	    
-		ExpressionBasedSolver inferencer = makeInferencer(factorsAndTypes, newUniqueConstantToTypeMap);
+		ExpressionBasedModelSolver inferencer = makeInferencer(factorsAndTypes, newUniqueConstantToTypeMap);
 		
 		Context context = inferencer.getContext();
 		
@@ -171,12 +171,12 @@ public class HOGModelGrounding {
 	}
 
 	/**
-	 * Provides an appropriate {@link ExpressionBasedSolver} object.
+	 * Provides an appropriate {@link ExpressionBasedModelSolver} object.
 	 * @param factorsAndTypes
 	 * @param newUniqueConstantToTypeMap
 	 * @return
 	 */
-	private static ExpressionBasedSolver makeInferencer(ExpressionBasedModel factorsAndTypes, Map<String, String> newUniqueConstantToTypeMap) {
+	private static ExpressionBasedModelSolver makeInferencer(ExpressionBasedModel factorsAndTypes, Map<String, String> newUniqueConstantToTypeMap) {
 		boolean isBayesianNetwork = false;
 		ExpressionBasedModel groundedFactorsAndTypesInformation = 
 				new HOGMExpressionBasedModel(
@@ -187,7 +187,7 @@ public class HOGModelGrounding {
 						factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
 						list(),
 						isBayesianNetwork); // additional types
-		ExpressionBasedSolver inferencer = new DefaultExpressionBasedSolver(groundedFactorsAndTypesInformation);
+		ExpressionBasedModelSolver inferencer = new DefaultExpressionBasedModelSolver(groundedFactorsAndTypesInformation);
 		return inferencer;
 	}
 
@@ -237,7 +237,7 @@ public class HOGModelGrounding {
 	 * @param inferencer
 	 * @param context
 	 */
-	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedSolver inferencer, Context context) {
+	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedModelSolver inferencer, Context context) {
 		int[] radices                    = new int[randomVariablesInFactor.size()];
 		List<List<Expression>> factorRandomVariableTypeValues = new ArrayList<>();
 		for (int i = 0; i < randomVariablesInFactor.size(); i++) {
@@ -377,7 +377,7 @@ public class HOGModelGrounding {
 	 * @param inferencer
 	 * @param context
 	 */
-	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedSolver inferencer, Context context) {
+	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedModelSolver inferencer, Context context) {
 		Function<Integer, Integer> fromVariableIndexToDomainSize = 
 				makeFunctionFromVariableIndexToDomainSize(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor);
 		int numberFactorValues = 

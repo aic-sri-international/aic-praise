@@ -35,35 +35,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.core.expressionbased;
+package com.sri.ai.praise.core.inference.core.expressionbased.model;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedQuerySolver;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedModelSolver;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedQuery;
+import com.sri.ai.praise.core.model.classbased.expressionbased.core.ExpressionBasedQueryFromModel;
 
 /**
- * An abstract basis for {@link ExpressionBasedSolver} implementations takes care of processing queries.
+ * A {@link ExpressionBasedModelSolver} based on a given {@link ExpressionBasedQueryFromModel}.
  * 
  * @author braz
  *
  */
-public abstract class AbstractExpressionBasedSolver implements ExpressionBasedSolver {
+public class ExpressionBasedQueryToModelSolverAdapter implements ExpressionBasedModelSolver {
 
+	private ExpressionBasedQuerySolver querySolver;
 	private ExpressionBasedModel model;
-
-	/**
-	 * A methods for returning a normalized marginal of {@link QueryInformation#querySymbol}.
-	 * @param queryInformation
-	 * @return
-	 */
-	protected abstract Expression computeNormalizedMarginal(QueryInformation queryInformation);
-
-	@Override
-	public abstract void interrupt();
-
-	public AbstractExpressionBasedSolver(ExpressionBasedModel model) {
+	
+	public ExpressionBasedQueryToModelSolverAdapter(ExpressionBasedQuerySolver querySolver, ExpressionBasedModel model) {
+		this.querySolver = querySolver;
 		this.model = model;
+	}
+	
+	@Override
+	public void interrupt() {
+		querySolver.interrupt();
 	}
 
 	@Override
@@ -78,9 +78,8 @@ public abstract class AbstractExpressionBasedSolver implements ExpressionBasedSo
 
 	@Override
 	public Expression solve(Expression queryExpression) {
-		QueryInformation queryInformation = new QueryInformation(model, queryExpression);
-		Expression normalizedMarginal = computeNormalizedMarginal(queryInformation);
-		Expression result = queryInformation.replaceQuerySymbolByQueryExpressionIfNeeded(normalizedMarginal);//
+		ExpressionBasedQuery query = new ExpressionBasedQueryFromModel(model, queryExpression);
+		Expression result = querySolver.solve(query);
 		return result;
 	}
 

@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.core.expressionbased;
+package com.sri.ai.praise.core.model.classbased.expressionbased.core;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
@@ -46,6 +46,7 @@ import static com.sri.ai.grinder.helper.GrinderUtil.getTypeOfExpression;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUAL;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUIVALENCE;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +55,9 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedModelSolver;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedQuery;
 
 /**
  * Given a {@link ExpressionBasedModel} and a (possibly compound) query expression for it,
@@ -67,37 +69,40 @@ import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedMo
  * Also provides a method for replacing the compound query back into a given expression containing
  * the variable query.
  */
-public class QueryInformation {
+public class ExpressionBasedQueryFromModel implements ExpressionBasedQuery {
 
 	private static final Expression QUERY_SYMBOL = parse("query");
 	
-	/** The original {@link ExpressionBasedSolver}. */
-	public ExpressionBasedModel originalExpressionBasedModel;
+	/** The original {@link ExpressionBasedModelSolver}. */
+	private ExpressionBasedModel originalExpressionBasedModel;
 	
 	/** The variable query to be used ("query" if original query was compound). */
-	public Expression querySymbol;
+	private Expression querySymbol;
 	
 	/** The list of factors to be used (including the variable query definition if original query was compound). */
-	public List<Expression> factorExpressionsIncludingQueryDefinitionIfAny;
+	private List<Expression> factorExpressionsIncludingQueryDefinitionIfAny;
+	
+	private List<Expression> originalRandomVariables;
 	
 	/** The original query. */
-	public Expression queryExpression;
+	private Expression queryExpression;
 	
 	/** Whether the list of factors represents a Bayesian network. */
-	public boolean isKnownToBeBayesianNetwork;
+	private boolean isKnownToBeBayesianNetwork;
 	
 	/** Whether the original query was compound. */
-	public boolean queryIsCompound;
+	private boolean queryIsCompound;
 	
 	/** The context to be used, possibly including the symbol "query" and its type. */
-	public Context context;
+	private Context context;
 	
-	public QueryInformation(ExpressionBasedModel model, Expression queryExpression) {
+	public ExpressionBasedQueryFromModel(ExpressionBasedModel model, Expression queryExpression) {
 		this.originalExpressionBasedModel = model;
 		this.queryExpression = queryExpression;
+		this.originalRandomVariables = originalExpressionBasedModel.getRandomVariables();
 		this.isKnownToBeBayesianNetwork = originalExpressionBasedModel.isKnownToBeBayesianNetwork();
 		
-		if (queryIsCompound()) {
+		if (decideIfQueryIsCompound()) {
 			processCompoundQuery();
 		}
 		else {
@@ -109,6 +114,7 @@ public class QueryInformation {
 	 * Replaces variable query ("query") by original query in given expression, 
 	 * and simplifies it with original model's context.
 	 */
+	@Override
 	public Expression replaceQuerySymbolByQueryExpressionIfNeeded(Expression expression) {
 		Expression result;
 		if (queryIsCompound) {
@@ -122,7 +128,7 @@ public class QueryInformation {
 		return result;
 	}
 	
-	private boolean queryIsCompound() {
+	private boolean decideIfQueryIsCompound() {
 		Map<String, String> mapFromRandomVariableNameToTypeName = originalExpressionBasedModel.getMapFromRandomVariableNameToTypeName();
 		boolean queryIsOneOfTheRandomVariables = mapFromRandomVariableNameToTypeName.containsKey(queryExpression.toString());
 		queryIsCompound = ! queryIsOneOfTheRandomVariables;
@@ -178,5 +184,44 @@ public class QueryInformation {
 		String queryTypeName = queryType.toString();
 		Context result = originalContext.extendWithSymbolsAndTypes("query", queryTypeName);
 		return result;
+	}
+
+	public ExpressionBasedModel getOriginalExpressionBasedModel() {
+		return originalExpressionBasedModel;
+	}
+
+	@Override
+	public Expression getQuerySymbol() {
+		return querySymbol;
+	}
+
+	@Override
+	public List<Expression> getFactorExpressionsIncludingQueryDefinitionIfAny() {
+		return Collections.unmodifiableList(factorExpressionsIncludingQueryDefinitionIfAny);
+	}
+
+	@Override
+	public List<Expression> getRandomVariablesExcludingQuerySymbol() {
+		return Collections.unmodifiableList(originalRandomVariables);
+	}
+
+	@Override
+	public Expression getQueryExpression() {
+		return queryExpression;
+	}
+
+	@Override
+	public boolean isKnownToBeBayesianNetwork() {
+		return isKnownToBeBayesianNetwork;
+	}
+
+	@Override
+	public boolean getQueryIsCompound() {
+		return queryIsCompound;
+	}
+
+	@Override
+	public Context getContext() {
+		return context;
 	}
 }

@@ -35,48 +35,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.core.expressionbased;
+package com.sri.ai.praise.core.inference.core.expressionbased.query;
 
 import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
-import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedQuery;
+import com.sri.ai.praise.core.model.classbased.expressionbased.core.ExpressionBasedQueryFromModel;
 import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactor;
 import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactorNetwork;
 import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionVariable;
 
 /**
- * A probabilistic solver for an {@link AddBooleanQueryToContext}
+ * A probabilistic solver for an {@link ExpressionBasedQueryFromModel}
  * that applies multi-quantifier elimination to marginalizing summations.
  * 
  * @author braz
  *
  */
-public class ExactBPExpressionBasedSolver extends AbstractExpressionBasedSolver implements ExpressionBasedSolver {
+public class ExactBPExpressionBasedQuerySolver extends AbstractExpressionBasedQuerySolver {
 
-	public ExactBPExpressionBasedSolver(ExpressionBasedModel model) {
-		super(model);
-	}
-	
 	@Override
-	protected Expression computeNormalizedMarginal(QueryInformation queryInformation) {
-		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(queryInformation.factorExpressionsIncludingQueryDefinitionIfAny, queryInformation.context);
-		ExpressionVariable queryVariable = new ExpressionVariable(queryInformation.querySymbol);
-		Expression result = computeNormalizedMarginal(queryVariable, factorNetwork);
-		return result;
-	}
-
-	private Expression computeNormalizedMarginal(ExpressionVariable queryVariable, ExpressionFactorNetwork factorNetwork) {
+	protected Expression computeNormalizedMarginal(ExpressionBasedQuery query) {
+		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(query.getFactorExpressionsIncludingQueryDefinitionIfAny(), query.getContext());
+		ExpressionVariable queryVariable = new ExpressionVariable(query.getQuerySymbol());
 		ExactBP exactBP = new ExactBP(queryVariable, factorNetwork);
 		Expression unnormalized = (ExpressionFactor) exactBP.apply();
-		Expression result = normalize(queryVariable, unnormalized, factorNetwork.getContext());
-		return result;
-	}
-
-	@Override
-	public void interrupt() {
-		System.err.println("interrupt() not yet implemented for " + ExactBPExpressionBasedSolver.class.getSimpleName());
+		Expression normalizedMarginal = normalize(queryVariable, unnormalized, factorNetwork.getContext());
+		return normalizedMarginal;
 	}
 }

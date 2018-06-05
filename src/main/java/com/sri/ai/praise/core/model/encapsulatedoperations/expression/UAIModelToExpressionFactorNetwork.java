@@ -29,7 +29,7 @@ import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.model.api.Factor;
-import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.table.core.data.FunctionTable;
 import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.model.classbased.table.core.uai.parsing.UAIModelReader;

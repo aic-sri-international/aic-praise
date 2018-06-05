@@ -41,13 +41,13 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.expressionbased.core.DefaultExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMSortDeclaration;
 import com.sri.ai.praise.core.model.classbased.table.api.GraphicalNetwork;
 import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil;
 
 @Beta
-public class UAI_to_ExpressionBased_Translator extends ExpressionBasedModel {
+public class UAI_to_ExpressionBased_Translator extends DefaultExpressionBasedModel {
 
 	public UAI_to_ExpressionBased_Translator(List<Expression> tables, GraphicalNetwork network) {
 		super(makeParameters(tables, network));

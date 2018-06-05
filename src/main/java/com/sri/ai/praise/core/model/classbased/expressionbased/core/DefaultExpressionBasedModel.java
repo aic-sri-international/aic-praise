@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.model.classbased.expressionbased;
+package com.sri.ai.praise.core.model.classbased.expressionbased.core;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
@@ -28,10 +28,10 @@ import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.core.model.api.Model;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.util.Util;
 
-public class ExpressionBasedModel implements Model, Cloneable {
+public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 
 	protected List<Expression> factors = new ArrayList<>();
 	protected Map<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>();
@@ -58,7 +58,7 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		public Theory optionalTheory = null;
 	}
 
-	protected ExpressionBasedModel(Parameters parameters) {
+	protected DefaultExpressionBasedModel(Parameters parameters) {
 		this(
 				parameters.factors,
 				parameters.mapFromRandomVariableNameToTypeName,
@@ -71,7 +71,7 @@ public class ExpressionBasedModel implements Model, Cloneable {
 				);
 	}
 	
-	public ExpressionBasedModel(
+	public DefaultExpressionBasedModel(
 			List<Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
@@ -92,7 +92,7 @@ public class ExpressionBasedModel implements Model, Cloneable {
 				);
 	}
 	
-	public ExpressionBasedModel(
+	public DefaultExpressionBasedModel(
 			List<Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
@@ -134,6 +134,7 @@ public class ExpressionBasedModel implements Model, Cloneable {
 
 	private Context context = null;
 
+	@Override
 	public Context getContext() {
 		if (context == null) {
 			context = makeContext();
@@ -164,16 +165,19 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		return contextWithQuery;
 	}
 
+	@Override
 	public List<Expression> getFactors() {
 		return Collections.unmodifiableList(factors);
 	}
 
+	@Override
 	public List<Expression> getRandomVariables() {
 		return Collections.unmodifiableList(randomVariables);
 	}
 
-	public ExpressionBasedModel getConditionedModel(Expression evidence) {
-		ExpressionBasedModel result;
+	@Override
+	public DefaultExpressionBasedModel getConditionedModel(Expression evidence) {
+		DefaultExpressionBasedModel result;
 		if (evidence != null && !Expressions.isNumber(evidence)) {
 			result = clone();
 			result.factors = new LinkedList<Expression>(factors);
@@ -186,39 +190,48 @@ public class ExpressionBasedModel implements Model, Cloneable {
 		return result;
 	}
 	
+	@Override
 	public Map<String, String> getMapFromRandomVariableNameToTypeName() {
 		return Collections.unmodifiableMap(mapFromRandomVariableNameToTypeName);
 	}
 
+	@Override
 	public Map<String, String> getMapFromNonUniquelyNamedConstantNameToTypeName() {
 		return Collections.unmodifiableMap(mapFromNonUniquelyNamedConstantNameToTypeName);
 	}
 
+	@Override
 	public Map<String, String> getMapFromUniquelyNamedConstantNameToTypeName() {
 		return Collections.unmodifiableMap(mapFromUniquelyNamedConstantNameToTypeName);
 	}
 
+	@Override
 	public Map<String, String> getMapFromCategoricalTypeNameToSizeString() {
 		return Collections.unmodifiableMap(mapFromCategoricalTypeNameToSizeString);
 	}
 
+	@Override
 	public Collection<Type> getAdditionalTypes() {
 		return Collections.unmodifiableCollection(additionalTypes);
 	}
 	
+	@Override
 	public boolean isKnownToBeBayesianNetwork() {
 		return isKnownToBeBayesianNetwork;
 	}
 
+	@Override
 	public Theory getTheory() {
 		return theory;
 	}
 
+	@Override
 	public void setTheory(Theory newTheory) {
 		theory = newTheory;
 		context = null;
 	}
 
+	@Override
 	public String toString() {
 		StringJoiner stringJoiner = new StringJoiner("\n");
 		
@@ -235,10 +248,10 @@ public class ExpressionBasedModel implements Model, Cloneable {
 	}
 	
 	@Override
-	public ExpressionBasedModel clone() {
-		ExpressionBasedModel result;
+	public DefaultExpressionBasedModel clone() {
+		DefaultExpressionBasedModel result;
 		try {
-			result = (ExpressionBasedModel) super.clone();
+			result = (DefaultExpressionBasedModel) super.clone();
 		}
 		catch (CloneNotSupportedException exception) {
 			throw new RuntimeException(exception);

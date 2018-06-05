@@ -44,10 +44,11 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.core.expressionbased.QueryInformation;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedQuery;
+import com.sri.ai.praise.core.model.classbased.expressionbased.core.ExpressionBasedQueryFromModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 
-public class QueryInformationTest {
+public class ExpressionBasedQueryTest {
 
 	@Test
 	public void test() {
@@ -93,33 +94,27 @@ public class QueryInformationTest {
 	private void runTest(String modelString, String queryString,
 			String expectedFactorExpressionsIncludingQueryDefinitionIfAnyString, String expectedQuerySymbolString,
 			boolean expectedQueryIsCompound, String expectedContextString) {
-		HOGMExpressionBasedModel model;
-		Expression query;
-		QueryInformation queryInformation;
-		String actualFactorExpressionsIncludingQueryDefinitionIfAnyString;
-		String actualQuerySymbol;
-		boolean actualQueryIsCompound;
-		String actualContextString;
-		model = new HOGMExpressionBasedModel(modelString);
-		query = parse(queryString);
-		queryInformation = new QueryInformation(model, query);
+		
+		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
+		Expression queryExpression = parse(queryString);
+		ExpressionBasedQuery query = new ExpressionBasedQueryFromModel(model, queryExpression);
 
-		actualFactorExpressionsIncludingQueryDefinitionIfAnyString = queryInformation.factorExpressionsIncludingQueryDefinitionIfAny.toString();
+		String actualFactorExpressionsIncludingQueryDefinitionIfAnyString = query.getFactorExpressionsIncludingQueryDefinitionIfAny().toString();
 		println(expectedFactorExpressionsIncludingQueryDefinitionIfAnyString);
 		println(actualFactorExpressionsIncludingQueryDefinitionIfAnyString);
 		assertEquals(expectedFactorExpressionsIncludingQueryDefinitionIfAnyString, actualFactorExpressionsIncludingQueryDefinitionIfAnyString);
 		
-		actualQuerySymbol = queryInformation.querySymbol.toString();
+		String actualQuerySymbol = query.getQuerySymbol().toString();
 		println("expected querySymbol: " + expectedQuerySymbolString);
 		println("actual   querySymbol: " + actualQuerySymbol);
 		assertEquals(expectedQuerySymbolString, actualQuerySymbol);
 		
-		actualQueryIsCompound = queryInformation.queryIsCompound;
+		boolean actualQueryIsCompound = query.getQueryIsCompound();
 		println("expected queryIsCompound: " + expectedQueryIsCompound);
 		println("actual   queryIsCompound: " + actualQueryIsCompound);
 		assertEquals(expectedQueryIsCompound, actualQueryIsCompound);
 		
-		actualContextString = queryInformation.context.toString();
+		String actualContextString = query.getContext().toString();
 		println("expected context string: " + expectedContextString);
 		println("actual   context string: " + actualContextString);
 		assertEquals(expectedContextString, actualContextString);

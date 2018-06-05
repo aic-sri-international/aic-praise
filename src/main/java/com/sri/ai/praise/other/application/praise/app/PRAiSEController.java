@@ -85,7 +85,7 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.praise.core.model.api.ModelLanguage;
-import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.parsing.HOGMParserWrapper;

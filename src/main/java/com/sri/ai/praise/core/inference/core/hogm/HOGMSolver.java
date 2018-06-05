@@ -53,9 +53,9 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.praise.core.inference.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.core.expressionbased.DefaultExpressionBasedSolver;
-import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.inference.api.ExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.core.expressionbased.model.DefaultExpressionBasedModelSolver;
+import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMSortDeclaration;
@@ -76,7 +76,7 @@ public class HOGMSolver {
 	private List<HOGMQueryError> errors = new ArrayList<>();
 	private boolean canceled = false;
 	private Theory optionalTheory = null;
-	private ExpressionBasedSolver inferencer = null;
+	private ExpressionBasedModelSolver inferencer = null;
 	
 	public HOGMSolver(String model, String query) {
 		this(model, list(query));
@@ -165,7 +165,7 @@ public class HOGMSolver {
 		if (!canceled) {
 			IntegrationRecording.startRecordingIntegrationsOverGroups();
 			ExpressionBasedModel factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
-			inferencer = new DefaultExpressionBasedSolver(factorsAndTypes);
+			inferencer = new DefaultExpressionBasedModelSolver(factorsAndTypes);
 			Pair<Expression, Long> inferenceResultAndTime = time(inference(queryExpression)); 			
 			HOGMQueryResult queryResult = new HOGMQueryResult(query, queryExpression, parsedModel, inferenceResultAndTime);
 			queryResult.recordNumberOfSummations();

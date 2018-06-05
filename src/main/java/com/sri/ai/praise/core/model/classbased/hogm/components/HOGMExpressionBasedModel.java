@@ -48,12 +48,12 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
-import com.sri.ai.praise.core.model.classbased.expressionbased.ExpressionBasedModel;
+import com.sri.ai.praise.core.model.classbased.expressionbased.core.DefaultExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.model.classbased.hogm.parsing.HOGMParserWrapper;
 
 @Beta
-public class HOGMExpressionBasedModel extends ExpressionBasedModel {
+public class HOGMExpressionBasedModel extends DefaultExpressionBasedModel {
 
 	public HOGMExpressionBasedModel(String hogmodelString) {
 		this(new HOGMParserWrapper().parseModel(hogmodelString));
