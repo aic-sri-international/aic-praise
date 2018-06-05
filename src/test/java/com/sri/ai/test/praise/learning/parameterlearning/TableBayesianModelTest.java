@@ -168,7 +168,7 @@ public class TableBayesianModelTest {
 		// Testing
 		
 		// For the sickNode first:
-		// Expected parameters (2 datapoints): {(0, [0, 0])=0.5, (1, [0, 0])=0.5, (1, [1, 0])=0.5, (1, [1, 1])=0.5, (0, [1, 1])=0.5, (0, [1, 0])=0.5, (0, [0, 1])=0.25, (1, [0, 1])=0.75}
+		// Expected parameters (2 datapoints1): {(0, [0, 0])=0.5, (1, [0, 0])=0.5, (1, [1, 0])=0.5, (1, [1, 1])=0.5, (0, [1, 1])=0.5, (0, [1, 0])=0.5, (0, [0, 1])=0.25, (1, [0, 1])=0.75}
 		TableBayesianNode learnedSickNode = learnedNodes.get(0); 
 		LinkedHashMap<TableVariable, Integer> variablesAndTheirValues = map();
 	    variablesAndTheirValues.put(sickVariable, 0);
