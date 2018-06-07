@@ -24,7 +24,6 @@ import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.c
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
 import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.AEBP;
-import com.sri.ai.praise.core.inference.core.treebased.gabrielstry.TestCases;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIModel;
@@ -66,7 +65,7 @@ public class AnytimeExactBPTest2 {
 	private static AEBPTestingDataFrame solveWithRodrigos(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
 			String PGMName) {
 		println("\nSolving with Rodrigo's Anytime\n");
-		ExactBPNode<Variable,Factor> exactBP = new ExactBP(query, factorNetwork);
+		ExactBPNode<Variable,Factor> exactBP = new ExactBP(query, factorNetwork, v -> true /* is free variable (uninterpreted constant) */);
 		AnytimeExactBP<Variable,Factor> anytimeExactBP = new AnytimeExactBP<>(exactBP);
 		return solveAndStoreInDataFrame(anytimeExactBP,query,maximunTimeInSeconds,0,PGMName,"Rodrigo's");		
 	}

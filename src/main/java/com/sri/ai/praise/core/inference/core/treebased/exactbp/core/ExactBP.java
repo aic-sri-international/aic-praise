@@ -41,6 +41,8 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 
+import java.util.function.Predicate;
+
 import com.sri.ai.praise.core.model.api.FactorNetwork;
 import com.sri.ai.praise.core.model.api.Variable;
 
@@ -52,7 +54,7 @@ import com.sri.ai.praise.core.model.api.Variable;
  */
 public class ExactBP extends ExactBPFromVariableToFactor {
 
-	public ExactBP(Variable query, FactorNetwork factorNetwork) {
-		super(query, null, liveSet(list()), redirectingTo(liveSet(list())), factorNetwork);
+	public ExactBP(Variable query, FactorNetwork factorNetwork, Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate) {
+		super(query, null, liveSet(list()), redirectingTo(liveSet(list())), factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
 	}
 }

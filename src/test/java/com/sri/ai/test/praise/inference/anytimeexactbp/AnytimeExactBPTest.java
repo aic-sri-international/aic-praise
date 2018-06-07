@@ -301,7 +301,7 @@ public class AnytimeExactBPTest {
 	}
 
 	private ExpressionFactor solveWithExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
-		ExactBPNode<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
+		ExactBPNode<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork, v -> true /* is free variable (uninterpreted constant) */);
 		ExpressionFactor result = (ExpressionFactor) exactBP.apply();
 		return result;
 	}
@@ -313,7 +313,7 @@ public class AnytimeExactBPTest {
 		println("\nSolving with Anytime\n");
 		
 		long initialTime = System.currentTimeMillis();
-		ExactBPNode<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
+		ExactBPNode<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork, v -> true /* is free variable (uninterpreted constant) */);
 		AnytimeExactBP<Variable,Factor> anytimeExactBP = new AnytimeExactBP<>(exactBP);
 		Approximation<Factor> current = null;
 		while (anytimeExactBP.hasNext()) {

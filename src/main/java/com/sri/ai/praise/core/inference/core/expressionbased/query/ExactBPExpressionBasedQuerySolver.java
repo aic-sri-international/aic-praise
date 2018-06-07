@@ -39,8 +39,11 @@ package com.sri.ai.praise.core.inference.core.expressionbased.query;
 
 import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
 
+import java.util.function.Predicate;
+
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
+import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedQuery;
 import com.sri.ai.praise.core.model.classbased.expressionbased.core.ExpressionBasedQueryFromModel;
 import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactor;
@@ -60,9 +63,16 @@ public class ExactBPExpressionBasedQuerySolver extends AbstractExpressionBasedQu
 	protected Expression computeNormalizedMarginal(ExpressionBasedQuery query) {
 		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(query.getFactorExpressionsIncludingQueryDefinitionIfAny(), query.getContext());
 		ExpressionVariable queryVariable = new ExpressionVariable(query.getQuerySymbol());
-		ExactBP exactBP = new ExactBP(queryVariable, factorNetwork);
+		Predicate<Expression> isDefinedAsFreeByTheClientCodePredicate = query.getIsDefinedAsFreeByTheClientCodePredicate();
+		ExactBP exactBP = new ExactBP(queryVariable, factorNetwork, makeIsDefinedAsFreeByTheClientCodePredicate(isDefinedAsFreeByTheClientCodePredicate));
 		Expression unnormalized = (ExpressionFactor) exactBP.apply();
 		Expression normalizedMarginal = normalize(queryVariable, unnormalized, factorNetwork.getContext());
 		return normalizedMarginal;
+	}
+
+	private Predicate<Variable> makeIsDefinedAsFreeByTheClientCodePredicate(
+			Predicate<Expression> isDefinedAsFreeByTheClientCodePredicate) {
+		
+		return ev -> isDefinedAsFreeByTheClientCodePredicate.test((ExpressionVariable) ev);
 	}
 }

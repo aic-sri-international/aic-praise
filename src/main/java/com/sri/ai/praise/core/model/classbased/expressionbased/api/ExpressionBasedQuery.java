@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.model.classbased.expressionbased.api;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
@@ -26,5 +27,7 @@ public interface ExpressionBasedQuery {
 	boolean getQueryIsCompound();
 
 	Context getContext();
+
+	Predicate<Expression> getIsDefinedAsFreeByTheClientCodePredicate();
 
 }

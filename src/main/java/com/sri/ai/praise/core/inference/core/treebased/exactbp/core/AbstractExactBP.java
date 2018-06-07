@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
 import com.sri.ai.praise.core.model.api.Factor;
@@ -101,7 +102,11 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBPNo
 	 * @param subIncludedFactors
 	 * @return
 	 */
-	protected abstract ExactBPNode<SubRootType,RootType> makeSubExactBP(SubRootType subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors);
+	protected abstract ExactBPNode<SubRootType,RootType> 
+	makeSubExactBP(
+			SubRootType subRoot, 
+			LiveSet<Factor> subExcludedFactors, 
+			RedirectingLiveSet<Factor> subIncludedFactors);
 
 	/**
 	 * An abstract method for extensions to define what are their sub's roots.
@@ -123,13 +128,23 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBPNo
 	
 	protected FactorNetwork factorNetwork;
 	
-	protected AbstractExactBP(RootType root, SubRootType parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, FactorNetwork factorNetwork) {
+	protected Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate;
+	
+	protected AbstractExactBP(
+			RootType root, 
+			SubRootType parent, 
+			LiveSet<Factor> excludedFactors, 
+			RedirectingLiveSet<Factor> includedFactors, 
+			FactorNetwork factorNetwork, 
+			Predicate<Variable> isDefinedAsFreeByTheCliendCodePredicate) {
+		
 		this.root = root;
 		this.parent = parent;
 		this.subs = null;
 		this.excludedFactors = excludedFactors;
 		this.includedFactors = includedFactors;
 		this.factorNetwork = factorNetwork;
+		this.isDefinedAsFreeByTheClientCodePredicate = isDefinedAsFreeByTheCliendCodePredicate;
 	}
 	
 	@Override
@@ -270,6 +285,8 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBPNo
 				||
 				isEqualToParentIfThereIsOne(variable)
 				||
+				isDefinedAsFreeByTheClientCode(variable)
+				||
 				isInExternalFactors(variable);
 		return result;
 	}
@@ -282,6 +299,10 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBPNo
 	private boolean isEqualToParentIfThereIsOne(Variable variable) {
 		boolean result = notNullAndEquals(getParent(), variable);
 		return result;
+	}
+
+	private boolean isDefinedAsFreeByTheClientCode(Variable variable) {
+		return isDefinedAsFreeByTheClientCodePredicate.test(variable);
 	}
 
 	private boolean isInExternalFactors(Variable variable) {

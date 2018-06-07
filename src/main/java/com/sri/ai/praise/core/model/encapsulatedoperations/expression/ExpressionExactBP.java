@@ -37,8 +37,11 @@
  */
 package com.sri.ai.praise.core.model.encapsulatedoperations.expression;
 
+import java.util.function.Predicate;
+
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
+import com.sri.ai.praise.core.model.api.Variable;
 
 
 /**
@@ -48,9 +51,9 @@ import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
  */
 public class ExpressionExactBP extends ExactBP {
 
-	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
+	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate) {
 		
-		super(new ExpressionVariable(query), factorNetwork);
+		super(new ExpressionVariable(query), factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
 		
 	}
 	

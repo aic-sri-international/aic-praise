@@ -43,6 +43,7 @@ import static com.sri.ai.util.Util.list;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
 import com.sri.ai.praise.core.model.api.Factor;
@@ -53,13 +54,20 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public class ExactBPFromFactorToVariable extends AbstractExactBP<Factor,Variable> {
 	
-	protected ExactBPFromFactorToVariable(Factor root, Variable parent, LiveSet<Factor> excludedFactors, RedirectingLiveSet<Factor> includedFactors, FactorNetwork model) {
-		super(root, parent, excludedFactors, includedFactors, model);
+	protected ExactBPFromFactorToVariable(
+			Factor root, 
+			Variable parent, 
+			LiveSet<Factor> excludedFactors, 
+			RedirectingLiveSet<Factor> includedFactors, 
+			FactorNetwork model, 
+			Predicate<Variable> isDefinedAsFreeByTheCliendCodePredicate) {
+		
+		super(root, parent, excludedFactors, includedFactors, model, isDefinedAsFreeByTheCliendCodePredicate);
 	}
 
 	@Override
 	protected ExactBPNode<Variable,Factor> makeSubExactBP(Variable subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork);
+		return new ExactBPFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
 	}
 
 	@Override

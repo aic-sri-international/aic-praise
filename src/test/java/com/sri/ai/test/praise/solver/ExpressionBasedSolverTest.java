@@ -60,6 +60,7 @@ import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.inference.api.ExpressionBasedModelSolver;
 import com.sri.ai.praise.core.inference.core.expressionbased.model.DefaultExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.core.expressionbased.model.ExactBPExpressionBasedModelSolver;
 import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;
@@ -977,10 +978,10 @@ public class ExpressionBasedSolverTest {
 			boolean useFactorization) throws AssertionError {
 		
 		
-		ExpressionBasedModelSolver[] solvers = new ExpressionBasedModelSolver[] { 
+		ExpressionBasedModelSolver[] solvers = new ExpressionBasedModelSolver[] {
 				new DefaultExpressionBasedModelSolver(model, useFactorization)
 //				,
-//t				new ExactBPExpressionBasedModelSolver(model)
+//				new ExactBPExpressionBasedModelSolver(model)
 		};
 		
 		for (ExpressionBasedModelSolver solver : solvers) {
