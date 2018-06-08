@@ -37,49 +37,56 @@
  */
 package com.sri.ai.praise.core.inference.core.treebased.exactbp.core;
 
+import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
-import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Predicate;
 
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.FactorNetwork;
 import com.sri.ai.praise.core.model.api.Variable;
-import com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet;
+import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
-/**
- * A solver that returns the normalized marginal of a query given a factor network, using the Exact BP algorithm.
- * 
- * @author braz
- *
- */
-public class ExactBP extends ExactBPNodeFromVariableToFactor {
-
-	public ExactBP(Variable query, FactorNetwork factorNetwork) {
-		this(query, factorNetwork, v -> false /* default is "no uninterpreted constants" */);
+public class ExactBPNodeFromVariableToFactor extends AbstractExactBPNode<Variable, Factor> {
+	
+	protected ExactBPNodeFromVariableToFactor(
+			Variable root, 
+			Factor parent, 
+			LiveSet<Factor> excludedFactors, 
+			RedirectingLiveSet<Factor> includedFactors, 
+			FactorNetwork factorNetwork, 
+			Predicate<Variable> isDefinedAsFreeByTheCliendCodePredicate) {
+		
+		super(root, parent, excludedFactors, includedFactors, factorNetwork, isDefinedAsFreeByTheCliendCodePredicate);
 	}
 
-	public ExactBP(Variable query, FactorNetwork factorNetwork, Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate) {
-		super(
-				query,
-				makeParent(),
-				makeExcludedFactors(),
-				makeIncludedFactors(),
-				factorNetwork,
-				isDefinedAsFreeByTheClientCodePredicate);
-	}
-
-	private static Factor makeParent() {
-		return null;  // there is none, as the message on the query is the final computation
+	@Override
+	protected ExactBPNode<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
+		return new ExactBPNodeFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
 	}
 	
-	private static ExtensionalLiveSet<Factor> makeExcludedFactors() {
-		return liveSet(list()); // there is no "exterior" to this ExactBPNode, so there are no excluded factors
+	@Override
+	protected ArrayList<? extends Factor> makeSubsRoots() {
+		ArrayList<? extends Factor> result = collectToArrayList(getRootNeighbors(), n -> ! excludedFactors.contains((Factor)n));
+		return result;
 	}
 
-	private static RedirectingLiveSet<Factor> makeIncludedFactors() {
-		return redirectingTo(makeExcludedFactors()); // the search initially starts with no included factors having been included yet
+	private Collection<? extends Factor> getRootNeighbors() {
+		return getFactorNetwork().getNeighbors(getRoot());
+	}
+
+	@Override
+	public List<Factor> getFactorsAtRoot() {
+		return list();
+	}
+
+	@Override
+	public Variable getMessageVariable() {
+		return getRoot();
 	}
 }

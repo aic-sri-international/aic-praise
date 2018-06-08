@@ -33,7 +33,7 @@ import com.sri.ai.praise.core.PRAiSEUtil;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.AnytimeExactBP;
 import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.AbstractExactBP;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.AbstractExactBPNode;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionExactBP;
@@ -56,7 +56,7 @@ public class AnytimeExactBPTest {
 		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
 		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
 
-		AbstractExactBP.debug = false;
+		AbstractExactBPNode.debug = false;
 		
 		String[] variableAndTypes;
 		String factorNetworkString;

@@ -88,7 +88,7 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * @author braz
  *
  */
-public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBPNode<RootType,SubRootType> {
+public abstract class AbstractExactBPNode<RootType,SubRootType> implements ExactBPNode<RootType,SubRootType> {
 
 	public static boolean debug = false;
 
@@ -130,7 +130,7 @@ public abstract class AbstractExactBP<RootType,SubRootType> implements ExactBPNo
 	
 	protected Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate;
 	
-	protected AbstractExactBP(
+	protected AbstractExactBPNode(
 			RootType root, 
 			SubRootType parent, 
 			LiveSet<Factor> excludedFactors, 

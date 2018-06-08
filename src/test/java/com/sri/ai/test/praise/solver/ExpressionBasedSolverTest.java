@@ -979,9 +979,10 @@ public class ExpressionBasedSolverTest {
 		
 		
 		ExpressionBasedModelSolver[] solvers = new ExpressionBasedModelSolver[] {
-				new DefaultExpressionBasedModelSolver(model, useFactorization)
-//				,
-//				new ExactBPExpressionBasedModelSolver(model)
+
+				new DefaultExpressionBasedModelSolver(model, useFactorization),
+				new ExactBPExpressionBasedModelSolver(model)
+				
 		};
 		
 		for (ExpressionBasedModelSolver solver : solvers) {

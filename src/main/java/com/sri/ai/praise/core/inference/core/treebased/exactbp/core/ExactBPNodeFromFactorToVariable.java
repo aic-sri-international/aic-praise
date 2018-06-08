@@ -52,41 +52,41 @@ import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
-public class ExactBPFromVariableToFactor extends AbstractExactBP<Variable, Factor> {
+public class ExactBPNodeFromFactorToVariable extends AbstractExactBPNode<Factor,Variable> {
 	
-	protected ExactBPFromVariableToFactor(
-			Variable root, 
-			Factor parent, 
+	protected ExactBPNodeFromFactorToVariable(
+			Factor root, 
+			Variable parent, 
 			LiveSet<Factor> excludedFactors, 
 			RedirectingLiveSet<Factor> includedFactors, 
-			FactorNetwork factorNetwork, 
+			FactorNetwork model, 
 			Predicate<Variable> isDefinedAsFreeByTheCliendCodePredicate) {
 		
-		super(root, parent, excludedFactors, includedFactors, factorNetwork, isDefinedAsFreeByTheCliendCodePredicate);
+		super(root, parent, excludedFactors, includedFactors, model, isDefinedAsFreeByTheCliendCodePredicate);
 	}
 
 	@Override
-	protected ExactBPNode<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
+	protected ExactBPNode<Variable,Factor> makeSubExactBP(Variable subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
+		return new ExactBPNodeFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
 	}
-	
+
 	@Override
-	protected ArrayList<? extends Factor> makeSubsRoots() {
-		ArrayList<? extends Factor> result = collectToArrayList(getRootNeighbors(), n -> ! excludedFactors.contains((Factor)n));
+	protected ArrayList<? extends Variable> makeSubsRoots() {
+		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> ! n.equals(parent));
 		return result;
 	}
 
-	private Collection<? extends Factor> getRootNeighbors() {
+	protected Collection<? extends Variable> getRootNeighbors() {
 		return getFactorNetwork().getNeighbors(getRoot());
 	}
 
 	@Override
 	public List<Factor> getFactorsAtRoot() {
-		return list();
+		return list(getRoot());
 	}
 
 	@Override
 	public Variable getMessageVariable() {
-		return getRoot();
+		return getParent();
 	}
 }

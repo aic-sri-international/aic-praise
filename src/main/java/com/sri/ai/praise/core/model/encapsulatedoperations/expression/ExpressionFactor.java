@@ -42,11 +42,13 @@ import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.collect.PredicateIterator.predicateIterator;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.WrappedExpression;
@@ -55,6 +57,8 @@ import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.praise.core.model.encapsulatedoperations.IdentityFactor;
+import com.sri.ai.util.collect.LazyConstant;
+import com.sri.ai.util.collect.PredicateIterator;
 
 /**
  * A {@link Factor} represented by an {@link Expression}.
@@ -75,7 +79,6 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	private static final long serialVersionUID = 1L;
 
 	private Context context;
-
 	public ExpressionFactor(Expression expression, Context context) {
 		super(expression);
 		this.context = context;
@@ -93,9 +96,20 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	@Override
 	public List<? extends Variable> getVariables() {
+		return variables.get();
+	}
+
+	private LazyConstant<List<? extends Variable>> variables = new LazyConstant<>(this::makeVariables);
+	
+	private List<? extends Variable> makeVariables() {
 		Set<Expression> freeVariableExpressions = Expressions.freeVariables(getInnerExpression(), context);
-		List<? extends Variable> result = mapIntoList(freeVariableExpressions, e -> new ExpressionVariable(e));
+		PredicateIterator<Expression> freeVariableExpressionsMinusTypeExpressions = predicateIterator(freeVariableExpressions, isNotATypeExpression());
+		List<? extends Variable> result = mapIntoList(freeVariableExpressionsMinusTypeExpressions, e -> new ExpressionVariable(e));
 		return result;
+	}
+
+	private Predicate<Expression> isNotATypeExpression() {
+		return e -> context.getTypeFromTypeExpression(e) == null;
 	}
 
 	@Override
