@@ -51,10 +51,12 @@ import com.sri.ai.praise.core.model.api.Variable;
  */
 public class ExpressionExactBP extends ExactBP {
 
+	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
+		super(new ExpressionVariable(query), factorNetwork);
+	}
+
 	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate) {
-		
 		super(new ExpressionVariable(query), factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
-		
 	}
 	
 }

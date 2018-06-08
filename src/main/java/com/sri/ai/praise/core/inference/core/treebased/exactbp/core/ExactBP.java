@@ -54,6 +54,10 @@ import com.sri.ai.praise.core.model.api.Variable;
  */
 public class ExactBP extends ExactBPFromVariableToFactor {
 
+	public ExactBP(Variable query, FactorNetwork factorNetwork) {
+		this(query, factorNetwork, v -> false /* default is "no uninterpreted constants" */);
+	}
+
 	public ExactBP(Variable query, FactorNetwork factorNetwork, Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate) {
 		super(query, null, liveSet(list()), redirectingTo(liveSet(list())), factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
 	}

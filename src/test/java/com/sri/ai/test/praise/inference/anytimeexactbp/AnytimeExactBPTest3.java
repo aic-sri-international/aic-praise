@@ -64,7 +64,7 @@ public class AnytimeExactBPTest3 {
 	public static AEBPTestingDataFrame solveRodrigoWithoutBoxing(Variable query, EditableFactorNetwork factorNetwork, long maximunTimeInSeconds,
 			String PGMName) {
 		println("\nSolving with Rodrigo's Anytime - no boxing\n");
-		ExactBPNode<Variable,Factor> exactBP = new ExactBP(query, factorNetwork, v -> true /* is free variable (uninterpreted constant) */);
+		ExactBPNode<Variable,Factor> exactBP = new ExactBP(query, factorNetwork);
 		AnytimeExactBP<Variable,Factor> anytimeExactBP = new AnytimeExactBP<>(exactBP);
 		return AEBPSolver.solve(anytimeExactBP,query,maximunTimeInSeconds,0,PGMName,"Rodrigo");
 	}
