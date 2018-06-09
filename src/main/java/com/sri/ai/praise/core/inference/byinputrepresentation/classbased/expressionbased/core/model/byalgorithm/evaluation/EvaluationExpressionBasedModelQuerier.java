@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver.ExpressionBasedSolverToExpressionBasedModelSolverAdapter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver.ExpressionBasedSolverToExpressionBasedModelQuerierAdapter;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.evaluation.EvaluationExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 
@@ -48,13 +48,13 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
  * @author braz
  *
  */
-public class EvaluationExpressionBasedModelSolver extends ExpressionBasedSolverToExpressionBasedModelSolverAdapter {
+public class EvaluationExpressionBasedModelQuerier extends ExpressionBasedSolverToExpressionBasedModelQuerierAdapter {
 
-	public EvaluationExpressionBasedModelSolver(ExpressionBasedModel model) {
+	public EvaluationExpressionBasedModelQuerier(ExpressionBasedModel model) {
 		this(model, true);
 	}
 
-	public EvaluationExpressionBasedModelSolver(ExpressionBasedModel model, boolean useFactorization) {
-		super(new EvaluationExpressionBasedSolver(useFactorization), model);
+	public EvaluationExpressionBasedModelQuerier(ExpressionBasedModel model, boolean exploitFactorization) {
+		super(model, new EvaluationExpressionBasedSolver(exploitFactorization));
 	}
 }

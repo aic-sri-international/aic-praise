@@ -75,8 +75,8 @@ import com.sri.ai.grinder.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelQuerier;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelQuerier;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.table.api.GraphicalNetwork;
 import com.sri.ai.praise.core.representation.classbased.table.core.data.FunctionTable;
@@ -219,7 +219,7 @@ public class UAIMARSolver {
 		private Map<Integer, List<Double>> solution;
 		private Theory           theory;
 		//
-		private ExpressionBasedModelSolver inferencer;
+		private ExpressionBasedModelQuerier inferencer;
 		boolean interrupted = false;
 		private MultiQuantifierEliminator genericTableSolver = null;
 		
@@ -351,7 +351,7 @@ public class UAIMARSolver {
 			}
 			
 			expressionBasedModel = expressionBasedModel.getConditionedModel(evidenceExpr);
-			inferencer = new EvaluationExpressionBasedModelSolver(expressionBasedModel);
+			inferencer = new EvaluationExpressionBasedModelQuerier(expressionBasedModel);
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
@@ -368,7 +368,7 @@ public class UAIMARSolver {
 						System.out.println("ExternalProcessSolver Interrupted (l).");
 						return false;
 					}
-					marginal = inferencer.solve(queryExpression);
+					marginal = inferencer.answer(queryExpression);
 					
 					if (evidenceExpr == null) {
 						System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);

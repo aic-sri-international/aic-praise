@@ -38,27 +38,26 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelQuerier;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.query.ExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedProblem;
 
 /**
- * A {@link ExpressionBasedModelSolver} based on a given {@link DefaultExpressionBasedProblem}.
+ * A {@link ExpressionBasedModelQuerier} based on a given {@link DefaultExpressionBasedProblem}.
  * 
  * @author braz
  *
  */
-public class ExpressionBasedSolverToExpressionBasedModelSolverAdapter implements ExpressionBasedModelSolver {
+public class ExpressionBasedSolverToExpressionBasedModelQuerierAdapter implements ExpressionBasedModelQuerier {
 
-	private ExpressionBasedSolver solver;
 	private ExpressionBasedModel model;
+	private ExpressionBasedSolver solver;
 	
-	public ExpressionBasedSolverToExpressionBasedModelSolverAdapter(ExpressionBasedSolver solver, ExpressionBasedModel model) {
-		this.solver = solver;
+	public ExpressionBasedSolverToExpressionBasedModelQuerierAdapter(ExpressionBasedModel model, ExpressionBasedSolver solver) {
 		this.model = model;
+		this.solver = solver;
 	}
 	
 	@Override
@@ -72,12 +71,7 @@ public class ExpressionBasedSolverToExpressionBasedModelSolverAdapter implements
 	}
 	
 	@Override
-	public Context getContext() {
-		return model.getContext();
-	}
-
-	@Override
-	public Expression solve(Expression queryExpression) {
+	public Expression answer(Expression queryExpression) {
 		ExpressionBasedProblem problem = new DefaultExpressionBasedProblem(queryExpression, model);
 		Expression result = solver.solve(problem);
 		return result;

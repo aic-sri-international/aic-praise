@@ -59,8 +59,8 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelQuerier;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelQuerier;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
@@ -110,10 +110,9 @@ public class HOGModelGrounding {
 		
 		Map<Expression, List<Expression>> typeToValues = createTypeToValuesMap(factorsAndTypes, randomVariableNameToTypeSizeAndUniqueConstants);
 		Map<String, String> newUniqueConstantToTypeMap = createGroundedUniqueConstantToTypeMap(typeToValues);
-	    
-		ExpressionBasedModelSolver inferencer = makeInferencer(factorsAndTypes, newUniqueConstantToTypeMap);
-		
-		Context context = inferencer.getContext();
+		ExpressionBasedModel groundedExpressionBasedModel = makeGroundedExpressionBasedModel(factorsAndTypes, newUniqueConstantToTypeMap);
+		ExpressionBasedModelQuerier inferencer = new EvaluationExpressionBasedModelQuerier(groundedExpressionBasedModel);
+		Context context = groundedExpressionBasedModel.getContext();
 		
 		listener.numberFactors(factorsAndTypes.getFactors().size());
 		int factorIndex = 0;
@@ -170,13 +169,8 @@ public class HOGModelGrounding {
 		listener.groundingComplete();
 	}
 
-	/**
-	 * Provides an appropriate {@link ExpressionBasedModelSolver} object.
-	 * @param factorsAndTypes
-	 * @param newUniqueConstantToTypeMap
-	 * @return
-	 */
-	private static ExpressionBasedModelSolver makeInferencer(ExpressionBasedModel factorsAndTypes, Map<String, String> newUniqueConstantToTypeMap) {
+	private static ExpressionBasedModel makeGroundedExpressionBasedModel(ExpressionBasedModel factorsAndTypes,
+			Map<String, String> newUniqueConstantToTypeMap) {
 		boolean isBayesianNetwork = false;
 		ExpressionBasedModel groundedFactorsAndTypesInformation = 
 				new HOGMExpressionBasedModel(
@@ -185,10 +179,9 @@ public class HOGModelGrounding {
 						factorsAndTypes.getMapFromNonUniquelyNamedConstantNameToTypeName(),
 						newUniqueConstantToTypeMap,
 						factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
-						list(),
-						isBayesianNetwork); // additional types
-		ExpressionBasedModelSolver inferencer = new EvaluationExpressionBasedModelSolver(groundedFactorsAndTypesInformation);
-		return inferencer;
+						list(), // additional types
+						isBayesianNetwork);
+		return groundedFactorsAndTypesInformation;
 	}
 
 	/**
@@ -237,7 +230,7 @@ public class HOGModelGrounding {
 	 * @param inferencer
 	 * @param context
 	 */
-	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedModelSolver inferencer, Context context) {
+	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedModelQuerier inferencer, Context context) {
 		int[] radices                    = new int[randomVariablesInFactor.size()];
 		List<List<Expression>> factorRandomVariableTypeValues = new ArrayList<>();
 		for (int i = 0; i < randomVariablesInFactor.size(); i++) {
@@ -256,7 +249,7 @@ public class HOGModelGrounding {
 				int valueIndex = mrn.getCurrentNumeralValue(i);
 				groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), factorRandomVariableTypeValues.get(i).get(valueIndex), context);
 			}  		
-			Expression value = inferencer.getContext().evaluate(groundedFactor);
+			Expression value = context.evaluate(groundedFactor);
 			//				Expression value = inferencer.evaluate(groundedFactor);
 			if (!Expressions.isNumber(value)) {
 				throw new IllegalStateException("Unable to compute a number for the grounded factor ["+groundedFactor+"], instead got:"+value);
@@ -377,7 +370,7 @@ public class HOGModelGrounding {
 	 * @param inferencer
 	 * @param context
 	 */
-	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedModelSolver inferencer, Context context) {
+	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedModelQuerier inferencer, Context context) {
 		Function<Integer, Integer> fromVariableIndexToDomainSize = 
 				makeFunctionFromVariableIndexToDomainSize(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor);
 		int numberFactorValues = 
@@ -389,7 +382,7 @@ public class HOGModelGrounding {
 				randomVariablesInFactor, // variables to be used
 				makeFunctionFromVariableIndexValueIndexToValue(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor, typeToValues),
 				fromVariableIndexToDomainSize,
-				inferencer.getContext().getTheory(),
+				context.getTheory(),
 				true, // first time this variable is being iterated (it happens only once)
 				true, // last time this variable is being iterated (it happens only once)
 				(isFirstValue, isLastValue, value)

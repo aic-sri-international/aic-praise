@@ -39,6 +39,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.api;
 
 import java.util.function.Predicate;
 
+/** Represents a (marginalization only, for now) inference problem given a model, a query variable, and definition of what variables are to be considered parameters. */
 public interface Problem {
 
 	Variable getQueryVariable();

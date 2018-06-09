@@ -53,8 +53,8 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelQuerier;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelQuerier;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
@@ -76,7 +76,8 @@ public class HOGMSolver {
 	private List<HOGMQueryError> errors = new ArrayList<>();
 	private boolean canceled = false;
 	private Theory optionalTheory = null;
-	private ExpressionBasedModelSolver inferencer = null;
+	private ExpressionBasedModelQuerier inferencer = null;
+	private Context context;
 	
 	public HOGMSolver(String model, String query) {
 		this(model, list(query));
@@ -91,6 +92,10 @@ public class HOGMSolver {
 		try {
 			this.model = model;
 			this.parsedModel = parseModel();
+			ExpressionBasedModel expressionBasedModel = new HOGMExpressionBasedModel(parsedModel);
+			this.inferencer = new EvaluationExpressionBasedModelQuerier(expressionBasedModel);
+			context = expressionBasedModel.getContext();
+
 		}
 		catch (RecognitionException recognitionError) {
 			collectQueryError(recognitionError);
@@ -164,8 +169,6 @@ public class HOGMSolver {
 	private void runInference(String query, Expression queryExpression, HOGModel parsedModel) {
 		if (!canceled) {
 			IntegrationRecording.startRecordingIntegrationsOverGroups();
-			ExpressionBasedModel factorsAndTypes = new HOGMExpressionBasedModel(parsedModel);
-			inferencer = new EvaluationExpressionBasedModelSolver(factorsAndTypes);
 			Pair<Expression, Long> inferenceResultAndTime = time(inference(queryExpression)); 			
 			HOGMQueryResult queryResult = new HOGMQueryResult(query, queryExpression, parsedModel, inferenceResultAndTime);
 			queryResult.recordNumberOfSummations();
@@ -175,7 +178,7 @@ public class HOGMSolver {
 
 	private NullaryFunction<Expression> inference(Expression queryExpression) {
 		final Expression finalQueryExpression = queryExpression;
-		NullaryFunction<Expression> inference = () -> inferencer.solve(finalQueryExpression);
+		NullaryFunction<Expression> inference = () -> inferencer.answer(finalQueryExpression);
 		return inference;
 	}
 
@@ -277,7 +280,7 @@ public class HOGMSolver {
 
 	public Expression simplifyAnswer(Expression answer, Expression forQuery) {
 		Expression result  = answer;
-		Context    context = getQueryContext();
+		Context    context = getContext();
 		if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(GrinderUtil.getTypeExpressionOfExpression(forQuery, context))) {
 			result = result.replaceAllOccurrences(forQuery, Expressions.TRUE, context);
 			result = simplify(result);
@@ -286,12 +289,12 @@ public class HOGMSolver {
 		return result;
 	}
 	
-	public Context getQueryContext() {
-		return inferencer.getContext();
+	public Context getContext() {
+		return context;
 	}
 	
 	public Expression simplify(Expression expression) {
-		return inferencer.getContext().evaluate(expression);
+		return context.evaluate(expression);
 	}
 	
 	protected class ParserErrorListener implements Parser.ErrorListener {
