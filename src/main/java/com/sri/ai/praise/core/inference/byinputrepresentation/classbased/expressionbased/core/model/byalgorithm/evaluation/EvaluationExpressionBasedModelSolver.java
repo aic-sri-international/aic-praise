@@ -37,8 +37,8 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver.ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.evaluation.EvaluationExpressionBasedQuerySolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver.ExpressionBasedSolverToExpressionBasedModelSolverAdapter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.evaluation.EvaluationExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 
 /**
@@ -48,22 +48,13 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
  * @author braz
  *
  */
-public class EvaluationExpressionBasedModelSolver extends ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter {
+public class EvaluationExpressionBasedModelSolver extends ExpressionBasedSolverToExpressionBasedModelSolverAdapter {
 
-	/**
-	 * Constructs a quantifier elimination-based variable elimination solver for a factor graph.
-	 * @param model a {@link AddBooleanQueryToContext} to be solved.
-	 */
 	public EvaluationExpressionBasedModelSolver(ExpressionBasedModel model) {
 		this(model, true);
 	}
 
-	/**
-	 * Constructs a quantifier elimination-based solver for a factor graph.
-	 * @param model a {@link AddBooleanQueryToContext} to be solved.
-	 * @param useFactorization indicates whether to use factorization (that is, factor factors out as in variable elimination)
-	 */
 	public EvaluationExpressionBasedModelSolver(ExpressionBasedModel model, boolean useFactorization) {
-		super(new EvaluationExpressionBasedQuerySolver(useFactorization), model);
+		super(new EvaluationExpressionBasedSolver(useFactorization), model);
 	}
 }

@@ -51,37 +51,36 @@ import com.sri.ai.grinder.group.AssociativeCommutativeSemiRing;
 import com.sri.ai.grinder.group.SumProduct;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.AbstractExpressionBasedQuerySolver;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedQuery;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.AbstractExpressionBasedSolver;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedProblem;
 
 /**
- * A probabilistic solver for an {@link DefaultExpressionBasedQuery} using multi-quantifier eliminators.
+ * A probabilistic solver for an {@link DefaultExpressionBasedProblem} using multi-quantifier eliminators.
  * 
  * @author braz
  */
-public class EvaluationExpressionBasedQuerySolver extends AbstractExpressionBasedQuerySolver {
+public class EvaluationExpressionBasedSolver extends AbstractExpressionBasedSolver {
 
 	private Expression partitionFunction;
 	private AssociativeCommutativeSemiRing semiRing;
 	private MultiQuantifierEliminator multiQuantifierEliminator;
 
 	/**
-	 * Constructs a quantifier elimination-based variable elimination solver for a factor graph.
-	 * @param model a {@link AddBooleanQueryToContext} to be solved.
+	 * Constructs a quantifier elimination-based solver for a factor graph
+	 * using factorization exploitation.
 	 */
-	public EvaluationExpressionBasedQuerySolver() {
+	public EvaluationExpressionBasedSolver() {
 		this(true);
 	}
 
 	/**
 	 * Constructs a quantifier elimination-based solver for a factor graph.
-	 * @param model a {@link AddBooleanQueryToContext} to be solved.
-	 * @param useFactorization indicates whether to use factorization (that is, factor factors out as in variable elimination)
+	 * @param exploitFactorization indicates whether to use factorization (that is, factor factors out as in variable elimination)
 	 */
-	public EvaluationExpressionBasedQuerySolver(boolean useFactorization) {
+	public EvaluationExpressionBasedSolver(boolean exploitFactorization) {
 		
-		if (useFactorization) {
+		if (exploitFactorization) {
 			multiQuantifierEliminator = new SGVET();
 		}
 		else {
@@ -98,40 +97,40 @@ public class EvaluationExpressionBasedQuerySolver extends AbstractExpressionBase
 	}
 	
 	@Override
-	public Expression computeNormalizedMarginal(ExpressionBasedQuery query) {
-		Context context = query.getContext();
-		Expression productOfPotentials = Times.make(query.getFactorExpressionsIncludingQueryDefinitionIfAny());
-		Expression queryVariable = query.getQuerySymbol();
+	public Expression solveForQuerySymbolDefinedByExpressionBasedProblem(ExpressionBasedProblem problem) {
+		Context context = problem.getContext();
+		Expression productOfPotentials = Times.make(problem.getFactorExpressionsIncludingQueryDefinitionIfAny());
+		Expression queryVariable = problem.getQuerySymbol();
 		List<Expression> queryVariables = list(queryVariable);
-		boolean queryIsCompound = query.getQueryIsCompound();
-		List<Expression> randomVariables = query.getRandomVariablesExcludingQuerySymbol();
+		boolean queryIsCompound = problem.getQueryIsCompound();
+		List<Expression> randomVariables = problem.getRandomVariablesExcludingQuerySymbol();
 		List<Expression> variablesToBeEliminated = queryIsCompound? randomVariables : setDifference(randomVariables, queryVariables);
 		
 		Expression unnormalizedMarginal = marginalize(variablesToBeEliminated, productOfPotentials, context);
-		Expression normalizedMarginal = getNormalizedMarginal(unnormalizedMarginal, query);
+		Expression normalizedMarginal = getNormalizedMarginal(unnormalizedMarginal, problem);
 		return normalizedMarginal;
 	}
 
-	private Expression getNormalizedMarginal(Expression unnormalizedMarginal, ExpressionBasedQuery query) {
+	private Expression getNormalizedMarginal(Expression unnormalizedMarginal, ExpressionBasedProblem problem) {
 		Expression normalizedMarginal;
-		if (query.isKnownToBeBayesianNetwork()) {
+		if (problem.modelIsKnownToBeBayesianNetwork()) {
 			normalizedMarginal = unnormalizedMarginal;
 		}
 		else {
-			normalizedMarginal = normalize(unnormalizedMarginal, query);
+			normalizedMarginal = normalize(unnormalizedMarginal, problem);
 		}
 		return normalizedMarginal;
 	}
 
-	private Expression normalize(Expression unnormalizedMarginal, ExpressionBasedQuery query) {
-		computePartitionFunction(unnormalizedMarginal, query);
-		Expression normalizedMarginal = divideByPartitionFunction(unnormalizedMarginal, query.getContext());
+	private Expression normalize(Expression unnormalizedMarginal, ExpressionBasedProblem problem) {
+		computePartitionFunction(unnormalizedMarginal, problem);
+		Expression normalizedMarginal = divideByPartitionFunction(unnormalizedMarginal, problem.getContext());
 		return normalizedMarginal;
 	}
 
-	private void computePartitionFunction(Expression unnormalizedMarginal, ExpressionBasedQuery query) {
+	private void computePartitionFunction(Expression unnormalizedMarginal, ExpressionBasedProblem problem) {
 		if (partitionFunction == null) {
-			partitionFunction = marginalize(list(query.getQuerySymbol()), unnormalizedMarginal, query.getContext());
+			partitionFunction = marginalize(list(problem.getQuerySymbol()), unnormalizedMarginal, problem.getContext());
 		}
 	}
 

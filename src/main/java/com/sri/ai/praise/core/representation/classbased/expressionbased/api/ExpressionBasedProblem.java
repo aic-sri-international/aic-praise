@@ -6,7 +6,13 @@ import java.util.function.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
 
-public interface ExpressionBasedQuery {
+/**
+ * Represents a (always marginalization, for now) problem using {@link Expression}.
+ * 
+ * @author braz
+ *
+ */
+public interface ExpressionBasedProblem {
 
 	/** 
 	 * Replaces variable query ("query") by original query in given expression, 
@@ -22,7 +28,7 @@ public interface ExpressionBasedQuery {
 
 	Expression getQueryExpression();
 
-	boolean isKnownToBeBayesianNetwork();
+	boolean modelIsKnownToBeBayesianNetwork();
 
 	boolean getQueryIsCompound();
 

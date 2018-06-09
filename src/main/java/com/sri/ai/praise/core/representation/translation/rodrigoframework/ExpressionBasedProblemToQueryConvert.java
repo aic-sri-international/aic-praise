@@ -40,21 +40,21 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework;
 import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.VariableMarginalQuery;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultVariableMarginalQuery;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
 
-public class ExpressionBasedQueryToVariableMarginalQueryTranslator {
+public class ExpressionBasedProblemToQueryConvert {
 
-	public static VariableMarginalQuery convert(ExpressionBasedQuery query) {
-		ExpressionVariable queryVariable = new ExpressionVariable(query.getQuerySymbol());
-		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(query.getFactorExpressionsIncludingQueryDefinitionIfAny(), query.getContext());
-		Predicate<Expression> isExpressionParameterPredicate = query.getIsParameterPredicate();
+	public static Problem translate(ExpressionBasedProblem problem) {
+		ExpressionVariable queryVariable = new ExpressionVariable(problem.getQuerySymbol());
+		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(problem.getFactorExpressionsIncludingQueryDefinitionIfAny(), problem.getContext());
+		Predicate<Expression> isExpressionParameterPredicate = problem.getIsParameterPredicate();
 		Predicate<Variable> isParameterPredicate = makeIsParameterPredicate(isExpressionParameterPredicate);
-		VariableMarginalQuery exactBPQuery = new DefaultVariableMarginalQuery(queryVariable, factorNetwork, isParameterPredicate);
+		Problem exactBPQuery = new DefaultVariableMarginalQuery(queryVariable, factorNetwork, isParameterPredicate);
 		return exactBPQuery;
 	}
 

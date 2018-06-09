@@ -57,19 +57,17 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 
 /**
- * Given a {@link ExpressionBasedModel} and a (possibly compound) query expression for it,
- * prepares information for solving the query, including the factors that need to be used, context, and which query symbol to use.
+ * An {@link ExpressionBasedProblem} based on a {@link ExpressionBasedModel} and a (possibly compound) query expression.
  * <p>
- * This is done by, in the case of compound queries, introducing a new variable, "query", and a factor
- * making it equal to the original compound query.
- * <p>
- * Also provides a method for replacing the compound query back into a given expression containing
+ * In the case of compound queries, it introduces a new variable, "query", and a factor
+ * defining "query" to be equal to the original compound query.
+ * Because of that, it also provides a method for replacing the compound query back into a given expression containing
  * the variable query.
  */
-public class DefaultExpressionBasedQuery implements ExpressionBasedQuery {
+public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 
 	private static final Expression QUERY_SYMBOL = parse("query");
 	
@@ -90,7 +88,7 @@ public class DefaultExpressionBasedQuery implements ExpressionBasedQuery {
 	private Expression queryExpression;
 	
 	/** Whether the list of factors represents a Bayesian network. */
-	private boolean isKnownToBeBayesianNetwork;
+	private boolean modelIsKnownToBeBayesianNetwork;
 	
 	/** Whether the original query was compound. */
 	private boolean queryIsCompound;
@@ -98,12 +96,12 @@ public class DefaultExpressionBasedQuery implements ExpressionBasedQuery {
 	/** The context to be used, possibly including the symbol "query" and its type. */
 	private Context context;
 	
-	public DefaultExpressionBasedQuery(ExpressionBasedModel model, Expression queryExpression) {
+	public DefaultExpressionBasedProblem(Expression queryExpression, ExpressionBasedModel model) {
 		this.originalExpressionBasedModel = model;
 		this.queryExpression = queryExpression;
 		this.originalRandomVariables = originalExpressionBasedModel.getRandomVariables();
 		this.isParameterPredicate = e -> model.getMapFromNonUniquelyNamedConstantNameToTypeName().containsKey(e.toString());
-		this.isKnownToBeBayesianNetwork = originalExpressionBasedModel.isKnownToBeBayesianNetwork();
+		this.modelIsKnownToBeBayesianNetwork = originalExpressionBasedModel.isKnownToBeBayesianNetwork();
 		
 		if (decideIfQueryIsCompound()) {
 			processCompoundQuery();
@@ -219,8 +217,8 @@ public class DefaultExpressionBasedQuery implements ExpressionBasedQuery {
 	}
 
 	@Override
-	public boolean isKnownToBeBayesianNetwork() {
-		return isKnownToBeBayesianNetwork;
+	public boolean modelIsKnownToBeBayesianNetwork() {
+		return modelIsKnownToBeBayesianNetwork;
 	}
 
 	@Override

@@ -42,6 +42,7 @@ import java.util.function.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.ExactBP;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultVariableMarginalQuery;
 
 
 /**
@@ -52,11 +53,11 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 public class ExpressionExactBP extends ExactBP {
 
 	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
-		super(new ExpressionVariable(query), factorNetwork);
+		this(new ExpressionVariable(query), factorNetwork, v -> false);
 	}
 
 	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
-		super(new ExpressionVariable(query), factorNetwork, isParameterPredicate);
+		super(new DefaultVariableMarginalQuery(new ExpressionVariable(query), factorNetwork, isParameterPredicate));
 	}
 	
 }

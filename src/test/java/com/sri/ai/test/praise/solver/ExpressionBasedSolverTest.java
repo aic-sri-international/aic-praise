@@ -57,12 +57,12 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.query.ExpressionBasedQuerySolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.evaluation.EvaluationExpressionBasedQuerySolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp.ExactBPExpressionBasedQuerySolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.query.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.evaluation.EvaluationExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedQuery;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;
 
@@ -350,24 +350,24 @@ public class ExpressionBasedSolverTest {
 		// exploit factorization (that is, employ ExpressionVariable Elimination,
 		// as opposed to summing over the entire joint probability distribution).
 
-		DefaultExpressionBasedQuery query;
+		DefaultExpressionBasedProblem problem;
 		Expression marginal;
 
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
 		model = model.getConditionedModel(evidence);
 		Expression queryExpression;
 
-		ExpressionBasedQuerySolver solver = new EvaluationExpressionBasedQuerySolver(exploitFactorization);
+		ExpressionBasedSolver solver = new EvaluationExpressionBasedSolver(exploitFactorization);
 
 		queryExpression = parse("not earthquake");
 		// can be any boolean expression, or any random variable
-		query = new DefaultExpressionBasedQuery(model, queryExpression);
-		marginal = solver.solve(query);
+		problem = new DefaultExpressionBasedProblem(queryExpression, model);
+		marginal = solver.solve(problem);
 		System.out.println("Marginal is " + marginal);
 		
 		queryExpression = parse("earthquake");
-		query = new DefaultExpressionBasedQuery(model, queryExpression);
-		marginal = solver.solve(query);
+		problem = new DefaultExpressionBasedProblem(queryExpression, model);
+		marginal = solver.solve(problem);
 		System.out.println("Marginal is " + marginal);
 	}
 
@@ -983,22 +983,22 @@ public class ExpressionBasedSolverTest {
 			boolean useFactorization) throws AssertionError {
 		
 		
-		ExpressionBasedQuery query = new DefaultExpressionBasedQuery(model, queryExpression);
+		ExpressionBasedProblem problem = new DefaultExpressionBasedProblem(queryExpression, model);
 
-		ExpressionBasedQuerySolver[] querySolvers = new ExpressionBasedQuerySolver[] {
+		ExpressionBasedSolver[] solvers = new ExpressionBasedSolver[] {
 
-				new EvaluationExpressionBasedQuerySolver(useFactorization),
-				new ExactBPExpressionBasedQuerySolver()
+				new EvaluationExpressionBasedSolver(useFactorization),
+				new ExactBPExpressionBasedSolver()
 				
 		};
 		
-		for (ExpressionBasedQuerySolver solver : querySolvers) {
-			Expression marginal = solver.solve(query);
-			checkResult(query, expected, marginal, solver);
+		for (ExpressionBasedSolver solver : solvers) {
+			Expression marginal = solver.solve(problem);
+			checkResult(problem, expected, marginal, solver);
 		}
 	}
 
-	private void checkResult(ExpressionBasedQuery query, Expression expected, Expression marginal, ExpressionBasedQuerySolver solver)
+	private void checkResult(ExpressionBasedProblem problem, Expression expected, Expression marginal, ExpressionBasedSolver solver)
 			throws AssertionError {
 		TrueContext context = new TrueContext();
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, context);
@@ -1007,7 +1007,7 @@ public class ExpressionBasedSolverTest {
 			println(solver + " on " + queryExpression + ": passed");
 		}
 		// check if they are not identical, but equivalent expressions
-		else if (query.getContext().evaluate(apply(MINUS, expected, marginal)).equals(ZERO)) { // first attempt was to compare with equality, but this requires a more complete test of equality theory literals to exclude such a complex equality from being considered a literal, which is much more expensive
+		else if (problem.getContext().evaluate(apply(MINUS, expected, marginal)).equals(ZERO)) { // first attempt was to compare with equality, but this requires a more complete test of equality theory literals to exclude such a complex equality from being considered a literal, which is much more expensive
 			// Ok!
 		}
 		else {

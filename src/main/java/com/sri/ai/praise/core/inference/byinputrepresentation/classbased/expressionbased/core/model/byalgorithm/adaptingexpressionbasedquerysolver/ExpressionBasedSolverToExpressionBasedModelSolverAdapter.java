@@ -40,30 +40,30 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expres
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.query.ExpressionBasedQuerySolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.query.ExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedQuery;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedProblem;
 
 /**
- * A {@link ExpressionBasedModelSolver} based on a given {@link DefaultExpressionBasedQuery}.
+ * A {@link ExpressionBasedModelSolver} based on a given {@link DefaultExpressionBasedProblem}.
  * 
  * @author braz
  *
  */
-public class ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter implements ExpressionBasedModelSolver {
+public class ExpressionBasedSolverToExpressionBasedModelSolverAdapter implements ExpressionBasedModelSolver {
 
-	private ExpressionBasedQuerySolver querySolver;
+	private ExpressionBasedSolver solver;
 	private ExpressionBasedModel model;
 	
-	public ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter(ExpressionBasedQuerySolver querySolver, ExpressionBasedModel model) {
-		this.querySolver = querySolver;
+	public ExpressionBasedSolverToExpressionBasedModelSolverAdapter(ExpressionBasedSolver solver, ExpressionBasedModel model) {
+		this.solver = solver;
 		this.model = model;
 	}
 	
 	@Override
 	public void interrupt() {
-		querySolver.interrupt();
+		solver.interrupt();
 	}
 
 	@Override
@@ -78,8 +78,8 @@ public class ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter imple
 
 	@Override
 	public Expression solve(Expression queryExpression) {
-		ExpressionBasedQuery query = new DefaultExpressionBasedQuery(model, queryExpression);
-		Expression result = querySolver.solve(query);
+		ExpressionBasedProblem problem = new DefaultExpressionBasedProblem(queryExpression, model);
+		Expression result = solver.solve(problem);
 		return result;
 	}
 

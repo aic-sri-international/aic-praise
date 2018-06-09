@@ -44,8 +44,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedQuery;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 
 public class ExpressionBasedQueryTest {
@@ -97,24 +97,24 @@ public class ExpressionBasedQueryTest {
 		
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
 		Expression queryExpression = parse(queryString);
-		ExpressionBasedQuery query = new DefaultExpressionBasedQuery(model, queryExpression);
+		ExpressionBasedProblem problem = new DefaultExpressionBasedProblem(queryExpression, model);
 
-		String actualFactorExpressionsIncludingQueryDefinitionIfAnyString = query.getFactorExpressionsIncludingQueryDefinitionIfAny().toString();
+		String actualFactorExpressionsIncludingQueryDefinitionIfAnyString = problem.getFactorExpressionsIncludingQueryDefinitionIfAny().toString();
 		println(expectedFactorExpressionsIncludingQueryDefinitionIfAnyString);
 		println(actualFactorExpressionsIncludingQueryDefinitionIfAnyString);
 		assertEquals(expectedFactorExpressionsIncludingQueryDefinitionIfAnyString, actualFactorExpressionsIncludingQueryDefinitionIfAnyString);
 		
-		String actualQuerySymbol = query.getQuerySymbol().toString();
+		String actualQuerySymbol = problem.getQuerySymbol().toString();
 		println("expected querySymbol: " + expectedQuerySymbolString);
 		println("actual   querySymbol: " + actualQuerySymbol);
 		assertEquals(expectedQuerySymbolString, actualQuerySymbol);
 		
-		boolean actualQueryIsCompound = query.getQueryIsCompound();
+		boolean actualQueryIsCompound = problem.getQueryIsCompound();
 		println("expected queryIsCompound: " + expectedQueryIsCompound);
 		println("actual   queryIsCompound: " + actualQueryIsCompound);
 		assertEquals(expectedQueryIsCompound, actualQueryIsCompound);
 		
-		String actualContextString = query.getContext().toString();
+		String actualContextString = problem.getContext().toString();
 		println("expected context string: " + expectedContextString);
 		println("actual   context string: " + actualContextString);
 		assertEquals(expectedContextString, actualContextString);

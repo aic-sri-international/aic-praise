@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, SRI International
+ * Copyright (c) 2013, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-praise nor the names of its
+ * Neither the name of the aic-expresso nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,15 +35,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.factor.api;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp;
 
-import java.util.function.Predicate;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.NormalizedExactBP;
 
-public interface VariableMarginalQuery {
+public class ExactBPExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 
-	Variable getQueryVariable();
-	
-	FactorNetwork getModel();
-	
-	Predicate<Variable> getIsParameterPredicate();
+	public ExactBPExpressionBasedSolver() {
+		super(new NormalizedExactBP());
+	}
+
 }

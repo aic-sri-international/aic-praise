@@ -41,9 +41,9 @@ import java.util.function.Predicate;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.VariableMarginalQuery;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 
-public class DefaultVariableMarginalQuery implements VariableMarginalQuery {
+public class DefaultVariableMarginalQuery implements Problem {
 	
 	private Variable queryVariable;
 	private FactorNetwork model;

@@ -37,19 +37,19 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.exactbp;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver.ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp.ExactBPExpressionBasedQuerySolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver.ExpressionBasedSolverToExpressionBasedModelSolverAdapter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 
 /**
- * A probabilistic solver for an {@link AddBooleanQueryToContext}
- * that applies multi-quantifier elimination to marginalizing summations.
+ * A probabilistic solver for an {@link ExpressionBasedModel}
+ * that uses a {@link ExactBPExpressionBasedSolver} to answer queries.
  * 
  * @author braz
  *
  */
-public class ExactBPExpressionBasedModelSolver extends ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter {
+public class ExactBPExpressionBasedModelSolver extends ExpressionBasedSolverToExpressionBasedModelSolverAdapter {
 	public ExactBPExpressionBasedModelSolver(ExpressionBasedModel model) {
-		super(new ExactBPExpressionBasedQuerySolver(), model);
+		super(new ExactBPExpressionBasedSolver(), model);
 	}
 }

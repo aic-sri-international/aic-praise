@@ -40,19 +40,19 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.co
 import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.VariableMarginalQuerySolver;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.VariableMarginalQuery;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
 
-public class NormalizedExactBP implements VariableMarginalQuerySolver {
+public class NormalizedExactBP implements Solver {
 
 	@Override
-	public Expression solve(VariableMarginalQuery query) {
-		ExactBP exactBP = new ExactBP(query);
-		ExpressionVariable queryVariable = (ExpressionVariable) query.getQueryVariable();
-		ExpressionFactorNetwork model = (ExpressionFactorNetwork) query.getModel();
+	public Expression solve(Problem problem) {
+		ExactBP exactBP = new ExactBP(problem);
+		ExpressionVariable queryVariable = (ExpressionVariable) problem.getQueryVariable();
+		ExpressionFactorNetwork model = (ExpressionFactorNetwork) problem.getModel();
 		Expression unnormalized = (ExpressionFactor) exactBP.apply();
 		Expression normalizedMarginal = normalize(queryVariable, unnormalized, model.getContext());
 		return normalizedMarginal;

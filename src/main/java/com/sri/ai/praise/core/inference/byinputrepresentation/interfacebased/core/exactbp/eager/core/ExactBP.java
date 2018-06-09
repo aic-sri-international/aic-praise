@@ -46,7 +46,7 @@ import java.util.function.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.VariableMarginalQuery;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 import com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -62,11 +62,11 @@ public class ExactBP extends ExactBPNodeFromVariableToFactor {
 		this(query, factorNetwork, v -> false /* default is "no uninterpreted constants" */);
 	}
 
-	public ExactBP(VariableMarginalQuery query) {
-		this(query.getQueryVariable(), query.getModel(), query.getIsParameterPredicate());
+	public ExactBP(Problem problem) {
+		this(problem.getQueryVariable(), problem.getModel(), problem.getIsParameterPredicate());
 	}
 	
-	public ExactBP(Variable query, FactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
+	private ExactBP(Variable query, FactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
 		super(
 				query,
 				makeParent(),
