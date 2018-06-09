@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.translation.core.common;
+package com.sri.ai.praise.core.representation.translation.ciaranframework.core.common;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -50,8 +50,8 @@ import java.util.Base64;
 import java.util.List;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.translation.api.Translator;
-import com.sri.ai.praise.core.translation.api.TranslatorOptions;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.api.Translator;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.api.TranslatorOptions;
 
 /**
  * Abstract Translator class to handle common functionality (e.g. caching).

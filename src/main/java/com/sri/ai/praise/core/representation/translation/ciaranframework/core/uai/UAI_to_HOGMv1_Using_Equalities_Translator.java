@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, SRI International
+ * Copyright (c) 2015, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-expresso nor the names of its
+ * Neither the name of the aic-praise nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,30 +35,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp;
+package com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai;
 
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.IntStream;
+
+import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.AbstractExpressionBasedQuerySolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.VariableMarginalQuerySolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.NormalizedExactBP;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedQuery;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.VariableMarginalQuery;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
+import com.sri.ai.praise.core.representation.classbased.table.core.data.FunctionTable;
+import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil;
 
 /**
- * A probabilistic solver for an {@link DefaultExpressionBasedQuery}
- * that applies multi-quantifier elimination to marginalizing summations.
+ * Translator: UAI->HOGMv1 using equalities
  * 
- * @author braz
+ * @author oreilly
  *
  */
-public class ExactBPExpressionBasedQuerySolver extends AbstractExpressionBasedQuerySolver {
+@Beta
+public class UAI_to_HOGMv1_Using_Equalities_Translator extends AbstractUAI_to_HOGMv1_Translator {
 
 	@Override
-	protected Expression computeNormalizedMarginal(ExpressionBasedQuery query) {
-		VariableMarginalQuery exactBPQuery = ExpressionBasedToExactBPQueryConverter.convert(query);
-		VariableMarginalQuerySolver solver = new NormalizedExactBP();
-		Expression result = solver.solve(exactBPQuery);
+	public void addSortAndRandomVariableDeclarationsRegarding(int varIdx, int varCardinality, List<String> sorts, List<String> randoms) {
+		String varName     = UAIUtil.instanceVariableName(varIdx);
+		String varTypeName = UAIUtil.instanceTypeNameForVariable(varIdx, varCardinality);
+		
+		StringJoiner sortConstants = new StringJoiner(", ", ", ", ";");
+		final int innerVarIdx = varIdx;
+		IntStream.range(0, varCardinality).forEach(valIdx -> {
+			sortConstants.add(UAIUtil.instanceConstantValueForVariable(valIdx, innerVarIdx, varCardinality));
+		});
+		if (!HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(varTypeName)) {
+			sorts.add("sort "+varTypeName+": "+varCardinality+sortConstants.toString());
+		}
+		randoms.add("random "+varName+": "+varTypeName+";");
+	}
+
+	@Override
+	public Expression convertToHOGMv1Expression(FunctionTable table) {
+		Expression result = UAIUtil.constructGenericTableExpressionUsingEqualities(table);
 		return result;
 	}
 }

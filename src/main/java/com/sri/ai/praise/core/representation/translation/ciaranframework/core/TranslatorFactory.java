@@ -35,17 +35,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.translation.core;
+package com.sri.ai.praise.core.representation.translation.ciaranframework.core;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
-import com.sri.ai.praise.core.translation.api.Translator;
-import com.sri.ai.praise.core.translation.core.hugin.UAI_to_HuginDotNet_Translator;
-import com.sri.ai.praise.core.translation.core.uai.HOGMv1_to_UAI_Translator;
-import com.sri.ai.praise.core.translation.core.uai.UAI_to_HOGMv1_Using_Inequalities_Translator;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.api.Translator;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.core.hugin.UAI_to_HuginDotNet_Translator;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai.HOGMv1_to_UAI_Translator;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai.UAI_to_HOGMv1_Using_Inequalities_Translator;
 import com.sri.ai.util.base.Pair;
 
 /**

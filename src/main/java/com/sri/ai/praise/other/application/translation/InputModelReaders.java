@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 
-import com.sri.ai.praise.core.translation.api.Translator;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.api.Translator;
 
 public class InputModelReaders implements AutoCloseable {
 	

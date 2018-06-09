@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.translation.core.common;
+package com.sri.ai.praise.core.representation.translation.ciaranframework.core.common;
 
 import java.io.PrintWriter;
 import java.io.Reader;

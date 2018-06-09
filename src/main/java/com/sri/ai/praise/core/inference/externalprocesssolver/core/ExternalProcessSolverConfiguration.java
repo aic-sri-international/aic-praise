@@ -39,7 +39,7 @@ package com.sri.ai.praise.core.inference.externalprocesssolver.core;
 
 import java.io.File;
 
-import com.sri.ai.praise.core.translation.api.TranslatorOptions;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.api.TranslatorOptions;
 
 /**
  * EvaluationConfiguration information for a solver evaluator.

@@ -84,7 +84,7 @@ import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIEvidenceReading;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIModelReader;
-import com.sri.ai.praise.core.translation.core.uai.UAI_to_ExpressionBased_Translator;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai.UAI_to_ExpressionBased_Translator;
 
 /**
  * 

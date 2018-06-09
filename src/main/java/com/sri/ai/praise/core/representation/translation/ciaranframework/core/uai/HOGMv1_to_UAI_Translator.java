@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.translation.core.uai;
+package com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -44,7 +44,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
-import com.sri.ai.praise.core.translation.core.common.AbstractHOGMv1_to_Target_Translator;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.core.common.AbstractHOGMv1_to_Target_Translator;
 
 /**
  * Translator: HOGMv1->UAI

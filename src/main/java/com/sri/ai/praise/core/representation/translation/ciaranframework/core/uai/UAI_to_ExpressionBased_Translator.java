@@ -35,34 +35,50 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.translation.core.uai;
+package com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai;
 
 import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.representation.classbased.table.core.data.FunctionTable;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
+import com.sri.ai.praise.core.representation.classbased.table.api.GraphicalNetwork;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil;
 
-/**
- * Translator: UAI->HOGMv1 using equalities
- * 
- * @author oreilly
- *
- */
 @Beta
-public class UAI_to_HOGMv1_Using_Inequalities_Translator extends AbstractUAI_to_HOGMv1_Translator {
+public class UAI_to_ExpressionBased_Translator extends DefaultExpressionBasedModel {
 
+	public UAI_to_ExpressionBased_Translator(List<Expression> tables, GraphicalNetwork network) {
+		super(makeParameters(tables, network));
+	}
+	
+	private static Parameters makeParameters(List<Expression> tables, GraphicalNetwork network) {
+		Parameters parameters = new Parameters();
+		parameters.factors.addAll(tables);
+		for (int variableIndex = 0; variableIndex < network.numberVariables(); variableIndex++) {
+			int variableCardinality = network.cardinality(variableIndex);
+			String variableTypeName = UAIUtil.instanceTypeNameForVariable(variableIndex, variableCardinality);
+			parameters.mapFromRandomVariableNameToTypeName.put(UAIUtil.instanceVariableName(variableIndex), variableTypeName);
+			if (!variableTypeName.equals(HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().toString())) {
+				for (int valueIndex = 0; valueIndex < variableCardinality; valueIndex++) {
+					parameters.mapFromUniquelyNamedConstantNameToTypeName.put(
+							UAIUtil.instanceConstantValueForVariable(valueIndex, variableIndex, variableCardinality), variableTypeName);
+				}
+			}
+			parameters.mapFromCategoricalTypeNameToSizeString.put(variableTypeName, Integer.toString(variableCardinality));
+		}
+		return parameters;
+	}
+	
+	
 	@Override
-	public void addSortAndRandomVariableDeclarationsRegarding(int varIdx, int varCardinality, List<String> sorts, List<String> randoms) {
-		String varName     = UAIUtil.instanceVariableName(varIdx);
-		String varTypeName = "0.." + (varCardinality - 1);
-		randoms.add("random " + varName + ": " + varTypeName + ";");
+	public UAI_to_ExpressionBased_Translator clone() {
+		return (UAI_to_ExpressionBased_Translator) super.clone();
 	}
 
 	@Override
-	public Expression convertToHOGMv1Expression(FunctionTable table) {
-		Expression result = TranslationOfTableToInequalities.constructGenericTableExpressionUsingInequalities(table);
-		return result;
+	public UAI_to_ExpressionBased_Translator getConditionedModel(Expression evidence) {
+		return (UAI_to_ExpressionBased_Translator) super.getConditionedModel(evidence);
 	}
 }

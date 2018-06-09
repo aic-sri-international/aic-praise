@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp;
+package com.sri.ai.praise.core.representation.translation.rodrigoframework;
 
 import java.util.function.Predicate;
 
@@ -47,7 +47,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultV
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
 
-public class ExpressionBasedToExactBPQueryConverter {
+public class ExpressionBasedQueryToVariableMarginalQueryTranslator {
 
 	public static VariableMarginalQuery convert(ExpressionBasedQuery query) {
 		ExpressionVariable queryVariable = new ExpressionVariable(query.getQuerySymbol());

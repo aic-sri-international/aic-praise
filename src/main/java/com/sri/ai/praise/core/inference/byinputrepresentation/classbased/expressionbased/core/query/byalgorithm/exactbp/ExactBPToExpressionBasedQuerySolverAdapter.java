@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, SRI International
+ * Copyright (c) 2013, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-praise nor the names of its
+ * Neither the name of the aic-expresso nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,40 +35,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.application.translation;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.NormalizedExactBP;
 
-import com.sri.ai.praise.core.representation.translation.ciaranframework.api.Translator;
+public class ExactBPToExpressionBasedQuerySolverAdapter extends VariableMarginalQuerySolverToExpressionBasedQuerySolverAdapter {
 
-public class OutputModelWriters implements AutoCloseable {
-	
-	public PrintWriter[] writers;
-	
-	public OutputModelWriters(Translator translator, File sourceModelFile, String sourceModelFileExtension) throws Exception {
-		writers = new PrintWriter[translator.getNumberOfOutputs()];
-
-		String modelName = translator.getInputModelFileNameWithNoExtension(sourceModelFile);
-		File outputDir = new File(sourceModelFile.getParentFile().getParent(), translator.getTarget().getCode());
-		for (int i = 0; i < writers.length; i++) {
-			Path file = new File(outputDir, modelName + translator.getOutputFileExtensions()[i]).toPath();
-			Charset targetCharset = translator.getTargetCharset();
-			BufferedWriter bufferedWriter = Files.newBufferedWriter(file, targetCharset);
-			writers[i] = new PrintWriter(bufferedWriter);
-		}
+	public ExactBPToExpressionBasedQuerySolverAdapter() {
+		super(new NormalizedExactBP());
 	}
-	
-	@Override
-	public void close() throws IOException {
-		for (PrintWriter writer : writers) {
-			writer.flush();
-			writer.close();
-		}
-	}
+
 }
