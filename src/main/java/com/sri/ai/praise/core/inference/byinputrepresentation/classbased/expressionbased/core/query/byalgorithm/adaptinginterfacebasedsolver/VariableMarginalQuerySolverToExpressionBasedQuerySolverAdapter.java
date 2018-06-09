@@ -1,7 +1,7 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.adaptinginterfacebasedsolver;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.adapter.AbstractExpressionBasedQuerySolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.AbstractExpressionBasedQuerySolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.VariableMarginalQuerySolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.VariableMarginalQuery;

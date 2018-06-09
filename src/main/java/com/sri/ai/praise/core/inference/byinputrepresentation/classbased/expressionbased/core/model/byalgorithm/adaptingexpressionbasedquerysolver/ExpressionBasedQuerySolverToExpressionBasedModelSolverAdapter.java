@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
@@ -51,12 +51,12 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.core.Def
  * @author braz
  *
  */
-public class ExpressionBasedQueryToModelSolverAdapter implements ExpressionBasedModelSolver {
+public class ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter implements ExpressionBasedModelSolver {
 
 	private ExpressionBasedQuerySolver querySolver;
 	private ExpressionBasedModel model;
 	
-	public ExpressionBasedQueryToModelSolverAdapter(ExpressionBasedQuerySolver querySolver, ExpressionBasedModel model) {
+	public ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter(ExpressionBasedQuerySolver querySolver, ExpressionBasedModel model) {
 		this.querySolver = querySolver;
 		this.model = model;
 	}

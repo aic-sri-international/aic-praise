@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.ExpressionBasedQueryToModelSolverAdapter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver.ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.evaluation.EvaluationExpressionBasedQuerySolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 
@@ -48,7 +48,7 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
  * @author braz
  *
  */
-public class EvaluationExpressionBasedModelSolver extends ExpressionBasedQueryToModelSolverAdapter {
+public class EvaluationExpressionBasedModelSolver extends ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter {
 
 	/**
 	 * Constructs a quantifier elimination-based variable elimination solver for a factor graph.

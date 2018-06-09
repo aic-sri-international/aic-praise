@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.adapter;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.query.ExpressionBasedQuerySolver;

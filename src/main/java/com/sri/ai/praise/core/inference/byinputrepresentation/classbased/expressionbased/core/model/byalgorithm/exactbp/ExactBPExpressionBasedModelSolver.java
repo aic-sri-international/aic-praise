@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.exactbp;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.ExpressionBasedQueryToModelSolverAdapter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.adaptingexpressionbasedquerysolver.ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp.ExactBPExpressionBasedQuerySolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 
@@ -48,7 +48,7 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
  * @author braz
  *
  */
-public class ExactBPExpressionBasedModelSolver extends ExpressionBasedQueryToModelSolverAdapter {
+public class ExactBPExpressionBasedModelSolver extends ExpressionBasedQuerySolverToExpressionBasedModelSolverAdapter {
 	public ExactBPExpressionBasedModelSolver(ExpressionBasedModel model) {
 		super(new ExactBPExpressionBasedQuerySolver(), model);
 	}
