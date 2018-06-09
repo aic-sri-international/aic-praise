@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, SRI International
+ * Copyright (c) 2015, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-expresso nor the names of its
+ * Neither the name of the aic-praise nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,28 +35,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.core.expressionbased.query;
+package com.sri.ai.praise.core.inference.core.treebased.exactbp.core;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.api.ExactBPQuerySolver;
+import java.util.function.Predicate;
+
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPQuery;
-import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedQuery;
-import com.sri.ai.praise.core.model.classbased.expressionbased.core.ExpressionBasedQueryFromModel;
+import com.sri.ai.praise.core.model.api.FactorNetwork;
+import com.sri.ai.praise.core.model.api.Variable;
 
-/**
- * A probabilistic solver for an {@link ExpressionBasedQueryFromModel}
- * that applies multi-quantifier elimination to marginalizing summations.
- * 
- * @author braz
- *
- */
-public class ExactBPExpressionBasedQuerySolver extends AbstractExpressionBasedQuerySolver {
+public class DefaultExactBPQuery implements ExactBPQuery {
+	
+	private Variable queryVariable;
+	private FactorNetwork model;
+	private Predicate<Variable> isParameterPredicate;
+	
+	public DefaultExactBPQuery(Variable queryVariable, FactorNetwork model, Predicate<Variable> isParameterPredicate) {
+		super();
+		this.queryVariable = queryVariable;
+		this.model = model;
+		this.isParameterPredicate = isParameterPredicate;
+	}
 
 	@Override
-	protected Expression computeNormalizedMarginal(ExpressionBasedQuery query) {
-		ExactBPQuery exactBPQuery = ExpressionBasedToExactBPQueryConverter.convert(query);
-		ExactBPQuerySolver solver = new DefaultExactBPQuerySolver();
-		Expression result = solver.solve(exactBPQuery);
-		return result;
+	public Variable getQueryVariable() {
+		return queryVariable;
+	}
+
+	@Override
+	public FactorNetwork getModel() {
+		return model;
+	}
+
+	@Override
+	public Predicate<Variable> getIsParameterPredicate() {
+		return isParameterPredicate;
 	}
 }

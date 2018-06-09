@@ -85,7 +85,7 @@ public class ExpressionBasedQueryFromModel implements ExpressionBasedQuery {
 	
 	private List<Expression> originalRandomVariables;
 
-	private Predicate<Expression> isDefinedAsFreeByTheClientCodePredicate;
+	private Predicate<Expression> isParameterPredicate;
 	
 	/** The original query. */
 	private Expression queryExpression;
@@ -103,7 +103,7 @@ public class ExpressionBasedQueryFromModel implements ExpressionBasedQuery {
 		this.originalExpressionBasedModel = model;
 		this.queryExpression = queryExpression;
 		this.originalRandomVariables = originalExpressionBasedModel.getRandomVariables();
-		this.isDefinedAsFreeByTheClientCodePredicate = e -> model.getMapFromNonUniquelyNamedConstantNameToTypeName().containsKey(e.toString());
+		this.isParameterPredicate = e -> model.getMapFromNonUniquelyNamedConstantNameToTypeName().containsKey(e.toString());
 		this.isKnownToBeBayesianNetwork = originalExpressionBasedModel.isKnownToBeBayesianNetwork();
 		
 		if (decideIfQueryIsCompound()) {
@@ -210,8 +210,8 @@ public class ExpressionBasedQueryFromModel implements ExpressionBasedQuery {
 	}
 
 	@Override
-	public Predicate<Expression> getIsDefinedAsFreeByTheClientCodePredicate() {
-		return isDefinedAsFreeByTheClientCodePredicate;
+	public Predicate<Expression> getIsParameterPredicate() {
+		return isParameterPredicate;
 	}
 
 	@Override

@@ -55,8 +55,8 @@ public class ExpressionExactBP extends ExactBP {
 		super(new ExpressionVariable(query), factorNetwork);
 	}
 
-	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate) {
-		super(new ExpressionVariable(query), factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
+	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
+		super(new ExpressionVariable(query), factorNetwork, isParameterPredicate);
 	}
 	
 }

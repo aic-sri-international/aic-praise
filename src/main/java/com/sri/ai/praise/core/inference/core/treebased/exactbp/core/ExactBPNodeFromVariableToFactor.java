@@ -60,14 +60,14 @@ public class ExactBPNodeFromVariableToFactor extends AbstractExactBPNode<Variabl
 			LiveSet<Factor> excludedFactors, 
 			RedirectingLiveSet<Factor> includedFactors, 
 			FactorNetwork factorNetwork, 
-			Predicate<Variable> isDefinedAsFreeByTheCliendCodePredicate) {
+			Predicate<Variable> isParameterPredicate) {
 		
-		super(root, parent, excludedFactors, includedFactors, factorNetwork, isDefinedAsFreeByTheCliendCodePredicate);
+		super(root, parent, excludedFactors, includedFactors, factorNetwork, isParameterPredicate);
 	}
 
 	@Override
 	protected ExactBPNode<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPNodeFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isDefinedAsFreeByTheClientCodePredicate);
+		return new ExactBPNodeFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isParameterPredicate);
 	}
 	
 	@Override

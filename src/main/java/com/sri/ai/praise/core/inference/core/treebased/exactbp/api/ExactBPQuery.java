@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.core.inference.core.treebased.exactbp.api;
 
+import java.util.function.Predicate;
+
 import com.sri.ai.praise.core.model.api.FactorNetwork;
 import com.sri.ai.praise.core.model.api.Variable;
 
@@ -45,4 +47,6 @@ public interface ExactBPQuery {
 	Variable getQueryVariable();
 	
 	FactorNetwork getModel();
+	
+	Predicate<Variable> getIsParameterPredicate();
 }

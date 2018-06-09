@@ -28,6 +28,6 @@ public interface ExpressionBasedQuery {
 
 	Context getContext();
 
-	Predicate<Expression> getIsDefinedAsFreeByTheClientCodePredicate();
+	Predicate<Expression> getIsParameterPredicate();
 
 }

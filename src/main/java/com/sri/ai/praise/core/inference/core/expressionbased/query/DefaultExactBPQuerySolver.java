@@ -37,26 +37,26 @@
  */
 package com.sri.ai.praise.core.inference.core.expressionbased.query;
 
+import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
+
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.inference.api.ExactBPQuerySolver;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPQuery;
-import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedQuery;
-import com.sri.ai.praise.core.model.classbased.expressionbased.core.ExpressionBasedQueryFromModel;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.ExactBP;
+import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactor;
+import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactorNetwork;
+import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionVariable;
 
-/**
- * A probabilistic solver for an {@link ExpressionBasedQueryFromModel}
- * that applies multi-quantifier elimination to marginalizing summations.
- * 
- * @author braz
- *
- */
-public class ExactBPExpressionBasedQuerySolver extends AbstractExpressionBasedQuerySolver {
+public class DefaultExactBPQuerySolver implements ExactBPQuerySolver {
 
 	@Override
-	protected Expression computeNormalizedMarginal(ExpressionBasedQuery query) {
-		ExactBPQuery exactBPQuery = ExpressionBasedToExactBPQueryConverter.convert(query);
-		ExactBPQuerySolver solver = new DefaultExactBPQuerySolver();
-		Expression result = solver.solve(exactBPQuery);
-		return result;
+	public Expression solve(ExactBPQuery exactBPQuery) {
+		ExactBP exactBP = new ExactBP(exactBPQuery);
+		Expression unnormalized = (ExpressionFactor) exactBP.apply();
+		ExpressionFactorNetwork model = (ExpressionFactorNetwork) exactBPQuery.getModel();
+		Context context = model.getContext();
+		Expression normalizedMarginal = normalize((ExpressionVariable) exactBPQuery.getQueryVariable(), unnormalized, context);
+		return normalizedMarginal;
 	}
 }

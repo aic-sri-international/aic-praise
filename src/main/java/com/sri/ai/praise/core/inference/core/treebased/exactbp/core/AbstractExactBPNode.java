@@ -128,7 +128,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	
 	protected FactorNetwork factorNetwork;
 	
-	protected Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate;
+	protected Predicate<Variable> isParameterPredicate;
 	
 	protected AbstractExactBPNode(
 			RootType root, 
@@ -136,7 +136,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 			LiveSet<Factor> excludedFactors, 
 			RedirectingLiveSet<Factor> includedFactors, 
 			FactorNetwork factorNetwork, 
-			Predicate<Variable> isDefinedAsFreeByTheCliendCodePredicate) {
+			Predicate<Variable> isParameterPredicate) {
 		
 		this.root = root;
 		this.parent = parent;
@@ -144,7 +144,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		this.excludedFactors = excludedFactors;
 		this.includedFactors = includedFactors;
 		this.factorNetwork = factorNetwork;
-		this.isDefinedAsFreeByTheClientCodePredicate = isDefinedAsFreeByTheCliendCodePredicate;
+		this.isParameterPredicate = isParameterPredicate;
 	}
 	
 	@Override
@@ -285,7 +285,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 				||
 				isEqualToParentIfThereIsOne(variable)
 				||
-				isDefinedAsFreeByTheClientCode(variable)
+				isParameter(variable)
 				||
 				isInExternalFactors(variable);
 		return result;
@@ -301,8 +301,8 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		return result;
 	}
 
-	private boolean isDefinedAsFreeByTheClientCode(Variable variable) {
-		return isDefinedAsFreeByTheClientCodePredicate.test(variable);
+	private boolean isParameter(Variable variable) {
+		return isParameterPredicate.test(variable);
 	}
 
 	private boolean isInExternalFactors(Variable variable) {

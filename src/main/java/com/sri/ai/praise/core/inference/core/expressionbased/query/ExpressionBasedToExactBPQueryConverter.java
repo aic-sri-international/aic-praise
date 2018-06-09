@@ -37,26 +37,28 @@
  */
 package com.sri.ai.praise.core.inference.core.expressionbased.query;
 
+import java.util.function.Predicate;
+
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.api.ExactBPQuerySolver;
 import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPQuery;
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.DefaultExactBPQuery;
+import com.sri.ai.praise.core.model.api.Variable;
 import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedQuery;
-import com.sri.ai.praise.core.model.classbased.expressionbased.core.ExpressionBasedQueryFromModel;
+import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactorNetwork;
+import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionVariable;
 
-/**
- * A probabilistic solver for an {@link ExpressionBasedQueryFromModel}
- * that applies multi-quantifier elimination to marginalizing summations.
- * 
- * @author braz
- *
- */
-public class ExactBPExpressionBasedQuerySolver extends AbstractExpressionBasedQuerySolver {
+public class ExpressionBasedToExactBPQueryConverter {
 
-	@Override
-	protected Expression computeNormalizedMarginal(ExpressionBasedQuery query) {
-		ExactBPQuery exactBPQuery = ExpressionBasedToExactBPQueryConverter.convert(query);
-		ExactBPQuerySolver solver = new DefaultExactBPQuerySolver();
-		Expression result = solver.solve(exactBPQuery);
-		return result;
+	public static ExactBPQuery convert(ExpressionBasedQuery query) {
+		ExpressionVariable queryVariable = new ExpressionVariable(query.getQuerySymbol());
+		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(query.getFactorExpressionsIncludingQueryDefinitionIfAny(), query.getContext());
+		Predicate<Expression> isExpressionParameterPredicate = query.getIsParameterPredicate();
+		Predicate<Variable> isParameterPredicate = makeIsParameterPredicate(isExpressionParameterPredicate);
+		ExactBPQuery exactBPQuery = new DefaultExactBPQuery(queryVariable, factorNetwork, isParameterPredicate);
+		return exactBPQuery;
+	}
+
+	private static Predicate<Variable> makeIsParameterPredicate(Predicate<Expression> isExpressionParameterPredicate) {
+		return ev -> isExpressionParameterPredicate.test((ExpressionVariable) ev);
 	}
 }

@@ -43,6 +43,7 @@ import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.r
 
 import java.util.function.Predicate;
 
+import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPQuery;
 import com.sri.ai.praise.core.model.api.Factor;
 import com.sri.ai.praise.core.model.api.FactorNetwork;
 import com.sri.ai.praise.core.model.api.Variable;
@@ -61,14 +62,18 @@ public class ExactBP extends ExactBPNodeFromVariableToFactor {
 		this(query, factorNetwork, v -> false /* default is "no uninterpreted constants" */);
 	}
 
-	public ExactBP(Variable query, FactorNetwork factorNetwork, Predicate<Variable> isDefinedAsFreeByTheClientCodePredicate) {
+	public ExactBP(ExactBPQuery query) {
+		this(query.getQueryVariable(), query.getModel(), query.getIsParameterPredicate());
+	}
+	
+	public ExactBP(Variable query, FactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
 		super(
 				query,
 				makeParent(),
 				makeExcludedFactors(),
 				makeIncludedFactors(),
 				factorNetwork,
-				isDefinedAsFreeByTheClientCodePredicate);
+				isParameterPredicate);
 	}
 
 	private static Factor makeParent() {
