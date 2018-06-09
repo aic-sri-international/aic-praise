@@ -56,7 +56,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
 
@@ -74,7 +73,7 @@ public class DefaultExpressionBasedQuery implements ExpressionBasedQuery {
 
 	private static final Expression QUERY_SYMBOL = parse("query");
 	
-	/** The original {@link ExpressionBasedModelSolver}. */
+	/** The original {@link ExpressionBasedModel}. */
 	private ExpressionBasedModel originalExpressionBasedModel;
 	
 	/** The variable query to be used ("query" if original query was compound). */

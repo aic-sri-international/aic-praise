@@ -5,6 +5,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.VariableM
 
 public interface VariableMarginalQuerySolver {
 
-	Expression solve(VariableMarginalQuery exactBPQuery);
+	Expression solve(VariableMarginalQuery query);
+	
+	void interrupt();
 
 }

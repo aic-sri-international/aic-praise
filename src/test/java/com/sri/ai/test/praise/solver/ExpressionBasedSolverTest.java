@@ -43,7 +43,6 @@ import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
-import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
 import java.util.List;
@@ -58,10 +57,12 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.exactbp.ExactBPExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.query.ExpressionBasedQuerySolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.evaluation.EvaluationExpressionBasedQuerySolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp.ExactBPExpressionBasedQuerySolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedQuery;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;
 
@@ -348,21 +349,25 @@ public class ExpressionBasedSolverTest {
 		boolean exploitFactorization = true;
 		// exploit factorization (that is, employ ExpressionVariable Elimination,
 		// as opposed to summing over the entire joint probability distribution).
-		
+
+		DefaultExpressionBasedQuery query;
+		Expression marginal;
+
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
 		model = model.getConditionedModel(evidence);
-		ExpressionBasedModelSolver solver = new EvaluationExpressionBasedModelSolver(model, exploitFactorization);
-
 		Expression queryExpression;
-		Expression marginal;
-		
+
+		ExpressionBasedQuerySolver solver = new EvaluationExpressionBasedQuerySolver(exploitFactorization);
+
 		queryExpression = parse("not earthquake");
 		// can be any boolean expression, or any random variable
-		marginal = solver.solve(queryExpression);
+		query = new DefaultExpressionBasedQuery(model, queryExpression);
+		marginal = solver.solve(query);
 		System.out.println("Marginal is " + marginal);
 		
 		queryExpression = parse("earthquake");
-		marginal = solver.solve(queryExpression);
+		query = new DefaultExpressionBasedQuery(model, queryExpression);
+		marginal = solver.solve(query);
 		System.out.println("Marginal is " + marginal);
 	}
 
@@ -978,20 +983,22 @@ public class ExpressionBasedSolverTest {
 			boolean useFactorization) throws AssertionError {
 		
 		
-		ExpressionBasedModelSolver[] solvers = new ExpressionBasedModelSolver[] {
+		ExpressionBasedQuery query = new DefaultExpressionBasedQuery(model, queryExpression);
 
-				new EvaluationExpressionBasedModelSolver(model, useFactorization),
-				new ExactBPExpressionBasedModelSolver(model)
+		ExpressionBasedQuerySolver[] querySolvers = new ExpressionBasedQuerySolver[] {
+
+				new EvaluationExpressionBasedQuerySolver(useFactorization),
+				new ExactBPExpressionBasedQuerySolver()
 				
 		};
 		
-		for (ExpressionBasedModelSolver solver : solvers) {
-			Expression marginal = solver.solve(queryExpression);
-			checkResult(queryExpression, expected, marginal, solver);
+		for (ExpressionBasedQuerySolver solver : querySolvers) {
+			Expression marginal = solver.solve(query);
+			checkResult(query, expected, marginal, solver);
 		}
 	}
 
-	private void checkResult(Expression queryExpression, Expression expected, Expression marginal, ExpressionBasedModelSolver solver)
+	private void checkResult(ExpressionBasedQuery query, Expression expected, Expression marginal, ExpressionBasedQuerySolver solver)
 			throws AssertionError {
 		TrueContext context = new TrueContext();
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, context);
@@ -1000,64 +1007,11 @@ public class ExpressionBasedSolverTest {
 			println(solver + " on " + queryExpression + ": passed");
 		}
 		// check if they are not identical, but equivalent expressions
-		else if (solver.getContext().evaluate(apply(MINUS, expected, marginal)).equals(ZERO)) { // first attempt was to compare with equality, but this requires a more complete test of equality theory literals to exclude such a complex equality from being considered a literal, which is much more expensive
+		else if (query.getContext().evaluate(apply(MINUS, expected, marginal)).equals(ZERO)) { // first attempt was to compare with equality, but this requires a more complete test of equality theory literals to exclude such a complex equality from being considered a literal, which is much more expensive
 			// Ok!
 		}
 		else {
 			throw new AssertionError(solver + ": expected:<" + expected + "> but was:<" + marginal + ">, which is not even equivalent.");
 		}
-	}
-
-	@Test
-	public void simplifyTest() {
-		
-		// The definitions of types
-		mapFromCategoricalTypeNameToSizeString = Util.map(
-				"People", "1000",
-				"Boolean", "2");
-	
-		// The definitions of variables
-		mapFromRandomVariableNameToTypeName = Util.map(
-				"lucky",  "Boolean",
-				"winner", "People"
-				);
-		
-		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
-	
-		mapFromUniquelyNamedConstantNameToTypeName = Util.map("rodrigo", "People");
-		
-		isBayesianNetwork = false;
-		factors = Times.getMultiplicands(parse(""
-				+ "(if lucky then 1 else 0)*"
-				+ "(if lucky then if winner = rodrigo then 1 else 0 else 0.5)"));
-	
-		queryExpression = parse("true or false");
-		expected = parse("true");
-	
-		queryExpression = parse("true and false");
-		expected = parse("false");
-	
-		queryExpression = parse("1.2 + 1.3 + if rodrigo = rodrigo then 1 else 2");
-		expected = parse("3.5");
-	
-		runSimplifyTest();
-	}
-
-	private void runSimplifyTest() {
-		ExpressionBasedModelSolver solver;
-		Expression simplification;
-		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(
-				factors,
-				mapFromRandomVariableNameToTypeName,
-				mapFromNonUniquelyNamedConstantNameToTypeName,
-				mapFromUniquelyNamedConstantNameToTypeName,
-				mapFromCategoricalTypeNameToSizeString,
-				list(),
-				isBayesianNetwork);
-		model = model.getConditionedModel(evidence);
-		solver = new EvaluationExpressionBasedModelSolver(model);
-	
-		simplification = solver.getContext().evaluate(queryExpression);
-		assertEquals(expected, simplification);
 	}
 }

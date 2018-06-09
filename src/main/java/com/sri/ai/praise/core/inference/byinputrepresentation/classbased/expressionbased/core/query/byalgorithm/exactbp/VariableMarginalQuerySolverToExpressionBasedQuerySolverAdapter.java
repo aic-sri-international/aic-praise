@@ -28,4 +28,9 @@ public abstract class VariableMarginalQuerySolverToExpressionBasedQuerySolverAda
 		return variableMarginalQuerySolver;
 	}
 
+	@Override
+	public void interrupt() {
+		variableMarginalQuerySolver.interrupt();
+	}
+
 }

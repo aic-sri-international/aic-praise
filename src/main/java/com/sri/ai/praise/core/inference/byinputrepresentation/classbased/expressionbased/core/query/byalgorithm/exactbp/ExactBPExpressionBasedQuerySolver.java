@@ -39,9 +39,9 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expres
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.NormalizedExactBP;
 
-public class ExactBPToExpressionBasedQuerySolverAdapter extends VariableMarginalQuerySolverToExpressionBasedQuerySolverAdapter {
+public class ExactBPExpressionBasedQuerySolver extends VariableMarginalQuerySolverToExpressionBasedQuerySolverAdapter {
 
-	public ExactBPToExpressionBasedQuerySolverAdapter() {
+	public ExactBPExpressionBasedQuerySolver() {
 		super(new NormalizedExactBP());
 	}
 

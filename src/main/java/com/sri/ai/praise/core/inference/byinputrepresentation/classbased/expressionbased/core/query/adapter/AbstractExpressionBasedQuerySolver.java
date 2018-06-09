@@ -15,9 +15,4 @@ public abstract class AbstractExpressionBasedQuerySolver implements ExpressionBa
 		return result;
 	}
 
-	@Override
-	public void interrupt() {
-		System.err.println("interrupt() not yet implemented for " + getClass().getSimpleName());
-	}
-
 }

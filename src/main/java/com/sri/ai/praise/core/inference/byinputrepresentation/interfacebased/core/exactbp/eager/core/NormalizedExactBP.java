@@ -49,12 +49,17 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 public class NormalizedExactBP implements VariableMarginalQuerySolver {
 
 	@Override
-	public Expression solve(VariableMarginalQuery exactBPQuery) {
-		ExactBP exactBP = new ExactBP(exactBPQuery);
-		ExpressionVariable queryVariable = (ExpressionVariable) exactBPQuery.getQueryVariable();
-		ExpressionFactorNetwork model = (ExpressionFactorNetwork) exactBPQuery.getModel();
+	public Expression solve(VariableMarginalQuery query) {
+		ExactBP exactBP = new ExactBP(query);
+		ExpressionVariable queryVariable = (ExpressionVariable) query.getQueryVariable();
+		ExpressionFactorNetwork model = (ExpressionFactorNetwork) query.getModel();
 		Expression unnormalized = (ExpressionFactor) exactBP.apply();
 		Expression normalizedMarginal = normalize(queryVariable, unnormalized, model.getContext());
 		return normalizedMarginal;
+	}
+
+	@Override
+	public void interrupt() {
+		throw new Error(this.getClass() + ".interrupt not implemented yet");
 	}
 }
