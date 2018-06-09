@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.AbstractExternalProcessSolver;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverResult;
-import com.sri.ai.praise.core.model.api.ModelLanguage;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
 import com.sri.ai.praise.core.translation.api.Translator;
 import com.sri.ai.praise.core.translation.core.TranslatorFactory;
 

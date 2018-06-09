@@ -43,9 +43,9 @@ import java.util.stream.IntStream;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMSortDeclaration;
-import com.sri.ai.praise.core.model.classbased.table.core.data.FunctionTable;
-import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
+import com.sri.ai.praise.core.representation.classbased.table.core.data.FunctionTable;
+import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil;
 
 /**
  * Translator: UAI->HOGMv1 using equalities

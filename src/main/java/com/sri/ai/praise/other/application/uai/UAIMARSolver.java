@@ -37,8 +37,8 @@
  */
 package com.sri.ai.praise.other.application.uai;
 
-import static com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
-import static com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil.convertGenericTableToInstance;
+import static com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
+import static com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil.convertGenericTableToInstance;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,15 +75,15 @@ import com.sri.ai.grinder.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.core.inference.api.ExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.core.expressionbased.model.DefaultExpressionBasedModelSolver;
-import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.table.api.GraphicalNetwork;
-import com.sri.ai.praise.core.model.classbased.table.core.data.FunctionTable;
-import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIModel;
-import com.sri.ai.praise.core.model.classbased.table.core.uai.UAIUtil;
-import com.sri.ai.praise.core.model.classbased.table.core.uai.parsing.UAIEvidenceReading;
-import com.sri.ai.praise.core.model.classbased.table.core.uai.parsing.UAIModelReader;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelSolver;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.table.api.GraphicalNetwork;
+import com.sri.ai.praise.core.representation.classbased.table.core.data.FunctionTable;
+import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
+import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil;
+import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIEvidenceReading;
+import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.translation.core.uai.UAI_to_ExpressionBased_Translator;
 
 /**
@@ -351,7 +351,7 @@ public class UAIMARSolver {
 			}
 			
 			expressionBasedModel = expressionBasedModel.getConditionedModel(evidenceExpr);
-			inferencer = new DefaultExpressionBasedModelSolver(expressionBasedModel);
+			inferencer = new EvaluationExpressionBasedModelSolver(expressionBasedModel);
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {

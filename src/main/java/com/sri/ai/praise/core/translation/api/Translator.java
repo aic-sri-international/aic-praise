@@ -44,7 +44,7 @@ import java.nio.charset.Charset;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
-import com.sri.ai.praise.core.model.api.ModelLanguage;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
 
 /**
  * Interface to be implemented by all Language Translators.

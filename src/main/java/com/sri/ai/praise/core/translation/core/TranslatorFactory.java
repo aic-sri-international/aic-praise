@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.model.api.ModelLanguage;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
 import com.sri.ai.praise.core.translation.api.Translator;
 import com.sri.ai.praise.core.translation.core.hugin.UAI_to_HuginDotNet_Translator;
 import com.sri.ai.praise.core.translation.core.uai.HOGMv1_to_UAI_Translator;

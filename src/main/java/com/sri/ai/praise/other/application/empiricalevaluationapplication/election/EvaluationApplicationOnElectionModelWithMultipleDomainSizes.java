@@ -42,9 +42,9 @@ import static com.sri.ai.util.Util.mapIntoList;
 
 import java.io.IOException;
 
-import com.sri.ai.praise.core.model.api.ModelLanguage;
-import com.sri.ai.praise.core.model.classbased.modelscontainer.ModelPage;
-import com.sri.ai.praise.core.model.classbased.modelscontainer.PagedModelContainer;
+import com.sri.ai.praise.core.representation.classbased.modelscontainer.ModelPage;
+import com.sri.ai.praise.core.representation.classbased.modelscontainer.PagedModelContainer;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
 import com.sri.ai.praise.other.application.empiricalevaluationapplication.core.AbstractEvaluationApplication;
 import com.sri.ai.praise.other.application.empiricalevaluationapplication.core.EvaluationConfigurationFromCommandLineOptions;
 import com.sri.ai.util.collect.IntegerIterator;

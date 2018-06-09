@@ -42,8 +42,8 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.model.api.ModelLanguage;
-import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
 import com.sri.ai.praise.core.translation.core.common.AbstractHOGMv1_to_Target_Translator;
 
 /**

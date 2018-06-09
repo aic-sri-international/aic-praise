@@ -43,7 +43,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.inference.core.hogm.HOGMQueryResult;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryResult;
 
 @Beta
 public class ExecuteHOGMQueryService extends Service<HOGMQueryResult> {

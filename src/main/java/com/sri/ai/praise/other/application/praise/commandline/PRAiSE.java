@@ -48,11 +48,11 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.grinder.core.solver.Integration;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
-import com.sri.ai.praise.core.inference.core.hogm.HOGMQueryError;
-import com.sri.ai.praise.core.inference.core.hogm.HOGMQueryResult;
-import com.sri.ai.praise.core.inference.core.hogm.HOGMSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryError;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryResult;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMSolver;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.praise.PRAiSESolver;
-import com.sri.ai.praise.core.model.classbased.modelscontainer.ModelPage;
+import com.sri.ai.praise.core.representation.classbased.modelscontainer.ModelPage;
 
 /**
  * Command line interface for running {@link PRAiSESolver}.

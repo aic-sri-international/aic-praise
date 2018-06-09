@@ -59,11 +59,11 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.praise.core.inference.api.ExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.core.expressionbased.model.DefaultExpressionBasedModelSolver;
-import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMSortDeclaration;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelSolver;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.TernaryProcedure;
 import com.sri.ai.util.base.Triple;
@@ -187,7 +187,7 @@ public class HOGModelGrounding {
 						factorsAndTypes.getMapFromCategoricalTypeNameToSizeString(),
 						list(),
 						isBayesianNetwork); // additional types
-		ExpressionBasedModelSolver inferencer = new DefaultExpressionBasedModelSolver(groundedFactorsAndTypesInformation);
+		ExpressionBasedModelSolver inferencer = new EvaluationExpressionBasedModelSolver(groundedFactorsAndTypesInformation);
 		return inferencer;
 	}
 

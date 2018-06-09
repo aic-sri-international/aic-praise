@@ -41,7 +41,7 @@ import static com.sri.ai.util.Util.toHoursMinutesAndSecondsString;
 
 import java.io.PrintStream;
 
-import com.sri.ai.praise.core.model.classbased.modelscontainer.PagedModelContainer;
+import com.sri.ai.praise.core.representation.classbased.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.other.empiricalevaluation.Problem;
 import com.sri.ai.praise.other.empiricalevaluation.solverevaluation.SolverEvaluationResult;
 

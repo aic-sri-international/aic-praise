@@ -41,7 +41,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.sri.ai.praise.core.model.classbased.modelscontainer.PagedModelContainer;
+import com.sri.ai.praise.core.representation.classbased.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.other.application.empiricalevaluationapplication.core.AbstractEvaluationApplication;
 import com.sri.ai.praise.other.application.empiricalevaluationapplication.core.EvaluationConfigurationFromCommandLineOptions;
 

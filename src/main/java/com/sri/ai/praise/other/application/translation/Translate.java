@@ -43,7 +43,7 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Stopwatch;
-import com.sri.ai.praise.core.model.api.ModelLanguage;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
 import com.sri.ai.praise.core.translation.api.Translator;
 import com.sri.ai.praise.core.translation.api.TranslatorOptions;
 import com.sri.ai.praise.core.translation.core.TranslatorFactory;

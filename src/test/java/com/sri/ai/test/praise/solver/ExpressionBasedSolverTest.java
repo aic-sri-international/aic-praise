@@ -58,11 +58,11 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
-import com.sri.ai.praise.core.inference.api.ExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.core.expressionbased.model.DefaultExpressionBasedModelSolver;
-import com.sri.ai.praise.core.inference.core.expressionbased.model.ExactBPExpressionBasedModelSolver;
-import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedModel;
-import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.exactbp.ExactBPExpressionBasedModelSolver;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.util.Util;
 
 public class ExpressionBasedSolverTest {
@@ -351,7 +351,7 @@ public class ExpressionBasedSolverTest {
 		
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
 		model = model.getConditionedModel(evidence);
-		ExpressionBasedModelSolver solver = new DefaultExpressionBasedModelSolver(model, exploitFactorization);
+		ExpressionBasedModelSolver solver = new EvaluationExpressionBasedModelSolver(model, exploitFactorization);
 
 		Expression queryExpression;
 		Expression marginal;
@@ -980,7 +980,7 @@ public class ExpressionBasedSolverTest {
 		
 		ExpressionBasedModelSolver[] solvers = new ExpressionBasedModelSolver[] {
 
-				new DefaultExpressionBasedModelSolver(model, useFactorization),
+				new EvaluationExpressionBasedModelSolver(model, useFactorization),
 				new ExactBPExpressionBasedModelSolver(model)
 				
 		};
@@ -1055,7 +1055,7 @@ public class ExpressionBasedSolverTest {
 				list(),
 				isBayesianNetwork);
 		model = model.getConditionedModel(evidence);
-		solver = new DefaultExpressionBasedModelSolver(model);
+		solver = new EvaluationExpressionBasedModelSolver(model);
 	
 		simplification = solver.getContext().evaluate(queryExpression);
 		assertEquals(expected, simplification);

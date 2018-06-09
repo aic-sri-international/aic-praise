@@ -30,15 +30,15 @@ import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.praise.core.PRAiSEUtil;
-import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.AnytimeExactBP;
-import com.sri.ai.praise.core.inference.core.treebased.anytimeexactbp.polytope.core.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.api.ExactBPNode;
-import com.sri.ai.praise.core.inference.core.treebased.exactbp.core.AbstractExactBPNode;
-import com.sri.ai.praise.core.model.api.Factor;
-import com.sri.ai.praise.core.model.api.Variable;
-import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionExactBP;
-import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactor;
-import com.sri.ai.praise.core.model.encapsulatedoperations.expression.ExpressionFactorNetwork;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.rodrigo.AnytimeExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.api.ExactBPNode;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.AbstractExactBPNode;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionExactBP;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
 import com.sri.ai.util.base.IdentityWrapper;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 

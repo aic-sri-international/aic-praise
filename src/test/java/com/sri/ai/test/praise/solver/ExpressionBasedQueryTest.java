@@ -44,9 +44,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.model.classbased.expressionbased.api.ExpressionBasedQuery;
-import com.sri.ai.praise.core.model.classbased.expressionbased.core.ExpressionBasedQueryFromModel;
-import com.sri.ai.praise.core.model.classbased.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedQuery;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedQuery;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 
 public class ExpressionBasedQueryTest {
 
@@ -97,7 +97,7 @@ public class ExpressionBasedQueryTest {
 		
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
 		Expression queryExpression = parse(queryString);
-		ExpressionBasedQuery query = new ExpressionBasedQueryFromModel(model, queryExpression);
+		ExpressionBasedQuery query = new DefaultExpressionBasedQuery(model, queryExpression);
 
 		String actualFactorExpressionsIncludingQueryDefinitionIfAnyString = query.getFactorExpressionsIncludingQueryDefinitionIfAny().toString();
 		println(expectedFactorExpressionsIncludingQueryDefinitionIfAnyString);
