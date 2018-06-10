@@ -35,9 +35,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.exactbp;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.NormalizedExactBP;
 
 public class ExactBPExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {

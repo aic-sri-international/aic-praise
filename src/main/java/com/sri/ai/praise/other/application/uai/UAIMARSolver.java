@@ -75,8 +75,8 @@ import com.sri.ai.grinder.theory.compound.CompoundTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelQuerier;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelQuerier;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.evaluation.EvaluationExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.table.api.GraphicalNetwork;
 import com.sri.ai.praise.core.representation.classbased.table.core.data.FunctionTable;
@@ -219,7 +219,8 @@ public class UAIMARSolver {
 		private Map<Integer, List<Double>> solution;
 		private Theory           theory;
 		//
-		private ExpressionBasedModelQuerier inferencer;
+		private ExpressionBasedSolver solver;
+		
 		boolean interrupted = false;
 		private MultiQuantifierEliminator genericTableSolver = null;
 		
@@ -251,9 +252,9 @@ public class UAIMARSolver {
 				}
 			}
 			
-			if (inferencer != null) {
+			if (solver != null) {
 				try {
-					inferencer.interrupt();
+					solver.interrupt();
 					System.out.println("ExternalProcessSolver interrupted (c).");
 				}
 				catch (Throwable t) {
@@ -351,7 +352,7 @@ public class UAIMARSolver {
 			}
 			
 			expressionBasedModel = expressionBasedModel.getConditionedModel(evidenceExpr);
-			inferencer = new EvaluationExpressionBasedModelQuerier(expressionBasedModel);
+			solver = new EvaluationExpressionBasedSolver();
 			
 			Map<Integer, List<Double>> computed = new LinkedHashMap<>();
 			for (int i = 0; i < model.numberVariables(); i++) {
@@ -368,7 +369,7 @@ public class UAIMARSolver {
 						System.out.println("ExternalProcessSolver Interrupted (l).");
 						return false;
 					}
-					marginal = inferencer.answer(queryExpression);
+					marginal = solver.solve(queryExpression, expressionBasedModel);
 					
 					if (evidenceExpr == null) {
 						System.out.println("Query marginal probability P(" + queryExpression + ") is: " + marginal);

@@ -53,8 +53,8 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.helper.GrinderUtil;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelQuerier;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelQuerier;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.evaluation.EvaluationExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
@@ -69,14 +69,15 @@ import com.sri.ai.util.base.Pair;
 @Beta
 public class HOGMSolver {
 	
-	private String model;
+	private String modelString;
 	private HOGMParserWrapper parser = new HOGMParserWrapper();
 	private HOGModel parsedModel = null;
 	private List<HOGMQueryResult> results = new ArrayList<>();
 	private List<HOGMQueryError> errors = new ArrayList<>();
 	private boolean canceled = false;
 	private Theory optionalTheory = null;
-	private ExpressionBasedModelQuerier inferencer = null;
+	private ExpressionBasedModel expressionBasedModel;
+	private ExpressionBasedSolver solver = null;
 	private Context context;
 	
 	public HOGMSolver(String model, String query) {
@@ -90,10 +91,10 @@ public class HOGMSolver {
 
 	private void initializeModel(String model) {
 		try {
-			this.model = model;
+			this.modelString = model;
 			this.parsedModel = parseModel();
-			ExpressionBasedModel expressionBasedModel = new HOGMExpressionBasedModel(parsedModel);
-			this.inferencer = new EvaluationExpressionBasedModelQuerier(expressionBasedModel);
+			this.expressionBasedModel = new HOGMExpressionBasedModel(parsedModel);
+			this.solver = new EvaluationExpressionBasedSolver();
 			context = expressionBasedModel.getContext();
 
 		}
@@ -137,12 +138,12 @@ public class HOGMSolver {
 
 	private HOGModel parseModel() {
 		HOGModel parsedModel = null;
-    	if (isEmpty(model)) {
+    	if (isEmpty(modelString)) {
 			HOGMQueryError error = new HOGMQueryError(HOGMQueryError.Context.MODEL, "FactorNetwork not specified");
 			errors.add(error);
 		}
     	else {
-    		parsedModel = parser.parseModel(model, new ParserErrorListener(HOGMQueryError.Context.MODEL, errors));
+    		parsedModel = parser.parseModel(modelString, new ParserErrorListener(HOGMQueryError.Context.MODEL, errors));
     	}
 		return parsedModel;
 	}
@@ -177,8 +178,7 @@ public class HOGMSolver {
 	}
 
 	private NullaryFunction<Expression> inference(Expression queryExpression) {
-		final Expression finalQueryExpression = queryExpression;
-		NullaryFunction<Expression> inference = () -> inferencer.answer(finalQueryExpression);
+		NullaryFunction<Expression> inference = () -> solver.solve(queryExpression, expressionBasedModel);
 		return inference;
 	}
 
@@ -273,8 +273,8 @@ public class HOGMSolver {
 	
 	public void cancelQuery() {
 		canceled = true;
-		if (inferencer != null) {
-			inferencer.interrupt();
+		if (solver != null) {
+			solver.interrupt();
 		}
 	}
 

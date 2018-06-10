@@ -59,8 +59,6 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.model.ExpressionBasedModelQuerier;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.model.byalgorithm.evaluation.EvaluationExpressionBasedModelQuerier;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
@@ -111,7 +109,6 @@ public class HOGModelGrounding {
 		Map<Expression, List<Expression>> typeToValues = createTypeToValuesMap(factorsAndTypes, randomVariableNameToTypeSizeAndUniqueConstants);
 		Map<String, String> newUniqueConstantToTypeMap = createGroundedUniqueConstantToTypeMap(typeToValues);
 		ExpressionBasedModel groundedExpressionBasedModel = makeGroundedExpressionBasedModel(factorsAndTypes, newUniqueConstantToTypeMap);
-		ExpressionBasedModelQuerier inferencer = new EvaluationExpressionBasedModelQuerier(groundedExpressionBasedModel);
 		Context context = groundedExpressionBasedModel.getContext();
 		
 		listener.numberFactors(factorsAndTypes.getFactors().size());
@@ -136,7 +133,6 @@ public class HOGModelGrounding {
 	    				listener,
 	    				randomVariableNameToTypeSizeAndUniqueConstants,
 	    				typeToValues,
-	    				inferencer,
 	    				context);
 	    	}
 	    	else {
@@ -146,7 +142,6 @@ public class HOGModelGrounding {
 	    				listener,
 	    				randomVariableNameToTypeSizeAndUniqueConstants,
 	    				typeToValues,
-	    				inferencer,
 	    				context);
 	    	}
 
@@ -227,10 +222,9 @@ public class HOGModelGrounding {
 	 * @param listener
 	 * @param randomVariableNameToTypeSizeAndUniqueConstants
 	 * @param typeToValues
-	 * @param inferencer
 	 * @param context
 	 */
-	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedModelQuerier inferencer, Context context) {
+	private static void fullGrounding(Expression factor, List<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, Context context) {
 		int[] radices                    = new int[randomVariablesInFactor.size()];
 		List<List<Expression>> factorRandomVariableTypeValues = new ArrayList<>();
 		for (int i = 0; i < randomVariablesInFactor.size(); i++) {
@@ -250,7 +244,6 @@ public class HOGModelGrounding {
 				groundedFactor = groundedFactor.replaceAllOccurrences(randomVariablesInFactor.get(i), factorRandomVariableTypeValues.get(i).get(valueIndex), context);
 			}  		
 			Expression value = context.evaluate(groundedFactor);
-			//				Expression value = inferencer.evaluate(groundedFactor);
 			if (!Expressions.isNumber(value)) {
 				throw new IllegalStateException("Unable to compute a number for the grounded factor ["+groundedFactor+"], instead got:"+value);
 			}
@@ -367,10 +360,9 @@ public class HOGModelGrounding {
 	 * @param listener
 	 * @param randomVariableNameToTypeSizeAndUniqueConstants
 	 * @param typeToValues TODO
-	 * @param inferencer
 	 * @param context
 	 */
-	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, ExpressionBasedModelQuerier inferencer, Context context) {
+	private static void contextSensitiveGrounding(Expression factor, ArrayList<Expression> randomVariablesInFactor, Listener listener, Map<Expression, Triple<Expression, Integer, List<Expression>>> randomVariableNameToTypeSizeAndUniqueConstants, Map<Expression, List<Expression>> typeToValues, Context context) {
 		Function<Integer, Integer> fromVariableIndexToDomainSize = 
 				makeFunctionFromVariableIndexToDomainSize(randomVariableNameToTypeSizeAndUniqueConstants, randomVariablesInFactor);
 		int numberFactorValues = 

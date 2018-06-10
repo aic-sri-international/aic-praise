@@ -1,7 +1,7 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.query;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.query.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 
 public abstract class AbstractExpressionBasedSolver implements ExpressionBasedSolver {
