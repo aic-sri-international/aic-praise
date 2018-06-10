@@ -54,7 +54,7 @@ import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.evaluation.EvaluationExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
@@ -69,6 +69,9 @@ import com.sri.ai.util.base.Pair;
 @Beta
 public class HOGMSolver {
 	
+//	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = EvaluationExpressionBasedSolver.class;
+	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = ExactBPExpressionBasedSolver.class;
+	
 	private String modelString;
 	private HOGMParserWrapper parser = new HOGMParserWrapper();
 	private HOGModel parsedModel = null;
@@ -77,15 +80,25 @@ public class HOGMSolver {
 	private boolean canceled = false;
 	private Theory optionalTheory = null;
 	private ExpressionBasedModel expressionBasedModel;
+	private Class<? extends ExpressionBasedSolver> solverClass;
 	private ExpressionBasedSolver solver = null;
 	private Context context;
 	
 	public HOGMSolver(String model, String query) {
-		this(model, list(query));
+		this(model, list(query), defaultSolverClass);
 	}
 	
 	public HOGMSolver(String model, List<String> queries) {
+		this(model, queries, defaultSolverClass);
+	}
+
+	public HOGMSolver(String model, String query, Class<? extends ExpressionBasedSolver> solverClass) {
+		this(model, list(query), solverClass);
+	}
+	
+	public HOGMSolver(String model, List<String> queries, Class<? extends ExpressionBasedSolver> solverClass) {
 		initializeModel(model);
+		initializeSolver(solverClass);
         processAllQueries(queries);
 	}
 
@@ -94,8 +107,9 @@ public class HOGMSolver {
 			this.modelString = model;
 			this.parsedModel = parseModel();
 			this.expressionBasedModel = new HOGMExpressionBasedModel(parsedModel);
-			this.solver = new EvaluationExpressionBasedSolver();
-			context = expressionBasedModel.getContext();
+			this.solverClass = defaultSolverClass;
+			this.solver = solverClass.newInstance();
+			this.context = expressionBasedModel.getContext();
 
 		}
 		catch (RecognitionException recognitionError) {
@@ -106,6 +120,15 @@ public class HOGMSolver {
 		}
 		catch (HOGModelException modelException) {
 			collectQueryErrors(modelException);
+		}
+		catch (Throwable throwable) {
+			collectQueryError(throwable);
+		}
+	}
+
+	private void initializeSolver(Class<? extends ExpressionBasedSolver> solverClass) {
+		try {
+			this.solver = solverClass.newInstance();
 		}
 		catch (Throwable throwable) {
 			collectQueryError(throwable);

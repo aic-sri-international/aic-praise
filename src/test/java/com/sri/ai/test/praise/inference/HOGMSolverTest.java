@@ -51,7 +51,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryResult;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMSolver;
 
-public class HOGMQueryRunnerTest {
+public class HOGMSolverTest {
 	
 	@Test
 	public void linearRealArithmeticOnPosition() {
@@ -78,8 +78,8 @@ public class HOGMQueryRunnerTest {
 				"";
 		
 		String query = "event";
-		HOGMSolver runner = new HOGMSolver(model, query);
-		List<HOGMQueryResult> results = runner.getResults();
+		HOGMSolver solver = new HOGMSolver(model, query);
+		List<HOGMQueryResult> results = solver.getResults();
 	
 		assertEquals(1, results.size());
 		

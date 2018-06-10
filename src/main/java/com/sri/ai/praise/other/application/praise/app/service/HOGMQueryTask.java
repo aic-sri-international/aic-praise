@@ -53,7 +53,7 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 	private String query;
 	private String model;
 	//
-	private HOGMSolver hogmQueryRunner = null;
+	private HOGMSolver solver = null;
 	
 	public HOGMQueryTask(String query, String model) {
 		this.query = query;
@@ -65,15 +65,15 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 		final AtomicReference<HOGMQueryResult> result = new AtomicReference<>();
 		
 		PRAiSEController.computeExpressionWithDesiredPrecision(() -> {
-			hogmQueryRunner = new HOGMSolver(model, query);
-			List<HOGMQueryResult> queryResults = hogmQueryRunner.getResults();
+			solver = new HOGMSolver(model, query);
+			List<HOGMQueryResult> queryResults = solver.getResults();
 			if (queryResults.size() == 1) {
 				HOGMQueryResult queryResult = queryResults.get(0);
 				if (queryResult.hasErrors()) {
 					result.set(queryResult);
 				}
 				else {
-					Expression answer = hogmQueryRunner.simplifyAnswer(queryResult.getResult(), queryResult.getQueryExpression());					
+					Expression answer = solver.simplifyAnswer(queryResult.getResult(), queryResult.getQueryExpression());					
 					result.set(new HOGMQueryResult(queryResult.getQueryString(), queryResult.getQueryExpression(), queryResult.getParsedModel(), answer, queryResult.getMillisecondsToCompute()));
 				}
 			}		
@@ -84,8 +84,8 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 	
 	@Override
 	protected void cancelled() {
-		if (hogmQueryRunner != null) {
-			hogmQueryRunner.cancelQuery();
+		if (solver != null) {
+			solver.cancelQuery();
 		}
 	}
 }

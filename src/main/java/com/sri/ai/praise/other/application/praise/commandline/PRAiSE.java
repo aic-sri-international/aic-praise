@@ -100,9 +100,9 @@ public class PRAiSE {
 	private void solveModel(ModelPage modelPage) {
 		outputModel(modelPage);
 		startSummationCounting();
-		HOGMSolver queryRunner = new HOGMSolver(modelPage.getModelString(), modelPage.getDefaultQueriesToRun());
-		List<HOGMQueryResult> modelPageResults = queryRunner.getResults();
-		outputModelResults(queryRunner, modelPageResults);
+		HOGMSolver solver = new HOGMSolver(modelPage.getModelString(), modelPage.getDefaultQueriesToRun());
+		List<HOGMQueryResult> modelPageResults = solver.getResults();
+		outputModelResults(solver, modelPageResults);
 	}
 
 	private void outputModel(ModelPage modelPage) {
@@ -123,16 +123,16 @@ public class PRAiSE {
 		}
 	}
 
-	private void outputModelResults(HOGMSolver queryRunner, List<HOGMQueryResult> modelPageResults) {
-		modelPageResults.forEach(hogModelQueryResult -> output(queryRunner, hogModelQueryResult));
+	private void outputModelResults(HOGMSolver solver, List<HOGMQueryResult> modelPageResults) {
+		modelPageResults.forEach(hogModelQueryResult -> output(solver, hogModelQueryResult));
 	}
 
-	private void output(HOGMSolver queryRunner, HOGMQueryResult modelQueryResult) {
+	private void output(HOGMSolver solver, HOGMQueryResult modelQueryResult) {
 		options.out.print("Query : ");
 		options.out.println(modelQueryResult.getQueryString());
 		options.out.print(RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT);
 		if (modelQueryResult.getResult() != null) {
-			options.out.println(queryRunner.simplifyAnswer(modelQueryResult.getResult(), modelQueryResult.getQueryExpression()));
+			options.out.println(solver.simplifyAnswer(modelQueryResult.getResult(), modelQueryResult.getQueryExpression()));
 			options.out.print("Took  : ");
 			options.out.println(toHoursMinutesAndSecondsString(modelQueryResult.getMillisecondsToCompute()));
 			if (options.countSummations) {
