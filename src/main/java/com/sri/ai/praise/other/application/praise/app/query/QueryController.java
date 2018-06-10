@@ -234,10 +234,10 @@ public class QueryController {
 		errors.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
 			if (newValue.intValue() >= 0) {
 				HOGMQueryError qError = errors.getItems().get(newValue.intValue());
-				if (qError.getContext() == HOGMQueryError.Context.MODEL) {
+				if (qError.getContext() == HOGMQueryError.Scope.MODEL) {
 					modelPageEditor.highlight(qError.getStartContextIndex(), qError.getEndContextIndex());
 				}
-				else if (qError.getContext() == HOGMQueryError.Context.QUERY) {
+				else if (qError.getContext() == HOGMQueryError.Scope.QUERY) {
 					queryComboBox.getEditor().selectAll();
 				}
 			}

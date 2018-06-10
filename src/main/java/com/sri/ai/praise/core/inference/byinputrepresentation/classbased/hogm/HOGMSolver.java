@@ -43,11 +43,8 @@ import static com.sri.ai.util.Util.time;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.RecognitionException;
-
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Parser;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
@@ -60,29 +57,28 @@ import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
 import com.sri.ai.praise.core.representation.classbased.hogm.parsing.HOGMParserWrapper;
-import com.sri.ai.praise.core.representation.classbased.hogm.parsing.UnableToParseAllTheInputError;
-import com.sri.ai.praise.core.representation.classbased.hogm.validation.HOGModelError;
-import com.sri.ai.praise.core.representation.classbased.hogm.validation.HOGModelException;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 
 @Beta
 public class HOGMSolver {
 	
+	// TODO: This class currently does too many things:
+	// it does both solving and lots of error manipulation, handles multiple queries, and deals with both HOGModels and expression-based models.
+	// It should instead: run another class for error checking of both model and queries, and run another class for processing an error-free query.
+	
 //	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = EvaluationExpressionBasedSolver.class;
 	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = ExactBPExpressionBasedSolver.class;
 	
-	private String modelString;
 	private HOGMParserWrapper parser = new HOGMParserWrapper();
-	private HOGModel parsedModel = null;
+	private HOGModel hogmModel = null;
 	private List<HOGMQueryResult> results = new ArrayList<>();
 	private List<HOGMQueryError> errors = new ArrayList<>();
 	private boolean canceled = false;
 	private Theory optionalTheory = null;
 	private ExpressionBasedModel expressionBasedModel;
-	private Class<? extends ExpressionBasedSolver> solverClass;
 	private ExpressionBasedSolver solver = null;
-	private Context context;
 	
 	public HOGMSolver(String model, String query) {
 		this(model, list(query), defaultSolverClass);
@@ -96,34 +92,16 @@ public class HOGMSolver {
 		this(model, list(query), solverClass);
 	}
 	
-	public HOGMSolver(String model, List<String> queries, Class<? extends ExpressionBasedSolver> solverClass) {
-		initializeModel(model);
+	public HOGMSolver(String modelString, List<String> queries, Class<? extends ExpressionBasedSolver> solverClass) {
+		initializeModel(modelString);
 		initializeSolver(solverClass);
         processAllQueries(queries);
 	}
 
-	private void initializeModel(String model) {
-		try {
-			this.modelString = model;
-			this.parsedModel = parseModel();
-			this.expressionBasedModel = new HOGMExpressionBasedModel(parsedModel);
-			this.solverClass = defaultSolverClass;
-			this.solver = solverClass.newInstance();
-			this.context = expressionBasedModel.getContext();
-
-		}
-		catch (RecognitionException recognitionError) {
-			collectQueryError(recognitionError);
-		}
-		catch (UnableToParseAllTheInputError unableToParseAllTheInputError) {
-			collectQueryError(unableToParseAllTheInputError);
-		}
-		catch (HOGModelException modelException) {
-			collectQueryErrors(modelException);
-		}
-		catch (Throwable throwable) {
-			collectQueryError(throwable);
-		}
+	private void initializeModel(String modelString) {
+		HOGMModelParsingWithErrorCollecting parsingWithErrorCollecting = new HOGMModelParsingWithErrorCollecting(modelString, errors);
+		this.hogmModel = parsingWithErrorCollecting.getModel();
+		this.expressionBasedModel = hogmModel == null? null : new HOGMExpressionBasedModel(hogmModel);
 	}
 
 	private void initializeSolver(Class<? extends ExpressionBasedSolver> solverClass) {
@@ -155,20 +133,8 @@ public class HOGMSolver {
 	
 	private void processQuery(String query) {
 		long queryProcessingStartingTime = System.currentTimeMillis();
-		collectQueryResults(query, parsedModel);
-		collectQueryResultBasedInErrors(query, parsedModel, queryProcessingStartingTime);
-	}
-
-	private HOGModel parseModel() {
-		HOGModel parsedModel = null;
-    	if (isEmpty(modelString)) {
-			HOGMQueryError error = new HOGMQueryError(HOGMQueryError.Context.MODEL, "FactorNetwork not specified");
-			errors.add(error);
-		}
-    	else {
-    		parsedModel = parser.parseModel(modelString, new ParserErrorListener(HOGMQueryError.Context.MODEL, errors));
-    	}
-		return parsedModel;
+		collectQueryResults(query, hogmModel);
+		collectQueryResultBasedInErrors(query, hogmModel, queryProcessingStartingTime);
 	}
 
 	private void collectQueryResults(String query, HOGModel parsedModel) {
@@ -176,7 +142,7 @@ public class HOGMSolver {
 		collectErrorIfQueryIsEmpty(query);
 		   		
 		if (errors.size() == 0) {
-			Expression queryExpression = parser.parseTerm(query, new ParserErrorListener(HOGMQueryError.Context.QUERY, errors));
+			Expression queryExpression = parser.parseTerm(query, new HOGMParserErrorListener(HOGMQueryError.Scope.QUERY, errors));
 			if (errors.size() == 0) {
 				runInference(query, queryExpression, parsedModel);
 			}
@@ -184,8 +150,8 @@ public class HOGMSolver {
 	}
 
 	private void collectErrorIfQueryIsEmpty(String query) {
-		if (isEmpty(query)) {
-			HOGMQueryError error = new HOGMQueryError(HOGMQueryError.Context.QUERY, "Query not specified");
+		if (Util.isNullOrEmptyString(query)) {
+			HOGMQueryError error = new HOGMQueryError(HOGMQueryError.Scope.QUERY, "Query not specified");
 			errors.add(error);
 		}
 	}
@@ -205,75 +171,6 @@ public class HOGMSolver {
 		return inference;
 	}
 
-	private void collectQueryError(RecognitionException recognitionError) {
-		HOGMQueryError error = new HOGMQueryError(HOGMQueryError.Context.MODEL, recognitionError);
-		errors.add(error);
-	}
-
-	private void collectQueryError(UnableToParseAllTheInputError unableToParseAllTheInputError) {
-		HOGMQueryError error = new HOGMQueryError(unableToParseAllTheInputError);
-		errors.add(error);
-	}
-
-	private void collectQueryErrors(HOGModelException modelException) {
-		modelException.getErrors().forEach(modelError ->  collectQueryError(modelError));
-	}
-
-	private void collectQueryError(HOGModelError modelError) {
-		HOGMQueryError error = makeHOGMQueryError(modelError);
-		errors.add(error);
-	}
-
-	private HOGMQueryError makeHOGMQueryError(HOGModelError modelError) {
-		String statement    = modelError.getStatementInfo().statement.toString();
-		String source       = modelError.getStatementInfo().sourceText;
-		String subStatement = modelError.getMessage(); 
-		String info = makeInfo(statement, subStatement, source);
-		HOGMQueryError error = makeHOGMQueryError(modelError, info);
-		return error;
-	}
-
-	private String makeInfo(String statement, String subStatement, String source) {
-		String info = makeInfoWithStatementAndSubstatementIfNeeded(statement, subStatement, source);
-		info = addSourceAndStatementToInfoIfNeeded(info, statement, source);
-		return info;
-	}
-
-	private String makeInfoWithStatementAndSubstatementIfNeeded(String statement, String subStatement, String source) {
-		String info;
-		if (subStatement.equals("") || subStatement.equals(source)) {
-			info = " in '" + statement + "'";
-		}
-		else {
-			info = " ('" + subStatement + "') in '" + statement + "'";
-		}
-		return info;
-	}
-
-	private String addSourceAndStatementToInfoIfNeeded(String info, String statement, String source) {
-		String sourceMinusSpacesAndCommas = source.replaceAll(" ", "").replaceAll(";", "");
-		String statementMinusSpaces = statement.replaceAll(" ", "");
-		String newInfo;
-		if (!sourceMinusSpacesAndCommas.equals(statementMinusSpaces)) {
-			newInfo = info + " derived from '" + source + "'";
-		}
-		else {
-			newInfo = info;
-		}
-		return newInfo;
-	}
-
-	private HOGMQueryError makeHOGMQueryError(HOGModelError modelError, String info) {
-		HOGMLinePortion linePortion = new HOGMLinePortion(modelError.getStatementInfo().startIndex, modelError.getStatementInfo().endIndex);
-		HOGMQueryError error = 
-				new HOGMQueryError(
-						HOGMQueryError.Context.MODEL, 
-						modelError.getErrorType().formattedMessage() + info, 
-						modelError.getStatementInfo().line, 
-						linePortion);
-		return error;
-	}
-
 	private void collectQueryError(Throwable throwable) {
 		HOGMQueryError error = new HOGMQueryError(throwable);
 		errors.add(error);
@@ -289,11 +186,6 @@ public class HOGMSolver {
 		}
 	}
 
-	private boolean isEmpty(String string) {
-		boolean result = string == null || string.trim().equals("");
-		return result;
-	}
-	
 	public void cancelQuery() {
 		canceled = true;
 		if (solver != null) {
@@ -313,33 +205,10 @@ public class HOGMSolver {
 	}
 	
 	public Context getContext() {
-		return context;
+		return expressionBasedModel.getContext();
 	}
 	
 	public Expression simplify(Expression expression) {
-		return context.evaluate(expression);
-	}
-	
-	protected class ParserErrorListener implements Parser.ErrorListener {
-		
-		HOGMQueryError.Context context;
-		List<HOGMQueryError> errors;
-		
-		ParserErrorListener(HOGMQueryError.Context context, List<HOGMQueryError> errors) {
-			this.context = context;
-			this.errors  = errors;
-		}
-
-		@Override
-		public void parseError(Object offendingSymbol, int line, int charPositionInLine, String message, Exception exception) {
-			HOGMLinePortion portion = new HOGMLinePortion(exception); 
-			String messageWithLineInformation = addLineInformation(line, charPositionInLine, message);
-			HOGMQueryError error = new HOGMQueryError(context, messageWithLineInformation, line, portion);
-			errors.add(error);
-		}
-
-		private String addLineInformation(int line, int charPositionInLine, String message) {
-			return "Error at line " + line + " column " + charPositionInLine + " - " + message;
-		}
+		return getContext().evaluate(expression);
 	} 
 }

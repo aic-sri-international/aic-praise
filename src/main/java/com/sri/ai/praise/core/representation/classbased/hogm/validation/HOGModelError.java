@@ -42,7 +42,10 @@ import java.util.StringJoiner;
 import com.google.common.annotations.Beta;
 
 @Beta
-public class HOGModelError {
+public class HOGModelError extends Error {
+
+	private static final long serialVersionUID = 1L;
+
 	public static enum Type {
 		//
 		// SORT RELATED ERRORS

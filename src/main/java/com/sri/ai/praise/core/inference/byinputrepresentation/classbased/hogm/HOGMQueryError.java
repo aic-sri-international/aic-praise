@@ -47,11 +47,11 @@ import com.google.common.annotations.Beta;
 @Beta
 public class HOGMQueryError {
 	
-	public enum Context {
+	public enum Scope {
 		MODEL, QUERY, UNKNOWN
 	}
 	
-	private Context   context         = Context.UNKNOWN;
+	private Scope   context         = Scope.UNKNOWN;
 	private int       line            = -1;
 	private HOGMLinePortion   portion;
 	private String    errorMessage    = "";
@@ -62,20 +62,20 @@ public class HOGMQueryError {
 		this.throwable    = t;
 	}
 	
-	public HOGMQueryError(Context context, RecognitionException recognitionException) {
+	public HOGMQueryError(Scope context, RecognitionException recognitionException) {
 		this(context, recognitionException.getMessage(), recognitionException.getOffendingToken().getLine(), new HOGMLinePortion(recognitionException));
 	}
 
-	public HOGMQueryError(Context context, String errorMessage) {
+	public HOGMQueryError(Scope context, String errorMessage) {
 		this(context, errorMessage, 0, new HOGMLinePortion(), null);
 	}
 	
-	public HOGMQueryError(Context context, String errorMessage, int line, HOGMLinePortion linePortion) {
+	public HOGMQueryError(Scope context, String errorMessage, int line, HOGMLinePortion linePortion) {
 		this(context, errorMessage, line, linePortion, null);
 	}
 	
-	public HOGMQueryError(Context context, String errorMessage, int line, HOGMLinePortion linePortion, Throwable t) {
-		if (context == Context.UNKNOWN) {
+	public HOGMQueryError(Scope context, String errorMessage, int line, HOGMLinePortion linePortion, Throwable t) {
+		if (context == Scope.UNKNOWN) {
 			throw new IllegalArgumentException("Context cannot be set to UNKNOWN when providing context start and end infofrmation.");
 		}
 		this.context         = context;
@@ -85,7 +85,7 @@ public class HOGMQueryError {
 		this.throwable       = t;
 	}
 	
-	public Context getContext() {
+	public Scope getContext() {
 		return context;
 	}
 	
@@ -109,17 +109,17 @@ public class HOGMQueryError {
 	public String toString() {
 		StringJoiner sj = new StringJoiner("");
 		
-		if (context == Context.UNKNOWN) {
+		if (context == Scope.UNKNOWN) {
 			sj.add("General Error: ");
 		}
-		else if (context == Context.QUERY) {
+		else if (context == Scope.QUERY) {
 			sj.add("Error in Query ");
 		}
-		else if (context == Context.MODEL) {
+		else if (context == Scope.MODEL) {
 			sj.add("Error in FactorNetwork ");
 		}
 		
-		if (context != Context.UNKNOWN) {
+		if (context != Scope.UNKNOWN) {
 			sj.add("at Line " + line + ": ");
 		}
 		sj.add(errorMessage);
