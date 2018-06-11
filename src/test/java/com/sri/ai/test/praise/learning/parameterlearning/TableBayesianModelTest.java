@@ -16,7 +16,13 @@ import com.sri.ai.praise.learning.parameterlearning.representation.dataset.Defau
 import com.sri.ai.praise.learning.parameterlearning.representation.dataset.DefaultDataset;
 import com.sri.ai.praise.learning.parameterlearning.representation.table.TableBayesianModel;
 import com.sri.ai.praise.learning.parameterlearning.representation.table.TableBayesianNode;
-import com.sri.ai.util.Util;
+
+/**
+ * CLass to test the implementation of parameter learning for bayesian nodes (using tables)
+ * 
+ * @author Roger Leite Lucena
+ *
+ */
 
 public class TableBayesianModelTest {
 	
@@ -59,7 +65,7 @@ public class TableBayesianModelTest {
 		// Learning
 		sickSunColdModel.learnModelParametersFromCompleteData(dataset);
 	    
-		List<TableBayesianNode> learnedNodes = (List<TableBayesianNode>) sickSunColdModel.getNodes();
+		List<? extends TableBayesianNode> learnedNodes = sickSunColdModel.getNodes();
 		
 		// Testing
 		
@@ -163,7 +169,7 @@ public class TableBayesianModelTest {
 		// Learning
 		sickSunColdModel.learnModelParametersFromCompleteData(dataset);
 	    
-		List<TableBayesianNode> learnedNodes = (List<TableBayesianNode>) sickSunColdModel.getNodes();
+		List<? extends TableBayesianNode> learnedNodes = sickSunColdModel.getNodes();
 		
 		// Testing
 		
@@ -256,7 +262,7 @@ public class TableBayesianModelTest {
 	    long elapsedTime = stopTime - startTime;
 	    System.out.println("Elapsed time for learning with " + numberOfDatapoints + " datapoints: " + elapsedTime + " miliseconds \n");
 	    
-		List<TableBayesianNode> learnedNodes = (List<TableBayesianNode>) sickSunColdModel.getNodes();
+		List<? extends TableBayesianNode> learnedNodes = sickSunColdModel.getNodes();
 		
 		// Testing
 		String expectedParametersForSick = "{(0, [0, 0])=0.5, (1, [0, 0])=0.5, (0, [0, 1])=0.25, (1, [0, 1])=0.75, (0, [1, 0])=0.5, (1, [1, 0])=0.5, (0, [1, 1])=0.5, (1, [1, 1])=0.5}";

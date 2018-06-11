@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.sri.ai.praise.inference.generic.representation.table.TableFactorNetwork;
 import com.sri.ai.praise.learning.parameterlearning.BayesianModel;
-import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
 
 public class TableBayesianModel extends TableFactorNetwork implements BayesianModel {
 	
@@ -15,7 +14,7 @@ public class TableBayesianModel extends TableFactorNetwork implements BayesianMo
 		this.nodes = nodes;
 	}
 	
-	public List<? extends BayesianNode> getNodes() {
+	public List<? extends TableBayesianNode> getNodes() {
 		return nodes;
 	}
 	
