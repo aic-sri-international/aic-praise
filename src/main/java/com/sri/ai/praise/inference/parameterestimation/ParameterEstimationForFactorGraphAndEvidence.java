@@ -86,7 +86,7 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 		
 		Expression marginalFunctionLog = applyLogTransformationProductToSum(listOfMarginals);
 		
-		//System.out.println(marginalFunctionLog.toString());
+		System.out.println(marginalFunctionLog);
 		
 		Set<Expression> listOfVariables = Expressions.freeVariables(marginalFunctionLog, context);
 		
@@ -187,7 +187,7 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 	 */
 	private static Expression applySigmoidTrick(Expression marginal, Context context) {
 		Set<Expression> variablesInExpression = Expressions.freeVariables(marginal, context);
-		System.out.println(variablesInExpression);
+		//System.out.println(variablesInExpression);
 		for (Expression arg : variablesInExpression) {
 			Expression argChanged = apply(DIVISION, 1, 
 					apply(PLUS, 1, apply(FunctorConstants.EXPONENTIAL, apply(FunctorConstants.MINUS,arg))));
