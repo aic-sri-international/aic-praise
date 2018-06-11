@@ -115,7 +115,8 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		Polytope subPolytope = checkIfApproximationIsPolytopeAndReturnPolytopeIfYesThrowErrorOtherwise(subApproximation);
 		Collection<? extends Variable> subVariables = subPolytope.getFreeVariables();
 		List<List<Object>> allCombinationsOfSubVariableValues = getAllPossibleValues(subVariables);
-		// TODO
+		
+		// TODO finish
 		return null;
 	}
 
