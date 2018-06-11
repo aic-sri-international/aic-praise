@@ -43,10 +43,10 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryResult;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemResult;
 
 @Beta
-public class ExecuteHOGMQueryService extends Service<HOGMQueryResult> {
+public class ExecuteHOGMQueryService extends Service<HOGMProblemResult> {
 
 	private StringProperty model = new SimpleStringProperty(this, "model");
 	private StringProperty query = new SimpleStringProperty(this, "query");
@@ -85,8 +85,8 @@ public class ExecuteHOGMQueryService extends Service<HOGMQueryResult> {
 	}
 	
 	@Override
-    protected Task<HOGMQueryResult> createTask() {	
-		Task<HOGMQueryResult> result = new HOGMQueryTask(getQuery(), getModel());
+    protected Task<HOGMProblemResult> createTask() {	
+		Task<HOGMProblemResult> result = new HOGMQueryTask(getQuery(), getModel());
 		return result;
 	}
 }

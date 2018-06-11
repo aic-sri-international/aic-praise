@@ -48,8 +48,8 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.grinder.core.solver.Integration;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryError;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryResult;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemError;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemResult;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMSolver;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.praise.PRAiSESolver;
 import com.sri.ai.praise.core.representation.classbased.modelscontainer.ModelPage;
@@ -101,15 +101,15 @@ public class PRAiSE {
 		outputModel(modelPage);
 		startSummationCounting();
 		HOGMSolver solver = new HOGMSolver(modelPage.getModelString(), modelPage.getDefaultQueriesToRun());
-		List<HOGMQueryResult> modelPageResults = solver.getResults();
+		List<HOGMProblemResult> modelPageResults = solver.getResults();
 		outputModelResults(solver, modelPageResults);
 	}
 
 	private void outputModel(ModelPage modelPage) {
 		if (options.showModel) {
-			options.out.print  ("FactorNetwork name: ");
+			options.out.print  ("Model name: ");
 			options.out.println(modelPage.getName());
-			options.out.println("FactorNetwork     : ");
+			options.out.println("Model     : ");
 			options.out.println(modelPage.getModelString());
 		}
 	}
@@ -123,11 +123,11 @@ public class PRAiSE {
 		}
 	}
 
-	private void outputModelResults(HOGMSolver solver, List<HOGMQueryResult> modelPageResults) {
+	private void outputModelResults(HOGMSolver solver, List<HOGMProblemResult> modelPageResults) {
 		modelPageResults.forEach(hogModelQueryResult -> output(solver, hogModelQueryResult));
 	}
 
-	private void output(HOGMSolver solver, HOGMQueryResult modelQueryResult) {
+	private void output(HOGMSolver solver, HOGMProblemResult modelQueryResult) {
 		options.out.print("Query : ");
 		options.out.println(modelQueryResult.getQueryString());
 		options.out.print(RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT);
@@ -149,7 +149,7 @@ public class PRAiSE {
 		options.out.println();
 	}
 
-	private void outputError(HOGMQueryError error) {
+	private void outputError(HOGMProblemError error) {
 		options.out.println("ERROR = " + error.getErrorMessage());
 		if (options.showDebugOutput && error.getThrowable() != null) {
 			options.out.println("THROWABLE = ");

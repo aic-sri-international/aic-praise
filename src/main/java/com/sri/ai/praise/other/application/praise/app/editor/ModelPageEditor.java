@@ -44,7 +44,7 @@ import org.fxmisc.undo.UndoManager;
 import javafx.scene.layout.Pane;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryError;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemError;
 import com.sri.ai.util.base.Pair;
 
 @Beta
@@ -55,7 +55,7 @@ public interface ModelPageEditor {
 	String getCurrentPageContents();
 	List<String> getCurrentQueries();
 	
-	Pair<List<HOGMQueryError>, String> validateAndGetModel();
+	Pair<List<HOGMProblemError>, String> validateAndGetModel();
 	
 	UndoManager getUndoManager();
 	void undo();

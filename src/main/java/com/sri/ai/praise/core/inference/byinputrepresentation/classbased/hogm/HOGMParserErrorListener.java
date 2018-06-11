@@ -6,10 +6,10 @@ import com.sri.ai.expresso.api.Parser;
 
 class HOGMParserErrorListener implements Parser.ErrorListener {
 	
-	HOGMQueryError.Scope context;
-	List<HOGMQueryError> errors;
+	HOGMProblemError.Scope context;
+	List<HOGMProblemError> errors;
 	
-	HOGMParserErrorListener(HOGMQueryError.Scope context, List<HOGMQueryError> errors) {
+	HOGMParserErrorListener(HOGMProblemError.Scope context, List<HOGMProblemError> errors) {
 		this.context = context;
 		this.errors  = errors;
 	}
@@ -18,7 +18,7 @@ class HOGMParserErrorListener implements Parser.ErrorListener {
 	public void parseError(Object offendingSymbol, int line, int charPositionInLine, String message, Exception exception) {
 		HOGMLinePortion portion = new HOGMLinePortion(exception); 
 		String messageWithLineInformation = addLineInformation(line, charPositionInLine, message);
-		HOGMQueryError error = new HOGMQueryError(context, messageWithLineInformation, line, portion);
+		HOGMProblemError error = new HOGMProblemError(context, messageWithLineInformation, line, portion);
 		errors.add(error);
 	}
 

@@ -54,21 +54,21 @@ import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.util.base.Pair;
 
 @Beta
-public class HOGMQueryResult {
+public class HOGMProblemResult {
 	private String               queryString           = null;
 	private Expression           queryExpression       = null;
 	private HOGModel       parsedModel           = null;
 	private Expression           result                = null;
-	private List<HOGMQueryError> errors                = new ArrayList<>();
+	private List<HOGMProblemError> errors                = new ArrayList<>();
 	private long                 millisecondsToCompute = 0L;
 	private int                  numberOfSummations    = -1;
 	private List<Integration>    summations            = null;
 	
-	public HOGMQueryResult(String queryString, Expression queryExpression, HOGModel parsedModel, Pair<Expression, Long> resultAndTime) {
+	public HOGMProblemResult(String queryString, Expression queryExpression, HOGModel parsedModel, Pair<Expression, Long> resultAndTime) {
 		this(queryString, queryExpression, parsedModel, resultAndTime.first, resultAndTime.second);
 	}
 
-	public HOGMQueryResult(String queryString, Expression queryExpression, HOGModel parsedModel, Expression result, long millisecondsToCompute) {
+	public HOGMProblemResult(String queryString, Expression queryExpression, HOGModel parsedModel, Expression result, long millisecondsToCompute) {
 		this.queryString           = queryString;
 		this.queryExpression       = queryExpression;
 		this.parsedModel           = parsedModel;
@@ -76,7 +76,7 @@ public class HOGMQueryResult {
 		this.millisecondsToCompute = millisecondsToCompute;
 	}
 	
-	public HOGMQueryResult(String queryString, HOGModel parsedModel, List<HOGMQueryError> errors, long millisecondsToCompute) {
+	public HOGMProblemResult(String queryString, HOGModel parsedModel, List<HOGMProblemError> errors, long millisecondsToCompute) {
 		this.queryString = queryString;
 		this.queryExpression = null;
 		this.parsedModel = parsedModel;
@@ -124,7 +124,7 @@ public class HOGMQueryResult {
 		return result;
 	}
 	
-	public List<HOGMQueryError> getErrors() {
+	public List<HOGMProblemError> getErrors() {
 		return errors;
 	}
 	

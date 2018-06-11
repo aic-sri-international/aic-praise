@@ -132,7 +132,8 @@ public class FXUtil {
 	}
 	
 	public static void exception(Throwable throwable) {
-		System.err.println("Exception being directed to FXUtil.exception, which is not showing anything at this point because it is not being invoked by the JavaFX thread: " + throwable);
+		System.err.println("Exception being directed to FXUtil.exception, which is not showing anything at this point because it is not being invoked by the JavaFX thread");
+		throwable.printStackTrace(System.err);
 
 		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
 

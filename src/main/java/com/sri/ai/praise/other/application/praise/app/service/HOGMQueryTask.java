@@ -42,14 +42,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryResult;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemResult;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMSolver;
 import com.sri.ai.praise.other.application.praise.app.PRAiSEController;
 
 import javafx.concurrent.Task;
 
 @Beta
-public class HOGMQueryTask extends Task<HOGMQueryResult> {
+public class HOGMQueryTask extends Task<HOGMProblemResult> {
 	private String query;
 	private String model;
 	//
@@ -61,20 +61,20 @@ public class HOGMQueryTask extends Task<HOGMQueryResult> {
 	}
 	
 	@Override
-	public HOGMQueryResult call() {
-		final AtomicReference<HOGMQueryResult> result = new AtomicReference<>();
+	public HOGMProblemResult call() {
+		final AtomicReference<HOGMProblemResult> result = new AtomicReference<>();
 		
 		PRAiSEController.computeExpressionWithDesiredPrecision(() -> {
 			solver = new HOGMSolver(model, query);
-			List<HOGMQueryResult> queryResults = solver.getResults();
+			List<HOGMProblemResult> queryResults = solver.getResults();
 			if (queryResults.size() == 1) {
-				HOGMQueryResult queryResult = queryResults.get(0);
+				HOGMProblemResult queryResult = queryResults.get(0);
 				if (queryResult.hasErrors()) {
 					result.set(queryResult);
 				}
 				else {
 					Expression answer = solver.simplifyAnswer(queryResult.getResult(), queryResult.getQueryExpression());					
-					result.set(new HOGMQueryResult(queryResult.getQueryString(), queryResult.getQueryExpression(), queryResult.getParsedModel(), answer, queryResult.getMillisecondsToCompute()));
+					result.set(new HOGMProblemResult(queryResult.getQueryString(), queryResult.getQueryExpression(), queryResult.getParsedModel(), answer, queryResult.getMillisecondsToCompute()));
 				}
 			}		
 		});		

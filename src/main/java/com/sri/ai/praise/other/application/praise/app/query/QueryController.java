@@ -43,7 +43,7 @@ import java.util.StringJoiner;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryError;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemError;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.other.application.praise.app.FXUtil;
 import com.sri.ai.praise.other.application.praise.app.PRAiSEController;
@@ -207,7 +207,7 @@ public class QueryController {
 			executeQueryService.cancel();
 		}
 		else {
-			Pair<List<HOGMQueryError>, String> initialModelValidation = modelPageEditor.validateAndGetModel();
+			Pair<List<HOGMProblemError>, String> initialModelValidation = modelPageEditor.validateAndGetModel();
 			
 			if (initialModelValidation.first.size() > 0) {
 				displayQueryErrors(getCurrentQuery(), initialModelValidation.first, null, 0);
@@ -225,19 +225,19 @@ public class QueryController {
 		outputAccordion.getPanes().clear();
 	}
 	
-	private void displayQueryErrors(String query, List<HOGMQueryError> queryErrors, HOGModel parsedModel, long millisecondsToCompute) {
+	private void displayQueryErrors(String query, List<HOGMProblemError> queryErrors, HOGModel parsedModel, long millisecondsToCompute) {
 		String title = "Query '" + query + "' encountered " + queryErrors.size() + " error(s) when attempting to compute answer (took " + Util.toHoursMinutesAndSecondsString(millisecondsToCompute) + ")";
-		ListView<HOGMQueryError> errors = new ListView<>(FXCollections.observableList(queryErrors));
+		ListView<HOGMProblemError> errors = new ListView<>(FXCollections.observableList(queryErrors));
 		// errors.setFixedCellSize(24);
 		errors.setPrefHeight(24*5);
 		errors.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		errors.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) -> {
 			if (newValue.intValue() >= 0) {
-				HOGMQueryError qError = errors.getItems().get(newValue.intValue());
-				if (qError.getContext() == HOGMQueryError.Scope.MODEL) {
+				HOGMProblemError qError = errors.getItems().get(newValue.intValue());
+				if (qError.getContext() == HOGMProblemError.Scope.MODEL) {
 					modelPageEditor.highlight(qError.getStartContextIndex(), qError.getEndContextIndex());
 				}
-				else if (qError.getContext() == HOGMQueryError.Scope.QUERY) {
+				else if (qError.getContext() == HOGMProblemError.Scope.QUERY) {
 					queryComboBox.getEditor().selectAll();
 				}
 			}

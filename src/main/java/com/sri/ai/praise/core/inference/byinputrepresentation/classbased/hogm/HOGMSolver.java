@@ -47,7 +47,6 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
@@ -56,8 +55,6 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
-import com.sri.ai.praise.core.representation.classbased.hogm.parsing.HOGMParserWrapper;
-import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 
@@ -71,13 +68,12 @@ public class HOGMSolver {
 //	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = EvaluationExpressionBasedSolver.class;
 	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = ExactBPExpressionBasedSolver.class;
 	
-	private HOGMParserWrapper parser = new HOGMParserWrapper();
 	private HOGModel hogmModel = null;
-	private List<HOGMQueryResult> results = new ArrayList<>();
-	private List<HOGMQueryError> errors = new ArrayList<>();
+	private List<HOGMProblemResult> results = new ArrayList<>();
+	private List<HOGMProblemError> modelErrors = new ArrayList<>();
 	private boolean canceled = false;
-	private Theory optionalTheory = null;
 	private ExpressionBasedModel expressionBasedModel;
+	private Class<? extends ExpressionBasedSolver> solverClass;
 	private ExpressionBasedSolver solver = null;
 	
 	public HOGMSolver(String model, String query) {
@@ -93,23 +89,30 @@ public class HOGMSolver {
 	}
 	
 	public HOGMSolver(String modelString, List<String> queries, Class<? extends ExpressionBasedSolver> solverClass) {
+		this.solverClass = solverClass;
 		initializeModel(modelString);
-		initializeSolver(solverClass);
         processAllQueries(queries);
 	}
 
 	private void initializeModel(String modelString) {
-		HOGMModelParsingWithErrorCollecting parsingWithErrorCollecting = new HOGMModelParsingWithErrorCollecting(modelString, errors);
+		HOGMModelParsingWithErrorCollecting parsingWithErrorCollecting = new HOGMModelParsingWithErrorCollecting(modelString, modelErrors);
 		this.hogmModel = parsingWithErrorCollecting.getModel();
 		this.expressionBasedModel = hogmModel == null? null : new HOGMExpressionBasedModel(hogmModel);
 	}
 
-	private void initializeSolver(Class<? extends ExpressionBasedSolver> solverClass) {
+	private ExpressionBasedSolver getSolver() {
+		if (solver == null) {
+			makeSolver(solverClass);
+		}
+		return solver;
+	}
+
+	private void makeSolver(Class<? extends ExpressionBasedSolver> solverClass) throws Error {
 		try {
 			this.solver = solverClass.newInstance();
 		}
 		catch (Throwable throwable) {
-			collectQueryError(throwable);
+			throw new Error("Could not instantiate " + solverClass);
 		}
 	}
 
@@ -119,71 +122,42 @@ public class HOGMSolver {
         }
 	}
 
-	public List<HOGMQueryResult> getResults() {
+	public List<HOGMProblemResult> getResults() {
         return results;
     }
 
-	public Theory getOptionalTheory() {
-		return optionalTheory;
-	}
-	
-	public void setOptionalTheory(Theory theory) {
-		this.optionalTheory = theory;
-	}
-	
 	private void processQuery(String query) {
-		long queryProcessingStartingTime = System.currentTimeMillis();
-		collectQueryResults(query, hogmModel);
-		collectQueryResultBasedInErrors(query, hogmModel, queryProcessingStartingTime);
-	}
-
-	private void collectQueryResults(String query, HOGModel parsedModel) {
-		
-		collectErrorIfQueryIsEmpty(query);
-		   		
-		if (errors.size() == 0) {
-			Expression queryExpression = parser.parseTerm(query, new HOGMParserErrorListener(HOGMQueryError.Scope.QUERY, errors));
-			if (errors.size() == 0) {
-				runInference(query, queryExpression, parsedModel);
-			}
+		HOGMQueryParsing queryParsing = new HOGMQueryParsing(query, hogmModel, modelErrors);
+		if (queryParsing.succeeded()) {
+			collectInferenceResult(query, queryParsing);
+		}
+		else {
+			collectParsingErrorResult(queryParsing);
 		}
 	}
 
-	private void collectErrorIfQueryIsEmpty(String query) {
-		if (Util.isNullOrEmptyString(query)) {
-			HOGMQueryError error = new HOGMQueryError(HOGMQueryError.Scope.QUERY, "Query not specified");
-			errors.add(error);
-		}
-	}
-
-	private void runInference(String query, Expression queryExpression, HOGModel parsedModel) {
+	private void collectInferenceResult(String query, HOGMQueryParsing queryParsing) {
 		if (!canceled) {
-			IntegrationRecording.startRecordingIntegrationsOverGroups();
-			Pair<Expression, Long> inferenceResultAndTime = time(inference(queryExpression)); 			
-			HOGMQueryResult queryResult = new HOGMQueryResult(query, queryExpression, parsedModel, inferenceResultAndTime);
-			queryResult.recordNumberOfSummations();
-			results.add(queryResult);
+			HOGMProblemResult inferenceResult = runInference(query, queryParsing.getQueryExpression());
+			results.add(inferenceResult);
 		}
+	}
+
+	private HOGMProblemResult runInference(String query, Expression queryExpression) {
+		IntegrationRecording.startRecordingIntegrationsOverGroups();
+		Pair<Expression, Long> inferenceResultAndTime = time(inference(queryExpression)); 			
+		HOGMProblemResult inferenceResult = new HOGMProblemResult(query, queryExpression, hogmModel, inferenceResultAndTime);
+		inferenceResult.recordNumberOfSummations();
+		return inferenceResult;
 	}
 
 	private NullaryFunction<Expression> inference(Expression queryExpression) {
-		NullaryFunction<Expression> inference = () -> solver.solve(queryExpression, expressionBasedModel);
+		NullaryFunction<Expression> inference = () -> getSolver().solve(queryExpression, expressionBasedModel);
 		return inference;
 	}
 
-	private void collectQueryError(Throwable throwable) {
-		HOGMQueryError error = new HOGMQueryError(throwable);
-		errors.add(error);
-	}
-
-	private void collectQueryResultBasedInErrors(String query, HOGModel parsedModel, long queryProcessingStartingTime) {
-		if (errors.size() > 0) {
-			long queryProcessingEndingTime = System.currentTimeMillis();
-			long time = queryProcessingEndingTime - queryProcessingStartingTime;
-			HOGMQueryResult queryResult = new HOGMQueryResult(query, parsedModel, errors, time);
-			results.add(queryResult);
-			errors.clear();
-		}
+	private void collectParsingErrorResult(HOGMQueryParsing queryParsing) {
+		results.add(queryParsing.getParsingErrorProblemResult());
 	}
 
 	public void cancelQuery() {

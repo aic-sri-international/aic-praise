@@ -45,7 +45,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.google.common.annotations.Beta;
 
 @Beta
-public class HOGMQueryError {
+public class HOGMProblemError {
 	
 	public enum Scope {
 		MODEL, QUERY, UNKNOWN
@@ -57,24 +57,24 @@ public class HOGMQueryError {
 	private String    errorMessage    = "";
 	private Throwable throwable       = null;
 	
-	public HOGMQueryError(Throwable t) {
+	public HOGMProblemError(Throwable t) {
 		this.errorMessage = t.getMessage() == null ? t.toString() : t.getMessage();
 		this.throwable    = t;
 	}
 	
-	public HOGMQueryError(Scope context, RecognitionException recognitionException) {
+	public HOGMProblemError(Scope context, RecognitionException recognitionException) {
 		this(context, recognitionException.getMessage(), recognitionException.getOffendingToken().getLine(), new HOGMLinePortion(recognitionException));
 	}
 
-	public HOGMQueryError(Scope context, String errorMessage) {
+	public HOGMProblemError(Scope context, String errorMessage) {
 		this(context, errorMessage, 0, new HOGMLinePortion(), null);
 	}
 	
-	public HOGMQueryError(Scope context, String errorMessage, int line, HOGMLinePortion linePortion) {
+	public HOGMProblemError(Scope context, String errorMessage, int line, HOGMLinePortion linePortion) {
 		this(context, errorMessage, line, linePortion, null);
 	}
 	
-	public HOGMQueryError(Scope context, String errorMessage, int line, HOGMLinePortion linePortion, Throwable t) {
+	public HOGMProblemError(Scope context, String errorMessage, int line, HOGMLinePortion linePortion, Throwable t) {
 		if (context == Scope.UNKNOWN) {
 			throw new IllegalArgumentException("Context cannot be set to UNKNOWN when providing context start and end infofrmation.");
 		}
@@ -116,7 +116,7 @@ public class HOGMQueryError {
 			sj.add("Error in Query ");
 		}
 		else if (context == Scope.MODEL) {
-			sj.add("Error in FactorNetwork ");
+			sj.add("Error in model ");
 		}
 		
 		if (context != Scope.UNKNOWN) {

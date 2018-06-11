@@ -49,7 +49,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMQueryError;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemError;
 import com.sri.ai.praise.other.application.praise.app.FXUtil;
 import com.sri.ai.praise.other.application.praise.app.query.QueryController;
 import com.sri.ai.util.base.Pair;
@@ -92,9 +92,9 @@ public class HOGMPageEditorController implements ModelPageEditor {
 	}
 	
 	@Override
-	public Pair<List<HOGMQueryError>, String> validateAndGetModel() {
+	public Pair<List<HOGMProblemError>, String> validateAndGetModel() {
 		// Nothing to validate up front with the default model
-		Pair<List<HOGMQueryError>, String> result = new Pair<>(Collections.emptyList(), getCurrentPageContents());
+		Pair<List<HOGMProblemError>, String> result = new Pair<>(Collections.emptyList(), getCurrentPageContents());
 		return result;
 	}
 	
