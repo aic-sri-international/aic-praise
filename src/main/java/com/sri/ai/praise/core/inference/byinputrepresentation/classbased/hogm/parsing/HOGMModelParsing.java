@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing;
 
 import static com.sri.ai.util.Util.isNullOrEmptyString;
 
@@ -51,12 +51,12 @@ import com.sri.ai.praise.core.representation.classbased.hogm.validation.HOGModel
 import com.sri.ai.praise.core.representation.classbased.hogm.validation.HOGModelException;
 
 @Beta
-public class HOGMModelParsingWithErrorCollecting {
+public class HOGMModelParsing {
 	
 	private HOGModel model = null;
 	private List<HOGMProblemError> errors;
 	
-	public HOGMModelParsingWithErrorCollecting(String model, List<HOGMProblemError> errors) {
+	public HOGMModelParsing(String model, List<HOGMProblemError> errors) {
 		this.errors = errors;
 		initializeModel(model);
 	}

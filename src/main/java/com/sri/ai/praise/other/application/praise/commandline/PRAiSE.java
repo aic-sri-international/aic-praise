@@ -48,9 +48,9 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.grinder.core.solver.Integration;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemError;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemResult;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.praise.PRAiSESolver;
 import com.sri.ai.praise.core.representation.classbased.modelscontainer.ModelPage;
 
@@ -100,7 +100,7 @@ public class PRAiSE {
 	private void solveModel(ModelPage modelPage) {
 		outputModel(modelPage);
 		startSummationCounting();
-		HOGMSolver solver = new HOGMSolver(modelPage.getModelString(), modelPage.getDefaultQueriesToRun());
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(modelPage.getModelString(), modelPage.getDefaultQueriesToRun());
 		List<HOGMProblemResult> modelPageResults = solver.getResults();
 		outputModelResults(solver, modelPageResults);
 	}
@@ -123,11 +123,11 @@ public class PRAiSE {
 		}
 	}
 
-	private void outputModelResults(HOGMSolver solver, List<HOGMProblemResult> modelPageResults) {
+	private void outputModelResults(HOGMMultiQueryProblemSolver solver, List<HOGMProblemResult> modelPageResults) {
 		modelPageResults.forEach(hogModelQueryResult -> output(solver, hogModelQueryResult));
 	}
 
-	private void output(HOGMSolver solver, HOGMProblemResult modelQueryResult) {
+	private void output(HOGMMultiQueryProblemSolver solver, HOGMProblemResult modelQueryResult) {
 		options.out.print("Query : ");
 		options.out.println(modelQueryResult.getQueryString());
 		options.out.print(RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT);

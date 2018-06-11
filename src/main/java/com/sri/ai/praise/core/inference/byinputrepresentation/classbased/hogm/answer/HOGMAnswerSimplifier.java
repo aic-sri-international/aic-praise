@@ -35,57 +35,30 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.application.praise.app.service;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.answer;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import static com.sri.ai.grinder.helper.GrinderUtil.getTypeExpressionOfExpression;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
-import com.sri.ai.praise.other.application.praise.app.PRAiSEController;
-
-import javafx.concurrent.Task;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.api.Context;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
 
 @Beta
-public class HOGMQueryTask extends Task<HOGMProblemResult> {
-	private String query;
-	private String model;
-	//
-	private HOGMMultiQueryProblemSolver solver = null;
+public class HOGMAnswerSimplifier {
 	
-	public HOGMQueryTask(String query, String model) {
-		this.query = query;
-		this.model = model;
-	}
-	
-	@Override
-	public HOGMProblemResult call() {
-		final AtomicReference<HOGMProblemResult> result = new AtomicReference<>();
-		
-		PRAiSEController.computeExpressionWithDesiredPrecision(() -> {
-			solver = new HOGMMultiQueryProblemSolver(model, query);
-			List<HOGMProblemResult> queryResults = solver.getResults();
-			if (queryResults.size() == 1) {
-				HOGMProblemResult queryResult = queryResults.get(0);
-				if (queryResult.hasErrors()) {
-					result.set(queryResult);
-				}
-				else {
-					Expression answer = solver.simplifyAnswer(queryResult.getResult(), queryResult.getQueryExpression());					
-					result.set(new HOGMProblemResult(queryResult.getQueryString(), queryResult.getQueryExpression(), queryResult.getParsedModel(), answer, queryResult.getMillisecondsToCompute()));
-				}
-			}		
-		});		
- 
-        return result.get();
-    }
-	
-	@Override
-	protected void cancelled() {
-		if (solver != null) {
-			solver.interrupt();
+	public static Expression simplifyAnswer(Expression answer, Expression forQuery, Context context) {
+		Expression result  = answer;
+		if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(getTypeExpressionOfExpression(forQuery, context))) {
+			result = result.replaceAllOccurrences(forQuery, Expressions.TRUE, context);
+			result = simplify(result, context);
+			answer = Expressions.parse(result.toString()); // This ensures numeric values have the correct precision
 		}
+		return result;
 	}
+	
+	public static Expression simplify(Expression expression, Context context) {
+		return context.evaluate(expression);
+	} 
 }

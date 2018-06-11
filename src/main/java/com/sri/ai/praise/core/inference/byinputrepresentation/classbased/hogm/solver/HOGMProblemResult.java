@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver;
 
 import static com.sri.ai.grinder.core.solver.IntegrationRecording.getNumberOfIntegrationsOverGroup;
 
@@ -50,6 +50,7 @@ import com.sri.ai.grinder.core.solver.Integration;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
 import com.sri.ai.grinder.group.Sum;
 import com.sri.ai.grinder.group.SumProduct;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.util.base.Pair;
 

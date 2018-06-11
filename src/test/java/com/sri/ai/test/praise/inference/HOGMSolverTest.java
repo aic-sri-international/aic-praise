@@ -48,8 +48,8 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemResult;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 
 public class HOGMSolverTest {
 	
@@ -78,7 +78,7 @@ public class HOGMSolverTest {
 				"";
 		
 		String query = "event";
-		HOGMSolver solver = new HOGMSolver(model, query);
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, query);
 		List<HOGMProblemResult> results = solver.getResults();
 	
 		assertEquals(1, results.size());

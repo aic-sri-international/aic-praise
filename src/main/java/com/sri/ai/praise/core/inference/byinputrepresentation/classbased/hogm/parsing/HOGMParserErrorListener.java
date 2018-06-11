@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing;
 
 import java.util.List;
 

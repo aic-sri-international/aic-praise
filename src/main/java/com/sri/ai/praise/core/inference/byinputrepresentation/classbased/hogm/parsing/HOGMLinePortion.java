@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing;
 
 import org.antlr.v4.runtime.RecognitionException;
 

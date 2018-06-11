@@ -49,7 +49,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
 import com.google.common.annotations.Beta;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.HOGMProblemError;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
 import com.sri.ai.praise.other.application.praise.app.FXUtil;
 import com.sri.ai.praise.other.application.praise.app.query.QueryController;
 import com.sri.ai.util.base.Pair;

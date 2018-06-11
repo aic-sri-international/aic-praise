@@ -35,9 +35,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver;
 
-import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.time;
 
 import java.util.ArrayList;
@@ -45,88 +44,28 @@ import java.util.List;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.solver.IntegrationRecording;
-import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMQueryParsing;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
-import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 
 @Beta
-public class HOGMSolver {
-	
-	// TODO: This class currently does too many things:
-	// it does both solving and lots of error manipulation, handles multiple queries, and deals with both HOGModels and expression-based models.
-	// It should instead: run another class for error checking of both model and queries, and run another class for processing an error-free query.
-	
-//	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = EvaluationExpressionBasedSolver.class;
-	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = ExactBPExpressionBasedSolver.class;
+public class HOGMSingleQueryProblemSolver {
 	
 	private HOGModel hogmModel = null;
 	private List<HOGMProblemResult> results = new ArrayList<>();
-	private List<HOGMProblemError> modelErrors = new ArrayList<>();
 	private boolean canceled = false;
 	private ExpressionBasedModel expressionBasedModel;
 	private Class<? extends ExpressionBasedSolver> solverClass;
-	private ExpressionBasedSolver solver = null;
-	
-	public HOGMSolver(String model, String query) {
-		this(model, list(query), defaultSolverClass);
-	}
-	
-	public HOGMSolver(String model, List<String> queries) {
-		this(model, queries, defaultSolverClass);
-	}
 
-	public HOGMSolver(String model, String query, Class<? extends ExpressionBasedSolver> solverClass) {
-		this(model, list(query), solverClass);
-	}
-	
-	public HOGMSolver(String modelString, List<String> queries, Class<? extends ExpressionBasedSolver> solverClass) {
+	public HOGMSingleQueryProblemSolver(String query, Class<? extends ExpressionBasedSolver> solverClass, HOGModel hogmModel, ExpressionBasedModel expressionBasedModel, List<HOGMProblemError> modelErrors) {
 		this.solverClass = solverClass;
-		initializeModel(modelString);
-        processAllQueries(queries);
-	}
-
-	private void initializeModel(String modelString) {
-		HOGMModelParsingWithErrorCollecting parsingWithErrorCollecting = new HOGMModelParsingWithErrorCollecting(modelString, modelErrors);
-		this.hogmModel = parsingWithErrorCollecting.getModel();
-		this.expressionBasedModel = hogmModel == null? null : new HOGMExpressionBasedModel(hogmModel);
-	}
-
-	private ExpressionBasedSolver getSolver() {
-		if (solver == null) {
-			makeSolver(solverClass);
-		}
-		return solver;
-	}
-
-	private void makeSolver(Class<? extends ExpressionBasedSolver> solverClass) throws Error {
-		try {
-			this.solver = solverClass.newInstance();
-		}
-		catch (Throwable throwable) {
-			throw new Error("Could not instantiate " + solverClass);
-		}
-	}
-
-	private void processAllQueries(List<String> queries) {
-		for (String query : queries) {
-        	processQuery(query);
-        }
-	}
-
-	public List<HOGMProblemResult> getResults() {
-        return results;
-    }
-
-	private void processQuery(String query) {
+		this.hogmModel = hogmModel;
+		this.expressionBasedModel = expressionBasedModel;
 		HOGMQueryParsing queryParsing = new HOGMQueryParsing(query, hogmModel, modelErrors);
 		if (queryParsing.succeeded()) {
 			collectInferenceResult(query, queryParsing);
@@ -152,37 +91,37 @@ public class HOGMSolver {
 	}
 
 	private NullaryFunction<Expression> inference(Expression queryExpression) {
-		NullaryFunction<Expression> inference = () -> getSolver().solve(queryExpression, expressionBasedModel);
-		return inference;
+		return () -> getExpressionBasedSolver().solve(queryExpression, expressionBasedModel);
 	}
 
 	private void collectParsingErrorResult(HOGMQueryParsing queryParsing) {
 		results.add(queryParsing.getParsingErrorProblemResult());
 	}
 
-	public void cancelQuery() {
+	public void interrupt() {
 		canceled = true;
-		if (solver != null) {
-			solver.interrupt();
+		expressionBasedSolver.interrupt();
+	}
+	
+	public List<HOGMProblemResult> getResults() {
+        return results;
+    }
+
+	private ExpressionBasedSolver expressionBasedSolver = null;
+
+	private ExpressionBasedSolver getExpressionBasedSolver() {
+		if (expressionBasedSolver == null) {
+			makeSolver(solverClass);
 		}
+		return expressionBasedSolver;
 	}
 
-	public Expression simplifyAnswer(Expression answer, Expression forQuery) {
-		Expression result  = answer;
-		Context    context = getContext();
-		if (HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(GrinderUtil.getTypeExpressionOfExpression(forQuery, context))) {
-			result = result.replaceAllOccurrences(forQuery, Expressions.TRUE, context);
-			result = simplify(result);
-			answer = Expressions.parse(result.toString()); // This ensures numeric values have the correct precision
+	private void makeSolver(Class<? extends ExpressionBasedSolver> solverClass) throws Error {
+		try {
+			this.expressionBasedSolver = solverClass.newInstance();
 		}
-		return result;
+		catch (Throwable throwable) {
+			throw new Error("Could not instantiate " + solverClass);
+		}
 	}
-	
-	public Context getContext() {
-		return expressionBasedModel.getContext();
-	}
-	
-	public Expression simplify(Expression expression) {
-		return getContext().evaluate(expression);
-	} 
 }
