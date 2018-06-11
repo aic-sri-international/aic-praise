@@ -5,6 +5,7 @@ import static com.sri.ai.expresso.helper.Expressions.freeVariables;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIAL;
+import static com.sri.ai.grinder.library.FunctorConstants.LOG;
 import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
 import static java.util.Arrays.asList;
@@ -24,7 +25,6 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
-import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.inference.expressionbased.InferenceForFactorGraphAndEvidence;
 import com.sri.ai.praise.inference.hogm.HOGMFactorsAndTypes;
 
@@ -175,12 +175,12 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 		if (listOfMarginals.length > 1) {
 			result = apply(PLUS, asList(listOfMarginals));
 			for (int i = 0; i < listOfMarginals.length; i++) {
-				Expression newIthArgument = apply(FunctorConstants.LOG, listOfMarginals[i]);
+				Expression newIthArgument = apply(LOG, listOfMarginals[i]);
 				result = result.set(i, newIthArgument);
 			}
 		}
 		else {
-			result = apply(FunctorConstants.LOG, listOfMarginals[0]);
+			result = apply(LOG, listOfMarginals[0]);
 		}
 		return result;
 	}
