@@ -1,7 +1,9 @@
 package com.sri.ai.test.praise.inference.parameterestimation;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
+import static com.sri.ai.grinder.library.number.Times.getMultiplicands;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.map;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
@@ -15,9 +17,7 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
-import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.inference.parameterestimation.ParameterEstimationForFactorGraphAndEvidence;
-import com.sri.ai.util.Util;
 
 public class ParameterEstimationForFactorGraphAndEvidenceTest {
 
@@ -25,30 +25,30 @@ public class ParameterEstimationForFactorGraphAndEvidenceTest {
 	public void test() {
 
 		// The definitions of types
-		Map<String, String> mapFromCategoricalTypeNameToSizeString = Util.map(
+		Map<String, String> mapFromCategoricalTypeNameToSizeString = map(
 				"Folks", "10",
 				"Boolean", "2");
 
 		// The definitions of variables
-		Map<String, String> mapFromRandomVariableNameToTypeName = Util.map(
+		Map<String, String> mapFromRandomVariableNameToTypeName = map(
 				"earthquake", "Boolean",
 				"burglary",    "Boolean", 
 				"alarm",      "Boolean"
 				);
 
 		// The definitions of non-uniquely named constants
-		Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
+		Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = map(
 				"seismicLocation", "Boolean",
 				"Alpha", "Real",
 				"Beta", "Real"
 				);
 
 		// The definitions of non-uniquely named constants
-		Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = Util.map("none", "Folks", "tom", "Folks");
+		Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = map("none", "Folks", "tom", "Folks");
 
 		// a variant of the earthquake/burglary model in which some burglars are more active than others.
 		boolean isBayesianNetwork = true;
-		List<Expression> factors = Times.getMultiplicands(parse("" + 
+		List<Expression> factors = getMultiplicands(parse("" + 
 				"(if earthquake then Alpha else 1-Alpha) * " +
 				"(if burglary then Beta else 1-Beta) * " +
 				// note the division above of the potential by number of remaining values, as the probabilities must sum up to 1
@@ -184,29 +184,31 @@ public class ParameterEstimationForFactorGraphAndEvidenceTest {
 		System.out.println("result : " + mapResult);
 		assertEquals(expected, mapResult);
 
+		// Test with another model
+		
 		// The definitions of types
-		mapFromCategoricalTypeNameToSizeString = Util.map(
+		mapFromCategoricalTypeNameToSizeString = map(
 				"Folks", "10",
 				"Boolean", "2");
 
 		// The definitions of variables
-		mapFromRandomVariableNameToTypeName = Util.map(
+		mapFromRandomVariableNameToTypeName = map(
 				"earthquake", "Boolean",
 				"burglar",    "Folks", // a multi-value random variable
 				"alarm",      "Boolean"
 				);
 
 		// The definitions of non-uniquely named constants
-		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map(
+		mapFromNonUniquelyNamedConstantNameToTypeName = map(
 				"seismicLocation", "Boolean"
 				);
 
 		// The definitions of non-uniquely named constants
-		mapFromUniquelyNamedConstantNameToTypeName = Util.map("none", "Folks", "tom", "Folks");
+		mapFromUniquelyNamedConstantNameToTypeName = map("none", "Folks", "tom", "Folks");
 
 		// a variant of the earthquake/burglary model in which some burglars are more active than others.
 		isBayesianNetwork = true;
-		factors = Times.getMultiplicands(parse("" + 
+		factors = getMultiplicands(parse("" + 
 				"(if earthquake then Alpha else 1-Alpha) * " +
 				"(if burglar = none then 0.7 else if burglar = tom then 0.1 else 0.2 / (|Folks| - 2)) * " +
 				// note the division above of the potential by number of remaining values, as the probabilities must sum up to 1
@@ -234,7 +236,7 @@ public class ParameterEstimationForFactorGraphAndEvidenceTest {
 
 	private HashMap<Expression,Double> runTest(Expression[] queryExpressionList, Expression[] evidenceList, HashMap<Expression,Double> expected, boolean isBayesianNetwork, List<Expression> factors, Map<String, String> mapFromRandomVariableNameToTypeName, Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromCategoricalTypeNameToSizeString, Collection<Type> additionalTypes, double[] startPoint) {
 
-		HashMap<Expression,Double> mapResult = ParameterEstimationForFactorGraphAndEvidence.optimize(false,
+		HashMap<Expression,Double> result = ParameterEstimationForFactorGraphAndEvidence.optimize(false,
 				queryExpressionList,
 				evidenceList,
 				isBayesianNetwork,
@@ -246,7 +248,7 @@ public class ParameterEstimationForFactorGraphAndEvidenceTest {
 				list(),
 				GoalType.MAXIMIZE,
 				startPoint);
-		return mapResult;
+		return result;
 
 
 	}

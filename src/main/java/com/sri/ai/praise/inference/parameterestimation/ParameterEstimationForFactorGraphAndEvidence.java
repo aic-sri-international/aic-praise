@@ -1,9 +1,14 @@
 package com.sri.ai.praise.inference.parameterestimation;
 
 import static com.sri.ai.expresso.helper.Expressions.apply;
+import static com.sri.ai.expresso.helper.Expressions.freeVariables;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
+import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIAL;
+import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
+import static java.util.Arrays.asList;
+import static org.apache.commons.math3.util.FastMath.exp;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,11 +17,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.util.FastMath;
-
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
-import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.optimization.OptimizationWithNonlinearConjugateGradientDescent;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
@@ -88,13 +90,13 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 		
 		System.out.println(marginalFunctionLog);
 		
-		Set<Expression> listOfVariables = Expressions.freeVariables(marginalFunctionLog, context);
+		Set<Expression> listOfVariables = freeVariables(marginalFunctionLog, context);
 		
 		double[] argopt = returnArgopt(startPoint, goalType, marginalFunctionLog);
 		
-		HashMap<Expression, Double> mapResult = buildHashMapContainingResult(listOfVariables, argopt);
+		HashMap<Expression, Double> result = buildHashMapContainingResult(listOfVariables, argopt);
 		
-		return mapResult;
+		return result;
 	}
 
 	/**
@@ -103,10 +105,10 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 	 */
 	private static double[] returnArgopt(double[] startPoint, GoalType goalType, Expression marginalFunctionLog) {
 		OptimizationWithNonlinearConjugateGradientDescent optimizer = new OptimizationWithNonlinearConjugateGradientDescent(marginalFunctionLog, goalType, startPoint);
-		double[] result_sig = optimizer.findArgopt();
-		double[] result = new double[result_sig.length];
-		for (int i = 0; i < result_sig.length; i++) {
-			result[i] = 1/(1+FastMath.exp(-result_sig[i]));
+		double[] resultSig = optimizer.findArgopt();
+		double[] result = new double[resultSig.length];
+		for (int i = 0; i < resultSig.length; i++) {
+			result[i] = 1/(1+exp(-resultSig[i]));
 		}
 		return result;
 	}
@@ -116,14 +118,14 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 	 *
 	 */
 	private static HashMap<Expression, Double> buildHashMapContainingResult(Set<Expression> listOfVariables,
-			double[] result) {
-		HashMap<Expression,Double> mapResult = new HashMap<Expression,Double>();
+			double[] argopt) {
+		HashMap<Expression,Double> result = new HashMap<Expression,Double>();
 		int k = 0;
 		for (Expression e : listOfVariables) {
-			mapResult.put(e, result[k]);
+			result.put(e, argopt[k]);
 			k++;
 		}
-		return mapResult;
+		return result;
 	}
 
 	/**
@@ -137,7 +139,8 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromCategoricalTypeNameToSizeString, Collection<Type> additionalTypes,
 			Context context) {
-		Expression[] listOfMarginals = new Expression[queryExpression.length];
+		
+		Expression[] result = new Expression[queryExpression.length];
 		for (int i = 0; i < queryExpression.length; i++) {
 			InferenceForFactorGraphAndEvidence inferencer;
 			Expression marginal;
@@ -157,9 +160,10 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 			marginal = applySigmoidTrick(marginal, context);
 	
 			Expression marginalFunction = convertExpression(marginal);
-			listOfMarginals[i] = marginalFunction;
+			result[i] = marginalFunction;
 		}
-		return listOfMarginals;
+		
+		return result;
 	}
 	
 	/**
@@ -169,14 +173,14 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 	private static Expression applyLogTransformationProductToSum(Expression[] listOfMarginals) {
 		Expression result;
 		if (listOfMarginals.length > 1) {
-			result = Expressions.apply(FunctorConstants.PLUS, listOfMarginals);
+			result = apply(PLUS, asList(listOfMarginals));
 			for (int i = 0; i < listOfMarginals.length; i++) {
-				Expression newIthArgument = Expressions.apply(FunctorConstants.LOG, listOfMarginals[i]);
+				Expression newIthArgument = apply(FunctorConstants.LOG, listOfMarginals[i]);
 				result = result.set(i, newIthArgument);
 			}
 		}
 		else {
-			result = Expressions.apply(FunctorConstants.LOG, listOfMarginals[0]);
+			result = apply(FunctorConstants.LOG, listOfMarginals[0]);
 		}
 		return result;
 	}
@@ -186,11 +190,11 @@ public class ParameterEstimationForFactorGraphAndEvidence {
 	 *
 	 */
 	private static Expression applySigmoidTrick(Expression marginal, Context context) {
-		Set<Expression> variablesInExpression = Expressions.freeVariables(marginal, context);
+		Set<Expression> variablesInExpression = freeVariables(marginal, context);
 		//System.out.println(variablesInExpression);
 		for (Expression arg : variablesInExpression) {
 			Expression argChanged = apply(DIVISION, 1, 
-					apply(PLUS, 1, apply(FunctorConstants.EXPONENTIAL, apply(FunctorConstants.MINUS,arg))));
+					apply(PLUS, 1, apply(EXPONENTIAL, apply(MINUS,arg))));
 			marginal = marginal.replaceAllOccurrences(arg, argChanged, context);
 		}
 		return marginal;
