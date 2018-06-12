@@ -69,8 +69,8 @@ public class HOGMParserWrapper implements Parser {
 	}
 	
 	public HOGModel parseModel(String string, Parser.ErrorListener errorListener) {
-		Expression     modelTupleExpr = parse(string, errorListener);
-		HOGModel result         = new HOGModel(string, modelTupleExpr);
+		Expression modelTupleExpression = parse(string, errorListener);
+		HOGModel result = new HOGModel(string, modelTupleExpression);
 		return result;
 	}
 	

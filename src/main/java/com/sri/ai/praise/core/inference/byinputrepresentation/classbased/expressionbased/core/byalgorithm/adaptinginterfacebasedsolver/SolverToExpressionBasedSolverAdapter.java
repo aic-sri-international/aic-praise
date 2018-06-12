@@ -5,7 +5,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.express
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.ExpressionBasedProblemToQueryConvert;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.ExpressionBasedProblemToInterfaceBasedProblemConversion;
 
 public abstract class SolverToExpressionBasedSolverAdapter extends AbstractExpressionBasedSolver {
 
@@ -18,7 +18,7 @@ public abstract class SolverToExpressionBasedSolverAdapter extends AbstractExpre
 
 	@Override
 	protected Expression solveForQuerySymbolDefinedByExpressionBasedProblem(ExpressionBasedProblem expressionBasedProblem) {
-		Problem problem = ExpressionBasedProblemToQueryConvert.translate(expressionBasedProblem);
+		Problem problem = ExpressionBasedProblemToInterfaceBasedProblemConversion.translate(expressionBasedProblem);
 		Expression result = getSolver().solve(problem);
 		return result;
 	}
