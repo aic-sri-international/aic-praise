@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
@@ -19,7 +20,7 @@ import com.sri.ai.praise.learning.symbolicparameterestimation.ParameterEstimatio
 
 public class ParameterEstimationForExpressionBasedModelTest {
 
-	//@Test
+	@Test
 	public void test() {
 
 		// The definitions of types
@@ -202,7 +203,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				);
 
 		// The definitions of non-uniquely named constants
-		mapFromUniquelyNamedConstantNameToTypeName = map("none", "Folks", "tom", "Folks");
+		mapFromUniquelyNamedConstantNameToTypeName = map("none", "Folks", "tom", "Folks", "Alpha", "Real");
 
 		// a variant of the earthquake/burglary model in which some burglars are more active than others.
 		isBayesianNetwork = true;
