@@ -10,16 +10,12 @@ import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
 import static java.util.Arrays.asList;
 import static org.apache.commons.math3.util.FastMath.exp;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.optimization.OptimizationWithNonlinearConjugateGradientDescent;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
@@ -29,7 +25,9 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.HOGModelToExpressionBasedModel;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.ModelStringToHOGModel;
 
 /**
  * Parameter Estimation.
@@ -40,43 +38,59 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.core.Def
 
 public class ParameterEstimationForExpressionBasedModel {
 
-	// The definitions of categorical types
-	static Map<String, String> mapFromCategoricalTypeNameToSizeString;
-
-	// The definitions of other types
-	static Collection<Type> additionalTypes;
-
-	// The definitions of variables
-	static Map<String, String> mapFromRandomVariableNameToTypeName;
-
-	// The definitions of non-uniquely named constants
-	static Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName;
-
-	// The definitions of uniquely named constants
-	static Map<String, String> mapFromUniquelyNamedConstantNameToTypeName;
-
-	static boolean isBayesianNetwork;
-	static List<Expression> factors;
+	static ExpressionBasedModel expressionBasedModel; 
+	static HOGModel hogmModel;
+	static String modelString;
+	
 	static Expression[] evidence;
 	static Expression[] queryExpression;
-	static Expression expected;
-	static Expression expectedWithNoFactorization;
-	static Expression expectedWithFactorization;
-
+	
 	/**
-	 * Main method to optimize the parameters of the model given the queries and evidences.
+	 * Main method to optimize the parameters of the model given the queries and evidences when the model is String based.
 	 *
 	 */
-	public static HashMap<Expression, Double> optimize(boolean useFactorization,
+	public static HashMap<Expression, Double> optimizeWhenModelIsString(String modelString, Expression[] evidence, Expression[] queryExpression, GoalType goalType,
+			double[] startPoint){
+		
+		HOGModel hogmModel = ModelStringToHOGModel.parseModelStringToHOGMModel(modelString);
+		
+		HashMap<Expression, Double> result = optimizeWhenModelIsHOGModel(
+			hogmModel,
+			queryExpression,
+			evidence,
+			goalType,
+			startPoint);
+		
+		return result;
+	}
+	
+	/**
+	 * Main method to optimize the parameters of the model given the queries and evidences when the model is HOGModel based.
+	 *
+	 */
+	public static HashMap<Expression, Double> optimizeWhenModelIsHOGModel(HOGModel hogmModel, Expression[] evidence, Expression[] queryExpression, GoalType goalType,
+			double[] startPoint){
+		
+		ExpressionBasedModel expressionBasedModel = HOGModelToExpressionBasedModel.parseModelStringToHOGMModel(hogmModel);
+		
+		HashMap<Expression, Double> result = optimizeWhenModelIsExpressionBased(
+			queryExpression,
+			evidence,
+			expressionBasedModel,
+			goalType,
+			startPoint);
+		
+		return result;
+	}
+
+	/**
+	 * Main method to optimize the parameters of the model given the queries and evidences when the model is Expression based.
+	 *
+	 */
+	public static HashMap<Expression, Double> optimizeWhenModelIsExpressionBased(
 			Expression[] queryExpression,
 			Expression[] evidence,
-			boolean isBayesianNetwork,
-			List<Expression> factors,
-			Map<String, String> mapFromRandomVariableNameToTypeName,
-			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
-			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
-			Map<String, String> mapFromCategoricalTypeNameToSizeString,
-			Collection<Type> additionalTypes,
+			ExpressionBasedModel expressionBasedModel,
 			GoalType goalType,
 			double[] startPoint) {
 
@@ -84,10 +98,8 @@ public class ParameterEstimationForExpressionBasedModel {
 		Theory theory = new CommonTheory();
 		Context context = new TrueContext(theory);
 		
-		Expression[] listOfMarginals = buildListOfMarginals(useFactorization, queryExpression, evidence,
-				isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName,
-				mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName,
-				mapFromCategoricalTypeNameToSizeString, additionalTypes, context);
+		Expression[] listOfMarginals = buildListOfMarginals(queryExpression, evidence,
+				expressionBasedModel, context);
 		
 		Expression marginalFunctionLog = applyLogTransformationProductToSum(listOfMarginals);
 		
@@ -135,24 +147,13 @@ public class ParameterEstimationForExpressionBasedModel {
 	 * Method to calculate the marginal for each query and evidence and return the list of marginals.
 	 *
 	 */
-	private static Expression[] buildListOfMarginals(boolean useFactorization, Expression[] queryExpression,
-			Expression[] evidence, boolean isBayesianNetwork, List<Expression> factors,
-			Map<String, String> mapFromRandomVariableNameToTypeName,
-			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
-			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
-			Map<String, String> mapFromCategoricalTypeNameToSizeString, Collection<Type> additionalTypes,
+	private static Expression[] buildListOfMarginals(Expression[] queryExpression,
+			Expression[] evidence, ExpressionBasedModel model,
 			Context context) {
 		
 		Expression[] result = new Expression[queryExpression.length];
 		for (int i = 0; i < queryExpression.length; i++) {
-			ExpressionBasedModel model = new DefaultExpressionBasedModel(
-					factors,
-					mapFromRandomVariableNameToTypeName,
-					mapFromNonUniquelyNamedConstantNameToTypeName,
-					mapFromUniquelyNamedConstantNameToTypeName,
-					mapFromCategoricalTypeNameToSizeString,
-					additionalTypes,
-					isBayesianNetwork);
+			
 			ExpressionBasedModel modelAndEvidence = model.getConditionedModel(evidence[i]);
 			ExpressionBasedSolver solver = new ExactBPExpressionBasedSolver();
 			Expression marginal = solver.solve(queryExpression[i], modelAndEvidence);

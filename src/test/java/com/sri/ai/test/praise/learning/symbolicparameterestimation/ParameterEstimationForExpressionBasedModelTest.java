@@ -6,7 +6,6 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,8 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Type;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.ParameterEstimationForExpressionBasedModel;
 
 public class ParameterEstimationForExpressionBasedModelTest {
@@ -55,6 +55,15 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				+    "then if alarm then 0.9 else 0.1 "
 				+    "else if alarm then 0.05 else 0.95) " +
 				""));
+		
+		ExpressionBasedModel expressionBasedModel = new DefaultExpressionBasedModel(
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				list(),
+				isBayesianNetwork);
 
 		Expression[] queryExpressionList = new Expression[2];
 		Expression[] evidenceList = new Expression[2];
@@ -65,11 +74,9 @@ public class ParameterEstimationForExpressionBasedModelTest {
 
 		HashMap<Expression,Double> expected = new HashMap<Expression,Double>();
 		expected.put(parse("Alpha"), 0.5);
-
+		
 		HashMap<Expression,Double> mapResult = runTest(queryExpressionList, evidenceList,
-				expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, 
-				mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, 
-				mapFromCategoricalTypeNameToSizeString, list(), new double[] {0});
+				expected, expressionBasedModel, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -85,9 +92,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		expected.put(parse("Alpha"), 1.0);
 
 		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, 
-				mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, 
-				mapFromCategoricalTypeNameToSizeString, list(), new double[] {0});
+				expected, expressionBasedModel, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -101,9 +106,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		expected.put(parse("Alpha"), 1.4905019930082135E-22);
 
 		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, 
-				mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, 
-				mapFromCategoricalTypeNameToSizeString, list(), new double[] {0});
+				expected, expressionBasedModel, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -138,9 +141,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		expected.put(parse("Alpha"), 0.9000011823080596);
 
 		mapResult = runTest(queryExpressionList, evidenceList,
-				 expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, 
-				 mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, 
-				 mapFromCategoricalTypeNameToSizeString, list(), new double[] {0});
+				 expected, expressionBasedModel, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -158,9 +159,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		expected.put(parse("Alpha"), 1.4905019930082135E-22);
 
 		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, 
-				mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, 
-				mapFromCategoricalTypeNameToSizeString, list(), new double[] {0});
+				expected, expressionBasedModel, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -175,9 +174,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		expected.put(parse("Beta"), 0.9999996696568659);
 
 		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, 
-				mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, 
-				mapFromCategoricalTypeNameToSizeString, list(), new double[] {0,0});
+				expected, expressionBasedModel, new double[] {0,0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -222,10 +219,18 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		evidenceList[0] = parse("alarm"); 
 		expected.remove(parse("Beta"));
 		expected.put(parse("Alpha"), 1.0); 
+		
+		ExpressionBasedModel expressionBasedModel2 = new DefaultExpressionBasedModel(
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				list(),
+				isBayesianNetwork);
+		
 		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, 
-				mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, 
-				mapFromCategoricalTypeNameToSizeString, list(), new double[] {0});
+				expected, expressionBasedModel2, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -233,18 +238,12 @@ public class ParameterEstimationForExpressionBasedModelTest {
 
 	}
 
-	private HashMap<Expression,Double> runTest(Expression[] queryExpressionList, Expression[] evidenceList, HashMap<Expression,Double> expected, boolean isBayesianNetwork, List<Expression> factors, Map<String, String> mapFromRandomVariableNameToTypeName, Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromUniquelyNamedConstantNameToTypeName, Map<String, String> mapFromCategoricalTypeNameToSizeString, Collection<Type> additionalTypes, double[] startPoint) {
+	private HashMap<Expression,Double> runTest(Expression[] queryExpressionList, Expression[] evidenceList, HashMap<Expression,Double> expected, ExpressionBasedModel expressionBasedModel, double[] startPoint) {
 
-		HashMap<Expression,Double> result = ParameterEstimationForExpressionBasedModel.optimize(false,
+		HashMap<Expression,Double> result = ParameterEstimationForExpressionBasedModel.optimizeWhenModelIsExpressionBased(
 				queryExpressionList,
 				evidenceList,
-				isBayesianNetwork,
-				factors,
-				mapFromRandomVariableNameToTypeName,
-				mapFromNonUniquelyNamedConstantNameToTypeName,
-				mapFromUniquelyNamedConstantNameToTypeName,
-				mapFromCategoricalTypeNameToSizeString,
-				list(),
+				expressionBasedModel,
 				GoalType.MAXIMIZE,
 				startPoint);
 		return result;
