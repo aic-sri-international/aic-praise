@@ -38,6 +38,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
+import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
@@ -53,11 +54,14 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.helper.WrappedExpression;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.library.number.Division;
+import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.IdentityFactor;
-import com.sri.ai.util.collect.LazyConstant;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.ZeroFactor;
 import com.sri.ai.util.collect.PredicateIterator;
 
 /**
@@ -79,6 +83,7 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	private static final long serialVersionUID = 1L;
 
 	private Context context;
+
 	public ExpressionFactor(Expression expression, Context context) {
 		super(expression);
 		this.context = context;
@@ -96,32 +101,42 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	@Override
 	public List<? extends Variable> getVariables() {
-		return variables.get();
-	}
-
-	private LazyConstant<List<? extends Variable>> variables = new LazyConstant<>(this::makeVariables);
-	
-	private List<? extends Variable> makeVariables() {
 		Set<Expression> freeVariableExpressions = Expressions.freeVariables(getInnerExpression(), context);
-		PredicateIterator<Expression> freeVariableExpressionsMinusTypeExpressions = predicateIterator(freeVariableExpressions, isNotATypeExpression());
-		List<? extends Variable> result = mapIntoList(freeVariableExpressionsMinusTypeExpressions, e -> new ExpressionVariable(e));
+		PredicateIterator<Expression> freeVariablesMinusTypeNames = predicateIterator(freeVariableExpressions, isNotType());
+		List<? extends Variable> result = mapIntoList(freeVariablesMinusTypeNames, e -> new ExpressionVariable(e));
 		return result;
 	}
 
-	private Predicate<Expression> isNotATypeExpression() {
+	private Predicate<Expression> isNotType() {
 		return e -> context.getTypeFromTypeExpression(e) == null;
 	}
 
 	@Override
 	public Factor multiply(Factor another) {
+		
 		Factor result;
-		if (another instanceof IdentityFactor) {
-			result = this;
+		
+		if (another instanceof ConstantFactor) {
+			if(another instanceof IdentityFactor) {
+				result = this;
+			}
+			if(another instanceof ZeroFactor) {
+				result = another;
+			}
+			result = ((ConstantFactor) another).multiply(this);
 		}
-		else {
+		
+		else if (another instanceof ExpressionFactor){
 			result = evaluateAsFactor(Times.make(this, (Expression) another));
 		}
+		
+		else {
+			throw new Error("Trying to multiply factors that belong to incompatible classes : classes are "
+					+ "respectively " + this.getClass() + " and " + another.getClass());
+		}
+		
 		return result;
+		
 	}
 
 	@Override
@@ -151,7 +166,7 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 		return set;
 	}
 
-	private Factor evaluateAsFactor(Expression expression) {
+	public Factor evaluateAsFactor(Expression expression) {
 		Expression resultFactorExpression = evaluate(expression);
 		Factor result = makeFactor(resultFactorExpression);
 		return result;
@@ -169,14 +184,52 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 
 	@Override
 	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
-		// TODO Auto-generated method stub
 		//TODO replace variables by it's value and evaluate
 		return null;
 	}
 
 	@Override
 	public Factor normalize() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error("An Expression factor cannot be normalized.");
+	}
+
+	@Override
+	public Factor add(Factor another) {
+		
+		Factor result;
+		
+		if (another instanceof ConstantFactor) {
+			result = ((ConstantFactor) another).add(this);
+		}
+		
+		else if(another.getClass() != this.getClass()) {
+			throw new Error("Trying to add different types of factors: this is a " +
+							this.getClass() + "and another is a " + another.getClass());
+		}
+		
+		else {
+			result = evaluateAsFactor(Plus.make(this, (Expression) another));
+		}
+		
+		return result;
+		
+	}
+
+	@Override
+	public boolean isZero() {
+		boolean result = getInnerExpression().equals(ZERO);
+		return result;
+	}
+
+	@Override
+	public Factor invert() {
+		Factor result;
+		if(isZero()) {
+			throw new Error("Division by zero impossible.");
+		}
+		else {
+			result = evaluateAsFactor(Division.make(ONE, (Expression) this));
+		}
+		return result;
 	}
 }

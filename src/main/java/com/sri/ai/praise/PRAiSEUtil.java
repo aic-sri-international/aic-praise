@@ -35,62 +35,40 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.factor.api;
+package com.sri.ai.praise;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.IdentityFactor.IDENTITY_FACTOR;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.ZeroFactor.ZERO_FACTOR;
-import static com.sri.ai.util.Util.accumulate;
+import static com.sri.ai.expresso.helper.Expressions.TRUE;
+import static com.sri.ai.expresso.helper.Expressions.apply;
+import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
+import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.grinder.api.Context;
+
 
 /**
- * A factor is defined up to a non-zero multiplicative constant
+ * @author braz
+ *
  */
-public interface Factor {
+public class PRAiSEUtil {
 
-	boolean contains(Variable variable);
-
-	List<? extends Variable> getVariables();
-	
-	Factor multiply(Factor another);
-	
-	/** Sums a variable out of factor up to a constant. */
-	Factor sumOut(List<? extends Variable> variablesToSumOut);
-	
-	boolean isIdentity();
-	
-	boolean isZero();
-	
-	static Factor multiply(Iterator<? extends Factor> factors) {
-		Factor result = accumulate(factors, Factor::multiply, IDENTITY_FACTOR);
+	/**
+	 * Normalizes an expression representing a potential on a given variable.
+	 * This requires the given context to have that variable registered with the appropriate type,
+	 * and to be able to {@link Context#evaluate(Expression)} the normalized expression definition
+	 * <code>expression/sum({{(on variable in &lt;variable type&gt;) expression}})</code>.
+	 * @param variable
+	 * @param expression
+	 * @param context
+	 * @return
+	 */
+	public static Expression normalize(Expression variable, Expression expression, Context context) {
+		Expression set = DefaultIntensionalMultiSet.intensionalMultiSet(variable, expression, TRUE, context);
+		Expression sum = apply(SUM, set);
+		Expression normalizedDefinition = apply(DIVISION, expression, sum);
+		Expression result = context.evaluate(normalizedDefinition);
 		return result;
 	}
 
-	static Factor multiply(Collection<? extends Factor> factors) {
-		Factor result = multiply(factors.iterator());
-		return result;
-	}
-	
-	Double getEntryFor(Map<? extends Variable,? extends Object> variableInstantiations);
-	
-	Factor normalize();
-	
-	Factor add(Factor another);
-	
-	static Factor add(Iterator<? extends Factor> factors) {
-		Factor result = accumulate(factors, Factor::add, ZERO_FACTOR);
-		return result;
-	}
-
-	static Factor add(Collection<? extends Factor> factors) {
-		Factor result = add(factors.iterator());
-		return result;
-	}
-	
-	/** if f is a factor, returns 1/f */
-	Factor invert();
-	
 }

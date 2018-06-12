@@ -23,7 +23,7 @@ import com.sri.ai.util.Util;
  */
 public class TableFactorNetwork extends AbstractEditableFactorNetwrok{
 	
-	public TableFactorNetwork(List<TableFactor> factors) {
+	public TableFactorNetwork(List<? extends TableFactor> factors) {
 		for(TableFactor f:factors) {
 			for(TableVariable v: f.getVariables()) {
 				this.add(identityWrapper(f), v);

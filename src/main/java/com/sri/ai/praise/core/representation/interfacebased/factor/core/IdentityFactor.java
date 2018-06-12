@@ -37,10 +37,6 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.factor.core;
 
-import static com.sri.ai.util.Util.list;
-import static java.util.Collections.unmodifiableList;
-
-import java.util.List;
 import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -54,31 +50,17 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
  * @author braz
  *
  */
-public class IdentityFactor implements Factor {
+public class IdentityFactor extends ConstantFactor {
 	
 	public final static IdentityFactor IDENTITY_FACTOR = new IdentityFactor();
 	
 	private IdentityFactor() {
-	}
-
-	@Override
-	public boolean contains(Variable variable) {
-		return false;
-	}
-
-	@Override
-	public List<? extends Variable> getVariables() {
-		return unmodifiableList(list());
+		super(1.);
 	}
 
 	@Override
 	public Factor multiply(Factor another) {
 		return another;
-	}
-
-	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
-		return this;
 	}
 	
 	@Override
@@ -96,6 +78,15 @@ public class IdentityFactor implements Factor {
 		return 1.;
 	}
 
+	@Override
+	public boolean isZero() {
+		return false;
+	}
+
+	@Override
+	public Factor invert() {
+		return this;
+	}
 	@Override
 	public Factor normalize() {
 		// TODO Auto-generated method stub
