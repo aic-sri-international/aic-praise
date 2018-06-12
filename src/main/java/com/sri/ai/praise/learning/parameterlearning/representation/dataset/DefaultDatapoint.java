@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.learning.parameterlearning.Datapoint;
-import com.sri.ai.praise.inference.generic.representation.api.Variable;
 
 public class DefaultDatapoint implements Datapoint {
 	

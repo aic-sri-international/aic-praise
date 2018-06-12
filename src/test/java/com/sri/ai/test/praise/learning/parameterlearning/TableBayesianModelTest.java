@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.sri.ai.praise.inference.generic.representation.table.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.praise.learning.parameterlearning.representation.dataset.DefaultDatapoint;
 import com.sri.ai.praise.learning.parameterlearning.representation.dataset.DefaultDataset;
 import com.sri.ai.praise.learning.parameterlearning.representation.table.TableBayesianModel;

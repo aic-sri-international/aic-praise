@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sri.ai.praise.other.application.praise.app.query.QueryController">
+	<top>
+		<ToolBar style="-fx-background-color: null;" BorderPane.alignment="CENTER">
+			<items>
+            <Label>
+               <graphic>
+                  <TextFlow textAlignment="CENTER">
+                     <children>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Q" />
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="u" underline="true" />
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="ery" />
+                     </children>
+                  </TextFlow>
+               </graphic>
+            </Label>
+				<ComboBox fx:id="queryComboBox" editable="true" prefWidth="500.0" />
+				<Separator orientation="VERTICAL" />
+				<Button fx:id="executeButton" mnemonicParsing="false" onAction="#executeQuery" text="Execute">
+					<tooltip>
+						<Tooltip fx:id="executeTooltip" text="Run query" />
+					</tooltip>
+				</Button>
+				<ProgressBar fx:id="queryProgressBar" prefWidth="200.0" progress="0.0" />
+				<Separator orientation="VERTICAL" />	
+				<Button fx:id="clearOutputButton" mnemonicParsing="false" onAction="#clearOutput" text="Clear">
+					<tooltip>
+						<Tooltip text="Clear Output" />
+					</tooltip>
+				</Button>
+				<Separator orientation="VERTICAL" />
+			</items>
+		</ToolBar>
+	</top>
+   <center>
+      <ScrollPane fx:id="outputScrollPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <content>
+            <Accordion fx:id="outputAccordion" />
+         </content>
+      </ScrollPane>
+   </center>
+</BorderPane>

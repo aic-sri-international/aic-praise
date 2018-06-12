@@ -1,20 +1,16 @@
 package com.sri.ai.praise.learning.parameterlearning.representation.table;
 
 import static com.sri.ai.util.Util.arrayList;
-import static com.sri.ai.util.Util.count;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import com.sri.ai.praise.inference.generic.representation.api.Variable;
-import com.sri.ai.praise.inference.generic.representation.table.TableFactor;
-import com.sri.ai.praise.inference.generic.representation.table.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
 
 /**
