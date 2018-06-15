@@ -7,6 +7,10 @@ import static com.sri.ai.grinder.library.FunctorConstants.CARDINALITY;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+
+import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.core.DefaultExistentiallyQuantifiedFormula;
@@ -16,9 +20,12 @@ import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
+import com.sri.ai.util.Util;
 
 public class UsefulExpressionOperations {
+	
 
 	public static void main(String[] args) {
 		Theory theory = new CommonTheory();
@@ -31,12 +38,22 @@ public class UsefulExpressionOperations {
 		Expression parent = parse("Parent");
 		Expression param1 = parse("Param1");
 		Expression param2 = parse("Param2");
+		Expression param3 = parse("Param3");
 		
-		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real");
+		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Integer", "Param2", "Integer", "Param3", "Integer");
+		
+		// Making parameters become constants
+		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate();
+		Predicate<Expression> newIsUniquelyNamedConstantPredicate = s -> s.equals(param1) || s.equals(param2) || s.equals(param3) || isUniquelyNamedConstantPredicate.apply(s);
+		context = context.setIsUniquelyNamedConstantPredicate(newIsUniquelyNamedConstantPredicate);
+		
 		println("My context:");
 		println(context.getSymbolsAndTypes());
 		
-		Expression E = parse("if Child < 5 then Param1 else Param2");
+		// Expression E = parse("if Child < 5 then Param1 else Param2");
+		// Expression E = parse("if Parent != 5 then Param1 else Param2");
+		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
+		Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3");
 		
 		println("\nE = " + E + "\n");
 		
@@ -50,25 +67,28 @@ public class UsefulExpressionOperations {
 		println("F2 = " + F2);
 		println(context.evaluate(F2) + "\n");
 		
-		Expression F1intersectsF2 = Equivalence.make(F1, F2);
+		Expression F1intersectsF2 = Equivalence.make(F1, F2); // Equivalence.make(F1, F2), usar o context para simplificar com o F! sabendo que é true ??? ou criar um existe cara ... bonitinho como deve ser? there exist Parent tal que F1 = true ...
 		println("F1intersectsF2 = " + F1intersectsF2);
 		println(context.evaluate(F1intersectsF2)); // should be true
 		
-		Expression Enew = E.replaceAllOccurrences(param1, parse("Param1_1"), context);
-		Enew = Enew.replaceAllOccurrences(param2, parse("Param2_1"), context);
-		
-		context = context.extendWithSymbolsAndTypes("Param1_1", "Real", "Param2_1", "Real");
-		
-		println("\nEnew = " + Enew);
-		
 		// Normalization for Parame1_1
-		Expression multiset = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(Enew, parse("Param1_1")));
+		Expression multiset = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(E, param1));
 		Expression cardinality = apply(CARDINALITY, multiset);
 		println("\nCardinality = " + cardinality);
-		//Expression cardinalityResult = context.evaluate(cardinality);
-		//println("\nN for normalizing Param1_1: " + cardinalityResult);
+		Expression cardinalityResult = context.evaluate(cardinality);
+		println("N for normalizing Param1_1: " + cardinalityResult);
 		
-		// println(context.evaluate(parse(child + " > 3 <=> " + child + " < 5")));
+		LinkedHashSet<Integer> set = Util.set(1, 2, 3);
+		Iterator<Integer> it = set.iterator();
+		while(it.hasNext()) {
+			int curr = it.next();
+			println(curr);
+			// if(curr == 2) set.add(4);
+		}
+		
+		// 2 problems:
+		// - Not possible to add while iterating through the LinkedHashSet (above)
+		// - Comment that <=> is not sufficient for what we want
 	}
 
 }
