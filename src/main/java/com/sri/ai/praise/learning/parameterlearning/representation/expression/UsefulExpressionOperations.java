@@ -9,12 +9,16 @@ import static com.sri.ai.util.Util.println;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.core.DefaultExistentiallyQuantifiedFormula;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.application.CommonTheory;
@@ -26,6 +30,25 @@ import com.sri.ai.util.Util;
 
 public class UsefulExpressionOperations {
 	
+	/**
+	 * Given two conditions as Expressions, verify if they are equivalent or return the condition for their intersection
+	 * @param e1
+	 * @param e2
+	 * @param context
+	 * @return true if total equivalence, false if the conditions do not intersect, and in the case of partial intersection the condition for this intersection is returned
+	 */
+	private static Expression verifyEquivalenceAndGetIntersectionCondition(Expression e1, Expression e2, Context context) {
+		Expression equivalence = Equivalence.make(e1, e2);
+		equivalence = context.evaluate(equivalence);
+		if(equivalence.equals(Expressions.TRUE)) {
+			return equivalence;
+		}
+		else {
+			Expression and = And.make(e1, e2);
+			and = context.evaluate(and);
+			return and;
+		}
+	}
 
 	public static void main(String[] args) {
 		Theory theory = new CommonTheory();
@@ -67,7 +90,7 @@ public class UsefulExpressionOperations {
 		println("F2 = " + F2);
 		println(context.evaluate(F2) + "\n");
 		
-		Expression F1intersectsF2 = Equivalence.make(F1, F2); // Equivalence.make(F1, F2), usar o context para simplificar com o F! sabendo que é true ??? ou criar um existe cara ... bonitinho como deve ser? there exist Parent tal que F1 = true ...
+		Expression F1intersectsF2 = verifyEquivalenceAndGetIntersectionCondition(F1, F2, context); // Equivalence.make(F1, F2), usar o context para simplificar com o F1 sabendo que é true ??? ou criar um existe cara ... bonitinho como deve ser? there exist Parent tal que F1 = true ...
 		println("F1intersectsF2 = " + F1intersectsF2);
 		println(context.evaluate(F1intersectsF2)); // should be true
 		
@@ -78,17 +101,22 @@ public class UsefulExpressionOperations {
 		Expression cardinalityResult = context.evaluate(cardinality);
 		println("N for normalizing Param1_1: " + cardinalityResult);
 		
-		LinkedHashSet<Integer> set = Util.set(1, 2, 3);
-		Iterator<Integer> it = set.iterator();
-		while(it.hasNext()) {
-			int curr = it.next();
-			println(curr);
-			// if(curr == 2) set.add(4);
+		// Draft for the Java syntax when shattering the families
+		LinkedList<Integer> initialFamilies = Util.list(1, 2, 3, 4, 5);
+		List<Integer> finalFamilies = Util.list();
+		while(!initialFamilies.isEmpty()) {
+			int family1 = initialFamilies.removeFirst();
+			
+			for(Iterator<Integer> it = initialFamilies.iterator(); it.hasNext();) {
+				int family2 = it.next();
+				if(family2 == 4) {it.remove();}
+			}
+			
+			if(family1 == 3) initialFamilies.add(7); 
+			finalFamilies.add(family1);
 		}
-		
-		// 2 problems:
-		// - Not possible to add while iterating through the LinkedHashSet (above)
-		// - Comment that <=> is not sufficient for what we want
+		println("\n" + finalFamilies);
+
 	}
 
 }

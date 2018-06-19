@@ -14,7 +14,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.Ta
 import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
 
 /**
- * Implementation of Bayesian nodes based on tables
+ * Implementation of Bayesian nodes based on Tables
  * 
  * @author Roger Leite Lucena
  *
@@ -82,13 +82,6 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		}
 	}
 	
-	private static <T> ArrayList<T> mergeElementsIntoOneList(T firstElement, List<T> otherElements) {
-		ArrayList<T> allElements = new ArrayList<>(otherElements.size() + 1);
-		allElements.add(firstElement);
-		allElements.addAll(otherElements);
-		return allElements;
-	}
-	
 	private List<ArrayList<Integer>> getAllPossibleVariablesAssignments(ArrayList<TableVariable> variables) {
 		List<ArrayList<Integer>> allPossibleVariablesAssignments = list();
 		Iterator<ArrayList<Integer>> iteratorForParentsAssignments = TableFactor.getCartesianProduct(variables);
@@ -120,6 +113,13 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 			countForThatParentsAssignment += countForThatChildAndParentsAssignment;
 		}
 		return countForThatParentsAssignment;
+	}
+	
+	private static <T> ArrayList<T> mergeElementsIntoOneList(T firstElement, List<T> otherElements) {
+		ArrayList<T> allElements = new ArrayList<>(otherElements.size() + 1);
+		allElements.add(firstElement);
+		allElements.addAll(otherElements);
+		return allElements;
 	}
 	
 	public static void main(String[] args) {

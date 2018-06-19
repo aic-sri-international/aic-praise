@@ -66,7 +66,7 @@ public class ExpressionFactorNetwork extends AbstractEditableFactorNetwrok {
 	
 	private Context context;
 
-	public ExpressionFactorNetwork(List<Expression> factorExpressions, Context context) {
+	public ExpressionFactorNetwork(List<? extends Expression> factorExpressions, Context context) {
 		indexFactorsAndVariables(factorExpressions, context);
 		this.context = context;
 	}
@@ -83,7 +83,7 @@ public class ExpressionFactorNetwork extends AbstractEditableFactorNetwrok {
 		return result;
 	}
 
-	private void indexFactorsAndVariables(List<Expression> factorExpressions, Context context) {
+	private void indexFactorsAndVariables(List<? extends Expression> factorExpressions, Context context) {
 		for (Expression factorExpression : factorExpressions) {
 			indexFactorsAndVariables(factorExpression, context);
 		}
