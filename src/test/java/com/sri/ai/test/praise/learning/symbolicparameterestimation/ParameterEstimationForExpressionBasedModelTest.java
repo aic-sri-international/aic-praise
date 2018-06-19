@@ -7,6 +7,7 @@ import static com.sri.ai.util.Util.map;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ import com.sri.ai.praise.learning.symbolicparameterestimation.ParameterEstimatio
 public class ParameterEstimationForExpressionBasedModelTest {
 
 	@Test
-	public void test() {
+	public void testExpressionBased() {
 
 		// The definitions of types
 		Map<String, String> mapFromCategoricalTypeNameToSizeString = map(
@@ -37,7 +38,6 @@ public class ParameterEstimationForExpressionBasedModelTest {
 
 		// The definitions of non-uniquely named constants
 		Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = map(
-				"seismicLocation", "Boolean",
 				"Alpha", "Real",
 				"Beta", "Real"
 				);
@@ -65,48 +65,41 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				list(),
 				isBayesianNetwork);
 
-		Expression[] queryExpressionList = new Expression[2];
-		Expression[] evidenceList = new Expression[2];
-		queryExpressionList[0] = parse("earthquake");
-		queryExpressionList[1] = parse("not earthquake");
-		evidenceList[0] = parse("true");
-		evidenceList[1] = parse("true");
+		List<Expression> queryExpressionList = new LinkedList<Expression>();
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("not earthquake"));
 
 		HashMap<Expression,Double> expected = new HashMap<Expression,Double>();
 		expected.put(parse("Alpha"), 0.5);
 		
-		HashMap<Expression,Double> mapResult = runTest(queryExpressionList, evidenceList,
-				expected, expressionBasedModel, new double[] {0});
+		HashMap<Expression,Double> mapResult = runTestExpressionBased(queryExpressionList,
+				expressionBasedModel, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
 		assertEquals(expected, mapResult);
 
-		queryExpressionList = new Expression[2];
-		evidenceList = new Expression[2];
-		queryExpressionList[0] = parse("earthquake");
-		queryExpressionList[1] = parse("earthquake");
-		evidenceList[0] = parse("true");
-		evidenceList[1] = parse("true");
+		queryExpressionList.clear();
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("earthquake"));
 
 		expected.put(parse("Alpha"), 1.0);
 
-		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, expressionBasedModel, new double[] {0});
+		mapResult = runTestExpressionBased(queryExpressionList,
+				expressionBasedModel, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
 		assertEquals(expected, mapResult);
 
-		queryExpressionList[0] = parse("not earthquake");
-		queryExpressionList[1] = parse("not earthquake");
-		evidenceList[0] = parse("true");
-		evidenceList[1] = parse("true");
+		queryExpressionList.clear();
+		queryExpressionList.add(parse("not earthquake"));
+		queryExpressionList.add(parse("not earthquake"));
 
 		expected.put(parse("Alpha"), 1.4905019930082135E-22);
 
-		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, expressionBasedModel, new double[] {0});
+		mapResult = runTestExpressionBased(queryExpressionList,
+				expressionBasedModel, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -115,66 +108,36 @@ public class ParameterEstimationForExpressionBasedModelTest {
 
 
 
-		queryExpressionList = new Expression[10];
-		evidenceList = new Expression[10];
-		queryExpressionList[0] = parse("earthquake");
-		queryExpressionList[1] = parse("earthquake");
-		queryExpressionList[2] = parse("earthquake");
-		queryExpressionList[3] = parse("earthquake");
-		queryExpressionList[4] = parse("earthquake");
-		queryExpressionList[5] = parse("earthquake");
-		queryExpressionList[6] = parse("earthquake");
-		queryExpressionList[7] = parse("earthquake");
-		queryExpressionList[8] = parse("earthquake");
-		queryExpressionList[9] = parse("not earthquake");
-		evidenceList[0] = parse("true");
-		evidenceList[1] = parse("true");
-		evidenceList[2] = parse("true");
-		evidenceList[3] = parse("true");
-		evidenceList[4] = parse("true");
-		evidenceList[5] = parse("true");
-		evidenceList[6] = parse("true");
-		evidenceList[7] = parse("true");
-		evidenceList[8] = parse("true");
-		evidenceList[9] = parse("true");
+		queryExpressionList.clear();
+		queryExpressionList.add(parse("not earthquake"));
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("earthquake"));
+		queryExpressionList.add(parse("earthquake"));
 
 		expected.put(parse("Alpha"), 0.9000011823080596);
 
-		mapResult = runTest(queryExpressionList, evidenceList,
-				 expected, expressionBasedModel, new double[] {0});
+		mapResult = runTestExpressionBased(queryExpressionList,
+				 expressionBasedModel, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
 		assertEquals(expected, mapResult);
 
+		queryExpressionList.clear();
+		queryExpressionList.add(parse("not earthquake"));
+		queryExpressionList.add(parse("burglary"));
 
-		queryExpressionList = new Expression[2];
-		evidenceList = new Expression[2];
+		expected.put(parse("Alpha"), 6.289892249011522E-23);
+		expected.put(parse("Beta"), 1.0);
 
-		queryExpressionList[0] = parse("not earthquake");
-		queryExpressionList[1] = parse("not earthquake");
-		evidenceList[0] = parse("true");
-		evidenceList[1] = parse("true");
-
-		expected.put(parse("Alpha"), 1.4905019930082135E-22);
-
-		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, expressionBasedModel, new double[] {0});
-
-		System.out.println("expected : " + expected);
-		System.out.println("result : " + mapResult);
-		assertEquals(expected, mapResult);
-
-		queryExpressionList[0] = parse("not earthquake");
-		queryExpressionList[1] = parse("not earthquake");
-		evidenceList[0] = parse("alarm");
-		evidenceList[1] = parse("not alarm");
-
-		expected.put(parse("Alpha"), 7.116459640918507E-24);
-		expected.put(parse("Beta"), 0.9999996696568659);
-
-		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, expressionBasedModel, new double[] {0,0});
+		mapResult = runTestExpressionBased(queryExpressionList, 
+				expressionBasedModel, new double[] {0,0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -213,10 +176,8 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				+    "else if alarm then 0.05 else 0.95) " +
 				""));
 
-		queryExpressionList = new Expression[1];
-		evidenceList = new Expression[1];
-		queryExpressionList[0] = parse("earthquake");
-		evidenceList[0] = parse("alarm"); 
+		queryExpressionList.clear();
+		queryExpressionList.add(parse("earthquake"));
 		expected.remove(parse("Beta"));
 		expected.put(parse("Alpha"), 1.0); 
 		
@@ -229,8 +190,8 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				list(),
 				isBayesianNetwork);
 		
-		mapResult = runTest(queryExpressionList, evidenceList,
-				expected, expressionBasedModel2, new double[] {0});
+		mapResult = runTestExpressionBased(queryExpressionList, 
+				expressionBasedModel2, new double[] {0});
 
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
@@ -238,17 +199,18 @@ public class ParameterEstimationForExpressionBasedModelTest {
 
 	}
 
-	private HashMap<Expression,Double> runTest(Expression[] queryExpressionList, Expression[] evidenceList, HashMap<Expression,Double> expected, ExpressionBasedModel expressionBasedModel, double[] startPoint) {
+	private HashMap<Expression,Double> runTestExpressionBased(List<Expression> queryExpressions, ExpressionBasedModel expressionBasedModel, double[] startPoint) {
 
-		HashMap<Expression,Double> result = ParameterEstimationForExpressionBasedModel.optimizeWhenModelIsExpressionBased(
-				queryExpressionList,
-				evidenceList,
+		ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel = new ParameterEstimationForExpressionBasedModel(expressionBasedModel, queryExpressions);
+		HashMap<Expression,Double> result = parameterEstimationForExpressionBasedModel.optimize(
 				expressionBasedModel,
+				queryExpressions,
 				GoalType.MAXIMIZE,
 				startPoint);
+		ExpressionBasedModel newModel = parameterEstimationForExpressionBasedModel.buildOptimizedExpressionBasedModel(startPoint, result);
+		System.out.println(" New Model : " + newModel);
 		return result;
 
-
 	}
-
+	
 }
