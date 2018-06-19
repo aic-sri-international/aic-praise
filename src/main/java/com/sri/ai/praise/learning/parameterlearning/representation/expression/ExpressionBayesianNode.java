@@ -59,19 +59,6 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		
 	}
 
-	private void computeFinalFamilies() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private LinkedList<Expression> generateInitialFamilies() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	
-	
-
 	@Override
 	public void incrementCountForChildAndParentsAssignment(List<? extends Object> childAndParentsValues) {
 		// TODO Auto-generated method stub
@@ -82,6 +69,16 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 	public void normalizeParameters() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private void computeFinalFamilies() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private LinkedList<Expression> generateInitialFamilies() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

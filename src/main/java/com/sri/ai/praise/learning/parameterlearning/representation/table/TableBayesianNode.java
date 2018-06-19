@@ -16,7 +16,7 @@ import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
 /**
  * Implementation of Bayesian nodes based on Tables
  * 
- * @author Roger Leite Lucena
+ * @author lucena
  *
  */
 
