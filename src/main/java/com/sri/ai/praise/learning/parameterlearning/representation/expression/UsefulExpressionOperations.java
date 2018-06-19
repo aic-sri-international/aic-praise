@@ -63,7 +63,7 @@ public class UsefulExpressionOperations {
 		Expression param2 = parse("Param2");
 		Expression param3 = parse("Param3");
 		
-		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Integer", "Param2", "Integer", "Param3", "Integer");
+		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real");
 		
 		// Making parameters become constants
 		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate();
@@ -75,8 +75,8 @@ public class UsefulExpressionOperations {
 		
 		// Expression E = parse("if Child < 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then Param1 else Param2");
-		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
-		Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3");
+		Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
+		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3");
 		
 		println("\nE = " + E + "\n");
 		

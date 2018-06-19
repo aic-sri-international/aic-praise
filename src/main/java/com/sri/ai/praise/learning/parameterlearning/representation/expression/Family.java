@@ -3,6 +3,7 @@ package com.sri.ai.praise.learning.parameterlearning.representation.expression;
 import java.util.LinkedHashSet;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.util.base.ToString;
 
 /**
  * Family (for datapoints) determined by a Expression condition over the parents of a Bayesian node
@@ -15,11 +16,16 @@ import com.sri.ai.expresso.api.Expression;
 public class Family {
 
 	public Expression condition;
-	public LinkedHashSet<Expression> parameters;
+	public LinkedHashSet<Expression> parametersThatCanBeGenerated;
 	
-	public Family(Expression condition, LinkedHashSet<Expression> parameters) {
+	public Family(Expression condition, LinkedHashSet<Expression> parametersThatCanBeGenerated) {
 		this.condition = condition;
-		this.parameters = parameters;
+		this.parametersThatCanBeGenerated = parametersThatCanBeGenerated;
+	}
+	
+	public String toString() {
+		String string = "[Condition: " + condition + ", Parameters: " + parametersThatCanBeGenerated + "]";
+		return string;
 	}
 	
 }
