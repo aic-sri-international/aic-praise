@@ -25,9 +25,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 	public void testExpressionBased() {
 
 		// The definitions of types
-		Map<String, String> mapFromCategoricalTypeNameToSizeString = map(
-				"Folks", "10",
-				"Boolean", "2");
+		Map<String, String> mapFromCategoricalTypeNameToSizeString = map();
 
 		// The definitions of variables
 		Map<String, String> mapFromRandomVariableNameToTypeName = map(
@@ -43,7 +41,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				);
 
 		// The definitions of non-uniquely named constants
-		Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = map("none", "Folks", "tom", "Folks");
+		Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = map();
 
 		// a variant of the earthquake/burglary model in which some burglars are more active than others.
 		boolean isBayesianNetwork = true;
@@ -190,6 +188,8 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				list(),
 				isBayesianNetwork);
 		
+		System.out.println(expressionBasedModel2);
+		
 		mapResult = runTestExpressionBased(queryExpressionList, 
 				expressionBasedModel2, new double[] {0});
 
@@ -197,6 +197,77 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		System.out.println("result : " + mapResult);
 		assertEquals(expected, mapResult);
 
+	}
+	
+	@Test
+	
+	public void testBuildOptimizedExpressionBasedModel() {
+		
+		// The definitions of types
+				Map<String, String> mapFromCategoricalTypeNameToSizeString = map();
+
+				// The definitions of variables
+				Map<String, String> mapFromRandomVariableNameToTypeName = map(
+						"earthquake", "Boolean",
+						"burglary",    "Boolean", 
+						"alarm",      "Boolean"
+						);
+
+				// The definitions of non-uniquely named constants
+				Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = map(
+						"Alpha", "Real",
+						"Beta", "Real"
+						);
+
+				// The definitions of non-uniquely named constants
+				Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = map();
+
+				// a variant of the earthquake/burglary model in which some burglars are more active than others.
+				boolean isBayesianNetwork = true;
+				List<Expression> factors = getMultiplicands(parse("" + 
+						"(if earthquake then Alpha else 1-Alpha) * " +
+						"(if burglary then Beta else 1-Beta) * " +
+						// note the division above of the potential by number of remaining values, as the probabilities must sum up to 1
+						"(if burglary or earthquake "
+						+    "then if alarm then 0.9 else 0.1 "
+						+    "else if alarm then 0.05 else 0.95) " +
+						""));
+				
+				ExpressionBasedModel expressionBasedModel = new DefaultExpressionBasedModel(
+						factors,
+						mapFromRandomVariableNameToTypeName,
+						mapFromNonUniquelyNamedConstantNameToTypeName,
+						mapFromUniquelyNamedConstantNameToTypeName,
+						mapFromCategoricalTypeNameToSizeString,
+						list(),
+						isBayesianNetwork);
+				
+				System.out.println(expressionBasedModel);
+
+				List<Expression> queryExpressions = new LinkedList<Expression>();
+				queryExpressions.add(parse("earthquake"));
+				
+				ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel = new ParameterEstimationForExpressionBasedModel(expressionBasedModel, queryExpressions);
+				HashMap<Expression,Double> result = parameterEstimationForExpressionBasedModel.optimize(
+						expressionBasedModel,
+						queryExpressions,
+						GoalType.MAXIMIZE,
+						new double[] {0});
+				ExpressionBasedModel newModel = parameterEstimationForExpressionBasedModel.buildOptimizedExpressionBasedModel(result);
+				
+				System.out.println(newModel);
+				
+				List<Expression> queryExpressions2 = new LinkedList<Expression>();
+				queryExpressions2.add(parse("burglary"));
+				ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel2 = new ParameterEstimationForExpressionBasedModel(newModel, queryExpressions2);
+				HashMap<Expression,Double> result2 = parameterEstimationForExpressionBasedModel2.optimize(
+						newModel,
+						queryExpressions2,
+						GoalType.MAXIMIZE,
+						new double[] {0});
+				ExpressionBasedModel newModel2 = parameterEstimationForExpressionBasedModel2.buildOptimizedExpressionBasedModel(result2);
+				System.out.println(newModel2);
+		
 	}
 
 	private HashMap<Expression,Double> runTestExpressionBased(List<Expression> queryExpressions, ExpressionBasedModel expressionBasedModel, double[] startPoint) {
@@ -207,8 +278,9 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				queryExpressions,
 				GoalType.MAXIMIZE,
 				startPoint);
-		ExpressionBasedModel newModel = parameterEstimationForExpressionBasedModel.buildOptimizedExpressionBasedModel(startPoint, result);
+		ExpressionBasedModel newModel = parameterEstimationForExpressionBasedModel.buildOptimizedExpressionBasedModel(result);
 		System.out.println(" New Model : " + newModel);
+		
 		return result;
 
 	}

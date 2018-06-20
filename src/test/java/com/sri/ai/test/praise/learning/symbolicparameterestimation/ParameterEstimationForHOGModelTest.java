@@ -13,6 +13,8 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.ParameterEstimationForHOGModel;
 
 public class ParameterEstimationForHOGModelTest {
@@ -51,7 +53,66 @@ public class ParameterEstimationForHOGModelTest {
 			
 			HashMap<Expression,Double> mapResult = runTestHOGModelBased(expected, parameterEstimationForHOGModel, new double[] {0});
 
+			HOGModel test = parameterEstimationForHOGModel.buildOptimizedHOGModel(mapResult);
+			ExpressionBasedModel newModel = parameterEstimationForHOGModel.parseHOGModelToExpressionBasedModel(test);
+			System.out.println(newModel.toString());
 			assertEquals(expected, mapResult);
+	}
+	
+	@Test
+	public void testBuildOptimizedHOGModel() {
+		String modelString = "random earthquake: Boolean;\n"
+				+"random burglary: Boolean;\n"
+		+"random alarm: Boolean;\n"
+		+"constant Alpha: Real;\n"
+		+"constant Beta: Real;\n"
+		
+		+"earthquake Alpha;\n"
+		+"burglary Beta;\n"
+
+		+"if earthquake\n"
+		   +"then if burglary\n"
+		      +"then alarm 0.95\n"
+		      +"else alarm 0.6\n"
+		   +"else if burglary\n"
+		      +"then alarm 0.9\n"
+		      +"else alarm 0.01;\n";
+		
+		List<HOGMProblemError> modelErrors = new ArrayList<>();
+		
+		List<Expression> queryExpressionList = new LinkedList<Expression>();
+		queryExpressionList.add(parse("earthquake"));
+		
+		ParameterEstimationForHOGModel parameterEstimationForHOGModel = new ParameterEstimationForHOGModel(modelString, queryExpressionList, modelErrors);
+		
+		HashMap<Expression,Double> expected = new HashMap<Expression,Double>();
+		expected.put(parse("Alpha"), 1.0); 
+		
+		HashMap<Expression,Double> mapResult = runTestHOGModelBased(expected, parameterEstimationForHOGModel, new double[] {0});
+
+		String newStringModel = parameterEstimationForHOGModel.buildOptimizedStringModel(mapResult);
+		//ExpressionBasedModel newExpressionBasedModel = parameterEstimationForHOGModel.parseHOGModelToExpressionBasedModel(newStringModel);
+		//System.out.println(newExpressionBasedModel.toString());
+		
+		System.out.println(newStringModel);
+		
+		queryExpressionList.clear();
+		queryExpressionList.add(parse("burglary"));
+		
+		ParameterEstimationForHOGModel parameterEstimationForHOGModel2 = new ParameterEstimationForHOGModel(newStringModel, queryExpressionList, modelErrors);
+		
+		expected.remove(parse("Alpha"));
+		expected.put(parse("Beta"), 1.0); 
+		
+		HashMap<Expression,Double> mapResult2 = runTestHOGModelBased(expected, parameterEstimationForHOGModel2, new double[] {0});
+		
+		System.out.println(mapResult);
+
+		String newStringModel2 = parameterEstimationForHOGModel2.buildOptimizedStringModel(mapResult2);
+		//ExpressionBasedModel newModel = parameterEstimationForHOGModel.parseHOGModelToExpressionBasedModel(test);
+		System.out.println(newStringModel2.toString());
+		
+		
 	}
 		
 	private HashMap<Expression,Double> runTestHOGModelBased(HashMap<Expression,Double> expected, ParameterEstimationForHOGModel parameterEstimationForHOGModel, double[] startPoint) {
