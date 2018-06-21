@@ -26,6 +26,7 @@ import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
+import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.util.Util;
 
 public class UsefulExpressionOperations {
@@ -74,8 +75,8 @@ public class UsefulExpressionOperations {
 		println(context.getSymbolsAndTypes());
 		
 		// Expression E = parse("if Child < 5 then Param1 else Param2");
-		// Expression E = parse("if Parent != 5 then Param1 else Param2");
-		Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
+		Expression E = parse("if Parent != 5 then Param1 else Param2");
+		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
 		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3");
 		
 		println("\nE = " + E + "\n");
@@ -116,7 +117,7 @@ public class UsefulExpressionOperations {
 			finalFamilies.add(family1);
 		}
 		println("\n" + finalFamilies);
-
+		
 	}
 
 }

@@ -1,8 +1,15 @@
 package com.sri.ai.praise.learning.parameterlearning.representation.expression;
 
+import static com.sri.ai.expresso.helper.Expressions.apply;
+import static com.sri.ai.grinder.library.FunctorConstants.CARDINALITY;
+
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.util.base.ToString;
 
 /**
@@ -21,6 +28,10 @@ public class Family {
 	public Family(Expression condition, LinkedHashSet<Expression> parametersThatCanBeGenerated) {
 		this.condition = condition;
 		this.parametersThatCanBeGenerated = parametersThatCanBeGenerated;
+	}
+	
+	public void addParameters(LinkedHashSet<Expression> moreParameters) {
+		parametersThatCanBeGenerated.addAll(moreParameters);
 	}
 	
 	public String toString() {

@@ -62,7 +62,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 
 	@Override
 	public void incrementCountForChildAndParentsAssignment(List<? extends Object> childAndParentsValues) {
-		verifyIfParametersHaveExpectedType(childAndParentsValues);
+		verifyIfInputHasExpectedTypeAndSize(childAndParentsValues);
 		incrementCountForThatParameter((List<Integer>) childAndParentsValues);
 	}
 	
@@ -97,10 +97,13 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		this.setEntryFor(childAndParentsAssignment, newParameterValue);
 	}
 
-	private void verifyIfParametersHaveExpectedType(List<? extends Object> childAndParentsValues) throws Error {
+	private void verifyIfInputHasExpectedTypeAndSize(List<? extends Object> childAndParentsValues) throws Error {
 		boolean valuesAreIntegers = childAndParentsValues.isEmpty() || childAndParentsValues.get(0) instanceof Integer;
 		if(!valuesAreIntegers) {
-			throw new Error("Values for BayesianVariables must be Integers.");
+			throw new Error("Values for BayesianVariables must be Integers here.");
+		}
+		if(childAndParentsValues.size() != allVariables.size()) {
+			throw new Error("The list of variableValues must have the same size as the list this.allVariables");
 		}
 	}
 	
