@@ -52,7 +52,7 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 	private Context context;
 	private ExpressionVariable child;
 	private LinkedList<ExpressionVariable> parents;
-	private LinkedList<ExpressionVariable> allVariables;
+	private LinkedList<ExpressionVariable> allVariables; // child is the first one, parents are the others
 	private LinkedHashSet<Expression> parameters;
 	
 	private LinkedHashSet<Family> families;
@@ -226,7 +226,7 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 					throw new Error("Partial intersections are not handled yet");
 				}
 			}
-			
+		
 			finalFamilies.add(family1);
 		}
 		
@@ -374,8 +374,10 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		
 		// Incrementing from datapoints
 		LinkedList<Expression> childAndParentsValues = list(parse("1"), parse("1")); 
-		// node.incrementCountForChildAndParentsAssignment(childAndParentsValues);
-		// Debug here, the value for param1 is not incrementing correctly!
+		int nIncrements = 0;
+		for(int i = 1; i <= nIncrements; i++) {
+			node.incrementCountForChildAndParentsAssignment(childAndParentsValues);
+		}
 		
 		node.normalizeParameters();
 		println("new E = " + node.getInnerExpression());
