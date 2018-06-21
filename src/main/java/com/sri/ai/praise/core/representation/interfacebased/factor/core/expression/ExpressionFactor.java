@@ -41,10 +41,13 @@ import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
+import static com.sri.ai.grinder.library.FunctorConstants.MAX;
 import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.collect.PredicateIterator.predicateIterator;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -231,5 +234,33 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 			result = evaluateAsFactor(Division.make(ONE, (Expression) this));
 		}
 		return result;
+	}
+
+	@Override
+	public Factor max(Collection<? extends Variable> variablesToMaximize) {
+		
+		Factor result = this;
+		
+		List<? extends Variable> variablesOfInterest = keepOnlyVariablesOfInterest(variablesToMaximize);
+		if(variablesOfInterest.isEmpty()) {
+			return result;
+		}
+		
+		Expression set = makeIntensionalMultiSet(variablesOfInterest);
+		Expression max = apply(MAX, set);
+		result = evaluateAsFactor(max);
+
+		return result;
+	}
+	
+	private List<? extends Variable> keepOnlyVariablesOfInterest(Collection<? extends Variable> variablesToMaximize) {
+		List<Variable> result = new ArrayList<Variable>();
+		for(Variable variable : variablesToMaximize) {
+			if(contains(variable)) {
+				result.add(variable);
+			}
+		}
+		return result;
+		
 	}
 }

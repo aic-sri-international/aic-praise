@@ -7,6 +7,7 @@ import static com.sri.ai.util.Util.list;
 import static java.util.Collections.unmodifiableList;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -213,5 +214,10 @@ public class ConstantFactor implements Factor {
 			result = new ConstantFactor(1/getConstant());
 			return result;
 		}
+	}
+
+	@Override
+	public Factor max(Collection<? extends Variable> variablesToMaximize) {
+		return this;
 	}
 }
