@@ -65,9 +65,13 @@ public class ParameterEstimationForExpressionBasedModel {
 
 		Expression marginalFunctionLog = applyLogTransformationProductToSum(listOfMarginals);
 
-		//System.out.println(marginalFunctionLog);
+		System.out.println(marginalFunctionLog);
 
 		Set<Expression> listOfVariables = freeVariables(marginalFunctionLog, context);
+		
+		if(listOfVariables.size() != startPoint.length) {
+			throw new Error("Length of double[] startPoint doesn't match the number of variables to optimize with evidence");
+		}
 
 		double[] argopt = returnArgopt(startPoint, goalType, marginalFunctionLog);
 
@@ -81,7 +85,7 @@ public class ParameterEstimationForExpressionBasedModel {
 	 * optimized values.
 	 *
 	 */
-	public ExpressionBasedModel buildOptimizedExpressionBasedModel(double[] startPoint, Map<Expression, Double> optimizedParameters) {
+	public ExpressionBasedModel buildOptimizedExpressionBasedModel(Map<Expression, Double> optimizedParameters) {
 
 		
 		List<Expression> factors = new ArrayList<>();
@@ -185,6 +189,12 @@ public class ParameterEstimationForExpressionBasedModel {
 			marginal = applySigmoidTrick(marginal, context);
 
 			Expression marginalFunction = convertExpression(marginal);
+			
+			Set<Expression> listOfVariables = freeVariables(marginalFunction, context);
+			if (listOfVariables.isEmpty()) {
+				throw new Error("Nothing to optimized in the expression : " + marginalFunction);
+			}
+			
 			result.add(marginalFunction);
 		}
 
@@ -228,11 +238,17 @@ public class ParameterEstimationForExpressionBasedModel {
 	 *
 	 */
 	private Expression convertExpression(Expression marginal) {
-		String input = marginal.toString();
-		input = input.substring(input.indexOf("then") + 5);
-		String resultString = input.split("else")[0];
-		Expression result = parse(resultString);
-		return result;
+		try {
+			String input = marginal.toString();
+			input = input.substring(input.indexOf("then") + 5);
+			String resultString = input.split("else")[0];
+			Expression result = parse(resultString);
+			return result;
+		}
+		catch(Exception e){
+			System.out.println("Impossible to convert the marginal : " + marginal);
+			return marginal;
+		}
 	}
 
 }
