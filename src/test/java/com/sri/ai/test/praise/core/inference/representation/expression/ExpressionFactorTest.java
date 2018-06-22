@@ -2,10 +2,14 @@ package com.sri.ai.test.praise.core.inference.representation.expression;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 import static  com.sri.ai.praise.core.representation.interfacebased.factor.core.IdentityFactor.IDENTITY_FACTOR;
 import static  com.sri.ai.praise.core.representation.interfacebased.factor.core.ZeroFactor.ZERO_FACTOR;
+import static com.sri.ai.expresso.helper.Expressions.parse;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultSymbol;
@@ -13,9 +17,17 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.grinder.theory.compound.CompoundTheory;
+import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
+import com.sri.ai.grinder.theory.equality.EqualityTheory;
+import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
+import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
+import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
 
 public class ExpressionFactorTest {
 	
@@ -139,6 +151,75 @@ public class ExpressionFactorTest {
 		Factor result = aFactor.add(tenFactor);
 
 		assertEquals("10 + a", result.toString());
+	}
+	
+	@Test
+	public void testGetVariables() {
+		
+		Theory theory = new CompoundTheory(
+				new EqualityTheory(false, true),
+				new DifferenceArithmeticTheory(false, false),
+				new LinearRealArithmeticTheory(false, false),
+				new TupleTheory(),
+				new PropositionalTheory());
+		Context context = new TrueContext(theory);
+		
+		Expression expression = parse("{{ (on I in 1..10) I + J }}");
+		Factor factor = new ExpressionFactor(expression, context);
+		
+		List<? extends Variable> factorFreeVariables = factor.getVariables();
+		
+		assertEquals(1, factorFreeVariables.size());
+		assertEquals("[J]", factorFreeVariables.toString());
+	}
+	
+	@Test
+	public void testSumOut() {
+		
+		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(
+				"U", "Boolean",
+				"V", "Boolean");
+		
+		ExpressionVariable u = new ExpressionVariable(parse("U"));
+		List<ExpressionVariable> variablesToSumOut = new ArrayList<>();
+		variablesToSumOut.add(u);
+		
+		ExpressionFactor factorUV = new ExpressionFactor(parse("if U and V then 2 else 3"), context);
+		
+		Factor summedOutFactor = factorUV.sumOut(variablesToSumOut);
+
+		assertEquals("if V then 5 else 6", summedOutFactor.toString());
+	}
+	
+	@Test
+	public void testInvert() {
+		
+		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(
+				"U", "Boolean",
+				"V", "Boolean");
+		
+		ExpressionFactor factorUV = new ExpressionFactor(parse("if U and V then 2 else 3"), context);
+		
+		Factor invertedFactor = factorUV.invert();
+
+		assertEquals("if U then if V then 0.5 else 1/3 else 1/3", invertedFactor.toString());
+	}
+	
+	@Test
+	public void testMax() {
+		
+		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(
+				"U", "Boolean",
+				"V", "Boolean");
+		
+		ExpressionFactor factorUV = new ExpressionFactor(parse("if U then if V then 4 else 2 else 3"), context);
+		
+		ExpressionVariable u = new ExpressionVariable(parse("U"));
+		List<ExpressionVariable> variablesToMaxOut = new ArrayList<>();
+		variablesToMaxOut.add(u);
+		Factor maxFactor = factorUV.max(variablesToMaxOut);
+
+		assertEquals("if V then 4 else 3", maxFactor.toString());
 	}
 
 }
