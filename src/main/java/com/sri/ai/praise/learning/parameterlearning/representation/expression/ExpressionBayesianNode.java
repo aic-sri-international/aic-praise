@@ -29,6 +29,7 @@ import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
+import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Plus;
@@ -199,6 +200,9 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		return computeFinalFamilies(initialFamilies);
 	}
 	
+
+
+	
 	/**
 	 * Break the initial families into final families without any intersection (shattering)
 	 * 
@@ -207,6 +211,48 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 	 * @return the set of the final families
 	 */
 	private LinkedHashSet<Family> computeFinalFamilies(LinkedList<Family> initialFamilies) {
+		LinkedHashSet<Family> finalFamilies = Util.set();
+		
+		while(!initialFamilies.isEmpty()) {
+			Family family1 = initialFamilies.removeFirst();
+			
+			for(ListIterator<Family> it = initialFamilies.listIterator(); it.hasNext();) {
+				Family family2 = it.next();
+				Expression intersection = verifyEquivalenceAndGetIntersectionCondition(family1.condition, family2.condition);
+				if(intersection.equals(Expressions.FALSE)) { // the families are totally disjunct
+					continue; 
+				}
+				else if(intersection.equals(Expressions.TRUE)) { // we have total intersection between the families
+					family1.addParameters(family2.parametersThatCanBeGenerated);
+					it.remove();
+				}
+				else {
+					Family familyIntersection = new Family(intersection, family1.parametersThatCanBeGenerated);
+					familyIntersection.addParameters(family2.parametersThatCanBeGenerated);
+					initialFamilies.add(familyIntersection);
+					
+					Expression newFamily1Condition = context.evaluate(And.make(family1.condition, Not.make(intersection)));
+					family1.condition = newFamily1Condition;
+					
+					Expression newFamily2Condition = context.evaluate(And.make(family2.condition, Not.make(intersection)));
+					family2.condition = newFamily2Condition;
+					
+					if(family1.condition.equals(Expressions.FALSE)) {
+						break;
+					}
+				}
+			}
+			
+			if(!family1.condition.equals(Expressions.FALSE)) {
+				finalFamilies.add(family1);
+			}
+			
+		}
+		
+		return finalFamilies;
+	}
+	
+	private LinkedHashSet<Family> computeFinalFamiliesWithoutPartialIntersections(LinkedList<Family> initialFamilies) {
 		LinkedHashSet<Family> finalFamilies = Util.set();
 		
 		while(!initialFamilies.isEmpty()) {
@@ -359,11 +405,12 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real");
 		LinkedList<ExpressionVariable> parents = list(parent);
 		LinkedHashSet<Expression> parameters = Util.set(param1, param2);
-		// parameters.add(param3);
+		parameters.add(param3);
 		
-		Expression E = parse("if Child < 5 then Param1 else Param2");
+		// Expression E = parse("if Child < 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then Param1 else Param2");
-		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
+		Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
+		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
 		
 		println("E = " + E + "\n");
 		
@@ -374,6 +421,12 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		
 		// Incrementing from datapoints
 		LinkedList<Expression> childAndParentsValues = list(parse("1"), parse("1")); 
+		
+		// verificar por que 5, 1 nao funciona, nem 1, 5
+		// verificar por que com o partial intersection, mesmo com as familias boas, está dando ruim (Param3 nao foi substituído)
+		// problema deve ser no normalize, ou set initial counts
+		// printar o parameterFinalValues e descobrir ...
+		
 		int nIncrements = 0;
 		for(int i = 1; i <= nIncrements; i++) {
 			node.incrementCountForChildAndParentsAssignment(childAndParentsValues);

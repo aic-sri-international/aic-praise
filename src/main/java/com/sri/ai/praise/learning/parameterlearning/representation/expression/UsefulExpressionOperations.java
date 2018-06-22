@@ -93,7 +93,7 @@ public class UsefulExpressionOperations {
 		
 		Expression F1intersectsF2 = verifyEquivalenceAndGetIntersectionCondition(F1, F2, context); // Equivalence.make(F1, F2), usar o context para simplificar com o F1 sabendo que é true ??? ou criar um existe cara ... bonitinho como deve ser? there exist Parent tal que F1 = true ...
 		println("F1intersectsF2 = " + F1intersectsF2);
-		println(context.evaluate(F1intersectsF2)); // should be true
+		println(context.evaluate(F1intersectsF2)); 
 		
 		// Normalization for Parame1_1
 		Expression multiset = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(E, param1));
