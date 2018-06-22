@@ -117,7 +117,7 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 	public void incrementCountForChildAndParentsAssignment(List<? extends Object> childAndParentsValues) {
 		verifyIfInputHasExpectedTypeAndSize(childAndParentsValues);
 		LinkedList<Expression> parentsValues = extractParentsValuesFrom((List<Expression>) childAndParentsValues);
-
+		
 		Expression expressionEvaluation = replaceVariablesByTheirValuesInAnExpression(expression, allVariables, (List<Expression>) childAndParentsValues);		
 		expressionEvaluation = context.evaluate(expressionEvaluation);
 		
@@ -145,19 +145,27 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		int iterationCount = 0;
 		for(Iterator<Family> it = families.iterator(); it.hasNext(); ) {
 			Family family = it.next();
-			Expression expressionWithNewParameters = expression;
 			
+			// println("\nCurrent family: " + family.condition);
+			
+			Expression expressionWithNewParameters = expression;
 			for(Expression parameter : family.parametersThatCanBeGenerated) {
 				Expression learnedParameterValue = finalParameterValues.get(new Pair<Family, Expression>(family, parameter));
 				expressionWithNewParameters = expressionWithNewParameters.replaceAllOccurrences(parameter, learnedParameterValue, context);
+				// println(parameter + " = " + learnedParameterValue);
 			}
+			
+			expressionWithNewParameters = context.evaluate(expressionWithNewParameters);
+			// println("Expression with new parameters: " + expressionWithNewParameters);
 			
 			if(iterationCount == 0) {
 				previousIfThenElse = newExpression = expressionWithNewParameters;
 			}
 			else {
-				newExpression = IfThenElse.make(family.condition, expressionWithNewParameters, previousIfThenElse);
+				previousIfThenElse = newExpression = IfThenElse.make(family.condition, expressionWithNewParameters, previousIfThenElse);
 			}
+			
+			// println("New expression: " + newExpression);
 		
 			iterationCount++;
 		}
@@ -169,12 +177,14 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 	private void computeTheFinalValuesOfTheParameters() {
 		for(Family family : families) {
 			Expression familyCount = familyCountFromDataset.get(family);
+			
 			for(Expression parameter : family.parametersThatCanBeGenerated) {
 				Expression parameterCount = parameterCountFromDataset.get(new Pair<Family, Expression>(family, parameter));
 				
 				Expression parameterCountDividedByFamilyCount = Division.make(parameterCount, familyCount);
 				Expression normalizationFactor = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
 				Expression finalParameterValue = Division.make(parameterCountDividedByFamilyCount, normalizationFactor);
+				finalParameterValue = context.evaluate(finalParameterValue);
 				
 				finalParameterValues.put(new Pair<Family, Expression>(family, parameter), finalParameterValue);
 			}
@@ -199,9 +209,6 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		LinkedList<Family> initialFamilies = generateInitialFamilies();
 		return computeFinalFamilies(initialFamilies);
 	}
-	
-
-
 	
 	/**
 	 * Break the initial families into final families without any intersection (shattering)
@@ -405,11 +412,11 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real");
 		LinkedList<ExpressionVariable> parents = list(parent);
 		LinkedHashSet<Expression> parameters = Util.set(param1, param2);
-		parameters.add(param3);
+		// parameters.add(param3);
 		
-		// Expression E = parse("if Child < 5 then Param1 else Param2");
+		Expression E = parse("if Child < 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then Param1 else Param2");
-		Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
+		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
 		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
 		
 		println("E = " + E + "\n");
@@ -420,12 +427,7 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		node.setInitialCountsForAllPossibleChildAndParentsAssignments();
 		
 		// Incrementing from datapoints
-		LinkedList<Expression> childAndParentsValues = list(parse("1"), parse("1")); 
-		
-		// verificar por que 5, 1 nao funciona, nem 1, 5
-		// verificar por que com o partial intersection, mesmo com as familias boas, está dando ruim (Param3 nao foi substituído)
-		// problema deve ser no normalize, ou set initial counts
-		// printar o parameterFinalValues e descobrir ...
+		LinkedList<Expression> childAndParentsValues = list(parse("1"), parse("1"));
 		
 		int nIncrements = 0;
 		for(int i = 1; i <= nIncrements; i++) {
@@ -433,7 +435,7 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		}
 		
 		node.normalizeParameters();
-		println("new E = " + node.getInnerExpression());
+		println("\nnew E = " + node.getInnerExpression());
 		
 		println("\nEnd of Program");
 		
