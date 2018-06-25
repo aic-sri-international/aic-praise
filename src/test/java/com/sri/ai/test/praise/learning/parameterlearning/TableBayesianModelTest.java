@@ -18,7 +18,7 @@ import com.sri.ai.praise.learning.parameterlearning.representation.table.TableBa
 import com.sri.ai.praise.learning.parameterlearning.representation.table.TableBayesianNode;
 
 /**
- * CLass to test the implementation of parameter learning for bayesian nodes (using tables)
+ * CLass to test the implementation of parameter learning for Bayesian nodes (using tables)
  * 
  * @author Roger Leite Lucena
  *

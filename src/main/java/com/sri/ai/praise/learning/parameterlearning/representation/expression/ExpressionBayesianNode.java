@@ -412,7 +412,7 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real");
 		LinkedList<ExpressionVariable> parents = list(parent);
 		LinkedHashSet<Expression> parameters = Util.set(param1, param2);
-		// parameters.add(param3);
+		parameters.add(param3);
 		
 		Expression E = parse("if Child < 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then Param1 else Param2");
