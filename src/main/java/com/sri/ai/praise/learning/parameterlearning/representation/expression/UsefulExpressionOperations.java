@@ -26,6 +26,7 @@ import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
+import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.util.Util;
 
 public class UsefulExpressionOperations {
@@ -74,8 +75,8 @@ public class UsefulExpressionOperations {
 		println(context.getSymbolsAndTypes());
 		
 		// Expression E = parse("if Child < 5 then Param1 else Param2");
-		// Expression E = parse("if Parent != 5 then Param1 else Param2");
-		Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
+		Expression E = parse("if Parent != 5 then Param1 else Param2");
+		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
 		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3");
 		
 		println("\nE = " + E + "\n");
@@ -92,7 +93,7 @@ public class UsefulExpressionOperations {
 		
 		Expression F1intersectsF2 = verifyEquivalenceAndGetIntersectionCondition(F1, F2, context); // Equivalence.make(F1, F2), usar o context para simplificar com o F1 sabendo que é true ??? ou criar um existe cara ... bonitinho como deve ser? there exist Parent tal que F1 = true ...
 		println("F1intersectsF2 = " + F1intersectsF2);
-		println(context.evaluate(F1intersectsF2)); // should be true
+		println(context.evaluate(F1intersectsF2)); 
 		
 		// Normalization for Parame1_1
 		Expression multiset = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(E, param1));
@@ -116,7 +117,7 @@ public class UsefulExpressionOperations {
 			finalFamilies.add(family1);
 		}
 		println("\n" + finalFamilies);
-
+		
 	}
 
 }
