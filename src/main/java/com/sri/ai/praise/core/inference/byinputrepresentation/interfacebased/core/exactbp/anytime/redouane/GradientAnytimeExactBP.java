@@ -112,12 +112,26 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 
 	@Override
 	public Double getAbsolutePartialDerivativeWithRespectTo(Anytime<Factor> sub) {
+		
 		Approximation<Factor> subApproximation = sub.getCurrentApproximation();
 		Polytope subPolytope = checkIfApproximationIsPolytopeAndReturnPolytopeIfYesThrowErrorOtherwise(subApproximation);
-		Collection<? extends Variable> subVariables = subPolytope.getFreeVariables();
-		List<List<Object>> allCombinationsOfSubVariableValues = getAllPossibleValues(subVariables);
 		
 		// TODO finish
+		
+		// Step 1 : get free variables V to sum out over
+		
+		// Step 2 : get other variables Q (also to sum out)
+		
+		// Step 3 : get variables I for incoming polytopes to sum over
+		
+		// Step 4 : loop over values of Q
+		
+		// Step 5 : get the max over I for each value of Q of the vertices at the root and store "the value of I" for each Q
+		
+		// Step 6 : same with min
+		
+		// Step 7 : compute product over q of max - min
+		
 		return null;
 	}
 

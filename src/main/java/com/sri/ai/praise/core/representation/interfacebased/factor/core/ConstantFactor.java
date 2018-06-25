@@ -7,6 +7,7 @@ import static com.sri.ai.util.Util.list;
 import static java.util.Collections.unmodifiableList;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,8 @@ import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
 
 public class ConstantFactor implements Factor {
@@ -111,7 +113,7 @@ public class ConstantFactor implements Factor {
 	}
 
 	private ExpressionFactor makeFactor(Expression expression, Context context) {
-		ExpressionFactor result = new ExpressionFactor(expression, context);
+		ExpressionFactor result = new DefaultExpressionFactor(expression, context);
 		return result;
 	}
 	
@@ -213,5 +215,10 @@ public class ConstantFactor implements Factor {
 			result = new ConstantFactor(1/getConstant());
 			return result;
 		}
+	}
+
+	@Override
+	public Factor max(Collection<? extends Variable> variablesToMaximize) {
+		return this;
 	}
 }

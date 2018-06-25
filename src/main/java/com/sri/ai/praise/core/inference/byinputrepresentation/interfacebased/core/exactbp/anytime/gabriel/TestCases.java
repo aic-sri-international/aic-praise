@@ -32,10 +32,12 @@ import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIEvidenceReading;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.UAIModelToExpressionFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.UAIModelToExpressionFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
@@ -241,7 +243,7 @@ public class TestCases {
 			ArrayList<ExpressionVariable> col = new ArrayList<>();
 			variables.add(col);
 			for (int j = 0; j < gridSize; j++) {
-				ExpressionVariable v =new ExpressionVariable(makeSymbol("A_"+i+"_"+j)); 
+				ExpressionVariable v = new DefaultExpressionVariable(makeSymbol("A_"+i+"_"+j)); 
 				col.add(j,v);
 				makeSymbol("A_"+i+"_"+j);
 				context = context.extendWithSymbolsAndTypes(v,parse("Boolean"));
@@ -263,7 +265,7 @@ public class TestCases {
 				Expression X = variables.get(i).get(j);
 				Expression Y = variables.get(i+1).get(j);
 				
-				result.add(new ExpressionFactor(
+				result.add(new DefaultExpressionFactor(
 						apply(IF_THEN_ELSE,apply(EQUAL,X,makeSymbol("true")), 
 								apply(IF_THEN_ELSE,apply(EQUAL,Y,makeSymbol("true")),entry1,entry2), 
 								apply(IF_THEN_ELSE,apply(EQUAL,Y,makeSymbol("true")),entry3,entry4)),
@@ -283,7 +285,7 @@ public class TestCases {
 				Expression X = variables.get(i).get(j);
 				Expression Y = variables.get(i).get(j+1);
 				
-				result.add(new ExpressionFactor(
+				result.add(new DefaultExpressionFactor(
 						apply(IF_THEN_ELSE,apply(EQUAL,X,makeSymbol("true")), 
 								apply(IF_THEN_ELSE,apply(EQUAL,Y,makeSymbol("true")),entry1,entry2), 
 								apply(IF_THEN_ELSE,apply(EQUAL,Y,makeSymbol("true")),entry3,entry4)),
@@ -300,7 +302,7 @@ public class TestCases {
 					
 					Expression X = variables.get(i).get(j);
 					
-					result.add(new ExpressionFactor(
+					result.add(new DefaultExpressionFactor(
 							apply(IF_THEN_ELSE,apply(EQUAL,X,makeSymbol("true")), 
 									entry1,
 									entry2),

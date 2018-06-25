@@ -1,8 +1,9 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil.constructGenericTableExpressionUsingEqualities;
 import static com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil.convertGenericTableToInstance;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork.expressionFactorNetwork;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.println;
 
@@ -33,6 +34,7 @@ import com.sri.ai.praise.core.representation.classbased.table.core.data.Function
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai.UAI_to_ExpressionBased_Translator;
 import com.sri.ai.util.base.IdentityWrapper;
 
@@ -60,7 +62,7 @@ public class UAIModelToExpressionFactorNetwork {
 		//Context 
 		Context context = fillingContext(theory, factorsAndTypes);
 		
-		ExpressionFactorNetwork result = new ExpressionFactorNetwork(factorsRepresentedAsExpressions, context);
+		ExpressionFactorNetwork result = expressionFactorNetwork(factorsRepresentedAsExpressions, context);
 		return result;
 	}
 

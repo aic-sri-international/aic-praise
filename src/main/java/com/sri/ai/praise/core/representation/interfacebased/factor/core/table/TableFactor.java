@@ -9,6 +9,7 @@ import static com.sri.ai.util.Util.mapIntoList;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -441,5 +442,11 @@ public class TableFactor implements Factor {
 		}
 		result = new TableFactor(getVariables(), newEntries);
 		return result;
+	}
+
+	@Override
+	public Factor max(Collection<? extends Variable> variablesToMaximize) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

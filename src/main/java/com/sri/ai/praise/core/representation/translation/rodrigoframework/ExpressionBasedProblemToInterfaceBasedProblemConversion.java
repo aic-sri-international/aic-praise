@@ -37,21 +37,24 @@
  */
 package com.sri.ai.praise.core.representation.translation.rodrigoframework;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork.expressionFactorNetwork;
+
 import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultVariableMarginalQuery;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 
 public class ExpressionBasedProblemToInterfaceBasedProblemConversion {
 
 	public static Problem translate(ExpressionBasedProblem expressionBasedProblem) {
-		ExpressionVariable queryVariable = new ExpressionVariable(expressionBasedProblem.getQuerySymbol());
-		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(expressionBasedProblem.getFactorExpressionsIncludingQueryDefinitionIfAny(), expressionBasedProblem.getContext());
+		ExpressionVariable queryVariable = new DefaultExpressionVariable(expressionBasedProblem.getQuerySymbol());
+		ExpressionFactorNetwork factorNetwork = expressionFactorNetwork(expressionBasedProblem.getFactorExpressionsIncludingQueryDefinitionIfAny(), expressionBasedProblem.getContext());
 		Predicate<Expression> isExpressionParameterPredicate = expressionBasedProblem.getIsParameterPredicate();
 		Predicate<Variable> isParameterPredicate = makeIsParameterPredicate(isExpressionParameterPredicate);
 		Problem problem = new DefaultVariableMarginalQuery(queryVariable, factorNetwork, isParameterPredicate);
