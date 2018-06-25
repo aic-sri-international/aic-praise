@@ -49,8 +49,10 @@ import org.junit.Test;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
@@ -64,9 +66,9 @@ public class PolytopeTest {
 			"V", "Boolean",
 			"W", "Boolean");
 
-	ExpressionVariable u = new ExpressionVariable(parse("U"));
-	ExpressionVariable v = new ExpressionVariable(parse("V"));
-	ExpressionVariable w = new ExpressionVariable(parse("W"));
+	ExpressionVariable u = new DefaultExpressionVariable(parse("U"));
+	ExpressionVariable v = new DefaultExpressionVariable(parse("V"));
+	ExpressionVariable w = new DefaultExpressionVariable(parse("W"));
 	
 	Polytope identity = Polytopes.identityPolytope();
 	
@@ -74,14 +76,14 @@ public class PolytopeTest {
 	AtomicPolytope simplexV = new Simplex(v);
 	AtomicPolytope simplexW = new Simplex(w);
 	
-	ExpressionFactor factorU = new ExpressionFactor(parse("if U then 2 else 3"), context);
-	ExpressionFactor factorV = new ExpressionFactor(parse("if V then 2 else 3"), context);
-	ExpressionFactor factorUV = new ExpressionFactor(parse("if U and V then 2 else 3"), context);
-	ExpressionFactor factorVW = new ExpressionFactor(parse("if V and W then 4 else 5"), context);
+	ExpressionFactor factorU = new DefaultExpressionFactor(parse("if U then 2 else 3"), context);
+	ExpressionFactor factorV = new DefaultExpressionFactor(parse("if V then 2 else 3"), context);
+	ExpressionFactor factorUV = new DefaultExpressionFactor(parse("if U and V then 2 else 3"), context);
+	ExpressionFactor factorVW = new DefaultExpressionFactor(parse("if V and W then 4 else 5"), context);
 	
-	ExpressionFactor factorU2 = new ExpressionFactor(parse("if U then 20 else 30"), context);
-	ExpressionFactor factorV2 = new ExpressionFactor(parse("if V then 20 else 30"), context);
-	ExpressionFactor factorUV2 = new ExpressionFactor(parse("if U and V then 20 else 30"), context);
+	ExpressionFactor factorU2 = new DefaultExpressionFactor(parse("if U then 20 else 30"), context);
+	ExpressionFactor factorV2 = new DefaultExpressionFactor(parse("if V then 20 else 30"), context);
+	ExpressionFactor factorUV2 = new DefaultExpressionFactor(parse("if U and V then 20 else 30"), context);
 	
 	AtomicPolytope convexHullU = new IntensionalConvexHullOfFactors(list(u), factorU);
 	AtomicPolytope convexHullV = new IntensionalConvexHullOfFactors(list(v), factorV);
@@ -207,7 +209,7 @@ public class PolytopeTest {
 		product = Polytope.multiply(list(convexHullUFreeVBound, convexHullVW));
 		actual = Polytopes.getEquivalentAtomicPolytopeOn(u, product);
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
-		ExpressionFactor expectedExpressionFactor = new ExpressionFactor(parse("if U then if V then if W then 8 else 10 else 15 else if V then if W then 12 else 15 else 15"), context);
+		ExpressionFactor expectedExpressionFactor = new DefaultExpressionFactor(parse("if U then if V then if W then 8 else 10 else 15 else if V then if W then 12 else 15 else 15"), context);
 		expected = new IntensionalConvexHullOfFactors(list(v,w), expectedExpressionFactor);
 		println(expected.toString());
 		println(actual.toString());

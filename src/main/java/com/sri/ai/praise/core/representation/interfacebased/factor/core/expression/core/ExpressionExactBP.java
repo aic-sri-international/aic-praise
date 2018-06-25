@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, SRI International
+ * Copyright (c) 2015, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.other.integration.proceduralattachment;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
 
-import java.util.Map;
+import java.util.function.Predicate;
 
-public interface ProceduralAttachments extends Map<String, Procedure> {
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.ExactBP;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultVariableMarginalQuery;
+
+
+/**
+ * A convenience class for creating a {@link ExactBP} based on expressions.
+ * @author braz
+ *
+ */
+public class ExpressionExactBP extends ExactBP {
+
+	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
+		this(new DefaultExpressionVariable(query), factorNetwork, v -> false);
+	}
+
+	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
+		super(new DefaultVariableMarginalQuery(new DefaultExpressionVariable(query), factorNetwork, isParameterPredicate));
+	}
 	
 }

@@ -35,13 +35,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.apply;
-import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 import static com.sri.ai.grinder.library.FunctorConstants.MAX;
+import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.collect.PredicateIterator.predicateIterator;
@@ -54,8 +54,8 @@ import java.util.Set;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.helper.AbstractExpressionWrapper;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.expresso.helper.WrappedExpression;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Plus;
@@ -65,10 +65,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.IdentityFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ZeroFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.util.collect.PredicateIterator;
 
 /**
- * A {@link Factor} represented by an {@link Expression}.
+ * A {@link Factor} represented by an {@link Expression} provided by {@link #computeInnerExpression()}.
+ * 
  * It also takes a {@link Context} as a construction argument in order to identify types of indices,
  * as well as being able to perform multiplication and summation operations.
  * Because of that, the {@link Context} must have the indices and their types already registered
@@ -81,14 +84,13 @@ import com.sri.ai.util.collect.PredicateIterator;
  * @author braz
  *
  */
-public class ExpressionFactor extends WrappedExpression implements Factor {
+public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper implements ExpressionFactor {
 
 	private static final long serialVersionUID = 1L;
 
 	private Context context;
 
-	public ExpressionFactor(Expression expression, Context context) {
-		super(expression);
+	public AbstractExpressionFactor(Context context) {
 		this.context = context;
 	}
 
@@ -106,7 +108,7 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	public List<? extends Variable> getVariables() {
 		Set<Expression> freeVariableExpressions = Expressions.freeVariables(getInnerExpression(), context);
 		PredicateIterator<Expression> freeVariablesMinusTypeNames = predicateIterator(freeVariableExpressions, isNotType());
-		List<? extends Variable> result = mapIntoList(freeVariablesMinusTypeNames, e -> new ExpressionVariable(e));
+		List<? extends Variable> result = mapIntoList(freeVariablesMinusTypeNames, e -> new DefaultExpressionVariable(e));
 		return result;
 	}
 
@@ -129,7 +131,7 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 			result = ((ConstantFactor) another).multiply(this);
 		}
 		
-		else if (another instanceof ExpressionFactor){
+		else if (another instanceof AbstractExpressionFactor){
 			result = evaluateAsFactor(Times.make(this, (Expression) another));
 		}
 		
@@ -162,7 +164,7 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	}
 
 	private Expression makeIntensionalMultiSet(List<? extends Variable> variablesToSumOut) {
-		List<Expression> variableExpressionsToSumOut = mapIntoList(variablesToSumOut, v -> ((ExpressionVariable)v).getInnerExpression());
+		List<Expression> variableExpressionsToSumOut = mapIntoList(variablesToSumOut, v -> (ExpressionVariable) v);
 		// TODO: should have been able to just cast variablesToSumOut to List<ExpressionVariable>, but expresso incorrectly assumes them to be Symbols
 		// We should be able to correct that and have expresso accept any expression of syntactic form "Symbol".
 		Expression set = intensionalMultiSet(variableExpressionsToSumOut, this, getContext());
@@ -181,7 +183,7 @@ public class ExpressionFactor extends WrappedExpression implements Factor {
 	}
 
 	private ExpressionFactor makeFactor(Expression expression) {
-		ExpressionFactor result = new ExpressionFactor(expression, getContext());
+		ExpressionFactor result = new DefaultExpressionFactor(expression, getContext());
 		return result;
 	}
 

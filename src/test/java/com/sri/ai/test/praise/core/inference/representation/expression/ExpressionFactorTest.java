@@ -1,15 +1,14 @@
 package com.sri.ai.test.praise.core.inference.representation.expression;
 
+import static com.sri.ai.expresso.helper.Expressions.parse;
+import static  com.sri.ai.praise.core.representation.interfacebased.factor.core.IdentityFactor.IDENTITY_FACTOR;
+import static  com.sri.ai.praise.core.representation.interfacebased.factor.core.ZeroFactor.ZERO_FACTOR;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-
-import static  com.sri.ai.praise.core.representation.interfacebased.factor.core.IdentityFactor.IDENTITY_FACTOR;
-import static  com.sri.ai.praise.core.representation.interfacebased.factor.core.ZeroFactor.ZERO_FACTOR;
-import static com.sri.ai.expresso.helper.Expressions.parse;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultSymbol;
@@ -26,8 +25,10 @@ import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 
 public class ExpressionFactorTest {
 	
@@ -38,10 +39,10 @@ public class ExpressionFactorTest {
 		Context context = new TrueContext(theory);
 		
 		Expression a = DefaultSymbol.createSymbol("a");
-		ExpressionFactor aFactor = new ExpressionFactor(a, context);
+		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		
 		Expression b = DefaultSymbol.createSymbol("b");
-		ExpressionFactor bFactor = new ExpressionFactor(b, context);
+		ExpressionFactor bFactor = new DefaultExpressionFactor(b, context);
 		
 		Factor abFactor = (ExpressionFactor) aFactor.multiply(bFactor);
 		
@@ -55,7 +56,7 @@ public class ExpressionFactorTest {
 		Context context = new TrueContext(theory);
 		
 		Expression a = DefaultSymbol.createSymbol("a");
-		ExpressionFactor aFactor = new ExpressionFactor(a, context);
+		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		
 		Factor result = (ExpressionFactor) aFactor.multiply(IDENTITY_FACTOR);
 		
@@ -69,7 +70,7 @@ public class ExpressionFactorTest {
 		Context context = new TrueContext(theory);
 		
 		Expression a = DefaultSymbol.createSymbol("a");
-		ExpressionFactor aFactor = new ExpressionFactor(a, context);
+		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		
 		Factor result = aFactor.multiply(ZERO_FACTOR);
 
@@ -83,7 +84,7 @@ public class ExpressionFactorTest {
 		Context context = new TrueContext(theory);
 		
 		Expression a = DefaultSymbol.createSymbol("a");
-		ExpressionFactor aFactor = new ExpressionFactor(a, context);
+		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		ConstantFactor tenFactor = new ConstantFactor(10.);
 		
 		Factor result = aFactor.multiply(tenFactor);
@@ -98,10 +99,10 @@ public class ExpressionFactorTest {
 		Context context = new TrueContext(theory);
 		
 		Expression a = DefaultSymbol.createSymbol("a");
-		ExpressionFactor aFactor = new ExpressionFactor(a, context);
+		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		
 		Expression b = DefaultSymbol.createSymbol("b");
-		ExpressionFactor bFactor = new ExpressionFactor(b, context);
+		ExpressionFactor bFactor = new DefaultExpressionFactor(b, context);
 		
 		Factor abFactor = (ExpressionFactor) aFactor.add(bFactor);
 		
@@ -115,7 +116,7 @@ public class ExpressionFactorTest {
 		Context context = new TrueContext(theory);
 		
 		Expression a = DefaultSymbol.createSymbol("a");
-		ExpressionFactor aFactor = new ExpressionFactor(a, context);
+		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		
 		Factor result = (ExpressionFactor) aFactor.add(IDENTITY_FACTOR);
 		
@@ -131,7 +132,7 @@ public class ExpressionFactorTest {
 		Context context = new TrueContext(theory);
 		
 		Expression a = DefaultSymbol.createSymbol("a");
-		ExpressionFactor aFactor = new ExpressionFactor(a, context);
+		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		
 		Factor result = aFactor.add(ZERO_FACTOR);
 
@@ -145,7 +146,7 @@ public class ExpressionFactorTest {
 		Context context = new TrueContext(theory);
 		
 		Expression a = DefaultSymbol.createSymbol("a");
-		ExpressionFactor aFactor = new ExpressionFactor(a, context);
+		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		ConstantFactor tenFactor = new ConstantFactor(10.);
 		
 		Factor result = aFactor.add(tenFactor);
@@ -165,7 +166,7 @@ public class ExpressionFactorTest {
 		Context context = new TrueContext(theory);
 		
 		Expression expression = parse("{{ (on I in 1..10) I + J }}");
-		Factor factor = new ExpressionFactor(expression, context);
+		Factor factor = new DefaultExpressionFactor(expression, context);
 		
 		List<? extends Variable> factorFreeVariables = factor.getVariables();
 		
@@ -180,11 +181,11 @@ public class ExpressionFactorTest {
 				"U", "Boolean",
 				"V", "Boolean");
 		
-		ExpressionVariable u = new ExpressionVariable(parse("U"));
+		ExpressionVariable u = new DefaultExpressionVariable(parse("U"));
 		List<ExpressionVariable> variablesToSumOut = new ArrayList<>();
 		variablesToSumOut.add(u);
 		
-		ExpressionFactor factorUV = new ExpressionFactor(parse("if U and V then 2 else 3"), context);
+		ExpressionFactor factorUV = new DefaultExpressionFactor(parse("if U and V then 2 else 3"), context);
 		
 		Factor summedOutFactor = factorUV.sumOut(variablesToSumOut);
 
@@ -198,7 +199,7 @@ public class ExpressionFactorTest {
 				"U", "Boolean",
 				"V", "Boolean");
 		
-		ExpressionFactor factorUV = new ExpressionFactor(parse("if U and V then 2 else 3"), context);
+		ExpressionFactor factorUV = new DefaultExpressionFactor(parse("if U and V then 2 else 3"), context);
 		
 		Factor invertedFactor = factorUV.invert();
 
@@ -212,9 +213,9 @@ public class ExpressionFactorTest {
 				"U", "Boolean",
 				"V", "Boolean");
 		
-		ExpressionFactor factorUV = new ExpressionFactor(parse("if U then if V then 4 else 2 else 3"), context);
+		ExpressionFactor factorUV = new DefaultExpressionFactor(parse("if U then if V then 4 else 2 else 3"), context);
 		
-		ExpressionVariable u = new ExpressionVariable(parse("U"));
+		ExpressionVariable u = new DefaultExpressionVariable(parse("U"));
 		List<ExpressionVariable> variablesToMaxOut = new ArrayList<>();
 		variablesToMaxOut.add(u);
 		Factor maxFactor = factorUV.max(variablesToMaxOut);

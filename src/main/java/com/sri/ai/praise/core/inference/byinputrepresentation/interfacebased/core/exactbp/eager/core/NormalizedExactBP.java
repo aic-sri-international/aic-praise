@@ -42,9 +42,9 @@ import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 
 public class NormalizedExactBP implements Solver {
 

@@ -35,19 +35,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
 
 import java.util.List;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.WrappedExpression;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 
-public class ExpressionVariable extends WrappedExpression implements Variable {
+public class DefaultExpressionVariable extends WrappedExpression implements ExpressionVariable {
 
 	private static final long serialVersionUID = 1L;
 
-	public ExpressionVariable(Expression expression) {
+	public DefaultExpressionVariable(Expression expression) {
 		super(expression);
 	}
 
