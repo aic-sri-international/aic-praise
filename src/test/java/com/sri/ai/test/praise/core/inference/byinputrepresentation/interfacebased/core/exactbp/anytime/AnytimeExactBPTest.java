@@ -3,6 +3,7 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 import static com.sri.ai.expresso.helper.Expressions.TRUE;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.expresso.helper.Expressions.parse;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork.expressionFactorNetwork;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
@@ -35,9 +36,9 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.cor
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.AbstractExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionExactBP;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionExactBP;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
 import com.sri.ai.util.base.IdentityWrapper;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -264,7 +265,7 @@ public class AnytimeExactBPTest {
 
 	private void runRodrigos(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected) {
 		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(variableAndTypes);
-		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(factorNetworkString, context);
+		ExpressionFactorNetwork factorNetwork = expressionFactorNetwork(factorNetworkString, context);
 		Expression query = Expressions.parse(queryVariableString);
 
 		printProblem(factorNetworkString, queryVariableString, expected);
@@ -277,14 +278,14 @@ public class AnytimeExactBPTest {
 		Context context = factorNetwork.getContext();
 		long initialTime = System.currentTimeMillis();
 		ExpressionFactor resultFactor = solveWithExactBP(query, factorNetwork);
-		Expression normalizedResult = PRAiSEUtil.normalize(query, resultFactor.getInnerExpression(), context);
+		Expression normalizedResult = PRAiSEUtil.normalize(query, resultFactor, context);
 		long finalTime = System.currentTimeMillis();
 		println("ExactBP: " + normalizedResult);
 		println("Time: " + (finalTime - initialTime) + " ms.");
 		
 		printResults(expected, resultFactor, normalizedResult);
 		
-		assertEquals(expected, resultFactor.getInnerExpression());
+		assertEquals(expected, resultFactor);
 		
 		Expression normalizedAnytimeResult = solveWithAnytimeExactBP(query, factorNetwork, context);
 		
@@ -327,7 +328,7 @@ public class AnytimeExactBPTest {
 		}
 		else {
 			ExpressionFactor resultFactor = (ExpressionFactor) ((IntensionalConvexHullOfFactors) current).getFactor();
-			result = PRAiSEUtil.normalize(query, resultFactor.getInnerExpression(), context);
+			result = PRAiSEUtil.normalize(query, resultFactor, context);
 			println("P(" + exactBP.getMessageVariable() + "): " + result);
 			println("Time: " + (finalTime - initialTime) + " ms.");
 		}
@@ -347,7 +348,7 @@ public class AnytimeExactBPTest {
 		println("Result factor: " + resultFactor);
 		println("Normalized   : " + result);
 		println("Expected     : " + expected);
-		println(expected.equals(resultFactor.getInnerExpression())? "Correct!" : "Error!");
+		println(expected.equals(resultFactor)? "Correct!" : "Error!");
 	}
 
 
@@ -359,13 +360,13 @@ public class AnytimeExactBPTest {
 				new TupleTheory(),
 				new PropositionalTheory());
 		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(variableAndTypes);
-		ExpressionFactorNetwork factorNetwork = new ExpressionFactorNetwork(factorNetworkString, context);
+		ExpressionFactorNetwork factorNetwork = expressionFactorNetwork(factorNetworkString, context);
 		Expression query = Expressions.parse(queryVariableString);
 		
 		Set<Expression> setOfFactors = new HashSet<>(); // not sure it will work
 		for(IdentityWrapper iw:factorNetwork.getAs()) {
 			ExpressionFactor f = (ExpressionFactor) iw.getObject();
-			Expression expressionFactor = f.getInnerExpression();
+			Expression expressionFactor = f;
 			boolean successfullyAdded = setOfFactors.add(expressionFactor);
 			if (!successfullyAdded) {
 				setOfFactors.remove(expressionFactor);

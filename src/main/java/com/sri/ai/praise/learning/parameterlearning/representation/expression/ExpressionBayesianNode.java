@@ -4,7 +4,6 @@ import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.helper.GrinderUtil.getIndexExpressionsForIndicesInListAndTypesInRegistry;
 import static com.sri.ai.grinder.library.FunctorConstants.CARDINALITY;
-import static com.sri.ai.util.Util.incrementalComputationOfComponentWiseAverage;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mergeElementsIntoOneList;
 import static com.sri.ai.util.Util.println;
@@ -34,8 +33,9 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
@@ -47,8 +47,10 @@ import com.sri.ai.util.base.Pair;
  *
  */
 
-public class ExpressionBayesianNode extends ExpressionFactor implements BayesianNode {
+public class ExpressionBayesianNode extends DefaultExpressionFactor implements BayesianNode {
 
+	private static final long serialVersionUID = 1L;
+	
 	private Expression expression;
 	private Context context;
 	private ExpressionVariable child;
@@ -403,8 +405,8 @@ public class ExpressionBayesianNode extends ExpressionFactor implements Bayesian
 				
 		// Only one child and one parent, 2 parameters (Param1 and Param2)
 		
-		ExpressionVariable child = new ExpressionVariable(parse("Child"));
-		ExpressionVariable parent = new ExpressionVariable(parse("Parent"));
+		ExpressionVariable child = new DefaultExpressionVariable(parse("Child"));
+		ExpressionVariable parent = new DefaultExpressionVariable(parse("Parent"));
 		Expression param1 = parse("Param1");
 		Expression param2 = parse("Param2");
 		Expression param3 = parse("Param3");

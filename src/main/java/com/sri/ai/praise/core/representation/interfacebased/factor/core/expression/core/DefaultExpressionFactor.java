@@ -35,29 +35,31 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression;
-
-import java.util.function.Predicate;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.ExactBP;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultVariableMarginalQuery;
-
+import com.sri.ai.grinder.api.Context;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 
 /**
- * A convenience class for creating a {@link ExactBP} based on expressions.
+ * A {@link AbstractExpressionFactor} based on a given {@link Expression}.
+ * 
  * @author braz
  *
  */
-public class ExpressionExactBP extends ExactBP {
+public class DefaultExpressionFactor extends AbstractExpressionFactor implements ExpressionFactor {
 
-	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
-		this(new ExpressionVariable(query), factorNetwork, v -> false);
+	private static final long serialVersionUID = 1L;
+
+	protected Expression innerExpression;
+
+	public DefaultExpressionFactor(Expression expression, Context context) {
+		super(context);
+		this.innerExpression = expression;
 	}
 
-	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
-		super(new DefaultVariableMarginalQuery(new ExpressionVariable(query), factorNetwork, isParameterPredicate));
+	@Override
+	protected Expression computeInnerExpression() {
+		return innerExpression;
 	}
-	
 }

@@ -17,7 +17,8 @@ import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
 
 public class ConstantFactor implements Factor {
@@ -112,7 +113,7 @@ public class ConstantFactor implements Factor {
 	}
 
 	private ExpressionFactor makeFactor(Expression expression, Context context) {
-		ExpressionFactor result = new ExpressionFactor(expression, context);
+		ExpressionFactor result = new DefaultExpressionFactor(expression, context);
 		return result;
 	}
 	
