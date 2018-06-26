@@ -60,6 +60,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.Util;
+import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -253,23 +254,27 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 
 	private void printTracingInformationHeader() {
 		if (getParent() == null) {
-			println("Final message on " + getRoot());
+			log(() -> "Final message on " + getRoot());
 		}
 		else {
-			println("Message from " + getRoot() + " to " + getParent());
+			log(() -> "Message from " + getRoot() + " to " + getParent());
 		}
 	}
 
 	private void printTracingInformationBody(Factor factor, List<? extends Variable> variablesToBeSummedOut, Factor result) {
-		println("Received total product " + factor);
+		log(() -> "Received total product " + factor);
 		String eliminatedString = variablesToBeSummedOut.isEmpty()? "no indices" : join(variablesToBeSummedOut);
-		println("Eliminating " + eliminatedString + " from " + factor + " ---> " + result);
-		println("Sending " + result);
+		log(() -> "Eliminating " + eliminatedString + " from " + factor + " ---> " + result);
+		log(() -> "Sending " + result);
 	}
 	
-	private void println(String string) {
+	/**
+	 * Logging function; takes a nullary function in order to avoid computing the message string unnecessarily.
+	 * @param message
+	 */
+	private void log(NullaryFunction<String> message) {
 		if (debug) {
-			Util.println(string);
+			Util.println(message.apply());
 		}
 	}
 

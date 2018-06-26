@@ -130,4 +130,22 @@ public class ProceduralAttachmentFactor extends AbstractExpressionFactor {
 		Expression result = IfThenElse.make(Equality.make(variable, getProcedureValue()), Expressions.ONE, Expressions.ZERO);
 		return result;
 	}
+	
+	@Override
+	public boolean equals(Object another) {
+		boolean result;
+		if (another instanceof ProceduralAttachmentFactor) {
+			throw new Error("Comparing two " + ProceduralAttachmentFactor.class + " can be expensive and should not really be happening, so it's likely there is a problem in the program's logic.");
+		}
+		else {
+			result = false;
+		}
+		return result;
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = System.identityHashCode(this);
+		return result;
+	}
 }
