@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.core.AbstractEditableFactorNetwrok;
 import com.sri.ai.praise.core.representation.classbased.table.core.data.markov.FactorTable;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.AbstractEditableFactorNetwork;
 import com.sri.ai.util.Util;
 /**
  * 
@@ -21,7 +21,7 @@ import com.sri.ai.util.Util;
  * @author gabriel
  *
  */
-public class TableFactorNetwork extends AbstractEditableFactorNetwrok{
+public class TableFactorNetwork extends AbstractEditableFactorNetwork {
 	
 	public TableFactorNetwork(List<? extends TableFactor> factors) {
 		for(TableFactor f:factors) {

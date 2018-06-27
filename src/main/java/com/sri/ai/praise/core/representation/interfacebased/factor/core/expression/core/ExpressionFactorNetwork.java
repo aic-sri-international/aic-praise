@@ -48,10 +48,10 @@ import java.util.List;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.core.AbstractEditableFactorNetwrok;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.AbstractEditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 
 
@@ -62,7 +62,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
  * @author braz
  *
  */
-public class ExpressionFactorNetwork extends AbstractEditableFactorNetwrok {
+public class ExpressionFactorNetwork extends AbstractEditableFactorNetwork {
 	
 	private Context context;
 

@@ -2,7 +2,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core;
 
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.api.EditableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.AbstractFactorNetwork;
