@@ -34,11 +34,9 @@ public class TableBayesianModelTest {
 	static TableBayesianModel sickSunColdModel = generateSickSunColdModel();
 	
 	static TableBayesianModel generateSickSunColdModel() {
-		ArrayList<TableVariable> parentsOfSick = arrayList(sunVariable, coldVariable);
-
-		TableBayesianNode sickNode = new TableBayesianNode(sickVariable, parentsOfSick);
 		TableBayesianNode sunNode = new TableBayesianNode(sunVariable, arrayList());
 		TableBayesianNode coldNode = new TableBayesianNode(coldVariable, arrayList());
+		TableBayesianNode sickNode = new TableBayesianNode(sickVariable, list(sunNode, coldNode));
 		
 		List<TableBayesianNode> nodes = list(sickNode, sunNode, coldNode);
 
@@ -285,7 +283,7 @@ public class TableBayesianModelTest {
 	}
 
 	public static void main(String[] args) {
-		// printSickSunColdModelTest();
+		printSickSunColdModelTest();
 	}
 
 }

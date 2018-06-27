@@ -7,9 +7,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
 public interface BayesianNode extends Factor {
 	
-	public Variable getChild();
+	public Variable getChildVariable();
 	
-	public List<? extends Variable> getParents();
+	public List<? extends Variable> getParentsVariables();
 	
 	public List<? extends Variable> getAllVariables();
 	
