@@ -3,7 +3,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.express
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.praise.other.integration.proceduralattachment.core.EmptyProcedurePayload.EMPTY_PROCEDURE_PAYLOAD;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.myAssert;
 import static java.util.Collections.unmodifiableList;
 
 import java.util.Collection;
@@ -19,7 +18,6 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.AbstractExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
@@ -27,24 +25,16 @@ import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
 public class ProceduralAttachmentFactor extends AbstractExpressionFactor {
 	
 	private static final long serialVersionUID = 1L;
-	
-	private ExpressionVariable variable;
+
+	private Variable variable;
 	private Procedure<?> procedure;
+//	private Context context;
 	
-	public ProceduralAttachmentFactor(ExpressionVariable variable, Procedure<?> procedure, Context context) {
+	public ProceduralAttachmentFactor(Variable variable, Procedure<?> procedure, Context context) {
 		super(context);
 		this.variable = variable;
 		this.procedure = procedure;
-	}
-
-	private Expression value;
-	
-	public Expression getProcedureValue() {
-		if (this.value == null) {
-			Object resultValue = procedure.evaluate(EMPTY_PROCEDURE_PAYLOAD);
-			this.value = DefaultSymbol.createSymbol(resultValue);
-		}
-		return this.value;
+//		this.context = context;
 	}
 
 	@Override
@@ -53,6 +43,10 @@ public class ProceduralAttachmentFactor extends AbstractExpressionFactor {
 		return result;
 	}
 
+//	public Context getContext() {
+//		return context;
+//	}
+
 	@Override
 	public List<? extends Variable> getVariables() {
 		return unmodifiableList(list(variable));
@@ -60,10 +54,8 @@ public class ProceduralAttachmentFactor extends AbstractExpressionFactor {
 
 	@Override
 	public Factor multiply(Factor another) {
-		myAssert(another instanceof ExpressionFactor, () -> this.getClass() + ".multiply requires " + ExpressionFactor.class + " argument but got  instance of " + another.getClass());
-		Expression anotherExpression = (ExpressionFactor) another;
-		Expression anotherExpressionWithValue = anotherExpression.replaceAllOccurrences(variable, getProcedureValue(), getContext());
-		ExpressionFactor result = new DefaultExpressionFactor(anotherExpressionWithValue, getContext());
+		Factor factor = makeFactor();
+		Factor result = factor.multiply(another);
 		return result;
 	}
 
@@ -104,33 +96,42 @@ public class ProceduralAttachmentFactor extends AbstractExpressionFactor {
 
 	@Override
 	public Factor add(Factor another) {
-		Factor result = getExpressionFactor().add(another);
+		Factor result = makeFactor().add(another);
 		return result;
 	}
 
 	@Override
 	public Factor invert() {
-		Factor result = getExpressionFactor().invert();
+		Factor result = makeFactor().invert();
 		return result;
 	}
 
 	@Override
 	public Factor max(Collection<? extends Variable> variablesToMaximize) {
-		Factor result = getExpressionFactor().max(variablesToMaximize);
+		Factor result = makeFactor().max(variablesToMaximize);
 		return result;
 	}
 	
-	private ExpressionFactor getExpressionFactor() {
-		ExpressionFactor result = new DefaultExpressionFactor(getInnerExpression(), getContext());
+	private Factor makeFactor() {
+		ExpressionFactor result = new DefaultExpressionFactor(makeExpression(), getContext());
 		return result;
 	}
 
-	@Override
-	protected Expression computeInnerExpression() {
+	protected Expression makeExpression() {
 		Expression result = IfThenElse.make(Equality.make(variable, getProcedureValue()), Expressions.ONE, Expressions.ZERO);
 		return result;
 	}
 	
+	private Expression value;
+
+	public Expression getProcedureValue() {
+		if (this.value == null) {
+			Object resultValue = procedure.evaluate(EMPTY_PROCEDURE_PAYLOAD);
+			this.value = DefaultSymbol.createSymbol(resultValue);
+		}
+		return this.value;
+	}
+
 	@Override
 	public boolean equals(Object another) {
 		boolean result;
@@ -147,5 +148,10 @@ public class ProceduralAttachmentFactor extends AbstractExpressionFactor {
 	public int hashCode() {
 		int result = System.identityHashCode(this);
 		return result;
+	}
+
+	@Override
+	protected Expression computeInnerExpression() {
+		return makeExpression();
 	}
 }
