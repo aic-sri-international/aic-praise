@@ -2,7 +2,6 @@ package com.sri.ai.praise.learning.parameterlearning.representation.expression;
 
 import java.util.List;
 
-import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 import com.sri.ai.praise.learning.parameterlearning.BayesianModel;
 import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
@@ -11,8 +10,8 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 
 	private List<ExpressionBayesianNode> nodes;
 	
-	public ExpressionBayesianModel(List<ExpressionBayesianNode> nodes, Context context) {
-		super(nodes, context);
+	public ExpressionBayesianModel(List<ExpressionBayesianNode> nodes) {
+		super(nodes);
 		this.nodes = nodes;
 	}
 

@@ -41,14 +41,12 @@ import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.AbstractEditableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 
 
@@ -59,10 +57,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
  * @author braz
  *
  */
-public class ExpressionFactorNetwork extends AbstractEditableFactorNetwork {
+public class ExpressionFactorNetwork extends DefaultFactorNetwork {
 	
-	private Context context;
-
 	public static ExpressionFactorNetwork expressionFactorNetwork(String tupleOfFactorExpressions, Context context) {
 		List<Expression> expressions = fromTupleOfExpressionsStringToListOfExpressions(tupleOfFactorExpressions);
 		ExpressionFactorNetwork result = expressionFactorNetwork(expressions, context);
@@ -79,7 +75,7 @@ public class ExpressionFactorNetwork extends AbstractEditableFactorNetwork {
 
 	public static ExpressionFactorNetwork expressionFactorNetwork(List<? extends Expression> factorExpressions, Context context) {
 		List<? extends ExpressionFactor> expressionFactors = fromExpressionsToExpressionFactors(factorExpressions, context);
-		ExpressionFactorNetwork result = new ExpressionFactorNetwork(expressionFactors, context);
+		ExpressionFactorNetwork result = new ExpressionFactorNetwork(expressionFactors);
 		return result;
 	}
 	
@@ -99,17 +95,7 @@ public class ExpressionFactorNetwork extends AbstractEditableFactorNetwork {
 		return result;
 	}
 	
-	public ExpressionFactorNetwork(List<? extends ExpressionFactor> expressionFactors, Context context) {
+	public ExpressionFactorNetwork(List<? extends ExpressionFactor> expressionFactors) {
 		super(expressionFactors);
-		this.context = context;
-	}
-
-	public Context getContext() {
-		return context;
-	}
-
-	@Override
-	public EditableFactorNetwork makeEmptyNetwork() {
-		return new ExpressionFactorNetwork(new ArrayList<>(), context);
 	}
 }

@@ -274,10 +274,10 @@ public class AnytimeExactBPTest {
 		runRodrigos(factorNetwork, query, expected);
 	}
 
-	private void runRodrigos(ExpressionFactorNetwork factorNetwork, Expression query,Expression expected) {
-		Context context = factorNetwork.getContext();
+	private void runRodrigos(ExpressionFactorNetwork factorNetwork, Expression query, Expression expected) {
 		long initialTime = System.currentTimeMillis();
 		ExpressionFactor resultFactor = solveWithExactBP(query, factorNetwork);
+		Context context = resultFactor.getContext();
 		Expression normalizedResult = PRAiSEUtil.normalize(query, resultFactor, context);
 		long finalTime = System.currentTimeMillis();
 		println("ExactBP: " + normalizedResult);

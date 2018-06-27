@@ -43,7 +43,7 @@ public class ProceduralAttachmentFactorTest {
 		
 		factor = new ProceduralAttachmentFactor(variable, procedure, context);
 		
-		network = new ExpressionFactorNetwork(list(factor), context);
+		network = new ExpressionFactorNetwork(list(factor));
 		ExactBP algorithm = new ExactBP(variable, network);
 		queryResult = algorithm.apply();
 		println("Result computed.");

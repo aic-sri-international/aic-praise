@@ -44,7 +44,6 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 
 public class NormalizedExactBP implements Solver {
 
@@ -52,9 +51,8 @@ public class NormalizedExactBP implements Solver {
 	public Expression solve(Problem problem) {
 		ExactBP exactBP = new ExactBP(problem);
 		ExpressionVariable queryVariable = (ExpressionVariable) problem.getQueryVariable();
-		ExpressionFactorNetwork model = (ExpressionFactorNetwork) problem.getModel();
-		Expression unnormalized = (ExpressionFactor) exactBP.apply();
-		Expression normalizedMarginal = normalize(queryVariable, unnormalized, model.getContext());
+		ExpressionFactor unnormalized = (ExpressionFactor) exactBP.apply();
+		Expression normalizedMarginal = normalize(queryVariable, unnormalized, unnormalized.getContext());
 		return normalizedMarginal;
 	}
 

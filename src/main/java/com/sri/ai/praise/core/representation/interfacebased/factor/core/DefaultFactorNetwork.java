@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core;
 
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.List;
@@ -8,9 +9,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableF
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
-public abstract class AbstractEditableFactorNetwork extends AbstractFactorNetwork implements EditableFactorNetwork {
+public class DefaultFactorNetwork extends AbstractFactorNetwork implements EditableFactorNetwork {
 	
-	public AbstractEditableFactorNetwork(List<? extends Factor> factors) {
+	public DefaultFactorNetwork(List<? extends Factor> factors) {
 		super(factors);
 	}
 	
@@ -22,5 +23,10 @@ public abstract class AbstractEditableFactorNetwork extends AbstractFactorNetwor
 	@Override
 	public void add(Factor factor, Variable variable) {
 		this.add(identityWrapper(factor),variable);
+	}
+
+	@Override
+	public EditableFactorNetwork makeEmptyNetwork() {
+		return new DefaultFactorNetwork(list());
 	}
 }
