@@ -59,6 +59,10 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
  */
 public class ExpressionFactorNetwork extends DefaultFactorNetwork {
 	
+	public ExpressionFactorNetwork(List<? extends ExpressionFactor> expressionFactors) {
+		super(expressionFactors);
+	}
+
 	public static ExpressionFactorNetwork expressionFactorNetwork(String tupleOfFactorExpressions, Context context) {
 		List<Expression> expressions = fromTupleOfExpressionsStringToListOfExpressions(tupleOfFactorExpressions);
 		ExpressionFactorNetwork result = expressionFactorNetwork(expressions, context);
@@ -93,9 +97,5 @@ public class ExpressionFactorNetwork extends DefaultFactorNetwork {
 			 result = new DefaultExpressionFactor(expression, context);
 		}
 		return result;
-	}
-	
-	public ExpressionFactorNetwork(List<? extends ExpressionFactor> expressionFactors) {
-		super(expressionFactors);
 	}
 }
