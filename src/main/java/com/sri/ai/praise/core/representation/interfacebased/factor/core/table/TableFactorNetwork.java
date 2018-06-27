@@ -2,7 +2,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
 
 import static com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil.genericVariableName;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.copyToSubTableFactor;
-import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,11 +23,7 @@ import com.sri.ai.util.Util;
 public class TableFactorNetwork extends AbstractEditableFactorNetwork {
 	
 	public TableFactorNetwork(List<? extends TableFactor> factors) {
-		for(TableFactor f:factors) {
-			for(TableVariable v: f.getVariables()) {
-				this.add(identityWrapper(f), v);
-			}
-		}
+		super(factors);
 	}
 	
 	public TableFactorNetwork(UAIModel model) {

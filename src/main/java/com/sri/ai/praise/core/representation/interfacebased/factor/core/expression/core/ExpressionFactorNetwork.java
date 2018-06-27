@@ -40,7 +40,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.express
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
-import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +48,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.AbstractEditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 
@@ -102,27 +99,9 @@ public class ExpressionFactorNetwork extends AbstractEditableFactorNetwork {
 		return result;
 	}
 	
-	public ExpressionFactorNetwork(List<? extends ExpressionFactor> factorExpressions, Context context) {
-		indexFactorsAndVariables(factorExpressions, context);
+	public ExpressionFactorNetwork(List<? extends ExpressionFactor> expressionFactors, Context context) {
+		super(expressionFactors);
 		this.context = context;
-	}
-	
-	// TODO: abstract this indexing to parent, since it works for any type of factors and variables
-	
-	private void indexFactorsAndVariables(List<? extends Factor> factors, Context context) {
-		for (Factor factor : factors) {
-			indexFactorAndItsVariables(factor);
-		}
-	}
-
-	private void indexFactorAndItsVariables(Factor factor) {
-		for (Variable variable : factor.getVariables()) {
-			indexFactorAndVariable(factor, variable);
-		}
-	}
-
-	private void indexFactorAndVariable(Factor factor, Variable variable) {
-		this.add(identityWrapper(factor), variable);
 	}
 
 	public Context getContext() {
