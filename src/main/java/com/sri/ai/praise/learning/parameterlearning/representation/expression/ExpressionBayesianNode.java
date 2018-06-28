@@ -360,7 +360,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 				expressionWithNewParameters = expressionWithNewParameters.replaceAllOccurrences(parameter, learnedParameterValue, context);
 			}
 			
-			expressionWithNewParameters = context.evaluate(expressionWithNewParameters);
+			// expressionWithNewParameters = context.evaluate(expressionWithNewParameters);
 			
 			if(iterationCount == 0) {
 				previousIfThenElse = newExpression = expressionWithNewParameters;
@@ -411,10 +411,10 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		LinkedHashSet<Expression> parameters = Util.set(param1, param2);
 		parameters.add(param3);
 		
-		Expression E = parse("if Child < 5 then Param1 else Param2");
+		// Expression E = parse("if Child < 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
-		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
+		Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
 		
 		println("E = " + E + "\n");
 		
