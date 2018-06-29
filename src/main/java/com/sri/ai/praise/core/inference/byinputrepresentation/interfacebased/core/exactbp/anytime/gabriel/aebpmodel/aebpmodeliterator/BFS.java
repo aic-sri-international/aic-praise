@@ -1,7 +1,5 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.aebpmodel.aebpmodeliterator;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -10,7 +8,6 @@ import java.util.Set;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.aebpmodel.AEBPModel;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.aebptree.AEBPFactorTreeNode;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.aebptree.AEBPTreeNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.aebptree.AEBPVariableTreeNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -18,7 +15,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 public class BFS extends AbstractAEBPTreeIterator{
 	private Set<Factor> visited = new LinkedHashSet<>();
 	private Queue<AEBPFactorTreeNode> queue = new LinkedList<>();
-	private HashMap<Object, AEBPTreeNode<?, ?>> fromNodeToPartition = new LinkedHashMap<>();
 	
 	public BFS(AEBPModel model) {
 		super(model);

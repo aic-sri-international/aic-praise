@@ -53,7 +53,9 @@ public class AnytimeExactBPTest2 {
 	
 	private static AEBPTestingDataFrame solveWithBothMethods(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
 			String PGMName) {
-		AEBPTestingDataFrame result = solveWithRodrigos(query, factorNetwork, maximunTimeInSeconds, PGMName);
+		//AEBPTestingDataFrame result = solveWithRodrigos(query, factorNetwork, maximunTimeInSeconds, PGMName);
+		AEBPTestingDataFrame result = solveWithGabrielsNotIncremental(query, factorNetwork, maximunTimeInSeconds, PGMName);
+		
 		AEBPTestingDataFrame gabriels = solveWithGabriels(query, factorNetwork, maximunTimeInSeconds, PGMName);
 		
 		for (int i = 0; i < gabriels.getNumberOfRows(); i++) {
@@ -76,6 +78,12 @@ public class AnytimeExactBPTest2 {
 		AEBP aebp = new AEBP(factorNetwork, query);
 		return solveAndStoreInDataFrame(aebp,query,maximunTimeInSeconds,0,PGMName,"Gabriel's");
 	}
+	private static AEBPTestingDataFrame solveWithGabrielsNotIncremental(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
+			String PGMName) {
+		println("\nSolving with Gabriel's Anytime (not incremental!!!)\n");
+		AEBP aebp = new AEBP(factorNetwork, query,(v)->false,false);
+		return solveAndStoreInDataFrame(aebp,query,maximunTimeInSeconds,0,PGMName,"Gabriel's (not incremental)");
+	}
 
 	private static AEBPTestingDataFrame solveAndStoreInDataFrame(Iterator<? extends Approximation<Factor>> anytimeEBPIterator, TableVariable query, 
 			double maximunTimeInSeconds,
@@ -86,7 +94,7 @@ public class AnytimeExactBPTest2 {
 		int i = 0;
 		Double currentTotalTime = .0;
 		long startTime = System.currentTimeMillis();
-		while ( currentTotalTime < maximunTimeInSeconds && anytimeEBPIterator.hasNext()) {
+		while (currentTotalTime < maximunTimeInSeconds && anytimeEBPIterator.hasNext()) {
 			println(++i);
 			Long currentTime = System.currentTimeMillis();
 			Polytope result = (Polytope) anytimeEBPIterator.next();
@@ -118,6 +126,7 @@ public class AnytimeExactBPTest2 {
 			if(query.getCardinality()== 2) {
 				println("query Cardinality: " + query.getCardinality());
 				println("max: " + maxProba.get(0) + " | min: "+ (1-maxProba.get(1)));
+				println("max - min:" + (maxProba.get(0) - 1 + maxProba.get(1) ));
 				result = new Pair<>(maxProba,list(1-maxProba.get(1),1-maxProba.get(0)));
 			}
 			else {
@@ -313,5 +322,6 @@ public class AnytimeExactBPTest2 {
 		AEBPTestingDataFrame df = solveWithBothMethods(pairQueryNet.first, pairQueryNet.second, maxTime,fileName.split(".uai")[0]);
 		AEBPRPlotting.plottingTheInterval(df,true, fileName.split(".uai")[0] + ".pdf");
 		AEBPRPlotting.plottingTheInterval(df,true, fileName.split(".uai")[0] + ".pdf");
+		df.printToCsv(fileName.split(".uai")[0] + ".csv");
 	}
 }
