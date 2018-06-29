@@ -118,6 +118,10 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	 */
 	@Override
 	public void incrementCountForChildAndParentsAssignment(List<? extends Object> childAndParentsValues) {
+		if(thereAreNoParametersToLearn()) { // in this case there are no parameters to learn, we have a fixed prior probability for the node for example, then there is no point on incrementing (we would have errors since we have no families and so on)
+			return;
+		}
+		
 		verifyIfInputHasExpectedTypeAndSize(childAndParentsValues);
 		LinkedList<Expression> parentsValues = extractParentsValuesFrom((List<Expression>) childAndParentsValues);
 		
@@ -337,6 +341,9 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 			}
 		}
 		
+		println("Node: " + this.child);
+		println("parentsValues: " + parentsValues);
+		
 		throw new Error("Family for parentsValues not found");
 	}
 	
@@ -392,6 +399,10 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 				finalParameterValues.put(new Pair<Family, Expression>(family, parameter), finalParameterValue);
 			}
 		}
+	}
+	
+	private boolean thereAreNoParametersToLearn() {
+		return this.parameters.size() == 0;
 	}
 	
 	public static void main(String[] args) {
