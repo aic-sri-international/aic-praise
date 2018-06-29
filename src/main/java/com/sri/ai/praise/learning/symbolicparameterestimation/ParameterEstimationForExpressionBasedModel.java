@@ -3,10 +3,8 @@ package com.sri.ai.praise.learning.symbolicparameterestimation;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.expresso.helper.Expressions.freeVariables;
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
-import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIAL;
-import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
+import static com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation.applySigmoidTrick;
 import static org.apache.commons.math3.util.FastMath.exp;
 
 import java.util.ArrayList;
@@ -40,7 +38,7 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.core.Def
  *
  */
 
-public class ParameterEstimationForExpressionBasedModel {
+public class ParameterEstimationForExpressionBasedModel implements ParameterEstimation {
 
 	public ExpressionBasedModel model;
 	public List<Expression> evidences;
@@ -187,8 +185,12 @@ public class ParameterEstimationForExpressionBasedModel {
 			Expression marginal = solver.solve(query, model);
 
 			marginal = applySigmoidTrick(marginal, context);
+			
+			System.out.println(marginal);
 
 			Expression marginalFunction = convertExpression(marginal);
+			
+			System.out.println(marginalFunction);
 			
 			Set<Expression> listOfVariables = freeVariables(marginalFunction, context);
 			if (listOfVariables.isEmpty()) {
@@ -220,27 +222,14 @@ public class ParameterEstimationForExpressionBasedModel {
 	}
 
 	/**
-	 * Sigmoid trick to have the parameters and result between 0 and 1.
-	 *
-	 */
-	private Expression applySigmoidTrick(Expression marginal, Context context) {
-		Set<Expression> variablesInExpression = freeVariables(marginal, context);
-		for (Expression arg : variablesInExpression) {
-			Expression argChanged = apply(DIVISION, 1, apply(PLUS, 1, apply(EXPONENTIAL, apply(MINUS, arg))));
-			marginal = marginal.replaceAllOccurrences(arg, argChanged, context);
-		}
-		return marginal;
-	}
-
-	/**
 	 * Method to have the right form of Expression for the optimization. For
 	 * example, convert "if earthquake then Alpha else 1-Alpha" into "Alpha".
 	 *
 	 */
-	private Expression convertExpression(Expression marginal) {
+	public Expression convertExpression(Expression marginal) {
 		try {
 			String input = marginal.toString();
-			input = input.substring(input.indexOf("then") + 5);
+			input = input.substring(input.lastIndexOf("then") + 5);
 			String resultString = input.split("else")[0];
 			Expression result = parse(resultString);
 			return result;

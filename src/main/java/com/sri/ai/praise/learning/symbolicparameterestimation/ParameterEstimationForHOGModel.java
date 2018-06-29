@@ -1,5 +1,7 @@
 package com.sri.ai.praise.learning.symbolicparameterestimation;
 
+import static com.sri.ai.expresso.helper.Expressions.parse;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +16,7 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 
-public class ParameterEstimationForHOGModel {
+public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	
 	public String stringModel;
 	public HOGModel hogmModel;
@@ -146,5 +148,20 @@ public class ParameterEstimationForHOGModel {
 		String result = stringModelToModify;
 		return result;
 		
+	}
+	
+	@Override
+	public Expression convertExpression(Expression marginal) {
+		try {
+			String input = marginal.toString();
+			input = input.substring(input.indexOf("then") + 5);
+			String resultString = input.split("else")[0];
+			Expression result = parse(resultString);
+			return result;
+		}
+		catch(Exception e){
+			System.out.println("Impossible to convert the marginal : " + marginal);
+			return marginal;
+		}
 	}
 }
