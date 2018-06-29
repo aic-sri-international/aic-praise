@@ -284,7 +284,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		return variablesToBeSummedOut;
 	}
 
-	private boolean isFreeVariable(Variable variable) {
+	protected boolean isFreeVariable(Variable variable) {
 		boolean result = 
 				isEqualToRoot(variable)
 				||
