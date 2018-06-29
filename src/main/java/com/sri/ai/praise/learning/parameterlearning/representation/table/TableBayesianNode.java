@@ -4,9 +4,11 @@ import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
@@ -33,25 +35,25 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		this.allVariables = this.getVariables();
 	}
 	
-	public TableBayesianNode(TableVariable child, ArrayList<TableVariable> parents) {
-		super(mergeElementsIntoOneList(child, parents));
-		this.child = child;
-		this.parents = parents;
+	public TableBayesianNode(TableVariable child, List<TableBayesianNode> parentsNodes) {
+		super(mergeElementsIntoOneList(child, parentsNodes.stream().map(parentNode -> parentNode.getChildVariable()).collect(Collectors.toList())));
 		this.allVariables = this.getVariables();
+		this.child = child;
+		this.parents = (ArrayList<TableVariable>) parentsNodes.stream().map(parent -> parent.getChildVariable()).collect(Collectors.toList());
 	}
 
 	@Override
-	public Variable getChild() {
+	public TableVariable getChildVariable() {
 		return child;
 	}
 
 	@Override
-	public List<? extends Variable> getParents() {
+	public List<TableVariable> getParentsVariables() {
 		return parents;
 	}
 	
 	@Override
-	public List<? extends Variable> getAllVariables() {
+	public List<TableVariable> getAllVariables() {
 		return allVariables;
 	}
 
@@ -118,7 +120,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		return countForThatParentsAssignment;
 	}
 	
-	private static <T> ArrayList<T> mergeElementsIntoOneList(T firstElement, List<T> otherElements) {
+	private static <T> ArrayList<T> mergeElementsIntoOneList(T firstElement, Collection<T> otherElements) {
 		ArrayList<T> allElements = new ArrayList<>(otherElements.size() + 1);
 		allElements.add(firstElement);
 		allElements.addAll(otherElements);
@@ -130,20 +132,18 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		TableVariable sun = new TableVariable("sun", 2);
 		TableVariable cold = new TableVariable("cold", 2);
 	    
-	    ArrayList<TableVariable> parentsOfSick = new ArrayList<TableVariable>();
-	    parentsOfSick.add(sun);
-	    parentsOfSick.add(cold);
-	    
-	    TableBayesianNode node = new TableBayesianNode(sick, parentsOfSick);
-	    node.setInitialCountsForAllPossibleChildAndParentsAssignments();
+	    TableBayesianNode sunNode = new TableBayesianNode(sun, list());
+	    TableBayesianNode coldNode = new TableBayesianNode(cold, list());
+	    TableBayesianNode sickNode = new TableBayesianNode(sick, list(sunNode, coldNode));
+	    sickNode.setInitialCountsForAllPossibleChildAndParentsAssignments();
 	    
 	    ArrayList<Integer> childAndParentsValues = new ArrayList<Integer>();
 	    childAndParentsValues.add(1);
 	    childAndParentsValues.add(0);
 	    childAndParentsValues.add(1);
 	    
-	    node.incrementCountForChildAndParentsAssignment(childAndParentsValues);
-	    node.normalizeParameters();
+	    sickNode.incrementCountForChildAndParentsAssignment(childAndParentsValues);
+	    sickNode.normalizeParameters();
 	    
 	    LinkedHashMap<TableVariable, Integer> variablesAndTheirValues = new LinkedHashMap<TableVariable, Integer>();
 	    variablesAndTheirValues.put(sick, 1);
@@ -151,7 +151,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 	    variablesAndTheirValues.put(cold, 1);
 	    
 	    System.out.println("Testing entries:");
-	    System.out.println("entryFor(" + variablesAndTheirValues.get(sick) + ", [" + variablesAndTheirValues.get(sun) + ", " + variablesAndTheirValues.get(cold) + "]) = " + node.getEntryFor(variablesAndTheirValues));
+	    System.out.println("entryFor(" + variablesAndTheirValues.get(sick) + ", [" + variablesAndTheirValues.get(sun) + ", " + variablesAndTheirValues.get(cold) + "]) = " + sickNode.getEntryFor(variablesAndTheirValues));
 	    // System.out.println("all entries: " + node.getEntries());
 	}
 
