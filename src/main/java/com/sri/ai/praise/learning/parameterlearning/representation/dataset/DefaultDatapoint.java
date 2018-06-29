@@ -29,7 +29,7 @@ public class DefaultDatapoint implements Datapoint {
 	@Override
 	public Object getValueOfVariable(Variable variable) {
 		if(!variablesAndTheirValues.containsKey(variable)) {
-			throw new Error("Variable" + variable + "is not present on the datatpoint.");
+			throw new Error("Variable " + variable + " is not present on the datatpoint.");
 		}
 		return variablesAndTheirValues.get(variable);
 	}

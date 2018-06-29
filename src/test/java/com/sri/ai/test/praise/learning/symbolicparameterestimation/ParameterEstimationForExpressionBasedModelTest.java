@@ -140,6 +140,24 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
 		assertEquals(expected, mapResult);
+		
+		//////////
+		
+		queryExpressionList.clear();
+		queryExpressionList.add(parse("earthquake and not burglary"));
+
+		expected.put(parse("Alpha"), 1.0);
+		expected.put(parse("Beta"), 6.289892248981177E-23);
+
+		mapResult = runTestExpressionBased(queryExpressionList,
+				 expressionBasedModel, new double[] {0,0});
+
+		System.out.println("expected : " + expected);
+		System.out.println("result : " + mapResult);
+		assertEquals(expected, mapResult);
+		
+		//////////
+		
 
 		// Test with another model
 		

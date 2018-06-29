@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 import com.sri.ai.praise.learning.parameterlearning.BayesianModel;
-import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
 
 public class ExpressionBayesianModel extends ExpressionFactorNetwork implements BayesianModel {
 
@@ -16,7 +15,7 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 	}
 
 	@Override
-	public List<? extends BayesianNode> getNodes() {
+	public List<ExpressionBayesianNode> getNodes() {
 		return nodes;
 	}
 	
