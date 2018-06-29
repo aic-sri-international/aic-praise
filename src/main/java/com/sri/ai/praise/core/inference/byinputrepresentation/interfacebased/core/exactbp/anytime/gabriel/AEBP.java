@@ -46,7 +46,7 @@ public class AEBP extends EZIterator<Polytope> {
 		cleverTrueBruteForceFalse = true;
 	}
 	
-	public AEBP(EditableFactorNetwork network, Variable query, Predicate<Polytope> boxIt,boolean cleverTrueBruteForceFalse) {
+	public AEBP(EditableFactorNetwork network, Variable query, Predicate<Polytope> boxIt, boolean cleverTrueBruteForceFalse) {
 		this(network, query, model -> new BFS(model), boxIt,cleverTrueBruteForceFalse);
 	}
 	public AEBP(EditableFactorNetwork network, Variable query) {

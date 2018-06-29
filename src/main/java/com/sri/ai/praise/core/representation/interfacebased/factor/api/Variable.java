@@ -39,6 +39,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.api;
 
 import java.util.List;
 
-public interface Variable{
+public interface Variable {
 	List<? extends Object> getValues();
 }
