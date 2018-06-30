@@ -54,6 +54,7 @@ public class AnytimeExactBPTest3 {
 		
 		Predicate<Polytope> criteria = p-> ((IntensionalConvexHullOfFactors)p).getIndices().size()>10;
 		AEBP aebp = new AEBP(factorNetwork, query, criteria,true );
+
 		/*while(aebp.hasNext()) {
 			Polytope p = aebp.next();
 			println(p);

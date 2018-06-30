@@ -42,13 +42,13 @@ import com.sri.ai.praise.core.representation.classbased.featurebased.FeatureBase
  *
  */
 
-public class RegularParameterEstimation implements ParameterEstimation {
+public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 	
 	public ExpressionBasedModel expressionBasedModel;
 	public List<Expression> parameters;
 	public List<Expression> evidences;
 	
-	public RegularParameterEstimation(ExpressionBasedModel expressionBasedModel, List<Expression> evidences) {
+	public RegularSymbolicParameterEstimation(ExpressionBasedModel expressionBasedModel, List<Expression> evidences) {
 		this.expressionBasedModel = expressionBasedModel;
 		this.parameters = findParameters(expressionBasedModel);
 		this.evidences = evidences;

@@ -33,7 +33,6 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Plus;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
@@ -105,7 +104,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		for(Family family : families) {
 			familyCountFromDataset.put(family, Expressions.ZERO);
 			for(Expression parameter : family.parametersThatCanBeGenerated) {
-				Expression numberOfChildValuesThatMakeExpressionEqualsToThisParameter = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
+				Expression numberOfChildValuesThatMakeExpressionEqualsToThisParameter = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(parameter, family.condition);
 				parameterCountFromDataset.put(new Pair<Family, Expression>(family, parameter), numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
 				
 				incrementFamilyCount(family, numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
@@ -141,6 +140,10 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	
 	public LinkedHashSet<Family> getFamilies() {
 		return this.families;
+	}
+	
+	public Context getContext() {
+		return this.context;
 	}
 	
 	/**
@@ -278,9 +281,11 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		familyCountFromDataset.put(family, newFamilyCount);
 	}
 
-	private Expression getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(Expression parameter) {
-		Expression multisetOfChildValuesThatMakeExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(expression, parameter));
-		return apply(CARDINALITY, multisetOfChildValuesThatMakeExpressionEqualsToThisParameter);
+	private Expression getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(Expression parameter, Expression condition) {
+		Expression multisetOfChildValuesThatMakeExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(And.make(expression, condition), parameter));
+		Expression numberOfChildValues = apply(CARDINALITY, multisetOfChildValuesThatMakeExpressionEqualsToThisParameter);
+		
+		return numberOfChildValues;
 	}
 	
 	private void verifyIfInputHasExpectedTypeAndSize(List<? extends Object> childAndParentsValues) throws Error {
@@ -392,7 +397,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 				Expression parameterCount = parameterCountFromDataset.get(new Pair<Family, Expression>(family, parameter));
 				
 				Expression parameterCountDividedByFamilyCount = Division.make(parameterCount, familyCount);
-				Expression normalizationFactor = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
+				Expression normalizationFactor = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(parameter, family.condition);
 				Expression finalParameterValue = Division.make(parameterCountDividedByFamilyCount, normalizationFactor);
 				finalParameterValue = context.evaluate(finalParameterValue);
 				
