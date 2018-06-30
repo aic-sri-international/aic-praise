@@ -72,7 +72,7 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 	}
 	
 	public DefaultExpressionBasedModel(
-			List<Expression> factors,
+			List<? extends Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
@@ -93,7 +93,7 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 	}
 	
 	public DefaultExpressionBasedModel(
-			List<Expression> factors,
+			List<? extends Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
