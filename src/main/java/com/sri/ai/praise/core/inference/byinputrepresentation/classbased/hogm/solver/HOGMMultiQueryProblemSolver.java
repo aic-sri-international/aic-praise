@@ -41,6 +41,7 @@ import static com.sri.ai.util.Util.list;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
@@ -52,6 +53,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.pa
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
 
 @Beta
 public class HOGMMultiQueryProblemSolver {
@@ -64,6 +66,7 @@ public class HOGMMultiQueryProblemSolver {
 	private HOGMSingleQueryProblemSolver problemSolver;
 	private List<HOGMProblemError> modelErrors = new ArrayList<>();
 	private List<HOGMProblemResult> results = new ArrayList<>();
+	private Map<String, Procedure> proceduralAttachments;
 	
 	public HOGMMultiQueryProblemSolver(String model, String query) {
 		this(model, list(query), defaultSolverClass);
@@ -81,6 +84,14 @@ public class HOGMMultiQueryProblemSolver {
 		this.solverClass = solverClass;
 		initializeModel(modelString);
         processAllQueries(queries);
+	}
+	
+	public void setProceduralAttachments(Map<String, Procedure> proceduralAttachments) {
+		this.proceduralAttachments = proceduralAttachments;
+	}
+
+	public Map<String, Procedure> getProceduralAttachments() {
+		return this.proceduralAttachments;
 	}
 
 	private void initializeModel(String modelString) {
