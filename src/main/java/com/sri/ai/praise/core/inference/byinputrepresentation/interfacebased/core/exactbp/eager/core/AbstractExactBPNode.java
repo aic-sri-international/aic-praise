@@ -61,6 +61,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
+import com.sri.ai.util.computation.treecomputation.api.EagerTreeComputationEvaluator;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -214,6 +215,11 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	}
 
 	@Override
+	public EagerTreeComputationEvaluator<Factor> getEvaluator() {
+		return this::function;
+	}
+	
+	//@Override
 	public Factor function(List<Factor> incomingMessages) {
 		Factor product = computeProductOfFactorsAtRootAndIncomingMessages(incomingMessages);
 		List<? extends Variable> allFreeVariablesInProduct = product.getVariables();
