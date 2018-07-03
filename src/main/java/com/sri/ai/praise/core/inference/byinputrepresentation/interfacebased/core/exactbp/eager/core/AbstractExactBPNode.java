@@ -215,11 +215,10 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	}
 
 	@Override
-	public EagerTreeComputationEvaluator<Factor> getEvaluator() {
+	public EagerTreeComputationEvaluator<Factor> makeNewEvaluator() {
 		return this::function;
 	}
 	
-	//@Override
 	public Factor function(List<Factor> incomingMessages) {
 		Factor product = computeProductOfFactorsAtRootAndIncomingMessages(incomingMessages);
 		List<? extends Variable> allFreeVariablesInProduct = product.getVariables();
