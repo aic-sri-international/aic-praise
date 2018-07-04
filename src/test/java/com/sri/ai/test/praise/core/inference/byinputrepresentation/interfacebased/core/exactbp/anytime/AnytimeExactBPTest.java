@@ -64,13 +64,13 @@ public class AnytimeExactBPTest {
 		String queryVariableString;
 		Expression expected;
 
-		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
-		factorNetworkString = "tuple("
-				+ "if P then if I = 1 then 2 else 3 else if I = 1 then 1 else 2"
-				+ ")";
-		queryVariableString = "I";
-		expected = parse("if I = 1 then 3 else 5");
-		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
+//		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
+//		factorNetworkString = "tuple("
+//				+ "if P then if I = 1 then 2 else 3 else if I = 1 then 1 else 2"
+//				+ ")";
+//		queryVariableString = "I";
+//		expected = parse("if I = 1 then 3 else 5");
+//		runTest(variableAndTypes, factorNetworkString, queryVariableString, expected, true, true);
 
 		variableAndTypes = new String[]{"I", "1..10", "P", "Boolean"};
 		factorNetworkString = "("

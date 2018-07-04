@@ -66,14 +66,14 @@ public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Facto
 	 * which in turn determines which ones must be summed out).
 	 * @return
 	 */
-	List<? extends Variable> getSummedOutVariables(Collection<? extends Variable> allFreeVariablesInSummand);
+	List<? extends Variable> determinedVariablesToBeSummedOut(Collection<? extends Variable> allFreeVariablesInSummand);
 	
 	/**
 	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
 	 */
 	List<? extends Factor> getFactorsAtRoot();
 
-	Factor sumOut(List<? extends Variable> variablesToBeSummedOut, Factor factor);
+	Factor sumOutWithBookkeeping(List<? extends Variable> variablesToBeSummedOut, Factor factor);
 
 	@Override
 	ArrayList<ExactBPNode<SubRootType,RootType>> getSubs();

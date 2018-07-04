@@ -149,7 +149,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	public Approximation<Factor> function(List<Approximation<Factor>> subsApproximations) {
 		Polytope product = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
 		Collection<? extends Variable> freeVariables = product.getFreeVariables();
-		List<? extends Variable> variablesSummedOut = getBase().getSummedOutVariables(freeVariables);
+		List<? extends Variable> variablesSummedOut = getBase().determinedVariablesToBeSummedOut(freeVariables);
 		Approximation<Factor> result = sumOut(variablesSummedOut, product);
 		return result;
 	}

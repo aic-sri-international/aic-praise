@@ -49,6 +49,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.cor
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.util.computation.treecomputation.api.TreeComputationEvaluator;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -88,5 +89,13 @@ public class ExactBPNodeFromVariableToFactor extends AbstractExactBPNode<Variabl
 	@Override
 	public Variable getMessageVariable() {
 		return getRoot();
+	}
+
+	@Override
+	public TreeComputationEvaluator<Factor> makeNewEvaluator() {
+		return new EagerExactBPNodeEvaluator(
+				this::getFactorsAtRoot, 
+				this::determinedVariablesToBeSummedOut, 
+				(variablesToBeSummedOut, product) -> sumOutWithBookkeeping(variablesToBeSummedOut, product));
 	}
 }

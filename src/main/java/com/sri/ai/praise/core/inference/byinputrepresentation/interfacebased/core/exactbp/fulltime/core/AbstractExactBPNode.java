@@ -37,13 +37,11 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor.multiply;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.notNullAndEquals;
-import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.union;
@@ -51,7 +49,6 @@ import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.unionOfAllButT
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -61,7 +58,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
-import com.sri.ai.util.computation.treecomputation.api.EagerTreeComputationEvaluator;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -212,22 +208,40 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	}
 
 	@Override
-	public EagerTreeComputationEvaluator<Factor> makeNewEvaluator() {
-		return new EagerExactBPNodeEvaluator(
-				this::computeProductOfFactorsAtRootAndIncomingMessages, 
-				this::getSummedOutVariables, 
-				(variablesToBeSummedOut, product) -> sumOut(variablesToBeSummedOut, product));
+	public List<? extends Variable> determinedVariablesToBeSummedOut(Collection<? extends Variable> variablesInSummand) {
+		List<? extends Variable> variablesToBeSummedOut = collectToList(variablesInSummand, n -> ! isFreeVariable((Variable) n));
+		return variablesToBeSummedOut;
 	}
-	
-	/**
-	 * Returns the product of given incoming messages and the factor at root, if there is any. 
-	 * @param incomingMessages
-	 * @return
-	 */
-	public Factor computeProductOfFactorsAtRootAndIncomingMessages(List<? extends Factor> incomingMessages) {
-		Iterator<Factor> allFactors = nestedIterator(getFactorsAtRoot(), incomingMessages);
-		Factor product = multiply(allFactors);
-		return product;
+
+	private boolean isFreeVariable(Variable variable) {
+		boolean result = 
+				isEqualToRoot(variable)
+				||
+				isEqualToParentIfThereIsOne(variable)
+				||
+				isParameter(variable)
+				||
+				isInExternalFactors(variable);
+		return result;
+	}
+
+	private boolean isEqualToRoot(Variable variable) {
+		boolean result = getRoot().equals(variable);
+		return result;
+	}
+
+	private boolean isEqualToParentIfThereIsOne(Variable variable) {
+		boolean result = notNullAndEquals(getParent(), variable);
+		return result;
+	}
+
+	private boolean isParameter(Variable variable) {
+		return isParameterPredicate.test(variable);
+	}
+
+	private boolean isInExternalFactors(Variable variable) {
+		boolean result = excludedFactors.thereIsAnElementSatisfying(f -> f.contains(variable));
+		return result;
 	}
 
 	/**
@@ -238,7 +252,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	 * @return
 	 */
 	@Override
-	public Factor sumOut(List<? extends Variable> variablesToBeSummedOut, Factor factor) {
+	public Factor sumOutWithBookkeeping(List<? extends Variable> variablesToBeSummedOut, Factor factor) {
 		Factor result = factor.sumOut(variablesToBeSummedOut);
 		printTracingInformation(factor, variablesToBeSummedOut, result);
 		return result;
@@ -273,43 +287,6 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		if (debug) {
 			Util.println(message.apply());
 		}
-	}
-
-	@Override
-	public List<? extends Variable> getSummedOutVariables(Collection<? extends Variable> allFreeVariablesInSummand) {
-		List<? extends Variable> variablesToBeSummedOut = collectToList(allFreeVariablesInSummand, n -> ! isFreeVariable((Variable) n));
-		return variablesToBeSummedOut;
-	}
-
-	private boolean isFreeVariable(Variable variable) {
-		boolean result = 
-				isEqualToRoot(variable)
-				||
-				isEqualToParentIfThereIsOne(variable)
-				||
-				isParameter(variable)
-				||
-				isInExternalFactors(variable);
-		return result;
-	}
-
-	private boolean isEqualToRoot(Variable variable) {
-		boolean result = getRoot().equals(variable);
-		return result;
-	}
-
-	private boolean isEqualToParentIfThereIsOne(Variable variable) {
-		boolean result = notNullAndEquals(getParent(), variable);
-		return result;
-	}
-
-	private boolean isParameter(Variable variable) {
-		return isParameterPredicate.test(variable);
-	}
-
-	private boolean isInExternalFactors(Variable variable) {
-		boolean result = excludedFactors.thereIsAnElementSatisfying(f -> f.contains(variable));
-		return result;
 	}
 
 	@Override
