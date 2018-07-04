@@ -35,58 +35,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core;
-
-import static com.sri.ai.util.Util.collectToArrayList;
-import static com.sri.ai.util.Util.list;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.util.livesets.api.LiveSet;
-import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
+import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
-public class ExactBPNodeFromFactorToVariable extends AbstractExactBPNode<Factor,Variable> {
+public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Factor> {
 	
-	protected ExactBPNodeFromFactorToVariable(
-			Factor root, 
-			Variable parent, 
-			LiveSet<Factor> excludedFactors, 
-			RedirectingLiveSet<Factor> includedFactors, 
-			FactorNetwork model, 
-			Predicate<Variable> isParameterPredicate) {
-		
-		super(root, parent, excludedFactors, includedFactors, model, isParameterPredicate);
-	}
+	SubRootType getParent();
+
+	RootType getRoot();
+	
+	/**
+	 * Returns the {@link Variable} over which the message coming from this algorithm is defined;
+	 * effectively, this is the root if this is rooted on a variable, and the parent, if any, otherwise.
+	 * @return
+	 */
+	Variable getMessageVariable();
+	
+	/**
+	 * Given the product of incoming messages and factor at root,
+	 * returns a list of indices being summed out at the root level,
+	 * based on the overall tree computation constructed so far
+	 * (this determines which indices are external cutset indices and which ones are internal ones,
+	 * which in turn determines which ones must be summed out).
+	 * @return
+	 */
+	List<? extends Variable> getSummedOutVariables(Collection<? extends Variable> allFreeVariablesInSummand);
+	
+	/**
+	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
+	 */
+	List<? extends Factor> getFactorsAtRoot();
+
+	Factor sumOut(List<? extends Variable> variablesToBeSummedOut, Factor factor);
 
 	@Override
-	protected ExactBPNode<Variable,Factor> makeSubExactBP(Variable subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPNodeFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isParameterPredicate);
-	}
+	ArrayList<ExactBPNode<SubRootType,RootType>> getSubs();
 
-	@Override
-	protected ArrayList<? extends Variable> makeSubsRoots() {
-		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> ! n.equals(parent));
-		return result;
-	}
-
-	protected Collection<? extends Variable> getRootNeighbors() {
-		return getFactorNetwork().getNeighbors(getRoot());
-	}
-
-	@Override
-	public List<Factor> getFactorsAtRoot() {
-		return list(getRoot());
-	}
-
-	@Override
-	public Variable getMessageVariable() {
-		return getParent();
-	}
 }

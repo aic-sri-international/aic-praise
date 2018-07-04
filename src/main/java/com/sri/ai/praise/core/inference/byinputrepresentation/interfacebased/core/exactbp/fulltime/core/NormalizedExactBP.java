@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, SRI International
+ * Copyright (c) 2013, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-praise nor the names of its
+ * Neither the name of the aic-expresso nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,47 +35,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.api;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 
-public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Factor> {
-	
-	SubRootType getParent();
-
-	RootType getRoot();
-	
-	/**
-	 * Returns the {@link Variable} over which the message coming from this algorithm is defined;
-	 * effectively, this is the root if this is rooted on a variable, and the parent, if any, otherwise.
-	 * @return
-	 */
-	Variable getMessageVariable();
-	
-	/**
-	 * Given the product of incoming messages and factor at root,
-	 * returns a list of indices being summed out at the root level,
-	 * based on the overall tree computation constructed so far
-	 * (this determines which indices are external cutset indices and which ones are internal ones,
-	 * which in turn determines which ones must be summed out).
-	 * @return
-	 */
-	List<? extends Variable> getSummedOutVariables(Collection<? extends Variable> allFreeVariablesInSummand);
-	
-	/**
-	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
-	 */
-	List<? extends Factor> getFactorsAtRoot();
-
-	Factor sumOut(List<? extends Variable> variablesToBeSummedOut, Factor factor);
+public class NormalizedExactBP implements Solver {
 
 	@Override
-	ArrayList<ExactBPNode<SubRootType,RootType>> getSubs();
+	public Expression solve(Problem problem) {
+		ExactBP exactBP = new ExactBP(problem);
+		ExpressionVariable queryVariable = (ExpressionVariable) problem.getQueryVariable();
+		ExpressionFactor unnormalized = (ExpressionFactor) exactBP.apply();
+		Expression normalizedMarginal = normalize(queryVariable, unnormalized, unnormalized.getContext());
+		return normalizedMarginal;
+	}
 
+	@Override
+	public void interrupt() {
+		throw new Error(this.getClass() + ".interrupt not implemented yet");
+	}
 }

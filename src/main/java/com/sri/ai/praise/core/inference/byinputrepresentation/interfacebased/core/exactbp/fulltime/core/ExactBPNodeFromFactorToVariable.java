@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
 import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.list;
@@ -45,48 +45,48 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.api.ExactBPNode;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
-public class ExactBPNodeFromVariableToFactor extends AbstractExactBPNode<Variable, Factor> {
+public class ExactBPNodeFromFactorToVariable extends AbstractExactBPNode<Factor,Variable> {
 	
-	protected ExactBPNodeFromVariableToFactor(
-			Variable root, 
-			Factor parent, 
+	protected ExactBPNodeFromFactorToVariable(
+			Factor root, 
+			Variable parent, 
 			LiveSet<Factor> excludedFactors, 
 			RedirectingLiveSet<Factor> includedFactors, 
-			FactorNetwork factorNetwork, 
+			FactorNetwork model, 
 			Predicate<Variable> isParameterPredicate) {
 		
-		super(root, parent, excludedFactors, includedFactors, factorNetwork, isParameterPredicate);
+		super(root, parent, excludedFactors, includedFactors, model, isParameterPredicate);
 	}
 
 	@Override
-	protected ExactBPNode<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPNodeFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isParameterPredicate);
+	protected ExactBPNode<Variable,Factor> makeSubExactBP(Variable subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
+		return new ExactBPNodeFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isParameterPredicate);
 	}
-	
+
 	@Override
-	protected ArrayList<? extends Factor> makeSubsRoots() {
-		ArrayList<? extends Factor> result = collectToArrayList(getRootNeighbors(), n -> ! excludedFactors.contains((Factor)n));
+	protected ArrayList<? extends Variable> makeSubsRoots() {
+		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> ! n.equals(parent));
 		return result;
 	}
 
-	private Collection<? extends Factor> getRootNeighbors() {
+	protected Collection<? extends Variable> getRootNeighbors() {
 		return getFactorNetwork().getNeighbors(getRoot());
 	}
 
 	@Override
 	public List<Factor> getFactorsAtRoot() {
-		return list();
+		return list(getRoot());
 	}
 
 	@Override
 	public Variable getMessageVariable() {
-		return getRoot();
+		return getParent();
 	}
 }

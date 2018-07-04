@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
 import java.util.List;
 import java.util.function.Function;

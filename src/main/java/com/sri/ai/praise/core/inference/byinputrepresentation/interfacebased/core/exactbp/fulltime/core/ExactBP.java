@@ -35,29 +35,56 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
+
+import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
+import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 
 import java.util.function.Predicate;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultVariableMarginalQuery;
-
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
+import com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet;
+import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 /**
- * A convenience class for creating a {@link ExactBP} based on expressions.
+ * A solver that returns the normalized marginal of a query given a factor network, using the Exact BP algorithm.
+ * 
  * @author braz
  *
  */
-public class ExpressionExactBP extends ExactBP {
+public class ExactBP extends ExactBPNodeFromVariableToFactor {
 
-	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
-		this(new DefaultExpressionVariable(query), factorNetwork, v -> false);
+	public ExactBP(Variable query, FactorNetwork factorNetwork) {
+		this(query, factorNetwork, v -> false /* default is "no uninterpreted constants" */);
 	}
 
-	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
-		super(new DefaultVariableMarginalQuery(new DefaultExpressionVariable(query), factorNetwork, isParameterPredicate));
+	public ExactBP(Problem problem) {
+		this(problem.getQueryVariable(), problem.getModel(), problem.getIsParameterPredicate());
 	}
 	
+	private ExactBP(Variable query, FactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
+		super(
+				query,
+				makeParent(),
+				makeExcludedFactors(),
+				makeIncludedFactors(),
+				factorNetwork,
+				isParameterPredicate);
+	}
+
+	private static Factor makeParent() {
+		return null;  // there is none, as the message on the query is the final computation
+	}
+	
+	private static ExtensionalLiveSet<Factor> makeExcludedFactors() {
+		return liveSet(list()); // there is no "exterior" to this ExactBPNode, so there are no excluded factors
+	}
+
+	private static RedirectingLiveSet<Factor> makeIncludedFactors() {
+		return redirectingTo(makeExcludedFactors()); // the search initially starts with no included factors having been included yet
+	}
 }
