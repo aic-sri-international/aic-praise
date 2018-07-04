@@ -1,7 +1,6 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
 import static com.sri.ai.util.Util.findFirst;
-import static com.sri.ai.util.Util.list;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ import com.sri.ai.util.computation.treecomputation.core.AbstractLazyTreeComputat
 
 public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTreeComputationEvaluator<Factor> {
 
-	private Factor currentResult;
+	private Factor currentProduct;
 	
 	private NullaryFunction<List<? extends Factor>> getFactorsAtRoot;
 	private Function<List<? extends Variable>, List<? extends Variable>> determineVariablesToBeSummedOut;
@@ -39,7 +38,7 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 
 	@Override
 	protected void reset() {
-		currentResult = Factor.multiply(getFactorsAtRoot.apply());
+		currentProduct = Factor.multiply(getFactorsAtRoot.apply());
 	}
 
 	@Override
@@ -58,27 +57,19 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 
 	private boolean isRelevantForCurrentResult(ExactBPNodeFromVariableToFactor subFromVariableToFactor) {
 		Variable variable = subFromVariableToFactor.getRoot();
-		boolean result = currentResult.getVariables().contains(variable);
+		boolean result = currentProduct.getVariables().contains(variable);
 		return result;
 	}
 
 	@Override
 	protected void simplifyFunctionWithValueForSub(NullaryFunction<Factor> sub, Factor subValue) {
-		Variable variable = getVariableOfSub(sub);
-		Factor productOfCurrentResultAndMessage = currentResult.multiply(subValue);
-		currentResult = productOfCurrentResultAndMessage.sumOut(list(variable));
-	}
-
-	private Variable getVariableOfSub(NullaryFunction<Factor> sub) {
-		ExactBPNodeFromVariableToFactor subFromVariableToFactor = (ExactBPNodeFromVariableToFactor) sub;
-		Variable variable = subFromVariableToFactor.getRoot();
-		return variable;
+		currentProduct = currentProduct.multiply(subValue);
 	}
 
 	@Override
 	protected Factor finishComputingResultOnceAllRelevantSubComputationsHaveBeenTakenIntoAccount() {
-		List<? extends Variable> variablesToBeSummedOut = determineVariablesToBeSummedOut.apply(currentResult.getVariables());
-		Factor result = sumOutWithBookkeeping.apply(variablesToBeSummedOut, currentResult);
+		List<? extends Variable> variablesToBeSummedOut = determineVariablesToBeSummedOut.apply(currentProduct.getVariables());
+		Factor result = sumOutWithBookkeeping.apply(variablesToBeSummedOut, currentProduct);
 		return result;
 	}
 }
