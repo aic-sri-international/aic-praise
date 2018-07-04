@@ -74,18 +74,15 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * which is left abstract since variable-rooted Exact BPs will want to create
  * subs which are factor-rooted Exact BPs and vice-versa,
  * so it is not a common functionality.
- * <p>
- * Method {@link #function(List)} is also left unspecified at this level
- * because variable-rooted Exact BPs will multiple messages
- * while factor-rooted ones will sum out certain indices of its factor times incoming messages.
+ * The same holds with {@link #getFactorsAtRoot()}.
  * <p>
  * Other than that, both types must keep track of
  * included factor nodes (those already assigned to be in its branch)
  * and excluded factor nodes (those in their siblings or parent),
  * so this is implemented at this level.
  * 
- * @param <RootType> the type ({@link Fator} or {@link Variable}) of the root node of the tree.
- * @param <SubRootType> the type ({@link Fator} or {@link Variable}) of the root node of the subs. Must be the opposite of RootType.
+ * @param <RootType> the type ({@link Factor} or {@link Variable}) of the root node of the tree.
+ * @param <SubRootType> the type ({@link Factor} or {@link Variable}) of the root node of the subs. Must be the opposite of RootType.
  *
  * @author braz
  *
@@ -216,23 +213,18 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 
 	@Override
 	public EagerTreeComputationEvaluator<Factor> makeNewEvaluator() {
-		return this::function;
+		return new EagerExactBPNodeEvaluator(
+				this::computeProductOfFactorsAtRootAndIncomingMessages, 
+				this::getSummedOutVariables, 
+				(variablesToBeSummedOut, product) -> sumOut(variablesToBeSummedOut, product));
 	}
 	
-	public Factor function(List<Factor> incomingMessages) {
-		Factor product = computeProductOfFactorsAtRootAndIncomingMessages(incomingMessages);
-		List<? extends Variable> allFreeVariablesInProduct = product.getVariables();
-		List<? extends Variable> variablesToBeSummedOut = getSummedOutVariables(allFreeVariablesInProduct);
-		Factor result = sumOut(variablesToBeSummedOut, product);
-		return result;
-	}
-
 	/**
 	 * Returns the product of given incoming messages and the factor at root, if there is any. 
 	 * @param incomingMessages
 	 * @return
 	 */
-	public Factor computeProductOfFactorsAtRootAndIncomingMessages(List<Factor> incomingMessages) {
+	public Factor computeProductOfFactorsAtRootAndIncomingMessages(List<? extends Factor> incomingMessages) {
 		Iterator<Factor> allFactors = nestedIterator(getFactorsAtRoot(), incomingMessages);
 		Factor product = multiply(allFactors);
 		return product;
