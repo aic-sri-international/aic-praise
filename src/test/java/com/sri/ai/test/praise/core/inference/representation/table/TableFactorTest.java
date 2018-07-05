@@ -9,6 +9,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.junit.Test;
+
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;

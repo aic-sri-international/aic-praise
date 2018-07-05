@@ -47,7 +47,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		super(base, new Simplex(base.getMessageVariable()));
 	}
 
-	private Iterator<? extends GradientAnytimeExactBP<SubRootType,RootType>> subIteratorForRefinement;
+	private Iterator<? extends Anytime<Factor>> subIteratorForRefinement;
 
 	@Override
 	protected void makeSubsAndIterateThemToTheirFirstApproximation() {
@@ -69,7 +69,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	}
 	
 	@SuppressWarnings("unchecked")
-	public ArrayList<? extends GradientAnytimeExactBP<SubRootType,RootType>> getSubs() {
+	public ArrayList<? extends Anytime<Factor>> getSubs() {
 		return (ArrayList<? extends GradientAnytimeExactBP<SubRootType,RootType>>) super.getSubs();
 	}
 	
@@ -116,21 +116,14 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		Approximation<Factor> subApproximation = sub.getCurrentApproximation();
 		Polytope subPolytope = checkIfApproximationIsPolytopeAndReturnPolytopeIfYesThrowErrorOtherwise(subApproximation);
 		
+		List<Approximation<Factor>> allSubsLastApproximations = getSubsCurrentApproximations();
+		List<Approximation<Factor>> allSubsButOneLastApproximations = getAllSubsButOneCurrentApproximations(sub);
+		
+		Approximation<Factor> summedOut = function(allSubsLastApproximations);
+		Approximation<Factor> summedOutWithOneSubLeftOut = function(allSubsButOneLastApproximations);
+		
+		
 		// TODO finish
-		
-		// Step 1 : get free variables V to sum out over
-		
-		// Step 2 : get other variables Q (also to sum out)
-		
-		// Step 3 : get variables I for incoming polytopes to sum over
-		
-		// Step 4 : loop over values of Q
-		
-		// Step 5 : get the max over I for each value of Q of the vertices at the root and store "the value of I" for each Q
-		
-		// Step 6 : same with min
-		
-		// Step 7 : compute product over q of max - min
 		
 		return null;
 	}
@@ -144,25 +137,33 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		return polytope;
 	}
 	
-	
-	private List<List<Object>> getAllPossibleValues(Collection<? extends Variable> subVariables) {
-		List<List<Object>> values = new ArrayList<List<Object>>();
-		for(Variable variable : subVariables) {
-			values = iterateThroughValuesAndCreateNewCombinations(values, variable);
+	private List<Approximation<Factor>> getSubsCurrentApproximations() {
+		List<Approximation<Factor>> result = new ArrayList<Approximation<Factor>>(); 
+		for(Anytime<Factor> sub : getSubs()) {
+			Approximation<Factor> subLastApproximation = sub.getCurrentApproximation();
+			result.add(subLastApproximation);
 		}
-		return values;
+		return result;
 	}
 	
-	private List<List<Object>> iterateThroughValuesAndCreateNewCombinations(List<List<Object>> oldCombinations, Variable newVariable) {
-		List<List<Object>> result = new ArrayList<List<Object>>();
-		for (Object value : newVariable.getValues()) {
-			Iterator<List<Object>> oldCombinationsIterator = oldCombinations.iterator();
-			while(oldCombinationsIterator.hasNext()) {
-				List<Object> combination = oldCombinationsIterator.next();
-				combination.add(value);
-				result.add(combination);
+	private List<Approximation<Factor>> getAllSubsButOneCurrentApproximations(Anytime<Factor> subToRemove) {
+		List<Approximation<Factor>> result = new ArrayList<Approximation<Factor>>(); 
+		for(Anytime<Factor> sub : getSubs()) {
+			if(!sub.equals(subToRemove)) {
+				Approximation<Factor> subLastApproximation = sub.getCurrentApproximation();
+				result.add(subLastApproximation);
 			}
 		}
 		return result;
 	}
+	
+	private List<? extends Variable> getVariablesNotSummedOut(List<Approximation<Factor>> subsApproximations) {
+		Polytope product = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
+		Collection<? extends Variable> freeVariables = product.getFreeVariables();
+		List<? extends Variable> variablesSummedOut = getBase().getSummedOutVariables(freeVariables);
+		return variablesSummedOut;
+		
+	}
+
+	
 }
