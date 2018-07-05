@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.other.application.praise.app.service;
 
+import static com.sri.ai.util.Util.map;
+
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,6 +47,9 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.other.application.praise.app.PRAiSEController;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
+import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
 
 import javafx.concurrent.Task;
 
@@ -66,6 +71,8 @@ public class HOGMQueryTask extends Task<HOGMProblemResult> {
 		
 		PRAiSEController.computeExpressionWithDesiredPrecision(() -> {
 			solver = new HOGMMultiQueryProblemSolver(model, query);
+			ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments(map("ultimateAnswer", (Procedure) p -> 42));
+			solver.setProceduralAttachments(proceduralAttachments);
 			List<HOGMProblemResult> queryResults = solver.getResults();
 			if (queryResults.size() == 1) {
 				HOGMProblemResult queryResult = queryResults.get(0);
