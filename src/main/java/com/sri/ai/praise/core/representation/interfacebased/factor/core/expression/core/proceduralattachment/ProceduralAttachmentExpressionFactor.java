@@ -1,5 +1,10 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.proceduralattachment;
 
+import static com.sri.ai.util.Util.list;
+
+import java.util.Collections;
+import java.util.List;
+
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.core.DefaultSymbol;
@@ -22,6 +27,11 @@ public class ProceduralAttachmentExpressionFactor extends AbstractExpressionFact
 		proceduralAttachment = new ProceduralAttachment(variable, procedure);
 	}
 
+	@Override
+	public List<? extends Variable> getVariables() {
+		return Collections.unmodifiableList(list(proceduralAttachment.getVariable()));
+	}
+	
 	@Override
 	protected Expression computeInnerExpression() {
 		Symbol valueExpression = DefaultSymbol.createSymbol(proceduralAttachment.getProcedureValue());

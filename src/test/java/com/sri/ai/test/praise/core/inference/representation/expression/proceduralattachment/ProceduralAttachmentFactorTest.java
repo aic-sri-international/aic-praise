@@ -3,6 +3,8 @@ package com.sri.ai.test.praise.core.inference.representation.expression.procedur
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -17,6 +19,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.proceduralattachment.ProceduralAttachmentExpressionFactor;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
+import com.sri.ai.util.base.Wrapper;
 
 public class ProceduralAttachmentFactorTest {
 
@@ -29,6 +32,11 @@ public class ProceduralAttachmentFactorTest {
 		Procedure<Boolean> procedure3;
 		Procedure<Boolean> procedure4;
 		Procedure<Boolean> procedure5;
+		Wrapper<Boolean> ran1 = new Wrapper<Boolean>(false);
+		Wrapper<Boolean> ran2 = new Wrapper<Boolean>(false);
+		Wrapper<Boolean> ran3 = new Wrapper<Boolean>(false);
+		Wrapper<Boolean> ran4 = new Wrapper<Boolean>(false);
+		Wrapper<Boolean> ran5 = new Wrapper<Boolean>(false);
 		ExpressionFactorNetwork network;
 		Factor queryResult;
 		
@@ -49,22 +57,27 @@ public class ProceduralAttachmentFactorTest {
 		
 		procedure1 = p -> {
 			println("Proceeding with procedure 1!");
+			ran1.value = true;
 			return true;
 		};
 		procedure2 = p -> {
 			println("Proceeding with procedure 2!");
-			return false;
+			ran2.value = true;
+			return true;
 		};
 		procedure3 = p -> {
 			println("Proceeding with procedure 3!");
-			return true;
+			ran3.value = true;
+			return false; // THIS ONE RETURNS FALSE! This will short-circuit and procedures 4 and 5 will not be run
 		};
 		procedure4 = p -> {
 			println("Proceeding with procedure 4!");
+			ran4.value = true;
 			return true;
 		};
 		procedure5 = p -> {
 			println("Proceeding with procedure 5!");
+			ran5.value = true;
 			return true;
 		};
 		
@@ -75,7 +88,7 @@ public class ProceduralAttachmentFactorTest {
 						new ProceduralAttachmentExpressionFactor(new DefaultExpressionVariable(parse("O3")), procedure3, context),
 						new ProceduralAttachmentExpressionFactor(new DefaultExpressionVariable(parse("O4")), procedure4, context),
 						new ProceduralAttachmentExpressionFactor(new DefaultExpressionVariable(parse("O5")), procedure5, context),
-						new DefaultExpressionFactor(parse("if V1 or O1 or V2 then 0.8 else 0.2"), context),
+						new DefaultExpressionFactor(parse("if V1 and O1 and V2 then 0.8 else 0.2"), context),
 						new DefaultExpressionFactor(parse("if V2 and O2 and V3 then 0.8 else 0.2"), context),
 						new DefaultExpressionFactor(parse("if V3 and O3 and V4 then 0.8 else 0.2"), context),
 						new DefaultExpressionFactor(parse("if V4 and O4 and V5 then 0.8 else 0.2"), context),
@@ -87,7 +100,12 @@ public class ProceduralAttachmentFactorTest {
 		println("Result computed.");
 		println("Result: " + queryResult);
 		
-		// TODO: make sure to check why expression is being computed before it's time to print.
+		assertTrue(ran1.value);
+		assertTrue(ran2.value);
+		assertTrue(ran3.value);
+		assertFalse(ran4.value);
+		assertFalse(ran5.value);
+		
 		// TODO: change code to automatically detect unregistered symbols
 		// TODO: deal with ease of forgetting to set up variable predicate. Should just use symbols, really.
 	}
