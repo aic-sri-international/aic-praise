@@ -55,6 +55,7 @@ import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
+import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
 
 @Beta
 public class HOGMMultiQueryProblemSolver {
@@ -67,7 +68,7 @@ public class HOGMMultiQueryProblemSolver {
 	private HOGMSingleQueryProblemSolver problemSolver;
 	private List<HOGMProblemError> modelErrors = new ArrayList<>();
 	private List<HOGMProblemResult> results = new ArrayList<>();
-	private ProceduralAttachments proceduralAttachments;
+	private ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
 	
 	public HOGMMultiQueryProblemSolver(String model, String query) {
 		this(model, list(query), defaultSolverClass);
