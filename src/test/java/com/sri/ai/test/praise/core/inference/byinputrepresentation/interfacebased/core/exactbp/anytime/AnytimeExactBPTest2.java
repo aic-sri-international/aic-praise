@@ -17,8 +17,8 @@ import java.util.List;
 import com.sri.ai.grinder.helper.AssignmentsIterator;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.AEBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.rodrigo.AnytimeExactBP;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.api.ExactBPNode;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.api.ExactBPNode;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -51,7 +51,7 @@ import com.sri.ai.util.rplot.dataframe.AEBPTestingDataFrame;
  */
 public class AnytimeExactBPTest2 {
 	
-	private static AEBPTestingDataFrame solveWithBothMethods(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
+	public static AEBPTestingDataFrame solveWithBothMethods(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
 			String PGMName) {
 		//AEBPTestingDataFrame result = solveWithRodrigos(query, factorNetwork, maximunTimeInSeconds, PGMName);
 		AEBPTestingDataFrame result = solveWithGabrielsNotIncremental(query, factorNetwork, maximunTimeInSeconds, PGMName);
@@ -64,7 +64,7 @@ public class AnytimeExactBPTest2 {
 		return result;
 	}
 	
-	private static AEBPTestingDataFrame solveWithRodrigos(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
+	public static AEBPTestingDataFrame solveWithRodrigos(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
 			String PGMName) {
 		println("\nSolving with Rodrigo's Anytime\n");
 		ExactBPNode<Variable,Factor> exactBP = new ExactBP(query, factorNetwork);
@@ -72,13 +72,17 @@ public class AnytimeExactBPTest2 {
 		return solveAndStoreInDataFrame(anytimeExactBP,query,maximunTimeInSeconds,0,PGMName,"Rodrigo's");		
 	}
 	
-	private static AEBPTestingDataFrame solveWithGabriels(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
+	public static AEBPTestingDataFrame solveWithGabriels(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
 			String PGMName) {
+		return solveWithGabriels(query, factorNetwork, maximunTimeInSeconds, PGMName,0);
+	}
+	public static AEBPTestingDataFrame solveWithGabriels(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
+			String PGMName, int runNumber) {
 		println("\nSolving with Gabriel's Anytime\n");
 		AEBP aebp = new AEBP(factorNetwork, query);
-		return solveAndStoreInDataFrame(aebp,query,maximunTimeInSeconds,0,PGMName,"Gabriel's");
+		return solveAndStoreInDataFrame(aebp,query,maximunTimeInSeconds,runNumber,PGMName,"Gabriel's");
 	}
-	private static AEBPTestingDataFrame solveWithGabrielsNotIncremental(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
+	public static AEBPTestingDataFrame solveWithGabrielsNotIncremental(TableVariable query, TableFactorNetwork factorNetwork, double maximunTimeInSeconds,
 			String PGMName) {
 		println("\nSolving with Gabriel's Anytime (not incremental!!!)\n");
 		AEBP aebp = new AEBP(factorNetwork, query,(v)->false,false);
@@ -93,17 +97,21 @@ public class AnytimeExactBPTest2 {
 		
 		int i = 0;
 		Double currentTotalTime = .0;
-		long startTime = System.currentTimeMillis();
-		while (currentTotalTime < maximunTimeInSeconds && anytimeEBPIterator.hasNext()) {
+		//long startTime = System.currentTimeMillis();
+		while (currentTotalTime < maximunTimeInSeconds) {
 			println(++i);
 			Long currentTime = System.currentTimeMillis();
+			if (!anytimeEBPIterator.hasNext()) {
+				break;
+			}
 			Polytope result = (Polytope) anytimeEBPIterator.next();
 			Pair<? extends List<Double>, ? extends List<Double>> maxAndMin = printPolytopeAndMaxAndMin(query, result);
-			currentTotalTime = .001*(System.currentTimeMillis() - startTime);
 			Double currentPartialTime = .001*(System.currentTimeMillis() - currentTime);
+			//currentTotalTime = .001*(System.currentTimeMillis() - startTime);
+			currentTotalTime += currentPartialTime;
 			println("time: " +  currentTotalTime);	
 			
-			df.addRow(runNumber,i,maxAndMin.first.get(0),maxAndMin.second.get(0),currentPartialTime,currentTotalTime
+			df.addRow(runNumber,i,maxAndMin.second.get(0),maxAndMin.first.get(0),currentPartialTime,currentTotalTime
 					,methodName,PGMName);
 			println("...");
 		}

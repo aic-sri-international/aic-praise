@@ -38,7 +38,7 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.NormalizedExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.NormalizedExactBP;
 
 public class ExactBPExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 

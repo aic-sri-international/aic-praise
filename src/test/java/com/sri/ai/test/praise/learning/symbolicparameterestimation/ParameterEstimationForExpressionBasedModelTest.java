@@ -41,7 +41,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				"Beta", "Real"
 				);
 
-		// The definitions of non-uniquely named constants
+		// The definitions of uniquely named constants
 		Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = map();
 
 		// a variant of the earthquake/burglary model in which some burglars are more active than others.

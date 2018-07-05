@@ -246,7 +246,7 @@ public class ExpressionBayesianModelTest {
 		// Generating the childVerification Expression after iteration through all the possible values of Parent
 		Expression childVerification;
 		Expression andExpression = Expressions.TRUE;
-		for(int i = 1; i<= 5; i++) {
+		for(int i = 1; i <= 5; i++) {
 			andExpression = And.make(andExpression, Equality.make(expectedChildExpression, learnedChild).replaceAllOccurrences(parentVariable, parse("" + i), contextForChildParentModel));
 		}
 		childVerification = andExpression;
@@ -402,7 +402,7 @@ public class ExpressionBayesianModelTest {
 		ExpressionBayesianModel model = generateChildParentModel(expressionForChildNode);
 		
 		// Dataset - Order of variables for the datapoints: (Child, Parent)
-		int numberOfDatapoints1 = 1; // (1, 2)
+		int numberOfDatapoints1 = 0; // (1, 2)
 		int numberOfDatapoints2 = 0; // (5, 1)
 		int numberOfDatapoints3 = 0; // (4, 3)
 		int numberOfDatapoints4 = 0; // (1, 5)

@@ -58,6 +58,7 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
 
 /**
  * An {@link ExpressionBasedProblem} based on a {@link ExpressionBasedModel} and a (possibly compound) query expression.
@@ -96,12 +97,16 @@ public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 	/** The context to be used, possibly including the symbol "query" and its type. */
 	private Context context;
 	
+	/** Procedural attachments. */
+	private ProceduralAttachments proceduralAttachments;
+	
 	public DefaultExpressionBasedProblem(Expression queryExpression, ExpressionBasedModel model) {
 		this.originalExpressionBasedModel = model;
 		this.queryExpression = queryExpression;
 		this.originalRandomVariables = originalExpressionBasedModel.getRandomVariables();
 		this.isParameterPredicate = e -> model.getMapFromNonUniquelyNamedConstantNameToTypeName().containsKey(e.toString());
 		this.modelIsKnownToBeBayesianNetwork = originalExpressionBasedModel.isKnownToBeBayesianNetwork();
+		this.proceduralAttachments = originalExpressionBasedModel.getProceduralAttachments();
 		
 		if (decideIfQueryIsCompound()) {
 			processCompoundQuery();
@@ -224,6 +229,16 @@ public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 	@Override
 	public boolean getQueryIsCompound() {
 		return queryIsCompound;
+	}
+
+	@Override
+	public ProceduralAttachments getProceduralAttachments() {
+		return proceduralAttachments;
+	}
+
+	@Override
+	public void setProceduralAttachments(ProceduralAttachments proceduralAttachments) {
+		this.proceduralAttachments = proceduralAttachments;
 	}
 
 	@Override

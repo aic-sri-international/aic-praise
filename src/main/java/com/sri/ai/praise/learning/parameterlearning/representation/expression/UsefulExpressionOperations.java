@@ -16,6 +16,7 @@ import java.util.ListIterator;
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
+import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.core.DefaultExistentiallyQuantifiedFormula;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
 import com.sri.ai.expresso.helper.Expressions;
@@ -27,6 +28,8 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
 import com.sri.ai.grinder.library.number.Plus;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.util.Util;
 
 public class UsefulExpressionOperations {
@@ -64,7 +67,7 @@ public class UsefulExpressionOperations {
 		Expression param2 = parse("Param2");
 		Expression param3 = parse("Param3");
 		
-		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real");
+		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real", "A", "Boolean");
 		
 		// Making parameters become constants
 		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate();
@@ -117,7 +120,16 @@ public class UsefulExpressionOperations {
 			finalFamilies.add(family1);
 		}
 		println("\n" + finalFamilies);
+	
 		
+		// Testing syntax for context (used for method convertToAnExpressionBasedModelAfterLearning in ExpressionBayesianModel)
+		ExpressionVariable expressionVariable = new DefaultExpressionVariable(parse("A"));
+		println("\nexpressionVariable.toString() = " + expressionVariable.toString());
+		Type type = context.getTypeOfRegisteredSymbol(expressionVariable);
+		println("type.toString() = " + type.toString());
+		println("child.toStringe() = " + child.toString());
+		type = context.getTypeOfRegisteredSymbol(child);
+		println("type.toString() = " + type.toString());
 	}
 
 }

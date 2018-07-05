@@ -35,56 +35,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.api;
 
-import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
-import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
-
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
-import com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet;
-import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
+import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
-/**
- * A solver that returns the normalized marginal of a query given a factor network, using the Exact BP algorithm.
- * 
- * @author braz
- *
- */
-public class ExactBP extends ExactBPNodeFromVariableToFactor {
-
-	public ExactBP(Variable query, FactorNetwork factorNetwork) {
-		this(query, factorNetwork, v -> false /* default is "no uninterpreted constants" */);
-	}
-
-	public ExactBP(Problem problem) {
-		this(problem.getQueryVariable(), problem.getModel(), problem.getIsParameterPredicate());
-	}
+public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Factor> {
 	
-	private ExactBP(Variable query, FactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
-		super(
-				query,
-				makeParent(),
-				makeExcludedFactors(),
-				makeIncludedFactors(),
-				factorNetwork,
-				isParameterPredicate);
-	}
+	SubRootType getParent();
 
-	private static Factor makeParent() {
-		return null;  // there is none, as the message on the query is the final computation
-	}
+	RootType getRoot();
 	
-	private static ExtensionalLiveSet<Factor> makeExcludedFactors() {
-		return liveSet(list()); // there is no "exterior" to this ExactBPNode, so there are no excluded factors
-	}
+	/**
+	 * Returns the {@link Variable} over which the message coming from this algorithm is defined;
+	 * effectively, this is the root if this is rooted on a variable, and the parent, if any, otherwise.
+	 * @return
+	 */
+	Variable getMessageVariable();
+	
+	/**
+	 * Given the product of incoming messages and factor at root,
+	 * returns a list of indices being summed out at the root level,
+	 * based on the overall tree computation constructed so far
+	 * (this determines which indices are external cutset indices and which ones are internal ones,
+	 * which in turn determines which ones must be summed out).
+	 * @return
+	 */
+	List<? extends Variable> determinedVariablesToBeSummedOut(Collection<? extends Variable> allFreeVariablesInSummand);
+	
+	/**
+	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
+	 */
+	List<? extends Factor> getFactorsAtRoot();
 
-	private static RedirectingLiveSet<Factor> makeIncludedFactors() {
-		return redirectingTo(makeExcludedFactors()); // the search initially starts with no included factors having been included yet
-	}
+	Factor sumOutWithBookkeeping(List<? extends Variable> variablesToBeSummedOut, Factor factor);
+
+	@Override
+	ArrayList<ExactBPNode<SubRootType,RootType>> getSubs();
+
 }
