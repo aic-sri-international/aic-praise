@@ -65,6 +65,14 @@ public class HOGMMultiQueryProblemSolverTest {
 				"random observedPosition : Real; // observed, noisy position of the same object\n" + 
 				"random event : Boolean;\n" + 
 				"random external : 1..5;\n" + 
+				"random alpha : Real;\n" + 
+				"\n" + 
+				"random internal1 : 1..5;\n" + 
+				"\n" + 
+				"random internal2 : 1..5;\n" + 
+				"\n" + 
+				"internal1 = internal2 - 2;\n" + 
+				"internal2 = external - 1;\n" + 
 				"\n" + 
 				"// p(position) proportional to inverted parabola around 0 + 10\n" + 
 				"if position > -10 and position < 10\n" + 
@@ -83,14 +91,16 @@ public class HOGMMultiQueryProblemSolverTest {
 				"event <=> position > 3 and position < 6;\n" + 
 				"";
 		
-		String query = "event";
-		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query, "external"));
-		ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments(map("external", (Procedure) p -> 3));
+		String query1 = "event";
+		String query2 = "internal1";
+		String query3 = "alpha";
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query1, query2, query3));
+		ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments(map("external", (Procedure) p -> 5, "alpha", (Procedure) p -> 0.8));
 		solver.setProceduralAttachments(proceduralAttachments);
 		
 		List<HOGMProblemResult> results = solver.getResults();
 	
-		assertEquals(2, results.size());
+		assertEquals(3, results.size());
 		
 		HOGMProblemResult result = getFirst(results);
 		result.getErrors().stream().forEach(e -> println(e));
@@ -104,6 +114,14 @@ public class HOGMMultiQueryProblemSolverTest {
 		resultValue = result.getResult();
 		println(resultValue);
 		assertFalse(result.hasErrors());
-		assertEquals(parse("if external = 3 then 1 else 0"), result.getResult());
+		assertEquals(parse("if internal1 = 2 then 1 else 0"), result.getResult());
+
+		// TODO: BUGGY
+//		result = results.get(2);
+//		result.getErrors().stream().forEach(e -> println(e));
+//		resultValue = result.getResult();
+//		println(resultValue);
+//		assertFalse(result.hasErrors());
+//		assertEquals(parse("if alpha = 0.8 then 1 else 0"), result.getResult());
 	}
 }
