@@ -42,12 +42,18 @@ import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.proceduralattachment.ProceduralAttachmentExpressionFactor;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
+import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
 
 
 /**
@@ -68,7 +74,7 @@ public class ExpressionFactorNetwork extends DefaultFactorNetwork {
 		ExpressionFactorNetwork result = expressionFactorNetwork(expressions, context);
 		return result;
 	}
-	
+
 	private static List<Expression> fromTupleOfExpressionsStringToListOfExpressions(String tupleOfFactorExpressions) {
 		Expression parsed = parse(tupleOfFactorExpressions);
 		myAssert(parsed instanceof Tuple, () -> ExpressionFactorNetwork.class + " constructor taking String should receive string of tuple of factors, but got something that is not a tuple: " + tupleOfFactorExpressions);
@@ -77,14 +83,42 @@ public class ExpressionFactorNetwork extends DefaultFactorNetwork {
 		return result;
 	}
 
-	public static ExpressionFactorNetwork expressionFactorNetwork(List<? extends Expression> factorExpressions, Context context) {
-		List<? extends ExpressionFactor> expressionFactors = fromExpressionsToExpressionFactors(factorExpressions, context);
+	public static ExpressionFactorNetwork expressionFactorNetwork(List<Expression> expressions, Context context) {
+		return expressionFactorNetwork(expressions, new DefaultProceduralAttachments(), context);
+	}
+	
+	public static ExpressionFactorNetwork expressionFactorNetwork(List<? extends Expression> factorExpressions, ProceduralAttachments proceduralAttachments, Context context) {
+		List<ExpressionFactor> expressionFactors = fromExpressionsToExpressionFactors(factorExpressions, context);
+		expressionFactors.addAll(fromProceduralAttachmentsToExpressionFactors(proceduralAttachments, context));
 		ExpressionFactorNetwork result = new ExpressionFactorNetwork(expressionFactors);
 		return result;
 	}
 	
-	private static List<? extends ExpressionFactor> fromExpressionsToExpressionFactors(List<? extends Expression> expressions, Context context) {
-		List<? extends ExpressionFactor> result = mapIntoList(expressions, e -> fromExpressionToExpressionFactor(e, context));
+	private static List<? extends ExpressionFactor> fromProceduralAttachmentsToExpressionFactors(ProceduralAttachments proceduralAttachments, Context context) {
+		Set<Entry<String, Procedure>> variableNameAndProcedurePairs = proceduralAttachments.entrySet();
+		List<? extends ExpressionFactor> result = 
+				mapIntoList(
+						variableNameAndProcedurePairs, 
+						variableNameAndProcedure -> makeProceduralAttachmentExpressionFactor(variableNameAndProcedure, context));
+		return result;
+	}
+
+	private static ProceduralAttachmentExpressionFactor makeProceduralAttachmentExpressionFactor(Entry<String, Procedure> variableNameAndProcedure, Context context) {
+		DefaultExpressionVariable variable = makeVariable(variableNameAndProcedure);
+		Procedure procedure = variableNameAndProcedure.getValue();
+		ProceduralAttachmentExpressionFactor result = new ProceduralAttachmentExpressionFactor(variable, procedure, context);
+		return result;
+	}
+
+	private static DefaultExpressionVariable makeVariable(Entry<String, Procedure> variableNameAndProcedure) {
+		String variableName = variableNameAndProcedure.getKey();
+		Expression variableExpression = parse(variableName);
+		DefaultExpressionVariable variable = new DefaultExpressionVariable(variableExpression);
+		return variable;
+	}
+
+	private static List<ExpressionFactor> fromExpressionsToExpressionFactors(List<? extends Expression> expressions, Context context) {
+		List<ExpressionFactor> result = mapIntoList(expressions, e -> fromExpressionToExpressionFactor(e, context));
 		return result;
 	}
 

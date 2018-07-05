@@ -9,6 +9,7 @@ import com.sri.ai.expresso.api.Type;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Model;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
 
 public interface ExpressionBasedModel extends Cloneable, Model {
 
@@ -35,6 +36,10 @@ public interface ExpressionBasedModel extends Cloneable, Model {
 	Theory getTheory();
 
 	void setTheory(Theory newTheory);
+	
+	ProceduralAttachments getProceduralAttachments();
+	
+	void setProceduralAttachments(ProceduralAttachments proceduralAttachments);
 
 	String toString();
 

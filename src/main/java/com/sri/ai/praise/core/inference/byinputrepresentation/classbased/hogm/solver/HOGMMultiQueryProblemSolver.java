@@ -53,6 +53,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.pa
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
 
 @Beta
@@ -66,7 +67,7 @@ public class HOGMMultiQueryProblemSolver {
 	private HOGMSingleQueryProblemSolver problemSolver;
 	private List<HOGMProblemError> modelErrors = new ArrayList<>();
 	private List<HOGMProblemResult> results = new ArrayList<>();
-	private Map<String, Procedure> proceduralAttachments;
+	private ProceduralAttachments proceduralAttachments;
 	
 	public HOGMMultiQueryProblemSolver(String model, String query) {
 		this(model, list(query), defaultSolverClass);
@@ -86,7 +87,7 @@ public class HOGMMultiQueryProblemSolver {
         processAllQueries(queries);
 	}
 	
-	public void setProceduralAttachments(Map<String, Procedure> proceduralAttachments) {
+	public void setProceduralAttachments(ProceduralAttachments proceduralAttachments) {
 		this.proceduralAttachments = proceduralAttachments;
 	}
 
@@ -98,6 +99,7 @@ public class HOGMMultiQueryProblemSolver {
 		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString, modelErrors);
 		this.hogmModel = parsingWithErrorCollecting.getModel();
 		this.expressionBasedModel = hogmModel == null? null : new HOGMExpressionBasedModel(hogmModel);
+		this.expressionBasedModel.setProceduralAttachments(proceduralAttachments);
 	}
 
 	private void processAllQueries(List<String> queries) {
