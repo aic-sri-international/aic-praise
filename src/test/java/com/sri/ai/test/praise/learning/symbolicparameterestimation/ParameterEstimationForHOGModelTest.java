@@ -1,6 +1,7 @@
 package com.sri.ai.test.praise.learning.symbolicparameterestimation;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
+import static com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation.parseHOGModelToExpressionBasedModel;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.pa
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.ParameterEstimationForHOGModel;
+import com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation;
 
 public class ParameterEstimationForHOGModelTest {
 	
@@ -54,7 +56,7 @@ public class ParameterEstimationForHOGModelTest {
 			HashMap<Expression,Double> mapResult = runTestHOGModelBased(expected, parameterEstimationForHOGModel, new double[] {0});
 
 			HOGModel test = parameterEstimationForHOGModel.buildOptimizedHOGModel(mapResult);
-			ExpressionBasedModel newModel = parameterEstimationForHOGModel.parseHOGModelToExpressionBasedModel(test);
+			ExpressionBasedModel newModel = parseHOGModelToExpressionBasedModel(test);
 			System.out.println(newModel.toString());
 			assertEquals(expected, mapResult);
 	}
