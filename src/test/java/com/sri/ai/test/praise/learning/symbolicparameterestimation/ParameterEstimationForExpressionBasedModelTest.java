@@ -40,7 +40,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				"Beta", "Real"
 				);
 
-		// The definitions of non-uniquely named constants
+		// The definitions of uniquely named constants
 		Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = map();
 
 		// a variant of the earthquake/burglary model in which some burglars are more active than others.
@@ -140,6 +140,24 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		System.out.println("expected : " + expected);
 		System.out.println("result : " + mapResult);
 		assertEquals(expected, mapResult);
+		
+		//////////
+		
+		queryExpressionList.clear();
+		queryExpressionList.add(parse("earthquake and not burglary"));
+
+		expected.put(parse("Alpha"), 1.0);
+		expected.put(parse("Beta"), 6.289892248981177E-23);
+
+		mapResult = runTestExpressionBased(queryExpressionList,
+				 expressionBasedModel, new double[] {0,0});
+
+		System.out.println("expected : " + expected);
+		System.out.println("result : " + mapResult);
+		assertEquals(expected, mapResult);
+		
+		//////////
+		
 
 		// Test with another model
 		

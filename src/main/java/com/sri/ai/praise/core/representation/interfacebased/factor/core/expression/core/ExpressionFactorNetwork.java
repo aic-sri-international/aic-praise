@@ -40,19 +40,20 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.express
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
-import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.core.AbstractEditableFactorNetwrok;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.proceduralattachment.ProceduralAttachmentExpressionFactor;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
+import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
 
 
 /**
@@ -62,16 +63,22 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
  * @author braz
  *
  */
-public class ExpressionFactorNetwork extends AbstractEditableFactorNetwrok {
+public class ExpressionFactorNetwork extends DefaultFactorNetwork {
 	
 	private Context context;
+	
+	public ExpressionFactorNetwork(List<? extends ExpressionFactor> expressionFactors) {
+		super(expressionFactors);
+		myAssert(expressionFactors.size() != 0, () -> "Cannot have " + getClass() + " defined over zero factors");
+		context = expressionFactors.get(0).getContext();
+	}
 
 	public static ExpressionFactorNetwork expressionFactorNetwork(String tupleOfFactorExpressions, Context context) {
 		List<Expression> expressions = fromTupleOfExpressionsStringToListOfExpressions(tupleOfFactorExpressions);
 		ExpressionFactorNetwork result = expressionFactorNetwork(expressions, context);
 		return result;
 	}
-	
+
 	private static List<Expression> fromTupleOfExpressionsStringToListOfExpressions(String tupleOfFactorExpressions) {
 		Expression parsed = parse(tupleOfFactorExpressions);
 		myAssert(parsed instanceof Tuple, () -> ExpressionFactorNetwork.class + " constructor taking String should receive string of tuple of factors, but got something that is not a tuple: " + tupleOfFactorExpressions);
@@ -80,14 +87,42 @@ public class ExpressionFactorNetwork extends AbstractEditableFactorNetwrok {
 		return result;
 	}
 
-	public static ExpressionFactorNetwork expressionFactorNetwork(List<? extends Expression> factorExpressions, Context context) {
-		List<? extends ExpressionFactor> expressionFactors = fromExpressionsToExpressionFactors(factorExpressions, context);
-		ExpressionFactorNetwork result = new ExpressionFactorNetwork(expressionFactors, context);
+	public static ExpressionFactorNetwork expressionFactorNetwork(List<Expression> expressions, Context context) {
+		return expressionFactorNetwork(expressions, new DefaultProceduralAttachments(), context);
+	}
+	
+	public static ExpressionFactorNetwork expressionFactorNetwork(List<? extends Expression> factorExpressions, ProceduralAttachments proceduralAttachments, Context context) {
+		List<ExpressionFactor> expressionFactors = fromExpressionsToExpressionFactors(factorExpressions, context);
+		expressionFactors.addAll(fromProceduralAttachmentsToExpressionFactors(proceduralAttachments, context));
+		ExpressionFactorNetwork result = new ExpressionFactorNetwork(expressionFactors);
 		return result;
 	}
 	
-	private static List<? extends ExpressionFactor> fromExpressionsToExpressionFactors(List<? extends Expression> expressions, Context context) {
-		List<? extends ExpressionFactor> result = mapIntoList(expressions, e -> fromExpressionToExpressionFactor(e, context));
+	private static List<? extends ExpressionFactor> fromProceduralAttachmentsToExpressionFactors(ProceduralAttachments proceduralAttachments, Context context) {
+		Set<Entry<String, Procedure>> variableNameAndProcedurePairs = proceduralAttachments.entrySet();
+		List<? extends ExpressionFactor> result = 
+				mapIntoList(
+						variableNameAndProcedurePairs, 
+						variableNameAndProcedure -> makeProceduralAttachmentExpressionFactor(variableNameAndProcedure, context));
+		return result;
+	}
+
+	private static ProceduralAttachmentExpressionFactor makeProceduralAttachmentExpressionFactor(Entry<String, Procedure> variableNameAndProcedure, Context context) {
+		DefaultExpressionVariable variable = makeVariable(variableNameAndProcedure);
+		Procedure procedure = variableNameAndProcedure.getValue();
+		ProceduralAttachmentExpressionFactor result = new ProceduralAttachmentExpressionFactor(variable, procedure, context);
+		return result;
+	}
+
+	private static DefaultExpressionVariable makeVariable(Entry<String, Procedure> variableNameAndProcedure) {
+		String variableName = variableNameAndProcedure.getKey();
+		Expression variableExpression = parse(variableName);
+		DefaultExpressionVariable variable = new DefaultExpressionVariable(variableExpression);
+		return variable;
+	}
+
+	private static List<ExpressionFactor> fromExpressionsToExpressionFactors(List<? extends Expression> expressions, Context context) {
+		List<ExpressionFactor> result = mapIntoList(expressions, e -> fromExpressionToExpressionFactor(e, context));
 		return result;
 	}
 
@@ -102,35 +137,7 @@ public class ExpressionFactorNetwork extends AbstractEditableFactorNetwrok {
 		return result;
 	}
 	
-	public ExpressionFactorNetwork(List<? extends ExpressionFactor> factorExpressions, Context context) {
-		indexFactorsAndVariables(factorExpressions, context);
-		this.context = context;
-	}
-	
-	// TODO: abstract this indexing to parent, since it works for any type of factors and variables
-	
-	private void indexFactorsAndVariables(List<? extends Factor> factors, Context context) {
-		for (Factor factor : factors) {
-			indexFactorAndItsVariables(factor);
-		}
-	}
-
-	private void indexFactorAndItsVariables(Factor factor) {
-		for (Variable variable : factor.getVariables()) {
-			indexFactorAndVariable(factor, variable);
-		}
-	}
-
-	private void indexFactorAndVariable(Factor factor, Variable variable) {
-		this.add(identityWrapper(factor), variable);
-	}
-
 	public Context getContext() {
 		return context;
-	}
-
-	@Override
-	public EditableFactorNetwork makeEmptyNetwork() {
-		return new ExpressionFactorNetwork(new ArrayList<>(), context);
 	}
 }

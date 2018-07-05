@@ -55,10 +55,10 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		this.children = children;
 		this.isExhausted = isExhausted;
 
-		this.separator = null;
-		this.notToSum = null;
-		this.setOfVariables = null;
-		this.setOfFactors = null;
+		this.separator = new LinkedHashSet<>();
+		this.notToSum = new LinkedHashSet<>();
+		this.setOfVariables = new LinkedHashSet<>();
+		this.setOfFactors = new LinkedHashSet<>();
 		
 	}
 	

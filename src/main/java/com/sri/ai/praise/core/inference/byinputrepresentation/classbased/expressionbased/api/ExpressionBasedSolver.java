@@ -17,7 +17,7 @@ public interface ExpressionBasedSolver {
 	Expression solve(ExpressionBasedProblem problem);
 
 	default Expression solve(Expression queryExpression, ExpressionBasedModel expressionBasedModel) {
-		DefaultExpressionBasedProblem problem = new DefaultExpressionBasedProblem(queryExpression, expressionBasedModel);
+		ExpressionBasedProblem problem = new DefaultExpressionBasedProblem(queryExpression, expressionBasedModel);
 		Expression result = solve(problem);
 		return result;
 	}

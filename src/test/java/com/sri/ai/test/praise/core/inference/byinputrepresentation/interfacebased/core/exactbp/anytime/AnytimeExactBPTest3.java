@@ -12,10 +12,10 @@ import com.google.common.base.Predicate;
 import com.sri.ai.grinder.helper.AssignmentsIterator;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.AEBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.TestCases;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.rodrigo.AnytimeExactBP;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.api.ExactBPNode;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.api.ExactBPNode;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
@@ -53,7 +53,8 @@ public class AnytimeExactBPTest3 {
 		
 		
 		Predicate<Polytope> criteria = p-> ((IntensionalConvexHullOfFactors)p).getIndices().size()>10;
-		AEBP aebp = new AEBP(factorNetwork, query, criteria );
+		AEBP aebp = new AEBP(factorNetwork, query, criteria,true );
+
 		/*while(aebp.hasNext()) {
 			Polytope p = aebp.next();
 			println(p);

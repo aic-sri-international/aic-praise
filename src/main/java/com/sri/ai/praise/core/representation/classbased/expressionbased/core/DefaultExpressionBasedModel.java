@@ -29,6 +29,8 @@ import com.sri.ai.grinder.theory.equality.EqualityTheory;
 import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory;
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
+import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
 import com.sri.ai.util.Util;
 
 public class DefaultExpressionBasedModel implements ExpressionBasedModel {
@@ -41,6 +43,7 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 	protected Collection<Type> additionalTypes = new LinkedList<>();
 	protected boolean isKnownToBeBayesianNetwork = false;
 	protected Theory theory = null;
+	protected ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
 	
 	private List<Expression> randomVariables;
 
@@ -72,7 +75,7 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 	}
 	
 	public DefaultExpressionBasedModel(
-			List<Expression> factors,
+			List<? extends Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
@@ -93,7 +96,7 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 	}
 	
 	public DefaultExpressionBasedModel(
-			List<Expression> factors,
+			List<? extends Expression> factors,
 			Map<String, String> mapFromRandomVariableNameToTypeName,
 			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
 			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
@@ -231,6 +234,17 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 		context = null;
 	}
 
+
+	@Override
+	public ProceduralAttachments getProceduralAttachments() {
+		return proceduralAttachments;
+	}
+
+	@Override
+	public void setProceduralAttachments(ProceduralAttachments proceduralAttachments) {
+		this.proceduralAttachments = proceduralAttachments;
+	}
+	
 	@Override
 	public String toString() {
 		StringJoiner stringJoiner = new StringJoiner("\n");

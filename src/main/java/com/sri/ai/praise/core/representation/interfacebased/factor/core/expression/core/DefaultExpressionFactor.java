@@ -62,4 +62,8 @@ public class DefaultExpressionFactor extends AbstractExpressionFactor implements
 	protected Expression computeInnerExpression() {
 		return innerExpression;
 	}
+	
+	protected void setInnerExpression(Expression newInnerExpression) {
+		this.innerExpression = this.cachedInnerExpression = newInnerExpression;
+	}
 }

@@ -2,7 +2,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
 
 import static com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil.genericVariableName;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.copyToSubTableFactor;
-import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -10,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.core.AbstractEditableFactorNetwrok;
 import com.sri.ai.praise.core.representation.classbased.table.core.data.markov.FactorTable;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultFactorNetwork;
 import com.sri.ai.util.Util;
 /**
  * 
@@ -21,14 +20,10 @@ import com.sri.ai.util.Util;
  * @author gabriel
  *
  */
-public class TableFactorNetwork extends AbstractEditableFactorNetwrok{
+public class TableFactorNetwork extends DefaultFactorNetwork {
 	
 	public TableFactorNetwork(List<? extends TableFactor> factors) {
-		for(TableFactor f:factors) {
-			for(TableVariable v: f.getVariables()) {
-				this.add(identityWrapper(f), v);
-			}
-		}
+		super(factors);
 	}
 	
 	public TableFactorNetwork(UAIModel model) {

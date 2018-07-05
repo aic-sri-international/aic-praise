@@ -32,8 +32,8 @@ import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.praise.core.PRAiSEUtil;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.rodrigo.AnytimeExactBP;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.api.ExactBPNode;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core.AbstractExactBPNode;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.api.ExactBPNode;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.AbstractExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
@@ -274,10 +274,10 @@ public class AnytimeExactBPTest {
 		runRodrigos(factorNetwork, query, expected);
 	}
 
-	private void runRodrigos(ExpressionFactorNetwork factorNetwork, Expression query,Expression expected) {
-		Context context = factorNetwork.getContext();
+	private void runRodrigos(ExpressionFactorNetwork factorNetwork, Expression query, Expression expected) {
 		long initialTime = System.currentTimeMillis();
 		ExpressionFactor resultFactor = solveWithExactBP(query, factorNetwork);
+		Context context = resultFactor.getContext();
 		Expression normalizedResult = PRAiSEUtil.normalize(query, resultFactor, context);
 		long finalTime = System.currentTimeMillis();
 		println("ExactBP: " + normalizedResult);

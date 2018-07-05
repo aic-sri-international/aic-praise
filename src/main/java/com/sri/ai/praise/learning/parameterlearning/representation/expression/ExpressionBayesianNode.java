@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
@@ -32,7 +33,6 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.grinder.library.number.Division;
 import com.sri.ai.grinder.library.number.Plus;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
@@ -54,8 +54,8 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	private Expression expression;
 	private Context context;
 	private ExpressionVariable child;
-	private LinkedList<ExpressionVariable> parents;
-	private LinkedList<ExpressionVariable> allVariables; // child is the first one, parents are the others
+	private List<ExpressionVariable> parents;
+	private List<ExpressionVariable> allVariables; // child is the first one, parents are the others
 	private LinkedHashSet<Expression> parameters;
 	
 	private LinkedHashSet<Family> families;
@@ -66,12 +66,12 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	// Useful variables used frequently:
 	private IndexExpressionsSet childIndexExpressionsSet;
 	
-	public ExpressionBayesianNode(Expression expression, Context context, ExpressionVariable child, LinkedList<ExpressionVariable> parents, LinkedHashSet<Expression> parameters) {
+	public ExpressionBayesianNode(Expression expression, Context context, ExpressionVariable child, LinkedList<ExpressionBayesianNode> parentsNodes, LinkedHashSet<Expression> parameters) {
 		super(expression, context);
 		this.expression = expression;
 		this.context = context;
 		this.child = child;
-		this.parents = parents;
+		this.parents = parentsNodes.stream().map(parentNode -> parentNode.getChildVariable()).collect(Collectors.toList());
 		this.allVariables = mergeElementsIntoOneList(child, parents);
 		this.parameters = parameters;
 		makeTheParamentersBecomeConstantsInsideTheExpression();
@@ -85,17 +85,17 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	}
 	
 	@Override
-	public Variable getChild() {
+	public ExpressionVariable getChildVariable() {
 		return this.child;
 	}
 
 	@Override
-	public List<? extends Variable> getParents() {
+	public List<ExpressionVariable> getParentsVariables() {
 		return this.parents;
 	}
 
 	@Override
-	public List<? extends Variable> getAllVariables() {
+	public List<ExpressionVariable> getAllVariables() {
 		return this.allVariables;
 	}
 
@@ -104,7 +104,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		for(Family family : families) {
 			familyCountFromDataset.put(family, Expressions.ZERO);
 			for(Expression parameter : family.parametersThatCanBeGenerated) {
-				Expression numberOfChildValuesThatMakeExpressionEqualsToThisParameter = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
+				Expression numberOfChildValuesThatMakeExpressionEqualsToThisParameter = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(parameter, family.condition);
 				parameterCountFromDataset.put(new Pair<Family, Expression>(family, parameter), numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
 				
 				incrementFamilyCount(family, numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
@@ -117,6 +117,10 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	 */
 	@Override
 	public void incrementCountForChildAndParentsAssignment(List<? extends Object> childAndParentsValues) {
+		if(thereAreNoParametersToLearn()) { // in this case there are no parameters to learn, we have a fixed prior probability for the node for example, then there is no point on incrementing (we would have errors since we have no families and so on)
+			return;
+		}
+		
 		verifyIfInputHasExpectedTypeAndSize(childAndParentsValues);
 		LinkedList<Expression> parentsValues = extractParentsValuesFrom((List<Expression>) childAndParentsValues);
 		
@@ -134,67 +138,12 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		updateInnerExpressionWithTheLearnedParameters();
 	}
 	
-	/**
-	 * Replaces all the parameters in the original expression by their learned values, and evaluates it with this.context.evaluate().
-	 * The new Expression is a conjunction of successive IfThenElses to create a "switch case" structure,
-	 * in which every case is the condition of a family and the result for that case is the original Expression with 
-	 * the parameters that can be generated by that family substituted by their learned values 
-	 */
-	private void updateInnerExpressionWithTheLearnedParameters() {
-		Expression newExpression = expression; 
-		
-		Expression previousIfThenElse = null;
-		int iterationCount = 0;
-		for(Iterator<Family> it = families.iterator(); it.hasNext(); ) {
-			Family family = it.next();
-			
-			// println("\nCurrent family: " + family.condition);
-			
-			Expression expressionWithNewParameters = expression;
-			for(Expression parameter : family.parametersThatCanBeGenerated) {
-				Expression learnedParameterValue = finalParameterValues.get(new Pair<Family, Expression>(family, parameter));
-				expressionWithNewParameters = expressionWithNewParameters.replaceAllOccurrences(parameter, learnedParameterValue, context);
-				// println(parameter + " = " + learnedParameterValue);
-			}
-			
-			expressionWithNewParameters = context.evaluate(expressionWithNewParameters);
-			// println("Expression with new parameters: " + expressionWithNewParameters);
-			
-			if(iterationCount == 0) {
-				previousIfThenElse = newExpression = expressionWithNewParameters;
-			}
-			else {
-				previousIfThenElse = newExpression = IfThenElse.make(family.condition, expressionWithNewParameters, previousIfThenElse);
-			}
-			
-			// println("New expression: " + newExpression);
-		
-			iterationCount++;
-		}
-		
-		newExpression = context.evaluate(newExpression);
-		this.innerExpression = expression = newExpression;
-	}
-
-	private void computeTheFinalValuesOfTheParameters() {
-		for(Family family : families) {
-			Expression familyCount = familyCountFromDataset.get(family);
-			
-			for(Expression parameter : family.parametersThatCanBeGenerated) {
-				Expression parameterCount = parameterCountFromDataset.get(new Pair<Family, Expression>(family, parameter));
-				
-				Expression parameterCountDividedByFamilyCount = Division.make(parameterCount, familyCount);
-				Expression normalizationFactor = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
-				Expression finalParameterValue = Division.make(parameterCountDividedByFamilyCount, normalizationFactor);
-				finalParameterValue = context.evaluate(finalParameterValue);
-				
-				finalParameterValues.put(new Pair<Family, Expression>(family, parameter), finalParameterValue);
-			}
-		}
-	}
-	
 	public LinkedHashSet<Family> getFamilies() {
 		return this.families;
+	}
+	
+	public Context getContext() {
+		return this.context;
 	}
 	
 	/**
@@ -332,9 +281,11 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		familyCountFromDataset.put(family, newFamilyCount);
 	}
 
-	private Expression getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(Expression parameter) {
-		Expression multisetOfChildValuesThatMakeExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(expression, parameter));
-		return apply(CARDINALITY, multisetOfChildValuesThatMakeExpressionEqualsToThisParameter);
+	private Expression getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(Expression parameter, Expression condition) {
+		Expression multisetOfChildValuesThatMakeExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(And.make(expression, condition), parameter));
+		Expression numberOfChildValues = apply(CARDINALITY, multisetOfChildValuesThatMakeExpressionEqualsToThisParameter);
+		
+		return numberOfChildValues;
 	}
 	
 	private void verifyIfInputHasExpectedTypeAndSize(List<? extends Object> childAndParentsValues) throws Error {
@@ -395,7 +346,68 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 			}
 		}
 		
+		println("Node: " + this.child);
+		println("parentsValues: " + parentsValues);
+		
 		throw new Error("Family for parentsValues not found");
+	}
+	
+	/**
+	 * Replaces all the parameters in the original expression by their learned values, and evaluates it with this.context.evaluate().
+	 * The new Expression is a conjunction of successive IfThenElses to create a "switch case" structure,
+	 * in which every case is the condition of a family and the result for that case is the original Expression with 
+	 * the parameters that can be generated by that family substituted by their learned values 
+	 */
+	private void updateInnerExpressionWithTheLearnedParameters() {
+		Expression newExpression = expression; 
+		
+		Expression previousIfThenElse = null;
+		int iterationCount = 0;
+		for(Iterator<Family> it = families.iterator(); it.hasNext(); ) {
+			Family family = it.next();
+			
+			Expression expressionWithNewParameters = expression;
+			for(Expression parameter : family.parametersThatCanBeGenerated) {
+				Expression learnedParameterValue = finalParameterValues.get(new Pair<Family, Expression>(family, parameter));
+				expressionWithNewParameters = expressionWithNewParameters.replaceAllOccurrences(parameter, learnedParameterValue, context);
+			}
+			
+			// expressionWithNewParameters = context.evaluate(expressionWithNewParameters);
+			
+			if(iterationCount == 0) {
+				previousIfThenElse = newExpression = expressionWithNewParameters;
+			}
+			else {
+				previousIfThenElse = newExpression = IfThenElse.make(family.condition, expressionWithNewParameters, previousIfThenElse);
+			}
+		
+			iterationCount++;
+		}
+		
+		newExpression = context.evaluate(newExpression);
+		expression = newExpression;
+		this.setInnerExpression(newExpression);
+	}
+
+	private void computeTheFinalValuesOfTheParameters() {
+		for(Family family : families) {
+			Expression familyCount = familyCountFromDataset.get(family);
+			
+			for(Expression parameter : family.parametersThatCanBeGenerated) {
+				Expression parameterCount = parameterCountFromDataset.get(new Pair<Family, Expression>(family, parameter));
+				
+				Expression parameterCountDividedByFamilyCount = Division.make(parameterCount, familyCount);
+				Expression normalizationFactor = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(parameter, family.condition);
+				Expression finalParameterValue = Division.make(parameterCountDividedByFamilyCount, normalizationFactor);
+				finalParameterValue = context.evaluate(finalParameterValue);
+				
+				finalParameterValues.put(new Pair<Family, Expression>(family, parameter), finalParameterValue);
+			}
+		}
+	}
+	
+	private boolean thereAreNoParametersToLearn() {
+		return this.parameters.size() == 0;
 	}
 	
 	public static void main(String[] args) {
@@ -412,32 +424,32 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		Expression param3 = parse("Param3");
 		
 		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real");
-		LinkedList<ExpressionVariable> parents = list(parent);
 		LinkedHashSet<Expression> parameters = Util.set(param1, param2);
-		// parameters.add(param3);
+		parameters.add(param3);
 		
-		Expression E = parse("if Child < 5 then Param1 else Param2");
+		// Expression E = parse("if Child < 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
-		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
+		Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
 		
 		println("E = " + E + "\n");
 		
-		ExpressionBayesianNode node = new ExpressionBayesianNode(E, context, child, parents, parameters);
-		println("Families = " + node.getFamilies());
+		ExpressionBayesianNode parentNode = new ExpressionBayesianNode(E, context, parent, list(), parameters);
+		ExpressionBayesianNode childNode = new ExpressionBayesianNode(E, context, child, list(parentNode), parameters);
+		println("Families = " + childNode.getFamilies());
 		
-		node.setInitialCountsForAllPossibleChildAndParentsAssignments();
+		childNode.setInitialCountsForAllPossibleChildAndParentsAssignments();
 		
 		// Incrementing from datapoints
 		LinkedList<Expression> childAndParentsValues = list(parse("1"), parse("1"));
 		
 		int nIncrements = 0;
 		for(int i = 1; i <= nIncrements; i++) {
-			node.incrementCountForChildAndParentsAssignment(childAndParentsValues);
+			childNode.incrementCountForChildAndParentsAssignment(childAndParentsValues);
 		}
 		
-		node.normalizeParameters();
-		println("\nnew E = " + node.getInnerExpression());
+		childNode.normalizeParameters();
+		println("\nnew E = " + childNode.getInnerExpression());
 		
 		println("\nEnd of Program");
 		

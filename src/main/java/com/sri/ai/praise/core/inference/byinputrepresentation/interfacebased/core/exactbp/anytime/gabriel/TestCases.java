@@ -193,7 +193,7 @@ public class TestCases {
 			ArrayList<TableVariable> col = new ArrayList<>();
 			variables.add(col);
 			for (int j = 0; j < gridSize; j++) {
-				col.add(j,new TableVariable(i+"_"+j, 2));
+				col.add(j,new TableVariable("A_"+i+"_"+j, 2));
 			}
 		}	
 		
@@ -243,7 +243,7 @@ public class TestCases {
 			ArrayList<ExpressionVariable> col = new ArrayList<>();
 			variables.add(col);
 			for (int j = 0; j < gridSize; j++) {
-				ExpressionVariable v = new DefaultExpressionVariable(makeSymbol("A_"+i+"_"+j)); 
+				ExpressionVariable v =new DefaultExpressionVariable(makeSymbol("A_"+i+"_"+j)); 
 				col.add(j,v);
 				makeSymbol("A_"+i+"_"+j);
 				context = context.extendWithSymbolsAndTypes(v,parse("Boolean"));
@@ -431,7 +431,7 @@ public class TestCases {
 		
 		for (int i = 0; i < depth; i++) {
 			for (int j = 0; j < pow(childrenPerNode,i); j++) {
-				result[i][j]= new TableVariable("g_"+i+"_"+j, cardinality);
+				result[i][j]= new TableVariable("A_"+i+"_"+j, cardinality);
 			}
 		}
 		return result;
@@ -543,6 +543,21 @@ public class TestCases {
 			println("ed");
 		}
 		*/
+	}
+	
+	public static TableVariable getTableVariableByName(String queryName,List<TableFactor> grid){
+		
+		TableVariable query = null;
+		for(TableFactor f : grid) {
+			for(TableVariable v : f.getVariables()) {
+				if(v.getName().equals(queryName) ){
+					query = v;
+					//Util.println("Query not null");
+				}
+			}
+			//Util.println(f.getVariables());	
+		}
+		return query;
 	}
 	
 }

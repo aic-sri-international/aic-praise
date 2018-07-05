@@ -56,8 +56,25 @@ import com.sri.ai.util.collect.DefaultManyToManyRelation;
 public abstract class AbstractFactorNetwork 
 extends DefaultManyToManyRelation<IdentityWrapper<Factor>, Variable> implements FactorNetwork {
 
-	public AbstractFactorNetwork() {
+	public AbstractFactorNetwork(List<? extends Factor> factors) {
 		super();
+		indexFactorsAndVariables(factors);
+	}
+
+	private void indexFactorsAndVariables(List<? extends Factor> factors) {
+		for (Factor factor : factors) {
+			indexFactorAndItsVariables(factor);
+		}
+	}
+
+	private void indexFactorAndItsVariables(Factor factor) {
+		for (Variable variable : factor.getVariables()) {
+			indexFactorAndVariable(factor, variable);
+		}
+	}
+
+	private void indexFactorAndVariable(Factor factor, Variable variable) {
+		this.add(identityWrapper(factor), variable);
 	}
 
 	@Override

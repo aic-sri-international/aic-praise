@@ -35,15 +35,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.core;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor.multiply;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.notNullAndEquals;
-import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.union;
@@ -51,15 +49,15 @@ import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.unionOfAllButT
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.eager.api.ExactBPNode;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.Util;
+import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -72,18 +70,15 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * which is left abstract since variable-rooted Exact BPs will want to create
  * subs which are factor-rooted Exact BPs and vice-versa,
  * so it is not a common functionality.
- * <p>
- * Method {@link #function(List)} is also left unspecified at this level
- * because variable-rooted Exact BPs will multiple messages
- * while factor-rooted ones will sum out certain indices of its factor times incoming messages.
+ * The same holds with {@link #getFactorsAtRoot()}.
  * <p>
  * Other than that, both types must keep track of
  * included factor nodes (those already assigned to be in its branch)
  * and excluded factor nodes (those in their siblings or parent),
  * so this is implemented at this level.
  * 
- * @param <RootType> the type ({@link Fator} or {@link Variable}) of the root node of the tree.
- * @param <SubRootType> the type ({@link Fator} or {@link Variable}) of the root node of the subs. Must be the opposite of RootType.
+ * @param <RootType> the type ({@link Factor} or {@link Variable}) of the root node of the tree.
+ * @param <SubRootType> the type ({@link Factor} or {@link Variable}) of the root node of the subs. Must be the opposite of RootType.
  *
  * @author braz
  *
@@ -213,69 +208,8 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	}
 
 	@Override
-	public Factor function(List<Factor> incomingMessages) {
-		Factor product = computeProductOfFactorsAtRootAndIncomingMessages(incomingMessages);
-		List<? extends Variable> allFreeVariablesInProduct = product.getVariables();
-		List<? extends Variable> variablesToBeSummedOut = getSummedOutVariables(allFreeVariablesInProduct);
-		Factor result = sumOut(variablesToBeSummedOut, product);
-		return result;
-	}
-
-	/**
-	 * Returns the product of given incoming messages and the factor at root, if there is any. 
-	 * @param incomingMessages
-	 * @return
-	 */
-	public Factor computeProductOfFactorsAtRootAndIncomingMessages(List<Factor> incomingMessages) {
-		Iterator<Factor> allFactors = nestedIterator(getFactorsAtRoot(), incomingMessages);
-		Factor product = multiply(allFactors);
-		return product;
-	}
-
-	/**
-	 * Returns the result of eliminating given indices from given factor, plus whatever bookkeeping such as printing information or recording size of computation
-	 * (since this is one of the most expensive steps). 
-	 * @param variablesToBeSummedOut
-	 * @param factor
-	 * @return
-	 */
-	@Override
-	public Factor sumOut(List<? extends Variable> variablesToBeSummedOut, Factor factor) {
-		Factor result = factor.sumOut(variablesToBeSummedOut);
-		printTracingInformation(factor, variablesToBeSummedOut, result);
-		return result;
-	}
-
-	private void printTracingInformation(Factor factor, List<? extends Variable> variablesToBeSummedOut, Factor result) {
-		printTracingInformationHeader();
-		printTracingInformationBody(factor, variablesToBeSummedOut, result);
-	}
-
-	private void printTracingInformationHeader() {
-		if (getParent() == null) {
-			println("Final message on " + getRoot());
-		}
-		else {
-			println("Message from " + getRoot() + " to " + getParent());
-		}
-	}
-
-	private void printTracingInformationBody(Factor factor, List<? extends Variable> variablesToBeSummedOut, Factor result) {
-		println("Received total product " + factor);
-		String eliminatedString = variablesToBeSummedOut.isEmpty()? "no indices" : join(variablesToBeSummedOut);
-		println("Eliminating " + eliminatedString + " from " + factor + " ---> " + result);
-		println("Sending " + result);
-	}
-	
-	private void println(String string) {
-		if (debug) {
-			Util.println(string);
-		}
-	}
-
-	@Override
-	public List<? extends Variable> getSummedOutVariables(Collection<? extends Variable> allFreeVariablesInSummand) {
-		List<? extends Variable> variablesToBeSummedOut = collectToList(allFreeVariablesInSummand, n -> ! isFreeVariable((Variable) n));
+	public List<? extends Variable> determinedVariablesToBeSummedOut(Collection<? extends Variable> variablesInSummand) {
+		List<? extends Variable> variablesToBeSummedOut = collectToList(variablesInSummand, n -> ! isFreeVariable((Variable) n));
 		return variablesToBeSummedOut;
 	}
 
@@ -308,6 +242,51 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	private boolean isInExternalFactors(Variable variable) {
 		boolean result = excludedFactors.thereIsAnElementSatisfying(f -> f.contains(variable));
 		return result;
+	}
+
+	/**
+	 * Returns the result of eliminating given indices from given factor, plus whatever bookkeeping such as printing information or recording size of computation
+	 * (since this is one of the most expensive steps). 
+	 * @param variablesToBeSummedOut
+	 * @param factor
+	 * @return
+	 */
+	@Override
+	public Factor sumOutWithBookkeeping(List<? extends Variable> variablesToBeSummedOut, Factor factor) {
+		Factor result = factor.sumOut(variablesToBeSummedOut);
+		printTracingInformation(factor, variablesToBeSummedOut, result);
+		return result;
+	}
+
+	private void printTracingInformation(Factor factor, List<? extends Variable> variablesToBeSummedOut, Factor result) {
+		printTracingInformationHeader();
+		printTracingInformationBody(factor, variablesToBeSummedOut, result);
+	}
+
+	private void printTracingInformationHeader() {
+		if (getParent() == null) {
+			log(() -> "Final message on " + getRoot());
+		}
+		else {
+			log(() -> "Message from " + getRoot() + " to " + getParent());
+		}
+	}
+
+	private void printTracingInformationBody(Factor factor, List<? extends Variable> variablesToBeSummedOut, Factor result) {
+		log(() -> "Received total product " + factor);
+		String eliminatedString = variablesToBeSummedOut.isEmpty()? "no indices" : join(variablesToBeSummedOut);
+		log(() -> "Eliminating " + eliminatedString + " from " + factor + " ---> " + result);
+		log(() -> "Sending " + result);
+	}
+	
+	/**
+	 * Logging function; takes a nullary function in order to avoid computing the message string unnecessarily.
+	 * @param message
+	 */
+	private void log(NullaryFunction<String> message) {
+		if (debug) {
+			Util.println(message.apply());
+		}
 	}
 
 	@Override

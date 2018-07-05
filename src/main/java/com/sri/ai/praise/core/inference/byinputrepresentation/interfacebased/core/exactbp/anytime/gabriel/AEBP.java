@@ -7,7 +7,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.cor
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.aebpmodel.aebpmodeliterator.api.AEBPTreeIterator;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.aebptree.AEBPFactorTreeNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.aebptree.AEBPQueryTreeNode;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.api.EditableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.util.collect.EZIterator;
@@ -32,21 +32,25 @@ public class AEBP extends EZIterator<Polytope> {
 	AEBPTreeIterator getNextNodeToPutOnTheTree;// This iterator determines the expansion of the tree:
 									// getNextNodeToPutOnTheTree.next() gives a treeNode pointing to the parent it has to be attached to
 	
+	private boolean cleverTrueBruteForceFalse;
+	
 	public AEBP(EditableFactorNetwork network, 
 			Variable query,
 			Function<AEBPModel,AEBPTreeIterator> getNextNodeToPutOnTheTree,
-			Predicate<Polytope> boxIt) {
+			Predicate<Polytope> boxIt,
+			boolean cleverTrueBruteForceFalse) {
 		this.model = new AEBPModel(network, query);
 		this.getNextNodeToPutOnTheTree = getNextNodeToPutOnTheTree.apply(model);
 		tree = this.getNextNodeToPutOnTheTree.getRootOfTree();
 		this.boxIt = boxIt;
+		cleverTrueBruteForceFalse = true;
 	}
 	
-	public AEBP(EditableFactorNetwork network, Variable query, Predicate<Polytope> boxIt) {
-		this(network, query, model -> new BFS(model), boxIt);
+	public AEBP(EditableFactorNetwork network, Variable query, Predicate<Polytope> boxIt, boolean cleverTrueBruteForceFalse) {
+		this(network, query, model -> new BFS(model), boxIt,cleverTrueBruteForceFalse);
 	}
 	public AEBP(EditableFactorNetwork network, Variable query) {
-		this(network, query, model -> new BFS(model), (v)->false);
+		this(network, query, model -> new BFS(model), (v)->false,true);
 	}
 
 	@Override
@@ -69,6 +73,6 @@ public class AEBP extends EZIterator<Polytope> {
 		//Add new factor to model
 		model.ExpandModel(nextTreeNodeToAddToTheTree.getRoot());
 		//Add new factor to the tree
-		tree.addNodeToTheTree(nextTreeNodeToAddToTheTree);
+		tree.addNodeToTheTree(nextTreeNodeToAddToTheTree,model.getMapFromNodeToPartition(),cleverTrueBruteForceFalse);
 	}
 }

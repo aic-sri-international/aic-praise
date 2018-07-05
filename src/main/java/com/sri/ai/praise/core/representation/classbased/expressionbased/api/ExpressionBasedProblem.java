@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
 
 /**
  * Represents a (always marginalization, for now) problem using {@link Expression}.
@@ -35,5 +36,9 @@ public interface ExpressionBasedProblem {
 	Context getContext();
 
 	Predicate<Expression> getIsParameterPredicate();
+	
+	ProceduralAttachments getProceduralAttachments();
+	
+	void setProceduralAttachments(ProceduralAttachments proceduralAttachments);
 
 }

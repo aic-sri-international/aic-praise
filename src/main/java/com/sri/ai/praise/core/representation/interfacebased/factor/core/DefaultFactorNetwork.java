@@ -1,16 +1,18 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core;
 
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime.gabriel.representation.api.EditableFactorNetwork;
+import java.util.List;
+
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.AbstractFactorNetwork;
 
-public abstract class AbstractEditableFactorNetwork extends AbstractFactorNetwork implements EditableFactorNetwork{
+public class DefaultFactorNetwork extends AbstractFactorNetwork implements EditableFactorNetwork {
 	
-	public AbstractEditableFactorNetwork() {
-		super();
+	public DefaultFactorNetwork(List<? extends Factor> factors) {
+		super(factors);
 	}
 	
 	@Override
@@ -21,5 +23,10 @@ public abstract class AbstractEditableFactorNetwork extends AbstractFactorNetwor
 	@Override
 	public void add(Factor factor, Variable variable) {
 		this.add(identityWrapper(factor),variable);
+	}
+
+	@Override
+	public EditableFactorNetwork makeEmptyNetwork() {
+		return new DefaultFactorNetwork(list());
 	}
 }

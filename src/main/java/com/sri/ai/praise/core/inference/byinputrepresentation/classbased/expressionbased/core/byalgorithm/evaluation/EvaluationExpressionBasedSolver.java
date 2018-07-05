@@ -38,6 +38,7 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.evaluation;
 
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.setDifference;
 
 import java.util.List;
@@ -98,6 +99,7 @@ public class EvaluationExpressionBasedSolver extends AbstractExpressionBasedSolv
 	
 	@Override
 	public Expression solveForQuerySymbolDefinedByExpressionBasedProblem(ExpressionBasedProblem problem) {
+		myAssert(problem.getProceduralAttachments().isEmpty(), () -> getClass() + " not prepared to solve problems with procedural attachments.");
 		Context context = problem.getContext();
 		Expression productOfPotentials = Times.make(problem.getFactorExpressionsIncludingQueryDefinitionIfAny());
 		Expression queryVariable = problem.getQuerySymbol();

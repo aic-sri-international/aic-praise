@@ -54,11 +54,20 @@ public class ExpressionBasedProblemToInterfaceBasedProblemConversion {
 
 	public static Problem translate(ExpressionBasedProblem expressionBasedProblem) {
 		ExpressionVariable queryVariable = new DefaultExpressionVariable(expressionBasedProblem.getQuerySymbol());
-		ExpressionFactorNetwork factorNetwork = expressionFactorNetwork(expressionBasedProblem.getFactorExpressionsIncludingQueryDefinitionIfAny(), expressionBasedProblem.getContext());
+		ExpressionFactorNetwork factorNetwork = makeFactorNetwork(expressionBasedProblem);
 		Predicate<Expression> isExpressionParameterPredicate = expressionBasedProblem.getIsParameterPredicate();
 		Predicate<Variable> isParameterPredicate = makeIsParameterPredicate(isExpressionParameterPredicate);
 		Problem problem = new DefaultVariableMarginalQuery(queryVariable, factorNetwork, isParameterPredicate);
 		return problem;
+	}
+
+	private static ExpressionFactorNetwork makeFactorNetwork(ExpressionBasedProblem expressionBasedProblem) {
+		ExpressionFactorNetwork result = 
+				expressionFactorNetwork(
+						expressionBasedProblem.getFactorExpressionsIncludingQueryDefinitionIfAny(), 
+						expressionBasedProblem.getProceduralAttachments(), 
+						expressionBasedProblem.getContext());
+		return result;
 	}
 
 	private static Predicate<Variable> makeIsParameterPredicate(Predicate<Expression> isExpressionParameterPredicate) {
