@@ -39,6 +39,8 @@ package com.sri.ai.test.praise.core.inference;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,8 +52,11 @@ import org.junit.Test;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
+import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
+import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
 
-public class HOGMSolverTest {
+public class HOGMMultiQueryProblemSolverTest {
 	
 	@Test
 	public void linearRealArithmeticOnPosition() {
@@ -59,6 +64,7 @@ public class HOGMSolverTest {
 				"random position         : Real; // real, unobserved position of an object\n" + 
 				"random observedPosition : Real; // observed, noisy position of the same object\n" + 
 				"random event : Boolean;\n" + 
+				"random external : 1..5;\n" + 
 				"\n" + 
 				"// p(position) proportional to inverted parabola around 0 + 10\n" + 
 				"if position > -10 and position < 10\n" + 
@@ -78,10 +84,13 @@ public class HOGMSolverTest {
 				"";
 		
 		String query = "event";
-		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, query);
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query, "external"));
+		ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments(map("external", (Procedure) p -> 3));
+		solver.setProceduralAttachments(proceduralAttachments);
+		
 		List<HOGMProblemResult> results = solver.getResults();
 	
-		assertEquals(1, results.size());
+		assertEquals(2, results.size());
 		
 		HOGMProblemResult result = getFirst(results);
 		result.getErrors().stream().forEach(e -> println(e));
@@ -89,5 +98,12 @@ public class HOGMSolverTest {
 		println(resultValue);
 		assertFalse(result.hasErrors());
 		assertEquals(parse("if event then 1 else 0"), result.getResult());
+
+		result = results.get(1);
+		result.getErrors().stream().forEach(e -> println(e));
+		resultValue = result.getResult();
+		println(resultValue);
+		assertFalse(result.hasErrors());
+		assertEquals(parse("if external = 3 then 1 else 0"), result.getResult());
 	}
 }

@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver;
 
+import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 
 import java.util.ArrayList;
@@ -61,13 +62,16 @@ import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProc
 public class HOGMMultiQueryProblemSolver {
 	
 	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = ExactBPExpressionBasedSolver.class;
+
+	private String modelString;
+	private List<String> queries;
 	
 	private HOGModel hogmModel = null;
 	private ExpressionBasedModel expressionBasedModel;
 	private Class<? extends ExpressionBasedSolver> solverClass;
 	private HOGMSingleQueryProblemSolver problemSolver;
 	private List<HOGMProblemError> modelErrors = new ArrayList<>();
-	private List<HOGMProblemResult> results = new ArrayList<>();
+	private List<HOGMProblemResult> results = null;
 	private ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
 	
 	public HOGMMultiQueryProblemSolver(String model, String query) {
@@ -83,9 +87,9 @@ public class HOGMMultiQueryProblemSolver {
 	}
 	
 	public HOGMMultiQueryProblemSolver(String modelString, List<String> queries, Class<? extends ExpressionBasedSolver> solverClass) {
+		this.modelString = modelString;
+		this.queries = queries;
 		this.solverClass = solverClass;
-		initializeModel(modelString);
-        processAllQueries(queries);
 	}
 	
 	public void setProceduralAttachments(ProceduralAttachments proceduralAttachments) {
@@ -96,11 +100,22 @@ public class HOGMMultiQueryProblemSolver {
 		return this.proceduralAttachments;
 	}
 
+	public List<HOGMProblemResult> getResults() {
+		if (results == null) {
+			results = arrayList();
+			initializeModel(modelString);
+	        processAllQueries(queries);
+		}
+        return results;
+    }
+
 	private void initializeModel(String modelString) {
 		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString, modelErrors);
 		this.hogmModel = parsingWithErrorCollecting.getModel();
 		this.expressionBasedModel = hogmModel == null? null : new HOGMExpressionBasedModel(hogmModel);
-		this.expressionBasedModel.setProceduralAttachments(proceduralAttachments);
+		if (this.expressionBasedModel != null) {
+			this.expressionBasedModel.setProceduralAttachments(proceduralAttachments);
+		}
 	}
 
 	private void processAllQueries(List<String> queries) {
@@ -119,10 +134,6 @@ public class HOGMMultiQueryProblemSolver {
 			problemSolver.interrupt();
 		}
 	}
-
-	public List<HOGMProblemResult> getResults() {
-        return results;
-    }
 
 	public Expression simplifyAnswer(Expression answer, Expression forQuery) {
 		Expression result = HOGMAnswerSimplifier.simplifyAnswer(answer, forQuery, expressionBasedModel.getContext());

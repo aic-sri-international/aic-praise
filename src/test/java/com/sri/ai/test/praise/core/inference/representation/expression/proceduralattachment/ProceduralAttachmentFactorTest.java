@@ -116,8 +116,5 @@ public class ProceduralAttachmentFactorTest {
 		assertTrue(ran3.value);
 		assertFalse(ran4.value);
 		assertFalse(ran5.value);
-		
-		// TODO: deal with ease of forgetting to set up variable predicate. Should just use symbols, really.
 	}
-
 }

@@ -65,8 +65,12 @@ import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProc
  */
 public class ExpressionFactorNetwork extends DefaultFactorNetwork {
 	
+	private Context context;
+	
 	public ExpressionFactorNetwork(List<? extends ExpressionFactor> expressionFactors) {
 		super(expressionFactors);
+		myAssert(expressionFactors.size() != 0, () -> "Cannot have " + getClass() + " defined over zero factors");
+		context = expressionFactors.get(0).getContext();
 	}
 
 	public static ExpressionFactorNetwork expressionFactorNetwork(String tupleOfFactorExpressions, Context context) {
@@ -131,5 +135,9 @@ public class ExpressionFactorNetwork extends DefaultFactorNetwork {
 			 result = new DefaultExpressionFactor(expression, context);
 		}
 		return result;
+	}
+	
+	public Context getContext() {
+		return context;
 	}
 }

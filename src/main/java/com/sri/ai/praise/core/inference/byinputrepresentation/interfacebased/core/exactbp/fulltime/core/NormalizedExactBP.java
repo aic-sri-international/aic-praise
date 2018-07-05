@@ -37,13 +37,19 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
+import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 
 public class NormalizedExactBP implements Solver {
 
@@ -51,9 +57,19 @@ public class NormalizedExactBP implements Solver {
 	public Expression solve(Problem problem) {
 		ExactBP exactBP = new ExactBP(problem);
 		ExpressionVariable queryVariable = (ExpressionVariable) problem.getQueryVariable();
-		ExpressionFactor unnormalized = (ExpressionFactor) exactBP.apply();
-		Expression normalizedMarginal = normalize(queryVariable, unnormalized, unnormalized.getContext());
+		Factor factor = exactBP.apply();
+		Context context = getContext(problem);
+		ExpressionFactor unnormalized = getUnnormalizedExpressionFactor(factor, context);
+		Expression normalizedMarginal = normalize(queryVariable, unnormalized, context);
 		return normalizedMarginal;
+	}
+
+	private Context getContext(Problem problem) {
+		return ((ExpressionFactorNetwork) problem.getModel()).getContext();
+	}
+
+	private ExpressionFactor getUnnormalizedExpressionFactor(Factor factor, Context context) {
+		return factor instanceof ConstantFactor? new DefaultExpressionFactor(ONE, context) : (ExpressionFactor) factor;
 	}
 
 	@Override
