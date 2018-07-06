@@ -2,6 +2,7 @@ package com.sri.ai.test.praise.learning.symbolicparameterestimation;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.library.number.Times.getMultiplicands;
+import static com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation.buildOptimizedExpressionBasedModel;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static org.junit.Assert.assertEquals;
@@ -271,7 +272,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 						queryExpressions,
 						GoalType.MAXIMIZE,
 						new double[] {0});
-				ExpressionBasedModel newModel = parameterEstimationForExpressionBasedModel.buildOptimizedExpressionBasedModel(result);
+				ExpressionBasedModel newModel = buildOptimizedExpressionBasedModel(result, expressionBasedModel);
 				
 				System.out.println(newModel);
 				
@@ -283,7 +284,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 						queryExpressions2,
 						GoalType.MAXIMIZE,
 						new double[] {0});
-				ExpressionBasedModel newModel2 = parameterEstimationForExpressionBasedModel2.buildOptimizedExpressionBasedModel(result2);
+				ExpressionBasedModel newModel2 = buildOptimizedExpressionBasedModel(result2, newModel);
 				System.out.println(newModel2);
 		
 	}
@@ -296,7 +297,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				queryExpressions,
 				GoalType.MAXIMIZE,
 				startPoint);
-		ExpressionBasedModel newModel = parameterEstimationForExpressionBasedModel.buildOptimizedExpressionBasedModel(result);
+		ExpressionBasedModel newModel = buildOptimizedExpressionBasedModel(result, expressionBasedModel);
 		System.out.println(" New Model : " + newModel);
 		
 		return result;

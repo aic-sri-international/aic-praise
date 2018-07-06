@@ -27,7 +27,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.optimization.FunctionToOptimize;
+import com.sri.ai.expresso.optimization.SymbolicFunctionToOptimize;
 import com.sri.ai.expresso.optimization.GradientToOptimize;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -45,6 +45,7 @@ import com.sri.ai.praise.core.representation.classbased.featurebased.FeatureBase
 public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 	
 	public ExpressionBasedModel expressionBasedModel;
+	public FeatureBasedModel featureBasedModel;
 	public List<Expression> parameters;
 	public List<Expression> evidences;
 	
@@ -52,6 +53,8 @@ public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 		this.expressionBasedModel = expressionBasedModel;
 		this.parameters = findParameters(expressionBasedModel);
 		this.evidences = evidences;
+		ExpressionBasedModelToFeatureBasedModelTranslation translation = new ExpressionBasedModelToFeatureBasedModelTranslation(expressionBasedModel, parameters);
+		this.featureBasedModel = translation.featureBasedModel;
 	}
 
 	public int countOccurencesGivenParameter(Expression parameter) {
@@ -78,11 +81,6 @@ public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 		
 		Map<Expression, Double> result = new HashMap<Expression, Double>();
 		
-		List<Expression> parameters = findParameters(expressionBasedModel);
-		
-		ExpressionBasedModelToFeatureBasedModelTranslation translation = new ExpressionBasedModelToFeatureBasedModelTranslation(expressionBasedModel, parameters);
-		FeatureBasedModel featureBasedModel = translation.featureBasedModel;
-		
 		System.out.println("featureBasedModel : " + featureBasedModel);
 		
 		Expression objectiveFunction = computeLogLikelyhoodFunction(featureBasedModel);
@@ -96,7 +94,7 @@ public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 		int k = 0;
 		for(Expression key : featureBasedModel.mapConditionToWeight.keySet()) {
 			double nonSigmoidResult = 1/(1+exp(-valueOptimum[k]));
-			result.put(featureBasedModel.mapConditionToWeight.get(key).get(0), nonSigmoidResult);
+			result.put(featureBasedModel.mapConditionToWeight.get(key), nonSigmoidResult);
 			k++;
 		}
 		
@@ -107,8 +105,7 @@ public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 		Vector<Expression> gradient = new Vector<Expression>();
 		
 		for (Expression condition : featureBasedModel.mapConditionToWeight.keySet()) {
-			Expression logParameter = featureBasedModel.mapConditionToWeight.get(condition);
-			Expression parameter = logParameter.get(0);
+			Expression parameter = featureBasedModel.mapConditionToWeight.get(condition);
 			
 			System.out.println("parameter : " + parameter);
 			
@@ -150,7 +147,7 @@ public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 				boolean booleanValueOfConditionGivenEvidence = newContext.evaluate(condition).booleanValue();
 				
 				//System.out.println(newContext.evaluate(condition));
-				Expression parameter = featureBasedModel.mapConditionToWeight.get(condition).get(0);
+				Expression parameter = featureBasedModel.mapConditionToWeight.get(condition);
 				Expression parameterWithSigmoidTrick = applySigmoidTrick(parameter, initialContext);
 				
 				if (booleanValueOfConditionGivenEvidence){ 
@@ -200,7 +197,7 @@ public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 		NonLinearConjugateGradientOptimizer optimizer = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE, 
 				new SimpleValueChecker(1e-13, 1e-13));
 		
-		final FunctionToOptimize f = new FunctionToOptimize(expressionToOptimize);
+		final SymbolicFunctionToOptimize f = new SymbolicFunctionToOptimize(expressionToOptimize);
 		final GradientToOptimize gradientToOptimize = new GradientToOptimize(expressionToOptimize, gradient);
 		
 		ObjectiveFunction objectiveFunction = new ObjectiveFunction(f);

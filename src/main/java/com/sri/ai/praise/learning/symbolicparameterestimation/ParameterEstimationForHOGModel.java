@@ -1,6 +1,7 @@
 package com.sri.ai.praise.learning.symbolicparameterestimation;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
+import static com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation.parseModelStringToHOGMModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,11 +11,10 @@ import java.util.Map;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMModelParsing;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
-import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation;
 
 public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	
@@ -34,24 +34,6 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 		this.hogmModel = hogmModel;
 		this.evidences = evidences;
 		this.modelErrors = modelErrors;
-	}
-	
-	public HOGModel parseModelStringToHOGMModel(String modelString, List<HOGMProblemError> modelErrors) {
-		
-		//System.out.println(modelString);
-		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString, modelErrors);
-		//System.out.println(parsingWithErrorCollecting.toString());
-		//System.out.println("errors : " + modelErrors);
-		HOGModel result = parsingWithErrorCollecting.getModel();
-		//System.out.println("random variable declaration : " + result.getRandomVariableDeclarations());
-		return result;
-	}
-	
-	public ExpressionBasedModel parseHOGModelToExpressionBasedModel(HOGModel hogmModel) {
-		
-		ExpressionBasedModel result = hogmModel == null? null : new HOGMExpressionBasedModel(hogmModel);
-		
-		return result;
 	}
 	
 	/**
@@ -81,7 +63,7 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	public HashMap<Expression, Double> optimizeWhenModelIsHOGModel(HOGModel hogmModel, List<Expression> queryExpression, GoalType goalType,
 			double[] startPoint){
 		
-		ExpressionBasedModel expressionBasedModel = parseHOGModelToExpressionBasedModel(hogmModel);
+		ExpressionBasedModel expressionBasedModel = UsefulOperationsParameterEstimation.parseHOGModelToExpressionBasedModel(hogmModel);
 		
 		ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel = new ParameterEstimationForExpressionBasedModel(expressionBasedModel, queryExpression);
 		
