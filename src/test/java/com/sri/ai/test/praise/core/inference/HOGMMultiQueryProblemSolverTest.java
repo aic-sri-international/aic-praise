@@ -106,6 +106,8 @@ public class HOGMMultiQueryProblemSolverTest {
 		result.getErrors().stream().forEach(e -> println(e));
 		Expression resultValue = result.getResult();
 		println(resultValue);
+		println("Explanation");
+		println(result.getExplanation());
 		assertFalse(result.hasErrors());
 		assertEquals(parse("if event then 1 else 0"), result.getResult());
 
@@ -113,6 +115,8 @@ public class HOGMMultiQueryProblemSolverTest {
 		result.getErrors().stream().forEach(e -> println(e));
 		resultValue = result.getResult();
 		println(resultValue);
+		println("Explanation");
+		println(result.getExplanation());
 		assertFalse(result.hasErrors());
 		assertEquals(parse("if internal1 = 2 then 1 else 0"), result.getResult());
 
@@ -121,6 +125,8 @@ public class HOGMMultiQueryProblemSolverTest {
 //		result.getErrors().stream().forEach(e -> println(e));
 //		resultValue = result.getResult();
 //		println(resultValue);
+//		println("Explanation");
+//		println(result.getExplanation());
 //		assertFalse(result.hasErrors());
 //		assertEquals(parse("if alpha = 0.8 then 1 else 0"), result.getResult());
 	}
