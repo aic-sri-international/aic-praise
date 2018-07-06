@@ -52,6 +52,7 @@ import com.sri.ai.grinder.group.Sum;
 import com.sri.ai.grinder.group.SumProduct;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
+import com.sri.ai.util.DefaultExplanationTree;
 import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.base.Pair;
 
@@ -65,7 +66,7 @@ public class HOGMProblemResult {
 	private long                 millisecondsToCompute = 0L;
 	private int                  numberOfSummations    = -1;
 	private List<Integration>    summations            = null;
-	private ExplanationTree      explanation           = ExplanationTree.PLACEHOLDER;
+	private ExplanationTree      explanation           = DefaultExplanationTree.PLACEHOLDER;
 	
 	public HOGMProblemResult(String queryString, Expression queryExpression, HOGModel parsedModel, Pair<Expression, Long> resultAndTime) {
 		this(queryString, queryExpression, parsedModel, resultAndTime.first, resultAndTime.second);
