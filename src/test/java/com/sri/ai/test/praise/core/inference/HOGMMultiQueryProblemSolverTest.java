@@ -177,6 +177,7 @@ public class HOGMMultiQueryProblemSolverTest {
 		result.getErrors().stream().forEach(e -> println(e));
 		Expression resultValue = result.getResult();
 		println(resultValue);
+		println(result.getExplanation());
 		assertFalse(result.hasErrors());
 		println("query: " + query);
 		println("expected: " + expected);
