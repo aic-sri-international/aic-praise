@@ -19,6 +19,7 @@ import java.util.Map;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
+import com.sri.ai.util.DefaultExplanationTree;
 import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
@@ -451,7 +452,7 @@ public class TableFactor implements Factor {
 		return null;
 	}
 
-	private ExplanationTree explanation;
+	private ExplanationTree explanation = DefaultExplanationTree.PLACEHOLDER;
 
 	@Override
 	public ExplanationTree getExplanation() {

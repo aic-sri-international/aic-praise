@@ -50,6 +50,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
+import com.sri.ai.util.DefaultExplanationTree;
 
 public class NormalizedExactBP implements Solver {
 
@@ -60,8 +61,13 @@ public class NormalizedExactBP implements Solver {
 		Factor factor = exactBP.apply();
 		Context context = getContext(problem);
 		ExpressionFactor unnormalized = getUnnormalizedExpressionFactor(factor, context);
-		Expression normalizedMarginal = normalize(queryVariable, unnormalized, context);
+		ExpressionFactor normalizedMarginal = new DefaultExpressionFactor(normalize(queryVariable, unnormalized, context), context);
+		normalizedMarginal.setExplanation(makeExplanation(normalizedMarginal, factor));
 		return normalizedMarginal;
+	}
+
+	private DefaultExplanationTree makeExplanation(ExpressionFactor normalizedMarginal, Factor factor) {
+		return new DefaultExplanationTree(normalizedMarginal + ", after normalizing:", factor.getExplanation());
 	}
 
 	private Context getContext(Problem problem) {

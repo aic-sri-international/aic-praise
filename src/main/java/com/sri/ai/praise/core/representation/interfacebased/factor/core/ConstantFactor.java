@@ -20,6 +20,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.util.DefaultExplanationTree;
 import com.sri.ai.util.ExplanationTree;
 
 public class ConstantFactor implements Factor {
@@ -223,7 +224,7 @@ public class ConstantFactor implements Factor {
 		return this;
 	}
 	
-	private ExplanationTree explanation;
+	private ExplanationTree explanation = DefaultExplanationTree.PLACEHOLDER;
 
 	@Override
 	public ExplanationTree getExplanation() {
