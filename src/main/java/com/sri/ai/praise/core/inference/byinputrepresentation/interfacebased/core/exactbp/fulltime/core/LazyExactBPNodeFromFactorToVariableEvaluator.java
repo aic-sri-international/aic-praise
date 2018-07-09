@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
+import static com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.EagerExactBPNodeEvaluator.conditionOnlyIfDeterministic_HACK_CLEAN_THIS_UP;
 import static com.sri.ai.util.Util.findFirst;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
@@ -83,7 +84,7 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 
 	private ExplanationTree makeExplanation(Factor factor) {
 		ExplanationTree result = 
-				new DefaultExplanationTree(factor + ", from " + getFirst(getFactorsAtRoot.apply()) + " given:", explanationsOfSubs);
+				new DefaultExplanationTree(conditionOnlyIfDeterministic_HACK_CLEAN_THIS_UP(factor) + ", from " + getFirst(getFactorsAtRoot.apply()) + " given:", explanationsOfSubs);
 		return result;
 	}
 }
