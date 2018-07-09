@@ -46,6 +46,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.sri.ai.util.ExplanationTree;
+
 /**
  * A factor is defined up to a non-zero multiplicative constant
  */
@@ -96,4 +98,7 @@ public interface Factor {
 	/** returns the factor obtained by maximizing according to the variables provided */
 	Factor max(Collection<? extends Variable> variablesToMaximize);
 	
+	ExplanationTree getExplanation();
+	
+	void setExplanation(ExplanationTree explanation);
 }

@@ -49,6 +49,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
@@ -181,5 +182,35 @@ public class HOGMMultiQueryProblemSolverTest {
 		println("expected: " + expected);
 		println("actual: " + result.getResult());
 		assertEquals(expected, result.getResult());
+	}
+
+
+	@Test
+	public void softProceduralAttachment3() {
+		
+		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
+
+		String model = 
+				"random x : [0;1000];"
+				+ "if x > 81.19 and x < 82.32 then 1 else 0;";
+		
+		String query = "x";
+		Expression expected = parse("if x > 81.19 then if x < 82.32 then 0.885 else 0 else 0");
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
+		
+		List<HOGMProblemResult> results = solver.getResults();
+	
+		assertEquals(1, results.size());
+		
+		HOGMProblemResult result = getFirst(results);
+		result.getErrors().stream().forEach(e -> println(e));
+		Expression resultValue = result.getResult();
+		println(resultValue);
+		assertFalse(result.hasErrors());
+		println("query: " + query);
+		println("expected: " + expected);
+		println("actual: " + result.getResult());
+		assertEquals(expected.toString(), result.getResult().toString());
 	}
 }

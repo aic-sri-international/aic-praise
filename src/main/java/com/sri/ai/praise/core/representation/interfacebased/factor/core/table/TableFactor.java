@@ -19,6 +19,7 @@ import java.util.Map;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
+import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
@@ -448,5 +449,17 @@ public class TableFactor implements Factor {
 	public Factor max(Collection<? extends Variable> variablesToMaximize) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private ExplanationTree explanation;
+
+	@Override
+	public ExplanationTree getExplanation() {
+		return explanation;
+	}
+	
+	@Override
+	public void setExplanation(ExplanationTree explanation) {
+		this.explanation = explanation;
 	}
 }

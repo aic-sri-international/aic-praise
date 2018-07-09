@@ -20,6 +20,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.util.ExplanationTree;
 
 public class ConstantFactor implements Factor {
 
@@ -220,5 +221,17 @@ public class ConstantFactor implements Factor {
 	@Override
 	public Factor max(Collection<? extends Variable> variablesToMaximize) {
 		return this;
+	}
+	
+	private ExplanationTree explanation;
+
+	@Override
+	public ExplanationTree getExplanation() {
+		return explanation;
+	}
+	
+	@Override
+	public void setExplanation(ExplanationTree explanation) {
+		this.explanation = explanation;
 	}
 }
