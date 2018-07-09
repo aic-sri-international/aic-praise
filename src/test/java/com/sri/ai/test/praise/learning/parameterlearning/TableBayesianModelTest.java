@@ -19,6 +19,7 @@ import com.sri.ai.praise.learning.parameterlearning.representation.table.TableBa
 
 /**
  * CLass to test the implementation of parameter learning for Bayesian nodes (using tables)
+ * (if you want to see a printed test, run this class as a Java application instead of a JUnit Test and take a look at the main method here)
  * 
  * @author Roger Leite Lucena
  *
@@ -36,7 +37,7 @@ public class TableBayesianModelTest {
 	static TableBayesianModel generateSickSunColdModel() {
 		TableBayesianNode sunNode = new TableBayesianNode(sunVariable, arrayList());
 		TableBayesianNode coldNode = new TableBayesianNode(coldVariable, arrayList());
-		TableBayesianNode sickNode = new TableBayesianNode(sickVariable, list(sunNode, coldNode));
+		TableBayesianNode sickNode = new TableBayesianNode(sickVariable, arrayList(sunVariable, coldVariable));
 		
 		List<TableBayesianNode> nodes = list(sickNode, sunNode, coldNode);
 

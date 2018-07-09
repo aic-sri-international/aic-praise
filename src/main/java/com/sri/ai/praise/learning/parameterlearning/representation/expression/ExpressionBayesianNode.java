@@ -66,12 +66,12 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	// Useful variables used frequently:
 	private IndexExpressionsSet childIndexExpressionsSet;
 	
-	public ExpressionBayesianNode(Expression expression, Context context, ExpressionVariable child, LinkedList<ExpressionBayesianNode> parentsNodes, LinkedHashSet<Expression> parameters) {
+	public ExpressionBayesianNode(Expression expression, Context context, ExpressionVariable child, List<ExpressionVariable> parents, LinkedHashSet<Expression> parameters) {
 		super(expression, context);
 		this.expression = expression;
 		this.context = context;
 		this.child = child;
-		this.parents = parentsNodes.stream().map(parentNode -> parentNode.getChildVariable()).collect(Collectors.toList());
+		this.parents = parents; // parentsNodes.stream().map(parentNode -> parentNode.getChildVariable()).collect(Collectors.toList());
 		this.allVariables = mergeElementsIntoOneList(child, parents);
 		this.parameters = parameters;
 		makeTheParamentersBecomeConstantsInsideTheExpression();
@@ -151,7 +151,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	 * since here parameters must be treated as symbolic literals, not variables
 	 */
 	private void makeTheParamentersBecomeConstantsInsideTheExpression() {
-		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate();
+		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate(); 
 		Predicate<Expression> newIsUniquelyNamedConstantPredicate = s -> parameters.contains(s) || isUniquelyNamedConstantPredicate.apply(s);
 		context = context.setIsUniquelyNamedConstantPredicate(newIsUniquelyNamedConstantPredicate);
 	}
@@ -427,15 +427,15 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		LinkedHashSet<Expression> parameters = Util.set(param1, param2);
 		parameters.add(param3);
 		
-		// Expression E = parse("if Child < 5 then Param1 else Param2");
+		Expression E = parse("if Child < 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
-		Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
+		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
 		
 		println("E = " + E + "\n");
 		
 		ExpressionBayesianNode parentNode = new ExpressionBayesianNode(E, context, parent, list(), parameters);
-		ExpressionBayesianNode childNode = new ExpressionBayesianNode(E, context, child, list(parentNode), parameters);
+		ExpressionBayesianNode childNode = new ExpressionBayesianNode(E, context, child, list(parent), parameters);
 		println("Families = " + childNode.getFamilies());
 		
 		childNode.setInitialCountsForAllPossibleChildAndParentsAssignments();
