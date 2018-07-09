@@ -130,4 +130,56 @@ public class HOGMMultiQueryProblemSolverTest {
 //		assertFalse(result.hasErrors());
 //		assertEquals(parse("if alpha = 0.8 then 1 else 0"), result.getResult());
 	}
+
+	// @Test // TODO: need to fix bug in which using theory mixing DifferenceArithmeticTheory and LinearRealArithmeticTheory cause errors recognizing literals.
+	public void linearRealArithmeticBug() {
+		String model = 
+				"random x : Real;\n" + 
+				"random y : Real;\n" + 
+				"y > 2.99 and y < 3.01;\n" + 
+				"x > y - 0.4999999999 and x < y + 0.4999999999;\n" + 
+				"//x = y;";
+		
+		String query = "x < 3";
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
+		
+		List<HOGMProblemResult> results = solver.getResults();
+	
+		assertEquals(1, results.size());
+		
+		HOGMProblemResult result = getFirst(results);
+		result.getErrors().stream().forEach(e -> println(e));
+		Expression resultValue = result.getResult();
+		println(resultValue);
+		assertFalse(result.hasErrors());
+		println("query: " + query);
+		println("expected: 0.5");
+		println("actual: " + result.getResult());
+		assertEquals(parse("0.5"), result.getResult());
+	}
+
+
+	@Test
+	public void linearRealArithmeticBug2() {
+		String model = 
+				"random x : [-10;10];";
+		
+		String query = "x > 5 and x < 7";
+		Expression expected = parse("if x > 5 and x < 7 then 0.1 else 0.9");
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
+		
+		List<HOGMProblemResult> results = solver.getResults();
+	
+		assertEquals(1, results.size());
+		
+		HOGMProblemResult result = getFirst(results);
+		result.getErrors().stream().forEach(e -> println(e));
+		Expression resultValue = result.getResult();
+		println(resultValue);
+		assertFalse(result.hasErrors());
+		println("query: " + query);
+		println("expected: " + expected);
+		println("actual: " + result.getResult());
+		assertEquals(expected, result.getResult());
+	}
 }

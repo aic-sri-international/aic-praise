@@ -919,6 +919,34 @@ public class ExpressionBasedSolverTest {
 		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
 	}
 	
+	//@Test
+	public void linearRealArithmeticBug() {
+		
+		// The definitions of types
+		mapFromCategoricalTypeNameToSizeString = Util.map();
+	
+		additionalTypes = list();
+		
+		// The definitions of variables
+		mapFromRandomVariableNameToTypeName = Util.map(
+				"x", "Real",
+				"y", "Real"
+				);
+		
+		mapFromNonUniquelyNamedConstantNameToTypeName = Util.map();
+	
+		mapFromUniquelyNamedConstantNameToTypeName = Util.map();
+	
+		isBayesianNetwork = false;
+		factors = Times.getMultiplicands(parse(
+				"(if y > 2.99 and y < 3.01 then 1 else 0)*(if x > y - 0.4999999999 and x < y + 0.4999999999 then 1 else 0)"));
+		
+		queryExpression = parse("x");
+		evidence = null;
+		expected = parse("0.5"); // density
+		runTest(queryExpression, evidence, expected, expected, isBayesianNetwork, factors, mapFromRandomVariableNameToTypeName, mapFromNonUniquelyNamedConstantNameToTypeName, mapFromUniquelyNamedConstantNameToTypeName, mapFromCategoricalTypeNameToSizeString, additionalTypes);
+	}
+	
 	/**
 	 * @param queryExpression
 	 * @param evidence
@@ -987,7 +1015,7 @@ public class ExpressionBasedSolverTest {
 
 		ExpressionBasedSolver[] solvers = new ExpressionBasedSolver[] {
 
-				new EvaluationExpressionBasedSolver(useFactorization),
+				//new EvaluationExpressionBasedSolver(useFactorization),
 				new ExactBPExpressionBasedSolver()
 				
 		};
@@ -1001,6 +1029,9 @@ public class ExpressionBasedSolverTest {
 	private void checkResult(ExpressionBasedProblem problem, Expression expected, Expression marginal, ExpressionBasedSolver solver)
 			throws AssertionError {
 		TrueContext context = new TrueContext();
+		println("query: " + problem.getQueryExpression());
+		println("expected: " + expected);
+		println("actual: " + marginal);
 		marginal = Expressions.roundToAGivenPrecision(marginal, 9, context);
 		expected = Expressions.roundToAGivenPrecision(expected, 9, context);
 		if (expected.equals(marginal)) {

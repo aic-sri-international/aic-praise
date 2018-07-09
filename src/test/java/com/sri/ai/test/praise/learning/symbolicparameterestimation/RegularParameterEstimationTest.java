@@ -14,7 +14,7 @@ import com.sri.ai.praise.learning.symbolicparameterestimation.util.ExpressionBas
 import org.junit.Test;
 
 /**
- * Tests for Regular Symbolic  Parameter Estimation.
+ * Tests for Regular Symbolic Parameter Estimation.
  * 
  * @author Sarah Perrin
  *
