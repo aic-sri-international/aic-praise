@@ -35,11 +35,11 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		this.allVariables = this.getVariables();
 	}
 	
-	public TableBayesianNode(TableVariable child, List<TableBayesianNode> parentsNodes) {
-		super(mergeElementsIntoOneList(child, parentsNodes.stream().map(parentNode -> parentNode.getChildVariable()).collect(Collectors.toList())));
+	public TableBayesianNode(TableVariable child, ArrayList<TableVariable> parents) {
+		super(mergeElementsIntoOneList(child, parents));
 		this.allVariables = this.getVariables();
 		this.child = child;
-		this.parents = (ArrayList<TableVariable>) parentsNodes.stream().map(parent -> parent.getChildVariable()).collect(Collectors.toList());
+		this.parents = parents; 
 	}
 
 	@Override
@@ -132,9 +132,9 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		TableVariable sun = new TableVariable("sun", 2);
 		TableVariable cold = new TableVariable("cold", 2);
 	    
-	    TableBayesianNode sunNode = new TableBayesianNode(sun, list());
-	    TableBayesianNode coldNode = new TableBayesianNode(cold, list());
-	    TableBayesianNode sickNode = new TableBayesianNode(sick, list(sunNode, coldNode));
+	    TableBayesianNode sunNode = new TableBayesianNode(sun, arrayList());
+	    TableBayesianNode coldNode = new TableBayesianNode(cold, arrayList());
+	    TableBayesianNode sickNode = new TableBayesianNode(sick, arrayList(sun, cold));
 	    sickNode.setInitialCountsForAllPossibleChildAndParentsAssignments();
 	    
 	    ArrayList<Integer> childAndParentsValues = new ArrayList<Integer>();
