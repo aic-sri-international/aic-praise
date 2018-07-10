@@ -124,9 +124,7 @@ public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 	public Expression replaceQuerySymbolByQueryExpressionIfNeeded(Expression expression) {
 		Expression result;
 		if (queryIsCompound) {
-			Expression replacement = 
-					expression.replaceAllOccurrences(QUERY_SYMBOL, queryExpression, originalExpressionBasedModel.getContext());
-			result = originalExpressionBasedModel.getContext().evaluate(replacement);
+			result = expression.replaceAllOccurrences(QUERY_SYMBOL, queryExpression, originalExpressionBasedModel.getContext());
 		}
 		else {
 			result = expression;

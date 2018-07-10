@@ -1,6 +1,9 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
+import static com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.EagerExactBPNodeEvaluator.conditionOnlyIfDeterministic_HACK_CLEAN_THIS_UP;
 import static com.sri.ai.util.Util.findFirst;
+import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.list;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +11,8 @@ import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.util.DefaultExplanationTree;
+import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.treecomputation.core.AbstractLazyTreeComputationEvaluator;
@@ -15,6 +20,7 @@ import com.sri.ai.util.computation.treecomputation.core.AbstractLazyTreeComputat
 public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTreeComputationEvaluator<Factor> {
 
 	private Factor currentProduct;
+	private List<ExplanationTree> explanationsOfSubs;
 	
 	private NullaryFunction<List<? extends Factor>> getFactorsAtRoot;
 	private Function<List<? extends Variable>, List<? extends Variable>> determineVariablesToBeSummedOut;
@@ -29,6 +35,7 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 		this.getFactorsAtRoot = getFactorsAtRoot;
 		this.determineVariablesToBeSummedOut = determineVariablesToBeSummedOut;
 		this.sumOutWithBookkeeping = sumOutWithBookkeeping;
+		this.explanationsOfSubs = list();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -64,12 +71,20 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 	@Override
 	protected void simplifyFunctionWithValueForSub(NullaryFunction<Factor> sub, Factor subValue) {
 		currentProduct = currentProduct.multiply(subValue);
+		explanationsOfSubs.add(subValue.getExplanation());
 	}
 
 	@Override
 	protected Factor finishComputingResultOnceAllRelevantSubComputationsHaveBeenTakenIntoAccount() {
 		List<? extends Variable> variablesToBeSummedOut = determineVariablesToBeSummedOut.apply(currentProduct.getVariables());
 		Factor result = sumOutWithBookkeeping.apply(variablesToBeSummedOut, currentProduct);
+		result.setExplanation(makeExplanation(result));
+		return result;
+	}
+
+	private ExplanationTree makeExplanation(Factor factor) {
+		ExplanationTree result = 
+				new DefaultExplanationTree(conditionOnlyIfDeterministic_HACK_CLEAN_THIS_UP(factor) + ", from " + getFirst(getFactorsAtRoot.apply()) + " given:", explanationsOfSubs);
 		return result;
 	}
 }

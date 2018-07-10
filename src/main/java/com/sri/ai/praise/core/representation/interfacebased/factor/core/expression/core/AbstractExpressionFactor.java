@@ -67,6 +67,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.Identity
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ZeroFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.util.DefaultExplanationTree;
+import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.collect.PredicateIterator;
 
 /**
@@ -264,5 +266,17 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 		}
 		return result;
 		
+	}
+
+	private ExplanationTree explanation = DefaultExplanationTree.PLACEHOLDER;
+
+	@Override
+	public ExplanationTree getExplanation() {
+		return explanation;
+	}
+	
+	@Override
+	public void setExplanation(ExplanationTree explanation) {
+		this.explanation = explanation;
 	}
 }

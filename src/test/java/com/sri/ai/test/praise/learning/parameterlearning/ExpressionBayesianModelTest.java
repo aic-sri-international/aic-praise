@@ -56,7 +56,7 @@ public class ExpressionBayesianModelTest {
 		Expression param4 = parse("Param4");
 		
 		ExpressionBayesianNode parentNode = new ExpressionBayesianNode(param4, contextForChildParentModel, parentVariable, list(), Util.set(param4)); // for the parent it is a uniform distribution, only one parameter (param4)
-		ExpressionBayesianNode childNode = new ExpressionBayesianNode(expressionForChildNode, contextForChildParentModel, childVariable, list(parentNode), Util.set(param1, param2, param3));
+		ExpressionBayesianNode childNode = new ExpressionBayesianNode(expressionForChildNode, contextForChildParentModel, childVariable, list(parentVariable), Util.set(param1, param2, param3));
 		
 		ExpressionBayesianModel model = new ExpressionBayesianModel(list(childNode, parentNode));
 		
@@ -82,7 +82,7 @@ public class ExpressionBayesianModelTest {
 		
 		ExpressionBayesianNode earthquakeNode = new ExpressionBayesianNode(expressionForEarthquakeNode, contextForEarthquakeBurglaryAlarmModel, earthquake, list(), Util.set()); 
 		ExpressionBayesianNode burglaryNode = new ExpressionBayesianNode(expressionForBurglaryNode, contextForEarthquakeBurglaryAlarmModel, burglary, list(), Util.set(parse("Param5"), parse("OneMinusParam5"))); 
-		ExpressionBayesianNode alarmNode = new ExpressionBayesianNode(expressionForAlarmNode, contextForEarthquakeBurglaryAlarmModel, alarm, list(earthquakeNode, burglaryNode), Util.set(parse("Param1"), parse("Param2"), parse("Param3"), parse("Param4"), parse("OneMinusParam1"), parse("OneMinusParam2"), parse("OneMinusParam3"), parse("OneMinusParam4"))); 
+		ExpressionBayesianNode alarmNode = new ExpressionBayesianNode(expressionForAlarmNode, contextForEarthquakeBurglaryAlarmModel, alarm, list(earthquake, burglary), Util.set(parse("Param1"), parse("Param2"), parse("Param3"), parse("Param4"), parse("OneMinusParam1"), parse("OneMinusParam2"), parse("OneMinusParam3"), parse("OneMinusParam4"))); 
 		
 		ExpressionBayesianModel model = new ExpressionBayesianModel(list(alarmNode, earthquakeNode, burglaryNode));
 		

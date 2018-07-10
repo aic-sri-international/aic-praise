@@ -49,6 +49,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
@@ -106,6 +107,8 @@ public class HOGMMultiQueryProblemSolverTest {
 		result.getErrors().stream().forEach(e -> println(e));
 		Expression resultValue = result.getResult();
 		println(resultValue);
+		println("Explanation");
+		println(result.getExplanation());
 		assertFalse(result.hasErrors());
 		assertEquals(parse("if event then 1 else 0"), result.getResult());
 
@@ -113,6 +116,8 @@ public class HOGMMultiQueryProblemSolverTest {
 		result.getErrors().stream().forEach(e -> println(e));
 		resultValue = result.getResult();
 		println(resultValue);
+		println("Explanation");
+		println(result.getExplanation());
 		assertFalse(result.hasErrors());
 		assertEquals(parse("if internal1 = 2 then 1 else 0"), result.getResult());
 
@@ -121,7 +126,92 @@ public class HOGMMultiQueryProblemSolverTest {
 //		result.getErrors().stream().forEach(e -> println(e));
 //		resultValue = result.getResult();
 //		println(resultValue);
+//		println("Explanation");
+//		println(result.getExplanation());
 //		assertFalse(result.hasErrors());
 //		assertEquals(parse("if alpha = 0.8 then 1 else 0"), result.getResult());
+	}
+
+	// @Test // TODO: need to fix bug in which using theory mixing DifferenceArithmeticTheory and LinearRealArithmeticTheory cause errors recognizing literals.
+	public void linearRealArithmeticBug() {
+		String model = 
+				"random x : Real;\n" + 
+				"random y : Real;\n" + 
+				"y > 2.99 and y < 3.01;\n" + 
+				"x > y - 0.4999999999 and x < y + 0.4999999999;\n" + 
+				"//x = y;";
+		
+		String query = "x < 3";
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
+		
+		List<HOGMProblemResult> results = solver.getResults();
+	
+		assertEquals(1, results.size());
+		
+		HOGMProblemResult result = getFirst(results);
+		result.getErrors().stream().forEach(e -> println(e));
+		Expression resultValue = result.getResult();
+		println(resultValue);
+		assertFalse(result.hasErrors());
+		println("query: " + query);
+		println("expected: 0.5");
+		println("actual: " + result.getResult());
+		assertEquals(parse("0.5"), result.getResult());
+	}
+
+
+	@Test
+	public void linearRealArithmeticBug2() {
+		String model = 
+				"random x : [-10;10];";
+		
+		String query = "x > 5 and x < 7";
+		Expression expected = parse("if x > 5 and x < 7 then 0.1 else 0.9");
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
+		
+		List<HOGMProblemResult> results = solver.getResults();
+	
+		assertEquals(1, results.size());
+		
+		HOGMProblemResult result = getFirst(results);
+		result.getErrors().stream().forEach(e -> println(e));
+		Expression resultValue = result.getResult();
+		println(resultValue);
+		println(result.getExplanation());
+		assertFalse(result.hasErrors());
+		println("query: " + query);
+		println("expected: " + expected);
+		println("actual: " + result.getResult());
+		assertEquals(expected, result.getResult());
+	}
+
+
+	@Test
+	public void softProceduralAttachment3() {
+		
+		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
+
+		String model = 
+				"random x : [0;1000];"
+				+ "if x > 81.19 and x < 82.32 then 1 else 0;";
+		
+		String query = "x";
+		Expression expected = parse("if x > 81.19 then if x < 82.32 then 0.885 else 0 else 0");
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
+		
+		List<HOGMProblemResult> results = solver.getResults();
+	
+		assertEquals(1, results.size());
+		
+		HOGMProblemResult result = getFirst(results);
+		result.getErrors().stream().forEach(e -> println(e));
+		Expression resultValue = result.getResult();
+		println(resultValue);
+		assertFalse(result.hasErrors());
+		println("query: " + query);
+		println("expected: " + expected);
+		println("actual: " + result.getResult());
+		assertEquals(expected.toString(), result.getResult().toString());
 	}
 }
