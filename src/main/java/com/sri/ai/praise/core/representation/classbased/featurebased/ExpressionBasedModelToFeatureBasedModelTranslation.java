@@ -1,24 +1,25 @@
 package com.sri.ai.praise.core.representation.classbased.featurebased;
 
-import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.helper.GrinderUtil.getIndexExpressionsOfFreeVariablesIn;
 import static com.sri.ai.grinder.library.number.Times.getMultiplicands;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.core.DefaultUniversallyQuantifiedFormula;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.Equality;
-import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel;
+import com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation;
 
 public class ExpressionBasedModelToFeatureBasedModelTranslation {
 	
@@ -36,16 +37,16 @@ public class ExpressionBasedModelToFeatureBasedModelTranslation {
 	 */
 	public ExpressionBasedModelToFeatureBasedModelTranslation(ExpressionBasedModel expressionBasedModel, List<Expression> parameters) {
 		this.expressionBasedModel = expressionBasedModel;
-		this.featureBasedModel = translateExpressionBasedModelToFeatureBasedModel(expressionBasedModel, parameters);
+		this.featureBasedModel = translateExpressionBasedModelToFeatureBasedModel(expressionBasedModel);
 	}
 	
 	/**
 	 * Build the FeatureBasedModel (not yet optimized) from the ExpressionBasedModel and a list of parameters.
 	 *
 	 */
-	public static FeatureBasedModel translateExpressionBasedModelToFeatureBasedModel(ExpressionBasedModel expressionBasedModel, List<Expression> parameters) {
+	public static FeatureBasedModel translateExpressionBasedModelToFeatureBasedModel(ExpressionBasedModel expressionBasedModel) {
 
-		
+		List<Expression> parameters = UsefulOperationsParameterEstimation.findParameters(expressionBasedModel);
 		Map<Expression, Expression> map = new HashMap<Expression, Expression>();
 		Context context = expressionBasedModel.getContext();
 		
@@ -62,13 +63,18 @@ public class ExpressionBasedModelToFeatureBasedModelTranslation {
 				System.out.println("condition : " + condition);
 				
 				if(!condition.getValue().equals(true) && !condition.getValue().equals(false)) {
-					Expression logParameter = apply(FunctorConstants.LOG, parameter);
-					map.put(condition, logParameter);
+					
+					map.put(condition, parameter);
 				}
 			}
 		}
+		Map<Expression, Expression> sortedMap = 
+			     map.entrySet().stream()
+			    .sorted(Entry.comparingByValue())
+			    .collect(Collectors.toMap(Entry::getKey, Entry::getValue,
+			                              (e1, e2) -> e1, LinkedHashMap::new));
 		
-		FeatureBasedModel result = new FeatureBasedModel(map);
+		FeatureBasedModel result = new FeatureBasedModel(sortedMap);
 		
 		return result;
 	}
@@ -114,11 +120,8 @@ public class ExpressionBasedModelToFeatureBasedModelTranslation {
 						list(),
 						isBayesianNetwork);
 				
-			List<Expression> parameters = new LinkedList<Expression>();
-			parameters.add(parse("Alpha"));
-			parameters.add(parse("Beta"));
 			
-			FeatureBasedModel test = ExpressionBasedModelToFeatureBasedModelTranslation.translateExpressionBasedModelToFeatureBasedModel(expressionBasedModel, parameters);
+			FeatureBasedModel test = ExpressionBasedModelToFeatureBasedModelTranslation.translateExpressionBasedModelToFeatureBasedModel(expressionBasedModel);
 			System.out.println(test.toString());
 		
 		

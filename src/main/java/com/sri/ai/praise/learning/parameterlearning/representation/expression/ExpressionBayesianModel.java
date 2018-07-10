@@ -15,6 +15,7 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.core.Def
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 import com.sri.ai.praise.learning.parameterlearning.BayesianModel;
+import com.sri.ai.praise.learning.parameterlearning.Dataset;
 
 public class ExpressionBayesianModel extends ExpressionFactorNetwork implements BayesianModel {
 
@@ -30,6 +31,18 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 		return nodes;
 	}
 	
+	public ExpressionBasedModel learnModelParametersFromCompleteDataAndConvertToAnExpressionBasedModel(Dataset dataset) {
+		this.learnModelParametersFromCompleteData(dataset);
+		ExpressionBasedModel convertedModel = this.convertToAnExpressionBasedModelAfterLearning();
+		return convertedModel;
+	}
+	
+	/**
+	 * Converting the learned ExpressionBayesianModel into a ExpressionBasedModel, ready for inferences.
+	 * Some assumptions: the only constants in the initial expressions of the nodes were the parameters that are now learned, and there were no special categorical types or additional types 
+	 * 
+	 * @return the equivalent ExpressionBasedModel for inference
+	 */
 	public ExpressionBasedModel convertToAnExpressionBasedModelAfterLearning() {
 		// The nodes of this Bayesian model
 		List<? extends Expression> factors = this.getNodes();
@@ -43,16 +56,20 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 			mapFromRandomVariableNameToTypeName.put(nodeVariable.toString(), type.toString());
 		}
 		
-		// The definitions of non-uniquely named constants (after learning we shall have no more constants) // come back here, save previous constants (before adding the parameters as constants) in this map, for every node
+		// The definitions of non-uniquely named constants 
+		// (we assume that the only constants for the expressions of the nodes were the parameters, now replaced by their learned values. After learning we shall have no more constants then - the map  below is empty)
 		Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = map();
 		
-		// The definitions of uniquely named constants // come back here, same reason as above
+		// The definitions of uniquely named constants 
+		// (similar comment as above)
 		Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = map();
 		
-		// The definitions of types // come back here, save categorical types for every node here
+		// The definitions of types 
+		// (we assume that there were no categorical types)
 		Map<String, String> mapFromCategoricalTypeNameToSizeString = map();
 		
-		// Additional types // come back here, is there a way to save any additional types for every node here?
+		// Additional types 
+		// (we assume that there were no additional types)
 		Collection<Type> additionalTypes = list();
 		
 		// ExpressionBayesianModels are known to be Bayesian models

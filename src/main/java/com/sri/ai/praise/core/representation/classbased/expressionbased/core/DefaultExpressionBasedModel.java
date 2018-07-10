@@ -131,6 +131,7 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 							new DifferenceArithmeticTheory(false, true),
 							new LinearRealArithmeticTheory(false, true),
 							new PropositionalTheory());
+			//theory = new CompoundTheory(new PropositionalTheory(), new LinearRealArithmeticTheory(false, false)); // TODO: temporary hack for July 2018 demo because DifferenceArithmeticTheory is interfering
 		}
 		return theory;
 	}
