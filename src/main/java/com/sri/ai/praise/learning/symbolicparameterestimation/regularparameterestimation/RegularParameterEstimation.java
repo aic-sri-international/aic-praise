@@ -62,8 +62,8 @@ public class RegularParameterEstimation {
 		int k = 0;
 		for(Expression condition : featureBasedModel.mapConditionToWeight.keySet()) {
 			double nonSigmoidResult = 1/(1+exp(-valueOptimum[k]));
-			System.out.println(nonSigmoidResult);
-			System.out.println(featureBasedModel.mapConditionToWeight.get(condition));
+			//System.out.println(nonSigmoidResult);
+			//System.out.println(featureBasedModel.mapConditionToWeight.get(condition));
 			result.put(featureBasedModel.mapConditionToWeight.get(condition), nonSigmoidResult);
 			k++;
 		}
