@@ -37,8 +37,12 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
 
+import java.util.Collection;
+
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 
 /**
@@ -65,5 +69,11 @@ public class DefaultExpressionFactor extends AbstractExpressionFactor implements
 	
 	protected void setInnerExpression(Expression newInnerExpression) {
 		this.innerExpression = this.cachedInnerExpression = newInnerExpression;
+	}
+
+	@Override
+	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

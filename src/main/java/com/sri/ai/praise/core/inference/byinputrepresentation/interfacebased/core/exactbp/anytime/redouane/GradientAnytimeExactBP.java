@@ -8,15 +8,19 @@ import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Simplex;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Anytime;
@@ -111,21 +115,65 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	}
 
 	@Override
-	public Double getAbsolutePartialDerivativeWithRespectTo(Anytime<Factor> sub) {
-		
+	public Double getAbsoluteVolumeVariationWithRespectTo(Anytime<Factor> sub) {
 		Approximation<Factor> subApproximation = sub.getCurrentApproximation();
-		Polytope subPolytope = checkIfApproximationIsPolytopeAndReturnPolytopeIfYesThrowErrorOtherwise(subApproximation);
-		
-		List<Approximation<Factor>> allSubsLastApproximations = getSubsCurrentApproximations();
-		List<Approximation<Factor>> allSubsButOneLastApproximations = getAllSubsButOneCurrentApproximations(sub);
-		
-		Approximation<Factor> summedOut = function(allSubsLastApproximations);
-		Approximation<Factor> summedOutWithOneSubLeftOut = function(allSubsButOneLastApproximations);
-		
-		
-		// TODO finish
-		
+		if(!(subApproximation instanceof Polytope)) {
+			throw new Error("Gradient descent AEBP works only with polytopes for now");
+		}
+		Polytope subPolytope = (Polytope) subApproximation;
+		AtomicPolytope subAtomicPolytope = collapse(subPolytope);
+		Set<? extends Variable> subAtomicPolytopeIndices = getIndices(subAtomicPolytope);
+		if(rootIsVariable()) {
+			return getAbsoluteVolumeVariationFromFactorToVariableWithRespectTo(subAtomicPolytope, subAtomicPolytopeIndices);
+		} 
+		return getAbsoluteVolumeVariationFromVariableToFactorWithRespectTo(subAtomicPolytope, subAtomicPolytopeIndices);
+	}
+	
+	private static AtomicPolytope collapse(Polytope subPolytope) {
+		Variable freeVariable = getFreeVariable(subPolytope);
+		AtomicPolytope subAtomicPolytope = Polytopes.getEquivalentAtomicPolytopeOn(freeVariable, subPolytope);
+		return subAtomicPolytope;
+	}
+	
+	private static Variable getFreeVariable(Polytope subPolytope) {
+		Collection<? extends Variable> freeVariables = subPolytope.getFreeVariables();
+		if(freeVariables.size() != 1) {
+			throw new Error("BP messages should have one and only one free variable");
+		}
+		Variable freeVariable = null;
+		for(Variable variable : freeVariables) {
+			freeVariable = variable;
+		}
+		return freeVariable;
+	}
+	
+	private static Set<? extends Variable> getIndices(AtomicPolytope subAtomicPolytope) {
+		Set<Variable> result = new HashSet<>();
+		if(subAtomicPolytope instanceof Simplex) {
+			Simplex subSimplex = (Simplex) subAtomicPolytope;
+			result.add(subSimplex.getVariable());
+		} else if(subAtomicPolytope instanceof IntensionalConvexHullOfFactors) {
+			IntensionalConvexHullOfFactors subConvexHull = (IntensionalConvexHullOfFactors) subAtomicPolytope;
+			result.addAll(subConvexHull.getIndices());
+		} else {
+			throw new Error("New unsupported type of atomic polytope added");
+		}
+		return result;
+	}
+
+	private Double getAbsoluteVolumeVariationFromVariableToFactorWithRespectTo(AtomicPolytope subPolytope, Collection<? extends Variable> subAtomicPolytopeIndices) {
+		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private Double getAbsoluteVolumeVariationFromFactorToVariableWithRespectTo(AtomicPolytope subPolytope, Collection<? extends Variable> subAtomicPolytopeIndices) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private boolean rootIsVariable() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	private Polytope checkIfApproximationIsPolytopeAndReturnPolytopeIfYesThrowErrorOtherwise(Approximation<Factor> approximation) {
@@ -160,9 +208,9 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	private List<? extends Variable> getVariablesNotSummedOut(List<Approximation<Factor>> subsApproximations) {
 		Polytope product = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
 		Collection<? extends Variable> freeVariables = product.getFreeVariables();
-		List<? extends Variable> variablesSummedOut = getBase().getSummedOutVariables(freeVariables);
-		return variablesSummedOut;
-		
+		//List<? extends Variable> variablesSummedOut = getBase().getSummedOutVariables(freeVariables);
+		//return variablesSummedOut;
+		return null;
 	}
 
 	

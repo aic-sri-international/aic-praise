@@ -235,4 +235,10 @@ public class ConstantFactor implements Factor {
 	public void setExplanation(ExplanationTree explanation) {
 		this.explanation = explanation;
 	}
+
+	@Override
+	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

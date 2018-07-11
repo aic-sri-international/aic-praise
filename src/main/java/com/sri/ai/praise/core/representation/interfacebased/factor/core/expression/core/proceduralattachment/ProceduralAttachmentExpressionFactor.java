@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.express
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.myAssert;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.AbstractExpressionFactor;
@@ -137,5 +139,11 @@ public class ProceduralAttachmentExpressionFactor extends AbstractExpressionFact
 	public int hashCode() {
 		int result = System.identityHashCode(this);
 		return result;
+	}
+
+	@Override
+	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
