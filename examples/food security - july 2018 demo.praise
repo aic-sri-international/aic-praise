@@ -1,0 +1,37 @@
+@LANG:HOGMv1
+@MODEL:name=[Page 1]parts=[page-1]queries=[query-page-1#1,query-page-1#2]
+@FRAGMENT:page-1
+random precipitation   : [0; 200];
+random conflict        : [0; 10];
+random flooding        : [0; 1];
+random food_insecurity : [0; 105];
+random crop_technology : [0; 11];
+random intervention    : [0; 105];
+// Indicators
+random beans_dry_Production          : [0;  20000];
+random closed_shrubland_Burned_Area  : [0; 500000];
+random nonCereals_Food_aid_shipments : [0; 100000];
+
+precipitation > 30;
+precipitation < 60;
+conflict > 1;
+conflict < 6;
+flooding > (1/200) * precipitation - 0.1;
+flooding < (1/200) * precipitation + 0.1;
+food_insecurity > (5/20) * (200 - precipitation)  +   5 * conflict   - 1;
+food_insecurity < (5/20) * (200 - precipitation)  +   5 * conflict   + 1;
+crop_technology > (10 - conflict) - 0.01;
+crop_technology < (10 - conflict) + 0.01;
+intervention > 10*(10 - conflict) - 0.1;
+intervention < 10*(10 - conflict) + 0.1;
+beans_dry_Production > 150 * precipitation - 150;
+beans_dry_Production < 150 * precipitation + 150;
+closed_shrubland_Burned_Area > 121929.0437 * flooding - 12192.90437;
+closed_shrubland_Burned_Area < 121929.0437 * flooding + 12192.90437;
+nonCereals_Food_aid_shipments > 29265.0 * (2/105) * intervention - 2926.5;
+nonCereals_Food_aid_shipments < 29265.0 * (2/105) * intervention + 2926.5;
+@FRAGMENT:query-page-1#1
+foodSecurity > 50
+
+@FRAGMENT:query-page-1#2
+food_insecurity > 50

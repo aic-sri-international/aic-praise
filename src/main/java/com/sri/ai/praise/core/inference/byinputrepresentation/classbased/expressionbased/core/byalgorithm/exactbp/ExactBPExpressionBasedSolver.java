@@ -37,8 +37,12 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp;
 
+import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.NormalizedExactBP;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 
 public class ExactBPExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 
@@ -46,4 +50,11 @@ public class ExactBPExpressionBasedSolver extends SolverToExpressionBasedSolverA
 		super(new NormalizedExactBP());
 	}
 
+	protected Expression replaceQuerySymbolByQueryExpressionIfNeeded(ExpressionBasedProblem problem, Expression normalizedMarginal) {
+		ExpressionFactor expressionFactor = (ExpressionFactor) normalizedMarginal;
+		Expression normalizedMarginalWithQueryExpression = super.replaceQuerySymbolByQueryExpressionIfNeeded(problem, normalizedMarginal);
+		ExpressionFactor result = new DefaultExpressionFactor(normalizedMarginalWithQueryExpression, expressionFactor.getContext());
+		result.setExplanation(expressionFactor.getExplanation());
+		return result;
+	}
 }
