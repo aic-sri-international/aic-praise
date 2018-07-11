@@ -98,7 +98,14 @@ public interface Factor {
 	/** returns the factor obtained by maximizing according to the variables provided */
 	Factor max(Collection<? extends Variable> variablesToMaximize);
 	
+	/** returns the factor equal to the argmax (constant if variablesToMaximize are all its variables) */
 	Factor argmax(Collection<? extends Variable> variablesToMaximize);
+	
+	/** returns the factor obtained by minimizing according to the variables provided */
+	Factor min(Collection<? extends Variable> variablesToMinimize);
+	
+	/** returns the factor equal to the argmin (constant if variablesToMinimize are all its variables) */
+	Factor argmin(Collection<? extends Variable> variablesToMinimize);
 	
 	ExplanationTree getExplanation();
 	

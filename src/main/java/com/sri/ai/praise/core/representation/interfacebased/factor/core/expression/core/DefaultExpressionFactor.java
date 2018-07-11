@@ -76,4 +76,16 @@ public class DefaultExpressionFactor extends AbstractExpressionFactor implements
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Factor min(Collection<? extends Variable> variablesToMinimize) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Factor argmin(Collection<? extends Variable> variablesToMinimize) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

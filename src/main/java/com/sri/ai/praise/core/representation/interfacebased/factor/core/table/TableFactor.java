@@ -469,4 +469,16 @@ public class TableFactor implements Factor {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Factor min(Collection<? extends Variable> variablesToMinimize) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Factor argmin(Collection<? extends Variable> variablesToMinimize) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
