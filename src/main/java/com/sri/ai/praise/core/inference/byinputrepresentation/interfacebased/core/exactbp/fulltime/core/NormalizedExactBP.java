@@ -39,10 +39,10 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.co
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
-import static com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.EagerExactBPNodeEvaluator.conditionOnlyIfDeterministic_HACK_CLEAN_THIS_UP;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.praise.core.PRAiSEUtil;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
@@ -68,7 +68,7 @@ public class NormalizedExactBP implements Solver {
 	}
 
 	private DefaultExplanationTree makeExplanation(ExpressionFactor normalizedMarginal, Factor factor) {
-		return new DefaultExplanationTree(conditionOnlyIfDeterministic_HACK_CLEAN_THIS_UP(normalizedMarginal) + ", after normalizing:", factor.getExplanation());
+		return new DefaultExplanationTree(PRAiSEUtil.conditionOnlyIfDeterministic(normalizedMarginal) + ", after normalizing:", factor.getExplanation());
 	}
 
 	private Context getContext(Problem problem) {

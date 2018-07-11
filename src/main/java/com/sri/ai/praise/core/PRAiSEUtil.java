@@ -44,7 +44,13 @@ import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.library.FunctorConstants;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 
 
 /**
@@ -69,6 +75,18 @@ public class PRAiSEUtil {
 		Expression normalizedDefinition = apply(DIVISION, expression, sum);
 		Expression result = context.evaluate(normalizedDefinition);
 		return result;
+	}
+
+	public static Factor conditionOnlyIfDeterministic(Factor factor) {
+		if (factor instanceof ExpressionFactor) {
+			Expression expression = (Expression) factor;
+				if (expression.hasFunctor(FunctorConstants.IF_THEN_ELSE)) {
+				if (IfThenElse.thenBranch(expression).equals(Expressions.ONE) && IfThenElse.elseBranch(expression).equals(Expressions.ZERO)) {
+					return new DefaultExpressionFactor(IfThenElse.condition(expression), ((ExpressionFactor)factor).getContext());
+				}
+			}
+		}
+		return factor;
 	}
 
 }

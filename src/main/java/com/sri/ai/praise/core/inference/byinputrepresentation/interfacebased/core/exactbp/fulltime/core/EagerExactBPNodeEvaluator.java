@@ -1,6 +1,8 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
+import static com.sri.ai.praise.core.PRAiSEUtil.conditionOnlyIfDeterministic;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor.multiply;
+import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
@@ -8,14 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.grinder.library.FunctorConstants;
-import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.util.DefaultExplanationTree;
 import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.base.BinaryFunction;
@@ -61,19 +57,16 @@ public class EagerExactBPNodeEvaluator implements EagerTreeComputationEvaluator<
 
 	private ExplanationTree makeExplanation(Factor factor, List<? extends Factor> incomingMessages) {
 		List<? extends ExplanationTree> explanationsOfSubs = mapIntoList(incomingMessages, Factor::getExplanation);
-		ExplanationTree result = new DefaultExplanationTree(conditionOnlyIfDeterministic_HACK_CLEAN_THIS_UP(factor) + ", from fusing:", explanationsOfSubs);
-		return result;
-	}
-	
-	public static Factor conditionOnlyIfDeterministic_HACK_CLEAN_THIS_UP(Factor factor) {
-		if (factor instanceof ExpressionFactor) {
-			Expression expression = (Expression) factor;
-				if (expression.hasFunctor(FunctorConstants.IF_THEN_ELSE)) {
-				if (IfThenElse.thenBranch(expression).equals(Expressions.ONE) && IfThenElse.elseBranch(expression).equals(Expressions.ZERO)) {
-					return new DefaultExpressionFactor(IfThenElse.condition(expression), ((ExpressionFactor)factor).getContext());
-				}
-			}
+		ExplanationTree result;
+		if (incomingMessages.size() == 0) {
+			result = new DefaultExplanationTree("uniform distribution, since there is no more information on this variable");
 		}
-		return factor;
+		else if (incomingMessages.size() == 1) {
+			result = getFirst(explanationsOfSubs);
+		}
+		else {
+			result = new DefaultExplanationTree("<" + conditionOnlyIfDeterministic(factor) + ">, from multiplying:", explanationsOfSubs);
+		}
+		return result;
 	}
 }
