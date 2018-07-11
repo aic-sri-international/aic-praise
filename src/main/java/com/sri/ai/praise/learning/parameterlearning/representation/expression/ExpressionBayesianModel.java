@@ -31,19 +31,32 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 		return nodes;
 	}
 	
-	public ExpressionBasedModel learnModelParametersFromCompleteDataAndConvertToAnExpressionBasedModel(Dataset dataset) {
+	/**
+	 * Learn the parameters of the model and convert the learned ExpressionBayesianModel into an ExpressionBasedModel, ready for inferences.
+	 * 
+	 * @param dataset
+	 * @param mapFromCategoricalTypeNameToSizeString (the user specifies the categorical types used, usually an empty map)
+	 * @param additionalTypes (the user specifies the additional types used, usually an empty list)
+	 * 
+	 * @return the final learned and already converted model
+	 */
+	public ExpressionBasedModel learnModelParametersFromCompleteDataAndConvertToAnExpressionBasedModel(Dataset dataset, Map<String, String> mapFromCategoricalTypeNameToSizeString, Collection<Type> additionalTypes) {
 		this.learnModelParametersFromCompleteData(dataset);
-		ExpressionBasedModel convertedModel = this.convertToAnExpressionBasedModelAfterLearning();
+		ExpressionBasedModel convertedModel = this.convertToAnExpressionBasedModelAfterLearning(mapFromCategoricalTypeNameToSizeString, additionalTypes);
 		return convertedModel;
 	}
 	
+	
 	/**
-	 * Converting the learned ExpressionBayesianModel into a ExpressionBasedModel, ready for inferences.
-	 * Some assumptions: the only constants in the initial expressions of the nodes were the parameters that are now learned, and there were no special categorical types or additional types 
+	 * Converting the learned ExpressionBayesianModel into an ExpressionBasedModel, ready for inferences.
+	 * Some assumptions: the only constants in the initial expressions of the nodes were the parameters that are now learned
+	 * 
+	 * @param mapFromCategoricalTypeNameToSizeString (the user specifies the categorical types used, usually an empty map)
+	 * @param additionalTypes (the user specifies the additional types used, usually an empty list)
 	 * 
 	 * @return the equivalent ExpressionBasedModel for inference
 	 */
-	public ExpressionBasedModel convertToAnExpressionBasedModelAfterLearning() {
+	public ExpressionBasedModel convertToAnExpressionBasedModelAfterLearning(Map<String, String> mapFromCategoricalTypeNameToSizeString, Collection<Type> additionalTypes) {
 		// The nodes of this Bayesian model
 		List<? extends Expression> factors = this.getNodes();
 		
@@ -63,14 +76,6 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 		// The definitions of uniquely named constants 
 		// (similar comment as above)
 		Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = map();
-		
-		// The definitions of types 
-		// (we assume that there were no categorical types)
-		Map<String, String> mapFromCategoricalTypeNameToSizeString = map();
-		
-		// Additional types 
-		// (we assume that there were no additional types)
-		Collection<Type> additionalTypes = list();
 		
 		// ExpressionBayesianModels are known to be Bayesian models
 		boolean isBayesianNetwork = true;

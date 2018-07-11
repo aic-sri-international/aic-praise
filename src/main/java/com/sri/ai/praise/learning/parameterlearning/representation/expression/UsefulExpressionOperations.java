@@ -70,9 +70,9 @@ public class UsefulExpressionOperations {
 		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real", "A", "Boolean");
 		
 		// Making parameters become constants
-		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate();
-		Predicate<Expression> newIsUniquelyNamedConstantPredicate = s -> s.equals(param1) || s.equals(param2) || s.equals(param3) || isUniquelyNamedConstantPredicate.apply(s);
-		context = context.setIsUniquelyNamedConstantPredicate(newIsUniquelyNamedConstantPredicate);
+		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate(); 
+		//Predicate<Expression> newIsUniquelyNamedConstantPredicate = s -> s.equals(param1) || s.equals(param2) || s.equals(param3) || isUniquelyNamedConstantPredicate.apply(s);
+		//context = context.setIsUniquelyNamedConstantPredicate(newIsUniquelyNamedConstantPredicate);
 		
 		println("My context:");
 		println(context.getSymbolsAndTypes());
@@ -86,7 +86,7 @@ public class UsefulExpressionOperations {
 		
 		IndexExpressionsSet childIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(list(child), context); // Gives you <Child in 1..5>
 		
-		Expression F1 = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, Equality.make(E, param1));
+		Expression F1 = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, Equality.make(E, param1)); // universal quantifier for all parameters instead of constants
 		println("F1 = " + F1);
 		println(context.evaluate(F1) + "\n");
 		
@@ -130,6 +130,18 @@ public class UsefulExpressionOperations {
 		println("child.toStringe() = " + child.toString());
 		type = context.getTypeOfRegisteredSymbol(child);
 		println("type.toString() = " + type.toString());
+		
+		
+		// TODO: Below I let some comments about Expresso edge case problems, to be studied and fixed later:
+		
+		// Comparison that we would like to be false, Expresso problem with constants - to be seen later (TODO)
+		// context.evaluate(Equality.make(parse("Param1"), parse("1-Param1"))); // we would like to have "false" as result here but it gives error, that is why we have to use OneMinusParam1 as other parameter 
+	
+		// Two Expressions that are equals, equality result should be true (from ExpressionBayesianModelTest, testChildParentModel4), but error with parent been canceled out, problem with Expresso - to be seen later
+		// also, TODO: see why it is not simplifying 1/Parent to 1/5 in learnedChild below
+		Expression expectedChild = parse("if Parent = 5 then 0.2 else if Child > Parent then (((5 - Parent) + 0) / (5 + 0)) / (5 - Parent) else ((Parent + 0) / (5 + 0)) / Parent");
+		Expression learnedChild = parse("if Parent < 5 then if Child > Parent then ((-Parent + 5) / ((-Parent + 5) + Parent)) / (-Parent + 5) else (Parent / ((-Parent + 5) + Parent)) / Parent else 1 / Parent");
+		// println(context.evaluate(Equality.make(expectedChild, learnedChild)));
 	}
 
 }
