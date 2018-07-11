@@ -122,5 +122,71 @@ public class ExpressionBasedModelExamples {
 		
 		return expressionBasedModel;
 	}
+	
+	public static ExpressionBasedModel buildModel4() {
+		
+		Map<String, String>	mapFromCategoricalTypeNameToSizeString = map(
+						"Folks", "10",
+						"Boolean", "2");
+
+		Map<String, String>	mapFromRandomVariableNameToTypeName = map(
+						"earthquake", "Boolean",
+						"burglar",    "Folks", // a multi-value random variable
+						"alarm",      "Boolean"
+						);
+
+		Map<String, String>	mapFromNonUniquelyNamedConstantNameToTypeName = map(
+						"seismicLocation", "Boolean"
+						);
+
+		Map<String, String>	mapFromUniquelyNamedConstantNameToTypeName = map("none", "Folks", "tom", "Folks", "Alpha", "Real");
+
+		boolean	isBayesianNetwork = true;
+		List<Expression> factors = getMultiplicands(parse("" + 
+						"(if earthquake then Alpha else 1-Alpha) * " +
+						"(if burglar = none then 0.7 else if burglar = tom then 0.1 else 0.2 / (|Folks| - 2)) * " +
+						// note the division above of the potential by number of remaining values, as the probabilities must sum up to 1
+						"(if burglar != none or earthquake "
+						+    "then if alarm then 0.9 else 0.1 "
+						+    "else if alarm then 0.05 else 0.95) " +
+						""));
+				
+		ExpressionBasedModel expressionBasedModel = new DefaultExpressionBasedModel(
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				list(),
+				isBayesianNetwork);
+		return expressionBasedModel;
+	}
+	
+	public static ExpressionBasedModel buildModel5() {
+		String modelString = "random earthquake: Boolean;\n"
+				+"random burglary: Boolean;\n"
+		+"random alarm: Boolean;\n"
+		+"constant Alpha: Real;\n"
+		+"constant Beta: Real;\n"
+		
+		+"earthquake 0.01;\n"
+		+"burglary 0.1;\n"
+
+		+"if earthquake\n"
+		   +"then if burglary\n"
+		      +"then alarm Alpha\n"
+		      +"else alarm Beta\n"
+		   +"else if burglary\n"
+		      +"then alarm 0.9\n"
+		      +"else alarm 0.01;\n";
+		
+		List<HOGMProblemError> modelErrors = new ArrayList<>();
+		
+		HOGModel hogmModel = parseModelStringToHOGMModel(modelString, modelErrors);
+		
+		ExpressionBasedModel expressionBasedModel = parseHOGModelToExpressionBasedModel(hogmModel);
+		
+		return expressionBasedModel;
+	}
 
 }

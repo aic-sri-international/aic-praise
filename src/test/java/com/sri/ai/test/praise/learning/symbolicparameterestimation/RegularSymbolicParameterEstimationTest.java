@@ -2,7 +2,6 @@ package com.sri.ai.test.praise.learning.symbolicparameterestimation;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.learning.symbolicparameterestimation.util.ExpressionBasedModelExamples.buildModel1;
-import static com.sri.ai.praise.learning.symbolicparameterestimation.util.ExpressionBasedModelExamples.buildModel2;
 import static com.sri.ai.praise.learning.symbolicparameterestimation.util.ExpressionBasedModelExamples.buildModel3;
 
 import java.util.LinkedList;
@@ -12,8 +11,6 @@ import java.util.Map;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.RegularSymbolicParameterEstimation;
-import com.sri.ai.praise.learning.symbolicparameterestimation.util.ExpressionBasedModelExamples;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -74,6 +71,19 @@ public class RegularSymbolicParameterEstimationTest {
 		Map<Expression, Double> result2 = regularParameterEstimation2.optimize();
 		
 		System.out.println(result2);
+		
+		ExpressionBasedModel expressionBasedModel3 = buildModel1();
+		
+		List<Expression> queryExpressionList3 = new LinkedList<Expression>();
+		queryExpressionList3.add(parse("not earthquake and not burglary"));
+		queryExpressionList3.add(parse("not earthquake and not burglary"));
+		queryExpressionList3.add(parse("earthquake and burglary"));
+
+		RegularSymbolicParameterEstimation regularParameterEstimation3 = new RegularSymbolicParameterEstimation(expressionBasedModel3, queryExpressionList3);
+		
+		Map<Expression, Double> result3 = regularParameterEstimation3.optimize();
+		
+		System.out.println(result3);
 		
 	}
 

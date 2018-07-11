@@ -9,8 +9,6 @@ import java.util.Map;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.regularparameterestimation.RegularParameterEstimation;
-import com.sri.ai.praise.learning.symbolicparameterestimation.util.ExpressionBasedModelExamples;
-
 import org.junit.Test;
 
 /**
@@ -45,16 +43,19 @@ public class RegularParameterEstimationTest {
 		
 		System.out.println(result);
 		
-		ExpressionBasedModel expressionBasedModel2 = ExpressionBasedModelExamples.buildModel2();
+		ExpressionBasedModel expressionBasedModel3 = buildModel1();
 		
-		List<Expression> queryExpressionList2 = new LinkedList<Expression>();
-		queryExpressionList2.add(parse("likeIncumbent > likeChallenger"));
+		List<Expression> queryExpressionList3 = new LinkedList<Expression>();
+		queryExpressionList3.add(parse("not earthquake and not burglary"));
+		queryExpressionList3.add(parse("not earthquake and not burglary"));
+		queryExpressionList3.add(parse("earthquake and burglary"));
+
+		RegularParameterEstimation regularParameterEstimation3 = new RegularParameterEstimation(expressionBasedModel3, queryExpressionList3);
 		
-		RegularParameterEstimation regularParameterEstimation2 = new RegularParameterEstimation(expressionBasedModel2, queryExpressionList2);
+		Map<Expression, Double> result3 = regularParameterEstimation3.optimize();
 		
-		Map<Expression, Double> result2 = regularParameterEstimation2.optimize();
+		System.out.println(result3);
 		
-		System.out.println(result2);
 		
 		
 		

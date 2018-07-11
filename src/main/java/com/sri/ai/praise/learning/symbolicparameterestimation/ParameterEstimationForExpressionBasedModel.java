@@ -125,9 +125,9 @@ public class ParameterEstimationForExpressionBasedModel implements ParameterEsti
 			System.out.println(marginalFunction);
 			
 			Set<Expression> listOfVariables = freeVariables(marginalFunction, context);
-			if (listOfVariables.isEmpty()) {
+			/*if (listOfVariables.isEmpty()) {
 				throw new Error("Nothing to optimized in the expression : " + marginalFunction);
-			}
+			}*/
 			
 			result.add(marginalFunction);
 		}
