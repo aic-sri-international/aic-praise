@@ -64,7 +64,7 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 	 * @param mapFromCategoricalTypeNameToSizeString (the user specifies the categorical types used, usually an empty map)
 	 * @param additionalTypes (the user specifies the additional types used, usually an empty list)
 	 * 
-	 * @return the equivalent ExpressionBasedModel for inference
+	 * @return the equivalent ExpressionBasedModel for inference 
 	 */
 	public ExpressionBasedModel convertToAnExpressionBasedModelAfterLearning(Map<String, String> mapFromCategoricalTypeNameToSizeString, Collection<Type> additionalTypes) {
 		// The nodes of this Bayesian model
