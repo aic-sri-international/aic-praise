@@ -76,7 +76,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		this.parents = parents; 
 		this.allVariables = mergeElementsIntoOneList(child, parents);
 		this.parameters = parameters;
-		// makeTheParametersBecomeConstantsInsideTheExpression(); // old way - handling all the parameters as constants
+		makeTheParametersBecomeConstantsInsideTheExpression(); 
 		
 		this.familyCountFromDataset = new LinkedHashMap<Family, Expression>();
 		this.parameterCountFromDataset = new LinkedHashMap<Pair<Family, Expression>, Expression>();
@@ -110,9 +110,9 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 			for(Expression parameter : family.parametersThatCanBeGenerated) {
 				Expression numberOfChildValuesThatMakeExpressionEqualsToThisParameter = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
 				parameterCountFromDataset.put(new Pair<Family, Expression>(family, parameter), numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
-			}
 			
-			setInitialCountForThatFamily(family);
+				incrementFamilyCount(family, numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
+			}
 		}
 	}
 	
@@ -159,7 +159,6 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	/**
 	 * Making the parameters become constants - important to forbid PRAiSE in considering the possibility of one parameter being equal to another (having the same value) in a logic evaluation, 
 	 * since here parameters must be treated as symbolic literals, not variables
-	 * (old way of handling the parameters)
 	 */
 	private void makeTheParametersBecomeConstantsInsideTheExpression() {
 		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate(); 
@@ -276,19 +275,6 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	}
 	
 	/**
-	 * Create an UniversallyQuantifiedFormula adding the condition "for all parameters in parametersValues" at the beginning of the expression taken as input
-	 * (newExpression = for all parameters in parametersValues : orginalExpression)
-	 * 
-	 * @param originalExpression
-	 * 
-	 * @return newExpression
-	 */
-	private Expression forAllParametersValues(Expression originalExpression) {
-		Expression newExpression = new DefaultUniversallyQuantifiedFormula(parametersIndexExpressionsSet, originalExpression);
-		return newExpression;
-	}
-	
-	/**
 	 * Generating one family for each parameter at the beginning, the associated condition being "there exists Child so that this.expression = currentParameter"
 	 * 
 	 * @return list of the initial families
@@ -297,7 +283,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		LinkedList<Family> initialFamilies = list();
 		
 		for(Expression parameter : parameters) {
-			Expression expressionForFamilyCondition = forAllParametersValues(Equality.make(expression, parameter));
+			Expression expressionForFamilyCondition = Equality.make(expression, parameter);
 			Expression familyCondition = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, expressionForFamilyCondition);
 			familyCondition = context.evaluate(familyCondition);
 			Family family = new Family(familyCondition, Util.set(parameter));
@@ -314,7 +300,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	}
 
 	private Expression getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(Expression parameter) {
-		Expression multisetOfChildValuesThatMakesExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, forAllParametersValues(Equality.make(expression, parameter)));
+		Expression multisetOfChildValuesThatMakesExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(expression, parameter));
 		Expression numberOfChildValues = apply(CARDINALITY, multisetOfChildValuesThatMakesExpressionEqualsToThisParameter);
 		
 		return numberOfChildValues; 
@@ -347,7 +333,6 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	private void incrementParameterCountByOne(Expression parameter, Family family) {
 		Pair<Family, Expression> familyAndParameter = new Pair<Family, Expression>(family, parameter);
 		Expression oldParameterCount = parameterCountFromDataset.get(familyAndParameter);
-		if(oldParameterCount == null) return; // we have parameter = "1-Parameter1" here instead of a real parameter for example  
 		Expression newParameterCount = Plus.make(oldParameterCount, Expressions.ONE);
 		parameterCountFromDataset.put(familyAndParameter, newParameterCount);
 	}
@@ -441,12 +426,6 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		return this.parameters.size() == 0;
 	}
 	
-	private void setInitialCountForThatFamily(Family family) {
-		Expression multisetWithAllChildValues = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Expressions.TRUE);
-		Expression numberOfAllChildValues = apply(CARDINALITY, multisetWithAllChildValues);
-		incrementFamilyCount(family, numberOfAllChildValues);
-	}
-	
 	public static void main(String[] args) {
 		Theory theory = new CommonTheory();
 		
@@ -464,12 +443,10 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		LinkedHashSet<Expression> parameters = Util.set(param1, param2);
 		parameters.add(param3);
 		
-		// Expression E = parse("if Child < 5 then Param1 else Param2");
-		Expression E = parse("if Parent != 5 then Param1 else Param2");
+		Expression E = parse("if Child < 5 then Param1 else Param2");
+		// Expression E = parse("if Parent != 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
 		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
-		
-		// Expression E = parse("if Child > 2 then Param1 else 1 - Param1"); // come here to verify! write new tests for this case
 		
 		println("E = " + E + "\n");
 		
@@ -482,7 +459,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		// Incrementing from datapoints
 		LinkedList<Expression> childAndParentsValues = list(parse("1"), parse("1"));
 		
-		int nIncrements = 2;
+		int nIncrements = 0;
 		for(int i = 1; i <= nIncrements; i++) {
 			childNode.incrementCountForChildAndParentsAssignment(childAndParentsValues);
 		}

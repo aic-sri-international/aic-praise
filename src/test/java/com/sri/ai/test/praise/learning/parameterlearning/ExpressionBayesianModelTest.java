@@ -70,19 +70,19 @@ public class ExpressionBayesianModelTest {
 	 */
 	private static ExpressionBayesianModel generateEarthquakeBurglaryAlarmModel() {
 		Expression expressionForEarthquakeNode = parse("if Earthquake = 1 then 0.01 else 0.99"); // prior probability
-		Expression expressionForBurglaryNode = parse("if Burglary = 1 then Param5 else 1 - Param5");
+		Expression expressionForBurglaryNode = parse("if Burglary = 1 then Param5 else OneMinusParam5");
 		
 		Expression expressionForAlarmNode = parse("if Earthquake = 1 " + 
 														"then if Burglary = 1 " + 
-															"then if Alarm = 1 then Param1 else 1 - Param1 " +
-															"else if Alarm = 1 then Param2 else 1 - Param2 " + 
+															"then if Alarm = 1 then Param1 else OneMinusParam1 " +
+															"else if Alarm = 1 then Param2 else OneMinusParam2 " + 
 														"else if Burglary = 1 " + 
-															"then if Alarm = 1 then Param3 else 1 - Param3 " + 
-															"else if Alarm = 1 then Param4 else 1 - Param4");
+															"then if Alarm = 1 then Param3 else OneMinusParam3 " + 
+															"else if Alarm = 1 then Param4 else OneMinusParam4");
 		
 		ExpressionBayesianNode earthquakeNode = new ExpressionBayesianNode(expressionForEarthquakeNode, contextForEarthquakeBurglaryAlarmModel, earthquake, list(), Util.set()); 
-		ExpressionBayesianNode burglaryNode = new ExpressionBayesianNode(expressionForBurglaryNode, contextForEarthquakeBurglaryAlarmModel, burglary, list(), Util.set(parse("Param5"))); 
-		ExpressionBayesianNode alarmNode = new ExpressionBayesianNode(expressionForAlarmNode, contextForEarthquakeBurglaryAlarmModel, alarm, list(earthquake, burglary), Util.set(parse("Param1"), parse("Param2"), parse("Param3"), parse("Param4"))); 
+		ExpressionBayesianNode burglaryNode = new ExpressionBayesianNode(expressionForBurglaryNode, contextForEarthquakeBurglaryAlarmModel, burglary, list(), Util.set(parse("Param5"), parse("OneMinusParam5"))); 
+		ExpressionBayesianNode alarmNode = new ExpressionBayesianNode(expressionForAlarmNode, contextForEarthquakeBurglaryAlarmModel, alarm, list(earthquake, burglary), Util.set(parse("Param1"), parse("Param2"), parse("Param3"), parse("Param4"), parse("OneMinusParam1"), parse("OneMinusParam2"), parse("OneMinusParam3"), parse("OneMinusParam4"))); 
 		
 		ExpressionBayesianModel model = new ExpressionBayesianModel(list(alarmNode, earthquakeNode, burglaryNode));
 		
