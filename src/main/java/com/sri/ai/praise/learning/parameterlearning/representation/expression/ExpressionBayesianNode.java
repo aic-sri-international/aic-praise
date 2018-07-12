@@ -65,13 +65,14 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	
 	// Useful variables used frequently:
 	private IndexExpressionsSet childIndexExpressionsSet;
+	private IndexExpressionsSet parametersIndexExpressionsSet;
 	
 	public ExpressionBayesianNode(Expression expression, Context context, ExpressionVariable child, List<ExpressionVariable> parents, LinkedHashSet<Expression> parameters) {
 		super(expression, context);
 		this.expression = expression;
 		this.context = context;
 		this.child = child;
-		this.parents = parents; // parentsNodes.stream().map(parentNode -> parentNode.getChildVariable()).collect(Collectors.toList());
+		this.parents = parents; 
 		this.allVariables = mergeElementsIntoOneList(child, parents);
 		this.parameters = parameters;
 		makeTheParamentersBecomeConstantsInsideTheExpression();
@@ -82,6 +83,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		this.finalParameterValues = new LinkedHashMap<Pair<Family, Expression>, Expression>();
 		
 		this.childIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(list(child), context);
+		this.parametersIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(parameters, context);
 	}
 	
 	@Override

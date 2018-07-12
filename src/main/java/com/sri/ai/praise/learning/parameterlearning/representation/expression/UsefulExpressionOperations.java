@@ -19,6 +19,7 @@ import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.core.DefaultExistentiallyQuantifiedFormula;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.expresso.core.DefaultUniversallyQuantifiedFormula;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
@@ -33,6 +34,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.util.Util;
 
 public class UsefulExpressionOperations {
+	
+	static IndexExpressionsSet childIndexExpressionsSet;
+	static IndexExpressionsSet parametersIndexExpressionsSet;
 	
 	/**
 	 * Given two conditions as Expressions, verify if they are equivalent or return the condition for their intersection
@@ -53,7 +57,20 @@ public class UsefulExpressionOperations {
 			return and;
 		}
 	}
-
+	
+	/**
+	 * Create an UniversallyQuantifiedFormula adding the condition "for all parameters in parametersValues" at the beginning of the expression taken as input
+	 * (newExpression = for all parameters in parametersValues : orginalExpression)
+	 * 
+	 * @param originalExpression
+	 * 
+	 * @return newExpression
+	 */
+	private static Expression forAllParametersValues(Expression originalExpression) {
+		Expression newExpression = new DefaultUniversallyQuantifiedFormula(parametersIndexExpressionsSet, originalExpression);
+		return newExpression;
+	}
+	
 	public static void main(String[] args) {
 		Theory theory = new CommonTheory();
 		
@@ -69,10 +86,10 @@ public class UsefulExpressionOperations {
 		
 		context = context.extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real", "A", "Boolean");
 		
-		// Making parameters become constants
-		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate(); 
-		//Predicate<Expression> newIsUniquelyNamedConstantPredicate = s -> s.equals(param1) || s.equals(param2) || s.equals(param3) || isUniquelyNamedConstantPredicate.apply(s);
-		//context = context.setIsUniquelyNamedConstantPredicate(newIsUniquelyNamedConstantPredicate);
+		// Old way: making parameters become constants
+		// Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate(); 
+		// Predicate<Expression> newIsUniquelyNamedConstantPredicate = s -> s.equals(param1) || s.equals(param2) || s.equals(param3) || isUniquelyNamedConstantPredicate.apply(s);
+		// context = context.setIsUniquelyNamedConstantPredicate(newIsUniquelyNamedConstantPredicate);
 		
 		println("My context:");
 		println(context.getSymbolsAndTypes());
@@ -84,22 +101,28 @@ public class UsefulExpressionOperations {
 		
 		println("\nE = " + E + "\n");
 		
-		IndexExpressionsSet childIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(list(child), context); // Gives you <Child in 1..5>
+		childIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(list(child), context); // Gives you <Child in 1..5>
+		parametersIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(list(param1, param2, param3), context);
 		
-		Expression F1 = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, Equality.make(E, param1)); // universal quantifier for all parameters instead of constants
+		Expression F1 = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, forAllParametersValues(Equality.make(E, param1))); 
 		println("F1 = " + F1);
 		println(context.evaluate(F1) + "\n");
+				
+		// Old way of computing families (taking the parameters as constants):
+		// Expression F1 = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, Equality.make(E, param1)); 
+		// println("F1 = " + F1);
+		// println(context.evaluate(F1) + "\n");
 		
-		Expression F2 = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, Equality.make(E, param2));
+		Expression F2 = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, forAllParametersValues(Equality.make(E, param2))); 
 		println("F2 = " + F2);
 		println(context.evaluate(F2) + "\n");
 		
-		Expression F1intersectsF2 = verifyEquivalenceAndGetIntersectionCondition(F1, F2, context); // Equivalence.make(F1, F2), usar o context para simplificar com o F1 sabendo que é true ??? ou criar um existe cara ... bonitinho como deve ser? there exist Parent tal que F1 = true ...
+		Expression F1intersectsF2 = verifyEquivalenceAndGetIntersectionCondition(F1, F2, context); 
 		println("F1intersectsF2 = " + F1intersectsF2);
 		println(context.evaluate(F1intersectsF2)); 
 		
 		// Normalization for Parame1_1
-		Expression multiset = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(E, param1));
+		Expression multiset = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, forAllParametersValues(Equality.make(E, param1)));
 		Expression cardinality = apply(CARDINALITY, multiset);
 		println("\nCardinality = " + cardinality);
 		Expression cardinalityResult = context.evaluate(cardinality);
