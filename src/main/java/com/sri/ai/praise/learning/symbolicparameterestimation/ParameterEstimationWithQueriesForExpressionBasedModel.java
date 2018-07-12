@@ -3,6 +3,8 @@ package com.sri.ai.praise.learning.symbolicparameterestimation;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.expresso.helper.Expressions.freeVariables;
 import static com.sri.ai.expresso.helper.Expressions.parse;
+import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIATION;
+import static com.sri.ai.grinder.library.FunctorConstants.LOG;
 import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
 import static com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation.applySigmoidTrick;
 import static org.apache.commons.math3.util.FastMath.exp;
@@ -10,6 +12,8 @@ import static org.apache.commons.math3.util.FastMath.exp;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -27,24 +31,20 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
 import com.sri.ai.util.base.Pair;
 
 /**
- * Parameter Estimation for ExpressionBasedModel.
+ * Parameter Estimation for ExpressionBasedModel when queries and evidences.
  * 
  * @author Sarah Perrin
  *
  */
 
-//TODO : implement countExamples
-
-public class ParameterEstimationForExpressionBasedModel implements ParameterEstimation {
+public class ParameterEstimationWithQueriesForExpressionBasedModel implements ParameterEstimation {
 
 	public ExpressionBasedModel model;
-	public List<Expression> evidences;
-	public List<Expression> queries;
-	public List<Pair<Expression, Expression>> pairsEvidenceQuery;
+	public List<Pair<Expression, Expression>> pairsQueryEvidence;
 
-	public ParameterEstimationForExpressionBasedModel(ExpressionBasedModel model, List<Expression> queries) {
+	public ParameterEstimationWithQueriesForExpressionBasedModel(ExpressionBasedModel model, List<Pair<Expression, Expression>> pairsQueryEvidence) {
 		this.model = model;
-		this.queries = queries;
+		this.pairsQueryEvidence = pairsQueryEvidence;
 	}
 
 	/**
@@ -53,19 +53,17 @@ public class ParameterEstimationForExpressionBasedModel implements ParameterEsti
 	 *
 	 */
 	public HashMap<Expression, Double> optimize(ExpressionBasedModel expressionBasedModel,
-			 GoalType goalType, double[] startPoint) {
+			GoalType goalType, double[] startPoint) {
 
 		Theory theory = new CommonTheory();
 		Context context = new TrueContext(theory);
 
-		List<Expression> listOfMarginals = buildListOfMarginals(expressionBasedModel, context);
-
-		Expression marginalFunctionLog = applyLogTransformationProductToSum(listOfMarginals);
+		Expression marginalFunctionLog = buildListOfMarginals();
 
 		System.out.println(marginalFunctionLog);
 
 		Set<Expression> listOfVariables = freeVariables(marginalFunctionLog, context);
-		
+
 		if(listOfVariables.size() != startPoint.length) {
 			throw new Error("Length of double[] startPoint doesn't match the number of variables to optimize with evidence");
 		}
@@ -112,49 +110,47 @@ public class ParameterEstimationForExpressionBasedModel implements ParameterEsti
 	 * list of marginals.
 	 *
 	 */
-	private List<Expression> buildListOfMarginals(ExpressionBasedModel model,
-			Context context) {
+	private Expression buildListOfMarginals() {
 
-		List<Expression> result = new LinkedList<Expression>();
-		for (Expression query : queries) {
-
+		List<Expression> listOfMarginals = new LinkedList<Expression>();
+		Map<Pair<Expression, Expression>, Integer> mapPairsToCount = buildMapToCountPairs();
+		
+		for (Entry<Pair<Expression, Expression>, Integer> entry : mapPairsToCount.entrySet()) {
+			Pair<Expression, Expression> pairEvidenceQuery = entry.getKey();
 			ExpressionBasedSolver solver = new ExactBPExpressionBasedSolver();
-			Expression marginal = solver.solve(query, model);
+			Expression query = pairEvidenceQuery.first;
+			Expression evidence = pairEvidenceQuery.second;
+			ExpressionBasedModel conditionedModel = model.getConditionedModel(evidence);
+			Expression marginal = solver.solve(query, conditionedModel);
 
-			marginal = applySigmoidTrick(marginal, context);
+			Context context = model.getContext();
 			
+
 			System.out.println(marginal);
 
 			Expression marginalFunction = convertExpression(marginal);
 			
-			System.out.println(marginalFunction);
+			marginalFunction = applySigmoidTrick(marginalFunction, context);
 			
-			//Set<Expression> listOfVariables = freeVariables(marginalFunction, context);
-			/*if (listOfVariables.isEmpty()) {
-				throw new Error("Nothing to optimized in the expression : " + marginalFunction);
-			}*/
-			
-			result.add(marginalFunction);
+			Expression marginalFunctionExponentiate = apply(EXPONENTIATION, marginalFunction, entry.getValue());
+
+			System.out.println(marginalFunctionExponentiate);
+
+			listOfMarginals.add(marginalFunctionExponentiate);
 		}
-
-		return result;
-	}
-
-	/**
-	 * Transform expression = a1*...*an into log(a1)+...+log(an)
-	 *
-	 */
-	private Expression applyLogTransformationProductToSum(List<Expression> listOfMarginals) {
+		
 		Expression result;
 		if (listOfMarginals.size() > 1) {
 			result = apply(PLUS, listOfMarginals);
 			for (int i = 0; i < listOfMarginals.size(); i++) {
-				Expression newIthArgument = apply(FunctorConstants.LOG, listOfMarginals.get(i));
+				Expression ithExpression = listOfMarginals.get(i);
+				Expression newIthArgument = apply(FunctorConstants.LOG, ithExpression);
 				result = result.set(i, newIthArgument);
 			}
 		} else {
-			result = apply(FunctorConstants.LOG, listOfMarginals.get(0));
+			result = apply(LOG, listOfMarginals.get(0));
 		}
+
 		return result;
 	}
 
@@ -176,5 +172,25 @@ public class ParameterEstimationForExpressionBasedModel implements ParameterEsti
 			return marginal;
 		}
 	}
+	
+	private Map<Pair<Expression, Expression>, Integer> buildMapToCountPairs(){
+		Map<Pair<Expression, Expression>, Integer> result = new HashMap<Pair<Expression, Expression>, Integer>();
+		for(Pair<Expression, Expression> pair : pairsQueryEvidence) {
+			if(!result.containsKey(pair)) {
+				result.put(pair, 1);
+			}
+			else {
+				System.out.println("ok");
+				int currentCount = result.get(pair);
+				currentCount++;
+				result.put(pair, currentCount);
+			}
+		}
+		System.out.println(result.toString());
+		return result;
+	}
 
 }
+
+
+

@@ -121,7 +121,6 @@ public class ParameterEstimationForHOGModelTest {
 		
 		HashMap<Expression,Double> result = parameterEstimationForHOGModel.optimizeWhenModelIsHOGModel(
 				parameterEstimationForHOGModel.hogmModel,
-				parameterEstimationForHOGModel.evidences,
 				GoalType.MAXIMIZE,
 				startPoint);
 		return result;

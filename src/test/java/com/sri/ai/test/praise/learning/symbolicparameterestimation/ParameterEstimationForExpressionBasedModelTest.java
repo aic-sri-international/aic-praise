@@ -215,7 +215,6 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel = new ParameterEstimationForExpressionBasedModel(expressionBasedModel, queryExpressions);
 				HashMap<Expression,Double> result = parameterEstimationForExpressionBasedModel.optimize(
 						expressionBasedModel,
-						queryExpressions,
 						GoalType.MAXIMIZE,
 						new double[] {0});
 				ExpressionBasedModel newModel = buildOptimizedExpressionBasedModel(result, expressionBasedModel);
@@ -227,7 +226,6 @@ public class ParameterEstimationForExpressionBasedModelTest {
 				ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel2 = new ParameterEstimationForExpressionBasedModel(newModel, queryExpressions2);
 				HashMap<Expression,Double> result2 = parameterEstimationForExpressionBasedModel2.optimize(
 						newModel,
-						queryExpressions2,
 						GoalType.MAXIMIZE,
 						new double[] {0});
 				ExpressionBasedModel newModel2 = buildOptimizedExpressionBasedModel(result2, newModel);
@@ -240,7 +238,6 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel = new ParameterEstimationForExpressionBasedModel(expressionBasedModel, queryExpressions);
 		HashMap<Expression,Double> result = parameterEstimationForExpressionBasedModel.optimize(
 				expressionBasedModel,
-				queryExpressions,
 				GoalType.MAXIMIZE,
 				startPoint);
 		ExpressionBasedModel newModel = buildOptimizedExpressionBasedModel(result, expressionBasedModel);

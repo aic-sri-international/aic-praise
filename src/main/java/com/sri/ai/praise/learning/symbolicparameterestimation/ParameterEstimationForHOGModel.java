@@ -22,12 +22,13 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	public HOGModel hogmModel;
 	List<HOGMProblemError> modelErrors;
 	public List<Expression> evidences;
+	public List<Expression> queries;
 	
-	public ParameterEstimationForHOGModel(String stringModel, List<Expression> evidences, List<HOGMProblemError> modelErrors) {
+	public ParameterEstimationForHOGModel(String stringModel, List<Expression> queries, List<HOGMProblemError> modelErrors) {
 		this.stringModel = stringModel;
 		this.modelErrors = new ArrayList<>();
 		this.hogmModel = parseModelStringToHOGMModel(stringModel, modelErrors);
-		this.evidences = evidences;
+		this.queries = queries;
 	}
 	
 	public ParameterEstimationForHOGModel(HOGModel hogmModel, List<Expression> evidences, List<HOGMProblemError> modelErrors) {
@@ -40,7 +41,7 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	 * Main method to optimize the parameters of the model given the queries and evidences when the model is String based.
 	 *
 	 */
-	public HashMap<Expression, Double> optimizeWhenModelIsString(String modelString, List<Expression> queryExpression, GoalType goalType,
+	public HashMap<Expression, Double> optimizeWhenModelIsString(String modelString, GoalType goalType,
 			double[] startPoint){
 		
 		List<HOGMProblemError> modelErrors = new ArrayList<>();
@@ -49,7 +50,6 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 		
 		HashMap<Expression, Double> result = optimizeWhenModelIsHOGModel(
 			hogmModel,
-			queryExpression,
 			goalType,
 			startPoint);
 		
@@ -60,18 +60,17 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	 * Main method to optimize the parameters of the model given the queries and evidences when the model is HOGModel based.
 	 *
 	 */
-	public HashMap<Expression, Double> optimizeWhenModelIsHOGModel(HOGModel hogmModel, List<Expression> queryExpression, GoalType goalType,
+	public HashMap<Expression, Double> optimizeWhenModelIsHOGModel(HOGModel hogmModel, GoalType goalType,
 			double[] startPoint){
 		
 		ExpressionBasedModel expressionBasedModel = UsefulOperationsParameterEstimation.parseHOGModelToExpressionBasedModel(hogmModel);
 		
-		ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel = new ParameterEstimationForExpressionBasedModel(expressionBasedModel, queryExpression);
+		ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel = new ParameterEstimationForExpressionBasedModel(expressionBasedModel, queries);
 		
 		System.out.println("expression based model after parsing : " + expressionBasedModel);
 		
 		HashMap<Expression, Double> result = parameterEstimationForExpressionBasedModel.optimize(
 			expressionBasedModel,
-			queryExpression,
 			goalType,
 			startPoint);
 		
