@@ -155,16 +155,29 @@ public class UsefulExpressionOperations {
 		println("type.toString() = " + type.toString());
 		
 		
-		// TODO: Below I let some comments about Expresso edge case problems, to be studied and fixed later:
+		// TODO: Below I let 2 comments about Expresso edge case problems, to be studied and fixed later:
 		
+		// 1]
 		// Comparison that we would like to be false, Expresso problem with constants - to be seen later (TODO)
 		// context.evaluate(Equality.make(parse("Param1"), parse("1-Param1"))); // we would like to have "false" as result here but it gives error, that is why we have to use OneMinusParam1 as other parameter 
 	
+		// 2]
 		// Two Expressions that are equals, equality result should be true (from ExpressionBayesianModelTest, testChildParentModel4), but error with parent been canceled out, problem with Expresso - to be seen later
 		// also, TODO: see why it is not simplifying 1/Parent to 1/5 in learnedChild below
 		Expression expectedChild = parse("if Parent = 5 then 0.2 else if Child > Parent then (((5 - Parent) + 0) / (5 + 0)) / (5 - Parent) else ((Parent + 0) / (5 + 0)) / Parent");
 		Expression learnedChild = parse("if Parent < 5 then if Child > Parent then ((-Parent + 5) / ((-Parent + 5) + Parent)) / (-Parent + 5) else (Parent / ((-Parent + 5) + Parent)) / Parent else 1 / Parent");
 		// println(context.evaluate(Equality.make(expectedChild, learnedChild)));
+		
+		
+		// Problem when using "for all parameters in parametersValues" instead of handling them as constants - the problem was when adding "and (Parent != 5)" (family.condition) at the end of expression bellow
+		Expression expression = parse("(if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3)");
+		println("\nexpression = " + expression);
+		multiset = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, forAllParametersValues(Equality.make(expression, param1)));
+		cardinality = apply(CARDINALITY, multiset);
+		Expression numberOfChildValues = cardinality;
+		println("numberOfChildValues = " + numberOfChildValues);
+		println(context.evaluate(numberOfChildValues));
+		
 	}
 
 }

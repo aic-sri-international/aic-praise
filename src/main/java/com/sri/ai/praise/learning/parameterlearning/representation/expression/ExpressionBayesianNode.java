@@ -104,7 +104,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		for(Family family : families) {
 			familyCountFromDataset.put(family, Expressions.ZERO);
 			for(Expression parameter : family.parametersThatCanBeGenerated) {
-				Expression numberOfChildValuesThatMakeExpressionEqualsToThisParameter = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(parameter, family.condition);
+				Expression numberOfChildValuesThatMakeExpressionEqualsToThisParameter = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
 				parameterCountFromDataset.put(new Pair<Family, Expression>(family, parameter), numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
 				
 				incrementFamilyCount(family, numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
@@ -295,9 +295,8 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		familyCountFromDataset.put(family, newFamilyCount);
 	}
 
-	private Expression getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(Expression parameter, Expression condition) {
-		Expression expressionUnderTheCondition = And.make(expression, condition);
-		Expression multisetOfChildValuesThatMakeExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(expressionUnderTheCondition, parameter));
+	private Expression getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(Expression parameter) {
+		Expression multisetOfChildValuesThatMakeExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(expression, parameter));
 		Expression numberOfChildValues = apply(CARDINALITY, multisetOfChildValuesThatMakeExpressionEqualsToThisParameter);
 		
 		return numberOfChildValues;
@@ -410,7 +409,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 				Expression parameterCount = parameterCountFromDataset.get(new Pair<Family, Expression>(family, parameter));
 				
 				Expression parameterCountDividedByFamilyCount = Division.make(parameterCount, familyCount);
-				Expression normalizationFactor = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(parameter, family.condition);
+				Expression normalizationFactor = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
 				Expression finalParameterValue = Division.make(parameterCountDividedByFamilyCount, normalizationFactor);
 				finalParameterValue = context.evaluate(finalParameterValue);
 				
