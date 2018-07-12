@@ -34,4 +34,6 @@ public interface BayesianNode extends Factor {
 	
 	public void normalizeParameters();
 	
+	public BayesianNode copy();
+	
 }

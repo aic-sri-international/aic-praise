@@ -146,6 +146,12 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		return this.context;
 	}
 	
+	@Override
+	public ExpressionBayesianNode copy() {
+		ExpressionBayesianNode copy = new ExpressionBayesianNode(this.expression, this.context, this.child, this.parents, this.parameters);
+		return copy;
+	}
+	
 	/**
 	 * Making the parameters become constants - important to forbid PRAiSE in considering the possibility of one parameter being equal to another (having the same value) in a logic evaluation, 
 	 * since here parameters must be treated as symbolic literals, not variables

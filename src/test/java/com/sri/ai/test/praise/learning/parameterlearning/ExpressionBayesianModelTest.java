@@ -104,7 +104,7 @@ public class ExpressionBayesianModelTest {
 		int numberOfDatapoints2 = 2; // (5, 1)
 		DefaultDataset dataset = generateDatasetForChildParentModel(numberOfDatapoints1, numberOfDatapoints2, 0, 0);
 		
-		model.learnModelParametersFromCompleteData(dataset);
+		model = (ExpressionBayesianModel) model.learnModelParametersFromCompleteData(dataset);
 		ExpressionBayesianNode learnedChild = model.getNodes().get(0);
 		ExpressionBayesianNode learnedParent = model.getNodes().get(1);
 		
@@ -142,7 +142,7 @@ public class ExpressionBayesianModelTest {
 		int numberOfDatapoints4 = 2; // (1, 5)
 		DefaultDataset dataset = generateDatasetForChildParentModel(numberOfDatapoints1, 0, 0, numberOfDatapoints4);
 		
-		model.learnModelParametersFromCompleteData(dataset);
+		model = (ExpressionBayesianModel) model.learnModelParametersFromCompleteData(dataset);
 		ExpressionBayesianNode learnedChild = model.getNodes().get(0);
 		ExpressionBayesianNode learnedParent = model.getNodes().get(1);
 		
@@ -183,7 +183,7 @@ public class ExpressionBayesianModelTest {
 		int numberOfDatapoints4 = 3; // (1, 5)
 		DefaultDataset dataset = generateDatasetForChildParentModel(numberOfDatapoints1, numberOfDatapoints2, 0, numberOfDatapoints4);
 		
-		model.learnModelParametersFromCompleteData(dataset);
+		model = (ExpressionBayesianModel) model.learnModelParametersFromCompleteData(dataset);
 		ExpressionBayesianNode learnedChild = model.getNodes().get(0);
 		ExpressionBayesianNode learnedParent = model.getNodes().get(1);
 		
@@ -227,7 +227,7 @@ public class ExpressionBayesianModelTest {
 		int numberOfDatapoints4 = 3; // (1, 5)
 		DefaultDataset dataset = generateDatasetForChildParentModel(numberOfDatapoints1, numberOfDatapoints2, 0, numberOfDatapoints4);
 		
-		model.learnModelParametersFromCompleteData(dataset);
+		model = (ExpressionBayesianModel) model.learnModelParametersFromCompleteData(dataset);
 		ExpressionBayesianNode learnedChild = model.getNodes().get(0);
 		ExpressionBayesianNode learnedParent = model.getNodes().get(1);
 		
@@ -285,7 +285,7 @@ public class ExpressionBayesianModelTest {
 		int numberOfDatapoints4 = 4; // (1, 5)
 		DefaultDataset dataset = generateDatasetForChildParentModel(numberOfDatapoints1, numberOfDatapoints2, numberOfDatapoints3, numberOfDatapoints4);
 		
-		model.learnModelParametersFromCompleteData(dataset);
+		model = (ExpressionBayesianModel) model.learnModelParametersFromCompleteData(dataset);
 		ExpressionBayesianNode learnedChild = model.getNodes().get(0);
 		ExpressionBayesianNode learnedParent = model.getNodes().get(1);
 		
@@ -368,7 +368,7 @@ public class ExpressionBayesianModelTest {
 		Expression expectedEarthquakeNode = parse("if Earthquake = 1 then 0.01 else 0.99");
 		
 		// Learning
-		model.learnModelParametersFromCompleteData(dataset);
+		model = (ExpressionBayesianModel) model.learnModelParametersFromCompleteData(dataset);
 		ExpressionBayesianNode learnedAlarmNode = model.getNodes().get(0);
 		ExpressionBayesianNode learnedEarthquakeNode = model.getNodes().get(1);
 		ExpressionBayesianNode learnedBurglaryNode = model.getNodes().get(2);
@@ -414,7 +414,7 @@ public class ExpressionBayesianModelTest {
 		// Learning
 	    println("(Learning ...)");
 		long startTime = System.currentTimeMillis();
-		model.learnModelParametersFromCompleteData(dataset);
+		model = (ExpressionBayesianModel) model.learnModelParametersFromCompleteData(dataset);
 		long stopTime = System.currentTimeMillis();
 	    long elapsedTime = stopTime - startTime;
 	    System.out.println("Elapsed time for learning with " + dataset.getDatapoints().size() + " datapoint(s): " + elapsedTime + " miliseconds \n");
@@ -466,7 +466,7 @@ public class ExpressionBayesianModelTest {
 		// Learning
 		println("\n(Learning ...)");
 		long startTime = System.currentTimeMillis();
-		model.learnModelParametersFromCompleteData(dataset);
+		model = (ExpressionBayesianModel) model.learnModelParametersFromCompleteData(dataset);
 		long stopTime = System.currentTimeMillis();
 	    long elapsedTime = stopTime - startTime;
 	    System.out.println("Elapsed time for learning with " + dataset.getDatapoints().size() + " datapoint(s): " + elapsedTime + " miliseconds \n");

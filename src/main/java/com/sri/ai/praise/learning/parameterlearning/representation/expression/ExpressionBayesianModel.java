@@ -31,6 +31,16 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 		return nodes;
 	}
 	
+	@Override
+	public ExpressionBayesianModel copy() {
+		List<ExpressionBayesianNode> copiedNodes = list();
+		for(ExpressionBayesianNode node : this.nodes) {
+			copiedNodes.add(node.copy());
+		}
+		ExpressionBayesianModel copy = new ExpressionBayesianModel(copiedNodes);
+		return copy;
+	}
+	
 	/**
 	 * Learn the parameters of the model and convert the learned ExpressionBayesianModel into an ExpressionBasedModel, ready for inferences.
 	 * 
@@ -41,8 +51,8 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 	 * @return the final learned and already converted model
 	 */
 	public ExpressionBasedModel learnModelParametersFromCompleteDataAndConvertToAnExpressionBasedModel(Dataset dataset, Map<String, String> mapFromCategoricalTypeNameToSizeString, Collection<Type> additionalTypes) {
-		this.learnModelParametersFromCompleteData(dataset);
-		ExpressionBasedModel convertedModel = this.convertToAnExpressionBasedModelAfterLearning(mapFromCategoricalTypeNameToSizeString, additionalTypes);
+		ExpressionBayesianModel learnedModel = (ExpressionBayesianModel) this.learnModelParametersFromCompleteData(dataset);
+		ExpressionBasedModel convertedModel = learnedModel.convertToAnExpressionBasedModelAfterLearning(mapFromCategoricalTypeNameToSizeString, additionalTypes);
 		return convertedModel;
 	}
 	

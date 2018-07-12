@@ -84,6 +84,12 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		}
 	}
 	
+	@Override
+	public TableBayesianNode copy() {
+		TableBayesianNode copy = new TableBayesianNode(this.child, this.parents);
+		return copy;
+	}
+	
 	private List<ArrayList<Integer>> getAllPossibleVariablesAssignments(ArrayList<TableVariable> variables) {
 		List<ArrayList<Integer>> allPossibleVariablesAssignments = list();
 		Iterator<ArrayList<Integer>> iteratorForParentsAssignments = TableFactor.getCartesianProduct(variables);

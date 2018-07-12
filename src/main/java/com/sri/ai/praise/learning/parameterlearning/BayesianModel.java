@@ -8,12 +8,17 @@ public interface BayesianModel extends FactorNetwork {
 	
 	public List<? extends BayesianNode> getNodes();
 	
-	default public void learnModelParametersFromCompleteData(Dataset dataset) {
-		List<? extends BayesianNode> nodes = this.getNodes();
+	default public BayesianModel learnModelParametersFromCompleteData(Dataset dataset) {
+		BayesianModel learnedModel = this.copy();
+		List<? extends BayesianNode> nodes = learnedModel.getNodes();
 		for(BayesianNode node : nodes) {
 			node.setParametersGivenCompleteData(dataset);
 		}
+		
+		return learnedModel;
 	}
+	
+	public BayesianModel copy();
 
 }
     
