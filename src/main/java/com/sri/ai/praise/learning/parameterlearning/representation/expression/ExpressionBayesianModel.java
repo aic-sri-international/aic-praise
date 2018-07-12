@@ -59,7 +59,7 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 	
 	/**
 	 * Converting the learned ExpressionBayesianModel into an ExpressionBasedModel, ready for inferences.
-	 * Some assumptions: the only constants in the initial expressions of the nodes were the parameters that are now learned
+	 * Some assumptions: there are no constants in the initial expressions of the nodes (would result in errors when learning the parameters)
 	 * 
 	 * @param mapFromCategoricalTypeNameToSizeString (the user specifies the categorical types used, usually an empty map)
 	 * @param additionalTypes (the user specifies the additional types used, usually an empty list)
@@ -80,7 +80,7 @@ public class ExpressionBayesianModel extends ExpressionFactorNetwork implements 
 		}
 		
 		// The definitions of non-uniquely named constants 
-		// (we assume that the only constants for the expressions of the nodes were the parameters, now replaced by their learned values. After learning we shall have no more constants then - the map  below is empty)
+		// (we assume that there are no constants in the initial expressions of the nodes - would result in errors when learning)
 		Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = map();
 		
 		// The definitions of uniquely named constants 
