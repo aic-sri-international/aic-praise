@@ -14,7 +14,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.stream.Collectors;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
@@ -65,7 +64,6 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	
 	// Useful variables used frequently:
 	private IndexExpressionsSet childIndexExpressionsSet;
-	private IndexExpressionsSet parametersIndexExpressionsSet;
 	
 	public ExpressionBayesianNode(Expression expression, Context context, ExpressionVariable child, List<ExpressionVariable> parents, LinkedHashSet<Expression> parameters) {
 		super(expression, context);
@@ -75,15 +73,15 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		this.parents = parents; 
 		this.allVariables = mergeElementsIntoOneList(child, parents);
 		this.parameters = parameters;
-		makeTheParamentersBecomeConstantsInsideTheExpression();
-		this.families = computeFamilies();
+		makeTheParametersBecomeConstantsInsideTheExpression(); 
 		
 		this.familyCountFromDataset = new LinkedHashMap<Family, Expression>();
 		this.parameterCountFromDataset = new LinkedHashMap<Pair<Family, Expression>, Expression>();
 		this.finalParameterValues = new LinkedHashMap<Pair<Family, Expression>, Expression>();
 		
 		this.childIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(list(child), context);
-		this.parametersIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(parameters, context);
+		
+		this.families = computeFamilies();
 	}
 	
 	@Override
@@ -152,7 +150,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	 * Making the parameters become constants - important to forbid PRAiSE in considering the possibility of one parameter being equal to another (having the same value) in a logic evaluation, 
 	 * since here parameters must be treated as symbolic literals, not variables
 	 */
-	private void makeTheParamentersBecomeConstantsInsideTheExpression() {
+	private void makeTheParametersBecomeConstantsInsideTheExpression() {
 		Predicate<Expression> isUniquelyNamedConstantPredicate = context.getIsUniquelyNamedConstantPredicate(); 
 		Predicate<Expression> newIsUniquelyNamedConstantPredicate = s -> parameters.contains(s) || isUniquelyNamedConstantPredicate.apply(s);
 		context = context.setIsUniquelyNamedConstantPredicate(newIsUniquelyNamedConstantPredicate);
@@ -165,6 +163,14 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	
 	/**
 	 * Break the initial families into final families without any intersection (shattering)
+	 * 
+	 * General idea of the shattering algorithm:
+	 * We go through the list of families with 2 iterators, family1 and family2, and compare then, leading to three possibilities:
+	 * 1) if their conditions do not intersect at all then we continue the iteration (doing family2++)
+	 * 2) if we have a total intersection (the family conditions are equivalent) then we add the parameters from family2 to family1 and delete family2 from the list
+	 * 3) if we have partial intersection between the conditions - that is the tricky case, here we do:
+	 * 		i) we create a new family to store this intersectionCondition, called here famillyIntersection, with the parameters from both family1 and family2, and add it to the end of the list of families
+	 * 		ii) we update the conditions of family1 and family2 as the disjunction between themselves and the intersectionCondition
 	 * 
 	 * @param initialFamilies
 	 * 
@@ -197,7 +203,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 					Expression newFamily2Condition = context.evaluate(And.make(family2.condition, Not.make(intersection)));
 					family2.condition = newFamily2Condition;
 					
-					if(family1.condition.equals(Expressions.FALSE)) {
+					if(family1.condition.equals(Expressions.FALSE)) { // optimization: if it is empty, we can break here already
 						break;
 					}
 				}
@@ -259,7 +265,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	}
 	
 	/**
-	 * Generating one family for each parameter at the beginning, the associated condition being "there exists Child so that Expression = currentParameter"
+	 * Generating one family for each parameter at the beginning, the associated condition being "there exists Child so that this.expression = currentParameter"
 	 * 
 	 * @return list of the initial families
 	 */
@@ -267,8 +273,8 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		LinkedList<Family> initialFamilies = list();
 		
 		for(Expression parameter : parameters) {
-			IndexExpressionsSet childIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(list(child), context);
-			Expression familyCondition = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, Equality.make(expression, parameter));
+			Expression expressionForFamilyCondition = Equality.make(expression, parameter);
+			Expression familyCondition = new DefaultExistentiallyQuantifiedFormula(childIndexExpressionsSet, expressionForFamilyCondition);
 			familyCondition = context.evaluate(familyCondition);
 			Family family = new Family(familyCondition, Util.set(parameter));
 			initialFamilies.add(family);
@@ -284,7 +290,8 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	}
 
 	private Expression getNumberOfChildValuesThatMakeExpressionEqualsToThisParameterUnderACondition(Expression parameter, Expression condition) {
-		Expression multisetOfChildValuesThatMakeExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(And.make(expression, condition), parameter));
+		Expression expressionUnderTheCondition = And.make(expression, condition);
+		Expression multisetOfChildValuesThatMakeExpressionEqualsToThisParameter = new DefaultIntensionalMultiSet(childIndexExpressionsSet, child, Equality.make(expressionUnderTheCondition, parameter));
 		Expression numberOfChildValues = apply(CARDINALITY, multisetOfChildValuesThatMakeExpressionEqualsToThisParameter);
 		
 		return numberOfChildValues;
@@ -374,8 +381,6 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 				expressionWithNewParameters = expressionWithNewParameters.replaceAllOccurrences(parameter, learnedParameterValue, context);
 			}
 			
-			// expressionWithNewParameters = context.evaluate(expressionWithNewParameters);
-			
 			if(iterationCount == 0) {
 				previousIfThenElse = newExpression = expressionWithNewParameters;
 			}
@@ -429,8 +434,8 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		LinkedHashSet<Expression> parameters = Util.set(param1, param2);
 		parameters.add(param3);
 		
-		Expression E = parse("if Child < 5 then Param1 else Param2");
-		// Expression E = parse("if Parent != 5 then Param1 else Param2");
+		// Expression E = parse("if Child < 5 then Param1 else Param2");
+		Expression E = parse("if Parent != 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
 		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
 		
