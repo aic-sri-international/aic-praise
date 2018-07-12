@@ -347,6 +347,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	private void incrementParameterCountByOne(Expression parameter, Family family) {
 		Pair<Family, Expression> familyAndParameter = new Pair<Family, Expression>(family, parameter);
 		Expression oldParameterCount = parameterCountFromDataset.get(familyAndParameter);
+		if(oldParameterCount == null) return; // we have parameter = "1-Parameter1" here instead of a real parameter for example  
 		Expression newParameterCount = Plus.make(oldParameterCount, Expressions.ONE);
 		parameterCountFromDataset.put(familyAndParameter, newParameterCount);
 	}
@@ -468,6 +469,8 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
 		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
 		
+		// Expression E = parse("if Child > 2 then Param1 else 1 - Param1"); // come here to verify! write new tests for this case
+		
 		println("E = " + E + "\n");
 		
 		ExpressionBayesianNode parentNode = new ExpressionBayesianNode(E, context, parent, list(), parameters);
@@ -479,7 +482,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		// Incrementing from datapoints
 		LinkedList<Expression> childAndParentsValues = list(parse("1"), parse("1"));
 		
-		int nIncrements = 0;
+		int nIncrements = 2;
 		for(int i = 1; i <= nIncrements; i++) {
 			childNode.incrementCountForChildAndParentsAssignment(childAndParentsValues);
 		}
