@@ -66,7 +66,6 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	
 	// Useful variables used frequently:
 	private IndexExpressionsSet childIndexExpressionsSet;
-	private IndexExpressionsSet parametersIndexExpressionsSet;
 	
 	public ExpressionBayesianNode(Expression expression, Context context, ExpressionVariable child, List<ExpressionVariable> parents, LinkedHashSet<Expression> parameters) {
 		super(expression, context);
@@ -83,7 +82,6 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		this.finalParameterValues = new LinkedHashMap<Pair<Family, Expression>, Expression>();
 		
 		this.childIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(list(child), context);
-		this.parametersIndexExpressionsSet = getIndexExpressionsForIndicesInListAndTypesInRegistry(parameters, context);
 		
 		this.families = computeFamilies();
 	}
@@ -443,10 +441,12 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		LinkedHashSet<Expression> parameters = Util.set(param1, param2);
 		parameters.add(param3);
 		
-		Expression E = parse("if Child < 5 then Param1 else Param2");
-		// Expression E = parse("if Parent != 5 then Param1 else Param2");
+		// Expression E = parse("if Child < 5 then Param1 else Param2");
+		Expression E = parse("if Parent != 5 then Param1 else Param2");
 		// Expression E = parse("if Parent != 5 then if Child < 5 then Param1 else Param2 else Param3");
 		// Expression E = parse("if Parent != 5 then if Child < Parent then Param1 else Param2 else Param3"); // partial intersection
+		
+		// Expression E = parse("if Child > 3 then Param1 else Param2");
 		
 		println("E = " + E + "\n");
 		
