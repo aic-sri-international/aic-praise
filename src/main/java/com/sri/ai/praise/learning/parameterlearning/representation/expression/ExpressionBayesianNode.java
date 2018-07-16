@@ -173,12 +173,13 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	 * Break the initial families into final families without any intersection (shattering)
 	 * 
 	 * General idea of the shattering algorithm:
-	 * We go through the list of families with 2 iterators, family1 and family2, and compare then, leading to three possibilities:
+	 * We go through the list of families with 2 iterators, family1 (starts at the beginning of the list) and family2 (always starting at the right of family1), and compare then, leading to three possibilities:
 	 * 1) if their conditions do not intersect at all then we continue the iteration (doing family2++)
 	 * 2) if we have a total intersection (the family conditions are equivalent) then we add the parameters from family2 to family1 and delete family2 from the list
 	 * 3) if we have partial intersection between the conditions - that is the tricky case, here we do:
 	 * 		i) we create a new family to store this intersectionCondition, called here famillyIntersection, with the parameters from both family1 and family2, and add it to the end of the list of families
 	 * 		ii) we update the conditions of family1 and family2 as the disjunction between themselves and the intersectionCondition
+	 * We continue the process above until family1 gets to the end of the list of families
 	 * 
 	 * @param initialFamilies
 	 * 
