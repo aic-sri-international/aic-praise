@@ -125,9 +125,9 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		Set<? extends Variable> subAtomicPolytopeIndices = getIndices(subAtomicPolytope);
 		if(evenOneSubWithTotalIgnoranceRendersApproximationEqualToTotalIgnorance()) {
 			// root is a variable
-			return getAbsoluteVolumeVariationFromFactorToVariableWithRespectTo(subAtomicPolytope, subAtomicPolytopeIndices);
+			return getAbsoluteVolumeVariationFromFactorToVariableWithRespectTo(sub, subAtomicPolytopeIndices);
 		} 
-		return getAbsoluteVolumeVariationFromVariableToFactorWithRespectTo(subAtomicPolytope, subAtomicPolytopeIndices);
+		return getAbsoluteVolumeVariationFromVariableToFactorWithRespectTo(sub, subAtomicPolytopeIndices);
 	}
 	
 	private static AtomicPolytope transformApproximationToAtomicPolytopeOrThrowsErrorIfNotPossible(Approximation<Factor> approximation) {
@@ -173,42 +173,48 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	
 	// implementation based on logVolume
 
-	private Double getAbsoluteVolumeVariationFromVariableToFactorWithRespectTo(AtomicPolytope subPolytope, Collection<? extends Variable> subAtomicPolytopeIndices) {
+	private Double getAbsoluteVolumeVariationFromVariableToFactorWithRespectTo(Anytime<Factor> sub, Collection<? extends Variable> subAtomicPolytopeIndices) {
 		
 		// root is a factor
+		
+		Approximation<Factor> subApproximation = sub.getCurrentApproximation();
+		AtomicPolytope subAtomicPolytope = transformApproximationToAtomicPolytopeOrThrowsErrorIfNotPossible(subApproximation);
 		
 		Approximation<Factor> rootApproximation = getCurrentApproximation(); 
 		IntensionalConvexHullOfFactors rootConvexHull = transformApproximationToConvexHullOrThrowsErrorIfNotPossible(rootApproximation);
 		
 		Factor rootFactor = rootConvexHull.getFactor();
+		Factor maxFactor = rootFactor.max(subAtomicPolytopeIndices);
+		Factor normalizedMaxFactor = maxFactor.normalize();
+		Factor minFactor = rootFactor.min(subAtomicPolytopeIndices);
+		Factor normalizedMinFactor = minFactor.normalize();
 		Factor invertedMaxMinusMinFactor = computeInvertedMaxMinusMinFactor(rootFactor, subAtomicPolytopeIndices);
 		
-		ArrayList<? extends Anytime<Factor>> subs = getSubs();
-		ArrayList<Approximation<Factor>> subApproximations = new ArrayList<Approximation<Factor>>();
-		for(Anytime<Factor> sub : subs) {
-			subApproximations.add(sub.getCurrentApproximation());
-		}
+		Approximation<Factor> functionWithoutOneSub = sumOutWithoutOneSub(sub);
+		Polytope rootPolytopeWithoutOneSub = (Polytope) functionWithoutOneSub;
+		IntensionalConvexHullOfFactors rootConvexHullWithoutOneSub = (IntensionalConvexHullOfFactors) rootPolytopeWithoutOneSub;
+		Factor rootFactorWithoutOneSub = rootConvexHullWithoutOneSub.getFactor();
+		Factor maxRootFactorWithoutOneSub = rootFactorWithoutOneSub.max(subAtomicPolytopeIndices);
+		Factor normalizedMaxFactorWithoutOneSub = maxRootFactorWithoutOneSub.normalize();
+		
+		Factor rootWithoutOneSubOverMaxMinusMinFactor = normalizedMaxFactorWithoutOneSub.multiply(invertedMaxMinusMinFactor);
+		List<? extends Variable> variablesToSumOut = rootWithoutOneSubOverMaxMinusMinFactor.getVariables();
+		variablesToSumOut.removeAll(subAtomicPolytopeIndices);
+		Factor summedUpFirstFactor = rootWithoutOneSubOverMaxMinusMinFactor.sumOut(variablesToSumOut);
+		
 		return null;
 		
 		// TODO
 	}
 
-	private Double getAbsoluteVolumeVariationFromFactorToVariableWithRespectTo(AtomicPolytope subPolytope, Collection<? extends Variable> subAtomicPolytopeIndices) {
+	private Double getAbsoluteVolumeVariationFromFactorToVariableWithRespectTo(Anytime<Factor> sub, Collection<? extends Variable> subAtomicPolytopeIndices) {
 		
 		// root is a variable
 		
 		Approximation<Factor> rootApproximation = getCurrentApproximation(); 
 		IntensionalConvexHullOfFactors rootConvexHull = transformApproximationToConvexHullOrThrowsErrorIfNotPossible(rootApproximation);
 		
-		Factor rootFactor = rootConvexHull.getFactor();
-		Factor maxRootFactor = rootFactor.max(subAtomicPolytopeIndices);
-		ArrayList<? extends Anytime<Factor>> subs = getSubs();
-		ArrayList<Approximation<Factor>> subApproximations = new ArrayList<Approximation<Factor>>();
-		for(Anytime<Factor> sub : subs) {
-			subApproximations.add(sub.getCurrentApproximation());
-		}
 		return null;
-		
 		// TODO
 	}
 
@@ -224,10 +230,47 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	private static Factor computeInvertedMaxMinusMinFactor(Factor factor, Collection<? extends Variable> variablesToMaximizeAndMinimizeOver) {
 		Factor maxFactor = factor.max(variablesToMaximizeAndMinimizeOver);
 		Factor minFactor = factor.min(variablesToMaximizeAndMinimizeOver);
-		Factor minusMinFactor = minFactor.multiply(new ConstantFactor(-1.));
-		Factor maxMinusMinFactor = maxFactor.add(minusMinFactor);
+		Factor normalizedMaxFactor = maxFactor.normalize();
+		Factor normalizedMinFactor = minFactor.normalize();
+		Factor minusMinFactor = normalizedMinFactor.multiply(new ConstantFactor(-1.));
+		Factor maxMinusMinFactor = normalizedMaxFactor.add(minusMinFactor);
 		Factor invertMaxMinusMinFactor = maxMinusMinFactor.invert();
 		return invertMaxMinusMinFactor;
+	}
+	
+	private Approximation<Factor> sumOutWithoutOneSub(Anytime<Factor> sub) {
+		List<Approximation<Factor>> subsApproximations = getSubsApproximation();
+		Polytope product = getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(sub, subsApproximations);
+		Collection<? extends Variable> freeVariables = product.getFreeVariables();
+		List<? extends Variable> variablesSummedOut = getBase().determinedVariablesToBeSummedOut(freeVariables);
+		Approximation<Factor> result = sumOut(variablesSummedOut, product);
+		return result;
+	}
+	
+	private List<Approximation<Factor>> getSubsApproximation() {
+		List<Approximation<Factor>> result = new ArrayList<Approximation<Factor>>();
+		for(Anytime<Factor> sub : getSubs()) {
+			result.add(sub.getCurrentApproximation());
+		}
+		return result;
+	}
+	
+	private Polytope getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(Anytime<Factor> sub, List<Approximation<Factor>> subsApproximations) {
+		Polytope subApproximationToRemove = (Polytope) sub.getCurrentApproximation();
+		List<Polytope> polytopesToMultiply = getAllPolytopesButOne(subApproximationToRemove, subsApproximations);
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
+		return result;
+	}
+
+	private List<Polytope> getAllPolytopesButOne(Polytope subApproximationToRemove, List<Approximation<Factor>> subsApproximations) {
+		List<Polytope> polytopesToMultiply = mapIntoList(subsApproximations, a -> (Polytope) a);
+		for(Polytope subPolytope : polytopesToMultiply) {
+			if(subPolytope.equals(subApproximationToRemove)) {
+				polytopesToMultiply.remove(subPolytope);
+			}
+		}
+		addFactorAtRootPolytope(polytopesToMultiply);
+		return polytopesToMultiply;
 	}
 
 	
