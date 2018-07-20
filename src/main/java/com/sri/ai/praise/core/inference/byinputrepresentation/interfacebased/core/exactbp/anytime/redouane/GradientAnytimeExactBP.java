@@ -182,37 +182,62 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		
 		Approximation<Factor> rootApproximation = getCurrentApproximation(); 
 		IntensionalConvexHullOfFactors rootConvexHull = transformApproximationToConvexHullOrThrowsErrorIfNotPossible(rootApproximation);
-		
+		Collection<? extends Variable> rootIndices = rootConvexHull.getIndices();
 		Factor rootFactor = rootConvexHull.getFactor();
-		Factor maxFactor = rootFactor.max(subAtomicPolytopeIndices);
-		Factor normalizedMaxFactor = maxFactor.normalize();
-		Factor minFactor = rootFactor.min(subAtomicPolytopeIndices);
-		Factor normalizedMinFactor = minFactor.normalize();
+		
+		Factor normalizedMaxFactor = createNormalizedMaxFactor(rootIndices);
+		Factor normalizedMinFactor = createNormalizedMinFactor(rootIndices);
 		Factor invertedMaxMinusMinFactor = computeInvertedMaxMinusMinFactor(rootFactor, subAtomicPolytopeIndices);
 		
-		Approximation<Factor> functionWithoutOneSub = sumOutWithoutOneSub(sub);
-		Polytope rootPolytopeWithoutOneSub = (Polytope) functionWithoutOneSub;
-		IntensionalConvexHullOfFactors rootConvexHullWithoutOneSub = (IntensionalConvexHullOfFactors) rootPolytopeWithoutOneSub;
-		Factor rootFactorWithoutOneSub = rootConvexHullWithoutOneSub.getFactor();
-		Factor maxRootFactorWithoutOneSub = rootFactorWithoutOneSub.max(subAtomicPolytopeIndices);
-		Factor normalizedMaxFactorWithoutOneSub = maxRootFactorWithoutOneSub.normalize();
+		Factor normalizedMaxFactorWithoutOneSub = createNormalizedMaxFactorWithoutOneSub(sub, rootIndices);
+		Factor normalizedMinFactorWithoutOneSub = createNormalizedMinFactorWithoutOneSub(sub, rootIndices);
 		
-		Factor rootWithoutOneSubOverMaxMinusMinFactor = normalizedMaxFactorWithoutOneSub.multiply(invertedMaxMinusMinFactor);
-		List<? extends Variable> variablesToSumOut = rootWithoutOneSubOverMaxMinusMinFactor.getVariables();
-		variablesToSumOut.removeAll(subAtomicPolytopeIndices);
-		Factor summedUpFirstFactor = rootWithoutOneSubOverMaxMinusMinFactor.sumOut(variablesToSumOut);
+		Factor minusNormalizedMinFactorWithoutOneSub = normalizedMinFactorWithoutOneSub.multiply(new ConstantFactor(1.));
+		Factor MaxMinusMinFactorWithoutOneSub = normalizedMaxFactorWithoutOneSub.add(minusNormalizedMinFactorWithoutOneSub);
+		
+		Factor firstTermProduct = invertedMaxMinusMinFactor.multiply(MaxMinusMinFactorWithoutOneSub);
+		Factor firstTerm = firstTermProduct.sumOut(new ArrayList<>(rootConvexHull.getFreeVariables()));
+		
+		// TODO second term
 		
 		return null;
 		
-		// TODO
+		
 	}
 
 	private Double getAbsoluteVolumeVariationFromFactorToVariableWithRespectTo(Anytime<Factor> sub, Collection<? extends Variable> subAtomicPolytopeIndices) {
 		
 		// root is a variable
 		
+		Approximation<Factor> subApproximation = sub.getCurrentApproximation();
+		AtomicPolytope subAtomicPolytope = transformApproximationToAtomicPolytopeOrThrowsErrorIfNotPossible(subApproximation);
+		
 		Approximation<Factor> rootApproximation = getCurrentApproximation(); 
 		IntensionalConvexHullOfFactors rootConvexHull = transformApproximationToConvexHullOrThrowsErrorIfNotPossible(rootApproximation);
+		Collection<? extends Variable> rootIndices = rootConvexHull.getIndices();
+		Factor rootFactor = rootConvexHull.getFactor();
+		
+		Factor normalizedMaxFactor = createNormalizedMaxFactor(rootIndices);
+		Factor normalizedMinFactor = createNormalizedMinFactor(rootIndices);
+		Factor invertedMaxMinusMinFactor = computeInvertedMaxMinusMinFactor(rootFactor, subAtomicPolytopeIndices);
+		
+		List<Variable> rootFreeVariables = new ArrayList<>(rootConvexHull.getFreeVariables());
+		
+		Factor maxFactor = rootFactor.max(rootIndices);
+		Factor maxNormalizationConstant = maxFactor.sumOut(rootFreeVariables);
+		Factor invertedMaxNormalizationConstant = maxNormalizationConstant.invert();
+		Factor maxProduct = invertedMaxMinusMinFactor.multiply(invertedMaxNormalizationConstant);
+		
+		Factor minFactor = rootFactor.min(rootIndices);
+		Factor minNormalizationConstant = minFactor.sumOut(rootFreeVariables);
+		Factor invertedMinNormalizationConstant = minNormalizationConstant.invert();
+		Factor minProduct = invertedMaxMinusMinFactor.multiply(invertedMinNormalizationConstant);
+		
+		Polytope  summedOutPolytopeWithoutOneSub = sumOutWithoutOneSub(sub);
+		IntensionalConvexHullOfFactors rootConvexHullWithoutOneSub = (IntensionalConvexHullOfFactors) summedOutPolytopeWithoutOneSub;
+		Factor rootFactorWithoutOneSub = rootConvexHullWithoutOneSub.getFactor();
+		
+		Factor summedOutRootFactorWithoutOneSub = rootFactorWithoutOneSub.sumOut(rootFreeVariables);
 		
 		return null;
 		// TODO
@@ -238,13 +263,10 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		return invertMaxMinusMinFactor;
 	}
 	
-	private Approximation<Factor> sumOutWithoutOneSub(Anytime<Factor> sub) {
+	private Polytope productWithoutOneSub(Anytime<Factor> sub) {
 		List<Approximation<Factor>> subsApproximations = getSubsApproximation();
-		Polytope product = getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(sub, subsApproximations);
-		Collection<? extends Variable> freeVariables = product.getFreeVariables();
-		List<? extends Variable> variablesSummedOut = getBase().determinedVariablesToBeSummedOut(freeVariables);
-		Approximation<Factor> result = sumOut(variablesSummedOut, product);
-		return result;
+		Polytope product = getProductOfAllIncomingPolytopesButOne(sub, subsApproximations);
+		return product;
 	}
 	
 	private List<Approximation<Factor>> getSubsApproximation() {
@@ -255,7 +277,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		return result;
 	}
 	
-	private Polytope getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(Anytime<Factor> sub, List<Approximation<Factor>> subsApproximations) {
+	private Polytope getProductOfAllIncomingPolytopesButOne(Anytime<Factor> sub, List<Approximation<Factor>> subsApproximations) {
 		Polytope subApproximationToRemove = (Polytope) sub.getCurrentApproximation();
 		List<Polytope> polytopesToMultiply = getAllPolytopesButOne(subApproximationToRemove, subsApproximations);
 		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
@@ -268,7 +290,69 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 			if(subPolytope.equals(subApproximationToRemove)) {
 				polytopesToMultiply.remove(subPolytope);
 			}
-		}
+		};
+		return polytopesToMultiply;
+	}
+	
+	private Factor createNormalizedMaxFactor(Collection<? extends Variable> rootIndices) {
+		Approximation<Factor> rootApproximation = getCurrentApproximation(); 
+		IntensionalConvexHullOfFactors rootConvexHull = transformApproximationToConvexHullOrThrowsErrorIfNotPossible(rootApproximation);
+		Factor rootFactor = rootConvexHull.getFactor();
+		Factor maxFactor = rootFactor.max(rootIndices);
+		Factor normalizedMaxFactor = maxFactor.normalize();
+		return normalizedMaxFactor;
+	}
+	
+	private Factor createNormalizedMinFactor(Collection<? extends Variable> rootIndices) {
+		Approximation<Factor> rootApproximation = getCurrentApproximation(); 
+		IntensionalConvexHullOfFactors rootConvexHull = transformApproximationToConvexHullOrThrowsErrorIfNotPossible(rootApproximation);
+		Factor rootFactor = rootConvexHull.getFactor();
+		Factor minFactor = rootFactor.min(rootIndices);
+		Factor normalizedMinFactor = minFactor.normalize();
+		return normalizedMinFactor;
+	}
+	
+	private Factor createNormalizedMaxFactorWithoutOneSub(Anytime<Factor> sub, Collection<? extends Variable> rootIndices) {
+		Polytope rootPolytopeWithoutOneSub = productWithoutOneSub(sub);
+		IntensionalConvexHullOfFactors rootConvexHullWithoutOneSub = (IntensionalConvexHullOfFactors) rootPolytopeWithoutOneSub;
+		Factor rootFactorWithoutOneSub = rootConvexHullWithoutOneSub.getFactor();
+		Factor maxRootFactorWithoutOneSub = rootFactorWithoutOneSub.max(rootIndices);
+		Factor normalizedMaxFactorWithoutOneSub = maxRootFactorWithoutOneSub.normalize();
+		return normalizedMaxFactorWithoutOneSub;
+	}
+	
+	private Factor createNormalizedMinFactorWithoutOneSub(Anytime<Factor> sub, Collection<? extends Variable> rootIndices) {
+		Polytope rootPolytopeWithoutOneSub = productWithoutOneSub(sub);
+		IntensionalConvexHullOfFactors rootConvexHullWithoutOneSub = (IntensionalConvexHullOfFactors) rootPolytopeWithoutOneSub;
+		Factor rootFactorWithoutOneSub = rootConvexHullWithoutOneSub.getFactor();
+		Factor minRootFactorWithoutOneSub = rootFactorWithoutOneSub.min(rootIndices);
+		Factor normalizedMinFactorWithoutOneSub = minRootFactorWithoutOneSub.normalize();
+		return normalizedMinFactorWithoutOneSub;
+	}
+	
+	private Polytope sumOutWithoutOneSub(Anytime<Factor> sub) {
+		List<Approximation<Factor>> subsApproximations = getSubsApproximation();
+		Polytope product = getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(sub, subsApproximations);
+		Collection<? extends Variable> freeVariables = product.getFreeVariables();
+		List<? extends Variable> variablesSummedOut = getBase().determinedVariablesToBeSummedOut(freeVariables);
+		Polytope result = sumOut(variablesSummedOut, product);
+		return result;
+	}
+
+	private Polytope getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(Anytime<Factor> sub, List<Approximation<Factor>> subsApproximations) {
+		Polytope subApproximationToRemove = (Polytope) sub.getCurrentApproximation();
+		List<Polytope> polytopesToMultiply = getAllPolytopesButOneWithFactor(subApproximationToRemove, subsApproximations);
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
+		return result;
+	}
+
+	private List<Polytope> getAllPolytopesButOneWithFactor(Polytope subApproximationToRemove, List<Approximation<Factor>> subsApproximations) {
+		List<Polytope> polytopesToMultiply = mapIntoList(subsApproximations, a -> (Polytope) a);
+		for(Polytope subPolytope : polytopesToMultiply) {
+			if(subPolytope.equals(subApproximationToRemove)) {
+				polytopesToMultiply.remove(subPolytope);
+			}
+		};
 		addFactorAtRootPolytope(polytopesToMultiply);
 		return polytopesToMultiply;
 	}
