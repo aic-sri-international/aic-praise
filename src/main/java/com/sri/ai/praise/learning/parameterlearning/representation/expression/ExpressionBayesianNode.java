@@ -43,6 +43,9 @@ import com.sri.ai.util.base.Pair;
 
 /**
  * Implementation of Bayesian nodes based on Expressions
+ * (The methods implemented here are to make it possible learning parameters for a Bayesian model given complete data.
+ * The high-level algorithm is described in the method learnModelParametersFromCompleteData from the interface BayesianModel.java and 
+ * consequently in the method setParametersGivenCompleteData from the interface BayesianNode.java, called by the first method)
  * 
  * @author Roger Leite Lucena
  *
@@ -105,17 +108,12 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	public void setInitialCountsForAllPossibleChildAndParentsAssignments() {
 		for(Family family : families) {
 			familyCountFromDataset.put(family, Expressions.ZERO);
-			for(Expression parameter : family.parametersThatCanBeGenerated) {
-				Expression numberOfChildValuesThatMakeExpressionEqualsToThisParameter = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
-				parameterCountFromDataset.put(new Pair<Family, Expression>(family, parameter), numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
-			
-				incrementFamilyCount(family, numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
-			}
+			setInitialCountForEveryParameterInThatFamilyAndIncrementCorrespondinglyTheCountForThatFamily(family);
 		}
 	}
 	
 	/**
-	 * For every childAndParentsValue (must be an Expression) we increment the counts for the corresponding family and parameter
+	 * For every childAndParentsValues (must be a list of Expressions, represents a datapoint) we increment the counts for the corresponding family and parameter
 	 */
 	@Override
 	public void incrementCountForChildAndParentsAssignment(List<? extends Object> childAndParentsValues) {
@@ -170,14 +168,14 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	}
 	
 	/**
-	 * Break the initial families into final families without any intersection (shattering)
+	 * Break the initial families into final families without any intersection (Shattering)
 	 * 
 	 * General idea of the shattering algorithm:
 	 * We go through the list of families with 2 iterators, family1 (starts at the beginning of the list) and family2 (always starting at the right of family1), and compare then, leading to three possibilities:
 	 * 1) if their conditions do not intersect at all then we continue the iteration (doing family2++)
 	 * 2) if we have a total intersection (the family conditions are equivalent) then we add the parameters from family2 to family1 and delete family2 from the list
 	 * 3) if we have partial intersection between the conditions - that is the tricky case, here we do:
-	 * 		i) we create a new family to store this intersectionCondition, called here famillyIntersection, with the parameters from both family1 and family2, and add it to the end of the list of families
+	 * 		i) we create a new family to store this intersectionCondition, called here familyIntersection, with the parameters from both family1 and family2, and add it to the end of the list of families
 	 * 		ii) we update the conditions of family1 and family2 as the disjunction between themselves and the intersectionCondition
 	 * We continue the process above until family1 gets to the end of the list of families
 	 * 
@@ -191,83 +189,81 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		while(!initialFamilies.isEmpty()) {
 			Family family1 = initialFamilies.removeFirst();
 			
-			for(ListIterator<Family> it = initialFamilies.listIterator(); it.hasNext();) {
-				Family family2 = it.next();
-				Expression intersection = verifyEquivalenceAndGetIntersectionCondition(family1.condition, family2.condition);
-				if(intersection.equals(Expressions.FALSE)) { // the families are totally disjunct
-					continue; 
-				}
-				else if(intersection.equals(Expressions.TRUE)) { // we have total intersection between the families
-					family1.addParameters(family2.parametersThatCanBeGenerated);
-					it.remove();
-				}
-				else {
-					Family familyIntersection = new Family(intersection, family1.parametersThatCanBeGenerated);
-					familyIntersection.addParameters(family2.parametersThatCanBeGenerated);
-					initialFamilies.add(familyIntersection);
-					
-					Expression newFamily1Condition = context.evaluate(And.make(family1.condition, Not.make(intersection)));
-					family1.condition = newFamily1Condition;
-					
-					Expression newFamily2Condition = context.evaluate(And.make(family2.condition, Not.make(intersection)));
-					family2.condition = newFamily2Condition;
-					
-					if(family1.condition.equals(Expressions.FALSE)) { // optimization: if it is empty, we can break here already
-						break;
-					}
-				}
-			}
+			verifyIntersectionBetweenGivenFamilyAndOthersInListAndDoCorrespondentOperation(family1, initialFamilies);
 			
-			if(!family1.condition.equals(Expressions.FALSE)) {
+			if(!family1.condition.equals(Expressions.FALSE)) { // we add to finalFamilies only families that are not empty (their condition is not false)
 				finalFamilies.add(family1);
 			}
-			
-		}
-		
-		return finalFamilies;
-	}
-	
-	private LinkedHashSet<Family> computeFinalFamiliesWithoutPartialIntersections(LinkedList<Family> initialFamilies) {
-		LinkedHashSet<Family> finalFamilies = Util.set();
-		
-		while(!initialFamilies.isEmpty()) {
-			Family family1 = initialFamilies.removeFirst();
-			
-			for(ListIterator<Family> it = initialFamilies.listIterator(); it.hasNext();) {
-				Family family2 = it.next();
-				Expression intersection = verifyEquivalenceAndGetIntersectionCondition(family1.condition, family2.condition);
-				if(intersection.equals(Expressions.FALSE)) { // the families are totally disjunct
-					continue; 
-				}
-				else if(intersection.equals(Expressions.TRUE)) { // we have total intersection between the families
-					family1.addParameters(family2.parametersThatCanBeGenerated);
-					it.remove();
-				}
-				else {
-					throw new Error("Partial intersections are not handled yet");
-				}
-			}
-		
-			finalFamilies.add(family1);
 		}
 		
 		return finalFamilies;
 	}
 	
 	/**
-	 * Given two conditions as Expressions, verify if they are equivalent or return the condition for their intersection
-	 * @param e1
-	 * @param e2
-	 * @return true if total equivalence, false if the conditions do not intersect, and in the case of partial intersection the condition for this intersection is returned
+	 * For every family2 in otherFamilies we take the intersection with family1 and do the correspondent operation:
+	 * 1) if intersection is empty we just continue iterating with family2 over otherFamilies
+	 * 2) if we have total intersection then the families are equivalent regarding their condition over parents, so we add the parameters from family2 to family1 and remove family2 from the list
+	 * 3) if we have partial intersection we handle it as a special case, see method handlePartialFamilyIntersection below
+	 * 
+	 * @param family1 - the given family to be compared with the others
+	 * @param otherFamilies
 	 */
-	private Expression verifyEquivalenceAndGetIntersectionCondition(Expression e1, Expression e2) {
-		Expression equivalence = Equivalence.make(e1, e2);
+	private void verifyIntersectionBetweenGivenFamilyAndOthersInListAndDoCorrespondentOperation(Family family1, LinkedList<Family> otherFamilies) {
+		for(ListIterator<Family> it = otherFamilies.listIterator(); it.hasNext();) {
+			Family family2 = it.next();
+			Expression intersection = verifyEquivalenceAndGetIntersectionCondition(family1.condition, family2.condition);
+			if(intersection.equals(Expressions.FALSE)) { // the families are totally disjunct
+				continue; 
+			}
+			else if(intersection.equals(Expressions.TRUE)) { // we have total intersection between the families
+				family1.addParameters(family2.parametersThatCanBeGenerated);
+				it.remove();
+			}
+			else { // case of partial intersection
+				handlePartialFamilyIntersection(family1, family2, intersection, otherFamilies);
+				if(family1.condition.equals(Expressions.FALSE)) break; // optimization: if family1 is empty, we can break here already, there is no point on comparing it with any other families
+			}
+		}
+	}
+
+	/**
+	 * Handling the case of partial intersection over the conditions of two families
+	 * Here we do:
+	 * 	i) we create a new family to store this intersectionCondition, called here familyIntersection, with the parameters from both family1 and family2, and add it to the end of the list of families
+	 * 	ii) we update the conditions of family1 and family2 as the disjunction between themselves and the intersectionCondition
+	 * 
+	 * @param family1
+	 * @param family2
+	 * @param intersectionCondition
+	 * @param otherFamilies
+	 */
+	private void handlePartialFamilyIntersection(Family family1, Family family2, Expression intersectionCondition, LinkedList<Family> otherFamilies) {
+		Family familyIntersection = new Family(intersectionCondition, family1.parametersThatCanBeGenerated);
+		familyIntersection.addParameters(family2.parametersThatCanBeGenerated);
+		otherFamilies.add(familyIntersection);
+		
+		Expression newFamily1Condition = context.evaluate(And.make(family1.condition, Not.make(intersectionCondition)));
+		family1.condition = newFamily1Condition;
+		
+		Expression newFamily2Condition = context.evaluate(And.make(family2.condition, Not.make(intersectionCondition)));
+		family2.condition = newFamily2Condition;
+	}
+	
+	/**
+	 * Given two conditions as Expressions, verify if they are equivalent or return the condition for their intersection
+	 * 
+	 * @param condition1
+	 * @param condition2
+	 * @return true if total equivalence, false if the conditions do not intersect at all, and in the case of partial intersection the condition for this intersection is returned
+	 */
+	private Expression verifyEquivalenceAndGetIntersectionCondition(Expression condition1, Expression condition2) {
+		Expression equivalence = Equivalence.make(condition1, condition2);
 		equivalence = context.evaluate(equivalence);
 		if(equivalence.equals(Expressions.TRUE)) {
 			return equivalence;
 		}
 		else {
-			Expression and = And.make(e1, e2);
+			Expression and = And.make(condition1, condition2);
 			and = context.evaluate(and);
 			return and;
 		}
@@ -315,6 +311,12 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		}
 	}
 	
+	/**
+	 * The first value on the list is the childValue, ignore it, all the others are parentsValues - add them to a list and return this list
+	 * 
+	 * @param childAndParentsValues
+	 * @return
+	 */
 	private LinkedList<Expression> extractParentsValuesFrom(List<Expression> childAndParentsValues) {
 		LinkedList<Expression> parentsValues = list();
 		int iterationCount = 0;
@@ -371,11 +373,27 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	
 	/**
 	 * Replaces all the parameters in the original expression by their learned values, and evaluates it with this.context.evaluate().
-	 * The new Expression is a conjunction of successive IfThenElses to create a "switch case" structure,
+	 * The new Expression is a conjunction of successive IfThenElses to create a "switch-case" structure,
 	 * in which every case is the condition of a family and the result for that case is the original Expression with 
 	 * the parameters that can be generated by that family substituted by their learned values 
 	 */
 	private void updateInnerExpressionWithTheLearnedParameters() {
+		Expression newExpression = generateSwitchCaseStructureFromFamiliesConditionsForFinalExpression();
+		
+		newExpression = context.evaluate(newExpression);
+		this.expression = newExpression;
+		this.setInnerExpression(newExpression);
+	}
+	
+	
+	/**
+	 * Simulates a switch-case like structure using successive IfThenElse expressions
+	 * Every "case" here is a family condition, for which we associate an Expression that is the 
+	 * original this.expression with the parameters associated to that family replaced by their learned values
+	 * 
+	 * @return the resulting switch-case structure for the final this.expression
+	 */
+	private Expression generateSwitchCaseStructureFromFamiliesConditionsForFinalExpression() {
 		Expression newExpression = expression; 
 		
 		Expression previousIfThenElse = null;
@@ -383,46 +401,66 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		for(Iterator<Family> it = families.iterator(); it.hasNext(); ) {
 			Family family = it.next();
 			
-			Expression expressionWithNewParameters = expression;
-			for(Expression parameter : family.parametersThatCanBeGenerated) {
-				Expression learnedParameterValue = finalParameterValues.get(new Pair<Family, Expression>(family, parameter));
-				expressionWithNewParameters = expressionWithNewParameters.replaceAllOccurrences(parameter, learnedParameterValue, context);
-			}
+			Expression expressionWithNewParametersForCurrentFamily = replaceInExpressionAllTheParametersFromThatFamilyByTheirLearnedValues(family);
 			
 			if(iterationCount == 0) {
-				previousIfThenElse = newExpression = expressionWithNewParameters;
+				previousIfThenElse = newExpression = expressionWithNewParametersForCurrentFamily;
 			}
 			else {
-				previousIfThenElse = newExpression = IfThenElse.make(family.condition, expressionWithNewParameters, previousIfThenElse);
+				previousIfThenElse = newExpression = IfThenElse.make(family.condition, expressionWithNewParametersForCurrentFamily, previousIfThenElse);
 			}
 		
 			iterationCount++;
 		}
 		
-		newExpression = context.evaluate(newExpression);
-		expression = newExpression;
-		this.setInnerExpression(newExpression);
+		return newExpression;
+	}
+
+	private Expression replaceInExpressionAllTheParametersFromThatFamilyByTheirLearnedValues(Family family) {
+		Expression expressionWithNewParameters = expression;
+		for(Expression parameter : family.parametersThatCanBeGenerated) {
+			Expression learnedParameterValue = finalParameterValues.get(new Pair<Family, Expression>(family, parameter));
+			expressionWithNewParameters = expressionWithNewParameters.replaceAllOccurrences(parameter, learnedParameterValue, context);
+		}
+		return expressionWithNewParameters;
 	}
 
 	private void computeTheFinalValuesOfTheParameters() {
 		for(Family family : families) {
-			Expression familyCount = familyCountFromDataset.get(family);
-			
-			for(Expression parameter : family.parametersThatCanBeGenerated) {
-				Expression parameterCount = parameterCountFromDataset.get(new Pair<Family, Expression>(family, parameter));
-				
-				Expression parameterCountDividedByFamilyCount = Division.make(parameterCount, familyCount);
-				Expression normalizationFactor = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
-				Expression finalParameterValue = Division.make(parameterCountDividedByFamilyCount, normalizationFactor);
-				finalParameterValue = context.evaluate(finalParameterValue);
-				
-				finalParameterValues.put(new Pair<Family, Expression>(family, parameter), finalParameterValue);
-			}
+			computeTheFinalValuesOfTheParametersInThatFamily(family);
 		}
+	}
+
+	private void computeTheFinalValuesOfTheParametersInThatFamily(Family family) {
+		Expression familyCount = familyCountFromDataset.get(family);
+		
+		for(Expression parameter : family.parametersThatCanBeGenerated) {
+			computeTheFinalValueForParameterInFamily(parameter, family, familyCount);
+		}
+	}
+
+	private void computeTheFinalValueForParameterInFamily(Expression parameter, Family family, Expression familyCount) {
+		Expression parameterCount = parameterCountFromDataset.get(new Pair<Family, Expression>(family, parameter));
+		
+		Expression parameterCountDividedByFamilyCount = Division.make(parameterCount, familyCount);
+		Expression normalizationFactor = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
+		Expression finalParameterValue = Division.make(parameterCountDividedByFamilyCount, normalizationFactor);
+		finalParameterValue = context.evaluate(finalParameterValue);
+		
+		finalParameterValues.put(new Pair<Family, Expression>(family, parameter), finalParameterValue);
 	}
 	
 	private boolean thereAreNoParametersToLearn() {
 		return this.parameters.size() == 0;
+	}
+	
+	private void setInitialCountForEveryParameterInThatFamilyAndIncrementCorrespondinglyTheCountForThatFamily(Family family) {
+		for(Expression parameter : family.parametersThatCanBeGenerated) {
+			Expression numberOfChildValuesThatMakeExpressionEqualsToThisParameter = getNumberOfChildValuesThatMakeExpressionEqualsToThisParameter(parameter);
+			parameterCountFromDataset.put(new Pair<Family, Expression>(family, parameter), numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
+		
+			incrementFamilyCount(family, numberOfChildValuesThatMakeExpressionEqualsToThisParameter);
+		}
 	}
 	
 	public static void main(String[] args) {
