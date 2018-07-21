@@ -315,7 +315,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	 * The first value on the list is the childValue, ignore it, all the others are parentsValues - add them to a list and return this list
 	 * 
 	 * @param childAndParentsValues
-	 * @return
+	 * @return parentsValues
 	 */
 	private LinkedList<Expression> extractParentsValuesFrom(List<Expression> childAndParentsValues) {
 		LinkedList<Expression> parentsValues = list();
