@@ -115,33 +115,45 @@ public class ParameterEstimationForExpressionBasedModel implements ParameterEsti
 		Map<Pair<Expression, Expression>, Integer> mapPairsToCount = buildMapToCountPairs();
 		
 		for (Entry<Pair<Expression, Expression>, Integer> entry : mapPairsToCount.entrySet()) {
-			
-			Pair<Expression, Expression> pairEvidenceQuery = entry.getKey();
-			
-			ExpressionBasedSolver solver = new ExactBPExpressionBasedSolver();
-			Expression query = pairEvidenceQuery.first;
-			Expression evidence = pairEvidenceQuery.second;
-			ExpressionBasedModel conditionedModel = model.getConditionedModel(evidence);
-			Expression marginal = solver.solve(query, conditionedModel);
-
-			Context context = model.getContext();
-			
-			System.out.println(marginal);
-
-			Expression marginalFunction = convertExpression(marginal);
-			
-			marginalFunction = applySigmoidTrick(marginalFunction, context);
-			
-			Expression marginalFunctionExponentiate = apply(EXPONENTIATION, marginalFunction, entry.getValue());
-
-			System.out.println(marginalFunctionExponentiate);
-
+			Expression marginalFunctionExponentiate = buildMarginal(entry);
 			listOfMarginals.add(marginalFunctionExponentiate);
 		}
 		
 		return applyLog(listOfMarginals);
 	}
 
+	/**
+	 * Return the marginal of a pair (with Sigmoid Trick and Log, exponentiate to the number of times the pair appears in the database)
+	 *
+	 */
+	private Expression buildMarginal(Entry<Pair<Expression, Expression>, Integer> entry) {
+		
+		Expression marginal = getMarginalBeforeTransformation(entry);
+		Context context = model.getContext();
+		Expression marginalFunction = convertExpression(marginal);
+		marginalFunction = applySigmoidTrick(marginalFunction, context);
+		Expression marginalFunctionExponentiate = apply(EXPONENTIATION, marginalFunction, entry.getValue());
+		System.out.println(marginalFunctionExponentiate);
+		return marginalFunctionExponentiate;
+	}
+
+	
+	/**
+	 * Return the "raw" marginal, before log and sigmoid transformation.
+	 *
+	 */
+	private Expression getMarginalBeforeTransformation(Entry<Pair<Expression, Expression>, Integer> entry) {
+		Pair<Expression, Expression> pairEvidenceQuery = entry.getKey();
+		
+		ExpressionBasedSolver solver = new ExactBPExpressionBasedSolver();
+		Expression query = pairEvidenceQuery.first;
+		Expression evidence = pairEvidenceQuery.second;
+		ExpressionBasedModel conditionedModel = model.getConditionedModel(evidence);
+		Expression marginal = solver.solve(query, conditionedModel);
+		return marginal;
+	}
+
+	
 	private Expression applyLog(List<Expression> listOfMarginals) {
 		Expression result;
 		if (listOfMarginals.size() > 1) {

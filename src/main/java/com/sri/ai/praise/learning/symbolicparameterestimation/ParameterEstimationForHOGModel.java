@@ -73,30 +73,27 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	}
 	
 	/**
-	 * Main method to optimize the parameters of the model given the queries and evidences when the model is HOGModel based.
+	 * Return the optimized HOGModel.
 	 *
 	 */
 	public HOGModel buildOptimizedHOGModel(Map<Expression, Double> optimizedParameters) {
 		
-		//prend le champ stringModel, le copie et le modifie puis construit un HOGModel a partir. 
-		String stringModelToModify = this.stringModel;
-		
-		System.out.println("stringModelToModify : " + this.stringModel);
-		
-		//supprimer "constant Alpha: Real;\n", attention ne faire que pour les parametres concernes
-		for (Expression parameter : optimizedParameters.keySet()) {
-			System.out.println("parameter : "+parameter.toString());
-			stringModelToModify = stringModelToModify.replaceAll("constant "+parameter.toString()+": Real;\n", "");
-			Double value = optimizedParameters.get(parameter);
-			Double oneMinusValue = 1.0 - value;
-			stringModelToModify = stringModelToModify.replaceAll("\\b1-"+parameter.toString()+"\\b", oneMinusValue.toString());
-			stringModelToModify = stringModelToModify.replaceAll("\\b"+parameter.toString()+"\\b", value.toString());
-		}
-		System.out.println(stringModelToModify);
-		HOGModel result = parseModelStringToHOGMModel(stringModelToModify, this.modelErrors);
-		//remplacer les parametres par la valeur apprise 
+		String optimizedStringModel = buildOptimizedStringModel(optimizedParameters);
+		HOGModel result = parseModelStringToHOGMModel(optimizedStringModel, this.modelErrors);
+		 
 		return result;
 		
+	}
+
+	private String replaceParameterWithOptimizedValue(Map<Expression, Double> optimizedParameters,
+			String stringModelToModify, Expression parameter) {
+		
+		stringModelToModify = stringModelToModify.replaceAll("constant "+parameter.toString()+": Real;\n", "");
+		Double value = optimizedParameters.get(parameter);
+		Double oneMinusValue = 1.0 - value;
+		stringModelToModify = stringModelToModify.replaceAll("\\b1-"+parameter.toString()+"\\b", oneMinusValue.toString());
+		stringModelToModify = stringModelToModify.replaceAll("\\b"+parameter.toString()+"\\b", value.toString());
+		return stringModelToModify;
 	}
 
 	/**
@@ -105,19 +102,13 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	 */
 	public String buildOptimizedStringModel(Map<Expression, Double> optimizedParameters) {
 		
-		//prend le champ stringModel, le copie et le modifie puis construit un HOGModel a partir. 
 		String stringModelToModify = this.stringModel;
 		
 		System.out.println("stringModelToModify : " + this.stringModel);
 		
-		//supprimer "constant Alpha: Real;\n", attention ne faire que pour les parametres concernes
 		for (Expression parameter : optimizedParameters.keySet()) {
-			System.out.println("parameter : "+parameter.toString());
-			stringModelToModify = stringModelToModify.replaceAll("constant "+parameter.toString()+": Real;\n", "");
-			Double value = optimizedParameters.get(parameter);
-			Double oneMinusValue = 1.0 - value;
-			stringModelToModify = stringModelToModify.replaceAll("\\b1-"+parameter.toString()+"\\b", oneMinusValue.toString());
-			stringModelToModify = stringModelToModify.replaceAll("\\b"+parameter.toString()+"\\b", value.toString());
+			stringModelToModify = replaceParameterWithOptimizedValue(optimizedParameters, stringModelToModify,
+					parameter);
 		}
 		System.out.println(stringModelToModify);
 		

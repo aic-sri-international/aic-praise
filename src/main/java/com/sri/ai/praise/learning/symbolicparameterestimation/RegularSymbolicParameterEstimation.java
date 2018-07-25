@@ -38,7 +38,9 @@ import com.sri.ai.praise.core.representation.classbased.featurebased.ExpressionB
 import com.sri.ai.praise.core.representation.classbased.featurebased.FeatureBasedModel;
 
 /**
- * Symbolic Regular Parameter Estimation (MLE) 
+ * Symbolic Regular Parameter Estimation. At a midpoint between Regular Parameter Estimation and Symbolic Parameter Estimation.
+ * 
+ * @author Sarah Perrin
  *
  */
 
