@@ -18,7 +18,6 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.autodifferentiation.AutomaticDifferentiation;
-import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.application.CommonTheory;
@@ -31,9 +30,7 @@ import com.sri.ai.praise.core.representation.classbased.featurebased.FeatureBase
 import com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation;
 
 /**
- * Class to convert an Expression into a MultivariateVectorFunction (from Apache Commons Math), which corresponds to its gradient. 
- * The gradient needs to be provided here, contrary to FunctionToOptimizeGradient. 
- * Used for optimization.
+ * Class to build 
  * @author Sarah Perrin
  *
  */
@@ -77,6 +74,7 @@ public class GradientLoglikelihoodToOptimize implements MultivariateVectorFuncti
     	return result;
     }
 
+    
     private double[] evaluateGradient(Vector<Expression> gradient) {
     	double[] result = new double[gradient.size()];
     	int i = 0;
@@ -102,15 +100,16 @@ public class GradientLoglikelihoodToOptimize implements MultivariateVectorFuncti
     	return result;
 	}
     
+    /**
+	 * Build the gradient following the formula described in "Graphical Models in a Nutshell".
+	 *
+	 */
     private Vector<Expression> buildGradient(Map<Expression, Double> mapParametersToValue) {
 		Vector<Expression> gradient = new Vector<Expression>();
 		
 		for (Expression condition : featureBasedModel.mapConditionToWeight.keySet()) {
+			
 			Expression parameter = featureBasedModel.mapConditionToWeight.get(condition);
-			
-			Expression parameterValue = Expressions.makeSymbol(mapParametersToValue.get(parameter));
-			
-			//System.out.println("parameterValue : " + parameterValue);
 			
 			ExpressionBasedSolver solver = new ExactBPExpressionBasedSolver();
 			
@@ -133,8 +132,6 @@ public class GradientLoglikelihoodToOptimize implements MultivariateVectorFuncti
 			Expression secondTerm = apply(DIVISION, makeSymbol(numberOfOccurences), makeSymbol(numberOfEvidences));
 		
 			Expression ithTermOfgradient = apply(MINUS, probabilityOfConditionWithSigmoidTrick, secondTerm);
-			
-			//System.out.println(ithTermOfgradient);
 			
 			gradient.add(ithTermOfgradient);
 		}
@@ -161,6 +158,10 @@ public class GradientLoglikelihoodToOptimize implements MultivariateVectorFuncti
 		return result;
 	}
     
+    /**
+	 * Convert an expression. For example, convert if earthquake then Alpha else 1-Alpha into: Alpha.
+	 *
+	 */
 	public Expression convertExpression(Expression marginal) {
 		try {
 			String input = marginal.toString();

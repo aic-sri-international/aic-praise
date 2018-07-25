@@ -18,7 +18,7 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.core.Def
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 
 /**
- * Define examples of ExpressionBasedModels to test methods in Parameter Estimation.
+ * Define database of examples of ExpressionBasedModels to test methods in Parameter Estimation.
  * 
  * @author Sarah Perrin
  *

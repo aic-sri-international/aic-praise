@@ -12,8 +12,18 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
 import com.sri.ai.praise.core.representation.classbased.featurebased.ExpressionBasedModelToFeatureBasedModelTranslation;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 
-public class GeneralTest {
+/**
+ * Class to test util functions. 
+ * @author Sarah Perrin
+ *
+ */
+
+public class UtilTest {
 	
+	/**
+	 * Test if conversion between String model and ExpressionBasedModel is working. 
+	 *
+	 */
 	public static void main (String[] args) {
 		
 		String modelString = "random earthquake: Boolean;\n"

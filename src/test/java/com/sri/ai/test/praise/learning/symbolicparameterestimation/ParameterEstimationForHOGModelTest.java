@@ -17,8 +17,11 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.pa
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.ParameterEstimationForHOGModel;
-import com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation;
+import com.sri.ai.util.base.Pair;
 
+/**
+ * @author Sarah Perrin
+ */
 public class ParameterEstimationForHOGModelTest {
 	
 	//@Test
@@ -45,10 +48,13 @@ public class ParameterEstimationForHOGModelTest {
 			
 			List<HOGMProblemError> modelErrors = new ArrayList<>();
 			
-			List<Expression> queryExpressionList = new LinkedList<Expression>();
-			queryExpressionList.add(parse("likeIncumbent > likeChallenger"));
+			List<Pair<Expression, Expression>> pairsQueryEvidence = new LinkedList<Pair<Expression, Expression>>();
 			
-			ParameterEstimationForHOGModel parameterEstimationForHOGModel = new ParameterEstimationForHOGModel(modelString, queryExpressionList, modelErrors);
+			Pair<Expression, Expression> pair = new Pair<Expression,Expression>(parse("likeIncumbent > likeChallenger"), parse("null"));
+			
+			pairsQueryEvidence.add(pair);
+			
+			ParameterEstimationForHOGModel parameterEstimationForHOGModel = new ParameterEstimationForHOGModel(modelString, pairsQueryEvidence, modelErrors);
 			
 			HashMap<Expression,Double> expected = new HashMap<Expression,Double>();
 			expected.put(parse("Alpha"), 1.0); 
@@ -82,10 +88,13 @@ public class ParameterEstimationForHOGModelTest {
 		
 		List<HOGMProblemError> modelErrors = new ArrayList<>();
 		
-		List<Expression> queryExpressionList = new LinkedList<Expression>();
-		queryExpressionList.add(parse("earthquake"));
+		List<Pair<Expression, Expression>> pairsQueryEvidence = new LinkedList<Pair<Expression, Expression>>();
 		
-		ParameterEstimationForHOGModel parameterEstimationForHOGModel = new ParameterEstimationForHOGModel(modelString, queryExpressionList, modelErrors);
+		Pair<Expression, Expression> pair = new Pair<Expression,Expression>(parse("earthquake"), parse("null"));
+		
+		pairsQueryEvidence.add(pair);
+		
+		ParameterEstimationForHOGModel parameterEstimationForHOGModel = new ParameterEstimationForHOGModel(modelString, pairsQueryEvidence, modelErrors);
 		
 		HashMap<Expression,Double> expected = new HashMap<Expression,Double>();
 		expected.put(parse("Alpha"), 1.0); 
@@ -98,10 +107,12 @@ public class ParameterEstimationForHOGModelTest {
 		
 		System.out.println(newStringModel);
 		
-		queryExpressionList.clear();
-		queryExpressionList.add(parse("burglary"));
+		pairsQueryEvidence.clear();
 		
-		ParameterEstimationForHOGModel parameterEstimationForHOGModel2 = new ParameterEstimationForHOGModel(newStringModel, queryExpressionList, modelErrors);
+		pair = new Pair<Expression,Expression>(parse("burglary"), parse("null"));
+		pairsQueryEvidence.add(pair);
+		
+		ParameterEstimationForHOGModel parameterEstimationForHOGModel2 = new ParameterEstimationForHOGModel(newStringModel, pairsQueryEvidence, modelErrors);
 		
 		expected.remove(parse("Alpha"));
 		expected.put(parse("Beta"), 1.0); 
@@ -113,8 +124,7 @@ public class ParameterEstimationForHOGModelTest {
 		String newStringModel2 = parameterEstimationForHOGModel2.buildOptimizedStringModel(mapResult2);
 		//ExpressionBasedModel newModel = parameterEstimationForHOGModel.parseHOGModelToExpressionBasedModel(test);
 		System.out.println(newStringModel2.toString());
-		
-		
+	
 	}
 		
 	private HashMap<Expression,Double> runTestHOGModelBased(HashMap<Expression,Double> expected, ParameterEstimationForHOGModel parameterEstimationForHOGModel, double[] startPoint) {

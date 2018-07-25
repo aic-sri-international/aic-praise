@@ -15,26 +15,23 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.pa
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation;
+import com.sri.ai.util.base.Pair;
 
+/**
+ * @author Sarah Perrin
+ */
 public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	
 	public String stringModel;
 	public HOGModel hogmModel;
 	List<HOGMProblemError> modelErrors;
-	public List<Expression> evidences;
-	public List<Expression> queries;
+	public List<Pair<Expression, Expression>> pairsQueryEvidence;
 	
-	public ParameterEstimationForHOGModel(String stringModel, List<Expression> queries, List<HOGMProblemError> modelErrors) {
+	public ParameterEstimationForHOGModel(String stringModel, List<Pair<Expression, Expression>> pairsQueryEvidence, List<HOGMProblemError> modelErrors) {
 		this.stringModel = stringModel;
 		this.modelErrors = new ArrayList<>();
 		this.hogmModel = parseModelStringToHOGMModel(stringModel, modelErrors);
-		this.queries = queries;
-	}
-	
-	public ParameterEstimationForHOGModel(HOGModel hogmModel, List<Expression> evidences, List<HOGMProblemError> modelErrors) {
-		this.hogmModel = hogmModel;
-		this.evidences = evidences;
-		this.modelErrors = modelErrors;
+		this.pairsQueryEvidence = pairsQueryEvidence;
 	}
 	
 	/**
@@ -65,13 +62,11 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 		
 		ExpressionBasedModel expressionBasedModel = UsefulOperationsParameterEstimation.parseHOGModelToExpressionBasedModel(hogmModel);
 		
-		ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel = new ParameterEstimationForExpressionBasedModel(expressionBasedModel, queries);
+		ParameterEstimationForExpressionBasedModel parameterEstimationForExpressionBasedModel = new ParameterEstimationForExpressionBasedModel(expressionBasedModel, pairsQueryEvidence);
 		
 		System.out.println("expression based model after parsing : " + expressionBasedModel);
 		
 		HashMap<Expression, Double> result = parameterEstimationForExpressionBasedModel.optimize(
-			expressionBasedModel,
-			goalType,
 			startPoint);
 		
 		return result;

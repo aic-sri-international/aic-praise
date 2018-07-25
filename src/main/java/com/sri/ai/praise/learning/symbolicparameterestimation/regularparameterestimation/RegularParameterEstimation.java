@@ -22,28 +22,29 @@ import com.sri.ai.praise.core.representation.classbased.featurebased.ExpressionB
 import com.sri.ai.praise.core.representation.classbased.featurebased.FeatureBasedModel;
 
 /**
- * Symbolic Regular Parameter Estimation (MLE) 
+ * Regular Parameter Estimation. Implementation is inspired by "Graphical Models in a Nutshell" by Daphne Koller and Nir Friedman. 
  *
+ *@author Sarah Perrin
  */
 
 public class RegularParameterEstimation {
 	
 	public ExpressionBasedModel expressionBasedModel;
 	public List<Expression> parameters;
-	public List<Expression> evidences;
+	public List<Expression> queries;
 	public FeatureBasedModel featureBasedModel;
 	
-	public RegularParameterEstimation(ExpressionBasedModel expressionBasedModel, List<Expression> evidences) {
+	public RegularParameterEstimation(ExpressionBasedModel expressionBasedModel, List<Expression> queries) {
 		this.expressionBasedModel = expressionBasedModel;
 		this.parameters = findParameters(expressionBasedModel);
-		this.evidences = evidences;
+		this.queries = queries;
 
 		ExpressionBasedModelToFeatureBasedModelTranslation translation = new ExpressionBasedModelToFeatureBasedModelTranslation(expressionBasedModel, parameters);
 		this.featureBasedModel = translation.featureBasedModel;
 	}
 	
 	/**
-	 * Method to optimize the parameters for regular symbolic parameter estimation (MLE, complete data). 
+	 * Method to optimize the parameters for regular parameter estimation. 
 	 * Result is a map of the name of the parameter with its value.
 	 *
 	 */
@@ -56,8 +57,6 @@ public class RegularParameterEstimation {
 		PointValuePair optimum = optimizeModel();
 		
 		double[] valueOptimum = optimum.getPoint();
-		
-		System.out.println("valueOptimum : " + 1/(1+exp(-valueOptimum[0])));
 		
 		int k = 0;
 		for(Expression condition : featureBasedModel.mapConditionToWeight.keySet()) {
@@ -72,7 +71,7 @@ public class RegularParameterEstimation {
 	}
 	
 	/**
-	 * Call the optimizer of Java Commons Math with the objectiveFunction and the gradient given in the arguments.
+	 * Call the optimizer of Java Commons Math.
 	 *
 	 */
 	public PointValuePair optimizeModel() {
@@ -80,8 +79,8 @@ public class RegularParameterEstimation {
 		NonLinearConjugateGradientOptimizer optimizer = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE, 
 				new SimpleValueChecker(1e-13, 1e-13));
 		
-		final LoglikelihoodToOptimize f = new LoglikelihoodToOptimize(expressionBasedModel, evidences);
-		final GradientLoglikelihoodToOptimize gradientToOptimize = new GradientLoglikelihoodToOptimize(expressionBasedModel, evidences);
+		final LoglikelihoodToOptimize f = new LoglikelihoodToOptimize(expressionBasedModel, queries);
+		final GradientLoglikelihoodToOptimize gradientToOptimize = new GradientLoglikelihoodToOptimize(expressionBasedModel, queries);
 		
 		ObjectiveFunction objectiveFunction = new ObjectiveFunction(f);
 		MultivariateVectorFunction gradientMultivariateFunction = gradientToOptimize;

@@ -27,7 +27,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.optimization.SymbolicFunctionToOptimize;
+import com.sri.ai.expresso.optimization.FunctionToOptimize;
 import com.sri.ai.expresso.optimization.GradientToOptimize;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.FunctorConstants;
@@ -197,7 +197,7 @@ public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 		NonLinearConjugateGradientOptimizer optimizer = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE, 
 				new SimpleValueChecker(1e-13, 1e-13));
 		
-		final SymbolicFunctionToOptimize f = new SymbolicFunctionToOptimize(expressionToOptimize);
+		final FunctionToOptimize f = new FunctionToOptimize(expressionToOptimize);
 		final GradientToOptimize gradientToOptimize = new GradientToOptimize(expressionToOptimize, gradient);
 		
 		ObjectiveFunction objectiveFunction = new ObjectiveFunction(f);
