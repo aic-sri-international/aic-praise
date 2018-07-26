@@ -9,6 +9,7 @@ import java.util.Map;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.regularparameterestimation.RegularParameterEstimation;
+import com.sri.ai.praise.learning.symbolicparameterestimation.util.ExpressionBasedModelExamples;
 import org.junit.Test;
 
 /**
@@ -19,6 +20,47 @@ import org.junit.Test;
  */
 
 public class RegularParameterEstimationTest {
+	
+	/**
+	 * Tests for my report
+	 */
+	@Test
+	public void testReport() {
+		
+		long startTime = System.nanoTime();
+		
+		ExpressionBasedModel expressionBasedModel = ExpressionBasedModelExamples.buildModel1();
+		
+		List<Expression> queryExpressionList = new LinkedList<Expression>();
+		queryExpressionList.add(parse("not earthquake and not burglary"));
+		
+		for(int i = 0; i < 3; i++) {
+			queryExpressionList.add(parse("earthquake and burglary and alarm"));
+		}
+		for(int i = 0; i < 10; i++) {
+			queryExpressionList.add(parse("not earthquake and burglary and alarm"));
+		}
+		for(int i = 0; i < 99; i++) {
+			queryExpressionList.add(parse("not earthquake and not burglary and not alarm"));
+		}
+		for(int i = 0; i < 5; i++) {
+			queryExpressionList.add(parse("earthquake and not burglary and not alarm"));
+		}
+		for(int i = 0; i < 4; i++) {
+			queryExpressionList.add(parse("earthquake and not burglary and alarm"));
+		}
+	
+		RegularParameterEstimation regularParameterEstimation = new RegularParameterEstimation(expressionBasedModel, queryExpressionList);
+		
+		Map<Expression, Double> result = regularParameterEstimation.optimize();
+		
+		System.out.println(result);
+		
+		long endTime   = System.nanoTime();
+		long totalTime = endTime - startTime;
+		System.out.println("running time : " + totalTime*0.000000001);
+		
+	}
 	
 	@Test
 	public void testOptimization() {

@@ -24,7 +24,7 @@ import com.sri.ai.util.base.Pair;
  */
 public class ParameterEstimationForHOGModelTest {
 	
-	//@Test
+	@Test
 	public void testHOGMBased() {
 			
 			String modelString = "random terrorAttacks : 0..20;\n"

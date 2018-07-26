@@ -22,7 +22,166 @@ import com.sri.ai.util.base.Pair;
  */
 public class ParameterEstimationForExpressionBasedModelTest {
 	
+	/**
+	 * Tests for my report
+	 */
 	@Test
+	public void testReportCompleteData() {
+		
+		long startTime = System.nanoTime();
+		
+		ExpressionBasedModel expressionBasedModel = ExpressionBasedModelExamples.buildModel1();
+
+		List<Pair<Expression, Expression>> pairsQueryEvidence = new LinkedList<Pair<Expression, Expression>>();
+		
+		Pair<Expression, Expression> pair = new Pair<Expression,Expression>(parse("earthquake and burglary and alarm"), parse("null"));
+
+		Pair<Expression, Expression> pair2 = new Pair<Expression,Expression>(parse("not earthquake and burglary and alarm"), parse("null"));
+		
+		Pair<Expression, Expression> pair3 = new Pair<Expression,Expression>(parse("not earthquake and not burglary and not alarm"), parse("null"));
+		
+		Pair<Expression, Expression> pair4 = new Pair<Expression,Expression>(parse("earthquake and not burglary and not alarm"), parse("null"));
+		
+		Pair<Expression, Expression> pair5 = new Pair<Expression,Expression>(parse("earthquake and not burglary and alarm"), parse("null"));
+		
+		for(int i = 0; i < 3; i++) {
+			pairsQueryEvidence.add(pair);
+		}
+		for(int i = 0; i < 10; i++) {
+			pairsQueryEvidence.add(pair2);
+		}
+		for(int i = 0; i < 99; i++) {
+			pairsQueryEvidence.add(pair3);
+		}
+		for(int i = 0; i < 5; i++) {
+			pairsQueryEvidence.add(pair4);
+		}
+		for(int i = 0; i < 4; i++) {
+			pairsQueryEvidence.add(pair5);
+		}
+		
+		HashMap<Expression,Double> expected = new HashMap<Expression,Double>();
+		expected.put(parse("Alpha"), 0.09917510761762943);
+		expected.put(parse("Beta"), 0.10743645971117469);
+		
+		HashMap<Expression,Double> mapResult = runTestExpressionBased(pairsQueryEvidence,
+				expressionBasedModel, new double[] {0,0});
+		
+		long endTime   = System.nanoTime();
+		long totalTime = endTime - startTime;
+		System.out.println("running time : " + totalTime*0.000000001);
+
+		System.out.println("expected : " + expected);
+		System.out.println("result : " + mapResult);
+		assertEquals(expected, mapResult);
+		
+		
+		
+	}
+	
+	//@Test
+	public void testReportDataWithContext() {
+		
+		long startTime = System.nanoTime();
+		
+		ExpressionBasedModel expressionBasedModel = ExpressionBasedModelExamples.buildModel1();
+
+		List<Pair<Expression, Expression>> pairsQueryEvidence = new LinkedList<Pair<Expression, Expression>>();
+		
+		Pair<Expression, Expression> pair = new Pair<Expression,Expression>(parse("earthquake and burglary"), parse("alarm"));
+
+		Pair<Expression, Expression> pair2 = new Pair<Expression,Expression>(parse("not earthquake and burglary"), parse("alarm"));
+		
+		Pair<Expression, Expression> pair3 = new Pair<Expression,Expression>(parse("not earthquake and not burglary"), parse("not alarm"));
+		
+		Pair<Expression, Expression> pair4 = new Pair<Expression,Expression>(parse("earthquake and not burglary"), parse("not alarm"));
+		
+		Pair<Expression, Expression> pair5 = new Pair<Expression,Expression>(parse("earthquake and not burglary"), parse("alarm"));
+		
+		for(int i = 0; i < 3; i++) {
+			pairsQueryEvidence.add(pair);
+		}
+		for(int i = 0; i < 10; i++) {
+			pairsQueryEvidence.add(pair2);
+		}
+		for(int i = 0; i < 99; i++) {
+			pairsQueryEvidence.add(pair3);
+		}
+		for(int i = 0; i < 5; i++) {
+			pairsQueryEvidence.add(pair4);
+		}
+		for(int i = 0; i < 4; i++) {
+			pairsQueryEvidence.add(pair5);
+		}
+		
+		HashMap<Expression,Double> expected = new HashMap<Expression,Double>();
+		expected.put(parse("Alpha"), 0.21125493100683665);
+		expected.put(parse("Beta"), 0.22885958533030093);
+		
+		HashMap<Expression,Double> mapResult = runTestExpressionBased(pairsQueryEvidence,
+				expressionBasedModel, new double[] {0,0});
+		
+		long endTime   = System.nanoTime();
+		long totalTime = endTime - startTime;
+		System.out.println("running time : " + totalTime*0.000000001);
+
+		System.out.println("expected : " + expected);
+		System.out.println("result : " + mapResult);
+		assertEquals(expected, mapResult);
+	}
+	
+	//@Test
+	public void testReportIncompleteData() {
+		
+		long startTime = System.nanoTime();
+		
+		ExpressionBasedModel expressionBasedModel = ExpressionBasedModelExamples.buildModel1();
+
+		List<Pair<Expression, Expression>> pairsQueryEvidence = new LinkedList<Pair<Expression, Expression>>();
+		
+		Pair<Expression, Expression> pair = new Pair<Expression,Expression>(parse("earthquake"), parse("alarm"));
+
+		Pair<Expression, Expression> pair2 = new Pair<Expression,Expression>(parse("burglary"), parse("alarm"));
+		
+		Pair<Expression, Expression> pair3 = new Pair<Expression,Expression>(parse("not earthquake and not burglary"), parse("not alarm"));
+		
+		Pair<Expression, Expression> pair4 = new Pair<Expression,Expression>(parse("earthquake or not burglary"), parse("not alarm"));
+		
+		Pair<Expression, Expression> pair5 = new Pair<Expression,Expression>(parse("earthquake and not burglary"), parse("alarm"));
+		
+		for(int i = 0; i < 3; i++) {
+			pairsQueryEvidence.add(pair);
+		}
+		for(int i = 0; i < 10; i++) {
+			pairsQueryEvidence.add(pair2);
+		}
+		for(int i = 0; i < 99; i++) {
+			pairsQueryEvidence.add(pair3);
+		}
+		for(int i = 0; i < 5; i++) {
+			pairsQueryEvidence.add(pair4);
+		}
+		for(int i = 0; i < 4; i++) {
+			pairsQueryEvidence.add(pair5);
+		}
+		
+		HashMap<Expression,Double> expected = new HashMap<Expression,Double>();
+		expected.put(parse("Alpha"), 0.1063354169257403);
+		expected.put(parse("Beta"), 0.13618421966599503);
+		
+		HashMap<Expression,Double> mapResult = runTestExpressionBased(pairsQueryEvidence,
+				expressionBasedModel, new double[] {0,0});
+		
+		long endTime   = System.nanoTime();
+		long totalTime = endTime - startTime;
+		System.out.println("running time : " + totalTime*0.000000001);
+
+		System.out.println("expected : " + expected);
+		System.out.println("result : " + mapResult);
+		assertEquals(expected, mapResult);
+	}
+	
+	//@Test
 	public void testExpressionBasedPairs() {
 		
 		ExpressionBasedModel expressionBasedModel = ExpressionBasedModelExamples.buildModel1();
@@ -96,7 +255,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 		
 	}
 	
-	@Test
+	//@Test
 	public void testExpressionBased() {
 		
 		ExpressionBasedModel expressionBasedModel = ExpressionBasedModelExamples.buildModel1();
@@ -196,7 +355,7 @@ public class ParameterEstimationForExpressionBasedModelTest {
 
 	}
 	
-	@Test
+	//@Test
 	
 	public void testBuildOptimizedExpressionBasedModel() {
 				
