@@ -40,7 +40,7 @@ public class PerformanceTest {
 		boolean includeExpressions = true;
 		
 		int initialNumberOfVariables = 1;
-		int finalNumberOfVariables = includeExpressions? 5 : 25;
+		int finalNumberOfVariables = includeExpressions? 4 : 9;
 		int cardinalityOfAllVariables = 4;
 		double minimumPotential = 0.1;
 		double maximumPotential = 1.0;
@@ -87,12 +87,12 @@ public class PerformanceTest {
 				println();
 			}
 			else {
-				print("For eliminating half of " + numberOfVariables + " variables,");
+				print("For eliminating half of " + numberOfVariables + " variables");
 				if (includeTables) {
-					print(" table: " + timeForEliminatingHalfOfVariablesFromTableFactor + " ms,");
+					print(", table: " + timeForEliminatingHalfOfVariablesFromTableFactor + " ms");
 				}
 				if (includeExpressions) {
-					print(" expression: " + timeForEliminatingHalfOfVariablesFromExpressionFactor + " ms");
+					print(", expression: " + timeForEliminatingHalfOfVariablesFromExpressionFactor + " ms");
 				}
 				println();
 			}
