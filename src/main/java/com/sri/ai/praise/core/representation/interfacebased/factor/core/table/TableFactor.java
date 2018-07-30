@@ -1,11 +1,12 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
+import static com.sri.ai.util.Util.setDifference;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -15,340 +16,143 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
 import com.sri.ai.util.DefaultExplanationTree;
 import com.sri.ai.util.ExplanationTree;
-import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
 import com.sri.ai.util.math.MixedRadixNumber;
 
 /**
+ * Data type representing a graph factor.
+ * 
  * @author gabriel
+ * @author bobak
  *
  */
 
 public class TableFactor implements Factor {
-	ArrayList<TableVariable> listOfVariables;
 	
-	ArrayList<Integer> listOfVariableCardinalities;
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	// DATA MEMBERS ////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	LinkedHashSet<TableVariable> setOfVariables;
+	private String name;
+	private LinkedHashSet<TableVariable> variables;
+	private ArrayList<Double> parameters;
+	private MixedRadixNumber parameterIndexRadix;
+	private ExplanationTree explanation = DefaultExplanationTree.PLACEHOLDER;	// use currently not supported
 	
-	//
-	ArrayList<Double> entries;
+	/*  NOTE:  Understanding the Parameter Order
+	 * 
+	 * ex:  consider a factor with three binary variables v1, v2, and v3 in that same order
+	 * 
+	 * parameters will be arranged based on the following variable assignment order:
+	 * 
+	 * 		[ (v1=0,v2=0,v3=0), (v1=0,v2=0,v3=1), (v1=0,v2=1,v3=0), (v1=0,v2=1,v3=1), 
+	 * 		  (v1=1,v2=0,v3=0), (v1=1,v2=0,v3=1), (v1=1,v2=1,v3=0), (v1=1,v2=1,v3=1) ]
+	 * 
+	 * Note that the order would change if the order the variables are stored as is changed.
+	 * 
+	 * parameterIndexRadix is responsible for mapping the variable assignments to the correct parameter index.
+	 */
 	
-	MixedRadixNumber entryIndex;
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	//
-	LinkedHashMap<TableVariable, Integer> mapFromVariableToItsIndexOnTheList; // TODO initialize	
 	
-	public TableFactor(ArrayList<TableVariable> listOfVariables, ArrayList<Double> entries) {
-		this.listOfVariables = listOfVariables;
-		this.setOfVariables = new LinkedHashSet<>(listOfVariables);
-		this.mapFromVariableToItsIndexOnTheList = new LinkedHashMap<>();
-		for (int i = 0; i < listOfVariables.size(); i++) {
-			this.mapFromVariableToItsIndexOnTheList.put(listOfVariables.get(i),i);
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// CONSTRUCTORS /////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public TableFactor(String factorName, Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
+
+		if(!(variables instanceof LinkedHashSet<?>))
+		{
+			variables = new LinkedHashSet<TableVariable>(variables);
 		}
-		this.listOfVariableCardinalities = Util.mapIntoArrayList(listOfVariables, v->v.getCardinality());
-		this.entries = entries;
-		entryIndex = new MixedRadixNumber(BigInteger.ZERO, listOfVariableCardinalities);
+		this.name = factorName;
+		this.variables = (LinkedHashSet<TableVariable>) variables;
+		this.parameters = parameters;
+		this.parameterIndexRadix = createMixedRadixNumberForIndexingFactorParameters();
 	}
 	
-	public TableFactor(ArrayList<TableVariable> listOfVariables) {
-		this(listOfVariables, -1.);
-	}
-	     
-	public TableFactor(ArrayList<TableVariable> listOfVariables, Double defaultValue) {
-		this(listOfVariables, arrayListFilledWith(defaultValue, numEntries(listOfVariables)));
+	public TableFactor(Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
+
+		this("phi",variables,parameters);
 	}
 	
-	public void reinitializeEntries(Double defaultValue) {
-		this.entries = arrayListFilledWith(defaultValue, numEntries(listOfVariables));
+	public TableFactor(Collection<? extends TableVariable> variables, Double defaultValue) {
+		this(variables, arrayListFilledWith(defaultValue, numEntries(variables)));
 	}
 	
-	public static int numEntries(ArrayList<TableVariable> listOfVariables2) {
+	public TableFactor(Collection<? extends TableVariable> variables) {
+		this(variables, -1.);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// PUBLIC METHODS ///////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	// STATIC METHODS ///////////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * Calculates the number of parameters are needed for a factor with scope based on the passed variables
+	 * 
+	 * @param variableList
+	 * @return number of parameters a factor of given scope needs
+	 */
+	public static int numEntries(Collection<? extends TableVariable> variableList) {
 		int result = 1;
-		for(TableVariable v : listOfVariables2) {
+		for(TableVariable v : variableList) {
 			result *= v.getCardinality();
 		}
 		return result;
 	}
-
-	@Override
-	public boolean contains(Variable variable) {
-		boolean res = setOfVariables.contains(variable);
-		return res;
-	}
 	
-	@Override
-	public ArrayList<TableVariable> getVariables() {
-		return this.listOfVariables;
-	}
-
-	@Override
-	public boolean isIdentity() {
-		if(entries.size() == 0 || entries.get(0) == 0) {
-			return false;	
-		}
-		double valueAtZero = entries.get(0);
-		for(Double v : entries) {
-			if (v != valueAtZero) {
-				return false;
-			}
-		}
-		return true;
-	}
 	
-	@Override
-	public String toString() {
-	
-		String result = "phi(";
-		
-		boolean first = true;
-		for(TableVariable v : this.getVariables()) {
-			if(first) {
-				first = false;
-			}
-			else {
-				result = result + ", ";
-			}
-			result = result + v.getName();
-		}
-		result = result + ") = ";
-		
-		for(Double entry : entries) {
-			result = result + entry + " ";
-		}
-		
-	/*	String result = "";
-		MixedRadixNumber radix = new MixedRadixNumber(BigInteger.ZERO,fillWithCardinality(listOfVariables));
-		
-		for(int j = 0; j < table.numberEntries();j++) {
-			if(j != 0) {
-				result = result + " | ";
-			}
-			int nCols = listOfVariables.size();
-			String s = "";
-			for (int i = 0; i < nCols; i++) {
-				s = s + " " + radix.getCurrentNumeralValue(i);
-			}
-			radix.increment();
-			result = result + s + " : " + table.getEntries().get(j);
-		}*/
-		return result;
-	}
-
-	public TableFactor normalize() {
-		
-		Double sum = 0.;
-		for(Double entry : this.entries) {
-			sum = sum + entry;
-		}
-		if(sum == 0.) {
-			return this;
-		}
-		
-		ArrayList<Double> newEntries = new ArrayList<>(entries.size());
-		for (Double entry :entries) {
-			newEntries.add(entry/sum);
-		}
-		TableFactor result = new TableFactor(listOfVariables, newEntries);
-		return result ;
-	}
-
-	@Override
-	public Double getEntryFor(Map<? extends Variable, ? extends Object> variablesAndTheirValues) {
-		int[] variableValues = getVariableValues(variablesAndTheirValues);
-		Double result = getEntryFor(variableValues);
-		return result;
-	}
-	
-	public <T extends Variable, U extends Object> Double getEntryFor(List<T> variables, List<U> variableValues) {
-		Map<T, U> variablesAndTheirValues = Util.mapFromListOfKeysAndListOfValues(variables, variableValues);
-		return getEntryFor(variablesAndTheirValues);
-	}
-	
-	public Double getEntryFor(List<? extends Integer> variableValuesInTheRightOrder) {
-		int entryPosition = getEntryPosition(variableValuesInTheRightOrder);
-		return entries.get(entryPosition);
-	}
-	
-	public void setEntryFor(Map<? extends Variable, ? extends Object> variablesAndTheirValues, Double newEntryValue) {
-		int entryPosition = fromMapOfVariableValuesToEntryPosition(variablesAndTheirValues);
-		entries.set(entryPosition, newEntryValue);
-	}
-	
-	public <T extends Variable, U extends Object> void setEntryFor(List<T> variables, List<U> variableValues, Double newEntryValue) {
-		Map<T, U> variablesAndTheirValues = Util.mapFromListOfKeysAndListOfValues(variables, variableValues);
-		int entryPosition = fromMapOfVariableValuesToEntryPosition(variablesAndTheirValues);
-		entries.set(entryPosition, newEntryValue);
-	}
-	
-	public void setEntryFor(List<? extends Integer> variableValuesInTheRightOrder, Double newEntryValue) {
-		int entryPosition = getEntryPosition(variableValuesInTheRightOrder);
-		entries.set(entryPosition, newEntryValue);
-	}
-	
-	public int fromMapOfVariableValuesToEntryPosition(Map<? extends Variable, ? extends Object> variableValues) {
-		int[] varValues = getVariableValues(variableValues);
-		
-		int entryPosition = getEntryPosition(varValues);
-		return entryPosition;
-	}
-	
-	private Double getEntryFor(int[] varValues) {
-		int entryPosition = getEntryPosition(varValues);
-		return entries.get(entryPosition);
-	}
-	
-	private int[] getVariableValues(Map<? extends Variable, ? extends Object> variablesAndTheirValues) {
-		int[] variableValues = new int[listOfVariables.size()];
-		/*for(Entry<? extends Variable, ? extends Object> entry : variableValues.entrySet()) {//iterate over listOfVariavles:moreEfficient
-			Integer indexOnTheList = mapFromVariableToItsIndexOnTheList.get(entry.getKey());
-			if(indexOnTheList != null) {
-				varValues[indexOnTheList] = (Integer) entry.getValue();
-			}
-		}*/
-		for (int i = 0; i < variableValues.length; i++) {
-			variableValues[i] = (Integer) variablesAndTheirValues.get(listOfVariables.get(i));
-		}
-		return variableValues;
-	}
-	
-	private int getEntryPosition(List<? extends Integer> variableValuesInTheRightOrder) {
-		int[] variableValuesArray = new int[variableValuesInTheRightOrder.size()];
-		int i = 0;
-		for(int variableValue : variableValuesInTheRightOrder) {
-			variableValuesArray[i] = variableValue;
-			i++;
-		}
-		
-		int entryPosition = getEntryPosition(variableValuesArray);
-		return entryPosition;
-	}
-	
-	private int getEntryPosition(int[] variableValues) {
-		int entryPosition = this.entryIndex.getValueFor(variableValues).intValue();
-		return entryPosition;
-	}
-
-	@Override
-	public Factor multiply(Factor another) {
-
-		if(another instanceof ConstantFactor) {
-			return another.multiply(this);
-		}
-		
-		if(another.getClass() != this.getClass()) {
-			Util.println("Trying to multiply different types of factors: this is a " +
-							this.getClass() + "and another is a " + another.getClass());
-			return null;
-		}
-
-		TableFactor anotherTable = (TableFactor) another;
-		
-		ArrayList<TableVariable> newListOfVariables = new ArrayList<>(this.listOfVariables);
-		for(TableVariable v : anotherTable.getVariables()) {
-			if(!this.setOfVariables.contains(v)) {
-				newListOfVariables.add(v);
-			}
-		}
-
-		Integer numberOfEntries = accumulate(mapIntoList(newListOfVariables, v->v.getCardinality()),
-												(i,j)->i*j, 1);
-		ArrayList<Double> newEntries = new ArrayList<>(numberOfEntries);
-		for (int i = 0; i < numberOfEntries; i++) {
-			newEntries.add(-1.);
-		}
-		
-		TableFactor result = new TableFactor(newListOfVariables, newEntries);
-		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(newListOfVariables);
-		
-		LinkedHashMap<Variable, Integer> mapFromVariableToValue = new LinkedHashMap<>();
-		for(ArrayList<Integer> values: in(cartesianProduct)) {
-			for (int i = 0; i < values.size(); i++) {
-				mapFromVariableToValue.put(newListOfVariables.get(i), values.get(i));
-			}
-			Double product = this.getEntryFor(mapFromVariableToValue) * anotherTable.getEntryFor(mapFromVariableToValue);
-			result.setEntryFor(mapFromVariableToValue, product);
-		}
-		
-		return result;
-		
-	}
-
-
-	public static Iterator<ArrayList<Integer>> getCartesianProduct(ArrayList<TableVariable> listOfVariables) {
+	//TODO:  finish description
+	/**
+	 *
+	 * 
+	 * @param listOfVariables
+	 * @return
+	 */
+	public static Iterator<ArrayList<Integer>> getCartesianProduct(Collection<TableVariable> listOfVariables) {
 		
 		ArrayList<ArrayList<Integer>> listOfValuesForTheVariables = mapIntoArrayList(listOfVariables, 
-																	v -> makeArrayWithValuesFromZeroToNMinusOne(v.getCardinality()));
+																	v -> makeArrayWithValuesFromZeroToCardinalityMinusOne(v.getCardinality()));
 		ArrayList<NullaryFunction<Iterator<Integer>>> iteratorForListOfVariableValues = 
 				mapIntoArrayList(listOfValuesForTheVariables, element -> () -> element.iterator());
 		
 		Iterator<ArrayList<Integer>> cartesianProduct = new CartesianProductIterator<Integer>(iteratorForListOfVariableValues);
 		return cartesianProduct;
 	}
-
-	private static ArrayList<Integer> makeArrayWithValuesFromZeroToNMinusOne(int cardinality) {
-		ArrayList<Integer> result = new ArrayList<>(cardinality);
-		for (int i = 0; i < cardinality; i++) {
-			result.add(i);
-		}
-		return result;
-	}
-
-	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
-		LinkedHashSet<TableVariable> setOfVariablesToSumOut = new LinkedHashSet<>();
-		for(Variable v : variablesToSumOut) {
-			setOfVariablesToSumOut.add((TableVariable) v);
-		}
-		ArrayList<TableVariable> variablesNotToSumOut = new ArrayList<>();
-		for(TableVariable v: this.listOfVariables) {
-			if(!setOfVariablesToSumOut.contains(v)) {
-				variablesNotToSumOut.add(v);
-			}
-		}
-		
-		if(variablesNotToSumOut.isEmpty()) {
-			return IDENTITY_FACTOR;
-		}
-		
-		Integer numberOfEntries= accumulate(mapIntoList(variablesNotToSumOut, v->v.getCardinality()),(i,j)->i*j, 1);
-		
-		ArrayList<Double> entries = new ArrayList<>(numberOfEntries);
-		for (int i = 0; i < numberOfEntries; i++) {
-			entries.add(0.);
-		}
-		
-		TableFactor result = new TableFactor(variablesNotToSumOut, entries);
-		
-		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(this.listOfVariables);
-		LinkedHashMap<Variable, Integer> mapFromVariableToValue = new LinkedHashMap<>();
-		for(ArrayList<Integer> values: in(cartesianProduct)) {
-			for (int i = 0; i < values.size(); i++) {
-				mapFromVariableToValue.put(this.listOfVariables.get(i), values.get(i));
-			}
-			Double currentValue = result.getEntryFor(mapFromVariableToValue);
-			Double addedValue = this.getEntryFor(mapFromVariableToValue);
-			result.setEntryFor(mapFromVariableToValue, currentValue + addedValue);
-		}
-		return result;
-	}
-	
-	public ArrayList<Double> getEntries() {
-		return this.entries;
-	}
 	
 	
+	//TODO:  I suggest refactoring copyToSubTableFactor() to getSubFactor() or sliceFactorAt() across project
+	/**
+	 * Slices the factor along variable values provided, returning the sub-factor produced by the slicing
+	 * 
+	 * @param factor (factor to slice on)
+	 * @param variablesPredetermined (variables to slice on)
+	 * @param valuesPredetermined (values of the above-mentioned variables to slice by)
+	 * @return sub-factor produced from slicing the passed variables at their given values
+	 */
 	public static TableFactor copyToSubTableFactor(TableFactor factor,
 			List<TableVariable> variablesPredetermined, List<Integer> valuesPredetermined) {
 		
-		Map<TableVariable, Integer> mapOfvaluesPredetermined = Util.mapFromListOfKeysAndListOfValues(variablesPredetermined, valuesPredetermined);
+		Map<TableVariable, Integer> mapOfvaluesPredetermined = mapFromListOfKeysAndListOfValues(variablesPredetermined, valuesPredetermined);
 		TableFactor result = copyToSubTableFactorWithoutRecreatingANewMap(factor, mapOfvaluesPredetermined);
 		return result;
 	}
@@ -362,65 +166,163 @@ public class TableFactor implements Factor {
 		return result;
 	}
 	
-	private static TableFactor copyToSubTableFactorWithoutRecreatingANewMap(TableFactor factor,
-			Map<TableVariable, Integer> mapOfvaluesPredetermined) {
-		ArrayList<TableVariable> newVariables = new ArrayList<>(factor.getVariables());
-		
-		newVariables.removeAll(mapOfvaluesPredetermined.keySet());
-		if(newVariables.size() == 0) {
-			return null;
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	
+	// METHODS BASED ON IMPLEMENTING FACTOR /////////////////////////////////////////////////////////////
+	
+	@Override
+	public boolean contains(Variable variable) {
+		boolean res = variables.contains(variable);
+		return res;
+	}
+	
+	
+	@Override
+	public ArrayList<TableVariable> getVariables() {
+		return new ArrayList<TableVariable>(this.variables);
+	}
+	
+
+	//TODO:  Check correctness of isIdentity() function
+	@Override
+	public boolean isIdentity() {
+		if(parameters.size() == 0 || parameters.get(0) == 0) {
+			return false;	
 		}
-		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(newVariables);
-		
-		TableFactor result = new TableFactor(newVariables);
-		for(ArrayList<Integer> instantiations: in(cartesianProduct)) {
-			for (int i = 0; i < newVariables.size(); i++) {
-				mapOfvaluesPredetermined.put(newVariables.get(i), instantiations.get(i));
+		double valueAtZero = parameters.get(0);
+		for(Double v : parameters) {
+			if (v != valueAtZero) {
+				return false;
 			}
-			Double newEntryValue =  factor.getEntryFor(mapOfvaluesPredetermined);
-			result.setEntryFor(mapOfvaluesPredetermined, newEntryValue);
 		}
+		return true;
+	}
+	
+	
+	@Override
+	public String toString() {
+		
+		String factorAsString = name + variables.toString() + ": " + parameters.toString();
+		
+		return factorAsString;
+	}
+	
+
+	/**
+	 * Normalizes factor so that the overall sum of all parameters together = 1.0
+	 * 
+	 * @return reference to normalized self
+	 */
+	@Override
+	public TableFactor normalize() {
+		
+		Double normalizationConstant = sumOfParameters();
+		if(normalizationConstant != 0.0 && normalizationConstant != 1.0) {
+			this.normalizeBy(normalizationConstant);
+		}
+		return this ;
+	}
+	
+	
+	/**
+	 * Returns parameter corresponding to given variable assignments
+	 * 
+	 * @param variablesAndTheirValues (variables and their value assignments)
+	 * @return parameter corresponding the given variable assignments
+	 */
+	@Override
+	public Double getEntryFor(Map<? extends Variable, ? extends Object> variablesAndTheirValues) {
+		int[] variableValues = getVariableValueIndices(variablesAndTheirValues);
+		Double result = getEntryFor(variableValues);
 		return result;
 	}
+	
+	public <T extends Variable, U extends Object> Double getEntryFor(List<T> variableList, List<U> variableValues) {
+		Map<T, U> variablesAndTheirValues = mapFromListOfKeysAndListOfValues(variableList, variableValues);
+		return getEntryFor(variablesAndTheirValues);
+	}
+	
+	public Double getEntryFor(List<? extends Integer> variableValuesInTheRightOrder) {
+		int parameterIndex = getParameterIndex(variableValuesInTheRightOrder);
+		return parameters.get(parameterIndex);
+	}
+	
+	
+	/**
+	 * Sums out given variables from factor.
+	 * 
+	 * @param variablesToSumOut (variables to sum out)
+	 * @return new factor with given variables summed out
+	 */
+	@Override
+	public Factor sumOut(List<? extends Variable> variablesToSumOutList) {
+		
+		//TODO: Error check for if variablesToSumOut is of type List<? extends TableVarable>
+		//TODO: Error check for if a variable listed to SumOut exists in the factor
+		
+		LinkedHashSet<TableVariable> variablesToSumOut = new LinkedHashSet<>((List<TableVariable>) variablesToSumOutList);
+		
+		LinkedHashSet<TableVariable> variablesNotToSumOut = new LinkedHashSet<>();
+		variablesNotToSumOut = (LinkedHashSet<TableVariable>) setDifference(this.variables, variablesToSumOut, variablesNotToSumOut);
+		
+		Factor result;
+		// if every variable is summed out, return the sum of all the parameters in a constant factor
+		if(variablesNotToSumOut.isEmpty()) {
+			result = new ConstantFactor(sumOfParameters());
+		}
+		else
+		{
+			result = sumOutEverythingExcept(variablesNotToSumOut);
+		}
+		
+		return result;
+	}
+	
+	
+	/**
+	 * Multiplies current TableFactor to another passed in TableFactor
+	 * 
+	 * @param another (the other TableFactor to be multiplied to)
+	 * @return a Factor reference to the TableFactor product of the multiplication
+	 */
+	@Override
+	public Factor multiply(Factor another) {
 
+		Factor result;
+		
+		if(another instanceof ConstantFactor) {
+			result = another.multiply(this);
+		}
+		else if(another.getClass() != this.getClass()) {
+			throw new Error("Trying to multiply different types of factors: this is a " +
+							this.getClass() + "and another is a " + another.getClass());
+		}
+		else
+		{
+			result = multiply((TableFactor)another);
+		}
+		
+		return result;
+	}
+	
+	
 	@Override
 	public Factor add(Factor another) {
 
+		Factor result;
+		
 		if(another instanceof ConstantFactor) {
-			return another.add(this);
-		}
-				
-		if(another.getClass() != this.getClass()) {
+			result = another.add(this);
+		}		
+		else if(another.getClass() != this.getClass()) {
 			throw new Error("Trying to multiply different types of factors: this is a " +
 						this.getClass() + "and another is a " + another.getClass());
 		}
-
-		TableFactor anotherTable = (TableFactor) another;
-				
-		ArrayList<TableVariable> newListOfVariables = new ArrayList<>(this.listOfVariables);
-		for(TableVariable v : anotherTable.getVariables()) {
-			if(!this.setOfVariables.contains(v)) {
-				newListOfVariables.add(v);
-			}
-		}
-
-		Integer numberOfEntries = accumulate(mapIntoList(newListOfVariables, v->v.getCardinality()),
-											(i,j)->i*j, 1);
-		ArrayList<Double> newEntries = new ArrayList<>(numberOfEntries);
-		for (int i = 0; i < numberOfEntries; i++) {
-			newEntries.add(-1.);
-		}
-				
-		TableFactor result = new TableFactor(newListOfVariables, newEntries);
-		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(newListOfVariables);
-				
-		LinkedHashMap<Variable, Integer> mapFromVariableToValue = new LinkedHashMap<>();
-		for(ArrayList<Integer> values: in(cartesianProduct)) {
-			for (int i = 0; i < values.size(); i++) {
-				mapFromVariableToValue.put(newListOfVariables.get(i), values.get(i));
-			}
-			Double sum = this.getEntryFor(mapFromVariableToValue) * anotherTable.getEntryFor(mapFromVariableToValue);
-			result.setEntryFor(mapFromVariableToValue, sum);
+		else
+		{
+			result = add((TableFactor) another);
 		}
 		
 		return result;
@@ -451,34 +353,315 @@ public class TableFactor implements Factor {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	private ExplanationTree explanation = DefaultExplanationTree.PLACEHOLDER;
+	
 
 	@Override
 	public ExplanationTree getExplanation() {
 		return explanation;
 	}
 	
+	
 	@Override
 	public void setExplanation(ExplanationTree explanation) {
 		this.explanation = explanation;
 	}
+	
 
 	@Override
 	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 
 	@Override
 	public Factor min(Collection<? extends Variable> variablesToMinimize) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 
 	@Override
 	public Factor argmin(Collection<? extends Variable> variablesToMinimize) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	
+	// TABLEFACTOR-SPECIFIC METHODS /////////////////////////////////////////////////////////////////////
+	
+	public void reinitializeEntries(Double defaultValue) {
+		this.parameters = arrayListFilledWith(defaultValue, parameters.size());
+	}
+	
+	
+	public TableFactor normalizedCopy() {
+		
+		Double normalizationConstant = sumOfParameters();
+		TableFactor normalizedTableFactor = this;
+		if(normalizationConstant != 0.0 && normalizationConstant != 1.0) {
+			ArrayList<Double> newParameters = new ArrayList<>(parameters.size());
+			for (Double unnormalizedParameter : parameters) {
+				newParameters.add(unnormalizedParameter/normalizationConstant);
+			}
+			normalizedTableFactor = new TableFactor(variables, newParameters);
+		}
+		return normalizedTableFactor;
+	}
+	
+	
+	public TableFactor multiply(TableFactor another) {
+		
+		TableFactor result = initializeNewFactorUnioningVariables(another);
+		result = operateOnUnionedParameters(another, result, (a,b) -> a * b);
+		
+		return result;
+	}
+	
+	
+	public TableFactor add(TableFactor another) {
+		
+		TableFactor result = initializeNewFactorUnioningVariables(another);
+		result = operateOnUnionedParameters(another, result, (a,b) -> a + b);
+		
+		return result;
+	}
+	
+	
+	public void setEntryFor(Map<? extends Variable, ? extends Object> variablesAndTheirValues, Double newParameterValue) {
+		int parameterIndex = getParameterIndex(variablesAndTheirValues);
+		parameters.set(parameterIndex, newParameterValue);
+	}
+	
+	public <T extends Variable, U extends Object> void setEntryFor(List<T> variableList, List<U> variableValues, Double newParameterValue) {
+		Map<T, U> variablesAndTheirValues = mapFromListOfKeysAndListOfValues(variableList, variableValues);
+		int parameterIndex = getParameterIndex(variablesAndTheirValues);
+		parameters.set(parameterIndex, newParameterValue);
+	}
+	
+	public void setEntryFor(List<? extends Integer> variableValuesInTheRightOrder, Double newParameterValue) {
+		int parameterIndex = getParameterIndex(variableValuesInTheRightOrder);
+		parameters.set(parameterIndex, newParameterValue);
+	}
+	
+	
+	public void setName(String newName) {
+		this.name = newName;
+	}
+	
+	
+	public ArrayList<Double> getEntries() {
+		return this.parameters;
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// PRIVATE METHODS //////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	// HELPER METHODS ///////////////////////////////////////////////////////////////////////////////////
+	
+	private MixedRadixNumber createMixedRadixNumberForIndexingFactorParameters()
+	{
+		ArrayList<Integer> listOfVariableCardinalities = mapIntoArrayList(variables, v->v.getCardinality());
+		
+		return new MixedRadixNumber(BigInteger.ZERO, listOfVariableCardinalities);
+	}
+	
+	
+	private Double sumOfParameters()
+	{
+		Double sumOfParameters = 0.;
+		for(Double p : this.parameters) {
+			sumOfParameters = sumOfParameters + p;
+		}
+		return sumOfParameters;
+	}
+	
+	
+	private void normalizeBy(Double normalizationConstant)
+	{
+		int numParameters = parameters.size();
+		for(int i = 0; i < numParameters; ++i)
+		{
+			parameters.set(i, parameters.get(i)/normalizationConstant);
+		}
+	}
+	
+	
+	private TableFactor sumOutEverythingExcept(LinkedHashSet<TableVariable> variablesNotToSumOut) {
+
+		TableFactor result = new TableFactor(variablesNotToSumOut, 0.0);
+		
+		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(this.variables);
+		LinkedHashMap<Variable, Integer> variableValueMap = new LinkedHashMap<>();
+		for(ArrayList<Integer> values: in(cartesianProduct)) {
+			variableValueMap = createVariableValueMap(variableValueMap, values);
+			Double currentValue = result.getEntryFor(variableValueMap);
+			Double addedValue = this.getEntryFor(variableValueMap);
+			result.setEntryFor(variableValueMap, currentValue + addedValue);
+		}
+		return result;
+	}
+	
+	
+	private TableFactor initializeNewFactorUnioningVariables(TableFactor another)
+	{
+		LinkedHashSet<TableVariable> newListOfVariables = new LinkedHashSet<>(this.variables);
+		newListOfVariables.addAll(another.variables);
+		Integer numberOfParametersForNewListOfVariables = numEntries(newListOfVariables);
+		ArrayList<Double> newParameters = arrayListFilledWith(-1.0,numberOfParametersForNewListOfVariables);	
+		TableFactor newFactor = new TableFactor(newListOfVariables, newParameters);
+		
+		return newFactor;
+	}
+	
+	
+	private LinkedHashMap<Variable,Integer> createVariableValueMap(LinkedHashMap<Variable,Integer> variableValueMap, ArrayList<Integer> values)
+	{
+		int i = 0;
+		for(Variable v : this.variables)
+		{
+			variableValueMap.put(v, values.get(i));
+			++i;
+		}
+		return variableValueMap;
+	}
+
+
+	private int getParameterIndex(Map<? extends Variable, ? extends Object> variableValues) {
+		int[] varValues = getVariableValueIndices(variableValues);
+		
+		int parameterIndex = getParameterIndex(varValues);
+		return parameterIndex;
+	}
+	
+	
+	/**
+	 * Returns the stored parameter corresponding to the input variable assignments
+	 * 
+	 * @param varValues (array with indices corresponding to variables, and entries
+	 * 					 corresponding to the variable assignments)
+	 * @return parameter corresponding to the input variable assignments
+	 */
+	private Double getEntryFor(int[] varValues) {
+		int parameterIndex = getParameterIndex(varValues);
+		return parameters.get(parameterIndex);
+	}
+	
+	
+	/**
+	 * Returns the index in this.parameters holding the parameter corresponding to the input variable assignments
+	 * <p>
+	 * First, the input Map<Variable,VariableAssignment> is converted into an int[] with indices corresponding 
+	 * to the variables and entries corresponding to the variable assignments.  Then this array is passed as an
+	 * argument to another overload of this function to obtain the value to be returned.
+	 * 
+	 * @param variableValuesInTheRightOrder (Map<Variable,VariableAssignment>)
+	 * @return index position in this.parameters of the parameter corresponding to the variable assignments provided
+	 */
+	private int[] getVariableValueIndices(Map<? extends Variable, ? extends Object> mapFromVariableToVariableValue) {
+		//TODO: error checking
+		//TODO: there is no mechanism for handling partial variable assignments
+		int numVariables = variables.size();
+		int[] indexOfVariablesValues = new int[numVariables];
+		int i = 0;
+		for(TableVariable v : variables)
+		{
+			indexOfVariablesValues[i] = (Integer) mapFromVariableToVariableValue.get(v);
+			++i;
+		}
+		return indexOfVariablesValues;
+	}
+	
+	
+	/**
+	 * Returns the index in this.parameters holding the parameter corresponding to the variable assignments input
+	 * 
+	 * @param variableValuesInTheRightOrder (List with element positions corresponding to variables, and entries
+	 * 										 corresponding to the variable assignments)
+	 * @return index position in this.parameters of the parameter corresponding to the variable assignments provided
+	 */
+	private int getParameterIndex(List<? extends Integer> variableValuesInTheRightOrder) {
+		int[] variableValuesArray = new int[variableValuesInTheRightOrder.size()];
+		int i = 0;
+		for(int variableValue : variableValuesInTheRightOrder) {
+			variableValuesArray[i] = variableValue;
+			i++;
+		}
+		
+		int parameterIndex = getParameterIndex(variableValuesArray);
+		return parameterIndex;
+	}
+	
+	
+	/**
+	 * Returns the index in this.entries holding the parameter corresponding to the variable assignments input
+	 * 
+	 * @param variableValues (array with indices corresponding to variables, and entries
+	 * 						  corresponding to the variable assignments)
+	 * @return index position in this.entries of the parameter corresponding to the variable assignments provided
+	 */
+	private int getParameterIndex(int[] variableValues) {
+		int parameterIndex = this.parameterIndexRadix.getValueFor(variableValues).intValue();
+		return parameterIndex;
+	}
+	
+
+	private static ArrayList<Integer> makeArrayWithValuesFromZeroToCardinalityMinusOne(int cardinality) {
+		ArrayList<Integer> result = new ArrayList<>(cardinality);
+		for (int i = 0; i < cardinality; i++) {
+			result.add(i);
+		}
+		return result;
+	}
+	
+	
+	private static TableFactor copyToSubTableFactorWithoutRecreatingANewMap(TableFactor factor,
+			Map<TableVariable, Integer> mapOfvaluesPredetermined) {
+		ArrayList<TableVariable> newVariables = new ArrayList<>(factor.getVariables());
+		
+		newVariables.removeAll(mapOfvaluesPredetermined.keySet());
+		if(newVariables.size() == 0) {
+			return null;
+		}
+		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(newVariables);
+		
+		TableFactor result = new TableFactor(newVariables);
+		for(ArrayList<Integer> instantiations: in(cartesianProduct)) {
+			for (int i = 0; i < newVariables.size(); i++) {
+				mapOfvaluesPredetermined.put(newVariables.get(i), instantiations.get(i));
+			}
+			Double newEntryValue =  factor.getEntryFor(mapOfvaluesPredetermined);
+			result.setEntryFor(mapOfvaluesPredetermined, newEntryValue);
+		}
+		return result;
+	}
+	
+	
+	private TableFactor operateOnUnionedParameters(TableFactor another, TableFactor result, BiFunction<Double, Double, Double> operator)
+	{
+		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(result.variables);
+		
+		LinkedHashMap<Variable, Integer> variableValueMap = new LinkedHashMap<>();
+		for(ArrayList<Integer> values: in(cartesianProduct)) {
+			variableValueMap = result.createVariableValueMap(variableValueMap, values);
+			Double product = operator.apply(this.getEntryFor(variableValueMap), another.getEntryFor(variableValueMap));
+			result.setEntryFor(variableValueMap, product);
+		}
+		
+		return result;
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 }
