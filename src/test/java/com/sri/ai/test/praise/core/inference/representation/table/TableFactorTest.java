@@ -2,95 +2,284 @@ package com.sri.ai.test.praise.core.inference.representation.table;
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.println;
+import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Iterator;
-
+import java.util.ArrayList;
 import org.junit.Test;
 
-import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
-import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.util.Util;
-import com.sri.ai.util.base.IdentityWrapper;
 
-
-//TODO improve tests...
+/**
+ * Class to test the TableFactor data type
+ * 
+ * @author Bobak
+ *
+ */
 public class TableFactorTest {
 
-	public static void test1() {
-		TableVariable v1 = new TableVariable("v1", 5);
-		TableVariable v2 = new TableVariable("v2", 5);
-		TableVariable v3 = new TableVariable("v3", 2);
-		TableVariable v4 = new TableVariable("v4", 2);
-		TableVariable v5 = new TableVariable("v5", 2);
-		TableVariable v6 = new TableVariable("v6", 2);
-		TableVariable v7 = new TableVariable("v7", 2);
+	// CREATE TABLES TO TEST //////////////////////////////////////////////////////////////////////////////////////////
+	
+	TableVariable V1 = new TableVariable("V1", 2);
+	TableVariable V2 = new TableVariable("V2", 3);
+	TableVariable V3 = new TableVariable("V3", 4);
+	TableVariable V4 = new TableVariable("V4", 2);
 
-		TableFactor f1 = new TableFactor(arrayList(v1,v2,v3,v4),
-				arrayList(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.));
-		TableFactor f2 = new TableFactor(arrayList(v4,v3,v5,v2,v7,v6), 
-				arrayList(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,
-						0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,.9,1.));
-		TableFactor f3 = new TableFactor(arrayList(v3), arrayList(0.7,0.8));
-
-		long startTime = System.currentTimeMillis();
-		for (int i = 0; i < 1; i++) {
-			f1.multiply(f2);
-		}
+	TableFactor f1 = new TableFactor("f1",arrayList(V1,V2,V3),
+			arrayList(1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.));
+	TableFactor f2 = new TableFactor("f2",arrayList(V2,V4), 
+			arrayList(11., 12., 21., 22., 31., 32.));
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	@Test
+	public void test() {
 		
-		long endTime = System.currentTimeMillis();
-		println(endTime-startTime);	
+		TableFactor tf = TableFactor.copyToSubTableFactor(f2, arrayList(V4), arrayList(1));
+		println(tf);
 
-		println(f2.sumOut(Util.list(v3)));
-
-		println(f3.sumOut(Util.list(v3)));
-
-		println(f3.sumOut(Util.list()));
+		println();
 	}
 	
-	public static void main(String[] args) {
-		test1();
+	
+	
+	// TEST CASES //////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	@Test
+	public void checkInitialFactors() {
 		
-		try {
-			String fileName = "1a1x.uai";
-			FileReader modelFile = new FileReader(new File("").getAbsolutePath()+"/UAITests/"+fileName );
-			UAIModel model = UAIModelReader.read(modelFile);
-			
-			// Converting the network
-			TableFactorNetwork tn = new TableFactorNetwork(model);
-			Iterator<IdentityWrapper<Factor>> it = tn.getAs().iterator();
-			
-			for (int i = 0; i < 70; i++) {
-				it.next();
-			}
-			
-			println(it.next().getObject().multiply(it.next().getObject()));
-			Factor f = it.next().getObject();
-			println(f);
-			println(f.sumOut(Util.list(f.getVariables().get(0))));
-			println(f.sumOut(f.getVariables()));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		println();
+		println("PRINTING INITIAL FACTORS");
+		println("------------------------");
+		
+		println(f1);
+		assertEquals("f1[{V1:card=2}, {V2:card=3}, {V3:card=4}]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, "
+															   + "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]", f1.toString());
+		println(f2);
+		assertEquals("f2[{V2:card=3}, {V4:card=2}]: [11.0, 12.0, 21.0, 22.0, 31.0, 32.0]", f2.toString());
+
+		println();
 	}
+	
+	
+	
+	@Test
+	public void testMultiplicationf1f2() {
+		
+		println();
+		println("MULTIPLYING f1 * f2");
+		println("-------------------");
+		
+		TableFactor f1f2 = (TableFactor)f1.multiply(f2);
+		f1f2.setName("f1f2");
+		
+		println(f1f2);
+		assertEquals("phi[{V1:card=2}, {V2:card=3}, {V3:card=4}, {V4:card=2}]: [11.0, 12.0, 11.0, 12.0, 11.0, 12.0, 11.0, 12.0, "
+																			 + "21.0, 22.0, 21.0, 22.0, 21.0, 22.0, 21.0, 22.0, "
+																			 + "31.0, 32.0, 31.0, 32.0, 31.0, 32.0, 31.0, 32.0, "
+																			 + "11.0, 12.0, 11.0, 12.0, 11.0, 12.0, 11.0, 12.0, "
+																			 + "21.0, 22.0, 21.0, 22.0, 21.0, 22.0, 21.0, 22.0, "
+																			 + "31.0, 32.0, 31.0, 32.0, 31.0, 32.0, 31.0, 32.0]", f1.multiply(f2).toString());
+		println();
+	}
+	
+	@Test
+	public void testMultiplicationf2f1() {
+		
+		println();
+		println("MULTIPLYING f2 * f1");
+		println("-------------------");
+		
+		TableFactor f2f1 = (TableFactor)f2.multiply(f1);
+		f2f1.setName("f2f1");
+
+		println(f2f1);
+		assertEquals("phi[{V2:card=3}, {V4:card=2}, {V1:card=2}, {V3:card=4}]: [11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, "
+																			 + "12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, "
+																			 + "21.0, 21.0, 21.0, 21.0, 21.0, 21.0, 21.0, 21.0, "
+																			 + "22.0, 22.0, 22.0, 22.0, 22.0, 22.0, 22.0, 22.0, "
+																			 + "31.0, 31.0, 31.0, 31.0, 31.0, 31.0, 31.0, 31.0, "
+																			 + "32.0, 32.0, 32.0, 32.0, 32.0, 32.0, 32.0, 32.0]", f2.multiply(f1).toString());
+		println();
+	}
+	
+	
+	
+	@Test
+	public void testf1SumOutV1() {
+		
+		println();
+		println("SUM OUT V1 from F1");
+		println("------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1);
+		TableFactor f1SumOutV1 = (TableFactor)f1.sumOut(variablesToSumOut);
+		f1SumOutV1.setName("f1SumOutV1");
+		
+		println(f1SumOutV1);
+		assertEquals("f1SumOutV1[{V2:card=3}, {V3:card=4}]: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]", f1SumOutV1.toString());
+		
+		println();
+	}
+	
+	@Test
+	public void testf1SumOutV2() {
+		
+		println();
+		println("SUM OUT V2 from F1");
+		println("------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V2);
+		TableFactor f1SumOutV2 = (TableFactor)f1.sumOut(variablesToSumOut);
+		f1SumOutV2.setName("f1SumOutV2");
+		
+		println(f1SumOutV2);
+		assertEquals("f1SumOutV2[{V1:card=2}, {V3:card=4}]: [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0]", f1SumOutV2.toString());
+		
+		println();
+	}
+	
+	@Test
+	public void testf1SumOutV3() {
+		
+		println();
+		println("SUM OUT V3 from F1");
+		println("------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V3);
+		TableFactor f1SumOutV3 = (TableFactor)f1.sumOut(variablesToSumOut);
+		f1SumOutV3.setName("f1SumOutV3");
+		
+		println(f1SumOutV3);
+		assertEquals("f1SumOutV3[{V1:card=2}, {V2:card=3}]: [4.0, 4.0, 4.0, 4.0, 4.0, 4.0]", f1SumOutV3.toString());
+		
+		println();
+	}
+	
+	public void testf2SumOutV2() {
+		
+		println();
+		println("SUM OUT V2 from F2");
+		println("------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V2);
+		TableFactor f2SumOutV2 = (TableFactor)f2.sumOut(variablesToSumOut);
+		f2SumOutV2.setName("f2SumOutV2");
+		
+		println(f2SumOutV2);
+		assertEquals("f2SumOutV2[{V4:card=2}]: [63.0, 66.0]", f2SumOutV2.toString());
+		
+		println();
+	}
+	
+	public void testf2SumOutV4() {
+		
+		println();
+		println("SUM OUT V4 from F2");
+		println("------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V4);
+		TableFactor f2SumOutV4 = (TableFactor)f2.sumOut(variablesToSumOut);
+		f2SumOutV4.setName("f2SumOutV4");
+		
+		println(f2SumOutV4);
+		assertEquals("f2SumOutV4[{V4:card=2}]: [13.0, 23.0, 33.0]", f2SumOutV4.toString());
+		
+		println();
+	}
+	
+	
+	
+	@Test
+	public void testf1SumOutV1V2() {
+		
+		println();
+		println("SUM OUT V1 and V2 frpm F1");
+		println("-------------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2);
+		TableFactor f1SumOutV1V2 = (TableFactor)f1.sumOut(variablesToSumOut);
+		f1SumOutV1V2.setName("f1SumOutV1V2");
+		
+		println(f1SumOutV1V2);
+		assertEquals("f1SumOutV1V2[{V3:card=4}]: [6.0, 6.0, 6.0, 6.0]", f1SumOutV1V2.toString());
+		
+		println();
+	}
+	
+	@Test
+	public void testf1SumOutV1V3() {
+		
+		println();
+		println("SUM OUT V1 and V3 from F1");
+		println("-------------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V3);
+		TableFactor f1SumOutV1V3 = (TableFactor)f1.sumOut(variablesToSumOut);
+		f1SumOutV1V3.setName("f1SumOutV1V3");
+		
+		println(f1SumOutV1V3);
+		assertEquals("f1SumOutV1V3[{V2:card=3}]: [8.0, 8.0, 8.0]", f1SumOutV1V3.toString());
+		
+		println();
+	}
+	
+	@Test
+	public void testf1SumOutV2V3() {
+		
+		println();
+		println("SUM OUT V2 and V3 from F1");
+		println("-------------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V2,V3);
+		TableFactor f1SumOutV2V3 = (TableFactor)f1.sumOut(variablesToSumOut);
+		f1SumOutV2V3.setName("f1SumOutV2V3");
+		
+		println(f1SumOutV2V3);
+		assertEquals("f1SumOutV2V3[{V1:card=2}]: [12.0, 12.0]", f1SumOutV2V3.toString());
+		
+		println();
+	}
+	
+//	@Test
+//	public void testf1SumOutV1V2V3() {
+//		
+//		println();
+//		println("SUM OUT V1, V2, and V3 from F1");
+//		println("-------------------------------");
+//
+//		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2,V3);
+//		TableFactor f1SumOutV1V2V3 = (TableFactor)f1.sumOut(variablesToSumOut);
+//		f1SumOutV1V2V3.setName("f1SumOutV1V2V3");
+//		
+//		println(f1SumOutV1V2V3);
+//		assertEquals("f1SumOutV1V2V3[{V1:card=2}]: [1]", f1SumOutV1V2V3.toString());
+//		
+//		println();
+//	}
+//	
+//	
+//
+//	public void testf2f1SumOutV1() {
+//		
+//		println();
+//		println("SUM OUT V4 from F2");
+//		println("------------------");
+//
+//		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V4);
+//		TableFactor f2SumOutV4 = (TableFactor)f2.sumOut(variablesToSumOut);
+//		f2SumOutV4.setName("f2SumOutV4");
+//		
+//		println(f2SumOutV4);
+//		assertEquals("f2SumOutV4[{V4:card=2}]: [13.0, 23.0, 33.0]", f2SumOutV4.toString());
+//		
+//		println();
+//	}
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
