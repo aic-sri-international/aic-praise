@@ -1,10 +1,8 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
 
-import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.mapIntoArrayList;
-import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
 import static com.sri.ai.util.Util.setDifference;
 
