@@ -45,10 +45,10 @@ public class PerformanceTest {
 		boolean verbose = false;
 		
 		boolean includeTables = true;
-		boolean includeExpressions = true;
+		boolean includeExpressions = false;
 		
 		int initialNumberOfVariables = 1;
-		int finalNumberOfVariables = includeExpressions? 4 : 9;
+		int finalNumberOfVariables = includeExpressions? 4 : 12;
 		int cardinalityOfAllVariables = 4;
 		double minimumPotential = 0.1;
 		double maximumPotential = 1.0;
@@ -201,7 +201,8 @@ public class PerformanceTest {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		// tablefactor variables to be summed out
-		List<? extends Variable> tablefactorVariablesToBeSummedOut = tablefactor.getVariables();
+		List<? extends Variable> tablefactorVariables = expressionfactor1.getVariables();
+		List<? extends Variable> tablefactorVariablesToBeSummedOut = new ArrayList<>(tablefactorVariables);
 		tablefactorVariablesToBeSummedOut.remove(tablefactorVariablesToBeSummedOut.size()-1);  //remove V4 from list	
 		
 		// expressionfactor1 variables to be summed out
