@@ -40,9 +40,10 @@ public class TableFactor implements Factor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	private String name;
-	private LinkedHashSet<TableVariable> variables;
+	private final ArrayList<TableVariable> variableList;
+	private final LinkedHashSet<TableVariable> variableSet;
 	private ArrayList<Double> parameters;
-	private MixedRadixNumber parameterIndexRadix;
+	private final MixedRadixNumber parameterIndexRadix;
 	private ExplanationTree explanation = DefaultExplanationTree.PLACEHOLDER;	// use currently not supported
 	
 	/*  NOTE:  Understanding the Parameter Order
@@ -70,12 +71,26 @@ public class TableFactor implements Factor {
 	
 	public TableFactor(String factorName, Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
 
-		if(!(variables instanceof LinkedHashSet<?>))
-		{
-			variables = new LinkedHashSet<TableVariable>(variables);
-		}
 		this.name = factorName;
-		this.variables = (LinkedHashSet<TableVariable>) variables;
+		
+		if(variables instanceof LinkedHashSet<?>)
+		{
+			this.variableSet = (LinkedHashSet<TableVariable>) variables;
+		}
+		else
+		{
+			this.variableSet = new LinkedHashSet<TableVariable>(variables);
+		}
+		
+		if(variables instanceof ArrayList<?>)
+		{
+			this.variableList = (ArrayList<TableVariable>) variables;
+		}
+		else
+		{
+			this.variableList = new ArrayList<TableVariable>(variables);
+		}
+
 		this.parameters = parameters;
 		this.parameterIndexRadix = createMixedRadixNumberForIndexingFactorParameters();
 	}
@@ -172,14 +187,14 @@ public class TableFactor implements Factor {
 	
 	@Override
 	public boolean contains(Variable variable) {
-		boolean res = variables.contains(variable);
+		boolean res = variableSet.contains(variable);
 		return res;
 	}
 	
 	
 	@Override
 	public ArrayList<TableVariable> getVariables() {
-		return new ArrayList<TableVariable>(this.variables);
+		return variableList;
 	}
 	
 
@@ -202,7 +217,7 @@ public class TableFactor implements Factor {
 	@Override
 	public String toString() {
 		
-		String factorAsString = name + variables.toString() + ": " + parameters.toString();
+		String factorAsString = name + variableSet.toString() + ": " + parameters.toString();
 		
 		return factorAsString;
 	}
@@ -225,14 +240,14 @@ public class TableFactor implements Factor {
 	
 	
 	/**
-	 * Returns parameter corresponding to given variable assignments
+	 * Returns parameter corresponding to given variable-assignments
 	 * 
 	 * @param variablesAndTheirValues (variables and their value assignments)
 	 * @return parameter corresponding the given variable assignments
 	 */
 	@Override
 	public Double getEntryFor(Map<? extends Variable, ? extends Object> variablesAndTheirValues) {
-		int[] variableValues = getVariableValueIndices(variablesAndTheirValues);
+		int[] variableValues = variableValuesInFactorVariableOrder(variablesAndTheirValues);
 		Double result = getEntryFor(variableValues);
 		return result;
 	}
@@ -242,7 +257,7 @@ public class TableFactor implements Factor {
 		return getEntryFor(variablesAndTheirValues);
 	}
 	
-	public Double getEntryFor(List<? extends Integer> variableValuesInTheRightOrder) {
+	public Double getEntryFor(List<? extends Object> variableValuesInTheRightOrder) {
 		int parameterIndex = getParameterIndex(variableValuesInTheRightOrder);
 		return parameters.get(parameterIndex);
 	}
@@ -263,7 +278,7 @@ public class TableFactor implements Factor {
 		LinkedHashSet<TableVariable> variablesToSumOut = new LinkedHashSet<>((List<TableVariable>) variablesToSumOutList);
 		
 		LinkedHashSet<TableVariable> variablesNotToSumOut = new LinkedHashSet<>();
-		variablesNotToSumOut = (LinkedHashSet<TableVariable>) setDifference(this.variables, variablesToSumOut, variablesNotToSumOut);
+		variablesNotToSumOut = (LinkedHashSet<TableVariable>) setDifference(this.variableSet, variablesToSumOut, variablesNotToSumOut);
 		
 		Factor result;
 		// if every variable is summed out, return the sum of all the parameters in a constant factor
@@ -405,7 +420,7 @@ public class TableFactor implements Factor {
 			for (Double unnormalizedParameter : parameters) {
 				newParameters.add(unnormalizedParameter/normalizationConstant);
 			}
-			normalizedTableFactor = new TableFactor(variables, newParameters);
+			normalizedTableFactor = new TableFactor(variableSet, newParameters);
 		}
 		return normalizedTableFactor;
 	}
@@ -470,7 +485,7 @@ public class TableFactor implements Factor {
 	
 	private MixedRadixNumber createMixedRadixNumberForIndexingFactorParameters()
 	{
-		ArrayList<Integer> listOfVariableCardinalities = mapIntoArrayList(variables, v->v.getCardinality());
+		ArrayList<Integer> listOfVariableCardinalities = mapIntoArrayList(variableList, v->v.getCardinality());
 		
 		return new MixedRadixNumber(BigInteger.ZERO, listOfVariableCardinalities);
 	}
@@ -500,10 +515,10 @@ public class TableFactor implements Factor {
 
 		TableFactor result = new TableFactor(variablesNotToSumOut, 0.0);
 		
-		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(this.variables);
+		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(this.variableList);
 		LinkedHashMap<Variable, Integer> variableValueMap = new LinkedHashMap<>();
 		for(ArrayList<Integer> values: in(cartesianProduct)) {
-			variableValueMap = createVariableValueMap(variableValueMap, values);
+			variableValueMap = addtoVariableValueMap(variableValueMap, values);
 			Double currentValue = result.getEntryFor(variableValueMap);
 			Double addedValue = this.getEntryFor(variableValueMap);
 			result.setEntryFor(variableValueMap, currentValue + addedValue);
@@ -514,8 +529,8 @@ public class TableFactor implements Factor {
 	
 	private TableFactor initializeNewFactorUnioningVariables(TableFactor another)
 	{
-		LinkedHashSet<TableVariable> newListOfVariables = new LinkedHashSet<>(this.variables);
-		newListOfVariables.addAll(another.variables);
+		LinkedHashSet<TableVariable> newListOfVariables = new LinkedHashSet<>(this.variableSet);
+		newListOfVariables.addAll(another.variableSet);
 		Integer numberOfParametersForNewListOfVariables = numEntries(newListOfVariables);
 		ArrayList<Double> newParameters = arrayListFilledWith(-1.0,numberOfParametersForNewListOfVariables);	
 		TableFactor newFactor = new TableFactor(newListOfVariables, newParameters);
@@ -524,20 +539,30 @@ public class TableFactor implements Factor {
 	}
 	
 	
-	private LinkedHashMap<Variable,Integer> createVariableValueMap(LinkedHashMap<Variable,Integer> variableValueMap, ArrayList<Integer> values)
+	private LinkedHashMap<Variable,Integer> addtoVariableValueMap(LinkedHashMap<Variable,Integer> variableValueMap, ArrayList<Integer> values)
 	{
-		int i = 0;
-		for(Variable v : this.variables)
+		int numVars = variableList.size();
+		for(int i = 0; i < numVars; ++i)
 		{
-			variableValueMap.put(v, values.get(i));
-			++i;
+			variableValueMap.put(variableList.get(i), values.get(i));
 		}
+
 		return variableValueMap;
 	}
 
 
-	private int getParameterIndex(Map<? extends Variable, ? extends Object> variableValues) {
-		int[] varValues = getVariableValueIndices(variableValues);
+	/**
+	 * Returns the indices in this.parameters holding the parameter corresponding to the input variables assignments
+	 * <p>
+	 * First, the input Map<Variable,VariableAssignment> is converted into an int[] such that each element's index 
+	 * corresponds to the variables in VariableList and the element values corresponding to the variable assignments.  
+	 * This array is then passed to another overload of this function to obtain the return value.
+	 * 
+	 * @param variableValueMap (a map from a variable to its assigned value)
+	 * @return index position in this.parameters of the parameter corresponding to the variable assignments provided
+	 */
+	private int getParameterIndex(Map<? extends Variable, ? extends Object> variableValueMap) {
+		int[] varValues = variableValuesInFactorVariableOrder(variableValueMap);
 		
 		int parameterIndex = getParameterIndex(varValues);
 		return parameterIndex;
@@ -557,26 +582,15 @@ public class TableFactor implements Factor {
 	}
 	
 	
-	/**
-	 * Returns the index in this.parameters holding the parameter corresponding to the input variable assignments
-	 * <p>
-	 * First, the input Map<Variable,VariableAssignment> is converted into an int[] with indices corresponding 
-	 * to the variables and entries corresponding to the variable assignments.  Then this array is passed as an
-	 * argument to another overload of this function to obtain the value to be returned.
-	 * 
-	 * @param variableValuesInTheRightOrder (Map<Variable,VariableAssignment>)
-	 * @return index position in this.parameters of the parameter corresponding to the variable assignments provided
-	 */
-	private int[] getVariableValueIndices(Map<? extends Variable, ? extends Object> mapFromVariableToVariableValue) {
+	private int[] variableValuesInFactorVariableOrder(Map<? extends Variable, ? extends Object> mapFromVariableToVariableValue) {
 		//TODO: error checking
 		//TODO: there is no mechanism for handling partial variable assignments
-		int numVariables = variables.size();
+		int numVariables = variableList.size();
 		int[] indexOfVariablesValues = new int[numVariables];
-		int i = 0;
-		for(TableVariable v : variables)
+		for(int i = 0; i < numVariables; ++i)
 		{
+			TableVariable v = variableList.get(i);
 			indexOfVariablesValues[i] = (Integer) mapFromVariableToVariableValue.get(v);
-			++i;
 		}
 		return indexOfVariablesValues;
 	}
@@ -589,11 +603,15 @@ public class TableFactor implements Factor {
 	 * 										 corresponding to the variable assignments)
 	 * @return index position in this.parameters of the parameter corresponding to the variable assignments provided
 	 */
-	private int getParameterIndex(List<? extends Integer> variableValuesInTheRightOrder) {
+	private int getParameterIndex(List<? extends Object> variableValuesInTheRightOrder) {
 		int[] variableValuesArray = new int[variableValuesInTheRightOrder.size()];
 		int i = 0;
-		for(int variableValue : variableValuesInTheRightOrder) {
-			variableValuesArray[i] = variableValue;
+		for(Object variableValue : variableValuesInTheRightOrder) {
+			
+			//TODO:  CURRENTLY NOT SUPPORTING VARIABLE VALUES THAT DO NOT RANGE FROM 0 - variableCardinality...  ONCE
+			//		 THIS IS SUPPORTED, NEED TO ADJUST THIS SECTION OF CODE
+			
+			variableValuesArray[i] = (Integer) variableValue;
 			i++;
 		}
 		
@@ -648,11 +666,11 @@ public class TableFactor implements Factor {
 	
 	private TableFactor operateOnUnionedParameters(TableFactor another, TableFactor result, BiFunction<Double, Double, Double> operator)
 	{
-		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(result.variables);
+		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(result.variableSet);
 		
 		LinkedHashMap<Variable, Integer> variableValueMap = new LinkedHashMap<>();
 		for(ArrayList<Integer> values: in(cartesianProduct)) {
-			variableValueMap = result.createVariableValueMap(variableValueMap, values);
+			variableValueMap = result.addtoVariableValueMap(variableValueMap, values);
 			Double product = operator.apply(this.getEntryFor(variableValueMap), another.getEntryFor(variableValueMap));
 			result.setEntryFor(variableValueMap, product);
 		}
