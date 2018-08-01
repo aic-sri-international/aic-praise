@@ -76,6 +76,109 @@ public class FromTableToExpressionFactorConverter {
 		}
 		return result;
 	}
+	
+	
+	
+	
+	
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// BOBAK'S SUGGESTED ADDITIONS / MODIFICATIONS /////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// TODO: Refactor code to enhance modularity and readability                                                                              //
+	// TODO: Refactor original versions of functions to integrate with the new overloads                                                      //
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public ExpressionFactor convert(TableFactor tableFactor, boolean convertAsTreeBasedExpression) {
+		Expression expression = makeExpressionEquivalentToTableFactor(tableFactor, convertAsTreeBasedExpression);
+		Context context = makeContextWithVariablesFrom(tableFactor);
+		ExpressionFactor expressionFactor = new DefaultExpressionFactor(expression, context);
+		return expressionFactor;
+	}
+	
+	
+	private Expression makeExpressionEquivalentToTableFactor(TableFactor tableFactor, boolean convertAsTreeBasedExpression) {
+		List<Integer> cardinalities = mapIntoArrayList(tableFactor.getVariables(), TableVariable::getCardinality);
+		CartesianProductIterator<Integer> assignmentsIterator = makeAssignmentsIterator(cardinalities);
+		Expression expression;
+		if(convertAsTreeBasedExpression)
+		{
+			int startingVariableIndex = 0;
+			expression = ifThenElseTreeExpressionFromCurrentPositionOf(assignmentsIterator, tableFactor, startingVariableIndex);
+		}
+		else
+		{
+			expression = ifThenElseExpressionFromCurrentPositionOf(assignmentsIterator, tableFactor);
+		}
+		return expression;
+	}
+	
+	
+	private Expression ifThenElseTreeExpressionFromCurrentPositionOf(CartesianProductIterator<Integer> assignmentsIterator, TableFactor tableFactor, int variableIndex) {
+		myAssert(assignmentsIterator.hasNext(), () -> "ifThenElseExpressionFromCurrentPositionOf: requires assignmentsIterator to be non-empty");
+		
+		ArrayList<TableVariable> variables = tableFactor.getVariables();
+		int varCardinality = variables.get(variableIndex).getCardinality();
+		int nextVariableIndex = variableIndex + 1;
+		
+		ArrayList<Expression> subBranchExpressions = new ArrayList<>(varCardinality);
+		if(variableIndex == variables.size()-1)
+		{
+			for(int i = 0; i < varCardinality; ++i)
+			{
+				ArrayList<Integer> assignment = assignmentsIterator.next();
+				Double potentialForAssignment = tableFactor.getEntryFor(assignment);
+				Expression potentialExpression = createSymbol(potentialForAssignment);
+				subBranchExpressions.add(potentialExpression);
+			}
+		}
+		else
+		{
+			for(int i = 0; i < varCardinality; ++i)
+			{
+				Expression branchExpression = ifThenElseTreeExpressionFromCurrentPositionOf(assignmentsIterator, tableFactor, nextVariableIndex);
+				subBranchExpressions.add(branchExpression);
+			}
+		}
+
+		int firstAssignmentValue = 0;
+		TableVariable variable = variables.get(variableIndex);
+		Expression result = combineVariableSubBranchExpressionsIntoIfElseIFElse(variable, firstAssignmentValue, subBranchExpressions);
+		
+		return result;
+	}
+	
+	
+	private Expression combineVariableSubBranchExpressionsIntoIfElseIFElse(TableVariable variable, int assignment, ArrayList<Expression> subBranchExpressions)
+	{
+		Expression result;
+		if(assignment == subBranchExpressions.size() - 1)
+		{
+			result = subBranchExpressions.get(assignment);
+		}
+		else
+		{
+			Expression assignmentTestExpression = makeComparisonToAssignedValue(variable, assignment);
+			Expression elseExpression = combineVariableSubBranchExpressionsIntoIfElseIFElse(variable, ++assignment, subBranchExpressions);
+			result = IfThenElse.make(assignmentTestExpression, subBranchExpressions.get(assignment), elseExpression);
+		}
+		return result;
+	}
+
+	
+	private Expression makeComparisonToAssignedValue(TableVariable tableVariable, int assignment) {
+		Symbol assignedValueExpression = createSymbol(assignment);
+		Symbol variableExpression = makeVariableExpression(tableVariable);
+		Expression result = Equality.make(variableExpression, assignedValueExpression);
+		return result;
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+
+	
+	
+	
 
 	private Expression makeAssignmentTestExpression(List<TableVariable> tableVariables, ArrayList<Integer> assignment) {
 		ArrayList<Expression> individualVariableConditions = mapIntegersIntoArrayList(assignment.size(), i -> makeComparisonToAssignedValue(i, tableVariables, assignment));
@@ -119,7 +222,7 @@ public class FromTableToExpressionFactorConverter {
 
 	Expression makeTypeExpression(TableVariable tableVariable) {
 		int cardinality = tableVariable.getCardinality();
-		Expression typeExpression = new IntegerInterval(0, cardinality).toExpression();
+		Expression typeExpression = new IntegerInterval(0, cardinality-1).toExpression();
 		return typeExpression;
 	}
 
