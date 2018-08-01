@@ -9,10 +9,13 @@ import static com.sri.ai.util.Util.print;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 
+import static java.lang.Math.min;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+
 
 import org.junit.Test;
 
@@ -45,10 +48,10 @@ public class PerformanceTest {
 		boolean verbose = false;
 		
 		boolean includeTables = true;
-		boolean includeExpressions = false;
+		boolean includeExpressions = true;
 		
 		int initialNumberOfVariables = 1;
-		int finalNumberOfVariables = includeExpressions? 4 : 12;
+		int finalNumberOfVariables = includeExpressions? 4 : 9;
 		int cardinalityOfAllVariables = 4;
 		double minimumPotential = 0.1;
 		double maximumPotential = 1.0;
@@ -157,41 +160,67 @@ public class PerformanceTest {
 		tablefactor.setName("tablefactor");
 		
 
-		// ExpressionFactor that uses if/else binary branching  (expressionfactor1)
-		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(
-				"V1", "1..2",
-				"V2", "1..2",
-				"V3", "1..2",
-				"V4", "1..2");
-		
-		ExpressionFactor expressionfactor1 = new DefaultExpressionFactor(parse(""
-															+ "if V1 = 1 then "
-																+ "if V2 = 1 then "
-																	+ "if V3 = 1 then "
-																		+ "if V4 = 1 then 1 else 1 "
-																	+ "else "
-																		+ "if V4 = 1 then 1 else 1 "
-																+ "else "
-																	+ "if V3 = 1 then "
-																		+ "if V4 = 1 then 1 else 1 "
-																	+ "else "
-																		+ "if V4 = 1 then 1 else 1 "
-															+ "else "
-																+ "if V2 = 1 then "
-																	+ "if V3 = 1 then "
-																		+ "if V4 = 1 then 1 else 1 "
-																	+ "else "
-																		+ "if V4 = 1 then 1 else 1 "
-																+ "else "
-																	+ "if V3 = 1 then "
-																		+ "if V4 = 1 then 1 else 1 "
-																	+ "else "
-																		+ "if V4 = 1 then 1 else 1"), context);
 
-
-		// ExpressionFactor that is effectively a linear table  (expressionfactor2)
+		// Converter and context for creating ExpressionFactor
 		FromTableToExpressionFactorConverter fromTableToExpressionFactorConverter = new FromTableToExpressionFactorConverter(THEORY);
-		ExpressionFactor expressionfactor2 = fromTableToExpressionFactorConverter.convert(tablefactor);
+		Context context = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes(
+				"V1", "0..1",
+				"V2", "0..1",
+				"V3", "0..1",
+				"V4", "0..1");
+		
+		
+		// ExpressionFactor that uses if/else binary branching  (expressionfactor1)
+		ExpressionFactor expressionfactor1 = new DefaultExpressionFactor(parse(""
+															+ "if V1 = 0 then "
+																+ "if V2 = 0 then "
+																	+ "if V3 = 0 then "
+																		+ "if V4 = 0 then 1 else 1 "
+																	+ "else "
+																		+ "if V4 = 0 then 1 else 1 "
+																+ "else "
+																	+ "if V3 = 0 then "
+																		+ "if V4 = 0 then 1 else 1 "
+																	+ "else "
+																		+ "if V4 = 0 then 1 else 1 "
+															+ "else "
+																+ "if V2 = 0 then "
+																	+ "if V3 = 0 then "
+																		+ "if V4 = 0 then 1 else 1 "
+																	+ "else "
+																		+ "if V4 = 0 then 1 else 1 "
+																+ "else "
+																	+ "if V3 = 0 then "
+																		+ "if V4 = 0 then 1 else 1 "
+																	+ "else "
+																		+ "if V4 = 0 then 1 else 1"), context);
+
+
+
+		ExpressionFactor expressionfactor2 = fromTableToExpressionFactorConverter.convert(tablefactor, true);
+		
+		
+		// ExpressionFactor that is effectively a linear table  (expressionfactor3)
+		ExpressionFactor expressionfactor3 = new DefaultExpressionFactor(parse(""
+															+ "if (V1 = 0) and (V2 = 0) and (V3 = 0) and (V4 = 0) then 1 "
+															+ "else if (V1 = 0) and (V2 = 0) and (V3 = 0) and (V4 = 1) then 1 "
+															+ "else if (V1 = 0) and (V2 = 0) and (V3 = 1) and (V4 = 0) then 1 "
+															+ "else if (V1 = 0) and (V2 = 0) and (V3 = 1) and (V4 = 1) then 1 "
+															+ "else if (V1 = 0) and (V2 = 1) and (V3 = 0) and (V4 = 0) then 1 "
+															+ "else if (V1 = 0) and (V2 = 1) and (V3 = 0) and (V4 = 1) then 1 "
+															+ "else if (V1 = 0) and (V2 = 1) and (V3 = 1) and (V4 = 0) then 1 "
+															+ "else if (V1 = 0) and (V2 = 1) and (V3 = 1) and (V4 = 1) then 1 "
+															+ "else if (V1 = 1) and (V2 = 0) and (V3 = 0) and (V4 = 0) then 1 "
+															+ "else if (V1 = 1) and (V2 = 0) and (V3 = 0) and (V4 = 1) then 1 "
+															+ "else if (V1 = 1) and (V2 = 0) and (V3 = 1) and (V4 = 0) then 1 "
+															+ "else if (V1 = 1) and (V2 = 0) and (V3 = 1) and (V4 = 1) then 1 "
+															+ "else if (V1 = 1) and (V2 = 1) and (V3 = 0) and (V4 = 0) then 1 "
+															+ "else if (V1 = 1) and (V2 = 1) and (V3 = 0) and (V4 = 1) then 1 "
+															+ "else if (V1 = 1) and (V2 = 1) and (V3 = 1) and (V4 = 0) then 1 "
+															+ "else 1"), context);
+		
+		// ExpressionFactor that is effectively a linear table  (expressionfactor2)
+		ExpressionFactor expressionfactor4 = fromTableToExpressionFactorConverter.convert(tablefactor, false);
 		
 		
 		
@@ -215,6 +244,16 @@ public class PerformanceTest {
 		List<? extends Variable> expressionfactor2VariablesToBeSummedOut = new ArrayList<>(expressionfactor2Variables);
 		expressionfactor2VariablesToBeSummedOut.remove(expressionfactor2VariablesToBeSummedOut.size()-1);  //remove V4 from list	
 		
+		// expressionfactor3 variables to be summed out
+		List<? extends Variable> expressionfactor3Variables = expressionfactor3.getVariables();
+		List<? extends Variable> expressionfactor3VariablesToBeSummedOut = new ArrayList<>(expressionfactor3Variables);
+		expressionfactor3VariablesToBeSummedOut.remove(expressionfactor3VariablesToBeSummedOut.size()-1);  //remove V4 from list	
+		
+		// expressionfactor4 variables to be summed out
+		List<? extends Variable> expressionfactor4Variables = expressionfactor4.getVariables();
+		List<? extends Variable> expressionfactor4VariablesToBeSummedOut = new ArrayList<>(expressionfactor4Variables);
+		expressionfactor4VariablesToBeSummedOut.remove(expressionfactor4VariablesToBeSummedOut.size()-1);  //remove V4 from list	
+		
 		
 		
 		
@@ -225,8 +264,22 @@ public class PerformanceTest {
 		final int N = 1;
 		
 		long tablefactortime = Timer.time(() -> repeatNtimes(() -> tablefactor.sumOut(tablefactorVariablesToBeSummedOut), N));
-		long expressionfactor1time = Timer.time(() -> repeatNtimes(() -> expressionfactor1.sumOut(expressionfactor1VariablesToBeSummedOut), N));
-		long expressionfactor2time = Timer.time(() -> repeatNtimes(() -> expressionfactor2.sumOut(expressionfactor2VariablesToBeSummedOut), N));
+		
+		long expressionfactor1timeA = Timer.time(() -> repeatNtimes(() -> expressionfactor1.sumOut(expressionfactor1VariablesToBeSummedOut), N));
+		long expressionfactor1timeB = Timer.time(() -> repeatNtimes(() -> expressionfactor1.sumOut(expressionfactor1VariablesToBeSummedOut), N));
+		long expressionfactor1time = min(expressionfactor1timeA, expressionfactor1timeB);
+		
+		long expressionfactor2timeA = Timer.time(() -> repeatNtimes(() -> expressionfactor2.sumOut(expressionfactor2VariablesToBeSummedOut), N));
+		long expressionfactor2timeB = Timer.time(() -> repeatNtimes(() -> expressionfactor2.sumOut(expressionfactor2VariablesToBeSummedOut), N));
+		long expressionfactor2time = min(expressionfactor2timeA, expressionfactor2timeB);
+		
+		long expressionfactor3timeA = Timer.time(() -> repeatNtimes(() -> expressionfactor3.sumOut(expressionfactor3VariablesToBeSummedOut), N));
+		long expressionfactor3timeB = Timer.time(() -> repeatNtimes(() -> expressionfactor3.sumOut(expressionfactor3VariablesToBeSummedOut), N));
+		long expressionfactor3time = min(expressionfactor3timeA, expressionfactor3timeB);
+		
+		long expressionfactor4timeA = Timer.time(() -> repeatNtimes(() -> expressionfactor4.sumOut(expressionfactor4VariablesToBeSummedOut), N));
+		long expressionfactor4timeB = Timer.time(() -> repeatNtimes(() -> expressionfactor4.sumOut(expressionfactor4VariablesToBeSummedOut), N));
+		long expressionfactor4time = min(expressionfactor4timeA, expressionfactor4timeB);
 		
 		
 		
@@ -240,6 +293,8 @@ public class PerformanceTest {
 		println(tablefactor);
 		println("expressionfactor1: " + expressionfactor1);
 		println("expressionfactor2: " + expressionfactor2);
+		println("expressionfactor3: " + expressionfactor3);
+		println("expressionfactor4: " + expressionfactor4);
 		println();
 		
 		println("SUMMING OUT TIMES");
@@ -250,17 +305,21 @@ public class PerformanceTest {
 			println("\tphi: " + expressionfactor1.sumOut(expressionfactor1VariablesToBeSummedOut));
 		println("expressionfactor2 SumOut time: " + expressionfactor2time+"ms");
 			println("\tphi: " + expressionfactor2.sumOut(expressionfactor2VariablesToBeSummedOut));
-		println();
-	
+		println("expressionfactor3 SumOut time: " + expressionfactor3time+"ms");
+			println("\tphi: " + expressionfactor3.sumOut(expressionfactor3VariablesToBeSummedOut));
+		println("expressionfactor4 SumOut time: " + expressionfactor4time+"ms");
+			println("\tphi: " + expressionfactor4.sumOut(expressionfactor4VariablesToBeSummedOut));
+		println();	
 	}
 	
 	
-	public static <T> boolean repeatNtimes(NullaryFunction<T> procedure, int N) {
-		for(int i = 0; i < N; ++i)
+	public static <T> int repeatNtimes(NullaryFunction<T> procedure, int N) {
+		int i = 0;
+		for(; i < N; ++i)
 		{
 			procedure.apply();
 		}
-		return true;
+		return i;
 	}
 	
 }
