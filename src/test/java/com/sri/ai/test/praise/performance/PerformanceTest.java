@@ -9,6 +9,8 @@ import static com.sri.ai.util.Util.print;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.RandomTableFactorMaker.TableFactorSpecs;
+
 import static java.lang.Math.min;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.Random;
 
 
 import org.junit.Test;
+import org.omg.CORBA.PRIVATE_MEMBER;
 
 import com.google.common.base.Function;
 import com.sri.ai.grinder.api.Context;
@@ -37,112 +40,93 @@ import com.sri.ai.util.base.NullaryFunction;
 
 public class PerformanceTest {
 
-
 	private static final Theory THEORY = new DifferenceArithmeticTheory(false, true);
+	private static final int TABLEFACTORINDEX = 0;
+	private static final int EXPRESSIONFACTORINDEX = 1;
+	
+	
+	private static final Function<Integer, String> fromVariableIndexToName = i -> "X" + i;
+	
+	private static final Random random = new Random();
+	private static final FromTableToExpressionFactorConverter fromTableToExpressionFactorConverter = new FromTableToExpressionFactorConverter(THEORY);
+
+	private static final boolean verbose = false;
+	private static final boolean includeTables = true;
+	private static final boolean includeExpressions = true;
+	
+	private static final int numberOfVariablesPerFactor = 4;
+	private static final int cardinalityOfEachVariable = 4;
+	private static final double minimumPotential = 0.1;
+	private static final double maximumPotential = 1.0;
+	
+	private static final TableFactorSpecs globalTableFactorSpecs = new TableFactorSpecs( 
+																fill(numberOfVariablesPerFactor, cardinalityOfEachVariable), //ArrayList of variable cardinalities
+																minimumPotential,
+																maximumPotential);
 
 	@Test
-	public void test() {
-		
-		Random random = new Random(0);
-		
-		boolean verbose = false;
-		
-		boolean includeTables = true;
-		boolean includeExpressions = true;
-		
-		int initialNumberOfVariables = 1;
-		int finalNumberOfVariables = includeExpressions? 4 : 9;
-		int cardinalityOfAllVariables = 4;
-		double minimumPotential = 0.1;
-		double maximumPotential = 1.0;
-
-		FromTableToExpressionFactorConverter fromTableToExpressionFactorConverter = new FromTableToExpressionFactorConverter(THEORY);
-		
-		Collection<? extends ArrayList<Integer>> cardinalitiesSet = 
-				makeCardinalitiesSetByVaryingNumberOfVariables(
-						initialNumberOfVariables, finalNumberOfVariables, cardinalityOfAllVariables);
+	public void varyingNumberOfVariables() {
 		
 		verboseMessage(verbose);
 		
-		for (ArrayList<Integer> cardinalities : cardinalitiesSet) {
-			
-			Function<Integer, String> fromVariableIndexToName = i -> "X" + i;
-			TableFactor tableFactor = makeRandomTableFactor(cardinalities, minimumPotential, maximumPotential, fromVariableIndexToName, random);
-			long timeForEliminatingHalfOfVariablesFromTableFactor = 0;
-			if (includeTables) {
-				timeForEliminatingHalfOfVariablesFromTableFactor = timeEliminationOfFirstHalfOfVariables(tableFactor);
-			}
-			
-			ExpressionFactor expressionFactor = null;
-			long timeForEliminatingHalfOfVariablesFromExpressionFactor = 0;
-			if (includeExpressions) {
-				expressionFactor = fromTableToExpressionFactorConverter.convert(tableFactor);
-				timeForEliminatingHalfOfVariablesFromExpressionFactor = timeEliminationOfFirstHalfOfVariables(expressionFactor);
-			}
-			
-			int numberOfVariables = cardinalities.size();
-			
-			if (verbose) {
-				println("For eliminating half of " + numberOfVariables + " variables:");
-				println("    Random table factor         : " + tableFactor);
-				if (includeExpressions) {
-					println("    Equivalent expression factor: " + expressionFactor);
-				}
-				println("    Time for eliminating half the variables:");
-				if (includeTables) {
-					println("    Table      representation: " + timeForEliminatingHalfOfVariablesFromTableFactor + " ms");
-				}
-				if (includeExpressions) {
-					println("    Expression representation: " + timeForEliminatingHalfOfVariablesFromExpressionFactor + " ms");
-				}
-				println();
-			}
-			else {
-				print("For eliminating half of " + numberOfVariables + " variables");
-				if (includeTables) {
-					print(", table: " + timeForEliminatingHalfOfVariablesFromTableFactor + " ms");
-				}
-				if (includeExpressions) {
-					print(", expression: " + timeForEliminatingHalfOfVariablesFromExpressionFactor + " ms");
-				}
-				println();
-			}
-		}
-	}
-
-	private static Collection<? extends ArrayList<Integer>> makeCardinalitiesSetByVaryingNumberOfVariables(
-			int initialNumberOfVariables, int finalNumberOfVariables, int cardinalityOfAllVariables) {
+		int initialNumberOfVariables = 1;
+		int finalNumberOfVariables = includeExpressions? 4 : 10;
 		
-		List<ArrayList<Integer>> result = 
-				mapIntegersIntoArrayList(initialNumberOfVariables, finalNumberOfVariables + 1, i -> fill(i, cardinalityOfAllVariables));
-		return result;
-	}
+		
+		TableFactorSpecs tableFactorSpecs = new TableFactorSpecs(globalTableFactorSpecs);
+		for (int numberOfVariables = initialNumberOfVariables; numberOfVariables <= finalNumberOfVariables; ++numberOfVariables) {
+			
+			tableFactorSpecs.cardinalities = fill(numberOfVariables, cardinalityOfEachVariable);
 
-	private void verboseMessage(boolean verbose) {
-		if (verbose) {
-			println("Verbose mode on (set local variable in test for disabling it)");
-		}
-		else {
-			println("Verbose mode off (set local variable in test for enabling it)");
+			TableFactor tableFactor = makeRandomTableFactor(tableFactorSpecs, fromVariableIndexToName, random);
+			ExpressionFactor expressionFactor = includeExpressions ? fromTableToExpressionFactorConverter.convert(tableFactor) : null;
+			
+			
+			ArrayList<Long> sumOutTimes = calculateTimesForSummingOutFirstHalfOfVariables(tableFactor, expressionFactor);
+			
+			
+			print("For eliminating half of " + numberOfVariables + " variables");
+			printTimes(sumOutTimes, tableFactor, expressionFactor);
 		}
 		println();
 	}
 
-	private long timeEliminationOfFirstHalfOfVariables(Factor factor) {
-		long time = Timer.time(() -> eliminateFirstHalfOfVariables(factor));
-		return time;
-	}
+	
+	
+	
+	@Test
+	public void varyingCardinalityOfVariables() {
+		
+		verboseMessage(verbose);
+		
+		int initialVariableCardinality = 1;
+		int finalVariableCardinality = includeExpressions? 5 : 10;
+		
+		
+		TableFactorSpecs tableFactorSpecs = new TableFactorSpecs(globalTableFactorSpecs);
+		for (int cardinality = initialVariableCardinality; cardinality <= finalVariableCardinality; ++cardinality) {
+			
+			tableFactorSpecs.cardinalities = fill(numberOfVariablesPerFactor, cardinality);
 
-	private Factor eliminateFirstHalfOfVariables(Factor factor) {
-		List<? extends Variable> variablesToBeEliminated = getFirstHalfSubList(factor.getVariables());
-		Factor result = factor.sumOut(variablesToBeEliminated);
-		return result;
+			TableFactor tableFactor = makeRandomTableFactor(tableFactorSpecs, fromVariableIndexToName, random);
+			ExpressionFactor expressionFactor = includeExpressions ? fromTableToExpressionFactorConverter.convert(tableFactor) : null;
+			
+			
+			ArrayList<Long> sumOutTimes = calculateTimesForSummingOutFirstHalfOfVariables(tableFactor, expressionFactor);
+			
+			
+			print("For variables with cardinality of " + cardinality);
+			printTimes(sumOutTimes, tableFactor, expressionFactor);
+		}
+		println();
+			
+
+
 	}
 	
 	
 	
 	
-
 	@Test
 	public void testDifferentExpressionFactorRepresentationsOfATableFactor()
 	{
@@ -311,6 +295,88 @@ public class PerformanceTest {
 			println("\tphi: " + expressionfactor4.sumOut(expressionfactor4VariablesToBeSummedOut));
 		println();	
 	}
+	
+
+	
+	
+	
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS ////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	private static void printTimes(ArrayList<Long> times, TableFactor tableFactor, ExpressionFactor expressionFactor)
+	{		
+		if (verbose) {
+			println();
+			println("    Random table factor         : " + tableFactor);
+			if (includeExpressions) {
+				println("    Equivalent expression factor: " + expressionFactor);
+			}
+			println("    Time for eliminating half the variables:");
+			if (includeTables) {
+				println("    Table      representation: " + times.get(TABLEFACTORINDEX) + " ms");
+			}
+			if (includeExpressions) {
+				println("    Expression representation: " + times.get(EXPRESSIONFACTORINDEX) + " ms");
+			}
+			println();
+		}
+		else {
+			if (includeTables) {
+				print(", table: " + times.get(TABLEFACTORINDEX) + " ms");
+			}
+			if (includeExpressions) {
+				print(", expression: " + times.get(EXPRESSIONFACTORINDEX) + " ms");
+			}
+			println();
+		}
+	}
+	
+	private static ArrayList<Long> calculateTimesForSummingOutFirstHalfOfVariables(TableFactor tableFactor, ExpressionFactor expressionFactor)
+	{
+		ArrayList<Long> sumOutTimes = new ArrayList<>(2);
+		sumOutTimes.add(-1l);
+		sumOutTimes.add(-1l);
+		
+		if (includeTables) {
+			sumOutTimes.set(TABLEFACTORINDEX, timeSummingOutOfFirstHalfOfVariables(tableFactor));
+		}
+		if (includeExpressions) {
+			sumOutTimes.set(EXPRESSIONFACTORINDEX, timeSummingOutOfFirstHalfOfVariables(expressionFactor));
+		}
+		
+		return sumOutTimes;
+	}
+	
+	private static Collection<? extends ArrayList<Integer>> makeCardinalitiesSetByVaryingNumberOfVariables(
+			int initialNumberOfVariables, int finalNumberOfVariables, int cardinalityOfAllVariables) {
+		
+		List<ArrayList<Integer>> result = 
+				mapIntegersIntoArrayList(initialNumberOfVariables, finalNumberOfVariables + 1, i -> fill(i, cardinalityOfAllVariables));
+		return result;
+	}
+
+	private static void verboseMessage(boolean verbose) {
+		if (verbose) {
+			println("Verbose mode on (set local variable in test for disabling it)");
+		}
+		else {
+			println("Verbose mode off (set local variable in test for enabling it)");
+		}
+		println();
+	}
+
+	private static long timeSummingOutOfFirstHalfOfVariables(Factor factor) {
+		long time = Timer.time(() -> sumOutFirstHalfOfVariables(factor));
+		return time;
+	}
+
+	private static Factor sumOutFirstHalfOfVariables(Factor factor) {
+		List<? extends Variable> variablesToBeEliminated = getFirstHalfSubList(factor.getVariables());
+		Factor result = factor.sumOut(variablesToBeEliminated);
+		return result;
+	}
+	
 	
 	
 	public static <T> int repeatNtimes(NullaryFunction<T> procedure, int N) {
