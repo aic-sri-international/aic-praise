@@ -11,6 +11,30 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.Ta
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 
 public class RandomTableFactorMaker {
+	
+	public static class TableFactorSpecs{
+		public ArrayList<Integer> cardinalities;
+		public double minimumPotential;
+		public double maximumPotential;
+		
+		public TableFactorSpecs(ArrayList<Integer> cardinalities, double minimumPotential, double maximumPotential)
+		{
+			this.cardinalities = cardinalities;
+			this.minimumPotential = minimumPotential;
+			this.maximumPotential = maximumPotential;
+		}
+		
+		public TableFactorSpecs(TableFactorSpecs toCopy)
+		{
+			cardinalities = new ArrayList<>(toCopy.cardinalities.size());
+			for(Integer cardinality : toCopy.cardinalities)
+			{
+				this.cardinalities.add(new Integer(cardinality));
+			}
+			this.minimumPotential = toCopy.minimumPotential;
+			this.maximumPotential = toCopy.maximumPotential;
+		}
+	}	
 
 	public static TableFactor makeRandomTableFactor(
 			ArrayList<Integer> cardinalities, double minimumPotential, double maximumPotential, Function<Integer, String> fromVariableIndexToName, Random random) {
@@ -20,6 +44,12 @@ public class RandomTableFactorMaker {
 		TableFactor tableFactor = new TableFactor(variables, entries);
 		return tableFactor;
 	}
+	
+	public static TableFactor makeRandomTableFactor(TableFactorSpecs specs, Function<Integer, String> fromVariableIndexToName, Random random)
+	{
+		return makeRandomTableFactor(specs.cardinalities, specs.minimumPotential, specs.maximumPotential, fromVariableIndexToName, random);
+	}
+
 
 	private static ArrayList<TableVariable> makeVariables(ArrayList<Integer> cardinalities, Function<Integer, String> fromVariableIndexToName) {
 		int numberOfVariables = cardinalities.size();
