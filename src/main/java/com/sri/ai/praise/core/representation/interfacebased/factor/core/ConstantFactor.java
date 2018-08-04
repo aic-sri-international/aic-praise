@@ -31,6 +31,11 @@ public class ConstantFactor implements Factor {
 		constant = c;
 	}
 	
+	@Override
+	public String toString() {
+		return constant.toString();
+	}
+
 	public Double getConstant() {
 		return constant;
 	}
