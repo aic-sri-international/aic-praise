@@ -82,6 +82,8 @@ public interface Factor {
 	
 	Factor add(Factor another);
 	
+	String toString();
+	
 	static Factor add(Iterator<? extends Factor> factors) {
 		Factor result = accumulate(factors, Factor::add, ZERO_FACTOR);
 		return result;
