@@ -213,15 +213,6 @@ public class TableFactor implements Factor {
 		return true;
 	}
 	
-	
-	@Override
-	public String toString() {
-		
-		String factorAsString = name + variableSet.toString() + ": " + parameters.toString();
-		
-		return factorAsString;
-	}
-	
 
 	/**
 	 * Normalizes factor so that the overall sum of all parameters together = 1.0
@@ -405,6 +396,15 @@ public class TableFactor implements Factor {
 	
 	
 	// TABLEFACTOR-SPECIFIC METHODS /////////////////////////////////////////////////////////////////////
+	
+	@Override
+	public String toString() {
+		
+		String factorAsString = name + variableSet.toString() + ": " + parameters.toString();
+		
+		return factorAsString;
+	}
+	
 	
 	public void reinitializeEntries(Double defaultValue) {
 		this.parameters = arrayListFilledWith(defaultValue, parameters.size());
