@@ -2,9 +2,12 @@ package com.sri.ai.test.praise.core.inference.representation.table;
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.print;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+
+import org.apache.jena.ext.com.google.common.annotations.VisibleForTesting;
 import org.junit.Test;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -235,40 +238,99 @@ public class TableFactorTest {
 		println();
 	}
 	
-//	@Test
-//	public void testf1SumOutV1V2V3() {
-//		
-//		println();
-//		println("SUM OUT V1, V2, and V3 from F1");
-//		println("-------------------------------");
-//
-//		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2,V3);
-//		TableFactor f1SumOutV1V2V3 = (TableFactor)f1.sumOut(variablesToSumOut);
-//		f1SumOutV1V2V3.setName("f1SumOutV1V2V3");
-//		
-//		println(f1SumOutV1V2V3);
-//		assertEquals("f1SumOutV1V2V3[{V1:card=2}]: [1]", f1SumOutV1V2V3.toString());
-//		
-//		println();
-//	}
-//	
-//	
-//
-//	public void testf2f1SumOutV1() {
-//		
-//		println();
-//		println("SUM OUT V4 from F2");
-//		println("------------------");
-//
-//		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V4);
-//		TableFactor f2SumOutV4 = (TableFactor)f2.sumOut(variablesToSumOut);
-//		f2SumOutV4.setName("f2SumOutV4");
-//		
-//		println(f2SumOutV4);
-//		assertEquals("f2SumOutV4[{V4:card=2}]: [13.0, 23.0, 33.0]", f2SumOutV4.toString());
-//		
-//		println();
-//	}
+	
+	
+	@Test
+	public void testf1SumOutV1V2V3() {
+		
+		println();
+		println("SUM OUT V1, V2, and V3 from F1");
+		println("-------------------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2,V3);
+		ConstantFactor f1SumOutV1V2V3 = (ConstantFactor) f1.sumOut(variablesToSumOut);
+		//f1SumOutV1V2V3.setName("f1SumOutV1V2V3");  cannot set name of a [now] ConstantFactor
+		
+		print("f1SumOutV1V2V3: "); println(f1SumOutV1V2V3);
+		assertEquals("24.0", f1SumOutV1V2V3.toString());
+		
+		println();
+	}
+	
+	@Test
+	public void testf2SumOutV2V4() {
+		
+		println();
+		println("SUM OUT V2 and V4 from F2");
+		println("-------------------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V2,V4);
+		ConstantFactor f2SumOutV2V4 = (ConstantFactor) f2.sumOut(variablesToSumOut);
+		//f1SumOutV1V2V3.setName("f1SumOutV1V2V3");  cannot set name of a [now] ConstantFactor
+		
+		print("f2SumOutV2V4: "); println(f2SumOutV2V4);
+		assertEquals("129.0", f2SumOutV2V4.toString());
+		
+		println();
+	}
+	
+	
+	
+	@Test
+	public void testf2f1SumOutV1() {
+		
+		println();
+		println("SUM OUT V1 from F2*F1");
+		println("------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1);
+		TableFactor f2f1SumOutV1 = (TableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
+		f2f1SumOutV1.setName("f2f1SumOutV1");
+		
+		println(f2f1SumOutV1);
+		assertEquals("f2f1SumOutV1[{V2:card=3}, {V4:card=2}, {V3:card=4}]: [22.0, 22.0, 22.0, 22.0, "
+																		 + "24.0, 24.0, 24.0, 24.0, "
+																		 + "42.0, 42.0, 42.0, 42.0, "
+																		 + "44.0, 44.0, 44.0, 44.0, "
+																		 + "62.0, 62.0, 62.0, 62.0, "
+																		 + "64.0, 64.0, 64.0, 64.0]", f2f1SumOutV1.toString());
+		
+		println();
+	}
+	
+	@Test
+	public void testf2f1SumOutV1V2() {
+		
+		println();
+		println("SUM OUT V1 and V2 from F2*F1");
+		println("------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2);
+		TableFactor f2f1SumOutV1V2 = (TableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
+		f2f1SumOutV1V2.setName("f2f1SumOutV1V2");
+		
+		println(f2f1SumOutV1V2);
+		assertEquals("f2f1SumOutV1V2[{V4:card=2}, {V3:card=4}]: [126.0, 126.0, 126.0, 126.0, 132.0, 132.0, 132.0, 132.0]", f2f1SumOutV1V2.toString());
+		
+		println();
+	}
+	
+	@Test
+	public void testf2f1SumOutV1V2V3() {
+		
+		println();
+		println("SUM OUT V1, V2, and V3 from F2*F1");
+		println("------------------");
+
+		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2,V3);
+		TableFactor f2f1SumOutV1V2V3 = (TableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
+		f2f1SumOutV1V2V3.setName("f2f1SumOutV1V2");
+		
+		println(f2f1SumOutV1V2V3);
+		assertEquals("f2f1SumOutV1V2[{V4:card=2}]: [504.0, 528.0]", f2f1SumOutV1V2V3.toString());
+		
+		println();
+	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
