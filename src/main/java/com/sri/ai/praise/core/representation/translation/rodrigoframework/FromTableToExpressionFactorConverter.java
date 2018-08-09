@@ -80,13 +80,11 @@ public class FromTableToExpressionFactorConverter {
 	
 	
 	
-	
-	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// BOBAK'S SUGGESTED ADDITIONS / MODIFICATIONS /////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// TODO: Refactor code to enhance modularity and readability                                                                              //
-	// TODO: Refactor original versions of functions to integrate with the new overloads                                                      //
+	// TODO: this suggested code has not yet been refactored to enhance modularity and readability                                                                              //
+	// TODO: refactor/remove original versions of functions to integrate with the new overloads                                                      //
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public ExpressionFactor convert(TableFactor tableFactor, boolean convertAsTreeBasedExpression) {
