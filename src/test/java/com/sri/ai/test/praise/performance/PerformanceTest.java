@@ -49,76 +49,74 @@ import com.sri.ai.util.base.NullaryFunction;
  *
  */
 public class PerformanceTest {
-
-	private static final Theory THEORY = new DifferenceArithmeticTheory(false, true);
 	
+	
+			//////////////////////////////////////////////////////////////
+			// GLOBAL TEST SETTINGS  /////////////////////////////////////
+			//////////////////////////////////////////////////////////////
+			
+			private static final boolean verbose = true;
+			
+			private static final int timeLimitPerOperation = 2000;			//how long (ms) you are willing to wait for a factor operation to complete
+			
+			private static final boolean includeTables = false;
+			private static final boolean includeTreeBasedExpressions = true;
+			private static final boolean includeLinearTableExpressions = false;
+			
+			private static final int numberOfVariablesPerFactor = 3;
+			private static final int cardinalityOfEachVariable = 3;
+			private static final double minimumPotential = 1.0;
+			private static final double maximumPotential = 1.0;
+			
+			Function<Factor,Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
+			//possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
+			//						sumOutFirstVariable(Factor f), sumOutLastVariable(Factor f)
+			
+			BinaryFunction<Factor,Factor,Factor> binaryFactorOperation = (Factor A, Factor B) -> A.multiply(B);
+			//possible functions:	A.multiply(B), B.multiply(A)
+			
+			///////////////////////////////////////////////////////////////
+			
+			
+			
+	// OTHER GLOBAL CONSTANTS
+	private static final Theory THEORY = new DifferenceArithmeticTheory(false, true);
+			
 	private static final int NUMBEROFSUPPORTEDFACTORTYPES = 3;  	//TableFactor, ExpressionFactor expressed as tree, ExpressionFactor expressed as linear table
 	private static final int TABLEFACTORINDEX = 0; 					//index of list holding TableFactor
 	private static final int TREEBASEDEXPRESSIONFACTORINDEX = 1;  	//index of list holding ExpressionFactor expressed as a tree
 	private static final int LINEARTABLEEXPRESSIONFACTORINDEX = 2;	//index of list holding ExpressionFactor expressed as a linear table
-	
-	private static final int TIMELIMITPEROPERATION = 30000;			//bound in (milliseconds) of how long you are willing to wait for a factor operation to complete
-	
-	private static final Function<Integer, String> fromVariableIndexToName = i -> "X" + i;
-	
-	private static final Random random = new Random();
-	private static final FromTableToExpressionFactorConverter fromTableToExpressionFactorConverter = new FromTableToExpressionFactorConverter(THEORY);
-
+				
+	private static final Function<Integer, String> FROMVARIABLEINDEXTONAME = i -> "X" + i;
+			
+	private static final Random RANDOM = new Random();
+	private static final FromTableToExpressionFactorConverter FROMTABLETOEXPRESSIONFACTORCONVERTER = new FromTableToExpressionFactorConverter(THEORY);
 	
 	
-	//////////////////////////////////////////////////////////////
-	// GLOBAL TEST SETTINGS  /////////////////////////////////////
-	//////////////////////////////////////////////////////////////
-	
-	private static final boolean verbose = false;
-	
-	private static final boolean includeTables = false;
-	private static final boolean includeTreeBasedExpressions = true;
-	private static final boolean includeLinearTableExpressions = false;
-	
-	private static final int numberOfVariablesPerFactor = 3;
-	private static final int cardinalityOfEachVariable = 3;
-	private static final double minimumPotential = 1.0;
-	private static final double maximumPotential = 1.0;
-	
-	Function<Factor,Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
-	//possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
-	//						sumOutFirstVariable(Factor f), sumOutLastVariable(Factor f)
-	
-	BinaryFunction<Factor,Factor,Factor> binaryFactorOperation = (Factor A, Factor B) -> A.multiply(B);
-	//possible functions:	A.multiply(B), B.multiply(A)
-	
-	///////////////////////////////////////////////////////////////
-	
-	
-	private static final TableFactorSpecs globalTableFactorSpecs = new TableFactorSpecs( 
+	private static final TableFactorSpecs GLOBALTABLEFACTORSPECS = new TableFactorSpecs( 
 																fill(numberOfVariablesPerFactor, cardinalityOfEachVariable), //ArrayList of variable cardinalities
 																minimumPotential,
 																maximumPotential);
 	
-	private static final FactorOperationResultAndTimeComparitor resultComparitor = new FactorOperationResultAndTimeComparitor();
+	private static final FactorOperationResultAndTimeComparitor TESTRESULTTIMECOMPARITOR = new FactorOperationResultAndTimeComparitor();
 	
 	
 	
 	
-	@Test
-	public void repeatTestFxnNTimes() {
-		
-		final int N = 4;
-		
-		repeatNtimes(() -> varyingCardinalityOfVariablesForUnaryFactorOperation(), N);
-	}
 	
-	
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// MAIN TESTING METHODS ///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Test
 	public void varyingNumberOfVariablesForUnaryFactorOperation() {
 		
-		println("TESTING PERFORMANCE BY VARYING NUMBER OF VARIABLES");
+		println("===============================================================================================\n");
+		println("Testing UNARY OPERATION based on NUMBER OF VARIABLES");
 		println("  variable cardinality = " + cardinalityOfEachVariable);
 		verboseMessage(verbose);
 
-		TableFactorSpecs factorSpecs = new TableFactorSpecs(globalTableFactorSpecs);
+		TableFactorSpecs factorSpecs = new TableFactorSpecs(GLOBALTABLEFACTORSPECS);
 		
 		//STARTING VARIABLE NUMBER
 		int numberOfVariables = 1;
@@ -132,10 +130,10 @@ public class PerformanceTest {
 
 			opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
-			print("For unary operation on factors with " + numberOfVariables + " variables");
+			print("|| " + numberOfVariables + " variables ||");
 			printTimes(factors, opeartionResultsAndTimes);
 			
-		} while (estimateTimeForNextVariableCount(numberOfVariables++, opeartionResultsAndTimes) < TIMELIMITPEROPERATION);
+		} while (estimateTimeForNextVariableCount(numberOfVariables++, opeartionResultsAndTimes) < timeLimitPerOperation);
 		
 		println();
 	}
@@ -145,11 +143,12 @@ public class PerformanceTest {
 	@Test
 	public void varyingCardinalityOfVariablesForUnaryFactorOperation() {
 		
-		println("TESTING PERFORMANCE BY VARYING CARDINALITIES OF VARIABLES");
+		println("===============================================================================================\n");
+		println("Testing UNARY OPERATION based on VARIABLE CARDINALITY");
 		println("  number of variables = " + numberOfVariablesPerFactor);
 		verboseMessage(verbose);
 		
-		TableFactorSpecs factorSpecs = new TableFactorSpecs(globalTableFactorSpecs);
+		TableFactorSpecs factorSpecs = new TableFactorSpecs(GLOBALTABLEFACTORSPECS);
 		
 		//STARTING CARDINALITY
 		int cardinality = 1;
@@ -162,69 +161,64 @@ public class PerformanceTest {
 
 			opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
-			print("For unary operation on factors with variable-cardinality of " + cardinality);
+			print("|| cardinality " + cardinality + " ||");
 			printTimes(factors, opeartionResultsAndTimes);
 			
-		} while (estimateTimeForNextCardinality(cardinality++, opeartionResultsAndTimes) < TIMELIMITPEROPERATION);
+		} while (estimateTimeForNextCardinality(cardinality++, opeartionResultsAndTimes) < timeLimitPerOperation);
 		
 		println();
 	}
 	
 	
 	
-	//TODO:  fix bugs
-	//TODO:  create automation of loop termination
+	//TODO:  resolve why cannot multiply to factor with more variables
+	//TODO:  create loop with automation of loop termination for varying number of variables
 	@Test
 	public void varyingNumberOfVariablesForBinaryFactorOperation() {
 		
-		int initialNumberOfVariablesForFactorB = 		1 	;
-		int finalNumberOfVariablesForFactorB = 
-				includeLinearTableExpressions? 			5 
-			    : includeTreeBasedExpressions? 			7
-											 : 			12	;
+		println("===============================================================================================\n");
+		println("Testing BINARY OPERATION based on NUMBER OF VARIABLES");
+		println("  number of variables = " + numberOfVariablesPerFactor);
+		verboseMessage(verbose);
 		
-		
-//		// FOR PROFILING //////////////////////////////////////////
-//		///////////////////////////////////////////////////////////
-//		final int profilingNumberOfVariablesForFactorB =  	4	;
-//		
-//		int initialNumberOfVariablesForFactorB = 			profilingNumberOfVariablesForFactorB 	;
-//		int finalNumberOfVariablesForFactorB = 
-//				includeLinearTableExpressions? 				profilingNumberOfVariablesForFactorB 
-//			    : includeTreeBasedExpressions? 				profilingNumberOfVariablesForFactorB
-//											 : 				profilingNumberOfVariablesForFactorB	;
-//		///////////////////////////////////////////////////////////
-		
-		
-		
-		TableFactorSpecs factorASpecs = new TableFactorSpecs(globalTableFactorSpecs);
+		TableFactorSpecs factorASpecs = new TableFactorSpecs(GLOBALTABLEFACTORSPECS);
 		List<Factor> factorArepresentations = constructEquivalentRandomFactors(factorASpecs);
-		
-		TableFactorSpecs factorBSpecs = new TableFactorSpecs(globalTableFactorSpecs);
-		for (int numberOfVariablesForFactorB = initialNumberOfVariablesForFactorB; numberOfVariablesForFactorB <= finalNumberOfVariablesForFactorB; ++numberOfVariablesForFactorB) {
-			
-			factorBSpecs.cardinalities = fill(numberOfVariablesForFactorB, cardinalityOfEachVariable);
-			
-			List<Factor> factorBrepresentations = constructEquivalentRandomFactors(factorBSpecs);
+		List<Factor> factorBrepresentations = constructEquivalentRandomFactors(factorASpecs);
 
-			ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes = recordTimesForFactorOperation(binaryFactorOperation, factorArepresentations, factorBrepresentations);
+		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes = recordTimesForFactorOperation(binaryFactorOperation, factorArepresentations, factorBrepresentations);
 
-			print("For binary operation on factors with " + numberOfVariablesForFactorB + " variables");
-			printTimes(factorArepresentations, factorBrepresentations, opeartionResultsAndTimes);
-		}
+		print("For binary operation on factors with " + numberOfVariablesPerFactor + " variables");
+		printTimes(factorArepresentations, factorBrepresentations, opeartionResultsAndTimes);
+	
+	println();
 		
 	}
 	
 	
 	
+	//@Test
+	public void repeatTestFxnNTimes() {
+		
+		final int N = 4;
+		
+		repeatNtimes(() -> varyingCardinalityOfVariablesForUnaryFactorOperation(), N);
+	}
+	
+	
+	
+	
+	
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ADDITINAL TESTING METHODS //////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	//@Test
 	public void testExpressionFactorPrintOut() {
 		
-		TableFactorSpecs tableFactorSpecs = new TableFactorSpecs(globalTableFactorSpecs);
-		TableFactor tableFactor = makeRandomTableFactor(tableFactorSpecs, fromVariableIndexToName, random);
-		ExpressionFactor treeExpressionFactor = fromTableToExpressionFactorConverter.convert(tableFactor, true);
-		ExpressionFactor linearExpressionFactor = fromTableToExpressionFactorConverter.convert(tableFactor, false);
+		TableFactorSpecs tableFactorSpecs = new TableFactorSpecs(GLOBALTABLEFACTORSPECS);
+		TableFactor tableFactor = makeRandomTableFactor(tableFactorSpecs, FROMVARIABLEINDEXTONAME, RANDOM);
+		ExpressionFactor treeExpressionFactor = FROMTABLETOEXPRESSIONFACTORCONVERTER.convert(tableFactor, true);
+		ExpressionFactor linearExpressionFactor = FROMTABLETOEXPRESSIONFACTORCONVERTER.convert(tableFactor, false);
 		
 		println("test");
 		println("-------------------------------------------------------------------------");
@@ -242,6 +236,7 @@ public class PerformanceTest {
 		println("    operation result:  " + unaryFactorOperation.apply(linearExpressionFactor));
 		println("-------------------------------------------------------------------------");
 	}
+	
 	
 	
 	//@Test
@@ -324,7 +319,6 @@ public class PerformanceTest {
 		
 		
 		
-		
 		// LISTS OF VARIABLES TO BE SUMMED OUT (AS ARRAYLISTS) TO TEST  ///////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
@@ -355,7 +349,6 @@ public class PerformanceTest {
 		
 		
 		
-		
 		// TIME SUMMING OUT VARIABLES, REPEATING PROCESS N TIMES  /////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
@@ -378,8 +371,6 @@ public class PerformanceTest {
 		
 		
 		
-		
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// PRINTED REPORT  ////////////////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -417,11 +408,11 @@ public class PerformanceTest {
 	
 	
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// HELPERS ////////////////////////////////////////////////////////////////////////////////////////////////////
+// SUPPORT CLASSES AND METHODS ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	
-	/// STRUCTS W/ SUPPORTING METHODS///////////////////////////////////////////////////////////////////////
+	/// STRUCTS W/ SUPPORTING METHODS //////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	private static class FactorOperationResultAndTime{
@@ -477,13 +468,13 @@ public class PerformanceTest {
 	
 	private List<Factor> constructEquivalentRandomFactors(TableFactorSpecs factorSpecs)
 	{
-		TableFactor tableFactor = makeRandomTableFactor(factorSpecs, fromVariableIndexToName, random);
+		TableFactor tableFactor = makeRandomTableFactor(factorSpecs, FROMVARIABLEINDEXTONAME, RANDOM);
 		
 		ArrayList<Factor> factors = new ArrayList<>(NUMBEROFSUPPORTEDFACTORTYPES);
 		
 		factors.add(tableFactor);
-		factors.add(includeTreeBasedExpressions ? fromTableToExpressionFactorConverter.convert(tableFactor, true) : null);
-		factors.add(includeLinearTableExpressions ? fromTableToExpressionFactorConverter.convert(tableFactor, false) : null);
+		factors.add(includeTreeBasedExpressions ? FROMTABLETOEXPRESSIONFACTORCONVERTER.convert(tableFactor, true) : null);
+		factors.add(includeLinearTableExpressions ? FROMTABLETOEXPRESSIONFACTORCONVERTER.convert(tableFactor, false) : null);
 		
 		return factors;
 	}
@@ -610,27 +601,27 @@ public class PerformanceTest {
 	{		
 		if (verbose) {
 			println();
-			    println("  Random table factor:                         " + factors.get(TABLEFACTORINDEX));
+			    println("     Random table factor:                         " + factors.get(TABLEFACTORINDEX));
 			if (includeTables) {
 				printResultingFactor(results,TABLEFACTORINDEX);
 			}
 			if (includeTreeBasedExpressions) {
-				println("  Equivalent tree-based expression factor:     " + factors.get(TREEBASEDEXPRESSIONFACTORINDEX));
+				println("     Equivalent tree-based expression factor:     " + factors.get(TREEBASEDEXPRESSIONFACTORINDEX));
 				printResultingFactor(results,TREEBASEDEXPRESSIONFACTORINDEX);
 			}
 			if (includeLinearTableExpressions) {
-				println("  Equivalent linear-table expression factor:   " + factors.get(LINEARTABLEEXPRESSIONFACTORINDEX));
+				println("     Equivalent linear-table expression factor:   " + factors.get(LINEARTABLEEXPRESSIONFACTORINDEX));
 				printResultingFactor(results,LINEARTABLEEXPRESSIONFACTORINDEX);
 			}
-			println("  -------------  Time for operation  ------------");
+			println("     -------------  Time for operation  ------------");
 			if (includeTables) {
-				println("  Table representation:                        " + results.get(TABLEFACTORINDEX).time() + " ms");
+				println("     Table representation:                        " + results.get(TABLEFACTORINDEX).time() + " ms");
 			}
 			if (includeTreeBasedExpressions) {
-				println("  Tree-Based Expression representation:        " + results.get(TREEBASEDEXPRESSIONFACTORINDEX).time() + " ms");
+				println("     Tree-Based Expression representation:        " + results.get(TREEBASEDEXPRESSIONFACTORINDEX).time() + " ms");
 			}
 			if (includeLinearTableExpressions) {
-				println("  Linear-Table Expression representation:      " + results.get(LINEARTABLEEXPRESSIONFACTORINDEX).time() + " ms");
+				println("     Linear-Table Expression representation:      " + results.get(LINEARTABLEEXPRESSIONFACTORINDEX).time() + " ms");
 			}
 			println();
 		}
@@ -652,30 +643,30 @@ public class PerformanceTest {
 	{		
 		if (verbose) {
 			println();
-			    println("  Random table factor A:                       " + factorsA.get(TABLEFACTORINDEX));
-			    println("  Random table factor B:                       " + factorsB.get(TABLEFACTORINDEX));
+			    println("     Random table factor A:                       " + factorsA.get(TABLEFACTORINDEX));
+			    println("     Random table factor B:                       " + factorsB.get(TABLEFACTORINDEX));
 			if (includeTables) {
 				printResultingFactor(results,TABLEFACTORINDEX);
 			}
 			if (includeTreeBasedExpressions) {
-				println("  Equivalent tree-based expression factor A:   " + factorsA.get(TREEBASEDEXPRESSIONFACTORINDEX));
-				println("  Equivalent tree-based expression factor B:   " + factorsB.get(TREEBASEDEXPRESSIONFACTORINDEX));
+				println("     Equivalent tree-based expression factor A:   " + factorsA.get(TREEBASEDEXPRESSIONFACTORINDEX));
+				println("     Equivalent tree-based expression factor B:   " + factorsB.get(TREEBASEDEXPRESSIONFACTORINDEX));
 				printResultingFactor(results,TREEBASEDEXPRESSIONFACTORINDEX);
 			}
 			if (includeLinearTableExpressions) {
-				println("  Equivalent linear-table expression factor A: " + factorsA.get(LINEARTABLEEXPRESSIONFACTORINDEX));
-				println("  Equivalent linear-table expression factor B: " + factorsB.get(LINEARTABLEEXPRESSIONFACTORINDEX));
+				println("     Equivalent linear-table expression factor A: " + factorsA.get(LINEARTABLEEXPRESSIONFACTORINDEX));
+				println("     Equivalent linear-table expression factor B: " + factorsB.get(LINEARTABLEEXPRESSIONFACTORINDEX));
 				printResultingFactor(results,LINEARTABLEEXPRESSIONFACTORINDEX);
 			}
-			println("  -------------  Time for operation  ------------");
+			println("   -------------  Time for operation  ------------");
 			if (includeTables) {
-				println("  Table representation:                      " + results.get(TABLEFACTORINDEX).time() + " ms");
+				println("     Table representation:                      " + results.get(TABLEFACTORINDEX).time() + " ms");
 			}
 			if (includeTreeBasedExpressions) {
-				println("  Tree-Based Expression representation:      " + results.get(TREEBASEDEXPRESSIONFACTORINDEX).time() + " ms");
+				println("     Tree-Based Expression representation:      " + results.get(TREEBASEDEXPRESSIONFACTORINDEX).time() + " ms");
 			}
 			if (includeLinearTableExpressions) {
-				println("  Linear-Table Expression representation:    " + results.get(LINEARTABLEEXPRESSIONFACTORINDEX).time() + " ms");
+				println("     Linear-Table Expression representation:    " + results.get(LINEARTABLEEXPRESSIONFACTORINDEX).time() + " ms");
 			}
 			println();
 		}
@@ -695,7 +686,7 @@ public class PerformanceTest {
 	
 	
 	private static void printResultingFactor(List<FactorOperationResultAndTime> results, int index) {
-		println("      operation result:                      " + results.get(index).result());
+		println("       operation result:                          " + results.get(index).result());
 	}
 	
 	
@@ -706,7 +697,7 @@ public class PerformanceTest {
 	
 	private static long estimateTimeForNextVariableCount(int currentCardinality, ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes) {
 		
-		long timeTakenForCurrentVariable = Collections.max(opeartionResultsAndTimes, resultComparitor).time();
+		long timeTakenForCurrentVariable = Collections.max(opeartionResultsAndTimes, TESTRESULTTIMECOMPARITOR).time();
 		double timeForIncrementedNumberOfVariables = timeTakenForCurrentVariable * cardinalityOfEachVariable;
 		
 		return (long) timeForIncrementedNumberOfVariables;
@@ -714,7 +705,7 @@ public class PerformanceTest {
 	
 	private static long estimateTimeForNextCardinality(int currentCardinality, ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes) {
 		
-		long timeTakenForCurrentCardinality = Collections.max(opeartionResultsAndTimes, resultComparitor).time();
+		long timeTakenForCurrentCardinality = Collections.max(opeartionResultsAndTimes, TESTRESULTTIMECOMPARITOR).time();
 		double timePerFactorParameter = timeTakenForCurrentCardinality / Math.pow(currentCardinality,numberOfVariablesPerFactor);
 		double timeForIncrementedVariableCardinality = timePerFactorParameter*Math.pow(++currentCardinality,numberOfVariablesPerFactor);
 		
