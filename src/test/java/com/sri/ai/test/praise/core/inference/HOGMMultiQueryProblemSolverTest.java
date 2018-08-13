@@ -132,6 +132,35 @@ public class HOGMMultiQueryProblemSolverTest {
 //		assertEquals(parse("if alpha = 0.8 then 1 else 0"), result.getResult());
 	}
 
+	@Test
+		public void linearRealArithmeticSmall() {
+			String model = 
+					"random external : 1..5;\n" + 
+					"random internal2 : 1..5;\n" + 
+					"\n" + 
+					"internal2 = external - 1;\n" +
+					"external = 5;" +
+					"";
+			
+			String query2 = "internal2";
+			HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query2));
+			ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
+			solver.setProceduralAttachments(proceduralAttachments);
+			
+			List<HOGMProblemResult> results = solver.getResults();
+		
+			assertEquals(1, results.size());
+			
+			HOGMProblemResult result = results.get(0);
+			result.getErrors().stream().forEach(e -> println(e));
+			Expression resultValue = result.getResult();
+			println(resultValue);
+			println("Explanation");
+			println(result.getExplanation());
+			assertFalse(result.hasErrors());
+			assertEquals(parse("if internal2 = 4 then 1 else 0"), result.getResult());
+		}
+
 	// @Test // TODO: need to fix bug in which using theory mixing DifferenceArithmeticTheory and LinearRealArithmeticTheory cause errors recognizing literals.
 	public void linearRealArithmeticBug() {
 		String model = 

@@ -59,7 +59,7 @@ public class ExpressionBasedProblemTest {
 		String expectedFactors;
 		String expectedQuerySymbolString;
 		boolean expectedQueryIsCompound;
-		String expectedContextString;
+		String expectedSymbolsAndTypesString;
 		
 		modelString = ""
 				+  
@@ -73,27 +73,27 @@ public class ExpressionBasedProblemTest {
 		expectedFactors = "[if earthquake then 0.01 else 0.99, if earthquake then if damage > 8 then 0.4 else 0.25 else 0.1]";
 		expectedQuerySymbolString = "earthquake";
 		expectedQueryIsCompound = false;
-		expectedContextString = "Context with: {damage=1..10, earthquake=Boolean, false=Boolean, true=Boolean}";
-		runTest(modelString, queryString, expectedFactors, expectedQuerySymbolString, expectedQueryIsCompound, expectedContextString);
+		expectedSymbolsAndTypesString = "{damage=1..10, earthquake=Boolean, false=Boolean, true=Boolean}";
+		runTest(modelString, queryString, expectedFactors, expectedQuerySymbolString, expectedQueryIsCompound, expectedSymbolsAndTypesString);
 		
 		queryString = "damage > 5";
 		expectedFactors = "[if earthquake then 0.01 else 0.99, if earthquake then if damage > 8 then 0.4 else 0.25 else 0.1, if query <=> (damage > 5) then 1 else 0]"; 
 		expectedQuerySymbolString = "query";
 		expectedQueryIsCompound = true;
-		expectedContextString = "Context with: {query=Boolean, damage=1..10, earthquake=Boolean, false=Boolean, true=Boolean}";
-		runTest(modelString, queryString, expectedFactors, expectedQuerySymbolString, expectedQueryIsCompound, expectedContextString);
+		expectedSymbolsAndTypesString = "{query=Boolean, damage=1..10, earthquake=Boolean, false=Boolean, true=Boolean}";
+		runTest(modelString, queryString, expectedFactors, expectedQuerySymbolString, expectedQueryIsCompound, expectedSymbolsAndTypesString);
 		
 		queryString = "damage + 1";
 		expectedFactors = "[if earthquake then 0.01 else 0.99, if earthquake then if damage > 8 then 0.4 else 0.25 else 0.1, if query = damage + 1 then 1 else 0]"; 
 		expectedQuerySymbolString = "query";
 		expectedQueryIsCompound = true;
-		expectedContextString = "Context with: {query=Integer, damage=1..10, earthquake=Boolean, false=Boolean, true=Boolean}";
-		runTest(modelString, queryString, expectedFactors, expectedQuerySymbolString, expectedQueryIsCompound, expectedContextString);
+		expectedSymbolsAndTypesString = "{query=Integer, damage=1..10, earthquake=Boolean, false=Boolean, true=Boolean}";
+		runTest(modelString, queryString, expectedFactors, expectedQuerySymbolString, expectedQueryIsCompound, expectedSymbolsAndTypesString);
 	}
 
 	private void runTest(String modelString, String queryString,
 			String expectedFactorExpressionsIncludingQueryDefinitionIfAnyString, String expectedQuerySymbolString,
-			boolean expectedQueryIsCompound, String expectedContextString) {
+			boolean expectedQueryIsCompound, String expectedSymbolsAndTypesString) {
 		
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
 		Expression queryExpression = parse(queryString);
@@ -114,10 +114,10 @@ public class ExpressionBasedProblemTest {
 		println("actual   queryIsCompound: " + actualQueryIsCompound);
 		assertEquals(expectedQueryIsCompound, actualQueryIsCompound);
 		
-		String actualContextString = problem.getContext().toString();
-		println("expected context string: " + expectedContextString);
-		println("actual   context string: " + actualContextString);
-		assertEquals(expectedContextString, actualContextString);
+		String actualSymbolsAndTypesString = problem.getContext().getSymbolsAndTypes().toString();
+		println("expected context string: " + expectedSymbolsAndTypesString);
+		println("actual   context string: " + actualSymbolsAndTypesString);
+		assertEquals(expectedSymbolsAndTypesString, actualSymbolsAndTypesString);
 	}
 
 }
