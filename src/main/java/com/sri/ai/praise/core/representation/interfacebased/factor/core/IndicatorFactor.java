@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.util.ExplanationTree;
+import com.sri.ai.util.explanation.tree.ExplanationTree;
 
 public class IndicatorFactor implements Factor {
 

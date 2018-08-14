@@ -12,11 +12,11 @@ import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.util.DefaultExplanationTree;
-import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.treecomputation.api.EagerTreeComputationEvaluator;
+import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
+import com.sri.ai.util.explanation.tree.ExplanationTree;
 
 public class EagerExactBPNodeEvaluator implements EagerTreeComputationEvaluator<Factor> {
 

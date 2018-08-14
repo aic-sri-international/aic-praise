@@ -53,9 +53,9 @@ import com.sri.ai.grinder.group.SumProduct;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
-import com.sri.ai.util.DefaultExplanationTree;
-import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
+import com.sri.ai.util.explanation.tree.ExplanationTree;
 
 @Beta
 public class HOGMProblemResult {

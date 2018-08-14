@@ -67,9 +67,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.Identity
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ZeroFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
-import com.sri.ai.util.DefaultExplanationTree;
-import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.collect.PredicateIterator;
+import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
+import com.sri.ai.util.explanation.tree.ExplanationTree;
 
 /**
  * A {@link Factor} represented by an {@link Expression} provided by {@link #computeInnerExpression()}.

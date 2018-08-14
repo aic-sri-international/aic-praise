@@ -46,7 +46,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.sri.ai.util.ExplanationTree;
+import com.sri.ai.util.explanation.tree.ExplanationTree;
 
 /**
  * A factor is defined up to a non-zero multiplicative constant

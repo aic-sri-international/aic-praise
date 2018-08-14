@@ -2,8 +2,8 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
 
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.in;
-import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
+import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.setDifference;
 
 import java.math.BigInteger;
@@ -19,10 +19,10 @@ import java.util.function.BiFunction;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
-import com.sri.ai.util.DefaultExplanationTree;
-import com.sri.ai.util.ExplanationTree;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
+import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
+import com.sri.ai.util.explanation.tree.ExplanationTree;
 import com.sri.ai.util.math.MixedRadixNumber;
 
 /**

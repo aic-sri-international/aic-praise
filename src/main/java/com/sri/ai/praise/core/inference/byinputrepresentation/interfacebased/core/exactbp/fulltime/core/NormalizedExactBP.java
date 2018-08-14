@@ -51,7 +51,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
-import com.sri.ai.util.DefaultExplanationTree;
+import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 
 public class NormalizedExactBP implements Solver {
 
