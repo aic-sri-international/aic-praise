@@ -138,7 +138,6 @@ public class FromTableToExpressionFactorConverter {
 				subBranchExpressions.add(branchExpression);
 			}
 		}
-
 		int firstAssignmentValue = 0;
 		TableVariable variable = variables.get(variableIndex);
 		Expression result = combineVariableSubBranchExpressionsIntoIfElseIFElse(variable, firstAssignmentValue, subBranchExpressions);
@@ -156,8 +155,9 @@ public class FromTableToExpressionFactorConverter {
 		}
 		else
 		{
+			int nextAssignment = assignment + 1;
 			Expression assignmentTestExpression = makeComparisonToAssignedValue(variable, assignment);
-			Expression elseExpression = combineVariableSubBranchExpressionsIntoIfElseIFElse(variable, ++assignment, subBranchExpressions);
+			Expression elseExpression = combineVariableSubBranchExpressionsIntoIfElseIFElse(variable, nextAssignment, subBranchExpressions);
 			result = IfThenElse.make(assignmentTestExpression, subBranchExpressions.get(assignment), elseExpression);
 		}
 		return result;
