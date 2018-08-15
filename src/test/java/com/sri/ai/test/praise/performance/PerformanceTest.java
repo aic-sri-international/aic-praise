@@ -10,7 +10,6 @@ import static com.sri.ai.util.Util.println;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Timer.timeAndGetResult;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.RandomTableFactorMaker.TableFactorSpecs;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,9 +32,11 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.RandomTableFactorSpecs;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.FromTableToExpressionFactorConverter;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
+import com.sri.ai.grinder.tester.ContextSplittingTester;
 
 
 /**
@@ -55,18 +56,19 @@ public class PerformanceTest {
 			// GLOBAL TEST SETTINGS  /////////////////////////////////////
 			//////////////////////////////////////////////////////////////
 			
-			private static final boolean verbose = true;
+			private static final boolean verbose = false;
 			
-			private static final int timeLimitPerOperation = 2000;			//how long (ms) you are willing to wait for a factor operation to complete
+			private static final int timeLimitPerOperation = 120000;	//how long (ms) you are willing to wait for a factor operation to complete
 			
 			private static final boolean includeTables = false;
 			private static final boolean includeTreeBasedExpressions = true;
 			private static final boolean includeLinearTableExpressions = false;
 			
-			private static final int numberOfVariablesPerFactor = 3;
-			private static final int cardinalityOfEachVariable = 3;
+			private static final int numberOfVariablesPerFactor = 1;
+			private static final int cardinalityOfVariables = 1;
 			private static final double minimumPotential = 1.0;
-			private static final double maximumPotential = 1.0;
+			private static final double maximumPotential = 5.0;
+			private static final boolean integerIncrements = true;
 			
 			Function<Factor,Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
 			//possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
@@ -93,10 +95,9 @@ public class PerformanceTest {
 	private static final FromTableToExpressionFactorConverter FROMTABLETOEXPRESSIONFACTORCONVERTER = new FromTableToExpressionFactorConverter(THEORY);
 	
 	
-	private static final TableFactorSpecs GLOBALTABLEFACTORSPECS = new TableFactorSpecs( 
-																fill(numberOfVariablesPerFactor, cardinalityOfEachVariable), //ArrayList of variable cardinalities
-																minimumPotential,
-																maximumPotential);
+	private static final RandomTableFactorSpecs GLOBALTABLEFACTORSPECS = new RandomTableFactorSpecs( 
+																fill(numberOfVariablesPerFactor, cardinalityOfVariables), //ArrayList of variable cardinalities
+																minimumPotential,maximumPotential,integerIncrements);
 	
 	private static final FactorOperationResultAndTimeComparitor TESTRESULTTIMECOMPARITOR = new FactorOperationResultAndTimeComparitor();
 	
@@ -105,18 +106,44 @@ public class PerformanceTest {
 	
 	
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// MAIN TESTING METHODS ///////////////////////////////////////////////////////////////////////////////////////
+// JUNIT TESTS ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Test
-	public void varyingNumberOfVariablesForUnaryFactorOperation() {
+	public void singleRunForUnaryFactorOperation() {
 		
 		println("===============================================================================================\n");
-		println("Testing UNARY OPERATION based on NUMBER OF VARIABLES");
-		println("  variable cardinality = " + cardinalityOfEachVariable);
+		println("Testing UNARY OPERATION");
+		println("  number of variables = " + numberOfVariablesPerFactor);
+		println("  variable cardinality = " + cardinalityOfVariables);
 		verboseMessage(verbose);
 
-		TableFactorSpecs factorSpecs = new TableFactorSpecs(GLOBALTABLEFACTORSPECS);
+		RandomTableFactorSpecs factorSpecs = new RandomTableFactorSpecs(GLOBALTABLEFACTORSPECS);
+		
+		List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
+
+		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
+
+		print("    total operation time");
+		printOperationTimes(factors, opeartionResultsAndTimes);
+		
+		println();
+	}
+	
+	
+	
+	//@Test
+	public void varyingNumberOfVariablesForUnaryFactorOperationComparedWithContextSplittingTime() {
+		
+		println("===============================================================================================\n");
+		println("Testing UNARY OPERATION based on NUMBER OF VARIABLES and comparing to CONTEXT SPLITTING");
+		println("  variable cardinality = " + cardinalityOfVariables);
+		println();
+
+		RandomTableFactorSpecs factorSpecs = new RandomTableFactorSpecs(GLOBALTABLEFACTORSPECS);
+		ContextSplittingTester contextSplittingTest;
+		
+		long contextSplittingTime = -1;
 		
 		//STARTING VARIABLE NUMBER
 		int numberOfVariables = 1;
@@ -124,14 +151,22 @@ public class PerformanceTest {
 
 		do {
 			
-			factorSpecs.cardinalities = fill(numberOfVariables, cardinalityOfEachVariable);
-
+			factorSpecs.cardinalities = fill(numberOfVariables, cardinalityOfVariables);
 			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
-
+			
+			contextSplittingTest = new ContextSplittingTester(numberOfVariables, cardinalityOfVariables, false, THEORY); //false <-- focus on recording overall time
+			
 			opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
-
-			print("|| " + numberOfVariables + " variables ||");
-			printTimes(factors, opeartionResultsAndTimes);
+			println("|| " + numberOfVariables + " variables ||");
+			print("    total operation time");
+			printOperationTimes(factors, opeartionResultsAndTimes);
+			
+			contextSplittingTime = contextSplittingTest.performContextSplittingTest();
+			println("    context splitting time,  tree-based expression: " + contextSplittingTime + " ms");
+			
+			printPercentageOfOperationTimeDueTo(opeartionResultsAndTimes, contextSplittingTime);
+			
+			println();
 			
 		} while (estimateTimeForNextVariableCount(numberOfVariables++, opeartionResultsAndTimes) < timeLimitPerOperation);
 		
@@ -140,7 +175,83 @@ public class PerformanceTest {
 	
 	
 	
-	@Test
+	
+	//@Test
+	public void varyingCardinalityOfVariablesForUnaryFactorOperationComparedWithContextSplittingTime() {
+		
+		println("===============================================================================================\n");
+		println("Testing UNARY OPERATION based on CARDINALITY OF VARIABLES and comparing to CONTEXT SPLITTING");
+		println("  number of variables = " + numberOfVariablesPerFactor);
+		println();
+
+		RandomTableFactorSpecs factorSpecs = new RandomTableFactorSpecs(GLOBALTABLEFACTORSPECS);
+		ContextSplittingTester contextSplittingTest;
+		
+		long contextSplittingTime = -1;
+		
+		//STARTING VARIABLE NUMBER
+		int cardinality = 1;
+		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes;
+
+		do {
+			
+			factorSpecs.cardinalities = fill(numberOfVariablesPerFactor, cardinality);
+			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
+			
+			contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinality, false, THEORY); //false <-- focus on recording overall time
+			
+			opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
+			println("|| " + "variables with cardinality of " + cardinality + " ||");
+			print("    total operation time");
+			printOperationTimes(factors, opeartionResultsAndTimes);
+			
+			contextSplittingTime = contextSplittingTest.performContextSplittingTest();
+			println("    context splitting time,  tree-based expression: " + contextSplittingTime + " ms");
+			
+			printPercentageOfOperationTimeDueTo(opeartionResultsAndTimes, contextSplittingTime);
+			
+			println();
+			
+		} while (estimateTimeForNextCardinality(cardinality++, opeartionResultsAndTimes) < timeLimitPerOperation);
+		
+		println();
+	}
+	
+	
+	
+	//@Test
+	public void varyingNumberOfVariablesForUnaryFactorOperation() {
+		
+		println("===============================================================================================\n");
+		println("Testing UNARY OPERATION based on NUMBER OF VARIABLES");
+		println("  variable cardinality = " + cardinalityOfVariables);
+		verboseMessage(verbose);
+
+		RandomTableFactorSpecs factorSpecs = new RandomTableFactorSpecs(GLOBALTABLEFACTORSPECS);
+		
+		//STARTING VARIABLE NUMBER
+		int numberOfVariables = 1;
+		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes;
+
+		do {
+			
+			factorSpecs.cardinalities = fill(numberOfVariables, cardinalityOfVariables);
+
+			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
+
+			opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
+
+			print("|| " + numberOfVariables + " variables ||");
+			printOperationTimes(factors, opeartionResultsAndTimes);
+			
+		} while (estimateTimeForNextVariableCount(numberOfVariables++, opeartionResultsAndTimes) < timeLimitPerOperation);
+		
+		println();
+	}
+	
+	
+	
+	//@Test
 	public void varyingCardinalityOfVariablesForUnaryFactorOperation() {
 		
 		println("===============================================================================================\n");
@@ -148,7 +259,7 @@ public class PerformanceTest {
 		println("  number of variables = " + numberOfVariablesPerFactor);
 		verboseMessage(verbose);
 		
-		TableFactorSpecs factorSpecs = new TableFactorSpecs(GLOBALTABLEFACTORSPECS);
+		RandomTableFactorSpecs factorSpecs = new RandomTableFactorSpecs(GLOBALTABLEFACTORSPECS);
 		
 		//STARTING CARDINALITY
 		int cardinality = 1;
@@ -162,7 +273,7 @@ public class PerformanceTest {
 			opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
 			print("|| cardinality " + cardinality + " ||");
-			printTimes(factors, opeartionResultsAndTimes);
+			printOperationTimes(factors, opeartionResultsAndTimes);
 			
 		} while (estimateTimeForNextCardinality(cardinality++, opeartionResultsAndTimes) < timeLimitPerOperation);
 		
@@ -173,7 +284,7 @@ public class PerformanceTest {
 	
 	//TODO:  resolve why cannot multiply to factor with more variables
 	//TODO:  create loop with automation of loop termination for varying number of variables
-	@Test
+	//@Test
 	public void varyingNumberOfVariablesForBinaryFactorOperation() {
 		
 		println("===============================================================================================\n");
@@ -181,14 +292,14 @@ public class PerformanceTest {
 		println("  number of variables = " + numberOfVariablesPerFactor);
 		verboseMessage(verbose);
 		
-		TableFactorSpecs factorASpecs = new TableFactorSpecs(GLOBALTABLEFACTORSPECS);
+		RandomTableFactorSpecs factorASpecs = new RandomTableFactorSpecs(GLOBALTABLEFACTORSPECS);
 		List<Factor> factorArepresentations = constructEquivalentRandomFactors(factorASpecs);
 		List<Factor> factorBrepresentations = constructEquivalentRandomFactors(factorASpecs);
 
 		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes = recordTimesForFactorOperation(binaryFactorOperation, factorArepresentations, factorBrepresentations);
 
 		print("For binary operation on factors with " + numberOfVariablesPerFactor + " variables");
-		printTimes(factorArepresentations, factorBrepresentations, opeartionResultsAndTimes);
+		printOperationTimes(factorArepresentations, factorBrepresentations, opeartionResultsAndTimes);
 	
 	println();
 		
@@ -215,7 +326,7 @@ public class PerformanceTest {
 	//@Test
 	public void testExpressionFactorPrintOut() {
 		
-		TableFactorSpecs tableFactorSpecs = new TableFactorSpecs(GLOBALTABLEFACTORSPECS);
+		RandomTableFactorSpecs tableFactorSpecs = new RandomTableFactorSpecs(GLOBALTABLEFACTORSPECS);
 		TableFactor tableFactor = makeRandomTableFactor(tableFactorSpecs, FROMVARIABLEINDEXTONAME, RANDOM);
 		ExpressionFactor treeExpressionFactor = FROMTABLETOEXPRESSIONFACTORCONVERTER.convert(tableFactor, true);
 		ExpressionFactor linearExpressionFactor = FROMTABLETOEXPRESSIONFACTORCONVERTER.convert(tableFactor, false);
@@ -466,7 +577,7 @@ public class PerformanceTest {
 	/// FACTOR CONSTRUCTION METHODS ////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private List<Factor> constructEquivalentRandomFactors(TableFactorSpecs factorSpecs)
+	private List<Factor> constructEquivalentRandomFactors(RandomTableFactorSpecs factorSpecs)
 	{
 		TableFactor tableFactor = makeRandomTableFactor(factorSpecs, FROMVARIABLEINDEXTONAME, RANDOM);
 		
@@ -597,7 +708,7 @@ public class PerformanceTest {
 	}
 	
 	
-	private static void printTimes(List<Factor> factors, List<FactorOperationResultAndTime> results)
+	private static void printOperationTimes(List<Factor> factors, List<FactorOperationResultAndTime> results)
 	{		
 		if (verbose) {
 			println();
@@ -639,7 +750,7 @@ public class PerformanceTest {
 		}
 	}
 	
-	private static void printTimes(List<Factor> factorsA, List<Factor> factorsB, List<FactorOperationResultAndTime> results)
+	private static void printOperationTimes(List<Factor> factorsA, List<Factor> factorsB, List<FactorOperationResultAndTime> results)
 	{		
 		if (verbose) {
 			println();
@@ -684,6 +795,19 @@ public class PerformanceTest {
 		}
 	}
 	
+	//TODO: expand to include ability to compare linear table expressions to their context splitting times as well (need to adjust ContextSplittingTester)
+	private static void printPercentageOfOperationTimeDueTo(List<FactorOperationResultAndTime> results, long subTime) {
+		print("    percentage of time spent in context splitting");
+		if (includeTreeBasedExpressions) {
+			print(", tree-based expression: "
+					+ Math.round(1000.0 * subTime / results.get(TREEBASEDEXPRESSIONFACTORINDEX).time())/10.0 + "%");
+		}
+		else		{
+			println("currently only Tree Based Expression can be compared to their context splitting times");
+		}
+		println();
+	}
+	
 	
 	private static void printResultingFactor(List<FactorOperationResultAndTime> results, int index) {
 		println("       operation result:                          " + results.get(index).result());
@@ -698,7 +822,7 @@ public class PerformanceTest {
 	private static long estimateTimeForNextVariableCount(int currentCardinality, ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes) {
 		
 		long timeTakenForCurrentVariable = Collections.max(opeartionResultsAndTimes, TESTRESULTTIMECOMPARITOR).time();
-		double timeForIncrementedNumberOfVariables = timeTakenForCurrentVariable * cardinalityOfEachVariable;
+		double timeForIncrementedNumberOfVariables = timeTakenForCurrentVariable * cardinalityOfVariables;
 		
 		return (long) timeForIncrementedNumberOfVariables;
 	}
