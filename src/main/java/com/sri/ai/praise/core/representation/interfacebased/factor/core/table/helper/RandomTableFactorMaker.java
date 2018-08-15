@@ -12,42 +12,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.Ta
 
 public class RandomTableFactorMaker {
 	
-	public static class TableFactorSpecs{
-		public ArrayList<Integer> cardinalities;
-		public double minimumPotential;
-		public double maximumPotential;
-		
-		public TableFactorSpecs(ArrayList<Integer> cardinalities, double minimumPotential, double maximumPotential)
-		{
-			this.cardinalities = cardinalities;
-			this.minimumPotential = minimumPotential;
-			this.maximumPotential = maximumPotential;
-		}
-		
-		public TableFactorSpecs(TableFactorSpecs toCopy)
-		{
-			cardinalities = new ArrayList<>(toCopy.cardinalities.size());
-			for(Integer cardinality : toCopy.cardinalities)
-			{
-				this.cardinalities.add(new Integer(cardinality));
-			}
-			this.minimumPotential = toCopy.minimumPotential;
-			this.maximumPotential = toCopy.maximumPotential;
-		}
-	}	
-
-	public static TableFactor makeRandomTableFactor(
-			ArrayList<Integer> cardinalities, double minimumPotential, double maximumPotential, Function<Integer, String> fromVariableIndexToName, Random random) {
-		
-		ArrayList<TableVariable> variables = makeVariables(cardinalities, fromVariableIndexToName);
-		ArrayList<Double> entries = makeUniformlyDistributedRandomEntries(cardinalities, minimumPotential, maximumPotential, random);
+	public static TableFactor makeRandomTableFactor(RandomTableFactorSpecs specs, Function<Integer, String> fromVariableIndexToName, Random random)
+	{
+		ArrayList<TableVariable> variables = makeVariables(specs.cardinalities, fromVariableIndexToName);
+		ArrayList<Double> entries = makeUniformlyDistributedRandomEntries(specs, random);
 		TableFactor tableFactor = new TableFactor(variables, entries);
 		return tableFactor;
-	}
-	
-	public static TableFactor makeRandomTableFactor(TableFactorSpecs specs, Function<Integer, String> fromVariableIndexToName, Random random)
-	{
-		return makeRandomTableFactor(specs.cardinalities, specs.minimumPotential, specs.maximumPotential, fromVariableIndexToName, random);
 	}
 
 
@@ -67,15 +37,22 @@ public class RandomTableFactorMaker {
 	}
 
 	private static ArrayList<Double> makeUniformlyDistributedRandomEntries(
-			ArrayList<Integer> cardinalities, double minimumPotential, double maximumPotential, Random random) {
+			RandomTableFactorSpecs specs, Random random) {
 		
-		int numberOfEntries = product(cardinalities).intValue();
-		ArrayList<Double> entries = mapIntegersIntoArrayList(numberOfEntries, i -> samplePotentialInRange(minimumPotential, maximumPotential, random));
+		int numberOfEntries = product(specs.cardinalities).intValue();
+		ArrayList<Double> entries = mapIntegersIntoArrayList(numberOfEntries, i -> samplePotentialInRange(specs, random));
 		return entries;
 	}
 
-	private static Double samplePotentialInRange(double minimumPotential, double maximumPotential, Random random) {
-		double result = minimumPotential + random.nextDouble()*(maximumPotential - minimumPotential);
+	private static Double samplePotentialInRange(RandomTableFactorSpecs specs, Random random) {
+		double result;
+		if(specs.integerIncrements) {
+			result = specs.minimumPotential + random.nextInt((int) (Math.round(specs.maximumPotential)));
+		}
+		else {
+			result = specs.minimumPotential + random.nextDouble()*(specs.maximumPotential - specs.minimumPotential);
+		}
+	
 		return result;
 	}
 
