@@ -38,6 +38,9 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 
@@ -58,6 +61,15 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  */
 public class ExactBP extends ExactBPNodeFromVariableToFactor {
 
+	@Override
+	public
+	Factor apply() {
+		return
+				explanationBlock("Computing unnormalized marginal of ", getRoot(), code(() -> {
+					return super.apply();
+				}), "Unnormalized marginal is ", getRoot(), " is ", RESULT);
+	}
+	
 	public ExactBP(Variable query, FactorNetwork factorNetwork) {
 		this(query, factorNetwork, v -> false /* default is "no uninterpreted constants" */);
 	}

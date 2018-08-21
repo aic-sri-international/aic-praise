@@ -55,20 +55,42 @@ import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 
 public class NormalizedExactBP implements Solver {
 
+	private class QueryUnnormalizedMarginalAndContext {
+		public ExpressionVariable queryVariable;
+		public Factor factor;
+		public Context context;
+		public ExpressionFactor unnormalizedMarginal;
+		
+		public QueryUnnormalizedMarginalAndContext(Problem problem) {
+			ExactBP exactBP = new ExactBP(problem);
+			queryVariable = (ExpressionVariable) problem.getQueryVariable();
+			factor = exactBP.apply();
+			context = getContext(problem);
+			unnormalizedMarginal = getUnnormalizedExpressionFactor(factor, context);
+		}
+	}
+	
 	@Override
 	public Expression solve(Problem problem) {
-		ExactBP exactBP = new ExactBP(problem);
-		ExpressionVariable queryVariable = (ExpressionVariable) problem.getQueryVariable();
-		Factor factor = exactBP.apply();
-		Context context = getContext(problem);
-		ExpressionFactor unnormalized = getUnnormalizedExpressionFactor(factor, context);
-		ExpressionFactor normalizedMarginal = new DefaultExpressionFactor(normalize(queryVariable, unnormalized, context), context);
-		normalizedMarginal.setExplanation(makeExplanation(normalizedMarginal, factor));
+		QueryUnnormalizedMarginalAndContext solution = new QueryUnnormalizedMarginalAndContext(problem);
+		ExpressionFactor normalizedMarginal = makeNormalizedMarginalFactor(solution);
+		normalizedMarginal.setExplanation(makeExplanation(normalizedMarginal, solution.factor));
 		return normalizedMarginal;
 	}
 
+	private DefaultExpressionFactor makeNormalizedMarginalFactor(QueryUnnormalizedMarginalAndContext solution) {
+		DefaultExpressionFactor result = new DefaultExpressionFactor(makeNormalizedMarginalExpression(solution), solution.context);
+		return result;
+	}
+
+	private Expression makeNormalizedMarginalExpression(QueryUnnormalizedMarginalAndContext solution) {
+		Expression result = normalize(solution.queryVariable, solution.unnormalizedMarginal, solution.context);
+		return result;
+	}
+
 	private DefaultExplanationTree makeExplanation(ExpressionFactor normalizedMarginal, Factor factor) {
-		return new DefaultExplanationTree(PRAiSEUtil.conditionOnlyIfDeterministic(normalizedMarginal) + ", after normalizing:", factor.getExplanation());
+		DefaultExplanationTree result = new DefaultExplanationTree(PRAiSEUtil.conditionOnlyIfDeterministic(normalizedMarginal) + ", after normalizing:", factor.getExplanation());
+		return result;
 	}
 
 	private Context getContext(Problem problem) {

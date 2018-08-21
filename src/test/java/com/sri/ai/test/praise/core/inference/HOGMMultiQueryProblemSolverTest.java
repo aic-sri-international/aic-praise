@@ -42,6 +42,8 @@ import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlockToFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -56,6 +58,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.so
 import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
 import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
+import com.sri.ai.util.explanation.logging.api.ExplanationConfiguration;
 
 public class HOGMMultiQueryProblemSolverTest {
 	
@@ -133,24 +136,31 @@ public class HOGMMultiQueryProblemSolverTest {
 	}
 
 	@Test
-		public void linearRealArithmeticSmall() {
+	public void linearRealArithmeticSmall() {
+		
+		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = false;
+
+		String explanationFileName = "explanation.txt";
+
+		explanationBlockToFile(explanationFileName, "Going to solve small linear arithmetic problem", code(() -> {
+
 			String model = 
 					"random external : 1..5;\n" + 
-					"random internal2 : 1..5;\n" + 
-					"\n" + 
-					"internal2 = external - 1;\n" +
-					"external = 5;" +
-					"";
-			
+							"random internal2 : 1..5;\n" + 
+							"\n" + 
+							"internal2 = external - 1;\n" +
+							"external = 5;" +
+							"";
+
 			String query2 = "internal2";
 			HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query2));
 			ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
 			solver.setProceduralAttachments(proceduralAttachments);
-			
+
 			List<HOGMProblemResult> results = solver.getResults();
-		
+
 			assertEquals(1, results.size());
-			
+
 			HOGMProblemResult result = results.get(0);
 			result.getErrors().stream().forEach(e -> println(e));
 			Expression resultValue = result.getResult();
@@ -159,7 +169,9 @@ public class HOGMMultiQueryProblemSolverTest {
 			println(result.getExplanation());
 			assertFalse(result.hasErrors());
 			assertEquals(parse("if internal2 = 4 then 1 else 0"), result.getResult());
-		}
+			
+		}));
+	}
 
 	// @Test // TODO: need to fix bug in which using theory mixing DifferenceArithmeticTheory and LinearRealArithmeticTheory cause errors recognizing literals.
 	public void linearRealArithmeticBug() {

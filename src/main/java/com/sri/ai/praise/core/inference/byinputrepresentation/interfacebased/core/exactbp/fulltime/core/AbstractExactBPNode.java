@@ -42,6 +42,9 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.notNullAndEquals;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.ExtensionalLiveSet.liveSet;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.redirectingTo;
 import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.union;
@@ -87,6 +90,15 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 
 	public static boolean debug = false;
 
+	@Override
+	public
+	Factor apply() {
+		return
+				explanationBlock("Computing message to ", getRoot(), code(() -> {
+					return ExactBPNode.super.apply();
+				}), "Message to ", getRoot(), " is ", RESULT);
+	}
+	
 	@Override
 	public abstract List<? extends Factor> getFactorsAtRoot();
 

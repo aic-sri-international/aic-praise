@@ -41,6 +41,8 @@ import static com.sri.ai.expresso.helper.Expressions.TRUE;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
@@ -51,6 +53,7 @@ import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
+import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
 
 
 /**
@@ -70,11 +73,14 @@ public class PRAiSEUtil {
 	 * @return
 	 */
 	public static Expression normalize(Expression variable, Expression expression, Context context) {
-		Expression set = DefaultIntensionalMultiSet.intensionalMultiSet(variable, expression, TRUE, context);
-		Expression sum = apply(SUM, set);
-		Expression normalizedDefinition = apply(DIVISION, expression, sum);
-		Expression result = context.evaluate(normalizedDefinition);
-		return result;
+		return 
+				explanationBlock("Normalizing ", expression, " with respect to ", variable, ThreadExplanationLogger.code(() -> {
+					Expression set = DefaultIntensionalMultiSet.intensionalMultiSet(variable, expression, TRUE, context);
+					Expression sum = apply(SUM, set);
+					Expression normalizedDefinition = apply(DIVISION, expression, sum);
+					Expression result = context.evaluate(normalizedDefinition);
+					return result;
+				}), "Normalization is ", RESULT);
 	}
 
 	public static Factor conditionOnlyIfDeterministic(Factor factor) {
