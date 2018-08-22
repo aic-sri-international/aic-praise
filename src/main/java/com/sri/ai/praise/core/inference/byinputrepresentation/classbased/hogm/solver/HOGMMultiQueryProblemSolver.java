@@ -39,6 +39,7 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.s
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 
@@ -129,8 +130,9 @@ public class HOGMMultiQueryProblemSolver {
 	private void solveProblemWithQuery(String query) {
 		explanationBlock("Solving query ", query, code(() -> {
 			HOGMSingleQueryProblemSolver problemSolver = new HOGMSingleQueryProblemSolver(query, solverClass, hogmModel, expressionBasedModel, modelErrors);
-			results.addAll(problemSolver.getResults());
-		}));
+			List<HOGMProblemResult> queryResult = problemSolver.getResults();
+			results.addAll(queryResult);
+		return queryResult; }), "Query result is ", RESULT);
 	}
 
 	public void interrupt() {

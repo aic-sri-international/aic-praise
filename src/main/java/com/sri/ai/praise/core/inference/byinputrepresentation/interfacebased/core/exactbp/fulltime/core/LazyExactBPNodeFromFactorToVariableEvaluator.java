@@ -4,6 +4,10 @@ import static com.sri.ai.praise.core.PRAiSEUtil.conditionOnlyIfDeterministic;
 import static com.sri.ai.util.Util.findFirst;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.lazy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,16 +74,22 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 
 	@Override
 	protected void simplifyFunctionWithValueForSub(NullaryFunction<Factor> sub, Factor subValue) {
-		currentProduct = currentProduct.multiply(subValue);
-		explanationsOfSubs.add(subValue.getExplanation());
+		explanationBlock("Updating current product of factor and messages ", currentProduct, " with ", subValue, code(() -> { 
+			currentProduct = currentProduct.multiply(subValue);
+			explanationsOfSubs.add(subValue.getExplanation());
+		}), "Current product now is ", lazy(() -> currentProduct)); // lazy, or otherwise *initial* value of currentProduct is passed to explanationBlock
 	}
 
 	@Override
 	protected Factor finishComputingResultOnceAllRelevantSubComputationsHaveBeenTakenIntoAccount() {
+		
 		List<? extends Variable> variablesToBeSummedOut = determineVariablesToBeSummedOut.apply(currentProduct.getVariables());
-		Factor result = sumOutWithBookkeeping.apply(variablesToBeSummedOut, currentProduct);
-		result.setExplanation(makeExplanation(result));
-		return result;
+		
+		return explanationBlock("Summing out variables ", variablesToBeSummedOut, " from ", currentProduct, code(() -> { 
+			Factor result = sumOutWithBookkeeping.apply(variablesToBeSummedOut, currentProduct);
+			result.setExplanation(makeExplanation(result));
+			return result;
+		}), "Summation is ", RESULT);
 	}
 
 	private ExplanationTree makeExplanation(Factor factor) {
