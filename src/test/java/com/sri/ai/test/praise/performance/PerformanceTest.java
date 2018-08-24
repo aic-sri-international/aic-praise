@@ -70,11 +70,11 @@ public class PerformanceTest {
 			private static final double maximumPotential = 5.0;
 			private static final boolean integerIncrements = true;
 			
-			Function<Factor,Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
+			Function<Factor, Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
 			//possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
 			//						sumOutFirstVariable(Factor f), sumOutLastVariable(Factor f)
 			
-			BinaryFunction<Factor,Factor,Factor> binaryFactorOperation = (Factor A, Factor B) -> A.multiply(B);
+			BinaryFunction<Factor, Factor, Factor> binaryFactorOperation = (Factor A, Factor B) -> A.multiply(B);
 			//possible functions:	A.multiply(B), B.multiply(A)
 			
 			///////////////////////////////////////////////////////////////
@@ -123,10 +123,10 @@ public class PerformanceTest {
 		
 		List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
 
-		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
+		ArrayList<FactorOperationResultAndTime> operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
 		print("    total operation time");
-		printOperationTimes(factors, opeartionResultsAndTimes);
+		printOperationTimes(factors, operationResultsAndTimes);
 		
 		println();
 	}
@@ -363,7 +363,7 @@ public class PerformanceTest {
 		TableVariable V3 = new TableVariable("V3", 2);
 		TableVariable V4 = new TableVariable("V4", 2);
 		
-		TableFactor tablefactor = new TableFactor(arrayList(V1,V2,V3,V4), 1.);
+		TableFactor tablefactor = new TableFactor(arrayList(V1, V2, V3, V4), 1.);
 		tablefactor.setName("tablefactor");
 		
 
@@ -528,9 +528,9 @@ public class PerformanceTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	private static class FactorOperationResultAndTime{
-		public Pair<Factor,Long> resultAndTime;
+		public Pair<Factor, Long> resultAndTime;
 		
-		public FactorOperationResultAndTime(Pair<Factor,Long> resultAndTime)
+		public FactorOperationResultAndTime(Pair<Factor, Long> resultAndTime)
 		{
 			this.resultAndTime = resultAndTime;
 		}
@@ -597,7 +597,7 @@ public class PerformanceTest {
 	/// RECORDING RESULTS FROM FACTOR OPERATIONS ////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private static ArrayList<FactorOperationResultAndTime> recordTimesForFactorOperation(Function<Factor,Factor> unaryFactorOperation, List<Factor> factors)
+	private static ArrayList<FactorOperationResultAndTime> recordTimesForFactorOperation(Function<Factor, Factor> unaryFactorOperation, List<Factor> factors)
 	{
 		ArrayList<FactorOperationResultAndTime> operationTimes = new ArrayList<>(NUMBER_OF_SUPPORTED_FACTOR_TYPES);
 		
@@ -611,7 +611,7 @@ public class PerformanceTest {
 		return operationTimes;
 	}
 	
-	private static ArrayList<FactorOperationResultAndTime> recordTimesForFactorOperation(BinaryFunction<Factor,Factor,Factor> binaryFactorOperation, 
+	private static ArrayList<FactorOperationResultAndTime> recordTimesForFactorOperation(BinaryFunction<Factor, Factor, Factor> binaryFactorOperation, 
 																															List<Factor> A, List<Factor> B)
 	{
 		ArrayList<FactorOperationResultAndTime> operationTimes = new ArrayList<>(NUMBER_OF_SUPPORTED_FACTOR_TYPES);
@@ -715,15 +715,15 @@ public class PerformanceTest {
 			println();
 			    println("     Random table factor:                         " + factors.get(TABLE_FACTOR_INDEX));
 			if (includeTables) {
-				printResultingFactor(results,TABLE_FACTOR_INDEX);
+				printResultingFactor(results, TABLE_FACTOR_INDEX);
 			}
 			if (includeTreeBasedExpressions) {
 				println("     Equivalent tree-based expression factor:     " + factors.get(TREE_BASED_EXPRESSION_FACTOR_INDEX));
-				printResultingFactor(results,TREE_BASED_EXPRESSION_FACTOR_INDEX);
+				printResultingFactor(results, TREE_BASED_EXPRESSION_FACTOR_INDEX);
 			}
 			if (includeLinearTableExpressions) {
 				println("     Equivalent linear-table expression factor:   " + factors.get(LINEAR_TABLE_EXPRESSION_FACTOR_INDEX));
-				printResultingFactor(results,LINEAR_TABLE_EXPRESSION_FACTOR_INDEX);
+				printResultingFactor(results, LINEAR_TABLE_EXPRESSION_FACTOR_INDEX);
 			}
 			println("     -------------  Time for operation  ------------");
 			if (includeTables) {
@@ -758,17 +758,17 @@ public class PerformanceTest {
 			    println("     Random table factor A:                       " + factorsA.get(TABLE_FACTOR_INDEX));
 			    println("     Random table factor B:                       " + factorsB.get(TABLE_FACTOR_INDEX));
 			if (includeTables) {
-				printResultingFactor(results,TABLE_FACTOR_INDEX);
+				printResultingFactor(results, TABLE_FACTOR_INDEX);
 			}
 			if (includeTreeBasedExpressions) {
 				println("     Equivalent tree-based expression factor A:   " + factorsA.get(TREE_BASED_EXPRESSION_FACTOR_INDEX));
 				println("     Equivalent tree-based expression factor B:   " + factorsB.get(TREE_BASED_EXPRESSION_FACTOR_INDEX));
-				printResultingFactor(results,TREE_BASED_EXPRESSION_FACTOR_INDEX);
+				printResultingFactor(results, TREE_BASED_EXPRESSION_FACTOR_INDEX);
 			}
 			if (includeLinearTableExpressions) {
 				println("     Equivalent linear-table expression factor A: " + factorsA.get(LINEAR_TABLE_EXPRESSION_FACTOR_INDEX));
 				println("     Equivalent linear-table expression factor B: " + factorsB.get(LINEAR_TABLE_EXPRESSION_FACTOR_INDEX));
-				printResultingFactor(results,LINEAR_TABLE_EXPRESSION_FACTOR_INDEX);
+				printResultingFactor(results, LINEAR_TABLE_EXPRESSION_FACTOR_INDEX);
 			}
 			println("   -------------  Time for operation  ------------");
 			if (includeTables) {
@@ -831,8 +831,8 @@ public class PerformanceTest {
 	private static long estimateTimeForNextCardinality(int currentCardinality, ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes) {
 		
 		long timeTakenForCurrentCardinality = Collections.max(opeartionResultsAndTimes, TEST_RESULT_TIME_COMPARATOR).time();
-		double timePerFactorParameter = timeTakenForCurrentCardinality / Math.pow(currentCardinality,numberOfVariablesPerFactor);
-		double timeForIncrementedVariableCardinality = timePerFactorParameter*Math.pow(++currentCardinality,numberOfVariablesPerFactor);
+		double timePerFactorParameter = timeTakenForCurrentCardinality / Math.pow(currentCardinality, numberOfVariablesPerFactor);
+		double timeForIncrementedVariableCardinality = timePerFactorParameter*Math.pow(++currentCardinality, numberOfVariablesPerFactor);
 		
 		return (long) timeForIncrementedVariableCardinality;
 	}
