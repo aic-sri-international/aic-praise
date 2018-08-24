@@ -58,7 +58,7 @@ public class PerformanceTest {
 			
 			private static final boolean verbose = false;
 			
-			private static final int timeLimitPerOperation = 120000;	//how long (ms) you are willing to wait for a factor operation to complete
+			private static final int timeLimitPerOperation = 120000;	// how long (ms) you are willing to wait for a factor operation to complete
 			
 			private static final boolean includeTables = false;
 			private static final boolean includeTreeBasedExpressions = true;
@@ -71,11 +71,11 @@ public class PerformanceTest {
 			private static final boolean integerIncrements = true;
 			
 			Function<Factor, Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
-			//possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
+			// possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
 			//						sumOutFirstVariable(Factor f), sumOutLastVariable(Factor f)
 			
 			BinaryFunction<Factor, Factor, Factor> binaryFactorOperation = (Factor A, Factor B) -> A.multiply(B);
-			//possible functions:	A.multiply(B), B.multiply(A)
+			// possible functions:	A.multiply(B), B.multiply(A)
 			
 			///////////////////////////////////////////////////////////////
 			
@@ -146,7 +146,7 @@ public class PerformanceTest {
 		
 		long contextSplittingTime = -1;
 		
-		//STARTING VARIABLE NUMBER
+		// STARTING VARIABLE NUMBER
 		int numberOfVariables = 1;
 		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes;
 
@@ -155,7 +155,7 @@ public class PerformanceTest {
 			factorSpecs.cardinalities = fill(numberOfVariables, cardinalityOfVariables);
 			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
 			
-			contextSplittingTest = new ContextSplittingTester(numberOfVariables, cardinalityOfVariables, false, THEORY); //false <-- focus on recording overall time
+			contextSplittingTest = new ContextSplittingTester(numberOfVariables, cardinalityOfVariables, false, THEORY); // false <-- focus on recording overall time
 			
 			opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 			println("|| " + numberOfVariables + " variables ||");
@@ -190,7 +190,7 @@ public class PerformanceTest {
 		
 		long contextSplittingTime = -1;
 		
-		//STARTING VARIABLE NUMBER
+		// STARTING VARIABLE NUMBER
 		int cardinality = 1;
 		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes;
 
@@ -199,7 +199,7 @@ public class PerformanceTest {
 			factorSpecs.cardinalities = fill(numberOfVariablesPerFactor, cardinality);
 			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
 			
-			contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinality, false, THEORY); //false <-- focus on recording overall time
+			contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinality, false, THEORY); // false <-- focus on recording overall time
 			
 			opeartionResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 			println("|| " + "variables with cardinality of " + cardinality + " ||");
@@ -230,7 +230,7 @@ public class PerformanceTest {
 
 		RandomTableFactorSpecs factorSpecs = new RandomTableFactorSpecs(GLOBAL_TABLE_FACTOR_SPECS);
 		
-		//STARTING VARIABLE NUMBER
+		// STARTING VARIABLE NUMBER
 		int numberOfVariables = 1;
 		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes;
 
@@ -262,7 +262,7 @@ public class PerformanceTest {
 		
 		RandomTableFactorSpecs factorSpecs = new RandomTableFactorSpecs(GLOBAL_TABLE_FACTOR_SPECS);
 		
-		//STARTING CARDINALITY
+		// STARTING CARDINALITY
 		int cardinality = 1;
 		ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes;
 		do {
@@ -283,8 +283,8 @@ public class PerformanceTest {
 	
 	
 	
-	//TODO:  resolve why cannot multiply to factor with more variables
-	//TODO:  create loop with automation of loop termination for varying number of variables
+	// TODO:  resolve why cannot multiply to factor with more variables
+	// TODO:  create loop with automation of loop termination for varying number of variables
 	//@Test
 	public void varyingNumberOfVariablesForBinaryFactorOperation() {
 		
@@ -437,27 +437,27 @@ public class PerformanceTest {
 		// tablefactor variables to be summed out
 		List<? extends Variable> tablefactorVariables = expressionfactor1.getVariables();
 		List<? extends Variable> tablefactorVariablesToBeSummedOut = new ArrayList<>(tablefactorVariables);
-		tablefactorVariablesToBeSummedOut.remove(tablefactorVariablesToBeSummedOut.size()-1);  //remove V4 from list	
+		tablefactorVariablesToBeSummedOut.remove(tablefactorVariablesToBeSummedOut.size()-1);  // remove V4 from list	
 		
 		// expressionfactor1 variables to be summed out
 		List<? extends Variable> expressionfactor1Variables = expressionfactor1.getVariables();
 		List<? extends Variable> expressionfactor1VariablesToBeSummedOut = new ArrayList<>(expressionfactor1Variables);
-		expressionfactor1VariablesToBeSummedOut.remove(expressionfactor1VariablesToBeSummedOut.size()-1);  //remove V4 from list
+		expressionfactor1VariablesToBeSummedOut.remove(expressionfactor1VariablesToBeSummedOut.size()-1);  // remove V4 from list
 		
 		// expressionfactor2 variables to be summed out
 		List<? extends Variable> expressionfactor2Variables = expressionfactor2.getVariables();
 		List<? extends Variable> expressionfactor2VariablesToBeSummedOut = new ArrayList<>(expressionfactor2Variables);
-		expressionfactor2VariablesToBeSummedOut.remove(expressionfactor2VariablesToBeSummedOut.size()-1);  //remove V4 from list	
+		expressionfactor2VariablesToBeSummedOut.remove(expressionfactor2VariablesToBeSummedOut.size()-1);  // remove V4 from list	
 		
 		// expressionfactor3 variables to be summed out
 		List<? extends Variable> expressionfactor3Variables = expressionfactor3.getVariables();
 		List<? extends Variable> expressionfactor3VariablesToBeSummedOut = new ArrayList<>(expressionfactor3Variables);
-		expressionfactor3VariablesToBeSummedOut.remove(expressionfactor3VariablesToBeSummedOut.size()-1);  //remove V4 from list	
+		expressionfactor3VariablesToBeSummedOut.remove(expressionfactor3VariablesToBeSummedOut.size()-1);  // remove V4 from list	
 		
 		// expressionfactor4 variables to be summed out
 		List<? extends Variable> expressionfactor4Variables = expressionfactor4.getVariables();
 		List<? extends Variable> expressionfactor4VariablesToBeSummedOut = new ArrayList<>(expressionfactor4Variables);
-		expressionfactor4VariablesToBeSummedOut.remove(expressionfactor4VariablesToBeSummedOut.size()-1);  //remove V4 from list	
+		expressionfactor4VariablesToBeSummedOut.remove(expressionfactor4VariablesToBeSummedOut.size()-1);  // remove V4 from list	
 		
 		
 		
@@ -796,7 +796,7 @@ public class PerformanceTest {
 		}
 	}
 	
-	//TODO: expand to include ability to compare linear table expressions to their context splitting times as well (need to adjust ContextSplittingTester)
+	// TODO: expand to include ability to compare linear table expressions to their context splitting times as well (need to adjust ContextSplittingTester)
 	private static void printPercentageOfOperationTimeDueTo(List<FactorOperationResultAndTime> results, long subTime) {
 		print("    percentage of time spent in context splitting");
 		if (includeTreeBasedExpressions) {
