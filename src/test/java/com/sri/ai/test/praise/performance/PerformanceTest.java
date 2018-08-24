@@ -56,16 +56,16 @@ public class PerformanceTest {
 			// GLOBAL TEST SETTINGS  /////////////////////////////////////
 			//////////////////////////////////////////////////////////////
 			
-			private static final boolean verbose = false;
+			private static final boolean verbose = true;
 			
 			private static final int timeLimitPerOperation = 120000;	// how long (ms) you are willing to wait for a factor operation to complete
 			
-			private static final boolean includeTables = false;
+			private static final boolean includeTables = true;
 			private static final boolean includeTreeBasedExpressions = true;
 			private static final boolean includeLinearTableExpressions = false;
 			
-			private static final int numberOfVariablesPerFactor = 1;
-			private static final int cardinalityOfVariables = 1;
+			private static final int numberOfVariablesPerFactor = 2;
+			private static final int cardinalityOfVariables = 2;
 			private static final double minimumPotential = 1.0;
 			private static final double maximumPotential = 5.0;
 			private static final boolean integerIncrements = true;
@@ -627,15 +627,15 @@ public class PerformanceTest {
 	}
 
 
-	private static FactorOperationResultAndTime timeFactorOperation(NullaryFunction<Factor> opeartion) {
-		FactorOperationResultAndTime result = new FactorOperationResultAndTime( timeAndGetResult(() -> opeartion.apply()) );
+	private static FactorOperationResultAndTime timeFactorOperation(NullaryFunction<Factor> operation) {
+		FactorOperationResultAndTime result = new FactorOperationResultAndTime( timeAndGetResult(() -> operation.apply()) );
 		return result;
 	}
 	
 	
 	
 	
-	/// POSSIBLE UNARY FACTOR OPEARTIONS ///////////////////////////////////////////////////////////////////
+	/// POSSIBLE UNARY FACTOR OPERATIONS ///////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static Factor sumOutFirstHalfOfVariables(Factor factor) {
@@ -700,10 +700,10 @@ public class PerformanceTest {
 	
 	private static void verboseMessage(boolean verbose) {
 		if (verbose) {
-			println("  Verbose mode on (set local variable in test for disabling it)");
+			println("  Verbose mode on (set global variable in " + PerformanceTest.class.getSimpleName() + " for disabling it)");
 		}
 		else {
-			println("  Verbose mode off (set local variable in test for enabling it)");
+			println("  Verbose mode off (set global variable in " + PerformanceTest.class.getSimpleName() + " for enabling it)");
 		}
 		println();
 	}
