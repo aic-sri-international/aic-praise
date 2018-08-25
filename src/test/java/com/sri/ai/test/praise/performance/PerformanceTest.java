@@ -1,15 +1,16 @@
 package com.sri.ai.test.praise.performance;
 
+import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.RandomTableFactorMaker.makeRandomTableFactor;
+import static com.sri.ai.util.Timer.timeAndGetResult;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.getFirstHalfSubList;
 import static com.sri.ai.util.Util.getLastHalfSubList;
 import static com.sri.ai.util.Util.print;
 import static com.sri.ai.util.Util.println;
-import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.util.Timer.timeAndGetResult;
-
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlockToFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,14 +18,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-
 import org.junit.Test;
-import com.sri.ai.util.base.Pair;
+
 import com.google.common.base.Function;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.grinder.tester.ContextSplittingTester;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -36,7 +37,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.he
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.FromTableToExpressionFactorConverter;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
-import com.sri.ai.grinder.tester.ContextSplittingTester;
+import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.explanation.logging.api.ExplanationConfiguration;
 
 
 /**
@@ -51,34 +53,34 @@ import com.sri.ai.grinder.tester.ContextSplittingTester;
  */
 public class PerformanceTest {
 	
-	
-			//////////////////////////////////////////////////////////////
-			// GLOBAL TEST SETTINGS  /////////////////////////////////////
-			//////////////////////////////////////////////////////////////
-			
-			private static final boolean verbose = true;
-			
-			private static final int timeLimitPerOperation = 120000;	// how long (ms) you are willing to wait for a factor operation to complete
-			
-			private static final boolean includeTables = true;
-			private static final boolean includeTreeBasedExpressions = true;
-			private static final boolean includeLinearTableExpressions = false;
-			
-			private static final int numberOfVariablesPerFactor = 2;
-			private static final int cardinalityOfVariables = 2;
-			private static final double minimumPotential = 1.0;
-			private static final double maximumPotential = 5.0;
-			private static final boolean integerIncrements = true;
-			
-			Function<Factor, Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
-			// possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
-			//						sumOutFirstVariable(Factor f), sumOutLastVariable(Factor f)
-			
-			BinaryFunction<Factor, Factor, Factor> binaryFactorOperation = (Factor A, Factor B) -> A.multiply(B);
-			// possible functions:	A.multiply(B), B.multiply(A)
-			
-			///////////////////////////////////////////////////////////////
-			
+
+	//////////////////////////////////////////////////////////////
+	// GLOBAL TEST SETTINGS  /////////////////////////////////////
+	//////////////////////////////////////////////////////////////
+
+	private static final boolean verbose = true;
+
+	private static final int timeLimitPerOperation = 120000;	// how long (ms) you are willing to wait for a factor operation to complete
+
+	private static final boolean includeTables = true;
+	private static final boolean includeTreeBasedExpressions = true;
+	private static final boolean includeLinearTableExpressions = false;
+
+	private static final int numberOfVariablesPerFactor = 1;
+	private static final int cardinalityOfVariables = 2;
+	private static final double minimumPotential = 1.0;
+	private static final double maximumPotential = 5.0;
+	private static final boolean integerIncrements = true;
+
+	Function<Factor, Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
+	// possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
+	//						sumOutFirstVariable(Factor f), sumOutLastVariable(Factor f)
+
+	BinaryFunction<Factor, Factor, Factor> binaryFactorOperation = (Factor A, Factor B) -> A.multiply(B);
+	// possible functions:	A.multiply(B), B.multiply(A)
+
+	///////////////////////////////////////////////////////////////
+
 			
 			
 	// OTHER GLOBAL CONSTANTS
@@ -113,22 +115,28 @@ public class PerformanceTest {
 	@Test
 	public void singleRunForUnaryFactorOperation() {
 		
-		println("===============================================================================================\n");
-		println("Testing UNARY OPERATION");
-		println("  number of variables = " + numberOfVariablesPerFactor);
-		println("  variable cardinality = " + cardinalityOfVariables);
-		verboseMessage(verbose);
-
-		RandomTableFactorSpecs factorSpecs = new RandomTableFactorSpecs(GLOBAL_TABLE_FACTOR_SPECS);
+		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = false;
 		
-		List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
+		explanationBlockToFile("explanation.txt", "Perfomance test of unary operation", code( () -> {
 
-		ArrayList<FactorOperationResultAndTime> operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
+			println("===============================================================================================\n");
+			println("Testing UNARY OPERATION");
+			println("  number of variables = " + numberOfVariablesPerFactor);
+			println("  variable cardinality = " + cardinalityOfVariables);
+			verboseMessage(verbose);
 
-		print("    total operation time");
-		printOperationTimes(factors, operationResultsAndTimes);
-		
-		println();
+			RandomTableFactorSpecs factorSpecs = new RandomTableFactorSpecs(GLOBAL_TABLE_FACTOR_SPECS);
+
+			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
+
+			ArrayList<FactorOperationResultAndTime> operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
+
+			print("    total operation time");
+			printOperationTimes(factors, operationResultsAndTimes);
+
+			println();
+
+		}));
 	}
 	
 	
