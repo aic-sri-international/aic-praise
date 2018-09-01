@@ -28,16 +28,10 @@ import com.sri.ai.util.collect.CartesianProductIterator;
 import com.sri.ai.util.collect.IntegerIterator;
 
 public class FromTableToExpressionFactorConverter {
-	
-	private Theory theory;
-	
-	public FromTableToExpressionFactorConverter(Theory theory) {
-		this.theory = theory;
-	}
 
-	public ExpressionFactor convert(TableFactor tableFactor) {
+	public ExpressionFactor convert(TableFactor tableFactor, Theory theory) {
 		Expression expression = makeExpressionEquivalentToTableFactor(tableFactor);
-		Context context = makeContextWithVariablesFrom(tableFactor);
+		Context context = makeContextWithVariablesFrom(tableFactor, theory);
 		ExpressionFactor expressionFactor = new DefaultExpressionFactor(expression, context);
 		return expressionFactor;
 	}
@@ -87,9 +81,9 @@ public class FromTableToExpressionFactorConverter {
 	// TODO: refactor/remove original versions of functions to integrate with the new overloads                                                      //
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public ExpressionFactor convert(TableFactor tableFactor, boolean convertAsTreeBasedExpression) {
+	public ExpressionFactor convert(TableFactor tableFactor, Theory theory, boolean convertAsTreeBasedExpression) {
 		Expression expression = makeExpressionEquivalentToTableFactor(tableFactor, convertAsTreeBasedExpression);
-		Context context = makeContextWithVariablesFrom(tableFactor);
+		Context context = makeContextWithVariablesFrom(tableFactor, theory);
 		ExpressionFactor expressionFactor = new DefaultExpressionFactor(expression, context);
 		return expressionFactor;
 	}
@@ -198,7 +192,7 @@ public class FromTableToExpressionFactorConverter {
 		return result;
 	}
 
-	private Context makeContextWithVariablesFrom(TableFactor tableFactor) {
+	private Context makeContextWithVariablesFrom(TableFactor tableFactor, Theory theory) {
 		Context context = new TrueContext(theory);
 		for (TableVariable tableVariable : tableFactor.getVariables()) {
 			context = register(tableVariable, context);

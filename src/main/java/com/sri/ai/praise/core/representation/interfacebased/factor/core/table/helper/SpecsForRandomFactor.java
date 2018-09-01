@@ -2,14 +2,14 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.h
 
 import java.util.ArrayList;
 
-public class RandomTableFactorSpecs {
+public class SpecsForRandomFactor {
 
 	public ArrayList<Integer> cardinalities;
 	public double minimumPotential;
 	public double maximumPotential;
 	public boolean integerIncrements;
 	
-	public RandomTableFactorSpecs(ArrayList<Integer> cardinalities, 
+	public SpecsForRandomFactor(ArrayList<Integer> cardinalities, 
 							double minimumPotential, double maximumPotential, boolean integerIncrements)
 	{
 		this.cardinalities = cardinalities;
@@ -18,7 +18,7 @@ public class RandomTableFactorSpecs {
 		this.integerIncrements = integerIncrements;
 	}
 	
-	public RandomTableFactorSpecs(RandomTableFactorSpecs toCopy)
+	public SpecsForRandomFactor(SpecsForRandomFactor toCopy)
 	{
 		cardinalities = new ArrayList<>(toCopy.cardinalities.size());
 		for(Integer cardinality : toCopy.cardinalities)
