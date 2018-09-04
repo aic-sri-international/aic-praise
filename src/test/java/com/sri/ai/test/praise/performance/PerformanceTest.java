@@ -34,6 +34,7 @@ import com.sri.ai.praise.core.representation.translation.rodrigoframework.FromTa
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.explanation.logging.api.ExplanationConfiguration;
+import com.sri.ai.grinder.core.constraint.ConstraintSplitting;
 
 
 /**
@@ -641,6 +642,7 @@ public class PerformanceTest {
 		int i = 0;
 		for(; i < N; ++i)
 		{
+			ConstraintSplitting.resetCounter();
 			explanationBlock("Test # ", i, code( () -> {
 			procedure.run();
 			}), "Result is ", RESULT);
