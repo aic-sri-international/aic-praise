@@ -7,7 +7,10 @@ import static com.sri.ai.util.Util.getFirstHalfSubList;
 import static com.sri.ai.util.Util.getLastHalfSubList;
 import static com.sri.ai.util.Util.print;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlockToFile;
 
 import java.util.ArrayList;
@@ -50,20 +53,22 @@ public class PerformanceTest {
 	// GLOBAL TEST SETTINGS  /////////////////////////////////////
 	//////////////////////////////////////////////////////////////
 
-	private static final boolean verbose = true;
-	private static final boolean testMultipleTheories = true;
+	private static final boolean verbose = false;
+	private static final boolean testMultipleTheories = false;
 	private static final boolean compareWithExpectedContextSplittingTimes = false;
 
-	private static final int timeLimitPerOperation = 10000;	// how long (ms) you are willing to wait for a factor operation to complete
+	private static final int timeLimitPerOperation = 10000;	// approximately how long (ms) you are willing to wait for a factor operation to complete
 
-	private static final Theory SingledOutTheory = new DifferenceArithmeticTheory(false, true);
+	private static final Theory SingledOutTheory = new DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters(false, true);
+	//	theories to use:	new DifferenceArithmeticTheory(false, true)
+	//						new DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters(false, true)
 	
-	private static final boolean includeTableFactor = true;
+	private static final boolean includeTableFactor = false;
 	private static final boolean includeTreeBasedExpressionFactors = true;
 	private static final boolean includeLinearTableExpressionFactors = false;
 
-	private static final int numberOfVariablesPerFactor = 4;
-	private static final int cardinalityOfVariables = 4;
+	private static final int numberOfVariablesPerFactor = 1;
+	private static final int cardinalityOfVariables = 2;
 	private static final double minimumPotential = 1.0;
 	private static final double maximumPotential = 10.0;
 	private static final boolean integerIncrements = true;
@@ -126,15 +131,27 @@ public class PerformanceTest {
 		println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
 		println();
 	}
-
-
+	
+	
+	
 	@Test
+	public void repeatTestFxnNTimes() {
+		
+		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = true;
+		final int N = 4;
+		explanationBlockToFile("explanation.txt", "Perfomance tests of unary operation...", code( () -> {	
+			repeatNtimes(() -> singleRunForUnaryFactorOperation(), N);
+		}));
+	}
+
+	
+
+	//@Test
 	public void singleRunForUnaryFactorOperation() {
 		println("\n");
+
 		
-		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = false;
-		
-		explanationBlockToFile("explanation.txt", "Perfomance test of unary operation", code( () -> {
+
 			println("==================================================================================================");
 			println("||                                  Testing UNARY OPERATION                                     ||");
 			println("==================================================================================================");
@@ -167,12 +184,12 @@ public class PerformanceTest {
 			println("==================================================================================================");
 			println();
 
-		}));
+
 	}
 	
 	
 	
-	@Test
+	//@Test
 	public void varyingNumberOfVariablesForUnaryFactorOperation() {
 		println("\n");
 		
@@ -223,7 +240,7 @@ public class PerformanceTest {
 	
 
 
-	@Test
+	//@Test
 	public void varyingCardinalityOfVariablesForUnaryFactorOperation() {
 		println("\n");
 		
@@ -389,6 +406,7 @@ public class PerformanceTest {
 		
 		for(int i = 0; i < NUMBER_OF_TESTED_FACTORS; ++i)
 		{
+			explain("Expression Factor Tested: ", factors.get(i));
 			Factor factorToTest = factors.get(i);
 			operationResults.add( timeFactorOperation(() -> unaryFactorOperation.apply(factorToTest)) );
 		}
@@ -623,7 +641,9 @@ public class PerformanceTest {
 		int i = 0;
 		for(; i < N; ++i)
 		{
+			explanationBlock("Test # ", i, code( () -> {
 			procedure.run();
+			}), "Result is ", RESULT);
 		}
 	}
 	
