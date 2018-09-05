@@ -33,8 +33,10 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.he
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.FromTableToExpressionFactorConverter;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.base.Triple;
 import com.sri.ai.util.explanation.logging.api.ExplanationConfiguration;
 import com.sri.ai.grinder.core.constraint.ConstraintSplitting;
+import com.sri.ai.grinder.core.constraint.ContextSplitting;
 
 
 /**
@@ -49,43 +51,46 @@ import com.sri.ai.grinder.core.constraint.ConstraintSplitting;
  */
 public class PerformanceTest {
 	
+	// GLOBAL CONSTANTS	
+	private static final Theory DIFFERENCE_ARITHMETIC_THEORY = new DifferenceArithmeticTheory(false, true);
+	private static final Theory SIMPLIFIED_DIFFERENCE_ARITHMETIC_THEORY = new DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters(false, true);
+	private static final Theory[] POSSIBLE_THEORIES = { DIFFERENCE_ARITHMETIC_THEORY, 
+														SIMPLIFIED_DIFFERENCE_ARITHMETIC_THEORY };
 
-	//////////////////////////////////////////////////////////////
-	// GLOBAL TEST SETTINGS  /////////////////////////////////////
-	//////////////////////////////////////////////////////////////
-
-	private static final boolean verbose = false;
-	private static final boolean testMultipleTheories = false;
-	private static final boolean compareWithExpectedContextSplittingTimes = false;
-
-	private static final int timeLimitPerOperation = 10000;	// approximately how long (ms) you are willing to wait for a factor operation to complete
-
-	private static final Theory SingledOutTheory = new DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters(false, true);
-	//	theories to use:	new DifferenceArithmeticTheory(false, true)
-	//						new DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters(false, true)
 	
-	private static final boolean includeTableFactor = false;
-	private static final boolean includeTreeBasedExpressionFactors = true;
-	private static final boolean includeLinearTableExpressionFactors = false;
-
-	private static final int numberOfVariablesPerFactor = 1;
-	private static final int cardinalityOfVariables = 2;
-	private static final double minimumPotential = 1.0;
-	private static final double maximumPotential = 10.0;
-	private static final boolean integerIncrements = true;
-
-	Function<Factor, Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
-	// possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
-	//						sumOutFirstVariable(Factor f), sumOutLastVariable(Factor f)
-
-	///////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////
+		// GLOBAL TEST SETTINGS  /////////////////////////////////////
+		//////////////////////////////////////////////////////////////
+	
+		private static final boolean verbose = true;
+		private static final boolean testMultipleTheories = true;
+		private static final boolean compareWithSimulatedContextSplittingTimes = true;
+	
+		private static final int timeLimitPerOperation = 10000;	// approximately how long (ms) you are willing to wait for a factor operation to complete
+	
+		private static final Theory SingledOutTheory = SIMPLIFIED_DIFFERENCE_ARITHMETIC_THEORY;
+		//	theories to use:	new DifferenceArithmeticTheory(false, true)
+		//						new DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters(false, true)
+		
+		private static final boolean includeTableFactor = true;
+		private static final boolean includeTreeBasedExpressionFactors = true;
+		private static final boolean includeLinearTableExpressionFactors = false;
+	
+		private static final int numberOfVariablesPerFactor = 4;
+		private static final int cardinalityOfVariables = 4;
+		private static final double minimumPotential = 1.0;
+		private static final double maximumPotential = 10.0;
+		private static final boolean integerIncrements = true;
+	
+		Function<Factor, Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
+		// possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
+		//						sumOutFirstVariable(Factor f), sumOutLastVariable(Factor f)
+	
+		///////////////////////////////////////////////////////////////
 
 			
 			
-	// GLOBAL CONSTANTS
-	private static final Theory[] POSSIBLE_THEORIES = { new DifferenceArithmeticTheory(false, true), 
-														new DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters(false, true) };
-	
+	// GLOBAL CONSTANTS	
 	private static final Theory[] THEORIES_TO_TEST = 	testMultipleTheories 	?   POSSIBLE_THEORIES	:	new Theory[] {SingledOutTheory};
 	
 	private static final int NUMBER_OF_TESTED_THEORIES = THEORIES_TO_TEST.length;
@@ -135,7 +140,7 @@ public class PerformanceTest {
 	
 	
 	
-	@Test
+	//@Test
 	public void repeatTestFxnNTimes() {
 		
 		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = true;
@@ -162,24 +167,27 @@ public class PerformanceTest {
 			println("==================================================================================================");
 
 			SpecsForRandomFactor factorSpecs = new SpecsForRandomFactor(GLOBAL_TABLE_FACTOR_SPECS);
-			
-			ContextSplittingTester contextSplittingTest;
-			long contextSplittingTime = -1;
 
 			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
 			
-			contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinalityOfVariables, false, SingledOutTheory); // false <-- focus on recording overall time
-
-			ArrayList<FactorOperationResultAndTime> operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
+			ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
 			printOperationResults(factors, operationResultsAndTimes);
 			
-			if(compareWithExpectedContextSplittingTimes) {
-			println("--------------------------------------------------------------------------------------------------");
-			contextSplittingTime = contextSplittingTest.performContextSplittingTest();
-			printExpectedContextSplittingTime(contextSplittingTime);
-			println("--------------------------------------------------------------------------------------------------");
-			printPercentageOfOperationTimeDueTo(operationResultsAndTimes, contextSplittingTime);
+			if(compareWithSimulatedContextSplittingTimes) {
+				ContextSplittingTester contextSplittingTest;
+				long timeForSimulatedContextSplittings;
+				
+				contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinalityOfVariables, false, SingledOutTheory); // false <-- focus on recording overall time
+				println("--------------------------------------------------------------------------------------------------");
+				timeForSimulatedContextSplittings = contextSplittingTest.performContextSplittingTest();
+				printSimulatedContextSplittingTime(timeForSimulatedContextSplittings);
+				println("--------------------------------------------------------------------------------------------------");
+				printPercentageOfOperationTimesDueTo(operationResultsAndTimes, timeForSimulatedContextSplittings);
+				println("--------------------------------------------------------------------------------------------------");
+				printActualContextSplittingTime(operationResultsAndTimes);
+				println("--------------------------------------------------------------------------------------------------");
+				printPercentageOfOperationTimesDueToContextSplitting(operationResultsAndTimes);
 			}
 
 			println("==================================================================================================");
@@ -187,10 +195,11 @@ public class PerformanceTest {
 
 
 	}
-	
-	
-	
-	//@Test
+
+
+
+
+	@Test
 	public void varyingNumberOfVariablesForUnaryFactorOperation() {
 		println("\n");
 		
@@ -204,12 +213,9 @@ public class PerformanceTest {
 
 		SpecsForRandomFactor factorSpecs = new SpecsForRandomFactor(GLOBAL_TABLE_FACTOR_SPECS);
 		
-		ContextSplittingTester contextSplittingTest;
-		long contextSplittingTime = -1;
-		
 		// STARTING VARIABLE NUMBER
 		int numberOfVariables = 1;
-		ArrayList<FactorOperationResultAndTime> operationResultsAndTimes;
+		ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes;
 
 		do {
 
@@ -217,19 +223,25 @@ public class PerformanceTest {
 			
 			factorSpecs.cardinalities = fill(numberOfVariables, cardinalityOfVariables);
 			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
-		
-			contextSplittingTest = new ContextSplittingTester(numberOfVariables, cardinalityOfVariables, false, SingledOutTheory); // false <-- focus on recording overall time
-			
+					
 			operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
 			printOperationResults(factors, operationResultsAndTimes);
 			
-			if(compareWithExpectedContextSplittingTimes) {
-			println("--------------------------------------------------------------------------------------------------");
-			contextSplittingTime = contextSplittingTest.performContextSplittingTest();
-			printExpectedContextSplittingTime(contextSplittingTime);
-			println("--------------------------------------------------------------------------------------------------");
-			printPercentageOfOperationTimeDueTo(operationResultsAndTimes, contextSplittingTime);
+			if(compareWithSimulatedContextSplittingTimes) {
+				ContextSplittingTester contextSplittingTest;
+				long timeForSimulatedContextSplittings;
+				
+				contextSplittingTest = new ContextSplittingTester(numberOfVariables, cardinalityOfVariables, false, DIFFERENCE_ARITHMETIC_THEORY); // false <-- focus on recording overall time
+				println("--------------------------------------------------------------------------------------------------");
+				timeForSimulatedContextSplittings = contextSplittingTest.performContextSplittingTest();
+				printSimulatedContextSplittingTime(timeForSimulatedContextSplittings);
+				println("--------------------------------------------------------------------------------------------------");
+				printPercentageOfOperationTimesDueTo(operationResultsAndTimes, timeForSimulatedContextSplittings);
+				println("--------------------------------------------------------------------------------------------------");
+				printActualContextSplittingTime(operationResultsAndTimes);
+				println("--------------------------------------------------------------------------------------------------");
+				printPercentageOfOperationTimesDueToContextSplitting(operationResultsAndTimes);
 			}
 			
 			println("==================================================================================================");
@@ -255,31 +267,34 @@ public class PerformanceTest {
 
 		SpecsForRandomFactor factorSpecs = new SpecsForRandomFactor(GLOBAL_TABLE_FACTOR_SPECS);
 		
-		ContextSplittingTester contextSplittingTest;
-		long contextSplittingTime = -1;
-		
 		// STARTING VARIABLE NUMBER
 		int cardinality = 1;
-		ArrayList<FactorOperationResultAndTime> operationResultsAndTimes;
+		ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes;
 		do {
 
 			println("|| CARDINALITY: " + cardinality + " ||");
 			
 			factorSpecs.cardinalities = fill(numberOfVariablesPerFactor, cardinality);
 			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
-			
-			contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinality, false, SingledOutTheory); // false <-- focus on recording overall time
-			
+						
 			operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
 			printOperationResults(factors, operationResultsAndTimes);
 			
-			if(compareWithExpectedContextSplittingTimes) {
-				println("----------------------------------------------------------------------------------------------");
-				contextSplittingTime = contextSplittingTest.performContextSplittingTest();
-				printExpectedContextSplittingTime(contextSplittingTime);
-				println("----------------------------------------------------------------------------------------------");
-				printPercentageOfOperationTimeDueTo(operationResultsAndTimes, contextSplittingTime);
+			if(compareWithSimulatedContextSplittingTimes) {
+				ContextSplittingTester contextSplittingTest;
+				long timeForSimulatedContextSplittings;
+				
+				contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinality, false, DIFFERENCE_ARITHMETIC_THEORY); // false <-- focus on recording overall time
+				println("--------------------------------------------------------------------------------------------------");
+				timeForSimulatedContextSplittings = contextSplittingTest.performContextSplittingTest();
+				printSimulatedContextSplittingTime(timeForSimulatedContextSplittings);
+				println("--------------------------------------------------------------------------------------------------");
+				printPercentageOfOperationTimesDueTo(operationResultsAndTimes, timeForSimulatedContextSplittings);
+				println("--------------------------------------------------------------------------------------------------");
+				printActualContextSplittingTime(operationResultsAndTimes);
+				println("--------------------------------------------------------------------------------------------------");
+				printPercentageOfOperationTimesDueToContextSplitting(operationResultsAndTimes);
 			}
 
 			println("==============================================================================================");
@@ -301,29 +316,49 @@ public class PerformanceTest {
 	
 	/// STRUCTS W/ SUPPORTING METHODS //////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	private static class FactorOperationResultAndTime{
-		public Pair<Factor, Long> resultAndTime;
+	/**
+	 * Struct to hold relevant results from a factor operation.
+	 * <p>
+	 * Field a Triple resultAndTimes such that: <br>
+	 * ... resultAndTimes.first = the resulting factor from the factor operation <br>
+	 * ... resultAndTimes.second = the time taken by the factor operation <br>
+	 * ... resultAndTimes.third = the total time taken to split contexts <br>
+	 *    
+	 * @author Bobak
+	 *
+	 */
+	private static class FactorOperationResultAndTimes{
+		public Triple<Factor, Long, Long> resultAndTimes;
 		
-		public FactorOperationResultAndTime(Pair<Factor, Long> resultAndTime)
+		public FactorOperationResultAndTimes(Triple<Factor, Long, Long> resultAndTimes)
 		{
-			this.resultAndTime = resultAndTime;
+			this.resultAndTimes = resultAndTimes;
+		}
+		
+		public FactorOperationResultAndTimes(Factor result, Long operationTime, Long contextSplittingTime)
+		{
+			this(new Triple<Factor, Long, Long>(result, operationTime, contextSplittingTime));
 		}
 
 		public Factor result()
 		{
-			return  resultAndTime.first;
+			return  resultAndTimes.first;
 		}
 		
-		public Long time()
+		public Long operationTime()
 		{
-			return  resultAndTime.second;
+			return  resultAndTimes.second;
+		}
+		
+		public Long contextSplittingTime()
+		{
+			return  Math.round(resultAndTimes.third/1000000.0);
 		}
 	}
 	
-	private static class FactorOperationResultAndTimeComparator implements Comparator<FactorOperationResultAndTime>{
+	private static class FactorOperationResultAndTimeComparator implements Comparator<FactorOperationResultAndTimes>{
 	     
-		public int compare(FactorOperationResultAndTime resultA, FactorOperationResultAndTime resultB)
+		public int compare(FactorOperationResultAndTimes resultA, FactorOperationResultAndTimes resultB)
 	    {
 			int result;
 			
@@ -340,7 +375,7 @@ public class PerformanceTest {
 				result = 1;
 			}
 			else {
-				result = resultA.time().compareTo(resultB.time());
+				result = resultA.operationTime().compareTo(resultB.operationTime());
 			}
 
 	        return result;
@@ -401,9 +436,9 @@ public class PerformanceTest {
 	/// RECORDING RESULTS FROM FACTOR OPERATIONS ////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private static ArrayList<FactorOperationResultAndTime> recordTimesForFactorOperation(Function<Factor, Factor> unaryFactorOperation, List<Factor> factors)
+	private static ArrayList<FactorOperationResultAndTimes> recordTimesForFactorOperation(Function<Factor, Factor> unaryFactorOperation, List<Factor> factors)
 	{
-		ArrayList<FactorOperationResultAndTime> operationResults = new ArrayList<>(NUMBER_OF_TESTED_FACTORS);
+		ArrayList<FactorOperationResultAndTimes> operationResults = new ArrayList<>(NUMBER_OF_TESTED_FACTORS);
 		
 		for(int i = 0; i < NUMBER_OF_TESTED_FACTORS; ++i)
 		{
@@ -416,8 +451,13 @@ public class PerformanceTest {
 	}
 
 
-	private static FactorOperationResultAndTime timeFactorOperation(NullaryFunction<Factor> operation) {
-		FactorOperationResultAndTime result = new FactorOperationResultAndTime( timeAndGetResult(() -> operation.apply()) );
+	private static FactorOperationResultAndTimes timeFactorOperation(NullaryFunction<Factor> operation) {
+		ContextSplitting.resetTotalConstraintSplittingTime();
+		Pair<Factor,Long> timeAndResult = timeAndGetResult( () -> operation.apply() );
+		long contextSplittingTime = ContextSplitting.getTotalConstraintSplittingTime();
+		FactorOperationResultAndTimes result = new FactorOperationResultAndTimes( timeAndResult.first,
+																				  timeAndResult.second,
+																				  contextSplittingTime);
 		return result;
 	}
 	
@@ -479,7 +519,7 @@ public class PerformanceTest {
 	/// PRINTING HELPER METHODS ////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	private static void printOperationResults(List<Factor> factors, List<FactorOperationResultAndTime> results)
+	private static void printOperationResults(List<Factor> factors, List<FactorOperationResultAndTimes> results)
 	{		
 		if (verbose) {
 			println("      Initial Factors and Resulting Factors:");
@@ -514,7 +554,7 @@ public class PerformanceTest {
 	}
 	
 	
-	private static void printFactorAndResultingFactor(List<Factor> factors, List<FactorOperationResultAndTime> results,
+	private static void printFactorAndResultingFactor(List<Factor> factors, List<FactorOperationResultAndTimes> results,
 																						int startingIndex, boolean isExpressionFactor) {
 		int factorIndex = startingIndex;
 		if (isExpressionFactor) {
@@ -530,54 +570,103 @@ public class PerformanceTest {
 		}
 	}
 
-	private static void printOperationTimes(List<FactorOperationResultAndTime> results, int startingIndex,
+	private static void printOperationTimes(List<FactorOperationResultAndTimes> results, int startingIndex,
 			boolean isExpressionFactor) {
 		int factorIndex = startingIndex;
 		if (isExpressionFactor) {
 			for (int i = 1; i <= NUMBER_OF_TESTED_THEORIES; ++i) {
 				print("              Theory " + i + ":  ");
-				println(results.get(factorIndex).time() + " ms");
+				println(results.get(factorIndex).operationTime() + " ms");
 				++factorIndex;
 			}
 		} else {
-			println("      " + results.get(factorIndex).time() + " ms");
-		}
-	}
-	
-	private static void printPercentUsageOfTime(List<FactorOperationResultAndTime> results, long subTime, int startingIndex) {
-		int factorIndex = startingIndex;
-		for (int i = 1; i <= NUMBER_OF_TESTED_THEORIES; ++i) {
-			print("              Theory " + i + ":  ");
-			println(Math.round(1000.0 * subTime / results.get(factorIndex).time())/10.0 + "%");
-			++factorIndex;
+			println("      " + results.get(factorIndex).operationTime() + " ms");
 		}
 	}
 	
 
-	private static void printPercentageOfOperationTimeDueTo(List<FactorOperationResultAndTime> results, long subTime) {
-		println("      Percentage of Time Due To Expected Number of Context Splittings:");
+	private static void printPercentageOfOperationTimesDueTo(List<FactorOperationResultAndTimes> results, long subTime) {
+		println("      Percentage of Time Due To Simulated Number of Context Splittings:");
 		if (includeTreeBasedExpressionFactors) {
 			println("          TREE-BASED EXPRESSION FACTOR:");
-			printPercentUsageOfTime(results, subTime, TREE_BASED_EXPRESSION_FACTOR_INDEX);
+			printPercentageOfOperationTimesForFactorSetDueTo(results, subTime, TREE_BASED_EXPRESSION_FACTOR_INDEX);
 		}
 		if (includeLinearTableExpressionFactors) {
 			println("          LINEAR-TABLE EXPRESSION FACTOR:");
-			printPercentUsageOfTime(results, subTime, LINEAR_TABLE_EXPRESSION_FACTOR_INDEX);
+			printPercentageOfOperationTimesForFactorSetDueTo(results, subTime, LINEAR_TABLE_EXPRESSION_FACTOR_INDEX);
 		}
 	}
 	
 	
-	private static void printResultingFactor(List<FactorOperationResultAndTime> results, int index) {
+	private static void printPercentageOfOperationTimesForFactorSetDueTo(List<FactorOperationResultAndTimes> results, long subTime, int startingIndex) {
+		int factorIndex = startingIndex;
+		for (int i = 1; i <= NUMBER_OF_TESTED_THEORIES; ++i) {
+			print("              Theory " + i + ":  ");
+			println(Math.round(1000.0 * subTime / results.get(factorIndex).operationTime())/10.0 + "%");
+			++factorIndex;
+		}
+	}
+
+
+	private void printPercentageOfOperationTimesDueToContextSplitting(List<FactorOperationResultAndTimes> results) {
+		println("      Percentage of Time Due To Actual Context Splittings:");
+		if (includeTreeBasedExpressionFactors) {
+			println("          TREE-BASED EXPRESSION FACTOR:");
+			printPercentageOfOperationTimesForFactorSetDueToContextSplitting(results, TREE_BASED_EXPRESSION_FACTOR_INDEX);
+		}
+		if (includeLinearTableExpressionFactors) {
+			println("          LINEAR-TABLE EXPRESSION FACTOR:");
+			printPercentageOfOperationTimesForFactorSetDueToContextSplitting(results, LINEAR_TABLE_EXPRESSION_FACTOR_INDEX);
+		}
+		
+	}
+	
+	private static void printPercentageOfOperationTimesForFactorSetDueToContextSplitting(List<FactorOperationResultAndTimes> results, int startingIndex) {
+		int factorIndex = startingIndex;
+		for (int i = 1; i <= NUMBER_OF_TESTED_THEORIES; ++i) {
+			print("              Theory " + i + ":  ");
+			println(Math.round(1000.0 * results.get(factorIndex).contextSplittingTime() / results.get(factorIndex).operationTime())/10.0 + "%");
+			++factorIndex;
+		}
+	}
+	
+	
+	private static void printResultingFactor(List<FactorOperationResultAndTimes> results, int index) {
 		println("                  result:   " + results.get(index).result());
 	}
 	
-	private void printExpectedContextSplittingTime(long contextSplittingTime) {
-		println("      Time for Expected Number of Context Splittings:  " + contextSplittingTime + " ms");
+	private void printSimulatedContextSplittingTime(long contextSplittingTime) {
+		println("      Simulated Context Splitting Time:  " + contextSplittingTime + " ms");
 		
 	}
 	
 	
+	private void printActualContextSplittingTime(List<FactorOperationResultAndTimes> results) {
+		println("      Actual Context Splitting Times:");
+		if (includeTreeBasedExpressionFactors) {
+			println("          TREE-BASED EXPRESSION FACTOR:");
+			printContextSplittingTimes(results, TREE_BASED_EXPRESSION_FACTOR_INDEX);
+		}
+		if (includeLinearTableExpressionFactors) {
+			println("          LINEAR-TABLE EXPRESSION FACTOR:");
+			printContextSplittingTimes(results, LINEAR_TABLE_EXPRESSION_FACTOR_INDEX);
+		}
+		
+	}
 	
+	
+	private void printContextSplittingTimes(List<FactorOperationResultAndTimes> results, int startingIndex) {
+		int factorIndex = startingIndex;
+		for (int i = 1; i <= NUMBER_OF_TESTED_THEORIES; ++i) {
+			print("              Theory " + i + ":  ");
+			println(results.get(factorIndex).contextSplittingTime() + " ms");
+			++factorIndex;
+		}
+		
+	}
+
+
+
 	private static void printVerboseMessage() {
 		String message = verbose ?	"  Verbose mode ON."
 								 :	"  Verbose mode OFF.";
@@ -593,9 +682,9 @@ public class PerformanceTest {
 	}
 	
 	private static void printContextSplittingSetting() {
-		String message = compareWithExpectedContextSplittingTimes ?	
-									"  Comparing with expected context splitting times."
-								 :	"  Not Comparing with expected context splitting times.";
+		String message = compareWithSimulatedContextSplittingTimes ?	
+									"  Comparing with simulated context splitting times."
+								 :	"  Not Comparing with simulated context splitting times.";
 		println(message);
 	}
 	
@@ -605,17 +694,17 @@ public class PerformanceTest {
 	/// TEST OPERATION ESTIMATOR ///////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private static long estimateTimeForNextVariableCount(int currentCardinality, ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes) {
+	private static long estimateTimeForNextVariableCount(int currentCardinality, ArrayList<FactorOperationResultAndTimes> opeartionResultsAndTimes) {
 		
-		long timeTakenForCurrentVariable = Collections.max(opeartionResultsAndTimes, COMPARITOR_OF_TEST_RESULTS_BY_TEST_TIME).time();
+		long timeTakenForCurrentVariable = Collections.max(opeartionResultsAndTimes, COMPARITOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
 		double timeForIncrementedNumberOfVariables = timeTakenForCurrentVariable * cardinalityOfVariables;
 		
 		return (long) timeForIncrementedNumberOfVariables;
 	}
 	
-	private static long estimateTimeForNextCardinality(int currentCardinality, ArrayList<FactorOperationResultAndTime> opeartionResultsAndTimes) {
+	private static long estimateTimeForNextCardinality(int currentCardinality, ArrayList<FactorOperationResultAndTimes> opeartionResultsAndTimes) {
 		
-		long timeTakenForCurrentCardinality = Collections.max(opeartionResultsAndTimes, COMPARITOR_OF_TEST_RESULTS_BY_TEST_TIME).time();
+		long timeTakenForCurrentCardinality = Collections.max(opeartionResultsAndTimes, COMPARITOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
 		double timePerFactorParameter = timeTakenForCurrentCardinality / Math.pow(currentCardinality, numberOfVariablesPerFactor);
 		double timeForIncrementedVariableCardinality = timePerFactorParameter*Math.pow(++currentCardinality, numberOfVariablesPerFactor);
 		
