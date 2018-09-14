@@ -122,7 +122,7 @@ public class HOGMMultiQueryProblemSolverTest {
 		println("Explanation");
 		println(result.getExplanation());
 		assertFalse(result.hasErrors());
-		assertEquals(parse("if not (internal1 > 3) then if not (internal1 > 2) then if internal1 = 2 then 1 else 0 else 0 else 0"), result.getResult());
+		assertEquals(parse("if internal1 = 2 then 1 else 0"), result.getResult());
 
 		// TODO: BUGGY
 //		result = results.get(2);
@@ -168,7 +168,7 @@ public class HOGMMultiQueryProblemSolverTest {
 			println("Explanation");
 			println(result.getExplanation());
 			assertFalse(result.hasErrors());
-			assertEquals(parse("if not (internal2 > 4) then if internal2 = 4 then 1 else 0 else 0"), result.getResult());
+			assertEquals(parse("if internal2 = 4 then 1 else 0"), result.getResult());
 			
 		}));
 	}
