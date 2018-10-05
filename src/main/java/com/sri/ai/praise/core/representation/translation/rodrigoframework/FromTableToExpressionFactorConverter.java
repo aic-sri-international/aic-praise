@@ -68,7 +68,7 @@ public class FromTableToExpressionFactorConverter {
 
 	private Expression ifThenElseLinearTableExpressionFromCurrentPositionOf(CartesianProductIterator<Integer> assignmentsIterator, TableFactor tableFactor) {
 		myAssert(assignmentsIterator.hasNext(), () -> "ifThenElseExpressionFromCurrentPositionOf: requires assignmentsIterator to be non-empty");
-		ArrayList<Integer> assignment = assignmentsIterator.next();
+		ArrayList<? extends Integer> assignment = assignmentsIterator.next();
 		Double potentionForAssignment = tableFactor.getEntryFor(assignment);
 		Expression potentialExpression = createSymbol(potentionForAssignment);
 		Expression result;
@@ -96,7 +96,7 @@ public class FromTableToExpressionFactorConverter {
 		{
 			for(int i = 0; i < varCardinality; ++i)
 			{
-				ArrayList<Integer> assignment = assignmentsIterator.next();
+				ArrayList<? extends Integer> assignment = assignmentsIterator.next();
 				Double potentialForAssignment = tableFactor.getEntryFor(assignment);
 				Expression potentialExpression = createSymbol(potentialForAssignment);
 				subBranchExpressions.add(potentialExpression);
@@ -134,7 +134,7 @@ public class FromTableToExpressionFactorConverter {
 		return result;
 	}
 
-	private Expression makeAssignmentTestExpression(List<TableVariable> tableVariables, ArrayList<Integer> assignment) {
+	private Expression makeAssignmentTestExpression(List<TableVariable> tableVariables, ArrayList<? extends Integer> assignment) {
 		ArrayList<Expression> individualVariableConditions = mapIntegersIntoArrayList(assignment.size(), i -> makeComparisonToAssignedValue(i, tableVariables, assignment));
 		Expression result = And.make(individualVariableConditions);
 		return result;
@@ -147,7 +147,7 @@ public class FromTableToExpressionFactorConverter {
 		return result;
 	}
 
-	private Expression makeComparisonToAssignedValue(Integer variableIndex, List<TableVariable> tableVariables, ArrayList<Integer> assignment) {
+	private Expression makeComparisonToAssignedValue(Integer variableIndex, List<TableVariable> tableVariables, ArrayList<? extends Integer> assignment) {
 		Integer assignedValue = assignment.get(variableIndex);
 		Symbol assignedValueExpression = createSymbol(assignedValue);
 		TableVariable tableVariable = tableVariables.get(variableIndex);
