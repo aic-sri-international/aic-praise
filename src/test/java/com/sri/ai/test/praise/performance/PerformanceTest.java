@@ -77,8 +77,8 @@ public class PerformanceTest {
 		private static final boolean includeTreeBasedExpressionFactors = true;
 		private static final boolean includeLinearTableExpressionFactors = false;
 	
-		private static final int numberOfVariablesPerFactor = 4;
-		private static final int cardinalityOfVariables = 4;
+		private static final int numberOfVariablesPerFactor = 5;
+		private static final int cardinalityOfVariables = 2;
 		private static final double minimumPotential = 1.0;
 		private static final double maximumPotential = 10.0;
 		private static final boolean integerIncrements = true;
@@ -100,7 +100,7 @@ public class PerformanceTest {
 													  + (includeLinearTableExpressionFactors  ?  NUMBER_OF_TESTED_THEORIES  :  0);
 	private static final int TABLE_FACTOR_INDEX = 0;
 	private static final int TREE_BASED_EXPRESSION_FACTOR_INDEX = (includeTableFactor ? 1 : 0);
-	private static final int LINEAR_TABLE_EXPRESSION_FACTOR_INDEX = TREE_BASED_EXPRESSION_FACTOR_INDEX + (includeTreeBasedExpressionFactors ?  NUMBER_OF_TESTED_THEORIES  :  0);
+	private static final int LINEAR_TABLE_EXPRESSION_FACTOR_INDEX = (includeTableFactor? 1 : 0) + (includeTreeBasedExpressionFactors? 1 : 0);
 				
 	private static final Function<Integer, String> FROM_VARIABLE_INDEX_TO_NAME = i -> "X" + i;
 			
@@ -141,10 +141,15 @@ public class PerformanceTest {
 	
 	
 	
-	//@Test
+	@Test
 	public void repeatTestFunctionNTimes() {
 		
+		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = false;
+		
+		repeatNtimes(() -> singleRunForUnaryFactorOperation(), 5); // burn-in for class loading, etc
+		
 		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = true;
+		
 		final int n = 1;
 		explanationBlockToFile("explanation.txt", "Perfomance tests of unary operation...", code( () -> {	
 			repeatNtimes(() -> singleRunForUnaryFactorOperation(), n);
@@ -204,27 +209,72 @@ public class PerformanceTest {
 		ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes;
 
 		do {
-
 			println("|| " + numberOfVariables + " VARIABLES ||");
-			
 			factorSpecs.cardinalities = fill(numberOfVariables, cardinalityOfVariables);
-			List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorSpecs);
-					
-			operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
-
-			printOperationResults(factors, operationResultsAndTimes);
 			
-			compareWithSimulatedContextSplittingTimesIfNeeded(operationResultsAndTimes);
+			operationResultsAndTimes = evaluate(factorSpecs);
 			
 			println("==================================================================================================");
-			
-		} while (estimateTimeForNextVariableCount(numberOfVariables++, operationResultsAndTimes) < timeLimitPerOperation);
+
+		} while (estimateTimeForNextVariableCount(operationResultsAndTimes) < timeLimitPerOperation);
 		
 		println();
 	}
 
 
 
+	@Test
+	public void varyingCardinalityOfVariablesForUnaryFactorOperation() {
+		println("\n");
+		
+		println("==================================================================================================");
+		println("|| Testing UNARY OPERATION based on CARDINALITY OF VARIABLES and comparing to CONTEXT SPLITTING ||");
+		println("==================================================================================================");
+		println("  Test Parameters:");
+		println("      number of variables = numberOfVariablesPerFactor");
+		println("      variable cardinality = ||varies||");
+		println("==================================================================================================");
+
+		SpecsForRandomTableFactorGeneration factorSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
+		
+		// STARTING VARIABLE NUMBER
+		int cardinality = 0;
+		ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes;
+		do {
+			cardinality++;
+			
+			println("|| CARDINALITY: " + cardinality + " ||");
+			factorSpecs.cardinalities = fill(numberOfVariablesPerFactor, cardinality);
+
+			operationResultsAndTimes = evaluate(factorSpecs);
+			
+			println("==================================================================================================");
+			
+		} while (estimateTimeForNextCardinality(cardinality, operationResultsAndTimes) < timeLimitPerOperation);
+		
+		println();
+	}
+
+
+	private ArrayList<FactorOperationResultAndTimes> evaluate(SpecsForRandomTableFactorGeneration factorSpecs) {
+		ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes;
+		List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorSpecs);
+
+		operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
+
+		printOperationResults(factors, operationResultsAndTimes);
+
+		compareWithSimulatedContextSplittingTimesIfNeeded(operationResultsAndTimes);
+		return operationResultsAndTimes;
+	}
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// SUPPORT CLASSES AND METHODS ////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
 	private void compareWithSimulatedContextSplittingTimesIfNeeded(List<FactorOperationResultAndTimes> operationResultsAndTimes) {
 		if (compareWithSimulatedContextSplittingTimes) {
 			ContextSplittingTester contextSplittingTest;
@@ -242,70 +292,12 @@ public class PerformanceTest {
 			printPercentageOfOperationTimesDueToContextSplitting(operationResultsAndTimes);
 		}
 	}
-	
 
 
-	//@Test
-	public void varyingCardinalityOfVariablesForUnaryFactorOperation() {
-		println("\n");
-		
-		println("==================================================================================================");
-		println("|| Testing UNARY OPERATION based on CARDINALITY OF VARIABLES and comparing to CONTEXT SPLITTING ||");
-		println("==================================================================================================");
-		println("  Test Parameters:");
-		println("      number of variables = numberOfVariablesPerFactor");
-		println("      variable cardinality = ||varies||");
-		println("==================================================================================================");
 
-		SpecsForRandomTableFactorGeneration factorSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
-		
-		// STARTING VARIABLE NUMBER
-		int cardinality = 1;
-		ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes;
-		do {
 
-			println("|| CARDINALITY: " + cardinality + " ||");
-			
-			factorSpecs.cardinalities = fill(numberOfVariablesPerFactor, cardinality);
-			List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorSpecs);
-						
-			operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
-			printOperationResults(factors, operationResultsAndTimes);
-			
-			if (compareWithSimulatedContextSplittingTimes) {
-				ContextSplittingTester contextSplittingTest;
-				long timeForSimulatedContextSplittings;
-				
-				contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinality, false, DIFFERENCE_ARITHMETIC_THEORY); // false <-- focus on recording overall time
-				println("--------------------------------------------------------------------------------------------------");
-				timeForSimulatedContextSplittings = contextSplittingTest.performContextSplittingTest();
-				printSimulatedContextSplittingTime(timeForSimulatedContextSplittings);
-				println("--------------------------------------------------------------------------------------------------");
-				printPercentageOfOperationTimesDueTo(operationResultsAndTimes, timeForSimulatedContextSplittings);
-				println("--------------------------------------------------------------------------------------------------");
-				printActualContextSplittingTime(operationResultsAndTimes);
-				println("--------------------------------------------------------------------------------------------------");
-				printPercentageOfOperationTimesDueToContextSplitting(operationResultsAndTimes);
-			}
 
-			println("==============================================================================================");
-			
-		} while (estimateTimeForNextCardinality(cardinality++, operationResultsAndTimes) < timeLimitPerOperation);
-		
-		println();
-	}
-	
-	
-	
-	
-	
-	
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// SUPPORT CLASSES AND METHODS ////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	
 	/// STRUCTS W/ SUPPORTING METHODS //////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
@@ -672,19 +664,19 @@ public class PerformanceTest {
 	/// TEST OPERATION ESTIMATOR ///////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private static long estimateTimeForNextVariableCount(int currentCardinality, ArrayList<FactorOperationResultAndTimes> opeartionResultsAndTimes) {
+	private static long estimateTimeForNextVariableCount(ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes) {
 		
-		long timeTakenForCurrentVariable = Collections.max(opeartionResultsAndTimes, COMPARATOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
+		long timeTakenForCurrentVariable = Collections.max(operationResultsAndTimes, COMPARATOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
 		double timeForIncrementedNumberOfVariables = timeTakenForCurrentVariable * cardinalityOfVariables;
 		
 		return (long) timeForIncrementedNumberOfVariables;
 	}
 	
-	private static long estimateTimeForNextCardinality(int currentCardinality, ArrayList<FactorOperationResultAndTimes> opeartionResultsAndTimes) {
+	private static long estimateTimeForNextCardinality(int currentCardinality, ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes) {
 		
-		long timeTakenForCurrentCardinality = Collections.max(opeartionResultsAndTimes, COMPARATOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
+		long timeTakenForCurrentCardinality = Collections.max(operationResultsAndTimes, COMPARATOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
 		double timePerFactorParameter = timeTakenForCurrentCardinality / Math.pow(currentCardinality, numberOfVariablesPerFactor);
-		double timeForIncrementedVariableCardinality = timePerFactorParameter*Math.pow(++currentCardinality, numberOfVariablesPerFactor);
+		double timeForIncrementedVariableCardinality = timePerFactorParameter*Math.pow(currentCardinality + 1, numberOfVariablesPerFactor);
 		
 		return (long) timeForIncrementedVariableCardinality;
 	}
@@ -709,8 +701,8 @@ public class PerformanceTest {
 		for (; i < n; ++i) {
 			ConstraintSplitting.resetCounter();
 			explanationBlock("Test # ", i, code( () -> {
-			procedure.run();
-			}), "Result is ", RESULT);
+				procedure.run();
+			}));
 		}
 	}
 	
