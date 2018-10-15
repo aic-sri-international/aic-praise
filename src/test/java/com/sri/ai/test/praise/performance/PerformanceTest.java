@@ -21,22 +21,23 @@ import java.util.Random;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import com.google.common.base.Function;
 import com.sri.ai.grinder.api.Theory;
+import com.sri.ai.grinder.core.constraint.ConstraintSplitting;
+import com.sri.ai.grinder.core.constraint.ContextSplitting;
 import com.sri.ai.grinder.tester.ContextSplittingTester;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.SpecsForRandomFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.SpecsForRandomTableFactorGeneration;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.FromTableToExpressionFactorConverter;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.base.Triple;
 import com.sri.ai.util.explanation.logging.api.ExplanationConfiguration;
-import com.sri.ai.grinder.core.constraint.ConstraintSplitting;
-import com.sri.ai.grinder.core.constraint.ContextSplitting;
 
 
 /**
@@ -68,9 +69,9 @@ public class PerformanceTest {
 	
 		private static final int timeLimitPerOperation = 10000;	// approximately how long (ms) you are willing to wait for a factor operation to complete
 	
-		private static final Theory SingledOutTheory = SIMPLIFIED_DIFFERENCE_ARITHMETIC_THEORY;
-		//	theories to use:	new DifferenceArithmeticTheory(false, true)
-		//						new DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters(false, true)
+		private static final Theory singledOutTheory = SIMPLIFIED_DIFFERENCE_ARITHMETIC_THEORY;
+		//	theories to use:	DIFFERENCE_ARITHMETIC_THEORY
+		//						SIMPLIFIED_DIFFERENCE_ARITHMETIC_THEORY
 		
 		private static final boolean includeTableFactor = true;
 		private static final boolean includeTreeBasedExpressionFactors = true;
@@ -82,7 +83,7 @@ public class PerformanceTest {
 		private static final double maximumPotential = 10.0;
 		private static final boolean integerIncrements = true;
 	
-		Function<Factor, Factor> unaryFactorOperation = (Factor f) -> sumOutAllVariables(f);
+		Function<Factor, Factor> unaryFactorOperation = PerformanceTest::sumOutAllVariables;
 		// possible functions:	sumOutFirstHalfOfVariables(Factor f), sumOutLastHalfOfVariables(Factor f), sumOutAllVariables(Factor f), 
 		//						sumOutFirstVariable(Factor f), sumOutLastVariable(Factor f)
 	
@@ -90,8 +91,8 @@ public class PerformanceTest {
 
 			
 			
-	// GLOBAL CONSTANTS	
-	private static final Theory[] THEORIES_TO_TEST = 	testMultipleTheories 	?   POSSIBLE_THEORIES	:	new Theory[] {SingledOutTheory};
+	// GLOBAL CONSTANTS	-- CONTINUED
+	private static final Theory[] THEORIES_TO_TEST = 	testMultipleTheories 	?   POSSIBLE_THEORIES	:	new Theory[] {singledOutTheory};
 	
 	private static final int NUMBER_OF_TESTED_THEORIES = THEORIES_TO_TEST.length;
 	private static final int NUMBER_OF_TESTED_FACTORS = (includeTableFactor 				  ?  1 							:  0) 
@@ -105,14 +106,14 @@ public class PerformanceTest {
 			
 	private static final Random RANDOM = new Random();
 
-	FromTableToExpressionFactorConverter TABLE_TO_EXPRESSION_FACTOR_CONVERTER = new FromTableToExpressionFactorConverter();
+	private static final FromTableToExpressionFactorConverter TABLE_TO_EXPRESSION_FACTOR_CONVERTER = new FromTableToExpressionFactorConverter();
 	
-	private static final SpecsForRandomFactor GLOBAL_TABLE_FACTOR_SPECS = 
-			new SpecsForRandomFactor( 
+	private static final SpecsForRandomTableFactorGeneration GLOBAL_TABLE_FACTOR_SPECS = 
+			new SpecsForRandomTableFactorGeneration( 
 					fill(numberOfVariablesPerFactor, cardinalityOfVariables), // ArrayList of variable cardinalities
 					minimumPotential, maximumPotential, integerIncrements);
 
-	private static final FactorOperationResultAndTimeComparator COMPARITOR_OF_TEST_RESULTS_BY_TEST_TIME = new FactorOperationResultAndTimeComparator();
+	private static final FactorOperationResultAndTimeComparator COMPARATOR_OF_TEST_RESULTS_BY_TEST_TIME = new FactorOperationResultAndTimeComparator();
 	
 	
 	
@@ -141,19 +142,18 @@ public class PerformanceTest {
 	
 	
 	//@Test
-	public void repeatTestFxnNTimes() {
+	public void repeatTestFunctionNTimes() {
 		
 		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = true;
-		final int N = 4;
+		final int n = 1;
 		explanationBlockToFile("explanation.txt", "Perfomance tests of unary operation...", code( () -> {	
-			repeatNtimes(() -> singleRunForUnaryFactorOperation(), N);
+			repeatNtimes(() -> singleRunForUnaryFactorOperation(), n);
 		}));
 	}
 
 	
 
-	//@Test
-	public void singleRunForUnaryFactorOperation() {
+	private void singleRunForUnaryFactorOperation() {
 		println("\n");
 
 		
@@ -166,29 +166,15 @@ public class PerformanceTest {
 			println("      variable cardinality = " + cardinalityOfVariables);
 			println("==================================================================================================");
 
-			SpecsForRandomFactor factorSpecs = new SpecsForRandomFactor(GLOBAL_TABLE_FACTOR_SPECS);
+			SpecsForRandomTableFactorGeneration factorGenerationSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
 
-			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
+			List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorGenerationSpecs);
 			
 			ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
 			printOperationResults(factors, operationResultsAndTimes);
 			
-			if(compareWithSimulatedContextSplittingTimes) {
-				ContextSplittingTester contextSplittingTest;
-				long timeForSimulatedContextSplittings;
-				
-				contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinalityOfVariables, false, SingledOutTheory); // false <-- focus on recording overall time
-				println("--------------------------------------------------------------------------------------------------");
-				timeForSimulatedContextSplittings = contextSplittingTest.performContextSplittingTest();
-				printSimulatedContextSplittingTime(timeForSimulatedContextSplittings);
-				println("--------------------------------------------------------------------------------------------------");
-				printPercentageOfOperationTimesDueTo(operationResultsAndTimes, timeForSimulatedContextSplittings);
-				println("--------------------------------------------------------------------------------------------------");
-				printActualContextSplittingTime(operationResultsAndTimes);
-				println("--------------------------------------------------------------------------------------------------");
-				printPercentageOfOperationTimesDueToContextSplitting(operationResultsAndTimes);
-			}
+			compareWithSimulatedContextSplittingTimesIfNeeded(operationResultsAndTimes);
 
 			println("==================================================================================================");
 			println();
@@ -199,7 +185,7 @@ public class PerformanceTest {
 
 
 
-	@Test
+	//@Test
 	public void varyingNumberOfVariablesForUnaryFactorOperation() {
 		println("\n");
 		
@@ -211,7 +197,7 @@ public class PerformanceTest {
 		println("      variable cardinality = " + cardinalityOfVariables);
 		println("==================================================================================================");
 
-		SpecsForRandomFactor factorSpecs = new SpecsForRandomFactor(GLOBAL_TABLE_FACTOR_SPECS);
+		SpecsForRandomTableFactorGeneration factorSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
 		
 		// STARTING VARIABLE NUMBER
 		int numberOfVariables = 1;
@@ -222,33 +208,39 @@ public class PerformanceTest {
 			println("|| " + numberOfVariables + " VARIABLES ||");
 			
 			factorSpecs.cardinalities = fill(numberOfVariables, cardinalityOfVariables);
-			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
+			List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorSpecs);
 					
 			operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
 			printOperationResults(factors, operationResultsAndTimes);
 			
-			if(compareWithSimulatedContextSplittingTimes) {
-				ContextSplittingTester contextSplittingTest;
-				long timeForSimulatedContextSplittings;
-				
-				contextSplittingTest = new ContextSplittingTester(numberOfVariables, cardinalityOfVariables, false, DIFFERENCE_ARITHMETIC_THEORY); // false <-- focus on recording overall time
-				println("--------------------------------------------------------------------------------------------------");
-				timeForSimulatedContextSplittings = contextSplittingTest.performContextSplittingTest();
-				printSimulatedContextSplittingTime(timeForSimulatedContextSplittings);
-				println("--------------------------------------------------------------------------------------------------");
-				printPercentageOfOperationTimesDueTo(operationResultsAndTimes, timeForSimulatedContextSplittings);
-				println("--------------------------------------------------------------------------------------------------");
-				printActualContextSplittingTime(operationResultsAndTimes);
-				println("--------------------------------------------------------------------------------------------------");
-				printPercentageOfOperationTimesDueToContextSplitting(operationResultsAndTimes);
-			}
+			compareWithSimulatedContextSplittingTimesIfNeeded(operationResultsAndTimes);
 			
 			println("==================================================================================================");
 			
 		} while (estimateTimeForNextVariableCount(numberOfVariables++, operationResultsAndTimes) < timeLimitPerOperation);
 		
 		println();
+	}
+
+
+
+	private void compareWithSimulatedContextSplittingTimesIfNeeded(List<FactorOperationResultAndTimes> operationResultsAndTimes) {
+		if (compareWithSimulatedContextSplittingTimes) {
+			ContextSplittingTester contextSplittingTest;
+			long timeForSimulatedContextSplittings;
+			
+			contextSplittingTest = new ContextSplittingTester(numberOfVariablesPerFactor, cardinalityOfVariables, /* verbose */ false, singledOutTheory);
+			println("--------------------------------------------------------------------------------------------------");
+			timeForSimulatedContextSplittings = contextSplittingTest.performContextSplittingTest();
+			printSimulatedContextSplittingTime(timeForSimulatedContextSplittings);
+			println("--------------------------------------------------------------------------------------------------");
+			printPercentageOfOperationTimesDueTo(operationResultsAndTimes, timeForSimulatedContextSplittings);
+			println("--------------------------------------------------------------------------------------------------");
+			printActualContextSplittingTime(operationResultsAndTimes);
+			println("--------------------------------------------------------------------------------------------------");
+			printPercentageOfOperationTimesDueToContextSplitting(operationResultsAndTimes);
+		}
 	}
 	
 
@@ -265,7 +257,7 @@ public class PerformanceTest {
 		println("      variable cardinality = ||varies||");
 		println("==================================================================================================");
 
-		SpecsForRandomFactor factorSpecs = new SpecsForRandomFactor(GLOBAL_TABLE_FACTOR_SPECS);
+		SpecsForRandomTableFactorGeneration factorSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
 		
 		// STARTING VARIABLE NUMBER
 		int cardinality = 1;
@@ -275,13 +267,13 @@ public class PerformanceTest {
 			println("|| CARDINALITY: " + cardinality + " ||");
 			
 			factorSpecs.cardinalities = fill(numberOfVariablesPerFactor, cardinality);
-			List<Factor> factors = constructEquivalentRandomFactors(factorSpecs);
+			List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorSpecs);
 						
 			operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
 			printOperationResults(factors, operationResultsAndTimes);
 			
-			if(compareWithSimulatedContextSplittingTimes) {
+			if (compareWithSimulatedContextSplittingTimes) {
 				ContextSplittingTester contextSplittingTest;
 				long timeForSimulatedContextSplittings;
 				
@@ -327,44 +319,37 @@ public class PerformanceTest {
 	 * @author Bobak
 	 *
 	 */
-	private static class FactorOperationResultAndTimes{
+	private static class FactorOperationResultAndTimes {
 		public Triple<Factor, Long, Long> resultAndTimes;
 		
-		public FactorOperationResultAndTimes(Triple<Factor, Long, Long> resultAndTimes)
-		{
+		public FactorOperationResultAndTimes(Triple<Factor, Long, Long> resultAndTimes) {
 			this.resultAndTimes = resultAndTimes;
 		}
 		
-		public FactorOperationResultAndTimes(Factor result, Long operationTime, Long contextSplittingTime)
-		{
+		public FactorOperationResultAndTimes(Factor result, Long operationTime, Long contextSplittingTime) {
 			this(new Triple<Factor, Long, Long>(result, operationTime, contextSplittingTime));
 		}
 
-		public Factor result()
-		{
+		public Factor result() {
 			return  resultAndTimes.first;
 		}
 		
-		public Long operationTime()
-		{
+		public Long operationTime() {
 			return  resultAndTimes.second;
 		}
 		
-		public Long contextSplittingTime()
-		{
+		public Long contextSplittingTime() {
 			return  Math.round(resultAndTimes.third/1000000.0);
 		}
 	}
 	
-	private static class FactorOperationResultAndTimeComparator implements Comparator<FactorOperationResultAndTimes>{
+	private static class FactorOperationResultAndTimeComparator implements Comparator<FactorOperationResultAndTimes> {
 	     
-		public int compare(FactorOperationResultAndTimes resultA, FactorOperationResultAndTimes resultB)
-	    {
+		public int compare(FactorOperationResultAndTimes resultA, FactorOperationResultAndTimes resultB) {
 			int result;
 			
-			if(resultA == null) {
-				if(resultB == null)
-				{
+			if (resultA == null) {
+				if (resultB == null) {
 					result = 0;
 				}
 				else {
@@ -388,19 +373,19 @@ public class PerformanceTest {
 	/// FACTOR CONSTRUCTION METHODS ////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private List<Factor> constructEquivalentRandomFactors(SpecsForRandomFactor factorSpecs)
+	private List<Factor> constructEquivalentRandomFactorsRepresentedInDifferentWays(SpecsForRandomTableFactorGeneration factorSpecs)
 	{
 		TableFactor tableFactor = makeRandomTableFactor(factorSpecs, FROM_VARIABLE_INDEX_TO_NAME, RANDOM);
 		
 		ArrayList<Factor> factors = new ArrayList<>(NUMBER_OF_TESTED_FACTORS);
 		
-		if(includeTableFactor) {
+		if (includeTableFactor) {
 			addTableFactorToListOfFactors(tableFactor, factors);
 		}
-		if(includeTreeBasedExpressionFactors) {
+		if (includeTreeBasedExpressionFactors) {
 			addTreeBasedExpressionFactorsToListOfFactors(tableFactor, factors);
 		}
-		if(includeLinearTableExpressionFactors) {
+		if (includeLinearTableExpressionFactors) {
 			addLinearTableExpressionFactorsToListOfFactors(tableFactor, factors);
 		}
 		
@@ -414,8 +399,7 @@ public class PerformanceTest {
 	
 	private void addTreeBasedExpressionFactorsToListOfFactors(TableFactor tableFactor, ArrayList<Factor> factors) {
 		Factor newFactor;
-		for(Theory theory : THEORIES_TO_TEST)
-		{
+		for (Theory theory : THEORIES_TO_TEST) {
 			newFactor = TABLE_TO_EXPRESSION_FACTOR_CONVERTER.convert(tableFactor, theory, true);
 			factors.add(newFactor);
 		}
@@ -423,8 +407,7 @@ public class PerformanceTest {
 	
 	private void addLinearTableExpressionFactorsToListOfFactors(TableFactor tableFactor, ArrayList<Factor> factors) {
 		Factor newFactor;
-		for(Theory theory : THEORIES_TO_TEST)
-		{
+		for (Theory theory : THEORIES_TO_TEST) {
 			newFactor = TABLE_TO_EXPRESSION_FACTOR_CONVERTER.convert(tableFactor, theory, false);
 			factors.add(newFactor);
 		}
@@ -436,12 +419,10 @@ public class PerformanceTest {
 	/// RECORDING RESULTS FROM FACTOR OPERATIONS ////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private static ArrayList<FactorOperationResultAndTimes> recordTimesForFactorOperation(Function<Factor, Factor> unaryFactorOperation, List<Factor> factors)
-	{
+	private static ArrayList<FactorOperationResultAndTimes> recordTimesForFactorOperation(Function<Factor, Factor> unaryFactorOperation, List<Factor> factors) {
 		ArrayList<FactorOperationResultAndTimes> operationResults = new ArrayList<>(NUMBER_OF_TESTED_FACTORS);
 		
-		for(int i = 0; i < NUMBER_OF_TESTED_FACTORS; ++i)
-		{
+		for (int i = 0; i < NUMBER_OF_TESTED_FACTORS; ++i) {
 			explain("Expression Factor Tested: ", factors.get(i));
 			Factor factorToTest = factors.get(i);
 			operationResults.add( timeFactorOperation(() -> unaryFactorOperation.apply(factorToTest)) );
@@ -492,7 +473,7 @@ public class PerformanceTest {
 		List<? extends Variable> factorVariables = factor.getVariables();
 		int indexOfFirstVariable = 0;
 		List<Variable> variablesToSumOut = new ArrayList<>();
-		if(factorVariables.size() > 0)
+		if (factorVariables.size() > 0)
 		{
 			variablesToSumOut.add(factorVariables.get(indexOfFirstVariable));
 		}
@@ -505,7 +486,7 @@ public class PerformanceTest {
 		List<? extends Variable> factorVariables = factor.getVariables();
 		int indexOfLastVariable = factorVariables.size() - 1;
 		List<Variable> variablesToSumOut = new ArrayList<>();
-		if(factorVariables.size() > 0)
+		if (factorVariables.size() > 0)
 		{
 			variablesToSumOut.add(factorVariables.get(indexOfLastVariable));
 		}
@@ -519,8 +500,7 @@ public class PerformanceTest {
 	/// PRINTING HELPER METHODS ////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////	
 	
-	private static void printOperationResults(List<Factor> factors, List<FactorOperationResultAndTimes> results)
-	{		
+	private static void printOperationResults(List<Factor> factors, List<FactorOperationResultAndTimes> results) {		
 		if (verbose) {
 			println("      Initial Factors and Resulting Factors:");
 			if (includeTableFactor) {
@@ -637,7 +617,6 @@ public class PerformanceTest {
 	
 	private void printSimulatedContextSplittingTime(long contextSplittingTime) {
 		println("      Simulated Context Splitting Time:  " + contextSplittingTime + " ms");
-		
 	}
 	
 	
@@ -662,7 +641,6 @@ public class PerformanceTest {
 			println(results.get(factorIndex).contextSplittingTime() + " ms");
 			++factorIndex;
 		}
-		
 	}
 
 
@@ -675,7 +653,7 @@ public class PerformanceTest {
 	
 	private static void printTheoriesBeingTested() {
 		println("  Theories being tested:");
-		for(int i = 0; i < NUMBER_OF_TESTED_THEORIES; ++i)
+		for (int i = 0; i < NUMBER_OF_TESTED_THEORIES; ++i)
 		{
 			println("      Theory " + (i+1) + ":  " + THEORIES_TO_TEST[i]);
 		}
@@ -696,7 +674,7 @@ public class PerformanceTest {
 	
 	private static long estimateTimeForNextVariableCount(int currentCardinality, ArrayList<FactorOperationResultAndTimes> opeartionResultsAndTimes) {
 		
-		long timeTakenForCurrentVariable = Collections.max(opeartionResultsAndTimes, COMPARITOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
+		long timeTakenForCurrentVariable = Collections.max(opeartionResultsAndTimes, COMPARATOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
 		double timeForIncrementedNumberOfVariables = timeTakenForCurrentVariable * cardinalityOfVariables;
 		
 		return (long) timeForIncrementedNumberOfVariables;
@@ -704,7 +682,7 @@ public class PerformanceTest {
 	
 	private static long estimateTimeForNextCardinality(int currentCardinality, ArrayList<FactorOperationResultAndTimes> opeartionResultsAndTimes) {
 		
-		long timeTakenForCurrentCardinality = Collections.max(opeartionResultsAndTimes, COMPARITOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
+		long timeTakenForCurrentCardinality = Collections.max(opeartionResultsAndTimes, COMPARATOR_OF_TEST_RESULTS_BY_TEST_TIME).operationTime();
 		double timePerFactorParameter = timeTakenForCurrentCardinality / Math.pow(currentCardinality, numberOfVariablesPerFactor);
 		double timeForIncrementedVariableCardinality = timePerFactorParameter*Math.pow(++currentCardinality, numberOfVariablesPerFactor);
 		
@@ -717,20 +695,18 @@ public class PerformanceTest {
 	/// REPEATERS //////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public static <T> T repeatNtimes(NullaryFunction<T> procedure, int N) {
+	public static <T> T repeatNtimes(NullaryFunction<T> procedure, int n) {
 		int i = 0;
-		for(; i < N-1; ++i)
-		{
+		for (; i < n - 1; ++i) {
 			procedure.apply();
 		}
 		
 		return procedure.apply();
 	}
 	
-	public static void repeatNtimes(Runnable procedure, int N) {
+	public static void repeatNtimes(Runnable procedure, int n) {
 		int i = 0;
-		for(; i < N; ++i)
-		{
+		for (; i < n; ++i) {
 			ConstraintSplitting.resetCounter();
 			explanationBlock("Test # ", i, code( () -> {
 			procedure.run();

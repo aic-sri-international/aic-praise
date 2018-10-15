@@ -12,7 +12,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.Ta
 
 public class RandomTableFactorMaker {
 	
-	public static TableFactor makeRandomTableFactor(SpecsForRandomFactor specs, Function<Integer, String> fromVariableIndexToName, Random random)
+	public static TableFactor makeRandomTableFactor(SpecsForRandomTableFactorGeneration specs, Function<Integer, String> fromVariableIndexToName, Random random)
 	{
 		ArrayList<TableVariable> variables = makeVariables(specs.cardinalities, fromVariableIndexToName);
 		ArrayList<Double> entries = makeUniformlyDistributedRandomEntries(specs, random);
@@ -37,14 +37,14 @@ public class RandomTableFactorMaker {
 	}
 
 	private static ArrayList<Double> makeUniformlyDistributedRandomEntries(
-			SpecsForRandomFactor specs, Random random) {
+			SpecsForRandomTableFactorGeneration specs, Random random) {
 		
 		int numberOfEntries = product(specs.cardinalities).intValue();
 		ArrayList<Double> entries = mapIntegersIntoArrayList(numberOfEntries, i -> samplePotentialInRange(specs, random));
 		return entries;
 	}
 
-	private static Double samplePotentialInRange(SpecsForRandomFactor specs, Random random) {
+	private static Double samplePotentialInRange(SpecsForRandomTableFactorGeneration specs, Random random) {
 		double result;
 		if(specs.integerIncrements) {
 			result = specs.minimumPotential + random.nextInt((int) (Math.round(specs.maximumPotential)));
