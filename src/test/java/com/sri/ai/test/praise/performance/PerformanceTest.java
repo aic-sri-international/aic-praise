@@ -7,7 +7,6 @@ import static com.sri.ai.util.Util.getFirstHalfSubList;
 import static com.sri.ai.util.Util.getLastHalfSubList;
 import static com.sri.ai.util.Util.print;
 import static com.sri.ai.util.Util.println;
-import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
@@ -143,12 +142,7 @@ public class PerformanceTest {
 	
 	@Test
 	public void repeatTestFunctionNTimes() {
-		
-		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = false;
-		
-		repeatNtimes(() -> singleRunForUnaryFactorOperation(), 5); // burn-in for class loading, etc
-		
-		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = true;
+		//repeatNtimes(() -> singleRunForUnaryFactorOperation(), 5); // burn-in for class loading, etc
 		
 		final int n = 1;
 		explanationBlockToFile("explanation.txt", "Perfomance tests of unary operation...", code( () -> {	
@@ -159,31 +153,28 @@ public class PerformanceTest {
 	
 
 	private void singleRunForUnaryFactorOperation() {
+
 		println("\n");
+		println("==================================================================================================");
+		println("||                                  Testing UNARY OPERATION                                     ||");
+		println("==================================================================================================");
+		println("  Test Parameters:");
+		println("      number of variables = " + numberOfVariablesPerFactor);
+		println("      variable cardinality = " + cardinalityOfVariables);
+		println("==================================================================================================");
 
-		
+		SpecsForRandomTableFactorGeneration factorGenerationSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
 
-			println("==================================================================================================");
-			println("||                                  Testing UNARY OPERATION                                     ||");
-			println("==================================================================================================");
-			println("  Test Parameters:");
-			println("      number of variables = " + numberOfVariablesPerFactor);
-			println("      variable cardinality = " + cardinalityOfVariables);
-			println("==================================================================================================");
+		List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorGenerationSpecs);
 
-			SpecsForRandomTableFactorGeneration factorGenerationSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
+		ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
 
-			List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorGenerationSpecs);
-			
-			ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes = recordTimesForFactorOperation(unaryFactorOperation, factors);
+		printOperationResults(factors, operationResultsAndTimes);
 
-			printOperationResults(factors, operationResultsAndTimes);
-			
-			compareWithSimulatedContextSplittingTimesIfNeeded(operationResultsAndTimes);
+		compareWithSimulatedContextSplittingTimesIfNeeded(operationResultsAndTimes);
 
-			println("==================================================================================================");
-			println();
-
+		println("==================================================================================================");
+		println();
 
 	}
 
@@ -192,8 +183,8 @@ public class PerformanceTest {
 
 	//@Test
 	public void varyingNumberOfVariablesForUnaryFactorOperation() {
+	
 		println("\n");
-		
 		println("==================================================================================================");
 		println("||    Testing UNARY OPERATION based on NUMBER OF VARIABLES and comparing to CONTEXT SPLITTING   ||");
 		println("==================================================================================================");

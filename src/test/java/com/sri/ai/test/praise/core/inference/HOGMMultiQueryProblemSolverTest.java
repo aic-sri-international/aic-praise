@@ -58,7 +58,6 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.so
 import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
 import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
-import com.sri.ai.util.explanation.logging.api.ExplanationConfiguration;
 
 public class HOGMMultiQueryProblemSolverTest {
 	
@@ -138,8 +137,6 @@ public class HOGMMultiQueryProblemSolverTest {
 	@Test
 	public void linearRealArithmeticSmall() {
 		
-		ExplanationConfiguration.WHETHER_EXPLANATION_LOGGERS_ARE_ACTIVE_BY_DEFAULT = false;
-
 		String explanationFileName = "explanation.txt";
 
 		explanationBlockToFile(explanationFileName, "Going to solve small linear arithmetic problem", code(() -> {
