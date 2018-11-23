@@ -18,7 +18,7 @@ import java.util.function.BiFunction;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.ConstantFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
@@ -48,14 +48,14 @@ public class TableFactor implements Factor {
 	
 	/*  NOTE:  Understanding the Parameter Order
 	 * 
-	 * ex:  consider a factor with three binary variables v1, v2, and v3 in that same order
+	 * Example: consider a factor with three binary variables v1, v2, and v3 in that same order
 	 * 
 	 * parameters will be arranged based on the following variable assignment order:
 	 * 
 	 * 		[ (v1=0,v2=0,v3=0), (v1=0,v2=0,v3=1), (v1=0,v2=1,v3=0), (v1=0,v2=1,v3=1), 
 	 * 		  (v1=1,v2=0,v3=0), (v1=1,v2=0,v3=1), (v1=1,v2=1,v3=0), (v1=1,v2=1,v3=1) ]
 	 * 
-	 * Note that the order would change if the order the variables are stored as is changed.
+	 * Note that the order would change if the order the variables are stored is changed.
 	 * 
 	 * parameterIndexRadix is responsible for mapping the variable assignments to the correct parameter index.
 	 */
@@ -69,25 +69,22 @@ public class TableFactor implements Factor {
 	// CONSTRUCTORS /////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	@SuppressWarnings("unchecked")
 	public TableFactor(String factorName, Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
 
 		this.name = factorName;
 		
-		if(variables instanceof LinkedHashSet<?>)
-		{
+		if (variables instanceof LinkedHashSet<?>) {
 			this.variableSet = (LinkedHashSet<TableVariable>) variables;
 		}
-		else
-		{
+		else {
 			this.variableSet = new LinkedHashSet<TableVariable>(variables);
 		}
 		
-		if(variables instanceof ArrayList<?>)
-		{
+		if (variables instanceof ArrayList<?>) {
 			this.variableList = (ArrayList<TableVariable>) variables;
 		}
-		else
-		{
+		else {
 			this.variableList = new ArrayList<TableVariable>(variables);
 		}
 
@@ -201,7 +198,7 @@ public class TableFactor implements Factor {
 	//TODO:  Check correctness of isIdentity() function
 	@Override
 	public boolean isIdentity() {
-		if(parameters.size() == 0 || parameters.get(0) == 0) {
+		if (parameters.size() == 0 || parameters.get(0) == 0) {
 			return false;	
 		}
 		double valueAtZero = parameters.get(0);
@@ -223,7 +220,7 @@ public class TableFactor implements Factor {
 	public TableFactor normalize() {
 		
 		Double normalizationConstant = sumOfParameters();
-		if(normalizationConstant != 0.0 && normalizationConstant != 1.0) {
+		if (normalizationConstant != 0.0 && normalizationConstant != 1.0) {
 			this.normalizeBy(normalizationConstant);
 		}
 		return this ;
@@ -263,9 +260,10 @@ public class TableFactor implements Factor {
 	@Override
 	public Factor sumOut(List<? extends Variable> variablesToSumOutList) {
 		
-		//TODO: Error check for if variablesToSumOut is of type List<? extends TableVarable>
+		//TODO: Error check for if variablesToSumOut is of type List<? extends TableVariable>
 		//TODO: Error check for if a variable listed to SumOut exists in the factor
 		
+		@SuppressWarnings("unchecked")
 		LinkedHashSet<TableVariable> variablesToSumOut = new LinkedHashSet<>((List<TableVariable>) variablesToSumOutList);
 		
 		LinkedHashSet<TableVariable> variablesNotToSumOut = new LinkedHashSet<>();
@@ -273,11 +271,10 @@ public class TableFactor implements Factor {
 		
 		Factor result;
 		// if every variable is summed out, return the sum of all the parameters in a constant factor
-		if(variablesNotToSumOut.isEmpty()) {
+		if (variablesNotToSumOut.isEmpty()) {
 			result = new ConstantFactor(sumOfParameters());
 		}
-		else
-		{
+		else {
 			result = sumOutEverythingExcept(variablesNotToSumOut);
 		}
 		
@@ -296,10 +293,10 @@ public class TableFactor implements Factor {
 
 		Factor result;
 		
-		if(another instanceof ConstantFactor) {
+		if (another instanceof ConstantFactor) {
 			result = another.multiply(this);
 		}
-		else if(another.getClass() != this.getClass()) {
+		else if (another.getClass() != this.getClass()) {
 			throw new Error("Trying to multiply different types of factors: this is a " +
 							this.getClass() + "and another is a " + another.getClass());
 		}
@@ -317,10 +314,10 @@ public class TableFactor implements Factor {
 
 		Factor result;
 		
-		if(another instanceof ConstantFactor) {
+		if (another instanceof ConstantFactor) {
 			result = another.add(this);
 		}		
-		else if(another.getClass() != this.getClass()) {
+		else if (another.getClass() != this.getClass()) {
 			throw new Error("Trying to multiply different types of factors: this is a " +
 						this.getClass() + "and another is a " + another.getClass());
 		}
@@ -343,7 +340,7 @@ public class TableFactor implements Factor {
 		TableFactor result;
 		ArrayList<Double> newEntries = new ArrayList<>(getEntries().size());
 		for (Double entry : getEntries()) {
-			if(Math.abs(entry) < 0.00000001) {
+			if (Math.abs(entry) < 0.00000001) {
 				throw new Error("Can't invert : 0 value in the table factor.");
 			}
 			newEntries.add(1/entry);
@@ -415,7 +412,7 @@ public class TableFactor implements Factor {
 		
 		Double normalizationConstant = sumOfParameters();
 		TableFactor normalizedTableFactor = this;
-		if(normalizationConstant != 0.0 && normalizationConstant != 1.0) {
+		if (normalizationConstant != 0.0 && normalizationConstant != 1.0) {
 			ArrayList<Double> newParameters = new ArrayList<>(parameters.size());
 			for (Double unnormalizedParameter : parameters) {
 				newParameters.add(unnormalizedParameter/normalizationConstant);
@@ -515,20 +512,18 @@ public class TableFactor implements Factor {
 
 		TableFactor result = new TableFactor(variablesNotToSumOut, 0.0);
 		
-		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(this.variableList);
 		LinkedHashMap<Variable, Integer> variableValueMap = new LinkedHashMap<>();
-		for(ArrayList<Integer> values: in(cartesianProduct)) {
+		for(ArrayList<Integer> values: in(getCartesianProduct(variableList))) {
 			variableValueMap = addtoVariableValueMap(variableValueMap, values);
 			Double currentValue = result.getEntryFor(variableValueMap);
-			Double addedValue = this.getEntryFor(variableValueMap);
+			Double addedValue = getEntryFor(variableValueMap);
 			result.setEntryFor(variableValueMap, currentValue + addedValue);
 		}
 		return result;
 	}
 	
 	
-	private TableFactor initializeNewFactorUnioningVariables(TableFactor another)
-	{
+	private TableFactor initializeNewFactorUnioningVariables(TableFactor another) {
 		LinkedHashSet<TableVariable> newListOfVariables = new LinkedHashSet<>(this.variableSet);
 		newListOfVariables.addAll(another.variableSet);
 		Integer numberOfParametersForNewListOfVariables = numEntries(newListOfVariables);
@@ -647,7 +642,7 @@ public class TableFactor implements Factor {
 		ArrayList<TableVariable> newVariables = new ArrayList<>(factor.getVariables());
 		
 		newVariables.removeAll(mapOfvaluesPredetermined.keySet());
-		if(newVariables.size() == 0) {
+		if (newVariables.size() == 0) {
 			return null;
 		}
 		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProduct(newVariables);

@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.classbased.modelscontainer;
 
-import static com.sri.ai.util.Util.unionArrayList;
+import static com.sri.ai.util.Util.addAllElementsOfCollectionsToArrayList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,7 +77,7 @@ public class ModelPage {
 			modelPageWithExtraQueries = this;
 		}
 		else {
-			List<String> combinedQueries = unionArrayList(extraQueries, getDefaultQueriesToRun());
+			List<String> combinedQueries = addAllElementsOfCollectionsToArrayList(extraQueries, getDefaultQueriesToRun());
 			modelPageWithExtraQueries = makeCopyWithNewQueries(combinedQueries);
 		}
 		return modelPageWithExtraQueries;

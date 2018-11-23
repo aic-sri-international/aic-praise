@@ -53,8 +53,7 @@ public class DefaultExpressionVariable extends WrappedExpression implements Expr
 
 	@Override
 	public List<? extends Object> getValues() {
-		// TODO Auto-generated method stub
-		//TODO maybe we should store a string like "1..5" or "Boolean" to indicate it
-		return null;
+		throw new Error(getClass() + ".getValues() not implemented -- getValues() is deemed not needed for most algorithms.");
+		// TODO: refactor to make getValues part of a specific interface used by the algorithms that require values
 	}
 }

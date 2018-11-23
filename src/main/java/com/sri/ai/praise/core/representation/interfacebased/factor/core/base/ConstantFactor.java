@@ -1,8 +1,8 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.IdentityFactor.IDENTITY_FACTOR;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.ZeroFactor.ZERO_FACTOR;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.IdentityFactor.IDENTITY_FACTOR;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ZeroFactor.ZERO_FACTOR;
 import static com.sri.ai.util.Util.list;
 import static java.util.Collections.unmodifiableList;
 

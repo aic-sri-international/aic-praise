@@ -35,57 +35,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.factor.core;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
 
-import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
+import java.util.function.Predicate;
 
-import java.util.List;
-
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.util.base.IdentityWrapper;
-import com.sri.ai.util.collect.DefaultManyToManyRelation;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 
-/**
- * An abstract {@link FactorNetwork} indexing factors and indices with a {@link DefaultManyToManyRelation}.
- * @author braz
- *
- */
-public abstract class AbstractFactorNetwork 
-extends DefaultManyToManyRelation<IdentityWrapper<Factor>, Variable> implements FactorNetwork {
-
-	public AbstractFactorNetwork(List<? extends Factor> factors) {
+public class DefaultVariableMarginalQuery implements Problem {
+	
+	private Variable queryVariable;
+	private FactorNetwork model;
+	private Predicate<Variable> isParameterPredicate;
+	
+	public DefaultVariableMarginalQuery(Variable queryVariable, FactorNetwork model, Predicate<Variable> isParameterPredicate) {
 		super();
-		indexFactorsAndVariables(factors);
-	}
-
-	private void indexFactorsAndVariables(List<? extends Factor> factors) {
-		for (Factor factor : factors) {
-			indexFactorAndItsVariables(factor);
-		}
-	}
-
-	private void indexFactorAndItsVariables(Factor factor) {
-		for (Variable variable : factor.getVariables()) {
-			indexFactorAndVariable(factor, variable);
-		}
-	}
-
-	private void indexFactorAndVariable(Factor factor, Variable variable) {
-		this.add(identityWrapper(factor), variable);
+		this.queryVariable = queryVariable;
+		this.model = model;
+		this.isParameterPredicate = isParameterPredicate;
 	}
 
 	@Override
-	public List<? extends Variable> getNeighbors(Factor factor) {
-		return mapIntoList(getBsOfA(identityWrapper(factor)), v -> v);
+	public Variable getQueryVariable() {
+		return queryVariable;
 	}
 
 	@Override
-	public List<? extends Factor> getNeighbors(Variable variable) {
-		List<Factor> result = mapIntoList(getAsOfB(variable), IdentityWrapper::getObject);
-		return result;
+	public FactorNetwork getModel() {
+		return model;
 	}
 
+	@Override
+	public Predicate<Variable> getIsParameterPredicate() {
+		return isParameterPredicate;
+	}
 }

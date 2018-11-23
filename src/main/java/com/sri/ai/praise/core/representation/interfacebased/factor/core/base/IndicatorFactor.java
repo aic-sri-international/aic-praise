@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 
 import java.util.Collection;
 import java.util.List;

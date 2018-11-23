@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 import com.sri.ai.praise.core.representation.classbased.table.core.data.markov.FactorTable;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultEditableFactorNetwork;
 import com.sri.ai.util.Util;
 /**
  * 
@@ -20,7 +20,7 @@ import com.sri.ai.util.Util;
  * @author gabriel
  *
  */
-public class TableFactorNetwork extends DefaultFactorNetwork {
+public class TableFactorNetwork extends DefaultEditableFactorNetwork {
 	
 	public TableFactorNetwork(List<? extends TableFactor> factors) {
 		super(factors);

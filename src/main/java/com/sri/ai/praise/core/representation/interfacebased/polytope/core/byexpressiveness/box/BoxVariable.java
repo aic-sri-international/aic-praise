@@ -2,6 +2,6 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexp
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
-public interface BoxVariable extends Variable{
+public interface BoxVariable extends Variable {
 	
 }

@@ -48,7 +48,7 @@ import java.util.Set;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.DefaultFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultEditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.proceduralattachment.ProceduralAttachmentExpressionFactor;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
@@ -63,7 +63,7 @@ import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProc
  * @author braz
  *
  */
-public class ExpressionFactorNetwork extends DefaultFactorNetwork {
+public class ExpressionFactorNetwork extends DefaultEditableFactorNetwork {
 	
 	private Context context;
 	
