@@ -30,7 +30,13 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 	
 	private JDKRandomGenerator randomGenerator;
 	
-	public NormalWithFixedStandardDeviation(Variable variable, Variable mean, double standardDeviation, PotentialFactory potentialFactory, Random random) {
+	public NormalWithFixedStandardDeviation(
+			Variable variable, 
+			Variable mean, 
+			double standardDeviation, 
+			PotentialFactory potentialFactory, 
+			Random random) {
+		
 		super(arrayList(variable, mean), random);
 		this.variable = variable;
 		this.mean = mean;

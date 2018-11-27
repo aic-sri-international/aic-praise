@@ -1,5 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample;
 
+import java.util.Map;
+
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
 public interface Assignment {
@@ -13,5 +15,7 @@ public interface Assignment {
 	boolean contains(Variable variable);
 	
 	int size();
+
+	Map mapValue();
 
 }
