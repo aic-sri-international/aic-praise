@@ -3,6 +3,10 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 /** A sample of a potential function. */
 public interface Sample {
 	
+	Sample copy();
+	
+	void copy(Sample another);
+	
 	Assignment getAssignment();
 	
 	Importance getImportance();
@@ -10,5 +14,9 @@ public interface Sample {
 	Potential getPotential();
 	
 	void updatePotential(Potential potentialFactor);
+	
+	default int size() {
+		return getAssignment().size();
+	}
 	
 }

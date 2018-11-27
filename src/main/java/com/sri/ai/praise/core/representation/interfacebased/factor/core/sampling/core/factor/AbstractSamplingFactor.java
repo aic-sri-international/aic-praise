@@ -1,6 +1,8 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ZeroFactor.ZERO_FACTOR;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.fill;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,20 +13,33 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
 public abstract class AbstractSamplingFactor implements SamplingFactor {
 	
 	@Override
-	public abstract void sample(Sample sample);
+	public abstract void sampleOrWeigh(Sample sample);
 
+	protected abstract SamplingRules makeSamplingRules();
+	
 	private List<? extends Variable> variables;
+	
+	private SamplingRules samplingRules;
 	
 	private Random random;
 
 	public AbstractSamplingFactor(List<? extends Variable> variables, Random random) {
 		this.variables = variables;
 		this.random = random;
+	}
+
+	@Override
+	public SamplingRules getSamplingRules() {
+		if (samplingRules == null) {
+			samplingRules = makeSamplingRules();
+		}
+		return samplingRules;
 	}
 
 	public Random getRandom() {
@@ -44,6 +59,12 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 
 	@Override
 	public Factor multiply(Factor another) {
+		if (another.isIdentity()) {
+			return this;
+		}
+		if (another.isZero()) {
+			return ZERO_FACTOR;
+		}
 		SamplingFactor anotherSamplingFactor = checkType(another);
 		SamplingProductFactor result = new SamplingProductFactor(arrayList(this, anotherSamplingFactor), getRandom());
 		return result;
@@ -51,7 +72,14 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 
 	@Override
 	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
-		return this;
+		Factor result;
+		if (variablesToSumOut.isEmpty()) {
+			result = this;
+		}
+		else {
+			result = new SamplingMarginalizingFactor(variablesToSumOut, this, getRandom());
+		}
+		return result;
 	}
 
 	@Override
@@ -127,4 +155,8 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 		return anotherSamplingFactor;
 	}
 
+	@Override
+	public String nestedString(int level, boolean rules) {
+		return fill(level*4, ' ') + this + rulesString(level, rules);
+	}
 }

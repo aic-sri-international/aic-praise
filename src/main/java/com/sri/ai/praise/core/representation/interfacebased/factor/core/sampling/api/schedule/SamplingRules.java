@@ -1,0 +1,27 @@
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule;
+
+import static com.sri.ai.util.Util.unionArrayList;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.samplingrules.DefaultSamplingRules;
+
+public interface SamplingRules {
+
+	ArrayList<? extends SamplingRule> getSamplingRules();
+	
+	public SamplingRules replaceFactor(SamplingFactor samplingFactor);
+
+	SamplingRules sumOut(List<? extends Variable> variables);
+
+	static SamplingRules union(List<? extends SamplingRules> samplingRulesSet) {
+		ArrayList<? extends SamplingRule> union = unionArrayList(functionIterator(samplingRulesSet, SamplingRules::getSamplingRules));
+		return new DefaultSamplingRules(union);
+	}
+	
+}

@@ -26,4 +26,21 @@ public class DefaultAssignment implements Assignment {
 		return fromVariablesToValues.toString();
 	}
 
+	@Override
+	public boolean contains(Variable variable) {
+		return fromVariablesToValues.containsKey(variable);
+	}
+
+	@Override
+	public int size() {
+		return fromVariablesToValues.size();
+	}
+
+	@Override
+	public Assignment copy() {
+		DefaultAssignment copy = new DefaultAssignment();
+		copy.fromVariablesToValues.putAll(fromVariablesToValues);
+		return copy;
+	}
+
 }

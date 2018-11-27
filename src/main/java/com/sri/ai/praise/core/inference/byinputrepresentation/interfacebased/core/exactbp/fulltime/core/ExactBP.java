@@ -67,7 +67,7 @@ public class ExactBP extends ExactBPNodeFromVariableToFactor {
 		return
 				explanationBlock("Computing unnormalized marginal of ", getRoot(), code(() -> {
 					return super.apply();
-				}), "Unnormalized marginal is ", getRoot(), " is ", RESULT);
+				}), "Unnormalized marginal is ", RESULT);
 	}
 	
 	public ExactBP(Variable query, FactorNetwork factorNetwork) {

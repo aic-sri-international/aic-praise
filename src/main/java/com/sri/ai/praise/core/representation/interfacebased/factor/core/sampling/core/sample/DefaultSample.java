@@ -1,5 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample;
 
+import static com.sri.ai.util.Util.myAssert;
+
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Assignment;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Importance;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.ImportanceFactory;
@@ -48,6 +50,20 @@ public class DefaultSample implements Sample {
 	@Override
 	public String toString() {
 		return "(" + assignment + ", " + importance + ", " + potential + ")";
+	}
+
+	@Override
+	public Sample copy() {
+		return new DefaultSample(getAssignment().copy(), getImportance(), getPotential());
+	}
+
+	@Override
+	public void copy(Sample another) {
+		myAssert(another instanceof DefaultSample, () -> getClass() + " can only copy from another " + getClass() + ", but got " + another + " of class " + another.getClass());
+		DefaultSample anotherDefault = (DefaultSample) another;
+		assignment = anotherDefault.getAssignment().copy();
+		importance = another.getImportance();
+		potential = another.getPotential();
 	}
 
 }

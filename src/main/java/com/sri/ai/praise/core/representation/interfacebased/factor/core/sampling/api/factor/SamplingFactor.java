@@ -1,7 +1,12 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor;
 
+import static com.sri.ai.util.Util.fill;
+import static com.sri.ai.util.Util.join;
+
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
+import com.sri.ai.util.collect.FunctionIterator;
 
 /**
  * A sampling factor is a factor that represents its potential function by a set of samples.
@@ -11,6 +16,31 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
  */
 public interface SamplingFactor extends Factor {
 	
-	void sample(Sample sample);
+	/**
+	 * Attempts to fill in the current sample and update its potential and importance.
+	 * Sampling factors are allowed to do no sampling if the given initial sample does not have enough information.
+	 * For example, a sampling factor of a normal distribution will not produce any sampling if
+	 * neither the mean nor the dependent (normally distributed) variable are assigned a value.
+	 * @param sample
+	 */
+	void sampleOrWeigh(Sample sample);
+	
+	SamplingRules getSamplingRules();
+	
+	default String nestedString(boolean rules) {
+		return nestedString(0, rules);
+	}
+	
+	String nestedString(int level, boolean rules);
+
+	default String rulesString(int level, boolean rules) {
+		if (!rules) return "";
+		String tab = fill(level*4, ' ');
+		return 
+				"\n" + tab + "--------------\n"
+				+ join("\n", FunctionIterator.functionIterator(getSamplingRules().getSamplingRules(), r -> tab + r))
+				+ "\n" + tab + "--------------";
+				
+	}
 
 }
