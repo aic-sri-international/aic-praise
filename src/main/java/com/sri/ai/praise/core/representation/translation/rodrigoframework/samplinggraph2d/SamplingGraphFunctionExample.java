@@ -30,11 +30,11 @@ public class SamplingGraphFunctionExample {
 		boolean forDavid = true;
 		
 		Random random = new Random();
-		int numberOfSamples = 500;
+		int numberOfSamples = 500000;
 
 		double mean = 50.0;
 		double standardDeviation = 5.0;
-		int numberOfPoints = 10;
+		int numberOfPoints = 500;
 
 		double axisStart = mean - standardDeviation*3;
 		double axisEnd   = mean + standardDeviation*3;

@@ -5,7 +5,6 @@ import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.myAssert;
-import static com.sri.ai.util.Util.println;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,8 +100,8 @@ public class SamplingGraphFunction extends AbstractFunction {
 		if (queryValueIndex != -1) { // out of the graph's range
 			distribution.add(queryValueIndex, sample.getPotential().doubleValue());
 		}
-		println("Added " + queryValueIndex + " with weight " + sample.getPotential());
-		println("Distribution: " + distribution.getProbabilities());
+//		println("Added " + queryValueIndex + " with weight " + sample.getPotential());
+//		println("Distribution: " + distribution.getProbabilities());
 	}
 
 	@Override
