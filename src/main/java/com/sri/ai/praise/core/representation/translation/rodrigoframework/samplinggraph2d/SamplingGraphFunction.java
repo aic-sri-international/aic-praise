@@ -1,11 +1,14 @@
 package com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d;
 
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.println;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
@@ -14,7 +17,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleImportanceFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
 import com.sri.ai.util.base.NullaryFunction;
-import com.sri.ai.util.distribution.DiscreteArrayDistribution;
+import com.sri.ai.util.distribution.WeightedFrequencyArrayDistribution;
 import com.sri.ai.util.graph2d.api.variables.Assignment;
 import com.sri.ai.util.graph2d.api.variables.DefaultValue;
 import com.sri.ai.util.graph2d.api.variables.SetOfVariables;
@@ -55,15 +58,13 @@ public class SamplingGraphFunction extends AbstractFunction {
 	
 	// Rationale of implementation:
 	// For each sample, we determine the joint index of all non-query variables,
-	// determine a distribution specific for that combination,
+	// determine a distribution (over the query) specific for that non-query variables combination,
 	// and update it with the probability ("potential") of the sample.
 	// At evaluation time, the appropriate distribution is picked to provide the probability for the query value.
 	
-	private com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable query;
-	
 	private SamplingFactor samplingFactor;
 
-	private Map<ArrayList<Integer>, DiscreteArrayDistribution> distributions;
+	private Map<ArrayList<Integer>, WeightedFrequencyArrayDistribution> distributions;
 	
 	private int queryVariableIndex;
 
@@ -71,21 +72,19 @@ public class SamplingGraphFunction extends AbstractFunction {
 
 	private com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable querySamplingVariable;
 
-	int numberOfValuesOfNonQueryVariables;
-	
 	protected SamplingGraphFunction(
 			SamplingFactor samplingFactor,
 			SetOfVariables inputVariablesWithRange,
-			int queryVariableIndex,
-			int numberOfSamples) {
+			int queryVariableIndex) {
 		
-		super(makeOutputVariable(), inputVariablesWithRange);
+		super(makeOutputVariable(inputVariablesWithRange.get(queryVariableIndex)), inputVariablesWithRange);
+
+		assertVariablesAllHaveADefinedSetOfValues(inputVariablesWithRange);
 		
 		this.queryVariable = getInputVariables().getVariables().get(queryVariableIndex);
 		this.queryVariableIndex = queryVariableIndex;
 		this.samplingFactor = samplingFactor;
 		this.querySamplingVariable = samplingFactor.getVariables().get(queryVariableIndex);
-		this.numberOfValuesOfNonQueryVariables = computeNumberOfValuesOfNonQueryVariables();
 		this.distributions = map();
 
 		myAssert(sameNumberOfFunctionAndSamplingVariables(), numberOfVariablesError());
@@ -97,29 +96,33 @@ public class SamplingGraphFunction extends AbstractFunction {
 	 */
 	public void iterate() {
 		Sample sample = getSample(samplingFactor);
-		DiscreteArrayDistribution distribution = getCorrespondingDistribution(sample);
+		WeightedFrequencyArrayDistribution distribution = getCorrespondingDistribution(sample);
 		int queryValueIndex = getQueryValueIndex(sample);
-		distribution.add(queryValueIndex, sample.getPotential().doubleValue());
+		if (queryValueIndex != -1) { // out of the graph's range
+			distribution.add(queryValueIndex, sample.getPotential().doubleValue());
+		}
+		println("Added " + queryValueIndex + " with weight " + sample.getPotential());
+		println("Distribution: " + distribution.getProbabilities());
 	}
 
 	@Override
 	public Value evaluate(Assignment assignmentToInputVariables) {
-		DiscreteArrayDistribution distribution = getCorrespondingDistribution(assignmentToInputVariables);
+		WeightedFrequencyArrayDistribution distribution = getCorrespondingDistribution(assignmentToInputVariables);
 		int queryValueIndex = getQueryValueIndex(assignmentToInputVariables);
 		ArrayList<Double> probabilities = distribution.getProbabilities();
 		Double probability = probabilities.get(queryValueIndex);
 		return new DefaultValue(probability);
 	}
 	
-	public DiscreteArrayDistribution getCorrespondingDistribution(Assignment assignment) {
+	public WeightedFrequencyArrayDistribution getCorrespondingDistribution(Assignment assignment) {
 		ArrayList<Integer> nonQueryValueIndices = getNonQueryValueIndices(assignment);
-		DiscreteArrayDistribution distribution = getDistributionForNonQueryValueIndices(nonQueryValueIndices);
+		WeightedFrequencyArrayDistribution distribution = getDistributionForNonQueryValueIndices(nonQueryValueIndices);
 		return distribution;
 	}
 
-	public DiscreteArrayDistribution getCorrespondingDistribution(Sample sample) {
+	public WeightedFrequencyArrayDistribution getCorrespondingDistribution(Sample sample) {
 		ArrayList<Integer> nonQueryValueIndices = getNonQueryValueIndices(sample);
-		DiscreteArrayDistribution distribution = getDistributionForNonQueryValueIndices(nonQueryValueIndices);
+		WeightedFrequencyArrayDistribution distribution = getDistributionForNonQueryValueIndices(nonQueryValueIndices);
 		return distribution;
 	}
 	
@@ -159,6 +162,7 @@ public class SamplingGraphFunction extends AbstractFunction {
 			com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable samplingVariable) {
 		
 		Object sampleValueObject = sample.getAssignment().get(samplingVariable);
+		myAssert(sampleValueObject != null, () -> "Sampling factor has not produced value for variable " + samplingVariable + " in sample " + sample + ". Factor is " + samplingFactor);
 		Value sampleValue = Value.value(sampleValueObject);
 		return getIndexOfValue(variable, sampleValue);
 	}
@@ -173,12 +177,12 @@ public class SamplingGraphFunction extends AbstractFunction {
 		return result;
 	}
 
-	private DiscreteArrayDistribution getDistributionForNonQueryValueIndices(ArrayList<Integer> nonQueryValueIndices) {
-		DiscreteArrayDistribution result = 
+	private WeightedFrequencyArrayDistribution getDistributionForNonQueryValueIndices(ArrayList<Integer> nonQueryValueIndices) {
+		WeightedFrequencyArrayDistribution result = 
 				getValuePossiblyCreatingIt(
 						distributions, 
 						nonQueryValueIndices, 
-						key -> new DiscreteArrayDistribution(queryVariable.getSetOfValuesOrNull().size() + 1, 0.01));
+						key -> new WeightedFrequencyArrayDistribution(queryVariable.getSetOfValuesOrNull().size() + 1, 0.01));
 		return result;
 	}
 
@@ -200,31 +204,29 @@ public class SamplingGraphFunction extends AbstractFunction {
 		return sample;
 	}
 
-	private int computeNumberOfValuesOfNonQueryVariables() {
-		int product = 1;
-		for (int i = 0; i != numberOfVariables(); i++) {
-			if (i != queryVariableIndex) {
-				product *= getVariable(i).getSetOfValuesOrNull().size();
-			}
-		}
-		return product;
-	}
-
-	public static RealVariable makeOutputVariable() {
-		return new RealVariable("P(\" + query + \" | ...)", Unit.NONE);
+	public static RealVariable makeOutputVariable(Variable queryVariable) {
+		return new RealVariable("P(" + queryVariable.getName() + " | ...)", Unit.NONE);
 	}
 
 	@Override
 	public String getName() {
-		return "P(" + query + " | ...)";
+		return "P(" + queryVariable.getName() + " | ...)";
 	}
 
-	public NullaryFunction<String> numberOfVariablesError() {
+	private NullaryFunction<String> numberOfVariablesError() {
 		return () -> "Number of Function input variables must be the same as the number of variables in the sampling factor";
 	}
 
-	public boolean sameNumberOfFunctionAndSamplingVariables() {
+	private boolean sameNumberOfFunctionAndSamplingVariables() {
 		return getInputVariables().size() == this.samplingFactor.getVariables().size();
+	}
+
+	private void assertVariablesAllHaveADefinedSetOfValues(SetOfVariables inputVariablesWithRange) throws Error {
+		List<? extends Variable> variables = inputVariablesWithRange.getVariables();
+		Variable withoutSetOfValues = getFirstSatisfyingPredicateOrNull(variables, v -> v.getSetOfValuesOrNull() == null);
+		if (withoutSetOfValues != null) {
+			throw new Error(getClass() + " requires that all graph2d variables have a defined set of values, but " + withoutSetOfValues + " does not");
+		}
 	}
 
 }

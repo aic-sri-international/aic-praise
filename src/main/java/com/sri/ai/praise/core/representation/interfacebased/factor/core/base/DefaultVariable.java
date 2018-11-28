@@ -17,7 +17,7 @@ public class DefaultVariable implements Variable {
 	public DefaultVariable(Object object) {
 		this.object = object;
 	}
-
+	
 	@Override
 	public List<? extends Object> getValues() {
 		throw new Error("getValues not supported by " + getClass());
