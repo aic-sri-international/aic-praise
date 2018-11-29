@@ -8,6 +8,7 @@ import static com.sri.ai.util.graph2d.api.functions.Functions.functions;
 import static com.sri.ai.util.graph2d.api.graph.GraphSetMaker.graphSetMaker;
 import static com.sri.ai.util.graph2d.api.variables.Variable.realVariable;
 
+import com.sri.ai.util.graph2d.jfreechart.GraphSettings;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
@@ -86,6 +87,7 @@ public class SamplingGraphFunctionExample {
 		}
 
 		GraphSetMaker graphSetMaker = graphSetMaker();
+		graphSetMaker.setGraphSettings(new GraphSettings().setDotWidth(1f).setLineWidth(.5f));
 
 		graphSetMaker.setFunctions(functions);
 
