@@ -456,11 +456,19 @@ public abstract class AbstractPerspective implements Perspective {
 		public boolean equals(Object other) {
 			if (other instanceof AddPageChange) {
 				AddPageChange that = (AddPageChange) other;
-				return Objects.equal(this.pageIdx, that.pageIdx) && Objects.equal(this.pageEditorSupplier, that.pageEditorSupplier);
+				boolean result = 
+						Objects.equal(this.pageIdx, that.pageIdx) && 
+						Objects.equal(this.pageEditorSupplier, that.pageEditorSupplier);
+				return result;
 			}
 			else {
 				return false;
 			}
+		}
+		
+		@Override
+		public int hashCode() {
+			return pageIdx*31 + pageEditorSupplier.hashCode();
 		}
 	}
 	
@@ -486,11 +494,19 @@ public abstract class AbstractPerspective implements Perspective {
 		public boolean equals(Object other) {
 			if (other instanceof RemovePageChange) {
 				RemovePageChange that = (RemovePageChange) other;
-				return Objects.equal(this.pageIdx, that.pageIdx) && Objects.equal(this.pageEditorSupplier, that.pageEditorSupplier);
+				boolean result = 
+						Objects.equal(this.pageIdx, that.pageIdx) && 
+						Objects.equal(this.pageEditorSupplier, that.pageEditorSupplier);
+				return result;
 			}
 			else {
 				return false;
 			}
+		}
+
+		@Override
+		public int hashCode() {
+			return pageIdx*31 + pageEditorSupplier.hashCode();
 		}
 	}
 	

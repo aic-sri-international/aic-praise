@@ -7,6 +7,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
 public interface ExpressionVariable extends Variable, Expression {
 
+	@Override
 	List<? extends Object> getValues();
 
 }

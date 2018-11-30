@@ -39,7 +39,8 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 
 	@Override
 	public SamplingRules makeSamplingRules() {
-		SamplingRules marginalSamplingRules = getMarginalizedFactor().getSamplingRules().sumOut(getMarginalizedVariables());
+		SamplingRules samplingRules = getMarginalizedFactor().getSamplingRules();
+		SamplingRules marginalSamplingRules = samplingRules.sumOut(getMarginalizedVariables(), this);
 		return marginalSamplingRules;
 	}
 

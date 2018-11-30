@@ -464,6 +464,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		Theory theory = new CommonTheory();
 		

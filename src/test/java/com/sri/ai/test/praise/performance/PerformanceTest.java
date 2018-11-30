@@ -24,7 +24,6 @@ import org.junit.Test;
 import com.google.common.base.Function;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.core.constraint.ConstraintSplitting;
-import com.sri.ai.grinder.core.constraint.ContextSplitting;
 import com.sri.ai.grinder.tester.ContextSplittingTester;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters;
@@ -469,9 +468,9 @@ public class PerformanceTest {
 
 
 	private static FactorOperationResultAndTimes timeFactorOperation(NullaryFunction<Factor> operation) {
-		ContextSplitting.resetTotalConstraintSplittingTime();
+		ConstraintSplitting.resetTotalConstraintSplittingTime();
 		Pair<Factor,Long> timeAndResult = timeAndGetResult( () -> operation.apply() );
-		long contextSplittingTime = ContextSplitting.getTotalConstraintSplittingTime();
+		long contextSplittingTime = ConstraintSplitting.getTotalConstraintSplittingTime();
 		FactorOperationResultAndTimes result = new FactorOperationResultAndTimes( timeAndResult.first,
 																				  timeAndResult.second,
 																				  contextSplittingTime);

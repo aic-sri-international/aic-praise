@@ -135,11 +135,13 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		return result;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public ExactBPNode<RootType,SubRootType> getBase() {
 		return (ExactBPNode<RootType,SubRootType>) super.getBase();
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	public ArrayList<? extends AnytimeExactBP<SubRootType,RootType>> getSubs() {
 		return (ArrayList<? extends AnytimeExactBP<SubRootType,RootType>>) super.getSubs();

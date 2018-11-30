@@ -292,7 +292,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 			if(subPolytope.equals(subApproximationToRemove)) {
 				polytopesToMultiply.remove(subPolytope);
 			}
-		};
+		}
 		return polytopesToMultiply;
 	}
 	
@@ -354,7 +354,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 			if(subPolytope.equals(subApproximationToRemove)) {
 				polytopesToMultiply.remove(subPolytope);
 			}
-		};
+		}
 		addFactorAtRootPolytope(polytopesToMultiply);
 		return polytopesToMultiply;
 	}

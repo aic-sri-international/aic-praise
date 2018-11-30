@@ -175,6 +175,7 @@ public class ParameterEstimationForExpressionBasedModel implements ParameterEsti
 	 * example, convert "if earthquake then Alpha else 1-Alpha" into "Alpha".
 	 *
 	 */
+	@Override
 	public Expression convertExpression(Expression marginal) {
 		try {
 			String input = marginal.toString();

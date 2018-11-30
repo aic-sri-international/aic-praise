@@ -252,8 +252,9 @@ public class HOGModelGrounding {
 			boolean isLastValue = mrn.getValue().intValue() == numberFactorValues - 1;
 			listener.factorValue(numberFactorValues, isFirstValue, isLastValue, value.rationalValue());
 
-			if (didIncrement = mrn.canIncrement()) {
+			if (mrn.canIncrement()) {
 				mrn.increment();
+				didIncrement = true;
 			}				
 		} while (didIncrement);
 	}

@@ -17,7 +17,7 @@ public interface SamplingRules {
 	
 	public SamplingRules replaceFactor(SamplingFactor samplingFactor);
 
-	SamplingRules sumOut(List<? extends Variable> variables);
+	SamplingRules sumOut(List<? extends Variable> variables, SamplingFactor factorOnResultingRules);
 
 	static SamplingRules union(List<? extends SamplingRules> samplingRulesSet) {
 		ArrayList<? extends SamplingRule> union = unionArrayList(functionIterator(samplingRulesSet, SamplingRules::getSamplingRules));

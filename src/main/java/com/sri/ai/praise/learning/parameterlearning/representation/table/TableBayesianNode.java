@@ -134,13 +134,13 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		return allElements;
 	}
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		TableVariable sick = new TableVariable("sick", 2);
 		TableVariable sun = new TableVariable("sun", 2);
 		TableVariable cold = new TableVariable("cold", 2);
 	    
 	    new TableBayesianNode(sun, arrayList());
-	    @SuppressWarnings("unused")
 		TableBayesianNode coldNode = new TableBayesianNode(cold, arrayList());
 	    TableBayesianNode sickNode = new TableBayesianNode(sick, arrayList(sun, cold));
 	    sickNode.setInitialCountsForAllPossibleChildAndParentsAssignments();

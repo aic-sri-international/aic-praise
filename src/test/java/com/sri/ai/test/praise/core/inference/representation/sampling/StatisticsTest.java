@@ -58,7 +58,7 @@ public class StatisticsTest {
 		println(factor);
 
 		meanAndVariance = new MeanAndVariance(numberFactory);
-		varianceOfMean = (Statistic<ArithmeticNumber>) StatisticsChain.<ArithmeticNumber>chain(
+		varianceOfMean = StatisticsChain.<ArithmeticNumber>chain(
 				new DefaultMean(numberFactory), 
 				new Variance(numberFactory));
 		for (int i = 0; i != numberOfSamples; i++) {

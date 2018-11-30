@@ -134,6 +134,7 @@ public class EvaluationConfigurationFromCommandLineOptions extends EvaluationCon
 		}
 	}
 
+	@Override
 	public void close() throws IOException {
 		closePrintStream(getNotificationOut());
 		closePrintStream(getResultOut());

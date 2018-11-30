@@ -1,9 +1,13 @@
 package com.sri.ai.test.praise.core.inference.representation.sampling;
 
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.println;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
@@ -16,11 +20,15 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.ImportanceFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingMarginalizingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingProductFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleImportanceFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.util.number.representation.api.ArithmeticNumber;
 import com.sri.ai.util.number.representation.core.ArithmeticDoubleFactory;
 import com.sri.ai.util.number.statistics.api.Statistic;
@@ -48,9 +56,11 @@ public class SamplingTest {
 	ExactBP solver;
 	SamplingFactor marginalOfX;
 	SamplingFactor marginalOfZ;
+	SamplingFactor factor;
 	double meanOfZ;
 	double varianceOfZ;
 	double expectedVarianceOfMarginalOfX;
+	String expectedString;
 
 	public void setXYZModel() {
 		x = new DefaultVariable("x");
@@ -66,13 +76,101 @@ public class SamplingTest {
 	}
 
 	@Test
-	void testSamplingRules() {
+	void testXYZModelSamplingRules() {
 		
 			setXYZModel();
-
+			
 			solver = new ExactBP(z, network);
 			marginalOfZ = (SamplingFactor) solver.apply();
 			println(marginalOfZ.nestedString(true));
+			
+			factor = marginalOfZ;
+			expectedString = "z <= ";
+			println(samplingRulesString(factor));
+			assertEquals(expectedString, samplingRulesString(marginalOfZ));
+
+			// message from y to z
+			SamplingMarginalizingFactor messageFromYToZ = (SamplingMarginalizingFactor) ((SamplingProductFactor) marginalOfZ).getInputFactors().get(0);
+			factor = messageFromYToZ;
+			expectedString = "";
+			runSamplingRulesTest();
+
+			SamplingFactor priorOfZ = ((SamplingProductFactor) marginalOfZ).getInputFactors().get(1);
+			factor = priorOfZ;
+			expectedString = "z <= ";
+			runSamplingRulesTest();
+
+			SamplingProductFactor incomingToY = (SamplingProductFactor) messageFromYToZ.getMarginalizedFactor();
+			factor = incomingToY;
+			expectedString = "z <= y; y <= z";
+			runSamplingRulesTest();
+
+			SamplingFactor YIsNormalZ = incomingToY.getInputFactors().get(0);
+			factor = YIsNormalZ;
+			expectedString = "z <= y; y <= z";
+			runSamplingRulesTest();
+
+			SamplingFactor messageFromXToY = incomingToY.getInputFactors().get(1);
+			factor = messageFromXToY;
+			expectedString = "";
+			runSamplingRulesTest();
+	}
+
+	@Test
+	void testModelSamplingRules() {
+		
+			setXYZModel();
+			
+			solver = new ExactBP(z, network);
+			marginalOfZ = (SamplingFactor) solver.apply();
+			println(marginalOfZ.nestedString(true));
+			
+			factor = marginalOfZ;
+			expectedString = "z <= ";
+			println(samplingRulesString(factor));
+			assertEquals(expectedString, samplingRulesString(marginalOfZ));
+
+			// message from y to z
+			SamplingMarginalizingFactor messageFromYToZ = (SamplingMarginalizingFactor) ((SamplingProductFactor) marginalOfZ).getInputFactors().get(0);
+			factor = messageFromYToZ;
+			expectedString = "";
+			runSamplingRulesTest();
+
+			SamplingFactor priorOfZ = ((SamplingProductFactor) marginalOfZ).getInputFactors().get(1);
+			factor = priorOfZ;
+			expectedString = "z <= ";
+			runSamplingRulesTest();
+
+			SamplingProductFactor incomingToY = (SamplingProductFactor) messageFromYToZ.getMarginalizedFactor();
+			factor = incomingToY;
+			expectedString = "z <= y; y <= z";
+			runSamplingRulesTest();
+
+			SamplingFactor YIsNormalZ = incomingToY.getInputFactors().get(0);
+			factor = YIsNormalZ;
+			expectedString = "z <= y; y <= z";
+			runSamplingRulesTest();
+
+			SamplingFactor messageFromXToY = incomingToY.getInputFactors().get(1);
+			factor = messageFromXToY;
+			expectedString = "";
+			runSamplingRulesTest();
+	}
+
+	public void runSamplingRulesTest() {
+		println(samplingRulesString(factor));
+		assertEquals(expectedString, samplingRulesString(factor));
+	}
+
+	public String samplingRulesString(SamplingFactor samplingFactor) {
+		SamplingRules samplingRules = samplingFactor.getSamplingRules();
+		List<String> ruleStrings = mapIntoList(samplingRules.getSamplingRules(), this::ruleString);
+		String samplingRulesString = join("; ", ruleStrings);
+		return samplingRulesString;
+	}
+	
+	private String ruleString(SamplingRule rule) {
+		return join(rule.getConsequents()) + " <= " + join(rule.getAntecendents());
 	}
 
 	//@Test
@@ -131,7 +229,6 @@ public class SamplingTest {
 
 	private Statistic<ArithmeticNumber> chain(Statistic... statistics) {
 		return 
-				(Statistic<ArithmeticNumber>) 
 				StatisticsChain.<ArithmeticNumber>chain(statistics);
 	}
 }

@@ -125,6 +125,7 @@ public class HOGModelError extends Error {
 		return errorType;
 	}
 	
+	@Override
 	public String getMessage() {
 		return message;
 	}

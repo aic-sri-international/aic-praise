@@ -73,7 +73,7 @@ public class ExactBPNodeFromVariableToFactor extends AbstractExactBPNode<Variabl
 	
 	@Override
 	protected ArrayList<? extends Factor> makeSubsRoots() {
-		ArrayList<? extends Factor> result = collectToArrayList(getRootNeighbors(), n -> ! excludedFactors.contains((Factor)n));
+		ArrayList<? extends Factor> result = collectToArrayList(getRootNeighbors(), n -> ! excludedFactors.contains(n));
 		return result;
 	}
 

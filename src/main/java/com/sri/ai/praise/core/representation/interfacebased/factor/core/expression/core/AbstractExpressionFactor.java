@@ -96,6 +96,7 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 		this.context = context;
 	}
 
+	@Override
 	public Context getContext() {
 		return context;
 	}
@@ -235,7 +236,7 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 			throw new Error("Division by zero impossible.");
 		}
 		else {
-			result = evaluateAsFactor(Division.make(ONE, (Expression) this));
+			result = evaluateAsFactor(Division.make(ONE, this));
 		}
 		return result;
 	}

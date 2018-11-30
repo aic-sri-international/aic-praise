@@ -176,7 +176,7 @@ public class AEBPSolver {
 			Pair<ArrayList<Double>,ArrayList<Double>> result = new Pair<>(arrayList(-1.,-1.),arrayList(-1.,-1.));
 			
 			if(polytope instanceof ProductPolytope) {
-				polytope = Polytopes.getEquivalentAtomicPolytopeOn(query, (ProductPolytope) polytope);
+				polytope = Polytopes.getEquivalentAtomicPolytopeOn(query, polytope);
 			}
 			if (polytope instanceof IntensionalConvexHullOfFactors) {
 				Pair<TableFactor, TableFactor> maxMinProba = getMaxMinProbabilityFromIntensionalConvHull((IntensionalConvexHullOfFactors) polytope);

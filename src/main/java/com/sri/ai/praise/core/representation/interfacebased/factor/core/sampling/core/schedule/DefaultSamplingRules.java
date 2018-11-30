@@ -43,15 +43,12 @@ public class DefaultSamplingRules implements SamplingRules {
 	}
 
 	@Override
-	public SamplingRules sumOut(List<? extends Variable> variables) {
+	public SamplingRules sumOut(List<? extends Variable> variables, SamplingFactor factorOnResultingRules) {
 
 		List<VariableGoal> variablesAsGoals = makeSureItsListOfVariableGoals(variables);
 		
-		BinaryFunction<VariableGoal, Set<? extends VariableGoal>, SamplingRule> ruleFactory = 
-				makeSamplingRuleFactory();
-
 		RuleMarginalizer<SamplingRule, VariableGoal> marginalizer =  
-				new RuleMarginalizer<SamplingRule, VariableGoal>(getSamplingRules(), variablesAsGoals, ruleFactory);
+				new RuleMarginalizer<>(getSamplingRules(), variablesAsGoals, makeSamplingRuleFactory());
 		
 		Set<? extends SamplingRule> marginalized = marginalizer.marginalize();
 		DefaultSamplingRules result = new DefaultSamplingRules(new ArrayList<>(marginalized));

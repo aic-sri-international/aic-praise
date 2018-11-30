@@ -64,7 +64,8 @@ public class GradientLoglikelihoodToOptimize implements MultivariateVectorFuncti
 	 * Implementation of the method from the interface MultivariateVectorFunction from Apache Commons Math.
 	 *
 	 */
-    public double[] value(double[] variables) {
+    @Override
+	public double[] value(double[] variables) {
 
 		Map<Expression, Double> mapParametersToValue = createMap(variables);
     	
