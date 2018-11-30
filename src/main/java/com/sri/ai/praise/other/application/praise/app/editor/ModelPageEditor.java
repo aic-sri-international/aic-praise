@@ -41,11 +41,11 @@ import java.util.List;
 
 import org.fxmisc.undo.UndoManager;
 
-import javafx.scene.layout.Pane;
-
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
 import com.sri.ai.util.base.Pair;
+
+import javafx.scene.layout.Pane;
 
 @Beta
 public interface ModelPageEditor {

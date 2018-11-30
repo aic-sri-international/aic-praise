@@ -18,6 +18,7 @@ import java.util.Random;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableGoal;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.PermutationIterator;
@@ -25,6 +26,7 @@ import com.sri.ai.util.planning.api.Plan;
 
 public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	
+	@SuppressWarnings("unused")
 	private Plan samplingPlan;
 
 	public SamplingProductFactor(ArrayList<? extends SamplingFactor> multipliedFactors, Random random) {
@@ -57,8 +59,9 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	}
 
 	private Plan makePlan() {
-		List<? extends VariableGoal> variableGoals = mapIntoList(getVariables(), v -> new VariableGoal(v));
-		Plan plan  =plan(variableGoals, getSamplingRules().getSamplingRules());
+		List<VariableGoal> variableGoals = mapIntoList(getVariables(), v -> new VariableGoal(v));
+		ArrayList<? extends SamplingRule> samplingRules = getSamplingRules().getSamplingRules();
+		Plan plan = plan(variableGoals, samplingRules);
 		return plan;
 	}
 

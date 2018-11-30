@@ -3,7 +3,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.util.Util.assertType;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.subtract;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,7 +13,7 @@ import com.sri.ai.util.planning.api.Rule;
 import com.sri.ai.util.planning.api.State;
 import com.sri.ai.util.planning.core.AbstractAtomicPlan;
 
-public class SamplingRule extends AbstractAtomicPlan implements Rule {
+public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoal> {
 
 	private SamplingFactor samplingFactor;
 
@@ -58,15 +57,6 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule {
 	public SamplingRule replaceFactor(SamplingFactor newSamplingFactor) {
 		SamplingRule result = new SamplingRule(newSamplingFactor, getConsequents(), getAntecendents(), getEstimatedSuccessWeight());
 		return result;
-	}
-	
-	public SamplingRule sumOut(List<? extends Variable> marginalizedVariables) {
-		List<? extends VariableGoal> marginalizedGoals = mapIntoList(marginalizedVariables, v -> new VariableGoal(v));
-		Collection<? extends VariableGoal> newConsequents = subtract(getConsequents(), marginalizedGoals);
-		Collection<? extends VariableGoal> newAntecedents = subtract(getAntecendents(), marginalizedGoals);
-		SamplingRule result = new SamplingRule(getSamplingFactor(), newConsequents, newAntecedents, getEstimatedSuccessWeight());
-		return result;
-		
 	}
 	
 	@Override

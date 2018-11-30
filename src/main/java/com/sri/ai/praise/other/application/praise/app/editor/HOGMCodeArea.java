@@ -37,6 +37,9 @@
  */
 package com.sri.ai.praise.other.application.praise.app.editor;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
@@ -52,9 +55,6 @@ import com.sri.ai.praise.model.v1.hogm.antlr.HOGMLexer;
 import com.sri.ai.praise.other.application.praise.app.FXUtil;
 
 import javafx.scene.layout.AnchorPane;
-
-import java.util.Collection;
-import java.util.Collections;
 
 @Beta
 public class HOGMCodeArea extends AnchorPane {

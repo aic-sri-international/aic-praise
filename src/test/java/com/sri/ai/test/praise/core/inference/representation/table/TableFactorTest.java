@@ -1,16 +1,14 @@
 package com.sri.ai.test.praise.core.inference.representation.table;
 
 import static com.sri.ai.util.Util.arrayList;
-import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.print;
+import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 
-import org.apache.jena.ext.com.google.common.annotations.VisibleForTesting;
 import org.junit.Test;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
@@ -67,7 +65,7 @@ public class TableFactorTest {
 		println("MULTIPLYING f1 * f2");
 		println("-------------------");
 		
-		TableFactor f1f2 = (TableFactor)f1.multiply(f2);
+		TableFactor f1f2 = f1.multiply(f2);
 		f1f2.setName("f1f2");
 		
 		println(f1f2);
@@ -87,7 +85,7 @@ public class TableFactorTest {
 		println("MULTIPLYING f2 * f1");
 		println("-------------------");
 		
-		TableFactor f2f1 = (TableFactor)f2.multiply(f1);
+		TableFactor f2f1 = f2.multiply(f1);
 		f2f1.setName("f2f1");
 
 		println(f2f1);

@@ -4,7 +4,6 @@ import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 

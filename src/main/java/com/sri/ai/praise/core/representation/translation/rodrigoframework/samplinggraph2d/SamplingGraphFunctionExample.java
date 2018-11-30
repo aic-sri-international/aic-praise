@@ -30,14 +30,14 @@ public class SamplingGraphFunctionExample {
 		boolean forDavid = true;
 		
 		Random random = new Random();
-		int numberOfSamples = 500000;
+		int numberOfSamples = 5000;
 
 		double mean = 50.0;
 		double standardDeviation = 5.0;
 		int numberOfPoints = 500;
 
-		double axisStart = mean - standardDeviation*3;
-		double axisEnd   = mean + standardDeviation*3;
+		double axisStart = mean - standardDeviation*5;
+		double axisEnd   = mean + standardDeviation*5;
 		double step = (axisEnd - axisStart)/(numberOfPoints - 1);
 		Variable x = realVariable("x", Unit.NONE, axisStart + "", step + "", axisEnd + "");
 		Variable y = realVariable("y", Unit.NONE, axisStart + "", step + "", axisEnd + "");
@@ -81,6 +81,7 @@ public class SamplingGraphFunctionExample {
 		
 		Functions functions = functions(function);
 		
+		println("Sampling...");
 		for (int i = 0; i < numberOfSamples; i++) {
 			function.iterate();
 		}
@@ -89,6 +90,7 @@ public class SamplingGraphFunctionExample {
 
 		graphSetMaker.setFunctions(functions);
 
+		println("Preparing plot...");
 		GraphSet graphSet = graphSetMaker.make(x);
 		
 		println(graphSet);

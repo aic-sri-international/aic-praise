@@ -366,6 +366,7 @@ public class PerformanceTest {
 	
 	private static class FactorOperationResultAndTimeComparator implements Comparator<FactorOperationResultAndTimes> {
 	     
+		@Override
 		public int compare(FactorOperationResultAndTimes resultA, FactorOperationResultAndTimes resultB) {
 			int result;
 			
@@ -483,6 +484,7 @@ public class PerformanceTest {
 	/// POSSIBLE UNARY FACTOR OPERATIONS ///////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@SuppressWarnings("unused")
 	private static Factor sumOutFirstHalfOfVariables(Factor factor) {
 		List<? extends Variable> variablesToSumOut = getFirstHalfSubList(factor.getVariables());
 		Factor result = factor.sumOut(variablesToSumOut);
@@ -490,6 +492,7 @@ public class PerformanceTest {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private static Factor sumOutLastHalfOfVariables(Factor factor) {
 		List<? extends Variable> variablesToSumOut = getLastHalfSubList(factor.getVariables());
 		Factor result = factor.sumOut(variablesToSumOut);
@@ -504,6 +507,7 @@ public class PerformanceTest {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private static Factor sumOutFirstVariable(Factor factor) {
 		List<? extends Variable> factorVariables = factor.getVariables();
 		int indexOfFirstVariable = 0;
@@ -517,6 +521,7 @@ public class PerformanceTest {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private static Factor sumOutLastVariable(Factor factor) {
 		List<? extends Variable> factorVariables = factor.getVariables();
 		int indexOfLastVariable = factorVariables.size() - 1;

@@ -2,15 +2,17 @@ package com.sri.ai.test.praise.learning.symbolicparameterestimation;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.learning.symbolicparameterestimation.util.ExpressionBasedModelExamples.buildModel1;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.regularparameterestimation.RegularParameterEstimation;
 import com.sri.ai.praise.learning.symbolicparameterestimation.util.ExpressionBasedModelExamples;
-import org.junit.Test;
 
 /**
  * Tests for Regular Symbolic Parameter Estimation.

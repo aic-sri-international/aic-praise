@@ -40,8 +40,6 @@ package com.sri.ai.praise.other.application.praise.app.perspective;
 import java.util.Arrays;
 import java.util.List;
 
-import javafx.fxml.FXMLLoader;
-
 import com.google.common.annotations.Beta;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
 import com.sri.ai.praise.other.application.praise.app.FXUtil;
@@ -53,6 +51,8 @@ import com.sri.ai.praise.other.application.praise.app.model.ElectionAsInIJCAI201
 import com.sri.ai.praise.other.application.praise.app.model.ExamplePages;
 import com.sri.ai.praise.other.application.praise.app.model.MontyHallProblem;
 import com.sri.ai.praise.other.application.praise.app.model.Position;
+
+import javafx.fxml.FXMLLoader;
 
 @Beta
 public class HOGMPerspective extends AbstractPerspective {

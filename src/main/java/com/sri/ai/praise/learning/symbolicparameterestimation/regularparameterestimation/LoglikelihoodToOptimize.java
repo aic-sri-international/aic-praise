@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.math3.analysis.MultivariateFunction;
 
 import com.sri.ai.expresso.api.Expression;

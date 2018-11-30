@@ -3,7 +3,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.subtract;
-import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.List;
 import java.util.Random;

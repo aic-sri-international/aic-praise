@@ -51,6 +51,26 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.controlsfx.control.PopOver;
+import org.controlsfx.control.PopOver.ArrowLocation;
+
+import com.google.common.annotations.Beta;
+import com.sri.ai.expresso.ExpressoConfiguration;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.parsing.HOGMParserWrapper;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.api.TranslatorOptions;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai.HOGMv1_to_UAI_Translator;
+import com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai.UAI_to_HOGMv1_Using_Equalities_Translator;
+import com.sri.ai.praise.other.application.praise.app.editor.ModelPageEditor;
+import com.sri.ai.praise.other.application.praise.app.model.ExamplePages;
+import com.sri.ai.praise.other.application.praise.app.perspective.HOGMPerspective;
+import com.sri.ai.praise.other.application.praise.app.perspective.Perspective;
+import com.sri.ai.util.math.Rational;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -78,27 +98,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import org.controlsfx.control.PopOver;
-import org.controlsfx.control.PopOver.ArrowLocation;
-
-import com.google.common.annotations.Beta;
-import com.sri.ai.expresso.ExpressoConfiguration;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
-import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
-import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.representation.classbased.hogm.parsing.HOGMParserWrapper;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
-import com.sri.ai.praise.core.representation.translation.ciaranframework.api.TranslatorOptions;
-import com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai.HOGMv1_to_UAI_Translator;
-import com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai.UAI_to_HOGMv1_Using_Equalities_Translator;
-import com.sri.ai.praise.other.application.praise.app.editor.ModelPageEditor;
-import com.sri.ai.praise.other.application.praise.app.model.ExamplePages;
-import com.sri.ai.praise.other.application.praise.app.perspective.HOGMPerspective;
-import com.sri.ai.praise.other.application.praise.app.perspective.Perspective;
-import com.sri.ai.util.math.Rational;
-
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
 @Beta
 public class PRAiSEController {

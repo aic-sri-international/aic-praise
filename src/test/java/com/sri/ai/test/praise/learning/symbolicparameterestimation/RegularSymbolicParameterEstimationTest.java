@@ -8,11 +8,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.learning.symbolicparameterestimation.RegularSymbolicParameterEstimation;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Tests for Regular Symbolic  Parameter Estimation.

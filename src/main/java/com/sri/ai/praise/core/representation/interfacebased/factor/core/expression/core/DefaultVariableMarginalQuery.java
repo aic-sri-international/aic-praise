@@ -40,8 +40,8 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.express
 import java.util.function.Predicate;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
 public class DefaultVariableMarginalQuery implements Problem {
 	
