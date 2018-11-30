@@ -2,6 +2,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules.union;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.flattenOneLevelToArrayList;
 import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.join;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
@@ -30,25 +32,10 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	private Plan samplingPlan;
 
 	public SamplingProductFactor(ArrayList<? extends SamplingFactor> multipliedFactors, Random random) {
-		super(flattenSamplingProductFactors(multipliedFactors), random);
+		super(flattenOneLevel(multipliedFactors), random);
 		// it is important that product factors be flat because we must be sure that all incoming messages of a variable in Exact BP
 		// are present in the same product factor if we are to limit the search for samplers to a single product factor.
 		this.samplingPlan = makePlan();
-	}
-
-	private static ArrayList<? extends SamplingFactor> flattenSamplingProductFactors(ArrayList<? extends SamplingFactor> multipliedFactors) {
-		ArrayList<SamplingFactor> flattenedList = arrayList();
-		for (SamplingFactor factor : multipliedFactors) {
-			if (factor instanceof SamplingProductFactor) {
-				SamplingProductFactor productFactor = (SamplingProductFactor) factor;
-				// uses the fact that pre-existing product factors are already flattened.
-				flattenedList.addAll(productFactor.getInputFactors());
-			}
-			else {
-				flattenedList.add(factor);
-			}
-		}
-		return flattenedList;
 	}
 
 	@Override
@@ -164,6 +151,14 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 
 	private NullaryFunction<String> samplingFailureMessage(Sample sampleToComplete) {
 		return () -> "No permutation of factors in sampling product factor produced a complete sample.\nSample: " + sampleToComplete + "\nProduct factor: " + this;
+	}
+
+	private static ArrayList<? extends SamplingFactor> flattenOneLevel(ArrayList<? extends SamplingFactor> list) {
+		Function<SamplingFactor, ArrayList<? extends SamplingFactor>> 
+		expand = 
+		f -> f instanceof SamplingProductFactor? ((SamplingProductFactor) f).getInputFactors() : arrayList(f);
+		return flattenOneLevelToArrayList(list, expand);
+		// Note we are relying on the fact that previous sampling product factors are already flattened.
 	}
 
 	@Override
