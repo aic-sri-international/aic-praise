@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.Test;
+
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
@@ -39,7 +41,7 @@ public class SamplingTest {
 
 	private static Random random = new Random();
 	
-	int numberOfSamples = 5000;
+	int numberOfSamples = 500000;
 
 	SamplingFactor normalOnX;
 	SamplingFactor normalOnY;
@@ -131,10 +133,10 @@ public class SamplingTest {
 		return join(rule.getConsequents()) + " <= " + join(rule.getAntecendents());
 	}
 
-	// @Test
-	void testNormalWithFixedStandardDeviation() {
+	@Test
+	public void testNormalWithFixedStandardDeviation() {
 		
-		for (int j = 0; j != 1000; j++) {
+		for (int j = 0; j != 1; j++) {
 
 			setXYZModel();
 

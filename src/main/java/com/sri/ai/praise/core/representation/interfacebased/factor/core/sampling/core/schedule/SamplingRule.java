@@ -21,6 +21,8 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 
 	private Collection<? extends VariableGoal> consequents;
 
+	private boolean hasFired;
+	
 	public static SamplingRule samplingRule(
 			SamplingFactor samplingFactor, 
 			Collection<? extends Variable> consequentVariables, 
@@ -38,12 +40,17 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 		this.samplingFactor = samplingFactor;
 		this.antecedents = antecedents;
 		this.consequents =  consequents;
+		this.hasFired = false;
 	}
 
 	public SamplingFactor getSamplingFactor() {
 		return samplingFactor;
 	}
-
+	
+	public boolean hasFired() {
+		return hasFired;
+	}
+	
 	@Override
 	public Collection<? extends VariableGoal> getConsequents() {
 		return consequents;
@@ -52,6 +59,10 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 	@Override
 	public Collection<? extends VariableGoal> getAntecendents() {
 		return antecedents;
+	}
+
+	public void reset() {
+		hasFired = false;
 	}
 
 	public SamplingRule replaceFactor(SamplingFactor newSamplingFactor) {
@@ -63,6 +74,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 	public void execute(State state) {
 		SampleState sampleState = assertType(state, SampleState.class, getClass());
 		getSamplingFactor().sampleOrWeigh(sampleState.getSample());
+		hasFired = true;
 	}
 	
 	@Override

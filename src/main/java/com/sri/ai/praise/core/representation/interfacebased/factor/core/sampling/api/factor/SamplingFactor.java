@@ -27,14 +27,14 @@ public interface SamplingFactor extends Factor {
 	
 	SamplingRuleSet getSamplingRuleSet();
 	
-	default String nestedString(boolean rules) {
-		return nestedString(0, rules);
+	default String nestedString(boolean showSamplingRules) {
+		return nestedString(0, showSamplingRules);
 	}
 	
-	String nestedString(int level, boolean rules);
+	String nestedString(int level, boolean showSamplingRules);
 
-	default String rulesString(int level, boolean rules) {
-		if (!rules) return "";
+	default String rulesString(int level, boolean showSamplingRules) {
+		if (!showSamplingRules) return "";
 		String tab = fill(level*4, ' ');
 		return 
 				"\n" + tab + "--------------\n"
