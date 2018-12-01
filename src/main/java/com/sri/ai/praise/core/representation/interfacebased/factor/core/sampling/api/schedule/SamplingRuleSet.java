@@ -11,16 +11,16 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRules;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 
-public interface SamplingRules {
+public interface SamplingRuleSet {
 
 	ArrayList<? extends SamplingRule> getSamplingRules();
 	
-	public SamplingRules replaceFactor(SamplingFactor samplingFactor);
+	public SamplingRuleSet replaceFactor(SamplingFactor samplingFactor);
 
-	SamplingRules sumOut(List<? extends Variable> variables, SamplingFactor factorOnResultingRules);
+	SamplingRuleSet sumOut(List<? extends Variable> variables, SamplingFactor factorOnResultingRules);
 
-	static SamplingRules union(List<? extends SamplingRules> samplingRulesSet) {
-		ArrayList<? extends SamplingRule> union = unionArrayList(functionIterator(samplingRulesSet, SamplingRules::getSamplingRules));
+	static SamplingRuleSet union(List<? extends SamplingRuleSet> samplingRulesSet) {
+		ArrayList<? extends SamplingRule> union = unionArrayList(functionIterator(samplingRulesSet, SamplingRuleSet::getSamplingRules));
 		return new DefaultSamplingRules(union);
 	}
 	

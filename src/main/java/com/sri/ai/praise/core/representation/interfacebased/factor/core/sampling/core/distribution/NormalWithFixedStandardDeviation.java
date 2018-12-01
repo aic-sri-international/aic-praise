@@ -13,7 +13,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Potential;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRules;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
@@ -118,7 +118,7 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 	}
 
 	@Override
-	public SamplingRules makeSamplingRules() {
+	public SamplingRuleSet makeSamplingRules() {
 		SamplingRule fromMeanToDependent = samplingRule(this, list(variable), list(mean), 0.5);
 		SamplingRule fromDependentToMean = samplingRule(this, list(mean), list(variable), 0.5);
 		return new DefaultSamplingRules(fromDependentToMean, fromMeanToDependent);

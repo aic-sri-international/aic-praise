@@ -10,7 +10,7 @@ import java.util.Random;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 
 public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 
@@ -38,9 +38,9 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 	}
 
 	@Override
-	public SamplingRules makeSamplingRules() {
-		SamplingRules samplingRules = getMarginalizedFactor().getSamplingRules();
-		SamplingRules marginalSamplingRules = samplingRules.sumOut(getMarginalizedVariables(), this);
+	public SamplingRuleSet makeSamplingRules() {
+		SamplingRuleSet samplingRules = getMarginalizedFactor().getSamplingRuleSet();
+		SamplingRuleSet marginalSamplingRules = samplingRules.sumOut(getMarginalizedVariables(), this);
 		return marginalSamplingRules;
 	}
 

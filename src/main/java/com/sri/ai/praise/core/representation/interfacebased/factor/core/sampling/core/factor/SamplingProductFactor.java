@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules.union;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet.union;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.flattenOneLevelToArrayList;
 import static com.sri.ai.util.Util.forAll;
@@ -9,7 +9,7 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.println;
-import static com.sri.ai.util.planning.core.Planner.plan;
+import static com.sri.ai.util.planning.core.PlannerUsingEachRuleAtMostOnce.planUsingEachRuleAtMostOnce;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableGoal;
 import com.sri.ai.util.base.NullaryFunction;
@@ -39,21 +39,24 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	}
 
 	@Override
-	protected SamplingRules makeSamplingRules() {
-		SamplingRules union = union(mapIntoList(getInputFactors(), SamplingFactor::getSamplingRules));
-		SamplingRules samplingRules = union.replaceFactor(this);
+	protected SamplingRuleSet makeSamplingRules() {
+		SamplingRuleSet union = union(mapIntoList(getInputFactors(), SamplingFactor::getSamplingRuleSet));
+		SamplingRuleSet samplingRules = union.replaceFactor(this);
 		return samplingRules;
 	}
 
 	private Plan makePlan() {
 		List<VariableGoal> variableGoals = mapIntoList(getVariables(), v -> new VariableGoal(v));
-		ArrayList<? extends SamplingRule> samplingRules = getSamplingRules().getSamplingRules();
-		Plan plan = plan(variableGoals, samplingRules);
+		ArrayList<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
+		Plan plan = planUsingEachRuleAtMostOnce(variableGoals, samplingRules);
 		return plan;
 	}
 
 	@Override
 	public void sampleOrWeigh(Sample sampleToComplete) {
+		
+//		samplingPlan.execute(new SampleState(sampleToComplete));
+		
 		// ATTENTION: there is bit of complicated footwork going on regarding sampleToComplete as a pointer in this and the next method
 		// The next method creates a copy and assigns it to 'sampleToComplete' in THERE, but it does not affect the one HERE.
 		// So we need to return the result (or null if it failed) and copy all the information back in the original object here.

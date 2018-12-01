@@ -13,12 +13,12 @@ import java.util.Set;
 import com.google.common.base.Function;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.planning.api.Goal;
 import com.sri.ai.util.planning.core.RuleMarginalizer;
 
-public class DefaultSamplingRules implements SamplingRules {
+public class DefaultSamplingRules implements SamplingRuleSet {
 
 	private ArrayList<? extends SamplingRule> samplingRules;
 	
@@ -36,14 +36,14 @@ public class DefaultSamplingRules implements SamplingRules {
 	}
 
 	@Override
-	public SamplingRules replaceFactor(SamplingFactor samplingFactor) {
+	public SamplingRuleSet replaceFactor(SamplingFactor samplingFactor) {
 		ArrayList<? extends SamplingRule> newRules = mapIntoArrayList(getSamplingRules(), r -> r.replaceFactor(samplingFactor));
 		DefaultSamplingRules result = new DefaultSamplingRules(newRules);
 		return result;
 	}
 
 	@Override
-	public SamplingRules sumOut(List<? extends Variable> variables, SamplingFactor factorOnResultingRules) {
+	public SamplingRuleSet sumOut(List<? extends Variable> variables, SamplingFactor factorOnResultingRules) {
 
 		List<VariableGoal> variablesAsGoals = makeSureItsListOfVariableGoals(variables);
 		

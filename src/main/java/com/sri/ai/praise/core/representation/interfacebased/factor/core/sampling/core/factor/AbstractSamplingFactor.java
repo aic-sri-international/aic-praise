@@ -13,7 +13,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
 public abstract class AbstractSamplingFactor implements SamplingFactor {
@@ -21,11 +21,11 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	@Override
 	public abstract void sampleOrWeigh(Sample sample);
 
-	protected abstract SamplingRules makeSamplingRules();
+	protected abstract SamplingRuleSet makeSamplingRules();
 	
 	private List<? extends Variable> variables;
 	
-	private SamplingRules samplingRules;
+	private SamplingRuleSet samplingRules;
 	
 	private Random random;
 
@@ -35,7 +35,7 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	}
 
 	@Override
-	public SamplingRules getSamplingRules() {
+	public SamplingRuleSet getSamplingRuleSet() {
 		if (samplingRules == null) {
 			samplingRules = makeSamplingRules();
 		}
