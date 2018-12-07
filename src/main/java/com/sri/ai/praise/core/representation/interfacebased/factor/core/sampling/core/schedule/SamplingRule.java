@@ -72,7 +72,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 	
 	@Override
 	public void execute(State state) {
-		SampleState sampleState = assertType(state, SampleState.class, getClass());
+		SamplingState sampleState = assertType(state, SamplingState.class, getClass());
 		getSamplingFactor().sampleOrWeigh(sampleState.getSample());
 		hasFired = true;
 	}

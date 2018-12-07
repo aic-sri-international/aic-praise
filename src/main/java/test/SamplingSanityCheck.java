@@ -44,7 +44,7 @@ public class SamplingSanityCheck {
 //			println("Current variance total:" + currentVarianceTotal);
 //			println("Current variance:" + currentVariance);
 			
-			meanAndVariance.add(x);
+			meanAndVariance.add(x, 1.0);
 		}
 		
 		double total = 0;

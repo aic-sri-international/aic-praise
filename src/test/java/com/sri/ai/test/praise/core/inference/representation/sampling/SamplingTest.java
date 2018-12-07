@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.junit.Test;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
@@ -30,6 +32,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.util.number.representation.api.ArithmeticNumber;
+import com.sri.ai.util.number.representation.api.ArithmeticNumberFactory;
 import com.sri.ai.util.number.representation.core.ArithmeticDoubleFactory;
 import com.sri.ai.util.number.statistics.api.Statistic;
 import com.sri.ai.util.number.statistics.core.DefaultMean;
@@ -41,7 +44,7 @@ public class SamplingTest {
 
 	private static Random random = new Random();
 	
-	int numberOfSamples = 500000;
+	int numberOfSamples = 50000;
 
 	SamplingFactor normalOnX;
 	SamplingFactor normalOnY;
@@ -151,6 +154,44 @@ public class SamplingTest {
 		}
 	}
 
+	@Test
+	public void testDoubleXTest() {
+
+		for (int j = 0; j != 1; j++) {
+
+			x = new DefaultVariable("x");
+			NormalWithFixedMeanAndStandardDeviation normal1OnX = new NormalWithFixedMeanAndStandardDeviation(x, 5, 1, new DoublePotentialFactory(), random);
+			NormalWithFixedMeanAndStandardDeviation normal2OnX = new NormalWithFixedMeanAndStandardDeviation(x, 10, 1, new DoublePotentialFactory(), random);
+			network = new DefaultFactorNetwork(list(normal1OnX, normal2OnX));
+
+			solver = new ExactBP(x, network);
+			marginalOfX = (SamplingFactor) solver.apply();
+
+			// Brute-force calculation:
+			double value = 0.0;
+			double sum_of_weighted_values = 0.0;
+			double sum_of_weighted_variances = 0;
+			double sum_of_weights = 0;
+			while (value < 15.0) {
+				double weight = 
+						new NormalDistribution(new JDKRandomGenerator(random.nextInt()), 5.0, 1.0).density(value)
+						*
+						new NormalDistribution(new JDKRandomGenerator(random.nextInt()), 10.0, 1.0).density(value);
+				sum_of_weighted_values += value * weight;
+				sum_of_weights += weight;
+				double weighted_variance = Math.pow(7.5 - value, 2.0) * weight;
+				sum_of_weighted_variances += weighted_variance;
+				value += 0.01;
+			}
+			double mean = sum_of_weighted_values/sum_of_weights;
+			double variance = sum_of_weighted_variances/sum_of_weights;
+			println("Brute force mean: " + mean);
+			println("Brute force variance: " + variance);
+
+			runTest(numberOfSamples, x, marginalOfX, mean, variance, importanceFactory, potentialFactory, numberFactory);
+		}
+	}
+
 	private void runTest(
 			int numberOfSamples, 
 			Variable variable, 
@@ -170,15 +211,20 @@ public class SamplingTest {
 		Statistic<ArithmeticNumber> varianceOfMean;
 		meanAndVariance = new MeanAndVariance(numberFactory);
 		
-		varianceOfMean = chain(new DefaultMean(numberFactory), new Variance(numberFactory));
+		varianceOfMean = chain(potentialFactory, new DefaultMean(numberFactory), new Variance(numberFactory));
 
 		for (int i = 0; i != numberOfSamples; i++) {
 			sample = new DefaultSample(importanceFactory, potentialFactory);
 			marginal.sampleOrWeigh(sample);
+			// println(sample);
 			Double variableValue = (Double) sample.getAssignment().get(variable);
-			meanAndVariance.add(variableValue);
-			varianceOfMean.add(numberFactory.make(variableValue));
+			meanAndVariance.add(numberFactory.make(variableValue), sample.getPotential());
+			varianceOfMean.add(numberFactory.make(variableValue), sample.getPotential());
 		}
+		
+		println(
+				"density of 5 given mean 10: " 
+						+ new NormalDistribution(new JDKRandomGenerator(random.nextInt()), 10, 1).density(5));
 		
 		println("# samples: " + numberOfSamples + ", Mean: " + meanAndVariance.getMean() + ", Variance: " + meanAndVariance.getVariance() + ", Variance of mean: " + varianceOfMean.getValue());
 		println("Expected mean: " + expectedMean);
@@ -187,8 +233,8 @@ public class SamplingTest {
 		assertTrue(meanAndVariance.getVariance().doubleValue() > expectedVariance*0.9 && meanAndVariance.getVariance().doubleValue() < expectedVariance*1.1);
 	}
 
-	private Statistic<ArithmeticNumber> chain(Statistic... statistics) {
+	private Statistic<ArithmeticNumber> chain(ArithmeticNumberFactory numberFactory, Statistic... statistics) {
 		return 
-				StatisticsChain.<ArithmeticNumber>chain(statistics);
+				StatisticsChain.<ArithmeticNumber>chain(numberFactory, statistics);
 	}
 }

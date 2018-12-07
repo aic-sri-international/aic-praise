@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SampleState;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingState;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableGoal;
 import com.sri.ai.util.planning.api.Plan;
@@ -71,7 +71,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	private List<? extends SamplingFactor> executeSamplingPlan(Sample sampleToComplete) {
 		
 		List<? extends SamplingFactor> factorsThatFired;
-		samplingPlan.execute(new SampleState(sampleToComplete));
+		samplingPlan.execute(new SamplingState(sampleToComplete, getRandom()));
 		factorsThatFired = 
 				getSamplingRuleSet()
 				.getSamplingRules()

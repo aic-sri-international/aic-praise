@@ -59,14 +59,15 @@ public class StatisticsTest {
 
 		meanAndVariance = new MeanAndVariance(numberFactory);
 		varianceOfMean = StatisticsChain.<ArithmeticNumber>chain(
+				numberFactory,
 				new DefaultMean(numberFactory), 
 				new Variance(numberFactory));
 		for (int i = 0; i != numberOfSamples; i++) {
 			sample = new DefaultSample(importanceFactory, potentialFactory);
 			factor.sampleOrWeigh(sample);
 			Double xValue = (Double) sample.getAssignment().get(variable);
-			meanAndVariance.add(xValue);
-			varianceOfMean.add(numberFactory.make(xValue));
+			meanAndVariance.add(numberFactory.make(xValue), sample.getPotential());
+			varianceOfMean.add(numberFactory.make(xValue), sample.getPotential());
 		}
 
 		println("# samples: " + numberOfSamples + ", Mean: " + meanAndVariance.getMean() + ", Variance: " + meanAndVariance.getVariance() + ", Variance of mean: " + varianceOfMean.getValue());

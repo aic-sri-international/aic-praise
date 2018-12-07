@@ -1,6 +1,8 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample;
 
-public interface PotentialFactory {
+import com.sri.ai.util.number.representation.api.ArithmeticNumberFactory;
+
+public interface PotentialFactory extends ArithmeticNumberFactory {
 	
 	Potential make(double value);
 
