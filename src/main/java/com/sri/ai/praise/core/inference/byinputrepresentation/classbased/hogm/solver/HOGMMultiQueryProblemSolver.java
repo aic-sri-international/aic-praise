@@ -132,7 +132,8 @@ public class HOGMMultiQueryProblemSolver {
 			HOGMSingleQueryProblemSolver problemSolver = new HOGMSingleQueryProblemSolver(query, solverClass, hogmModel, expressionBasedModel, modelErrors);
 			List<HOGMProblemResult> queryResult = problemSolver.getResults();
 			results.addAll(queryResult);
-		return queryResult; }), "Query result is ", RESULT);
+			return queryResult;
+		}), "Query result is ", RESULT);
 	}
 
 	public void interrupt() {

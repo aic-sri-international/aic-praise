@@ -30,7 +30,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 			double estimatedSuccessWeight) {
 		
 		List<? extends VariableGoal> antecedents = mapIntoList(antecedentVariables, v -> new VariableGoal(v));
-		List<? extends VariableGoal> consequents =  mapIntoList(consequentVariables, v -> new VariableGoal(v));
+		List<? extends VariableGoal> consequents = mapIntoList(consequentVariables, v -> new VariableGoal(v));
 		
 		return new SamplingRule(samplingFactor, consequents, antecedents, estimatedSuccessWeight);
 	}
@@ -79,7 +79,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 	
 	@Override
 	public String toString() {
-		return join(consequents) + " <= " + join(antecedents);
+		return join(consequents) + " <= " + join(antecedents) + " with " + getSamplingFactor();
 	}
 
 }

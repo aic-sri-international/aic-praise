@@ -20,12 +20,18 @@ import java.util.stream.Collectors;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingState;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingState;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableGoal;
 import com.sri.ai.util.planning.api.Plan;
 
 public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
+	
+	/**
+	 * If true, this flag uses the weights of obtained samples to reward plans that generated them
+	 * so that they are more likely picked for future samples.
+	 */
+	public static boolean adaptiveSampling = true;
 	
 	private Plan samplingPlan;
 
@@ -49,10 +55,15 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		return plan;
 	}
 
+	public Plan getSamplingPlan() {
+		return samplingPlan;
+	}
+	
 	@Override
 	public void sampleOrWeigh(Sample sampleToComplete) {
 		List<? extends SamplingFactor> factorsThatFired = executePlanIfAny(sampleToComplete);
 		makeSureToConsultAllInputFactors(sampleToComplete, factorsThatFired);
+		rewardIfNeeded(sampleToComplete);
 		myAssert(complete(sampleToComplete), () -> "Factor was not able to complete sample.\nSample: " + sampleToComplete + "\nFactor: " + this + "\nSampling plan: " + (samplingPlan == null? "none" : samplingPlan.nestedString()));
 	}
 
@@ -70,9 +81,8 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 
 	private List<? extends SamplingFactor> executeSamplingPlan(Sample sampleToComplete) {
 		
-		List<? extends SamplingFactor> factorsThatFired;
 		samplingPlan.execute(new SamplingState(sampleToComplete, getRandom()));
-		factorsThatFired = 
+		List<? extends SamplingFactor> factorsThatFired = 
 				getSamplingRuleSet()
 				.getSamplingRules()
 				.stream()
@@ -89,6 +99,12 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		List<SamplingFactor> factorsThatDidNotFire = subtract(getInputFactors(), factorsThatFired);
 		for (SamplingFactor factor : factorsThatDidNotFire) {
 			factor.sampleOrWeigh(sampleToComplete);
+		}
+	}
+
+	private void rewardIfNeeded(Sample sampleToComplete) {
+		if (adaptiveSampling && samplingPlan != null) {
+			samplingPlan.reward(sampleToComplete.getPotential().doubleValue());
 		}
 	}
 
