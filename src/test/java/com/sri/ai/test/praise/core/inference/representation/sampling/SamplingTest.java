@@ -1,13 +1,9 @@
 package com.sri.ai.test.praise.core.inference.representation.sampling;
 
-import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.println;
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
@@ -22,16 +18,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.ImportanceFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.Equality;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingMarginalizingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingProductFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleImportanceFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.util.number.representation.api.ArithmeticNumber;
 import com.sri.ai.util.number.representation.api.ArithmeticNumberFactory;
 import com.sri.ai.util.number.representation.core.ArithmeticDoubleFactory;
@@ -46,24 +38,22 @@ public class SamplingTest {
 
 	private static Random random = new Random();
 	
-	SamplingFactor normalOnX;
-	SamplingFactor normalOnY;
-	SamplingFactor normalOnZ;
-	Variable x;
-	Variable y;
-	Variable z;
-	ImportanceFactory importanceFactory = new DoubleImportanceFactory();
-	PotentialFactory potentialFactory = new DoublePotentialFactory();
-	ArithmeticDoubleFactory numberFactory = new ArithmeticDoubleFactory();
-	DefaultFactorNetwork network;
-	ExactBP solver;
-	SamplingFactor marginalOfX;
-	SamplingFactor marginalOfZ;
-	SamplingFactor factor;
-	double meanOfZ;
-	double varianceOfZ;
-	double expectedVarianceOfMarginalOfX;
-	String expectedString;
+	private SamplingFactor normalOnX;
+	private SamplingFactor normalOnY;
+	private SamplingFactor normalOnZ;
+	private Variable x;
+	private Variable y;
+	private Variable z;
+	private ImportanceFactory importanceFactory = new DoubleImportanceFactory();
+	private PotentialFactory potentialFactory = new DoublePotentialFactory();
+	private ArithmeticDoubleFactory numberFactory = new ArithmeticDoubleFactory();
+	private DefaultFactorNetwork network;
+	private ExactBP solver;
+	private SamplingFactor marginalOfX;
+	private SamplingFactor marginalOfZ;
+	private double meanOfZ;
+	private double varianceOfZ;
+	private double expectedVarianceOfMarginalOfX;
 
 	public void setXYZModel() {
 		x = new DefaultVariable("x");
@@ -77,65 +67,7 @@ public class SamplingTest {
 		normalOnZ = new NormalWithFixedMeanAndStandardDeviation(z, meanOfZ, Math.pow(varianceOfZ, 0.5), new DoublePotentialFactory(), random);
 		network = new DefaultFactorNetwork(list(normalOnY, normalOnX, normalOnZ));
 	}
-
-	// @Test : order variation issues make this unreliable for automated testing, but it is good for manual testing.
-	void testXYZModelSamplingRules() {
-
-		setXYZModel();
-
-		solver = new ExactBP(z, network);
-		marginalOfZ = (SamplingFactor) solver.apply();
-		println(marginalOfZ.nestedString(true));
-
-		factor = marginalOfZ;
-		expectedString = "z <= ";
-		println(samplingRulesString(factor));
-		assertEquals(expectedString, samplingRulesString(marginalOfZ));
-
-		// message from y to z
-		SamplingMarginalizingFactor messageFromYToZ = (SamplingMarginalizingFactor) ((SamplingProductFactor) marginalOfZ).getInputFactors().get(0);
-		factor = messageFromYToZ;
-		expectedString = "";
-		runSamplingRulesTest();
-
-		SamplingFactor priorOfZ = ((SamplingProductFactor) marginalOfZ).getInputFactors().get(1);
-		factor = priorOfZ;
-		expectedString = "z <= ";
-		runSamplingRulesTest();
-
-		SamplingProductFactor incomingToY = (SamplingProductFactor) messageFromYToZ.getMarginalizedFactor();
-		factor = incomingToY;
-		expectedString = "z <= y; y <= z";
-		runSamplingRulesTest();
-
-		SamplingFactor YIsNormalZ = incomingToY.getInputFactors().get(0);
-		factor = YIsNormalZ;
-		expectedString = "z <= y; y <= z";
-		runSamplingRulesTest();
-
-		SamplingFactor messageFromXToY = incomingToY.getInputFactors().get(1);
-		factor = messageFromXToY;
-		expectedString = "";
-		runSamplingRulesTest();
-
-	}
-
-	private void runSamplingRulesTest() {
-		println(samplingRulesString(factor));
-		assertEquals(expectedString, samplingRulesString(factor));
-	}
-
-	private String samplingRulesString(SamplingFactor samplingFactor) {
-		SamplingRuleSet samplingRules = samplingFactor.getSamplingRuleSet();
-		List<String> ruleStrings = mapIntoList(samplingRules.getSamplingRules(), this::ruleString);
-		String samplingRulesString = join("; ", ruleStrings);
-		return samplingRulesString;
-	}
 	
-	private String ruleString(SamplingRule rule) {
-		return join(rule.getConsequents()) + " <= " + join(rule.getAntecendents());
-	}
-
 	@Test
 	public void testNormalWithFixedStandardDeviation() {
 		
@@ -314,7 +246,6 @@ public class SamplingTest {
 		println("Expected variance: " + expectedVariance);
 		println("Variance of mean: " + varianceOfMean.getValue());
 		
-
 		try {
 			OrPlan samplingPlan = (OrPlan) ((SamplingProductFactor) marginalOfX).getSamplingPlan();
 			println("Sampling plan probability distribution: " + samplingPlan.getDistribution());
@@ -330,65 +261,5 @@ public class SamplingTest {
 
 	private Statistic<ArithmeticNumber> chain(ArithmeticNumberFactory numberFactory, Statistic... statistics) {
 		return StatisticsChain.<ArithmeticNumber>chain(numberFactory, statistics);
-	}
-	
-	@Test
-	public void testEquality() {
-		
-		long numberOfSamples = 5;
-		
-		Variable x = new DefaultVariable("x");
-		Variable y = new DefaultVariable("y");
-
-		Equality xEqualsY = new Equality(x, y, new DoublePotentialFactory());
-
-		println("Generating " + numberOfSamples + " samples from Y = 'A string value'");
-		for (int i = 0; i != numberOfSamples; i++) {
-			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(y, "A string value");
-			xEqualsY.sampleOrWeigh(sample);
-			assertEquals("A string value", sample.getAssignment().get(x));
-		}
-		
-		runEqualityTest(numberOfSamples, x, y, xEqualsY);
-
-		network = new DefaultFactorNetwork(list(xEqualsY));
-		solver = new ExactBP(x, network);
-		marginalOfX = (SamplingFactor) solver.apply();
-
-		runEqualityTest(numberOfSamples, x, y, marginalOfX);
-
-	}
-
-	private void runEqualityTest(long numberOfSamples, Variable x, Variable y, SamplingFactor factor) {
-		println("Generating " + numberOfSamples + " samples from X = 'A string value'");
-		for (int i = 0; i != numberOfSamples; i++) {
-			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, "A string value");
-			factor.sampleOrWeigh(sample);
-			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals("A string value", sample.getAssignment().get(x));
-			assertEquals("A string value", sample.getAssignment().get(y));
-		}
-		
-		println("Generating " + numberOfSamples + " samples from X = 'A string value' and Y = 'Another string value'");
-		for (int i = 0; i != numberOfSamples; i++) {
-			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, "A string value");
-			sample.getAssignment().set(y, "Another string value");
-			factor.sampleOrWeigh(sample);
-			assertEquals(0.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals("A string value", sample.getAssignment().get(x));
-			assertEquals("Another string value", sample.getAssignment().get(y));
-		}
-		
-		println("Generating " + numberOfSamples + " samples from empty sample");
-		for (int i = 0; i != numberOfSamples; i++) {
-			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			factor.sampleOrWeigh(sample);
-			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(null, sample.getAssignment().get(x));
-			assertEquals(null, sample.getAssignment().get(y));
-		}
 	}
 }
