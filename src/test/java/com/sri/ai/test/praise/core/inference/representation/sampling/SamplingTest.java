@@ -23,6 +23,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.Equality;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingMarginalizingFactor;
@@ -185,7 +186,7 @@ public class SamplingTest {
 	public void testProductOfTwoNormalsWithQuiteDifferentStandardDeviations() {
 
 		int numberOfTests = 1;
-		long numberOfSamples = 5000000;
+		long numberOfSamples = 5000;
 
 		int mean1 = 5;
 		double standardDeviation1 = 0.1;
@@ -328,7 +329,66 @@ public class SamplingTest {
 	}
 
 	private Statistic<ArithmeticNumber> chain(ArithmeticNumberFactory numberFactory, Statistic... statistics) {
-		return 
-				StatisticsChain.<ArithmeticNumber>chain(numberFactory, statistics);
+		return StatisticsChain.<ArithmeticNumber>chain(numberFactory, statistics);
+	}
+	
+	@Test
+	public void testEquality() {
+		
+		long numberOfSamples = 5;
+		
+		Variable x = new DefaultVariable("x");
+		Variable y = new DefaultVariable("y");
+
+		Equality xEqualsY = new Equality(x, y, new DoublePotentialFactory());
+
+		println("Generating " + numberOfSamples + " samples from Y = 'A string value'");
+		for (int i = 0; i != numberOfSamples; i++) {
+			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
+			sample.getAssignment().set(y, "A string value");
+			xEqualsY.sampleOrWeigh(sample);
+			assertEquals("A string value", sample.getAssignment().get(x));
+		}
+		
+		runEqualityTest(numberOfSamples, x, y, xEqualsY);
+
+		network = new DefaultFactorNetwork(list(xEqualsY));
+		solver = new ExactBP(x, network);
+		marginalOfX = (SamplingFactor) solver.apply();
+
+		runEqualityTest(numberOfSamples, x, y, marginalOfX);
+
+	}
+
+	private void runEqualityTest(long numberOfSamples, Variable x, Variable y, SamplingFactor factor) {
+		println("Generating " + numberOfSamples + " samples from X = 'A string value'");
+		for (int i = 0; i != numberOfSamples; i++) {
+			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
+			sample.getAssignment().set(x, "A string value");
+			factor.sampleOrWeigh(sample);
+			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
+			assertEquals("A string value", sample.getAssignment().get(x));
+			assertEquals("A string value", sample.getAssignment().get(y));
+		}
+		
+		println("Generating " + numberOfSamples + " samples from X = 'A string value' and Y = 'Another string value'");
+		for (int i = 0; i != numberOfSamples; i++) {
+			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
+			sample.getAssignment().set(x, "A string value");
+			sample.getAssignment().set(y, "Another string value");
+			factor.sampleOrWeigh(sample);
+			assertEquals(0.0, sample.getPotential().doubleValue(), 0.0);
+			assertEquals("A string value", sample.getAssignment().get(x));
+			assertEquals("Another string value", sample.getAssignment().get(y));
+		}
+		
+		println("Generating " + numberOfSamples + " samples from empty sample");
+		for (int i = 0; i != numberOfSamples; i++) {
+			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
+			factor.sampleOrWeigh(sample);
+			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
+			assertEquals(null, sample.getAssignment().get(x));
+			assertEquals(null, sample.getAssignment().get(y));
+		}
 	}
 }
