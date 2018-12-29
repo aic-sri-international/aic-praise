@@ -44,7 +44,7 @@ public class StatisticsTest {
 	DefaultFactorNetwork network;
 	ExactBP solver;
 	MeanAndVariance meanAndVariance;
-	Statistic<ArithmeticNumber> varianceOfMean;
+	Statistic<ArithmeticNumber, ArithmeticNumber> varianceOfMean;
 
 	@Test
 	void testNormalWithFixedMeanAndStandardDeviation() {
@@ -58,10 +58,11 @@ public class StatisticsTest {
 		println(factor);
 
 		meanAndVariance = new MeanAndVariance(numberFactory);
-		varianceOfMean = StatisticsChain.<ArithmeticNumber>chain(
+		varianceOfMean = StatisticsChain.<ArithmeticNumber, ArithmeticNumber>chain(
 				numberFactory,
 				new DefaultMean(numberFactory), 
 				new Variance(numberFactory));
+		
 		for (int i = 0; i != numberOfSamples; i++) {
 			sample = new DefaultSample(importanceFactory, potentialFactory);
 			factor.sampleOrWeigh(sample);

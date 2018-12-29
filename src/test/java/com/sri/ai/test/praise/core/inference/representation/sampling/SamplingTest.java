@@ -219,11 +219,8 @@ public class SamplingTest {
 		println("Variable: " + variable);
 
 		Sample sample;
-		MeanAndVariance meanAndVariance;
-		Statistic<ArithmeticNumber> varianceOfMean;
-		meanAndVariance = new MeanAndVariance(numberFactory);
-		
-		varianceOfMean = chain(potentialFactory, new DefaultMean(numberFactory), new Variance(numberFactory));
+		MeanAndVariance meanAndVariance = new MeanAndVariance(numberFactory);
+		StatisticsChain<ArithmeticNumber, ArithmeticNumber> varianceOfMean = chain(potentialFactory, new DefaultMean(numberFactory), new Variance(numberFactory));
 
 		println("Generating " + numberOfSamples + " samples");
 		for (int i = 0; i != numberOfSamples; i++) {
@@ -259,7 +256,7 @@ public class SamplingTest {
 		assertTrue(meanAndVariance.getVariance().doubleValue() > expectedVariance*(1 - varianceTolerance) && meanAndVariance.getVariance().doubleValue() < expectedVariance*(1 + varianceTolerance));
 	}
 
-	private Statistic<ArithmeticNumber> chain(ArithmeticNumberFactory numberFactory, Statistic... statistics) {
-		return StatisticsChain.<ArithmeticNumber>chain(numberFactory, statistics);
+	private StatisticsChain<ArithmeticNumber, ArithmeticNumber> chain(ArithmeticNumberFactory numberFactory, Statistic... statistics) {
+		return StatisticsChain.<ArithmeticNumber, ArithmeticNumber>chain(numberFactory, statistics);
 	}
 }
