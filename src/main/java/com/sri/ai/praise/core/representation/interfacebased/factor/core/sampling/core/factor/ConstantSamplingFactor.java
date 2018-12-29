@@ -4,12 +4,11 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.s
 import static com.sri.ai.util.Util.list;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Potential;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
-import com.sri.ai.util.number.representation.api.ArithmeticNumber;
 
 /**
  * A sampling factor binding a variable to a value.
@@ -17,17 +16,15 @@ import com.sri.ai.util.number.representation.api.ArithmeticNumber;
  * @author braz
  *
  */
-public class ConstantFactor extends AbstractSamplingFactor {
+public class ConstantSamplingFactor extends AbstractSamplingFactor {
 
 	private Variable variable;
 	private Object value;
-	private PotentialFactory potentialFactory;
 	
-	public ConstantFactor(Variable variable, Object value, PotentialFactory potentialFactory) {
+	public ConstantSamplingFactor(Variable variable, Object value) {
 		super(list(variable), null /* null */);
 		this.variable = variable;
 		this.value = value;
-		this.potentialFactory = potentialFactory;
 	}
 
 	@Override
@@ -45,13 +42,12 @@ public class ConstantFactor extends AbstractSamplingFactor {
 	}
 
 	private void weigh(Sample sample) {
-		double probabilityOfVariableValue = probabilityOfVariableValue(sample);
-		sample.updatePotential(potentialFactory.make(probabilityOfVariableValue));
+		sample.updatePotential(probabilityOfVariableValue(sample));
 	}
 	
-	private double probabilityOfVariableValue(Sample sample) {
+	private Potential probabilityOfVariableValue(Sample sample) {
 		Object value = getValue(variable, sample);
-		double probability = value.equals(this.value)? 1.0 : 0.0;
+		Potential probability = value.equals(this.value)? sample.getPotential().one() : sample.getPotential().zero();
 		return probability;
 	}
 	
@@ -60,8 +56,8 @@ public class ConstantFactor extends AbstractSamplingFactor {
 		return result;
 	}
 
-	private ArithmeticNumber getValue(Variable variable, Sample sample) {
-		ArithmeticNumber result = (ArithmeticNumber) sample.getAssignment().get(variable);
+	private Object getValue(Variable variable, Sample sample) {
+		Object result = sample.getAssignment().get(variable);
 		return result;
 	}
 

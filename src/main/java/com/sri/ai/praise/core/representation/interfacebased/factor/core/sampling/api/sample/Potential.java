@@ -24,6 +24,12 @@ public interface Potential extends ArithmeticNumber {
 	
 	@Override
 	Potential pow(ArithmeticNumber another);
+	
+	@Override
+	Potential one();
+	
+	@Override
+	Potential zero();
 
 	public static Potential make(double number) {
 		return getThreadPotentialFactory().make(number);

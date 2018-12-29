@@ -4,6 +4,7 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.s
 import static com.sri.ai.util.Util.getOrUseDefault;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapFromLists;
+import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Potential;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
@@ -29,18 +30,16 @@ public class TableSamplingFactor extends AbstractSamplingFactor {
 	private Variable variable;
 	private ArrayList<Object> values;
 	private ArrayList<Double> probabilities;
-	private Map<Object, Double> fromValueToProbability;
-	private PotentialFactory potentialFactory;
+	private Map<Object, Potential> fromValueToProbability;
 	
-	public TableSamplingFactor(Variable variable, ArrayList<Object> values, ArrayList<Double> probabilities, PotentialFactory potentialFactory, Random random) {
+	public TableSamplingFactor(Variable variable, ArrayList<Object> values, ArrayList<Potential> probabilities, Random random) {
 		super(list(variable), random);
 		myAssert( ! values.isEmpty(), () -> getClass() + " requires at least one value, but got none.");
 		myAssert( values.size() == probabilities.size(), () -> getClass() + " requires one probability for each value, but got " + values.size() + " values and " + probabilities.size() + " probabilities.");
 		this.variable = variable;
 		this.values = values;
-		this.probabilities = probabilities;
+		this.probabilities = mapIntoArrayList(probabilities, p -> p.doubleValue());
 		this.fromValueToProbability = mapFromLists(values, probabilities);
-		this.potentialFactory = potentialFactory;
 	}
 
 	@Override
@@ -60,13 +59,13 @@ public class TableSamplingFactor extends AbstractSamplingFactor {
 	}
 
 	private void weigh(Sample sample) {
-		double probabilityOfVariableValue = probabilityOfVariableValue(sample);
-		sample.updatePotential(potentialFactory.make(probabilityOfVariableValue));
+		Potential probabilityOfVariableValue = probabilityOfVariableValue(sample);
+		sample.updatePotential(probabilityOfVariableValue);
 	}
 	
-	private double probabilityOfVariableValue(Sample sample) {
+	private Potential probabilityOfVariableValue(Sample sample) {
 		Object value = getValue(variable, sample);
-		double probability = getOrUseDefault(fromValueToProbability, value, 0.0);
+		Potential probability = getOrUseDefault(fromValueToProbability, value, sample.getPotential().zero());
 		return probability;
 	}
 	
