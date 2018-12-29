@@ -4,8 +4,6 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
 
-import java.util.Random;
-
 import org.junit.Test;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
@@ -16,7 +14,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.ImportanceFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SumSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleImportanceFactory;
@@ -364,21 +361,21 @@ public class SumSamplingFactorTest {
 		}
 	}
 	
-	@Test
-	public void testSamplingRules() {
-		
-		long numberOfSamples = 5;
-
-		Random random = new Random();
-		Variable x = new DefaultVariable("x");
-		Variable y = new DefaultVariable("y");
-		
-
-		SumSamplingFactor xEqualsY = new SumSamplingFactor(x, list(y), new DoublePotentialFactory());
-		NormalWithFixedMeanAndStandardDeviation normalOnY = new NormalWithFixedMeanAndStandardDeviation(y, 10, 0.1, new DoublePotentialFactory(), random);
-
-		network = new DefaultFactorNetwork(list(xEqualsY, normalOnY));
-		solver = new ExactBP(x, network);
-		marginalOfX = (SamplingFactor) solver.apply();
-	}
+//	@Test
+//	public void testSamplingRules() {
+//		
+//		long numberOfSamples = 5;
+//
+//		Random random = new Random();
+//		Variable x = new DefaultVariable("x");
+//		Variable y = new DefaultVariable("y");
+//		
+//
+//		SumSamplingFactor xEqualsY = new SumSamplingFactor(x, list(y), new DoublePotentialFactory());
+//		NormalWithFixedMeanAndStandardDeviation normalOnY = new NormalWithFixedMeanAndStandardDeviation(y, 10, 0.1, new DoublePotentialFactory(), random);
+//
+//		network = new DefaultFactorNetwork(list(xEqualsY, normalOnY));
+//		solver = new ExactBP(x, network);
+//		marginalOfX = (SamplingFactor) solver.apply();
+//	}
 }
