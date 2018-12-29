@@ -22,6 +22,22 @@ import com.sri.ai.util.collect.FunctionIterator;
 import com.sri.ai.util.number.representation.api.ArithmeticNumber;
 import com.sri.ai.util.number.representation.core.ArithmeticDouble;
 
+/**
+ * A sampling factor respecting a sum relationship of the type <code>s = x_1 + x_2 + ... + x_n</code>.
+ * It will instantiate any of the variables <code>s, x_1, x_2, ..., x_n</code> if the others are instantiated.
+ * If all are instantiated, it will update the weight of the sample to 1 if the values are consistent, or 0 if not.
+ * If more than one are uninstantiated, it does nothing.
+ * <p>
+ * Note that this does not solve equations. Given an equation <code>x = y + y</code> with instantiated <code>x</code>,
+ * it will <b>not</not> instantiate <code>y</code> even though that would be possible in principle.
+ * This choice was made because variables can be arbitrarily complex (consider <code>x = y + z</code> where <code>z</code>
+ * is defined somewhere else to be <code>x * y</code>), and going this route is out of scope.
+ * Instead, this type of factor guarantees to define one variable (the sum) as a function of others,
+ * and the ability to instantiate variables other than then sum is seen as a sampling bonus that may or may not be available.
+ *  
+ * @author braz
+ *
+ */
 public class SumSamplingFactor extends AbstractSamplingFactor {
 
 	private Variable sum;
@@ -38,7 +54,7 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 	@Override
 	public void sampleOrWeigh(Sample sample) {
 
-		int missingSummandIndex = analyseMissingSummands(sample);
+		int missingSummandIndex = analyzeMissingSummands(sample);
 		
 		if (missingSummandIndex == -1) {
 			allSummandsDefined(sample);
@@ -57,7 +73,7 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 	 * @param sample
 	 * @return
 	 */
-	private int analyseMissingSummands(Sample sample) {
+	private int analyzeMissingSummands(Sample sample) {
 		int result = -1; // all summands so far are defined
 		int i = 0;
 		for (Variable summand : summands) {
@@ -157,7 +173,8 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
 		ArrayList<SamplingRule> samplingRules = makeSamplingRulesList();
-		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(getVariables(), (SamplingRule[]) samplingRules.toArray());
+		SamplingRule[] samplingRulesArray = samplingRules.toArray(new SamplingRule[samplingRules.size()]);
+		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(getVariables(), samplingRulesArray);
 		return result;
 	}
 
