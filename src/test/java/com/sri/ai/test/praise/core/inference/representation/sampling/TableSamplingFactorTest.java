@@ -37,8 +37,6 @@ public class TableSamplingFactorTest {
 		long numberOfSamples = 10000;
 		
 		Variable x = new DefaultVariable("x");
-		Variable y = new DefaultVariable("y");
-		Variable z = new DefaultVariable("z");
 
 		TableSamplingFactor factorOnX = 
 				new TableSamplingFactor(x, 
@@ -47,17 +45,17 @@ public class TableSamplingFactorTest {
 						new DoublePotentialFactory(), 
 						new Random());
 
-		runTableSamplingFactorTest(numberOfSamples, x, y, z, factorOnX);
+		runTableSamplingFactorTest(numberOfSamples, x, factorOnX);
 
 		network = new DefaultFactorNetwork(list(factorOnX));
 		solver = new ExactBP(x, network);
 		marginalOfX = (SamplingFactor) solver.apply();
 
-		runTableSamplingFactorTest(numberOfSamples, x, y, z, marginalOfX);
+		runTableSamplingFactorTest(numberOfSamples, x, marginalOfX);
 
 	}
 
-	private void runTableSamplingFactorTest(long numberOfSamples, Variable x, Variable y, Variable z, SamplingFactor factor) {
+	private void runTableSamplingFactorTest(long numberOfSamples, Variable x, SamplingFactor factor) {
 		println("Working with x in a, b, c with probabilities 0.1, 0.2, 0.7");
 		println("Generating " + numberOfSamples + " samples from nothing");
 		SampleDistribution<Object> sampleDistribution = new SampleDistribution<>();
