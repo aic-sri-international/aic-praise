@@ -17,7 +17,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.util.Util;
-import com.sri.ai.util.number.representation.api.ArithmeticNumber;
 
 /**
  * A sampling factor binding a variable to a list of possible values, each with its probability.
@@ -76,8 +75,8 @@ public class TableSamplingFactor extends AbstractSamplingFactor {
 		return result;
 	}
 
-	private ArithmeticNumber getValue(Variable variable, Sample sample) {
-		ArithmeticNumber result = (ArithmeticNumber) sample.getAssignment().get(variable);
+	private Object getValue(Variable variable, Sample sample) {
+		Object result = sample.getAssignment().get(variable);
 		return result;
 	}
 

@@ -23,12 +23,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.util.number.representation.api.ArithmeticNumber;
 import com.sri.ai.util.number.representation.core.ArithmeticDoubleFactory;
 import com.sri.ai.util.number.statistics.api.Statistic;
+import com.sri.ai.util.number.statistics.core.CompoundStatistic;
 import com.sri.ai.util.number.statistics.core.DefaultMean;
 import com.sri.ai.util.number.statistics.core.MeanAndVariance;
-import com.sri.ai.util.number.statistics.core.StatisticsChain;
 import com.sri.ai.util.number.statistics.core.Variance;
 
-public class StatisticsTest {
+public class SamplingStatisticsTest {
 
 	private static Random random = new Random();
 	
@@ -58,8 +58,7 @@ public class StatisticsTest {
 		println(factor);
 
 		meanAndVariance = new MeanAndVariance(numberFactory);
-		varianceOfMean = StatisticsChain.<ArithmeticNumber, ArithmeticNumber>chain(
-				numberFactory,
+		varianceOfMean = CompoundStatistic.<ArithmeticNumber, ArithmeticNumber, ArithmeticNumber>chain(
 				new DefaultMean(numberFactory), 
 				new Variance(numberFactory));
 		

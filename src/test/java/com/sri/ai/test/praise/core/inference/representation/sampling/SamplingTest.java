@@ -28,9 +28,9 @@ import com.sri.ai.util.number.representation.api.ArithmeticNumber;
 import com.sri.ai.util.number.representation.api.ArithmeticNumberFactory;
 import com.sri.ai.util.number.representation.core.ArithmeticDoubleFactory;
 import com.sri.ai.util.number.statistics.api.Statistic;
+import com.sri.ai.util.number.statistics.core.CompoundStatistic;
 import com.sri.ai.util.number.statistics.core.DefaultMean;
 import com.sri.ai.util.number.statistics.core.MeanAndVariance;
-import com.sri.ai.util.number.statistics.core.StatisticsChain;
 import com.sri.ai.util.number.statistics.core.Variance;
 import com.sri.ai.util.planning.core.OrPlan;
 
@@ -220,7 +220,8 @@ public class SamplingTest {
 
 		Sample sample;
 		MeanAndVariance meanAndVariance = new MeanAndVariance(numberFactory);
-		StatisticsChain<ArithmeticNumber, ArithmeticNumber> varianceOfMean = chain(potentialFactory, new DefaultMean(numberFactory), new Variance(numberFactory));
+		CompoundStatistic<ArithmeticNumber, ArithmeticNumber, ArithmeticNumber> varianceOfMean = 
+				chain(potentialFactory, new DefaultMean(numberFactory), new Variance(numberFactory));
 
 		println("Generating " + numberOfSamples + " samples");
 		for (int i = 0; i != numberOfSamples; i++) {
@@ -256,7 +257,7 @@ public class SamplingTest {
 		assertTrue(meanAndVariance.getVariance().doubleValue() > expectedVariance*(1 - varianceTolerance) && meanAndVariance.getVariance().doubleValue() < expectedVariance*(1 + varianceTolerance));
 	}
 
-	private StatisticsChain<ArithmeticNumber, ArithmeticNumber> chain(ArithmeticNumberFactory numberFactory, Statistic... statistics) {
-		return StatisticsChain.<ArithmeticNumber, ArithmeticNumber>chain(numberFactory, statistics);
+	private CompoundStatistic<ArithmeticNumber, ArithmeticNumber, ArithmeticNumber> chain(ArithmeticNumberFactory numberFactory, Statistic... statistics) {
+		return CompoundStatistic.<ArithmeticNumber, ArithmeticNumber, ArithmeticNumber>chain(statistics);
 	}
 }
