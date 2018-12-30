@@ -28,18 +28,41 @@ public class EqualitySamplingFactor extends AbstractSamplingFactor {
 		Object variable1Value = sample.getAssignment().get(variable1);
 		Object variable2Value = sample.getAssignment().get(variable2);
 		if (variable1Value != null) {
-			if (variable2Value != null) {
-				if ( ! variable1Value.equals(variable2Value)) {
-					sample.updatePotential(sample.getPotential().zero());
-				}
-			}
-			else {
-				sample.getAssignment().set(variable2, variable1Value);
-			}
+			variable1IsDefined(sample, variable1Value, variable2Value);
+		}
+		else if (variable2Value != null) {
+			variable1IsUndefinedAndVariable2IsDefined(sample, variable2Value);
 		}
 		else {
-			sample.getAssignment().set(variable1, variable2Value);
+			bothVarianlesAreUndefined();
 		}
+	}
+
+	private void variable1IsDefined(Sample sample, Object variable1Value, Object variable2Value) {
+		if (variable2Value != null) {
+			bothVariablesAreDefined(sample, variable1Value, variable2Value);
+		}
+		else {
+			variable2IsUndefinedAndVariable1IsDefined(sample, variable1Value);
+		}
+	}
+
+	private void bothVariablesAreDefined(Sample sample, Object variable1Value, Object variable2Value) {
+		if ( ! variable1Value.equals(variable2Value)) {
+			sample.updatePotential(sample.getPotential().zero());
+		}
+	}
+
+	private void variable2IsUndefinedAndVariable1IsDefined(Sample sample, Object variable1Value) {
+		sample.getAssignment().set(variable2, variable1Value);
+	}
+
+	private void variable1IsUndefinedAndVariable2IsDefined(Sample sample, Object variable2Value) {
+		sample.getAssignment().set(variable1, variable2Value);
+	}
+
+	private void bothVarianlesAreUndefined() {
+		// do nothing
 	}
 
 	@Override

@@ -53,20 +53,28 @@ public class EqualitySamplingTest {
 	private void runTwoEqualitiesOnSameVariableTest(long numberOfSamples, Variable x, Variable y, Variable z, SamplingFactor factor) {
 
 		println("Working with x = y and x = z");
+
+		Sample sample = new DefaultSample(importanceFactory, potentialFactory);
 		
-//		println("Generating " + numberOfSamples + " samples from empty sample");
-//		for (int i = 0; i != numberOfSamples; i++) {
-//			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-//			factor.sampleOrWeigh(sample);
-//			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-//			assertEquals(null, sample.getAssignment().get(x));
-//			assertEquals(null, sample.getAssignment().get(y));
-//			assertEquals(null, sample.getAssignment().get(z));
-//		}
+		try {
+			println("Generating " + numberOfSamples + " samples from empty sample");
+			for (int i = 0; i != numberOfSamples; i++) {
+				factor.sampleOrWeigh(sample);
+			}
+		}
+		catch (Throwable throwable) {
+			if ( ! throwable.getMessage().contains("Factor was not able to complete sample") ) {
+				throw throwable;
+			}
+			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
+			assertEquals(null, sample.getAssignment().get(x));
+			assertEquals(null, sample.getAssignment().get(y));
+			assertEquals(null, sample.getAssignment().get(z));
+		}
 
 		println("Generating " + numberOfSamples + " samples from X = 'A string value'");
 		for (int i = 0; i != numberOfSamples; i++) {
-			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
+			sample = new DefaultSample(importanceFactory, potentialFactory);
 			sample.getAssignment().set(x, "A string value");
 			factor.sampleOrWeigh(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
