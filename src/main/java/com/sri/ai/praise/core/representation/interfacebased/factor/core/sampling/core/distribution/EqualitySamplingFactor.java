@@ -5,26 +5,22 @@ import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 
-public class Equality extends AbstractSamplingFactor {
+public class EqualitySamplingFactor extends AbstractSamplingFactor {
 
 	private Variable variable1;
 	
 	private Variable variable2;
 	
-	private PotentialFactory potentialFactory;
-	
-	public Equality(Variable variable1, Variable variable2, PotentialFactory potentialFactory) {
+	public EqualitySamplingFactor(Variable variable1, Variable variable2) {
 		super(arrayList(variable1, variable2), null /* random not necessary */);
 		this.variable1 = variable1;
 		this.variable2 = variable2;
-		this.potentialFactory = potentialFactory;
 	}
 
 	@Override
@@ -34,7 +30,7 @@ public class Equality extends AbstractSamplingFactor {
 		if (variable1Value != null) {
 			if (variable2Value != null) {
 				if ( ! variable1Value.equals(variable2Value)) {
-					sample.updatePotential(potentialFactory.make(0.0));
+					sample.updatePotential(sample.getPotential().zero());
 				}
 			}
 			else {
