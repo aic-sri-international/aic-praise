@@ -8,6 +8,7 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.set;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.planning.core.PlannerUsingEachRuleAtMostOnce.planUsingEachRuleAtMostOnce;
 
@@ -51,7 +52,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	private Plan makePlan() {
 		List<VariableGoal> variableGoals = mapIntoList(getVariables(), v -> new VariableGoal(v));
 		ArrayList<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
-		Plan plan = planUsingEachRuleAtMostOnce(variableGoals, samplingRules);
+		Plan plan = planUsingEachRuleAtMostOnce(variableGoals, set(), samplingRules);
 		return plan;
 	}
 
