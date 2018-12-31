@@ -16,6 +16,6 @@ public interface Assignment {
 	
 	int size();
 
-	Map mapValue();
+	Map<Variable, Object> mapValue();
 
 }

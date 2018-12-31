@@ -31,7 +31,7 @@ public class EqualitySamplingTest {
 	private ExactBP solver;
 	private SamplingFactor marginalOfX;
 
-	@Test
+	//@Test
 	public void testTwoEqualitiesOnSameVariable() {
 		
 		long numberOfSamples = 5;

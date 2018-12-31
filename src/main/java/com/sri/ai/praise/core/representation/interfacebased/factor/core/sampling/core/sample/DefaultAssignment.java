@@ -45,7 +45,7 @@ public class DefaultAssignment implements Assignment {
 	}
 
 	@Override
-	public Map mapValue() {
+	public Map<Variable, Object> mapValue() {
 		return Collections.unmodifiableMap(fromVariablesToValues);
 	}
 

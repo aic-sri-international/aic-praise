@@ -2,6 +2,7 @@ package com.sri.ai.test.praise.core.inference.representation.sampling;
 
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.set;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
@@ -140,8 +141,12 @@ public class SamplingTest {
 
 	}
 
-	private void testTwoNormals(int numberOfTests, long numberOfSamples, int mean1, double standardDeviation1,
-			int mean2, int standardDeviation2, double meanTolerance, double varianceTolerance) {
+	private void testTwoNormals(
+			int numberOfTests, long numberOfSamples, 
+			int mean1, double standardDeviation1,
+			int mean2, double standardDeviation2, 
+			double meanTolerance, double varianceTolerance) {
+		
 		for (int j = 0; j != numberOfTests; j++) {
 
 			x = new DefaultVariable("x");
@@ -198,7 +203,7 @@ public class SamplingTest {
 							+ new NormalDistribution(new JDKRandomGenerator(random.nextInt()), mean2, standardDeviation2).density(mean1));
 			
 			println("Sampling plan:");
-			println(((SamplingProductFactor) marginalOfX).getSamplingPlan().nestedString());
+			println(((SamplingProductFactor) marginalOfX).getSamplingPlan(set()).nestedString());
 			
 			runTest(numberOfSamples, x, marginalOfX, analyticMean, meanTolerance, analyticVariance, varianceTolerance, importanceFactory, potentialFactory, numberFactory);
 		}
@@ -245,7 +250,7 @@ public class SamplingTest {
 		println("Variance of mean: " + varianceOfMean.getValue());
 		
 		try {
-			OrPlan samplingPlan = (OrPlan) ((SamplingProductFactor) marginalOfX).getSamplingPlan();
+			OrPlan samplingPlan = (OrPlan) ((SamplingProductFactor) marginalOfX).getSamplingPlan(set());
 			println("Sampling plan probability distribution: " + samplingPlan.getDistribution());
 			println("Number of sub-plan executions: " + samplingPlan.getNumberOfSubPlanExecutions());
 		}
