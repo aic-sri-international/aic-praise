@@ -50,7 +50,7 @@ public class SamplingStatisticsTest {
 	void testNormalWithFixedMeanAndStandardDeviation() {
 
 		variable = new DefaultVariable("x");
-		normal = new NormalWithFixedMeanAndStandardDeviation(variable, 10, 2, new DoublePotentialFactory(), random);
+		normal = new NormalWithFixedMeanAndStandardDeviation(variable, 10, 2, random);
 		network = new DefaultFactorNetwork(list(normal));
 		solver = new ExactBP(variable, network);
 		factor = (SamplingFactor) solver.apply();

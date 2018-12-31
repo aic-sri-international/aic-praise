@@ -15,7 +15,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingProductFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
 import com.sri.ai.util.graph2d.api.functions.Functions;
 import com.sri.ai.util.graph2d.api.graph.GraphSet;
 import com.sri.ai.util.graph2d.api.graph.GraphSetMaker;
@@ -48,13 +47,11 @@ public class SamplingGraphFunctionExample {
 				xV,
 				yV,
 				standardDeviation, 
-				new DoublePotentialFactory(),
 				random);
 		SamplingFactor yPrior = new NormalWithFixedMeanAndStandardDeviation(
 				yV,
 				mean,
 				0.000001, 
-				new DoublePotentialFactory(),
 				random);
 		
 		
@@ -68,7 +65,6 @@ public class SamplingGraphFunctionExample {
 					xV,
 					50.0,
 					standardDeviation, 
-					new DoublePotentialFactory(),
 					random);
 			queryIndex = getIndexOf(factorToBeShown.getVariables(), xV);
 			function = new SamplingGraphFunction(factorToBeShown, new DefaultSetOfVariables(list(x)), queryIndex);

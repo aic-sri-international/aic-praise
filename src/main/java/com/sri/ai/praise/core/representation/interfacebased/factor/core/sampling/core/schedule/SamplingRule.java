@@ -9,11 +9,14 @@ import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
+import com.sri.ai.util.planning.api.Plan;
 import com.sri.ai.util.planning.api.Rule;
 import com.sri.ai.util.planning.api.State;
 import com.sri.ai.util.planning.core.AbstractAtomicPlan;
 
 public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoal> {
+	
+	public static final double MAXIMUM_ESTIMATED_SUCCESS_WEIGHT = Plan.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT;
 
 	private SamplingFactor samplingFactor;
 

@@ -21,9 +21,11 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingProductFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleImportanceFactory;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotential;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
+import com.sri.ai.util.number.statistics.core.SampleDistribution;
 
-public class EqualitySamplingTest {
+public class EqualitySamplingFactorTest {
 
 	private ImportanceFactory importanceFactory = new DoubleImportanceFactory();
 	private PotentialFactory potentialFactory = new DoublePotentialFactory();
@@ -31,7 +33,7 @@ public class EqualitySamplingTest {
 	private ExactBP solver;
 	private SamplingFactor marginalOfX;
 
-	//@Test
+	@Test
 	public void testTwoEqualitiesOnSameVariable() {
 		
 		long numberOfSamples = 5;
@@ -82,6 +84,63 @@ public class EqualitySamplingTest {
 			assertEquals("A string value", sample.getAssignment().get(y));
 			assertEquals("A string value", sample.getAssignment().get(z));
 		}
+
+		println("Generating " + numberOfSamples + " samples from X = Y = 'A string value'");
+		for (int i = 0; i != numberOfSamples; i++) {
+			sample = new DefaultSample(importanceFactory, potentialFactory);
+			sample.getAssignment().set(x, "A string value");
+			sample.getAssignment().set(y, "A string value");
+			factor.sampleOrWeigh(sample);
+			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
+			assertEquals("A string value", sample.getAssignment().get(x));
+			assertEquals("A string value", sample.getAssignment().get(y));
+			assertEquals("A string value", sample.getAssignment().get(z));
+		}
+
+		println("Generating " + numberOfSamples + " samples from X = Y = Z = 'A string value'");
+		for (int i = 0; i != numberOfSamples; i++) {
+			sample = new DefaultSample(importanceFactory, potentialFactory);
+			sample.getAssignment().set(x, "A string value");
+			sample.getAssignment().set(y, "A string value");
+			sample.getAssignment().set(z, "A string value");
+			factor.sampleOrWeigh(sample);
+			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
+			assertEquals("A string value", sample.getAssignment().get(x));
+			assertEquals("A string value", sample.getAssignment().get(y));
+			assertEquals("A string value", sample.getAssignment().get(z));
+		}
+
+		println("Generating " + numberOfSamples + " samples from X = Y = 'A string value' and Z = 'Another string value'");
+		for (int i = 0; i != numberOfSamples; i++) {
+			sample = new DefaultSample(importanceFactory, potentialFactory);
+			sample.getAssignment().set(x, "A string value");
+			sample.getAssignment().set(y, "A string value");
+			sample.getAssignment().set(z, "Another string value");
+			factor.sampleOrWeigh(sample);
+			assertEquals(0.0, sample.getPotential().doubleValue(), 0.0);
+			assertEquals("A string value", sample.getAssignment().get(x));
+			assertEquals("A string value", sample.getAssignment().get(y));
+			assertEquals("Another string value", sample.getAssignment().get(z));
+		}
+
+		long oldNumberOfSamples = numberOfSamples;
+		numberOfSamples = 5000;
+		SampleDistribution<Object> xDistribution = new SampleDistribution<>();
+		println("Generating " + numberOfSamples + " samples from Y = 'A string value' and Z = 'Another string value'");
+		for (int i = 0; i != numberOfSamples; i++) {
+			sample = new DefaultSample(importanceFactory, potentialFactory);
+			sample.getAssignment().set(y, "A string value");
+			sample.getAssignment().set(z, "Another string value");
+			factor.sampleOrWeigh(sample);
+			xDistribution.add(sample.getAssignment().get(x), new DoublePotential(1.0)); // all samples have weight 0, but we want to check proportion of values for x regardless of that, so we provide weight 1.
+			assertEquals(0.0, sample.getPotential().doubleValue(), 0.0);
+			assertEquals("A string value", sample.getAssignment().get(y));
+			assertEquals("Another string value", sample.getAssignment().get(z));
+		}
+		println("Distribution of x: " + xDistribution.getValue());
+		assertEquals(0.5, xDistribution.getValue().get("A string value").doubleValue(), 0.1);
+		assertEquals(0.5, xDistribution.getValue().get("Another string value").doubleValue(), 0.1);
+		numberOfSamples = oldNumberOfSamples;
 	}
 
 	@Test

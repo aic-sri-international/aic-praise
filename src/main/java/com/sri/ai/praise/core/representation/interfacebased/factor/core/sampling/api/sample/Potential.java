@@ -30,8 +30,11 @@ public interface Potential extends ArithmeticNumber {
 	
 	@Override
 	Potential zero();
+	
+	@Override
+	Potential make(double value);
 
-	public static Potential make(double number) {
+	public static Potential makePotential(double number) {
 		return getThreadPotentialFactory().make(number);
 	}
 	

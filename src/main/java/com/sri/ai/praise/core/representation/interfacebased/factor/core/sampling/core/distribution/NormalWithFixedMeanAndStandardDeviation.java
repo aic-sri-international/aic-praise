@@ -11,7 +11,6 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Potential;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractSamplingFactor;
@@ -24,12 +23,9 @@ public class NormalWithFixedMeanAndStandardDeviation extends AbstractSamplingFac
 	
 	private NormalDistribution normalDistribution;
 	
-	private PotentialFactory potentialFactory;
-	
-	public NormalWithFixedMeanAndStandardDeviation(Variable variable, double mean, double standardDeviation, PotentialFactory potentialFactory, Random random) {
+	public NormalWithFixedMeanAndStandardDeviation(Variable variable, double mean, double standardDeviation, Random random) {
 		super(arrayList(variable), random);
 		this.variable = variable;
-		this.potentialFactory = potentialFactory;
 		this.normalDistribution = new NormalDistribution(new JDKRandomGenerator(random.nextInt()), mean, standardDeviation);
 	}
 
@@ -50,14 +46,9 @@ public class NormalWithFixedMeanAndStandardDeviation extends AbstractSamplingFac
 	}
 
 	private void weigh(Double value, Sample sample) {
-		Potential potentialUpdate = getPotentialUpdate(value);
+		double density = normalDistribution.density(value);
+		Potential potentialUpdate = sample.getPotential().make(density);
 		sample.updatePotential(potentialUpdate);
-	}
-
-	private Potential getPotentialUpdate(Double value) {
-		double density = normalDistribution.density(value.doubleValue());
-		Potential potentialFactor = potentialFactory.make(density);
-		return potentialFactor;
 	}
 
 	private Double getValue(Sample sample) {

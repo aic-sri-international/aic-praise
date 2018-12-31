@@ -57,6 +57,11 @@ public class DoublePotential extends ArithmeticDouble implements Potential {
 	public DoublePotential zero() {
 		return new DoublePotential(super.zero());
 	}
+	
+	@Override
+	public DoublePotential make(double value) {
+		return new DoublePotential(super.make(value));
+	}
 
 	public static ArrayList<Potential> arrayListOfDoublePotentials(Double... doubles) {
 		return mapIntoArrayList(Arrays.asList(doubles), d -> new DoublePotential(d));

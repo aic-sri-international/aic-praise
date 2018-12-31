@@ -180,7 +180,7 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 
 	private ArrayList<SamplingRule> makeSamplingRulesList() {
 		ArrayList<SamplingRule> result = arrayList();
-		SamplingRule samplingRuleForSum = samplingRule(this, list(sum), summands, Double.MAX_VALUE);
+		SamplingRule samplingRuleForSum = samplingRule(this, list(sum), summands, SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
 		result.add(samplingRuleForSum);
 		for (int i = 0; i != summands.size(); i++) {
 			SamplingRule samplingRule = makeSamplingRuleForSummandAt(i);
@@ -192,7 +192,7 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 	private SamplingRule makeSamplingRuleForSummandAt(int i) {
 		List<Variable> otherSummandsAndSum = new ArrayList<Variable>(summands);
 		otherSummandsAndSum.set(i, sum);
-		SamplingRule samplingRule = samplingRule(this, list(summands.get(i)), otherSummandsAndSum, Double.MAX_VALUE);
+		SamplingRule samplingRule = samplingRule(this, list(summands.get(i)), otherSummandsAndSum, SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
 		return samplingRule;
 	}
 

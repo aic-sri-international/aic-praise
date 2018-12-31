@@ -67,8 +67,8 @@ public class EqualitySamplingFactor extends AbstractSamplingFactor {
 
 	@Override
 	public SamplingRuleSet makeSamplingRules() {
-		SamplingRule fromVariable1ToVariable2 = samplingRule(this, list(variable2), list(variable1), Double.MAX_VALUE);
-		SamplingRule fromVariable2ToVariable1 = samplingRule(this, list(variable1), list(variable2), Double.MAX_VALUE);
+		SamplingRule fromVariable1ToVariable2 = samplingRule(this, list(variable2), list(variable1), SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
+		SamplingRule fromVariable2ToVariable1 = samplingRule(this, list(variable1), list(variable2), SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
 		return new DefaultSamplingRuleSet(getVariables(), fromVariable1ToVariable2, fromVariable2ToVariable1);
 	}
 

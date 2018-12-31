@@ -63,9 +63,9 @@ public class SamplingTest {
 		meanOfZ = 10;
 		varianceOfZ = 4;
 		expectedVarianceOfMarginalOfX = 12;
-		normalOnX = new NormalWithFixedStandardDeviation(x, y, 2, new DoublePotentialFactory(), random);
-		normalOnY = new NormalWithFixedStandardDeviation(y, z, 2, new DoublePotentialFactory(), random);
-		normalOnZ = new NormalWithFixedMeanAndStandardDeviation(z, meanOfZ, Math.pow(varianceOfZ, 0.5), new DoublePotentialFactory(), random);
+		normalOnX = new NormalWithFixedStandardDeviation(x, y, 2, random);
+		normalOnY = new NormalWithFixedStandardDeviation(y, z, 2, random);
+		normalOnZ = new NormalWithFixedMeanAndStandardDeviation(z, meanOfZ, Math.pow(varianceOfZ, 0.5), random);
 		network = new DefaultFactorNetwork(list(normalOnY, normalOnX, normalOnZ));
 	}
 	
@@ -150,8 +150,8 @@ public class SamplingTest {
 		for (int j = 0; j != numberOfTests; j++) {
 
 			x = new DefaultVariable("x");
-			NormalWithFixedMeanAndStandardDeviation normal1OnX = new NormalWithFixedMeanAndStandardDeviation(x, mean1, standardDeviation1, new DoublePotentialFactory(), random);
-			NormalWithFixedMeanAndStandardDeviation normal2OnX = new NormalWithFixedMeanAndStandardDeviation(x, mean2, standardDeviation2, new DoublePotentialFactory(), random);
+			NormalWithFixedMeanAndStandardDeviation normal1OnX = new NormalWithFixedMeanAndStandardDeviation(x, mean1, standardDeviation1, random);
+			NormalWithFixedMeanAndStandardDeviation normal2OnX = new NormalWithFixedMeanAndStandardDeviation(x, mean2, standardDeviation2, random);
 			network = new DefaultFactorNetwork(list(normal1OnX, normal2OnX));
 
 			solver = new ExactBP(x, network);

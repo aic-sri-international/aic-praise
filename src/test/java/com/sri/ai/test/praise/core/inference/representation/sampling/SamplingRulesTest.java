@@ -17,13 +17,11 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingMarginalizingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingProductFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 
 public class SamplingRulesTest {
@@ -36,7 +34,6 @@ public class SamplingRulesTest {
 	private Variable x;
 	private Variable y;
 	private Variable z;
-	private PotentialFactory potentialFactory = new DoublePotentialFactory();
 	private DefaultFactorNetwork network;
 	private ExactBP solver;
 	private SamplingFactor marginalOfZ;
@@ -51,9 +48,9 @@ public class SamplingRulesTest {
 		z = new DefaultVariable("z");
 		meanOfZ = 10;
 		varianceOfZ = 4;
-		normalOnX = new NormalWithFixedStandardDeviation(x, y, 2, potentialFactory, random);
-		normalOnY = new NormalWithFixedStandardDeviation(y, z, 2, potentialFactory, random);
-		normalOnZ = new NormalWithFixedMeanAndStandardDeviation(z, meanOfZ, Math.pow(varianceOfZ, 0.5), new DoublePotentialFactory(), random);
+		normalOnX = new NormalWithFixedStandardDeviation(x, y, 2, random);
+		normalOnY = new NormalWithFixedStandardDeviation(y, z, 2, random);
+		normalOnZ = new NormalWithFixedMeanAndStandardDeviation(z, meanOfZ, Math.pow(varianceOfZ, 0.5), random);
 		network = new DefaultFactorNetwork(list(normalOnY, normalOnX, normalOnZ));
 	}
 
