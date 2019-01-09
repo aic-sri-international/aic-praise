@@ -119,6 +119,10 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 		return 1 / standardDeviation;
 	}
 
+	public double getStandardDeviation() {
+		return standardDeviation;
+	}
+
 	@Override
 	public String toString() {
 		return variable + " = Normal(" + mean + ", " + Math.pow(standardDeviation, 2) + ")";

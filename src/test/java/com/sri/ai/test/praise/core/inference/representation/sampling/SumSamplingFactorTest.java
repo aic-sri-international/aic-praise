@@ -37,7 +37,7 @@ public class SumSamplingFactorTest {
 		Variable y = new DefaultVariable("y");
 		Variable z = new DefaultVariable("z");
 
-		SumSamplingFactor xEqualsYPlusZ = new SumSamplingFactor(x, list(y,z), new DoublePotentialFactory());
+		SumSamplingFactor xEqualsYPlusZ = new SumSamplingFactor(x, list(y,z));
 
 		runSumOfDistinctThreeTest(numberOfSamples, x, y, z, xEqualsYPlusZ);
 
@@ -149,7 +149,7 @@ public class SumSamplingFactorTest {
 		Variable x = new DefaultVariable("x");
 		Variable y = new DefaultVariable("y");
 
-		SumSamplingFactor xEqualsYPlusY = new SumSamplingFactor(x, list(y,y), new DoublePotentialFactory());
+		SumSamplingFactor xEqualsYPlusY = new SumSamplingFactor(x, list(y,y));
 
 		runSumOfRepeatingArgumentTest(numberOfSamples, x, y, xEqualsYPlusY);
 
@@ -228,7 +228,7 @@ public class SumSamplingFactorTest {
 		Variable x = new DefaultVariable("x");
 		Variable y = new DefaultVariable("y");
 
-		SumSamplingFactor xEqualsXPlusY = new SumSamplingFactor(x, list(x,y), new DoublePotentialFactory());
+		SumSamplingFactor xEqualsXPlusY = new SumSamplingFactor(x, list(x,y));
 
 		runSumOfRepeatingSumVariableTest(numberOfSamples, x, y, xEqualsXPlusY);
 
@@ -318,7 +318,7 @@ public class SumSamplingFactorTest {
 		
 		Variable x = new DefaultVariable("x");
 
-		SumSamplingFactor xEqualsSumOfNone = new SumSamplingFactor(x, list(), new DoublePotentialFactory());
+		SumSamplingFactor xEqualsSumOfNone = new SumSamplingFactor(x, list());
 
 		runSumOfNoneTest(numberOfSamples, x, xEqualsSumOfNone);
 

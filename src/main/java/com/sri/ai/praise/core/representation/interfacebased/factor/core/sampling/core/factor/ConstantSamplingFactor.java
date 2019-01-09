@@ -19,12 +19,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 public class ConstantSamplingFactor extends AbstractSamplingFactor {
 
 	private Variable variable;
-	private Object value;
+	private Object constant;
 	
-	public ConstantSamplingFactor(Variable variable, Object value) {
+	public ConstantSamplingFactor(Variable variable, Object constant) {
 		super(list(variable), null /* null */);
 		this.variable = variable;
-		this.value = value;
+		this.constant = constant;
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class ConstantSamplingFactor extends AbstractSamplingFactor {
 	}
 
 	private void sample(Sample sample) throws Error {
-		sample.getAssignment().set(variable, value);
+		sample.getAssignment().set(variable, constant);
 	}
 
 	private void weigh(Sample sample) {
@@ -47,7 +47,7 @@ public class ConstantSamplingFactor extends AbstractSamplingFactor {
 	
 	private Potential probabilityOfVariableValue(Sample sample) {
 		Object value = getValue(variable, sample);
-		Potential probability = value.equals(this.value)? sample.getPotential().one() : sample.getPotential().zero();
+		Potential probability = value.equals(this.constant)? sample.getPotential().one() : sample.getPotential().zero();
 		return probability;
 	}
 	
@@ -66,6 +66,15 @@ public class ConstantSamplingFactor extends AbstractSamplingFactor {
 		SamplingRule samplingRule = samplingRule(this, list(variable), list(), SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
 		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(getVariables(), samplingRule);
 		return result;
+	}
+
+	public Object getConstant() {
+		return constant;
+	}
+
+	@Override
+	public String toString() {
+		return variable + " = " + constant;
 	}
 
 }

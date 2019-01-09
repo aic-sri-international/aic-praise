@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
@@ -42,13 +41,11 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 
 	private Variable sum;
 	private List<? extends Variable> summands;
-	private PotentialFactory potentialFactory;
 	
-	public SumSamplingFactor(Variable result, List<? extends Variable> summands, PotentialFactory potentialFactory) {
+	public SumSamplingFactor(Variable result, List<? extends Variable> summands) {
 		super(flatList(result, summands), null /* random */);
 		this.sum = result;
 		this.summands = summands;
-		this.potentialFactory = potentialFactory;
 	}
 
 	@Override
@@ -116,7 +113,7 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 	private void checkConsistencyOfFullyDefinedVariables(Sample sample) {
 		ArithmeticNumber summandsSum = sum(summandValues(sample));
 		if ( ! summandsSum.equals(getValue(sum, sample))) {
-			sample.updatePotential(potentialFactory.make(0.0));
+			sample.updatePotential(sample.getPotential().make(0.0));
 		}
 	}
 

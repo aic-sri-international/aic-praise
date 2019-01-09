@@ -48,6 +48,10 @@ public class DefaultVariable implements Variable {
 //		return true;
 //	}
 	
+	public Object getObject() {
+		return object;
+	}
+
 	@Override
 	public String toString() {
 		return object.toString();
