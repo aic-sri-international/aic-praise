@@ -79,7 +79,7 @@ public class HOGMMultiQueryProblemSolver {
 	private HOGModel hogmModel = null;
 	private ExpressionBasedModel expressionBasedModel;
 	private Class<? extends ExpressionBasedSolver> solverClass;
-	private HOGMSingleQueryProblemSolver problemSolver;
+	private HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing problemSolver;
 	private List<HOGMProblemResult> results = null;
 	private ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
 	
@@ -150,7 +150,7 @@ public class HOGMMultiQueryProblemSolver {
 	 */
 	private void processQuery(String query, List<? extends HOGMProblemError> modelErrors) {
 		explanationBlock("Processing query ", query, code(() -> {
-			HOGMSingleQueryProblemSolver problemSolver = new HOGMSingleQueryProblemSolver(query, solverClass, hogmModel, expressionBasedModel, modelErrors);
+			HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing problemSolver = new HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing(query, solverClass, hogmModel, expressionBasedModel, modelErrors);
 			List<HOGMProblemResult> queryResult = problemSolver.getResults();
 			results.addAll(queryResult);
 			return queryResult;
