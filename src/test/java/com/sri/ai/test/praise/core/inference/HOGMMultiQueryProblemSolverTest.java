@@ -241,8 +241,9 @@ public class HOGMMultiQueryProblemSolverTest {
 		assertEquals(1, results.size());
 		
 		HOGMProblemResult result = getFirst(results);
-		result.getErrors().stream().forEach(e -> println(e));
 		assertTrue(result.hasErrors());
+		println(join("\n", result.getErrors()));
+		assertEquals("Error in model at Line 1: Error at line 1 column 20 - no viable alternative at input 'randomx:[-10;10;'", result.getErrors().get(0).toString());
 		assertNull(result.getResult());
 	}
 
