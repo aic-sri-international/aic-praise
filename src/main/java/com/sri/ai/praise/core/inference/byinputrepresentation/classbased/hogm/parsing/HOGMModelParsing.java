@@ -63,13 +63,6 @@ public class HOGMModelParsing {
 		initializeModel(model);
 	}
 
-	@Deprecated
-	public HOGMModelParsing(String model, List<HOGMProblemError> errors) {
-		this.currentErrors = list();
-		initializeModel(model);
-		errors.addAll(currentErrors);
-	}
-
 	public HOGModel getModel() {
 		return model;
 	}

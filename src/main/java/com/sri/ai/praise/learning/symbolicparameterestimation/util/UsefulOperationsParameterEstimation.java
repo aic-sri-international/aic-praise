@@ -20,7 +20,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMModelParsing;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
@@ -69,17 +68,6 @@ public class UsefulOperationsParameterEstimation {
 	 */
 	public static HOGModel parseModelStringToHOGMModel(String modelString) {
 		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString);
-		HOGModel result = parsingWithErrorCollecting.getModel();
-		return result;
-	}
-	
-	/**
-	 * To convert a model String into a HOGModel.
-	 *
-	 */
-	@Deprecated
-	public static HOGModel parseModelStringToHOGMModel(String modelString, List<HOGMProblemError> modelErrors) {
-		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString, modelErrors);
 		HOGModel result = parsingWithErrorCollecting.getModel();
 		return result;
 	}

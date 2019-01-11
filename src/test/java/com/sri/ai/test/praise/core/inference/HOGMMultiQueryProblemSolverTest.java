@@ -39,6 +39,7 @@ package com.sri.ai.test.praise.core.inference;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.println;
@@ -55,6 +56,7 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMModelParsing;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
@@ -242,6 +244,16 @@ public class HOGMMultiQueryProblemSolverTest {
 		result.getErrors().stream().forEach(e -> println(e));
 		assertTrue(result.hasErrors());
 		assertNull(result.getResult());
+	}
+
+
+	@Test
+	public void modelTest() {
+		String modelString = "random x : [-10;10]; random normal : Real x Real -> [-10;10]; x = normal(10.1, 0.1);";
+		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString);
+		println("Succeeded: " + parsingWithErrorCollecting.succeeded());
+		println(join(parsingWithErrorCollecting.getErrors()));
+		println(join("\n", parsingWithErrorCollecting.getModel().getConditionedPotentials()));
 	}
 
 

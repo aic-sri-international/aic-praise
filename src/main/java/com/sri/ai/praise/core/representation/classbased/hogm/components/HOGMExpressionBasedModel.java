@@ -59,49 +59,49 @@ public class HOGMExpressionBasedModel extends DefaultExpressionBasedModel {
 		this(new HOGMParserWrapper().parseModel(hogmodelString));
 	}
 
-	public HOGMExpressionBasedModel(HOGModel parsedModel) {
-		super(makeParameters(parsedModel));
+	public HOGMExpressionBasedModel(HOGModel model) {
+		super(makeParameters(model));
 	}
 	
-	private static Parameters makeParameters(HOGModel parsedModel) {
+	private static Parameters makeParameters(HOGModel model) {
 		Parameters parameters = new Parameters();
 		
-		parameters.factors.addAll(parsedModel.getConditionedPotentials());
+		parameters.factors.addAll(model.getConditionedPotentials());
 		
-		parsedModel.getRandomVariableDeclarations().forEach(random -> {
+		model.getRandomVariableDeclarations().forEach(random -> {
 			parameters.mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.toTypeRepresentation());
 		});
 		
-		parsedModel.getConstatDeclarations().forEach(constant -> {
+		model.getConstatDeclarations().forEach(constant -> {
 			parameters.mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.toTypeRepresentation());
 		});
 		
-		parsedModel.getSortDeclarations().forEach(sortDeclaration -> {
+		model.getSortDeclarations().forEach(sortDeclaration -> {
 			sortDeclaration.getAssignedConstants().forEach(constant -> {
 				parameters.mapFromUniquelyNamedConstantNameToTypeName.put(constant.toString(), sortDeclaration.getName().toString());
 			});
 		});
 		
-		parsedModel.getSortDeclarations().forEach(sort -> {
+		model.getSortDeclarations().forEach(sort -> {
 			if (!sort.getSize().equals(HOGMSortDeclaration.UNKNOWN_SIZE)) {
 				parameters.mapFromCategoricalTypeNameToSizeString.put(sort.getName().toString(), sort.getSize().toString());
 			}
 		});
 		
 		Set<String> integerIntervalTypes = new LinkedHashSet<>();
-		parsedModel.getRandomVariableDeclarations().forEach(random -> {
+		model.getRandomVariableDeclarations().forEach(random -> {
 			integerIntervalTypes.addAll(random.getReferencedIntegerIntervalTypes());
 		});
-		parsedModel.getConstatDeclarations().forEach(constant -> {
+		model.getConstatDeclarations().forEach(constant -> {
 			integerIntervalTypes.addAll(constant.getReferencedIntegerIntervalTypes());
 		});
 		integerIntervalTypes.forEach(integerIntervalName -> parameters.additionalTypes.add(new IntegerInterval(integerIntervalName)));
 		
 		Set<String> realIntervalTypes = new LinkedHashSet<>();
-		parsedModel.getRandomVariableDeclarations().forEach(random -> {
+		model.getRandomVariableDeclarations().forEach(random -> {
 			realIntervalTypes.addAll(random.getReferencedRealIntervalTypes());
 		});
-		parsedModel.getConstatDeclarations().forEach(constant -> {
+		model.getConstatDeclarations().forEach(constant -> {
 			realIntervalTypes.addAll(constant.getReferencedRealIntervalTypes());
 		});
 		realIntervalTypes.forEach(realIntervalName -> parameters.additionalTypes.add(new RealInterval(realIntervalName)));

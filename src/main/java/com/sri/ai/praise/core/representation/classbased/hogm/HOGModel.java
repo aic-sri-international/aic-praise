@@ -65,7 +65,13 @@ public class HOGModel implements Model {
 				extractConditionedPotentials(modelTupleExpression));
 	}
 	
-	public HOGModel(String modelString, List<HOGMSortDeclaration> sorts, List<HOGMConstantDeclaration> constants, List<HOGMRandomVariableDeclaration> randoms, List<Expression> conditionedPotentials) {
+	public HOGModel(
+			String modelString, 
+			List<HOGMSortDeclaration> sorts, 
+			List<HOGMConstantDeclaration> constants, 
+			List<HOGMRandomVariableDeclaration> randoms, 
+			List<Expression> conditionedPotentials) {
+		
 		this.modelString = modelString;
 		// Ensure the in-built sorts are included.
 		for (HOGMSortDeclaration inBuiltSort : HOGMSortDeclaration.IN_BUILT_SORTS) {
@@ -108,46 +114,46 @@ public class HOGModel implements Model {
 	//
 	// PRIVATE
 	//
-	private static boolean isLegalModelTuple(Expression modelTupleExpr) {
-		boolean result = modelTupleExpr != null && Tuple.isTuple(modelTupleExpr) && modelTupleExpr.numberOfArguments() == 4;
+	private static boolean isLegalModelTuple(Expression modelTupleExpression) {
+		boolean result = modelTupleExpression != null && Tuple.isTuple(modelTupleExpression) && modelTupleExpression.numberOfArguments() == 4;
 		return result;
 	}
-	private static List<HOGMSortDeclaration> extractSorts(Expression modelTupleExpr) {
+	private static List<HOGMSortDeclaration> extractSorts(Expression modelTupleExpression) {
 		List<HOGMSortDeclaration> result = new ArrayList<>();
 		
-		if (isLegalModelTuple(modelTupleExpr)) {
-			Expression sortsTuple = modelTupleExpr.get(0);
+		if (isLegalModelTuple(modelTupleExpression)) {
+			Expression sortsTuple = modelTupleExpression.get(0);
 			sortsTuple.getArguments().forEach(sortExpr -> result.add(HOGMSortDeclaration.makeSortDeclaration(sortExpr)));
 		}
 		return result;
 	}
 	
-	private static List<HOGMConstantDeclaration> extractConstants(Expression modelTupleExpr) {
+	private static List<HOGMConstantDeclaration> extractConstants(Expression modelTupleExpression) {
 		List<HOGMConstantDeclaration> result = new ArrayList<>();
 		
-		if (isLegalModelTuple(modelTupleExpr)) {
-			Expression constantsTuple = modelTupleExpr.get(1);
+		if (isLegalModelTuple(modelTupleExpression)) {
+			Expression constantsTuple = modelTupleExpression.get(1);
 			constantsTuple.getArguments().forEach(constantExpr -> result.add(HOGMConstantDeclaration.makeConstantDeclaration(constantExpr)));
 		}
 		
 		return result;
 	}
 	
-	private static List<HOGMRandomVariableDeclaration> extractRandom(Expression modelTupleExpr) {
+	private static List<HOGMRandomVariableDeclaration> extractRandom(Expression modelTupleExpression) {
 		List<HOGMRandomVariableDeclaration> result = new ArrayList<>();
 		
-		if (isLegalModelTuple(modelTupleExpr)) {
-			Expression randomsTuple = modelTupleExpr.get(2);
+		if (isLegalModelTuple(modelTupleExpression)) {
+			Expression randomsTuple = modelTupleExpression.get(2);
 			randomsTuple.getArguments().forEach(randomExpr -> result.add(HOGMRandomVariableDeclaration.makeRandomVariableDeclaration(randomExpr)));
 		}
 		
 		return result;
 	}
 	
-	private static List<Expression> extractConditionedPotentials(Expression modelTupleExpr) {
+	private static List<Expression> extractConditionedPotentials(Expression modelTupleExpression) {
 		List<Expression> result = new ArrayList<>();
-		if (isLegalModelTuple(modelTupleExpr)) {
-			Expression conditionedPotentialsTuple = modelTupleExpr.get(3);
+		if (isLegalModelTuple(modelTupleExpression)) {
+			Expression conditionedPotentialsTuple = modelTupleExpression.get(3);
 			conditionedPotentialsTuple.getArguments().forEach(conditionedPotential -> result.add(conditionedPotential));
 		}
 		return result;
