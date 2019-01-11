@@ -73,7 +73,7 @@ public class HOGMQueryTask extends Task<HOGMProblemResult> {
 			solver = new HOGMMultiQueryProblemSolver(model, query);
 			ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments(map("ultimateAnswer", (Procedure) p -> 42));
 			solver.setProceduralAttachments(proceduralAttachments);
-			List<HOGMProblemResult> queryResults = solver.getResults();
+			List<? extends HOGMProblemResult> queryResults = solver.getResults();
 			if (queryResults.size() == 1) {
 				HOGMProblemResult queryResult = queryResults.get(0);
 				if (queryResult.hasErrors()) {

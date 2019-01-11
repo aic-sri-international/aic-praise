@@ -38,6 +38,7 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing;
 
 import static com.sri.ai.util.Util.isNullOrEmptyString;
+import static com.sri.ai.util.Util.list;
 
 import java.util.List;
 
@@ -54,15 +55,31 @@ import com.sri.ai.praise.core.representation.classbased.hogm.validation.HOGModel
 public class HOGMModelParsing {
 	
 	private HOGModel model = null;
-	private List<HOGMProblemError> errors;
 	
-	public HOGMModelParsing(String model, List<HOGMProblemError> errors) {
-		this.errors = errors;
+	private List<HOGMProblemError> currentErrors;
+
+	public HOGMModelParsing(String model) {
+		this.currentErrors = list();
 		initializeModel(model);
+	}
+
+	@Deprecated
+	public HOGMModelParsing(String model, List<HOGMProblemError> errors) {
+		this.currentErrors = list();
+		initializeModel(model);
+		errors.addAll(currentErrors);
 	}
 
 	public HOGModel getModel() {
 		return model;
+	}
+	
+	public boolean succeeded() {
+		return currentErrors.isEmpty();
+	}
+	
+	public List<? extends HOGMProblemError> getErrors() {
+		return currentErrors;
 	}
 
 	private void initializeModel(String modelString) {
@@ -70,16 +87,16 @@ public class HOGMModelParsing {
 			this.model = parse(modelString);
 		}
 		catch (RecognitionException recognitionError) {
-			collectQueryError(recognitionError);
+			collectError(recognitionError);
 		}
 		catch (UnableToParseAllTheInputError unableToParseAllTheInputError) {
-			collectQueryError(unableToParseAllTheInputError);
+			collectError(unableToParseAllTheInputError);
 		}
 		catch (HOGModelException modelException) {
-			collectQueryErrors(modelException);
+			collectErrors(modelException);
 		}
 		catch (Throwable throwable) {
-			collectQueryError(throwable);
+			collectError(throwable);
 		}
 	}
 
@@ -97,7 +114,7 @@ public class HOGMModelParsing {
 
 	private void collectEmptyModelStringError() {
 		HOGMProblemError error = new HOGMProblemError(HOGMProblemError.Scope.MODEL, "Model not specified");
-		errors.add(error);
+		registerError(error);
 	}
 
 	private HOGModel parseNonEmptyModelString(String nonEmptyModelString) {
@@ -108,34 +125,39 @@ public class HOGMModelParsing {
 	}
 
 	private HOGMParserErrorListener makeParserErrorListener() {
-		return new HOGMParserErrorListener(HOGMProblemError.Scope.MODEL, errors);
+		return new HOGMParserErrorListener(HOGMProblemError.Scope.MODEL, currentErrors);
 	}
 
-	private void collectQueryError(RecognitionException recognitionError) {
+	private void collectError(RecognitionException recognitionError) {
 		HOGMProblemError error = new HOGMProblemError(HOGMProblemError.Scope.MODEL, recognitionError);
-		errors.add(error);
+		registerError(error);
 	}
 
-	private void collectQueryError(UnableToParseAllTheInputError unableToParseAllTheInputError) {
+	private void collectError(UnableToParseAllTheInputError unableToParseAllTheInputError) {
 		HOGMProblemError error = new HOGMProblemError(unableToParseAllTheInputError);
-		errors.add(error);
+		registerError(error);
 	}
 
-	private void collectQueryErrors(HOGModelException modelException) {
-		modelException.getErrors().forEach(modelError ->  collectQueryError(modelError));
+	private void collectErrors(HOGModelException modelException) {
+		modelException.getErrors().forEach(modelError ->  collectError(modelError));
 	}
 
-	private void collectQueryError(HOGModelError modelError) {
-		HOGMProblemError error = makeHOGMQueryError(modelError);
-		errors.add(error);
+	private void collectError(HOGModelError modelError) {
+		HOGMProblemError error = makeHOGMProblemError(modelError);
+		registerError(error);
 	}
 
-	private HOGMProblemError makeHOGMQueryError(HOGModelError modelError) {
+	private void collectError(Throwable throwable) {
+		HOGMProblemError error = new HOGMProblemError(throwable);
+		registerError(error);
+	}
+
+	private HOGMProblemError makeHOGMProblemError(HOGModelError modelError) {
 		String statement    = modelError.getStatementInfo().statement.toString();
 		String source       = modelError.getStatementInfo().sourceText;
 		String subStatement = modelError.getMessage(); 
 		String info = makeInfo(statement, subStatement, source);
-		HOGMProblemError error = makeHOGMQueryError(modelError, info);
+		HOGMProblemError error = makeHOGMError(modelError, info);
 		return error;
 	}
 
@@ -169,7 +191,7 @@ public class HOGMModelParsing {
 		return newInfo;
 	}
 
-	private HOGMProblemError makeHOGMQueryError(HOGModelError modelError, String info) {
+	private HOGMProblemError makeHOGMError(HOGModelError modelError, String info) {
 		HOGMLinePortion linePortion = new HOGMLinePortion(modelError.getStatementInfo().startIndex, modelError.getStatementInfo().endIndex);
 		HOGMProblemError error = 
 				new HOGMProblemError(
@@ -180,8 +202,7 @@ public class HOGMModelParsing {
 		return error;
 	}
 
-	private void collectQueryError(Throwable throwable) {
-		HOGMProblemError error = new HOGMProblemError(throwable);
-		errors.add(error);
+	private void registerError(HOGMProblemError error) {
+		currentErrors.add(error);
 	}
 }

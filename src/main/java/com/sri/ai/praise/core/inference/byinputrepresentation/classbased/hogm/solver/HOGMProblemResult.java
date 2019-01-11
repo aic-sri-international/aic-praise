@@ -84,7 +84,7 @@ public class HOGMProblemResult {
 		}
 	}
 	
-	public HOGMProblemResult(String queryString, HOGModel parsedModel, List<HOGMProblemError> errors, long millisecondsToCompute) {
+	public HOGMProblemResult(String queryString, HOGModel parsedModel, List<? extends HOGMProblemError> errors, long millisecondsToCompute) {
 		this.queryString = queryString;
 		this.queryExpression = null;
 		this.parsedModel = parsedModel;

@@ -62,7 +62,13 @@ public class HOGMSingleQueryProblemSolver {
 	private ExpressionBasedModel expressionBasedModel;
 	private Class<? extends ExpressionBasedSolver> solverClass;
 
-	public HOGMSingleQueryProblemSolver(String query, Class<? extends ExpressionBasedSolver> solverClass, HOGModel hogmModel, ExpressionBasedModel expressionBasedModel, List<HOGMProblemError> modelErrors) {
+	public HOGMSingleQueryProblemSolver(
+			String query, 
+			Class<? extends ExpressionBasedSolver> solverClass, 
+			HOGModel hogmModel, 
+			ExpressionBasedModel expressionBasedModel, 
+			List<? extends HOGMProblemError> modelErrors) {
+		
 		this.solverClass = solverClass;
 		this.hogmModel = hogmModel;
 		this.expressionBasedModel = expressionBasedModel;

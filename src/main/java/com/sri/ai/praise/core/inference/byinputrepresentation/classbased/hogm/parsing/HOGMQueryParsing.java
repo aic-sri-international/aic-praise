@@ -58,7 +58,7 @@ public class HOGMQueryParsing {
 	private HOGMProblemResult parsingErrorResult = null;
 	private HOGModel hogmModel;
 	
-	public HOGMQueryParsing(String query, HOGModel hogmModel, List<HOGMProblemError> modelErrors) {
+	public HOGMQueryParsing(String query, HOGModel hogmModel, List<? extends HOGMProblemError> modelErrors) {
 		this.errors = new LinkedList<>(modelErrors);
 		this.hogmModel = hogmModel;
 		parseQuery(query);

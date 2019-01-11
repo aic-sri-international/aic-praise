@@ -67,6 +67,17 @@ public class UsefulOperationsParameterEstimation {
 	 * To convert a model String into a HOGModel.
 	 *
 	 */
+	public static HOGModel parseModelStringToHOGMModel(String modelString) {
+		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString);
+		HOGModel result = parsingWithErrorCollecting.getModel();
+		return result;
+	}
+	
+	/**
+	 * To convert a model String into a HOGModel.
+	 *
+	 */
+	@Deprecated
 	public static HOGModel parseModelStringToHOGMModel(String modelString, List<HOGMProblemError> modelErrors) {
 		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString, modelErrors);
 		HOGModel result = parsingWithErrorCollecting.getModel();

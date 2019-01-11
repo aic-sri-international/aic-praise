@@ -7,12 +7,10 @@ import static com.sri.ai.praise.learning.symbolicparameterestimation.util.Useful
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
@@ -87,9 +85,7 @@ public class ExpressionBasedModelExamples {
 				+ "else if attackPerception\n"
 				+ "then if likeIncumbent < 60000000 then 0.9/60000000 else 0.1/(40000000 + 1);\n";
 		
-		List<HOGMProblemError> modelErrors = new ArrayList<>();
-		
-		HOGModel hogmModel = parseModelStringToHOGMModel(modelString, modelErrors);
+		HOGModel hogmModel = parseModelStringToHOGMModel(modelString);
 		
 		ExpressionBasedModel expressionBasedModel = parseHOGModelToExpressionBasedModel(hogmModel);
 		
@@ -114,9 +110,7 @@ public class ExpressionBasedModelExamples {
 		      +"then alarm 0.9\n"
 		      +"else alarm 0.01;\n";
 		
-		List<HOGMProblemError> modelErrors = new ArrayList<>();
-		
-		HOGModel hogmModel = parseModelStringToHOGMModel(modelString, modelErrors);
+		HOGModel hogmModel = parseModelStringToHOGMModel(modelString);
 		
 		ExpressionBasedModel expressionBasedModel = parseHOGModelToExpressionBasedModel(hogmModel);
 		
@@ -180,9 +174,7 @@ public class ExpressionBasedModelExamples {
 		      +"then alarm 0.9\n"
 		      +"else alarm 0.01;\n";
 		
-		List<HOGMProblemError> modelErrors = new ArrayList<>();
-		
-		HOGModel hogmModel = parseModelStringToHOGMModel(modelString, modelErrors);
+		HOGModel hogmModel = parseModelStringToHOGMModel(modelString);
 		
 		ExpressionBasedModel expressionBasedModel = parseHOGModelToExpressionBasedModel(hogmModel);
 		

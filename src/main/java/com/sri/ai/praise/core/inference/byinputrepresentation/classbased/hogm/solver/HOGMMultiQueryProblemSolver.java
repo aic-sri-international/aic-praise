@@ -43,7 +43,6 @@ import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RE
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +61,14 @@ import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
 import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
 
 @Beta
+/**
+ * Executes multiple queries for the same model, producing one {@link HOGMProblemResult} for each query.
+ * The results may contain inference results, or collections of errors if there are problems with the model or query.
+ * If there are errors in the model, they will be included in the {@link HOGMProblemResult} for each query.
+ *  
+ * @author braz
+ *
+ */
 public class HOGMMultiQueryProblemSolver {
 	
 	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = ExactBPExpressionBasedSolver.class;
@@ -73,7 +80,6 @@ public class HOGMMultiQueryProblemSolver {
 	private ExpressionBasedModel expressionBasedModel;
 	private Class<? extends ExpressionBasedSolver> solverClass;
 	private HOGMSingleQueryProblemSolver problemSolver;
-	private List<HOGMProblemError> modelErrors = new ArrayList<>();
 	private List<HOGMProblemResult> results = null;
 	private ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
 	
@@ -103,32 +109,47 @@ public class HOGMMultiQueryProblemSolver {
 		return this.proceduralAttachments;
 	}
 
-	public List<HOGMProblemResult> getResults() {
+	public List<? extends HOGMProblemResult> getResults() {
 		if (results == null) {
 			results = arrayList();
-			initializeModel(modelString);
-	        processAllQueries(queries);
+			List<? extends HOGMProblemError> modelErrors = initializeHOGMAndExpressionBasedModels(modelString);
+	        processAllQueries(queries, modelErrors);
 		}
         return results;
     }
 
-	private void initializeModel(String modelString) {
-		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString, modelErrors);
-		this.hogmModel = parsingWithErrorCollecting.getModel();
-		this.expressionBasedModel = hogmModel == null? null : new HOGMExpressionBasedModel(hogmModel);
-		if (this.expressionBasedModel != null) {
-			this.expressionBasedModel.setProceduralAttachments(proceduralAttachments);
+	private List<? extends HOGMProblemError> initializeHOGMAndExpressionBasedModels(String modelString) {
+		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString);
+		if (parsingWithErrorCollecting.succeeded()) {
+			hogmModel = parsingWithErrorCollecting.getModel();
+			expressionBasedModel = new HOGMExpressionBasedModel(hogmModel);
+			expressionBasedModel.setProceduralAttachments(proceduralAttachments);
 		}
+		else {
+			hogmModel = null;
+			expressionBasedModel = null;
+		}
+		return parsingWithErrorCollecting.getErrors();
 	}
 
-	private void processAllQueries(List<String> queries) {
+	/**
+	 * Processes all queries, either solving them or producing error results in case of model or query errors.
+	 * @param query
+	 * @param modelErrors
+	 */
+	private void processAllQueries(List<String> queries, List<? extends HOGMProblemError> modelErrors) {
 		for (String query : queries) {
-        	solveProblemWithQuery(query);
+        	processQuery(query, modelErrors);
         }
 	}
 
-	private void solveProblemWithQuery(String query) {
-		explanationBlock("Solving query ", query, code(() -> {
+	/**
+	 * Processes query, either solving it or producing error results in case of model or query errors.
+	 * @param query
+	 * @param modelErrors
+	 */
+	private void processQuery(String query, List<? extends HOGMProblemError> modelErrors) {
+		explanationBlock("Processing query ", query, code(() -> {
 			HOGMSingleQueryProblemSolver problemSolver = new HOGMSingleQueryProblemSolver(query, solverClass, hogmModel, expressionBasedModel, modelErrors);
 			List<HOGMProblemResult> queryResult = problemSolver.getResults();
 			results.addAll(queryResult);
