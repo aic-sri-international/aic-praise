@@ -4,9 +4,9 @@ import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.getIndexOf;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
-import static com.sri.ai.util.graph2d.api.functions.Functions.functions;
-import static com.sri.ai.util.graph2d.api.graph.GraphSetMaker.graphSetMaker;
-import static com.sri.ai.util.graph2d.api.variables.Variable.realVariable;
+import static com.sri.ai.util.function.api.functions.Functions.functions;
+import static com.sri.ai.util.function.api.variables.Variable.realVariable;
+import static com.sri.ai.util.graph2d.api.GraphSetMaker.graphSetMaker;
 
 import java.util.Random;
 
@@ -15,12 +15,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingProductFactor;
-import com.sri.ai.util.graph2d.api.functions.Functions;
-import com.sri.ai.util.graph2d.api.graph.GraphSet;
-import com.sri.ai.util.graph2d.api.graph.GraphSetMaker;
-import com.sri.ai.util.graph2d.api.variables.DefaultSetOfVariables;
-import com.sri.ai.util.graph2d.api.variables.Unit;
-import com.sri.ai.util.graph2d.api.variables.Variable;
+import com.sri.ai.util.function.api.functions.Functions;
+import com.sri.ai.util.function.api.variables.Unit;
+import com.sri.ai.util.function.api.variables.Variable;
+import com.sri.ai.util.function.core.variables.DefaultSetOfVariables;
+import com.sri.ai.util.graph2d.api.GraphSet;
+import com.sri.ai.util.graph2d.api.GraphSetMaker;
 
 public class SamplingGraphFunctionExample {
 

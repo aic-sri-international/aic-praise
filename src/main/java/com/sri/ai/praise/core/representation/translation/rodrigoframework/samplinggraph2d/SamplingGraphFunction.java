@@ -2,13 +2,10 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.sampl
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
-import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
-import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.myAssert;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
@@ -16,15 +13,15 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleImportanceFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
 import com.sri.ai.util.base.NullaryFunction;
-import com.sri.ai.util.distribution.WeightedFrequencyArrayDistribution;
-import com.sri.ai.util.graph2d.api.variables.Assignment;
-import com.sri.ai.util.graph2d.api.variables.DefaultValue;
-import com.sri.ai.util.graph2d.api.variables.SetOfVariables;
-import com.sri.ai.util.graph2d.api.variables.Unit;
-import com.sri.ai.util.graph2d.api.variables.Value;
-import com.sri.ai.util.graph2d.api.variables.Variable;
-import com.sri.ai.util.graph2d.core.functions.AbstractFunction;
-import com.sri.ai.util.graph2d.core.variables.RealVariable;
+import com.sri.ai.util.distribution.WeightedFrequencyArrayDistributionOfMainVariableGivenRemainingVariables;
+import com.sri.ai.util.function.api.values.Value;
+import com.sri.ai.util.function.api.variables.Assignment;
+import com.sri.ai.util.function.api.variables.SetOfVariables;
+import com.sri.ai.util.function.api.variables.Unit;
+import com.sri.ai.util.function.api.variables.Variable;
+import com.sri.ai.util.function.core.functions.AbstractFunction;
+import com.sri.ai.util.function.core.values.DefaultValue;
+import com.sri.ai.util.function.core.variables.RealVariable;
 
 /**
  * Takes a function indicating the probability of an assignment to its values (a factor).
@@ -63,14 +60,14 @@ public class SamplingGraphFunction extends AbstractFunction {
 	
 	private SamplingFactor samplingFactor;
 
-	private Map<ArrayList<Integer>, WeightedFrequencyArrayDistribution> distributions;
-	
-	private int queryVariableIndex;
-
 	private Variable queryVariable;
+
+	private int queryVariableIndex;
 
 	private com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable querySamplingVariable;
 
+	private WeightedFrequencyArrayDistributionOfMainVariableGivenRemainingVariables indexDistribution;
+	
 	protected SamplingGraphFunction(
 			SamplingFactor samplingFactor,
 			SetOfVariables inputVariablesWithRange,
@@ -84,9 +81,11 @@ public class SamplingGraphFunction extends AbstractFunction {
 		this.queryVariableIndex = queryVariableIndex;
 		this.samplingFactor = samplingFactor;
 		this.querySamplingVariable = samplingFactor.getVariables().get(queryVariableIndex);
-		this.distributions = map();
 
-		myAssert(sameNumberOfFunctionAndSamplingVariables(), numberOfVariablesError());
+		myAssert(sameNumberOfVariablesForFunctionAndForSamplingFactor(), numberOfVariablesError());
+
+		int numberOfQueryValueIndices = queryVariable.getSetOfValuesOrNull().size() + 1;
+		this.indexDistribution = new WeightedFrequencyArrayDistributionOfMainVariableGivenRemainingVariables(numberOfQueryValueIndices);
 		
 	}
 
@@ -95,34 +94,20 @@ public class SamplingGraphFunction extends AbstractFunction {
 	 */
 	public void iterate() {
 		Sample sample = getSample(samplingFactor);
-		WeightedFrequencyArrayDistribution distribution = getCorrespondingDistribution(sample);
 		int queryValueIndex = getQueryValueIndex(sample);
-		if (queryValueIndex != -1) { // out of the graph's range
-			distribution.add(queryValueIndex, sample.getPotential().doubleValue());
+		if (queryValueIndex != -1) { // is in graph's range
+			ArrayList<Integer> nonQueryValueIndices = getNonQueryValueIndices(sample);
+			double weight = sample.getPotential().doubleValue();
+			indexDistribution.register(queryValueIndex, nonQueryValueIndices, weight);
 		}
-//		println("Added " + queryValueIndex + " with weight " + sample.getPotential());
-//		println("Distribution: " + distribution.getProbabilities());
 	}
 
 	@Override
 	public Value evaluate(Assignment assignmentToInputVariables) {
-		WeightedFrequencyArrayDistribution distribution = getCorrespondingDistribution(assignmentToInputVariables);
+		ArrayList<Integer> nonQueryValueIndices = getNonQueryValueIndices(assignmentToInputVariables);
 		int queryValueIndex = getQueryValueIndex(assignmentToInputVariables);
-		ArrayList<Double> probabilities = distribution.getProbabilities();
-		Double probability = probabilities.get(queryValueIndex);
+		double probability = indexDistribution.getProbability(queryValueIndex, nonQueryValueIndices);
 		return new DefaultValue(probability);
-	}
-	
-	public WeightedFrequencyArrayDistribution getCorrespondingDistribution(Assignment assignment) {
-		ArrayList<Integer> nonQueryValueIndices = getNonQueryValueIndices(assignment);
-		WeightedFrequencyArrayDistribution distribution = getDistributionForNonQueryValueIndices(nonQueryValueIndices);
-		return distribution;
-	}
-
-	public WeightedFrequencyArrayDistribution getCorrespondingDistribution(Sample sample) {
-		ArrayList<Integer> nonQueryValueIndices = getNonQueryValueIndices(sample);
-		WeightedFrequencyArrayDistribution distribution = getDistributionForNonQueryValueIndices(nonQueryValueIndices);
-		return distribution;
 	}
 	
 	private int getQueryValueIndex(Assignment assignment) {
@@ -176,15 +161,6 @@ public class SamplingGraphFunction extends AbstractFunction {
 		return result;
 	}
 
-	private WeightedFrequencyArrayDistribution getDistributionForNonQueryValueIndices(ArrayList<Integer> nonQueryValueIndices) {
-		WeightedFrequencyArrayDistribution result = 
-				getValuePossiblyCreatingIt(
-						distributions, 
-						nonQueryValueIndices, 
-						key -> new WeightedFrequencyArrayDistribution(queryVariable.getSetOfValuesOrNull().size() + 1, 0.01));
-		return result;
-	}
-
 	public Variable getVariable(int i) {
 		return getInputVariables().getVariables().get(i);
 	}
@@ -216,7 +192,7 @@ public class SamplingGraphFunction extends AbstractFunction {
 		return () -> "Number of Function input variables must be the same as the number of variables in the sampling factor";
 	}
 
-	private boolean sameNumberOfFunctionAndSamplingVariables() {
+	private boolean sameNumberOfVariablesForFunctionAndForSamplingFactor() {
 		return getInputVariables().size() == this.samplingFactor.getVariables().size();
 	}
 
