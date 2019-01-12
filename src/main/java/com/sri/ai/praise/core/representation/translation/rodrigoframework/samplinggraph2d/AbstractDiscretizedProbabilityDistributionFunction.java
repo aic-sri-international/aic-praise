@@ -44,15 +44,81 @@ public abstract class AbstractDiscretizedProbabilityDistributionFunction extends
 	public static RealVariable makeOutputVariable(Variable queryVariable) {
 		return new RealVariable("P(" + queryVariable.getName() + " | ...)", Unit.NONE);
 	}
+	
+	
+	@Override
+	public Value evaluate(Assignment assignmentToInputVariables) {
+		ArrayList<Object> valueObjects = getValues(assignmentToInputVariables);
+		return evaluate(valueObjects);
+	}
+
+	private ArrayList<Object> getValues(Assignment assignment) {
+		ArrayList<Object> valueObjects = mapIntoArrayList(getVariables(), v -> assignment.get(v).objectValue());
+		return valueObjects;
+	}
+	
+	protected List<? extends Variable> getVariables() {
+		return getInputVariables().getVariables();
+	}
+
+	/////////////////////////////////
+
+	@Override
+	public String getName() {
+		return "P(" + queryVariable.getName() + " | ...)";
+	}
 
 	public void iterate() {
 		Pair<ArrayList<Object>, Double> valuesAndWeight = getValuesAndWeight();
-		Object queryValueObject = getValueOfVariableAt(queryVariableIndex, valuesAndWeight.first);
-		int queryValueIndex = getIndexOfValue(queryVariable, queryValueObject);
-		if (queryValueIndex != -1) { // is in range
-			ArrayList<Integer> nonQueryValueIndices = getNonQueryValueIndices(valuesAndWeight.first);
-			indexDistribution.register(queryValueIndex, nonQueryValueIndices, valuesAndWeight.second);
+		Pair<Integer, ArrayList<Integer>> valueIndices = getValueIndices(valuesAndWeight.first);
+		Integer queryValueIndex = valueIndices.first;
+		ArrayList<Integer> second = valueIndices.second;
+		if (queryValueIndex != -1) { // query value is in range
+			indexDistribution.register(queryValueIndex, second, valuesAndWeight.second);
 		}
+	}
+
+	public Value evaluate(ArrayList<Object> valueObjects) {
+		Pair<Integer, ArrayList<Integer>> valueIndices = getValueIndices(valueObjects);
+		int queryValueIndex = valueIndices.first;
+		ArrayList<Integer> nonQueryValueIndices = valueIndices.second;
+		double probability = indexDistribution.getProbability(queryValueIndex, nonQueryValueIndices);
+		return new DefaultValue(probability);
+	}
+
+	/**
+	 * Returns the index of the value of the query, and the indices of values of remaining variables.
+	 * If index of value of query is -1 (meaning the value is out of range), the indices of values of remaining variables are not calculated (array is empty).
+	 * @param valueObjects
+	 * @return
+	 */
+	private Pair<Integer, ArrayList<Integer>> getValueIndices(ArrayList<Object> valueObjects) {
+		Object queryValueObject = getValueOfVariableAt(queryVariableIndex, valueObjects);
+		int queryValueIndex = getIndexOfValue(queryVariable, queryValueObject);
+		ArrayList<Integer> nonQueryValueIndices;
+		if (queryValueIndex != -1) { // is in range
+			nonQueryValueIndices = getNonQueryValueIndices(valueObjects);
+		}
+		else {
+			nonQueryValueIndices = arrayList();
+		}
+		return new Pair<>(queryValueIndex, nonQueryValueIndices);
+	}
+
+	private Object getValueOfVariableAt(int variableIndex, ArrayList<Object> valueObjects) {
+		Object valueObject = valueObjects.get(variableIndex);
+		myAssert(valueObject != null, () -> "Value not available for " + getInputVariables().get(variableIndex));
+		return valueObject;
+	}
+
+	private int getIndexOfValue(Variable variable, Object valueObject) {
+		Value value = Value.value(valueObject);
+		return getIndexOfValue(variable, value);
+	}
+
+	private int getIndexOfValue(Variable variable, Value value) {
+		int result = variable.getSetOfValuesOrNull().getIndex(value);
+		return result;
 	}
 
 	private ArrayList<Integer> getNonQueryValueIndices(ArrayList<Object> valueObjects) {
@@ -67,55 +133,12 @@ public abstract class AbstractDiscretizedProbabilityDistributionFunction extends
 		return result;
 	}
 
-	private Object getValueOfVariableAt(int variableIndex, ArrayList<Object> valueObjects) {
-		Object valueObject = valueObjects.get(variableIndex);
-		myAssert(valueObject != null, () -> "Value not available for " + getInputVariables().get(variableIndex));
-		return valueObject;
-	}
-
-	private int getIndexOfValue(Variable variable, Object valueObject) {
-		Value value = Value.value(valueObject);
-		return getIndexOfValue(variable, value);
-	}
-
-	@Override
-	public Value evaluate(Assignment assignmentToInputVariables) {
-		int queryValueIndex = getQueryValueIndex(assignmentToInputVariables);
-		ArrayList<Integer> nonQueryValueIndices = getNonQueryValueIndices(assignmentToInputVariables);
-		double probability = indexDistribution.getProbability(queryValueIndex, nonQueryValueIndices);
-		return new DefaultValue(probability);
-	}
-
-	private int getQueryValueIndex(Assignment assignment) {
-		return getIndexOfValue(assignment, queryVariable);
-	}
-
-	private ArrayList<Integer> getNonQueryValueIndices(Assignment assignment) {
-		ArrayList<Object> valueObjects = mapIntoArrayList(getVariables(), v -> assignment.get(v).objectValue());
-		ArrayList<Integer> result = getNonQueryValueIndices(valueObjects);
-		return result;
-	}
-
-	private int getIndexOfValue(Assignment assignment, Variable variable) {
-		Value value = assignment.get(variable);
-		return getIndexOfValue(variable, value);
-	}
-
-	private int getIndexOfValue(Variable variable, Value value) {
-		int result = variable.getSetOfValuesOrNull().getIndex(value);
-		return result;
-	}
-
-	protected List<? extends Variable> getVariables() {
-		return getInputVariables().getVariables();
+	protected int numberOfVariables() {
+		return getInputVariables().size();
 	}
 
 	protected Variable getVariable(int i) {
 		return getInputVariables().getVariables().get(i);
-	}
-
-	protected int numberOfVariables() {
-		return getInputVariables().size();
 	}
 
 	private void assertVariablesAllHaveADefinedSetOfValues(SetOfVariables inputVariablesWithRange) throws Error {
@@ -124,11 +147,6 @@ public abstract class AbstractDiscretizedProbabilityDistributionFunction extends
 		if (withoutSetOfValues != null) {
 			throw new Error(getClass() + " requires that all graph2d variables have a defined set of values, but " + withoutSetOfValues + " does not");
 		}
-	}
-
-	@Override
-	public String getName() {
-		return "P(" + queryVariable.getName() + " | ...)";
 	}
 
 }
