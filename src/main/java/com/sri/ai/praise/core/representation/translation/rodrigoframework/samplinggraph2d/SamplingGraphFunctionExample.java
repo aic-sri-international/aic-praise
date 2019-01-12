@@ -58,7 +58,7 @@ public class SamplingGraphFunctionExample {
 		
 		SamplingFactor factorToBeShown;
 		int queryIndex;
-		AbstractDiscretizedProbabilityDistributionFunction function;
+		SamplingFactorDiscretizedProbabilityDistributionFunction function;
 		
 		if (forDavid) {
 			factorToBeShown = new NormalWithFixedMeanAndStandardDeviation(
