@@ -12,7 +12,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
-import com.sri.ai.util.distribution.DiscretizedProbabilityDistributionFunction;
+import com.sri.ai.util.distribution.DiscretizedConditionalProbabilityDistributionFunction;
 import com.sri.ai.util.function.api.variables.Assignment;
 import com.sri.ai.util.function.api.variables.SetOfVariables;
 import com.sri.ai.util.function.api.variables.Variable;
@@ -44,7 +44,7 @@ import com.sri.ai.util.function.api.variables.Variable;
  * so this could be used in a separate thread to refine the graph as initial versions are displayed. 
  * 
  */ 
-public class SamplingFactorDiscretizedProbabilityDistributionFunction extends DiscretizedProbabilityDistributionFunction {
+public class SamplingFactorDiscretizedProbabilityDistributionFunction extends DiscretizedConditionalProbabilityDistributionFunction {
 	
 	// Rationale of implementation:
 	// For each sample, we determine the joint index of all non-query variables,
