@@ -26,7 +26,7 @@ public class SamplingGraphFunctionExample {
 
 	public static void main(String[] args) {
 
-		boolean forDavid = true;
+		boolean forDavid = false;
 		
 		Random random = new Random();
 		int numberOfSamples = 5000;
@@ -51,14 +51,14 @@ public class SamplingGraphFunctionExample {
 		SamplingFactor yPrior = new NormalWithFixedMeanAndStandardDeviation(
 				yV,
 				mean,
-				0.000001, 
+				15.0, 
 				random);
 		
 		
 		
 		SamplingFactor factorToBeShown;
 		int queryIndex;
-		SamplingGraphFunction function;
+		AbstractDiscretizedProbabilityDistributionFunction function;
 		
 		if (forDavid) {
 			factorToBeShown = new NormalWithFixedMeanAndStandardDeviation(
@@ -67,12 +67,12 @@ public class SamplingGraphFunctionExample {
 					standardDeviation, 
 					random);
 			queryIndex = getIndexOf(factorToBeShown.getVariables(), xV);
-			function = new SamplingGraphFunction(factorToBeShown, new DefaultSetOfVariables(list(x)), queryIndex);
+			function = new SamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x)), queryIndex);
 		}
 		else {
 			factorToBeShown = new SamplingProductFactor(arrayList(xFromY, yPrior), random);
 			queryIndex = getIndexOf(factorToBeShown.getVariables(), xV);
-			function = new SamplingGraphFunction(factorToBeShown, new DefaultSetOfVariables(list(x, y)), queryIndex);
+			function = new SamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x, y)), queryIndex);
 		}
 		
 		Functions functions = functions(function);
