@@ -76,13 +76,9 @@ public class SamplingFactorDiscretizedProbabilityDistributionFunction extends Di
 		Sample sample = getSample(samplingFactor);
 		ArrayList<Object> valueObjects = mapIntoArrayList(samplingFactor.getVariables(), v -> sample.getAssignment().get(v));
 		double weight = sample.getPotential().doubleValue();
-		Pair<ArrayList<Object>, Double> valuesAndWeight = new Pair<>(valueObjects, weight);
-		return valuesAndWeight;
+		return new Pair<>(valueObjects, weight);
 	}
 
-	/**
-	 * Takes a sample and updates internal statistics to be able to evaluate function later.
-	 */
 	private static Sample getSample(SamplingFactor samplingFactor) {
 		Sample sample = new DefaultSample(new DoubleImportanceFactory(), new DoublePotentialFactory());
 		samplingFactor.sampleOrWeigh(sample);
@@ -92,7 +88,7 @@ public class SamplingFactorDiscretizedProbabilityDistributionFunction extends Di
 	//////////////////////////////
 
 	protected boolean sameNumberOfVariablesForFunctionAndForSamplingFactor() {
-		return getInputVariables().size() == this.samplingFactor.getVariables().size();
+		return getSetOfInputVariables().size() == this.samplingFactor.getVariables().size();
 	}
 	
 	private NullaryFunction<String> numberOfVariablesError() {
