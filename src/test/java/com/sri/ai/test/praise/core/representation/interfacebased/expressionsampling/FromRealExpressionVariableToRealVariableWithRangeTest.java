@@ -12,8 +12,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.TrueContext;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.util.function.core.variables.RealVariable;
 
 class FromRealExpressionVariableToRealVariableWithRangeTest {
@@ -80,9 +78,8 @@ class FromRealExpressionVariableToRealVariableWithRangeTest {
 		Expression expression = parse(expressionString);
 		Context context = new TrueContext();
 		context = context.setSymbolsAndTypes(map(expression, parse(typeString)));
-		ExpressionVariable expressionVariable = new DefaultExpressionVariable(expression);
 		RealInterval type = (RealInterval) context.getTypeOfRegisteredSymbol(expression);
-		RealVariable realVariable = makeRealVariableWithRange(expressionVariable, type, numberOfDiscreteValues, context);
+		RealVariable realVariable = makeRealVariableWithRange(expression.toString(), type, numberOfDiscreteValues, context);
 		if (expected.equals(realVariable.toString())) {
 			println(realVariable);
 		}

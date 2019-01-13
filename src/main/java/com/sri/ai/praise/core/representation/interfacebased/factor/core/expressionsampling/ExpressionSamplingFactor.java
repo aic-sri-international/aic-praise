@@ -129,9 +129,9 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	}
 
 	public static Variable makeVariableWithRange(ExpressionVariable expression, Integer numberOfDiscreteValues, Context context) {
-		Type type = context.getTypeOfRegisteredSymbol(expression);
 		Variable result;
 		String name = expression.toString();
+		Type type = context.getTypeOfRegisteredSymbol(expression);
 		if (type instanceof RealInterval) {
 			result = makeRealVariableWithRange(name, (RealInterval) type, numberOfDiscreteValues, context);
 		}
