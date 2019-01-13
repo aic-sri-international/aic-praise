@@ -7,21 +7,18 @@ import java.math.MathContext;
 
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.util.function.api.variables.Unit;
 import com.sri.ai.util.function.core.values.SetOfRealValues;
 import com.sri.ai.util.function.core.variables.RealVariable;
 
 public class FromRealExpressionVariableToRealVariableWithRange {
 
-	public static RealVariable makeRealVariableWithRange(ExpressionVariable expressionVariable, RealInterval type, int numberOfDiscreteValues, Context context) {
+	public static RealVariable makeRealVariableWithRange(String name, RealInterval type, int numberOfDiscreteValues, Context context) {
 		
-		myAssert(numberOfDiscreteValues > 0, () -> ExpressionSamplingFactor.class + " requires a positive number of discrete values but received " + numberOfDiscreteValues + " for variable " + expressionVariable);
-		myAssert(type.boundsAreConstants(),  () -> ExpressionSamplingFactor.class + " requires real-valued variables to have constant bounds, but got " + expressionVariable + " in " + type);
-		myAssert(!type.noLowerBound(),       () -> ExpressionSamplingFactor.class + " requires real-valued variables to be bounded, but got " + expressionVariable + " in " + type);
-		myAssert(!type.noUpperBound(),       () -> ExpressionSamplingFactor.class + " requires real-valued variables to be bounded, but got " + expressionVariable + " in " + type);
-		
-		String name = expressionVariable.toString();
+		myAssert(numberOfDiscreteValues > 0, () -> ExpressionSamplingFactor.class + " requires a positive number of discrete values but received " + numberOfDiscreteValues + " for variable " + name);
+		myAssert(type.boundsAreConstants(),  () -> ExpressionSamplingFactor.class + " requires real-valued variables to have constant bounds, but got " + name + " in " + type);
+		myAssert(!type.noLowerBound(),       () -> ExpressionSamplingFactor.class + " requires real-valued variables to be bounded, but got " + name + " in " + type);
+		myAssert(!type.noUpperBound(),       () -> ExpressionSamplingFactor.class + " requires real-valued variables to be bounded, but got " + name + " in " + type);
 		
 		SetOfRealValues setOfRealValues = makeSetOfRealValues(type, numberOfDiscreteValues);
 		

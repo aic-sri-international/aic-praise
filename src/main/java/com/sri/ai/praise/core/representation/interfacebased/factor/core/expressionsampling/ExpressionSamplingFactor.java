@@ -128,35 +128,36 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 
 	}
 
-	public static Variable makeVariableWithRange(ExpressionVariable expressionVariable, Integer numberOfDiscreteValues, Context context) {
-		Type type = context.getTypeOfRegisteredSymbol(expressionVariable);
+	public static Variable makeVariableWithRange(ExpressionVariable expression, Integer numberOfDiscreteValues, Context context) {
+		Type type = context.getTypeOfRegisteredSymbol(expression);
 		Variable result;
+		String name = expression.toString();
 		if (type instanceof RealInterval) {
-			result = makeRealVariableWithRange(expressionVariable, (RealInterval) type, numberOfDiscreteValues, context);
+			result = makeRealVariableWithRange(name, (RealInterval) type, numberOfDiscreteValues, context);
 		}
 		else if (type instanceof IntegerInterval) {
-			result = makeIntegerVariableWithRange(expressionVariable, (IntegerInterval) type, context);
+			result = makeIntegerVariableWithRange(name, (IntegerInterval) type, context);
 		}
 		else if (type instanceof Categorical) {
-			result = makeEnumVariableWithRange(expressionVariable, (Categorical) type, context);
+			result = makeEnumVariableWithRange(name, (Categorical) type, context);
 		}
 		else {
-			throw new Error(ExpressionSamplingFactor.class + " only supports real, integer and enum types, but got variable " + expressionVariable + " of type " + type);
+			throw new Error(ExpressionSamplingFactor.class + " only supports real, integer and enum types, but got variable " + expression + " of type " + type);
 		}
 		return result;
 	}
 
-	public static Variable makeIntegerVariableWithRange(ExpressionVariable expressionVariable, IntegerInterval type, Context context) {
+	public static Variable makeIntegerVariableWithRange(String name, IntegerInterval type, Context context) {
 		int first = type.getNonStrictLowerBound().intValue();
 		int last = type.getNonStrictUpperBound().intValue();
 		SetOfIntegerValues setOfIntegerValues = new SetOfIntegerValues(first, last);
-		IntegerVariable integerVariable = new IntegerVariable(expressionVariable.toString(), Unit.NONE, setOfIntegerValues);
+		IntegerVariable integerVariable = new IntegerVariable(name, Unit.NONE, setOfIntegerValues);
 		return integerVariable;
 	}
 
-	public static Variable makeEnumVariableWithRange(ExpressionVariable expressionVariable, Categorical type, Context context) {
+	public static Variable makeEnumVariableWithRange(String name, Categorical type, Context context) {
 		myAssert(Expressions.isNumber(type.cardinality()), () -> ExpressionSamplingFactor.class + " requires categorical types to have known finite cardinality, but got " + type);
 		String[] values = mapIntoArray(String.class, type.cardinality().intValue(), type.iterator(), Expression::toString);
-		return new EnumVariable(expressionVariable.toString(), values);
+		return new EnumVariable(name, values);
 	}
 }
