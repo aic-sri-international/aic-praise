@@ -1,6 +1,7 @@
 package com.sri.ai.test.praise.core.representation.interfacebased.expressionsampling;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.FromRealExpressionVariableToRealVariableWithRange.makeRealVariableWithRange;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
@@ -13,10 +14,9 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
 import com.sri.ai.util.function.core.variables.RealVariable;
 
-class ExpressionSamplingFactorTest {
+class FromRealExpressionVariableToRealVariableWithRangeTest {
 
 	@Test
 	void makeSetOfVariablesWithRangesTest() {
@@ -82,7 +82,7 @@ class ExpressionSamplingFactorTest {
 		context = context.setSymbolsAndTypes(map(expression, parse(typeString)));
 		ExpressionVariable expressionVariable = new DefaultExpressionVariable(expression);
 		RealInterval type = (RealInterval) context.getTypeOfRegisteredSymbol(expression);
-		RealVariable realVariable = ExpressionSamplingFactor.makeRealVariableWithRange(expressionVariable, type, numberOfDiscreteValues, context);
+		RealVariable realVariable = makeRealVariableWithRange(expressionVariable, type, numberOfDiscreteValues, context);
 		if (expected.equals(realVariable.toString())) {
 			println(realVariable);
 		}
