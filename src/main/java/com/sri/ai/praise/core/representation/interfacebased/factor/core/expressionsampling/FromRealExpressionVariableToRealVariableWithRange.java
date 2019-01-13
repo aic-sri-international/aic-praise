@@ -81,6 +81,7 @@ public class FromRealExpressionVariableToRealVariableWithRange {
 
 	public static SetOfRealValues assembleSetOfRealValuesWithMoreThanOnePoint(RealInterval type, BigDecimal lowerBound, BigDecimal step, BigDecimal upperBound) {
 		SetOfRealValues setOfRealValues;
+		
 		BigDecimal firstValue = lowerBound;
 		if (type.lowerBoundIsOpen()) {
 			firstValue = firstValue.add(step);

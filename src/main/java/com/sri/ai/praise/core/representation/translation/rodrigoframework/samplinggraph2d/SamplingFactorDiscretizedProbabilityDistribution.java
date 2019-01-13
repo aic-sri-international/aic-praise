@@ -65,22 +65,39 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 	 */
 	public void sample() {
 		Pair<ArrayList<Object>, Double> valuesAndWeight = getValuesAndWeight();
+		// println(getClass().getSimpleName() + ": values and weight: " + valuesAndWeight);
 		register(valuesAndWeight.first, valuesAndWeight.second);
+		// println("Distributions: " + this);
 	}
 
 	protected Pair<ArrayList<Object>, Double> getValuesAndWeight() {
 		Sample sample = getSample(samplingFactor);
-		ArrayList<Object> valueObjects = mapIntoArrayList(samplingFactor.getVariables(), v -> sample.getAssignment().get(v));
-		double weight = sample.getPotential().doubleValue();
-		return new Pair<>(valueObjects, weight);
+		return new Pair<>(getValueObjects(sample), getWeight(sample));
 	}
 
+	//////////////////////////////
+
 	private static Sample getSample(SamplingFactor samplingFactor) {
-		Sample sample = new DefaultSample(new DoubleImportanceFactory(), new DoublePotentialFactory());
+		Sample sample = makeFreshSample();
 		samplingFactor.sampleOrWeigh(sample);
 		return sample;
 	}
+
+	private static DefaultSample makeFreshSample() {
+		return new DefaultSample(new DoubleImportanceFactory(), new DoublePotentialFactory());
+	}
 	
+	//////////////////////////////
+
+	private ArrayList<Object> getValueObjects(Sample sample) {
+		ArrayList<Object> result = mapIntoArrayList(samplingFactor.getVariables(), v -> sample.getAssignment().get(v));
+		return result;
+	}
+
+	private double getWeight(Sample sample) {
+		return sample.getPotential().doubleValue();
+	}
+
 	//////////////////////////////
 
 	protected boolean sameNumberOfVariablesForFunctionAndForSamplingFactor() {
