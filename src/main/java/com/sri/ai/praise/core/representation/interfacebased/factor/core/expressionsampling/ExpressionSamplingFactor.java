@@ -6,6 +6,7 @@ import static com.sri.ai.util.Util.myAssert;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.function.Function;
 
@@ -125,26 +126,39 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		// So to compensate for that think in terms of "delimiters", which are the discretized values plus the open bounds,
 		// and use those to compute the step.
 		
-		int numberOfDelimiters = numberOfDiscreteValues + (type.lowerBoundIsOpen()? 1 : 0) + (type.upperBoundIsOpen()? 1 : 0);
-		
 		BigDecimal lowerBound = new BigDecimal(type.getLowerBound().toString());
 		BigDecimal upperBound = new BigDecimal(type.getUpperBound().toString());
 
-		BigDecimal step = (upperBound.subtract(lowerBound)).divide(new BigDecimal(numberOfDelimiters).subtract(new BigDecimal(1)));
+		int numberOfDelimiters = numberOfDiscreteValues + (type.lowerBoundIsOpen()? 1 : 0) + (type.upperBoundIsOpen()? 1 : 0);
+		BigDecimal numberOfGaps = new BigDecimal(numberOfDelimiters).subtract(new BigDecimal(1));
+		BigDecimal step = upperBound.subtract(lowerBound).divide(numberOfGaps, MathContext.DECIMAL64);
 
-		BigDecimal firstValue = lowerBound;
-		if (type.lowerBoundIsOpen()) {
-			firstValue = firstValue.add(step);
+		SetOfRealValues setOfRealValues;
+		if (step.compareTo(BigDecimal.ZERO) <= 0) {
+			if (!type.lowerBoundIsOpen() && !type.upperBoundIsOpen()) {
+				// singleton set
+				setOfRealValues = new SetOfRealValues(lowerBound, BigDecimal.ZERO, lowerBound);
+			}
+			else {
+				// empty set of values, which means an upper bound smaller than the lower bound
+				setOfRealValues = new SetOfRealValues(lowerBound, step, lowerBound.subtract(BigDecimal.ONE));
+			}
 		}
-		
-		BigDecimal lastValue = upperBound;
-		if (type.upperBoundIsOpen()) {
-			lastValue = lastValue.subtract(step);
+		else {
+			BigDecimal firstValue = lowerBound;
+			if (type.lowerBoundIsOpen()) {
+				firstValue = firstValue.add(step);
+			}
+
+			BigDecimal lastValue = upperBound;
+			if (type.upperBoundIsOpen()) {
+				lastValue = lastValue.subtract(step);
+			}
+
+			setOfRealValues = new SetOfRealValues(firstValue, step, lastValue);
+			setOfRealValues.setLowerBoundForDiscretizedValue(lowerBound);
+			setOfRealValues.setUpperBoundForDiscretizedValue(upperBound);
 		}
-		
-		SetOfRealValues setOfRealValues = new SetOfRealValues(firstValue, step, lastValue);
-		setOfRealValues.setLowerBoundForDiscretizedValue(lowerBound);
-		setOfRealValues.setUpperBoundForDiscretizedValue(upperBound);
 		
 		RealVariable result = new RealVariable(name, Unit.NONE, setOfRealValues); // TODO: accept option specification of units for each of the factor's variables
 		return result;

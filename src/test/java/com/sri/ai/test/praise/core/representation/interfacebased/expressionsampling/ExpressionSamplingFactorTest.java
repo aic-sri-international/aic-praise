@@ -37,6 +37,43 @@ class ExpressionSamplingFactorTest {
 		numberOfDiscreteValues = 99;
 		expected = "RealVariable [getName()=X, getUnit()=DefaultUnit{name='none', symbol=''}, getSetOfValuesOrNull()=SetOfRealValues from 1 to 99, step 1, lower bound 0, upperBoundForDiscretizedValue 100]";
 		runMakeSetOfVariablesWithRangesTest(expressionString, typeString, numberOfDiscreteValues, expected);
+		
+		expressionString = "X";
+		typeString = "[0;100[";
+		numberOfDiscreteValues = 100;
+		expected = "RealVariable [getName()=X, getUnit()=DefaultUnit{name='none', symbol=''}, getSetOfValuesOrNull()=SetOfRealValues from 0 to 99, step 1, lower bound 0, upperBoundForDiscretizedValue 100]";
+		runMakeSetOfVariablesWithRangesTest(expressionString, typeString, numberOfDiscreteValues, expected);
+		
+		expressionString = "X";
+		typeString = "]0;100]";
+		numberOfDiscreteValues = 100;
+		expected = "RealVariable [getName()=X, getUnit()=DefaultUnit{name='none', symbol=''}, getSetOfValuesOrNull()=SetOfRealValues from 1 to 100, step 1, lower bound 0, upperBoundForDiscretizedValue 100]";
+		runMakeSetOfVariablesWithRangesTest(expressionString, typeString, numberOfDiscreteValues, expected);
+		
+		// Same as above but with one less number of discrete values in other to test inexact division
+		expressionString = "X";
+		typeString = "]0;100]";
+		numberOfDiscreteValues = 99;
+		expected = "RealVariable [getName()=X, getUnit()=DefaultUnit{name='none', symbol=''}, getSetOfValuesOrNull()=SetOfRealValues from 1.010101010101010 to 100, step 1.010101010101010, lower bound 0, upperBoundForDiscretizedValue 100]";
+		runMakeSetOfVariablesWithRangesTest(expressionString, typeString, numberOfDiscreteValues, expected);
+		
+		expressionString = "X";
+		typeString = "]100;0[";
+		numberOfDiscreteValues = 99;
+		expected = "RealVariable [getName()=X, getUnit()=DefaultUnit{name='none', symbol=''}, getSetOfValuesOrNull()=Empty set of real values]";
+		runMakeSetOfVariablesWithRangesTest(expressionString, typeString, numberOfDiscreteValues, expected);
+		
+		expressionString = "X";
+		typeString = "]0;0[";
+		numberOfDiscreteValues = 99;
+		expected = "RealVariable [getName()=X, getUnit()=DefaultUnit{name='none', symbol=''}, getSetOfValuesOrNull()=Empty set of real values]";
+		runMakeSetOfVariablesWithRangesTest(expressionString, typeString, numberOfDiscreteValues, expected);
+		
+		expressionString = "X";
+		typeString = "[0;0]";
+		numberOfDiscreteValues = 99;
+		expected = "RealVariable [getName()=X, getUnit()=DefaultUnit{name='none', symbol=''}, getSetOfValuesOrNull()=Singleton set of real 0]";
+		runMakeSetOfVariablesWithRangesTest(expressionString, typeString, numberOfDiscreteValues, expected);
 	}
 
 	private void runMakeSetOfVariablesWithRangesTest(String expressionString, String typeString, int numberOfDiscreteValues, String expected) {
@@ -46,7 +83,13 @@ class ExpressionSamplingFactorTest {
 		ExpressionVariable expressionVariable = new DefaultExpressionVariable(expression);
 		RealInterval type = (RealInterval) context.getTypeOfRegisteredSymbol(expression);
 		RealVariable realVariable = ExpressionSamplingFactor.makeRealVariableWithRange(expressionVariable, type, numberOfDiscreteValues, context);
-		println(realVariable);
+		if (expected.equals(realVariable.toString())) {
+			println(realVariable);
+		}
+		else {
+			println ("Expected: " + expected);
+			println ("Actual  : " + realVariable);
+		}
 		assertEquals(expected, realVariable.toString());
 	}
 
