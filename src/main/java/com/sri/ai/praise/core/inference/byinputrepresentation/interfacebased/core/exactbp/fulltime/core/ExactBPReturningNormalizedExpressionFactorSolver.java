@@ -35,18 +35,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.NormalizedExactBPSolver;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.ExpressionBasedProblemToExpressionInterfaceBasedProblemConversion;
+import static com.sri.ai.util.Util.myAssert;
 
-public class NormalizedExactBPExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 
-	public NormalizedExactBPExpressionBasedSolver() {
-		super(
-				ebp -> ExpressionBasedProblemToExpressionInterfaceBasedProblemConversion.translate(ebp), 
-				new NormalizedExactBPSolver());
+/**
+ * A {@link Solver} adapter for {@link ExactBP}s that return a normalized {@link ExpressionFactor}.
+ * 
+ * @author braz
+ *
+ */
+public class ExactBPReturningNormalizedExpressionFactorSolver implements Solver {
+
+	@Override
+	public Expression solve(Problem problem) {
+		ExactBP exactBP = new ExactBP(problem);
+		Factor normalizedMarginal = exactBP.apply();
+		myAssert(normalizedMarginal instanceof ExpressionFactor, () -> getClass() + " requires " + ExactBP.class.getSimpleName() + " to return a (normalized) " + ExpressionFactor.class);
+		return (ExpressionFactor) normalizedMarginal;
+	}
+
+	@Override
+	public void interrupt() {
+		throw new Error(this.getClass() + ".interrupt not implemented yet");
 	}
 
 }

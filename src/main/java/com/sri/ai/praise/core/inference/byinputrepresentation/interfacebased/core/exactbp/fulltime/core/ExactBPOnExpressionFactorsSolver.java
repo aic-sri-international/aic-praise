@@ -54,13 +54,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 
 /**
- * A wrapper around {@link ExactBP} returning a normalized marginal.
+ * A wrapper around {@link ExactBP} that normalizes its marginal.
  * It requires that the {@link Problem} be defined in {@link ExpressionFactor}s that use {@link ExpressionVariable}s.
  * 
  * @author braz
  *
  */
-public class NormalizedExactBPSolver implements Solver {
+public class ExactBPOnExpressionFactorsSolver implements Solver {
 
 	private class QueryUnnormalizedMarginalAndContext {
 		public ExpressionVariable queryVariable;
