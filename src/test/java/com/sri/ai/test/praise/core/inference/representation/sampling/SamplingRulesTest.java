@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;

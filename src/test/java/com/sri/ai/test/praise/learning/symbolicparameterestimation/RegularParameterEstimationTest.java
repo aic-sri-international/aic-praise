@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;

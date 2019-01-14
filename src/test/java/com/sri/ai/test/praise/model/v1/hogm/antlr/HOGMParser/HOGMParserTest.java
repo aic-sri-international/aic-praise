@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Parser;

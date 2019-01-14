@@ -44,7 +44,7 @@ import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;

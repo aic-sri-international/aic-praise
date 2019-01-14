@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;

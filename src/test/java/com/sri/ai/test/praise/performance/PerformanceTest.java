@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.base.Function;
 import com.sri.ai.grinder.api.Theory;
