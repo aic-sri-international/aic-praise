@@ -41,7 +41,7 @@ import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.table.core.data.FunctionTable;

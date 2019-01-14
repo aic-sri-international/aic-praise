@@ -55,7 +55,7 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 	@Override
 	public SamplingRuleSet sumOut(List<? extends Variable> summedOutVariables, SamplingFactor factorOnResultingRules) {
 
-		List<VariableGoal> summedOutVariableGoals = makeSureItsListOfVariableGoals(summedOutVariables);
+		List<? extends VariableGoal> summedOutVariableGoals = makeSureItsListOfVariableGoals(summedOutVariables);
 		
 		List<VariableGoal> remainingVariablesAsGoals = subtract(getVariables(), summedOutVariableGoals);
 		
@@ -65,9 +65,9 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<VariableGoal> makeSureItsListOfVariableGoals(List<? extends Variable> variables) {
+	private static List<? extends VariableGoal> makeSureItsListOfVariableGoals(List<? extends Variable> variables) {
 		if (forAll(variables, v -> v instanceof Goal)) {
-			return (List<VariableGoal>) variables;
+			return (List<? extends VariableGoal>) variables;
 		}
 		else {
 			List<VariableGoal> variablesAsGoals = mapIntoArrayList(variables, wrapAsGoal());

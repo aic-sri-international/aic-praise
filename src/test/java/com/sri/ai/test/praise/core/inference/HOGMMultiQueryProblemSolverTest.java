@@ -47,12 +47,13 @@ import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.co
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlockToFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
@@ -115,6 +116,7 @@ public class HOGMMultiQueryProblemSolverTest {
 		println(resultValue);
 		println("Explanation");
 		println(result.getExplanation());
+		assertNotNull(result.getExplanation());
 		assertFalse(result.hasErrors());
 		assertEquals(parse("if event then 1 else 0"), result.getResult());
 
@@ -124,6 +126,7 @@ public class HOGMMultiQueryProblemSolverTest {
 		println(resultValue);
 		println("Explanation");
 		println(result.getExplanation());
+		assertNotNull(result.getExplanation());
 		assertFalse(result.hasErrors());
 		assertEquals(parse("if internal1 = 2 then 1 else 0"), result.getResult());
 
@@ -168,6 +171,7 @@ public class HOGMMultiQueryProblemSolverTest {
 			println(resultValue);
 			println("Explanation");
 			println(result.getExplanation());
+			assertNotNull(result.getExplanation());
 			assertFalse(result.hasErrors());
 			assertEquals(parse("if internal2 = 4 then 1 else 0"), result.getResult());
 			

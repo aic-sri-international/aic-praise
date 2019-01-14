@@ -27,7 +27,7 @@ import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPOnExpressionFactorsExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.util.base.Pair;
 
@@ -145,7 +145,7 @@ public class ParameterEstimationForExpressionBasedModel implements ParameterEsti
 	private Expression getMarginalBeforeTransformation(Entry<Pair<Expression, Expression>, Integer> entry) {
 		Pair<Expression, Expression> pairEvidenceQuery = entry.getKey();
 		
-		ExpressionBasedSolver solver = new ExactBPExpressionBasedSolver();
+		ExpressionBasedSolver solver = new ExactBPOnExpressionFactorsExpressionBasedSolver();
 		Expression query = pairEvidenceQuery.first;
 		Expression evidence = pairEvidenceQuery.second;
 		ExpressionBasedModel conditionedModel = model.getConditionedModel(evidence);

@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.praise.learning.parameterlearning.representation.dataset.DefaultDatapoint;

@@ -32,7 +32,7 @@ import com.sri.ai.expresso.optimization.GradientToOptimize;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPOnExpressionFactorsExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.featurebased.ExpressionBasedModelToFeatureBasedModelTranslation;
 import com.sri.ai.praise.core.representation.classbased.featurebased.FeatureBasedModel;
@@ -111,7 +111,7 @@ public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 			
 			System.out.println("parameter : " + parameter);
 			
-			ExpressionBasedSolver solver = new ExactBPExpressionBasedSolver();
+			ExpressionBasedSolver solver = new ExactBPOnExpressionFactorsExpressionBasedSolver();
 			Expression marginal = solver.solve(condition, expressionBasedModel);
 			
 			Expression probabilityOfCondition = convertExpression(marginal);

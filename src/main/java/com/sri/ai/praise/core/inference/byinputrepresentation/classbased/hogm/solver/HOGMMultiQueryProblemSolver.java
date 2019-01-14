@@ -49,7 +49,7 @@ import java.util.Map;
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPOnExpressionFactorsExpressionBasedSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.answer.HOGMAnswerSimplifier;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMModelParsing;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
@@ -71,7 +71,7 @@ import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProc
  */
 public class HOGMMultiQueryProblemSolver {
 	
-	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = ExactBPExpressionBasedSolver.class;
+	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = ExactBPOnExpressionFactorsExpressionBasedSolver.class;
 
 	private String modelString;
 	private List<String> queries;

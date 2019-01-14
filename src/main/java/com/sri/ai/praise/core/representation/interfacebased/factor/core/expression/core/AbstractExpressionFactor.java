@@ -280,4 +280,5 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 	public void setExplanation(ExplanationTree explanation) {
 		this.explanation = explanation;
 	}
+
 }

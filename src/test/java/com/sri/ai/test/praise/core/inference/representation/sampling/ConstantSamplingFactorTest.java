@@ -9,7 +9,7 @@ import java.util.Random;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
