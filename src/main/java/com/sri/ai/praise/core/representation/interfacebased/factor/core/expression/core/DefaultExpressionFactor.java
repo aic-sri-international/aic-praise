@@ -39,11 +39,15 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.express
 
 import java.util.Collection;
 
+import com.google.common.base.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.api.Registry;
+import com.sri.ai.grinder.core.PruningPredicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.util.base.TernaryProcedure;
 
 /**
  * A {@link AbstractExpressionFactor} based on a given {@link Expression}.
@@ -67,6 +71,17 @@ public class DefaultExpressionFactor extends AbstractExpressionFactor implements
 		return innerExpression;
 	}
 	
+	@Override
+	/**
+	 * Overriding implementation that keeps explanation. 
+	 */
+	public Expression replace(Function<Expression, Expression> replacementFunction, boolean onlyTheFirstOne, PruningPredicate prunePredicate, boolean ignoreTopExpression, TernaryProcedure<Expression, Expression, Registry> listener, Registry registry) {
+		Expression newInnerExpression = super.replace(replacementFunction, onlyTheFirstOne, prunePredicate, ignoreTopExpression, listener, registry);
+		DefaultExpressionFactor result = new DefaultExpressionFactor(newInnerExpression, getContext());
+		result.setExplanation(getExplanation());
+		return result;	
+	}
+
 	protected void setInnerExpression(Expression newInnerExpression) {
 		this.innerExpression = this.cachedInnerExpression = newInnerExpression;
 	}
