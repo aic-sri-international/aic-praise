@@ -8,7 +8,7 @@ import static com.sri.ai.util.function.api.functions.Functions.functions;
 import static com.sri.ai.util.function.api.variables.Variable.realVariable;
 import static com.sri.ai.util.graph2d.api.GraphSetMaker.graphSetMaker;
 
-import com.sri.ai.util.graph2d.jfreechart.GraphSettings;
+import com.sri.ai.util.graph2d.core.jfreechart.GraphSettings;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
