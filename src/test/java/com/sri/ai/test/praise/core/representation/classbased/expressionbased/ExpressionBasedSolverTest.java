@@ -59,7 +59,7 @@ import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.evaluation.EvaluationExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.NormalizedExactBPExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedProblem;
@@ -1020,7 +1020,7 @@ public class ExpressionBasedSolverTest {
 		ExpressionBasedSolver[] solvers = new ExpressionBasedSolver[] {
 
 				//new EvaluationExpressionBasedSolver(useFactorization),
-				new ExactBPExpressionBasedSolver()
+				new NormalizedExactBPExpressionBasedSolver()
 				
 		};
 		

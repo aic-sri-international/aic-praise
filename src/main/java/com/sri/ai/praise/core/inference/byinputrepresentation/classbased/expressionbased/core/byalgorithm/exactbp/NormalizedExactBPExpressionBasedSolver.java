@@ -39,15 +39,18 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expres
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.NormalizedExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.NormalizedExactBPSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.ExpressionBasedProblemToExpressionInterfaceBasedProblemConversion;
 
-public class ExactBPExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
+public class NormalizedExactBPExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 
-	public ExactBPExpressionBasedSolver() {
-		super(new NormalizedExactBP());
+	public NormalizedExactBPExpressionBasedSolver() {
+		super(
+				ebp -> ExpressionBasedProblemToExpressionInterfaceBasedProblemConversion.translate(ebp), 
+				new NormalizedExactBPSolver());
 	}
 
 	@Override

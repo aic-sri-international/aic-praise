@@ -23,7 +23,7 @@ import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.ExactBPExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp.NormalizedExactBPExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.featurebased.ExpressionBasedModelToFeatureBasedModelTranslation;
 import com.sri.ai.praise.core.representation.classbased.featurebased.FeatureBasedModel;
@@ -112,7 +112,7 @@ public class GradientLoglikelihoodToOptimize implements MultivariateVectorFuncti
 			
 			Expression parameter = featureBasedModel.mapConditionToWeight.get(condition);
 			
-			ExpressionBasedSolver solver = new ExactBPExpressionBasedSolver();
+			ExpressionBasedSolver solver = new NormalizedExactBPExpressionBasedSolver();
 			
 			ExpressionBasedModel newExpressionBasedModel = UsefulOperationsParameterEstimation.buildOptimizedExpressionBasedModel(mapParametersToValue, expressionBasedModel);
 			Expression marginal = solver.solve(condition, newExpressionBasedModel);
