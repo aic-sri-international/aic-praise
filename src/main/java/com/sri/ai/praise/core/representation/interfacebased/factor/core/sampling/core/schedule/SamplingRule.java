@@ -3,18 +3,20 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.util.Util.assertType;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.subtract;
 
 import java.util.Collection;
 import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
+import com.sri.ai.util.planning.api.Plan;
 import com.sri.ai.util.planning.api.Rule;
 import com.sri.ai.util.planning.api.State;
 import com.sri.ai.util.planning.core.AbstractAtomicPlan;
 
-public class SamplingRule extends AbstractAtomicPlan implements Rule {
+public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoal> {
+	
+	public static final double MAXIMUM_ESTIMATED_SUCCESS_WEIGHT = Plan.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT;
 
 	private SamplingFactor samplingFactor;
 
@@ -22,6 +24,8 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule {
 
 	private Collection<? extends VariableGoal> consequents;
 
+	private boolean hasFired;
+	
 	public static SamplingRule samplingRule(
 			SamplingFactor samplingFactor, 
 			Collection<? extends Variable> consequentVariables, 
@@ -29,7 +33,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule {
 			double estimatedSuccessWeight) {
 		
 		List<? extends VariableGoal> antecedents = mapIntoList(antecedentVariables, v -> new VariableGoal(v));
-		List<? extends VariableGoal> consequents =  mapIntoList(consequentVariables, v -> new VariableGoal(v));
+		List<? extends VariableGoal> consequents = mapIntoList(consequentVariables, v -> new VariableGoal(v));
 		
 		return new SamplingRule(samplingFactor, consequents, antecedents, estimatedSuccessWeight);
 	}
@@ -39,12 +43,17 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule {
 		this.samplingFactor = samplingFactor;
 		this.antecedents = antecedents;
 		this.consequents =  consequents;
+		this.hasFired = false;
 	}
 
 	public SamplingFactor getSamplingFactor() {
 		return samplingFactor;
 	}
-
+	
+	public boolean hasFired() {
+		return hasFired;
+	}
+	
 	@Override
 	public Collection<? extends VariableGoal> getConsequents() {
 		return consequents;
@@ -55,29 +64,25 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule {
 		return antecedents;
 	}
 
+	public void reset() {
+		hasFired = false;
+	}
+
 	public SamplingRule replaceFactor(SamplingFactor newSamplingFactor) {
 		SamplingRule result = new SamplingRule(newSamplingFactor, getConsequents(), getAntecendents(), getEstimatedSuccessWeight());
 		return result;
 	}
 	
-	public SamplingRule sumOut(List<? extends Variable> marginalizedVariables) {
-		List<? extends VariableGoal> marginalizedGoals = mapIntoList(marginalizedVariables, v -> new VariableGoal(v));
-		Collection<? extends VariableGoal> newConsequents = subtract(getConsequents(), marginalizedGoals);
-		Collection<? extends VariableGoal> newAntecedents = subtract(getAntecendents(), marginalizedGoals);
-		SamplingRule result = new SamplingRule(getSamplingFactor(), newConsequents, newAntecedents, getEstimatedSuccessWeight());
-		return result;
-		
-	}
-	
 	@Override
 	public void execute(State state) {
-		SampleState sampleState = assertType(state, SampleState.class, getClass());
+		SamplingState sampleState = assertType(state, SamplingState.class, getClass());
 		getSamplingFactor().sampleOrWeigh(sampleState.getSample());
+		hasFired = true;
 	}
 	
 	@Override
 	public String toString() {
-		return join(consequents) + " <= " + join(antecedents);
+		return join(consequents) + " <= " + join(antecedents) + " with " + getSamplingFactor();
 	}
 
 }

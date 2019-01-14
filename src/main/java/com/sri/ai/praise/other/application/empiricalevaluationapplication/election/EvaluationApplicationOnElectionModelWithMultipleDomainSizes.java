@@ -58,6 +58,7 @@ import com.sri.ai.util.collect.IntegerIterator;
  */
 public class EvaluationApplicationOnElectionModelWithMultipleDomainSizes extends AbstractEvaluationApplication {
 	
+	@Override
 	protected PagedModelContainer getModelsContainer(EvaluationConfigurationFromCommandLineOptions evaluationConfiguration) throws IOException {
 		return 
 				new PagedModelContainer(

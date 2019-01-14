@@ -42,6 +42,7 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 		this.explanationsOfSubs = list();
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	protected ArrayList<? extends ExactBPNodeFromVariableToFactor> getSubs() {
 		return (ArrayList<? extends ExactBPNodeFromVariableToFactor>) super.getSubs();

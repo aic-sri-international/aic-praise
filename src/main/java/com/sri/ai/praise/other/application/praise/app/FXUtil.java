@@ -43,6 +43,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.annotations.Beta;
 
+import de.jensd.fx.glyphs.GlyphIcons;
+import de.jensd.fx.glyphs.GlyphsBuilder;
+import de.jensd.fx.glyphs.GlyphsDude;
+import de.jensd.fx.glyphs.GlyphsStack;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -62,12 +68,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.GlyphsBuilder;
-import de.jensd.fx.glyphs.GlyphsDude;
-import de.jensd.fx.glyphs.GlyphsStack;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 
 @Beta
 public class FXUtil {

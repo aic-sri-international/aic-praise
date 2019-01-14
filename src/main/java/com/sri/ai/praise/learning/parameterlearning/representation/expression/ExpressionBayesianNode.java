@@ -14,14 +14,12 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.stream.Collectors;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.core.DefaultExistentiallyQuantifiedFormula;
 import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
-import com.sri.ai.expresso.core.DefaultUniversallyQuantifiedFormula;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
@@ -122,8 +120,10 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		}
 		
 		verifyIfInputHasExpectedTypeAndSize(childAndParentsValues);
+		@SuppressWarnings("unchecked")
 		LinkedList<Expression> parentsValues = extractParentsValuesFrom((List<Expression>) childAndParentsValues);
 		
+		@SuppressWarnings("unchecked")
 		Expression expressionEvaluation = replaceVariablesByTheirValuesInAnExpression(expression, allVariables, (List<Expression>) childAndParentsValues);		
 		expressionEvaluation = context.evaluate(expressionEvaluation);
 		
@@ -142,6 +142,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		return this.families;
 	}
 	
+	@Override
 	public Context getContext() {
 		return this.context;
 	}
@@ -320,7 +321,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 	private LinkedList<Expression> extractParentsValuesFrom(List<Expression> childAndParentsValues) {
 		LinkedList<Expression> parentsValues = list();
 		int iterationCount = 0;
-		for(ListIterator<Expression> it = (ListIterator<Expression>) childAndParentsValues.listIterator(); it.hasNext(); ) {
+		for(ListIterator<Expression> it = childAndParentsValues.listIterator(); it.hasNext(); ) {
 			Expression value = it.next();
 			if(iterationCount != 0) {
 				parentsValues.add(value);
@@ -349,7 +350,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		
 		while(itValue.hasNext() && itValue.hasNext()) {
 			ExpressionVariable variable = itVariable.next();
-			Expression variableValue = (Expression) itValue.next(); 
+			Expression variableValue = itValue.next(); 
 			newExpression = newExpression.replaceAllOccurrences(variable, variableValue, context);
 		}
 		
@@ -463,6 +464,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		Theory theory = new CommonTheory();
 		
@@ -489,7 +491,7 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 		
 		println("E = " + E + "\n");
 		
-		ExpressionBayesianNode parentNode = new ExpressionBayesianNode(E, context, parent, list(), parameters);
+		new ExpressionBayesianNode(E, context, parent, list(), parameters);
 		ExpressionBayesianNode childNode = new ExpressionBayesianNode(E, context, child, list(parent), parameters);
 		println("Families = " + childNode.getFamilies());
 		

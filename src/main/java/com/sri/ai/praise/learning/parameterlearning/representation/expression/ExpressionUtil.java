@@ -8,12 +8,9 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
-import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.Type;
@@ -28,12 +25,11 @@ import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Equivalence;
-import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.util.Util;
 
-public class UsefulExpressionOperations {
+public class ExpressionUtil {
 	
 	static IndexExpressionsSet childIndexExpressionsSet;
 	static IndexExpressionsSet parametersIndexExpressionsSet;
@@ -79,7 +75,7 @@ public class UsefulExpressionOperations {
 		// Only one child and one parent, 2 parameters (Param1 and Param2)
 		
 		Expression child = parse("Child");
-		Expression parent = parse("Parent");
+		parse("Parent");
 		Expression param1 = parse("Param1");
 		Expression param2 = parse("Param2");
 		Expression param3 = parse("Param3");
@@ -164,9 +160,9 @@ public class UsefulExpressionOperations {
 		// 2]
 		// Two Expressions that are equals, equality result should be true (from ExpressionBayesianModelTest, testChildParentModel4), but error with parent been canceled out, problem with Expresso - to be seen later
 		// also, TODO: see why it is not simplifying 1/Parent to 1/5 in learnedChild below
+		@SuppressWarnings("unused")
 		Expression expectedChild = parse("if Parent = 5 then 0.2 else if Child > Parent then (((5 - Parent) + 0) / (5 + 0)) / (5 - Parent) else ((Parent + 0) / (5 + 0)) / Parent");
-		Expression learnedChild = parse("if Parent < 5 then if Child > Parent then ((-Parent + 5) / ((-Parent + 5) + Parent)) / (-Parent + 5) else (Parent / ((-Parent + 5) + Parent)) / Parent else 1 / Parent");
-		// println(context.evaluate(Equality.make(expectedChild, learnedChild)));
+		parse("if Parent < 5 then if Child > Parent then ((-Parent + 5) / ((-Parent + 5) + Parent)) / (-Parent + 5) else (Parent / ((-Parent + 5) + Parent)) / Parent else 1 / Parent");
 		
 		
 		// Problem when using "for all parameters in parametersValues" instead of handling them as constants - the problem was when adding "and (Parent != 5)" (family.condition) at the end of expression bellow

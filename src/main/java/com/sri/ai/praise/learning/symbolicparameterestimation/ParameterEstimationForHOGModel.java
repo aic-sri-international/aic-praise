@@ -3,7 +3,6 @@ package com.sri.ai.praise.learning.symbolicparameterestimation;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation.parseModelStringToHOGMModel;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,13 +23,11 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	
 	public String stringModel;
 	public HOGModel hogmModel;
-	List<HOGMProblemError> modelErrors;
 	public List<Pair<Expression, Expression>> pairsQueryEvidence;
 	
 	public ParameterEstimationForHOGModel(String stringModel, List<Pair<Expression, Expression>> pairsQueryEvidence, List<HOGMProblemError> modelErrors) {
 		this.stringModel = stringModel;
-		this.modelErrors = new ArrayList<>();
-		this.hogmModel = parseModelStringToHOGMModel(stringModel, modelErrors);
+		this.hogmModel = parseModelStringToHOGMModel(stringModel);
 		this.pairsQueryEvidence = pairsQueryEvidence;
 	}
 	
@@ -41,9 +38,7 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	public HashMap<Expression, Double> optimizeWhenModelIsString(String modelString, GoalType goalType,
 			double[] startPoint){
 		
-		List<HOGMProblemError> modelErrors = new ArrayList<>();
-		
-		HOGModel hogmModel = parseModelStringToHOGMModel(modelString, modelErrors);
+		HOGModel hogmModel = parseModelStringToHOGMModel(modelString);
 		
 		HashMap<Expression, Double> result = optimizeWhenModelIsHOGModel(
 			hogmModel,
@@ -79,7 +74,7 @@ public class ParameterEstimationForHOGModel implements ParameterEstimation {
 	public HOGModel buildOptimizedHOGModel(Map<Expression, Double> optimizedParameters) {
 		
 		String optimizedStringModel = buildOptimizedStringModel(optimizedParameters);
-		HOGModel result = parseModelStringToHOGMModel(optimizedStringModel, this.modelErrors);
+		HOGModel result = parseModelStringToHOGMModel(optimizedStringModel);
 		 
 		return result;
 		

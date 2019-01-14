@@ -38,6 +38,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.IdentityFactor.IDENTITY_FACTOR;
+import static com.sri.ai.util.Util.addAllElementsOfCollectionsToList;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
@@ -48,7 +49,6 @@ import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
-import static com.sri.ai.util.Util.addAllElementsOfCollectionsToList;
 
 import java.util.ArrayList;
 import java.util.Collection;

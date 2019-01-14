@@ -2,11 +2,11 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
-import com.sri.ai.util.collect.FunctionIterator;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 
 /**
  * A sampling factor is a factor that represents its potential function by a set of samples.
@@ -25,20 +25,20 @@ public interface SamplingFactor extends Factor {
 	 */
 	void sampleOrWeigh(Sample sample);
 	
-	SamplingRules getSamplingRules();
+	SamplingRuleSet getSamplingRuleSet();
 	
-	default String nestedString(boolean rules) {
-		return nestedString(0, rules);
+	default String nestedString(boolean showSamplingRules) {
+		return nestedString(0, showSamplingRules);
 	}
 	
-	String nestedString(int level, boolean rules);
+	String nestedString(int level, boolean showSamplingRules);
 
-	default String rulesString(int level, boolean rules) {
-		if (!rules) return "";
+	default String rulesString(int level, boolean showSamplingRules) {
+		if (!showSamplingRules) return "";
 		String tab = fill(level*4, ' ');
 		return 
 				"\n" + tab + "--------------\n"
-				+ join("\n", FunctionIterator.functionIterator(getSamplingRules().getSamplingRules(), r -> tab + r))
+				+ join("\n", functionIterator(getSamplingRuleSet().getSamplingRules(), r -> tab + r))
 				+ "\n" + tab + "--------------";
 				
 	}

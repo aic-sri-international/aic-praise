@@ -38,6 +38,7 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing;
 
 import static com.sri.ai.util.Util.isNullOrEmptyString;
+import static com.sri.ai.util.Util.myAssert;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -57,7 +58,7 @@ public class HOGMQueryParsing {
 	private HOGMProblemResult parsingErrorResult = null;
 	private HOGModel hogmModel;
 	
-	public HOGMQueryParsing(String query, HOGModel hogmModel, List<HOGMProblemError> modelErrors) {
+	public HOGMQueryParsing(String query, HOGModel hogmModel, List<? extends HOGMProblemError> modelErrors) {
 		this.errors = new LinkedList<>(modelErrors);
 		this.hogmModel = hogmModel;
 		parseQuery(query);
@@ -100,6 +101,7 @@ public class HOGMQueryParsing {
 	}
 	
 	public HOGMProblemResult getParsingErrorProblemResult() {
+		myAssert(parsingErrorResult != null, () -> getClass() + "'s parsing error problem result requested, but there were no parsing errors; test with method 'succeeded' first.");
 		return parsingErrorResult;
 	}
 	

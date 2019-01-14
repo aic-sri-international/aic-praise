@@ -39,7 +39,7 @@ package com.sri.ai.test.praise.core.representation.translation.ciaranframework.c
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 

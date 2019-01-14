@@ -50,6 +50,7 @@ public class ExactBPExpressionBasedSolver extends SolverToExpressionBasedSolverA
 		super(new NormalizedExactBP());
 	}
 
+	@Override
 	protected Expression replaceQuerySymbolByQueryExpressionIfNeeded(ExpressionBasedProblem problem, Expression normalizedMarginal) {
 		ExpressionFactor expressionFactor = (ExpressionFactor) normalizedMarginal;
 		Expression normalizedMarginalWithQueryExpression = super.replaceQuerySymbolByQueryExpressionIfNeeded(problem, normalizedMarginal);

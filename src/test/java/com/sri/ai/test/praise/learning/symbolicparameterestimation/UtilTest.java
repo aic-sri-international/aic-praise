@@ -3,11 +3,8 @@ package com.sri.ai.test.praise.learning.symbolicparameterestimation;
 import static com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation.parseHOGModelToExpressionBasedModel;
 import static com.sri.ai.praise.learning.symbolicparameterestimation.util.UsefulOperationsParameterEstimation.parseModelStringToHOGMModel;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMProblemError;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.featurebased.ExpressionBasedModelToFeatureBasedModelTranslation;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
@@ -41,8 +38,7 @@ public class UtilTest {
 		      +"then alarm 0.9\n"
 		      +"else alarm 0.01;\n";
 		
-		List<HOGMProblemError> modelErrors = new ArrayList<>();
-		HOGModel hogModel = parseModelStringToHOGMModel(modelString, modelErrors);
+		HOGModel hogModel = parseModelStringToHOGMModel(modelString);
 		ExpressionBasedModel expressionBasedModel = parseHOGModelToExpressionBasedModel(hogModel);
 		
 		System.out.println(expressionBasedModel.toString() + "\n");

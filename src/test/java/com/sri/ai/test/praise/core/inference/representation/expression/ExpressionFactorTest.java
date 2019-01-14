@@ -44,7 +44,7 @@ public class ExpressionFactorTest {
 		Expression b = DefaultSymbol.createSymbol("b");
 		ExpressionFactor bFactor = new DefaultExpressionFactor(b, context);
 		
-		Factor abFactor = (ExpressionFactor) aFactor.multiply(bFactor);
+		Factor abFactor = aFactor.multiply(bFactor);
 		
 		assertEquals("a * b", abFactor.toString());
 	}
@@ -58,7 +58,7 @@ public class ExpressionFactorTest {
 		Expression a = DefaultSymbol.createSymbol("a");
 		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		
-		Factor result = (ExpressionFactor) aFactor.multiply(IDENTITY_FACTOR);
+		Factor result = aFactor.multiply(IDENTITY_FACTOR);
 		
 		assertEquals(aFactor, result);
 	}
@@ -104,7 +104,7 @@ public class ExpressionFactorTest {
 		Expression b = DefaultSymbol.createSymbol("b");
 		ExpressionFactor bFactor = new DefaultExpressionFactor(b, context);
 		
-		Factor abFactor = (ExpressionFactor) aFactor.add(bFactor);
+		Factor abFactor = aFactor.add(bFactor);
 		
 		assertEquals("a + b", abFactor.toString());
 	}
@@ -118,7 +118,7 @@ public class ExpressionFactorTest {
 		Expression a = DefaultSymbol.createSymbol("a");
 		ExpressionFactor aFactor = new DefaultExpressionFactor(a, context);
 		
-		Factor result = (ExpressionFactor) aFactor.add(IDENTITY_FACTOR);
+		Factor result = aFactor.add(IDENTITY_FACTOR);
 		
 		System.out.println(result.toString());
 		

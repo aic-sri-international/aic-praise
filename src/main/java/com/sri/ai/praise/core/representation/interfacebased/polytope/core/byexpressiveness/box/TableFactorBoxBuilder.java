@@ -132,7 +132,7 @@ public class TableFactorBoxBuilder {
 	}
 
 	private static Pair<TableFactor, TableFactor> divideABoxFactorIntoTwoHalves(TableFactor factor) {
-		ArrayList<TableVariable> varaibles = (ArrayList<TableVariable>)factor.getVariables();
+		ArrayList<TableVariable> varaibles = factor.getVariables();
 		
 		
 		TableFactor minValueHalfFactor;

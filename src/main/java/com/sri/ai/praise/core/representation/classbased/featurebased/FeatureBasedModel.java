@@ -19,6 +19,7 @@ public class FeatureBasedModel {
 		this.mapConditionToWeight = mapConditionToWeight;
 	}
 	
+	@Override
 	public String toString() {
 		return mapConditionToWeight.toString();
 	}

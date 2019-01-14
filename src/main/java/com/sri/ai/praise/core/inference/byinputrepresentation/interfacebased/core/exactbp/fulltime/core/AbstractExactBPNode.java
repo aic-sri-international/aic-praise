@@ -221,7 +221,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 
 	@Override
 	public List<? extends Variable> determinedVariablesToBeSummedOut(Collection<? extends Variable> variablesInSummand) {
-		List<? extends Variable> variablesToBeSummedOut = collectToList(variablesInSummand, n -> ! isFreeVariable((Variable) n));
+		List<? extends Variable> variablesToBeSummedOut = collectToList(variablesInSummand, n -> ! isFreeVariable(n));
 		return variablesToBeSummedOut;
 	}
 

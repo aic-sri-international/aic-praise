@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai;
 
+import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
+
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.IntStream;
@@ -66,8 +68,8 @@ public class UAI_to_HOGMv1_Using_Equalities_Translator extends AbstractUAI_to_HO
 		IntStream.range(0, varCardinality).forEach(valIdx -> {
 			sortConstants.add(UAIUtil.instanceConstantValueForVariable(valIdx, innerVarIdx, varCardinality));
 		});
-		if (!HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(varTypeName)) {
-			sorts.add("sort "+varTypeName+": "+varCardinality+sortConstants.toString());
+		if (!HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName().equals(makeSymbol(varTypeName))) {
+			sorts.add("sort " + varTypeName + ": "+varCardinality+sortConstants.toString());
 		}
 		randoms.add("random "+varName+": "+varTypeName+";");
 	}

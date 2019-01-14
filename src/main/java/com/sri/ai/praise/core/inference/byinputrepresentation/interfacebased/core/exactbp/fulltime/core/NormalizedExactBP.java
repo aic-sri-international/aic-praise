@@ -53,6 +53,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 
+/**
+ * A wrapper around {@link ExactBP} returning a normalized marginal.
+ * It requires that the {@link Problem} be defined in {@link ExpressionFactor}s that use {@link ExpressionVariable}s.
+ * 
+ * @author braz
+ *
+ */
 public class NormalizedExactBP implements Solver {
 
 	private class QueryUnnormalizedMarginalAndContext {
@@ -88,15 +95,6 @@ public class NormalizedExactBP implements Solver {
 		return result;
 	}
 
-	private DefaultExplanationTree makeExplanation(ExpressionFactor normalizedMarginal, Factor factor) {
-		DefaultExplanationTree result = new DefaultExplanationTree(PRAiSEUtil.conditionOnlyIfDeterministic(normalizedMarginal) + ", after normalizing:", factor.getExplanation());
-		return result;
-	}
-
-	private Context getContext(Problem problem) {
-		return ((ExpressionFactorNetwork) problem.getModel()).getContext();
-	}
-
 	private ExpressionFactor getUnnormalizedExpressionFactor(Factor factor, Context context) {
 		return factor instanceof ConstantFactor? new DefaultExpressionFactor(ONE, context) : (ExpressionFactor) factor;
 	}
@@ -104,5 +102,14 @@ public class NormalizedExactBP implements Solver {
 	@Override
 	public void interrupt() {
 		throw new Error(this.getClass() + ".interrupt not implemented yet");
+	}
+
+	private Context getContext(Problem problem) {
+		return ((ExpressionFactorNetwork) problem.getModel()).getContext();
+	}
+
+	private DefaultExplanationTree makeExplanation(ExpressionFactor normalizedMarginal, Factor factor) {
+		DefaultExplanationTree result = new DefaultExplanationTree(PRAiSEUtil.conditionOnlyIfDeterministic(normalizedMarginal) + ", after normalizing:", factor.getExplanation());
+		return result;
 	}
 }

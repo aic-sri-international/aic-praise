@@ -101,7 +101,7 @@ public class PRAiSE {
 		outputModel(modelPage);
 		startSummationCounting();
 		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(modelPage.getModelString(), modelPage.getDefaultQueriesToRun());
-		List<HOGMProblemResult> modelPageResults = solver.getResults();
+		List<? extends HOGMProblemResult> modelPageResults = solver.getResults();
 		outputModelResults(solver, modelPageResults);
 	}
 
@@ -123,7 +123,7 @@ public class PRAiSE {
 		}
 	}
 
-	private void outputModelResults(HOGMMultiQueryProblemSolver solver, List<HOGMProblemResult> modelPageResults) {
+	private void outputModelResults(HOGMMultiQueryProblemSolver solver, List<? extends HOGMProblemResult> modelPageResults) {
 		modelPageResults.forEach(hogModelQueryResult -> output(solver, hogModelQueryResult));
 	}
 

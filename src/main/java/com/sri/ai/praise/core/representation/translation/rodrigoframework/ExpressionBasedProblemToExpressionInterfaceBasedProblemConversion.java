@@ -50,7 +50,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultVariableMarginalQuery;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 
-public class ExpressionBasedProblemToInterfaceBasedProblemConversion {
+public class ExpressionBasedProblemToExpressionInterfaceBasedProblemConversion {
 
 	public static Problem translate(ExpressionBasedProblem expressionBasedProblem) {
 		ExpressionVariable queryVariable = new DefaultExpressionVariable(expressionBasedProblem.getQuerySymbol());

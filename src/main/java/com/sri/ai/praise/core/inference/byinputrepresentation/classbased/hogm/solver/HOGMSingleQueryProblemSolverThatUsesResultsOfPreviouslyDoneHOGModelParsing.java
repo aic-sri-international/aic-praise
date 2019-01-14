@@ -54,7 +54,14 @@ import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 
 @Beta
-public class HOGMSingleQueryProblemSolver {
+/**
+ * A solver for a query to a {@link HOGModel} that takes both the model and its {@link ExpressionBasedModel} form as well as possible model parsing errors.
+ * It also takes at construction which {@link ExpressionBasedSolver} to use.
+ * 
+ * @author braz
+ *
+ */
+public class HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing {
 	
 	private HOGModel hogmModel = null;
 	private List<HOGMProblemResult> results = new ArrayList<>();
@@ -62,7 +69,13 @@ public class HOGMSingleQueryProblemSolver {
 	private ExpressionBasedModel expressionBasedModel;
 	private Class<? extends ExpressionBasedSolver> solverClass;
 
-	public HOGMSingleQueryProblemSolver(String query, Class<? extends ExpressionBasedSolver> solverClass, HOGModel hogmModel, ExpressionBasedModel expressionBasedModel, List<HOGMProblemError> modelErrors) {
+	public HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing(
+			String query, 
+			Class<? extends ExpressionBasedSolver> solverClass, 
+			HOGModel hogmModel, 
+			ExpressionBasedModel expressionBasedModel, 
+			List<? extends HOGMProblemError> modelErrors) {
+		
 		this.solverClass = solverClass;
 		this.hogmModel = hogmModel;
 		this.expressionBasedModel = expressionBasedModel;

@@ -39,6 +39,7 @@ package com.sri.ai.test.praise.core.inference;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.println;
@@ -46,6 +47,8 @@ import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.co
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlockToFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -53,6 +56,7 @@ import org.junit.Test;
 
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.parsing.HOGMModelParsing;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
@@ -101,7 +105,7 @@ public class HOGMMultiQueryProblemSolverTest {
 		ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments(map("external", (Procedure) p -> 5, "alpha", (Procedure) p -> 0.8));
 		solver.setProceduralAttachments(proceduralAttachments);
 		
-		List<HOGMProblemResult> results = solver.getResults();
+		List<? extends HOGMProblemResult> results = solver.getResults();
 	
 		assertEquals(3, results.size());
 		
@@ -154,7 +158,7 @@ public class HOGMMultiQueryProblemSolverTest {
 			ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
 			solver.setProceduralAttachments(proceduralAttachments);
 
-			List<HOGMProblemResult> results = solver.getResults();
+			List<? extends HOGMProblemResult> results = solver.getResults();
 
 			assertEquals(1, results.size());
 
@@ -182,7 +186,7 @@ public class HOGMMultiQueryProblemSolverTest {
 		String query = "x < 3";
 		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
 		
-		List<HOGMProblemResult> results = solver.getResults();
+		List<? extends HOGMProblemResult> results = solver.getResults();
 	
 		assertEquals(1, results.size());
 		
@@ -207,7 +211,7 @@ public class HOGMMultiQueryProblemSolverTest {
 		Expression expected = parse("if x > 5 and x < 7 then 0.1 else 0.9");
 		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
 		
-		List<HOGMProblemResult> results = solver.getResults();
+		List<? extends HOGMProblemResult> results = solver.getResults();
 	
 		assertEquals(1, results.size());
 		
@@ -225,6 +229,36 @@ public class HOGMMultiQueryProblemSolverTest {
 
 
 	@Test
+	public void modelParsingErrorTest() {
+		String model = 
+				"random x : [-10;10  ;";
+		
+		String query = "x > 5 and x < 7";
+		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
+		
+		List<? extends HOGMProblemResult> results = solver.getResults();
+	
+		assertEquals(1, results.size());
+		
+		HOGMProblemResult result = getFirst(results);
+		assertTrue(result.hasErrors());
+		println(join("\n", result.getErrors()));
+		assertEquals("Error in model at Line 1: Error at line 1 column 20 - no viable alternative at input 'randomx:[-10;10;'", result.getErrors().get(0).toString());
+		assertNull(result.getResult());
+	}
+
+
+	@Test
+	public void modelTest() {
+		String modelString = "random x : [-10;10]; random normal : Real x Real -> [-10;10]; x = normal(10.1, 0.1);";
+		HOGMModelParsing parsingWithErrorCollecting = new HOGMModelParsing(modelString);
+		println("Succeeded: " + parsingWithErrorCollecting.succeeded());
+		println(join(parsingWithErrorCollecting.getErrors()));
+		println(join("\n", parsingWithErrorCollecting.getModel().getConditionedPotentials()));
+	}
+
+
+	@Test
 	public void softProceduralAttachment3() {
 		
 		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
@@ -238,7 +272,7 @@ public class HOGMMultiQueryProblemSolverTest {
 		Expression expected = parse("if x > 81.19 then if x < 82.32 then 0.885 else 0 else 0");
 		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
 		
-		List<HOGMProblemResult> results = solver.getResults();
+		List<? extends HOGMProblemResult> results = solver.getResults();
 	
 		assertEquals(1, results.size());
 		

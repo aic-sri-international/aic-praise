@@ -8,9 +8,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
@@ -62,12 +60,14 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		this.reinitializeEntries(1.0); // the initial count is 1 for all possible childAndParentsAssignments
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void incrementCountForChildAndParentsAssignment(List<? extends Object> childAndParentsValues) {
 		verifyIfInputHasExpectedTypeAndSize(childAndParentsValues);
 		incrementCountForThatParameter((List<Integer>) childAndParentsValues);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void normalizeParameters() {
 		List<ArrayList<Integer>> allPossibleParentsAssignments = getAllPossibleVariablesAssignments(parents);
@@ -115,6 +115,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private double getCountForThatParentsAssignment(ArrayList<Integer> parentsAssignment) {
 		double countForThatParentsAssignment = 0.0;
 		List<Integer> childAndParentsAssignment = mergeElementsIntoOneList(0, parentsAssignment);
@@ -133,13 +134,14 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		return allElements;
 	}
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		TableVariable sick = new TableVariable("sick", 2);
 		TableVariable sun = new TableVariable("sun", 2);
 		TableVariable cold = new TableVariable("cold", 2);
 	    
-	    TableBayesianNode sunNode = new TableBayesianNode(sun, arrayList());
-	    TableBayesianNode coldNode = new TableBayesianNode(cold, arrayList());
+	    new TableBayesianNode(sun, arrayList());
+		TableBayesianNode coldNode = new TableBayesianNode(cold, arrayList());
 	    TableBayesianNode sickNode = new TableBayesianNode(sick, arrayList(sun, cold));
 	    sickNode.setInitialCountsForAllPossibleChildAndParentsAssignments();
 	    

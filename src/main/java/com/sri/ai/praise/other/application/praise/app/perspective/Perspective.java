@@ -41,15 +41,15 @@ import java.io.File;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.google.common.annotations.Beta;
+import com.sri.ai.praise.other.application.praise.app.editor.ModelPageEditor;
+import com.sri.ai.praise.other.application.praise.app.model.ExamplePages;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyMapProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.ObservableMap;
-
-import com.google.common.annotations.Beta;
-import com.sri.ai.praise.other.application.praise.app.editor.ModelPageEditor;
-import com.sri.ai.praise.other.application.praise.app.model.ExamplePages;
 
 @Beta
 public interface Perspective {	

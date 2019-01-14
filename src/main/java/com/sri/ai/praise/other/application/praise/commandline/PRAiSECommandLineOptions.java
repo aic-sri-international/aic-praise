@@ -57,11 +57,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
@@ -70,6 +65,11 @@ import com.sri.ai.praise.core.representation.classbased.modelscontainer.ModelPag
 import com.sri.ai.praise.core.representation.classbased.modelscontainer.PagedModelContainer;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.ModelLanguage;
 import com.sri.ai.util.Util;
+
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 
 /**
  * Command line interface for running {@link PRAiSESolver}.

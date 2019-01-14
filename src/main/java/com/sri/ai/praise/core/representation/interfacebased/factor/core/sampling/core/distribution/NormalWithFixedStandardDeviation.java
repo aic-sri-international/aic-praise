@@ -11,12 +11,11 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Potential;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.samplingrules.DefaultSamplingRules;
 
 public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 
@@ -26,22 +25,18 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 	
 	private double standardDeviation;
 	
-	private PotentialFactory potentialFactory;
-	
 	private JDKRandomGenerator randomGenerator;
 	
 	public NormalWithFixedStandardDeviation(
 			Variable variable, 
 			Variable mean, 
 			double standardDeviation, 
-			PotentialFactory potentialFactory, 
 			Random random) {
 		
 		super(arrayList(variable, mean), random);
 		this.variable = variable;
 		this.mean = mean;
 		this.standardDeviation = standardDeviation;
-		this.potentialFactory = potentialFactory;
 		this.randomGenerator = new JDKRandomGenerator(random.nextInt());
 	}
 
@@ -73,7 +68,8 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 
 	private void weigh(Double sampledValue, double meanValue, Sample sample) {
 		double density = densityFromMean(sampledValue, meanValue);
-		weight(sample, density);
+		Potential potentialFactor = sample.getPotential().make(density);
+		sample.updatePotential(potentialFactor);
 	}
 
 	private void sampleOrWeightWithUnknownMean(Sample sample) {
@@ -91,11 +87,6 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 		sampleOrWeightGivenMean(sampledOrWeighedVariableInInvertedProblem, meanValueInInvertedProblem, sample);
 	}
 	
-	private void weight(Sample sample, double density) {
-		Potential potentialFactor = potentialFactory.make(density);
-		sample.updatePotential(potentialFactor);
-	}
-
 	private double sampleFromMean(double meanValue) {
 		return getNormalDistribution(meanValue).sample();
 	}
@@ -118,10 +109,18 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 	}
 
 	@Override
-	public SamplingRules makeSamplingRules() {
-		SamplingRule fromMeanToDependent = samplingRule(this, list(variable), list(mean), 0.5);
-		SamplingRule fromDependentToMean = samplingRule(this, list(mean), list(variable), 0.5);
-		return new DefaultSamplingRules(fromDependentToMean, fromMeanToDependent);
+	public SamplingRuleSet makeSamplingRules() {
+		SamplingRule fromMeanToDependent = samplingRule(this, list(variable), list(mean), computeEstimatedSuccessWeight());
+		SamplingRule fromDependentToMean = samplingRule(this, list(mean), list(variable), computeEstimatedSuccessWeight());
+		return new DefaultSamplingRuleSet(getVariables(), fromDependentToMean, fromMeanToDependent);
+	}
+
+	private double computeEstimatedSuccessWeight() {
+		return 1 / standardDeviation;
+	}
+
+	public double getStandardDeviation() {
+		return standardDeviation;
 	}
 
 	@Override

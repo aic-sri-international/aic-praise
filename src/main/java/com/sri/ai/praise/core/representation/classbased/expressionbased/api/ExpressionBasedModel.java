@@ -41,6 +41,7 @@ public interface ExpressionBasedModel extends Cloneable, Model {
 	
 	void setProceduralAttachments(ProceduralAttachments proceduralAttachments);
 
+	@Override
 	String toString();
 
 	ExpressionBasedModel clone();

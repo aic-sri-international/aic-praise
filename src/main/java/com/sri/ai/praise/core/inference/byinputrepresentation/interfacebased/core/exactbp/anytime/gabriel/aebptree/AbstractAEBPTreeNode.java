@@ -162,7 +162,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		List<Variable> variablesToBeSummedOut = new ArrayList<>(this.separator);
 		if(this.isRootAFactor()) {
 			variablesToBeSummedOut.addAll(((Factor)this.getRoot()).getVariables());//TODO add get variables less parents
-			variablesToBeSummedOut.remove((Variable) this.parent.getRoot());
+			variablesToBeSummedOut.remove(this.parent.getRoot());
 		}
 		variablesToBeSummedOut.removeAll(this.notToSum);
 		return variablesToBeSummedOut;
@@ -194,6 +194,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 	}
 	
 	//----------- Basic Functions ----------- 
+	@Override
 	public AEBPTreeNode<ParentNode, RootNode> getParent() {
 		return this.parent;
 	}
@@ -202,10 +203,12 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		return this.children;
 	}
 	
+	@Override
 	public void addChild(AEBPTreeNode<ParentNode, RootNode> node) {
 		this.children.add((AbstractAEBPTreeNode<ParentNode, RootNode>) node);
 	}
 	
+	@Override
 	public RootNode getRoot() {
 		return this.root;
 	}

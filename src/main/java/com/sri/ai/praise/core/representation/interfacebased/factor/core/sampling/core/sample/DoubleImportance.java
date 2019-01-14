@@ -39,4 +39,19 @@ public class DoubleImportance extends ArithmeticDouble implements Importance {
 		return wrapper(super.pow(another));
 	}
 
+	
+	@Override
+	public DoubleImportance one() {
+		return new DoubleImportance(super.one());
+	}
+	
+	@Override
+	public DoubleImportance zero() {
+		return new DoubleImportance(super.zero());
+	}
+	
+	@Override
+	public DoubleImportance make(double value) {
+		return new DoubleImportance(super.make(value));
+	}
 }

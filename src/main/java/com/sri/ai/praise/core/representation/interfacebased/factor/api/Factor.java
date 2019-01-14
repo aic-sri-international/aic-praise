@@ -82,6 +82,7 @@ public interface Factor {
 	
 	Factor add(Factor another);
 	
+	@Override
 	String toString();
 	
 	static Factor add(Iterator<? extends Factor> factors) {

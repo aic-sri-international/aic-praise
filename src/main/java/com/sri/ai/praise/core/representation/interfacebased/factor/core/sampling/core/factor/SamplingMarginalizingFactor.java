@@ -3,7 +3,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.subtract;
-import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.List;
 import java.util.Random;
@@ -11,7 +10,7 @@ import java.util.Random;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRules;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 
 public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 
@@ -39,8 +38,13 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 	}
 
 	@Override
-	public SamplingRules makeSamplingRules() {
-		SamplingRules marginalSamplingRules = getMarginalizedFactor().getSamplingRules().sumOut(getMarginalizedVariables());
+	public SamplingRuleSet makeSamplingRules() {
+//		println("Marginalizing rules for " + this);
+		SamplingRuleSet samplingRuleSet = getMarginalizedFactor().getSamplingRuleSet();
+		SamplingRuleSet marginalSamplingRules = samplingRuleSet.sumOut(getMarginalizedVariables(), this);
+//		println("Sampling rules: " + samplingRuleSet);
+//		println("Marginalized variables: " + getMarginalizedVariables());
+//		println("Marginalized sampling rules:" + marginalSamplingRules);
 		return marginalSamplingRules;
 	}
 

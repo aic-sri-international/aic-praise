@@ -72,7 +72,7 @@ public class TranslatorFactory {
 // PagedModelContainer -> HOGMv1
 // Church              -> PagedModelContainer
 // HOGMv1              -> PagedModelContainer		
-	};
+	}
 	
 	/**
 	 * Instantiate a new Translator based on the given source->target mapping.

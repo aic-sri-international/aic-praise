@@ -153,7 +153,7 @@ public class Box extends IntensionalConvexHullOfFactors{
 							phiMaxEntries.get(i)
 					);
 		}
-		ArrayList<TableVariable> variables = (ArrayList<TableVariable>) phiMax.getVariables();
+		ArrayList<TableVariable> variables = phiMax.getVariables();
 		TableFactor result = new TableFactor(variables,newEntries);
 		return result;
 	}

@@ -24,7 +24,6 @@ import org.junit.Test;
 import com.google.common.base.Function;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.core.constraint.ConstraintSplitting;
-import com.sri.ai.grinder.core.constraint.ContextSplitting;
 import com.sri.ai.grinder.tester.ContextSplittingTester;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory;
 import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheoryWithNonExhaustiveNonRecursiveRewriters;
@@ -366,6 +365,7 @@ public class PerformanceTest {
 	
 	private static class FactorOperationResultAndTimeComparator implements Comparator<FactorOperationResultAndTimes> {
 	     
+		@Override
 		public int compare(FactorOperationResultAndTimes resultA, FactorOperationResultAndTimes resultB) {
 			int result;
 			
@@ -468,9 +468,9 @@ public class PerformanceTest {
 
 
 	private static FactorOperationResultAndTimes timeFactorOperation(NullaryFunction<Factor> operation) {
-		ContextSplitting.resetTotalConstraintSplittingTime();
+		ConstraintSplitting.resetTotalConstraintSplittingTime();
 		Pair<Factor,Long> timeAndResult = timeAndGetResult( () -> operation.apply() );
-		long contextSplittingTime = ContextSplitting.getTotalConstraintSplittingTime();
+		long contextSplittingTime = ConstraintSplitting.getTotalConstraintSplittingTime();
 		FactorOperationResultAndTimes result = new FactorOperationResultAndTimes( timeAndResult.first,
 																				  timeAndResult.second,
 																				  contextSplittingTime);
@@ -483,6 +483,7 @@ public class PerformanceTest {
 	/// POSSIBLE UNARY FACTOR OPERATIONS ///////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@SuppressWarnings("unused")
 	private static Factor sumOutFirstHalfOfVariables(Factor factor) {
 		List<? extends Variable> variablesToSumOut = getFirstHalfSubList(factor.getVariables());
 		Factor result = factor.sumOut(variablesToSumOut);
@@ -490,6 +491,7 @@ public class PerformanceTest {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private static Factor sumOutLastHalfOfVariables(Factor factor) {
 		List<? extends Variable> variablesToSumOut = getLastHalfSubList(factor.getVariables());
 		Factor result = factor.sumOut(variablesToSumOut);
@@ -504,6 +506,7 @@ public class PerformanceTest {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private static Factor sumOutFirstVariable(Factor factor) {
 		List<? extends Variable> factorVariables = factor.getVariables();
 		int indexOfFirstVariable = 0;
@@ -517,6 +520,7 @@ public class PerformanceTest {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private static Factor sumOutLastVariable(Factor factor) {
 		List<? extends Variable> factorVariables = factor.getVariables();
 		int indexOfLastVariable = factorVariables.size() - 1;
