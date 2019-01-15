@@ -60,7 +60,7 @@ import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
  * @author braz
  *
  */
-public class ExactBPOnExpressionFactorsSolver implements Solver {
+public class SolverAdapterForExactBPThatReturnsUnnormalizedExpressionFactor implements Solver {
 
 	private class QueryUnnormalizedMarginalAndContext {
 		public ExpressionVariable queryVariable;

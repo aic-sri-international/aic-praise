@@ -1019,8 +1019,9 @@ public class ExpressionBasedSolverTest {
 
 		ExpressionBasedSolver[] solvers = new ExpressionBasedSolver[] {
 
-				//new EvaluationExpressionBasedSolver(useFactorization),
-				new ExactBPOnExpressionFactorsExpressionBasedSolver()
+				new EvaluationExpressionBasedSolver(useFactorization),
+				new ExactBPOnExpressionFactorsExpressionBasedSolver(),
+//				new ExactBPOnSamplingFactorsExpressionBasedSolver(v -> 10)
 				
 		};
 		

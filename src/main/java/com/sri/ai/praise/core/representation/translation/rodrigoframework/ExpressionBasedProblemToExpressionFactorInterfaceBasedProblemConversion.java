@@ -45,19 +45,19 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultVariableMarginalQuery;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 
-public class ExpressionBasedProblemToExpressionInterfaceBasedProblemConversion {
+public class ExpressionBasedProblemToExpressionFactorInterfaceBasedProblemConversion {
 
 	public static Problem translate(ExpressionBasedProblem expressionBasedProblem) {
 		ExpressionVariable queryVariable = new DefaultExpressionVariable(expressionBasedProblem.getQuerySymbol());
 		ExpressionFactorNetwork factorNetwork = makeFactorNetwork(expressionBasedProblem);
 		Predicate<Expression> isExpressionParameterPredicate = expressionBasedProblem.getIsParameterPredicate();
 		Predicate<Variable> isParameterPredicate = makeIsParameterPredicate(isExpressionParameterPredicate);
-		Problem problem = new DefaultVariableMarginalQuery(queryVariable, factorNetwork, isParameterPredicate);
+		Problem problem = new DefaultProblem(queryVariable, factorNetwork, isParameterPredicate);
 		return problem;
 	}
 

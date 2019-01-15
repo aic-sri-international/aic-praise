@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, SRI International
+ * Copyright (c) 2013, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-praise nor the names of its
+ * Neither the name of the aic-expresso nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,39 +35,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling;
 
-import java.util.function.Predicate;
+import java.util.function.Function;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.SolverAdapterForExactBPThatReturnsSamplingFactor;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion;
 
-public class DefaultVariableMarginalQuery implements Problem {
-	
-	private Variable queryVariable;
-	private FactorNetwork model;
-	private Predicate<Variable> isParameterPredicate;
-	
-	public DefaultVariableMarginalQuery(Variable queryVariable, FactorNetwork model, Predicate<Variable> isParameterPredicate) {
-		super();
-		this.queryVariable = queryVariable;
-		this.model = model;
-		this.isParameterPredicate = isParameterPredicate;
+public class ExactBPOnSamplingFactorsExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
+
+	public ExactBPOnSamplingFactorsExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues) {
+		super(
+				ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion::translate, 
+				ebp -> new SolverAdapterForExactBPThatReturnsSamplingFactor(fromVariableToNumberOfDiscreteValues, ebp.getContext()));
 	}
 
-	@Override
-	public Variable getQueryVariable() {
-		return queryVariable;
-	}
-
-	@Override
-	public FactorNetwork getModel() {
-		return model;
-	}
-
-	@Override
-	public Predicate<Variable> getIsParameterPredicate() {
-		return isParameterPredicate;
-	}
 }

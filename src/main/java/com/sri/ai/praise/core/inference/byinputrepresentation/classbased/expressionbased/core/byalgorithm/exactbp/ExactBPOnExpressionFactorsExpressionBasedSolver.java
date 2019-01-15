@@ -38,15 +38,15 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.exactbp;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBPOnExpressionFactorsSolver;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.ExpressionBasedProblemToExpressionInterfaceBasedProblemConversion;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.SolverAdapterForExactBPThatReturnsUnnormalizedExpressionFactor;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.ExpressionBasedProblemToExpressionFactorInterfaceBasedProblemConversion;
 
 public class ExactBPOnExpressionFactorsExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 
 	public ExactBPOnExpressionFactorsExpressionBasedSolver() {
 		super(
-				ebp -> ExpressionBasedProblemToExpressionInterfaceBasedProblemConversion.translate(ebp), 
-				new ExactBPOnExpressionFactorsSolver());
+				ExpressionBasedProblemToExpressionFactorInterfaceBasedProblemConversion::translate, 
+				ebp -> new SolverAdapterForExactBPThatReturnsUnnormalizedExpressionFactor());
 	}
 
 }

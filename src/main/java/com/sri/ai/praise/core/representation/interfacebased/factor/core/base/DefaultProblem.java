@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, SRI International
+ * Copyright (c) 2015, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
  * 
- * Neither the name of the aic-expresso nor the names of its
+ * Neither the name of the aic-praise nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  * 
@@ -35,35 +35,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 
-import static com.sri.ai.util.Util.myAssert;
+import java.util.function.Predicate;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
-/**
- * A {@link Solver} adapter for {@link ExactBP}s that return a normalized {@link ExpressionFactor}.
- * 
- * @author braz
- *
- */
-public class ExactBPReturningNormalizedExpressionFactorSolver implements Solver {
-
-	@Override
-	public Expression solve(Problem problem) {
-		ExactBP exactBP = new ExactBP(problem);
-		Factor normalizedMarginal = exactBP.apply();
-		myAssert(normalizedMarginal instanceof ExpressionFactor, () -> getClass() + " requires " + ExactBP.class.getSimpleName() + " to return a (normalized) " + ExpressionFactor.class);
-		return (ExpressionFactor) normalizedMarginal;
+public class DefaultProblem implements Problem {
+	
+	private Variable queryVariable;
+	private FactorNetwork model;
+	private Predicate<Variable> isParameterPredicate;
+	
+	public DefaultProblem(Variable queryVariable, FactorNetwork model, Predicate<Variable> isParameterPredicate) {
+		super();
+		this.queryVariable = queryVariable;
+		this.model = model;
+		this.isParameterPredicate = isParameterPredicate;
 	}
 
 	@Override
-	public void interrupt() {
-		throw new Error(this.getClass() + ".interrupt not implemented yet");
+	public Variable getQueryVariable() {
+		return queryVariable;
 	}
 
+	@Override
+	public FactorNetwork getModel() {
+		return model;
+	}
+
+	@Override
+	public Predicate<Variable> getIsParameterPredicate() {
+		return isParameterPredicate;
+	}
 }

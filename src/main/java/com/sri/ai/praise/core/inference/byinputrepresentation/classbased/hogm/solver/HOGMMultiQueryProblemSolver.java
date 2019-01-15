@@ -95,8 +95,8 @@ public class HOGMMultiQueryProblemSolver {
 		this(model, list(query), solverClass);
 	}
 	
-	public HOGMMultiQueryProblemSolver(String modelString, List<String> queries, Class<? extends ExpressionBasedSolver> solverClass) {
-		this.modelString = modelString;
+	public HOGMMultiQueryProblemSolver(String model, List<String> queries, Class<? extends ExpressionBasedSolver> solverClass) {
+		this.modelString = model;
 		this.queries = queries;
 		this.solverClass = solverClass;
 	}

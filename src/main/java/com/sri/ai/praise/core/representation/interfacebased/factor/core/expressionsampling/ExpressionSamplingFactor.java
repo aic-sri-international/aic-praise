@@ -52,7 +52,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	public static ExpressionSamplingFactor newInstance(
 			SamplingFactor samplingFactor, 
 			int queryIndex, 
-			Function<ExpressionVariable, Integer> fromVariableToNumberOfDiscreteValues,
+			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues,
 			Context context) {
 		
 	     return (ExpressionSamplingFactor) java.lang.reflect.Proxy.newProxyInstance(
@@ -65,22 +65,22 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 
 		private SamplingFactor samplingFactor;
 		private int queryIndex;
-		private Function<ExpressionVariable, Integer> fromVariableToNumberOfDiscreteValues;
+		private Function<Expression, Integer> fromVariableToNumberOfDiscreteValues;
 		private Context context;
 		private SamplingFactorDiscretizedProbabilityDistributionFunction samplingFactorDiscretizedProbabilityDistribution;
 		
-		public ExpressionSamplingFactorProxyInvocationHandler(SamplingFactor samplingFactor, int queryIndex, Function<ExpressionVariable, Integer> fromVariableToNumberOfDiscreteValues, Context context) {
+		public ExpressionSamplingFactorProxyInvocationHandler(SamplingFactor samplingFactor, int queryIndex, Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, Context context) {
 			this.samplingFactor = samplingFactor;
 			this.queryIndex = queryIndex;
 			this.fromVariableToNumberOfDiscreteValues = fromVariableToNumberOfDiscreteValues;
 			this.context = context;
 		}
 		
-		public Function<ExpressionVariable, Integer> getFromVariableToNumberOfDiscreteValues() {
+		public Function<Expression, Integer> getFromVariableToNumberOfDiscreteValues() {
 			return fromVariableToNumberOfDiscreteValues;
 		}
 
-		public void setFromVariableToNumberOfDiscreteValues(Function<ExpressionVariable, Integer> fromVariableToNumberOfDiscreteValues) {
+		public void setFromVariableToNumberOfDiscreteValues(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues) {
 			this.fromVariableToNumberOfDiscreteValues = fromVariableToNumberOfDiscreteValues;
 		}
 
@@ -225,7 +225,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	 */
 	public static SetOfVariables makeSetOfVariablesWithRanges(
 			List<? extends ExpressionVariable> expressionVariables, 
-			Function<ExpressionVariable, Integer> numberOfDiscreteValues,
+			Function<Expression, Integer> numberOfDiscreteValues,
 			Context context) {
 		
 		ArrayList<Variable> variables = mapIntoArrayList(expressionVariables,v -> makeVariableWithRange(v, numberOfDiscreteValues.apply(v), context));

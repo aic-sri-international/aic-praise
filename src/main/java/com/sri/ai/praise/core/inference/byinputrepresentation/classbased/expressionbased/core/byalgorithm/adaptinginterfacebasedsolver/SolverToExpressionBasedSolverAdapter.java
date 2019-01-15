@@ -11,23 +11,23 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 public abstract class SolverToExpressionBasedSolverAdapter extends AbstractExpressionBasedSolver {
 
 	private Function<ExpressionBasedProblem, Problem> fromExpressionBasedProblemToProblem;
+	private Function<ExpressionBasedProblem, Solver> fromExpressionBasedProblemToSolver;
 	private Solver solver;
-
-	public SolverToExpressionBasedSolverAdapter(Function<ExpressionBasedProblem, Problem> fromExpressionBasedProblemToProblem, Solver solver) {
+	
+	public SolverToExpressionBasedSolverAdapter(
+			Function<ExpressionBasedProblem, Problem> fromExpressionBasedProblemToProblem, 
+			Function<ExpressionBasedProblem, Solver> fromExpressionBasedProblemToSolver) {
 		super();
-		this.solver = solver;
+		this.fromExpressionBasedProblemToSolver = fromExpressionBasedProblemToSolver;
 		this.fromExpressionBasedProblemToProblem = fromExpressionBasedProblemToProblem;
 	}
 
 	@Override
 	protected Expression solveForQuerySymbolDefinedByExpressionBasedProblem(ExpressionBasedProblem expressionBasedProblem) {
 		Problem problem = fromExpressionBasedProblemToProblem.apply(expressionBasedProblem);
-		Expression result = getSolver().solve(problem);
+		solver = fromExpressionBasedProblemToSolver.apply(expressionBasedProblem);
+		Expression result = solver.solve(problem);
 		return result;
-	}
-
-	private Solver getSolver() {
-		return solver;
 	}
 
 	@Override

@@ -616,8 +616,16 @@ public class HOGMModelValidator {
 						newError(Type.TERM_CONSTANT_NOT_DEFINED, arg, termStatement);
 					}
 					else {
-						if (getSort(rvDeclaration.getParameterSorts().get(i)) != determineSortType(arg, scopedConstants)) {
-							newError(Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
+						HOGMSortDeclaration parameterSort = getSort(rvDeclaration.getParameterSorts().get(i));
+						HOGMSortDeclaration argumentSort = determineSortType(arg, scopedConstants);
+						if (parameterSort != argumentSort) {
+							if (parameterSort == HOGMSortDeclaration.IN_BUILT_REAL && argumentSort == HOGMSortDeclaration.IN_BUILT_INTEGER) {
+								// TODO: HACK (Jan 2019)
+								// We give this a pass so that integers can be accepted as reals.
+							}
+							else {
+								newError(Type.RANDOM_VARIABLE_ARGUMENT_IS_OF_THE_INCORRECT_TYPE, arg, termStatement);
+							}
 						}
 					}
 				}
