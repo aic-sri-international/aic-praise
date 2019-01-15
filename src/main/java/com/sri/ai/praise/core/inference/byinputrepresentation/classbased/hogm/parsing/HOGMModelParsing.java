@@ -112,7 +112,8 @@ public class HOGMModelParsing {
 
 	private HOGModel parseNonEmptyModelString(String nonEmptyModelString) {
 		// TODO: hack for introducing normal distributions into the model without having to examine the entire parser validation for now (Jan 2019).
-		nonEmptyModelString = "random Normal : Real x Real -> Real;\n" + nonEmptyModelString;
+		// We add it at the end so that errors containing line numbers coincide with the original string's line numbers.
+		nonEmptyModelString = nonEmptyModelString + "\nrandom Normal : Real x Real -> Real;";
 		HOGMParserWrapper parser = new HOGMParserWrapper();
 		HOGModel model = parser.parseModel(nonEmptyModelString, makeParserErrorListener());
 		parser.close();

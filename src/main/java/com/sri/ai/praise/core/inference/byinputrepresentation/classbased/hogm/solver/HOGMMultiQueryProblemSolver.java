@@ -65,40 +65,39 @@ import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProc
  * Executes multiple queries for the same model, producing one {@link HOGMProblemResult} for each query.
  * The results may contain inference results, or collections of errors if there are problems with the model or query.
  * If there are errors in the model, they will be included in the {@link HOGMProblemResult} for each query.
- *  
+ * <p>
+ * This class uses a {@link ExpressionBasedSolver}, with the default being a {@link ExactBPOnExpressionFactorsExpressionBasedSolver}.
  * @author braz
  *
  */
 public class HOGMMultiQueryProblemSolver {
 	
-	public static Class<? extends ExpressionBasedSolver> defaultSolverClass = ExactBPOnExpressionFactorsExpressionBasedSolver.class;
-
 	private String modelString;
 	private List<String> queries;
 	
 	private HOGModel hogmModel = null;
 	private ExpressionBasedModel expressionBasedModel;
-	private Class<? extends ExpressionBasedSolver> solverClass;
+	public ExpressionBasedSolver expressionBasedSolver;
 	private HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing problemSolver;
 	private List<HOGMProblemResult> results = null;
 	private ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
 	
 	public HOGMMultiQueryProblemSolver(String model, String query) {
-		this(model, list(query), defaultSolverClass);
+		this(model, list(query), null);
 	}
 	
 	public HOGMMultiQueryProblemSolver(String model, List<String> queries) {
-		this(model, queries, defaultSolverClass);
+		this(model, queries, null);
 	}
 
-	public HOGMMultiQueryProblemSolver(String model, String query, Class<? extends ExpressionBasedSolver> solverClass) {
-		this(model, list(query), solverClass);
+	public HOGMMultiQueryProblemSolver(String model, String query, ExpressionBasedSolver expressionBasedSolver) {
+		this(model, list(query), expressionBasedSolver);
 	}
 	
-	public HOGMMultiQueryProblemSolver(String model, List<String> queries, Class<? extends ExpressionBasedSolver> solverClass) {
+	public HOGMMultiQueryProblemSolver(String model, List<String> queries, ExpressionBasedSolver expressionBasedSolver) {
 		this.modelString = model;
 		this.queries = queries;
-		this.solverClass = solverClass;
+		this.expressionBasedSolver = expressionBasedSolver == null? new ExactBPOnExpressionFactorsExpressionBasedSolver() : expressionBasedSolver;
 	}
 	
 	public void setProceduralAttachments(ProceduralAttachments proceduralAttachments) {
@@ -150,7 +149,7 @@ public class HOGMMultiQueryProblemSolver {
 	 */
 	private void processQuery(String query, List<? extends HOGMProblemError> modelErrors) {
 		explanationBlock("Processing query ", query, code(() -> {
-			HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing problemSolver = new HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing(query, solverClass, hogmModel, expressionBasedModel, modelErrors);
+			HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing problemSolver = new HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing(query, expressionBasedSolver, hogmModel, expressionBasedModel, modelErrors);
 			List<HOGMProblemResult> queryResult = problemSolver.getResults();
 			results.addAll(queryResult);
 			return queryResult;

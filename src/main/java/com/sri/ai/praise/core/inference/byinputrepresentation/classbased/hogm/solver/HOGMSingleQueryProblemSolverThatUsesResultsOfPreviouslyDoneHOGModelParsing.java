@@ -55,7 +55,7 @@ import com.sri.ai.util.base.Pair;
 
 @Beta
 /**
- * A solver for a query to a {@link HOGModel} that takes both the model and its {@link ExpressionBasedModel} form as well as possible model parsing errors.
+ * A expressionBasedSolver for a query to a {@link HOGModel} that takes both the model and its {@link ExpressionBasedModel} form as well as possible model parsing errors.
  * It also takes at construction which {@link ExpressionBasedSolver} to use.
  * 
  * @author braz
@@ -67,16 +67,16 @@ public class HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModel
 	private List<HOGMProblemResult> results = new ArrayList<>();
 	private boolean canceled = false;
 	private ExpressionBasedModel expressionBasedModel;
-	private Class<? extends ExpressionBasedSolver> solverClass;
+	private ExpressionBasedSolver expressionBasedSolver;
 
 	public HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing(
 			String query, 
-			Class<? extends ExpressionBasedSolver> solverClass, 
+			ExpressionBasedSolver expressionBasedSolver, 
 			HOGModel hogmModel, 
 			ExpressionBasedModel expressionBasedModel, 
 			List<? extends HOGMProblemError> modelErrors) {
 		
-		this.solverClass = solverClass;
+		this.expressionBasedSolver = expressionBasedSolver;
 		this.hogmModel = hogmModel;
 		this.expressionBasedModel = expressionBasedModel;
 		HOGMQueryParsing queryParsing = new HOGMQueryParsing(query, hogmModel, modelErrors);
@@ -120,21 +120,7 @@ public class HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModel
         return results;
     }
 
-	private ExpressionBasedSolver expressionBasedSolver = null;
-
 	private ExpressionBasedSolver getExpressionBasedSolver() {
-		if (expressionBasedSolver == null) {
-			makeSolver(solverClass);
-		}
 		return expressionBasedSolver;
-	}
-
-	private void makeSolver(Class<? extends ExpressionBasedSolver> solverClass) throws Error {
-		try {
-			this.expressionBasedSolver = solverClass.newInstance();
-		}
-		catch (Throwable throwable) {
-			throw new Error("Could not instantiate " + solverClass);
-		}
 	}
 }
