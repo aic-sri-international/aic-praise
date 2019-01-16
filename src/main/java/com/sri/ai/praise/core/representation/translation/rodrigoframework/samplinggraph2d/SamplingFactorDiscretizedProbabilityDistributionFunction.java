@@ -12,7 +12,7 @@ import com.sri.ai.util.graph2d.api.GraphSetMaker;
  * equipping it with {@link #evaluate(Assignment)} method.
  * Among other things, this allows it to be used by {@link GraphSetMaker}.
  * <p>
- * It also defines a {@link #iterate()} method that further samples the inner {@link SamplingFactorDiscretizedProbabilityDistribution}.
+ * It also defines a {@link #sample()} method that further samples the inner {@link SamplingFactorDiscretizedProbabilityDistribution}.
  */ 
 public class SamplingFactorDiscretizedProbabilityDistributionFunction extends DiscretizedConditionalProbabilityDistributionFunction {
 	
@@ -24,7 +24,7 @@ public class SamplingFactorDiscretizedProbabilityDistributionFunction extends Di
 		super(new SamplingFactorDiscretizedProbabilityDistribution(samplingFactor, inputVariablesWithRange, queryVariableIndex));
 	}
 	
-	public void iterate() {
+	public void sample() {
 		((SamplingFactorDiscretizedProbabilityDistribution) getConditionalDistribution()).sample();
 	}
 }

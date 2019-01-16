@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.representation.sampling;
+package com.sri.ai.test.praise.core.representation.sampling;
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;

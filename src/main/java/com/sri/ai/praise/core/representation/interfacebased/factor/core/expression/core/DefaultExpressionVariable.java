@@ -56,4 +56,15 @@ public class DefaultExpressionVariable extends WrappedExpression implements Expr
 		throw new Error(getClass() + ".getValues() not implemented -- getValues() is deemed not needed for most algorithms.");
 		// TODO: refactor to make getValues part of a specific interface used by the algorithms that require values
 	}
+	
+	@Override
+	public int hashCode() {
+		return getInnerExpression().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object anotherObject) {
+		
+		return super.equals(anotherObject);
+	}
 }

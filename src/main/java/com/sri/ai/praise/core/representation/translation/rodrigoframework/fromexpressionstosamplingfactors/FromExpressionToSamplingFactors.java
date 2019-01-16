@@ -1,8 +1,14 @@
 package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors;
 
+import static com.sri.ai.expresso.helper.Expressions.ONE;
+import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.getConstantDoubleValueOrThrowErrorWithMessage;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
 import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
+import static com.sri.ai.grinder.library.controlflow.IfThenElse.condition;
+import static com.sri.ai.grinder.library.controlflow.IfThenElse.elseBranch;
+import static com.sri.ai.grinder.library.controlflow.IfThenElse.isIfThenElse;
+import static com.sri.ai.grinder.library.controlflow.IfThenElse.thenBranch;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
@@ -15,7 +21,7 @@ import java.util.function.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualitySamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
@@ -34,12 +40,17 @@ public class FromExpressionToSamplingFactors {
 
 	public List<? extends Factor> factorCompilation(Expression expression) {
 		List<Factor> factors = list();
-		
-		if (expression.hasFunctor(EQUALITY)) {
+		factorCompilation(expression, factors);
+		return factors;
+	}
+
+	private void factorCompilation(Expression expression, List<Factor> factors) {
+		if (isFormulaAssertedToBeTrueWithProbabilityOne(expression)) {
+			factorCompilation(condition(expression), factors);
+		}
+		else if (expression.hasFunctor(EQUALITY)) {
 			equalityCompilation(expression, factors);
 		}
-		
-		return factors;
 	}
 
 	private void equalityCompilation(Expression expression, List<Factor> factors) {
@@ -62,7 +73,7 @@ public class FromExpressionToSamplingFactors {
 	private Variable expressionCompilationWithCompoundExpressionVariableAlreadyAvailable(Expression expression, Variable compoundExpressionVariableIfAvailable, List<Factor> factors) {
 		Variable variable;
 		if (isVariable(expression)) {
-			variable = new DefaultVariable(expression);
+			variable = new DefaultExpressionVariable(expression);
 		}
 		else {
 			variable = compoundExpressionCompilation(expression, compoundExpressionVariableIfAvailable, factors);
@@ -71,7 +82,7 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private Variable compoundExpressionCompilation(Expression expression, Variable compoundExpressionVariableIfAvailable, List<Factor> factors) throws Error {
-		Variable compoundExpressionVariable = compoundExpressionVariableIfAvailable != null? compoundExpressionVariableIfAvailable : new DefaultVariable(expression);
+		Variable compoundExpressionVariable = compoundExpressionVariableIfAvailable != null? compoundExpressionVariableIfAvailable : new DefaultExpressionVariable(expression);
 		if (isConstant(expression)) {
 			constantCompilation(compoundExpressionVariable, expression, factors);
 		}
@@ -85,8 +96,18 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private void constantCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
-		Factor constantFactor = new ConstantSamplingFactor(compoundExpressionVariable, expression.getValue());
+		Factor constantFactor = new ConstantSamplingFactor(compoundExpressionVariable, value(expression));
 		factors.add(constantFactor);
+	}
+
+	private Object value(Expression expression) {
+		Object expressionValue = expression.getValue();
+		if (expressionValue instanceof Number) {
+			return ((Number) expressionValue).doubleValue();
+		}
+		else {
+			return expressionValue;
+		}
 	}
 
 	private void sumCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
@@ -127,6 +148,10 @@ public class FromExpressionToSamplingFactors {
 
 	public Random getRandom() {
 		return random;
+	}
+
+	private boolean isFormulaAssertedToBeTrueWithProbabilityOne(Expression expression) {
+		return isIfThenElse(expression) && thenBranch(expression).equals(ONE) && elseBranch(expression).equals(ZERO);
 	}
 	
 	

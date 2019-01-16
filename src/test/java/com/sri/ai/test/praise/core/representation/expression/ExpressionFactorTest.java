@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.representation.expression;
+package com.sri.ai.test.praise.core.representation.expression;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.IdentityFactor.IDENTITY_FACTOR;

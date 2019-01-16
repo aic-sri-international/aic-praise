@@ -37,6 +37,9 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core;
 
+import static com.sri.ai.expresso.helper.Expressions.ONE;
+import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor.expressionSamplingFactor;
 import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.myAssert;
 
@@ -45,7 +48,9 @@ import java.util.function.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
@@ -59,33 +64,67 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver {
 
 	private Function<Expression, Integer> fromExpressionVariableToNumberOfDiscreteValues;
+	int numberOfInitialSamples;
 	private Context context;
 	
 	public SolverAdapterForExactBPThatReturnsSamplingFactor(
-			Function<Expression, Integer> fromExpressionVariableToNumberOfDiscreteValues, 
+			Function<Expression, Integer> fromExpressionVariableToNumberOfDiscreteValues,
+			int numberOfInitialSamples,
 			Context context) {
 		
 		this.fromExpressionVariableToNumberOfDiscreteValues = fromExpressionVariableToNumberOfDiscreteValues;
+		this.numberOfInitialSamples = numberOfInitialSamples;
 		this.context = context;
 	}
 	
 	@Override
 	public Expression solve(Problem problem) {
+		Factor unnormalizedMarginal = new ExactBP(problem).apply();
+		Expression normalizedMarginalExpression = getNormalizedMarginalExpression(unnormalizedMarginal, problem);
+		return normalizedMarginalExpression;
+	}
 
-		SamplingFactor unnormalizedSamplingFactor = (SamplingFactor) new ExactBP(problem).apply();
-		
+	private Expression getNormalizedMarginalExpression(Factor unnormalizedMarginal, Problem problem) {
+		Expression normalizedMarginalExpression;
+		if (unnormalizedMarginal instanceof ConstantFactor) {
+			normalizedMarginalExpression = getNormalizedMarginalExpressionFromConstantFactor(problem);
+		}
+		else {
+			normalizedMarginalExpression = getNormalizedMarginalExpressionFromSamplingFactor(unnormalizedMarginal, problem);
+		}
+		return normalizedMarginalExpression;
+	}
+
+	private Expression getNormalizedMarginalExpressionFromConstantFactor(Problem problem) {
+		ExpressionVariable queryVariable = (ExpressionVariable) problem.getQueryVariable();
+		Expression normalizedMarginalExpression = normalize(queryVariable, ONE, context);
+		return normalizedMarginalExpression;
+	}
+
+	private Expression getNormalizedMarginalExpressionFromSamplingFactor(Factor unnormalizedMarginal, Problem problem) {
+		SamplingFactor unnormalizedSamplingFactor = getUnnormalizedSamplingFactor(unnormalizedMarginal);
+		Expression normalizedMarginalExpression = makeNormalizedMarginalExpression(unnormalizedSamplingFactor, problem);
+		return normalizedMarginalExpression;
+	}
+
+	private SamplingFactor getUnnormalizedSamplingFactor(Factor unnormalizedMarginal) {
+		SamplingFactor unnormalizedSamplingFactor = (SamplingFactor) unnormalizedMarginal; 
 		myAssert(isDefinedOnExpressionVariables(unnormalizedSamplingFactor), () -> getClass() + " requires " + ExactBP.class.getSimpleName() + " to return " + SamplingFactor.class.getSimpleName() + " defined on " + ExpressionVariable.class.getSimpleName() + "s only.");
+		return unnormalizedSamplingFactor;
+	}
 
+	private Expression makeNormalizedMarginalExpression(SamplingFactor unnormalizedSamplingFactor, Problem problem) {
 		int queryIndex = unnormalizedSamplingFactor.getVariables().indexOf(problem.getQueryVariable());
-		ExpressionSamplingFactor result = 
-				ExpressionSamplingFactor.newInstance(
+		Expression normalizedMarginalExpression = 
+				expressionSamplingFactor(
 						unnormalizedSamplingFactor, 
 						queryIndex, 
 						fromExpressionVariableToNumberOfDiscreteValues, 
 						context);
-		return result;
+		ExpressionSamplingFactor.sample(normalizedMarginalExpression, numberOfInitialSamples);
+		return normalizedMarginalExpression;
 	}
-
+	
 	@Override
 	public void interrupt() {
 		throw new Error(this.getClass() + ".interrupt not implemented yet");

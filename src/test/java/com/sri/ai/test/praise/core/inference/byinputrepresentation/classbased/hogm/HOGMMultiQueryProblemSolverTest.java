@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.test.praise.core.inference;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.classbased.hogm;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.getFirst;
@@ -230,38 +230,6 @@ public class HOGMMultiQueryProblemSolverTest {
 		println("actual: " + result.getResult());
 		assertEquals(expected, result.getResult());
 	}
-
-
-//	@Test
-//	public void normalSamplingTest() {
-//		String model = 
-//				"random x : [-10;10];"
-//				+ "x = Normal(5.0, 1.0);"
-//						;
-//		
-//		String query = "x";
-//		Expression expected = parse("if x > 5 and x < 7 then 0.1 else 0.9");
-//		
-////		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query));
-//		
-//		ExpressionBasedSolver samplingExpressionBasedSolver = new ExactBPOnSamplingFactorsExpressionBasedSolver(v -> 10);
-//		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(model, list(query), samplingExpressionBasedSolver);
-//		
-//		List<? extends HOGMProblemResult> results = solver.getResults();
-//	
-//		assertEquals(1, results.size());
-//		
-//		HOGMProblemResult result = getFirst(results);
-//		result.getErrors().stream().forEach(e -> println(e));
-//		Expression resultValue = result.getResult();
-//		println(resultValue);
-//		println(result.getExplanation());
-//		assertFalse(result.hasErrors());
-//		println("query: " + query);
-//		println("expected: " + expected);
-//		println("actual: " + result.getResult());
-//		assertEquals(expected, result.getResult());
-//	}
 
 
 	@Test

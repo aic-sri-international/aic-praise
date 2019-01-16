@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling;
 
+import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
@@ -46,10 +47,14 @@ import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromex
 
 public class ExactBPOnSamplingFactorsExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 
-	public ExactBPOnSamplingFactorsExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues) {
+	public ExactBPOnSamplingFactorsExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int numberOfInitialSamples, Random random) {
 		super(
-				ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion::translate, 
-				ebp -> new SolverAdapterForExactBPThatReturnsSamplingFactor(fromVariableToNumberOfDiscreteValues, ebp.getContext()));
+				new ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion(random)::translate, 
+
+				ebp -> new SolverAdapterForExactBPThatReturnsSamplingFactor(
+						fromVariableToNumberOfDiscreteValues, 
+						numberOfInitialSamples, 
+						ebp.getContext()));
 	}
 
 }

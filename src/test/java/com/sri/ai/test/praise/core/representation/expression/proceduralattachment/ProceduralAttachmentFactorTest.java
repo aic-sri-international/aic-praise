@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.representation.expression.proceduralattachment;
+package com.sri.ai.test.praise.core.representation.expression.proceduralattachment;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork.expressionFactorNetwork;

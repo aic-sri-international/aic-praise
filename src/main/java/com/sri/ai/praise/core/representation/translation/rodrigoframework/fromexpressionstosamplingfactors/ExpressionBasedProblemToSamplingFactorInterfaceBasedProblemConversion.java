@@ -57,8 +57,14 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 
 public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion {
+	
+	private Random random;
 
-	public static Problem translate(ExpressionBasedProblem expressionBasedProblem) {
+	public ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion(Random random) {
+		this.random = random;
+	}
+
+	public Problem translate(ExpressionBasedProblem expressionBasedProblem) {
 		ExpressionVariable queryVariable = new DefaultExpressionVariable(expressionBasedProblem.getQuerySymbol());
 		FactorNetwork factorNetwork = makeFactorNetwork(expressionBasedProblem);
 		Predicate<Variable> isParameterPredicate = makeIsParameterPredicate(expressionBasedProblem);
@@ -66,20 +72,20 @@ public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversi
 		return problem;
 	}
 
-	private static FactorNetwork makeFactorNetwork(ExpressionBasedProblem expressionBasedProblem) {
+	private FactorNetwork makeFactorNetwork(ExpressionBasedProblem expressionBasedProblem) {
 		Predicate<Expression> isVariablePredicate = makeIsVariablePredicate(expressionBasedProblem);
 		List<Factor> factors = makeFactors(expressionBasedProblem, isVariablePredicate);
 		return new DefaultFactorNetwork(factors);
 	}
 
-	private static Predicate<Expression> makeIsVariablePredicate(ExpressionBasedProblem expressionBasedProblem) {
+	private Predicate<Expression> makeIsVariablePredicate(ExpressionBasedProblem expressionBasedProblem) {
 		IsVariable isVariable = new IsVariable(expressionBasedProblem.getContext());
 		Predicate<Expression> isVariablePredicate = e -> isVariable.apply(e);
 		return isVariablePredicate;
 	}
 
-	private static List<Factor> makeFactors(ExpressionBasedProblem expressionBasedProblem, Predicate<Expression> isVariablePredicate) {
-		FromExpressionToSamplingFactors factorTranslator = new FromExpressionToSamplingFactors(isVariablePredicate, new Random());
+	private List<Factor> makeFactors(ExpressionBasedProblem expressionBasedProblem, Predicate<Expression> isVariablePredicate) {
+		FromExpressionToSamplingFactors factorTranslator = new FromExpressionToSamplingFactors(isVariablePredicate, random);
 		List<Factor> factors = 
 				unionArrayList(
 						functionIterator(
@@ -88,13 +94,13 @@ public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversi
 		return factors;
 	}
 
-	private static Predicate<Variable> makeIsParameterPredicate(ExpressionBasedProblem expressionBasedProblem) {
+	private Predicate<Variable> makeIsParameterPredicate(ExpressionBasedProblem expressionBasedProblem) {
 		Predicate<Expression> isExpressionParameterPredicate = expressionBasedProblem.getIsParameterPredicate();
 		Predicate<Variable> isParameterPredicate = makeIsParameterPredicate(isExpressionParameterPredicate);
 		return isParameterPredicate;
 	}
 	
-	private static Predicate<Variable> makeIsParameterPredicate(Predicate<Expression> isExpressionParameterPredicate) {
+	private Predicate<Variable> makeIsParameterPredicate(Predicate<Expression> isExpressionParameterPredicate) {
 		return ev -> isExpressionParameterPredicate.test((ExpressionVariable) ev);
 	}
 }

@@ -8,6 +8,7 @@ import static com.sri.ai.util.Util.mapIntoArray;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.repeat;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -49,7 +50,20 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	
 	SamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistribution();
 
-	public static ExpressionSamplingFactor newInstance(
+	void sample();
+
+	/**
+	 * If given expression is an instance of {@link ExpressionSamplingFactor}, samples it a given number of times.
+	 * @param expression
+	 * @param numberOfSamples
+	 */
+	public static void sample(Expression expression, int numberOfSamples) {
+		if (expression instanceof ExpressionSamplingFactor) {
+			repeat(numberOfSamples, () -> ((ExpressionSamplingFactor) expression).sample());
+		}
+	}
+
+	public static ExpressionSamplingFactor expressionSamplingFactor(
 			SamplingFactor samplingFactor, 
 			int queryIndex, 
 			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues,
@@ -94,19 +108,27 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 				return result;
 			}
 			else if (method.getName().equals("getSamplingFactorDiscretizedProbabilityDistribution")) {
-				return getSamplingFactorDiscretizedProbabilityDistribution();
+				return getSamplingFactorDiscretizedProbabilityDistributionFunction();
+			}
+			else if (method.getName().equals("sample")) {
+				sample();
+				return null;
 			}
 			else {
 				throw new Error(getClass() + " received method of interface " + method.getDeclaringClass() + " which it is not prepared to execute.");
 			}
 		}
 
-		private Object getExpression() {
-			List<Integer> numberOfValues = mapIntoList(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()); 
-			Expression result = getExpressionFor(new CartesianProductOnIntegersIterator(numberOfValues));
-			return result;
+		public void sample() {
+			getSamplingFactorDiscretizedProbabilityDistributionFunction().sample();
 		}
 		
+		private Object getExpression() {
+			List<Integer> fromVariableIndexToNumberOfValues = mapIntoList(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()); 
+			Expression result = getExpressionFor(new CartesianProductOnIntegersIterator(fromVariableIndexToNumberOfValues));
+			return result;
+		}
+
 		private Expression getExpressionFor(Iterator<ArrayList<Integer>> valueIndicesIterator) {
 			Expression result;
 			if (valueIndicesIterator.hasNext()) {
@@ -133,7 +155,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 
 		private Expression getProbabilityForAssignment(ArrayList<Integer> valueIndices) {
 			Assignment assignment = getAssignmentFromValueIndices(valueIndices);
-			double probability = getSamplingFactorDiscretizedProbabilityDistribution().evaluate(assignment).doubleValue();
+			double probability = getSamplingFactorDiscretizedProbabilityDistributionFunction().evaluate(assignment).doubleValue();
 			return makeSymbol(probability);
 		}
 
@@ -153,7 +175,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		}
 		
 		private Assignment getAssignmentFromValueIndices(ArrayList<Integer> valueIndices) {
-			SetOfVariables setOfVariables = getSamplingFactorDiscretizedProbabilityDistribution().getSetOfVariablesWithRange();
+			SetOfVariables setOfVariables = getSamplingFactorDiscretizedProbabilityDistributionFunction().getSetOfVariablesWithRange();
 			ArrayList<Value> values = mapIntegersIntoArrayList(setOfVariables.size(), i -> getValue(setOfVariables, valueIndices, i));
 			Assignment assignment = new DefaultAssignment(setOfVariables, values);
 			return assignment;
@@ -193,7 +215,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			return result;
 		}
 
-		public SamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistribution() {
+		public SamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction() {
 			if (samplingFactorDiscretizedProbabilityDistribution == null) {
 				samplingFactorDiscretizedProbabilityDistribution = makeSamplingFactorDiscretizedProbabilityDistribution();
 			}
@@ -208,7 +230,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		}
 
 		private ArrayList<? extends Variable> getFunctionVariables() {
-			return getSamplingFactorDiscretizedProbabilityDistribution().getSetOfInputVariables().getVariables();
+			return getSamplingFactorDiscretizedProbabilityDistributionFunction().getSetOfInputVariables().getVariables();
 		}
 
 	}

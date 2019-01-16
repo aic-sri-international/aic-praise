@@ -13,12 +13,10 @@ import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualitySamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.FromExpressionToSamplingFactors;
-import com.sri.ai.util.math.Rational;
 
 class FromExpressionToSamplingFactorsTest {
 	
@@ -40,11 +38,11 @@ class FromExpressionToSamplingFactorsTest {
 		assertEquals(1, factors.size());
 		assertEquals(EqualitySamplingFactor.class, factors.get(0).getClass());
 		
-		DefaultVariable firstCompiledVariable = (DefaultVariable) factors.get(0).getVariables().get(0);
-		DefaultVariable secondCompiledVariable = (DefaultVariable) factors.get(0).getVariables().get(1);
+		Expression firstCompiledVariable = (Expression) factors.get(0).getVariables().get(0);
+		Expression secondCompiledVariable = (Expression) factors.get(0).getVariables().get(1);
 		
-		assertEquals(parse("X"), firstCompiledVariable.getObject());
-		assertEquals(parse("Y"), secondCompiledVariable.getObject());
+		assertEquals(parse("X"), firstCompiledVariable);
+		assertEquals(parse("Y"), secondCompiledVariable);
 	}
 
 	@Test
@@ -62,10 +60,10 @@ class FromExpressionToSamplingFactorsTest {
 		assertEquals(ConstantSamplingFactor.class, factors.get(0).getClass());
 		
 		ConstantSamplingFactor constantSamplingFactor = (ConstantSamplingFactor) factors.get(0);
-		DefaultVariable variableConstrainedToBeingConstant = (DefaultVariable) constantSamplingFactor.getVariables().get(0);
+		Expression variableConstrainedToBeingConstant = (Expression) constantSamplingFactor.getVariables().get(0);
 		
-		assertEquals(parse("X"), variableConstrainedToBeingConstant.getObject());
-		assertEquals(new Rational(10), constantSamplingFactor.getConstant());
+		assertEquals(parse("X"), variableConstrainedToBeingConstant);
+		assertEquals(new Double(10.0), constantSamplingFactor.getConstant());
 	}
 
 	@Test
@@ -83,12 +81,12 @@ class FromExpressionToSamplingFactorsTest {
 		assertEquals(NormalWithFixedStandardDeviation.class, factors.get(0).getClass());
 		
 		NormalWithFixedStandardDeviation normalSamplingFactor = (NormalWithFixedStandardDeviation) factors.get(0);
-		DefaultVariable variableConstrainedToBeingNormal = (DefaultVariable) normalSamplingFactor.getVariables().get(0);
+		Expression variableConstrainedToBeingNormal = (Expression) normalSamplingFactor.getVariables().get(0);
 		
-		assertEquals(parse("X"), variableConstrainedToBeingNormal.getObject());
+		assertEquals(parse("X"), variableConstrainedToBeingNormal);
 		
-		DefaultVariable meanVariable = (DefaultVariable) normalSamplingFactor.getVariables().get(1);
-		assertEquals(parse("Y"), meanVariable.getObject());
+		Expression meanVariable = (Expression) normalSamplingFactor.getVariables().get(1);
+		assertEquals(parse("Y"), meanVariable);
 		
 		assertEquals(0.1, normalSamplingFactor.getStandardDeviation(), 0.0);
 	}

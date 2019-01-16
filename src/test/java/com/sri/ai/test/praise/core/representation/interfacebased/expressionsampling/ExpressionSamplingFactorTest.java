@@ -33,10 +33,10 @@ class ExpressionSamplingFactorTest {
 		ExpressionVariable x = new DefaultExpressionVariable(parse("x"));
 		Context context = new TrueContext().setSymbolsAndTypes(map(parse("x"), parse("[0;100]")));
 		SamplingFactor normal = new NormalWithFixedMeanAndStandardDeviation(x, 50.0, 10.0, random);
-		ExpressionSamplingFactor expressionSamplingFactor = ExpressionSamplingFactor.newInstance(normal, 0, v -> 11, context);
+		ExpressionSamplingFactor expressionSamplingFactor = ExpressionSamplingFactor.expressionSamplingFactor(normal, 0, v -> 11, context);
 		SamplingFactorDiscretizedProbabilityDistributionFunction distribution = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistribution();
 		for (int i = 0; i != 100000; i++) {
-			distribution.iterate();
+			distribution.sample();
 		}
 		for (double value = 0; value <= 100; value += 10) {
 			Value probability = distribution.apply(arrayList(value));
@@ -57,10 +57,10 @@ class ExpressionSamplingFactorTest {
 		ExpressionVariable x = new DefaultExpressionVariable(parse("x"));
 		Context context = new TrueContext().setSymbolsAndTypes(map(parse("x"), parse("[0;100]")));
 		SamplingFactor normal = new NormalWithFixedMeanAndStandardDeviation(x, 50.0, 10.0, random);
-		ExpressionSamplingFactor expressionSamplingFactor = ExpressionSamplingFactor.newInstance(normal, 0, v -> 6, context);
+		ExpressionSamplingFactor expressionSamplingFactor = ExpressionSamplingFactor.expressionSamplingFactor(normal, 0, v -> 6, context);
 		SamplingFactorDiscretizedProbabilityDistributionFunction distribution = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistribution();
 		for (int i = 0; i != 100000; i++) {
-			distribution.iterate();
+			distribution.sample();
 		}
 		
 		String expected = "if x < 10 then 0.001 else if x < 30 then 0.02 else if x < 50 then 0.5 else if x < 70 then 0.5 else if x < 90 then 0.02 else 0.001";

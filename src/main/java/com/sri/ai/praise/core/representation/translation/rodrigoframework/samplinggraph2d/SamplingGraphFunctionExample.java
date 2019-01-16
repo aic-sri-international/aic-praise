@@ -80,7 +80,7 @@ public class SamplingGraphFunctionExample {
 		
 		println("Sampling...");
 		for (int i = 0; i < numberOfSamples; i++) {
-			function.iterate();
+			function.sample();
 		}
 
 		GraphSetMaker graphSetMaker = graphSetMaker();
