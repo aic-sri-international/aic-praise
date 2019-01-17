@@ -25,5 +25,14 @@ public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSo
 						numberOfInitialSamples, 
 						random));
 	}
-	
+
+	/**
+	 * Same as {@link #HOGMMultiQuerySamplingProblemSolver(String, List, Function, int, Random)}
+	 * with default of 10 discrete values per variable, 10000 initial samples, and a unique seed {@link Random}.
+	 * @param model
+	 * @param queries
+	 */
+	public HOGMMultiQuerySamplingProblemSolver(String model, List<String> queries) {
+		this(model, queries, v -> 10, 10000, new Random()); 
+	}
 }

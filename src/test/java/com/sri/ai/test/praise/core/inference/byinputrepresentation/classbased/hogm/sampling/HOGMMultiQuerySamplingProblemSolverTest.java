@@ -17,23 +17,62 @@ import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
 
 class HOGMMultiQuerySamplingProblemSolverTest {
 
 	@Test
 	public void normalSamplingTest() {
 
-		String model = 
+		String model = "" +
 				"random x : [-10;10];" +
-						"x = Normal(0.0, 15.0);"
-						;
+				"x = Normal(0.0, 15.0);"
+				;
 
 		String query = "x";
 		Expression expected = parse("if x < -7.5 then 0.12 else if x < -2.5 then 0.249 else if x < 2.5 then 0.267 else if x < 7.5 then 0.249 else 0.114");
 		int numberOfInitialSamples = 1000;
 		int numberOfDiscreteValues = 5;
 
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
+	@Test
+	public void doubleNormalSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"y = Normal(-9, 0.01);" +
+				"x = Normal(y, 1);"
+				;
+
+		String query = "x";
+		Expression expected = parse("if x < -7.5 then 0.917 else if x < -2.5 then 0.076 else if x < 2.5 then 0.002 else if x < 7.5 then 0.002 else 0.002");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 5;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
+	//	@Test
+	//	public void equalitySamplingTest() {
+	//
+	//		String model = "" +
+	//				"random x : [-10;10];" +
+	//				"random y : [-10;10];" +
+	//				"x = y;" +
+	//				"y = 1.0;"
+	//				;
+	//
+	//		String query = "x";
+	//		Expression expected = parse("if x = 1.0 then 1 else 0");
+	//		int numberOfInitialSamples = 100;
+	//		int numberOfDiscreteValues = 5;
+	//
+	//		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	//	}
+	
+	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues) {
 		HOGMMultiQuerySamplingProblemSolver solver = 
 				new HOGMMultiQuerySamplingProblemSolver(
 						model, 
@@ -43,34 +82,46 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 						new Random());
 
 		List<? extends HOGMProblemResult> results = solver.getResults();
+		setPrecisionAndCheckResult(query, expected, results);
+	}
 
+	private void setPrecisionAndCheckResult(String query, Expression expected, List<? extends HOGMProblemResult> results)
+			throws Error {
 		int oldPrecision = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(3);
-
 		try {
-
-			assertEquals(1, results.size());
-
-			HOGMProblemResult result = getFirst(results);
-			result.getErrors().stream().forEach(e -> println(e));
-			assertFalse(result.hasErrors());
-
-			Expression resultValue = result.getResult();
-			ExpressionSamplingFactor.sample(resultValue, 1000);
-
-			println("query: " + query);
-			println("expected: " + expected);
-			println("actual  : " + resultValue);
-			String reasonForDifference = areEqualUpToNumericDifference(expected, resultValue, 0.1);
-			if (reasonForDifference != "") {
-				println(reasonForDifference);
-			}
-			assertEquals("", reasonForDifference);
-
+			checkResult(query, expected, results);
 		} catch (Throwable t) {
-			throw t;
+			throw new Error(t);
 		}
 		finally {
 			ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(oldPrecision);
 		}
+	}
+
+	private void checkResult(String query, Expression expected, List<? extends HOGMProblemResult> results) {
+		assertEquals(1, results.size());
+		HOGMProblemResult result = getFirst(results);
+
+		assertNoErrors(result);
+
+		Expression resultValue = result.getResult();
+
+		printAndCompare(query, resultValue, expected);
+	}
+
+	private void assertNoErrors(HOGMProblemResult result) {
+		result.getErrors().stream().forEach(e -> println(e));
+		assertFalse(result.hasErrors());
+	}
+
+	private void printAndCompare(String query, Expression resultValue, Expression expected) {
+		println("query: " + query);
+		println("expected: " + expected);
+		println("actual  : " + resultValue);
+		String reasonForDifference = areEqualUpToNumericDifference(expected, resultValue, 0.1);
+		if (reasonForDifference != "") {
+			println("Failure: " + reasonForDifference);
+		}
+		assertEquals("", reasonForDifference);
 	}
 }

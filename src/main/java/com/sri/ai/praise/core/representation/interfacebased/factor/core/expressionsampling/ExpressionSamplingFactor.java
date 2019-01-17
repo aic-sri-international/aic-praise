@@ -48,7 +48,7 @@ import com.sri.ai.util.function.core.variables.IntegerVariable;
 
 public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	
-	SamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistribution();
+	SamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction();
 
 	void sample();
 
