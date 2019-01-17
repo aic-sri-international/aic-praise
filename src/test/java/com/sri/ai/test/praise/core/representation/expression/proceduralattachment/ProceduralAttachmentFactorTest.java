@@ -10,6 +10,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.ExpressoConfiguration;
@@ -29,12 +31,24 @@ import com.sri.ai.util.base.Wrapper;
 
 public class ProceduralAttachmentFactorTest {
 
+	boolean oldExact;
+	int oldPrecision;
+
+	@Before
+	public void setUp() {
+		oldExact = ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
+		oldPrecision = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
+	}
+	
+	@After
+	public void tearDown() {
+		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(oldExact);
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(oldPrecision);
+	}
+	
 	@Test
 	public void testBooleans() {
 		
-		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
-		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
-
 		Theory theory;
 		Context context;
 		Procedure<Boolean> procedure1;
@@ -126,9 +140,6 @@ public class ProceduralAttachmentFactorTest {
 	@Test
 	public void testReals() {
 		
-		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
-		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
-
 		Theory theory;
 		Context context;
 		Procedure<Double> procedure1;

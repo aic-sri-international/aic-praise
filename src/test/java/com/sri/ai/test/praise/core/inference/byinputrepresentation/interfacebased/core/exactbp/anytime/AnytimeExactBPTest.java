@@ -54,8 +54,8 @@ public class AnytimeExactBPTest {
 	@Test
 	public void test() {
 		
-		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
-		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
+		boolean oldExact = ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
+		int oldPrecision = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
 
 		AbstractExactBPNode.debug = false;
 		
@@ -252,6 +252,8 @@ public class AnytimeExactBPTest {
 //			e.printStackTrace();
 //		}			
 		
+		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(oldExact);
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(oldPrecision);
 	}
 	
 	private void runTest(String[] variableAndTypes, String factorNetworkString, String queryVariableString, Expression expected, boolean rodrigo, boolean gabriel) {

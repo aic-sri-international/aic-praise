@@ -67,11 +67,13 @@ class ExpressionSamplingFactorTest {
 		
 		Expression rounded = Expressions.roundToAGivenPrecision(expressionSamplingFactor, 1, context);
 		String roundedString = rounded.toString();
-		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(3);
+		int old = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(3);
 		
 		println("Expected: " + expected);
 		println("Actual  : " + roundedString);
 		
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(old);
+ 
 		assertEquals(expected, roundedString);
 	}
 

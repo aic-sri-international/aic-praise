@@ -265,8 +265,8 @@ public class HOGMMultiQueryProblemSolverTest {
 	@Test
 	public void softProceduralAttachment3() {
 		
-		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
-		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
+		boolean oldExact = ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
+		int oldPrecision = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
 
 		String model = 
 				"random x : [0;1000];"
@@ -289,5 +289,9 @@ public class HOGMMultiQueryProblemSolverTest {
 		println("expected: " + expected);
 		println("actual: " + result.getResult());
 		assertEquals(expected.toString(), result.getResult().toString());
+		
+		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(oldExact);
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(oldPrecision);
+		
 	}
 }

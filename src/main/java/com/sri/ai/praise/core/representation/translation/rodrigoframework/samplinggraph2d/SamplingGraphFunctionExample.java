@@ -83,15 +83,7 @@ public class SamplingGraphFunctionExample {
 			function.sample();
 		}
 
-		GraphSetMaker graphSetMaker = graphSetMaker();
-		graphSetMaker.setGraphSettings(new GraphSettings().setDotWidth(1f).setLineWidth(.5f));
-
-		graphSetMaker.setFunctions(functions);
-
-		println("Preparing plot...");
-		GraphSet graphSet = graphSetMaker.make(x);
-		
-		println(graphSet);
+		plot(functions, x);
 
 //		// cleanup by removing graph files
 //		for (GraphPlot graphPlot : graphSet.getGraphPlots()) {
@@ -99,5 +91,17 @@ public class SamplingGraphFunctionExample {
 //				println("Deleted: " + graphPlot.getImageFile().getName());
 //			}
 //		}
+	}
+
+	private static void plot(Functions functions, Variable xAxisVariable) {
+		GraphSetMaker graphSetMaker = graphSetMaker();
+		graphSetMaker.setGraphSettings(new GraphSettings().setDotWidth(1f).setLineWidth(.5f));
+
+		graphSetMaker.setFunctions(functions);
+
+		println("Preparing plot...");
+		GraphSet graphSet = graphSetMaker.make(xAxisVariable);
+		
+		println(graphSet);
 	}
 }

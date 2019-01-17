@@ -107,7 +107,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 				Object result = method.invoke(samplingFactor, args);
 				return result;
 			}
-			else if (method.getName().equals("getSamplingFactorDiscretizedProbabilityDistribution")) {
+			else if (method.getName().equals("getSamplingFactorDiscretizedProbabilityDistributionFunction")) {
 				return getSamplingFactorDiscretizedProbabilityDistributionFunction();
 			}
 			else if (method.getName().equals("sample")) {
@@ -115,7 +115,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 				return null;
 			}
 			else {
-				throw new Error(getClass() + " received method of interface " + method.getDeclaringClass() + " which it is not prepared to execute.");
+				throw new Error(getClass() + " received method '" + method + "' of " + method.getDeclaringClass() + " which it is not prepared to execute.");
 			}
 		}
 
