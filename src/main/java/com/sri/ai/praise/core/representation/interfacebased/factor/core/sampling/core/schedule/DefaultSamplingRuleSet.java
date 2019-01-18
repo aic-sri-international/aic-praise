@@ -26,6 +26,10 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 
 	private List<? extends VariableGoal> allVariables;
 	
+	public static DefaultSamplingRuleSet samplingRuleSet(List<? extends Variable> allVariables, ArrayList<? extends SamplingRule> samplingRules) {
+		return new DefaultSamplingRuleSet(makeSureItsListOfVariableGoals(allVariables), samplingRules);
+	}
+
 	public DefaultSamplingRuleSet(List<? extends Variable> allVariables, SamplingRule... samplingRules) {
 		this(makeSureItsListOfVariableGoals(allVariables), new ArrayList<>(Arrays.asList(samplingRules)));
 	}

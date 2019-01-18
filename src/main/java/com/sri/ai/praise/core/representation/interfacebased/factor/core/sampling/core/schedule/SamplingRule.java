@@ -38,6 +38,14 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 		return new SamplingRule(samplingFactor, consequents, antecedents, estimatedSuccessWeight);
 	}
 
+	public static SamplingRule deterministicSamplingRule(
+			SamplingFactor samplingFactor, 
+			Collection<? extends Variable> consequentVariables, 
+			Collection<? extends Variable> antecedentVariables) {
+		
+		return samplingRule(samplingFactor, consequentVariables, antecedentVariables, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
+	}
+
 	public SamplingRule(SamplingFactor samplingFactor, Collection<? extends VariableGoal> consequents, Collection<? extends VariableGoal> antecedents, double estimatedSuccessWeight) {
 		super(estimatedSuccessWeight);
 		this.samplingFactor = samplingFactor;
