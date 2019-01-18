@@ -6,7 +6,6 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.function.api.functions.Functions.functions;
 import static com.sri.ai.util.function.api.variables.Variable.realVariable;
-import static com.sri.ai.util.graph2d.api.GraphSetMaker.graphSetMaker;
 
 import java.util.Random;
 
@@ -20,8 +19,6 @@ import com.sri.ai.util.function.api.variables.Unit;
 import com.sri.ai.util.function.api.variables.Variable;
 import com.sri.ai.util.function.core.variables.DefaultSetOfVariables;
 import com.sri.ai.util.graph2d.api.GraphSet;
-import com.sri.ai.util.graph2d.api.GraphSetMaker;
-import com.sri.ai.util.graph2d.core.jfreechart.GraphSettings;
 
 public class SamplingGraphFunctionExample {
 
@@ -83,25 +80,11 @@ public class SamplingGraphFunctionExample {
 			function.sample();
 		}
 
-		plot(functions, x);
+		GraphSet graphSet = GraphSet.plot(functions, x);
 
-//		// cleanup by removing graph files
-//		for (GraphPlot graphPlot : graphSet.getGraphPlots()) {
-//			if (graphPlot.getImageFile().delete()) {
-//				println("Deleted: " + graphPlot.getImageFile().getName());
-//			}
-//		}
-	}
-
-	private static void plot(Functions functions, Variable xAxisVariable) {
-		GraphSetMaker graphSetMaker = graphSetMaker();
-		graphSetMaker.setGraphSettings(new GraphSettings().setDotWidth(1f).setLineWidth(.5f));
-
-		graphSetMaker.setFunctions(functions);
-
-		println("Preparing plot...");
-		GraphSet graphSet = graphSetMaker.make(xAxisVariable);
-		
-		println(graphSet);
+		boolean deleteFilesForCleanUp = false; // change this to clean up files.
+		if (deleteFilesForCleanUp) {
+			graphSet.deleteFiles(f -> println("Deleted: " + f.getName()));
+		}
 	}
 }

@@ -17,8 +17,17 @@ import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.SamplingFactorDiscretizedProbabilityDistributionFunction;
+import com.sri.ai.util.function.api.functions.Functions;
+import com.sri.ai.util.graph2d.api.GraphSet;
 
 class HOGMMultiQuerySamplingProblemSolverTest {
+
+	/**
+	 * If property receives any value, a graph "graph.png" is generated in the current directory with the test's result graph.
+	 */
+	private static final String PROPERTY_KEY_GENERATING_GRAPH_FILE = "generateGraphFileForHOGMSamplingTest";
 
 	@Test
 	public void normalSamplingTest() {
@@ -36,20 +45,20 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
 
-	@Test
+	//@Test
 	public void normalAndEqualitySamplingTest() {
 
 		String model = "" +
 				"random x : [-10;10];" +
 				"random y : [-10;10];" +
-				"y = Normal(0.0, 15.0);" +
+				"y = Normal(0.0, 2);" +
 				"x = y;"
 				;
 
 		String query = "x";
 		Expression expected = parse("if x < -7.5 then 0.12 else if x < -2.5 then 0.249 else if x < 2.5 then 0.267 else if x < 7.5 then 0.249 else 0.114");
-		int numberOfInitialSamples = 1000;
-		int numberOfDiscreteValues = 5;
+		int numberOfInitialSamples = 100000;
+		int numberOfDiscreteValues = 50;
 
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
@@ -119,12 +128,8 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 	private void checkResult(String query, Expression expected, List<? extends HOGMProblemResult> results) {
 		assertEquals(1, results.size());
 		HOGMProblemResult result = getFirst(results);
-
 		assertNoErrors(result);
-
-		Expression resultValue = result.getResult();
-
-		printAndCompare(query, resultValue, expected);
+		printAndCompare(query, result.getResult(), expected);
 	}
 
 	private void assertNoErrors(HOGMProblemResult result) {
@@ -136,6 +141,12 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 		println("query: " + query);
 		println("expected: " + expected);
 		println("actual  : " + resultValue);
+		if (System.getProperty(PROPERTY_KEY_GENERATING_GRAPH_FILE) != null) {
+			ExpressionSamplingFactor expressionSamplingFactor = (ExpressionSamplingFactor) resultValue;
+			SamplingFactorDiscretizedProbabilityDistributionFunction function = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistributionFunction();
+			Functions functions = Functions.functions(function);
+			GraphSet.plot(functions, 0, "graph");
+		}
 		String reasonForDifference = areEqualUpToNumericDifference(expected, resultValue, 0.1);
 		if (reasonForDifference != "") {
 			println("Failure: " + reasonForDifference);
