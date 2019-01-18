@@ -141,16 +141,20 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 		println("query: " + query);
 		println("expected: " + expected);
 		println("actual  : " + resultValue);
+		generateGraph(resultValue);
+		String reasonForDifference = areEqualUpToNumericDifference(expected, resultValue, 0.1);
+		if (reasonForDifference != "") {
+			println("Failure: " + reasonForDifference);
+		}
+		assertEquals("", reasonForDifference);
+	}
+
+	private void generateGraph(Expression resultValue) {
 		if (System.getProperty(PROPERTY_KEY_GENERATING_GRAPH_FILE) != null) {
 			ExpressionSamplingFactor expressionSamplingFactor = (ExpressionSamplingFactor) resultValue;
 			SamplingFactorDiscretizedProbabilityDistributionFunction function = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistributionFunction();
 			Functions functions = Functions.functions(function);
 			GraphSet.plot(functions, 0, "graph");
 		}
-		String reasonForDifference = areEqualUpToNumericDifference(expected, resultValue, 0.1);
-		if (reasonForDifference != "") {
-			println("Failure: " + reasonForDifference);
-		}
-		assertEquals("", reasonForDifference);
 	}
 }
