@@ -145,25 +145,66 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
 	
-//	@Test
-//	public void sumSamplingTest() {
-//
-//		String model = "" +
-//				"random x : [-10;10];" +
-//				"random y : [-10;10];" +
-//				"random z : [-10;10];" +
-//				"x = Normal(5,2);" +
-//				"y = Normal(-5,2);" +
-//				"z = x + y;" +
-//				"";
-//
-//		String query = "z";
-//		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0 else if x < -0.5 then 0 else if x < 0.5 then 0 else if x < 1.5 then 0.991 else if x < 2.5 then 0 else if x < 3.5 then 0 else if x < 4.5 then 0 else if x < 5.5 then 0 else if x < 6.5 then 0 else if x < 7.5 then 0 else if x < 8.5 then 0 else if x < 9.5 then 0 else 0");
-//		int numberOfInitialSamples = 100000;
-//		int numberOfDiscreteValues = 21;
-//
-//		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
-//	}
+	@Test
+	public void sumSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"x = 2;" +
+				"y = 3;" +
+				"z = x + y;" +
+				"";
+
+		String query = "z";
+		Expression expected = parse("if z < -9.5 then 0 else if z < -8.5 then 0 else if z < -7.5 then 0 else if z < -6.5 then 0 else if z < -5.5 then 0 else if z < -4.5 then 0 else if z < -3.5 then 0 else if z < -2.5 then 0 else if z < -1.5 then 0 else if z < -0.5 then 0 else if z < 0.5 then 0 else if z < 1.5 then 0 else if z < 2.5 then 0 else if z < 3.5 then 0 else if z < 4.5 then 0 else if z < 5.5 then 0.991 else if z < 6.5 then 0 else if z < 7.5 then 0 else if z < 8.5 then 0 else if z < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+	
+	
+	@Test
+	public void sumInverseSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"x = 5;" +
+				"z = 1;" +
+				"z + 2.0 = x + y + 1.0;" +
+				"";
+
+		String query = "y";
+		Expression expected = parse("if y < -9.5 then 0 else if y < -8.5 then 0 else if y < -7.5 then 0 else if y < -6.5 then 0 else if y < -5.5 then 0 else if y < -4.5 then 0 else if y < -3.5 then 0 else if y < -2.5 then 0.991 else if y < -1.5 then 0 else if y < -0.5 then 0 else if y < 0.5 then 0 else if y < 1.5 then 0 else if y < 2.5 then 0 else if y < 3.5 then 0 else if y < 4.5 then 0 else if y < 5.5 then 0 else if y < 6.5 then 0 else if y < 7.5 then 0 else if y < 8.5 then 0 else if y < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+	
+	@Test
+	public void sumOfNormalsSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"x = Normal(5,2);" +
+				"y = Normal(-4,2);" +
+				"z = x + y;" +
+				"";
+
+		String query = "z";
+		Expression expected = parse("if z < -9.5 then 0 else if z < -8.5 then 0.001 else if z < -7.5 then 0.001 else if z < -6.5 then 0.003 else if z < -5.5 then 0.007 else if z < -4.5 then 0.015 else if z < -3.5 then 0.031 else if z < -2.5 then 0.052 else if z < -1.5 then 0.081 else if z < -0.5 then 0.108 else if z < 0.5 then 0.132 else if z < 1.5 then 0.139 else if z < 2.5 then 0.131 else if z < 3.5 then 0.108 else if z < 4.5 then 0.081 else if z < 5.5 then 0.052 else if z < 6.5 then 0.029 else if z < 7.5 then 0.016 else if z < 8.5 then 0.007 else if z < 9.5 then 0.003 else 0.001");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
 
 	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues) {
 		HOGMMultiQuerySamplingProblemSolver solver = 

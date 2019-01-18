@@ -20,7 +20,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleImportanceFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
-import com.sri.ai.util.number.representation.core.ArithmeticDouble;
 
 public class SumSamplingFactorTest {
 
@@ -71,11 +70,11 @@ public class SumSamplingFactorTest {
 		println("Generating " + numberOfSamples + " samples from X = 1.0 and nothing else");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
+			sample.getAssignment().set(x, 1.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
+			assertEquals(1.0, sample.getAssignment().get(x));
 			assertEquals(null, sample.getAssignment().get(y));
 			assertEquals(null, sample.getAssignment().get(z));
 		}
@@ -83,67 +82,67 @@ public class SumSamplingFactorTest {
 		println("Generating " + numberOfSamples + " samples from Y = 1.0 and nothing else");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(y, new ArithmeticDouble(1.0));
+			sample.getAssignment().set(y, 1.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
 			assertEquals(null, sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(y));
+			assertEquals(1.0, sample.getAssignment().get(y));
 			assertEquals(null, sample.getAssignment().get(z));
 		}
 
 		println("Generating " + numberOfSamples + " samples from Y = 1.0 and Z = 2.0");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(y, new ArithmeticDouble(1.0));
-			sample.getAssignment().set(z, new ArithmeticDouble(2.0));
+			sample.getAssignment().set(y, 1.0);
+			sample.getAssignment().set(z, 2.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(3.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(y));
-			assertEquals(new ArithmeticDouble(2.0), sample.getAssignment().get(z));
+			assertEquals(new Double(3.0), sample.getAssignment().get(x));
+			assertEquals(1.0, sample.getAssignment().get(y));
+			assertEquals(2.0, sample.getAssignment().get(z));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 1.0 and Z = 2.0");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
-			sample.getAssignment().set(z, new ArithmeticDouble(2.0));
+			sample.getAssignment().set(x, 1.0);
+			sample.getAssignment().set(z, 2.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(-1.0), sample.getAssignment().get(y));
-			assertEquals(new ArithmeticDouble(2.0), sample.getAssignment().get(z));
+			assertEquals(1.0, sample.getAssignment().get(x));
+			assertEquals(-1.0, sample.getAssignment().get(y));
+			assertEquals(2.0, sample.getAssignment().get(z));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 1.0, Y = -1.0 and Z = 2.0 (consistent sum)");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
-			sample.getAssignment().set(y, new ArithmeticDouble(-1.0));
-			sample.getAssignment().set(z, new ArithmeticDouble(2.0));
+			sample.getAssignment().set(x, 1.0);
+			sample.getAssignment().set(y, -1.0);
+			sample.getAssignment().set(z, 2.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(-1.0), sample.getAssignment().get(y));
-			assertEquals(new ArithmeticDouble(2.0), sample.getAssignment().get(z));
+			assertEquals(1.0, sample.getAssignment().get(x));
+			assertEquals(-1.0, sample.getAssignment().get(y));
+			assertEquals(2.0, sample.getAssignment().get(z));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 1.0, Y = 1.0 and Z = 2.0 (inconsistent sum)");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
-			sample.getAssignment().set(y, new ArithmeticDouble(1.0));
-			sample.getAssignment().set(z, new ArithmeticDouble(2.0));
+			sample.getAssignment().set(x, 1.0);
+			sample.getAssignment().set(y, 1.0);
+			sample.getAssignment().set(z, 2.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(0.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(y));
-			assertEquals(new ArithmeticDouble(2.0), sample.getAssignment().get(z));
+			assertEquals(1.0, sample.getAssignment().get(x));
+			assertEquals(1.0, sample.getAssignment().get(y));
+			assertEquals(2.0, sample.getAssignment().get(z));
 		}
 	}
 
@@ -182,47 +181,47 @@ public class SumSamplingFactorTest {
 		println("Generating " + numberOfSamples + " samples from X = 1.0 and nothing else");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
+			sample.getAssignment().set(x, 1.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
+			assertEquals(1.0, sample.getAssignment().get(x));
 			assertEquals(null, sample.getAssignment().get(y));
 		}
 
 		println("Generating " + numberOfSamples + " samples from Y = 1.0 and nothing else");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(y, new ArithmeticDouble(1.0));
+			sample.getAssignment().set(y, 1.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(2.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(y));
+			assertEquals(2.0, sample.getAssignment().get(x));
+			assertEquals(1.0, sample.getAssignment().get(y));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 1.0 and Y = 2.0");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
-			sample.getAssignment().set(y, new ArithmeticDouble(2.0));
+			sample.getAssignment().set(x, 1.0);
+			sample.getAssignment().set(y, 2.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(0.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(2.0), sample.getAssignment().get(y));
+			assertEquals(1.0, sample.getAssignment().get(x));
+			assertEquals(2.0, sample.getAssignment().get(y));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 2.0 and Y = 1.0");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(2.0));
-			sample.getAssignment().set(y, new ArithmeticDouble(1.0));
+			sample.getAssignment().set(x, 2.0);
+			sample.getAssignment().set(y, 1.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(2.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(y));
+			assertEquals(2.0, sample.getAssignment().get(x));
+			assertEquals(1.0, sample.getAssignment().get(y));
 		}
 	}
 
@@ -261,59 +260,59 @@ public class SumSamplingFactorTest {
 		println("Generating " + numberOfSamples + " samples from X = 1.0 and nothing else");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
+			sample.getAssignment().set(x, 1.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(0.0), sample.getAssignment().get(y));
+			assertEquals(1.0, sample.getAssignment().get(x));
+			assertEquals(0.0, sample.getAssignment().get(y));
 		}
 
 		println("Generating " + numberOfSamples + " samples from Y = 1.0 and nothing else (consistent but requires equation-solving, so does nothing)");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(y, new ArithmeticDouble(1.0));
+			sample.getAssignment().set(y, 1.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
 			assertEquals(null, sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(y));
+			assertEquals(1.0, sample.getAssignment().get(y));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 1.0 and Y = 2.0 (inconsistent)");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
-			sample.getAssignment().set(y, new ArithmeticDouble(2.0));
+			sample.getAssignment().set(x, 1.0);
+			sample.getAssignment().set(y, 2.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(0.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(2.0), sample.getAssignment().get(y));
+			assertEquals(1.0, sample.getAssignment().get(x));
+			assertEquals(2.0, sample.getAssignment().get(y));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 1.0 and Y = 0.0 (consistent)");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
-			sample.getAssignment().set(y, new ArithmeticDouble(0.0));
+			sample.getAssignment().set(x, 1.0);
+			sample.getAssignment().set(y, 0.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(0.0), sample.getAssignment().get(y));
+			assertEquals(1.0, sample.getAssignment().get(x));
+			assertEquals(0.0, sample.getAssignment().get(y));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 0.0 and Y = 1.0 (inconsistent)");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(0.0));
-			sample.getAssignment().set(y, new ArithmeticDouble(1.0));
+			sample.getAssignment().set(x, 0.0);
+			sample.getAssignment().set(y, 1.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(0.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(0.0), sample.getAssignment().get(x));
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(y));
+			assertEquals(0.0, sample.getAssignment().get(x));
+			assertEquals(1.0, sample.getAssignment().get(y));
 		}
 	}
 
@@ -344,7 +343,7 @@ public class SumSamplingFactorTest {
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(0.0), sample.getAssignment().get(x));
+			assertEquals(0.0, sample.getAssignment().get(x));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 0.0 (consistent sum)");
@@ -353,35 +352,17 @@ public class SumSamplingFactorTest {
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(0.0), sample.getAssignment().get(x));
+			assertEquals(0.0, sample.getAssignment().get(x));
 		}
 
 		println("Generating " + numberOfSamples + " samples from X = 1.0 (inconsistent sum)");
 		for (int i = 0; i != numberOfSamples; i++) {
 			Sample sample = new DefaultSample(importanceFactory, potentialFactory);
-			sample.getAssignment().set(x, new ArithmeticDouble(1.0));
+			sample.getAssignment().set(x, 1.0);
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(0.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new ArithmeticDouble(1.0), sample.getAssignment().get(x));
+			assertEquals(1.0, sample.getAssignment().get(x));
 		}
 	}
-	
-//	@Test
-//	public void testSamplingRules() {
-//		
-//		long numberOfSamples = 5;
-//
-//		Random random = new Random();
-//		Variable x = new DefaultVariable("x");
-//		Variable y = new DefaultVariable("y");
-//		
-//
-//		SumSamplingFactor xEqualsY = new SumSamplingFactor(x, list(y), new DoublePotentialFactory());
-//		NormalWithFixedMeanAndStandardDeviation normalOnY = new NormalWithFixedMeanAndStandardDeviation(y, 10, 0.1, new DoublePotentialFactory(), random);
-//
-//		network = new DefaultFactorNetwork(list(xEqualsY, normalOnY));
-//		solver = new ExactBP(x, network);
-//		marginalOfX = (SamplingFactor) solver.apply();
-//	}
 }

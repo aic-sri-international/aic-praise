@@ -19,8 +19,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.collect.FunctionIterator;
-import com.sri.ai.util.number.representation.api.ArithmeticNumber;
-import com.sri.ai.util.number.representation.core.ArithmeticDouble;
 
 /**
  * A sampling factor respecting a sum relationship of the type <code>s = x_1 + x_2 + ... + x_n</code>.
@@ -112,30 +110,30 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 	}
 
 	private void checkConsistencyOfFullyDefinedVariables(Sample sample) {
-		ArithmeticNumber summandsSum = sum(summandValues(sample));
+		Double summandsSum = sum(summandValues(sample));
 		if ( ! summandsSum.equals(getValue(sum, sample))) {
 			sample.updatePotential(sample.getPotential().make(0.0));
 		}
 	}
 
 	private void completeSumResult(Sample sample) {
-		ArithmeticNumber sumValue = sum(summandValues(sample));
+		Double sumValue = sum(summandValues(sample));
 		setValue(sum, sumValue, sample);
 	}
 
 	private void completeMissingSummand(Sample sample, int missingSummandIndex) {
-		ArithmeticNumber missingSummandValue = computeMissingSummandValue(sample, missingSummandIndex);
+		Double missingSummandValue = computeMissingSummandValue(sample, missingSummandIndex);
 		setMissingSummandValue(sample, missingSummandIndex, missingSummandValue);
 	}
 
-	private ArithmeticNumber computeMissingSummandValue(Sample sample, int missingSummandIndex) {
-		Iterator<ArithmeticNumber> summandsButMissingOne = Util.filterByIndexIterator(summandValues(sample), i -> i != missingSummandIndex);
-		ArithmeticNumber definedSummandsSum = sum(summandsButMissingOne);
-		ArithmeticNumber missingSummandValue = getValue(sum, sample).subtract(definedSummandsSum);
+	private Double computeMissingSummandValue(Sample sample, int missingSummandIndex) {
+		Iterator<Double> summandsButMissingOne = Util.filterByIndexIterator(summandValues(sample), i -> i != missingSummandIndex);
+		Double definedSummandsSum = sum(summandsButMissingOne);
+		Double missingSummandValue = getValue(sum, sample) - definedSummandsSum;
 		return missingSummandValue;
 	}
 
-	private void setMissingSummandValue(Sample sample, int missingSummandIndex, ArithmeticNumber missingSummandValue) {
+	private void setMissingSummandValue(Sample sample, int missingSummandIndex, Double missingSummandValue) {
 		Variable missingSummand = summands.get(missingSummandIndex);
 		setValue(missingSummand, missingSummandValue, sample);
 	}
@@ -150,21 +148,21 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 		return result;
 	}
 
-	private void setValue(Variable variable, ArithmeticNumber value, Sample sample) {
+	private void setValue(Variable variable, Double value, Sample sample) {
 		sample.getAssignment().set(variable, value);
 	}
 
-	private ArithmeticNumber getValue(Variable variable, Sample sample) {
-		ArithmeticNumber result = (ArithmeticNumber) sample.getAssignment().get(variable);
+	private Double getValue(Variable variable, Sample sample) {
+		Double result = (Double) sample.getAssignment().get(variable);
 		return result;
 	}
 
-	private FunctionIterator<? extends Variable, ArithmeticNumber> summandValues(Sample sample) {
+	private FunctionIterator<? extends Variable, Double> summandValues(Sample sample) {
 		return functionIterator(summands, v -> getValue(v, sample));
 	}
 
-	private ArithmeticNumber sum(Iterator<ArithmeticNumber> values) {
-		ArithmeticNumber result = fold(values, ArithmeticNumber::add, new ArithmeticDouble(0.0));
+	private Double sum(Iterator<Double> values) {
+		Double result = fold(values, (d1, d2) -> d1 + d2, 0.0);
 		return result;
 	}
 	
