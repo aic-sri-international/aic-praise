@@ -61,7 +61,7 @@ public class FromExpressionToSamplingFactors {
 			// no need to enforce equality
 		}
 		else {
-			Factor equalityFactor = new EqualitySamplingFactor(leftHandSideVariable, rightHandSideVariable);
+			Factor equalityFactor = new EqualitySamplingFactor(leftHandSideVariable, rightHandSideVariable, new Random());
 			factors.add(equalityFactor);
 		}
 	}
@@ -96,7 +96,7 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private void constantCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
-		Factor constantFactor = new ConstantSamplingFactor(compoundExpressionVariable, value(expression));
+		Factor constantFactor = new ConstantSamplingFactor(compoundExpressionVariable, value(expression), new Random());
 		factors.add(constantFactor);
 	}
 

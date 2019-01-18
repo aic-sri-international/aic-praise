@@ -64,6 +64,24 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 
 	@Test
+	public void normalWithVariableMeanSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"y = Normal(0.0, 1);" +
+				"x = Normal(y, 3);"
+				;
+
+		String query = "x";
+		Expression expected = parse("if x < -9.583 then 0.001 else if x < -8.75 then 0.001 else if x < -7.917 then 0.003 else if x < -7.083 then 0.006 else if x < -6.25 then 0.007 else if x < -5.417 then 0.014 else if x < -4.583 then 0.029 else if x < -3.75 then 0.036 else if x < -2.917 then 0.059 else if x < -2.083 then 0.098 else if x < -1.25 then 0.085 else if x < -0.417 then 0.106 else if x < 0.417 then 0.106 else if x < 1.25 then 0.106 else if x < 2.083 then 0.087 else if x < 2.917 then 0.078 else if x < 3.75 then 0.058 else if x < 4.583 then 0.051 else if x < 5.417 then 0.027 else if x < 6.25 then 0.016 else if x < 7.083 then 0.011 else if x < 7.917 then 0.004 else if x < 8.75 then 0.005 else if x < 9.583 then 0.002 else 0");
+		int numberOfInitialSamples = 100000;
+		int numberOfDiscreteValues = 25;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
+	@Test
 	public void doubleNormalSamplingTest() {
 
 		String model = "" +
@@ -88,13 +106,40 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 				"random x : [-10;10];" +
 				"random y : [-10;10];" +
 				"x = y;" +
-				"y = 1.0;"
-				;
+				"y = 1.0;" +
+				"";
 
 		String query = "x";
 		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0 else if x < -0.5 then 0 else if x < 0.5 then 0 else if x < 1.5 then 0.991 else if x < 2.5 then 0 else if x < 3.5 then 0 else if x < 4.5 then 0 else if x < 5.5 then 0 else if x < 6.5 then 0 else if x < 7.5 then 0 else if x < 8.5 then 0 else if x < 9.5 then 0 else 0");
 //		Expression expected = parse("if x = 1.0 then 1 else 0");
-		int numberOfInitialSamples = 100;
+		int numberOfInitialSamples = 100000;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
+	@Test
+	public void longEqualitySamplingTest() {
+
+		String model = "" +
+				"random a : [-10;10];" +
+				"random b : [-10;10];" +
+				"random c : [-10;10];" +
+				"random d : [-10;10];" +
+				"random e : [-10;10];" +
+				"random f : [-10;10];" +
+				"a = b;" +
+				"b = c;" +
+				"c = d;" +
+				"d = e;" +
+				"e = f;" +
+				"f = 1.0;" +
+				"";
+
+		String query = "a";
+		Expression expected = parse("if a < -9.5 then 0 else if a < -8.5 then 0 else if a < -7.5 then 0 else if a < -6.5 then 0 else if a < -5.5 then 0 else if a < -4.5 then 0 else if a < -3.5 then 0 else if a < -2.5 then 0 else if a < -1.5 then 0 else if a < -0.5 then 0 else if a < 0.5 then 0 else if a < 1.5 then 0.991 else if a < 2.5 then 0 else if a < 3.5 then 0 else if a < 4.5 then 0 else if a < 5.5 then 0 else if a < 6.5 then 0 else if a < 7.5 then 0 else if a < 8.5 then 0 else if a < 9.5 then 0 else 0");
+//		Expression expected = parse("if a = 1.0 then 1 else 0");
+		int numberOfInitialSamples = 100000;
 		int numberOfDiscreteValues = 21;
 
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);

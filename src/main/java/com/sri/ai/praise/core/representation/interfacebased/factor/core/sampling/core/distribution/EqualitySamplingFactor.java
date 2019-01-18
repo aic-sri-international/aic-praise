@@ -4,6 +4,8 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.s
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 
+import java.util.Random;
+
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
@@ -17,8 +19,8 @@ public class EqualitySamplingFactor extends AbstractSamplingFactor {
 	
 	private Variable variable2;
 	
-	public EqualitySamplingFactor(Variable variable1, Variable variable2) {
-		super(arrayList(variable1, variable2), null /* random not necessary */);
+	public EqualitySamplingFactor(Variable variable1, Variable variable2, Random random) {
+		super(arrayList(variable1, variable2), random);
 		this.variable1 = variable1;
 		this.variable2 = variable2;
 	}

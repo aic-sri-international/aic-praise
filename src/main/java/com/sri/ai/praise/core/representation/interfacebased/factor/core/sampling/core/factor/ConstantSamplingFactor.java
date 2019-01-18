@@ -3,6 +3,8 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.samplingRule;
 import static com.sri.ai.util.Util.list;
 
+import java.util.Random;
+
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Potential;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
@@ -21,8 +23,8 @@ public class ConstantSamplingFactor extends AbstractSamplingFactor {
 	private Variable variable;
 	private Object constant;
 	
-	public ConstantSamplingFactor(Variable variable, Object constant) {
-		super(list(variable), null /* null */);
+	public ConstantSamplingFactor(Variable variable, Object constant, Random random) {
+		super(list(variable), random);
 		this.variable = variable;
 		this.constant = constant;
 	}

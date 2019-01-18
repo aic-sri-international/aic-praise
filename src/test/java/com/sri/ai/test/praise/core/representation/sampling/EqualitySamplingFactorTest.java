@@ -42,8 +42,8 @@ public class EqualitySamplingFactorTest {
 		Variable y = new DefaultVariable("y");
 		Variable z = new DefaultVariable("z");
 
-		EqualitySamplingFactor xEqualsY = new EqualitySamplingFactor(x, y);
-		EqualitySamplingFactor xEqualsZ = new EqualitySamplingFactor(x, z);
+		EqualitySamplingFactor xEqualsY = new EqualitySamplingFactor(x, y, new Random());
+		EqualitySamplingFactor xEqualsZ = new EqualitySamplingFactor(x, z, new Random());
 
 		SamplingFactor xEqualsYAndXEqualsZ = new SamplingProductFactor(arrayList(xEqualsY, xEqualsZ), new Random());
 		println(xEqualsYAndXEqualsZ.nestedString(true));
@@ -151,7 +151,7 @@ public class EqualitySamplingFactorTest {
 		Variable x = new DefaultVariable("x");
 		Variable y = new DefaultVariable("y");
 
-		EqualitySamplingFactor xEqualsY = new EqualitySamplingFactor(x, y);
+		EqualitySamplingFactor xEqualsY = new EqualitySamplingFactor(x, y, new Random());
 
 		runEqualityTest(numberOfSamples, x, y, xEqualsY);
 

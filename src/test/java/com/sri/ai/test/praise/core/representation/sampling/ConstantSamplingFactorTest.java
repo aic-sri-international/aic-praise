@@ -41,7 +41,7 @@ public class ConstantSamplingFactorTest {
 		
 		Variable x = new DefaultVariable("x");
 
-		ConstantSamplingFactor factorOnX = new ConstantSamplingFactor(x, "a");
+		ConstantSamplingFactor factorOnX = new ConstantSamplingFactor(x, "a", new Random());
 
 		runConstantSamplingFactorTest(numberOfSamples, x, factorOnX);
 
@@ -94,7 +94,7 @@ public class ConstantSamplingFactorTest {
 		Variable x = new DefaultVariable("x");
 
 		SamplingFactor xIsNormallyDistributed = new NormalWithFixedMeanAndStandardDeviation(x, 10, 0.5, random);
-		SamplingFactor xEquals8 = new ConstantSamplingFactor(x, 8.0);
+		SamplingFactor xEquals8 = new ConstantSamplingFactor(x, 8.0, new Random());
 
 		SamplingFactor xIsNormallyDistributedAndEquals8 = new SamplingProductFactor(arrayList(xIsNormallyDistributed, xEquals8), random);
 		println(xIsNormallyDistributedAndEquals8.nestedString(true));

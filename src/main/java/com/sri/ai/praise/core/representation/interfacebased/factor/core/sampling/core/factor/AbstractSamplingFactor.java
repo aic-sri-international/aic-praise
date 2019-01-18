@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ZeroFactor.ZERO_FACTOR;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.fill;
+import static com.sri.ai.util.Util.myAssert;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +33,7 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	public AbstractSamplingFactor(List<? extends Variable> variables, Random random) {
 		this.variables = variables;
 		this.random = random;
+		myAssert(getRandom() != null, () -> this.getClass().getSimpleName() + " must have a Random");
 	}
 
 	@Override
