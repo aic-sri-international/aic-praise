@@ -4,6 +4,8 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
 
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
@@ -28,6 +30,10 @@ public class SumSamplingFactorTest {
 	private ExactBP solver;
 	private SamplingFactor marginalOfX;
 	
+	private Random getRandom() {
+		return new Random();
+	}
+	
 	@Test
 	public void testSumOfDistinctThreeSampling() {
 		
@@ -37,7 +43,7 @@ public class SumSamplingFactorTest {
 		Variable y = new DefaultVariable("y");
 		Variable z = new DefaultVariable("z");
 
-		SumSamplingFactor xEqualsYPlusZ = new SumSamplingFactor(x, list(y,z));
+		SumSamplingFactor xEqualsYPlusZ = new SumSamplingFactor(x, list(y,z), getRandom());
 
 		runSumOfDistinctThreeTest(numberOfSamples, x, y, z, xEqualsYPlusZ);
 
@@ -149,7 +155,7 @@ public class SumSamplingFactorTest {
 		Variable x = new DefaultVariable("x");
 		Variable y = new DefaultVariable("y");
 
-		SumSamplingFactor xEqualsYPlusY = new SumSamplingFactor(x, list(y,y));
+		SumSamplingFactor xEqualsYPlusY = new SumSamplingFactor(x, list(y,y), getRandom());
 
 		runSumOfRepeatingArgumentTest(numberOfSamples, x, y, xEqualsYPlusY);
 
@@ -228,7 +234,7 @@ public class SumSamplingFactorTest {
 		Variable x = new DefaultVariable("x");
 		Variable y = new DefaultVariable("y");
 
-		SumSamplingFactor xEqualsXPlusY = new SumSamplingFactor(x, list(x,y));
+		SumSamplingFactor xEqualsXPlusY = new SumSamplingFactor(x, list(x,y), getRandom());
 
 		runSumOfRepeatingSumVariableTest(numberOfSamples, x, y, xEqualsXPlusY);
 
@@ -318,7 +324,7 @@ public class SumSamplingFactorTest {
 		
 		Variable x = new DefaultVariable("x");
 
-		SumSamplingFactor xEqualsSumOfNone = new SumSamplingFactor(x, list());
+		SumSamplingFactor xEqualsSumOfNone = new SumSamplingFactor(x, list(), getRandom());
 
 		runSumOfNoneTest(numberOfSamples, x, xEqualsSumOfNone);
 

@@ -112,7 +112,7 @@ public class FromExpressionToSamplingFactors {
 
 	private void sumCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
-		Factor sumFactor = new SumSamplingFactor(compoundExpressionVariable, argumentVariables);
+		Factor sumFactor = new SumSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
 		factors.add(sumFactor);
 	}
 

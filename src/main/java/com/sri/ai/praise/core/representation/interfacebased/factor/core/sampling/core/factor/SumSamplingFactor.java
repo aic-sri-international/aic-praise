@@ -10,6 +10,7 @@ import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
@@ -42,8 +43,8 @@ public class SumSamplingFactor extends AbstractSamplingFactor {
 	private Variable sum;
 	private List<? extends Variable> summands;
 	
-	public SumSamplingFactor(Variable result, List<? extends Variable> summands) {
-		super(flatList(result, summands), null /* random */);
+	public SumSamplingFactor(Variable result, List<? extends Variable> summands, Random random) {
+		super(flatList(result, summands), random);
 		this.sum = result;
 		this.summands = summands;
 	}
