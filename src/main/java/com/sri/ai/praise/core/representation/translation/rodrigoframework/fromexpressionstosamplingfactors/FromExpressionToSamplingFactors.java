@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.frome
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.getConstantDoubleValueOrThrowErrorWithMessage;
+import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
 import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
 import static com.sri.ai.grinder.library.FunctorConstants.TIMES;
@@ -26,8 +27,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualitySamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ring.MultiplicationSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ring.SumSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.DivisionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.MultiplicationSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.SumSamplingFactor;
 
 public class FromExpressionToSamplingFactors {
 	
@@ -94,6 +96,9 @@ public class FromExpressionToSamplingFactors {
 		else if (expression.hasFunctor(TIMES)) {
 			multiplicationCompilation(compoundExpressionVariable, expression, factors);
 		}
+		else if (expression.hasFunctor(DIVISION)) {
+			divisionCompilation(compoundExpressionVariable, expression, factors);
+		}
 		else if (expression.hasFunctor("Normal")) {
 			normalCompilation(compoundExpressionVariable, expression, factors);
 		}
@@ -125,6 +130,12 @@ public class FromExpressionToSamplingFactors {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
 		Factor sumFactor = new MultiplicationSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
 		factors.add(sumFactor);
+	}
+
+	private void divisionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor divisionFactor = new DivisionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(divisionFactor);
 	}
 
 	private void normalCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) throws Error {

@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
 
 import static com.sri.ai.util.Util.fold;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractDeterministicFunctionSamplingFactor;
 import com.sri.ai.util.collect.IntegerIterator;
 import com.sri.ai.util.collect.PredicateIterator;
 
