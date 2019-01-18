@@ -4,6 +4,7 @@ import static com.sri.ai.util.Util.myAssert;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.api.Context;
@@ -48,7 +49,7 @@ public class FromRealExpressionVariableToRealVariableWithRange {
 		// and use those to compute the step.
 		int numberOfDelimiters = numberOfDiscreteValues + (type.lowerBoundIsOpen()? 1 : 0) + (type.upperBoundIsOpen()? 1 : 0);
 		BigDecimal numberOfGaps = new BigDecimal(numberOfDelimiters).subtract(new BigDecimal(1));
-		BigDecimal step = upperBound.subtract(lowerBound).divide(numberOfGaps, MathContext.DECIMAL64);
+		BigDecimal step = upperBound.subtract(lowerBound).divide(numberOfGaps, new MathContext(16, RoundingMode.FLOOR));
 		return step;
 	}
 

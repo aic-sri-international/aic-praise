@@ -34,31 +34,31 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 
 		String model = "" +
 				"random x : [-10;10];" +
-				"x = Normal(0.0, 15.0);"
+				"x = Normal(0.0, 3.0);"
 				;
 
 		String query = "x";
-		Expression expected = parse("if x < -7.5 then 0.12 else if x < -2.5 then 0.249 else if x < 2.5 then 0.267 else if x < 7.5 then 0.249 else 0.114");
+		Expression expected = parse("if x < -9.583 then 0.001 else if x < -8.75 then 0.003 else if x < -7.917 then 0.004 else if x < -7.083 then 0.005 else if x < -6.25 then 0.011 else if x < -5.417 then 0.017 else if x < -4.583 then 0.031 else if x < -3.75 then 0.047 else if x < -2.917 then 0.046 else if x < -2.083 then 0.088 else if x < -1.25 then 0.08 else if x < -0.417 then 0.088 else if x < 0.417 then 0.103 else if x < 1.25 then 0.117 else if x < 2.083 then 0.088 else if x < 2.917 then 0.089 else if x < 3.75 then 0.052 else if x < 4.583 then 0.041 else if x < 5.417 then 0.027 else if x < 6.25 then 0.023 else if x < 7.083 then 0.015 else if x < 7.917 then 0.014 else if x < 8.75 then 0.003 else if x < 9.583 then 0.001 else 0");
 		int numberOfInitialSamples = 1000;
-		int numberOfDiscreteValues = 5;
+		int numberOfDiscreteValues = 25;
 
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
 
-	//@Test
+	@Test
 	public void normalAndEqualitySamplingTest() {
 
 		String model = "" +
 				"random x : [-10;10];" +
 				"random y : [-10;10];" +
-				"y = Normal(0.0, 2);" +
+				"y = Normal(0.0, 3);" +
 				"x = y;"
 				;
 
 		String query = "x";
-		Expression expected = parse("if x < -7.5 then 0.12 else if x < -2.5 then 0.249 else if x < 2.5 then 0.267 else if x < 7.5 then 0.249 else 0.114");
-		int numberOfInitialSamples = 100000;
-		int numberOfDiscreteValues = 50;
+		Expression expected = parse("if x < -9.583 then 0.001 else if x < -8.75 then 0.001 else if x < -7.917 then 0.003 else if x < -7.083 then 0.006 else if x < -6.25 then 0.007 else if x < -5.417 then 0.014 else if x < -4.583 then 0.029 else if x < -3.75 then 0.036 else if x < -2.917 then 0.059 else if x < -2.083 then 0.098 else if x < -1.25 then 0.085 else if x < -0.417 then 0.106 else if x < 0.417 then 0.106 else if x < 1.25 then 0.106 else if x < 2.083 then 0.087 else if x < 2.917 then 0.078 else if x < 3.75 then 0.058 else if x < 4.583 then 0.051 else if x < 5.417 then 0.027 else if x < 6.25 then 0.016 else if x < 7.083 then 0.011 else if x < 7.917 then 0.004 else if x < 8.75 then 0.005 else if x < 9.583 then 0.002 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 25;
 
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
@@ -81,23 +81,24 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
 
-//	@Test
-//	public void equalitySamplingTest() {
-//
-//		String model = "" +
-//				"random x : [-10;10];" +
-//				"random y : [-10;10];" +
-//				"x = y;" +
-//				"y = 1.0;"
-//				;
-//
-//		String query = "x";
+	@Test
+	public void equalitySamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"x = y;" +
+				"y = 1.0;"
+				;
+
+		String query = "x";
+		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0 else if x < -0.5 then 0 else if x < 0.5 then 0 else if x < 1.5 then 0.991 else if x < 2.5 then 0 else if x < 3.5 then 0 else if x < 4.5 then 0 else if x < 5.5 then 0 else if x < 6.5 then 0 else if x < 7.5 then 0 else if x < 8.5 then 0 else if x < 9.5 then 0 else 0");
 //		Expression expected = parse("if x = 1.0 then 1 else 0");
-//		int numberOfInitialSamples = 100;
-//		int numberOfDiscreteValues = 5;
-//
-//		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
-//	}
+		int numberOfInitialSamples = 100;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
 	
 	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues) {
 		HOGMMultiQuerySamplingProblemSolver solver = 
@@ -154,7 +155,7 @@ class HOGMMultiQuerySamplingProblemSolverTest {
 			ExpressionSamplingFactor expressionSamplingFactor = (ExpressionSamplingFactor) resultValue;
 			SamplingFactorDiscretizedProbabilityDistributionFunction function = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistributionFunction();
 			Functions functions = Functions.functions(function);
-			GraphSet.plot(functions, 0, "graph");
+			GraphSet.plot(functions, 0, "HOGMMultiQuerySamplingProblemSolverTest");
 		}
 	}
 }

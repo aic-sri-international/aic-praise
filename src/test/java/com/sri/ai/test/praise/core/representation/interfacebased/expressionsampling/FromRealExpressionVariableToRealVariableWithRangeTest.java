@@ -12,6 +12,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.util.function.core.values.SetOfRealValues;
 import com.sri.ai.util.function.core.variables.RealVariable;
 
 class FromRealExpressionVariableToRealVariableWithRangeTest {
@@ -72,6 +73,15 @@ class FromRealExpressionVariableToRealVariableWithRangeTest {
 		numberOfDiscreteValues = 99;
 		expected = "RealVariable [getName()=X, getUnit()=DefaultUnit{name='none', symbol=''}, getSetOfValuesOrNull()=Singleton set of real 0]";
 		runMakeSetOfVariablesWithRangesTest(expressionString, typeString, numberOfDiscreteValues, expected);
+
+		// OVERREACHING STEP BUG (search for this to see where this is specifically tested)
+		// Error found in debugging: step was approximated and first + step*(number of values + 1) would be greater than last.
+		// This was fixed by setting the rounding mode of step to RondingMode.FLOOR rather than using the DECIMAL64 default of HALF_EVEN.
+		expressionString = "X";
+		typeString = "[-10;10]";
+		numberOfDiscreteValues = 15;
+		expected = "RealVariable [getName()=X, getUnit()=DefaultUnit{name='none', symbol=''}, getSetOfValuesOrNull()=SetOfRealValues from -10 to 10, step 1.428571428571428, lower bound -10, upperBoundForDiscretizedValue 10]";
+		runMakeSetOfVariablesWithRangesTest(expressionString, typeString, numberOfDiscreteValues, expected);
 	}
 
 	private void runMakeSetOfVariablesWithRangesTest(String expressionString, String typeString, int numberOfDiscreteValues, String expected) {
@@ -88,6 +98,12 @@ class FromRealExpressionVariableToRealVariableWithRangeTest {
 			println ("Actual  : " + realVariable);
 		}
 		assertEquals(expected, realVariable.toString());
+		
+		// OVERREACHING STEP BUG (search for this to see where this is explained)
+		SetOfRealValues setOfRealValues = realVariable.getSetOfValuesOrNull();
+		if (!setOfRealValues.isEmpty()) {
+			assertEquals(setOfRealValues.getLast().doubleValue(), setOfRealValues.get(numberOfDiscreteValues - 1).doubleValue(), 0.000001);
+		}
 	}
 
 }
