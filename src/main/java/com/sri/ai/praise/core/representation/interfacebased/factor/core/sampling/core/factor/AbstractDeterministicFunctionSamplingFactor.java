@@ -37,13 +37,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
  * @author braz
  *
  */
-public abstract class DeterministicFunctionSamplingFactor extends AbstractSamplingFactor {
+public abstract class AbstractDeterministicFunctionSamplingFactor extends AbstractSamplingFactor {
 
 	protected abstract Object evaluateFunction(Function<Variable, Object> fromVariableToValue);
 
 	protected abstract Iterator<? extends Integer> argumentsWithInverseFunctionIterator();
 
-	protected abstract Double computeMissingArgumentValue(Function<Variable, Object> fromVariableToValue, int missingArgumentIndex);
+	protected abstract Object computeMissingArgumentValue(Function<Variable, Object> fromVariableToValue, int missingArgumentIndex);
 
 	//////////////////////
 	
@@ -53,7 +53,7 @@ public abstract class DeterministicFunctionSamplingFactor extends AbstractSampli
 
 	//////////////////////
 	
-	public DeterministicFunctionSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
+	public AbstractDeterministicFunctionSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(flatList(result, arguments), random);
 		this.functionResult = result;
 		this.arguments = arguments;
