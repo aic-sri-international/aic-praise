@@ -430,6 +430,41 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		}
 	}
 	
+	@Test
+	public void unaryMinusSamplingTest() {
+	
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"x = 2;" +
+				"y = -x;" +
+				"";
+	
+		String query = "y";
+		Expression expected = parse("if y < -9.5 then 0 else if y < -8.5 then 0 else if y < -7.5 then 0 else if y < -6.5 then 0 else if y < -5.5 then 0 else if y < -4.5 then 0 else if y < -3.5 then 0 else if y < -2.5 then 0 else if y < -1.5 then 0.991 else if y < -0.5 then 0 else if y < 0.5 then 0 else if y < 1.5 then 0 else if y < 2.5 then 0 else if y < 3.5 then 0 else if y < 4.5 then 0 else if y < 5.5 then 0 else if y < 6.5 then 0 else if y < 7.5 then 0 else if y < 8.5 then 0 else if y < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
+	@Test
+	public void unaryMinusInverseSamplingTest() {
+	
+		String model = "" +
+				"random x : [-10;10];" +
+				"-2 = -x;" +
+				"";
+	
+		String query = "x";
+		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0 else if x < -0.5 then 0 else if x < 0.5 then 0 else if x < 1.5 then 0 else if x < 2.5 then 0.991 else if x < 3.5 then 0 else if x < 4.5 then 0 else if x < 5.5 then 0 else if x < 6.5 then 0 else if x < 7.5 then 0 else if x < 8.5 then 0 else if x < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
 	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues) {
 		HOGMMultiQuerySamplingProblemSolver solver = 
 				new HOGMMultiQuerySamplingProblemSolver(

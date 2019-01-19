@@ -34,6 +34,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.MultiplicationSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.SubtractionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.SumSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.UnaryMinusSamplingFactor;
 
 public class FromExpressionToSamplingFactors {
 	
@@ -109,6 +110,9 @@ public class FromExpressionToSamplingFactors {
 		else if (expression.hasFunctor(EXPONENTIATION)) {
 			exponentiationCompilation(compoundExpressionVariable, expression, factors);
 		}
+		else if (expression.hasFunctor(MINUS) && expression.numberOfArguments() == 1) {
+			unaryMinusCompilation(compoundExpressionVariable, expression, factors);
+		}
 		else if (expression.hasFunctor("Normal")) {
 			normalCompilation(compoundExpressionVariable, expression, factors);
 		}
@@ -158,6 +162,12 @@ public class FromExpressionToSamplingFactors {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
 		Factor exponentiationFactor = new ExponentiationSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
 		factors.add(exponentiationFactor);
+	}
+
+	private void unaryMinusCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor unaryMinusFactor = new UnaryMinusSamplingFactor(compoundExpressionVariable, argumentVariables.get(0), getRandom());
+		factors.add(unaryMinusFactor);
 	}
 
 	private void normalCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) throws Error {

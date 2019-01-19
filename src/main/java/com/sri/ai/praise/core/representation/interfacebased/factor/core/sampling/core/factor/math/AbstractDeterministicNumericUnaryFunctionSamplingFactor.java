@@ -1,9 +1,9 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
 
 import static com.sri.ai.util.Util.iterator;
+import static com.sri.ai.util.Util.list;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -12,49 +12,43 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.util.base.NullaryFunction;
 
 /**
- * A specialization of {@link AbstractDeterministicFunctionSamplingFactor} for numeric operators with two arguments.
+ * A specialization of {@link AbstractDeterministicFunctionSamplingFactor} for numeric operators with one argument.
  * 
  * @author braz
  *
  */
-public abstract class AbstractDeterministicNumericBinaryFunctionSamplingFactor
+public abstract class AbstractDeterministicNumericUnaryFunctionSamplingFactor
 		extends AbstractDeterministicFunctionSamplingFactor {
 
 	protected abstract String operatorSymbol();
 
-	protected abstract double operation(Double firstValue, Double secondValue);
+	protected abstract double operation(Double argumentValue);
 
-	protected abstract double computeFirstFromOthers(Double secondValue, Double functionResultValue);
-
-	protected abstract double computeSecondFromOthers(Double firstValue, Double functionResultValue);
+	protected abstract double computeArgumentFromResult(Double functionResultValue);
 
 	////////////////////
 	
-	private Variable first;
-	private Variable second;
+	private Variable argument;
 
 	////////////////////
 	
-	public AbstractDeterministicNumericBinaryFunctionSamplingFactor(Variable result, List<? extends Variable> arguments,
-			Random random) {
-		super(result, arguments, random);
-		this.first = arguments.get(0);
-		this.second = arguments.get(1);
+	public AbstractDeterministicNumericUnaryFunctionSamplingFactor(Variable result, Variable argument, Random random) {
+		super(result, list(argument), random);
+		this.argument = argument;
 	}
 
 	////////////////////
 	
 	@Override
 	protected Object evaluateFunction(Function<Variable, Object> fromVariableToValue) {
-		Double firstValue = getFirstValue(fromVariableToValue);
-		Double secondValue = getSecondValue(fromVariableToValue);
-		Object result = computeWithErrorChecking(fromVariableToValue, () -> operation(firstValue, secondValue));
+		Double argumentValue = getArgumentValue(fromVariableToValue);
+		Object result = computeWithErrorChecking(fromVariableToValue, () -> operation(argumentValue));
 		return result;
 	}
 
 	@Override
 	protected Iterator<? extends Integer> argumentsWithInverseFunctionIterator() {
-		return iterator(0, 1); 
+		return iterator(0); 
 	}
 
 	@Override
@@ -70,27 +64,16 @@ public abstract class AbstractDeterministicNumericBinaryFunctionSamplingFactor
 
 	private Object computeMissingArgumentValueWithoutOperationErrorChecking(Function<Variable, Object> fromVariableToValue, int missingArgumentIndex) throws Error {
 		if (missingArgumentIndex == 0) {
-			return computeFirstFromOthers(fromVariableToValue);
-		}
-		else if (missingArgumentIndex == 1) {
-			return computeSecondFromOthers(fromVariableToValue);
+			return computeArgumentFromResult(fromVariableToValue);
 		}
 		else {
 			throw new Error("computeMissingArgumentValue got invalid argument index " + missingArgumentIndex + " while solving" + problemDescription(fromVariableToValue));
 		}
 	}
 
-	private Object computeFirstFromOthers(Function<Variable, Object> fromVariableToValue) {
-		Double secondValue = getSecondValue(fromVariableToValue);
+	private Object computeArgumentFromResult(Function<Variable, Object> fromVariableToValue) {
 		Double functionResultValue = getResultValue(fromVariableToValue);
-		double result = computeFirstFromOthers(secondValue, functionResultValue);
-		return result;
-	}
-
-	private Object computeSecondFromOthers(Function<Variable, Object> fromVariableToValue) {
-		Double firstValue = getFirstValue(fromVariableToValue);
-		Double functionResultValue = getResultValue(fromVariableToValue);
-		double result = computeSecondFromOthers(firstValue, functionResultValue);
+		double result = computeArgumentFromResult(functionResultValue);
 		return result;
 	}
 
@@ -117,14 +100,9 @@ public abstract class AbstractDeterministicNumericBinaryFunctionSamplingFactor
 		return resultValue;
 	}
 
-	private Double getFirstValue(Function<Variable, Object> fromVariableToValue) {
-		Double baseValue = (Double) fromVariableToValue.apply(first);
+	private Double getArgumentValue(Function<Variable, Object> fromVariableToValue) {
+		Double baseValue = (Double) fromVariableToValue.apply(argument);
 		return baseValue;
-	}
-
-	private Double getSecondValue(Function<Variable, Object> fromVariableToValue) {
-		Double exponentValue = (Double) fromVariableToValue.apply(second);
-		return exponentValue;
 	}
 
 	////////////////////
@@ -133,9 +111,8 @@ public abstract class AbstractDeterministicNumericBinaryFunctionSamplingFactor
 		return 
 				valueOrVariable(getFunctionResult(), fromVariableToValue) 
 				+ " = " 
-				+ valueOrVariable(first, fromVariableToValue) 
-				+ operatorSymbol() 
-				+ valueOrVariable(second, fromVariableToValue);
+				+ operatorSymbol()
+				+ valueOrVariable(argument, fromVariableToValue); 
 	}
 
 	private Object valueOrVariable(Variable variable, Function<Variable, Object> fromVariableToValue) {
