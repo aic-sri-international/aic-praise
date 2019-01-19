@@ -93,7 +93,7 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 			SamplingFactor factorOnResultingRules) {
 		
 		RuleMarginalizer<SamplingRule, VariableGoal> marginalizer = getMarginalizer(summedOutVariableGoals);
-		Set<? extends SamplingRule> marginalizedSamplingRules = marginalizer.marginalize();
+		Set<? extends SamplingRule> marginalizedSamplingRules = marginalizer.getMarginalizedRules();
 		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(remainingVariablesAsGoals, new ArrayList<>(marginalizedSamplingRules));
 		result = result.replaceFactor(factorOnResultingRules);
 		return result;

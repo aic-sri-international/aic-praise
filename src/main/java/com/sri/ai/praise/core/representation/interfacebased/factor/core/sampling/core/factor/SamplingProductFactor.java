@@ -68,7 +68,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	}
 
 	public Plan getSamplingPlan(Set<VariableGoal> satisfiedGoals) {
-		Plan samplingPlan = getValuePossiblyCreatingIt(fromSatisfiedGoalsToPlan, satisfiedGoals, s -> makePlan(s));
+		Plan samplingPlan = getValuePossiblyCreatingIt(fromSatisfiedGoalsToPlan, satisfiedGoals, this::makePlan);
 		return samplingPlan;
 	}
 	
