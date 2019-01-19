@@ -465,7 +465,45 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
 
+	@Test
+	public void booleanSamplingTest() {
+	
+		String model = "" +
+				"random x : Boolean;" +
+				"x = true;" +
+				"";
+	
+		String query = "x";
+		Expression expected = parse("if x then 1 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+	}
+	
+	@Test
+	public void booleanFalseSamplingTest() {
+	
+		String model = "" +
+				"random x : Boolean;" +
+				"x = false;" +
+				"";
+	
+		String query = "x";
+		Expression expected = parse("if x then 0 else 1");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+	}
+	
+	///////////////////////////////
+
 	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues) {
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, true);
+	}
+	
+	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues, boolean generateGraph) {
 		HOGMMultiQuerySamplingProblemSolver solver = 
 				new HOGMMultiQuerySamplingProblemSolver(
 						model, 
@@ -475,14 +513,14 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 						new Random());
 
 		List<? extends HOGMProblemResult> results = solver.getResults();
-		setPrecisionAndCheckResult(query, expected, results);
+		setPrecisionAndCheckResult(query, expected, results, generateGraph);
 	}
 
-	private void setPrecisionAndCheckResult(String query, Expression expected, List<? extends HOGMProblemResult> results)
+	private void setPrecisionAndCheckResult(String query, Expression expected, List<? extends HOGMProblemResult> results, boolean generateGraph)
 			throws Error {
 		int oldPrecision = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(3);
 		try {
-			checkResult(query, expected, results);
+			checkResult(query, expected, results, generateGraph);
 		} catch (Throwable t) {
 			throw new Error(t);
 		}
@@ -491,11 +529,11 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		}
 	}
 
-	private void checkResult(String query, Expression expected, List<? extends HOGMProblemResult> results) {
+	private void checkResult(String query, Expression expected, List<? extends HOGMProblemResult> results, boolean generateGraph) {
 		assertEquals(1, results.size());
 		HOGMProblemResult result = getFirst(results);
 		assertNoErrors(result);
-		printAndCompare(query, result.getResult(), expected);
+		printAndCompare(query, result.getResult(), expected, generateGraph);
 	}
 
 	private void assertNoErrors(HOGMProblemResult result) {
@@ -503,11 +541,11 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		assertFalse(result.hasErrors());
 	}
 
-	private void printAndCompare(String query, Expression resultValue, Expression expected) {
+	private void printAndCompare(String query, Expression resultValue, Expression expected, boolean generateGraph) {
 		println("query: " + query);
 		println("expected: " + expected);
 		println("actual  : " + resultValue);
-		generateGraph(resultValue);
+		if (generateGraph) generateGraph(resultValue);
 		String reasonForDifference = areEqualUpToNumericDifference(expected, resultValue, 0.1);
 		if (reasonForDifference != "") {
 			println("Failure: " + reasonForDifference);

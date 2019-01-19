@@ -8,6 +8,7 @@ import static com.sri.ai.util.Util.mapIntoArray;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.objectStringEqualsOneOf;
 import static com.sri.ai.util.Util.repeat;
 
 import java.lang.reflect.InvocationHandler;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.Categorical;
@@ -28,6 +30,7 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
+import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
@@ -101,7 +104,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (method.getDeclaringClass().isAssignableFrom(Expression.class)) {
-				return method.invoke(getExpression(), args);
+				return method.invoke(getFactorExpression(), args);
 			}
 			else if (method.getDeclaringClass().isAssignableFrom(SamplingFactor.class)) {
 				Object result = method.invoke(samplingFactor, args);
@@ -123,29 +126,29 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			getSamplingFactorDiscretizedProbabilityDistributionFunction().sample();
 		}
 		
-		private Object getExpression() {
+		private Object getFactorExpression() {
 			List<Integer> fromVariableIndexToNumberOfValues = mapIntoList(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()); 
-			Expression result = getExpressionFor(new CartesianProductOnIntegersIterator(fromVariableIndexToNumberOfValues));
+			Expression result = getFactorExpressionFor(new CartesianProductOnIntegersIterator(fromVariableIndexToNumberOfValues));
 			return result;
 		}
 
-		private Expression getExpressionFor(Iterator<ArrayList<Integer>> valueIndicesIterator) {
+		private Expression getFactorExpressionFor(Iterator<ArrayList<Integer>> valueIndicesIterator) {
 			Expression result;
 			if (valueIndicesIterator.hasNext()) {
-				result = getExpressionForNonEmptyDomain(valueIndicesIterator);
+				result = getFactorExpressionForNonEmptyDomain(valueIndicesIterator);
 			}
 			else {
-				result = getExpressionForEmptyDomain();
+				result = getFactorExpressionForEmptyDomain();
 			}
 			return result;
 		}
 
-		private Expression getExpressionForNonEmptyDomain(Iterator<ArrayList<Integer>> valueIndicesIterator) {
+		private Expression getFactorExpressionForNonEmptyDomain(Iterator<ArrayList<Integer>> valueIndicesIterator) {
 			Expression result;
 			ArrayList<Integer> valueIndices = valueIndicesIterator.next();
 			Expression probabilityExpression = getProbabilityForAssignment(valueIndices);
 			if (valueIndicesIterator.hasNext()) {
-				result = getExpressionForNotLastAssignment(valueIndicesIterator, valueIndices, probabilityExpression);
+				result = getFactorExpressionForNotLastAssignment(valueIndicesIterator, valueIndices, probabilityExpression);
 			}
 			else {
 				result = probabilityExpression;
@@ -159,18 +162,18 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			return makeSymbol(probability);
 		}
 
-		private Expression getExpressionForNotLastAssignment(
+		private Expression getFactorExpressionForNotLastAssignment(
 				Iterator<ArrayList<Integer>> valueIndicesIterator,
 				ArrayList<Integer> valueIndices, 
 				Expression probabilityExpression) {
 			
-			Expression condition = getExpressionFor(valueIndices);
-			Expression remaining = getExpressionFor(valueIndicesIterator);
+			Expression condition = getConditionForAssignmentIndices(valueIndices);
+			Expression remaining = getFactorExpressionFor(valueIndicesIterator);
 			Expression result = IfThenElse.make(condition, probabilityExpression, remaining);
 			return result;
 		}
 
-		private Expression getExpressionForEmptyDomain() {
+		private Expression getFactorExpressionForEmptyDomain() {
 			return Expressions.ONE;
 		}
 		
@@ -188,28 +191,50 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			return value;
 		}
 
-		private Expression getExpressionFor(ArrayList<Integer> valueIndices) {
+		private Expression getConditionForAssignmentIndices(ArrayList<Integer> valueIndices) {
 			ArrayList<? extends Variable> variables = getFunctionVariables();
-			List<Expression> conjuncts = mapIntegersIntoList(valueIndices.size(), i -> getConditionFor(variables.get(i), valueIndices.get(i)));
+			List<Expression> conjuncts = 
+					mapIntegersIntoList(
+							valueIndices.size(), 
+							i -> getConditionForAssignment(variables.get(i), valueIndices.get(i)));
 			Expression result = And.make(conjuncts);
 			return result;
 		}
 
-		private Expression getConditionFor(Variable variable, int valueIndex) {
+		private Expression getConditionForAssignment(Variable variable, int valueIndex) {
 			if (variable instanceof IntegerVariable || variable instanceof EnumVariable) {
-				return getConditionForDiscreteVariable(variable, valueIndex);
+				return getConditionForDiscreteVariableAssignment(variable, valueIndex);
 			}
 			else {
-				return getConditionForRealVariable(variable, valueIndex);
+				return getConditionForRealVariableAssignment(variable, valueIndex);
 			}
 		}
 
-		private Expression getConditionForDiscreteVariable(Variable variable, int valueIndex) {
-			Expression result = Equality.make(variable.getName(), variable.getSetOfValuesOrNull().get(valueIndex));
+		private Expression getConditionForDiscreteVariableAssignment(Variable variable, int valueIndex) {
+			Expression result;
+			Object value = variable.getSetOfValuesOrNull().get(valueIndex).objectValue();
+			if (objectStringEqualsOneOf(value, "true", "false")) {
+				result = getConditionForBooleanVariableAssignment(variable, value);
+			}
+			else {
+				result = Equality.make(variable.getName(), value);
+			}
 			return result;
 		}
 
-		private Expression getConditionForRealVariable(Variable variable, int valueIndex) {
+		private Expression getConditionForBooleanVariableAssignment(Variable variable, Object value) {
+			Expression result;
+			Symbol variableExpression = Expressions.makeSymbol(variable.getName());
+			if (value.toString().equals("true")) {
+				result = variableExpression;
+			}
+			else {
+				result = Not.make(variableExpression);
+			}
+			return result;
+		}
+
+		private Expression getConditionForRealVariableAssignment(Variable variable, int valueIndex) {
 			Pair<BigDecimal, BigDecimal> boundsForIndex = ((SetOfRealValues) variable.getSetOfValuesOrNull()).getBoundsForIndex(valueIndex);
 			Expression result = Expressions.apply(FunctorConstants.LESS_THAN, variable.getName(), boundsForIndex.second.doubleValue());
 			return result;

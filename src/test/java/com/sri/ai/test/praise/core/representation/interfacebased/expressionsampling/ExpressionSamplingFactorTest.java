@@ -1,10 +1,12 @@
 package com.sri.ai.test.praise.core.representation.interfacebased.expressionsampling;
 
+import static com.sri.ai.expresso.helper.Expressions.areEqualUpToNumericDifference;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -14,7 +16,6 @@ import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
@@ -63,18 +64,19 @@ class ExpressionSamplingFactorTest {
 			distribution.sample();
 		}
 		
-		String expected = "if x < 10 then 0.001 else if x < 30 then 0.02 else if x < 50 then 0.5 else if x < 70 then 0.5 else if x < 90 then 0.02 else 0.001";
+		Expression expected = parse("if x < 10 then 0.001 else if x < 30 then 0.02 else if x < 50 then 0.5 else if x < 70 then 0.5 else if x < 90 then 0.02 else 0.001");
 		
-		Expression rounded = Expressions.roundToAGivenPrecision(expressionSamplingFactor, 1, context);
-		String roundedString = rounded.toString();
 		int old = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(3);
 		
 		println("Expected: " + expected);
-		println("Actual  : " + roundedString);
+		println("Actual  : " + expressionSamplingFactor);
 		
 		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(old);
  
-		assertEquals(expected, roundedString);
+		String reasonForDifference = areEqualUpToNumericDifference(expected, expressionSamplingFactor, 0.1);
+		if (reasonForDifference != "") {
+			fail("Not equal up to a difference: " + reasonForDifference);
+		}
 	}
 
 }
