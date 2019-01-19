@@ -9,20 +9,21 @@ import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
+import com.sri.ai.util.planning.api.Goal;
 import com.sri.ai.util.planning.api.Plan;
 import com.sri.ai.util.planning.api.Rule;
 import com.sri.ai.util.planning.api.State;
 import com.sri.ai.util.planning.core.AbstractAtomicPlan;
 
-public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoal> {
+public class SamplingRule extends AbstractAtomicPlan implements Rule<Goal> {
 	
 	public static final double MAXIMUM_ESTIMATED_SUCCESS_WEIGHT = Plan.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT;
 
 	private SamplingFactor samplingFactor;
 
-	private Collection<? extends VariableGoal> antecedents;
+	private Collection<? extends Goal> antecedents;
 
-	private Collection<? extends VariableGoal> consequents;
+	private Collection<? extends Goal> consequents;
 
 	private boolean hasFired;
 	
@@ -32,8 +33,8 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 			Collection<? extends Variable> antecedentVariables, 
 			double estimatedSuccessWeight) {
 		
-		List<? extends VariableGoal> antecedents = mapIntoList(antecedentVariables, v -> new VariableGoal(v));
-		List<? extends VariableGoal> consequents = mapIntoList(consequentVariables, v -> new VariableGoal(v));
+		List<? extends Goal> antecedents = mapIntoList(antecedentVariables, v -> new VariableIsDefinedGoal(v));
+		List<? extends Goal> consequents = mapIntoList(consequentVariables, v -> new VariableIsDefinedGoal(v));
 		
 		return new SamplingRule(samplingFactor, consequents, antecedents, estimatedSuccessWeight);
 	}
@@ -46,7 +47,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 		return samplingRule(samplingFactor, consequentVariables, antecedentVariables, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
 	}
 
-	public SamplingRule(SamplingFactor samplingFactor, Collection<? extends VariableGoal> consequents, Collection<? extends VariableGoal> antecedents, double estimatedSuccessWeight) {
+	public SamplingRule(SamplingFactor samplingFactor, Collection<? extends Goal> consequents, Collection<? extends Goal> antecedents, double estimatedSuccessWeight) {
 		super(estimatedSuccessWeight);
 		this.samplingFactor = samplingFactor;
 		this.antecedents = antecedents;
@@ -63,12 +64,12 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<VariableGoa
 	}
 	
 	@Override
-	public Collection<? extends VariableGoal> getConsequents() {
+	public Collection<? extends Goal> getConsequents() {
 		return consequents;
 	}
 
 	@Override
-	public Collection<? extends VariableGoal> getAntecendents() {
+	public Collection<? extends Goal> getAntecendents() {
 		return antecedents;
 	}
 

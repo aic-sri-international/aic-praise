@@ -3,11 +3,11 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.planning.api.Goal;
 
-public class VariableGoal implements Goal {
+public class VariableIsDefinedGoal implements Goal {
 
 	private Variable variable;
 
-	public VariableGoal(Variable variable) {
+	public VariableIsDefinedGoal(Variable variable) {
 		this.variable = variable;
 	}
 
@@ -31,7 +31,7 @@ public class VariableGoal implements Goal {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		VariableGoal other = (VariableGoal) obj;
+		VariableIsDefinedGoal other = (VariableIsDefinedGoal) obj;
 		if (variable == null) {
 			if (other.variable != null)
 				return false;

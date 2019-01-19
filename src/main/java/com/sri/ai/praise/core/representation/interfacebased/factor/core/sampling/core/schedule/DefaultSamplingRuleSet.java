@@ -24,7 +24,7 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 
 	private ArrayList<? extends SamplingRule> samplingRules;
 
-	private List<? extends VariableGoal> allVariables;
+	private List<? extends Goal> allGoals;
 	
 	public static DefaultSamplingRuleSet samplingRuleSet(List<? extends Variable> allVariables, ArrayList<? extends SamplingRule> samplingRules) {
 		return new DefaultSamplingRuleSet(makeSureItsListOfVariableGoals(allVariables), samplingRules);
@@ -34,9 +34,9 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 		this(makeSureItsListOfVariableGoals(allVariables), new ArrayList<>(Arrays.asList(samplingRules)));
 	}
 
-	public DefaultSamplingRuleSet(List<? extends VariableGoal> allVariables, ArrayList<? extends SamplingRule> samplingRules) {
+	public DefaultSamplingRuleSet(List<? extends Goal> allVariables, ArrayList<? extends SamplingRule> samplingRules) {
 		this.samplingRules = samplingRules;
-		this.allVariables = allVariables;
+		this.allGoals = allVariables;
 	}
 
 	@Override
@@ -45,23 +45,23 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 	}
 
 	@Override
-	public List<? extends VariableGoal> getVariables() {
-		return allVariables;
+	public List<? extends Goal> getAllGoals() {
+		return allGoals;
 	}
 
 	@Override
 	public DefaultSamplingRuleSet replaceFactor(SamplingFactor samplingFactor) {
 		ArrayList<? extends SamplingRule> newRules = mapIntoArrayList(getSamplingRules(), r -> r.replaceFactor(samplingFactor));
-		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(getVariables(), newRules);
+		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(getAllGoals(), newRules);
 		return result;
 	}
 
 	@Override
 	public SamplingRuleSet sumOut(List<? extends Variable> summedOutVariables, SamplingFactor factorOnResultingRules) {
 
-		List<? extends VariableGoal> summedOutVariableGoals = makeSureItsListOfVariableGoals(summedOutVariables);
+		List<? extends Goal> summedOutVariableGoals = makeSureItsListOfVariableGoals(summedOutVariables);
 		
-		List<VariableGoal> remainingVariablesAsGoals = subtract(getVariables(), summedOutVariableGoals);
+		List<Goal> remainingVariablesAsGoals = subtract(getAllGoals(), summedOutVariableGoals);
 		
 		DefaultSamplingRuleSet result = makeMarginalizedSamplingRules(summedOutVariableGoals,  remainingVariablesAsGoals, factorOnResultingRules);
 		
@@ -69,38 +69,38 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<? extends VariableGoal> makeSureItsListOfVariableGoals(List<? extends Variable> variables) {
+	private static List<? extends Goal> makeSureItsListOfVariableGoals(List<? extends Variable> variables) {
 		if (forAll(variables, v -> v instanceof Goal)) {
-			return (List<? extends VariableGoal>) variables;
+			return (List<? extends Goal>) variables;
 		}
 		else {
-			List<VariableGoal> variablesAsGoals = mapIntoArrayList(variables, wrapAsGoal());
+			List<Goal> variablesAsGoals = mapIntoArrayList(variables, wrapAsGoal());
 			return variablesAsGoals;
 		}
 	}
 
-	private static Function<Variable, VariableGoal> wrapAsGoal() {
-		return v -> v instanceof Goal? (VariableGoal) v : new VariableGoal(v);
+	private static Function<Variable, Goal> wrapAsGoal() {
+		return v -> v instanceof Goal? (Goal) v : new VariableIsDefinedGoal(v);
 	}
 
-	private ProjectionOfSetOfRules<SamplingRule, VariableGoal> getMarginalizer(List<? extends VariableGoal> remainingVariablesAsGoals) {
+	private ProjectionOfSetOfRules<SamplingRule, Goal> getMarginalizer(List<? extends Goal> remainingVariablesAsGoals) {
 		return new ProjectionOfSetOfRules<>(getSamplingRules(), remainingVariablesAsGoals, makeSamplingRuleFactory());
 	}
 
 	private DefaultSamplingRuleSet makeMarginalizedSamplingRules(
-			List<? extends VariableGoal> summedOutVariableGoals,
-			List<VariableGoal> remainingVariablesAsGoals, 
+			List<? extends Goal> summedOutVariableGoals,
+			List<Goal> remainingVariablesAsGoals, 
 			SamplingFactor factorOnResultingRules) {
 		
-		ProjectionOfSetOfRules<SamplingRule, VariableGoal> marginalizer = getMarginalizer(remainingVariablesAsGoals);
+		ProjectionOfSetOfRules<SamplingRule, Goal> marginalizer = getMarginalizer(remainingVariablesAsGoals);
 		Set<? extends SamplingRule> marginalizedSamplingRules = marginalizer.getProjectedSetOfRules();
 		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(remainingVariablesAsGoals, new ArrayList<>(marginalizedSamplingRules));
 		result = result.replaceFactor(factorOnResultingRules);
 		return result;
 	}
 
-	private BinaryFunction<VariableGoal, Set<? extends VariableGoal>, SamplingRule> makeSamplingRuleFactory() {
-		return (VariableGoal consequent, Set<? extends VariableGoal> antecedents) -> {
+	private BinaryFunction<Goal, Set<? extends Goal>, SamplingRule> makeSamplingRuleFactory() {
+		return (Goal consequent, Set<? extends Goal> antecedents) -> {
 			return new SamplingRule(null, arrayList(consequent), arrayListFrom(antecedents), 0.5);
 		};
 	}

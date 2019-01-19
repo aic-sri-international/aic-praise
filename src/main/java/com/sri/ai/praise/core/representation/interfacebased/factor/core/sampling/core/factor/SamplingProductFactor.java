@@ -29,7 +29,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingState;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableGoal;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableIsDefinedGoal;
+import com.sri.ai.util.planning.api.Goal;
 import com.sri.ai.util.planning.api.Plan;
 
 public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
@@ -40,7 +41,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	 */
 	public static boolean adaptiveSampling = true;
 	
-	private Map<Set<VariableGoal>, Plan> fromSatisfiedGoalsToPlan;
+	private Map<Set<Goal>, Plan> fromSatisfiedGoalsToPlan;
 
 	public SamplingProductFactor(ArrayList<? extends SamplingFactor> multipliedFactors, Random random) {
 		super(flattenOneLevel(multipliedFactors), random);
@@ -56,24 +57,24 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	}
 
 	public Plan getSamplingPlan(Sample sampleToComplete) {
-		Set<VariableGoal> satisfiedGoals = getSatisfiedGoals(sampleToComplete);
+		Set<Goal> satisfiedGoals = getSatisfiedGoals(sampleToComplete);
 		return getSamplingPlan(satisfiedGoals);
 	}
 
-	private Set<VariableGoal> getSatisfiedGoals(Sample sample) {
+	private Set<Goal> getSatisfiedGoals(Sample sample) {
 		Set<Variable> variablesDefinedInSample = sample.getAssignment().mapValue().keySet();
 		Set<Variable> factorVariablesDefinedInSample = intersection(getVariables(), variablesDefinedInSample);
-		Set<VariableGoal> result = mapIntoSet(factorVariablesDefinedInSample, v -> new VariableGoal(v));
+		Set<Goal> result = mapIntoSet(factorVariablesDefinedInSample, v -> new VariableIsDefinedGoal(v));
 		return result;
 	}
 
-	public Plan getSamplingPlan(Set<VariableGoal> satisfiedGoals) {
+	public Plan getSamplingPlan(Set<Goal> satisfiedGoals) {
 		Plan samplingPlan = getValuePossiblyCreatingIt(fromSatisfiedGoalsToPlan, satisfiedGoals, this::makePlan);
 		return samplingPlan;
 	}
 	
-	private Plan makePlan(Set<VariableGoal> satisfiedGoals) {
-		List<VariableGoal> allGoals = mapIntoList(getVariables(), v -> new VariableGoal(v));
+	private Plan makePlan(Set<Goal> satisfiedGoals) {
+		List<Goal> allGoals = mapIntoList(getVariables(), v -> new VariableIsDefinedGoal(v));
 		ArrayList<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
 		Plan plan = planUsingEachRuleAtMostOnce(allGoals, satisfiedGoals, samplingRules);
 		return plan;

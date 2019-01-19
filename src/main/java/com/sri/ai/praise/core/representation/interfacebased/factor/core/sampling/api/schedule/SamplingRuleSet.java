@@ -10,20 +10,20 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableGoal;
+import com.sri.ai.util.planning.api.Goal;
 
 public interface SamplingRuleSet {
 
 	ArrayList<? extends SamplingRule> getSamplingRules();
 
-	List<? extends VariableGoal> getVariables();
+	List<? extends Goal> getAllGoals();
 	
 	public SamplingRuleSet replaceFactor(SamplingFactor samplingFactor);
 
 	SamplingRuleSet sumOut(List<? extends Variable> variables, SamplingFactor factorOnResultingRules);
 
 	static SamplingRuleSet union(List<? extends SamplingRuleSet> samplingRulesSet) {
-		List<? extends VariableGoal> unionOfVariables = unionArrayList(functionIterator(samplingRulesSet, SamplingRuleSet::getVariables));
+		List<? extends Goal> unionOfVariables = unionArrayList(functionIterator(samplingRulesSet, SamplingRuleSet::getAllGoals));
 		ArrayList<? extends SamplingRule> unionOfRules = unionArrayList(functionIterator(samplingRulesSet, SamplingRuleSet::getSamplingRules));
 		return new DefaultSamplingRuleSet(unionOfVariables, unionOfRules);
 	}
