@@ -18,7 +18,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.planning.api.Goal;
-import com.sri.ai.util.planning.core.RuleMarginalizer;
+import com.sri.ai.util.planning.core.ProjectionOfSetOfRules;
 
 public class DefaultSamplingRuleSet implements SamplingRuleSet {
 
@@ -83,8 +83,8 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 		return v -> v instanceof Goal? (VariableGoal) v : new VariableGoal(v);
 	}
 
-	private RuleMarginalizer<SamplingRule, VariableGoal> getMarginalizer(List<? extends VariableGoal> marginalizedVariables) {
-		return new RuleMarginalizer<>(getSamplingRules(), marginalizedVariables, makeSamplingRuleFactory());
+	private ProjectionOfSetOfRules<SamplingRule, VariableGoal> getMarginalizer(List<? extends VariableGoal> remainingVariablesAsGoals) {
+		return new ProjectionOfSetOfRules<>(getSamplingRules(), remainingVariablesAsGoals, makeSamplingRuleFactory());
 	}
 
 	private DefaultSamplingRuleSet makeMarginalizedSamplingRules(
@@ -92,8 +92,8 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 			List<VariableGoal> remainingVariablesAsGoals, 
 			SamplingFactor factorOnResultingRules) {
 		
-		RuleMarginalizer<SamplingRule, VariableGoal> marginalizer = getMarginalizer(summedOutVariableGoals);
-		Set<? extends SamplingRule> marginalizedSamplingRules = marginalizer.getMarginalizedRules();
+		ProjectionOfSetOfRules<SamplingRule, VariableGoal> marginalizer = getMarginalizer(remainingVariablesAsGoals);
+		Set<? extends SamplingRule> marginalizedSamplingRules = marginalizer.getProjectedSetOfRules();
 		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(remainingVariablesAsGoals, new ArrayList<>(marginalizedSamplingRules));
 		result = result.replaceFactor(factorOnResultingRules);
 		return result;
