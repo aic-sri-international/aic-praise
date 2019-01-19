@@ -65,7 +65,7 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicFunctionS
 			return computeSecondFromOthers(fromVariableToValue);
 		}
 		else {
-			throw new Error("computeMissingArgumentValue got invalid index " + missingArgumentIndex + " for operation .");
+			throw new Error("computeMissingArgumentValue got invalid argument index " + missingArgumentIndex + " while solving" + problemDescription(fromVariableToValue));
 		}
 	}
 
@@ -80,6 +80,21 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicFunctionS
 		Double firstValue = getFirstValue(fromVariableToValue);
 		Double functionResultValue = getResultValue(fromVariableToValue);
 		double result = computeSecondFromOthers(firstValue, functionResultValue);
+		return result;
+	}
+
+	private Object computeWithErrorChecking(Function<Variable, Object> fromVariableToValue, NullaryFunction<Object> calculation) throws Error {
+		Object result;
+		try {
+			result = calculation.apply();
+		}
+		catch (Throwable e) {
+			throw new Error("Error solving " + problemDescription(fromVariableToValue) + ": " + e.getMessage(), e);
+		}
+		
+		if (Double.isNaN((Double) result)) {
+			throw new Error("Error solving " + problemDescription(fromVariableToValue) + ": illegal arguments resulting in NaN.");
+		}
 		return result;
 	}
 
@@ -102,8 +117,7 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicFunctionS
 
 	private String problemDescription(Function<Variable, Object> fromVariableToValue) {
 		return 
-				"'" 
-				+ valueOrVariable(getFunctionResult(), fromVariableToValue) 
+				valueOrVariable(getFunctionResult(), fromVariableToValue) 
 				+ " = " 
 				+ valueOrVariable(first, fromVariableToValue) 
 				+ operatorSymbol() 
@@ -120,21 +134,6 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicFunctionS
 		}
 	}
 	
-	private Object computeWithErrorChecking(Function<Variable, Object> fromVariableToValue, NullaryFunction<Object> calculation) throws Error {
-		Object result;
-		try {
-			result = calculation.apply();
-		}
-		catch (Throwable e) {
-			throw new Error("Error solving " + problemDescription(fromVariableToValue) + ": " + e.getMessage(), e);
-		}
-		
-		if (Double.isNaN((Double) result)) {
-			throw new Error("Error solving " + problemDescription(fromVariableToValue) + ": illegal arguments resulting in NaN.");
-		}
-		return result;
-	}
-
 	////////////////////
 	
 	protected double operation(Double firstValue, Double secondValue) {
