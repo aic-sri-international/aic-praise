@@ -8,12 +8,12 @@ import java.util.Random;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
 /**
- * An extension of {@link AbstractDeterministicBinaryFunctionSamplingFactor} for exponentiation.
+ * An extension of {@link AbstractDeterministicNumericBinaryFunctionSamplingFactor} for exponentiation.
  *
  * @author braz
  *
  */
-public class ExponentiationSamplingFactor extends AbstractDeterministicBinaryFunctionSamplingFactor {
+public class ExponentiationSamplingFactor extends AbstractDeterministicNumericBinaryFunctionSamplingFactor {
 
 	public ExponentiationSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);

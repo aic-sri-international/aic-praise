@@ -329,8 +329,9 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 			runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 		}
 		catch (Error e) {
-			if (!Util.containsAllCaseInsensitive(e.getMessage(), "division", "zero")) {
-				throw new AssertionError("Should have thrown 'division by zero' error, but threw " + e.getMessage(), e);
+			println(e.getMessage());
+			if (!Util.containsAllCaseInsensitive(e.getMessage(), "illegal", "arguments")) {
+				throw new AssertionError("Should have thrown 'illegal arguments' error, but threw " + e.getMessage(), e);
 			}
 		}
 	}

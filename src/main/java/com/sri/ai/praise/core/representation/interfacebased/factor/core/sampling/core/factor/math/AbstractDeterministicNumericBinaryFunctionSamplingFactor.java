@@ -17,7 +17,7 @@ import com.sri.ai.util.base.NullaryFunction;
  * @author braz
  *
  */
-public abstract class AbstractDeterministicBinaryFunctionSamplingFactor
+public abstract class AbstractDeterministicNumericBinaryFunctionSamplingFactor
 		extends AbstractDeterministicFunctionSamplingFactor {
 
 	protected abstract String operatorSymbol();
@@ -35,7 +35,7 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor
 
 	////////////////////
 	
-	public AbstractDeterministicBinaryFunctionSamplingFactor(Variable result, List<? extends Variable> arguments,
+	public AbstractDeterministicNumericBinaryFunctionSamplingFactor(Variable result, List<? extends Variable> arguments,
 			Random random) {
 		super(result, arguments, random);
 		this.first = arguments.get(0);
@@ -103,8 +103,8 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor
 			throw new Error("Error solving " + problemDescription(fromVariableToValue) + ": " + e.getMessage(), e);
 		}
 		
-		if (Double.isNaN((Double) result)) {
-			throw new Error("Error solving " + problemDescription(fromVariableToValue) + ": illegal arguments resulting in NaN.");
+		if (Double.isNaN((Double) result) || Double.isInfinite((Double) result)) {
+			throw new Error("Error solving " + problemDescription(fromVariableToValue) + ": illegal arguments resulting in " + result);
 		}
 		return result;
 	}
