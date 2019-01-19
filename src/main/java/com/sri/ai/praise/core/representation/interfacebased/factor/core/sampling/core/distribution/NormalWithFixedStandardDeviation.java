@@ -112,7 +112,7 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 	public SamplingRuleSet makeSamplingRules() {
 		SamplingRule fromMeanToDependent = samplingRule(this, list(variable), list(mean), computeEstimatedSuccessWeight());
 		SamplingRule fromDependentToMean = samplingRule(this, list(mean), list(variable), computeEstimatedSuccessWeight());
-		return new DefaultSamplingRuleSet(getVariables(), fromDependentToMean, fromMeanToDependent);
+		return new DefaultSamplingRuleSet(fromDependentToMean, fromMeanToDependent);
 	}
 
 	private double computeEstimatedSuccessWeight() {

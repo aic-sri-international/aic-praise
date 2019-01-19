@@ -62,7 +62,7 @@ public class NormalWithFixedMeanAndStandardDeviation extends AbstractSamplingFac
 	@Override
 	public SamplingRuleSet makeSamplingRules() {
 		SamplingRule samplingRule = samplingRule(this, getVariables(), list(), computeEstimatedSuccessWeight());
-		return new DefaultSamplingRuleSet(getVariables(), samplingRule);
+		return new DefaultSamplingRuleSet(samplingRule);
 	}
 
 	private double computeEstimatedSuccessWeight() {

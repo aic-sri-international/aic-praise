@@ -66,7 +66,7 @@ public class ConstantSamplingFactor extends AbstractSamplingFactor {
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
 		SamplingRule samplingRule = samplingRule(this, list(variable), list(), SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
-		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(getVariables(), samplingRule);
+		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(samplingRule);
 		return result;
 	}
 

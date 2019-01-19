@@ -167,7 +167,7 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
 		ArrayList<? extends SamplingRule> samplingRulesArrayList = makeSamplingRulesArrayList();
-		SamplingRuleSet result = samplingRuleSet(getVariables(), samplingRulesArrayList);
+		SamplingRuleSet result = samplingRuleSet(samplingRulesArrayList);
 		return result;
 	}
 

@@ -82,7 +82,7 @@ public class TableSamplingFactor extends AbstractSamplingFactor {
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
 		SamplingRule samplingRule = samplingRule(this, list(variable), list(), 1.0/values.size());
-		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(getVariables(), samplingRule);
+		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(samplingRule);
 		return result;
 	}
 
