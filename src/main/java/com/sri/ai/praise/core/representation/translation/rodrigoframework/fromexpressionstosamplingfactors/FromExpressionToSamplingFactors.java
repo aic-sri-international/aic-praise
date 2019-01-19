@@ -5,6 +5,7 @@ import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.getConstantDoubleValueOrThrowErrorWithMessage;
 import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
+import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
 import static com.sri.ai.grinder.library.FunctorConstants.TIMES;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.condition;
@@ -29,6 +30,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.DivisionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.MultiplicationSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.SubtractionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.SumSamplingFactor;
 
 public class FromExpressionToSamplingFactors {
@@ -93,6 +95,9 @@ public class FromExpressionToSamplingFactors {
 		else if (expression.hasFunctor(PLUS)) {
 			sumCompilation(compoundExpressionVariable, expression, factors);
 		}
+		else if (expression.hasFunctor(MINUS) && expression.numberOfArguments() == 2) {
+			subtractionCompilation(compoundExpressionVariable, expression, factors);
+		}
 		else if (expression.hasFunctor(TIMES)) {
 			multiplicationCompilation(compoundExpressionVariable, expression, factors);
 		}
@@ -124,6 +129,12 @@ public class FromExpressionToSamplingFactors {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
 		Factor sumFactor = new SumSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
 		factors.add(sumFactor);
+	}
+
+	private void subtractionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor subtractionFactor = new SubtractionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(subtractionFactor);
 	}
 
 	private void multiplicationCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
