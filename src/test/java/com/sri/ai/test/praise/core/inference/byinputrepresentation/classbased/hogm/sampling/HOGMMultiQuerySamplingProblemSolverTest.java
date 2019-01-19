@@ -26,9 +26,11 @@ import com.sri.ai.util.graph2d.api.GraphSet;
 public class HOGMMultiQuerySamplingProblemSolverTest {
 
 	/**
-	 * If property receives any value, a graph "graph.png" is generated in the current directory with the test's result graph.
+	 * If property receives any value, a graph file named <code>GRAPH_FILENAME_WITHOUT_EXTENSION + ".png"</code>
+	 * is generated in the current directory with the test's result graph.
 	 */
 	private static final String PROPERTY_KEY_GENERATING_GRAPH_FILE = "generateGraphFileForHOGMSamplingTest";
+	private static final String GRAPH_FILENAME_WITHOUT_EXTENSION = "HOGMMultiQuerySamplingProblemSolverTest";
 
 	@Test
 	public void normalSamplingTest() {
@@ -388,7 +390,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 			ExpressionSamplingFactor expressionSamplingFactor = (ExpressionSamplingFactor) resultValue;
 			SamplingFactorDiscretizedProbabilityDistributionFunction function = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistributionFunction();
 			Functions functions = Functions.functions(function);
-			GraphSet.plot(functions, 0, "HOGMMultiQuerySamplingProblemSolverTest");
+			GraphSet.plot(functions, 0, GRAPH_FILENAME_WITHOUT_EXTENSION);
 		}
 	}
 }
