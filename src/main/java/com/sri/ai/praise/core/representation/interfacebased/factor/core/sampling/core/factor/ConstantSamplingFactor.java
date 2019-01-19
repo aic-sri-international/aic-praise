@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.samplingRule;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.deterministicSamplingRuleFromVariables;
 import static com.sri.ai.util.Util.list;
 
 import java.util.Random;
@@ -65,7 +65,7 @@ public class ConstantSamplingFactor extends AbstractSamplingFactor {
 
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
-		SamplingRule samplingRule = samplingRule(this, list(variable), list(), SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
+		SamplingRule samplingRule = deterministicSamplingRuleFromVariables(this, list(variable), list());
 		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(samplingRule);
 		return result;
 	}

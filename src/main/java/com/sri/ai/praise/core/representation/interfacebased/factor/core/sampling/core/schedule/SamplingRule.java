@@ -27,7 +27,24 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<Goal> {
 
 	private boolean hasFired;
 	
-	public static SamplingRule samplingRule(
+	public static SamplingRule samplingRuleFromGoals(
+			SamplingFactor samplingFactor, 
+			Collection<? extends Goal> consequents, 
+			Collection<? extends Goal> antecedents, 
+			double estimatedSuccessWeight) {
+		
+		return new SamplingRule(samplingFactor, consequents, antecedents, estimatedSuccessWeight);
+	}
+
+	/**
+	 * Convenience creator taking variables to stand for {@link VariableIsDefined} goals.
+	 * @param samplingFactor
+	 * @param consequentVariables
+	 * @param antecedentVariables
+	 * @param estimatedSuccessWeight
+	 * @return
+	 */
+	public static SamplingRule samplingRuleFromVariables(
 			SamplingFactor samplingFactor, 
 			Collection<? extends Variable> consequentVariables, 
 			Collection<? extends Variable> antecedentVariables, 
@@ -39,12 +56,27 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<Goal> {
 		return new SamplingRule(samplingFactor, consequents, antecedents, estimatedSuccessWeight);
 	}
 
-	public static SamplingRule deterministicSamplingRule(
+	/**
+	 * Convenience deterministic sampling rule creator taking variables to stand for {@link VariableIsDefined} goals.
+	 * @param samplingFactor
+	 * @param consequentVariables
+	 * @param antecedentVariables
+	 * @return
+	 */
+	public static SamplingRule deterministicSamplingRuleFromVariables(
 			SamplingFactor samplingFactor, 
 			Collection<? extends Variable> consequentVariables, 
 			Collection<? extends Variable> antecedentVariables) {
 		
-		return samplingRule(samplingFactor, consequentVariables, antecedentVariables, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
+		return samplingRuleFromVariables(samplingFactor, consequentVariables, antecedentVariables, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
+	}
+
+	public static SamplingRule deterministicSamplingRuleFromGoals(
+			SamplingFactor samplingFactor, 
+			Collection<? extends Goal> consequentVariables, 
+			Collection<? extends Goal> antecedentVariables) {
+		
+		return samplingRuleFromGoals(samplingFactor, consequentVariables, antecedentVariables, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
 	}
 
 	public SamplingRule(SamplingFactor samplingFactor, Collection<? extends Goal> consequents, Collection<? extends Goal> antecedents, double estimatedSuccessWeight) {

@@ -43,11 +43,15 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 	@Override
 	public Set<? extends Goal> getAllGoals() {
 		if (allGoals == null) {
-			allGoals = set();
-			getSamplingRules().forEach(r -> allGoals.addAll(r.getAntecendents()));
-			getSamplingRules().forEach(r -> allGoals.addAll(r.getConsequents()));
+			makeAllGoals();
 		}
 		return allGoals;
+	}
+
+	private void makeAllGoals() {
+		allGoals = set();
+		getSamplingRules().forEach(r -> allGoals.addAll(r.getAntecendents()));
+		getSamplingRules().forEach(r -> allGoals.addAll(r.getConsequents()));
 	}
 
 	@Override

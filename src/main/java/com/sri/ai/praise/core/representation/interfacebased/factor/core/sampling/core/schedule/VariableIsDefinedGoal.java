@@ -1,9 +1,14 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.util.planning.api.Goal;
+import static com.sri.ai.util.Util.list;
 
-public class VariableIsDefinedGoal implements Goal {
+import java.util.Collection;
+import java.util.List;
+
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.VariableDependentGoal;
+
+public class VariableIsDefinedGoal implements VariableDependentGoal {
 
 	private Variable variable;
 
@@ -13,6 +18,16 @@ public class VariableIsDefinedGoal implements Goal {
 
 	public Variable getVariable() {
 		return variable;
+	}
+
+	List<Variable> cachedDependencies;
+	
+	@Override
+	public Collection<? extends Variable> dependencies() {
+		if (cachedDependencies == null) {
+			cachedDependencies = list(variable);
+		}
+		return cachedDependencies;
 	}
 
 	@Override

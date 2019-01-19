@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.samplingRule;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.deterministicSamplingRuleFromVariables;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 
@@ -69,8 +69,8 @@ public class EqualitySamplingFactor extends AbstractSamplingFactor {
 
 	@Override
 	public SamplingRuleSet makeSamplingRules() {
-		SamplingRule fromVariable1ToVariable2 = samplingRule(this, list(variable2), list(variable1), SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
-		SamplingRule fromVariable2ToVariable1 = samplingRule(this, list(variable1), list(variable2), SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
+		SamplingRule fromVariable1ToVariable2 = deterministicSamplingRuleFromVariables(this, list(variable2), list(variable1));
+		SamplingRule fromVariable2ToVariable1 = deterministicSamplingRuleFromVariables(this, list(variable1), list(variable2));
 		return new DefaultSamplingRuleSet(fromVariable1ToVariable2, fromVariable2ToVariable1);
 	}
 

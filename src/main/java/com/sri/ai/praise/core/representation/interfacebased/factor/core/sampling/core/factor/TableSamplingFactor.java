@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.samplingRule;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.samplingRuleFromVariables;
 import static com.sri.ai.util.Util.getOrUseDefault;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapFromLists;
@@ -81,7 +81,7 @@ public class TableSamplingFactor extends AbstractSamplingFactor {
 
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
-		SamplingRule samplingRule = samplingRule(this, list(variable), list(), 1.0/values.size());
+		SamplingRule samplingRule = samplingRuleFromVariables(this, list(variable), list(), 1.0/values.size());
 		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(samplingRule);
 		return result;
 	}

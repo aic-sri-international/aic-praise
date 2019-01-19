@@ -42,13 +42,9 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 
 	@Override
 	public SamplingRuleSet makeSamplingRules() {
-//		println("Marginalizing rules for " + this);
 		SamplingRuleSet samplingRuleSet = getMarginalizedFactor().getSamplingRuleSet();
 		List<? extends Goal> remainingGoals = mapIntoList(getVariables(), v -> new VariableIsDefinedGoal(v));
 		SamplingRuleSet marginalSamplingRules = samplingRuleSet.project(remainingGoals, this);
-//		println("Sampling rules: " + samplingRuleSet);
-//		println("Marginalized variables: " + getMarginalizedVariables());
-//		println("Marginalized sampling rules:" + marginalSamplingRules);
 		return marginalSamplingRules;
 	}
 

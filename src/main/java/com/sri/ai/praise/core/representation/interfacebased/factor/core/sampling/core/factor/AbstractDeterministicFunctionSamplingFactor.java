@@ -1,7 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet.samplingRuleSet;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.deterministicSamplingRule;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.deterministicSamplingRuleFromVariables;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.flatList;
 import static com.sri.ai.util.Util.list;
@@ -178,12 +178,12 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	}
 
 	private SamplingRule makeSamplingRuleForFunctionResult() {
-		return deterministicSamplingRule(this, list(this.functionResult), arguments);
+		return deterministicSamplingRuleFromVariables(this, list(this.functionResult), arguments);
 	}
 
 	private SamplingRule makeSamplingRuleForArgumentAt(int i) {
 		List<Variable> otherArgumentsAndFunctionResult = makeListOfOtherArgumentsAndFunctionResult(i);
-		SamplingRule samplingRule = deterministicSamplingRule(this, list(arguments.get(i)), otherArgumentsAndFunctionResult);
+		SamplingRule samplingRule = deterministicSamplingRuleFromVariables(this, list(arguments.get(i)), otherArgumentsAndFunctionResult);
 		return samplingRule;
 	}
 

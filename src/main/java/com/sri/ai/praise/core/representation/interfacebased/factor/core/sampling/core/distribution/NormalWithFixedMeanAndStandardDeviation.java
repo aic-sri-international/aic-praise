@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.samplingRule;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.samplingRuleFromVariables;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 
@@ -61,7 +61,7 @@ public class NormalWithFixedMeanAndStandardDeviation extends AbstractSamplingFac
 
 	@Override
 	public SamplingRuleSet makeSamplingRules() {
-		SamplingRule samplingRule = samplingRule(this, getVariables(), list(), computeEstimatedSuccessWeight());
+		SamplingRule samplingRule = samplingRuleFromVariables(this, getVariables(), list(), computeEstimatedSuccessWeight());
 		return new DefaultSamplingRuleSet(samplingRule);
 	}
 
