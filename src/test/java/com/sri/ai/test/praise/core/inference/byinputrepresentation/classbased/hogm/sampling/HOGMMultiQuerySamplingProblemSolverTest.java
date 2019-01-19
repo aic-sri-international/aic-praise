@@ -335,6 +335,100 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		}
 	}
 	
+	
+	@Test
+	public void exponentiationSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"x = 2;" +
+				"y = 3;" +
+				"z = x ^ y;" +
+				"";
+
+		String query = "z";
+		Expression expected = parse("if z < -9.5 then 0 else if z < -8.5 then 0 else if z < -7.5 then 0 else if z < -6.5 then 0 else if z < -5.5 then 0 else if z < -4.5 then 0 else if z < -3.5 then 0 else if z < -2.5 then 0 else if z < -1.5 then 0 else if z < -0.5 then 0 else if z < 0.5 then 0 else if z < 1.5 then 0 else if z < 2.5 then 0 else if z < 3.5 then 0 else if z < 4.5 then 0 else if z < 5.5 then 0 else if z < 6.5 then 0 else if z < 7.5 then 0 else if z < 8.5 then 0.991 else if z < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+	
+	@Test
+	public void exponentiationInverseSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"x = 9;" +
+				"y = 2;" +
+				"x = z ^ y;" +
+				"";
+
+		String query = "z";
+		Expression expected = parse("if z < -9.5 then 0 else if z < -8.5 then 0 else if z < -7.5 then 0 else if z < -6.5 then 0 else if z < -5.5 then 0 else if z < -4.5 then 0 else if z < -3.5 then 0 else if z < -2.5 then 0 else if z < -1.5 then 0 else if z < -0.5 then 0 else if z < 0.5 then 0 else if z < 1.5 then 0 else if z < 2.5 then 0 else if z < 3.5 then 0.991 else if z < 4.5 then 0 else if z < 5.5 then 0 else if z < 6.5 then 0 else if z < 7.5 then 0 else if z < 8.5 then 0 else if z < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
+	@Test
+	public void exponentiationIllegalSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"x = 0.5;" +
+				"y = (-4)^x;" + // illegal square root
+				"";
+
+		String query = "y";
+		Expression expected = parse("if z < -9.5 then 0 else if z < -8.5 then 0 else if z < -7.5 then 0 else if z < -6.5 then 0 else if z < -5.5 then 0 else if z < -4.5 then 0 else if z < -3.5 then 0 else if z < -2.5 then 0 else if z < -1.5 then 0 else if z < -0.5 then 0 else if z < 0.5 then 0 else if z < 1.5 then 0 else if z < 2.5 then 0 else if z < 3.5 then 0 else if z < 4.5 then 0 else if z < 5.5 then 0 else if z < 6.5 then 0 else if z < 7.5 then 0 else if z < 8.5 then 0.991 else if z < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+
+		try {
+			runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+		}
+		catch (Error e) {
+			println(e.getMessage());
+			if (!Util.containsAllCaseInsensitive(e.getMessage(), "error", "solving")) {
+				throw new AssertionError("Should have thrown 'Error solving...' error, but threw " + e.getMessage(), e);
+			}
+		}
+	}
+
+	@Test
+	public void exponentiationIllegalInverseSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"-4 = x^2;" + // inverse sampling tries (-4)^0.5 = x, which is an illegal square root.
+				"";
+
+		String query = "x";
+		Expression expected = parse("if z < -9.5 then 0 else if z < -8.5 then 0 else if z < -7.5 then 0 else if z < -6.5 then 0 else if z < -5.5 then 0 else if z < -4.5 then 0 else if z < -3.5 then 0 else if z < -2.5 then 0 else if z < -1.5 then 0 else if z < -0.5 then 0 else if z < 0.5 then 0 else if z < 1.5 then 0 else if z < 2.5 then 0 else if z < 3.5 then 0 else if z < 4.5 then 0 else if z < 5.5 then 0 else if z < 6.5 then 0 else if z < 7.5 then 0 else if z < 8.5 then 0.991 else if z < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+
+		try {
+			runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+		}
+		catch (Error e) {
+			println(e.getMessage());
+			if (!Util.containsAllCaseInsensitive(e.getMessage(), "error", "solving")) {
+				throw new AssertionError("Should have thrown 'Error solving...' error, but threw " + e.getMessage(), e);
+			}
+		}
+	}
+	
 	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues) {
 		HOGMMultiQuerySamplingProblemSolver solver = 
 				new HOGMMultiQuerySamplingProblemSolver(
