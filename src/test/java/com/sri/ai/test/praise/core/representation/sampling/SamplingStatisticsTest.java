@@ -32,7 +32,7 @@ public class SamplingStatisticsTest {
 
 	private static Random random = new Random();
 	
-	int numberOfSamples = 10000000;
+	int numberOfSamples = 10000;
 
 	SamplingFactor factor;
 	SamplingFactor normal;
