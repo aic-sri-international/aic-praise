@@ -6,7 +6,6 @@ import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
@@ -20,7 +19,7 @@ public interface SamplingRuleSet {
 	
 	public SamplingRuleSet replaceFactor(SamplingFactor samplingFactor);
 
-	SamplingRuleSet sumOut(List<? extends Variable> variables, SamplingFactor factorOnResultingRules);
+	SamplingRuleSet project(List<? extends Goal> remainingGoals, SamplingFactor factorOnProjectedSamplingRules);
 
 	static SamplingRuleSet union(List<? extends SamplingRuleSet> samplingRulesSet) {
 		List<? extends Goal> unionOfVariables = unionArrayList(functionIterator(samplingRulesSet, SamplingRuleSet::getAllGoals));

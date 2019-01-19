@@ -2,6 +2,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.subtract;
 
 import java.util.List;
@@ -11,6 +12,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableIsDefinedGoal;
+import com.sri.ai.util.planning.api.Goal;
 
 public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 
@@ -41,7 +44,8 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 	public SamplingRuleSet makeSamplingRules() {
 //		println("Marginalizing rules for " + this);
 		SamplingRuleSet samplingRuleSet = getMarginalizedFactor().getSamplingRuleSet();
-		SamplingRuleSet marginalSamplingRules = samplingRuleSet.sumOut(getMarginalizedVariables(), this);
+		List<? extends Goal> remainingGoals = mapIntoList(getVariables(), v -> new VariableIsDefinedGoal(v));
+		SamplingRuleSet marginalSamplingRules = samplingRuleSet.project(remainingGoals, this);
 //		println("Sampling rules: " + samplingRuleSet);
 //		println("Marginalized variables: " + getMarginalizedVariables());
 //		println("Marginalized sampling rules:" + marginalSamplingRules);

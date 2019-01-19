@@ -5,7 +5,6 @@ import static com.sri.ai.util.Util.arrayListFrom;
 import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoArrayList;
-import static com.sri.ai.util.Util.subtract;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,14 +56,12 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 	}
 
 	@Override
-	public SamplingRuleSet sumOut(List<? extends Variable> summedOutVariables, SamplingFactor factorOnResultingRules) {
+	public SamplingRuleSet project(List<? extends Goal> remainingGoals, SamplingFactor factorOnProjectedSamplingRules) {
 
-		List<? extends Goal> summedOutVariableGoals = makeSureItsListOfVariableGoals(summedOutVariables);
-		
-		List<Goal> remainingVariablesAsGoals = subtract(getAllGoals(), summedOutVariableGoals);
-		
-		DefaultSamplingRuleSet result = makeMarginalizedSamplingRules(summedOutVariableGoals,  remainingVariablesAsGoals, factorOnResultingRules);
-		
+		ProjectionOfSetOfRules<SamplingRule, Goal> projector = getProjector(remainingGoals);
+		Set<? extends SamplingRule> projectedSamplingRules = projector.getProjectedSetOfRules();
+		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(remainingGoals, new ArrayList<>(projectedSamplingRules));
+		result = result.replaceFactor(factorOnProjectedSamplingRules);
 		return result;
 	}
 
@@ -83,20 +80,8 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 		return v -> v instanceof Goal? (Goal) v : new VariableIsDefinedGoal(v);
 	}
 
-	private ProjectionOfSetOfRules<SamplingRule, Goal> getMarginalizer(List<? extends Goal> remainingVariablesAsGoals) {
+	private ProjectionOfSetOfRules<SamplingRule, Goal> getProjector(List<? extends Goal> remainingVariablesAsGoals) {
 		return new ProjectionOfSetOfRules<>(getSamplingRules(), remainingVariablesAsGoals, makeSamplingRuleFactory());
-	}
-
-	private DefaultSamplingRuleSet makeMarginalizedSamplingRules(
-			List<? extends Goal> summedOutVariableGoals,
-			List<Goal> remainingVariablesAsGoals, 
-			SamplingFactor factorOnResultingRules) {
-		
-		ProjectionOfSetOfRules<SamplingRule, Goal> marginalizer = getMarginalizer(remainingVariablesAsGoals);
-		Set<? extends SamplingRule> marginalizedSamplingRules = marginalizer.getProjectedSetOfRules();
-		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(remainingVariablesAsGoals, new ArrayList<>(marginalizedSamplingRules));
-		result = result.replaceFactor(factorOnResultingRules);
-		return result;
 	}
 
 	private BinaryFunction<Goal, Set<? extends Goal>, SamplingRule> makeSamplingRuleFactory() {
