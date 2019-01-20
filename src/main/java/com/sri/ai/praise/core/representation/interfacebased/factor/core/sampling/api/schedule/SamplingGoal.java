@@ -3,16 +3,19 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import java.util.Collection;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.util.planning.api.Goal;
 
 /**
- * A type of {@link Goal} that depends on information on a {@link Variable} to be satisfied.
+ * A type of {@link Goal} that depends on variables in a {@link Sample} to be satisfied.
  * @author braz
  * 
  *
  */
-public interface VariableDependentGoal extends Goal {
+public interface SamplingGoal extends Goal {
 
+	boolean isSatisfied(Sample sample);
+	
 	/**
 	 * Provides the variables on which this goal depends.
 	 * @return

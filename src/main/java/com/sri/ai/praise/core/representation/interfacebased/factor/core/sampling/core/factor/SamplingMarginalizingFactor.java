@@ -1,19 +1,20 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
+import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.fill;
+import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.join;
-import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.subtract;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableIsDefinedGoal;
-import com.sri.ai.util.planning.api.Goal;
 
 public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 
@@ -43,9 +44,19 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 	@Override
 	public SamplingRuleSet makeSamplingRules() {
 		SamplingRuleSet samplingRuleSet = getMarginalizedFactor().getSamplingRuleSet();
-		List<? extends Goal> remainingGoals = mapIntoList(getVariables(), v -> new VariableIsDefinedGoal(v));
+		List<? extends SamplingGoal> remainingGoals = computeRemainingGoals(samplingRuleSet);
 		SamplingRuleSet marginalSamplingRules = samplingRuleSet.project(remainingGoals, this);
 		return marginalSamplingRules;
+	}
+
+	private List<? extends SamplingGoal> computeRemainingGoals(SamplingRuleSet samplingRuleSet) {
+		Set<? extends SamplingGoal> allGoals = samplingRuleSet.getAllGoals();
+		List<? extends SamplingGoal> remainingGoals = collectToList(allGoals, this::doesNotDependOnMarginalizedVariables);
+		return remainingGoals;
+	}
+
+	private boolean doesNotDependOnMarginalizedVariables(SamplingGoal goal) {
+		return !intersect(goal.dependencies(), marginalizedVariables);
 	}
 
 	@Override

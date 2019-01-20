@@ -6,9 +6,10 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.VariableDependentGoal;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 
-public class VariableIsDefinedGoal implements VariableDependentGoal {
+public class VariableIsDefinedGoal implements SamplingGoal {
 
 	private Variable variable;
 
@@ -18,6 +19,12 @@ public class VariableIsDefinedGoal implements VariableDependentGoal {
 
 	public Variable getVariable() {
 		return variable;
+	}
+
+	@Override
+	public boolean isSatisfied(Sample sample) {
+		boolean result = sample.getAssignment().get(variable) != null;
+		return result;
 	}
 
 	List<Variable> cachedDependencies;

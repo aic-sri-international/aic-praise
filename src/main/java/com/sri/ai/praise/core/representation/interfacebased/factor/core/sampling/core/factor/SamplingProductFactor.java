@@ -2,15 +2,14 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet.union;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.collectToSet;
 import static com.sri.ai.util.Util.flattenOneLevelToArrayList;
 import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
-import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.planning.core.PlannerUsingEachRuleAtMostOnce.planUsingEachRuleAtMostOnce;
@@ -23,14 +22,12 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingState;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableIsDefinedGoal;
-import com.sri.ai.util.planning.api.Goal;
 import com.sri.ai.util.planning.api.Plan;
 
 public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
@@ -41,7 +38,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	 */
 	public static boolean adaptiveSampling = true;
 	
-	private Map<Set<Goal>, Plan> fromSatisfiedGoalsToPlan;
+	private Map<Set<SamplingGoal>, Plan> fromSatisfiedGoalsToPlan;
 
 	public SamplingProductFactor(ArrayList<? extends SamplingFactor> multipliedFactors, Random random) {
 		super(flattenOneLevel(multipliedFactors), random);
@@ -57,24 +54,23 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	}
 
 	public Plan getSamplingPlan(Sample sampleToComplete) {
-		Set<Goal> satisfiedGoals = getSatisfiedGoals(sampleToComplete);
+		Set<SamplingGoal> satisfiedGoals = getSatisfiedGoals(sampleToComplete);
 		return getSamplingPlan(satisfiedGoals);
 	}
 
-	private Set<Goal> getSatisfiedGoals(Sample sample) {
-		Set<Variable> variablesDefinedInSample = sample.getAssignment().mapValue().keySet();
-		Set<Variable> factorVariablesDefinedInSample = intersection(getVariables(), variablesDefinedInSample);
-		Set<Goal> result = mapIntoSet(factorVariablesDefinedInSample, v -> new VariableIsDefinedGoal(v));
+	private Set<SamplingGoal> getSatisfiedGoals(Sample sample) {
+		Set<? extends SamplingGoal> allGoals = getSamplingRuleSet().getAllGoals();
+		Set<SamplingGoal> result = collectToSet(allGoals, g -> g.isSatisfied(sample));
 		return result;
 	}
 
-	public Plan getSamplingPlan(Set<Goal> satisfiedGoals) {
+	public Plan getSamplingPlan(Set<SamplingGoal> satisfiedGoals) {
 		Plan samplingPlan = getValuePossiblyCreatingIt(fromSatisfiedGoalsToPlan, satisfiedGoals, this::makePlan);
 		return samplingPlan;
 	}
 	
-	private Plan makePlan(Set<Goal> satisfiedGoals) {
-		List<Goal> allGoals = mapIntoList(getVariables(), v -> new VariableIsDefinedGoal(v));
+	private Plan makePlan(Set<SamplingGoal> satisfiedGoals) {
+		Set<? extends SamplingGoal> allGoals = getSamplingRuleSet().getAllGoals();
 		ArrayList<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
 		Plan plan = planUsingEachRuleAtMostOnce(allGoals, satisfiedGoals, samplingRules);
 		return plan;
