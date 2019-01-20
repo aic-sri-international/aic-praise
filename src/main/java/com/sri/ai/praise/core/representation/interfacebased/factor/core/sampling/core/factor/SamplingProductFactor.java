@@ -11,6 +11,7 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.set;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.planning.core.PlannerUsingEachRuleAtMostOnce.planUsingEachRuleAtMostOnce;
 
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
@@ -72,7 +74,8 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	private Plan makePlan(Set<SamplingGoal> satisfiedGoals) {
 		Set<? extends SamplingGoal> allGoals = getSamplingRuleSet().getAllGoals();
 		ArrayList<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
-		Plan plan = planUsingEachRuleAtMostOnce(allGoals, satisfiedGoals, samplingRules);
+		Predicate<SamplingGoal> isEffectivelyStaticGoal = g -> true;
+		Plan plan = planUsingEachRuleAtMostOnce(allGoals, satisfiedGoals, set() /* TODO can do better */, isEffectivelyStaticGoal, samplingRules);
 		return plan;
 	}
 
