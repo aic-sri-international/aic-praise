@@ -30,6 +30,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingState;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableIsDefinedGoal;
 import com.sri.ai.util.planning.api.Plan;
 
 public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
@@ -72,10 +73,11 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	}
 	
 	private Plan makePlan(Set<SamplingGoal> satisfiedGoals) {
-		Set<? extends SamplingGoal> allGoals = getSamplingRuleSet().getAllGoals();
+		Predicate<SamplingGoal> isEffectivelyStaticGoal = g -> g instanceof VariableIsDefinedGoal;
+		Set<? extends SamplingGoal> allRequiredGoals = collectToSet(getSamplingRuleSet().getAllGoals(), g -> isEffectivelyStaticGoal.test(g));
 		ArrayList<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
-		Predicate<SamplingGoal> isEffectivelyStaticGoal = g -> true;
-		Plan plan = planUsingEachRuleAtMostOnce(allGoals, satisfiedGoals, set() /* TODO can do better */, isEffectivelyStaticGoal, samplingRules);
+		Plan plan = planUsingEachRuleAtMostOnce(allRequiredGoals, satisfiedGoals, set() /* TODO can do better */, isEffectivelyStaticGoal, samplingRules);
+		myAssert(!plan.isFailedPlan(), () -> "Plan for sampling product factor has failed: " + this);
 		return plan;
 	}
 

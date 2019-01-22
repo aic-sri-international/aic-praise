@@ -45,4 +45,9 @@ public class DivisionSamplingFactor extends AbstractDeterministicNumericBinaryFu
 		return functionResultValue * firstValue;
 	}
 
+	@Override
+	protected String getFunctionName() {
+		return "/";
+	}
+
 }

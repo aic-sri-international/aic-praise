@@ -56,7 +56,7 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 	}
 
 	private boolean doesNotDependOnMarginalizedVariables(SamplingGoal goal) {
-		return !intersect(goal.dependencies(), marginalizedVariables);
+		return !intersect(goal.getVariables(), marginalizedVariables);
 	}
 
 	@Override

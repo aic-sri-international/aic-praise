@@ -1,6 +1,7 @@
 package com.sri.ai.test.praise.core.representation.sampling;
 
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.containsAllCaseInsensitive;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
@@ -64,9 +65,9 @@ public class EqualitySamplingFactorTest {
 				factor.sampleOrWeigh(sample);
 			}
 		}
-		catch (Throwable throwable) {
-			if ( ! throwable.getMessage().contains("Factor was not able to complete sample") ) {
-				throw throwable;
+		catch (Throwable t) {
+			if ( ! t.getMessage().contains("Factor was not able to complete sample") && ! containsAllCaseInsensitive(t.getMessage(), "plan", "failed")) {
+				throw t;
 			}
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
 			assertEquals(null, sample.getAssignment().get(x));

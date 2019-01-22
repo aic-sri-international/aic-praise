@@ -18,6 +18,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.SamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.function.api.functions.Functions;
@@ -268,6 +269,59 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
 	
+	// @Test
+	public void multiplicationInverseSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"x = Normal(4, 2);" +
+				"y = 2;" +
+				"z = 6;" +
+				"z = x * y;" +
+				"";
+
+		// x must be 3 with probability 1 in spite of its normal prior because x = z/y = 3/2.
+		String query = "x";
+		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0 else if x < -0.5 then 0 else if x < 0.5 then 0 else if x < 1.5 then 0 else if x < 2.5 then 0 else if x < 3.5 then 1 else if x < 4.5 then 0 else if x < 5.5 then 0 else if x < 6.5 then 0 else if x < 7.5 then 0 else if x < 8.5 then 0 else if x < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+	
+	//@Test
+	public void multiplicationInverseNotKickingInWhenOtherProductOfOtherArgumentsIsZeroSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"random w : [-10;10];" +
+				"x = Normal(4, 2);" +
+				"y = 0;" +
+				"z = Normal(6, 2);" +
+				"w = Normal(6, 2);" +
+				"z = x * y * w;" + // y is zero so z will also be zero and we cannot tell anything about the value of x, which will follow its prior.
+				"";
+
+		String query = "x";
+		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0.002 else if x < -0.5 then 0.008 else if x < 0.5 then 0.032 else if x < 1.5 then 0.06 else if x < 2.5 then 0.121 else if x < 3.5 then 0.169 else if x < 4.5 then 0.222 else if x < 5.5 then 0.169 else if x < 6.5 then 0.121 else if x < 7.5 then 0.059 else if x < 8.5 then 0.025 else if x < 9.5 then 0.01 else 0.002");
+		int numberOfInitialSamples = 1000;
+		int numberOfDiscreteValues = 21;
+		
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+		
+		// let's also test that z is indeed 0 in spite of its normal prior.
+		query = "z";
+		expected = parse("if z < -9.5 then 0 else if z < -8.5 then 0 else if z < -7.5 then 0 else if z < -6.5 then 0 else if z < -5.5 then 0 else if z < -4.5 then 0 else if z < -3.5 then 0 else if z < -2.5 then 0 else if z < -1.5 then 0 else if z < -0.5 then 0 else if z < 0.5 then 1 else if z < 1.5 then 0 else if z < 2.5 then 0 else if z < 3.5 then 0 else if z < 4.5 then 0 else if z < 5.5 then 0 else if z < 6.5 then 0 else if z < 7.5 then 0 else if z < 8.5 then 0 else if z < 9.5 then 0 else 0");
+		numberOfInitialSamples = 1000;
+		numberOfDiscreteValues = 21;
+		
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
 	@Test
 	public void divisionSamplingTest() {
 
@@ -545,6 +599,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		println("query: " + query);
 		println("expected: " + expected);
 		println("actual  : " + resultValue);
+		if (resultValue instanceof SamplingFactor) println(((SamplingFactor) resultValue).nestedString(true));
 		if (generateGraph) generateGraph(resultValue);
 		String reasonForDifference = areEqualUpToNumericDifference(expected, resultValue, 0.1);
 		if (reasonForDifference != "") {

@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.frome
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.getConstantDoubleValueOrThrowErrorWithMessage;
+import static com.sri.ai.expresso.helper.Expressions.isNumber;
 import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
 import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIATION;
@@ -27,6 +28,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualitySamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.DivisionSamplingFactor;
@@ -173,10 +175,34 @@ public class FromExpressionToSamplingFactors {
 	private void normalCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) throws Error {
 		int numberOfArguments = expression.numberOfArguments();
 		myAssert(numberOfArguments == 2, () -> "the Normal distribution must have two arguments, but this one has " + expression.getArguments());
+		if (isNumber(expression.get(0))) {
+			normalWithFixedMeanCompilation(compoundExpressionVariable, expression, factors);
+		}
+		else {
+			normalWithVariableMeanCompilation(compoundExpressionVariable, expression, factors);
+		}
+	}
+
+	private void normalWithFixedMeanCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		double mean = getMean(expression);
+		double standardDeviation = getStandardDeviation(expression);
+		Factor normalFactor = new NormalWithFixedMeanAndStandardDeviation(compoundExpressionVariable, mean, standardDeviation, getRandom());
+		factors.add(normalFactor);
+	}
+
+	private void normalWithVariableMeanCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
 		Variable meanVariable = expressionCompilation(expression.get(0), factors);
 		double standardDeviation = getStandardDeviation(expression);
 		Factor normalFactor = new NormalWithFixedStandardDeviation(compoundExpressionVariable, meanVariable, standardDeviation, getRandom());
 		factors.add(normalFactor);
+	}
+
+	private double getMean(Expression expression) throws Error {
+		double standardDeviation = 
+				getConstantDoubleValueOrThrowErrorWithMessage(
+						expression.get(0), 
+						"Normal must take a constant mean, but got " + expression.get(0) + " instead");
+		return standardDeviation;
 	}
 
 	private double getStandardDeviation(Expression expression) throws Error {

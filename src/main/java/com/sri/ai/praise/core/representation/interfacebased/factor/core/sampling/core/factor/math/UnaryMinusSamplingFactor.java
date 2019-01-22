@@ -33,4 +33,9 @@ public class UnaryMinusSamplingFactor extends AbstractDeterministicNumericUnaryF
 		return -functionResultValue;
 	}
 
+	@Override
+	protected String getFunctionName() {
+		return "-";
+	}
+
 }

@@ -32,6 +32,6 @@ public interface SamplingGoal extends ContingentGoal {
 	 * Provides the variables on which this goal depends.
 	 * @return
 	 */
-	Collection<? extends Variable> dependencies();
+	Collection<? extends Variable> getVariables();
 	
 }

@@ -1,13 +1,18 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet.samplingRuleSet;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.deterministicSamplingRuleFromGoals;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.deterministicSamplingRuleFromVariables;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.collectThoseWhoseIndexSatisfy;
 import static com.sri.ai.util.Util.flatList;
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.println;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -16,8 +21,10 @@ import java.util.function.Function;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableIsDefinedGoal;
 
 /**
  * An abstract implementation of a {@link SamplingFactor} based on a deterministic function.
@@ -44,6 +51,20 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	protected abstract Iterator<? extends Integer> argumentsWithInverseFunctionIterator();
 
 	protected abstract Object computeMissingArgumentValue(Function<Variable, Object> fromVariableToValue, int missingArgumentIndex);
+
+	protected abstract String getFunctionName();
+
+	/**
+	 * Provides the contingent conditions for application of the inverse for a given argument,
+	 * in addition to the other variables being defined.
+	 * For example, in multiplication w = x*y*z, we can compute z from w, z, y but only if the product x*y is not zero.
+	 * Default is empty list. 
+	 * @param i
+	 * @return
+	 */
+	protected Collection<? extends SamplingGoal> conditionsForInverseOfArgument(int i) {
+		return list();
+	}
 
 	//////////////////////
 	
@@ -182,9 +203,28 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	}
 
 	private SamplingRule makeSamplingRuleForArgumentAt(int i) {
-		List<Variable> otherArgumentsAndFunctionResult = makeListOfOtherArgumentsAndFunctionResult(i);
-		SamplingRule samplingRule = deterministicSamplingRuleFromVariables(this, list(arguments.get(i)), otherArgumentsAndFunctionResult);
+		List<SamplingGoal> antecedents = getAntecedentsForSamplingRuleForArgument(i);
+		SamplingGoal iThArgumentIsDefined = getConsequentForSamplingRuleForArgument(i);
+		SamplingRule samplingRule = deterministicSamplingRuleFromGoals(this, list(iThArgumentIsDefined), antecedents);
 		return samplingRule;
+	}
+
+	private List<SamplingGoal> getAntecedentsForSamplingRuleForArgument(int i) {
+		List<SamplingGoal> antecedents = list();
+		antecedents.addAll(makeGoalsForFunctionResultAndOtherArgumentsBeingDefined(i));
+		antecedents.addAll(conditionsForInverseOfArgument(i));
+		return antecedents;
+	}
+
+	private List<SamplingGoal> makeGoalsForFunctionResultAndOtherArgumentsBeingDefined(int i) {
+		List<Variable> functionResultAndArgumentsOtherThanI = makeListOfFunctionResultAndArgumentsOtherThan(i);
+		List<SamplingGoal> goalsForFunctionResultAndArgumentsOtherThanI = mapIntoList(functionResultAndArgumentsOtherThanI, v -> new VariableIsDefinedGoal(v));
+		return goalsForFunctionResultAndArgumentsOtherThanI;
+	}
+
+	private SamplingGoal getConsequentForSamplingRuleForArgument(int i) {
+		SamplingGoal iThArgumentIsDefined = new VariableIsDefinedGoal(arguments.get(i));
+		return iThArgumentIsDefined;
 	}
 
 	//////////////////////
@@ -195,10 +235,25 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	 * @param i
 	 * @return
 	 */
-	protected List<Variable> makeListOfOtherArgumentsAndFunctionResult(int i) {
+	protected List<Variable> makeListOfFunctionResultAndArgumentsOtherThan(int i) {
 		List<Variable> otherArgumentsAndFunctionResult = new ArrayList<Variable>(arguments);
 		otherArgumentsAndFunctionResult.set(i, functionResult);
 		return otherArgumentsAndFunctionResult;
+	}
+	
+	/**
+	 * A convenience protected method providing all arguments but the one with given index.
+	 * @param i
+	 * @return
+	 */
+	protected List<Variable> getArgumentsOtherThan(int i) {
+		List<Variable> otherArguments = collectThoseWhoseIndexSatisfy(getArguments(), j -> 
+		{ 
+			println("j: " + j);
+			println("i: " + i);
+			return j != i;
+		});
+		return otherArguments;
 	}
 	
 	//////////////////////
@@ -214,5 +269,11 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	public List<? extends Variable> getArguments() {
 		return arguments;
 	}
+	
+	//////////////////////
 
+	@Override
+	public String toString() {
+		return getFunctionResult() + " = " + getFunctionName() + "(" + join(getArguments()) + ")";
+	}
 }

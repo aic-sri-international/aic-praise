@@ -40,7 +40,7 @@ public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extend
 	 */
 	@Override
 	protected abstract Iterator<? extends Integer> argumentsWithInverseFunctionIterator();
-
+	
 	/**
 	 * Define how to compute the missing value of an argument based on the result and
 	 * the application of the operator to all remaining, defined arguments.

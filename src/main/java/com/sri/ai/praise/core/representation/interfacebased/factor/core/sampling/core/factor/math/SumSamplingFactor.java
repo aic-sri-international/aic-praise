@@ -43,4 +43,9 @@ public class SumSamplingFactor extends AbstractCommutativeAssociativeRingSamplin
 		return Double.class;
 	}
 
+	@Override
+	protected String getFunctionName() {
+		return "+";
+	}
+
 }

@@ -45,4 +45,9 @@ public class SubtractionSamplingFactor extends AbstractDeterministicNumericBinar
 		return functionResultValue + firstValue;
 	}
 
+	@Override
+	protected String getFunctionName() {
+		return "-";
+	}
+
 }

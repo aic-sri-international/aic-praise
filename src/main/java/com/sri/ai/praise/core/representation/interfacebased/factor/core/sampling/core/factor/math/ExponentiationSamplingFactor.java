@@ -45,4 +45,9 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicNumericBi
 		return Math.log(functionResultValue) / Math.log(firstValue);
 	}
 
+	@Override
+	protected String getFunctionName() {
+		return "^";
+	}
+
 }
