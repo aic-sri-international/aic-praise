@@ -9,7 +9,6 @@ import static com.sri.ai.util.Util.flatList;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.println;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -249,8 +248,6 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	protected List<Variable> getArgumentsOtherThan(int i) {
 		List<Variable> otherArguments = collectThoseWhoseIndexSatisfy(getArguments(), j -> 
 		{ 
-			println("j: " + j);
-			println("i: " + i);
 			return j != i;
 		});
 		return otherArguments;

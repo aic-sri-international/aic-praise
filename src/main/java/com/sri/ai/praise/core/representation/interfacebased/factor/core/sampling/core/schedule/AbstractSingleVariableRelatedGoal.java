@@ -11,7 +11,7 @@ public abstract class AbstractSingleVariableRelatedGoal extends AbstractVariable
 		super(list(variable));
 	}
 	
-	Variable getVariable() {
+	public Variable getVariable() {
 		return getFirst(getVariables());
 	}
 

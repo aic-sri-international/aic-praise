@@ -5,10 +5,13 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
+import com.google.common.base.Function;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.util.planning.api.Plan;
 import com.sri.ai.util.planning.api.Rule;
@@ -113,17 +116,42 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		SamplingRule result = new SamplingRule(newSamplingFactor, getConsequents(), getAntecendents(), getEstimatedSuccessWeight());
 		return result;
 	}
+
+	public SamplingRule replaceGoals(Function<SamplingGoal, SamplingGoal> replacement) {
+		List<SamplingGoal> newAntecedents = mapIntoList(getAntecendents(), replacement);
+		List<SamplingGoal> newConsequents = mapIntoList(getConsequents(), replacement);
+		SamplingRule result = new SamplingRule(getSamplingFactor(), newConsequents, newAntecedents, getEstimatedSuccessWeight());
+		return result;
+	}
 	
 	@Override
 	public void execute(State state) {
 		SamplingState sampleState = assertType(state, SamplingState.class, getClass());
-		getSamplingFactor().sampleOrWeigh(sampleState.getSample());
+		sampleOrWeigh(sampleState.getSample());
 		hasFired = true;
+	}
+
+	public void sampleOrWeigh(Sample sample) {
+		getSamplingFactor().sampleOrWeigh(sample);
 	}
 	
 	@Override
 	public String toString() {
-		return join(consequents) + " <= " + join(antecedents) + " with " + getSamplingFactor();
+		String consequentsString = join(consequents);
+		String antecedentsString = join(antecedents);
+		SamplingFactor factorString = getSamplingFactor();
+		String result = consequentsString + " <= " + antecedentsString + " with " + factorString;
+		return result;
 	}
+
+	public static final Comparator<? super SamplingRule> SUCCESS_COMPARATOR = new Comparator<SamplingRule>() {
+	
+		@Override
+		public int compare(SamplingRule rule1, SamplingRule rule2) {
+			return Double.compare(rule2.getEstimatedSuccessWeight(), rule1.getEstimatedSuccessWeight());
+			// note the inversion, as we want descending order
+		}
+		
+	};
 
 }

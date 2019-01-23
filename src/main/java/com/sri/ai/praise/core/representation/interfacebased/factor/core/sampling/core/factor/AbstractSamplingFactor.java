@@ -44,6 +44,7 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 		return samplingRules;
 	}
 
+	@Override
 	public Random getRandom() {
 		return random;
 	}

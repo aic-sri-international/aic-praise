@@ -2,7 +2,11 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.arrayListFrom;
+import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.mapIntoArrayList;
+import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.set;
 
 import java.util.ArrayList;
@@ -55,26 +59,65 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 	}
 
 	@Override
-	public SamplingRuleSet project(List<? extends SamplingGoal> remainingGoals, SamplingFactor projectedFactor) {
-		Set<? extends SamplingRule> projectedSamplingRules = projectSamplingRules(remainingGoals, projectedFactor);
+	public SamplingRuleSet project(List<? extends SamplingGoal> remainingGoals, SamplingFactor projectedFactor, SamplingFactor originalFactor) {
+		Set<? extends SamplingRule> projectedSamplingRules = projectSamplingRules(remainingGoals, projectedFactor, originalFactor);
 		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(new ArrayList<>(projectedSamplingRules));
 		return result;
 	}
 
-	private Set<? extends SamplingRule> projectSamplingRules(List<? extends SamplingGoal> remainingGoals, SamplingFactor projectedFactor) {
-		ProjectionOfSetOfRules<SamplingRule, SamplingGoal> projector = getProjector(remainingGoals, projectedFactor);
+	private Set<? extends SamplingRule> projectSamplingRules(List<? extends SamplingGoal> remainingGoals, SamplingFactor projectedFactor, SamplingFactor originalFactor) {
+		ProjectionOfSetOfRules<SamplingRule, SamplingGoal> projector = getProjector(remainingGoals, projectedFactor, originalFactor);
 		Set<? extends SamplingRule> projectedSamplingRules = projector.getProjectedSetOfRules();
+		println("Projected sampling rules:");
+		println(join("\n", projectedSamplingRules));
 		return projectedSamplingRules;
 	}
 
-	private ProjectionOfSetOfRules<SamplingRule, SamplingGoal> getProjector(List<? extends SamplingGoal> remainingVariablesAsGoals, SamplingFactor projectedFactor) {
-		return new ProjectionOfSetOfRules<>(getSamplingRules(), remainingVariablesAsGoals, makeSamplingRuleFactory(projectedFactor));
+	private ProjectionOfSetOfRules<SamplingRule, SamplingGoal> getProjector(List<? extends SamplingGoal> remainingAsGoals, SamplingFactor projectedFactor, SamplingFactor originalFactor) {
+		ArrayList<? extends SamplingRule> samplingRulesForProjection = getSamplingRulesForProjection(originalFactor);
+		List<? extends SamplingGoal> remainingGoalsForProjection = getRemainingGoalsForProjection(remainingAsGoals, originalFactor);
+		return new ProjectionOfSetOfRules<>(samplingRulesForProjection, remainingGoalsForProjection, makeSamplingRuleFactory(projectedFactor));
 	}
 
 	private BinaryFunction<SamplingGoal, Set<? extends SamplingGoal>, SamplingRule> makeSamplingRuleFactory(SamplingFactor projectedFactor) {
 		return (SamplingGoal consequent, Set<? extends SamplingGoal> antecedents) -> {
 			return new SamplingRule(projectedFactor, arrayList(consequent), arrayListFrom(antecedents), 0.5);
 		};
+	}
+	
+	private ArrayList<? extends SamplingRule> getSamplingRulesForProjection(SamplingFactor originalFactor) {
+		ArrayList<? extends SamplingRule> result = mapIntoArrayList(getSamplingRules(), g -> replaceByLucky(g, originalFactor));
+		println("Original rules:");
+		println(join("\n", getSamplingRules()));
+		println("Lucky rules:");
+		println(join("\n", result));
+		return result;
+	}
+	
+	private SamplingRule replaceByLucky(SamplingRule rule, SamplingFactor originalFactor) {
+		SamplingRule result = rule.replaceGoals(g -> replaceByLucky(g, originalFactor));
+		println("Original rule: " + rule);
+		println("Lucky rule   : " + result);
+		return result;
+	}
+	
+	private List<? extends SamplingGoal> getRemainingGoalsForProjection(List<? extends SamplingGoal> remainingGoals, SamplingFactor originalFactor) {
+		return mapIntoList(remainingGoals, g -> replaceByLucky(g, originalFactor));
+	}
+
+	private SamplingGoal replaceByLucky(SamplingGoal goal, SamplingFactor originalFactor) {
+		SamplingGoal result;
+		if ( isEffectivelyContingent(goal) && intersect(goal.getVariables(), originalFactor.getVariables())) {
+			result = new LuckySamplingGoal(goal, originalFactor);
+		}
+		else {
+			result = goal;
+		}
+		return result;
+	}
+
+	private boolean isEffectivelyContingent(SamplingGoal goal) {
+		return ! (goal instanceof VariableIsDefinedGoal);
 	}
 
 	@Override

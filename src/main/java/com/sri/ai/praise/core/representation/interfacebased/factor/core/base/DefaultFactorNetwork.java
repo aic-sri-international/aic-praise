@@ -40,6 +40,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -75,6 +76,16 @@ extends DefaultManyToManyRelation<IdentityWrapper<Factor>, Variable> implements 
 
 	private void indexFactorAndVariable(Factor factor, Variable variable) {
 		this.add(identityWrapper(factor), variable);
+	}
+
+	@Override
+	public Collection<Variable> getVariables() {
+		return getBs();
+	}
+
+	@Override
+	public Collection<Factor> getFactors() {
+		return mapIntoList(getAs(), wrapper -> wrapper.getObject());
 	}
 
 	@Override

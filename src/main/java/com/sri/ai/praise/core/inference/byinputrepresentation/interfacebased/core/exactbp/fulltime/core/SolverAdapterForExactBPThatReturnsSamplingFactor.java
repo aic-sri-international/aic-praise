@@ -39,10 +39,18 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.co
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.praise.core.PRAiSEUtil.normalize;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor.expressionSamplingFactor;
+import static com.sri.ai.util.Util.collectToList;
+import static com.sri.ai.util.Util.fold;
 import static com.sri.ai.util.Util.forAll;
+import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.println;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
@@ -50,10 +58,13 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.DynamicSamplingProductFactor;
+import com.sri.ai.util.Util;
 
 /**
  * A {@link Solver} adapter based on {@link ExactBP} for {@link Problem}s using {@link SamplingFactor}s defined on {@link ExpressionVariable}s.
@@ -79,9 +90,56 @@ public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver 
 	
 	@Override
 	public Expression solve(Problem problem) {
-		Factor unnormalizedMarginal = new ExactBP(problem).apply();
+		Factor unnormalizedMarginal = useDynamicGlobalProduct(problem);
+//		Factor unnormalizedMarginal = useGlobalProduct(problem);
+//		Factor unnormalizedMarginal = useExactBP(problem);
 		Expression normalizedMarginalExpression = getNormalizedMarginalExpression(unnormalizedMarginal, problem);
 		return normalizedMarginalExpression;
+	}
+
+	private Factor useExactBP(Problem problem) {
+		Factor unnormalizedMarginal = new ExactBP(problem).apply();
+		println("ExactBP result:");
+		if (unnormalizedMarginal instanceof SamplingFactor) {
+			println(((SamplingFactor)unnormalizedMarginal).nestedString(true));
+		}
+		return unnormalizedMarginal;
+	}
+	
+	private Factor useGlobalProduct(Problem problem) {
+		Factor globalProduct = fold(problem.getModel().getFactors(), Factor::multiply, IDENTITY_FACTOR);
+		List<Variable> eliminatedVariables = 
+				collectToList(
+						problem.getModel().getVariables(), 
+						v -> ! isRemainingVariable(v, problem));
+		Factor result = globalProduct.sumOut(eliminatedVariables);
+		return result;
+	}
+	
+	private Factor useDynamicGlobalProduct(Problem problem) {
+		ArrayList<SamplingFactor> samplingFactors = mapIntoArrayList(problem.getModel().getFactors(), f -> ((SamplingFactor) f));
+		Factor globalProduct;
+		if (samplingFactors.isEmpty()) {
+			globalProduct = IDENTITY_FACTOR;
+		}
+		else {
+			Random random = Util.getFirst(samplingFactors).getRandom();
+			globalProduct = new DynamicSamplingProductFactor(samplingFactors, random);
+		}
+		List<Variable> eliminatedVariables = 
+				collectToList(
+						problem.getModel().getVariables(), 
+						v -> ! isRemainingVariable(v, problem));
+		Factor result = globalProduct.sumOut(eliminatedVariables);
+		return result;
+	}
+
+	private boolean isRemainingVariable(Variable variable, Problem problem) {
+		boolean result = 
+				variable.equals(problem.getQueryVariable()) 
+				|| 
+				problem.getIsParameterPredicate().test(variable);
+		return result;
 	}
 
 	private Expression getNormalizedMarginalExpression(Factor unnormalizedMarginal, Problem problem) {

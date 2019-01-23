@@ -19,7 +19,7 @@ public class SumSamplingFactor extends AbstractCommutativeAssociativeRingSamplin
 	}
 
 	@Override
-	protected Double computeMissingArgument(Double functionResultValue, Double definedArgumentsOperatorApplication) {
+	protected Double computeMissingArgument(Double functionResultValue, Double definedArgumentsOperatorApplication, int missingArgumentIndex) {
 		return functionResultValue - definedArgumentsOperatorApplication;
 	}
 

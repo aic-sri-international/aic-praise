@@ -46,9 +46,10 @@ public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extend
 	 * the application of the operator to all remaining, defined arguments.
 	 * @param functionResultValue
 	 * @param definedArgumentsOperatorApplication
+	 * @param missingArgumentIndex TODO
 	 * @return
 	 */
-	abstract protected T computeMissingArgument(T functionResultValue, T definedArgumentsOperatorApplication);
+	abstract protected T computeMissingArgument(T functionResultValue, T definedArgumentsOperatorApplication, int missingArgumentIndex);
 
 	/**
 	 * Specifies the identity element of the operator.
@@ -81,7 +82,7 @@ public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extend
 		Iterator<T> argumentsButMissingOne = otherArgumentsIterator(fromVariableToValue, missingArgumentIndex);
 		T definedArgumentsOperatorApplication = evaluateFunction(argumentsButMissingOne);
 		T functionResultValue = getValue(fromVariableToValue, getFunctionResult());
-		T missingArgumentValue = computeMissingArgument(functionResultValue, definedArgumentsOperatorApplication);
+		T missingArgumentValue = computeMissingArgument(functionResultValue, definedArgumentsOperatorApplication, missingArgumentIndex);
 		return missingArgumentValue;
 	}
 

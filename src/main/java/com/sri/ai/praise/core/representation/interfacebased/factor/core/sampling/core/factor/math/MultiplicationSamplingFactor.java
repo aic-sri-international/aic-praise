@@ -25,8 +25,8 @@ public class MultiplicationSamplingFactor extends AbstractCommutativeAssociative
 	}
 
 	@Override
-	protected Double computeMissingArgument(Double functionResultValue, Double definedArgumentsOperatorApplication) {
-		myAssert(definedArgumentsOperatorApplication != 0.0, () -> "Oops, this should never happen!");
+	protected Double computeMissingArgument(Double functionResultValue, Double definedArgumentsOperatorApplication, int missingArgumentIndex) {
+		myAssert(definedArgumentsOperatorApplication != 0.0, () -> "Sampling rule for computing " + getArguments().get(missingArgumentIndex) + " out of " + getFunctionResult() + " and " + getArgumentsOtherThan(missingArgumentIndex) + " in " + this + " was invoked, but product of " + getArgumentsOtherThan(missingArgumentIndex) + " is zero. This was supposed to have been checked at this point.");
 		double result = functionResultValue / definedArgumentsOperatorApplication;
 		return result;
 	}

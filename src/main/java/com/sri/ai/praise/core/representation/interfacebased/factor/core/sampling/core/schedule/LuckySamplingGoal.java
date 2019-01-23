@@ -25,7 +25,7 @@ public class LuckySamplingGoal extends AbstractVariablesRelatedGoal {
 	private SamplingFactor factor;
 	private SamplingGoal goal;
 	
-	public LuckySamplingGoal(SamplingFactor factor, SamplingGoal goal) {
+	public LuckySamplingGoal(SamplingGoal goal, SamplingFactor factor) {
 		super(list());
 		this.factor = factor;
 		this.goal = goal;
@@ -39,8 +39,8 @@ public class LuckySamplingGoal extends AbstractVariablesRelatedGoal {
 	}
 
 	@Override
-	protected String getGoalName() {
-		return "lucky(" + factor + ", " + goal + ")";
+	public String getGoalName() {
+		return "lucky[" + factor + ", " + goal + "]";
 	}
 
 }

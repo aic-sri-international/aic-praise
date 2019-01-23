@@ -17,7 +17,7 @@ public interface SamplingRuleSet {
 
 	Set<? extends SamplingGoal> getAllGoals();
 	
-	SamplingRuleSet project(List<? extends SamplingGoal> remainingGoals, SamplingFactor factorOnProjectedSamplingRules);
+	SamplingRuleSet project(List<? extends SamplingGoal> remainingGoals, SamplingFactor factorOnProjectedSamplingRules, SamplingFactor originalFactor);
 
 	static SamplingRuleSet union(List<? extends SamplingRuleSet> samplingRulesSet) {
 		ArrayList<? extends SamplingRule> unionOfRules = unionArrayList(functionIterator(samplingRulesSet, SamplingRuleSet::getSamplingRules));

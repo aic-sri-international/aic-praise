@@ -4,6 +4,8 @@ import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
+import java.util.Random;
+
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
@@ -26,6 +28,8 @@ public interface SamplingFactor extends Factor {
 	void sampleOrWeigh(Sample sample);
 	
 	SamplingRuleSet getSamplingRuleSet();
+	
+	Random getRandom();
 	
 	default String nestedString(boolean showSamplingRules) {
 		return nestedString(0, showSamplingRules);

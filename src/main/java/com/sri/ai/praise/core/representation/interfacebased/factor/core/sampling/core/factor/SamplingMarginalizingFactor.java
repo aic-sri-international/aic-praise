@@ -45,7 +45,7 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 	public SamplingRuleSet makeSamplingRules() {
 		SamplingRuleSet samplingRuleSet = getMarginalizedFactor().getSamplingRuleSet();
 		List<? extends SamplingGoal> remainingGoals = computeRemainingGoals(samplingRuleSet);
-		SamplingRuleSet marginalSamplingRules = samplingRuleSet.project(remainingGoals, this);
+		SamplingRuleSet marginalSamplingRules = samplingRuleSet.project(remainingGoals, this, marginalizedFactor);
 		return marginalSamplingRules;
 	}
 

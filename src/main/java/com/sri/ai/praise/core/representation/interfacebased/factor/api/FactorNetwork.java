@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.factor.api;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -46,6 +47,10 @@ import java.util.List;
  *
  */
 public interface FactorNetwork extends Model {
+
+	Collection<Variable> getVariables();
+
+	Collection<Factor> getFactors();
 
 	List<? extends Variable> getNeighbors(Factor factor);
 
