@@ -9,6 +9,7 @@ import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
 import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIATION;
 import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
+import static com.sri.ai.grinder.library.FunctorConstants.OR;
 import static com.sri.ai.grinder.library.FunctorConstants.PLUS;
 import static com.sri.ai.grinder.library.FunctorConstants.TIMES;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.condition;
@@ -33,6 +34,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.logic.ConjunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.logic.DisjunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.DivisionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.ExponentiationSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.MultiplicationSamplingFactor;
@@ -120,6 +122,9 @@ public class FromExpressionToSamplingFactors {
 		else if (expression.hasFunctor(AND)) {
 			conjunctionCompilation(compoundExpressionVariable, expression, factors);
 		}
+		else if (expression.hasFunctor(OR)) {
+			disjunctionCompilation(compoundExpressionVariable, expression, factors);
+		}
 		else if (expression.hasFunctor("Normal")) {
 			normalCompilation(compoundExpressionVariable, expression, factors);
 		}
@@ -181,6 +186,12 @@ public class FromExpressionToSamplingFactors {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
 		Factor sumFactor = new ConjunctionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
 		factors.add(sumFactor);
+	}
+
+	private void disjunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor disjunctionFactor = new DisjunctionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(disjunctionFactor);
 	}
 
 	private void normalCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) throws Error {
