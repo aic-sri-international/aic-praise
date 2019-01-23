@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
 
 import static com.sri.ai.util.Util.list;
 
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractDeterministicNumericBinaryFunctionSamplingFactor;
 
 /**
  * An extension of {@link AbstractDeterministicNumericBinaryFunctionSamplingFactor} for exponentiation.

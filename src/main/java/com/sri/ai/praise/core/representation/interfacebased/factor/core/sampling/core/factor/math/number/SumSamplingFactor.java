@@ -1,18 +1,19 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractAssociativeCommutativeSemiRingSamplingFactor;
 import com.sri.ai.util.collect.IntegerIterator;
 
 /**
- * A {@link AbstractCommutativeAssociativeRingSamplingFactor} instantiated for summation.  
+ * A {@link AbstractAssociativeCommutativeSemiRingSamplingFactor} instantiated for summation.  
  * @author braz
  *
  */
-public class SumSamplingFactor extends AbstractCommutativeAssociativeRingSamplingFactor<Double> {
+public class SumSamplingFactor extends AbstractAssociativeCommutativeSemiRingSamplingFactor<Double> {
 
 	public SumSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);
@@ -36,6 +37,11 @@ public class SumSamplingFactor extends AbstractCommutativeAssociativeRingSamplin
 	@Override
 	protected Double getAbsorbingElement() {
 		return null;
+	}
+
+	@Override
+	protected boolean isAbsorbingElement(Double value) {
+		return false;
 	}
 
 	@Override

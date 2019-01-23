@@ -38,7 +38,12 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 
 	@Override
 	public void sampleOrWeigh(Sample sampleToComplete) {
-		marginalizedFactor.sampleOrWeigh(sampleToComplete);
+		if (marginalizedFactor instanceof DynamicSamplingProductFactor) { // TODO: too hard-wired; create interface for factors that can sample a subset of its variables
+			((DynamicSamplingProductFactor) marginalizedFactor).sampleOrWeigh(getVariables(), sampleToComplete);
+		}
+		else {
+			marginalizedFactor.sampleOrWeigh(sampleToComplete);
+		}
 	}
 
 	@Override

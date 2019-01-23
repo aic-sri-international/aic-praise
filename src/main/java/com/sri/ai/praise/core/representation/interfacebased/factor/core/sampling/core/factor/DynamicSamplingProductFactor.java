@@ -11,6 +11,7 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.setFrom;
+import static com.sri.ai.util.Util.thereExists;
 import static com.sri.ai.util.Util.whileDo;
 import static com.sri.ai.util.collect.PredicateIterator.predicateIterator;
 
@@ -48,14 +49,25 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 	
 	@Override
 	public void sampleOrWeigh(Sample sample) {
-		stackOfVariablesWeAreTryingToInstantiate = list();
-		inputFactorsYetToUse = setFrom(getInputFactors());
-		makeSureToInstantiate(getVariables(), sample);
-		makeSureAllInputFactorsAreExecuted(sample);
+		sampleOrWeigh(getVariables(), sample);
 	}
 
-	private void makeSureAllInputFactorsAreExecuted(Sample sample) {
-		inputFactorsYetToUse.forEach(f -> f.sampleOrWeigh(sample));
+	/**
+	 * Samples or weight only a subset of variables (others may be sampled auxiliarly).
+	 * @param variablesToSample
+	 * @param sample
+	 */
+	public void sampleOrWeigh(List<? extends Variable> variablesToSample, Sample sample) {
+		stackOfVariablesWeAreTryingToInstantiate = list();
+		inputFactorsYetToUse = setFrom(getInputFactors());
+		makeSureToInstantiate(variablesToSample, sample);
+		makeSureAllRelevantInputFactorsAreExecuted(sample);
+	}
+
+	private void makeSureAllRelevantInputFactorsAreExecuted(Sample sample) {
+		inputFactorsYetToUse.stream()
+		.filter(f -> thereExists(f.getVariables(), sample::instantiates))
+		.forEach(f -> f.sampleOrWeigh(sample));
 	}
 
 	private void makeSureToInstantiate(Collection<? extends Variable> variables, Sample sample) {
@@ -95,6 +107,9 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 			boolean successfullyInstantiated = tryToInstantiate(requiredButUninstantiatedVariables, sample);
 			if (successfullyInstantiated) {
 				tryToExecuteRuleWithInstantiatedAntecedentVariables(rule, sample);
+				if (thereExists(sample.getAssignment().mapValue().values(), v -> v instanceof Double && (Double.isNaN((double) v) || Double.isInfinite((double) v)))) {
+					throw new Error("Invalid double");
+				}
 			}
 		}
 		

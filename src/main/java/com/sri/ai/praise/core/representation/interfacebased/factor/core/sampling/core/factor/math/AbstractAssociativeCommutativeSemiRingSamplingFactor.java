@@ -22,7 +22,7 @@ import com.sri.ai.util.collect.IntegerIterator;
 import com.sri.ai.util.collect.PredicateIterator;
 
 /**
- * An extension of {@link AbstractDeterministicFunctionSamplingFactor} for commutative associative ring operators.
+ * An extension of {@link AbstractDeterministicFunctionSamplingFactor} for associative commutative ring operators.
  * Implement abstract methods to specify the specific operator.
  * <p>
  * The sampling factor works by respecting a relationship of the type <code>s = x_1 + x_2 + ... + x_n</code>,
@@ -41,7 +41,7 @@ import com.sri.ai.util.collect.PredicateIterator;
  * @author braz
  *
  */
-public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extends AbstractDeterministicFunctionSamplingFactor {
+public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> extends AbstractDeterministicFunctionSamplingFactor {
 
 	/**
 	 * Specifies the indices of arguments for which there is an inverse operation given any values of all the other variables, including the result. 
@@ -54,7 +54,7 @@ public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extend
 	 * the application of the operator to all remaining, defined arguments.
 	 * @param functionResultValue
 	 * @param definedArgumentsOperatorApplication
-	 * @param missingArgumentIndex TODO
+	 * @param missingArgumentIndex 
 	 * @return
 	 */
 	abstract protected T computeMissingArgument(T functionResultValue, T definedArgumentsOperatorApplication, int missingArgumentIndex);
@@ -73,6 +73,12 @@ public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extend
 	abstract protected T getAbsorbingElement();
 
 	/**
+	 * Tests whether the value is an absorbing element (some types, like double, have more than one, like double which has 0.0 and -0.0).
+	 * @return
+	 */
+	abstract protected boolean isAbsorbingElement(T value);
+
+	/**
 	 * Specifies how to compute the operator.
 	 * @return
 	 */
@@ -86,7 +92,7 @@ public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extend
 
 	//////////////////////
 
-	public AbstractCommutativeAssociativeRingSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
+	public AbstractAssociativeCommutativeSemiRingSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);
 	}
 
@@ -137,9 +143,9 @@ public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extend
 						SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT));
 	}
 
-	private FunctionOnSetOfVariablesSatisfiesCondition<Double> argumentIsAbsorbingValue(Integer i) {
+	private FunctionOnSetOfVariablesSatisfiesCondition<T> argumentIsAbsorbingValue(Integer i) {
 		return 
-				new FunctionOnSetOfVariablesSatisfiesCondition<Double>(
+				new FunctionOnSetOfVariablesSatisfiesCondition<T>(
 						"argumentIs" + getAbsorbingElement(),
 						list(getArguments().get(i)), 
 						c -> getFirst(c), 

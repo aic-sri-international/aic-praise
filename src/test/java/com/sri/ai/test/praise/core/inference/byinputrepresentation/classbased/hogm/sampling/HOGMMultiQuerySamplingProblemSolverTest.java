@@ -303,7 +303,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"x = Normal(4, 2);" +
 				"y = 0;" +
 				"z = Normal(6, 2);" +
-				"w = Normal(6, 2);" +
+				"w = Normal(-4, 2);" + // making w negative so that y*w turns into -0.0 which is different from 0.0 but must be detected as absorbing element
 				"z = x * y * w;" + // y is zero so z will also be zero and we cannot tell anything about the value of x, which will follow its prior.
 				"";
 
@@ -539,12 +539,12 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	public void booleanSamplingTest() {
 	
 		String model = "" +
-				"random x : Boolean;" +
-				"x = true;" +
+				"random p : Boolean;" +
+				"p = true;" +
 				"";
 	
-		String query = "x";
-		Expression expected = parse("if x then 1 else 0");
+		String query = "p";
+		Expression expected = parse("if p then 1 else 0");
 		int numberOfInitialSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
@@ -555,18 +555,160 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	public void booleanFalseSamplingTest() {
 	
 		String model = "" +
-				"random x : Boolean;" +
-				"x = false;" +
+				"random p : Boolean;" +
+				"p = false;" +
 				"";
 	
-		String query = "x";
-		Expression expected = parse("if x then 0 else 1");
+		String query = "p";
+		Expression expected = parse("if p then 0 else 1");
 		int numberOfInitialSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
 	}
 	
+	@Test
+	public void conjunctionSamplingTest() {
+	
+		String model = "" +
+				"random p : Boolean;" +
+				"random q : Boolean;" +
+				"random r : Boolean;" +
+				"r = (p and q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
+				"p = true;" +      // TODO: replace by simply "p"
+				"q = false;" +
+				"";
+		
+		String query = "r";
+		Expression expected = parse("if r then 0 else 1");
+		int numberOfInitialSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		
+		query = "p";
+		expected = parse("if p then 1 else 0");
+		numberOfInitialSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		
+		query = "q";
+		expected = parse("if q then 0 else 1");
+		numberOfInitialSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+	}
+	
+	@Test
+	public void conjunctionInverseSamplingTest() {
+	
+		String model = "" +
+				"random p : Boolean;" +
+				"random q : Boolean;" +
+				"random r : Boolean;" +
+				"r = (p and q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
+				"r = true;" +      // TODO: replace by simply "r"
+				"q = true;" +
+				"";
+		// p should be true by inversion in r = (p and q) when r and q are true
+		
+		String query = "r";
+		Expression expected = parse("if r then 1 else 0");
+		int numberOfInitialSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		
+		query = "p";
+		expected = parse("if p then 1 else 0");
+		numberOfInitialSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		
+		query = "q";
+		expected = parse("if q then 1 else 0");
+		numberOfInitialSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+	}
+
+	@Test
+	public void conjunctionResultIsFalseIfOnlyOneArgumentIsFalseSamplingTest() {
+	
+		String model = "" +
+				"random p : Boolean;" +
+				"random q : Boolean;" +
+				"random r : Boolean;" +
+				"r = (p and q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
+				"q = false;" +
+				"";
+		// note that p has no specified distribution
+		// this is on purpose so that it does not get instantiated and allows r to be determined in absence of its information
+		// However, this model will raise an error if p is to be sampled, as tested below.
+		
+		String query = "r";
+		Expression expected = parse("if r then 0 else 1");
+		int numberOfInitialSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		
+		query = "q";
+		expected = parse("if q then 0 else 1");
+		numberOfInitialSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+
+		query = "p";
+		expected = null; // should cause error
+		numberOfInitialSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		try {
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		}
+		catch (Throwable e) {
+			println(e.getMessage());
+			if (!Util.containsAllCaseInsensitive(e.getMessage(), "could not sample p")) {
+				throw new AssertionError("Should have thrown \"Could not sample p\" error, but threw " + e.getMessage(), e);
+			}
+		}
+	}
+
+	@Test
+	public void partialSamplingTest() {
+	
+		String model = "" +
+				"random p : Boolean;" +
+				"random q : Boolean;" +
+				"random r : Boolean;" +
+				"r = (p and q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
+				"q = false;" +
+				"";
+		// note that p has no specified distribution
+		// this is on purpose so that it does not get instantiated and allows r to be determined in absence of its information
+		// However, this model will raise an error if p is to be sampled. This is checked in another test
+		
+		String query = "r";
+		Expression expected = parse("if r then 0 else 1");
+		int numberOfInitialSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		
+		query = "q";
+		expected = parse("if q then 0 else 1");
+		numberOfInitialSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+	}
+
 	///////////////////////////////
 
 	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues) {

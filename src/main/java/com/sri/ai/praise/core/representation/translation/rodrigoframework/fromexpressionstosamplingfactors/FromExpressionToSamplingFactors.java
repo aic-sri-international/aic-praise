@@ -4,6 +4,7 @@ import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.getConstantDoubleValueOrThrowErrorWithMessage;
 import static com.sri.ai.expresso.helper.Expressions.isNumber;
+import static com.sri.ai.grinder.library.FunctorConstants.AND;
 import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
 import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIATION;
@@ -31,12 +32,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.DivisionSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.ExponentiationSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.MultiplicationSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.SubtractionSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.SumSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.UnaryMinusSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.logic.ConjunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.DivisionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.ExponentiationSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.MultiplicationSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.SubtractionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.SumSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.UnaryMinusSamplingFactor;
 
 public class FromExpressionToSamplingFactors {
 	
@@ -115,6 +117,9 @@ public class FromExpressionToSamplingFactors {
 		else if (expression.hasFunctor(MINUS) && expression.numberOfArguments() == 1) {
 			unaryMinusCompilation(compoundExpressionVariable, expression, factors);
 		}
+		else if (expression.hasFunctor(AND)) {
+			conjunctionCompilation(compoundExpressionVariable, expression, factors);
+		}
 		else if (expression.hasFunctor("Normal")) {
 			normalCompilation(compoundExpressionVariable, expression, factors);
 		}
@@ -170,6 +175,12 @@ public class FromExpressionToSamplingFactors {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
 		Factor unaryMinusFactor = new UnaryMinusSamplingFactor(compoundExpressionVariable, argumentVariables.get(0), getRandom());
 		factors.add(unaryMinusFactor);
+	}
+
+	private void conjunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor sumFactor = new ConjunctionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(sumFactor);
 	}
 
 	private void normalCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) throws Error {

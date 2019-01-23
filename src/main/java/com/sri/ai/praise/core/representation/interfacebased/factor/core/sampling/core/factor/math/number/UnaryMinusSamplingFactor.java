@@ -1,8 +1,9 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
 
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractDeterministicNumericUnaryFunctionSamplingFactor;
 
 /**
  * An extension of {@link AbstractDeterministicNumericUnaryFunctionSamplingFactor} for unary minus.
