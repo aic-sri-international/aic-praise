@@ -40,7 +40,7 @@ public abstract class AbstractDeterministicNumericUnaryFunctionSamplingFactor
 	////////////////////
 	
 	@Override
-	protected Object evaluateFunction(Function<Variable, Object> fromVariableToValue) {
+	protected Object evaluateFunctionFromAllArguments(Function<Variable, Object> fromVariableToValue) {
 		Double argumentValue = getArgumentValue(fromVariableToValue);
 		Object result = computeWithErrorChecking(fromVariableToValue, () -> operation(argumentValue));
 		return result;

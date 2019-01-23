@@ -1,24 +1,30 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal;
 
 import static com.sri.ai.util.Util.mapIntoArrayList;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 
-public class FunctionOnSetOfVariablesWillNotBeEqualTogGoal<T> extends AbstractVariablesRelatedGoal {
+public class FunctionOnSetOfVariablesSatisfiesCondition<T> extends AbstractVariablesRelatedGoal {
 
 	private Function<Collection<T>, T> function;
-	private Object forbiddenValue;
+	private Predicate<T> condition;
 	private String goalName;
 	
-	public FunctionOnSetOfVariablesWillNotBeEqualTogGoal(String goalName, Collection<? extends Variable> variables, Function<Collection<T>, T> function, Object forbiddenValue) {
+	public FunctionOnSetOfVariablesSatisfiesCondition(
+			String goalName, 
+			Collection<? extends Variable> variables, 
+			Function<Collection<T>, T> function,
+			Predicate<T> condition) {
+		
 		super(variables);
 		this.function = function;
-		this.forbiddenValue = forbiddenValue;
+		this.condition = condition;
 		this.goalName = goalName;
 	}
 
@@ -32,7 +38,7 @@ public class FunctionOnSetOfVariablesWillNotBeEqualTogGoal<T> extends AbstractVa
 		}
 		else {
 			T valueFromSample = function.apply(values);
-			result = ! valueFromSample.equals(forbiddenValue);
+			result = condition.test(valueFromSample);
 		}
 		return result;
 	}

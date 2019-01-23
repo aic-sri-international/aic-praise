@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal;
 
 import static com.sri.ai.util.Util.join;
 

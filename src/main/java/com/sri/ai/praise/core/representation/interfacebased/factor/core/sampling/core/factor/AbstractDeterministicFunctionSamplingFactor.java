@@ -6,6 +6,8 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.s
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.collectThoseWhoseIndexSatisfy;
 import static com.sri.ai.util.Util.flatList;
+import static com.sri.ai.util.Util.forAll;
+import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -13,6 +15,7 @@ import static com.sri.ai.util.Util.mapIntoList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
@@ -23,7 +26,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.VariableIsDefinedGoal;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableIsDefinedGoal;
 
 /**
  * An abstract implementation of a {@link SamplingFactor} based on a deterministic function.
@@ -45,7 +48,32 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
  */
 public abstract class AbstractDeterministicFunctionSamplingFactor extends AbstractSamplingFactor {
 
-	protected abstract Object evaluateFunction(Function<Variable, Object> fromVariableToValue);
+	/**
+	 * Extending classes may override this method to compute the function result
+	 * even if not all arguments are instantiated, if possible.
+	 * There is no need to cover the case of evaluating it from a total assignment,
+	 * because that is dealt with later anyway by {@link #evaluateFunctionFromAllArguments(Function)},
+	 * but dealing with it causes no problems.
+	 * This method is intended for situations in which a subset of arguments define the result,
+	 * such as in short-circuiting such as y = 0*x.
+	 * The default implementation does nothing.
+	 */
+	protected void completeFunctionResultFromPossiblyPartialAssignmentIfPossible(Sample sample) {
+	}
+
+	protected abstract Object evaluateFunctionFromAllArguments(Function<Variable, Object> fromVariableToValue);
+
+	/**
+	 * A protected method that gives extensions a chance to define further ways of computing the function result
+	 * other than just plain computing it from all arguments.
+	 * For example, z = x*y can be computed from x alone if x is zero.
+	 * In such case, this method can return a specification indicating the index of x, the condition that it is zero,
+	 * and the estimated success weight of such a sampling operation.
+	 * @return
+	 */
+	protected Iterator<SpecificationForFunctionResultSamplingRule> specificationsForFunctionResultSamplingRules() {
+		return iterator();
+	}
 
 	protected abstract Iterator<? extends Integer> argumentsWithInverseFunctionIterator();
 
@@ -83,6 +111,8 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	
 	@Override
 	public void sampleOrWeigh(Sample sample) {
+		
+		completeFunctionResultFromPossiblyPartialAssignmentIfPossible(sample);
 	
 		int missingArgumentIndex = analyzeMissingArguments(sample);
 		
@@ -126,7 +156,7 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 			checkConsistencyOfFullyDefinedVariables(sample);
 		}
 		else {
-			completeFunctionResult(sample);
+			completeFunctionResultWhenAllArgumentsAreDefined(sample);
 		}
 	}
 
@@ -144,20 +174,22 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	}
 
 	private void checkConsistencyOfFullyDefinedVariables(Sample sample) {
-		Object functionOnArguments = evaluateFunction(fromSampleToValueFunction(sample));
+		Object functionOnArguments = evaluateFunctionFromAllArguments(fromSampleToValueFunction(sample));
 		if ( ! functionOnArguments.equals(getValue(functionResult, sample))) {
 			sample.updatePotential(sample.getPotential().make(0.0));
 		}
 	}
 
-	private void completeFunctionResult(Sample sample) {
-		Object functionResultValue = evaluateFunction(fromSampleToValueFunction(sample));
+	private void completeFunctionResultWhenAllArgumentsAreDefined(Sample sample) {
+		Object functionResultValue = evaluateFunctionFromAllArguments(fromSampleToValueFunction(sample));
 		setValue(functionResult, functionResultValue, sample);
 	}
 	
 	private void completeMissingArgument(Sample sample, int missingArgumentIndex) {
-		Object missingArgumentValue = computeMissingArgumentValue(fromSampleToValueFunction(sample), missingArgumentIndex);
-		setMissingArgumentValue(sample, missingArgumentIndex, missingArgumentValue);
+		if (forAll(conditionsForInverseOfArgument(missingArgumentIndex), g -> g.isSatisfied(sample))) {
+			Object missingArgumentValue = computeMissingArgumentValue(fromSampleToValueFunction(sample), missingArgumentIndex);
+			setMissingArgumentValue(sample, missingArgumentIndex, missingArgumentValue);
+		}
 	}
 
 	private void setMissingArgumentValue(Sample sample, int missingArgumentIndex, Object missingArgumentValue) {
@@ -192,13 +224,32 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	}
 
 	private ArrayList<SamplingRule> makeSamplingRulesArrayList() {
-		ArrayList<SamplingRule> samplingRules = arrayList(makeSamplingRuleForFunctionResult());
-		mapIntoList(argumentsWithInverseFunctionIterator(), this::makeSamplingRuleForArgumentAt, samplingRules);
+		ArrayList<SamplingRule> samplingRules = arrayList();
+		addSamplingRulesForFunctionResult(samplingRules);
+		addSamplingRulesForArguments(samplingRules);
 		return samplingRules;
 	}
 
-	private SamplingRule makeSamplingRuleForFunctionResult() {
+	private void addSamplingRulesForFunctionResult(ArrayList<SamplingRule> samplingRules) {
+		samplingRules.add(makeSamplingRuleForFunctionResultBasedOnAllArguments());
+		mapIntoList(specificationsForFunctionResultSamplingRules(), this::makeSamplingRuleFromSpecificationForFunctionResultSamplingRule, samplingRules);
+	}
+
+	private SamplingRule makeSamplingRuleForFunctionResultBasedOnAllArguments() {
 		return deterministicSamplingRuleFromVariables(this, list(this.functionResult), arguments);
+	}
+
+	private SamplingRule makeSamplingRuleFromSpecificationForFunctionResultSamplingRule(SpecificationForFunctionResultSamplingRule specification) {
+		List<SamplingGoal> antecedents = list();
+		mapIntoList(specification.argumentsIndices, i -> new VariableIsDefinedGoal(getArguments().get(i)), antecedents);
+		antecedents.addAll(specification.goalsBesidesArgumentsBeingDefined);
+		LinkedList<VariableIsDefinedGoal> consequents = list(new VariableIsDefinedGoal(getFunctionResult()));
+		SamplingRule result = new SamplingRule(this, consequents, antecedents, specification.estimatedSuccessWeight);
+		return result;
+	}
+
+	private void addSamplingRulesForArguments(ArrayList<SamplingRule> samplingRules) {
+		mapIntoList(argumentsWithInverseFunctionIterator(), this::makeSamplingRuleForArgumentAt, samplingRules);
 	}
 
 	private SamplingRule makeSamplingRuleForArgumentAt(int i) {

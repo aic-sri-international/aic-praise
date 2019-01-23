@@ -1,14 +1,21 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal;
+
+import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.list;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 
-public class VariableEqualsSomethingDifferentFrom extends AbstractSingleVariableRelatedGoal {
+public class VariableEqualsGoal extends AbstractVariablesRelatedGoal {
 
 	private Object value;
 	
-	public VariableEqualsSomethingDifferentFrom(Variable variable, Object value) {
-		super(variable);
+	public VariableEqualsGoal(Variable variable, Object value) {
+		super(list(variable));
+	}
+	
+	Variable getVariable() {
+		return getFirst(getVariables());
 	}
 	
 	public Object getValue() {
@@ -18,7 +25,7 @@ public class VariableEqualsSomethingDifferentFrom extends AbstractSingleVariable
 	@Override
 	public boolean isSatisfied(Sample sample) {
 		Object variableValue = sample.getAssignment().get(getVariable());
-		boolean result = variableValue != null && !variableValue.equals(value);
+		boolean result = variableValue != null && variableValue.equals(value);
 		return result;
 	}
 
@@ -38,7 +45,7 @@ public class VariableEqualsSomethingDifferentFrom extends AbstractSingleVariable
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		VariableEqualsSomethingDifferentFrom other = (VariableEqualsSomethingDifferentFrom) obj;
+		VariableEqualsGoal other = (VariableEqualsGoal) obj;
 		if (value == null) {
 			if (other.value != null)
 				return false;
@@ -50,9 +57,9 @@ public class VariableEqualsSomethingDifferentFrom extends AbstractSingleVariable
 
 	@Override
 	public String toString() {
-		return "Goal[" + super.toString() + " instantiated but different from " + getValue() + "]";
+		return "Goal[" + super.toString() + " = " + getValue() + "]";
 	}
-	
+
 	@Override
 	protected String getGoalName() {
 		return getClass().getSimpleName();

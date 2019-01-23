@@ -75,7 +75,7 @@ import com.sri.ai.util.Util;
 public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver {
 
 	private Function<Expression, Integer> fromExpressionVariableToNumberOfDiscreteValues;
-	int numberOfInitialSamples;
+	private int numberOfInitialSamples;
 	private Context context;
 	
 	public SolverAdapterForExactBPThatReturnsSamplingFactor(
@@ -97,6 +97,7 @@ public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver 
 		return normalizedMarginalExpression;
 	}
 
+	@SuppressWarnings("unused")
 	private Factor useExactBP(Problem problem) {
 		Factor unnormalizedMarginal = new ExactBP(problem).apply();
 		println("ExactBP result:");
@@ -106,6 +107,7 @@ public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver 
 		return unnormalizedMarginal;
 	}
 	
+	@SuppressWarnings("unused")
 	private Factor useGlobalProduct(Problem problem) {
 		Factor globalProduct = fold(problem.getModel().getFactors(), Factor::multiply, IDENTITY_FACTOR);
 		List<Variable> eliminatedVariables = 

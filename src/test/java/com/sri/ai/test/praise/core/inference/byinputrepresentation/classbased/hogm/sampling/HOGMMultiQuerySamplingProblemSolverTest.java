@@ -5,8 +5,10 @@ import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.repeat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.Random;
@@ -18,7 +20,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.SamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.function.api.functions.Functions;
@@ -291,8 +292,8 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
 	
-	// @Test
-	public void multiplicationInverseNotKickingInWhenOtherProductOfOtherArgumentsIsZeroSamplingTest() {
+	@Test
+	public void multiplicationInverseNotKickingInWhenOtherArgumentsIsZeroSamplingTest() {
 
 		String model = "" +
 				"random x : [-10;10];" +
@@ -307,17 +308,32 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"";
 
 		String query = "x";
-		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0.002 else if x < -0.5 then 0.008 else if x < 0.5 then 0.032 else if x < 1.5 then 0.06 else if x < 2.5 then 0.121 else if x < 3.5 then 0.169 else if x < 4.5 then 0.222 else if x < 5.5 then 0.169 else if x < 6.5 then 0.121 else if x < 7.5 then 0.059 else if x < 8.5 then 0.025 else if x < 9.5 then 0.01 else 0.002");
+		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0.003 else if x < -0.5 then 0.009 else if x < 0.5 then 0.028 else if x < 1.5 then 0.065 else if x < 2.5 then 0.122 else if x < 3.5 then 0.174 else if x < 4.5 then 0.196 else if x < 5.5 then 0.176 else if x < 6.5 then 0.121 else if x < 7.5 then 0.067 else if x < 8.5 then 0.028 else if x < 9.5 then 0.01 else 0.002");
 		int numberOfInitialSamples = 1000;
 		int numberOfDiscreteValues = 21;
 		
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
-		
-		// let's also test that z is indeed 0 in spite of its normal prior.
-		query = "z";
-		expected = parse("if z < -9.5 then 0 else if z < -8.5 then 0 else if z < -7.5 then 0 else if z < -6.5 then 0 else if z < -5.5 then 0 else if z < -4.5 then 0 else if z < -3.5 then 0 else if z < -2.5 then 0 else if z < -1.5 then 0 else if z < -0.5 then 0 else if z < 0.5 then 1 else if z < 1.5 then 0 else if z < 2.5 then 0 else if z < 3.5 then 0 else if z < 4.5 then 0 else if z < 5.5 then 0 else if z < 6.5 then 0 else if z < 7.5 then 0 else if z < 8.5 then 0 else if z < 9.5 then 0 else 0");
-		numberOfInitialSamples = 1;
-		numberOfDiscreteValues = 21;
+	}
+	
+	@Test
+	public void multiplicationResultIsZeroIfJustOneArgumentIs0Test() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"random z : [-10;10];" +
+				"random w : [-10;10];" +
+				"x = Normal(4, 2);" +
+				"y = 0;" +
+				"z = Normal(6, 2);" +
+				"w = Normal(6, 2);" +
+				"z = x * y * w;" + // y is zero so z will also be zero
+				"";
+
+		String query = "z";
+		Expression expected = parse("if z < -9.5 then 0 else if z < -8.5 then 0 else if z < -7.5 then 0 else if z < -6.5 then 0 else if z < -5.5 then 0 else if z < -4.5 then 0 else if z < -3.5 then 0 else if z < -2.5 then 0 else if z < -1.5 then 0 else if z < -0.5 then 0 else if z < 0.5 then 1 else if z < 1.5 then 0 else if z < 2.5 then 0 else if z < 3.5 then 0 else if z < 4.5 then 0 else if z < 5.5 then 0 else if z < 6.5 then 0 else if z < 7.5 then 0 else if z < 8.5 then 0 else if z < 9.5 then 0 else 0");
+		int numberOfInitialSamples = 1;
+		int numberOfDiscreteValues = 21;
 		
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
 	}
@@ -554,7 +570,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	///////////////////////////////
 
 	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues) {
-		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, true);
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* generate graph */ true);
 	}
 	
 	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues, boolean generateGraph) {
@@ -565,16 +581,37 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 						v -> numberOfDiscreteValues, 
 						numberOfInitialSamples, 
 						new Random());
-
+		
 		List<? extends HOGMProblemResult> results = solver.getResults();
-		setPrecisionAndCheckResult(query, expected, results, generateGraph);
+
+		if (generateGraph) generateGraph(results);
+		
+		// if the number of samples is just one, the test problem should be deterministic
+		// (the user is betting on getting the right answer in one shot)
+		// but we still run the complete test several times to increase the changes of detecting randomness.
+		boolean testProblemIsMeantToBeDeterministic = numberOfInitialSamples == 1;
+		int numberOfCompletTests = testProblemIsMeantToBeDeterministic? 10 : 1;
+		repeat(
+				numberOfCompletTests, 
+				() -> setPrecisionAndCheckResult(query, expected, results, testProblemIsMeantToBeDeterministic));
 	}
 
-	private void setPrecisionAndCheckResult(String query, Expression expected, List<? extends HOGMProblemResult> results, boolean generateGraph)
-			throws Error {
+	private void generateGraph(List<? extends HOGMProblemResult> results) {
+		assertEquals(1, results.size());
+		HOGMProblemResult result = getFirst(results);
+		if (System.getProperty(PROPERTY_KEY_GENERATING_GRAPH_FILE) != null) {
+			ExpressionSamplingFactor expressionSamplingFactor = (ExpressionSamplingFactor) result.getResult();
+			SamplingFactorDiscretizedProbabilityDistributionFunction function = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistributionFunction();
+			Functions functions = Functions.functions(function);
+			GraphSet.plot(functions, 0, GRAPH_FILENAME_WITHOUT_EXTENSION);
+		}
+	}
+
+	private void setPrecisionAndCheckResult(String query, Expression expected, List<? extends HOGMProblemResult> results, boolean deterministic) {
+
 		int oldPrecision = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(3);
 		try {
-			checkResult(query, expected, results, generateGraph);
+			checkResult(query, expected, results, deterministic);
 		} catch (Throwable t) {
 			throw new Error(t);
 		}
@@ -583,11 +620,11 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		}
 	}
 
-	private void checkResult(String query, Expression expected, List<? extends HOGMProblemResult> results, boolean generateGraph) {
+	private void checkResult(String query, Expression expected, List<? extends HOGMProblemResult> results, boolean deterministic) {
 		assertEquals(1, results.size());
 		HOGMProblemResult result = getFirst(results);
 		assertNoErrors(result);
-		printAndCompare(query, result.getResult(), expected, generateGraph);
+		printAndCompare(query, result.getResult(), expected, deterministic);
 	}
 
 	private void assertNoErrors(HOGMProblemResult result) {
@@ -595,25 +632,18 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		assertFalse(result.hasErrors());
 	}
 
-	private void printAndCompare(String query, Expression resultValue, Expression expected, boolean generateGraph) {
+	private void printAndCompare(String query, Expression resultValue, Expression expected, boolean deterministic) {
 		println("query: " + query);
 		println("expected: " + expected);
 		println("actual  : " + resultValue);
-		if (resultValue instanceof SamplingFactor) println(((SamplingFactor) resultValue).nestedString(true));
-		if (generateGraph) generateGraph(resultValue);
+		if (resultValue instanceof ExpressionSamplingFactor && ((ExpressionSamplingFactor) resultValue).getTotalWeight() == 0.0) {
+			println("All collected samples had weight equal to 0!");
+			fail("All collected samples had weight equal to 0!");
+		}
 		String reasonForDifference = areEqualUpToNumericDifference(expected, resultValue, 0.1);
 		if (reasonForDifference != "") {
 			println("Failure: " + reasonForDifference);
 		}
 		assertEquals("", reasonForDifference);
-	}
-
-	private void generateGraph(Expression resultValue) {
-		if (System.getProperty(PROPERTY_KEY_GENERATING_GRAPH_FILE) != null) {
-			ExpressionSamplingFactor expressionSamplingFactor = (ExpressionSamplingFactor) resultValue;
-			SamplingFactorDiscretizedProbabilityDistributionFunction function = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistributionFunction();
-			Functions functions = Functions.functions(function);
-			GraphSet.plot(functions, 0, GRAPH_FILENAME_WITHOUT_EXTENSION);
-		}
 	}
 }

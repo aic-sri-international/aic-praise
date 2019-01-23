@@ -1,21 +1,14 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule;
-
-import static com.sri.ai.util.Util.getFirst;
-import static com.sri.ai.util.Util.list;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 
-public class VariableEquals extends AbstractVariablesRelatedGoal {
+public class VariableEqualsSomethingDifferentFrom extends AbstractSingleVariableRelatedGoal {
 
 	private Object value;
 	
-	public VariableEquals(Variable variable, Object value) {
-		super(list(variable));
-	}
-	
-	Variable getVariable() {
-		return getFirst(getVariables());
+	public VariableEqualsSomethingDifferentFrom(Variable variable, Object value) {
+		super(variable);
 	}
 	
 	public Object getValue() {
@@ -25,7 +18,7 @@ public class VariableEquals extends AbstractVariablesRelatedGoal {
 	@Override
 	public boolean isSatisfied(Sample sample) {
 		Object variableValue = sample.getAssignment().get(getVariable());
-		boolean result = variableValue != null && variableValue.equals(value);
+		boolean result = variableValue != null && !variableValue.equals(value);
 		return result;
 	}
 
@@ -45,7 +38,7 @@ public class VariableEquals extends AbstractVariablesRelatedGoal {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		VariableEquals other = (VariableEquals) obj;
+		VariableEqualsSomethingDifferentFrom other = (VariableEqualsSomethingDifferentFrom) obj;
 		if (value == null) {
 			if (other.value != null)
 				return false;
@@ -57,9 +50,9 @@ public class VariableEquals extends AbstractVariablesRelatedGoal {
 
 	@Override
 	public String toString() {
-		return "Goal[" + super.toString() + " = " + getValue() + "]";
+		return "Goal[" + super.toString() + " instantiated but different from " + getValue() + "]";
 	}
-
+	
 	@Override
 	protected String getGoalName() {
 		return getClass().getSimpleName();

@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling;
 
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
+import static com.sri.ai.grinder.library.FunctorConstants.LESS_THAN;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.FromRealExpressionVariableToRealVariableWithRange.makeRealVariableWithRange;
 import static com.sri.ai.util.Util.mapIntegersIntoArrayList;
 import static com.sri.ai.util.Util.mapIntegersIntoList;
@@ -28,7 +29,6 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.Equality;
-import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -54,6 +54,8 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	SamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction();
 
 	void sample();
+	
+	double getTotalWeight();
 
 	/**
 	 * If given expression is an instance of {@link ExpressionSamplingFactor}, samples it a given number of times.
@@ -117,6 +119,9 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 				sample();
 				return null;
 			}
+			else if (method.getName().equals("getTotalWeight")) {
+				return getTotalWeight();
+			}
 			else {
 				throw new Error(getClass() + " received method '" + method + "' of " + method.getDeclaringClass() + " which it is not prepared to execute.");
 			}
@@ -126,7 +131,11 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			getSamplingFactorDiscretizedProbabilityDistributionFunction().sample();
 		}
 		
-		private Object getFactorExpression() {
+		public double getTotalWeight() {
+			return getSamplingFactorDiscretizedProbabilityDistributionFunction().getTotalWeight();
+		}
+		
+		private Expression getFactorExpression() {
 			List<Integer> fromVariableIndexToNumberOfValues = mapIntoList(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()); 
 			Expression result = getFactorExpressionFor(new CartesianProductOnIntegersIterator(fromVariableIndexToNumberOfValues));
 			return result;
@@ -236,7 +245,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 
 		private Expression getConditionForRealVariableAssignment(Variable variable, int valueIndex) {
 			Pair<BigDecimal, BigDecimal> boundsForIndex = ((SetOfRealValues) variable.getSetOfValuesOrNull()).getBoundsForIndex(valueIndex);
-			Expression result = Expressions.apply(FunctorConstants.LESS_THAN, variable.getName(), boundsForIndex.second.doubleValue());
+			Expression result = Expressions.apply(LESS_THAN, variable.getName(), boundsForIndex.second.doubleValue());
 			return result;
 		}
 

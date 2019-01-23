@@ -1,16 +1,18 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
 
+import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.map;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.FunctionOnSetOfVariablesWillNotBeEqualTogGoal;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.FunctionOnSetOfVariablesSatisfiesCondition;
 import com.sri.ai.util.collect.IntegerIterator;
 
 /**
@@ -26,7 +28,6 @@ public class MultiplicationSamplingFactor extends AbstractCommutativeAssociative
 
 	@Override
 	protected Double computeMissingArgument(Double functionResultValue, Double definedArgumentsOperatorApplication, int missingArgumentIndex) {
-		myAssert(definedArgumentsOperatorApplication != 0.0, () -> "Sampling rule for computing " + getArguments().get(missingArgumentIndex) + " out of " + getFunctionResult() + " and " + getArgumentsOtherThan(missingArgumentIndex) + " in " + this + " was invoked, but product of " + getArgumentsOtherThan(missingArgumentIndex) + " is zero. This was supposed to have been checked at this point.");
 		double result = functionResultValue / definedArgumentsOperatorApplication;
 		return result;
 	}
@@ -36,21 +37,32 @@ public class MultiplicationSamplingFactor extends AbstractCommutativeAssociative
 		return new IntegerIterator(0, getArguments().size()); // none
 	}
 
+	private Map<Integer, Collection<? extends SamplingGoal>> conditionsForInverseOfArgumentCache = map();
+	
 	@Override
 	protected Collection<? extends SamplingGoal> conditionsForInverseOfArgument(int i) {
-		FunctionOnSetOfVariablesWillNotBeEqualTogGoal<Double> 
+		return getValuePossiblyCreatingIt(conditionsForInverseOfArgumentCache, i, this::makeConditionsForInverseOfArgument);
+	}
+
+	private Collection<? extends SamplingGoal> makeConditionsForInverseOfArgument(int i) {
+		FunctionOnSetOfVariablesSatisfiesCondition<Double> 
 		productOfOtherArgumentsIsNotZero = 
-		new FunctionOnSetOfVariablesWillNotBeEqualTogGoal<Double>(
+		new FunctionOnSetOfVariablesSatisfiesCondition<Double>(
 				"productIsNotZero",
 				getArgumentsOtherThan(i), 
-				c -> evaluateFunction(c.iterator()), 
-				0.0);
+				c -> evaluateFunctionFromAllArgumentsValues(c.iterator()), 
+				v -> v != 0.0);
 		return list(productOfOtherArgumentsIsNotZero);
 	}
 	
 	@Override
 	protected Double getIdentityElement() {
 		return 1.0;
+	}
+
+	@Override
+	protected Double getAbsorbingElement() {
+		return 0.0;
 	}
 
 	@Override

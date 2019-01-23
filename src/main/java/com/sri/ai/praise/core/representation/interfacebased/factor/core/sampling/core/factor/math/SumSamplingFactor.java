@@ -34,6 +34,11 @@ public class SumSamplingFactor extends AbstractCommutativeAssociativeRingSamplin
 	}
 
 	@Override
+	protected Double getAbsorbingElement() {
+		return null;
+	}
+
+	@Override
 	protected Double apply(Double v1, Double v2) {
 		return v1 + v2;
 	}

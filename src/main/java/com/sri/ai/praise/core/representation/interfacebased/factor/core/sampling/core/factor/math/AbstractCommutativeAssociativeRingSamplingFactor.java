@@ -1,6 +1,10 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
 
 import static com.sri.ai.util.Util.fold;
+import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.notNullAndEquals;
+import static com.sri.ai.util.Util.thereExists;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.Iterator;
@@ -9,7 +13,11 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractDeterministicFunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SpecificationForFunctionResultSamplingRule;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.FunctionOnSetOfVariablesSatisfiesCondition;
 import com.sri.ai.util.collect.IntegerIterator;
 import com.sri.ai.util.collect.PredicateIterator;
 
@@ -58,6 +66,13 @@ public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extend
 	abstract protected T getIdentityElement();
 
 	/**
+	 * Specifies the absorbing element of the operator (for example, zero for multiplication, or false for conjunction),
+	 * or null if there isn't one.
+	 * @return
+	 */
+	abstract protected T getAbsorbingElement();
+
+	/**
 	 * Specifies how to compute the operator.
 	 * @return
 	 */
@@ -78,30 +93,57 @@ public abstract class AbstractCommutativeAssociativeRingSamplingFactor<T> extend
 	//////////////////////
 	
 	@Override
-	protected T computeMissingArgumentValue(Function<Variable, Object> fromVariableToValue, int missingArgumentIndex) {
-		Iterator<T> argumentsButMissingOne = otherArgumentsIterator(fromVariableToValue, missingArgumentIndex);
-		T definedArgumentsOperatorApplication = evaluateFunction(argumentsButMissingOne);
-		T functionResultValue = getValue(fromVariableToValue, getFunctionResult());
-		T missingArgumentValue = computeMissingArgument(functionResultValue, definedArgumentsOperatorApplication, missingArgumentIndex);
-		return missingArgumentValue;
+	protected void completeFunctionResultFromPossiblyPartialAssignmentIfPossible(Sample sample) {
+		if (thereExists(getArguments(), v -> notNullAndEquals(sample.getAssignment().get(v), getAbsorbingElement()))) {
+			sample.getAssignment().set(getFunctionResult(), getAbsorbingElement());
+		}
 	}
 
 	@Override
-	protected Object evaluateFunction(Function<Variable, Object> fromVariableToValue) {
+	protected Object evaluateFunctionFromAllArguments(Function<Variable, Object> fromVariableToValue) {
 		Iterator<T> doubleValues = functionIterator(getArguments(), v -> getValue(fromVariableToValue, v));
-		T result = evaluateFunction(doubleValues);
+		T result = evaluateFunctionFromAllArgumentsValues(doubleValues);
 		return result;
 	}
 
-	protected T evaluateFunction(Iterator<T> values) {
+	protected T evaluateFunctionFromAllArgumentsValues(Iterator<T> values) {
 		T result = fold(values, (v1, v2) -> apply(v1, v2), getIdentityElement());
 		return result;
+	}
+
+	@Override
+	protected T computeMissingArgumentValue(Function<Variable, Object> fromVariableToValue, int missingArgumentIndex) {
+		Iterator<T> argumentsButMissingOne = otherArgumentsIterator(fromVariableToValue, missingArgumentIndex);
+		T definedArgumentsOperatorApplication = evaluateFunctionFromAllArgumentsValues(argumentsButMissingOne);
+		T functionResultValue = getValue(fromVariableToValue, getFunctionResult());
+		T missingArgumentValue = computeMissingArgument(functionResultValue, definedArgumentsOperatorApplication, missingArgumentIndex);
+		return missingArgumentValue;
 	}
 
 	protected Iterator<T> otherArgumentsIterator(Function<Variable, Object> fromVariableToValue, int missingArgumentIndex) {
 		IntegerIterator argumentIndices = new IntegerIterator(0, getArguments().size());
 		PredicateIterator<Integer> otherArgumentsIndices = new PredicateIterator<>(argumentIndices, i -> i != missingArgumentIndex);
 		return functionIterator(otherArgumentsIndices, i -> getValue(fromVariableToValue, getArguments().get(i)));
+	}
+
+	@Override
+	protected Iterator<SpecificationForFunctionResultSamplingRule> specificationsForFunctionResultSamplingRules() {
+		return functionIterator(
+				new IntegerIterator(0, getArguments().size()),
+				argumentIndex ->
+				new SpecificationForFunctionResultSamplingRule(
+						list(argumentIndex),
+						list(argumentIsAbsorbingValue(argumentIndex)),
+						SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT));
+	}
+
+	private FunctionOnSetOfVariablesSatisfiesCondition<Double> argumentIsAbsorbingValue(Integer i) {
+		return 
+				new FunctionOnSetOfVariablesSatisfiesCondition<Double>(
+						"argumentIs" + getAbsorbingElement(),
+						list(getArguments().get(i)), 
+						c -> getFirst(c), 
+						v -> v.equals(getAbsorbingElement()));
 	}
 
 	@SuppressWarnings("unchecked")

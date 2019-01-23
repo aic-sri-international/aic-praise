@@ -6,7 +6,6 @@ import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.set;
 
 import java.util.ArrayList;
@@ -17,6 +16,8 @@ import java.util.Set;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.LuckySamplingGoal;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableIsDefinedGoal;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.planning.core.ProjectionOfSetOfRules;
 
@@ -68,8 +69,6 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 	private Set<? extends SamplingRule> projectSamplingRules(List<? extends SamplingGoal> remainingGoals, SamplingFactor projectedFactor, SamplingFactor originalFactor) {
 		ProjectionOfSetOfRules<SamplingRule, SamplingGoal> projector = getProjector(remainingGoals, projectedFactor, originalFactor);
 		Set<? extends SamplingRule> projectedSamplingRules = projector.getProjectedSetOfRules();
-		println("Projected sampling rules:");
-		println(join("\n", projectedSamplingRules));
 		return projectedSamplingRules;
 	}
 
@@ -87,17 +86,11 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 	
 	private ArrayList<? extends SamplingRule> getSamplingRulesForProjection(SamplingFactor originalFactor) {
 		ArrayList<? extends SamplingRule> result = mapIntoArrayList(getSamplingRules(), g -> replaceByLucky(g, originalFactor));
-		println("Original rules:");
-		println(join("\n", getSamplingRules()));
-		println("Lucky rules:");
-		println(join("\n", result));
 		return result;
 	}
 	
 	private SamplingRule replaceByLucky(SamplingRule rule, SamplingFactor originalFactor) {
 		SamplingRule result = rule.replaceGoals(g -> replaceByLucky(g, originalFactor));
-		println("Original rule: " + rule);
-		println("Lucky rule   : " + result);
 		return result;
 	}
 	

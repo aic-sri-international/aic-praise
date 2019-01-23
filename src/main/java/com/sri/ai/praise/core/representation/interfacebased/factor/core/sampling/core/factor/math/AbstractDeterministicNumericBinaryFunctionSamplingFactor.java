@@ -45,7 +45,7 @@ public abstract class AbstractDeterministicNumericBinaryFunctionSamplingFactor
 	////////////////////
 	
 	@Override
-	protected Object evaluateFunction(Function<Variable, Object> fromVariableToValue) {
+	protected Object evaluateFunctionFromAllArguments(Function<Variable, Object> fromVariableToValue) {
 		Double firstValue = getFirstValue(fromVariableToValue);
 		Double secondValue = getSecondValue(fromVariableToValue);
 		Object result = computeWithErrorChecking(fromVariableToValue, () -> operation(firstValue, secondValue));
