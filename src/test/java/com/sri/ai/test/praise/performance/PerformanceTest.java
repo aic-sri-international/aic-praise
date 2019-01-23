@@ -70,10 +70,10 @@ public class PerformanceTest {
 		private static final boolean testMultipleTheories = true;
 		private static final boolean compareWithSimulatedContextSplittingTimes = true;
 		
-		private static final int initialNumberOfVariablesWhenVaryingThat = 5;
-		private static final int finalNumberOfVariablesWhenVaryingThat = 8;
+		private static final int initialNumberOfVariablesWhenVaryingThat = 2;
+		private static final int finalNumberOfVariablesWhenVaryingThat = 3;
 	
-		private static final int timeLimitPerOperation = 10000;	// approximately how long (ms) you are willing to wait for a factor operation to complete
+		private static final int timeLimitPerOperation = 10;	// approximately how long (ms) you are willing to wait for a factor operation to complete
 	
 		private static final Theory singledOutTheory = SIMPLIFIED_DIFFERENCE_ARITHMETIC_THEORY;
 		//	theories to use:	DIFFERENCE_ARITHMETIC_THEORY
