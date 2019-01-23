@@ -42,8 +42,7 @@ public abstract class AbstractDeterministicUnaryFunctionSamplingFactor<T> extend
 	
 	@Override
 	protected Object evaluateFunctionFromAllArguments(Function<Variable, Object> fromVariableToValue) {
-		@SuppressWarnings("unchecked")
-		T argumentValue = (T) getArgumentValue(fromVariableToValue);
+		T argumentValue = getArgumentValue(fromVariableToValue);
 		Object result = computeWithErrorChecking(fromVariableToValue, () -> operation(argumentValue));
 		return result;
 	}
@@ -74,8 +73,7 @@ public abstract class AbstractDeterministicUnaryFunctionSamplingFactor<T> extend
 	}
 
 	private Object computeArgumentFromResult(Function<Variable, Object> fromVariableToValue) {
-		@SuppressWarnings("unchecked")
-		T functionResultValue = (T) getResultValue(fromVariableToValue);
+		T functionResultValue = getResultValue(fromVariableToValue);
 		T result = computeArgumentFromResult(functionResultValue);
 		return result;
 	}
@@ -99,13 +97,15 @@ public abstract class AbstractDeterministicUnaryFunctionSamplingFactor<T> extend
 
 	////////////////////
 	
-	private Double getResultValue(Function<Variable, Object> fromVariableToValue) {
-		Double resultValue = (Double) fromVariableToValue.apply(getFunctionResult());
+	private T getResultValue(Function<Variable, Object> fromVariableToValue) {
+		@SuppressWarnings("unchecked")
+		T resultValue = (T) fromVariableToValue.apply(getFunctionResult());
 		return resultValue;
 	}
 
-	private Double getArgumentValue(Function<Variable, Object> fromVariableToValue) {
-		Double baseValue = (Double) fromVariableToValue.apply(argument);
+	private T getArgumentValue(Function<Variable, Object> fromVariableToValue) {
+		@SuppressWarnings("unchecked")
+		T baseValue = (T) fromVariableToValue.apply(argument);
 		return baseValue;
 	}
 

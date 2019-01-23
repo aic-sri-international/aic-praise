@@ -797,6 +797,78 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 	///////////////////////////////
 
+	@Test
+	public void negationSamplingTest() {
+	
+		String model = "" +
+				"random p : Boolean;" +
+				"random q : Boolean;" +
+				"p = (not true);" +
+				"q = (not not p);" +
+				"";
+	
+		String query = "q";
+		Expression expected = parse("if q then 0 else 1");
+		int numberOfInitialSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+
+		query = "p";
+		expected = parse("if p then 0 else 1");
+		numberOfInitialSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
+	@Test
+	public void negationInverseSamplingTest() {
+	
+		String model = "" +
+				"random p : Boolean;" +
+				"random q : Boolean;" +
+				"q = (not not not p);" +
+				"p = false;" +
+				"";
+		
+		String query = "q";
+		Expression expected = parse("if q then 1 else 0");
+		int numberOfInitialSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+		
+		query = "p";
+		expected = parse("if p then 0 else 1");
+		numberOfInitialSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
+
+	@Test
+	public void formulaPropagationSamplingTest() {
+	
+		String model = "" +
+				"random playTennis : Boolean;" +
+				"random raining : Boolean;" +
+				"random partnerIsAvailable : Boolean;" +
+				"random playByMyself : Boolean;" +
+				"playTennis = (((partnerIsAvailable and not raining)) or playByMyself);" +
+				"raining = true;" +
+				"playByMyself = false;" +
+				"";
+		
+		String query = "playTennis";
+		Expression expected = parse("if playTennis then 0 else 1");
+		int numberOfInitialSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues);
+	}
+
 	private void runTest(String model, String query, Expression expected, int numberOfInitialSamples, int numberOfDiscreteValues) {
 		runTest(model, query, expected, numberOfInitialSamples, numberOfDiscreteValues, /* generate graph */ true);
 	}
