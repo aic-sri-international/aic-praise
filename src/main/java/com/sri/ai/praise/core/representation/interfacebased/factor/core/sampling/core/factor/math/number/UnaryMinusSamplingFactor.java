@@ -20,7 +20,7 @@ public class UnaryMinusSamplingFactor extends AbstractDeterministicNumericUnaryF
 	////////////////////
 
 	@Override
-	protected double operation(Double argumentValue) {
+	protected Double operation(Double argumentValue) {
 		return -argumentValue;
 	}
 
@@ -30,7 +30,7 @@ public class UnaryMinusSamplingFactor extends AbstractDeterministicNumericUnaryF
 	}
 
 	@Override
-	protected double computeArgumentFromResult(Double functionResultValue) {
+	protected Double computeArgumentFromResult(Double functionResultValue) {
 		return -functionResultValue;
 	}
 
