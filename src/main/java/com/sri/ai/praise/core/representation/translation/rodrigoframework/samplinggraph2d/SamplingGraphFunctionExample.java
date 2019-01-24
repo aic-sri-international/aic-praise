@@ -58,6 +58,7 @@ public class SamplingGraphFunctionExample {
 		int queryIndex;
 		SamplingFactorDiscretizedProbabilityDistributionFunction function;
 		
+		println("Sampling...");
 		if (forDavid) {
 			factorToBeShown = new NormalWithFixedMeanAndStandardDeviation(
 					xV,
@@ -65,21 +66,17 @@ public class SamplingGraphFunctionExample {
 					standardDeviation, 
 					random);
 			queryIndex = getIndexOf(factorToBeShown.getVariables(), xV);
-			function = new SamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x)), queryIndex);
+			function = new SamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x)), queryIndex, numberOfSamples);
 		}
 		else {
 			factorToBeShown = new SamplingProductFactor(arrayList(xFromY, yPrior), random);
 			queryIndex = getIndexOf(factorToBeShown.getVariables(), xV);
-			function = new SamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x, y)), queryIndex);
+			function = new SamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x, y)), queryIndex, numberOfSamples);
 		}
-		
+		println("Sampling done");
+
 		Functions functions = functions(function);
 		
-		println("Sampling...");
-		for (int i = 0; i < numberOfSamples; i++) {
-			function.sample();
-		}
-
 		GraphSet graphSet = GraphSet.plot(functions, x);
 
 		boolean deleteFilesForCleanUp = false; // change this to clean up files.

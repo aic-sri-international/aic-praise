@@ -64,7 +64,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.DynamicSamplingProductFactor;
-import com.sri.ai.util.Util;
 
 /**
  * A {@link Solver} adapter based on {@link ExactBP} for {@link Problem}s using {@link SamplingFactor}s defined on {@link ExpressionVariable}s.
@@ -75,25 +74,31 @@ import com.sri.ai.util.Util;
 public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver {
 
 	private Function<Expression, Integer> fromExpressionVariableToNumberOfDiscreteValues;
-	private int numberOfInitialSamples;
+	private int initialNumberOfSamples;
 	private Context context;
 	
 	public SolverAdapterForExactBPThatReturnsSamplingFactor(
 			Function<Expression, Integer> fromExpressionVariableToNumberOfDiscreteValues,
-			int numberOfInitialSamples,
+			int initialNumberOfSamples,
 			Context context) {
 		
 		this.fromExpressionVariableToNumberOfDiscreteValues = fromExpressionVariableToNumberOfDiscreteValues;
-		this.numberOfInitialSamples = numberOfInitialSamples;
+		this.initialNumberOfSamples = initialNumberOfSamples;
 		this.context = context;
 	}
 	
 	@Override
 	public Expression solve(Problem problem) {
-		Factor unnormalizedMarginal = useDynamicGlobalProduct(problem);
+
+		Random random = new Random();
+		
+		Factor unnormalizedMarginal = useDynamicGlobalProduct(problem, random);
 //		Factor unnormalizedMarginal = useGlobalProduct(problem);
 //		Factor unnormalizedMarginal = useExactBP(problem);
-		Expression normalizedMarginalExpression = getNormalizedMarginalExpression(unnormalizedMarginal, problem);
+		
+		SamplingFactor unnormalizedMarginalAsSamplingFactor = ensureItsSamplingFactor(unnormalizedMarginal, (ExpressionVariable) problem.getQueryVariable(), random);
+		
+		Expression normalizedMarginalExpression = getNormalizedMarginalExpression(unnormalizedMarginalAsSamplingFactor, problem);
 		return normalizedMarginalExpression;
 	}
 
@@ -118,14 +123,25 @@ public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver 
 		return result;
 	}
 	
-	private Factor useDynamicGlobalProduct(Problem problem) {
-		ArrayList<SamplingFactor> samplingFactors = mapIntoArrayList(problem.getModel().getFactors(), f -> ((SamplingFactor) f));
+	private SamplingFactor ensureItsSamplingFactor(Factor factor, ExpressionVariable queryVariable, Random random) {
+		if (factor instanceof ConstantFactor) {
+			return ExpressionSamplingFactor.makeUniformSamplingFactor(queryVariable, random, context);
+		}
+		else if (factor instanceof SamplingFactor) {
+			return (SamplingFactor) factor;
+		}
+		else {
+			throw new Error(getClass() + "' inner solver should have received either a ConstantFactor or a SamplingFactor, but got " + factor.getClass().getSimpleName() + " " + factor);
+		}
+	}
+	
+	private Factor useDynamicGlobalProduct(Problem problem, Random random) {
+		ArrayList<SamplingFactor> samplingFactors = getFactors(problem);
 		Factor globalProduct;
 		if (samplingFactors.isEmpty()) {
 			globalProduct = IDENTITY_FACTOR;
 		}
 		else {
-			Random random = Util.getFirst(samplingFactors).getRandom();
 			globalProduct = new DynamicSamplingProductFactor(samplingFactors, random);
 		}
 		List<Variable> eliminatedVariables = 
@@ -134,6 +150,10 @@ public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver 
 						v -> ! isRemainingVariable(v, problem));
 		Factor result = globalProduct.sumOut(eliminatedVariables);
 		return result;
+	}
+
+	private ArrayList<SamplingFactor> getFactors(Problem problem) {
+		return mapIntoArrayList(problem.getModel().getFactors(), f -> ((SamplingFactor) f));
 	}
 
 	private boolean isRemainingVariable(Variable variable, Problem problem) {
@@ -180,8 +200,8 @@ public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver 
 						unnormalizedSamplingFactor, 
 						queryIndex, 
 						fromExpressionVariableToNumberOfDiscreteValues, 
+						initialNumberOfSamples,
 						context);
-		ExpressionSamplingFactor.sample(normalizedMarginalExpression, numberOfInitialSamples);
 		return normalizedMarginalExpression;
 	}
 	

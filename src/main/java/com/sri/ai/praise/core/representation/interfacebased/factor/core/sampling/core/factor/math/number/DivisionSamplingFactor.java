@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
 
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.normalizeDoubleZeroToPositiveZero;
 
 import java.util.List;
 import java.util.Random;
@@ -28,7 +29,7 @@ public class DivisionSamplingFactor extends AbstractDeterministicNumericBinaryFu
 
 	@Override
 	protected double operation(Double firstValue, Double secondValue) {
-		return firstValue / secondValue;
+		return normalizeDoubleZeroToPositiveZero(firstValue / secondValue);
 	}
 
 	@Override
@@ -38,12 +39,12 @@ public class DivisionSamplingFactor extends AbstractDeterministicNumericBinaryFu
 
 	@Override
 	protected double computeFirstFromOthers(Double secondValue, Double functionResultValue) {
-		return functionResultValue * secondValue;
+		return normalizeDoubleZeroToPositiveZero(functionResultValue * secondValue);
 	}
 
 	@Override
 	protected double computeSecondFromOthers(Double firstValue, Double functionResultValue) {
-		return functionResultValue * firstValue;
+		return normalizeDoubleZeroToPositiveZero(functionResultValue * firstValue);
 	}
 
 	@Override

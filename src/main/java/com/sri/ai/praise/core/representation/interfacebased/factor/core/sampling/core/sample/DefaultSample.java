@@ -66,4 +66,9 @@ public class DefaultSample implements Sample {
 		potential = another.getPotential();
 	}
 
+	public static DefaultSample makeFreshSample() {
+		return new DefaultSample(new DoubleImportanceFactory(), new DoublePotentialFactory());
+		// TODO: change this to use samplingFactor's factories
+	}
+
 }

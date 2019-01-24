@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
@@ -34,6 +35,13 @@ import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.UniformDiscreteSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.UniformIntegerSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.UniformRealSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.UniformSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.SamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductOnIntegersIterator;
@@ -53,6 +61,8 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	
 	SamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction();
 
+	ExpressionSamplingFactor condition(Sample conditioningSample);
+	
 	void sample();
 	
 	double getTotalWeight();
@@ -72,12 +82,13 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			SamplingFactor samplingFactor, 
 			int queryIndex, 
 			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues,
+			int initialNumberOfSamples,
 			Context context) {
 		
 	     return (ExpressionSamplingFactor) java.lang.reflect.Proxy.newProxyInstance(
 	             samplingFactor.getClass().getClassLoader(),
 	             new Class[] { ExpressionSamplingFactor.class },
-	             new ExpressionSamplingFactorProxyInvocationHandler(samplingFactor, queryIndex, fromVariableToNumberOfDiscreteValues, context));		
+	             new ExpressionSamplingFactorProxyInvocationHandler(samplingFactor, queryIndex, fromVariableToNumberOfDiscreteValues, initialNumberOfSamples, context));		
 	}
 
 	public static class ExpressionSamplingFactorProxyInvocationHandler implements InvocationHandler {
@@ -85,13 +96,15 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		private SamplingFactor samplingFactor;
 		private int queryIndex;
 		private Function<Expression, Integer> fromVariableToNumberOfDiscreteValues;
+		private int initialNumberOfSamples;
 		private Context context;
 		private SamplingFactorDiscretizedProbabilityDistributionFunction samplingFactorDiscretizedProbabilityDistribution;
 		
-		public ExpressionSamplingFactorProxyInvocationHandler(SamplingFactor samplingFactor, int queryIndex, Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, Context context) {
+		public ExpressionSamplingFactorProxyInvocationHandler(SamplingFactor samplingFactor, int queryIndex, Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int initialNumberOfSamples, Context context) {
 			this.samplingFactor = samplingFactor;
 			this.queryIndex = queryIndex;
 			this.fromVariableToNumberOfDiscreteValues = fromVariableToNumberOfDiscreteValues;
+			this.initialNumberOfSamples = initialNumberOfSamples;
 			this.context = context;
 		}
 		
@@ -112,6 +125,9 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 				Object result = method.invoke(samplingFactor, args);
 				return result;
 			}
+			else if (method.getName().equals("condition")) {
+				return condition((Sample) args[0]);
+			}
 			else if (method.getName().equals("getSamplingFactorDiscretizedProbabilityDistributionFunction")) {
 				return getSamplingFactorDiscretizedProbabilityDistributionFunction();
 			}
@@ -125,6 +141,18 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			else {
 				throw new Error(getClass() + " received method '" + method + "' of " + method.getDeclaringClass() + " which it is not prepared to execute.");
 			}
+		}
+
+		public ExpressionSamplingFactor condition(Sample conditioningSample) {
+			
+			SamplingFactor conditionedSamplingFactor = 
+					ConditionedSamplingFactor.condition(samplingFactor, conditioningSample);
+			
+			ExpressionSamplingFactor result = 
+					expressionSamplingFactor(conditionedSamplingFactor, queryIndex, fromVariableToNumberOfDiscreteValues, initialNumberOfSamples, context);
+			
+			return result;
+			
 		}
 
 		public void sample() {
@@ -259,7 +287,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		private SamplingFactorDiscretizedProbabilityDistributionFunction makeSamplingFactorDiscretizedProbabilityDistribution() {
 			List<? extends ExpressionVariable> expressionVariables = mapIntoList(samplingFactor.getVariables(), v -> (ExpressionVariable) v);
 			SetOfVariables setOfVariables = makeSetOfVariablesWithRanges(expressionVariables, fromVariableToNumberOfDiscreteValues, context);
-			SamplingFactorDiscretizedProbabilityDistributionFunction result = new SamplingFactorDiscretizedProbabilityDistributionFunction(samplingFactor, setOfVariables, queryIndex);
+			SamplingFactorDiscretizedProbabilityDistributionFunction result = new SamplingFactorDiscretizedProbabilityDistributionFunction(samplingFactor, setOfVariables, queryIndex, initialNumberOfSamples);
 			return result;
 		}
 
@@ -284,7 +312,11 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			Function<Expression, Integer> numberOfDiscreteValues,
 			Context context) {
 		
-		ArrayList<Variable> variables = mapIntoArrayList(expressionVariables,v -> makeVariableWithRange(v, numberOfDiscreteValues.apply(v), context));
+		ArrayList<Variable> variables = 
+				mapIntoArrayList(
+						expressionVariables,
+						v -> makeVariableWithRange(v, numberOfDiscreteValues.apply(v), context));
+		
 		SetOfVariables result = new DefaultSetOfVariables(variables);
 		return result;
 
@@ -322,4 +354,44 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		String[] values = mapIntoArray(String.class, type.cardinality().intValue(), type.iterator(), Expression::toString);
 		return new EnumVariable(name, values);
 	}
+	
+	public static UniformSamplingFactor makeUniformSamplingFactor(ExpressionVariable variable, Random random, Context context) {
+		UniformSamplingFactor result;
+		Type type = context.getTypeOfRegisteredSymbol(variable);
+		if (type instanceof RealInterval) {
+			RealInterval realInterval = (RealInterval) type;
+			result = 
+					new UniformRealSamplingFactor(
+							variable, 
+							realInterval.getLowerBound().doubleValue(), 
+							realInterval.getUpperBound().doubleValue(), 
+							new DoublePotentialFactory(), 
+							random);
+		}
+		else if (type instanceof IntegerInterval) {
+			IntegerInterval integerInterval = (IntegerInterval) type;
+			result = 
+					new UniformIntegerSamplingFactor(
+							variable, 
+							integerInterval.getNonStrictLowerBound().intValue(), 
+							integerInterval.getNonStrictUpperBound().intValue() + 1, 
+							new DoublePotentialFactory(), 
+							random);
+		}
+		else if (type instanceof Categorical) {
+			Categorical categoricalType = (Categorical) type;
+			result = 
+					new UniformDiscreteSamplingFactor<String>(
+							variable, 
+							() -> categoricalType.sampleUniquelyNamedConstant(random).toString(), 
+							categoricalType.cardinality().intValue(), 
+							new DoublePotentialFactory(), 
+							random);
+		}
+		else {
+			throw new Error(ExpressionSamplingFactor.class + " only supports real, integer and enum types, but got variable " + variable + " of type " + type);
+		}
+		return result;
+	}
+
 }

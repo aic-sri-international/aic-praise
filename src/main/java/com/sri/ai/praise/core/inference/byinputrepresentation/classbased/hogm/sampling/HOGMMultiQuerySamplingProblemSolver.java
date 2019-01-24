@@ -14,7 +14,7 @@ public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSo
 			String model, 
 			List<String> queries,
 			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues,
-			int numberOfInitialSamples,
+			int initialNumberOfSamples,
 			Random random) {
 
 		super(
@@ -22,7 +22,7 @@ public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSo
 				queries, 
 				new ExactBPOnSamplingFactorsExpressionBasedSolver(
 						fromVariableToNumberOfDiscreteValues, 
-						numberOfInitialSamples, 
+						initialNumberOfSamples, 
 						random));
 	}
 

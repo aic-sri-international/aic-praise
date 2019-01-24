@@ -1,5 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
 
+import static com.sri.ai.util.Util.normalizeDoubleZeroToPositiveZero;
+
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -21,7 +23,7 @@ public class UnaryMinusSamplingFactor extends AbstractDeterministicNumericUnaryF
 
 	@Override
 	protected Double operation(Double argumentValue) {
-		return -argumentValue;
+		return normalizeDoubleZeroToPositiveZero(-argumentValue);
 	}
 
 	@Override
@@ -31,7 +33,7 @@ public class UnaryMinusSamplingFactor extends AbstractDeterministicNumericUnaryF
 
 	@Override
 	protected Double computeArgumentFromResult(Double functionResultValue) {
-		return -functionResultValue;
+		return normalizeDoubleZeroToPositiveZero(-functionResultValue);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
 
+import static com.sri.ai.util.Util.normalizeDoubleZeroToPositiveZero;
+
 import java.util.List;
 import java.util.Random;
 
@@ -19,7 +21,7 @@ public class MultiplicationSamplingFactor extends AbstractAssociativeCommutative
 
 	@Override
 	protected Double computeMissingArgument(Double functionResultValue, Double definedArgumentsOperatorApplication, int missingArgumentIndex) {
-		return functionResultValue / definedArgumentsOperatorApplication;
+		return normalizeDoubleZeroToPositiveZero(functionResultValue / definedArgumentsOperatorApplication);
 	}
 
 	@Override
@@ -34,12 +36,12 @@ public class MultiplicationSamplingFactor extends AbstractAssociativeCommutative
 
 	@Override
 	protected boolean isAbsorbingElement(Double value) {
-		return value.equals(getAbsorbingElement()) || value.equals(-0.0);
+		return normalizeDoubleZeroToPositiveZero(value) == getAbsorbingElement();
 	}
 
 	@Override
 	protected Double apply(Double v1, Double v2) {
-		return v1 * v2;
+		return normalizeDoubleZeroToPositiveZero(v1 * v2);
 	}
 
 	@Override

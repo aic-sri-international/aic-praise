@@ -1,18 +1,19 @@
 package com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample.makeFreshSample;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.repeat;
 
 import java.util.ArrayList;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleImportanceFactory;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.distribution.DiscretizedConditionalProbabilityDistribution;
+import com.sri.ai.util.function.api.values.Value;
 import com.sri.ai.util.function.api.variables.SetOfVariables;
 import com.sri.ai.util.function.api.variables.Variable;
 
@@ -46,47 +47,71 @@ import com.sri.ai.util.function.api.variables.Variable;
 public class SamplingFactorDiscretizedProbabilityDistribution extends DiscretizedConditionalProbabilityDistribution {
 	
 	private SamplingFactor samplingFactor;
+	private int initialNumberOfSamples;
 
 	public SamplingFactorDiscretizedProbabilityDistribution(
 			SamplingFactor samplingFactor,
 			SetOfVariables inputVariablesWithRange,
-			int queryVariableIndex) {
+			int queryVariableIndex,
+			int initialNumberOfSamples) {
 		
 		super(inputVariablesWithRange, queryVariableIndex);
 		this.samplingFactor = samplingFactor;
+		this.initialNumberOfSamples = initialNumberOfSamples;
 		myAssert(sameNumberOfVariablesForFunctionAndForSamplingFactor(), numberOfVariablesError());
 		
+		repeat(initialNumberOfSamples, () -> sample());
+		
 	}
+	
+	//////////////////////////////
 
+	public SamplingFactor getSamplingFactor() {
+		return samplingFactor;
+	}
+	
+	public int getInitialNumberOfSamples() {
+		return initialNumberOfSamples;
+	}
+	
+	//////////////////////////////
+
+	public SamplingFactorDiscretizedProbabilityDistribution condition(Sample conditioningSample) {
+		SamplingFactor conditionedSamplingFactor = ConditionedSamplingFactor.condition(samplingFactor, conditioningSample);
+		return new SamplingFactorDiscretizedProbabilityDistribution(conditionedSamplingFactor, this.getSetOfVariablesWithRange(), getQueryVariableIndex(), getInitialNumberOfSamples());
+		// TODO: this resets the underlying condition probability distribution and requires re-sampling
+		// the conditioned distribution.
+		// It is possible though to re-use the underlying distribution and condition it too to avoid initial re-sampling.
+		// Depending on how conditioned the distribution is being, this may not be worth all that much, but it's
+		// good to get done when we have the time.
+	}
+	
 	//////////////////////////////
 
 	/**
-	 * Generates a new sample from sampling factor and registers it in the underlying conditional probability distribution.
+	 * Generates a new sample (starting from an initial sample if this distribution is conditioned)
+	 * from sampling factor and registers it in the underlying conditional probability distribution.
 	 */
 	public void sample() {
-		Pair<ArrayList<Object>, Double> valuesAndWeight = getValuesAndWeight();
-		// println(getClass().getSimpleName() + ": values and weight: " + valuesAndWeight);
+		Pair<ArrayList<Object>, Double> valuesAndWeight = getValuesAndWeightForNewSample();
 		register(valuesAndWeight.first, valuesAndWeight.second);
-		// println("Distributions: " + this);
 	}
 
-	protected Pair<ArrayList<Object>, Double> getValuesAndWeight() {
+	protected Pair<ArrayList<Object>, Double> getValuesAndWeightForNewSample() {
 		Sample sample = getSample(samplingFactor);
-		return new Pair<>(getValueObjects(sample), getWeight(sample));
+		return getValuesAndWeight(sample);
 	}
 
-	//////////////////////////////
-
-	private static Sample getSample(SamplingFactor samplingFactor) {
+	private Sample getSample(SamplingFactor samplingFactor) {
 		Sample sample = makeFreshSample();
 		samplingFactor.sampleOrWeigh(sample);
 		return sample;
 	}
 
-	private static DefaultSample makeFreshSample() {
-		return new DefaultSample(new DoubleImportanceFactory(), new DoublePotentialFactory());
+	private Pair<ArrayList<Object>, Double> getValuesAndWeight(Sample sample) {
+		return new Pair<>(getValueObjects(sample), getWeight(sample));
 	}
-	
+
 	//////////////////////////////
 
 	private ArrayList<Object> getValueObjects(Sample sample) {

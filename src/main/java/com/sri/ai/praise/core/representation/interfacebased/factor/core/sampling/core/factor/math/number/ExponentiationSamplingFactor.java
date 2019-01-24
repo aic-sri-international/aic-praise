@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
 
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.normalizeDoubleZeroToPositiveZero;
 
 import java.util.List;
 import java.util.Random;
@@ -28,7 +29,7 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicNumericBi
 
 	@Override
 	protected double operation(Double firstValue, Double secondValue) {
-		return Math.pow(firstValue, secondValue);
+		return normalizeDoubleZeroToPositiveZero(Math.pow(firstValue, secondValue));
 	}
 
 	@Override
@@ -38,12 +39,12 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicNumericBi
 
 	@Override
 	protected double computeFirstFromOthers(Double secondValue, Double functionResultValue) {
-		return Math.pow(functionResultValue, 1/secondValue);
+		return normalizeDoubleZeroToPositiveZero(Math.pow(functionResultValue, 1/secondValue));
 	}
 
 	@Override
 	protected double computeSecondFromOthers(Double firstValue, Double functionResultValue) {
-		return Math.log(functionResultValue) / Math.log(firstValue);
+		return normalizeDoubleZeroToPositiveZero(Math.log(functionResultValue) / Math.log(firstValue));
 	}
 
 	@Override

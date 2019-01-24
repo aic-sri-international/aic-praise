@@ -47,13 +47,13 @@ import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromex
 
 public class ExactBPOnSamplingFactorsExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 
-	public ExactBPOnSamplingFactorsExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int numberOfInitialSamples, Random random) {
+	public ExactBPOnSamplingFactorsExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int initialNumberOfSamples, Random random) {
 		super(
 				new ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion(random)::translate, 
 
 				ebp -> new SolverAdapterForExactBPThatReturnsSamplingFactor(
 						fromVariableToNumberOfDiscreteValues, 
-						numberOfInitialSamples, 
+						initialNumberOfSamples, 
 						ebp.getContext()));
 	}
 
