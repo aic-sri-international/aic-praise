@@ -4,6 +4,7 @@ import static com.sri.ai.expresso.helper.Expressions.areEqualUpToNumericDifferen
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.repeat;
 import static org.junit.Assert.assertEquals;
@@ -48,7 +49,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -64,7 +65,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -80,7 +81,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph - waiting for bar chart implementation */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph - waiting for bar chart implementation */ false);
 	}
 
 	@Test
@@ -96,10 +97,10 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
-	// @Test // TODO: works, but parser crashes at that long if then else for some reason 
+	@Test 
 	public void queryWithTwoVariablesSamplingTest() {
 
 		String model = "" +
@@ -109,11 +110,31 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"";
 
 		String query = "x";
-		Expression expected = parse("1");
+		boolean quantitativeTests = false; // too large
+		Expression expected = null;
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests);
+	}
+
+	@Test  
+	public void queryWithThreeVariablesSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"constant b : [-10;10];" +
+				"constant c : [-10;10];" +
+				"x = Normal(b + c, 3.0);" +
+				"";
+
+		String query = "x";
+		boolean quantitativeTests = false; // too large
+		Expression expected = null;
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 25;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests);
 	}
 
 	@Test
@@ -131,7 +152,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -149,7 +170,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -169,7 +190,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, conditioningSample);
 	}
 
 	@Test
@@ -187,7 +208,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 250;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -206,7 +227,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -233,7 +254,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 	
 	@Test
@@ -253,7 +274,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 	
 	@Test
@@ -273,7 +294,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -293,7 +314,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -313,7 +334,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 	
 	@Test
@@ -333,7 +354,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -353,7 +374,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 	
 	@Test
@@ -375,7 +396,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 	
 	@Test
@@ -398,7 +419,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 		
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 	
 	@Test
@@ -421,7 +442,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 		
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -441,7 +462,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 	
 	@Test
@@ -461,7 +482,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -482,7 +503,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int numberOfDiscreteValues = 21;
 
 		try {
-			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 		}
 		catch (Error e) {
 			println(e.getMessage());
@@ -510,7 +531,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 	
 	@Test
@@ -530,7 +551,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -550,7 +571,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int numberOfDiscreteValues = 21;
 
 		try {
-			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 		}
 		catch (Error e) {
 			println(e.getMessage());
@@ -576,7 +597,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int numberOfDiscreteValues = 21;
 
 		try {
-			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 		}
 		catch (Error e) {
 			println(e.getMessage());
@@ -602,7 +623,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -618,7 +639,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -634,7 +655,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, true);
 	}
 	
 	@Test
@@ -650,7 +671,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 	}
 	
 	@Test
@@ -670,21 +691,21 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "p";
 		expected = parse("if p then 1 else 0");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "q";
 		expected = parse("if q then 0 else 1");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 	}
 	
 	@Test
@@ -705,21 +726,21 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "p";
 		expected = parse("if p then 1 else 0");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "q";
 		expected = parse("if q then 1 else 0");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 	}
 
 	@Test
@@ -741,14 +762,14 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "q";
 		expected = parse("if q then 0 else 1");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 
 		query = "p";
 		expected = null; // should cause error
@@ -756,7 +777,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		numberOfDiscreteValues = 21;
 	
 		try {
-			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		}
 		catch (Throwable e) {
 			println(e.getMessage());
@@ -783,21 +804,21 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "p";
 		expected = parse("if p then 1 else 0");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "q";
 		expected = parse("if q then 0 else 1");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 	}
 
 	@Test
@@ -818,21 +839,21 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "p";
 		expected = parse("if p then 1 else 0");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "q";
 		expected = parse("if q then 0 else 1");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 	}
 
 	@Test
@@ -854,14 +875,14 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		
 		query = "q";
 		expected = parse("if q then 1 else 0");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 	
 		query = "p";
 		expected = null; // should cause error
@@ -869,7 +890,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		numberOfDiscreteValues = 21;
 	
 		try {
-			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* no graph for discrete values for now */ false);
+			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 		}
 		catch (Throwable e) {
 			println(e.getMessage());
@@ -894,14 +915,14 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 
 		query = "p";
 		expected = parse("if p then 0 else 1");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -919,14 +940,14 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 		
 		query = "p";
 		expected = parse("if p then 0 else 1");
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -947,7 +968,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -968,29 +989,36 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues);
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	///////////////////////////////
 
-	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues) {
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* generate graph */ true, DefaultSample.makeFreshSample());
+	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests) {
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, /* generate graph */ true, DefaultSample.makeFreshSample());
 	}
 
-	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, /* generate graph */ true, conditioningSample);
+	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests, Sample conditioningSample) {
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, /* generate graph */ true, conditioningSample);
 	}
 	
-	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean generateGraph) {
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, generateGraph, DefaultSample.makeFreshSample());
+	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph) {
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, DefaultSample.makeFreshSample());
 	}
 	
-	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean generateGraph, Sample conditioningSample) {
+	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph, Sample conditioningSample) {
 
 		if (generateGraph) {
 			generateGraph(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 		}
 		
+		if (quantitativeTests) {
+			runQuantitativeTests(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
+		}
+	}
+
+	private void runQuantitativeTests(String model, String query, Expression expected, int initialNumberOfSamples,
+			int numberOfDiscreteValues, Sample conditioningSample) {
 		// if the number of samples is just one, the test problem should be deterministic
 		// (the user is betting on getting the right answer in one shot)
 		// but we still run the complete test several times to increase the changes of detecting randomness.
@@ -1007,7 +1035,9 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		if (System.getProperty(PROPERTY_KEY_GENERATING_GRAPH_FILE) != null) {
 			Function conditionedFunction = conditioned.getSamplingFactorDiscretizedProbabilityDistributionFunction();
 			Functions functions = Functions.functions(conditionedFunction);
-			GraphSet.plot(functions, 0, GRAPH_FILENAME_WITHOUT_EXTENSION);
+			int queryIndex = Util.getIndexOfFirstSatisfyingPredicateOrMinusOne(conditionedFunction.getSetOfInputVariables().getVariables(), v -> v.getName().equals(query));
+			myAssert(queryIndex != -1, () -> "Query variable " + query + " not found in variables " + conditionedFunction.getSetOfInputVariables().getVariables());
+			GraphSet.plot(functions, queryIndex, GRAPH_FILENAME_WITHOUT_EXTENSION);
 		}
 	}
 

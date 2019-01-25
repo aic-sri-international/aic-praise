@@ -57,6 +57,16 @@ implements SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction {
 	}
 
 	@Override
+	public boolean averageWeightIsZero() {
+		return getBase().averageWeightIsZero();
+	}
+
+	@Override
+	public int getNumberOfSamples() {
+		return getBase().getNumberOfSamples();
+	}
+
+	@Override
 	public double getTotalWeight() {
 		return getBase().getTotalWeight();
 	}

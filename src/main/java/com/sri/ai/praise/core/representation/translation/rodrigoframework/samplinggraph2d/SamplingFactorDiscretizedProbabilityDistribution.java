@@ -119,11 +119,14 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 		SetOfVariables projectedSetOfVariablesWithRange = 
 				new DefaultSetOfVariables(projectedVariablesWithRange);
 		
+		int queryVariableIndexInProjection = 
+				projectedVariablesWithRange.indexOf(getQueryVariable());
+		
 		SamplingFactorDiscretizedProbabilityDistribution result = 
 				new SamplingFactorDiscretizedProbabilityDistribution(
 						conditionedSamplingFactor, 
 						projectedSetOfVariablesWithRange, 
-						getQueryVariableIndex(), 
+						queryVariableIndexInProjection, 
 						getInitialNumberOfSamples());
 		
 		return result;
@@ -133,6 +136,10 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 		// It is possible though to re-use the underlying distribution and condition it too to avoid initial re-sampling.
 		// Depending on how conditioned the distribution is being, this may not be worth all that much, but it's
 		// good to get done when we have the time.
+	}
+
+	private Variable getQueryVariable() {
+		return getSetOfVariablesWithRange().get(getQueryVariableIndex());
 	}
 
 	/**

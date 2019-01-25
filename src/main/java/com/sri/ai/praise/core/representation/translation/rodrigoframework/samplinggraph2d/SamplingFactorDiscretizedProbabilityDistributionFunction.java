@@ -18,6 +18,10 @@ extends Function, java.util.function.Function<ArrayList<Object>, Value> {
 
 	void sample();
 
+	boolean averageWeightIsZero();
+	
+	int getNumberOfSamples();
+	
 	double getTotalWeight();
 
 	@Override

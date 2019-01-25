@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.express
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.grinder.library.FunctorConstants.LESS_THAN;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.FromRealExpressionVariableToRealVariableWithRange.makeRealVariableWithRange;
+import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.mapIntegersIntoArrayList;
 import static com.sri.ai.util.Util.mapIntegersIntoList;
 import static com.sri.ai.util.Util.mapIntoArray;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -65,6 +67,10 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	ExpressionSamplingFactor condition(Sample conditioningSample);
 	
 	void sample();
+	
+	boolean averageWeightIsZero();
+	
+	int getNumberOfSamples();
 	
 	double getTotalWeight();
 
@@ -136,6 +142,12 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 				sample();
 				return null;
 			}
+			else if (method.getName().equals("getNumberOfSamples")) {
+				return getNumberOfSamples();
+			}
+			else if (method.getName().equals("averageWeightIsZero")) {
+				return averageWeightIsZero();
+			}
 			else if (method.getName().equals("getTotalWeight")) {
 				return getTotalWeight();
 			}
@@ -160,6 +172,14 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			getSamplingFactorDiscretizedProbabilityDistributionFunction().sample();
 		}
 		
+		public boolean averageWeightIsZero() {
+			return getSamplingFactorDiscretizedProbabilityDistributionFunction().averageWeightIsZero();
+		}
+
+		public int getNumberOfSamples() {
+			return getSamplingFactorDiscretizedProbabilityDistributionFunction().getNumberOfSamples();
+		}
+
 		public double getTotalWeight() {
 			return getSamplingFactorDiscretizedProbabilityDistributionFunction().getTotalWeight();
 		}
@@ -186,19 +206,36 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		}
 
 		private Expression getFactorExpressionForNonEmptyDomain(Iterator<ArrayList<Integer>> valueIndicesIterator) {
-			Expression result;
-			ArrayList<Integer> valueIndices = valueIndicesIterator.next();
-			Expression probabilityExpression = getProbabilityForAssignment(valueIndices);
-			if (valueIndicesIterator.hasNext()) {
-				result = getFactorExpressionForNotLastAssignment(valueIndicesIterator, valueIndices, probabilityExpression);
+			
+			ArrayList<Expression> conditions = arrayList();
+			ArrayList<Expression> probabilities = arrayList();
+			
+			while (valueIndicesIterator.hasNext()) {
+				
+				ArrayList<Integer> valueIndices = valueIndicesIterator.next();
+				
+				Expression condition = getConditionForAssignmentIndices(valueIndices);
+				conditions.add(condition);
+
+				Expression probability = getProbabilityForAssignmentIndices(valueIndices);
+				probabilities.add(probability);
 			}
-			else {
-				result = probabilityExpression;
+			
+			ListIterator<Expression> conditionsIterator = conditions.listIterator(conditions.size());
+			ListIterator<Expression> probabilitiesIterator = probabilities.listIterator(probabilities.size());
+
+			conditionsIterator.previous(); // no need for last condition, as it is implied by all the others failing
+			Expression current = probabilitiesIterator.previous();
+			while (probabilitiesIterator.hasPrevious()) {
+				Expression condition = conditionsIterator.previous();
+				Expression probability = probabilitiesIterator.previous();
+				current = IfThenElse.make(condition, probability, current);
 			}
-			return result;
+			
+			return current;
 		}
 
-		private Expression getProbabilityForAssignment(ArrayList<Integer> valueIndices) {
+		private Expression getProbabilityForAssignmentIndices(ArrayList<Integer> valueIndices) {
 			
 			Assignment assignment = 
 					getAssignmentFromValueIndices(valueIndices);
@@ -206,13 +243,14 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			SamplingFactorDiscretizedProbabilityDistributionFunction probabilityDistributionFunction = 
 					getSamplingFactorDiscretizedProbabilityDistributionFunction();
 			
-			probabilityDistributionFunction = 
+			SamplingFactorDiscretizedProbabilityDistributionFunction 
+			projectedProbabilityDistributionFunction = 
 					projectIfNeeded(probabilityDistributionFunction, assignment);
 			
-			myAssert(probabilityDistributionFunction.getTotalWeight() > 0.0, () -> "Samples for distribution from " + samplingFactor + " have zero weight");
+			myAssert(!projectedProbabilityDistributionFunction.averageWeightIsZero(), () -> "Samples for distribution from " + samplingFactor + " on " + samplingFactor.getVariables() + " have zero weight");
 
 			double probability = 
-					probabilityDistributionFunction.evaluate(assignment).doubleValue();
+					projectedProbabilityDistributionFunction.evaluate(assignment).doubleValue();
 			
 			Symbol result = 
 					makeSymbol(probability);
@@ -249,17 +287,6 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 				throw new Error("Assignment should have at least query variable " + query + " but was " + assignment);
 			}
 			
-			return result;
-		}
-
-		private Expression getFactorExpressionForNotLastAssignment(
-				Iterator<ArrayList<Integer>> valueIndicesIterator,
-				ArrayList<Integer> valueIndices, 
-				Expression probabilityExpression) {
-			
-			Expression condition = getConditionForAssignmentIndices(valueIndices);
-			Expression remaining = getFactorExpressionFor(valueIndicesIterator);
-			Expression result = IfThenElse.make(condition, probabilityExpression, remaining);
 			return result;
 		}
 
