@@ -49,4 +49,29 @@ public class DefaultAssignment implements Assignment {
 		return Collections.unmodifiableMap(fromVariablesToValues);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fromVariablesToValues == null) ? 0 : fromVariablesToValues.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultAssignment other = (DefaultAssignment) obj;
+		if (fromVariablesToValues == null) {
+			if (other.fromVariablesToValues != null)
+				return false;
+		} else if (!fromVariablesToValues.equals(other.fromVariablesToValues))
+			return false;
+		return true;
+	}
+
 }

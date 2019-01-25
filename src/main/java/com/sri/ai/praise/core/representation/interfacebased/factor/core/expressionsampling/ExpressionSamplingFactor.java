@@ -42,6 +42,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.UniformRealSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.UniformSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotentialFactory;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.DefaultSamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.SamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductOnIntegersIterator;
@@ -59,7 +60,7 @@ import com.sri.ai.util.function.core.variables.IntegerVariable;
 
 public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	
-	SamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction();
+	DefaultSamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction();
 
 	ExpressionSamplingFactor condition(Sample conditioningSample);
 	
@@ -98,7 +99,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		private Function<Expression, Integer> fromVariableToNumberOfDiscreteValues;
 		private int initialNumberOfSamples;
 		private Context context;
-		private SamplingFactorDiscretizedProbabilityDistributionFunction samplingFactorDiscretizedProbabilityDistribution;
+		private DefaultSamplingFactorDiscretizedProbabilityDistributionFunction samplingFactorDiscretizedProbabilityDistribution;
 		
 		public ExpressionSamplingFactorProxyInvocationHandler(SamplingFactor samplingFactor, int queryIndex, Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int initialNumberOfSamples, Context context) {
 			this.samplingFactor = samplingFactor;
@@ -163,10 +164,14 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			return getSamplingFactorDiscretizedProbabilityDistributionFunction().getTotalWeight();
 		}
 		
+		private Expression expression;
+		
 		private Expression getFactorExpression() {
-			List<Integer> fromVariableIndexToNumberOfValues = mapIntoList(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()); 
-			Expression result = getFactorExpressionFor(new CartesianProductOnIntegersIterator(fromVariableIndexToNumberOfValues));
-			return result;
+			if (expression == null) {
+				List<Integer> fromVariableIndexToNumberOfValues = mapIntoList(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()); 
+				expression = getFactorExpressionFor(new CartesianProductOnIntegersIterator(fromVariableIndexToNumberOfValues));
+			}
+			return expression;
 		}
 
 		private Expression getFactorExpressionFor(Iterator<ArrayList<Integer>> valueIndicesIterator) {
@@ -194,9 +199,57 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		}
 
 		private Expression getProbabilityForAssignment(ArrayList<Integer> valueIndices) {
-			Assignment assignment = getAssignmentFromValueIndices(valueIndices);
-			double probability = getSamplingFactorDiscretizedProbabilityDistributionFunction().evaluate(assignment).doubleValue();
-			return makeSymbol(probability);
+			
+			Assignment assignment = 
+					getAssignmentFromValueIndices(valueIndices);
+			
+			SamplingFactorDiscretizedProbabilityDistributionFunction probabilityDistributionFunction = 
+					getSamplingFactorDiscretizedProbabilityDistributionFunction();
+			
+			probabilityDistributionFunction = 
+					projectIfNeeded(probabilityDistributionFunction, assignment);
+			
+			myAssert(probabilityDistributionFunction.getTotalWeight() > 0.0, () -> "Samples for distribution from " + samplingFactor + " have zero weight");
+
+			double probability = 
+					probabilityDistributionFunction.evaluate(assignment).doubleValue();
+			
+			Symbol result = 
+					makeSymbol(probability);
+			
+			return result;
+		}
+
+		/**
+		 * We take the projection of the Function based on the assignment, but only if needed
+		 * (that is, if the assignment contains any variables).
+		 * If the assignment does not contain any variables, the projection is just the initial function.
+		 * This is preferable because projection creates a new instance of Function that will
+		 * throw away previous samples.
+		 * @param probabilityDistributionFunction
+		 * @param assignment
+		 * @return
+		 */
+		private SamplingFactorDiscretizedProbabilityDistributionFunction projectIfNeeded(
+				SamplingFactorDiscretizedProbabilityDistributionFunction probabilityDistributionFunction,
+				Assignment assignment) {
+
+			SamplingFactorDiscretizedProbabilityDistributionFunction result;
+			
+			Variable query = probabilityDistributionFunction.getSetOfInputVariables().get(queryIndex);
+
+			if (assignment.size() > 1) {
+				Assignment assignmentWithoutQuery = assignment.remove(query);
+				result = probabilityDistributionFunction.project(query, assignmentWithoutQuery);
+			}
+			else if (assignment.size() == 1) {
+				result = probabilityDistributionFunction;
+			}
+			else {
+				throw new Error("Assignment should have at least query variable " + query + " but was " + assignment);
+			}
+			
+			return result;
 		}
 
 		private Expression getFactorExpressionForNotLastAssignment(
@@ -277,17 +330,17 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			return result;
 		}
 
-		public SamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction() {
+		public DefaultSamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction() {
 			if (samplingFactorDiscretizedProbabilityDistribution == null) {
 				samplingFactorDiscretizedProbabilityDistribution = makeSamplingFactorDiscretizedProbabilityDistribution();
 			}
 			return samplingFactorDiscretizedProbabilityDistribution;
 		}
 		
-		private SamplingFactorDiscretizedProbabilityDistributionFunction makeSamplingFactorDiscretizedProbabilityDistribution() {
+		private DefaultSamplingFactorDiscretizedProbabilityDistributionFunction makeSamplingFactorDiscretizedProbabilityDistribution() {
 			List<? extends ExpressionVariable> expressionVariables = mapIntoList(samplingFactor.getVariables(), v -> (ExpressionVariable) v);
 			SetOfVariables setOfVariables = makeSetOfVariablesWithRanges(expressionVariables, fromVariableToNumberOfDiscreteValues, context);
-			SamplingFactorDiscretizedProbabilityDistributionFunction result = new SamplingFactorDiscretizedProbabilityDistributionFunction(samplingFactor, setOfVariables, queryIndex, initialNumberOfSamples);
+			DefaultSamplingFactorDiscretizedProbabilityDistributionFunction result = new DefaultSamplingFactorDiscretizedProbabilityDistributionFunction(samplingFactor, setOfVariables, queryIndex, initialNumberOfSamples);
 			return result;
 		}
 

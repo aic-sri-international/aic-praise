@@ -56,7 +56,7 @@ public class SamplingGraphFunctionExample {
 		
 		SamplingFactor factorToBeShown;
 		int queryIndex;
-		SamplingFactorDiscretizedProbabilityDistributionFunction function;
+		DefaultSamplingFactorDiscretizedProbabilityDistributionFunction function;
 		
 		println("Sampling...");
 		if (forDavid) {
@@ -66,12 +66,12 @@ public class SamplingGraphFunctionExample {
 					standardDeviation, 
 					random);
 			queryIndex = getIndexOf(factorToBeShown.getVariables(), xV);
-			function = new SamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x)), queryIndex, numberOfSamples);
+			function = new DefaultSamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x)), queryIndex, numberOfSamples);
 		}
 		else {
 			factorToBeShown = new SamplingProductFactor(arrayList(xFromY, yPrior), random);
 			queryIndex = getIndexOf(factorToBeShown.getVariables(), xV);
-			function = new SamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x, y)), queryIndex, numberOfSamples);
+			function = new DefaultSamplingFactorDiscretizedProbabilityDistributionFunction(factorToBeShown, new DefaultSetOfVariables(list(x, y)), queryIndex, numberOfSamples);
 		}
 		println("Sampling done");
 

@@ -71,4 +71,41 @@ public class DefaultSample implements Sample {
 		// TODO: change this to use samplingFactor's factories
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((assignment == null) ? 0 : assignment.hashCode());
+		result = prime * result + ((importance == null) ? 0 : importance.hashCode());
+		result = prime * result + ((potential == null) ? 0 : potential.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultSample other = (DefaultSample) obj;
+		if (assignment == null) {
+			if (other.assignment != null)
+				return false;
+		} else if (!assignment.equals(other.assignment))
+			return false;
+		if (importance == null) {
+			if (other.importance != null)
+				return false;
+		} else if (!importance.equals(other.importance))
+			return false;
+		if (potential == null) {
+			if (other.potential != null)
+				return false;
+		} else if (!potential.equals(other.potential))
+			return false;
+		return true;
+	}
+
 }

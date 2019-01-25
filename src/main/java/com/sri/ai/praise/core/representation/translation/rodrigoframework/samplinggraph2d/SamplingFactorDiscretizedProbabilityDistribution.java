@@ -1,14 +1,18 @@
 package com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample.makeFreshSample;
+import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
+import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.repeat;
 import static com.sri.ai.util.Util.splice;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
@@ -54,6 +58,9 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 	private SamplingFactor samplingFactor;
 	private int initialNumberOfSamples;
 
+	private static int globalId = 0;
+	private int id;
+
 	public SamplingFactorDiscretizedProbabilityDistribution(
 			SamplingFactor samplingFactor,
 			SetOfVariables inputVariablesWithRange,
@@ -65,8 +72,15 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 		this.initialNumberOfSamples = initialNumberOfSamples;
 		myAssert(sameNumberOfVariablesForFunctionAndForSamplingFactor(), numberOfVariablesError());
 		
+		id = globalId++;
+	}
+	
+	//////////////////////////////
+	
+	@Override
+	protected void beforeFirstUseOfUnderlyingDistribution() {
+		println("Taking " + initialNumberOfSamples + " from " + id + "-th " + getClass().getSimpleName());
 		repeat(initialNumberOfSamples, () -> sample());
-		
 	}
 	
 	//////////////////////////////
@@ -81,8 +95,18 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 	
 	//////////////////////////////
 
+	private Map<Sample, SamplingFactorDiscretizedProbabilityDistribution> conditionings = map();
+	
 	public SamplingFactorDiscretizedProbabilityDistribution condition(Sample conditioningSample) {
-		
+//		println("Conditioning on " + conditioningSample);
+//		println("Within          " + System.identityHashCode(this));
+//		println("Id            : " + id);
+//		println("Keys in map:\n" + join("\n", conditionings.keySet()));
+//		println("Conditioning sample belongs in map: " + conditionings.containsKey(conditioningSample));
+		return getValuePossiblyCreatingIt(conditionings, conditioningSample, this::makeConditioning);
+	}
+
+	private SamplingFactorDiscretizedProbabilityDistribution makeConditioning(Sample conditioningSample) {
 		SamplingFactor conditionedSamplingFactor = 
 				ConditionedSamplingFactor.condition(samplingFactor, conditioningSample);
 		
