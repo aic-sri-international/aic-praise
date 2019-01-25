@@ -2,20 +2,25 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.sampl
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample.makeFreshSample;
 import static com.sri.ai.util.Util.mapIntoArrayList;
+import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.repeat;
+import static com.sri.ai.util.Util.splice;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.distribution.DiscretizedConditionalProbabilityDistribution;
 import com.sri.ai.util.function.api.values.Value;
 import com.sri.ai.util.function.api.variables.SetOfVariables;
 import com.sri.ai.util.function.api.variables.Variable;
+import com.sri.ai.util.function.core.variables.DefaultSetOfVariables;
 
 /**
  * A {@link java.util.function.Function} from array lists of values to a {@link Value} containing its probability.
@@ -77,15 +82,62 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 	//////////////////////////////
 
 	public SamplingFactorDiscretizedProbabilityDistribution condition(Sample conditioningSample) {
-		SamplingFactor conditionedSamplingFactor = ConditionedSamplingFactor.condition(samplingFactor, conditioningSample);
-		return new SamplingFactorDiscretizedProbabilityDistribution(conditionedSamplingFactor, this.getSetOfVariablesWithRange(), getQueryVariableIndex(), getInitialNumberOfSamples());
+		
+		SamplingFactor conditionedSamplingFactor = 
+				ConditionedSamplingFactor.condition(samplingFactor, conditioningSample);
+		
+		List<Variable> projectedVariablesWithRange =                 /* reduced version of corresponding list */
+				getReducedCorresponding(
+						samplingFactor.getVariables(),               /* original list      */
+						getSetOfVariablesWithRange().getVariables(), /* corresponding list */
+						conditionedSamplingFactor.getVariables());   /* reduced version of original list */
+		
+		SetOfVariables projectedSetOfVariablesWithRange = 
+				new DefaultSetOfVariables(projectedVariablesWithRange);
+		
+		SamplingFactorDiscretizedProbabilityDistribution result = 
+				new SamplingFactorDiscretizedProbabilityDistribution(
+						conditionedSamplingFactor, 
+						projectedSetOfVariablesWithRange, 
+						getQueryVariableIndex(), 
+						getInitialNumberOfSamples());
+		
+		return result;
+		
 		// TODO: this resets the underlying condition probability distribution and requires re-sampling
 		// the conditioned distribution.
 		// It is possible though to re-use the underlying distribution and condition it too to avoid initial re-sampling.
 		// Depending on how conditioned the distribution is being, this may not be worth all that much, but it's
 		// good to get done when we have the time.
 	}
+
+	/**
+	 * Given an original list without repeated elements,
+	 * another of the same size corresponding to it,
+	 * and a reduced version of the original list,
+	 * returns a new list containing the elements in the corresponding list
+	 * that correspond to the elements in the reduced list.
+	 * @param original
+	 * @param reduced
+	 * @return
+	 */
+	public static <T1, T2> List<T2> getReducedCorresponding(List<? extends T1> original, List<? extends T2> originalCorresponding, List<? extends T1> reduced) {
+		List<Integer> indices = getIndicesOfIn(reduced, original);
+		List<T2> reducedCorresponding = splice(originalCorresponding, indices);
+		return reducedCorresponding;
+	}
 	
+	/**
+	 * Returns the indices (in the second list) of the elements in the first list. 
+	 * @param reduced
+	 * @param original
+	 * @return
+	 */
+	public static <T> List<Integer> getIndicesOfIn(List<? extends T> reduced, List<? extends T> original) {
+		List<Integer> result = mapIntoList(reduced, r -> Util.getIndexOf(original, r));
+		return result;
+	}
+
 	//////////////////////////////
 
 	/**

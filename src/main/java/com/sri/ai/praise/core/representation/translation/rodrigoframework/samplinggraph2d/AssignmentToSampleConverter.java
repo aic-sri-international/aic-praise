@@ -72,10 +72,23 @@ public class AssignmentToSampleConverter {
 	}
 
 	private void setValueInIthSamplingFactorVariableInSample(Value value, int i, Sample sample) {
-		com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable samplingFactorVariable = 
+		com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable
+		samplingFactorVariable = 
 				samplingFactor.getVariables().get(i);
-		Object samplingFactorValue = value.objectValue();
-		sample.getAssignment().set(samplingFactorVariable, samplingFactorValue);
+		Object valueInTypeUsedByAssignment = value.objectValue();
+		Object valueInTypeUsedBySamplingFactors = convertValueForAssignmentsToValueForSamplingFactors(valueInTypeUsedByAssignment);
+		sample.getAssignment().set(samplingFactorVariable, valueInTypeUsedBySamplingFactors);
+	}
+
+	private Object convertValueForAssignmentsToValueForSamplingFactors(Object valueInTypeUsedByAssignment) {
+		Object valueInTypeUsedBySamplingFactors;
+		if (valueInTypeUsedByAssignment instanceof Number && !(valueInTypeUsedByAssignment instanceof Integer)) {
+			valueInTypeUsedBySamplingFactors = ((Number) valueInTypeUsedByAssignment).doubleValue();
+		}
+		else {
+			valueInTypeUsedBySamplingFactors = valueInTypeUsedByAssignment;
+		}
+		return valueInTypeUsedBySamplingFactors;
 	}
 
 }

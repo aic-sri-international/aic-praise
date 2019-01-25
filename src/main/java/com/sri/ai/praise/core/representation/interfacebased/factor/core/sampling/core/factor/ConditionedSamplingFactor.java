@@ -1,7 +1,12 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
+import static com.sri.ai.util.Util.collectToArrayList;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map.Entry;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -22,10 +27,13 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 
 			private SamplingFactor samplingFactor;
 			private Sample conditioningSample;
+			private ArrayList<Variable> variables;
 			
 			public ConditionedSamplingFactorProxyInvocationHandler(SamplingFactor samplingFactor, Sample conditioningSample) {
 				this.samplingFactor = samplingFactor;
 				this.conditioningSample = conditioningSample;
+				Collection<? extends Variable> variablesInAssignment = conditioningSample.getAssignment().mapValue().keySet();
+				this.variables = collectToArrayList(samplingFactor.getVariables(), v -> ! variablesInAssignment.contains(v));
 			}
 			
 			@Override
@@ -33,6 +41,9 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 				if (method.getName().equals("sampleOrWeigh")) {
 					sampleOrWeigh((Sample) args[0]);
 					return null;
+				}
+				else if (method.getName().equals("getVariables")) {
+					return Collections.unmodifiableList(variables);
 				}
 				else if (method.getDeclaringClass().isAssignableFrom(SamplingFactor.class)) {
 					Object result = method.invoke(samplingFactor, args);
