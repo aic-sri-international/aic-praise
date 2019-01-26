@@ -990,27 +990,6 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 
 	@Test
-	public void categoricalSamplingTest() {
-	
-		String model = "" +
-				"random playTennis : Boolean;" +
-				"random raining : Boolean;" +
-				"random partnerIsAvailable : Boolean;" +
-				"random playByMyself : Boolean;" +
-				"playTennis = (((partnerIsAvailable and not raining)) or playByMyself);" +
-				"raining = true;" +
-				"playByMyself = false;" +
-				"";
-		
-		String query = "playTennis";
-		Expression expected = parse("if playTennis then 0 else 1");
-		int initialNumberOfSamples = 1;
-		int numberOfDiscreteValues = 21;
-	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
-	}
-	
-	@Test
 	public void countiesSamplingTest() {
 	
 		String model = "" +

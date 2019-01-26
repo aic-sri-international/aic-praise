@@ -152,8 +152,17 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 	}
 
 	private void executeSamplingRule(SamplingRule rule, Sample sample) {
-		rule.getSamplingFactor().sampleOrWeigh(sample);
-		inputFactorsYetToUse.remove(rule.getSamplingFactor());
+		rule.getSampler().sampleOrWeigh(sample);
+		if (rule.getSampler() instanceof SamplingFactor) {
+			inputFactorsYetToUse.remove(rule.getSampler());
+		}
+		// the above is the reason for why samplers that are not sampling factors may not
+		// change the potential of the sample;
+		// We need to make sure each factor changes the potential only once,
+		// but more than one sampling rule in it could potentially fire,
+		// so they are not supposed to do that.
+		// TODO: change class hierarchy so that sampling rule samplers
+		// becomes some type of object that does not even see the sample potential.
 	}
 
 	///////////////////// Auxiliary

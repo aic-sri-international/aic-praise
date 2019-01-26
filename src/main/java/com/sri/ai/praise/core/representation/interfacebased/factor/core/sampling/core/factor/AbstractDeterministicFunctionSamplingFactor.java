@@ -48,19 +48,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
  */
 public abstract class AbstractDeterministicFunctionSamplingFactor extends AbstractSamplingFactor {
 
-	/**
-	 * Extending classes may override this method to compute the function result
-	 * even if not all arguments are instantiated, if possible.
-	 * There is no need to cover the case of evaluating it from a total assignment,
-	 * because that is dealt with later anyway by {@link #evaluateFunctionFromAllArguments(Function)},
-	 * but dealing with it causes no problems.
-	 * This method is intended for situations in which a subset of arguments define the result,
-	 * such as in short-circuiting such as y = 0*x.
-	 * The default implementation does nothing.
-	 */
-	protected void completeFunctionResultFromPossiblyPartialAssignmentIfPossible(Sample sample) {
-	}
-
 	protected abstract Object evaluateFunctionFromAllArguments(Function<Variable, Object> fromVariableToValue);
 
 	/**
@@ -112,7 +99,7 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	@Override
 	public void sampleOrWeigh(Sample sample) {
 		
-		completeFunctionResultFromPossiblyPartialAssignmentIfPossible(sample);
+		// completeFunctionResultFromPossiblyPartialAssignmentIfPossible(sample);
 	
 		int missingArgumentIndex = analyzeMissingArguments(sample);
 		
@@ -239,7 +226,7 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 		mapIntoList(specification.argumentsIndices, i -> new VariableIsDefinedGoal(getArguments().get(i)), antecedents);
 		antecedents.addAll(specification.goalsBesidesArgumentsBeingDefined);
 		LinkedList<VariableIsDefinedGoal> consequents = list(new VariableIsDefinedGoal(getFunctionResult()));
-		SamplingRule result = new SamplingRule(this, consequents, antecedents, specification.estimatedSuccessWeight);
+		SamplingRule result = new SamplingRule(specification.sampler, consequents, antecedents, specification.estimatedSuccessWeight);
 		return result;
 	}
 
@@ -311,6 +298,10 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 
 	public List<? extends Variable> getArguments() {
 		return arguments;
+	}
+	
+	public Variable getArgument(int i) {
+		return getArguments().get(i);
 	}
 	
 	//////////////////////

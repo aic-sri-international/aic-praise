@@ -2,6 +2,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet.union;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.collectToSet;
 import static com.sri.ai.util.Util.flattenOneLevelToArrayList;
 import static com.sri.ai.util.Util.forAll;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.Sampler;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
@@ -105,13 +107,15 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		
 		getSamplingRuleSet().getSamplingRules().forEach(SamplingRule::reset);
 		samplingPlan.execute(new SamplingState(sampleToComplete, getRandom()));
-		List<? extends SamplingFactor> factorsThatFired = 
+		List<? extends Sampler> samplersThatFired = 
 				getSamplingRuleSet()
 				.getSamplingRules()
 				.stream()
 				.filter(SamplingRule::hasFired)
-				.map(SamplingRule::getSamplingFactor)
+				.map(SamplingRule::getSampler) // only samplers that are sampling factors will reach here
 				.collect(Collectors.toList());
+		@SuppressWarnings("unchecked")
+		List<? extends SamplingFactor> factorsThatFired = (List<? extends SamplingFactor>) collectToList(samplersThatFired, s -> s instanceof SamplingFactor);
 		return factorsThatFired;
 	}
 

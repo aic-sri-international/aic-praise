@@ -28,7 +28,7 @@ public class DivisionSamplingFactor extends AbstractDeterministicNumericBinaryFu
 	////////////////////
 
 	@Override
-	protected double operation(Double firstValue, Double secondValue) {
+	protected Double operation(Double firstValue, Double secondValue) {
 		return normalizeDoubleZeroToPositiveZero(firstValue / secondValue);
 	}
 
@@ -38,12 +38,12 @@ public class DivisionSamplingFactor extends AbstractDeterministicNumericBinaryFu
 	}
 
 	@Override
-	protected double computeFirstFromOthers(Double secondValue, Double functionResultValue) {
+	protected Double computeFirstFromOthers(Double secondValue, Double functionResultValue) {
 		return normalizeDoubleZeroToPositiveZero(functionResultValue * secondValue);
 	}
 
 	@Override
-	protected double computeSecondFromOthers(Double firstValue, Double functionResultValue) {
+	protected Double computeSecondFromOthers(Double firstValue, Double functionResultValue) {
 		return normalizeDoubleZeroToPositiveZero(functionResultValue * firstValue);
 	}
 

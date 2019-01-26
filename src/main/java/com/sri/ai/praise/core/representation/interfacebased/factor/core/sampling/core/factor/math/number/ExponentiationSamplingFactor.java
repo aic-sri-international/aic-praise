@@ -28,7 +28,7 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicNumericBi
 	////////////////////
 
 	@Override
-	protected double operation(Double firstValue, Double secondValue) {
+	protected Double operation(Double firstValue, Double secondValue) {
 		return normalizeDoubleZeroToPositiveZero(Math.pow(firstValue, secondValue));
 	}
 
@@ -38,12 +38,12 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicNumericBi
 	}
 
 	@Override
-	protected double computeFirstFromOthers(Double secondValue, Double functionResultValue) {
+	protected Double computeFirstFromOthers(Double secondValue, Double functionResultValue) {
 		return normalizeDoubleZeroToPositiveZero(Math.pow(functionResultValue, 1/secondValue));
 	}
 
 	@Override
-	protected double computeSecondFromOthers(Double firstValue, Double functionResultValue) {
+	protected Double computeSecondFromOthers(Double firstValue, Double functionResultValue) {
 		return normalizeDoubleZeroToPositiveZero(Math.log(functionResultValue) / Math.log(firstValue));
 	}
 

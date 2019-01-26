@@ -12,7 +12,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.util.base.NullaryFunction;
 
 /**
- * A specialization of {@link AbstractDeterministicFunctionSamplingFactor} for numeric operators with two arguments.
+ * A specialization of {@link AbstractDeterministicFunctionSamplingFactor} for operators with two arguments.
  * 
  * @author braz
  *
@@ -22,11 +22,11 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 
 	protected abstract String operatorSymbol();
 
-	protected abstract double operation(A firstValue, B secondValue);
+	protected abstract R operation(A firstValue, B secondValue);
 
-	protected abstract double computeFirstFromOthers(B secondValue, R functionResultValue);
+	protected abstract A computeFirstFromOthers(B secondValue, R functionResultValue);
 
-	protected abstract double computeSecondFromOthers(A firstValue, R functionResultValue);
+	protected abstract B computeSecondFromOthers(A firstValue, R functionResultValue);
 
 	abstract protected boolean isValidResult(R value);
 
@@ -45,6 +45,16 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 		super(result, arguments, random);
 		this.first = arguments.get(0);
 		this.second = arguments.get(1);
+	}
+
+	////////////////////
+	
+	public Variable getFirst() {
+		return first;
+	}
+
+	public Variable getSecond() {
+		return second;
 	}
 
 	////////////////////
@@ -93,14 +103,14 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 	private Object computeFirstFromOthers(Function<Variable, Object> fromVariableToValue) {
 		B secondValue = getSecondValue(fromVariableToValue);
 		R functionResultValue = getResultValue(fromVariableToValue);
-		double result = computeFirstFromOthers(secondValue, functionResultValue);
+		A result = computeFirstFromOthers(secondValue, functionResultValue);
 		return result;
 	}
 
 	private Object computeSecondFromOthers(Function<Variable, Object> fromVariableToValue) {
 		A firstValue = getFirstValue(fromVariableToValue);
 		R functionResultValue = getResultValue(fromVariableToValue);
-		double result = computeSecondFromOthers(firstValue, functionResultValue);
+		B result = computeSecondFromOthers(firstValue, functionResultValue);
 		return result;
 	}
 

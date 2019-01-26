@@ -3,8 +3,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.util.Util.fold;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.notNullAndEquals;
-import static com.sri.ai.util.Util.thereExists;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.Iterator;
@@ -13,7 +11,6 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractDeterministicFunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SpecificationForFunctionResultSamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
@@ -99,13 +96,6 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 	//////////////////////
 	
 	@Override
-	protected void completeFunctionResultFromPossiblyPartialAssignmentIfPossible(Sample sample) {
-		if (thereExists(getArguments(), v -> notNullAndEquals(getValue(v, sample), getAbsorbingElement()))) {
-			sample.getAssignment().set(getFunctionResult(), getAbsorbingElement());
-		}
-	}
-
-	@Override
 	protected Object evaluateFunctionFromAllArguments(Function<Variable, Object> fromVariableToValue) {
 		Iterator<T> doubleValues = functionIterator(getArguments(), v -> getValue(fromVariableToValue, v));
 		T result = evaluateFunctionFromAllArgumentsValues(doubleValues);
@@ -138,6 +128,7 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 				new IntegerIterator(0, getArguments().size()),
 				argumentIndex ->
 				new SpecificationForFunctionResultSamplingRule(
+						sample -> sample.getAssignment().set(getFunctionResult(), getAbsorbingElement()),
 						list(argumentIndex),
 						list(argumentIsAbsorbingValue(argumentIndex)),
 						SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT));
