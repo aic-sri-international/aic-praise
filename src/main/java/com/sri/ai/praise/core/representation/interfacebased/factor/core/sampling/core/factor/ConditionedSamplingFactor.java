@@ -29,9 +29,10 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 			return samplingFactor;
 		}
 
-		return makeProxy(ConditionedSamplingFactor.class, samplingFactor, conditioningSample);		
+		ConditionedSamplingFactor proxy = makeProxy(ConditionedSamplingFactor.class, samplingFactor, conditioningSample);
+		return proxy;		
 	}
-
+	
 	public static class ConditionedSamplingFactorProxyInvocationHandler implements InvocationHandler {
 
 		private SamplingFactor samplingFactor;
@@ -44,7 +45,7 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 			this.samplingFactor = samplingFactor;
 			this.conditioningSample = conditioningSample;
 			this.conditionedVariables = makeConditionedVariables(samplingFactor, conditioningSample);
-			this.conditionedSamplingRuleSet = makeConditionedSamplingRuleSet();
+			this.conditionedSamplingRuleSet = null; // needs to be made after construction, because 'proxy' field has not been set yet.
 		}
 
 		private ArrayList<Variable> makeConditionedVariables(SamplingFactor samplingFactor, Sample conditioningSample) {
@@ -63,6 +64,9 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 				return Collections.unmodifiableList(conditionedVariables);
 			}
 			else if (method.getName().equals("getSamplingRuleSet")) {
+				if (conditionedSamplingRuleSet == null) {
+					conditionedSamplingRuleSet = makeConditionedSamplingRuleSet();
+				}
 				return conditionedSamplingRuleSet;
 			}
 			else if (method.getDeclaringClass().isAssignableFrom(SamplingFactor.class)) {
@@ -81,7 +85,7 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 			samplingFactor.sampleOrWeigh(sample);
 		}
 		
-		private SamplingRuleSet makeConditionedSamplingRuleSet() {
+		public SamplingRuleSet makeConditionedSamplingRuleSet() {
 			ArrayList<SamplingRule> rules = 
 					getOriginalSamplingRules().stream()
 					.map(this::conditionOrNull)

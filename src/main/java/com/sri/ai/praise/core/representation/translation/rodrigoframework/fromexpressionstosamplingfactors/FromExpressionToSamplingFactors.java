@@ -30,7 +30,6 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualityFunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualitySamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
@@ -77,12 +76,12 @@ public class FromExpressionToSamplingFactors {
 	private void equalityCompilation(Expression expression, List<Factor> factors) {
 		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
 		Variable rightHandSideVariable = expressionCompilationWithCompoundExpressionVariableAlreadyAvailable(expression.get(1), leftHandSideVariable, factors);
-		boolean leftHandSideVariableWasUsedAsRightHandSideVariable = rightHandSideVariable == leftHandSideVariable;
-		if (leftHandSideVariableWasUsedAsRightHandSideVariable) {
+		boolean leftHandSideVariableWasReusedAsRightHandSideVariable = rightHandSideVariable == leftHandSideVariable;
+		if (leftHandSideVariableWasReusedAsRightHandSideVariable) {
 			// no need to enforce equality
 		}
 		else {
-			Factor equalityFactor = new EqualitySamplingFactor(leftHandSideVariable, rightHandSideVariable, new Random());
+			Factor equalityFactor = EqualitySamplingFactor.equalitySamplingFactor(leftHandSideVariable, rightHandSideVariable, random);
 			factors.add(equalityFactor);
 		}
 	}
@@ -217,7 +216,7 @@ public class FromExpressionToSamplingFactors {
 
 	private void equalityFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
-		Factor equalityFunctionFactor = new EqualityFunctionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
+		Factor equalityFunctionFactor = new EqualitySamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
 		factors.add(equalityFunctionFactor);
 	}
 
