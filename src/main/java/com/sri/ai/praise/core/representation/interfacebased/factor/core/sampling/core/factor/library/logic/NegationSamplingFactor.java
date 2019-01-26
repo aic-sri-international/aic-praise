@@ -1,10 +1,10 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.logic;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic;
 
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractDeterministicNumericUnaryFunctionSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractDeterministicInvertibleUnaryFunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractDeterministicInvertibleUnaryFunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.AbstractDeterministicNumericUnaryFunctionSamplingFactor;
 
 /**
  * An extension of {@link AbstractDeterministicNumericUnaryFunctionSamplingFactor} for negation.

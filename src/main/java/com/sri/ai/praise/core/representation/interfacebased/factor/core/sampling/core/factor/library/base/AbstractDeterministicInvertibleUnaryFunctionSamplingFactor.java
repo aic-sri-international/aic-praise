@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base;
 
 import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.list;

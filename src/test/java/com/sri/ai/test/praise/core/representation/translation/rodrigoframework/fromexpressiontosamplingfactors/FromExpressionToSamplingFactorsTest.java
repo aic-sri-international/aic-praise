@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.FromExpressionToSamplingFactors;
 
 class FromExpressionToSamplingFactorsTest {

@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number;
 
 import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.list;
@@ -29,6 +29,11 @@ public abstract class AbstractDeterministicNumericBinaryFunctionWithGuaranteedAr
 
 	////////////////////
 	
+	@Override
+	protected Iterator<? extends Integer> argumentsWithInverseFunctionIterator() {
+		return iterator(0, 1); 
+	}
+
 	@Override
 	protected Collection<? extends SamplingGoal> conditionsForInverseOfArgument(int i) {
 		return list();

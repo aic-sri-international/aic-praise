@@ -17,6 +17,8 @@ import static com.sri.ai.grinder.library.controlflow.IfThenElse.condition;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.elseBranch;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.isIfThenElse;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.thenBranch;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor.conditionToTrue;
+import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
@@ -30,19 +32,19 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualitySamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.logic.ConjunctionSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.logic.DisjunctionSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.logic.NegationSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.DivisionSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.ExponentiationSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.MultiplicationSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.SubtractionSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.SumSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.UnaryMinusSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.EqualitySamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.ConjunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.DisjunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.NegationSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.DivisionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.ExponentiationSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.MultiplicationSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.SubtractionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.SumSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.UnaryMinusSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedMeanAndStandardDeviation;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedStandardDeviation;
 
 public class FromExpressionToSamplingFactors {
 	
@@ -81,7 +83,13 @@ public class FromExpressionToSamplingFactors {
 			// no need to enforce equality
 		}
 		else {
-			Factor equalityFactor = EqualitySamplingFactor.equalitySamplingFactor(leftHandSideVariable, rightHandSideVariable, random);
+			Factor equalityFactor = 
+					conditionToTrue(
+							truth -> 
+							new EqualitySamplingFactor(
+									truth, 
+									arrayList(leftHandSideVariable, rightHandSideVariable), 
+									random));
 			factors.add(equalityFactor);
 		}
 	}

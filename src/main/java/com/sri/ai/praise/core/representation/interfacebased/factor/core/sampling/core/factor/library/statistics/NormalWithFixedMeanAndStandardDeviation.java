@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.samplingRuleFromVariables;
 import static com.sri.ai.util.Util.arrayList;

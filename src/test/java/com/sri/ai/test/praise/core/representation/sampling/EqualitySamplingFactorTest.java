@@ -1,6 +1,5 @@
 package com.sri.ai.test.praise.core.representation.sampling;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualitySamplingFactor.equalitySamplingFactor;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.containsAllCaseInsensitive;
 import static com.sri.ai.util.Util.list;
@@ -20,6 +19,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.PotentialFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SamplingProductFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.EqualitySamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleImportanceFactory;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoublePotential;
@@ -43,8 +43,8 @@ public class EqualitySamplingFactorTest {
 		Variable y = new DefaultVariable("y");
 		Variable z = new DefaultVariable("z");
 
-		SamplingFactor xEqualsY = equalitySamplingFactor(x, y, new Random());
-		SamplingFactor xEqualsZ = equalitySamplingFactor(x, z, new Random());
+		SamplingFactor xEqualsY = SamplingFactor.conditionToTrue(t -> new EqualitySamplingFactor(t, arrayList(x, y), new Random()));
+		SamplingFactor xEqualsZ = SamplingFactor.conditionToTrue(t -> new EqualitySamplingFactor(t, arrayList(x, z), new Random()));
 
 		SamplingFactor xEqualsYAndXEqualsZ = new SamplingProductFactor(arrayList(xEqualsY, xEqualsZ), new Random());
 		println(xEqualsYAndXEqualsZ.nestedString(true));
@@ -152,7 +152,7 @@ public class EqualitySamplingFactorTest {
 		Variable x = new DefaultVariable("x");
 		Variable y = new DefaultVariable("y");
 
-		SamplingFactor xEqualsY = equalitySamplingFactor(x, y, new Random());
+		SamplingFactor xEqualsY = SamplingFactor.conditionToTrue(t -> new EqualitySamplingFactor(t, arrayList(x, y), new Random()));
 
 		runEqualityTest(numberOfSamples, x, y, xEqualsY);
 

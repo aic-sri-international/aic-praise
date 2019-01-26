@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number;
 
 import static com.sri.ai.util.Util.normalizeDoubleZeroToPositiveZero;
 
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractAssociativeCommutativeSemiRingSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractAssociativeCommutativeSemiRingSamplingFactor;
 
 /**
  * A {@link AbstractAssociativeCommutativeSemiRingSamplingFactor} instantiated for multiplication.  

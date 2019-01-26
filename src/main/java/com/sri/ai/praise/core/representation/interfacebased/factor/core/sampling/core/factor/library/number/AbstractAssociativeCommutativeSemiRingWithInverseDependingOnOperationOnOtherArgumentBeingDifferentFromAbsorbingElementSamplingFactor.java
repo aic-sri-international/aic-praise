@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number;
 
 import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
 import static com.sri.ai.util.Util.list;
@@ -12,7 +12,7 @@ import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractAssociativeCommutativeSemiRingSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractAssociativeCommutativeSemiRingSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.FunctionOnSetOfVariablesSatisfiesCondition;
 import com.sri.ai.util.collect.IntegerIterator;
 

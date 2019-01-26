@@ -1,8 +1,5 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base;
 
-import static com.sri.ai.util.Util.iterator;
-
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
@@ -67,11 +64,6 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 		Object result = computeWithErrorChecking(fromVariableToValue, () -> operation(firstValue, secondValue));
 		check(isInvalidFunctionResult((R)result), getFunctionResult(), result, fromVariableToValue);
 		return result;
-	}
-
-	@Override
-	protected Iterator<? extends Integer> argumentsWithInverseFunctionIterator() {
-		return iterator(0, 1); 
 	}
 
 	@Override

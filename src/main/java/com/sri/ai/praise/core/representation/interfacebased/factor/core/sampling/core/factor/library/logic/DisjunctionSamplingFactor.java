@@ -1,11 +1,11 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.logic;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic;
 
 import java.util.List;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractAssociativeCommutativeSemiRingSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number.AbstractAssociativeCommutativeSemiRingWithInverseDependingOnOperationOnOtherArgumentBeingDifferentFromAbsorbingElementSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractAssociativeCommutativeSemiRingSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.AbstractAssociativeCommutativeSemiRingWithInverseDependingOnOperationOnOtherArgumentBeingDifferentFromAbsorbingElementSamplingFactor;
 
 /**
  * A {@link AbstractAssociativeCommutativeSemiRingSamplingFactor} instantiated for disjunction.  

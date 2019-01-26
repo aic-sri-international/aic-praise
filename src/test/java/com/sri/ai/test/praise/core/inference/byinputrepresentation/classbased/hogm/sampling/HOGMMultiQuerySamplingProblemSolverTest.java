@@ -77,7 +77,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"";
 
 		String query = "neighbor";
-		Expression expected = parse("if neighbor = bob then 0.234 else if neighbor = mary then 0.24 else if neighbor = person3 then 0.277 else 0.249");
+		Expression expected = parse("if neighbor = bob then 0.25 else if neighbor = mary then 0.25 else if neighbor = person3 then 0.25 else 0.25");
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
@@ -283,7 +283,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 		String query = "y";
 		Expression expected = parse("if y < -9.5 then 0 else if y < -8.5 then 0 else if y < -7.5 then 0 else if y < -6.5 then 0 else if y < -5.5 then 0 else if y < -4.5 then 0 else if y < -3.5 then 0 else if y < -2.5 then 0 else if y < -1.5 then 0 else if y < -0.5 then 0 else if y < 0.5 then 0 else if y < 1.5 then 1 else if y < 2.5 then 0 else if y < 3.5 then 0 else if y < 4.5 then 0 else if y < 5.5 then 0 else if y < 6.5 then 0 else if y < 7.5 then 0 else if y < 8.5 then 0 else if y < 9.5 then 0 else 0");
-		int initialNumberOfSamples = 1000000;
+		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);

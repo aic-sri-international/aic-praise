@@ -1,8 +1,9 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number;
 
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractDeterministicInvertibleUnaryFunctionSamplingFactor;
 
 /**
  * A specialization of {@link AbstractDeterministicInvertibleUnaryFunctionSamplingFactor} for numeric values,
