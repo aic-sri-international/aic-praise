@@ -74,11 +74,6 @@ public class TableSamplingFactor extends AbstractSamplingFactor {
 		return result;
 	}
 
-	private Object getValue(Variable variable, Sample sample) {
-		Object result = sample.getAssignment().get(variable);
-		return result;
-	}
-
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
 		SamplingRule samplingRule = samplingRuleFromVariables(this, list(variable), list(), 1.0/values.size());

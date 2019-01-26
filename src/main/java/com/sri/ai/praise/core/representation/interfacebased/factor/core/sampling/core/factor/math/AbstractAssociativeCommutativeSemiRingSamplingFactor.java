@@ -100,7 +100,7 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 	
 	@Override
 	protected void completeFunctionResultFromPossiblyPartialAssignmentIfPossible(Sample sample) {
-		if (thereExists(getArguments(), v -> notNullAndEquals(sample.getAssignment().get(v), getAbsorbingElement()))) {
+		if (thereExists(getArguments(), v -> notNullAndEquals(getValue(v, sample), getAbsorbingElement()))) {
 			sample.getAssignment().set(getFunctionResult(), getAbsorbingElement());
 		}
 	}

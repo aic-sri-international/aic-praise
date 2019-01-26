@@ -44,6 +44,11 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 		return samplingRules;
 	}
 
+	protected Object getValue(Variable variable, Sample sample) {
+		Object result = sample.getAssignment().get(variable);
+		return result;
+	}
+
 	@Override
 	public Random getRandom() {
 		return random;

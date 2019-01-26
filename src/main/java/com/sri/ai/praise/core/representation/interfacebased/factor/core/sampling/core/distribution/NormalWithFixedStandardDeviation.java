@@ -42,7 +42,7 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 
 	@Override
 	public void sampleOrWeigh(Sample sample) {
-		Double meanValue = getValue(sample, mean);
+		Double meanValue = (Double) getValue(mean, sample);
 		if (meanValue != null) {
 			sampleOrWeightGivenMean(variable, meanValue, sample);
 		}
@@ -52,7 +52,7 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 	}
 
 	private void sampleOrWeightGivenMean(Variable sampledOrWeighedVariable, double meanValue, Sample sample) {
-		Double value = getValue(sample, sampledOrWeighedVariable);
+		Double value = (Double) getValue(sampledOrWeighedVariable, sample);
 		if (value == null) {
 			sample(sampledOrWeighedVariable, meanValue, sample);
 		}
@@ -73,7 +73,7 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 	}
 
 	private void sampleOrWeightWithUnknownMean(Sample sample) {
-		Double variableValue = getValue(sample, variable);
+		Double variableValue = (Double) getValue(variable, sample);
 		if (variableValue != null) {
 			sampleOrWeightMeanInInvertedProblem(variableValue, sample);
 		}
@@ -97,11 +97,6 @@ public class NormalWithFixedStandardDeviation extends AbstractSamplingFactor {
 
 	protected NormalDistribution getNormalDistribution(double meanValue) {
 		return new NormalDistribution(randomGenerator, meanValue, standardDeviation);
-	}
-
-	private Double getValue(Sample sample, Variable variable) {
-		Double result = (Double) sample.getAssignment().get(variable);
-		return result;
 	}
 
 	private void setValue(Sample sample, Variable variable, Double value) {

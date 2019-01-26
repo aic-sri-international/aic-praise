@@ -211,11 +211,6 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 		sample.getAssignment().set(variable, value);
 	}
 
-	private Object getValue(Variable variable, Sample sample) {
-		Object result = sample.getAssignment().get(variable);
-		return result;
-	}
-
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
 		ArrayList<? extends SamplingRule> samplingRulesArrayList = makeSamplingRulesArrayList();

@@ -58,11 +58,6 @@ public class ConstantSamplingFactor extends AbstractSamplingFactor {
 		return result;
 	}
 
-	private Object getValue(Variable variable, Sample sample) {
-		Object result = sample.getAssignment().get(variable);
-		return result;
-	}
-
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
 		SamplingRule samplingRule = deterministicSamplingRuleFromVariables(this, list(variable), list());
