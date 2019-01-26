@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
 import static com.sri.ai.util.Util.collectToArrayList;
+import static com.sri.ai.util.Util.makeProxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -21,10 +22,7 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 			return samplingFactor;
 		}
 
-		return (ConditionedSamplingFactor) java.lang.reflect.Proxy.newProxyInstance(
-				samplingFactor.getClass().getClassLoader(),
-				new Class[] { ConditionedSamplingFactor.class },
-				new ConditionedSamplingFactorProxyInvocationHandler(samplingFactor, conditioningSample));		
+		return makeProxy(ConditionedSamplingFactor.class, samplingFactor, conditioningSample);		
 	}
 
 	public static class ConditionedSamplingFactorProxyInvocationHandler implements InvocationHandler {

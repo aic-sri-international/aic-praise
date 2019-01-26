@@ -4,6 +4,7 @@ import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.grinder.library.FunctorConstants.LESS_THAN;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.FromRealExpressionVariableToRealVariableWithRange.makeRealVariableWithRange;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.makeProxy;
 import static com.sri.ai.util.Util.mapIntegersIntoArrayList;
 import static com.sri.ai.util.Util.mapIntegersIntoList;
 import static com.sri.ai.util.Util.mapIntoArray;
@@ -110,10 +111,13 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			int initialNumberOfSamples,
 			Context context) {
 		
-	     return (ExpressionSamplingFactor) java.lang.reflect.Proxy.newProxyInstance(
-	             samplingFactor.getClass().getClassLoader(),
-	             new Class[] { ExpressionSamplingFactor.class },
-	             new ExpressionSamplingFactorProxyInvocationHandler(samplingFactor, queryIndex, fromVariableToNumberOfDiscreteValues, initialNumberOfSamples, context));		
+		return makeProxy(
+				ExpressionSamplingFactor.class, 
+				samplingFactor, 
+				queryIndex, 
+				fromVariableToNumberOfDiscreteValues, 
+				initialNumberOfSamples, 
+				context);
 	}
 
 	public static class ExpressionSamplingFactorProxyInvocationHandler implements InvocationHandler {
