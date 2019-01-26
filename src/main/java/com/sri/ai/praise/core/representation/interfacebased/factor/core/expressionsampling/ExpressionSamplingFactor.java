@@ -11,7 +11,10 @@ import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.objectStringEqualsOneOf;
+import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.Util.repeat;
+import static com.sri.ai.util.base.PairOf.makePairOf;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -47,6 +50,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.DefaultSamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.SamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.base.PairOf;
 import com.sri.ai.util.collect.CartesianProductOnIntegersIterator;
 import com.sri.ai.util.function.api.values.Value;
 import com.sri.ai.util.function.api.variables.Assignment;
@@ -62,6 +66,20 @@ import com.sri.ai.util.function.core.variables.IntegerVariable;
 
 public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	
+	/**
+	 * The maximum number of assignments to factor's discretized values
+	 * that will allow generating an expression for it
+	 * ({@link #TOO_LARGE_FOR_EXPRESSION_GENERATION} is used otherwise).
+	 *
+	 */
+	public static int maximum_number_of_assignments_for_expression_generation = 100;
+	
+	/**
+	 * The factor's expression if the number of assignments to factor's discretized values
+	 * is greater than {@link #maximum_number_of_assignments_for_expression_generation}.
+	 */
+	public static final Symbol TOO_LARGE_FOR_EXPRESSION_GENERATION = makeSymbol("too large");
+
 	DefaultSamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction();
 
 	ExpressionSamplingFactor condition(Sample conditioningSample);
@@ -188,24 +206,64 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 		
 		private Expression getFactorExpression() {
 			if (expression == null) {
-				List<Integer> fromVariableIndexToNumberOfValues = mapIntoList(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()); 
-				expression = getFactorExpressionFor(new CartesianProductOnIntegersIterator(fromVariableIndexToNumberOfValues));
+				makeFactorExpressionOrTooLarge();
 			}
 			return expression;
 		}
 
-		private Expression getFactorExpressionFor(Iterator<ArrayList<Integer>> valueIndicesIterator) {
-			Expression result;
-			if (valueIndicesIterator.hasNext()) {
-				result = getFactorExpressionForNonEmptyDomain(valueIndicesIterator);
+		private void makeFactorExpressionOrTooLarge() {
+			int numberOfAssignments = computeNumberOfAssignments();
+			if (numberOfAssignments > maximum_number_of_assignments_for_expression_generation) {
+				expression = TOO_LARGE_FOR_EXPRESSION_GENERATION;
 			}
 			else {
-				result = getFactorExpressionForEmptyDomain();
+				makeFactorExpression(); 
 			}
+		}
+
+		private int computeNumberOfAssignments() {
+			return (int) product(functionIterator(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()));
+		}
+
+		private void makeFactorExpression() {
+			Iterator<ArrayList<Integer>> valueIndicesIterator = makeValueIndicesIterator();
+			if (valueIndicesIterator.hasNext()) {
+				expression = getFactorExpressionForNonEmptyDomain(valueIndicesIterator);
+			}
+			else {
+				expression = getFactorExpressionForEmptyDomain();
+			}
+		}
+
+		private Iterator<ArrayList<Integer>> makeValueIndicesIterator() {
+			List<Integer> fromVariableIndexToNumberOfValues = makeListOfVariableNumberOfValues();
+			return makeValueIndicesIterator(fromVariableIndexToNumberOfValues);
+		}
+
+		private List<Integer> makeListOfVariableNumberOfValues() {
+			List<Integer> result = mapIntoList(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size());
 			return result;
 		}
 
+		private CartesianProductOnIntegersIterator makeValueIndicesIterator(List<Integer> fromVariableIndexToNumberOfValues) {
+			return new CartesianProductOnIntegersIterator(fromVariableIndexToNumberOfValues);
+		}
+
 		private Expression getFactorExpressionForNonEmptyDomain(Iterator<ArrayList<Integer>> valueIndicesIterator) {
+			
+			PairOf<ArrayList<Expression>> conditionsAndProbabilities = 
+					gatherConditionsAndProbabilities(valueIndicesIterator);
+			
+			Expression result = 
+					makeExpression(conditionsAndProbabilities.first, conditionsAndProbabilities.second);
+			
+			return result;
+			
+		}
+
+		private 
+		PairOf<ArrayList<Expression>>
+		gatherConditionsAndProbabilities(Iterator<ArrayList<Integer>> valueIndicesIterator) {
 			
 			ArrayList<Expression> conditions = arrayList();
 			ArrayList<Expression> probabilities = arrayList();
@@ -221,6 +279,10 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 				probabilities.add(probability);
 			}
 			
+			return makePairOf(conditions, probabilities);
+		}
+
+		private Expression makeExpression(ArrayList<Expression> conditions, ArrayList<Expression> probabilities) {
 			ListIterator<Expression> conditionsIterator = conditions.listIterator(conditions.size());
 			ListIterator<Expression> probabilitiesIterator = probabilities.listIterator(probabilities.size());
 

@@ -110,7 +110,25 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"";
 
 		String query = "x";
-		boolean quantitativeTests = false; // too large
+		boolean quantitativeTests = false; // too large to parse due to a bug (not to generate)
+		Expression expected = null;
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 25;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests);
+	}
+
+	@Test 
+	public void queryWithTwoVariablesAndSumSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"constant b : [-10;10];" +
+				"x = Normal(b + 2, 3.0);" +
+				"";
+
+		String query = "x";
+		boolean quantitativeTests = false; // too large to parse due to a bug (not to generate)
 		Expression expected = null;
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
@@ -129,7 +147,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"";
 
 		String query = "x";
-		boolean quantitativeTests = false; // too large
+		boolean quantitativeTests = false; // too large to parse due to a bug (not to generate)
 		Expression expected = null;
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
@@ -204,9 +222,9 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				;
 
 		String query = "x";
-		Expression expected = parse("if x < -9.96 then 0.012 else if x < -9.88 then 0.024 else if x < -9.799 then 0.026 else if x < -9.719 then 0.028 else if x < -9.639 then 0.029 else if x < -9.558 then 0.03 else if x < -9.478 then 0.032 else if x < -9.398 then 0.034 else if x < -9.317 then 0.035 else if x < -9.237 then 0.037 else if x < -9.157 then 0.037 else if x < -9.076 then 0.038 else if x < -8.996 then 0.038 else if x < -8.916 then 0.038 else if x < -8.835 then 0.037 else if x < -8.755 then 0.037 else if x < -8.675 then 0.036 else if x < -8.594 then 0.035 else if x < -8.514 then 0.034 else if x < -8.434 then 0.034 else if x < -8.353 then 0.032 else if x < -8.273 then 0.031 else if x < -8.193 then 0.028 else if x < -8.112 then 0.027 else if x < -8.032 then 0.024 else if x < -7.952 then 0.022 else if x < -7.871 then 0.02 else if x < -7.791 then 0.019 else if x < -7.711 then 0.018 else if x < -7.631 then 0.016 else if x < -7.55 then 0.014 else if x < -7.47 then 0.014 else if x < -7.39 then 0.011 else if x < -7.309 then 0.009 else if x < -7.229 then 0.009 else if x < -7.149 then 0.007 else if x < -7.068 then 0.007 else if x < -6.988 then 0.005 else if x < -6.908 then 0.005 else if x < -6.827 then 0.004 else if x < -6.747 then 0.003 else if x < -6.667 then 0.003 else if x < -6.586 then 0.002 else if x < -6.506 then 0.002 else if x < -6.426 then 0.002 else if x < -6.345 then 0.001 else if x < -6.265 then 0.001 else if x < -6.185 then 0.001 else if x < -6.104 then 0.001 else if x < -6.024 then 0.001 else if x < -5.944 then 0 else if x < -5.863 then 0 else if x < -5.783 then 0 else if x < -5.703 then 0 else if x < -5.622 then 0 else if x < -5.542 then 0 else if x < -5.462 then 0 else if x < -5.382 then 0 else if x < -5.301 then 0 else if x < -5.221 then 0 else if x < -5.141 then 0 else if x < -5.06 then 0 else if x < -4.98 then 0 else if x < -4.9 then 0 else if x < -4.819 then 0 else if x < -4.739 then 0 else if x < -4.659 then 0 else if x < -4.578 then 0 else if x < -4.498 then 0 else if x < -4.418 then 0 else if x < -4.337 then 0 else if x < -4.257 then 0 else if x < -4.177 then 0 else if x < -4.096 then 0 else if x < -4.016 then 0 else if x < -3.936 then 0 else if x < -3.855 then 0 else if x < -3.775 then 0 else if x < -3.695 then 0 else if x < -3.614 then 0 else if x < -3.534 then 0 else if x < -3.454 then 0 else if x < -3.373 then 0 else if x < -3.293 then 0 else if x < -3.213 then 0 else if x < -3.133 then 0 else if x < -3.052 then 0 else if x < -2.972 then 0 else if x < -2.892 then 0 else if x < -2.811 then 0 else if x < -2.731 then 0 else if x < -2.651 then 0 else if x < -2.57 then 0 else if x < -2.49 then 0 else if x < -2.41 then 0 else if x < -2.329 then 0 else if x < -2.249 then 0 else if x < -2.169 then 0 else if x < -2.088 then 0 else if x < -2.008 then 0 else if x < -1.928 then 0 else if x < -1.847 then 0 else if x < -1.767 then 0 else if x < -1.687 then 0 else if x < -1.606 then 0 else if x < -1.526 then 0 else if x < -1.446 then 0 else if x < -1.365 then 0 else if x < -1.285 then 0 else if x < -1.205 then 0 else if x < -1.124 then 0 else if x < -1.044 then 0 else if x < -0.964 then 0 else if x < -0.884 then 0 else if x < -0.803 then 0 else if x < -0.723 then 0 else if x < -0.643 then 0 else if x < -0.562 then 0 else if x < -0.482 then 0 else if x < -0.402 then 0 else if x < -0.321 then 0 else if x < -0.241 then 0 else if x < -0.161 then 0 else if x < -0.08 then 0 else if x < -1.12E-15 then 0 else if x < 0.08 then 0 else if x < 0.161 then 0 else if x < 0.241 then 0 else if x < 0.321 then 0 else if x < 0.402 then 0 else if x < 0.482 then 0 else if x < 0.562 then 0 else if x < 0.643 then 0 else if x < 0.723 then 0 else if x < 0.803 then 0 else if x < 0.884 then 0 else if x < 0.964 then 0 else if x < 1.044 then 0 else if x < 1.124 then 0 else if x < 1.205 then 0 else if x < 1.285 then 0 else if x < 1.365 then 0 else if x < 1.446 then 0 else if x < 1.526 then 0 else if x < 1.606 then 0 else if x < 1.687 then 0 else if x < 1.767 then 0 else if x < 1.847 then 0 else if x < 1.928 then 0 else if x < 2.008 then 0 else if x < 2.088 then 0 else if x < 2.169 then 0 else if x < 2.249 then 0 else if x < 2.329 then 0 else if x < 2.41 then 0 else if x < 2.49 then 0 else if x < 2.57 then 0 else if x < 2.651 then 0 else if x < 2.731 then 0 else if x < 2.811 then 0 else if x < 2.892 then 0 else if x < 2.972 then 0 else if x < 3.052 then 0 else if x < 3.133 then 0 else if x < 3.213 then 0 else if x < 3.293 then 0 else if x < 3.373 then 0 else if x < 3.454 then 0 else if x < 3.534 then 0 else if x < 3.614 then 0 else if x < 3.695 then 0 else if x < 3.775 then 0 else if x < 3.855 then 0 else if x < 3.936 then 0 else if x < 4.016 then 0 else if x < 4.096 then 0 else if x < 4.177 then 0 else if x < 4.257 then 0 else if x < 4.337 then 0 else if x < 4.418 then 0 else if x < 4.498 then 0 else if x < 4.578 then 0 else if x < 4.659 then 0 else if x < 4.739 then 0 else if x < 4.819 then 0 else if x < 4.9 then 0 else if x < 4.98 then 0 else if x < 5.06 then 0 else if x < 5.141 then 0 else if x < 5.221 then 0 else if x < 5.301 then 0 else if x < 5.382 then 0 else if x < 5.462 then 0 else if x < 5.542 then 0 else if x < 5.622 then 0 else if x < 5.703 then 0 else if x < 5.783 then 0 else if x < 5.863 then 0 else if x < 5.944 then 0 else if x < 6.024 then 0 else if x < 6.104 then 0 else if x < 6.185 then 0 else if x < 6.265 then 0 else if x < 6.345 then 0 else if x < 6.426 then 0 else if x < 6.506 then 0 else if x < 6.586 then 0 else if x < 6.667 then 0 else if x < 6.747 then 0 else if x < 6.827 then 0 else if x < 6.908 then 0 else if x < 6.988 then 0 else if x < 7.068 then 0 else if x < 7.149 then 0 else if x < 7.229 then 0 else if x < 7.309 then 0 else if x < 7.39 then 0 else if x < 7.47 then 0 else if x < 7.55 then 0 else if x < 7.631 then 0 else if x < 7.711 then 0 else if x < 7.791 then 0 else if x < 7.871 then 0 else if x < 7.952 then 0 else if x < 8.032 then 0 else if x < 8.112 then 0 else if x < 8.193 then 0 else if x < 8.273 then 0 else if x < 8.353 then 0 else if x < 8.434 then 0 else if x < 8.514 then 0 else if x < 8.594 then 0 else if x < 8.675 then 0 else if x < 8.755 then 0 else if x < 8.835 then 0 else if x < 8.916 then 0 else if x < 8.996 then 0 else if x < 9.076 then 0 else if x < 9.157 then 0 else if x < 9.237 then 0 else if x < 9.317 then 0 else if x < 9.398 then 0 else if x < 9.478 then 0 else if x < 9.558 then 0 else if x < 9.639 then 0 else if x < 9.719 then 0 else if x < 9.799 then 0 else if x < 9.88 then 0 else if x < 9.96 then 0 else 0");
+		Expression expected = parse("if x < -9.583 then 0.147 else if x < -8.75 then 0.378 else if x < -7.917 then 0.312 else if x < -7.083 then 0.13 else if x < -6.25 then 0.029 else if x < -5.417 then 0.004 else if x < -4.583 then 0 else if x < -3.75 then 0 else if x < -2.917 then 0 else if x < -2.083 then 0 else if x < -1.25 then 0 else if x < -0.417 then 0 else if x < 0.417 then 0 else if x < 1.25 then 0 else if x < 2.083 then 0 else if x < 2.917 then 0 else if x < 3.75 then 0 else if x < 4.583 then 0 else if x < 5.417 then 0 else if x < 6.25 then 0 else if x < 7.083 then 0 else if x < 7.917 then 0 else if x < 8.75 then 0 else if x < 9.583 then 0 else 0");
 		int initialNumberOfSamples = 1000;
-		int numberOfDiscreteValues = 250;
+		int numberOfDiscreteValues = 25;
 
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
@@ -772,7 +790,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph for discrete values for now */ false);
 
 		query = "p";
-		expected = null; // should cause error
+		expected = null; // no expected expression, because sampling should cause error before that's needed
 		initialNumberOfSamples = 1;
 		numberOfDiscreteValues = 21;
 	
@@ -1100,10 +1118,12 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		println("query: " + query);
 		println("expected: " + expected);
 		println("actual  : " + conditioned);
-		String reasonForDifference = areEqualUpToNumericDifference(expected, conditioned, 0.05);
-		if (reasonForDifference != "") {
-			println("Failure: " + reasonForDifference);
+		if (expected != null) {
+			String reasonForDifference = areEqualUpToNumericDifference(expected, conditioned, 0.05);
+			if (reasonForDifference != "") {
+				println("Failure: " + reasonForDifference);
+			}
+			assertEquals("", reasonForDifference);
 		}
-		assertEquals("", reasonForDifference);
 	}
 }
