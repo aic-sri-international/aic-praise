@@ -1009,6 +1009,23 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
+	
+	@Test
+	public void countiesSamplingTest() {
+	
+		String model = "" +
+				"sort Counties: 4, Abiemnhom, Abyei, Akobo, AweilCentre;" + 
+				"random capital: Counties;" + 
+				"capital = Abiemnhom;" + 
+				"";
+		
+		String query = "capital";
+		Expression expected = parse("if capital = Abiemnhom then 1 else if capital = Abyei then 0 else if capital = Akobo then 0 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
 
 	///////////////////////////////
 
