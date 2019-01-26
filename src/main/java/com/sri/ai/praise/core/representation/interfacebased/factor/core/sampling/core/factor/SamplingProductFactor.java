@@ -2,7 +2,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet.union;
 import static com.sri.ai.util.Util.arrayList;
-import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.collectToSet;
 import static com.sri.ai.util.Util.flattenOneLevelToArrayList;
 import static com.sri.ai.util.Util.forAll;
@@ -114,8 +113,13 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 				.filter(SamplingRule::hasFired)
 				.map(SamplingRule::getSampler) // only samplers that are sampling factors will reach here
 				.collect(Collectors.toList());
-		@SuppressWarnings("unchecked")
-		List<? extends SamplingFactor> factorsThatFired = (List<? extends SamplingFactor>) collectToList(samplersThatFired, s -> s instanceof SamplingFactor);
+
+		List<SamplingFactor> factorsThatFired = list();
+		for (Sampler s : samplersThatFired) {
+			if (s instanceof SamplingFactor) {
+				factorsThatFired.add((SamplingFactor) s);
+			}
+		}
 		return factorsThatFired;
 	}
 
