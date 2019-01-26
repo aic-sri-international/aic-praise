@@ -28,11 +28,11 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 
 	protected abstract B computeSecondFromOthers(A firstValue, R functionResultValue);
 
-	abstract protected boolean isValidResult(R value);
+	abstract protected boolean isInvalidFunctionResult(R value);
 
-	abstract protected boolean isValidFirstArgument(A value);
+	abstract protected boolean isInvalidFirstArgument(A value);
 
-	abstract protected boolean isValidSecondArgument(B value);
+	abstract protected boolean isInvalidSecondArgument(B value);
 
 	////////////////////
 	
@@ -65,7 +65,7 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 		A firstValue = getFirstValue(fromVariableToValue);
 		B secondValue = getSecondValue(fromVariableToValue);
 		Object result = computeWithErrorChecking(fromVariableToValue, () -> operation(firstValue, secondValue));
-		check(isValidResult((R)result), getFunctionResult(), result, fromVariableToValue);
+		check(isInvalidFunctionResult((R)result), getFunctionResult(), result, fromVariableToValue);
 		return result;
 	}
 
@@ -170,15 +170,15 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 	@SuppressWarnings("unchecked")
 	private void checkArgument(int missingArgumentIndex, Object value, Function<Variable, Object> fromVariableToValue) {
 		if (missingArgumentIndex == 0) {
-			check(isValidFirstArgument((A) value), getArguments().get(0), value, fromVariableToValue);
+			check(isInvalidFirstArgument((A) value), getArguments().get(0), value, fromVariableToValue);
 		}
 		else {
-			check(isValidSecondArgument((B) value), getArguments().get(1), value, fromVariableToValue);
+			check(isInvalidSecondArgument((B) value), getArguments().get(1), value, fromVariableToValue);
 		}
 	}
 
-	private void check(boolean isValid, Variable variable, Object checkedValue, Function<Variable, Object> fromVariableToValue) {
-		if (isValid) {
+	private void check(boolean isInvalid, Variable variable, Object checkedValue, Function<Variable, Object> fromVariableToValue) {
+		if (isInvalid) {
 			throw new Error("Error solving " + problemDescription(fromVariableToValue) + ": illegal arguments resulting in " + variable + " = " + checkedValue);
 		}
 	}

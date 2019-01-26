@@ -1,12 +1,15 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.number;
 
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.normalizeDoubleZeroToPositiveZero;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractAssociativeCommutativeSemiRingSamplingFactor;
 import com.sri.ai.util.collect.IntegerIterator;
 
@@ -59,6 +62,11 @@ public class SumSamplingFactor extends AbstractAssociativeCommutativeSemiRingSam
 	@Override
 	protected String getFunctionName() {
 		return "+";
+	}
+
+	@Override
+	protected Collection<? extends SamplingGoal> conditionsForInverseOfArgument(int i) {
+		return list();
 	}
 
 }

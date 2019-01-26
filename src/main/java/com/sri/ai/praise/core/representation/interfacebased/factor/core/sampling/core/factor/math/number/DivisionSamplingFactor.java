@@ -8,6 +8,7 @@ import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractDeterministicNumericBinaryFunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractDeterministicNumericBinaryFunctionWithGuaranteedArgumentInversesSamplingFactor;
 
 /**
  * An extension of {@link AbstractDeterministicNumericBinaryFunctionSamplingFactor} for division.
@@ -15,7 +16,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
  * @author braz
  *
  */
-public class DivisionSamplingFactor extends AbstractDeterministicNumericBinaryFunctionSamplingFactor {
+public class DivisionSamplingFactor extends AbstractDeterministicNumericBinaryFunctionWithGuaranteedArgumentInversesSamplingFactor {
 
 	public DivisionSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);

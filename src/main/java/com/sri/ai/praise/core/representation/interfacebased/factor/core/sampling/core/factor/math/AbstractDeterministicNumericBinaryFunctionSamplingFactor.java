@@ -23,17 +23,17 @@ public abstract class AbstractDeterministicNumericBinaryFunctionSamplingFactor
 	////////////////////
 	
 	@Override
-	protected boolean isValidResult(Double value) {
+	protected boolean isInvalidFunctionResult(Double value) {
 		return Double.isNaN(value) || Double.isInfinite(value);
 	}
 
 	@Override
-	protected boolean isValidFirstArgument(Double value) {
+	protected boolean isInvalidFirstArgument(Double value) {
 		return Double.isNaN(value) || Double.isInfinite(value);
 	}
 
 	@Override
-	protected boolean isValidSecondArgument(Double value) {
+	protected boolean isInvalidSecondArgument(Double value) {
 		return Double.isNaN(value) || Double.isInfinite(value);
 	}
 

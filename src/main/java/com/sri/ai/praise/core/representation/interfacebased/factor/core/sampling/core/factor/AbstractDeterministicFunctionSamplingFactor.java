@@ -7,7 +7,6 @@ import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.collectThoseWhoseIndexSatisfy;
 import static com.sri.ai.util.Util.flatList;
 import static com.sri.ai.util.Util.forAll;
-import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -58,9 +57,7 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	 * and the estimated success weight of such a sampling operation.
 	 * @return
 	 */
-	protected Iterator<SpecificationForFunctionResultSamplingRule> specificationsForFunctionResultSamplingRules() {
-		return iterator();
-	}
+	protected abstract Iterator<SpecificationForFunctionResultSamplingRule> specificationsForShortCircuitingSamplingRules();
 
 	protected abstract Iterator<? extends Integer> argumentsWithInverseFunctionIterator();
 
@@ -72,13 +69,10 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	 * Provides the contingent conditions for application of the inverse for a given argument,
 	 * in addition to the other variables being defined.
 	 * For example, in multiplication w = x*y*z, we can compute z from w, z, y but only if the product x*y is not zero.
-	 * Default is empty list. 
 	 * @param i
 	 * @return
 	 */
-	protected Collection<? extends SamplingGoal> conditionsForInverseOfArgument(int i) {
-		return list();
-	}
+	abstract protected Collection<? extends SamplingGoal> conditionsForInverseOfArgument(int i);
 
 	//////////////////////
 	
@@ -214,7 +208,7 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 
 	private void addSamplingRulesForFunctionResult(ArrayList<SamplingRule> samplingRules) {
 		samplingRules.add(makeSamplingRuleForFunctionResultBasedOnAllArguments());
-		mapIntoList(specificationsForFunctionResultSamplingRules(), this::makeSamplingRuleFromSpecificationForFunctionResultSamplingRule, samplingRules);
+		mapIntoList(specificationsForShortCircuitingSamplingRules(), this::makeSamplingRuleFromSpecificationForFunctionResultSamplingRule, samplingRules);
 	}
 
 	private SamplingRule makeSamplingRuleForFunctionResultBasedOnAllArguments() {

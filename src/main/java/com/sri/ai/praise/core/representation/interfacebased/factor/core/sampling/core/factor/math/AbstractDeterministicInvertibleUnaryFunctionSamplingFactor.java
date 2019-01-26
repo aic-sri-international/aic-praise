@@ -3,12 +3,15 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.list;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractDeterministicFunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SpecificationForFunctionResultSamplingRule;
 import com.sri.ai.util.base.NullaryFunction;
 
 /**
@@ -17,7 +20,7 @@ import com.sri.ai.util.base.NullaryFunction;
  * @author braz
  *
  */
-public abstract class AbstractDeterministicUnaryFunctionSamplingFactor<T> extends AbstractDeterministicFunctionSamplingFactor {
+public abstract class AbstractDeterministicInvertibleUnaryFunctionSamplingFactor<T> extends AbstractDeterministicFunctionSamplingFactor {
 
 	protected abstract String operatorSymbol();
 
@@ -33,7 +36,7 @@ public abstract class AbstractDeterministicUnaryFunctionSamplingFactor<T> extend
 
 	////////////////////
 	
-	public AbstractDeterministicUnaryFunctionSamplingFactor(Variable result, Variable argument, Random random) {
+	public AbstractDeterministicInvertibleUnaryFunctionSamplingFactor(Variable result, Variable argument, Random random) {
 		super(result, list(argument), random);
 		this.argument = argument;
 	}
@@ -129,4 +132,13 @@ public abstract class AbstractDeterministicUnaryFunctionSamplingFactor<T> extend
 		}
 	}
 
+	@Override
+	protected Iterator<SpecificationForFunctionResultSamplingRule> specificationsForShortCircuitingSamplingRules() {
+		return iterator();
+	}
+
+	@Override
+	protected Collection<? extends SamplingGoal> conditionsForInverseOfArgument(int i) {
+		return list();
+	}
 }

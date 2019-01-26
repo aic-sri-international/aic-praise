@@ -123,7 +123,7 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 	}
 
 	@Override
-	protected Iterator<SpecificationForFunctionResultSamplingRule> specificationsForFunctionResultSamplingRules() {
+	protected Iterator<SpecificationForFunctionResultSamplingRule> specificationsForShortCircuitingSamplingRules() {
 		return functionIterator(
 				new IntegerIterator(0, getArguments().size()),
 				argumentIndex ->

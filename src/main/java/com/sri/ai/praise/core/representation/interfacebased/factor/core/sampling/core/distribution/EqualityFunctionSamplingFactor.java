@@ -1,17 +1,24 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution;
 
-import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.iterator;
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.myAssert;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SpecificationForFunctionResultSamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.math.AbstractDeterministicBinaryFunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableEqualsGoal;
 
-public class EqualitySamplingFactor2 extends AbstractDeterministicBinaryFunctionSamplingFactor<Object, Object, Boolean> {
+public class EqualityFunctionSamplingFactor extends AbstractDeterministicBinaryFunctionSamplingFactor<Object, Object, Boolean> {
 
-	public EqualitySamplingFactor2(Variable functionResult, Variable variable1, Variable variable2, Random random) {
-		super(functionResult, arrayList(variable1, variable2), random);
+	public EqualityFunctionSamplingFactor(Variable functionResult, ArrayList<? extends Variable> arguments, Random random) {
+		super(functionResult, arguments, random);
 	}
 	
 	@Override
@@ -21,7 +28,17 @@ public class EqualitySamplingFactor2 extends AbstractDeterministicBinaryFunction
 
 	@Override
 	protected Boolean operation(Object firstValue, Object secondValue) {
-		return firstValue == secondValue;
+		return firstValue.equals(secondValue);
+	}
+
+	@Override
+	protected Collection<? extends SamplingGoal> conditionsForInverseOfArgument(int i) {
+		return list(new VariableEqualsGoal(getFunctionResult(), true));
+	}
+
+	@Override
+	protected Iterator<SpecificationForFunctionResultSamplingRule> specificationsForShortCircuitingSamplingRules() {
+		return iterator();
 	}
 
 	@Override
@@ -37,18 +54,18 @@ public class EqualitySamplingFactor2 extends AbstractDeterministicBinaryFunction
 	}
 
 	@Override
-	protected boolean isValidResult(Boolean value) {
-		return true;
+	protected boolean isInvalidFunctionResult(Boolean value) {
+		return false;
 	}
 
 	@Override
-	protected boolean isValidFirstArgument(Object value) {
-		return true;
+	protected boolean isInvalidFirstArgument(Object value) {
+		return false;
 	}
 
 	@Override
-	protected boolean isValidSecondArgument(Object value) {
-		return true;
+	protected boolean isInvalidSecondArgument(Object value) {
+		return false;
 	}
 
 	@Override

@@ -12,6 +12,7 @@ public class VariableEqualsGoal extends AbstractVariablesRelatedGoal {
 	
 	public VariableEqualsGoal(Variable variable, Object value) {
 		super(list(variable));
+		this.value = value;
 	}
 	
 	Variable getVariable() {

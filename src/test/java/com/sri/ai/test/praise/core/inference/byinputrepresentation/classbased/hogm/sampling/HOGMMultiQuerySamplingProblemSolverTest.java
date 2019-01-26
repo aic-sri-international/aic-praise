@@ -242,6 +242,68 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		String query = "x";
 		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0 else if x < -0.5 then 0 else if x < 0.5 then 0 else if x < 1.5 then 0.991 else if x < 2.5 then 0 else if x < 3.5 then 0 else if x < 4.5 then 0 else if x < 5.5 then 0 else if x < 6.5 then 0 else if x < 7.5 then 0 else if x < 8.5 then 0 else if x < 9.5 then 0 else 0");
 //		Expression expected = parse("if x = 1.0 then 1 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void equalityFunctionSamplingTest() {
+
+		String model = "" +
+				"random equal : Boolean;" +
+				"random x : 0..5;" +
+				"random y : 0..5;" +
+				"equal = (x = y);" +
+				"x = 1;" +
+				"y = 1;" +
+				"";
+
+		String query = "equal";
+		Expression expected = parse("if equal then 1 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void equalityFunctionApplicableInverseSamplingTest() {
+
+		String model = "" +
+				"random equal : Boolean;" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"equal = (x = y);" +
+				"equal = true;" +
+				"x = 1.0;" +
+				"y = Normal(2.0, 2.0);" +
+				"";
+
+		String query = "y";
+		Expression expected = parse("if y < -9.5 then 0 else if y < -8.5 then 0 else if y < -7.5 then 0 else if y < -6.5 then 0 else if y < -5.5 then 0 else if y < -4.5 then 0 else if y < -3.5 then 0 else if y < -2.5 then 0 else if y < -1.5 then 0 else if y < -0.5 then 0 else if y < 0.5 then 0 else if y < 1.5 then 1 else if y < 2.5 then 0 else if y < 3.5 then 0 else if y < 4.5 then 0 else if y < 5.5 then 0 else if y < 6.5 then 0 else if y < 7.5 then 0 else if y < 8.5 then 0 else if y < 9.5 then 0 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 21;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void equalityFunctionNotApplicableInverseSamplingTest() {
+
+		String model = "" +
+				"random equal : Boolean;" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"equal = (x = y);" +
+				"equal = false;" +
+				"x = 1.0;" +
+				"y = Normal(2.0, 2.0);" +
+				"";
+
+		String query = "y";
+		Expression expected = parse("if y < -9.5 then 0 else if y < -8.5 then 0 else if y < -7.5 then 0 else if y < -6.5 then 0 else if y < -5.5 then 0 else if y < -4.5 then 0 else if y < -3.5 then 0.002 else if y < -2.5 then 0.009 else if y < -1.5 then 0.028 else if y < -0.5 then 0.067 else if y < 0.5 then 0.121 else if y < 1.5 then 0.174 else if y < 2.5 then 0.198 else if y < 3.5 then 0.174 else if y < 4.5 then 0.121 else if y < 5.5 then 0.065 else if y < 6.5 then 0.028 else if y < 7.5 then 0.009 else if y < 8.5 then 0.003 else if y < 9.5 then 0.001 else 0");
 		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 

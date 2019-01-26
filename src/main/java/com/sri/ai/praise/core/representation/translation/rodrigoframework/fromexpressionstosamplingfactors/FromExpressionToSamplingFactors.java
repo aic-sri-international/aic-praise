@@ -30,6 +30,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualityFunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.EqualitySamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.distribution.NormalWithFixedStandardDeviation;
@@ -133,6 +134,9 @@ public class FromExpressionToSamplingFactors {
 		else if (expression.hasFunctor(NOT) && expression.numberOfArguments() == 1) {
 			negationCompilation(compoundExpressionVariable, expression, factors);
 		}
+		else if (expression.hasFunctor(EQUALITY)) {
+			equalityFunctionCompilation(compoundExpressionVariable, expression, factors);
+		}
 		else if (expression.hasFunctor("Normal")) {
 			normalCompilation(compoundExpressionVariable, expression, factors);
 		}
@@ -209,6 +213,12 @@ public class FromExpressionToSamplingFactors {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
 		Factor negationFactor = new NegationSamplingFactor(compoundExpressionVariable, argumentVariables.get(0), getRandom());
 		factors.add(negationFactor);
+	}
+
+	private void equalityFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor equalityFunctionFactor = new EqualityFunctionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(equalityFunctionFactor);
 	}
 
 	private void normalCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) throws Error {
