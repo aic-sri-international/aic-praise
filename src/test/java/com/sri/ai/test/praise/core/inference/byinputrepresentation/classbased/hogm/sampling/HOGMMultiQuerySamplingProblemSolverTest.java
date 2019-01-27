@@ -328,6 +328,75 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 
 	@Test
+	public void greaterThanSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"x = Normal(1.0, 2.0);" +
+				"x > 0.0;" +
+				"";
+
+		String query = "x";
+		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0 else if x < -7.917 then 0 else if x < -7.083 then 0 else if x < -6.25 then 0 else if x < -5.417 then 0 else if x < -4.583 then 0 else if x < -3.75 then 0 else if x < -2.917 then 0 else if x < -2.083 then 0 else if x < -1.25 then 0 else if x < -0.417 then 0 else if x < 0.417 then 0.111 else if x < 1.25 then 0.236 else if x < 2.083 then 0.228 else if x < 2.917 then 0.179 else if x < 3.75 then 0.121 else if x < 4.583 then 0.071 else if x < 5.417 then 0.034 else if x < 6.25 then 0.014 else if x < 7.083 then 0.004 else if x < 7.917 then 0.002 else if x < 8.75 then 0 else if x < 9.583 then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 25;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void lessThanOrEqualToSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"x = Normal(2.0, 2.0);" +
+				"x <= 0.0;" +
+				"";
+
+		String query = "x";
+		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0 else if x < -7.917 then 0 else if x < -7.083 then 0 else if x < -6.25 then 0 else if x < -5.417 then 0.001 else if x < -4.583 then 0.002 else if x < -3.75 then 0.009 else if x < -2.917 then 0.032 else if x < -2.083 then 0.087 else if x < -1.25 then 0.199 else if x < -0.417 then 0.386 else if x < 0.417 then 0.284 else if x < 1.25 then 0 else if x < 2.083 then 0 else if x < 2.917 then 0 else if x < 3.75 then 0 else if x < 4.583 then 0 else if x < 5.417 then 0 else if x < 6.25 then 0 else if x < 7.083 then 0 else if x < 7.917 then 0 else if x < 8.75 then 0 else if x < 9.583 then 0 else 0");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void greaterThanOrEqualToSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"x = Normal(1.0, 2.0);" +
+				"x >= 0.0;" +
+				"";
+
+		String query = "x";
+		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0 else if x < -7.917 then 0 else if x < -7.083 then 0 else if x < -6.25 then 0 else if x < -5.417 then 0 else if x < -4.583 then 0 else if x < -3.75 then 0 else if x < -2.917 then 0 else if x < -2.083 then 0 else if x < -1.25 then 0 else if x < -0.417 then 0 else if x < 0.417 then 0.111 else if x < 1.25 then 0.236 else if x < 2.083 then 0.228 else if x < 2.917 then 0.179 else if x < 3.75 then 0.121 else if x < 4.583 then 0.071 else if x < 5.417 then 0.034 else if x < 6.25 then 0.014 else if x < 7.083 then 0.004 else if x < 7.917 then 0.002 else if x < 8.75 then 0 else if x < 9.583 then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 25;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+
+	//@Test
+	public void orSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"x = Normal(2.0, 2.0);" +
+				"x < 1.0 or x > 3.0;" +
+				"";
+
+		String query = "x";
+		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0 else if x < -7.917 then 0 else if x < -7.083 then 0 else if x < -6.25 then 0 else if x < -5.417 then 0.001 else if x < -4.583 then 0.002 else if x < -3.75 then 0.009 else if x < -2.917 then 0.032 else if x < -2.083 then 0.087 else if x < -1.25 then 0.199 else if x < -0.417 then 0.386 else if x < 0.417 then 0.284 else if x < 1.25 then 0 else if x < 2.083 then 0 else if x < 2.917 then 0 else if x < 3.75 then 0 else if x < 4.583 then 0 else if x < 5.417 then 0 else if x < 6.25 then 0 else if x < 7.083 then 0 else if x < 7.917 then 0 else if x < 8.75 then 0 else if x < 9.583 then 0 else 0");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
 	public void longEqualitySamplingTest() {
 
 		String model = "" +

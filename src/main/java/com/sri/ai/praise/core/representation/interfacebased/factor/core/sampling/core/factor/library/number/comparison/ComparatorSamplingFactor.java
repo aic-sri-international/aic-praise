@@ -1,10 +1,11 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.comparison;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.AbstractDeterministicBinaryFunctionWithoutInversesSamplingFactor;
 
 public class ComparatorSamplingFactor<T> extends AbstractDeterministicBinaryFunctionWithoutInversesSamplingFactor<T, T, Integer> {
 

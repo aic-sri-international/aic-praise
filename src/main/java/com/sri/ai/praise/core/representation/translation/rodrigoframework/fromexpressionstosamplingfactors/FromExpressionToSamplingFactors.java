@@ -8,7 +8,10 @@ import static com.sri.ai.grinder.library.FunctorConstants.AND;
 import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
 import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIATION;
+import static com.sri.ai.grinder.library.FunctorConstants.GREATER_THAN;
+import static com.sri.ai.grinder.library.FunctorConstants.GREATER_THAN_OR_EQUAL_TO;
 import static com.sri.ai.grinder.library.FunctorConstants.LESS_THAN;
+import static com.sri.ai.grinder.library.FunctorConstants.LESS_THAN_OR_EQUAL_TO;
 import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.grinder.library.FunctorConstants.NOT;
 import static com.sri.ai.grinder.library.FunctorConstants.OR;
@@ -23,7 +26,10 @@ import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.println;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -33,9 +39,9 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.EqualitySamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.NaturalComparatorSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.ConjunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.DisjunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.NegationSamplingFactor;
@@ -45,6 +51,10 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.SubtractionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.SumSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.UnaryMinusSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.comparison.GreaterThanOrEqualToSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.comparison.GreaterThanSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.comparison.LessThanOrEqualToSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.comparison.LessThanSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedStandardDeviation;
 
@@ -70,17 +80,31 @@ public class FromExpressionToSamplingFactors {
 			factorCompilation(condition(expression), factors);
 		}
 		else if (expression.hasFunctor(EQUALITY)) {
-			equalityCompilation(expression, factors);
+			equalityFactorCompilation(expression, factors);
 		}
 		else if (expression.hasFunctor(LESS_THAN)) {
-			lessThanCompilation(expression, factors);
+			lessThanFactorCompilation(expression, factors);
+		}
+		else if (expression.hasFunctor(GREATER_THAN)) {
+			greaterFactorThanCompilation(expression, factors);
+		}
+		else if (expression.hasFunctor(LESS_THAN_OR_EQUAL_TO)) {
+			lessThanOrEqualToFactorCompilation(expression, factors);
+		}
+		else if (expression.hasFunctor(GREATER_THAN_OR_EQUAL_TO)) {
+			greaterThanOrEqualToFactorCompilation(expression, factors);
+		}
+		else if (expression.hasFunctor(OR)) {
+			orFactorCompilation(expression, factors);
 		}
 		else {
 			throw new Error("Conversion to sampling factors not yet implemented for " + expression);
 		}
 	}
 
-	private void equalityCompilation(Expression expression, List<Factor> factors) {
+	//////////////////
+	
+	private void equalityFactorCompilation(Expression expression, List<Factor> factors) {
 		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
 		Variable rightHandSideVariable = expressionCompilationWithCompoundExpressionVariableAlreadyAvailable(expression.get(1), leftHandSideVariable, factors);
 		boolean leftHandSideVariableWasReusedAsRightHandSideVariable = rightHandSideVariable == leftHandSideVariable;
@@ -100,20 +124,65 @@ public class FromExpressionToSamplingFactors {
 		}
 	}
 
-	private void lessThanCompilation(Expression expression, List<Factor> factors) {
+	private void lessThanFactorCompilation(Expression expression, List<Factor> factors) {
+		makeTrueBooleanBinarySamplingFactorCompilation(LessThanSamplingFactor.class, expression, factors);
+	}
+
+	private void greaterFactorThanCompilation(Expression expression, List<Factor> factors) {
+		makeTrueBooleanBinarySamplingFactorCompilation(GreaterThanSamplingFactor.class, expression, factors);
+	}
+
+	private void lessThanOrEqualToFactorCompilation(Expression expression, List<Factor> factors) {
+		makeTrueBooleanBinarySamplingFactorCompilation(LessThanOrEqualToSamplingFactor.class, expression, factors);
+	}
+
+	private void greaterThanOrEqualToFactorCompilation(Expression expression, List<Factor> factors) {
+		makeTrueBooleanBinarySamplingFactorCompilation(GreaterThanOrEqualToSamplingFactor.class, expression, factors);
+	}
+
+	private void makeTrueBooleanBinarySamplingFactorCompilation(Class<? extends SamplingFactor> samplingFactorClass, Expression expression, List<Factor> factors) {
 		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
 		Variable rightHandSideVariable = expressionCompilation(expression.get(1), factors);
-		Factor lessThanFactor = 
+		Factor comparisonFactor = makeTrueBooleanBinarySamplingFactor(samplingFactorClass, leftHandSideVariable, rightHandSideVariable);
+		factors.add(comparisonFactor);
+	}
+
+	private SamplingFactor makeTrueBooleanBinarySamplingFactor(Class<? extends SamplingFactor> samplingFactorClass, Variable leftHandSideVariable, Variable rightHandSideVariable) {
+		return conditionResult(
+				true, 
+				truth -> 
+				{
+					try {
+						Constructor<?> constructor = samplingFactorClass.getConstructors()[0];
+						println("Constructor: " + constructor);
+						return (SamplingFactor)
+						constructor.newInstance(
+								truth, 
+								arrayList(leftHandSideVariable, rightHandSideVariable), 
+								random);
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException | SecurityException e) {
+						throw new Error(e);
+					}
+				});
+	}
+	
+	private void orFactorCompilation(Expression expression, List<Factor> factors) {
+		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
+		Variable rightHandSideVariable = expressionCompilation(expression.get(1), factors);
+		Factor orFactor = 
 				conditionResult(
-						-1, 
+						true, 
 						truth -> 
-						new NaturalComparatorSamplingFactor<Double>(
+						new DisjunctionSamplingFactor(
 								truth, 
 								arrayList(leftHandSideVariable, rightHandSideVariable), 
 								random));
-		factors.add(lessThanFactor);
+		factors.add(orFactor);
 	}
 
+	////////////////////
+	
 	private Variable expressionCompilation(Expression expression, List<Factor> factors) {
 		return expressionCompilationWithCompoundExpressionVariableAlreadyAvailable(expression, null, factors);
 	}
@@ -163,6 +232,18 @@ public class FromExpressionToSamplingFactors {
 		}
 		else if (expression.hasFunctor(EQUALITY)) {
 			equalityFunctionCompilation(compoundExpressionVariable, expression, factors);
+		}
+		else if (expression.hasFunctor(LESS_THAN)) {
+			lessThanFunctionCompilation(compoundExpressionVariable, expression, factors);
+		}
+		else if (expression.hasFunctor(GREATER_THAN)) {
+			greaterThanFunctionCompilation(compoundExpressionVariable, expression, factors);
+		}
+		else if (expression.hasFunctor(LESS_THAN_OR_EQUAL_TO)) {
+			lessThanOrEqualToFunctionCompilation(compoundExpressionVariable, expression, factors);
+		}
+		else if (expression.hasFunctor(GREATER_THAN_OR_EQUAL_TO)) {
+			greaterThanOrEqualToFunctionCompilation(compoundExpressionVariable, expression, factors);
 		}
 		else if (expression.hasFunctor("Normal")) {
 			normalCompilation(compoundExpressionVariable, expression, factors);
@@ -246,6 +327,30 @@ public class FromExpressionToSamplingFactors {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
 		Factor equalityFunctionFactor = new EqualitySamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
 		factors.add(equalityFunctionFactor);
+	}
+
+	private void lessThanFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor lessThanFunctionFactor = new LessThanSamplingFactor<Double>(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(lessThanFunctionFactor);
+	}
+
+	private void lessThanOrEqualToFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor lessThanOrEqualToFunctionFactor = new LessThanOrEqualToSamplingFactor<Double>(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(lessThanOrEqualToFunctionFactor);
+	}
+
+	private void greaterThanFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor greaterThanFunctionFactor = new GreaterThanSamplingFactor<Double>(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(greaterThanFunctionFactor);
+	}
+
+	private void greaterThanOrEqualToFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		Factor greaterThanOrEqualToFunctionFactor = new GreaterThanOrEqualToSamplingFactor<Double>(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(greaterThanOrEqualToFunctionFactor);
 	}
 
 	private void normalCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) throws Error {
