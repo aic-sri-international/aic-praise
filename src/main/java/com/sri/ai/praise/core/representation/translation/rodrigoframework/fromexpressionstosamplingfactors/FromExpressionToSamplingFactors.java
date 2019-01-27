@@ -325,6 +325,8 @@ public class FromExpressionToSamplingFactors {
 						And.make(         condition , Equality.make(compoundExpressionVariable, thenBranch)),
 						And.make(Not.make(condition), Equality.make(compoundExpressionVariable, elseBranch)));
 		factorCompilation(equivalent, factors);
+		// note that this is different from the compilation of other
+		// expressions as functions, because we are asserting that the above disjunction is true.
 	}
 
 	private void sumCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
