@@ -148,19 +148,16 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private void notFactorCompilation(Expression expression, List<Factor> factors) {
-		Expression negatedArgument = expression.get(0);
-		List<Factor> factorsForArgument = list();
-		Variable argumentVariable = expressionCompilation(negatedArgument, factorsForArgument);
+		Variable expressionVariable = expressionCompilation(expression, factors);
 		SamplingFactor resultFactor = 
 				(SamplingFactor) 
 				getFirstSatisfyingPredicateOrNull(
-						factorsForArgument, 
-						f -> f.getVariables().get(0).equals(argumentVariable));
-		myAssert(resultFactor != null, () -> "Factors generated for negated argument " + negatedArgument + " do not contain argument variable '" + argumentVariable + "'");
-		SamplingFactor conditionedToFalse = SamplingFactor.condition(resultFactor, argumentVariable, false);
-		factorsForArgument.remove(resultFactor);
-		factorsForArgument.add(conditionedToFalse);
-		factors.addAll(factorsForArgument);
+						factors, 
+						f -> f.getVariables().get(0).equals(expressionVariable));
+		myAssert(resultFactor != null, () -> "Factors generated for negation " + expression + " do not contain result variable '" + expressionVariable + "'");
+		SamplingFactor conditionedToFalse = SamplingFactor.condition(resultFactor, expressionVariable, true);
+		factors.remove(resultFactor);
+		factors.add(conditionedToFalse);
 	}
 
 	//////////////////////
