@@ -85,6 +85,88 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 
 	@Test
+	public void ifThenElseSamplingTest() {
+
+		String model = "" +
+				"random p : Boolean;" +
+				"random x : [-10;10];" +
+				"x = Normal(0.0, 3.0);" +
+				"if p then x > -3 and x < -1 else x > 1 and x < 2;" +
+				"p = true;" +
+				"";
+
+		String query = "x";
+		Expression expected = parse("if x < -9.796 then 0 else if x < -9.388 then 0 else if x < -8.98 then 0 else if x < -8.571 then 0 else if x < -8.163 then 0 else if x < -7.755 then 0 else if x < -7.347 then 0 else if x < -6.939 then 0 else if x < -6.531 then 0 else if x < -6.122 then 0 else if x < -5.714 then 0 else if x < -5.306 then 0 else if x < -4.898 then 0 else if x < -4.49 then 0 else if x < -4.082 then 0 else if x < -3.673 then 0 else if x < -3.265 then 0 else if x < -2.857 then 0.053 else if x < -2.449 then 0.169 else if x < -2.041 then 0.198 else if x < -1.633 then 0.214 else if x < -1.224 then 0.235 else if x < -0.816 then 0.13 else if x < -0.408 then 0 else if x < -1.2E-15 then 0 else if x < 0.408 then 0 else if x < 0.816 then 0 else if x < 1.224 then 0 else if x < 1.633 then 0 else if x < 2.041 then 0 else if x < 2.449 then 0 else if x < 2.857 then 0 else if x < 3.265 then 0 else if x < 3.673 then 0 else if x < 4.082 then 0 else if x < 4.49 then 0 else if x < 4.898 then 0 else if x < 5.306 then 0 else if x < 5.714 then 0 else if x < 6.122 then 0 else if x < 6.531 then 0 else if x < 6.939 then 0 else if x < 7.347 then 0 else if x < 7.755 then 0 else if x < 8.163 then 0 else if x < 8.571 then 0 else if x < 8.98 then 0 else if x < 9.388 then 0 else if x < 9.796 then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 50;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void ifThenElseInverseSamplingTest() {
+
+		String model = "" +
+				"random p : Boolean;" +
+				"random x : [-10;10];" +
+				"x = -2;" +
+				"if p then x > -3 and x < -1 else x > 1 and x < 2;" +
+				"";
+
+		String query = "p";
+		Expression expected = parse("if p then 1 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 50;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void ifThenElseIndeterminateInverseSamplingTest() {
+
+		String model = "" +
+				"random p : Boolean;" +
+				"random x : [-10;10];" +
+				"x = -2;" +
+				"if p then x > -3 and x < -1 else x = -2;" +
+				"";
+
+		String query = "p";
+		Expression expected = parse("if p then 1 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 50;
+
+		try {
+			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+		}
+		catch (Throwable e) {
+			println(e);
+			if (!e.getMessage().contains("Could not sample p")) {
+				throw e;
+			}
+		}
+	}
+
+	@Test
+	public void ifThenElseSalvageableIndeterminateInverseSamplingTest() {
+
+		String model = "" +
+				"random p : Boolean;" +
+				"random x : [-10;10];" +
+				"x = -2;" +
+				"if p then x > -3 and x < -1 else x = -2;" +
+				"p = true;" +
+				"";
+
+		String query = "p";
+		Expression expected = parse("if p then 1 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 50;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
 	public void normalSamplingTest() {
 
 		String model = "" +
@@ -94,7 +176,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 		String query = "x";
 		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0.001 else if x < -7.917 then 0.002 else if x < -7.083 then 0.005 else if x < -6.25 then 0.009 else if x < -5.417 then 0.017 else if x < -4.583 then 0.028 else if x < -3.75 then 0.042 else if x < -2.917 then 0.059 else if x < -2.083 then 0.08 else if x < -1.25 then 0.095 else if x < -0.417 then 0.107 else if x < 0.417 then 0.111 else if x < 1.25 then 0.106 else if x < 2.083 then 0.095 else if x < 2.917 then 0.078 else if x < 3.75 then 0.059 else if x < 4.583 then 0.042 else if x < 5.417 then 0.028 else if x < 6.25 then 0.016 else if x < 7.083 then 0.01 else if x < 7.917 then 0.005 else if x < 8.75 then 0.003 else if x < 9.583 then 0.001 else 0");
-		int initialNumberOfSamples = 100000;
+		int initialNumberOfSamples = 10000;
 		int numberOfDiscreteValues = 25;
 
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);

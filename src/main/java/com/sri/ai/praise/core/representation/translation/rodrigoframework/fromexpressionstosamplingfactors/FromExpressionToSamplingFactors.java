@@ -10,6 +10,7 @@ import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
 import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIATION;
 import static com.sri.ai.grinder.library.FunctorConstants.GREATER_THAN;
 import static com.sri.ai.grinder.library.FunctorConstants.GREATER_THAN_OR_EQUAL_TO;
+import static com.sri.ai.grinder.library.FunctorConstants.IF_THEN_ELSE;
 import static com.sri.ai.grinder.library.FunctorConstants.LESS_THAN;
 import static com.sri.ai.grinder.library.FunctorConstants.LESS_THAN_OR_EQUAL_TO;
 import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
@@ -36,6 +37,11 @@ import java.util.Random;
 import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.grinder.library.boole.And;
+import com.sri.ai.grinder.library.boole.Not;
+import com.sri.ai.grinder.library.boole.Or;
+import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
@@ -76,8 +82,14 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private void factorCompilation(Expression expression, List<Factor> factors) {
+		
+		expression = transformIfThenElse10IntoTheirConditions(expression);
+		
 		if (isFormulaAssertedToBeTrueWithProbabilityOne(expression)) {
 			factorCompilation(condition(expression), factors);
+		}
+		else if (expression.hasFunctor(IF_THEN_ELSE)) {
+			ifThenElseFactorCompilation(expression, factors);
 		}
 		else if (expression.hasFunctor(EQUALITY)) {
 			equalityFactorCompilation(expression, factors);
@@ -109,6 +121,26 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	//////////////////
+
+	private Expression transformIfThenElse10IntoTheirConditions(Expression expression) {
+		return 
+				expression.replaceAllOccurrences(
+						e -> isFormulaAssertedToBeTrueWithProbabilityOne(e)? IfThenElse.condition(e) : e, 
+								new TrueContext());
+	}
+	
+	//////////////////
+
+	private void ifThenElseFactorCompilation(Expression expression, List<Factor> factors) {
+		Expression condition = IfThenElse.condition(expression);
+		Expression thenBranch = IfThenElse.thenBranch(expression);
+		Expression elseBranch = IfThenElse.elseBranch(expression);
+		Expression equivalent = 
+				Or.make(
+						And.make(condition, thenBranch), 
+						And.make(Not.make(condition), elseBranch));
+		factorCompilation(equivalent, factors);
+	}
 	
 	private void equalityFactorCompilation(Expression expression, List<Factor> factors) {
 		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
@@ -423,7 +455,13 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private boolean isFormulaAssertedToBeTrueWithProbabilityOne(Expression expression) {
-		return isIfThenElse(expression) && thenBranch(expression).equals(ONE) && elseBranch(expression).equals(ZERO);
+		boolean result = 
+				isIfThenElse(expression) 
+				&& 
+				thenBranch(expression).equals(ONE) 
+				&& 
+				elseBranch(expression).equals(ZERO);
+		return result;
 	}
 	
 	
