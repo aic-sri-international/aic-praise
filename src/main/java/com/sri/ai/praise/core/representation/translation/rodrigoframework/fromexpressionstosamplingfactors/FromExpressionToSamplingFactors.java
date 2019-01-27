@@ -89,6 +89,9 @@ public class FromExpressionToSamplingFactors {
 		if (isFormulaAssertedToBeTrueWithProbabilityOne(expression)) {
 			factorCompilation(condition(expression), factors);
 		}
+		else if (isVariable.test(expression)) {
+			booleanVariableFactorCompilation(expression, factors);
+		}
 		else if (expression.hasFunctor(IF_THEN_ELSE)) {
 			ifThenElseFactorCompilation(expression, factors);
 		}
@@ -132,6 +135,12 @@ public class FromExpressionToSamplingFactors {
 	
 	//////////////////
 
+	private void booleanVariableFactorCompilation(Expression expression, List<Factor> factors) {
+		DefaultExpressionVariable variable = new DefaultExpressionVariable(expression);
+		Factor truthFactor = new ConstantSamplingFactor(variable, true, random);
+		factors.add(truthFactor);
+	}
+	
 	private void ifThenElseFactorCompilation(Expression expression, List<Factor> factors) {
 		Expression condition = IfThenElse.condition(expression);
 		Expression thenBranch = IfThenElse.thenBranch(expression);
@@ -302,7 +311,7 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private void constantCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
-		Factor constantFactor = new ConstantSamplingFactor(compoundExpressionVariable, value(expression), new Random());
+		Factor constantFactor = new ConstantSamplingFactor(compoundExpressionVariable, value(expression), random);
 		factors.add(constantFactor);
 	}
 

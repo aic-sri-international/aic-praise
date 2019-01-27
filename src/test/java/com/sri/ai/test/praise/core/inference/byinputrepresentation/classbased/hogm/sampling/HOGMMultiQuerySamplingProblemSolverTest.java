@@ -92,7 +92,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random x : [-10;10];" +
 				"x = Normal(0.0, 3.0);" +
 				"if p then x > -3 and x < -1 else x > 1 and x < 2;" +
-				"p = true;" +
+				"p;" +
 				"";
 
 		String query = "x";
@@ -155,7 +155,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random x : [-10;10];" +
 				"x = -2;" +
 				"if p then x > -3 and x < -1 else x = -2;" +
-				"p = true;" +
+				"p;" +
 				"";
 
 		String query = "p";
@@ -175,7 +175,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random y : [-10;10];" +
 				"x = Normal(0.0, 3.0);" +
 				"y = if p then x else 3;" +
-				"p = true;" +
+				"p;" +
 				"";
 
 		String query = "y";
@@ -378,7 +378,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random x : [-10;10];" +
 				"random y : [-10;10];" +
 				"equal = (x = y);" +
-				"equal = true;" +
+				"equal;" +
 				"x = 1.0;" +
 				"y = Normal(2.0, 2.0);" +
 				"";
@@ -399,7 +399,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random x : [-10;10];" +
 				"random y : [-10;10];" +
 				"equal = (x = y);" +
-				"equal = false;" +
+				"not equal;" +
 				"x = 1.0;" +
 				"y = Normal(2.0, 2.0);" +
 				"";
@@ -948,7 +948,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	
 		String model = "" +
 				"random p : Boolean;" +
-				"p = true;" +
+				"p;" +
 				"";
 	
 		String query = "p";
@@ -964,7 +964,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	
 		String model = "" +
 				"random p : Boolean;" +
-				"p = false;" +
+				"not p;" +
 				"";
 	
 		String query = "p";
@@ -983,8 +983,8 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random q : Boolean;" +
 				"random r : Boolean;" +
 				"r = (p and q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
-				"p = true;" +      // TODO: replace by simply "p"
-				"q = false;" +
+				"p;" +
+				"not q;" +
 				"";
 		
 		String query = "r";
@@ -1017,8 +1017,8 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random q : Boolean;" +
 				"random r : Boolean;" +
 				"r = (p and q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
-				"r = true;" +      // TODO: replace by simply "r"
-				"q = true;" +
+				"r;" +
+				"q;" +
 				"";
 		// p should be true by inversion in r = (p and q) when r and q are true
 		
@@ -1052,7 +1052,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random q : Boolean;" +
 				"random r : Boolean;" +
 				"r = (p and q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
-				"q = false;" +
+				"not q;" +
 				"";
 		// note that p has no specified distribution
 		// this is on purpose so that it does not get instantiated and allows r to be determined in absence of its information
@@ -1096,8 +1096,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random q : Boolean;" +
 				"random r : Boolean;" +
 				"r = (p or q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
-				"p = true;" +      // TODO: replace by simply "p"
-				"q = false;" +
+				"p and not q;" +
 				"";
 		
 		String query = "r";
@@ -1130,8 +1129,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random q : Boolean;" +
 				"random r : Boolean;" +
 				"r = (p or q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
-				"r = true;" +      // TODO: replace by simply "r"
-				"q = false;" +
+				"r and not q;" +
 				"";
 		// p should be true by inversion in r = (p or q) when r is true and q is false
 		
@@ -1165,7 +1163,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random q : Boolean;" +
 				"random r : Boolean;" +
 				"r = (p or q);" + // TODO: replace by equivalence, as = has a parsing issue that = has greater precedence than and
-				"q = true;" +
+				"q;" +
 				"";
 		// note that p has no specified distribution
 		// this is on purpose so that it does not get instantiated and allows r to be determined in absence of its information
@@ -1209,7 +1207,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random q : Boolean;" +
 				"random r : Boolean;" +
 				"(p and q) or (not p and r);" +
-				"p = true;" +
+				"p;" +
 				"";
 
 		String query = "q";
@@ -1252,7 +1250,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random p : Boolean;" +
 				"random q : Boolean;" +
 				"q = (not not not p);" +
-				"p = false;" +
+				"not p;" +
 				"";
 		
 		String query = "q";
@@ -1279,8 +1277,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random partnerIsAvailable : Boolean;" +
 				"random playByMyself : Boolean;" +
 				"playTennis = (((partnerIsAvailable and not raining)) or playByMyself);" +
-				"raining = true;" +
-				"playByMyself = false;" +
+				"raining and not playByMyself;" +
 				"";
 		
 		String query = "playTennis";
