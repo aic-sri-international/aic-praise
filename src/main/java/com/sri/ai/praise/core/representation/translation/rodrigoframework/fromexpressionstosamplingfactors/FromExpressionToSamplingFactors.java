@@ -38,6 +38,7 @@ import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.boole.Or;
@@ -246,6 +247,9 @@ public class FromExpressionToSamplingFactors {
 		if (isConstant(expression)) {
 			constantCompilation(compoundExpressionVariable, expression, factors);
 		}
+		else if (expression.hasFunctor(IF_THEN_ELSE)) {
+			ifThenElseFunctionCompilation(compoundExpressionVariable, expression, factors);
+		}
 		else if (expression.hasFunctor(PLUS)) {
 			sumCompilation(compoundExpressionVariable, expression, factors);
 		}
@@ -310,6 +314,17 @@ public class FromExpressionToSamplingFactors {
 		else {
 			return expressionValue;
 		}
+	}
+
+	private void ifThenElseFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+		Expression condition  = IfThenElse.condition(expression);
+		Expression thenBranch = IfThenElse.thenBranch(expression);
+		Expression elseBranch = IfThenElse.elseBranch(expression);
+		Expression equivalent = 
+				Or.make(
+						And.make(         condition , Equality.make(compoundExpressionVariable, thenBranch)),
+						And.make(Not.make(condition), Equality.make(compoundExpressionVariable, elseBranch)));
+		factorCompilation(equivalent, factors);
 	}
 
 	private void sumCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {

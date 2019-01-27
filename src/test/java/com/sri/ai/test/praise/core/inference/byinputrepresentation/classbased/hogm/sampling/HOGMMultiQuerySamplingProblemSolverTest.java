@@ -167,6 +167,26 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 
 	@Test
+	public void ifThenElseFunctionSamplingTest() {
+
+		String model = "" +
+				"random p : Boolean;" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"x = Normal(0.0, 3.0);" +
+				"y = if p then x else 3;" +
+				"p = true;" +
+				"";
+
+		String query = "y";
+		Expression expected = parse("if y < -9.796 then 0 else if y < -9.388 then 0 else if y < -8.98 then 0.001 else if y < -8.571 then 0.001 else if y < -8.163 then 0.001 else if y < -7.755 then 0.001 else if y < -7.347 then 0.002 else if y < -6.939 then 0.003 else if y < -6.531 then 0.004 else if y < -6.122 then 0.006 else if y < -5.714 then 0.008 else if y < -5.306 then 0.01 else if y < -4.898 then 0.013 else if y < -4.49 then 0.016 else if y < -4.082 then 0.019 else if y < -3.673 then 0.023 else if y < -3.265 then 0.028 else if y < -2.857 then 0.032 else if y < -2.449 then 0.038 else if y < -2.041 then 0.04 else if y < -1.633 then 0.045 else if y < -1.224 then 0.049 else if y < -0.816 then 0.051 else if y < -0.408 then 0.053 else if y < -1.2E-15 then 0.054 else if y < 0.408 then 0.055 else if y < 0.816 then 0.053 else if y < 1.224 then 0.051 else if y < 1.633 then 0.048 else if y < 2.041 then 0.045 else if y < 2.449 then 0.041 else if y < 2.857 then 0.036 else if y < 3.265 then 0.032 else if y < 3.673 then 0.029 else if y < 4.082 then 0.023 else if y < 4.49 then 0.02 else if y < 4.898 then 0.016 else if y < 5.306 then 0.013 else if y < 5.714 then 0.01 else if y < 6.122 then 0.008 else if y < 6.531 then 0.006 else if y < 6.939 then 0.005 else if y < 7.347 then 0.003 else if y < 7.755 then 0.002 else if y < 8.163 then 0.002 else if y < 8.571 then 0.001 else if y < 8.98 then 0.001 else if y < 9.388 then 0 else if y < 9.796 then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 50;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
 	public void normalSamplingTest() {
 
 		String model = "" +
@@ -505,7 +525,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 		String query = "x";
 		Expression expected = parse("if x < -9.796 then 0 else if x < -9.388 then 0.001 else if x < -8.98 then 0.001 else if x < -8.571 then 0.001 else if x < -8.163 then 0.002 else if x < -7.755 then 0.002 else if x < -7.347 then 0.003 else if x < -6.939 then 0.004 else if x < -6.531 then 0.005 else if x < -6.122 then 0.006 else if x < -5.714 then 0.007 else if x < -5.306 then 0.009 else if x < -4.898 then 0.011 else if x < -4.49 then 0.013 else if x < -4.082 then 0.015 else if x < -3.673 then 0.018 else if x < -3.265 then 0.021 else if x < -2.857 then 0.023 else if x < -2.449 then 0.027 else if x < -2.041 then 0.03 else if x < -1.633 then 0.033 else if x < -1.224 then 0.036 else if x < -0.816 then 0.039 else if x < -0.408 then 0.042 else if x < -1.2E-15 then 0.045 else if x < 0.408 then 0.047 else if x < 0.816 then 0.049 else if x < 1.224 then 0.023 else if x < 1.633 then 0 else if x < 2.041 then 0 else if x < 2.449 then 0 else if x < 2.857 then 0 else if x < 3.265 then 0.033 else if x < 3.673 then 0.049 else if x < 4.082 then 0.047 else if x < 4.49 then 0.044 else if x < 4.898 then 0.042 else if x < 5.306 then 0.038 else if x < 5.714 then 0.036 else if x < 6.122 then 0.032 else if x < 6.531 then 0.029 else if x < 6.939 then 0.026 else if x < 7.347 then 0.023 else if x < 7.755 then 0.02 else if x < 8.163 then 0.017 else if x < 8.571 then 0.015 else if x < 8.98 then 0.012 else if x < 9.388 then 0.01 else if x < 9.796 then 0.009 else 0.004");
-		int initialNumberOfSamples = 1000;
+		int initialNumberOfSamples = 10000;
 		int numberOfDiscreteValues = 50;
 
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
@@ -1179,6 +1199,25 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				throw new AssertionError("Should have thrown \"Could not sample p\" error, but threw " + e.getMessage(), e);
 			}
 		}
+	}
+
+	@Test
+	public void orAndCompoundInverseSamplingTest() {
+
+		String model = "" +
+				"random p : Boolean;" +
+				"random q : Boolean;" +
+				"random r : Boolean;" +
+				"(p and q) or (not p and r);" +
+				"p = true;" +
+				"";
+
+		String query = "q";
+		Expression expected = parse("if q then 1 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 50;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
