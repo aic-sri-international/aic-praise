@@ -32,11 +32,6 @@ public class ExponentiationSamplingFactor extends AbstractDeterministicNumericBi
 	}
 
 	@Override
-	protected String operatorSymbol() {
-		return "^";
-	}
-
-	@Override
 	protected Double computeFirstFromOthers(Double secondValue, Double functionResultValue) {
 		return normalizeDoubleZeroToPositiveZero(Math.pow(functionResultValue, 1/secondValue));
 	}

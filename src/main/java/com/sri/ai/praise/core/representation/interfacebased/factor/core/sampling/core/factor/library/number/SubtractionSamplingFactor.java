@@ -32,11 +32,6 @@ public class SubtractionSamplingFactor extends AbstractDeterministicNumericBinar
 	}
 
 	@Override
-	protected String operatorSymbol() {
-		return "-";
-	}
-
-	@Override
 	protected Double computeFirstFromOthers(Double secondValue, Double functionResultValue) {
 		return normalizeDoubleZeroToPositiveZero(functionResultValue + secondValue);
 	}

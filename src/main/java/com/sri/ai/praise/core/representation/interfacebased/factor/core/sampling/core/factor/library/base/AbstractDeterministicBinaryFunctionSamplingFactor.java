@@ -17,8 +17,6 @@ import com.sri.ai.util.base.NullaryFunction;
 public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 		extends AbstractDeterministicFunctionSamplingFactor {
 
-	protected abstract String operatorSymbol();
-
 	protected abstract R operation(A firstValue, B secondValue);
 
 	protected abstract A computeFirstFromOthers(B secondValue, R functionResultValue);
@@ -145,7 +143,7 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 				valueOrVariable(getFunctionResult(), fromVariableToValue) 
 				+ " = " 
 				+ valueOrVariable(first, fromVariableToValue) 
-				+ operatorSymbol() 
+				+ getFunctionName() 
 				+ valueOrVariable(second, fromVariableToValue);
 	}
 
@@ -175,4 +173,8 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 		}
 	}
 
+	@Override
+	public String toString() {
+		return getFunctionResult() + " = (" + getFirst() + " = " + getSecond() + ")";
+	}
 }

@@ -8,6 +8,7 @@ import static com.sri.ai.grinder.library.FunctorConstants.AND;
 import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUALITY;
 import static com.sri.ai.grinder.library.FunctorConstants.EXPONENTIATION;
+import static com.sri.ai.grinder.library.FunctorConstants.LESS_THAN;
 import static com.sri.ai.grinder.library.FunctorConstants.MINUS;
 import static com.sri.ai.grinder.library.FunctorConstants.NOT;
 import static com.sri.ai.grinder.library.FunctorConstants.OR;
@@ -17,7 +18,7 @@ import static com.sri.ai.grinder.library.controlflow.IfThenElse.condition;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.elseBranch;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.isIfThenElse;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.thenBranch;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor.conditionToTrue;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor.conditionResult;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
@@ -34,6 +35,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.EqualitySamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.NaturalComparatorSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.ConjunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.DisjunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.NegationSamplingFactor;
@@ -70,6 +72,9 @@ public class FromExpressionToSamplingFactors {
 		else if (expression.hasFunctor(EQUALITY)) {
 			equalityCompilation(expression, factors);
 		}
+		else if (expression.hasFunctor(LESS_THAN)) {
+			lessThanCompilation(expression, factors);
+		}
 		else {
 			throw new Error("Conversion to sampling factors not yet implemented for " + expression);
 		}
@@ -84,7 +89,8 @@ public class FromExpressionToSamplingFactors {
 		}
 		else {
 			Factor equalityFactor = 
-					conditionToTrue(
+					conditionResult(
+							true, 
 							truth -> 
 							new EqualitySamplingFactor(
 									truth, 
@@ -92,6 +98,20 @@ public class FromExpressionToSamplingFactors {
 									random));
 			factors.add(equalityFactor);
 		}
+	}
+
+	private void lessThanCompilation(Expression expression, List<Factor> factors) {
+		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
+		Variable rightHandSideVariable = expressionCompilation(expression.get(1), factors);
+		Factor lessThanFactor = 
+				conditionResult(
+						-1, 
+						truth -> 
+						new NaturalComparatorSamplingFactor<Double>(
+								truth, 
+								arrayList(leftHandSideVariable, rightHandSideVariable), 
+								random));
+		factors.add(lessThanFactor);
 	}
 
 	private Variable expressionCompilation(Expression expression, List<Factor> factors) {

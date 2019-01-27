@@ -311,6 +311,23 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 
 	@Test
+	public void lessThanSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"x = Normal(2.0, 2.0);" +
+				"x < 0.0;" +
+				"";
+
+		String query = "x";
+		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0 else if x < -7.917 then 0 else if x < -7.083 then 0 else if x < -6.25 then 0 else if x < -5.417 then 0.001 else if x < -4.583 then 0.002 else if x < -3.75 then 0.009 else if x < -2.917 then 0.032 else if x < -2.083 then 0.087 else if x < -1.25 then 0.199 else if x < -0.417 then 0.386 else if x < 0.417 then 0.284 else if x < 1.25 then 0 else if x < 2.083 then 0 else if x < 2.917 then 0 else if x < 3.75 then 0 else if x < 4.583 then 0 else if x < 5.417 then 0 else if x < 6.25 then 0 else if x < 7.083 then 0 else if x < 7.917 then 0 else if x < 8.75 then 0 else if x < 9.583 then 0 else 0");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
 	public void longEqualitySamplingTest() {
 
 		String model = "" +

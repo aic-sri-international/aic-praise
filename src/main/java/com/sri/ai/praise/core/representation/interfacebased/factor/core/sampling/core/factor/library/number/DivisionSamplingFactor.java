@@ -32,11 +32,6 @@ public class DivisionSamplingFactor extends AbstractDeterministicNumericBinaryFu
 	}
 
 	@Override
-	protected String operatorSymbol() {
-		return "/";
-	}
-
-	@Override
 	protected Double computeFirstFromOthers(Double secondValue, Double functionResultValue) {
 		return normalizeDoubleZeroToPositiveZero(functionResultValue * secondValue);
 	}

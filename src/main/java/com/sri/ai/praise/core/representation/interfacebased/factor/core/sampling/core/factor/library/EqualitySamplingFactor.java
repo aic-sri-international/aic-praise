@@ -22,11 +22,6 @@ public class EqualitySamplingFactor extends AbstractDeterministicBinaryFunctionS
 	}
 	
 	@Override
-	protected String operatorSymbol() {
-		return "=";
-	}
-
-	@Override
 	protected Boolean operation(Object firstValue, Object secondValue) {
 		return firstValue.equals(secondValue);
 	}

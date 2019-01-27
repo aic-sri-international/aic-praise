@@ -5,6 +5,7 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.s
 import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.forAll;
+import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
 import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.list;
@@ -65,9 +66,29 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 	}
 
 	private void makeSureAllRelevantInputFactorsAreExecuted(Sample sample) {
-		inputFactorsYetToUse.stream()
-		.filter(f -> thereExists(f.getVariables(), sample::instantiates))
-		.forEach(f -> f.sampleOrWeigh(sample));
+		while ( ! inputFactorsYetToUse.isEmpty()) {
+			SamplingFactor factor = getFirst(inputFactorsYetToUse);
+			inputFactorsYetToUse.remove(factor);
+			if (thereExists(factor.getVariables(), sample::instantiates)) {
+				tryToInstantiate(factor.getVariables(), sample);
+				// the factor may need a variable that was not requested to be instantiated
+				// so we try to instantiate them all here in case it needs it
+				// Note that we are just trying because it may not be possible to instantiate the variable
+				// AND it may not be needed.
+				// In cases when they are both needed but there is no way to instantiate,
+				// there will be a justified error.
+				// One inefficiency here is that we may be instantiating more than
+				// is needed.
+				// TODO improve sampling factors API so that the factor requests instantiation itself if needed
+				
+				
+				factor.sampleOrWeigh(sample);
+			}
+		}
+	}
+
+	private void tryToInstantiate(Collection<? extends Variable> variables, Sample sample) {
+		variables.forEach(v -> tryToInstantiate(v, sample));
 	}
 
 	private void makeSureToInstantiate(Collection<? extends Variable> variables, Sample sample) {

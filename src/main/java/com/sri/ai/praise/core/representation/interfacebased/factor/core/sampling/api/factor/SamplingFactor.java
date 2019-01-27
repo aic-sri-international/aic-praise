@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor;
 
-import static com.sri.ai.expresso.helper.Expressions.TRUE;
+import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
@@ -48,19 +48,19 @@ public interface SamplingFactor extends Sampler, Factor {
 	}
 
 	/**
-	 * This method takes a function that, given a variable, creates a sampling factor
-	 * representing a boolean function, with the given variable assigned to the truth result,
-	 * and provides a sampling factor conditioning the result to 'true'.
-	 * @param makeSamplingFactorAsTruthFunction
+	 * This method takes a value and a function that, given a variable, creates a sampling factor
+	 * representing a function, with the given variable assigned to its result.
+	 * It then provides a sampling factor conditioning the result to the given value.
+	 * @param makeSamplingFactorGivenResultVariable
 	 * @return
 	 */
-	static SamplingFactor conditionToTrue(Function<Variable, SamplingFactor> makeSamplingFactorAsTruthFunction) {
-		Variable truth = new DefaultExpressionVariable(TRUE);
-		SamplingFactor samplingFactorAsTruthFunction = makeSamplingFactorAsTruthFunction.apply(truth);
+	static SamplingFactor conditionResult(Object value, Function<Variable, SamplingFactor> makeSamplingFactorGivenResultVariable) {
+		Variable functionResult = new DefaultExpressionVariable(makeSymbol(value));
+		SamplingFactor samplingFactorAsFunction = makeSamplingFactorGivenResultVariable.apply(functionResult);
 		Sample sample = DefaultSample.makeFreshSample();
-		sample.getAssignment().set(truth, true);
-		SamplingFactor samplingFactorOfFunctionConditionedToTrue = ConditionedSamplingFactor.condition(samplingFactorAsTruthFunction, sample);
-		return samplingFactorOfFunctionConditionedToTrue;
+		sample.getAssignment().set(functionResult, value);
+		SamplingFactor samplingFactorOfFunctionConditionedToValue = ConditionedSamplingFactor.condition(samplingFactorAsFunction, sample);
+		return samplingFactorOfFunctionConditionedToValue;
 	}
 
 }
