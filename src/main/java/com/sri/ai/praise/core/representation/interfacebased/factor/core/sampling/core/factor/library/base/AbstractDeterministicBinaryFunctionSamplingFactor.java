@@ -175,6 +175,6 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 
 	@Override
 	public String toString() {
-		return getFunctionResult() + " = (" + getFirst() + " = " + getSecond() + ")";
+		return getFunctionResult() + " = (" + getFirst() + " " + getFunctionName() + " " + getSecond() + ")";
 	}
 }

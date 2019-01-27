@@ -54,13 +54,17 @@ public interface SamplingFactor extends Sampler, Factor {
 	 * @param makeSamplingFactorGivenResultVariable
 	 * @return
 	 */
-	static SamplingFactor conditionResult(Object value, Function<Variable, SamplingFactor> makeSamplingFactorGivenResultVariable) {
+	public static SamplingFactor conditionResult(Object value, Function<Variable, SamplingFactor> makeSamplingFactorGivenResultVariable) {
 		Variable functionResult = new DefaultExpressionVariable(makeSymbol(value));
 		SamplingFactor samplingFactorAsFunction = makeSamplingFactorGivenResultVariable.apply(functionResult);
+		return condition(samplingFactorAsFunction, functionResult, value);
+	}
+
+	public static SamplingFactor condition(SamplingFactor samplingFactor, Variable variable, Object value) {
 		Sample sample = DefaultSample.makeFreshSample();
-		sample.getAssignment().set(functionResult, value);
-		SamplingFactor samplingFactorOfFunctionConditionedToValue = ConditionedSamplingFactor.condition(samplingFactorAsFunction, sample);
-		return samplingFactorOfFunctionConditionedToValue;
+		sample.getAssignment().set(variable, value);
+		SamplingFactor conditioned = ConditionedSamplingFactor.condition(samplingFactor, sample);
+		return conditioned;
 	}
 
 }

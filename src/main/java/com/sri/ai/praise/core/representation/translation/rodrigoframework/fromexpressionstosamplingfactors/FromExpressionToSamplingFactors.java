@@ -23,6 +23,7 @@ import static com.sri.ai.grinder.library.controlflow.IfThenElse.isIfThenElse;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.thenBranch;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor.conditionResult;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
@@ -96,6 +97,12 @@ public class FromExpressionToSamplingFactors {
 		else if (expression.hasFunctor(OR)) {
 			orFactorCompilation(expression, factors);
 		}
+		else if (expression.hasFunctor(AND)) {
+			andFactorCompilation(expression, factors);
+		}
+		else if (expression.hasFunctor(NOT)) {
+			notFactorCompilation(expression, factors);
+		}
 		else {
 			throw new Error("Conversion to sampling factors not yet implemented for " + expression);
 		}
@@ -112,7 +119,7 @@ public class FromExpressionToSamplingFactors {
 		}
 		else {
 			ArrayList<Variable> argumentVariables = arrayList(leftHandSideVariable, rightHandSideVariable);
-			makeTrueBooleanVarArgSamplingFactor(EqualitySamplingFactor.class, argumentVariables, factors);
+			trueBooleanVarArgSamplingFactorCompilation(EqualitySamplingFactor.class, argumentVariables, factors);
 		}
 	}
 
@@ -136,18 +143,46 @@ public class FromExpressionToSamplingFactors {
 		trueBooleanVarArgSamplingFactorCompilation(DisjunctionSamplingFactor.class, expression, factors);
 	}
 
+	private void andFactorCompilation(Expression expression, List<Factor> factors) {
+		expression.getArguments().forEach(a -> factorCompilation(a, factors));
+	}
+
+	private void notFactorCompilation(Expression expression, List<Factor> factors) {
+		Expression negatedArgument = expression.get(0);
+		List<Factor> factorsForArgument = list();
+		Variable argumentVariable = expressionCompilation(negatedArgument, factorsForArgument);
+		SamplingFactor resultFactor = 
+				(SamplingFactor) 
+				getFirstSatisfyingPredicateOrNull(
+						factorsForArgument, 
+						f -> f.getVariables().get(0).equals(argumentVariable));
+		myAssert(resultFactor != null, () -> "Factors generated for negated argument " + negatedArgument + " do not contain argument variable '" + argumentVariable + "'");
+		SamplingFactor conditionedToFalse = SamplingFactor.condition(resultFactor, argumentVariable, false);
+		factorsForArgument.remove(resultFactor);
+		factorsForArgument.add(conditionedToFalse);
+		factors.addAll(factorsForArgument);
+	}
+
 	//////////////////////
 	
 	private void trueBooleanVarArgSamplingFactorCompilation(Class<? extends SamplingFactor> samplingFactorClass, Expression expression, List<Factor> factors) {
 		List<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
-		makeTrueBooleanVarArgSamplingFactor(samplingFactorClass, argumentVariables, factors);
+		trueBooleanVarArgSamplingFactorCompilation(samplingFactorClass, argumentVariables, factors);
 	}
 
-	private void makeTrueBooleanVarArgSamplingFactor(Class<? extends SamplingFactor> samplingFactorClass,
-			List<Variable> argumentVariables, List<Factor> factors) {
+	private void trueBooleanVarArgSamplingFactorCompilation(Class<? extends SamplingFactor> samplingFactorClass, List<Variable> argumentVariables, List<Factor> factors) {
+		booleanVarArgSamplingFactorCompilation(true, samplingFactorClass, argumentVariables, factors);
+	}
+
+	private void booleanVarArgSamplingFactorCompilation(
+			boolean truthValue,
+			Class<? extends SamplingFactor> samplingFactorClass, 
+			List<Variable> argumentVariables,
+			List<Factor> factors) {
+		
 		Factor factor = 
 				conditionResult(
-						true, 
+						truthValue, 
 						truth -> {
 							Constructor<?> constructor = samplingFactorClass.getConstructors()[0];
 							try {
@@ -201,13 +236,13 @@ public class FromExpressionToSamplingFactors {
 			unaryMinusCompilation(compoundExpressionVariable, expression, factors);
 		}
 		else if (expression.hasFunctor(AND)) {
-			conjunctionCompilation(compoundExpressionVariable, expression, factors);
+			andFunctionCompilation(compoundExpressionVariable, expression, factors);
 		}
 		else if (expression.hasFunctor(OR)) {
-			disjunctionCompilation(compoundExpressionVariable, expression, factors);
+			orFunctionCompilation(compoundExpressionVariable, expression, factors);
 		}
 		else if (expression.hasFunctor(NOT) && expression.numberOfArguments() == 1) {
-			negationCompilation(compoundExpressionVariable, expression, factors);
+			negationFunctionCompilation(compoundExpressionVariable, expression, factors);
 		}
 		else if (expression.hasFunctor(EQUALITY)) {
 			equalityFunctionCompilation(compoundExpressionVariable, expression, factors);
@@ -284,19 +319,19 @@ public class FromExpressionToSamplingFactors {
 		factors.add(unaryMinusFactor);
 	}
 
-	private void conjunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+	private void andFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
-		Factor sumFactor = new ConjunctionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
-		factors.add(sumFactor);
+		Factor andFactor = new ConjunctionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(andFactor);
 	}
 
-	private void disjunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+	private void orFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
-		Factor disjunctionFactor = new DisjunctionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
-		factors.add(disjunctionFactor);
+		Factor orFactor = new DisjunctionSamplingFactor(compoundExpressionVariable, argumentVariables, getRandom());
+		factors.add(orFactor);
 	}
 
-	private void negationCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
+	private void negationFunctionCompilation(Variable compoundExpressionVariable, Expression expression, List<Factor> factors) {
 		ArrayList<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
 		Factor negationFactor = new NegationSamplingFactor(compoundExpressionVariable, argumentVariables.get(0), getRandom());
 		factors.add(negationFactor);
