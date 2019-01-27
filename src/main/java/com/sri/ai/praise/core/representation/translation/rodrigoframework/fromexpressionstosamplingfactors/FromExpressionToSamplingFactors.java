@@ -26,7 +26,6 @@ import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
-import static com.sri.ai.util.Util.println;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -112,73 +111,53 @@ public class FromExpressionToSamplingFactors {
 			// no need to enforce equality
 		}
 		else {
-			Factor equalityFactor = 
-					conditionResult(
-							true, 
-							truth -> 
-							new EqualitySamplingFactor(
-									truth, 
-									arrayList(leftHandSideVariable, rightHandSideVariable), 
-									random));
-			factors.add(equalityFactor);
+			ArrayList<Variable> argumentVariables = arrayList(leftHandSideVariable, rightHandSideVariable);
+			makeTrueBooleanVarArgSamplingFactor(EqualitySamplingFactor.class, argumentVariables, factors);
 		}
 	}
 
 	private void lessThanFactorCompilation(Expression expression, List<Factor> factors) {
-		makeTrueBooleanBinarySamplingFactorCompilation(LessThanSamplingFactor.class, expression, factors);
+		trueBooleanVarArgSamplingFactorCompilation(LessThanSamplingFactor.class, expression, factors);
 	}
 
 	private void greaterFactorThanCompilation(Expression expression, List<Factor> factors) {
-		makeTrueBooleanBinarySamplingFactorCompilation(GreaterThanSamplingFactor.class, expression, factors);
+		trueBooleanVarArgSamplingFactorCompilation(GreaterThanSamplingFactor.class, expression, factors);
 	}
 
 	private void lessThanOrEqualToFactorCompilation(Expression expression, List<Factor> factors) {
-		makeTrueBooleanBinarySamplingFactorCompilation(LessThanOrEqualToSamplingFactor.class, expression, factors);
+		trueBooleanVarArgSamplingFactorCompilation(LessThanOrEqualToSamplingFactor.class, expression, factors);
 	}
 
 	private void greaterThanOrEqualToFactorCompilation(Expression expression, List<Factor> factors) {
-		makeTrueBooleanBinarySamplingFactorCompilation(GreaterThanOrEqualToSamplingFactor.class, expression, factors);
+		trueBooleanVarArgSamplingFactorCompilation(GreaterThanOrEqualToSamplingFactor.class, expression, factors);
 	}
 
-	private void makeTrueBooleanBinarySamplingFactorCompilation(Class<? extends SamplingFactor> samplingFactorClass, Expression expression, List<Factor> factors) {
-		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
-		Variable rightHandSideVariable = expressionCompilation(expression.get(1), factors);
-		Factor comparisonFactor = makeTrueBooleanBinarySamplingFactor(samplingFactorClass, leftHandSideVariable, rightHandSideVariable);
-		factors.add(comparisonFactor);
-	}
-
-	private SamplingFactor makeTrueBooleanBinarySamplingFactor(Class<? extends SamplingFactor> samplingFactorClass, Variable leftHandSideVariable, Variable rightHandSideVariable) {
-		return conditionResult(
-				true, 
-				truth -> 
-				{
-					try {
-						Constructor<?> constructor = samplingFactorClass.getConstructors()[0];
-						println("Constructor: " + constructor);
-						return (SamplingFactor)
-						constructor.newInstance(
-								truth, 
-								arrayList(leftHandSideVariable, rightHandSideVariable), 
-								random);
-					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-							| InvocationTargetException | SecurityException e) {
-						throw new Error(e);
-					}
-				});
-	}
-	
 	private void orFactorCompilation(Expression expression, List<Factor> factors) {
-		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
-		Variable rightHandSideVariable = expressionCompilation(expression.get(1), factors);
-		Factor orFactor = 
+		trueBooleanVarArgSamplingFactorCompilation(DisjunctionSamplingFactor.class, expression, factors);
+	}
+
+	//////////////////////
+	
+	private void trueBooleanVarArgSamplingFactorCompilation(Class<? extends SamplingFactor> samplingFactorClass, Expression expression, List<Factor> factors) {
+		List<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+		makeTrueBooleanVarArgSamplingFactor(samplingFactorClass, argumentVariables, factors);
+	}
+
+	private void makeTrueBooleanVarArgSamplingFactor(Class<? extends SamplingFactor> samplingFactorClass,
+			List<Variable> argumentVariables, List<Factor> factors) {
+		Factor factor = 
 				conditionResult(
 						true, 
-						truth -> 
-						new DisjunctionSamplingFactor(
-								truth, 
-								arrayList(leftHandSideVariable, rightHandSideVariable), 
-								random));
-		factors.add(orFactor);
+						truth -> {
+							Constructor<?> constructor = samplingFactorClass.getConstructors()[0];
+							try {
+								return (SamplingFactor) constructor.newInstance(truth, argumentVariables, random);
+							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+									| InvocationTargetException e) {
+								throw new Error(e);
+							}	
+						});
+		factors.add(factor);
 	}
 
 	////////////////////
