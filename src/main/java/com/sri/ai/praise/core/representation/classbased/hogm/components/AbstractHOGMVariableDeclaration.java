@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, SRI International
+ * Copyright (c) 2013, SRI International
  * All rights reserved.
  * Licensed under the The BSD 3-Clause License;
  * you may not use this file except in compliance with the License.
@@ -48,26 +48,27 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.util.base.TernaryFunction;
 
 /**
- * A variable declaration. The basic structure of a variable declaration is as follows:<br>
+ * An abstract parametric variable declaration. The basic structure of a variable declaration is as follows:<br>
  * 
  * <pre>
- * // A constant declaration
- * constant(name, arity, parameterSortName1,...,parameterSortNameN, rangeSortName),
+ * // A variable declaration
+ * <functor for the type of variable (constant, variable etc)>(name, arity, parameterSortName1,...,parameterSortNameN, rangeSortName),
  * 
  * name:
- * . mandatory: must be a unique string valued symbol within the model for identifying the constant.
+ * . mandatory: must be a unique string valued symbol within the model for identifying the variable.
  * 
  * arity:
  * . optional: defaults to an integer valued symbol 0.
  *   specifies the number of parameters that the
- *   constant takes.
+ *   variable takes.
  *   
  * parameterSortName<n>:
  * . optional: only if arity is = 0. Otherwise a sort name
  *   must be specified for each parameter that the 
- *   constant takes (i.e. number specified must match
+ *   variable takes (i.e. number specified must match
  *   the declared arity).
  * 
  * rangeSortName:
@@ -81,10 +82,10 @@ import com.sri.ai.expresso.helper.Expressions;
  * 
  */
 @Beta
-public class HOGMConstantDeclaration {
+public abstract class AbstractHOGMVariableDeclaration {
 
-	//
-	public static final String FUNCTOR_CONSTANT_DECLARATION = "constant";
+	protected abstract String getFunctor();
+	
 	//
 	private Expression name = null;
 	private Expression arity = null;
@@ -94,13 +95,13 @@ public class HOGMConstantDeclaration {
 	private Expression variableDeclaration = null;
 
 	/**
-	 * Default constructor. Will default the arity of the constant
+	 * Default constructor. Will default the arity of the variable
 	 * declaration to 0 and range to be of sort 'Boolean'.
 	 * 
 	 * @param name
-	 *            a unique string valued symbol for the constant declaration.
+	 *            a unique string valued symbol for the variable declaration.
 	 */
-	public HOGMConstantDeclaration(Expression name) {
+	public AbstractHOGMVariableDeclaration(Expression name) {
 		this(name, Expressions.ZERO, HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName());
 	}
 
@@ -109,16 +110,16 @@ public class HOGMConstantDeclaration {
 	 * added to end of list of parameters.
 	 * 
 	 * @param name
-	 *            a unique string valued symbol for the constant declaration.
+	 *            a unique string valued symbol for the variable declaration.
 	 * @param arity
-	 *            the number of parameters that the constant takes
+	 *            the number of parameters that the variable takes
 	 * @param parametersAndRange
 	 *            is arity > 0 must specify the sort for each parameter.
-	 *            Optional append the sort for the range of the constant
+	 *            Optional append the sort for the range of the variable
 	 *            to the end of this list (will default to 'Boolean' if not
 	 *            specified).
 	 */
-	public HOGMConstantDeclaration(Expression name, Expression arity, Expression... parametersAndRange) {
+	public AbstractHOGMVariableDeclaration(Expression name, Expression arity, Expression... parametersAndRange) {
 		assertNameOk(name);
 		assertArityOk(arity);
 		assertParametersAndRangeOk(name, arity, parametersAndRange);
@@ -141,57 +142,18 @@ public class HOGMConstantDeclaration {
 		}
 	}
 
-	private static HOGMConstantDeclaration make(Expression name, Expression arity, Expression[] parametersAndRange) {
-		return new HOGMConstantDeclaration(name, arity, parametersAndRange);
-	}
-
-	private static String getFunctor() {
-		return FUNCTOR_CONSTANT_DECLARATION;
-	}
-	
 	//
 	// STATIC UTILITY ROUTINES
 	//
 
-	/**
-	 * Determine if an expression is a legal constant declaration.
-	 * 
-	 * @param expression
-	 *            an expression to be checked for whether or not it is a legal
-	 *            variable declaration.
-	 * @return true if a legal variable declaration, false otherwise.
-	 */
-	public static boolean isConstantDeclaration(Expression expression) {
-		boolean isConstantDeclaration = false;
+	protected static AbstractHOGMVariableDeclaration makeDeclaration(
+			TernaryFunction<Expression, Expression, Expression[], AbstractHOGMVariableDeclaration> maker, 
+			String functor, 
+			Expression expression) {
 		
-		try {
-			// Attempt to construct a HOGMConstantDeclaration instance from the expression
-			makeConstantDeclaration(expression);
-			isConstantDeclaration = true;
-		} catch (IllegalArgumentException iae) {
-			isConstantDeclaration = false;
-		}
+		AbstractHOGMVariableDeclaration declaration = null;
 		
-		return isConstantDeclaration;
-	}
-
-	/**
-	 * Make a constant declaration object. Will default the arity of the
-	 * variable declaration to 0 and range to be of sort 'Boolean' if not
-	 * specified in the expression passed in.
-	 * 
-	 * @param expression
-	 *            an expression in the form of a variable declaration.
-	 * @return a HOGMConstantDeclaration object corresponding to the expression
-	 *         passed in.
-	 */
-	public static HOGMConstantDeclaration makeConstantDeclaration(Expression expression) {
-		HOGMConstantDeclaration declaration = null;
-		return makeDeclaration(expression, declaration);
-	}
-
-	private static HOGMConstantDeclaration makeDeclaration(Expression expression, HOGMConstantDeclaration declaration) {
-		if (Expressions.hasFunctor(expression, getFunctor())) {
+		if (Expressions.hasFunctor(expression, functor)) {
 			int numArgs = expression.numberOfArguments();
 			if (numArgs > 0) {
 
@@ -213,7 +175,7 @@ public class HOGMConstantDeclaration {
 					parametersAndRange = new Expression[0];
 				}
 				
-				declaration = make(name, arity, parametersAndRange);
+				declaration = maker.apply(name, arity, parametersAndRange);
 			}
 		}
 		
@@ -224,7 +186,7 @@ public class HOGMConstantDeclaration {
 
 		return declaration;
 	}
-	
+
 	////////////////////// GETTERS
 
 	/**
@@ -272,7 +234,7 @@ public class HOGMConstantDeclaration {
 	 * 
 	 * @return an expression representing the full variable declaration.
 	 */
-	public Expression getVariableDeclaration() {
+	public Expression getVariableDeclaration(String functor) {
 		// Lazy initialize this attribute
 		if (variableDeclaration == null) {
 			List<Expression> declarationArgs = new ArrayList<Expression>();
@@ -282,7 +244,7 @@ public class HOGMConstantDeclaration {
 			declarationArgs.add(range);
 
 			variableDeclaration = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-					getFunctor(),
+					functor,
 					declarationArgs.toArray());
 		}
 
@@ -415,5 +377,13 @@ public class HOGMConstantDeclaration {
 					+ parametersAndRange.length
 					+ "] do not match up with arity [" + arity + "]");
 		}
+	}
+
+	/**
+	 * 
+	 * @return an expression representing the full variable declaration.
+	 */
+	public Expression getVariableDeclaration() {
+		return getVariableDeclaration(getFunctor());
 	}
 }

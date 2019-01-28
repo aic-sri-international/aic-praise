@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.jupiter.api.Test;
+
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
@@ -20,12 +22,11 @@ import com.sri.ai.util.function.api.variables.SetOfVariables;
 import com.sri.ai.util.function.api.variables.Variable;
 import com.sri.ai.util.function.core.variables.DefaultAssignment;
 import com.sri.ai.util.function.core.variables.DefaultSetOfVariables;
-import com.sri.ai.util.graph2d.api.GraphPlot;
 import com.sri.ai.util.graph2d.api.GraphSetMaker;
 
 public class HOGMMultiQuerySamplingProblemSolverProblemTest {
 
-  // @Test
+  @Test
   public void testArrayOutOfBound() {
     String model =
         ""
@@ -65,7 +66,8 @@ public class HOGMMultiQuerySamplingProblemSolverProblemTest {
     GraphSetMaker graphSetMaker = GraphSetMaker.graphSetMaker();
     graphSetMaker.setFunctions(functions);
     // Array out of bounds exception from below
-    GraphPlot graphPlot = graphSetMaker.plot(assignmentOnNonXAxisVariables, xmVariable);
+    //GraphPlot graphPlot = 
+    		graphSetMaker.plot(assignmentOnNonXAxisVariables, xmVariable);
   }
 
   private HOGMProblemResult computeResult(

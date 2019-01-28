@@ -190,6 +190,7 @@ public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 		return result;
 	}
 
+	@Override
 	public ExpressionBasedModel getOriginalExpressionBasedModel() {
 		return originalExpressionBasedModel;
 	}

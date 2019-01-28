@@ -21,6 +21,8 @@ public interface ExpressionBasedProblem {
 	 */
 	Expression replaceQuerySymbolByQueryExpressionIfNeeded(Expression expression);
 
+	ExpressionBasedModel getOriginalExpressionBasedModel();
+	
 	Expression getQuerySymbol();
 
 	List<Expression> getFactorExpressionsIncludingQueryDefinitionIfAny();

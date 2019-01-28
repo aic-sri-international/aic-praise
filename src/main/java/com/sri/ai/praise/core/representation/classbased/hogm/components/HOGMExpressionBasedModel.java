@@ -55,12 +55,19 @@ import com.sri.ai.praise.core.representation.classbased.hogm.parsing.HOGMParserW
 @Beta
 public class HOGMExpressionBasedModel extends DefaultExpressionBasedModel {
 
+	private HOGModel hogmodel;
+	
 	public HOGMExpressionBasedModel(String hogmodelString) {
 		this(new HOGMParserWrapper().parseModel(hogmodelString));
 	}
 
-	public HOGMExpressionBasedModel(HOGModel model) {
-		super(makeParameters(model));
+	public HOGMExpressionBasedModel(HOGModel hogmodel) {
+		super(makeParameters(hogmodel));
+		this.hogmodel = hogmodel;
+	}
+	
+	public HOGModel getHOGModel() {
+		return hogmodel;
 	}
 	
 	private static Parameters makeParameters(HOGModel model) {

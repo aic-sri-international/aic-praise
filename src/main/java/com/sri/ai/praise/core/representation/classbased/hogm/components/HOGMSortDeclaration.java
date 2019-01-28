@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.core.representation.classbased.hogm.components;
 
+import static com.sri.ai.util.Util.join;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,6 +53,7 @@ import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.set.Sets;
 import com.sri.ai.grinder.library.set.extensional.ExtensionalSets;
+import com.sri.ai.util.collect.NestedIterator;
 
 /**
  * Sorts (from <a
@@ -274,6 +277,10 @@ public class HOGMSortDeclaration {
 	public String toString() {
 		String result = getSortDeclaration().toString();
 		return result;
+	}
+	
+	public String toHOGMString() {
+		return "sort " + getName() + ": " + join(new NestedIterator(this.getSize(), this.getConstants().getArguments())) + ";"; 
 	}
 
 	//

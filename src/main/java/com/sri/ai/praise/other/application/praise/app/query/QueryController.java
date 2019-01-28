@@ -306,12 +306,12 @@ public class QueryController {
 			if (parseModel.getConstatDeclarations().size() > 0) {
 				sj.add("// CONSTANT DECLARATIONS:");
 				parseModel.getConstatDeclarations().forEach(cd -> {
-					sj.add(cd.getConstantDeclaration().toString()+";");
+					sj.add(cd.getVariableDeclaration().toString()+";");
 				});
 			}
 			sj.add("// RANDOM VARIABLE DECLARATIONS:");
 			parseModel.getRandomVariableDeclarations().forEach(rd -> {
-				sj.add(rd.getRandomVariableDeclaration().toString()+";");
+				sj.add(rd.getVariableDeclaration().toString()+";");
 			});
 			sj.add("// CONDITIONED POTENTIALS:");
 			parseModel.getConditionedPotentials().forEach(cp -> {

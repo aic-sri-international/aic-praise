@@ -108,8 +108,8 @@ public class HOGMModelValidator {
 		
 		// Map validated values
 		sortDeclarations.addAll(sorts.values().stream().map(sd -> sd.getSortDeclaration()).collect(Collectors.toList()));
-		constantDeclarations.addAll(constants.values().stream().map(cd -> cd.getConstantDeclaration()).collect(Collectors.toList()));
-		randomVariableDeclarations.addAll(randoms.values().stream().map(rd -> rd.getRandomVariableDeclaration()).collect(Collectors.toList()));
+		constantDeclarations.addAll(constants.values().stream().map(cd -> cd.getVariableDeclaration()).collect(Collectors.toList()));
+		randomVariableDeclarations.addAll(randoms.values().stream().map(rd -> rd.getVariableDeclaration()).collect(Collectors.toList()));
 		conditionedPotentials.addAll(conditioned);
 
 		if (!isValid()) {
