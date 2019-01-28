@@ -14,9 +14,13 @@ class FromRelationalToGroundHOGMExpressionBasedProblemTest {
 		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(
 				""
 						+ "sort People: 5, ann, bob, carl;"
+						+ "sort Countries: 3, US, France, Canada;"
+						+ "random sunny: Boolean;"
+						+ "random year: Integer;"
 						+ "random happy: People -> Boolean;"
+						+ "constant nationality: People -> Countries;"
 						+ ""
-						+ "for all X in People: happy(X);"
+						+ "for all X in People : if nationality(X) = Canada then happy(X) else not happy(X);"
 				);
 		String actual = FromRelationalToGroundHOGMExpressionBasedProblem.getModelString(model);
 		println(actual);

@@ -79,7 +79,7 @@ public class HOGMExpressionBasedModel extends DefaultExpressionBasedModel {
 			parameters.mapFromRandomVariableNameToTypeName.put(random.getName().toString(), random.toTypeRepresentation());
 		});
 		
-		model.getConstatDeclarations().forEach(constant -> {
+		model.getConstantDeclarations().forEach(constant -> {
 			parameters.mapFromNonUniquelyNamedConstantNameToTypeName.put(constant.getName().toString(), constant.toTypeRepresentation());
 		});
 		
@@ -99,7 +99,7 @@ public class HOGMExpressionBasedModel extends DefaultExpressionBasedModel {
 		model.getRandomVariableDeclarations().forEach(random -> {
 			integerIntervalTypes.addAll(random.getReferencedIntegerIntervalTypes());
 		});
-		model.getConstatDeclarations().forEach(constant -> {
+		model.getConstantDeclarations().forEach(constant -> {
 			integerIntervalTypes.addAll(constant.getReferencedIntegerIntervalTypes());
 		});
 		integerIntervalTypes.forEach(integerIntervalName -> parameters.additionalTypes.add(new IntegerInterval(integerIntervalName)));
@@ -108,7 +108,7 @@ public class HOGMExpressionBasedModel extends DefaultExpressionBasedModel {
 		model.getRandomVariableDeclarations().forEach(random -> {
 			realIntervalTypes.addAll(random.getReferencedRealIntervalTypes());
 		});
-		model.getConstatDeclarations().forEach(constant -> {
+		model.getConstantDeclarations().forEach(constant -> {
 			realIntervalTypes.addAll(constant.getReferencedRealIntervalTypes());
 		});
 		realIntervalTypes.forEach(realIntervalName -> parameters.additionalTypes.add(new RealInterval(realIntervalName)));

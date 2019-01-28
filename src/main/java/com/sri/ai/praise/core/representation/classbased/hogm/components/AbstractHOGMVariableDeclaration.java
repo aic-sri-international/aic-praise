@@ -82,7 +82,7 @@ import com.sri.ai.util.base.TernaryFunction;
  * 
  */
 @Beta
-public abstract class AbstractHOGMVariableDeclaration {
+public abstract class AbstractHOGMVariableDeclaration implements HOGMVariableDeclaration {
 
 	protected abstract String getFunctor();
 	
@@ -146,12 +146,12 @@ public abstract class AbstractHOGMVariableDeclaration {
 	// STATIC UTILITY ROUTINES
 	//
 
-	protected static AbstractHOGMVariableDeclaration makeDeclaration(
+	protected static HOGMVariableDeclaration makeDeclaration(
 			TernaryFunction<Expression, Expression, Expression[], AbstractHOGMVariableDeclaration> maker, 
 			String functor, 
 			Expression expression) {
 		
-		AbstractHOGMVariableDeclaration declaration = null;
+		HOGMVariableDeclaration declaration = null;
 		
 		if (Expressions.hasFunctor(expression, functor)) {
 			int numArgs = expression.numberOfArguments();
@@ -193,6 +193,7 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * 
 	 * @return the unique identifying name for the variable.
 	 */
+	@Override
 	public Expression getName() {
 		return name;
 	}
@@ -201,6 +202,7 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * 
 	 * @return the arity of the number of parameters that the parametric variable declaration takes.
 	 */
+	@Override
 	public Expression getArity() {
 		return arity;
 	}
@@ -210,6 +212,7 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * @return the actual value of the number of parameters that the parametric
 	 *         variable declaration takes.
 	 */
+	@Override
 	public int getArityValue() {
 		return intArity;
 	}
@@ -218,6 +221,7 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * 
 	 * @return the sorts for the parameters of the variable declaration.
 	 */
+	@Override
 	public List<Expression> getParameterSorts() {
 		return Collections.unmodifiableList(parameters);
 	}
@@ -226,6 +230,7 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * 
 	 * @return the sort for the range that the variable can take.
 	 */
+	@Override
 	public Expression getRangeSort() {
 		return range;
 	}
@@ -234,6 +239,7 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * 
 	 * @return an expression representing the full variable declaration.
 	 */
+	@Override
 	public Expression getVariableDeclaration(String functor) {
 		// Lazy initialize this attribute
 		if (variableDeclaration == null) {
@@ -255,6 +261,7 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * 
 	 * @return the type representation of the variable declaration.
 	 */
+	@Override
 	public String toTypeRepresentation() {
 		String result = null;
 		if (getArityValue() == 0) {
@@ -276,6 +283,7 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * 
 	 * @return a set of IntegerInterval type strings for referenced sorts that are integer intervals.
 	 */
+	@Override
 	public Set<String> getReferencedIntegerIntervalTypes() {
 		Set<String> result = new LinkedHashSet<>();
 		
@@ -295,6 +303,7 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * 
 	 * @return a set of RealInterval type strings for referenced sorts that are real intervals.
 	 */
+	@Override
 	public Set<String> getReferencedRealIntervalTypes() {
 		Set<String> result = new LinkedHashSet<>();
 		
@@ -383,7 +392,13 @@ public abstract class AbstractHOGMVariableDeclaration {
 	 * 
 	 * @return an expression representing the full variable declaration.
 	 */
+	@Override
 	public Expression getVariableDeclaration() {
 		return getVariableDeclaration(getFunctor());
+	}
+	
+	@Override
+	public String toHOGMString() {
+		return getHOGMModifier() + " " + getName() + " : " + getRangeSort() + ";";
 	}
 }

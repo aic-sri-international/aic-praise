@@ -136,4 +136,9 @@ public class HOGMRandomVariableDeclaration extends AbstractHOGMVariableDeclarati
 						expression);
 		return result;
 	}
+
+	@Override
+	public String getHOGMModifier() {
+		return "random";
+	}
 }

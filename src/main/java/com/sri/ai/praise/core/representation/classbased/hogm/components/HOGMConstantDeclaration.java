@@ -37,61 +37,21 @@
  */
 package com.sri.ai.praise.core.representation.classbased.hogm.components;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringJoiner;
-
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 
 /**
- * A variable declaration. The basic structure of a variable declaration is as follows:<br>
- * 
- * <pre>
- * // A constant declaration
- * constant(name, arity, parameterSortName1,...,parameterSortNameN, rangeSortName),
- * 
- * name:
- * . mandatory: must be a unique string valued symbol within the model for identifying the constant.
- * 
- * arity:
- * . optional: defaults to an integer valued symbol 0.
- *   specifies the number of parameters that the
- *   constant takes.
- *   
- * parameterSortName<n>:
- * . optional: only if arity is = 0. Otherwise a sort name
- *   must be specified for each parameter that the 
- *   constant takes (i.e. number specified must match
- *   the declared arity).
- * 
- * rangeSortName:
- * . optional: defaults to the in-built sort 'Boolean'. If specified
- *   must follow the parameterSortNames (i.e. there would be arity+1 sort
- *   names in the declaration).
- * 
- * </pre>
- * 
+ * A parametric constant declaration following {@link AbstractHOGMVariableDeclaration}.
+ *
  * @author oreilly
  * 
  */
 @Beta
-public class HOGMConstantDeclaration {
+public class HOGMConstantDeclaration extends AbstractHOGMVariableDeclaration {
 
 	//
 	public static final String FUNCTOR_CONSTANT_DECLARATION = "constant";
-	//
-	private Expression name = null;
-	private Expression arity = null;
-	private int intArity = 0;
-	private List<Expression> parameters = new ArrayList<Expression>();
-	private Expression range = null;
-	private Expression variableDeclaration = null;
 
 	/**
 	 * Default constructor. Will default the arity of the constant
@@ -119,33 +79,15 @@ public class HOGMConstantDeclaration {
 	 *            specified).
 	 */
 	public HOGMConstantDeclaration(Expression name, Expression arity, Expression... parametersAndRange) {
-		assertNameOk(name);
-		assertArityOk(arity);
-		assertParametersAndRangeOk(name, arity, parametersAndRange);
-
-		this.name = name;
-		this.arity = arity;
-		this.intArity = arity.intValue();
-		if (intArity == parametersAndRange.length) {
-			for (int i = 0; i < parametersAndRange.length; i++) {
-				parameters.add(parametersAndRange[i]);
-			}
-			// default range to boolean
-			range = HOGMSortDeclaration.IN_BUILT_BOOLEAN.getName();
-		} 
-		else {
-			for (int i = 0; i < parametersAndRange.length - 1; i++) {
-				parameters.add(parametersAndRange[i]);
-			}
-			range = parametersAndRange[parametersAndRange.length - 1];
-		}
+		super(name, arity, parametersAndRange);
 	}
 
 	private static HOGMConstantDeclaration make(Expression name, Expression arity, Expression[] parametersAndRange) {
 		return new HOGMConstantDeclaration(name, arity, parametersAndRange);
 	}
 
-	private static String getFunctor() {
+	@Override
+	protected String getFunctor() {
 		return FUNCTOR_CONSTANT_DECLARATION;
 	}
 	
@@ -165,7 +107,7 @@ public class HOGMConstantDeclaration {
 		boolean isConstantDeclaration = false;
 		
 		try {
-			// Attempt to construct a HOGMConstantDeclaration instance from the expression
+			// Attempt to construct a ConstantDeclaration instance from the expression
 			makeConstantDeclaration(expression);
 			isConstantDeclaration = true;
 		} catch (IllegalArgumentException iae) {
@@ -182,238 +124,21 @@ public class HOGMConstantDeclaration {
 	 * 
 	 * @param expression
 	 *            an expression in the form of a variable declaration.
-	 * @return a HOGMConstantDeclaration object corresponding to the expression
+	 * @return a ConstantDeclaration object corresponding to the expression
 	 *         passed in.
 	 */
 	public static HOGMConstantDeclaration makeConstantDeclaration(Expression expression) {
-		HOGMConstantDeclaration declaration = null;
-		return makeDeclaration(expression, declaration);
-	}
-
-	private static HOGMConstantDeclaration makeDeclaration(Expression expression, HOGMConstantDeclaration declaration) {
-		if (Expressions.hasFunctor(expression, getFunctor())) {
-			int numArgs = expression.numberOfArguments();
-			if (numArgs > 0) {
-
-				// Extract arguments
-				Expression name = expression.get(0);
-				Expression arity = Expressions.ZERO;
-				if (numArgs >= 2) {
-					arity = expression.get(1);
-					
-				}
-				Expression[] parametersAndRange = new Expression[0];
-				if (numArgs > 2) {
-					parametersAndRange = new Expression[numArgs - 2];
-					for (int i = 2; i < numArgs; i++) {
-						parametersAndRange[i - 2] = expression.get(i);
-					}
-				} 
-				else {
-					parametersAndRange = new Expression[0];
-				}
-				
-				declaration = make(name, arity, parametersAndRange);
-			}
-		}
-		
-		if (declaration == null) {
-			throw new IllegalArgumentException(
-					"Not a legal definition of a variable declaration:" + expression);
-		}
-
-		return declaration;
-	}
-	
-	////////////////////// GETTERS
-
-	/**
-	 * 
-	 * @return the unique identifying name for the variable.
-	 */
-	public Expression getName() {
-		return name;
-	}
-
-	/**
-	 * 
-	 * @return the arity of the number of parameters that the parametric variable declaration takes.
-	 */
-	public Expression getArity() {
-		return arity;
-	}
-
-	/**
-	 * 
-	 * @return the actual value of the number of parameters that the parametric
-	 *         variable declaration takes.
-	 */
-	public int getArityValue() {
-		return intArity;
-	}
-
-	/**
-	 * 
-	 * @return the sorts for the parameters of the variable declaration.
-	 */
-	public List<Expression> getParameterSorts() {
-		return Collections.unmodifiableList(parameters);
-	}
-
-	/**
-	 * 
-	 * @return the sort for the range that the variable can take.
-	 */
-	public Expression getRangeSort() {
-		return range;
-	}
-
-	/**
-	 * 
-	 * @return an expression representing the full variable declaration.
-	 */
-	public Expression getVariableDeclaration() {
-		// Lazy initialize this attribute
-		if (variableDeclaration == null) {
-			List<Expression> declarationArgs = new ArrayList<Expression>();
-			declarationArgs.add(name);
-			declarationArgs.add(arity);
-			declarationArgs.addAll(parameters);
-			declarationArgs.add(range);
-
-			variableDeclaration = Expressions.makeExpressionOnSyntaxTreeWithLabelAndSubTrees(
-					getFunctor(),
-					declarationArgs.toArray());
-		}
-
-		return variableDeclaration;
-	}
-
-	/**
-	 * 
-	 * @return the type representation of the variable declaration.
-	 */
-	public String toTypeRepresentation() {
-		String result = null;
-		if (getArityValue() == 0) {
-			result = HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort());
-		}
-		else if (getArityValue() == 1) {
-			result = HOGMSortDeclaration.sortReferenceAsTypeString(getParameterSorts().get(0)) + " -> " + HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort());
-		} else {
-			StringJoiner params = new StringJoiner(", ");
-			getParameterSorts().forEach(paramSort -> params.add(HOGMSortDeclaration.sortReferenceAsTypeString(paramSort)));
-			
-			result = "'->'(x("+params.toString()+"), "+HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort())+")";
-		}
-		
-		return result;
-	}
-	
-	/**
-	 * 
-	 * @return a set of IntegerInterval type strings for referenced sorts that are integer intervals.
-	 */
-	public Set<String> getReferencedIntegerIntervalTypes() {
-		Set<String> result = new LinkedHashSet<>();
-		
-		getParameterSorts().forEach(paramSort -> {
-			if (HOGMSortDeclaration.isIntegerIntervalReference(paramSort)) {
-				result.add(HOGMSortDeclaration.sortReferenceAsTypeString(paramSort));
-			}
-		});
-		if (HOGMSortDeclaration.isIntegerIntervalReference(getRangeSort())) {
-			result.add(HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort()));
-		}
-		
-		return result;
-	}
-	
-	/**
-	 * 
-	 * @return a set of RealInterval type strings for referenced sorts that are real intervals.
-	 */
-	public Set<String> getReferencedRealIntervalTypes() {
-		Set<String> result = new LinkedHashSet<>();
-		
-		getParameterSorts().forEach(paramSort -> {
-			if (HOGMSortDeclaration.isRealIntervalReference(paramSort)) {
-				result.add(HOGMSortDeclaration.sortReferenceAsTypeString(paramSort));
-			}
-		});
-		if (HOGMSortDeclaration.isRealIntervalReference(getRangeSort())) {
-			result.add(HOGMSortDeclaration.sortReferenceAsTypeString(getRangeSort()));
-		}
-		
+		HOGMConstantDeclaration result = 
+				(HOGMConstantDeclaration) 
+				AbstractHOGMVariableDeclaration.makeDeclaration(
+						HOGMConstantDeclaration::make,
+						FUNCTOR_CONSTANT_DECLARATION, 
+						expression);
 		return result;
 	}
 
-	//
-	// PRIVATE METHODS
-	//
-	private static void assertNameOk(Expression name) {
-		boolean illegal = true;
-		if (Expressions.isSymbol(name)
-			&& name.getValue() instanceof String
-			// Ensure is not a String Literal
-			&& !Expressions.isStringLiteral(name)) {
-			illegal = false;
-		}
-		if (illegal) {
-			throw new IllegalArgumentException(
-					"name ["
-							+ name
-							+ "] is not of the correct type. must be a correctly formed string valued symbol.");
-		}
-	}
-
-	private static void assertArityOk(Expression arity) {
-		boolean illegal = true;
-
-		if (arity.getSyntacticFormType().equals(Symbol.SYNTACTIC_FORM_TYPE)) {
-			Object value = arity.getValue();
-			if (value instanceof Number) {
-				int ivalue = ((Number) value).intValue();
-				if (ivalue >= 0) {
-					illegal = false;
-				}
-			}
-		}
-
-		if (illegal) {
-			throw new IllegalArgumentException(
-					"arity ["
-							+ arity
-							+ "] is not of the correct type. must be an integer valued symbol.");
-		}
-	}
-
-	private static void assertParametersAndRangeOk(Expression name,
-			Expression arity, Expression... parametersAndRange) {
-		boolean illegal = true;
-
-		int intArity = arity.intValue();
-		if (intArity == parametersAndRange.length
-				|| intArity == parametersAndRange.length - 1) {
-			// Ensure are legal names for sorts and do not conflict with name of
-			// the variable declaration
-			boolean sortNamesOk = true;
-			for (int i = 0; i < parametersAndRange.length; i++) {
-				HOGMSortDeclaration.isSortReference(parametersAndRange[i]);
-				if (name.equals(parametersAndRange[i])) {
-					sortNamesOk = false;
-					break;
-				}
-			}
-			if (sortNamesOk) {
-				illegal = false;
-			}
-		}
-
-		if (illegal) {
-			throw new IllegalArgumentException("Parameters and Range ["
-					+ parametersAndRange.length
-					+ "] do not match up with arity [" + arity + "]");
-		}
+	@Override
+	public String getHOGMModifier() {
+		return "constant";
 	}
 }

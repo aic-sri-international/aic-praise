@@ -9,6 +9,7 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.makeNewIdentifier;
 import static com.sri.ai.util.Util.mapIntoList;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,11 +21,13 @@ import com.sri.ai.grinder.helper.AssignmentsIterator;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedProblem;
-import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMRandomVariableDeclaration;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
+import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMVariableDeclaration;
 
 public class FromRelationalToGroundHOGMExpressionBasedProblem {
 	
+	private static final LinkedList<String> BUILT_IN_TYPE_NAMES = list("Integer", "String", "Real", "Boolean");
+
 	public static ExpressionBasedProblem translate(HOGMExpressionBasedProblem problem) {
 		
 		String modelString = getModelString(problem.getHOGMExpressionBasedModel());
@@ -39,7 +42,8 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		StringBuilder groundedModelString = new StringBuilder();
 
 		groundedModelString.append(getSorts(model));
-		groundedModelString.append(getRandomVariableDeclarations(model));
+		groundedModelString.append(getVariableDeclarations(model, model.getHOGModel().getRandomVariableDeclarations()));
+		groundedModelString.append(getVariableDeclarations(model, model.getHOGModel().getConstantDeclarations()));
 		
 		String modelString = groundedModelString.toString();
 		
@@ -49,22 +53,24 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 	private static String getSorts(HOGMExpressionBasedModel model) {
 		StringBuilder result = new StringBuilder();
 		for (HOGMSortDeclaration sortDeclaration : model.getHOGModel().getSortDeclarations()) {
-			if (!list("Integer", "String", "Real").contains(sortDeclaration.getName().toString())) {
+			if (!BUILT_IN_TYPE_NAMES.contains(sortDeclaration.getName().toString())) {
 				result.append(sortDeclaration.toHOGMString() + "\n");
 			}
 		}
+		result.append("\n");
 		return result.toString();
 	}
 	
-	private static String getRandomVariableDeclarations(HOGMExpressionBasedModel model) {
+	private static String getVariableDeclarations(HOGMExpressionBasedModel model,
+			List<? extends HOGMVariableDeclaration> randomVariableDeclarations) {
 		StringBuilder result = new StringBuilder();
-		for (HOGMRandomVariableDeclaration declaration : model.getHOGModel().getRandomVariableDeclarations()) {
+		for (HOGMVariableDeclaration declaration : randomVariableDeclarations) {
 			result.append(grounding(declaration, model.getContext()) + "\n");
 		}
 		return result.toString();
 	}
 
-	private static String grounding(HOGMRandomVariableDeclaration declaration, Context context) {
+	private static String grounding(HOGMVariableDeclaration declaration, Context context) {
 		StringBuilder result = new StringBuilder();
 		IndexExpressionsSet parameters = makeParameters(declaration, context);
 		AssignmentsIterator parameterValues = new AssignmentsIterator(parameters, context);
@@ -74,7 +80,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		return result.toString();
 	}
 
-	private static IndexExpressionsSet makeParameters(HOGMRandomVariableDeclaration declaration, Context context) {
+	private static IndexExpressionsSet makeParameters(HOGMVariableDeclaration declaration, Context context) {
 		List<Expression> indexExpressions = mapIntoList(declaration.getParameterSorts(), e -> makeParameterIndexExpression(e, context));
 		IndexExpressionsSet result = new ExtensionalIndexExpressionsSet(indexExpressions);
 		return result;
@@ -86,7 +92,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		return indexExpression;
 	}
 
-	private static String grounding(HOGMRandomVariableDeclaration declaration, Map<Expression, Expression> assignment, Context context) {
+	private static String grounding(HOGMVariableDeclaration declaration, Map<Expression, Expression> assignment, Context context) {
 		List<String> nameComponents = list();
 		nameComponents.add(declaration.getName().toString());
 		if (!assignment.isEmpty()) {
@@ -95,7 +101,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		mapIntoList(assignment.values(), Expression::toString, nameComponents);
 		String name = join("_", nameComponents);
 		Expression type = declaration.getRangeSort();
-		String result = "random " + name + ": " + type + ";";
+		String result = declaration.getHOGMModifier() + " " + name + ": " + type + ";";
 		return result;
 	}
 

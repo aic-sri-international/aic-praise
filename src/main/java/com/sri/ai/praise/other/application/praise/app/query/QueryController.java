@@ -303,9 +303,9 @@ public class QueryController {
 			parseModel.getSortDeclarations().forEach(sd -> {
 				sj.add(sd.getSortDeclaration().toString()+";");
 			});
-			if (parseModel.getConstatDeclarations().size() > 0) {
+			if (parseModel.getConstantDeclarations().size() > 0) {
 				sj.add("// CONSTANT DECLARATIONS:");
-				parseModel.getConstatDeclarations().forEach(cd -> {
+				parseModel.getConstantDeclarations().forEach(cd -> {
 					sj.add(cd.getVariableDeclaration().toString()+";");
 				});
 			}

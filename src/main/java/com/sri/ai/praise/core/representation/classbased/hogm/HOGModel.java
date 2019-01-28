@@ -99,7 +99,7 @@ public class HOGModel implements Model {
 		return sorts;
 	}
 	
-	public List<HOGMConstantDeclaration> getConstatDeclarations() {
+	public List<HOGMConstantDeclaration> getConstantDeclarations() {
 		return constants;
 	}
 
