@@ -28,7 +28,7 @@ class FromRelationalToGroundHOGMExpressionBasedProblemTest {
 						+ "year = 1971 <=> sunny;"
 						+ "for all X in People : for all Y in People : if married(X, Y) and nationality(X) = Canada then nationality(Y) = Canada else not nationality(Y) = Canada;"
 				);
-		String actual = FromRelationalToGroundHOGMExpressionBasedProblem.getModelString(model);
+		String actual = FromRelationalToGroundHOGMExpressionBasedProblem.getGroundedModelString(model);
 		println(actual);
 		assertEquals(expected(), actual);
 	}

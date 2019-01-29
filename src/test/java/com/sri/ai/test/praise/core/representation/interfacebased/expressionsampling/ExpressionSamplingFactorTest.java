@@ -36,7 +36,7 @@ class ExpressionSamplingFactorTest {
 		Context context = new TrueContext().setSymbolsAndTypes(map(parse("x"), parse("[0;100]")));
 		SamplingFactor normal = new NormalWithFixedMeanAndStandardDeviation(x, 50.0, 10.0, random);
 		ExpressionSamplingFactor expressionSamplingFactor = ExpressionSamplingFactor.expressionSamplingFactor(normal, 0, v -> 11, 0, context);
-		DefaultSamplingFactorDiscretizedProbabilityDistributionFunction distribution = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistributionFunction();
+		DefaultSamplingFactorDiscretizedProbabilityDistributionFunction distribution = expressionSamplingFactor.getDiscretizedConditionalProbabilityDistributionFunction();
 		for (int i = 0; i != 100000; i++) {
 			distribution.sample();
 		}
@@ -60,7 +60,7 @@ class ExpressionSamplingFactorTest {
 		Context context = new TrueContext().setSymbolsAndTypes(map(parse("x"), parse("[0;100]")));
 		SamplingFactor normal = new NormalWithFixedMeanAndStandardDeviation(x, 50.0, 10.0, random);
 		ExpressionSamplingFactor expressionSamplingFactor = ExpressionSamplingFactor.expressionSamplingFactor(normal, 0, v -> 6, 0, context);
-		SamplingFactorDiscretizedProbabilityDistributionFunction distribution = expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistributionFunction();
+		SamplingFactorDiscretizedProbabilityDistributionFunction distribution = expressionSamplingFactor.getDiscretizedConditionalProbabilityDistributionFunction();
 		for (int i = 0; i != 100000; i++) {
 			distribution.sample();
 		}

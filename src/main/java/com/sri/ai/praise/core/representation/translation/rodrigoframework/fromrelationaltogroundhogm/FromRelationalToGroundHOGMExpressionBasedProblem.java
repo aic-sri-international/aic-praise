@@ -3,12 +3,13 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromr
 import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
-import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.makeIndexExpression;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.mapIntoMap;
+import static com.sri.ai.util.Util.mapValues;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
@@ -26,8 +27,8 @@ import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.type.FunctionType;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.helper.AssignmentsIterator;
+import com.sri.ai.grinder.interpreter.Assignment;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
@@ -61,17 +62,46 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 					);
 	
 
-	public static ExpressionBasedProblem translate(HOGMExpressionBasedProblem problem) {
+	public static 
+	Map<Assignment, HOGMExpressionBasedProblem>
+	ground(HOGMExpressionBasedProblem problem) {
 		
-		String modelString = getModelString(problem.getHOGMExpressionBasedModel());
+		HOGMExpressionBasedModel hogmExpressionBasedModel = problem.getHOGMExpressionBasedModel();
+		Context context = hogmExpressionBasedModel.getContext();
+		Expression query = problem.getQueryExpression();
 		
-		HOGMExpressionBasedModel model = new HOGMExpressionBasedModel(modelString);
-		ExpressionBasedProblem result = new HOGMExpressionBasedProblem(parse("query"), model);
+		HOGMExpressionBasedModel groundedModel = ground(hogmExpressionBasedModel);
+		
+		Map<Assignment, HOGMExpressionBasedProblem> result = 
+				makeMapFromAssignmentsToQueryFreeVariablesToGroundedProblems(
+						query, groundedModel, context);
 		
 		return result;
 	}
 
-	public static String getModelString(HOGMExpressionBasedModel model) {
+	private static HOGMExpressionBasedModel ground(HOGMExpressionBasedModel hogmExpressionBasedModel) {
+		String modelString = getGroundedModelString(hogmExpressionBasedModel);
+		HOGMExpressionBasedModel groundedModel = new HOGMExpressionBasedModel(modelString);
+		return groundedModel;
+	}
+
+	private static 
+	Map<Assignment, HOGMExpressionBasedProblem> 
+	makeMapFromAssignmentsToQueryFreeVariablesToGroundedProblems(
+			Expression query,
+			HOGMExpressionBasedModel groundedModel, 
+			Context context) {
+		
+		Map<Assignment, Expression> fromAssignmentsToGroundQueries = 
+				makeMapFromAssignmentsToGrounding(query, context);
+		
+		Map<Assignment, HOGMExpressionBasedProblem> fromAssignmentsToGroundedProblems =
+				mapValues(fromAssignmentsToGroundQueries, q -> new HOGMExpressionBasedProblem(q, groundedModel));
+		
+		return fromAssignmentsToGroundedProblems;
+	}
+	
+	public static String getGroundedModelString(HOGMExpressionBasedModel model) {
 		StringBuilder groundedModelString = new StringBuilder();
 
 		groundedModelString.append(getSorts(model));
@@ -122,7 +152,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 			ExtensionalIndexExpressionsSet parameters = makeParameters(declaration, context);
 			StringBuilder result = new StringBuilder();
 			AssignmentsIterator parameterValues = new AssignmentsIterator(parameters, context);
-			for (Map<Expression, Expression> assignment : in(parameterValues)) {
+			for (Assignment assignment : in(parameterValues)) {
 				List<Expression> argumentValues = getArgumentValues(parameters, assignment);
 				result.append(grounding(declaration, argumentValues, context) + "\n");
 			}
@@ -131,7 +161,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		}));
 	}
 
-	private static List<Expression> getArgumentValues(ExtensionalIndexExpressionsSet parameters, Map<Expression, Expression> assignment) {
+	private static List<Expression> getArgumentValues(ExtensionalIndexExpressionsSet parameters, Assignment assignment) {
 		return mapIntoList(parameters.getList(), indexExpression -> assignment.get(indexExpression.get(0)));
 	}
 
@@ -182,7 +212,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 				return groundIfThenElse(factor, context);
 			}
 			else {
-				return groundFactorThatIsNotAnDeterministicIfThenElse(factor, context);
+				return groundExpression(factor, context);
 			}
 
 		}));
@@ -190,7 +220,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 
 	private static String groundIfThenElse(Expression factor, Context context) {
 		Expression actualFactor = getActualFactor(factor);
-		return groundFactorThatIsNotAnDeterministicIfThenElse(actualFactor, context);
+		return groundExpression(actualFactor, context);
 	}
 
 	private static Expression getActualFactor(Expression factor) {
@@ -207,22 +237,31 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		return actualFactor;
 	}
 
-	private static String groundFactorThatIsNotAnDeterministicIfThenElse(Expression factor, Context context) {
+	private static String groundExpression(Expression factor, Context context) {
 		if (factor.getSyntacticFormType().equals("For all")) {
-			return groundUniversallyQuantifiedFactor2(factor, context);
+			return groundUniversallyQuantifiedExpression(factor, context);
 		}
 		else {
 			return factor.toString() + ";";
 		}
 	}
 
-	private static String groundUniversallyQuantifiedFactor2(Expression factor, Context context) {
-		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsAndBody(factor);
+	private static String groundUniversallyQuantifiedExpression(Expression expression, Context context) {
+		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsAndBody(expression);
 		IndexExpressionsSet indexExpressions = indexExpressionsAndBody.first;
 		Expression body = indexExpressionsAndBody.second;
 		AssignmentsIterator assignments = new AssignmentsIterator(indexExpressions, context);
 		List<String> bodyGroundings = mapIntoList(assignments, a -> groundNonQuantifiedFactorWithAssignment(body, a, context).toString() + ";");
 		return join("\n", bodyGroundings);
+	}
+
+	private static Map<Assignment, Expression> makeMapFromAssignmentsToGrounding(Expression expression, Context context) {
+		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsAndBody(expression);
+		IndexExpressionsSet indexExpressions = indexExpressionsAndBody.first;
+		Expression body = indexExpressionsAndBody.second;
+		AssignmentsIterator assignments = new AssignmentsIterator(indexExpressions, context);
+		Map<Assignment, Expression> result = mapIntoMap(assignments, a -> groundNonQuantifiedFactorWithAssignment(body, a, context));
+		return result;
 	}
 
 	private static Pair<IndexExpressionsSet, Expression> getIndexExpressionsAndBody(Expression factor) {
@@ -243,11 +282,11 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		}), "Result: ", RESULT);
 	}
 
-	private static Expression groundNonQuantifiedFactorWithAssignment(Expression factor, Map<Expression, Expression> assignment, Context context) {
+	private static Expression groundNonQuantifiedFactorWithAssignment(Expression factor, Assignment assignment, Context context) {
 		return factor.replaceAllOccurrences(e -> groundExpression(e, assignment, context), context);
 	}
 	
-	private static Expression groundExpression(Expression expression, Map<Expression, Expression> assignment, Context context) {
+	private static Expression groundExpression(Expression expression, Assignment assignment, Context context) {
 		Expression directValue = assignment.get(expression);
 		if (directValue != null) {
 			return directValue;
@@ -276,7 +315,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		return ! isBuiltInFunctionApplication;
 	}
 
-	private static Expression groundFunctionApplication(Expression expression, Map<Expression, Expression> assignment) {
+	private static Expression groundFunctionApplication(Expression expression, Assignment assignment) {
 		return explanationBlock("Grounding ", expression, " with ", assignment, code(() -> {
 
 			List<Expression> argumentValues = mapIntoList(expression.getArguments(), assignment::get);

@@ -44,7 +44,7 @@ public class HOGMMultiQuerySamplingProblemSolverProblemTest {
     Expression exp = result.getResult();
     ExpressionSamplingFactor expressionSamplingFactor = (ExpressionSamplingFactor) exp;
     SamplingFactorDiscretizedProbabilityDistributionFunction function =
-        expressionSamplingFactor.getSamplingFactorDiscretizedProbabilityDistributionFunction();
+        expressionSamplingFactor.getDiscretizedConditionalProbabilityDistributionFunction();
     Functions functions = Functions.functions(function);
 
     SetOfVariables inputVariables = function.getSetOfInputVariables();

@@ -66,18 +66,18 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.DynamicSamplingProductFactor;
 
 /**
- * A {@link Solver} adapter based on {@link ExactBP} for {@link Problem}s using {@link SamplingFactor}s defined on {@link ExpressionVariable}s.
+ * A {@link Solver} adapter based on {@link DynamicSamplingProductFactor} for {@link Problem}s using {@link SamplingFactor}s defined on {@link ExpressionVariable}s.
  * 
  * @author braz
  *
  */
-public class SolverAdapterForExactBPThatReturnsSamplingFactor implements Solver {
+public class SolverAdapterDynamicSampling implements Solver {
 
 	private Function<Expression, Integer> fromExpressionVariableToNumberOfDiscreteValues;
 	private int initialNumberOfSamples;
 	private Context context;
 	
-	public SolverAdapterForExactBPThatReturnsSamplingFactor(
+	public SolverAdapterDynamicSampling(
 			Function<Expression, Integer> fromExpressionVariableToNumberOfDiscreteValues,
 			int initialNumberOfSamples,
 			Context context) {

@@ -21,6 +21,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sa
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithDiscretizedConditionalProbabilityDistributionFunction;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
 import com.sri.ai.util.Util;
@@ -1344,9 +1345,9 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 	private void generateGraph(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
 
-		ExpressionSamplingFactor conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
+		ExpressionWithDiscretizedConditionalProbabilityDistributionFunction conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 		if (System.getProperty(PROPERTY_KEY_GENERATING_GRAPH_FILE) != null) {
-			Function conditionedFunction = conditioned.getSamplingFactorDiscretizedProbabilityDistributionFunction();
+			Function conditionedFunction = conditioned.getDiscretizedConditionalProbabilityDistributionFunction();
 			Functions functions = Functions.functions(conditionedFunction);
 			int queryIndex = Util.getIndexOfFirstSatisfyingPredicateOrMinusOne(conditionedFunction.getSetOfInputVariables().getVariables(), v -> v.getName().equals(query));
 			myAssert(queryIndex != -1, () -> "Query variable " + query + " not found in variables " + conditionedFunction.getSetOfInputVariables().getVariables());

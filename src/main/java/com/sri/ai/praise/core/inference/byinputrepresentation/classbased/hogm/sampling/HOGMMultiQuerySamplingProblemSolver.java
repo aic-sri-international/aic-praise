@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling.ExactBPOnSamplingFactorsExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling.SamplingExpressionBasedSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 
 public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSolver {
@@ -20,7 +20,7 @@ public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSo
 		super(
 				model, 
 				queries, 
-				new ExactBPOnSamplingFactorsExpressionBasedSolver(
+				new SamplingExpressionBasedSolver(
 						fromVariableToNumberOfDiscreteValues, 
 						initialNumberOfSamples, 
 						random));

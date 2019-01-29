@@ -65,7 +65,7 @@ import com.sri.ai.util.function.core.variables.DefaultSetOfVariables;
 import com.sri.ai.util.function.core.variables.EnumVariable;
 import com.sri.ai.util.function.core.variables.IntegerVariable;
 
-public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
+public interface ExpressionSamplingFactor extends Expression, SamplingFactor, ExpressionWithDiscretizedConditionalProbabilityDistributionFunction {
 	
 	/**
 	 * The maximum number of assignments to factor's discretized values
@@ -81,10 +81,11 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 	 */
 	public static final Symbol TOO_LARGE_FOR_EXPRESSION_GENERATION = makeSymbol("too large");
 
-	DefaultSamplingFactorDiscretizedProbabilityDistributionFunction getSamplingFactorDiscretizedProbabilityDistributionFunction();
-
 	ExpressionSamplingFactor condition(Sample conditioningSample);
 	
+	@Override
+	DefaultSamplingFactorDiscretizedProbabilityDistributionFunction getDiscretizedConditionalProbabilityDistributionFunction();
+
 	void sample();
 	
 	boolean averageWeightIsZero();
@@ -157,7 +158,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			else if (method.getName().equals("condition")) {
 				return condition((Sample) args[0]);
 			}
-			else if (method.getName().equals("getSamplingFactorDiscretizedProbabilityDistributionFunction")) {
+			else if (method.getName().equals("getDiscretizedConditionalProbabilityDistributionFunction")) {
 				return getSamplingFactorDiscretizedProbabilityDistributionFunction();
 			}
 			else if (method.getName().equals("sample")) {
@@ -178,12 +179,12 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor {
 			}
 		}
 
-		public ExpressionSamplingFactor condition(Sample conditioningSample) {
+		public ExpressionWithDiscretizedConditionalProbabilityDistributionFunction condition(Sample conditioningSample) {
 			
 			SamplingFactor conditionedSamplingFactor = 
 					ConditionedSamplingFactor.condition(samplingFactor, conditioningSample);
 			
-			ExpressionSamplingFactor result = 
+			ExpressionWithDiscretizedConditionalProbabilityDistributionFunction result = 
 					expressionSamplingFactor(conditionedSamplingFactor, queryIndex, fromVariableToNumberOfDiscreteValues, initialNumberOfSamples, context);
 			
 			return result;
