@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.core.representation.classbased.hogm.components;
 
+import static com.sri.ai.util.Util.join;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -399,6 +401,6 @@ public abstract class AbstractHOGMVariableDeclaration implements HOGMVariableDec
 	
 	@Override
 	public String toHOGMString() {
-		return getHOGMModifier() + " " + getName() + " : " + getRangeSort() + ";";
+		return getHOGMModifier() + " " + getName() + " : " + join(" x ", getParameterSorts()) + " -> " + getRangeSort() + ";";
 	}
 }
