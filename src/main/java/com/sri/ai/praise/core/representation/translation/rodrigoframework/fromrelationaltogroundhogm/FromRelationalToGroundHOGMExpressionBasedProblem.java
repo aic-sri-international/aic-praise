@@ -12,6 +12,7 @@ import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.mapIntoMap;
 import static com.sri.ai.util.Util.mapValues;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.base.Pair.pair;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
@@ -85,7 +86,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 	}
 
 	public static IndexExpressionsSet getIndexExpressionsSet(Expression expression, Context context) {
-		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsAndBody(expression);
+		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsSetAndBody(expression);
 		return indexExpressionsAndBody.first;
 	}
 
@@ -93,11 +94,11 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		return expression.replaceAllOccurrences(e -> groundExpression(e, assignment, context), context);
 	}
 	
-	public static Pair<IndexExpressionsSet, Expression> getIndexExpressionsAndBody(Expression factor) {
-		return explanationBlock("Getting index expressions and body for ", factor, code(() -> {
+	public static Pair<IndexExpressionsSet, Expression> getIndexExpressionsSetAndBody(Expression expression) {
+		return explanationBlock("Getting index expressions and body for ", expression, code(() -> {
 	
 			List<Expression> indexExpressions = list();
-			Expression current = factor;
+			Expression current = expression;
 			while (current.getSyntacticFormType().equals("For all")) {
 				UniversallyQuantifiedFormula universallyQuantifiedCurrent = (UniversallyQuantifiedFormula) current;
 				ExtensionalIndexExpressionsSet indexExpressionsSet = (ExtensionalIndexExpressionsSet) universallyQuantifiedCurrent.getIndexExpressions();
@@ -106,7 +107,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 			}
 			Expression body = current;
 			ExtensionalIndexExpressionsSet indexExpressionsSet = new ExtensionalIndexExpressionsSet(indexExpressions);
-			return Pair.make(indexExpressionsSet, body);
+			return pair(indexExpressionsSet, body);
 	
 		}), "Result: ", RESULT);
 	}
@@ -317,7 +318,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 	}
 
 	private static String groundUniversallyQuantifiedExpression(Expression expression, Context context) {
-		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsAndBody(expression);
+		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsSetAndBody(expression);
 		IndexExpressionsSet indexExpressions = indexExpressionsAndBody.first;
 		Expression body = indexExpressionsAndBody.second;
 		AssignmentsIterator assignments = new AssignmentsIterator(indexExpressions, context);
@@ -326,7 +327,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 	}
 
 	private static Map<Assignment, Expression> makeMapFromAssignmentsToGrounding(Expression expression, Context context) {
-		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsAndBody(expression);
+		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsSetAndBody(expression);
 		IndexExpressionsSet indexExpressions = indexExpressionsAndBody.first;
 		Expression body = indexExpressionsAndBody.second;
 		AssignmentsIterator assignments = new AssignmentsIterator(indexExpressions, context);
@@ -377,8 +378,12 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		return assignment.containsKey(expression)? assignment.get(expression) : expression;
 	}
 
+	public static IndexExpressionsSet getQueryIndexExpressionsSet(ExpressionBasedProblem problem) {
+		return getIndexExpressionsSetAndBody(problem.getQueryExpression()).first;
+	}
+
 	public static Expression getQueryBody(ExpressionBasedProblem problem) {
-		return getIndexExpressionsAndBody(problem.getQueryExpression()).second;
+		return getIndexExpressionsSetAndBody(problem.getQueryExpression()).second;
 	}
 
 }

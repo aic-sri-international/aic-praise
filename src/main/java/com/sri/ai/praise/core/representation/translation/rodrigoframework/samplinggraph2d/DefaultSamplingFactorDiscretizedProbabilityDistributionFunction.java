@@ -5,7 +5,6 @@ import static com.sri.ai.util.Util.myAssert;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
-import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.distribution.DiscretizedConditionalProbabilityDistributionFunction;
 import com.sri.ai.util.function.api.variables.Assignment;
 import com.sri.ai.util.function.api.variables.SetOfVariables;
@@ -69,8 +68,8 @@ implements SamplingFactorDiscretizedProbabilityDistributionFunction {
 	SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction 
 	project(Variable variable, Assignment assignmentToRemainingVariables) {
 		
-		myAssert(assignmentToRemainingVariables.get(variable) == null, () -> (new Enclosing() {}).methodName() + " got request to create a projection on " + variable + " but assignment on \"other\" variables includes this variable: " + assignmentToRemainingVariables);
-		myAssert(assignmentToRemainingVariables.size() == this.getSetOfInputVariables().size() - 1, () -> (new Enclosing() {}).methodName() + " must receive an assignment on all input variables " + getSetOfInputVariables() + " excluuding " + variable + ", but got an assignment on " + assignmentToRemainingVariables.getSetOfVariables() + " instead");
+		myAssert(assignmentToRemainingVariables.get(variable) == null, this, () -> " got request to create a projection on " + variable + " but assignment on \"other\" variables includes this variable: " + assignmentToRemainingVariables);
+		myAssert(assignmentToRemainingVariables.size() == getSetOfInputVariables().size() - 1, this, () -> " must receive an assignment on all input variables " + getSetOfInputVariables() + " excluding " + variable + ", but got an assignment on " + assignmentToRemainingVariables.getSetOfVariables() + " instead");
 
 		Sample conditioningSample = 
 				getCorrespondingSample(getSamplingFactor(), getSetOfVariablesWithRange(), assignmentToRemainingVariables);

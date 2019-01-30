@@ -6,4 +6,6 @@ public interface ExpressionWithProbabilityFunction extends Expression {
 
 	com.sri.ai.util.function.api.functions.Function getDiscretizedConditionalProbabilityDistributionFunction();
 
+	int getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex();
+
 }

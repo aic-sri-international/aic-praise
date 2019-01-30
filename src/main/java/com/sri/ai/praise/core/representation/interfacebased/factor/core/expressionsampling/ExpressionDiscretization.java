@@ -140,7 +140,7 @@ public class ExpressionDiscretization {
 		for (com.sri.ai.util.function.api.variables.Variable variable : assignment.getSetOfVariables().getVariables()) {
 			Value value = assignment.get(variable);
 			Expression valueExpression = makeSymbol(value.objectValue());
-			Expression variableExpression = makeSymbol(variable.toString());
+			Expression variableExpression = makeSymbol(variable.getName().toString());
 			expressoMap.put(variableExpression, valueExpression);
 		}
 		return new com.sri.ai.grinder.interpreter.DefaultAssignment(expressoMap);

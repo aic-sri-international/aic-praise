@@ -69,6 +69,9 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor, Ex
 	@Override
 	DefaultSamplingFactorDiscretizedProbabilityDistributionFunction getDiscretizedConditionalProbabilityDistributionFunction();
 
+	@Override
+	public int getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex();
+	
 	void sample();
 	
 	boolean averageWeightIsZero();
@@ -143,6 +146,9 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor, Ex
 			}
 			else if (method.getName().equals("getDiscretizedConditionalProbabilityDistributionFunction")) {
 				return getSamplingFactorDiscretizedProbabilityDistributionFunction();
+			}
+			else if (method.getName().equals("getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex")) {
+				return queryIndex;
 			}
 			else if (method.getName().equals("sample")) {
 				sample();

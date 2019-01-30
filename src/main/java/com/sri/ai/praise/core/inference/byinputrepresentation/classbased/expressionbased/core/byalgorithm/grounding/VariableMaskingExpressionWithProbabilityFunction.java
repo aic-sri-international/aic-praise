@@ -55,6 +55,11 @@ public class VariableMaskingExpressionWithProbabilityFunction extends AbstractEx
 		return new VariablesMaskingFunction(baseFunction, oldVariable, newVariable);
 	}
 
+	@Override
+	public int getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex() {
+		return base.getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex();
+	}
+
 	private Variable getOldVariable(Function baseFunction) {
 		ArrayList<? extends Variable> oldVariables = baseFunction.getSetOfInputVariables().getVariables();
 		Variable oldVariable = getFirstSatisfyingPredicateOrNull(oldVariables, v -> v.getName().equals(oldVariableName));

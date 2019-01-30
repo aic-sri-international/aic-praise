@@ -4,9 +4,10 @@ import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.getInd
 import static com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.VariableMaskingExpressionWithProbabilityFunction.mask;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization.makeSetOfVariablesWithRanges;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.getIndexExpressionsSet;
+import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.getQueryBody;
+import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.getQueryIndexExpressionsSet;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.ground;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.groundNonQuantifiedExpressionWithAssignment;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.makeRelationalExpressionFromGroundedVariable;
 import static com.sri.ai.util.Util.assertType;
 
 import java.util.Collection;
@@ -15,6 +16,7 @@ import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.helper.LazyIfThenElse;
 import com.sri.ai.grinder.interpreter.Assignment;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
@@ -24,7 +26,7 @@ import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpr
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.distribution.DiscretizedConditionalProbabilityDistributionFunction;
 import com.sri.ai.util.function.api.variables.SetOfVariables;
 import com.sri.ai.util.function.core.functions.AggregatorFunction;
@@ -55,9 +57,24 @@ import com.sri.ai.util.function.core.functions.AggregatorFunction;
 public class RelationalQuerySolutionExpression extends LazyIfThenElse implements ExpressionWithProbabilityFunction {
 
 	private static final long serialVersionUID = 1L;
+
+	private ExpressionBasedProblem problem;
+	private ExpressionBasedSolver solver;
 	
 	public RelationalQuerySolutionExpression(ExpressionBasedProblem problem, ExpressionBasedSolver baseSolver) {
-		super(makeKeys(problem), makeSubExpressionMaker(problem, baseSolver), problem.getContext());
+		super(makeKeys(problem), makeSubExpressionMaker(problem, baseSolver), makeContext(problem));
+		this.problem = problem;
+		this.solver = baseSolver;
+	}
+
+	///////////////////// 
+	
+	public ExpressionBasedProblem getProblem() {
+		return problem;
+	}
+
+	public ExpressionBasedSolver getSolver() {
+		return solver;
 	}
 
 	///////////////////// STATIC METHODS PROVIDING ARGUMENTS FOR SUPER CONSTRUCTOR
@@ -67,7 +84,7 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 		// The "keys" in this case are the query free variables
 		
 		IndexExpressionsSet indexExpressionsSet = 
-				getIndexExpressionsSet(problem.getQueryExpression(), problem.getContext());
+				getIndexExpressionsSet(problem.getQueryExpression(), makeContext(problem));
 		
 		List<Expression> result = 
 				getIndices(indexExpressionsSet);
@@ -81,7 +98,7 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 		ExpressionBasedModel originalExpressionBasedModel = problem.getOriginalExpressionBasedModel();
 		HOGMExpressionBasedModel hogModel = assertType(originalExpressionBasedModel, HOGMExpressionBasedModel.class, RelationalQuerySolutionExpression.class); 
 		HOGMExpressionBasedModel groundedModel = ground(hogModel);
-		Expression queryBody = FromRelationalToGroundHOGMExpressionBasedProblem.getQueryBody(problem);
+		Expression queryBody = getQueryBody(problem);
 		return assignment -> solveSubProblem(problem, baseSolver, groundedModel, queryBody, assignment);
 	}
 
@@ -92,42 +109,57 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 			Expression queryBody, 
 			Assignment assignment) {
 		
-		Expression groundQuery = groundNonQuantifiedExpressionWithAssignment(queryBody, assignment, problem.getContext());
+		Expression groundQuery = groundNonQuantifiedExpressionWithAssignment(queryBody, assignment, makeContext(problem));
 		ExpressionBasedProblem groundedProblem = new HOGMExpressionBasedProblem(groundQuery, groundedModel);
 		Expression baseSolution = baseSolver.solve(groundedProblem);
-		VariableMaskingExpressionWithProbabilityFunction masked = maskWithRelationalQueryVariable(groundQuery, baseSolution);
+		VariableMaskingExpressionWithProbabilityFunction masked = maskWithRelationalQueryVariable(queryBody, groundQuery, baseSolution);
 		return masked;
 	}
 
-	private static VariableMaskingExpressionWithProbabilityFunction maskWithRelationalQueryVariable(Expression groundQuery, Expression baseSolution) {
-		Expression liftedQueryVariable = makeRelationalExpressionFromGroundedVariable(groundQuery);
+	private static VariableMaskingExpressionWithProbabilityFunction maskWithRelationalQueryVariable(Expression queryBody, Expression groundQuery, Expression baseSolution) {
 		ExpressionWithProbabilityFunction baseSolutionWithProbabilityFunction = (ExpressionWithProbabilityFunction) baseSolution;
-		VariableMaskingExpressionWithProbabilityFunction masked = mask(baseSolutionWithProbabilityFunction, groundQuery, liftedQueryVariable);
+		VariableMaskingExpressionWithProbabilityFunction masked = mask(baseSolutionWithProbabilityFunction, groundQuery, queryBody);
 		return masked;
 		// TODO: this is a hack.
 		// The main problem here is that it is assuming the base solver is returning a ExpressionWithProbabilityFunction,
 		// which it might be not.
 		// Ideally, we would use Expression's replace method and it would take of everything,
 		// but this would require copying constructors all the way down the hierarchy, which I don't have time for right now.
-		// Besides, it would be good to have more systematic data structures so that all these copy constructors could act
-		// on a common data structure instead of having to write them for all classes.
+		// Besides, it would be good to have more systematic data structures so that all these copy constructors could
+		// be implemented at an abstract level acting on on a common data structure
+		// instead of having to write them for all classes.
 	}
 	
+	private static Context makeContext(ExpressionBasedProblem problem) {
+		Context contextWithQueryIndices = problem.getContext().extendWith(getQueryIndexExpressionsSet(problem)); 
+		return contextWithQueryIndices;
+	}
+
 	/////////////////////
+
+	@Override
+	public int getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex() {
+		Expression queryBody = getQueryBody(problem);
+		AggregatorFunction aggregator = getDiscretizedConditionalProbabilityDistributionFunction();
+		int result = Util.getIndexOfFirstSatisfyingPredicateOrMinusOne(aggregator.getSetOfInputVariables().getVariables(), v -> v.getName().equals(queryBody.toString()));
+		return result;
+	}
+	
+	private AggregatorFunction aggregatorFunction;
 	
 	@Override
-	public com.sri.ai.util.function.api.functions.Function getDiscretizedConditionalProbabilityDistributionFunction() {
-		
-		Collection<? extends Expression> queryFreeVariables = getKeys();
-		
-		SetOfVariables setOfVariablesForQueryFreeVariables = 
-				makeSetOfVariablesWithRanges(queryFreeVariables, v -> 25, getContext());
-		
-		AggregatorFunction aggregatorFunction = 
-				new AggregatorFunction(
-						setOfVariablesForQueryFreeVariables,
-						assignment -> computeDiscretizedFunctionForSubSolution(assignment));
-		
+	public AggregatorFunction getDiscretizedConditionalProbabilityDistributionFunction() {
+		if (aggregatorFunction == null) {
+			Collection<? extends Expression> queryFreeVariables = getKeys();
+			
+			SetOfVariables setOfVariablesForQueryFreeVariables = 
+					makeSetOfVariablesWithRanges(queryFreeVariables, v -> 25, getContext());
+			
+			aggregatorFunction = 
+					new AggregatorFunction(
+							setOfVariablesForQueryFreeVariables,
+							assignment -> computeDiscretizedFunctionForSubSolution(assignment));
+		}
 		return aggregatorFunction;
 	}
 
