@@ -73,6 +73,7 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 		myAssert(sameNumberOfVariablesForFunctionAndForSamplingFactor(), numberOfVariablesError());
 		
 		id = globalId++;
+		println("Just created the " + id + "-th " + getClass().getSimpleName());
 	}
 	
 	//////////////////////////////
@@ -121,6 +122,8 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 		
 		int queryVariableIndexInProjection = 
 				projectedVariablesWithRange.indexOf(getQueryVariable());
+		
+		println("Going to make " + SamplingFactorDiscretizedProbabilityDistribution.class.getSimpleName() + " conditioned on " + conditioningSample.getAssignment());
 		
 		SamplingFactorDiscretizedProbabilityDistribution result = 
 				new SamplingFactorDiscretizedProbabilityDistribution(

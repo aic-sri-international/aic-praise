@@ -64,9 +64,9 @@ implements SamplingFactorDiscretizedProbabilityDistributionFunction {
 	 *
 	 */
 	@Override
-	public 
+	protected 
 	SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction 
-	project(Variable variable, Assignment assignmentToRemainingVariables) {
+	projectIfNeeded(Variable variable, Assignment assignmentToRemainingVariables) {
 		
 		myAssert(assignmentToRemainingVariables.get(variable) == null, this, () -> " got request to create a projection on " + variable + " but assignment on \"other\" variables includes this variable: " + assignmentToRemainingVariables);
 		myAssert(assignmentToRemainingVariables.size() == getSetOfInputVariables().size() - 1, this, () -> " must receive an assignment on all input variables " + getSetOfInputVariables() + " excluding " + variable + ", but got an assignment on " + assignmentToRemainingVariables.getSetOfVariables() + " instead");
@@ -82,6 +82,12 @@ implements SamplingFactorDiscretizedProbabilityDistributionFunction {
 		
 		return singleInputDistributionFunction;
 		
+	}
+	
+	@Override
+	public SamplingFactorDiscretizedProbabilityDistributionSingleInputFunctionAdapter
+	project(Variable variable, Assignment assignmentToRemainingVariables) {
+		return (SamplingFactorDiscretizedProbabilityDistributionSingleInputFunctionAdapter) super.project(variable, assignmentToRemainingVariables);
 	}
 
 	/**

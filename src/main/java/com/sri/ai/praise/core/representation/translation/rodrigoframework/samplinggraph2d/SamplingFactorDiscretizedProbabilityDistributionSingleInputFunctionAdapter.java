@@ -39,10 +39,17 @@ implements SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction {
 	}
 
 	@Override
+	protected SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction 
+	projectIfNeeded(Variable variable, Assignment assignmentToRemainingVariables) {
+		
+		return getBase().project(variable, assignmentToRemainingVariables);
+	}
+
+	@Override
 	public SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction 
 	project(Variable variable, Assignment assignmentToRemainingVariables) {
 		
-		return getBase().project(variable, assignmentToRemainingVariables);
+		return (SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction) super.project(variable, assignmentToRemainingVariables);
 	}
 
 //	@Override
