@@ -41,20 +41,16 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.SolverAdapterDynamicSampling;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.GroundingExpressionBasedSolver;
 
-public class SamplingExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
+public class GroundingAndSamplingExpressionBasedSolver extends GroundingExpressionBasedSolver {
 
-	public SamplingExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int initialNumberOfSamples, Random random) {
+	public GroundingAndSamplingExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int initialNumberOfSamples, Random random) {
 		super(
-				new ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion(random)::translate, 
-
-				ebp -> new SolverAdapterDynamicSampling(
+				new SamplingPropositionalExpressionBasedSolver(
 						fromVariableToNumberOfDiscreteValues, 
 						initialNumberOfSamples, 
-						ebp.getContext()));
+						random));
 	}
 
 }

@@ -29,6 +29,7 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.helper.AssignmentsIterator;
 import com.sri.ai.grinder.interpreter.Assignment;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
+import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
@@ -79,7 +80,47 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		return result;
 	}
 
-	private static HOGMExpressionBasedModel ground(HOGMExpressionBasedModel hogmExpressionBasedModel) {
+	public static IndexExpressionsSet getIndexExpressionsSet(Expression expression, Context context) {
+		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsAndBody(expression);
+		return indexExpressionsAndBody.first;
+	}
+
+	public static Expression groundNonQuantifiedExpressionWithAssignment(Expression expression, Assignment assignment, Context context) {
+		return expression.replaceAllOccurrences(e -> groundExpression(e, assignment, context), context);
+	}
+	
+	public static Pair<IndexExpressionsSet, Expression> getIndexExpressionsAndBody(Expression factor) {
+		return explanationBlock("Getting index expressions and body for ", factor, code(() -> {
+	
+			List<Expression> indexExpressions = list();
+			Expression current = factor;
+			while (current.getSyntacticFormType().equals("For all")) {
+				UniversallyQuantifiedFormula universallyQuantifiedCurrent = (UniversallyQuantifiedFormula) current;
+				ExtensionalIndexExpressionsSet indexExpressionsSet = (ExtensionalIndexExpressionsSet) universallyQuantifiedCurrent.getIndexExpressions();
+				indexExpressions.addAll(indexExpressionsSet.getList());
+				current = universallyQuantifiedCurrent.getBody();
+			}
+			Expression body = current;
+			ExtensionalIndexExpressionsSet indexExpressionsSet = new ExtensionalIndexExpressionsSet(indexExpressions);
+			return Pair.make(indexExpressionsSet, body);
+	
+		}), "Result: ", RESULT);
+	}
+
+	public static String getGroundedModelString(HOGMExpressionBasedModel model) {
+		StringBuilder groundedModelString = new StringBuilder();
+	
+		groundedModelString.append(getSorts(model));
+		groundedModelString.append(getVariableDeclarations(model, model.getHOGModel().getConstantDeclarations()));
+		groundedModelString.append(getVariableDeclarations(model, model.getHOGModel().getRandomVariableDeclarations()));
+		groundedModelString.append(getFactors(model, model.getHOGModel().getConditionedPotentials(), model.getContext()));
+		
+		String modelString = groundedModelString.toString();
+		
+		return modelString;
+	}
+
+	public static HOGMExpressionBasedModel ground(HOGMExpressionBasedModel hogmExpressionBasedModel) {
 		String modelString = getGroundedModelString(hogmExpressionBasedModel);
 		HOGMExpressionBasedModel groundedModel = new HOGMExpressionBasedModel(modelString);
 		return groundedModel;
@@ -101,19 +142,6 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		return fromAssignmentsToGroundedProblems;
 	}
 	
-	public static String getGroundedModelString(HOGMExpressionBasedModel model) {
-		StringBuilder groundedModelString = new StringBuilder();
-
-		groundedModelString.append(getSorts(model));
-		groundedModelString.append(getVariableDeclarations(model, model.getHOGModel().getConstantDeclarations()));
-		groundedModelString.append(getVariableDeclarations(model, model.getHOGModel().getRandomVariableDeclarations()));
-		groundedModelString.append(getFactors(model, model.getHOGModel().getConditionedPotentials(), model.getContext()));
-		
-		String modelString = groundedModelString.toString();
-		
-		return modelString;
-	}
-
 	private static String getSorts(HOGMExpressionBasedModel model) {
 		return explanationBlock("Copying sorts", code(() -> {
 			
@@ -251,7 +279,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		IndexExpressionsSet indexExpressions = indexExpressionsAndBody.first;
 		Expression body = indexExpressionsAndBody.second;
 		AssignmentsIterator assignments = new AssignmentsIterator(indexExpressions, context);
-		List<String> bodyGroundings = mapIntoList(assignments, a -> groundNonQuantifiedFactorWithAssignment(body, a, context).toString() + ";");
+		List<String> bodyGroundings = mapIntoList(assignments, a -> groundNonQuantifiedExpressionWithAssignment(body, a, context).toString() + ";");
 		return join("\n", bodyGroundings);
 	}
 
@@ -260,32 +288,10 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 		IndexExpressionsSet indexExpressions = indexExpressionsAndBody.first;
 		Expression body = indexExpressionsAndBody.second;
 		AssignmentsIterator assignments = new AssignmentsIterator(indexExpressions, context);
-		Map<Assignment, Expression> result = mapIntoMap(assignments, a -> groundNonQuantifiedFactorWithAssignment(body, a, context));
+		Map<Assignment, Expression> result = mapIntoMap(assignments, a -> groundNonQuantifiedExpressionWithAssignment(body, a, context));
 		return result;
 	}
 
-	private static Pair<IndexExpressionsSet, Expression> getIndexExpressionsAndBody(Expression factor) {
-		return explanationBlock("Getting index expressions and body for ", factor, code(() -> {
-
-			List<Expression> indexExpressions = list();
-			Expression current = factor;
-			while (current.getSyntacticFormType().equals("For all")) {
-				UniversallyQuantifiedFormula universallyQuantifiedCurrent = (UniversallyQuantifiedFormula) current;
-				ExtensionalIndexExpressionsSet indexExpressionsSet = (ExtensionalIndexExpressionsSet) universallyQuantifiedCurrent.getIndexExpressions();
-				indexExpressions.addAll(indexExpressionsSet.getList());
-				current = universallyQuantifiedCurrent.getBody();
-			}
-			Expression body = current;
-			ExtensionalIndexExpressionsSet indexExpressionsSet = new ExtensionalIndexExpressionsSet(indexExpressions);
-			return Pair.make(indexExpressionsSet, body);
-
-		}), "Result: ", RESULT);
-	}
-
-	private static Expression groundNonQuantifiedFactorWithAssignment(Expression factor, Assignment assignment, Context context) {
-		return factor.replaceAllOccurrences(e -> groundExpression(e, assignment, context), context);
-	}
-	
 	private static Expression groundExpression(Expression expression, Assignment assignment, Context context) {
 		Expression directValue = assignment.get(expression);
 		if (directValue != null) {
@@ -323,6 +329,10 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 			return groundVariable;
 
 		}), "Result is ", RESULT);
+	}
+
+	public static Expression getQueryBody(ExpressionBasedProblem problem) {
+		return getIndexExpressionsAndBody(problem.getQueryExpression()).second;
 	}
 
 }

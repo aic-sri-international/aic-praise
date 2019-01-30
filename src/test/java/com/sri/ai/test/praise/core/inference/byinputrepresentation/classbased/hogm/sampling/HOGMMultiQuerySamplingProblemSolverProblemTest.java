@@ -11,7 +11,7 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingPropositionalProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.SamplingFactorDiscretizedProbabilityDistributionFunction;
@@ -72,8 +72,8 @@ public class HOGMMultiQuerySamplingProblemSolverProblemTest {
 
   private HOGMProblemResult computeResult(
       String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues) {
-    HOGMMultiQuerySamplingProblemSolver solver =
-        new HOGMMultiQuerySamplingProblemSolver(
+    HOGMMultiQuerySamplingPropositionalProblemSolver solver =
+        new HOGMMultiQuerySamplingPropositionalProblemSolver(
             model, list(query), v -> numberOfDiscreteValues, initialNumberOfSamples, new Random());
 
     List<? extends HOGMProblemResult> results = solver.getResults();

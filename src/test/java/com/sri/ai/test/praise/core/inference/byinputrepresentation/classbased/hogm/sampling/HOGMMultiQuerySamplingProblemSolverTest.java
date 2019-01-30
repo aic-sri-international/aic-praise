@@ -20,8 +20,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithDiscretizedConditionalProbabilityDistributionFunction;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
 import com.sri.ai.util.Util;
@@ -181,7 +180,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 		String query = "y";
 		Expression expected = parse("if y < -9.796 then 0 else if y < -9.388 then 0 else if y < -8.98 then 0.001 else if y < -8.571 then 0.001 else if y < -8.163 then 0.001 else if y < -7.755 then 0.001 else if y < -7.347 then 0.002 else if y < -6.939 then 0.003 else if y < -6.531 then 0.004 else if y < -6.122 then 0.006 else if y < -5.714 then 0.008 else if y < -5.306 then 0.01 else if y < -4.898 then 0.013 else if y < -4.49 then 0.016 else if y < -4.082 then 0.019 else if y < -3.673 then 0.023 else if y < -3.265 then 0.028 else if y < -2.857 then 0.032 else if y < -2.449 then 0.038 else if y < -2.041 then 0.04 else if y < -1.633 then 0.045 else if y < -1.224 then 0.049 else if y < -0.816 then 0.051 else if y < -0.408 then 0.053 else if y < -1.2E-15 then 0.054 else if y < 0.408 then 0.055 else if y < 0.816 then 0.053 else if y < 1.224 then 0.051 else if y < 1.633 then 0.048 else if y < 2.041 then 0.045 else if y < 2.449 then 0.041 else if y < 2.857 then 0.036 else if y < 3.265 then 0.032 else if y < 3.673 then 0.029 else if y < 4.082 then 0.023 else if y < 4.49 then 0.02 else if y < 4.898 then 0.016 else if y < 5.306 then 0.013 else if y < 5.714 then 0.01 else if y < 6.122 then 0.008 else if y < 6.531 then 0.006 else if y < 6.939 then 0.005 else if y < 7.347 then 0.003 else if y < 7.755 then 0.002 else if y < 8.163 then 0.002 else if y < 8.571 then 0.001 else if y < 8.98 then 0.001 else if y < 9.388 then 0 else if y < 9.796 then 0 else 0");
-		int initialNumberOfSamples = 1000;
+		int initialNumberOfSamples = 10000;
 		int numberOfDiscreteValues = 50;
 
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
@@ -294,7 +293,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
-	@Test
+	// @Test
 	public void normalWithVariableMeanAndConditioningSamplingTest() {
 
 		String model = "" +
@@ -1345,7 +1344,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 	private void generateGraph(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
 
-		ExpressionWithDiscretizedConditionalProbabilityDistributionFunction conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
+		ExpressionWithProbabilityFunction conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 		if (System.getProperty(PROPERTY_KEY_GENERATING_GRAPH_FILE) != null) {
 			Function conditionedFunction = conditioned.getDiscretizedConditionalProbabilityDistributionFunction();
 			Functions functions = Functions.functions(conditionedFunction);
@@ -1371,22 +1370,23 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 
 	private void runNumericalTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean deterministic, Sample conditioningSample, int testIndex) {
-		ExpressionSamplingFactor conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
+		ExpressionWithProbabilityFunction conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 		printAndCompare(query, conditioned, expected, deterministic, conditioningSample, testIndex);
 	}
 
-	private ExpressionSamplingFactor computeConditionedResult(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
-		ExpressionSamplingFactor expressionSamplingFactor = computeUnconditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues);
-		ExpressionSamplingFactor conditioned = expressionSamplingFactor.condition(conditioningSample);
-		return conditioned;
+	private ExpressionWithProbabilityFunction computeConditionedResult(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
+		ExpressionWithProbabilityFunction solution = computeUnconditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues);
+//		ExpressionSamplingFactor conditioned = solution.condition(conditioningSample);
+//		return conditioned;
+		return solution;
 	}
 
-	private ExpressionSamplingFactor computeUnconditionedResult(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues) {
+	private ExpressionWithProbabilityFunction computeUnconditionedResult(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues) {
 		HOGMProblemResult hogmResult = computeResult(model, query, initialNumberOfSamples, numberOfDiscreteValues);
 		assertNoErrors(hogmResult);
 		Expression result = hogmResult.getResult();
-		ExpressionSamplingFactor expressionSamplingFactor = (ExpressionSamplingFactor) result;
-		return expressionSamplingFactor;
+		ExpressionWithProbabilityFunction solution = (ExpressionWithProbabilityFunction) result;
+		return solution;
 	}
 
 	private HOGMProblemResult computeResult(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues) {
@@ -1409,7 +1409,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		assertFalse(result.hasErrors());
 	}
 
-	private void printAndCompare(String query, ExpressionSamplingFactor conditioned, Expression expected, boolean deterministic, Sample conditioningSample, int testIndex) {
+	private void printAndCompare(String query, ExpressionWithProbabilityFunction conditioned, Expression expected, boolean deterministic, Sample conditioningSample, int testIndex) {
 		
 		println("query: " + query);
 		println("expected: " + expected);

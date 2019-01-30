@@ -61,7 +61,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.DynamicSamplingProductFactor;
 
@@ -125,7 +125,7 @@ public class SolverAdapterDynamicSampling implements Solver {
 	
 	private SamplingFactor ensureItsSamplingFactor(Factor factor, ExpressionVariable queryVariable, Random random) {
 		if (factor instanceof ConstantFactor) {
-			return ExpressionSamplingFactor.makeUniformSamplingFactor(queryVariable, random, context);
+			return ExpressionDiscretization.makeUniformSamplingFactor(queryVariable, random, context);
 		}
 		else if (factor instanceof SamplingFactor) {
 			return (SamplingFactor) factor;

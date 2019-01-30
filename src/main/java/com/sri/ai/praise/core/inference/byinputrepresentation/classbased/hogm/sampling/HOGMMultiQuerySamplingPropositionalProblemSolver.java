@@ -5,12 +5,12 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling.GroundingAndSamplingExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling.SamplingPropositionalExpressionBasedSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 
-public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSolver {
+public class HOGMMultiQuerySamplingPropositionalProblemSolver extends HOGMMultiQueryProblemSolver {
 
-	public HOGMMultiQuerySamplingProblemSolver(
+	public HOGMMultiQuerySamplingPropositionalProblemSolver(
 			String model, 
 			List<String> queries,
 			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues,
@@ -20,7 +20,7 @@ public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSo
 		super(
 				model, 
 				queries, 
-				new GroundingAndSamplingExpressionBasedSolver(
+				new SamplingPropositionalExpressionBasedSolver(
 						fromVariableToNumberOfDiscreteValues, 
 						initialNumberOfSamples, 
 						random));
@@ -32,7 +32,7 @@ public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSo
 	 * @param model
 	 * @param queries
 	 */
-	public HOGMMultiQuerySamplingProblemSolver(String model, List<String> queries) {
+	public HOGMMultiQuerySamplingPropositionalProblemSolver(String model, List<String> queries) {
 		this(model, queries, v -> 10, 10000, new Random()); 
 	}
 }
