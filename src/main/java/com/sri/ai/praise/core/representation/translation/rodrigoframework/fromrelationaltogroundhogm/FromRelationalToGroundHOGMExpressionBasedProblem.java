@@ -239,7 +239,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 	 * @param groundedVariable
 	 * @return
 	 */
-	public static Expression makeExpressionFromGroundedVariable(Expression groundedVariable) {
+	public static Expression makeRelationalExpressionFromGroundedVariable(Expression groundedVariable) {
 		String name = groundedVariable.toString();
 		int i = name.indexOf("__");
 		if (i != -1) {

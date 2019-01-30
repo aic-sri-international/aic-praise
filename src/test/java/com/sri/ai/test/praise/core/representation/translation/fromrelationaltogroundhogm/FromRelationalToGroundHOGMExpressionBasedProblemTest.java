@@ -1,7 +1,7 @@
 package com.sri.ai.test.praise.core.representation.translation.fromrelationaltogroundhogm;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.makeExpressionFromGroundedVariable;
+import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.makeRelationalExpressionFromGroundedVariable;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
@@ -23,43 +23,43 @@ class FromRelationalToGroundHOGMExpressionBasedProblemTest {
 		
 		string = "f";
 		expected = "f";
-		actual = makeExpressionFromGroundedVariable(parse(string));
+		actual = makeRelationalExpressionFromGroundedVariable(parse(string));
 		assertEquals(parse(expected), actual);
 		
 		string = "foo";
 		expected = "foo";
-		actual = makeExpressionFromGroundedVariable(parse(string));
+		actual = makeRelationalExpressionFromGroundedVariable(parse(string));
 		assertEquals(parse(expected), actual);
 		
 		string = "10";
 		expected = "10";
-		actual = makeExpressionFromGroundedVariable(parse(string));
+		actual = makeRelationalExpressionFromGroundedVariable(parse(string));
 		assertEquals(parse(expected), actual);
 		
 		string = "1.0";
 		expected = "1.0";
-		actual = makeExpressionFromGroundedVariable(parse(string));
+		actual = makeRelationalExpressionFromGroundedVariable(parse(string));
 		assertEquals(parse(expected), actual);
 
 		for (String functor : list("f", "foo", "f123")) {
 			string = functor + "__a_10";
 			expected = functor + "(a, 10)";
-			actual = makeExpressionFromGroundedVariable(parse(string));
+			actual = makeRelationalExpressionFromGroundedVariable(parse(string));
 			assertEquals(parse(expected), actual);
 
 			string = functor + "__";
 			expected = functor + "()";
-			actual = makeExpressionFromGroundedVariable(parse(string));
+			actual = makeRelationalExpressionFromGroundedVariable(parse(string));
 			assertEquals(parse(expected), actual);
 
 			string = functor + "__abc";
 			expected = functor + "(abc)";
-			actual = makeExpressionFromGroundedVariable(parse(string));
+			actual = makeRelationalExpressionFromGroundedVariable(parse(string));
 			assertEquals(parse(expected), actual);
 
 			string = functor + "__0_11_222_3333";
 			expected = functor + "(0, 11, 222, 3333)";
-			actual = makeExpressionFromGroundedVariable(parse(string));
+			actual = makeRelationalExpressionFromGroundedVariable(parse(string));
 			assertEquals(parse(expected), actual);
 		}
 	}

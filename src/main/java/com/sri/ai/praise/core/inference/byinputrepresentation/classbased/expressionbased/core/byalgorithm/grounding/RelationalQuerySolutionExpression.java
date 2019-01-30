@@ -1,10 +1,12 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding;
 
 import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.getIndices;
+import static com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.VariableMaskingExpressionWithProbabilityFunction.mask;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization.makeSetOfVariablesWithRanges;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.getIndexExpressionsSet;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.ground;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.groundNonQuantifiedExpressionWithAssignment;
+import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.makeRelationalExpressionFromGroundedVariable;
 import static com.sri.ai.util.Util.assertType;
 
 import java.util.Collection;
@@ -92,8 +94,23 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 		
 		Expression groundQuery = groundNonQuantifiedExpressionWithAssignment(queryBody, assignment, problem.getContext());
 		ExpressionBasedProblem groundedProblem = new HOGMExpressionBasedProblem(groundQuery, groundedModel);
-		Expression solution = baseSolver.solve(groundedProblem);
-		return solution;
+		Expression baseSolution = baseSolver.solve(groundedProblem);
+		VariableMaskingExpressionWithProbabilityFunction masked = maskWithRelationalQueryVariable(groundQuery, baseSolution);
+		return masked;
+	}
+
+	private static VariableMaskingExpressionWithProbabilityFunction maskWithRelationalQueryVariable(Expression groundQuery, Expression baseSolution) {
+		Expression liftedQueryVariable = makeRelationalExpressionFromGroundedVariable(groundQuery);
+		ExpressionWithProbabilityFunction baseSolutionWithProbabilityFunction = (ExpressionWithProbabilityFunction) baseSolution;
+		VariableMaskingExpressionWithProbabilityFunction masked = mask(baseSolutionWithProbabilityFunction, groundQuery, liftedQueryVariable);
+		return masked;
+		// TODO: this is a hack.
+		// The main problem here is that it is assuming the base solver is returning a ExpressionWithProbabilityFunction,
+		// which it might be not.
+		// Ideally, we would use Expression's replace method and it would take of everything,
+		// but this would require copying constructors all the way down the hierarchy, which I don't have time for right now.
+		// Besides, it would be good to have more systematic data structures so that all these copy constructors could act
+		// on a common data structure instead of having to write them for all classes.
 	}
 	
 	/////////////////////

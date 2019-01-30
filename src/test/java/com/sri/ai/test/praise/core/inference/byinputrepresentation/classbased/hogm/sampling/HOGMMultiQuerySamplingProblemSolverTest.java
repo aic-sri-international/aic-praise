@@ -1305,7 +1305,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
-	// @Test
+	@Test
 	public void simpleRelationalSamplingTest() {
 	
 		String model = "" +
@@ -1314,8 +1314,8 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"";
 		
 		String query = "x(0)";
-		Expression expected = parse("if capital = Abiemnhom then 1 else if capital = Abyei then 0 else if capital = Akobo then 0 else 0");
-		int initialNumberOfSamples = 1000;
+		Expression expected = parse("if x(0) < -9.5 then 0 else if x(0) < -8.5 then 0.002 else if x(0) < -7.5 then 0.004 else if x(0) < -6.5 then 0.009 else if x(0) < -5.5 then 0.018 else if x(0) < -4.5 then 0.033 else if x(0) < -3.5 then 0.056 else if x(0) < -2.5 then 0.08 else if x(0) < -1.5 then 0.107 else if x(0) < -0.5 then 0.124 else if x(0) < 0.5 then 0.134 else if x(0) < 1.5 then 0.125 else if x(0) < 2.5 then 0.106 else if x(0) < 3.5 then 0.081 else if x(0) < 4.5 then 0.055 else if x(0) < 5.5 then 0.035 else if x(0) < 6.5 then 0.018 else if x(0) < 7.5 then 0.009 else if x(0) < 8.5 then 0.004 else if x(0) < 9.5 then 0.001 else 0");
+		int initialNumberOfSamples = 10000;
 		int numberOfDiscreteValues = 21;
 	
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
