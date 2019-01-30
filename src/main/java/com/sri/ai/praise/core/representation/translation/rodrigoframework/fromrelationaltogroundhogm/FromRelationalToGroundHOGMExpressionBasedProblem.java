@@ -10,6 +10,7 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.mapIntoMap;
 import static com.sri.ai.util.Util.mapValues;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
@@ -122,6 +123,7 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 
 	public static HOGMExpressionBasedModel ground(HOGMExpressionBasedModel hogmExpressionBasedModel) {
 		String modelString = getGroundedModelString(hogmExpressionBasedModel);
+		println(modelString);
 		HOGMExpressionBasedModel groundedModel = new HOGMExpressionBasedModel(modelString);
 		return groundedModel;
 	}
@@ -217,14 +219,13 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 	private static String makeGroundVariableName(Expression functor, Collection<Expression> argumentValues) {
 		return explanationBlock("Grounding ", functor, "(", argumentValues, ")", code(() -> {
 
-			List<String> nameComponents = list();
-			nameComponents.add(functor.toString());
+			StringBuilder name = new StringBuilder();
+			name.append(functor.toString());
 			if (!argumentValues.isEmpty()) {
-				nameComponents.add("_");
+				name.append("_");
 			}
-			mapIntoList(argumentValues, Expression::toString, nameComponents);
-			String name = join("_", nameComponents);
-			return name;
+			argumentValues.forEach(a -> name.append("_" + a));
+			return name.toString();
 
 		}));
 	}
@@ -324,11 +325,15 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 	private static Expression groundFunctionApplication(Expression expression, Assignment assignment) {
 		return explanationBlock("Grounding ", expression, " with ", assignment, code(() -> {
 
-			List<Expression> argumentValues = mapIntoList(expression.getArguments(), assignment::get);
+			List<Expression> argumentValues = mapIntoList(expression.getArguments(), a -> getAssignmentOrItself(a, assignment));
 			Expression groundVariable = makeSymbol(makeGroundVariableName(expression.getFunctor(), argumentValues));
 			return groundVariable;
 
 		}), "Result is ", RESULT);
+	}
+
+	private static Expression getAssignmentOrItself(Expression expression, Assignment assignment) {
+		return assignment.containsKey(expression)? assignment.get(expression) : expression;
 	}
 
 	public static Expression getQueryBody(ExpressionBasedProblem problem) {

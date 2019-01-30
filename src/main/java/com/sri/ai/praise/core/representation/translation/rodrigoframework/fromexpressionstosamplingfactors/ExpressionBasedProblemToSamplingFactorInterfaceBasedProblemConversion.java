@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors;
 
+import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.unionArrayList;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
@@ -85,6 +87,10 @@ public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversi
 	}
 
 	private List<Factor> makeFactors(ExpressionBasedProblem expressionBasedProblem, Predicate<Expression> isVariablePredicate) {
+		println(getClass().getSimpleName() + ": Factors:");
+		println(join("\n", expressionBasedProblem.getFactorExpressionsIncludingQueryDefinitionIfAny()));
+		println(getClass().getSimpleName() + ": End of factors");
+
 		FromExpressionToSamplingFactors factorTranslator = new FromExpressionToSamplingFactors(isVariablePredicate, random);
 		List<Factor> factors = 
 				unionArrayList(

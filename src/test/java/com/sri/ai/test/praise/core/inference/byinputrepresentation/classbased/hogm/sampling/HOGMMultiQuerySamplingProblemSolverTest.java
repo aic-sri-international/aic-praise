@@ -1305,6 +1305,22 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
+	//@Test
+	public void simpleRelationalSamplingTest() {
+	
+		String model = "" +
+				"random x: 0..3 -> [-10;10];" +
+				"for all I in 0..3 : x(I) = Normal(0.0, 3.0);" +
+				"";
+		
+		String query = "x(0)";
+		Expression expected = parse("if capital = Abiemnhom then 1 else if capital = Abyei then 0 else if capital = Akobo then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
 	///////////////////////////////
 
 	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests) {
