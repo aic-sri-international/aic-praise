@@ -67,7 +67,8 @@ public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversi
 	}
 
 	public Problem translate(ExpressionBasedProblem expressionBasedProblem) {
-		ExpressionVariable queryVariable = new DefaultExpressionVariable(expressionBasedProblem.getQuerySymbol());
+		Expression querySymbol = expressionBasedProblem.getQuerySymbol();
+		ExpressionVariable queryVariable = new DefaultExpressionVariable(querySymbol);
 		FactorNetwork factorNetwork = makeFactorNetwork(expressionBasedProblem);
 		Predicate<Variable> isParameterPredicate = makeIsParameterPredicate(expressionBasedProblem);
 		Problem problem = new DefaultProblem(queryVariable, factorNetwork, isParameterPredicate);

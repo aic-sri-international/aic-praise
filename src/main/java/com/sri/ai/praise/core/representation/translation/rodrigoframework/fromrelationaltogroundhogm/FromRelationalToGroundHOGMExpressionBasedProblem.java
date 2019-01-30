@@ -4,6 +4,7 @@ import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.makeIndexExpression;
+import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
@@ -15,6 +16,7 @@ import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RE
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +27,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
 import com.sri.ai.expresso.api.UniversallyQuantifiedFormula;
 import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
+import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.FunctionType;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.helper.AssignmentsIterator;
@@ -228,6 +231,44 @@ public class FromRelationalToGroundHOGMExpressionBasedProblem {
 			return name.toString();
 
 		}));
+	}
+
+	/** 
+	 * Generates an expression lifting up a grounded variable.
+	 * A grounded variable is represented with the name <code>functorOrSymbol__arg0_arg1_..._argn</code>.
+	 * @param groundedVariable
+	 * @return
+	 */
+	public static Expression makeExpressionFromGroundedVariable(Expression groundedVariable) {
+		String name = groundedVariable.toString();
+		int i = name.indexOf("__");
+		if (i != -1) {
+			String argumentsString = name.substring(i + 2);
+			ArrayList<Expression> arguments = getArguments(argumentsString);
+			Expression functor = makeSymbol(name.substring(0, i));
+			return Expressions.apply(functor, arguments);
+		}
+		else {
+			return makeSymbol(name);
+		}
+	}
+	
+	private static ArrayList<Expression> getArguments(String argumentsString) {
+		ArrayList<Expression> arguments = arrayList();
+		while (argumentsString.length() > 0) {
+			boolean foundUnderscore;
+			int end = argumentsString.indexOf("_");
+			if (end == -1) {
+				end = argumentsString.length();
+				foundUnderscore = false;
+			}
+			else {
+				foundUnderscore = true;
+			}
+			arguments.add(makeSymbol(argumentsString.substring(0, end)));
+			argumentsString = argumentsString.substring(end + (foundUnderscore? 1 : 0));
+		}
+		return arguments;
 	}
 
 	private static String getFactors(HOGMExpressionBasedModel model, List<Expression> factors, Context context) {

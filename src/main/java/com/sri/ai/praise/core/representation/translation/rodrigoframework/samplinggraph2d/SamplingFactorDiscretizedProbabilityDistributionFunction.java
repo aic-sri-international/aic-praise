@@ -3,7 +3,6 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.sampl
 import java.util.ArrayList;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.util.function.api.functions.Function;
 import com.sri.ai.util.function.api.values.Value;
 import com.sri.ai.util.function.api.variables.Assignment;
@@ -28,6 +27,6 @@ extends Function, java.util.function.Function<ArrayList<Object>, Value> {
 	SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction 
 	project(Variable variable, Assignment assignmentToRemainingVariables);
 
-	SamplingFactorDiscretizedProbabilityDistributionFunction condition(Sample conditioningSample);
+//	SamplingFactorDiscretizedProbabilityDistributionFunction condition(Sample conditioningSample);
 
 }
