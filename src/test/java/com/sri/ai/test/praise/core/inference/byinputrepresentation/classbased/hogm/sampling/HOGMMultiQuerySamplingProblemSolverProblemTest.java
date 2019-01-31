@@ -4,12 +4,6 @@ import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static org.junit.Assert.assertEquals;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
-import com.sri.ai.util.function.api.functions.Function;
-import com.sri.ai.util.function.core.values.SetOfRealValues;
-import com.sri.ai.util.function.core.variables.RealVariable;
-import com.sri.ai.util.graph2d.api.GraphPlot;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,17 +13,23 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingPropositionalProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.SamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.util.Util;
+import com.sri.ai.util.function.api.functions.Function;
 import com.sri.ai.util.function.api.functions.Functions;
 import com.sri.ai.util.function.api.values.Value;
 import com.sri.ai.util.function.api.variables.SetOfVariables;
 import com.sri.ai.util.function.api.variables.Variable;
+import com.sri.ai.util.function.core.values.SetOfRealValues;
 import com.sri.ai.util.function.core.variables.DefaultAssignment;
 import com.sri.ai.util.function.core.variables.DefaultSetOfVariables;
+import com.sri.ai.util.function.core.variables.RealVariable;
+import com.sri.ai.util.graph2d.api.GraphPlot;
 import com.sri.ai.util.graph2d.api.GraphSetMaker;
 
 public class HOGMMultiQuerySamplingProblemSolverProblemTest {
@@ -82,7 +82,7 @@ public class HOGMMultiQuerySamplingProblemSolverProblemTest {
     SetOfRealValues origSetOfRealValues =  (SetOfRealValues) xmVariable.getSetOfValuesOrNull();
 
     SetOfRealValues newSetOfRealValues = new SetOfRealValues(1, new BigDecimal(1), 5);
-    RealVariable newXm = new RealVariable(xmVariable.getName(), xmVariable.getUnit(), newSetOfRealValues);
+    RealVariable newXm = new RealVariable("blah", xmVariable.getUnit(), newSetOfRealValues);
 
     graphSetMaker = GraphSetMaker.graphSetMaker();
     graphSetMaker.setFunctions(functions);

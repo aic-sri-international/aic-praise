@@ -214,7 +214,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		String query = "x";
 		boolean quantitativeTests = false; // too large to parse due to a bug (not to generate)
 		Expression expected = null;
-		int initialNumberOfSamples = 100000;
+		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 25;
 
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests);
@@ -1340,6 +1340,23 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
+
+//	@Test
+//	public void countiesWithExternalVariableSamplingTest() {
+//	
+//		String model = "" +
+//				"sort Counties: 2, Abyei', Akobo';" + // the quotes makes them not be region names and makes plots be recorded, not maps. 
+//				"random capital: Counties;" + 
+//				"constant year : Boolean;" +
+//				"capital = if year then Abyei' else Akobo';";
+//		
+//		String query = "capital";
+//		Expression expected = parse("if (x < -9.5) and (capital = Abiemnhom') then 0 else if (x < -9.5) and (capital = Abyei') then 0 else if (x < -9.5) and (capital = Akobo') then 1 else if (x < -8.5) and (capital = Abiemnhom') then 0 else if (x < -8.5) and (capital = Abyei') then 0 else if (x < -8.5) and (capital = Akobo') then 1 else if (x < -7.5) and (capital = Abiemnhom') then 0 else if (x < -7.5) and (capital = Abyei') then 0 else if (x < -7.5) and (capital = Akobo') then 1 else if (x < -6.5) and (capital = Abiemnhom') then 0 else if (x < -6.5) and (capital = Abyei') then 0 else if (x < -6.5) and (capital = Akobo') then 1 else if (x < -5.5) and (capital = Abiemnhom') then 0 else if (x < -5.5) and (capital = Abyei') then 0 else if (x < -5.5) and (capital = Akobo') then 1 else if (x < -4.5) and (capital = Abiemnhom') then 0 else if (x < -4.5) and (capital = Abyei') then 0 else if (x < -4.5) and (capital = Akobo') then 1 else if (x < -3.5) and (capital = Abiemnhom') then 0 else if (x < -3.5) and (capital = Abyei') then 0 else if (x < -3.5) and (capital = Akobo') then 1 else if (x < -2.5) and (capital = Abiemnhom') then 0 else if (x < -2.5) and (capital = Abyei') then 0 else if (x < -2.5) and (capital = Akobo') then 1 else if (x < -1.5) and (capital = Abiemnhom') then 0 else if (x < -1.5) and (capital = Abyei') then 0 else if (x < -1.5) and (capital = Akobo') then 1 else if (x < -0.5) and (capital = Abiemnhom') then 0 else if (x < -0.5) and (capital = Abyei') then 0 else if (x < -0.5) and (capital = Akobo') then 1 else if (x < 0.5) and (capital = Abiemnhom') then 0 else if (x < 0.5) and (capital = Abyei') then 0 else if (x < 0.5) and (capital = Akobo') then 1 else if (x < 1.5) and (capital = Abiemnhom') then 0 else if (x < 1.5) and (capital = Abyei') then 1 else if (x < 1.5) and (capital = Akobo') then 0 else if (x < 2.5) and (capital = Abiemnhom') then 0 else if (x < 2.5) and (capital = Abyei') then 1 else if (x < 2.5) and (capital = Akobo') then 0 else if (x < 3.5) and (capital = Abiemnhom') then 0 else if (x < 3.5) and (capital = Abyei') then 1 else if (x < 3.5) and (capital = Akobo') then 0 else if (x < 4.5) and (capital = Abiemnhom') then 0 else if (x < 4.5) and (capital = Abyei') then 1 else if (x < 4.5) and (capital = Akobo') then 0 else if (x < 5.5) and (capital = Abiemnhom') then 0 else if (x < 5.5) and (capital = Abyei') then 1 else if (x < 5.5) and (capital = Akobo') then 0 else if (x < 6.5) and (capital = Abiemnhom') then 0 else if (x < 6.5) and (capital = Abyei') then 1 else if (x < 6.5) and (capital = Akobo') then 0 else if (x < 7.5) and (capital = Abiemnhom') then 0 else if (x < 7.5) and (capital = Abyei') then 1 else if (x < 7.5) and (capital = Akobo') then 0 else if (x < 8.5) and (capital = Abiemnhom') then 0 else if (x < 8.5) and (capital = Abyei') then 1 else if (x < 8.5) and (capital = Akobo') then 0 else if (x < 9.5) and (capital = Abiemnhom') then 0 else if (x < 9.5) and (capital = Abyei') then 1 else if (x < 9.5) and (capital = Akobo') then 0 else if (x < 10) and (capital = Abiemnhom') then 0 else if (x < 10) and (capital = Abyei') then 1 else 0");
+//		int initialNumberOfSamples = 1;
+//		int numberOfDiscreteValues = 21;
+//	
+//		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+//	}
 
 	@Test
 	public void countiesSamplingConditioningTest() {

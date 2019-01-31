@@ -29,7 +29,17 @@ public class AbstractComparisonGivenComparatorSamplingFactor<T> extends Abstract
 	
 	@Override
 	protected Boolean operation(T firstValue, T secondValue) {
-		return comparisonResults.contains(comparator.compare(firstValue, secondValue));
+		int comparisonResult;
+		if (firstValue instanceof Integer && secondValue instanceof Double) {
+			comparisonResult = new Double(((Integer) firstValue).doubleValue()).compareTo((Double) secondValue);
+		}
+		else if (secondValue instanceof Integer && firstValue instanceof Double) {
+			comparisonResult = ((Double) firstValue).compareTo(new Double(((Integer) secondValue).doubleValue()));
+		}
+		else {
+			comparisonResult = comparator.compare(firstValue, secondValue);
+		}
+		return comparisonResults.contains(comparisonResult);
 	}
 
 	@Override
