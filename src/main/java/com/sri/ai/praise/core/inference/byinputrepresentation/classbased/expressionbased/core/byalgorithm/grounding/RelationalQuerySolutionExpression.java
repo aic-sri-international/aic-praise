@@ -3,11 +3,9 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expres
 import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.getIndices;
 import static com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.VariableMaskingExpressionWithProbabilityFunction.mask;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization.makeSetOfVariablesWithRanges;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.getIndexExpressionsSet;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.getQueryBody;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.getQueryIndexExpressionsSet;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.ground;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.FromRelationalToGroundHOGMExpressionBasedProblem.groundNonQuantifiedExpressionWithAssignment;
+import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getIndexExpressionsSet;
+import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryBody;
+import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryIndexExpressionsSet;
 import static com.sri.ai.util.Util.assertType;
 
 import java.util.Collection;
@@ -26,6 +24,7 @@ import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpr
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.distribution.DiscretizedConditionalProbabilityDistributionFunction;
 import com.sri.ai.util.function.api.variables.SetOfVariables;
@@ -96,21 +95,21 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 		// the sub-expression makers takes an assignment to the keys and makes the corresponding then branch
 		// Here, this means solving the grounded problems to the query grounded with the given assignment
 		ExpressionBasedModel originalExpressionBasedModel = problem.getOriginalExpressionBasedModel();
-		HOGMExpressionBasedModel hogModel = assertType(originalExpressionBasedModel, HOGMExpressionBasedModel.class, RelationalQuerySolutionExpression.class); 
-		HOGMExpressionBasedModel groundedModel = ground(hogModel);
+		HOGMExpressionBasedModel hogModel = assertType(originalExpressionBasedModel, HOGMExpressionBasedModel.class, RelationalQuerySolutionExpression.class);
+		RelationalHOGMExpressionBasedModelGrounder converter = new RelationalHOGMExpressionBasedModelGrounder(hogModel);
 		Expression queryBody = getQueryBody(problem);
-		return assignment -> solveSubProblem(problem, baseSolver, groundedModel, queryBody, assignment);
+		return assignment -> solveSubProblem(problem, baseSolver, converter, queryBody, assignment);
 	}
 
 	private static Expression solveSubProblem(
 			ExpressionBasedProblem problem, 
 			ExpressionBasedSolver baseSolver,
-			HOGMExpressionBasedModel groundedModel, 
+			RelationalHOGMExpressionBasedModelGrounder converter, 
 			Expression queryBody, 
 			Assignment assignment) {
 		
-		Expression groundQuery = groundNonQuantifiedExpressionWithAssignment(queryBody, assignment, makeContext(problem));
-		ExpressionBasedProblem groundedProblem = new HOGMExpressionBasedProblem(groundQuery, groundedModel);
+		Expression groundQuery = converter.groundNonQuantifiedExpressionWithAssignment(queryBody, assignment, makeContext(problem));
+		ExpressionBasedProblem groundedProblem = new HOGMExpressionBasedProblem(groundQuery, converter.getGroundedModel());
 		Expression baseSolution = baseSolver.solve(groundedProblem);
 		ExpressionWithProbabilityFunction masked = maskWithRelationalQueryVariable(queryBody, groundQuery, baseSolution);
 		return masked;

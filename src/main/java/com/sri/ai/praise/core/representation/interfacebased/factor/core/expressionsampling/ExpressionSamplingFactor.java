@@ -10,6 +10,7 @@ import static com.sri.ai.util.Util.mapIntegersIntoList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.objectStringEqualsOneOf;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.Util.repeat;
 import static com.sri.ai.util.base.PairOf.makePairOf;
@@ -56,7 +57,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor, Ex
 	 * ({@link #TOO_LARGE_FOR_EXPRESSION_GENERATION} is used otherwise).
 	 *
 	 */
-	public static int maximum_number_of_assignments_for_expression_generation = 100;
+	public static int maximum_number_of_assignments_for_expression_generation = 200000;
 	
 	/**
 	 * The factor's expression if the number of assignments to factor's discretized values
@@ -216,7 +217,13 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor, Ex
 		}
 
 		private int computeNumberOfAssignments() {
-			return (int) product(functionIterator(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()));
+			int numberOfAssignments = (int) product(functionIterator(getFunctionVariables(), v -> {
+				int size = v.getSetOfValuesOrNull().size();
+				println("Variable " + v + " has " + size + " number Of assignments");
+				return size;	
+			}));
+			println("Total number of assignments: " + numberOfAssignments);
+			return numberOfAssignments;
 		}
 
 		private void makeFactorExpression() {
