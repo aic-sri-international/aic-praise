@@ -1,6 +1,9 @@
 package com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d;
 
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.myAssert;
+
+import java.util.LinkedList;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
@@ -19,6 +22,7 @@ import com.sri.ai.util.function.api.variables.Variable;
  */ 
 public class AssignmentToSampleConverter {
 	
+	private static final LinkedList<String> BOOLEAN_CONSTANT_STRINGS = list("true", "false");
 	private SamplingFactor samplingFactor;
 	private SetOfVariables setOfVariables;
 	
@@ -84,6 +88,10 @@ public class AssignmentToSampleConverter {
 		Object valueInTypeUsedBySamplingFactors;
 		if (valueInTypeUsedByAssignment instanceof Number && !(valueInTypeUsedByAssignment instanceof Integer)) {
 			valueInTypeUsedBySamplingFactors = ((Number) valueInTypeUsedByAssignment).doubleValue();
+		}
+		else if (valueInTypeUsedByAssignment instanceof String && BOOLEAN_CONSTANT_STRINGS.contains(valueInTypeUsedByAssignment)) {
+			String string = (String) valueInTypeUsedByAssignment;
+			valueInTypeUsedBySamplingFactors = string == "true"? true : false;
 		}
 		else {
 			valueInTypeUsedBySamplingFactors = valueInTypeUsedByAssignment;

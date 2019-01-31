@@ -30,6 +30,7 @@ public class AbstractComparisonGivenComparatorSamplingFactor<T> extends Abstract
 	@Override
 	protected Boolean operation(T firstValue, T secondValue) {
 		int comparisonResult;
+		// TODO this should be cleaner, and taken care of somewhere else
 		if (firstValue instanceof Integer && secondValue instanceof Double) {
 			comparisonResult = new Double(((Integer) firstValue).doubleValue()).compareTo((Double) secondValue);
 		}

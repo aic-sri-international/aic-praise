@@ -1341,8 +1341,8 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
-	//@Test
-	public void countiesWithExternalVariableSamplingTest() {
+	@Test
+	public void countiesWithBooleanExternalVariableSamplingTest() {
 	
 		String model = "" +
 				"sort Counties: 2, Abyei', Akobo';" + // the quotes makes them not be region names and makes plots be recorded, not maps. 
@@ -1351,7 +1351,32 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"capital = if year then Abyei' else Akobo';";
 		
 		String query = "capital";
-		Expression expected = parse("if (x < -9.5) and (capital = Abiemnhom') then 0 else if (x < -9.5) and (capital = Abyei') then 0 else if (x < -9.5) and (capital = Akobo') then 1 else if (x < -8.5) and (capital = Abiemnhom') then 0 else if (x < -8.5) and (capital = Abyei') then 0 else if (x < -8.5) and (capital = Akobo') then 1 else if (x < -7.5) and (capital = Abiemnhom') then 0 else if (x < -7.5) and (capital = Abyei') then 0 else if (x < -7.5) and (capital = Akobo') then 1 else if (x < -6.5) and (capital = Abiemnhom') then 0 else if (x < -6.5) and (capital = Abyei') then 0 else if (x < -6.5) and (capital = Akobo') then 1 else if (x < -5.5) and (capital = Abiemnhom') then 0 else if (x < -5.5) and (capital = Abyei') then 0 else if (x < -5.5) and (capital = Akobo') then 1 else if (x < -4.5) and (capital = Abiemnhom') then 0 else if (x < -4.5) and (capital = Abyei') then 0 else if (x < -4.5) and (capital = Akobo') then 1 else if (x < -3.5) and (capital = Abiemnhom') then 0 else if (x < -3.5) and (capital = Abyei') then 0 else if (x < -3.5) and (capital = Akobo') then 1 else if (x < -2.5) and (capital = Abiemnhom') then 0 else if (x < -2.5) and (capital = Abyei') then 0 else if (x < -2.5) and (capital = Akobo') then 1 else if (x < -1.5) and (capital = Abiemnhom') then 0 else if (x < -1.5) and (capital = Abyei') then 0 else if (x < -1.5) and (capital = Akobo') then 1 else if (x < -0.5) and (capital = Abiemnhom') then 0 else if (x < -0.5) and (capital = Abyei') then 0 else if (x < -0.5) and (capital = Akobo') then 1 else if (x < 0.5) and (capital = Abiemnhom') then 0 else if (x < 0.5) and (capital = Abyei') then 0 else if (x < 0.5) and (capital = Akobo') then 1 else if (x < 1.5) and (capital = Abiemnhom') then 0 else if (x < 1.5) and (capital = Abyei') then 1 else if (x < 1.5) and (capital = Akobo') then 0 else if (x < 2.5) and (capital = Abiemnhom') then 0 else if (x < 2.5) and (capital = Abyei') then 1 else if (x < 2.5) and (capital = Akobo') then 0 else if (x < 3.5) and (capital = Abiemnhom') then 0 else if (x < 3.5) and (capital = Abyei') then 1 else if (x < 3.5) and (capital = Akobo') then 0 else if (x < 4.5) and (capital = Abiemnhom') then 0 else if (x < 4.5) and (capital = Abyei') then 1 else if (x < 4.5) and (capital = Akobo') then 0 else if (x < 5.5) and (capital = Abiemnhom') then 0 else if (x < 5.5) and (capital = Abyei') then 1 else if (x < 5.5) and (capital = Akobo') then 0 else if (x < 6.5) and (capital = Abiemnhom') then 0 else if (x < 6.5) and (capital = Abyei') then 1 else if (x < 6.5) and (capital = Akobo') then 0 else if (x < 7.5) and (capital = Abiemnhom') then 0 else if (x < 7.5) and (capital = Abyei') then 1 else if (x < 7.5) and (capital = Akobo') then 0 else if (x < 8.5) and (capital = Abiemnhom') then 0 else if (x < 8.5) and (capital = Abyei') then 1 else if (x < 8.5) and (capital = Akobo') then 0 else if (x < 9.5) and (capital = Abiemnhom') then 0 else if (x < 9.5) and (capital = Abyei') then 1 else if (x < 9.5) and (capital = Akobo') then 0 else if (x < 10) and (capital = Abiemnhom') then 0 else if (x < 10) and (capital = Abyei') then 1 else 0");
+		Expression expected = parse("if (capital = Abyei') and year then 1 else if (capital = Abyei') and not year then 0 else if (capital = Akobo') and year then 0 else 1");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void countiesWithIntegerExternalVariableSamplingTest() {
+	
+		String model = "" +
+				"sort Counties: 3, Abiemnhom', Abyei', Akobo';" + // the quotes makes them not be region names and makes plots be recorded, not maps. 
+				"random capital: Counties;" + 
+				"constant month : 0..2;" +
+				"constant year : 0..2;" +
+				"capital = "
+				+ "if year < 1 "
+				+ "then Abyei' "
+				+ "else if year = 1"
+				+ "        then if month = 0 then Abyei' "
+				+ "        else if month = 1 then Akobo' "
+				+ "        else Abiemnhom'"
+				+ "else Abiemnhom';";
+		
+		String query = "capital";
+		Expression expected = parse("if (year = 0) and (capital = Abiemnhom') and (month = 0) then 0 else if (year = 0) and (capital = Abiemnhom') and (month = 1) then 0 else if (year = 0) and (capital = Abiemnhom') and (month = 2) then 0 else if (year = 0) and (capital = Abyei') and (month = 0) then 1 else if (year = 0) and (capital = Abyei') and (month = 1) then 1 else if (year = 0) and (capital = Abyei') and (month = 2) then 1 else if (year = 0) and (capital = Akobo') and (month = 0) then 0 else if (year = 0) and (capital = Akobo') and (month = 1) then 0 else if (year = 0) and (capital = Akobo') and (month = 2) then 0 else if (year = 1) and (capital = Abiemnhom') and (month = 0) then 0 else if (year = 1) and (capital = Abiemnhom') and (month = 1) then 0 else if (year = 1) and (capital = Abiemnhom') and (month = 2) then 1 else if (year = 1) and (capital = Abyei') and (month = 0) then 1 else if (year = 1) and (capital = Abyei') and (month = 1) then 0 else if (year = 1) and (capital = Abyei') and (month = 2) then 0 else if (year = 1) and (capital = Akobo') and (month = 0) then 0 else if (year = 1) and (capital = Akobo') and (month = 1) then 1 else if (year = 1) and (capital = Akobo') and (month = 2) then 0 else if (year = 2) and (capital = Abiemnhom') and (month = 0) then 1 else if (year = 2) and (capital = Abiemnhom') and (month = 1) then 1 else if (year = 2) and (capital = Abiemnhom') and (month = 2) then 1 else if (year = 2) and (capital = Abyei') and (month = 0) then 0 else if (year = 2) and (capital = Abyei') and (month = 1) then 0 else if (year = 2) and (capital = Abyei') and (month = 2) then 0 else if (year = 2) and (capital = Akobo') and (month = 0) then 0 else if (year = 2) and (capital = Akobo') and (month = 1) then 0 else 0");
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;
 	
@@ -1469,8 +1494,8 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 	private void generateGraph(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
 
-		ExpressionWithProbabilityFunction conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 		if (System.getProperty(PROPERTY_KEY_GENERATING_GRAPH_FILE) != null) {
+			ExpressionWithProbabilityFunction conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 			Function conditionedFunction = conditioned.getDiscretizedConditionalProbabilityDistributionFunction();
 //			int queryIndex = Util.getIndexOfFirstSatisfyingPredicateOrMinusOne(conditionedFunction.getSetOfInputVariables().getVariables(), v -> v.getName().equals(query));
 			int queryIndex = conditioned.getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex();

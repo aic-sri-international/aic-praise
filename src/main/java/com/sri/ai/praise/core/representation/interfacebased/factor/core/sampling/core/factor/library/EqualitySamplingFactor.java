@@ -23,7 +23,18 @@ public class EqualitySamplingFactor extends AbstractDeterministicBinaryFunctionS
 	
 	@Override
 	protected Boolean operation(Object firstValue, Object secondValue) {
-		return firstValue.equals(secondValue);
+		// TODO this should be cleaner, and taken care of somewhere else
+		boolean equals;
+		if (firstValue instanceof Integer && secondValue instanceof Double) {
+			equals = new Double(((Integer) firstValue).doubleValue()).equals(secondValue);
+		}
+		else if (secondValue instanceof Integer && firstValue instanceof Double) {
+			equals = ((Double) firstValue).equals(new Double(((Integer) secondValue).doubleValue()));
+		}
+		else {
+			 equals = firstValue.equals(secondValue);
+		}
+		return equals;
 	}
 
 	@Override
