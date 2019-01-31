@@ -1325,6 +1325,23 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 
 	@Test
+	public void countiesSamplingTest3() {
+	
+		String model = "" +
+				"sort Counties: 3, Abiemnhom', Abyei', Akobo';" + // the quotes makes them not be region names and makes plots be recorded, not maps. 
+				"random capital: Counties;" + 
+				"constant x : [-10;10];" + 
+				"capital = if x > 0 then Abyei' else Akobo';";
+		
+		String query = "capital";
+		Expression expected = parse("if (x < -9.5) and (capital = Abiemnhom') then 0 else if (x < -9.5) and (capital = Abyei') then 0 else if (x < -9.5) and (capital = Akobo') then 1 else if (x < -8.5) and (capital = Abiemnhom') then 0 else if (x < -8.5) and (capital = Abyei') then 0 else if (x < -8.5) and (capital = Akobo') then 1 else if (x < -7.5) and (capital = Abiemnhom') then 0 else if (x < -7.5) and (capital = Abyei') then 0 else if (x < -7.5) and (capital = Akobo') then 1 else if (x < -6.5) and (capital = Abiemnhom') then 0 else if (x < -6.5) and (capital = Abyei') then 0 else if (x < -6.5) and (capital = Akobo') then 1 else if (x < -5.5) and (capital = Abiemnhom') then 0 else if (x < -5.5) and (capital = Abyei') then 0 else if (x < -5.5) and (capital = Akobo') then 1 else if (x < -4.5) and (capital = Abiemnhom') then 0 else if (x < -4.5) and (capital = Abyei') then 0 else if (x < -4.5) and (capital = Akobo') then 1 else if (x < -3.5) and (capital = Abiemnhom') then 0 else if (x < -3.5) and (capital = Abyei') then 0 else if (x < -3.5) and (capital = Akobo') then 1 else if (x < -2.5) and (capital = Abiemnhom') then 0 else if (x < -2.5) and (capital = Abyei') then 0 else if (x < -2.5) and (capital = Akobo') then 1 else if (x < -1.5) and (capital = Abiemnhom') then 0 else if (x < -1.5) and (capital = Abyei') then 0 else if (x < -1.5) and (capital = Akobo') then 1 else if (x < -0.5) and (capital = Abiemnhom') then 0 else if (x < -0.5) and (capital = Abyei') then 0 else if (x < -0.5) and (capital = Akobo') then 1 else if (x < 0.5) and (capital = Abiemnhom') then 0 else if (x < 0.5) and (capital = Abyei') then 0 else if (x < 0.5) and (capital = Akobo') then 1 else if (x < 1.5) and (capital = Abiemnhom') then 0 else if (x < 1.5) and (capital = Abyei') then 1 else if (x < 1.5) and (capital = Akobo') then 0 else if (x < 2.5) and (capital = Abiemnhom') then 0 else if (x < 2.5) and (capital = Abyei') then 1 else if (x < 2.5) and (capital = Akobo') then 0 else if (x < 3.5) and (capital = Abiemnhom') then 0 else if (x < 3.5) and (capital = Abyei') then 1 else if (x < 3.5) and (capital = Akobo') then 0 else if (x < 4.5) and (capital = Abiemnhom') then 0 else if (x < 4.5) and (capital = Abyei') then 1 else if (x < 4.5) and (capital = Akobo') then 0 else if (x < 5.5) and (capital = Abiemnhom') then 0 else if (x < 5.5) and (capital = Abyei') then 1 else if (x < 5.5) and (capital = Akobo') then 0 else if (x < 6.5) and (capital = Abiemnhom') then 0 else if (x < 6.5) and (capital = Abyei') then 1 else if (x < 6.5) and (capital = Akobo') then 0 else if (x < 7.5) and (capital = Abiemnhom') then 0 else if (x < 7.5) and (capital = Abyei') then 1 else if (x < 7.5) and (capital = Akobo') then 0 else if (x < 8.5) and (capital = Abiemnhom') then 0 else if (x < 8.5) and (capital = Abyei') then 1 else if (x < 8.5) and (capital = Akobo') then 0 else if (x < 9.5) and (capital = Abiemnhom') then 0 else if (x < 9.5) and (capital = Abyei') then 1 else if (x < 9.5) and (capital = Akobo') then 0 else if (x < 10) and (capital = Abiemnhom') then 0 else if (x < 10) and (capital = Abyei') then 1 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
 	public void countiesSamplingConditioningTest() {
 	
 		String model = "" +
