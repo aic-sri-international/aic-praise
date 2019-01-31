@@ -32,7 +32,7 @@ class ExpressionSamplingFactorTest {
 	@Test
 	void testConditionalDistributionFunction() {
 		Random random = new Random();
-		ExpressionVariable x = new DefaultExpressionVariable(parse("x"));
+		ExpressionVariable x = DefaultExpressionVariable.expressionVariable(parse("x"));
 		Context context = new TrueContext().setSymbolsAndTypes(map(parse("x"), parse("[0;100]")));
 		SamplingFactor normal = new NormalWithFixedMeanAndStandardDeviation(x, 50.0, 10.0, random);
 		ExpressionSamplingFactor expressionSamplingFactor = ExpressionSamplingFactor.expressionSamplingFactor(normal, 0, v -> 11, 0, context);
@@ -56,7 +56,7 @@ class ExpressionSamplingFactorTest {
 	@Test
 	void testGetExpression() {
 		Random random = new Random();
-		ExpressionVariable x = new DefaultExpressionVariable(parse("x"));
+		ExpressionVariable x = DefaultExpressionVariable.expressionVariable(parse("x"));
 		Context context = new TrueContext().setSymbolsAndTypes(map(parse("x"), parse("[0;100]")));
 		SamplingFactor normal = new NormalWithFixedMeanAndStandardDeviation(x, 50.0, 10.0, random);
 		ExpressionSamplingFactor expressionSamplingFactor = ExpressionSamplingFactor.expressionSamplingFactor(normal, 0, v -> 6, 0, context);

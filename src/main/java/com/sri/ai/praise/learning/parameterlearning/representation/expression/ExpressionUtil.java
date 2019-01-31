@@ -142,7 +142,7 @@ public class ExpressionUtil {
 	
 		
 		// Testing syntax for context (used for method convertToAnExpressionBasedModelAfterLearning in ExpressionBayesianModel)
-		ExpressionVariable expressionVariable = new DefaultExpressionVariable(parse("A"));
+		ExpressionVariable expressionVariable = DefaultExpressionVariable.expressionVariable(parse("A"));
 		println("\nexpressionVariable.toString() = " + expressionVariable.toString());
 		Type type = context.getTypeOfRegisteredSymbol(expressionVariable);
 		println("type.toString() = " + type.toString());

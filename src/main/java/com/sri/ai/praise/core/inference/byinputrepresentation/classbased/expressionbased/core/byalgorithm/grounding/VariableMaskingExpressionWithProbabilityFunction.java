@@ -15,20 +15,25 @@ import com.sri.ai.util.function.core.functions.VariablesMaskingFunction;
 
 public class VariableMaskingExpressionWithProbabilityFunction extends AbstractExpressionWrapper implements ExpressionWithProbabilityFunction {
 
-	public static VariableMaskingExpressionWithProbabilityFunction mask(
+	public static ExpressionWithProbabilityFunction mask(
 			ExpressionWithProbabilityFunction base,
 			String oldVariableName, 
 			String newVariableName) {
-		
-		return new VariableMaskingExpressionWithProbabilityFunction(base, oldVariableName, newVariableName);
+
+		if (oldVariableName.equals(newVariableName)) {
+			return base;
+		}
+		else {
+			return new VariableMaskingExpressionWithProbabilityFunction(base, oldVariableName, newVariableName);
+		}
 	}
 	
-	public static VariableMaskingExpressionWithProbabilityFunction mask(
+	public static ExpressionWithProbabilityFunction mask(
 			ExpressionWithProbabilityFunction base,
 			Expression oldVariable, 
 			Expression newVariable) {
 		
-		return new VariableMaskingExpressionWithProbabilityFunction(base, oldVariable.toString(), newVariable.toString());
+		return mask(base, oldVariable.toString(), newVariable.toString());
 	}
 	
 	private static final long serialVersionUID = 1L;
@@ -37,7 +42,7 @@ public class VariableMaskingExpressionWithProbabilityFunction extends AbstractEx
 	private String oldVariableName;
 	private String newVariableName;
 	
-	public VariableMaskingExpressionWithProbabilityFunction(
+	private VariableMaskingExpressionWithProbabilityFunction(
 			ExpressionWithProbabilityFunction base,
 			String oldVariableName, 
 			String newVariableName) {

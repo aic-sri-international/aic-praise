@@ -243,7 +243,7 @@ public class TestCases {
 			ArrayList<ExpressionVariable> col = new ArrayList<>();
 			variables.add(col);
 			for (int j = 0; j < gridSize; j++) {
-				ExpressionVariable v =new DefaultExpressionVariable(makeSymbol("A_"+i+"_"+j)); 
+				ExpressionVariable v =DefaultExpressionVariable.expressionVariable(makeSymbol("A_"+i+"_"+j)); 
 				col.add(j,v);
 				makeSymbol("A_"+i+"_"+j);
 				context = context.extendWithSymbolsAndTypes(v,parse("Boolean"));

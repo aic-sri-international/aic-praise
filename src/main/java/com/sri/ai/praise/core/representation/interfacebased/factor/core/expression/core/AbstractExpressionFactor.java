@@ -111,7 +111,7 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 	public List<? extends Variable> getVariables() {
 		Set<Expression> freeVariableExpressions = Expressions.freeVariables(getInnerExpression(), context);
 		PredicateIterator<Expression> freeVariablesMinusTypeNames = predicateIterator(freeVariableExpressions, isNotType());
-		List<? extends Variable> result = mapIntoList(freeVariablesMinusTypeNames, e -> new DefaultExpressionVariable(e));
+		List<? extends Variable> result = mapIntoList(freeVariablesMinusTypeNames, e -> DefaultExpressionVariable.expressionVariable(e));
 		return result;
 	}
 

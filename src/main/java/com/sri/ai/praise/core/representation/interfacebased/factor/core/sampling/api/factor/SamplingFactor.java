@@ -55,7 +55,7 @@ public interface SamplingFactor extends Sampler, Factor {
 	 * @return
 	 */
 	public static SamplingFactor conditionResult(Object value, Function<Variable, SamplingFactor> makeSamplingFactorGivenResultVariable) {
-		Variable functionResult = new DefaultExpressionVariable(makeSymbol(value));
+		Variable functionResult = DefaultExpressionVariable.expressionVariable(makeSymbol(value));
 		SamplingFactor samplingFactorAsFunction = makeSamplingFactorGivenResultVariable.apply(functionResult);
 		return condition(samplingFactorAsFunction, functionResult, value);
 	}

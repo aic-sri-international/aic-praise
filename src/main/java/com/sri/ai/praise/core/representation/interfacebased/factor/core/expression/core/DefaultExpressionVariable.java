@@ -47,24 +47,23 @@ public class DefaultExpressionVariable extends WrappedExpression implements Expr
 
 	private static final long serialVersionUID = 1L;
 
-	public DefaultExpressionVariable(Expression expression) {
-		super(expression);
+	public static ExpressionVariable expressionVariable(Expression expression) {
+		if (expression instanceof ExpressionVariable) {
+			return (ExpressionVariable) expression;
+		}
+		else {
+			return new DefaultExpressionVariable(expression);
+		}
 	}
 
+	private DefaultExpressionVariable(Expression expression) {
+		super(expression);
+	}
+	
 	@Override
 	public List<? extends Object> getValues() {
 		throw new Error(getClass() + ".getValues() not implemented -- getValues() is deemed not needed for most algorithms.");
 		// TODO: refactor to make getValues part of a specific interface used by the algorithms that require values
 	}
-	
-	@Override
-	public int hashCode() {
-		return getInnerExpression().hashCode();
-	}
-	
-	@Override
-	public boolean equals(Object anotherObject) {
-		
-		return super.equals(anotherObject);
-	}
+
 }

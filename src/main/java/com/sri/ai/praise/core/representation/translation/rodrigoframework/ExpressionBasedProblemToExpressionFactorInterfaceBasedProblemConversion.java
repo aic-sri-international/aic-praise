@@ -53,7 +53,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 public class ExpressionBasedProblemToExpressionFactorInterfaceBasedProblemConversion {
 
 	public static Problem translate(ExpressionBasedProblem expressionBasedProblem) {
-		ExpressionVariable queryVariable = new DefaultExpressionVariable(expressionBasedProblem.getQuerySymbol());
+		ExpressionVariable queryVariable = DefaultExpressionVariable.expressionVariable(expressionBasedProblem.getQuerySymbol());
 		ExpressionFactorNetwork factorNetwork = makeFactorNetwork(expressionBasedProblem);
 		Predicate<Expression> isExpressionParameterPredicate = expressionBasedProblem.getIsParameterPredicate();
 		Predicate<Variable> isParameterPredicate = makeIsParameterPredicate(isExpressionParameterPredicate);

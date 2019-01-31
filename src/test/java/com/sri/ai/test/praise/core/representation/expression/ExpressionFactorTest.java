@@ -181,7 +181,7 @@ public class ExpressionFactorTest {
 				"U", "Boolean",
 				"V", "Boolean");
 		
-		ExpressionVariable u = new DefaultExpressionVariable(parse("U"));
+		ExpressionVariable u = DefaultExpressionVariable.expressionVariable(parse("U"));
 		List<ExpressionVariable> variablesToSumOut = new ArrayList<>();
 		variablesToSumOut.add(u);
 		
@@ -215,7 +215,7 @@ public class ExpressionFactorTest {
 		
 		ExpressionFactor factorUV = new DefaultExpressionFactor(parse("if U then if V then 4 else 2 else 3"), context);
 		
-		ExpressionVariable u = new DefaultExpressionVariable(parse("U"));
+		ExpressionVariable u = DefaultExpressionVariable.expressionVariable(parse("U"));
 		List<ExpressionVariable> variablesToMaxOut = new ArrayList<>();
 		variablesToMaxOut.add(u);
 		Factor maxFactor = factorUV.max(variablesToMaxOut);

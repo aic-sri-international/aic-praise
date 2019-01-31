@@ -305,7 +305,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 		String query = "x";
 		Sample conditioningSample = DefaultSample.makeFreshSample();
-		conditioningSample.getAssignment().set(new DefaultExpressionVariable(parse("y")), 4.0);
+		conditioningSample.getAssignment().set(DefaultExpressionVariable.expressionVariable(parse("y")), 4.0);
 		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0 else if x < -7.917 then 0 else if x < -7.083 then 0 else if x < -6.25 then 0 else if x < -5.417 then 0 else if x < -4.583 then 0.001 else if x < -3.75 then 0.003 else if x < -2.917 then 0.006 else if x < -2.083 then 0.011 else if x < -1.25 then 0.019 else if x < -0.417 then 0.031 else if x < 0.417 then 0.046 else if x < 1.25 then 0.066 else if x < 2.083 then 0.083 else if x < 2.917 then 0.099 else if x < 3.75 then 0.112 else if x < 4.583 then 0.114 else if x < 5.417 then 0.106 else if x < 6.25 then 0.093 else if x < 7.083 then 0.077 else if x < 7.917 then 0.057 else if x < 8.75 then 0.04 else if x < 9.583 then 0.027 else 0.009");
 		int initialNumberOfSamples = 10000;
 		int numberOfDiscreteValues = 25;
@@ -1300,6 +1300,65 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		String query = "capital";
 		Expression expected = parse("if capital = Abiemnhom then 1 else if capital = Abyei then 0 else if capital = Akobo then 0 else 0");
 		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void countiesSamplingTest2() {
+	
+		String model = "" +
+				"sort Counties: 3, Abiemnhom, Abyei, Akobo;" + 
+				"random capital: Counties;" + 
+				"random x : [-10;10];" + 
+				"x = Normal(0,1);" + 
+				"capital = if x > -1 then (if x > 0 then Abyei else Abiemnhom) else Akobo;" +
+				"";
+		
+		String query = "capital";
+		Expression expected = parse("if capital = Abiemnhom then 0.35 else if capital = Abyei then 0.488 else 0.162");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void countiesSamplingConditioningTest() {
+	
+		String model = "" +
+				"sort Counties: 3, Abiemnhom, Abyei, Akobo;" + 
+				"random capital: Counties;" + 
+				"random x : [-10;10];" + 
+				"x = Normal(0,1);" + 
+				"capital = if x > -1 then (if x > 0 then Abyei else Abiemnhom) else Akobo;" +
+				"x = 0;" +
+				"";
+		
+		String query = "capital";
+		Expression expected = parse("if capital = Abiemnhom then 1 else if capital = Abyei then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void countiesSamplingConditioningTest2() {
+	
+		String model = "" +
+				"sort Counties: 3, Abiemnhom, Abyei, Akobo;" + 
+				"random capital: Counties;" + 
+				"random x : [-10;10];" + 
+				"x = Normal(0,1);" + 
+				"capital = if x > -1 then (if x > 0 then Abyei else Abiemnhom) else Akobo;" +
+				"capital = Abyei;" +
+				"";
+		
+		String query = "x";
+		Expression expected = parse("if x < -9.5 then 0 else if x < -8.5 then 0 else if x < -7.5 then 0 else if x < -6.5 then 0 else if x < -5.5 then 0 else if x < -4.5 then 0 else if x < -3.5 then 0 else if x < -2.5 then 0 else if x < -1.5 then 0 else if x < -0.5 then 0 else if x < 0.5 then 0.381 else if x < 1.5 then 0.487 else if x < 2.5 then 0.12 else if x < 3.5 then 0.012 else if x < 4.5 then 0 else if x < 5.5 then 0 else if x < 6.5 then 0 else if x < 7.5 then 0 else if x < 8.5 then 0 else if x < 9.5 then 0 else 0");
+		int initialNumberOfSamples = 1000;
 		int numberOfDiscreteValues = 21;
 	
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);

@@ -472,8 +472,8 @@ public class ExpressionBayesianNode extends DefaultExpressionFactor implements B
 				
 		// Only one child and one parent, 2 parameters (Param1 and Param2)
 		
-		ExpressionVariable child = new DefaultExpressionVariable(parse("Child"));
-		ExpressionVariable parent = new DefaultExpressionVariable(parse("Parent"));
+		ExpressionVariable child = DefaultExpressionVariable.expressionVariable(parse("Child"));
+		ExpressionVariable parent = DefaultExpressionVariable.expressionVariable(parse("Parent"));
 		Expression param1 = parse("Param1");
 		Expression param2 = parse("Param2");
 		Expression param3 = parse("Param3");

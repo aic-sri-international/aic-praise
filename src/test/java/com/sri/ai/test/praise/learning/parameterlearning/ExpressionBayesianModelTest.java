@@ -34,13 +34,13 @@ import com.sri.ai.util.Util;
 
 public class ExpressionBayesianModelTest {
 	
-	static ExpressionVariable childVariable = new DefaultExpressionVariable(parse("Child"));
-	static ExpressionVariable parentVariable = new DefaultExpressionVariable(parse("Parent"));
+	static ExpressionVariable childVariable = DefaultExpressionVariable.expressionVariable(parse("Child"));
+	static ExpressionVariable parentVariable = DefaultExpressionVariable.expressionVariable(parse("Parent"));
 	static Context contextForChildParentModel = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes("Child", "1..5", "Parent", "1..5", "Param1", "Real", "Param2", "Real", "Param3", "Real", "Param4", "Real");
 	
-	static ExpressionVariable earthquake = new DefaultExpressionVariable(parse("Earthquake"));
-	static ExpressionVariable burglary = new DefaultExpressionVariable(parse("Burglary"));
-	static ExpressionVariable alarm = new DefaultExpressionVariable(parse("Alarm"));
+	static ExpressionVariable earthquake = DefaultExpressionVariable.expressionVariable(parse("Earthquake"));
+	static ExpressionVariable burglary = DefaultExpressionVariable.expressionVariable(parse("Burglary"));
+	static ExpressionVariable alarm = DefaultExpressionVariable.expressionVariable(parse("Alarm"));
 	static Context contextForEarthquakeBurglaryAlarmModel = new TrueContext(new CommonTheory()).extendWithSymbolsAndTypes("Earthquake", "0..1", "Burglary", "0..1", "Alarm", "0..1", "Param1", "Real", "Param2", "Real", "Param3", "Real", "Param4", "Real", "Param5", "Real", "OneMinusParam1", "Real", "OneMinusParam2", "Real", "OneMinusParam3", "Real", "OneMinusParam4", "Real", "OneMinusParam5", "Real");
 	
 	/**

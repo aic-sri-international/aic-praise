@@ -53,11 +53,11 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.Def
 public class ExpressionExactBP extends ExactBP {
 
 	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
-		this(new DefaultExpressionVariable(query), factorNetwork, v -> false);
+		this(DefaultExpressionVariable.expressionVariable(query), factorNetwork, v -> false);
 	}
 
 	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
-		super(new DefaultProblem(new DefaultExpressionVariable(query), factorNetwork, isParameterPredicate));
+		super(new DefaultProblem(DefaultExpressionVariable.expressionVariable(query), factorNetwork, isParameterPredicate));
 	}
 	
 }

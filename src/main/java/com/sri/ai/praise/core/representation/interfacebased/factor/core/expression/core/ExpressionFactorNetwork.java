@@ -50,6 +50,7 @@ import com.sri.ai.expresso.api.Tuple;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultEditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.proceduralattachment.ProceduralAttachmentExpressionFactor;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
@@ -108,16 +109,16 @@ public class ExpressionFactorNetwork extends DefaultEditableFactorNetwork {
 	}
 
 	private static ProceduralAttachmentExpressionFactor makeProceduralAttachmentExpressionFactor(Entry<String, Procedure> variableNameAndProcedure, Context context) {
-		DefaultExpressionVariable variable = makeVariable(variableNameAndProcedure);
+		ExpressionVariable variable = makeVariable(variableNameAndProcedure);
 		Procedure procedure = variableNameAndProcedure.getValue();
 		ProceduralAttachmentExpressionFactor result = new ProceduralAttachmentExpressionFactor(variable, procedure, context);
 		return result;
 	}
 
-	private static DefaultExpressionVariable makeVariable(Entry<String, Procedure> variableNameAndProcedure) {
+	private static ExpressionVariable makeVariable(Entry<String, Procedure> variableNameAndProcedure) {
 		String variableName = variableNameAndProcedure.getKey();
 		Expression variableExpression = parse(variableName);
-		DefaultExpressionVariable variable = new DefaultExpressionVariable(variableExpression);
+		ExpressionVariable variable = DefaultExpressionVariable.expressionVariable(variableExpression);
 		return variable;
 	}
 

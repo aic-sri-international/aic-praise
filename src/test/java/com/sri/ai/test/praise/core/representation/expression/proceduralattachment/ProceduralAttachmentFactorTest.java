@@ -125,7 +125,7 @@ public class ProceduralAttachmentFactorTest {
 
 		network = expressionFactorNetwork(factorExpressions, proceduralAttachments, context);
 		
-		ExactBP algorithm = new ExactBP(new DefaultExpressionVariable(parse("V1")), network);
+		ExactBP algorithm = new ExactBP(DefaultExpressionVariable.expressionVariable(parse("V1")), network);
 		queryResult = algorithm.apply();
 		println("Result computed for query V1.");
 		println("Result: " + queryResult);
@@ -216,7 +216,7 @@ public class ProceduralAttachmentFactorTest {
 
 		network = expressionFactorNetwork(factorExpressions, proceduralAttachments, context);
 		
-		ExactBP algorithm = new ExactBP(new DefaultExpressionVariable(parse("V1")), network);
+		ExactBP algorithm = new ExactBP(DefaultExpressionVariable.expressionVariable(parse("V1")), network);
 		queryResult = algorithm.apply();
 		println("Result computed for query V1.");
 		println("Result: " + queryResult);
@@ -246,7 +246,7 @@ public class ProceduralAttachmentFactorTest {
 //								));
 //		network = expressionFactorNetwork(factorExpressions, proceduralAttachments, context);
 //
-//		algorithm = new ExactBP(new DefaultExpressionVariable(parse("O1")), network);
+//		algorithm = new ExactBP(DefaultExpressionVariable.expressionVariable(parse("O1")), network);
 //		queryResult = algorithm.apply();
 //		println("Result computed for query O1.");
 //		println("Result: " + queryResult);

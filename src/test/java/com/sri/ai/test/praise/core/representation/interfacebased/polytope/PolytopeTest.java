@@ -66,9 +66,9 @@ public class PolytopeTest {
 			"V", "Boolean",
 			"W", "Boolean");
 
-	ExpressionVariable u = new DefaultExpressionVariable(parse("U"));
-	ExpressionVariable v = new DefaultExpressionVariable(parse("V"));
-	ExpressionVariable w = new DefaultExpressionVariable(parse("W"));
+	ExpressionVariable u = DefaultExpressionVariable.expressionVariable(parse("U"));
+	ExpressionVariable v = DefaultExpressionVariable.expressionVariable(parse("V"));
+	ExpressionVariable w = DefaultExpressionVariable.expressionVariable(parse("W"));
 	
 	Polytope identity = Polytopes.identityPolytope();
 	

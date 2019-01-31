@@ -45,6 +45,7 @@ import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
@@ -136,7 +137,7 @@ public class FromExpressionToSamplingFactors {
 	//////////////////
 
 	private void booleanVariableFactorCompilation(Expression expression, List<Factor> factors) {
-		DefaultExpressionVariable variable = new DefaultExpressionVariable(expression);
+		ExpressionVariable variable = DefaultExpressionVariable.expressionVariable(expression);
 		Factor truthFactor = new ConstantSamplingFactor(variable, true, random);
 		factors.add(truthFactor);
 	}
@@ -154,7 +155,7 @@ public class FromExpressionToSamplingFactors {
 	
 	private void equalityFactorCompilation(Expression expression, List<Factor> factors) {
 		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
-		Variable rightHandSideVariable = expressionCompilationWithCompoundExpressionVariableAlreadyAvailable(expression.get(1), leftHandSideVariable, factors);
+		Variable rightHandSideVariable = expressionCompilation(expression.get(1), leftHandSideVariable, factors);
 		boolean leftHandSideVariableWasReusedAsRightHandSideVariable = rightHandSideVariable == leftHandSideVariable;
 		if (leftHandSideVariableWasReusedAsRightHandSideVariable) {
 			// no need to enforce equality
@@ -237,13 +238,16 @@ public class FromExpressionToSamplingFactors {
 	////////////////////
 	
 	private Variable expressionCompilation(Expression expression, List<Factor> factors) {
-		return expressionCompilationWithCompoundExpressionVariableAlreadyAvailable(expression, null, factors);
+		return expressionCompilation(expression, null, factors);
 	}
 
-	private Variable expressionCompilationWithCompoundExpressionVariableAlreadyAvailable(Expression expression, Variable compoundExpressionVariableIfAvailable, List<Factor> factors) {
+	private Variable expressionCompilation(Expression expression, Variable compoundExpressionVariableIfAvailable, List<Factor> factors) {
 		Variable variable;
-		if (isVariable(expression)) {
-			variable = new DefaultExpressionVariable(expression);
+		if (expression instanceof Variable) {
+			variable = (Variable) expression; // has already been compiled
+		}
+		else if (isVariable(expression)) {
+			variable = DefaultExpressionVariable.expressionVariable(expression);
 		}
 		else {
 			variable = compoundExpressionCompilation(expression, compoundExpressionVariableIfAvailable, factors);
@@ -252,7 +256,7 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private Variable compoundExpressionCompilation(Expression expression, Variable compoundExpressionVariableIfAvailable, List<Factor> factors) throws Error {
-		Variable compoundExpressionVariable = compoundExpressionVariableIfAvailable != null? compoundExpressionVariableIfAvailable : new DefaultExpressionVariable(expression);
+		Variable compoundExpressionVariable = compoundExpressionVariableIfAvailable != null? compoundExpressionVariableIfAvailable : DefaultExpressionVariable.expressionVariable(expression);
 		if (isConstant(expression)) {
 			constantCompilation(compoundExpressionVariable, expression, factors);
 		}

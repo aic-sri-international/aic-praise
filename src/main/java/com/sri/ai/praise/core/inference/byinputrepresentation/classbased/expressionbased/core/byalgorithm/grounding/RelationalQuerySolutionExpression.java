@@ -112,13 +112,13 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 		Expression groundQuery = groundNonQuantifiedExpressionWithAssignment(queryBody, assignment, makeContext(problem));
 		ExpressionBasedProblem groundedProblem = new HOGMExpressionBasedProblem(groundQuery, groundedModel);
 		Expression baseSolution = baseSolver.solve(groundedProblem);
-		VariableMaskingExpressionWithProbabilityFunction masked = maskWithRelationalQueryVariable(queryBody, groundQuery, baseSolution);
+		ExpressionWithProbabilityFunction masked = maskWithRelationalQueryVariable(queryBody, groundQuery, baseSolution);
 		return masked;
 	}
 
-	private static VariableMaskingExpressionWithProbabilityFunction maskWithRelationalQueryVariable(Expression queryBody, Expression groundQuery, Expression baseSolution) {
+	private static ExpressionWithProbabilityFunction maskWithRelationalQueryVariable(Expression queryBody, Expression groundQuery, Expression baseSolution) {
 		ExpressionWithProbabilityFunction baseSolutionWithProbabilityFunction = (ExpressionWithProbabilityFunction) baseSolution;
-		VariableMaskingExpressionWithProbabilityFunction masked = mask(baseSolutionWithProbabilityFunction, groundQuery, queryBody);
+		ExpressionWithProbabilityFunction masked = mask(baseSolutionWithProbabilityFunction, groundQuery, queryBody);
 		return masked;
 		// TODO: this is a hack.
 		// The main problem here is that it is assuming the base solver is returning a ExpressionWithProbabilityFunction,
