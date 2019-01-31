@@ -82,7 +82,7 @@ public class HOGMMultiQuerySamplingProblemSolverProblemTest {
     SetOfRealValues origSetOfRealValues =  (SetOfRealValues) xmVariable.getSetOfValuesOrNull();
 
     SetOfRealValues newSetOfRealValues = new SetOfRealValues(1, new BigDecimal(1), 5);
-    RealVariable newXm = new RealVariable("blah", xmVariable.getUnit(), newSetOfRealValues);
+    RealVariable newXm = new RealVariable("x", xmVariable.getUnit(), newSetOfRealValues);
 
     graphSetMaker = GraphSetMaker.graphSetMaker();
     graphSetMaker.setFunctions(functions);
