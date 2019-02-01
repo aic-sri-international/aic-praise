@@ -9,6 +9,7 @@ import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.repeat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -23,6 +24,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.FromExpressionToSamplingFactors.NonBooleanFactorError;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.function.api.functions.Function;
 import com.sri.ai.util.function.api.functions.Functions;
@@ -1505,6 +1507,32 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
+	@Test
+	public void nonBooleanFactorErrorTest() {
+	
+		String model = "" +
+				"random temp: 0..5 -> [0;60];\n" + 
+				"\n" + 
+				"for all Month in 0..5 : if Month = 0 then temp(Month) = Normal(20,5) else temp(Month) = Normal(temp(Month - 1), 2);" +
+				"temp(0);" + 
+				"";
+		
+		String query = "temp(0)";
+		Expression expected = null;
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		boolean error = false;
+		try {
+			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+		}
+		catch (NonBooleanFactorError e) {
+			error = true;
+		}
+		assertTrue(error);
+		
+	}
+
 	///////////////////////////////
 
 	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests) {
@@ -1563,7 +1591,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 			runNumericalTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, deterministic, conditioningSample, testIndex);
 			
 		} catch (Throwable t) {
-			throw new Error(t);
+			throw t;
 		}
 		finally {
 			ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(oldPrecision);

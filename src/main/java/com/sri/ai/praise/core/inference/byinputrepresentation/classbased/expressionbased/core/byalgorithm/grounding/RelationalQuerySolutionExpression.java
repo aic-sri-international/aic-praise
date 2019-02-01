@@ -6,6 +6,7 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.e
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getIndexExpressionsSet;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryBody;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryIndexExpressionsSet;
+import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.makeRelationalExpressionFromGroundedVariable;
 import static com.sri.ai.util.Util.assertType;
 
 import java.util.Collection;
@@ -24,6 +25,8 @@ import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpr
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.FromExpressionToSamplingFactors;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.FromExpressionToSamplingFactors.NonBooleanFactorError;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.distribution.DiscretizedConditionalProbabilityDistributionFunction;
@@ -110,9 +113,23 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 		
 		Expression groundQuery = converter.groundNonQuantifiedExpressionWithAssignment(queryBody, assignment, makeContext(problem));
 		ExpressionBasedProblem groundedProblem = new HOGMExpressionBasedProblem(groundQuery, converter.getGroundedModel());
-		Expression baseSolution = baseSolver.solve(groundedProblem);
+		Expression baseSolution = solveWithErrorLifting(baseSolver, groundedProblem);
 		ExpressionWithProbabilityFunction masked = maskWithRelationalQueryVariable(queryBody, groundQuery, baseSolution);
 		return masked;
+	}
+
+	public static Expression solveWithErrorLifting(ExpressionBasedSolver baseSolver, ExpressionBasedProblem groundedProblem) throws NonBooleanFactorError {
+		Expression baseSolution;
+		try {
+			baseSolution = baseSolver.solve(groundedProblem);
+		}
+		catch (FromExpressionToSamplingFactors.NonBooleanFactorError nonBooleanFactorError) {
+			Expression lifted = makeRelationalExpressionFromGroundedVariable(nonBooleanFactorError.getFactor());
+			throw new FromExpressionToSamplingFactors.NonBooleanFactorError(lifted);
+			// TODO this could be improved by having the converter keep track of the relational factor from which each
+			// factor came and showing the original lifted factor instead.
+		}
+		return baseSolution;
 	}
 
 	private static ExpressionWithProbabilityFunction maskWithRelationalQueryVariable(Expression queryBody, Expression groundQuery, Expression baseSolution) {

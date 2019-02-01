@@ -12,6 +12,8 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.api.Context;
+import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedStandardDeviation;
@@ -23,11 +25,13 @@ class FromExpressionToSamplingFactorsTest {
 	
 	private static LinkedList<Expression> variables = list(parse("X"), parse("Y"), parse("Z"));
 
+	Context context = new TrueContext().extendWithSymbolsAndTypes("X", "Integer", "Y", "Integer");
+
 	@Test
 	void equalityOfTwoVariablesTest() {
 		Expression expression;
 		List<? extends Factor> factors;
-		FromExpressionToSamplingFactors compiler = new FromExpressionToSamplingFactors(v -> variables.contains(v), random);
+		FromExpressionToSamplingFactors compiler = new FromExpressionToSamplingFactors(v -> variables.contains(v), random, context);
 		
 		expression = parse("X = Y");
 		factors = compiler.factorCompilation(expression);
@@ -47,7 +51,7 @@ class FromExpressionToSamplingFactorsTest {
 	void equalityOfVariableAndConstantTest() {
 		Expression expression;
 		List<? extends Factor> factors;
-		FromExpressionToSamplingFactors compiler = new FromExpressionToSamplingFactors(v -> variables.contains(v), random);
+		FromExpressionToSamplingFactors compiler = new FromExpressionToSamplingFactors(v -> variables.contains(v), random, context);
 		
 		expression = parse("X = 10");
 		factors = compiler.factorCompilation(expression);
@@ -68,7 +72,7 @@ class FromExpressionToSamplingFactorsTest {
 	void equalityOfVariableAndNormalTest() {
 		Expression expression;
 		List<? extends Factor> factors;
-		FromExpressionToSamplingFactors compiler = new FromExpressionToSamplingFactors(v -> variables.contains(v), random);
+		FromExpressionToSamplingFactors compiler = new FromExpressionToSamplingFactors(v -> variables.contains(v), random, context);
 		
 		expression = parse("X = Normal(Y, 0.1)");
 		factors = compiler.factorCompilation(expression);

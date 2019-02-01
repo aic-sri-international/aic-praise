@@ -45,6 +45,7 @@ import java.util.Random;
 import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.api.Registry;
 import com.sri.ai.grinder.library.IsVariable;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -75,7 +76,7 @@ public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversi
 
 	private FactorNetwork makeFactorNetwork(ExpressionBasedProblem expressionBasedProblem) {
 		Predicate<Expression> isVariablePredicate = makeIsVariablePredicate(expressionBasedProblem);
-		List<Factor> factors = makeFactors(expressionBasedProblem, isVariablePredicate);
+		List<Factor> factors = makeFactors(expressionBasedProblem, isVariablePredicate, expressionBasedProblem.getContext());
 		return new DefaultFactorNetwork(factors);
 	}
 
@@ -85,8 +86,8 @@ public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversi
 		return isVariablePredicate;
 	}
 
-	private List<Factor> makeFactors(ExpressionBasedProblem expressionBasedProblem, Predicate<Expression> isVariablePredicate) {
-		FromExpressionToSamplingFactors factorTranslator = new FromExpressionToSamplingFactors(isVariablePredicate, random);
+	private List<Factor> makeFactors(ExpressionBasedProblem expressionBasedProblem, Predicate<Expression> isVariablePredicate, Registry context) {
+		FromExpressionToSamplingFactors factorTranslator = new FromExpressionToSamplingFactors(isVariablePredicate, random, context);
 		List<Factor> factors = 
 				unionArrayList(
 						functionIterator(

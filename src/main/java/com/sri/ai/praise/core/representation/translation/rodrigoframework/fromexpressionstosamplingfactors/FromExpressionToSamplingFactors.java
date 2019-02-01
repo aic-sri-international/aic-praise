@@ -24,6 +24,7 @@ import static com.sri.ai.grinder.library.controlflow.IfThenElse.isIfThenElse;
 import static com.sri.ai.grinder.library.controlflow.IfThenElse.thenBranch;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor.conditionResult;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.assertOrThrow;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
@@ -37,7 +38,10 @@ import java.util.Random;
 import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Type;
+import com.sri.ai.grinder.api.Registry;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
@@ -72,9 +76,12 @@ public class FromExpressionToSamplingFactors {
 
 	private Random random;
 	
-	public FromExpressionToSamplingFactors(Predicate<Expression> isVariable, Random random) {
+	private Registry context;
+	
+	public FromExpressionToSamplingFactors(Predicate<Expression> isVariable, Random random, Registry context) {
 		this.isVariable = isVariable;
 		this.random = random;
+		this.context = context;
 	}
 
 	public List<? extends Factor> factorCompilation(Expression expression) {
@@ -82,10 +89,29 @@ public class FromExpressionToSamplingFactors {
 		factorCompilation(expression, factors);
 		return factors;
 	}
+	
+	public static class NonBooleanFactorError extends Error {
+		private static final long serialVersionUID = 1L;
+		private Expression factor;
+		public NonBooleanFactorError(Expression factor) {
+			this.factor = factor;
+		}
+		public Expression getFactor() {
+			return factor;
+		}
+		@Override
+		public String getMessage() {
+			return "Statement " + factor + " must be of type Boolean";
+		}
+	}
 
-	private void factorCompilation(Expression expression, List<Factor> factors) {
+	private void factorCompilation(Expression factorExpressionPossiblyIfThenElse10, List<Factor> factors) {
 		
-		expression = transformIfThenElse10IntoTheirConditions(expression);
+		Expression expression = transformIfThenElse10IntoTheirConditions(factorExpressionPossiblyIfThenElse10);
+		
+		Type type = GrinderUtil.getTypeOfExpression(expression, context);
+		
+		assertOrThrow(type.getName().equals("Boolean"), () -> new NonBooleanFactorError(expression));
 		
 		if (isFormulaAssertedToBeTrueWithProbabilityOne(expression)) {
 			factorCompilation(condition(expression), factors);
