@@ -1487,6 +1487,24 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
+	@Test
+	public void liftedSeriesWithGroundStatementSamplingTest() {
+	
+		String model = "" +
+				"random temp: 0..5 -> [0;60];\n" + 
+				"\n" + 
+				"for all Month in 0..5 : if Month = 0 then temp(Month) = Normal(20,5) else temp(Month) = Normal(temp(Month - 1), 2);" +
+				"temp(0) = 35;" + 
+				"";
+		
+		String query = "temp(0)";
+		Expression expected = parse("if temp(0) < 1.5 then 0 else if temp(0) < 4.5 then 0 else if temp(0) < 7.5 then 0 else if temp(0) < 10.5 then 0 else if temp(0) < 13.5 then 0 else if temp(0) < 16.5 then 0 else if temp(0) < 19.5 then 0 else if temp(0) < 22.5 then 0 else if temp(0) < 25.5 then 0 else if temp(0) < 28.5 then 0 else if temp(0) < 31.5 then 0 else if temp(0) < 34.5 then 0 else if temp(0) < 37.5 then 1 else if temp(0) < 40.5 then 0 else if temp(0) < 43.5 then 0 else if temp(0) < 46.5 then 0 else if temp(0) < 49.5 then 0 else if temp(0) < 52.5 then 0 else if temp(0) < 55.5 then 0 else if temp(0) < 58.5 then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
 	///////////////////////////////
 
 	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests) {

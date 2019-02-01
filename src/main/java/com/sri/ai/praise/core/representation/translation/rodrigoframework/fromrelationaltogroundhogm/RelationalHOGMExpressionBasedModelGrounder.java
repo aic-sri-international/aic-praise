@@ -337,16 +337,7 @@ public class RelationalHOGMExpressionBasedModelGrounder {
 	}
 
 	private String groundBooleanFactor(Expression factor, Context context) {
-		if (factor.getSyntacticFormType().equals("For all")) {
-			return groundUniversallyQuantifiedFactor(factor, context);
-		}
-		else {
-			return factor.toString() + ";";
-		}
-	}
-
-	private String groundUniversallyQuantifiedFactor(Expression expression, Context context) {
-		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsSetAndBody(expression);
+		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsSetAndBody(factor);
 		IndexExpressionsSet indexExpressions = indexExpressionsAndBody.first;
 		Expression body = indexExpressionsAndBody.second;
 		AssignmentsIterator assignments = new AssignmentsIterator(indexExpressions, context);
