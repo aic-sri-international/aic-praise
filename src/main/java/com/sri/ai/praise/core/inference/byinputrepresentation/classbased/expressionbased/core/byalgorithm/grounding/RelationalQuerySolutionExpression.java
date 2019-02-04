@@ -99,21 +99,65 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 		ExpressionBasedModel originalExpressionBasedModel = problem.getOriginalExpressionBasedModel();
 		HOGMExpressionBasedModel hogModel = assertType(originalExpressionBasedModel, HOGMExpressionBasedModel.class, RelationalQuerySolutionExpression.class);
 		RelationalHOGMExpressionBasedModelGrounder converter = new RelationalHOGMExpressionBasedModelGrounder(hogModel);
-		Expression queryBody = getQueryBody(problem);
-		return assignment -> solveSubProblem(problem, baseSolver, converter, queryBody, assignment);
+		return assignment -> solveSubProblem(problem, baseSolver, converter, assignment);
 	}
 
 	private static Expression solveSubProblem(
 			ExpressionBasedProblem problem, 
 			ExpressionBasedSolver baseSolver,
 			RelationalHOGMExpressionBasedModelGrounder converter, 
-			Expression queryBody, 
 			Assignment assignment) {
 		
-		Expression groundQuery = converter.groundNonQuantifiedExpressionWithAssignment(queryBody, assignment, makeContext(problem));
+		Expression queryBody = getQueryBody(problem);
+
+		Expression queryBodyWithoutStatistic = getQueryBodyWithoutStatistic(queryBody);
+		
+		ExpressionWithProbabilityFunction masked = 
+				solveQueryBodyWithoutStatistic(
+						queryBodyWithoutStatistic, 
+						assignment,
+						converter, 
+						baseSolver, 
+						makeContext(problem));
+		
+		Expression result = wrapResultInStatisticExpressionWithFunction(problem, queryBody, masked);
+		
+		return result;
+	}
+
+	public static Expression getQueryBodyWithoutStatistic(Expression queryBody) {
+		Expression queryBodyWithoutStatistic;
+		if (queryBody.hasFunctor("mean")) {
+			queryBodyWithoutStatistic = queryBody.get(0);
+		}
+		else {
+			queryBodyWithoutStatistic = queryBody;
+		}
+		return queryBodyWithoutStatistic;
+	}
+
+	public static Expression wrapResultInStatisticExpressionWithFunction(
+			ExpressionBasedProblem problem,
+			Expression queryBody, 
+			ExpressionWithProbabilityFunction masked) {
+		
+		Expression result;
+		if (queryBody.hasFunctor("mean")) {
+			result = new MeanExpressionWithFunction(masked);
+		}
+		else {
+			result = masked;
+		}
+		return result;
+	}
+
+	public static ExpressionWithProbabilityFunction solveQueryBodyWithoutStatistic(Expression queryBodyWithoutStatistic,
+			Assignment assignment, RelationalHOGMExpressionBasedModelGrounder converter,
+			ExpressionBasedSolver baseSolver, Context context) throws NonBooleanFactorError {
+		Expression groundQuery = converter.groundNonQuantifiedExpressionWithAssignment(queryBodyWithoutStatistic, assignment, context);
 		ExpressionBasedProblem groundedProblem = new HOGMExpressionBasedProblem(groundQuery, converter.getGroundedModel());
 		Expression baseSolution = solveWithErrorLifting(baseSolver, groundedProblem);
-		ExpressionWithProbabilityFunction masked = maskWithRelationalQueryVariable(queryBody, groundQuery, baseSolution);
+		ExpressionWithProbabilityFunction masked = maskWithRelationalQueryVariable(queryBodyWithoutStatistic, groundQuery, baseSolution);
 		return masked;
 	}
 
@@ -134,6 +178,7 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 	private static ExpressionWithProbabilityFunction maskWithRelationalQueryVariable(Expression queryBody, Expression groundQuery, Expression baseSolution) {
 		ExpressionWithProbabilityFunction baseSolutionWithProbabilityFunction = (ExpressionWithProbabilityFunction) baseSolution;
 		ExpressionWithProbabilityFunction masked = mask(baseSolutionWithProbabilityFunction, groundQuery, queryBody);
+
 		return masked;
 		// TODO: this is a hack.
 		// The main problem here is that it is assuming the base solver is returning a ExpressionWithProbabilityFunction,

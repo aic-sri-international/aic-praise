@@ -79,7 +79,6 @@ public class HOGMMultiQuerySamplingProblemSolverProblemTest {
     // Using the same function but using a different xmVariable generates the same results ??
 
     // use modified xm
-    SetOfRealValues origSetOfRealValues =  (SetOfRealValues) xmVariable.getSetOfValuesOrNull();
 
     SetOfRealValues newSetOfRealValues = new SetOfRealValues(1, new BigDecimal(1), 5);
     RealVariable newXm = new RealVariable("x", xmVariable.getUnit(), newSetOfRealValues);

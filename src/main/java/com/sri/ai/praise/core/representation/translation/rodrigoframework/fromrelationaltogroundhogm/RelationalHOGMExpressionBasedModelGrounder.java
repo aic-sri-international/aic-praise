@@ -51,6 +51,7 @@ public class RelationalHOGMExpressionBasedModelGrounder {
 	private static final LinkedList<String> BUILT_IN_FUNCTION_STRINGS = 
 			list(
 					"Normal", 
+					"mean",
 					"+", 
 					"-", 
 					"*", 

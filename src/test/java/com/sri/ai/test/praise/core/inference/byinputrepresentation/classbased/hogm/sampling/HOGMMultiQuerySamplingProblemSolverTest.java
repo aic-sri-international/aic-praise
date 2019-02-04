@@ -1718,6 +1718,39 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
+	@Test
+	public void meanSamplingTest() {
+
+		String model = "" +
+				"sort Counties: 3, a, b, c;"
+				+ "random x : Counties x 0..5 -> [-50;50];\r\n" + 
+				"for all c in Counties : for all t in 0..5 : x(c,t) = Normal(20, 5);" +
+				"";
+		
+		String query = "for all c in Counties : for all t in 0..5 : mean(x(c,t))";
+		Expression expected = parse("if (c = a) and (t = 0) then 19.911 else if (c = b) and (t = 0) then 19.975 else if t = 0 then 20.007 else if (c = a) and (t = 1) then 20.07 else if (c = b) and (t = 1) then 20.009 else if t = 1 then 20.04 else if (c = a) and (t = 2) then 20.02 else if (c = b) and (t = 2) then 19.975 else if t = 2 then 19.993 else if (c = a) and (t = 3) then 19.965 else if (c = b) and (t = 3) then 19.983 else if t = 3 then 20.014 else if (c = a) and (t = 4) then 19.98 else if (c = b) and (t = 4) then 20.041 else if t = 4 then 19.999 else if (c = a) and (t = 5) then 19.965 else if (c = b) and (t = 5) then 19.959 else 20.003");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void meanWithoutIndicesSamplingTest() {
+
+		String model = ""
+				+ "random x : [-50;50];\r\n" + 
+				"x = Normal(20, 5);" +
+				"";
+		
+		String query = "mean(x)";
+		Expression expected = parse("20.0");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
 	///////////////////////////////
 
 	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests) {
@@ -1762,9 +1795,14 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 			Function conditionedFunction = conditioned.getDiscretizedConditionalProbabilityDistributionFunction();
 //			int queryIndex = Util.getIndexOfFirstSatisfyingPredicateOrMinusOne(conditionedFunction.getSetOfInputVariables().getVariables(), v -> v.getName().equals(query));
 			int queryIndex = conditioned.getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex();
-			Functions functions = Functions.functions(conditionedFunction);
-			myAssert(queryIndex != -1, () -> "Query variable " + query + " not found in variables " + conditionedFunction.getSetOfInputVariables().getVariables());
-			GraphSet.plot(functions, queryIndex, GRAPH_FILENAME_WITHOUT_EXTENSION);
+			if (queryIndex == -1) {
+				println("Not plotting graphs because function has no variables");
+			}
+			else {
+				Functions functions = Functions.functions(conditionedFunction);
+				myAssert(queryIndex != -1, () -> "Query variable " + query + " not found in variables " + conditionedFunction.getSetOfInputVariables().getVariables());
+				GraphSet.plot(functions, queryIndex, GRAPH_FILENAME_WITHOUT_EXTENSION);
+			}
 		}
 	}
 
