@@ -25,8 +25,7 @@ import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpr
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.FromExpressionToSamplingFactors;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.FromExpressionToSamplingFactors.NonBooleanFactorError;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.NonBooleanFactorError;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.distribution.DiscretizedConditionalProbabilityDistributionFunction;
@@ -123,9 +122,9 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 		try {
 			baseSolution = baseSolver.solve(groundedProblem);
 		}
-		catch (FromExpressionToSamplingFactors.NonBooleanFactorError nonBooleanFactorError) {
+		catch (NonBooleanFactorError nonBooleanFactorError) {
 			Expression lifted = makeRelationalExpressionFromGroundedVariable(nonBooleanFactorError.getFactor());
-			throw new FromExpressionToSamplingFactors.NonBooleanFactorError(lifted);
+			throw new NonBooleanFactorError(lifted, nonBooleanFactorError.getReason());
 			// TODO this could be improved by having the converter keep track of the relational factor from which each
 			// factor came and showing the original lifted factor instead.
 		}

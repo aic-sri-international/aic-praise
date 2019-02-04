@@ -4,7 +4,6 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.s
 import static com.sri.ai.util.Util.getOrUseDefault;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapFromLists;
-import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
 
 import java.util.ArrayList;
@@ -30,15 +29,15 @@ public class TableSamplingFactor extends AbstractSamplingFactor {
 	private Variable variable;
 	private ArrayList<Object> values;
 	private ArrayList<Double> probabilities;
-	private Map<Object, Potential> fromValueToProbability;
+	private Map<Object, Double> fromValueToProbability;
 	
-	public TableSamplingFactor(Variable variable, ArrayList<Object> values, ArrayList<Potential> probabilities, Random random) {
+	public TableSamplingFactor(Variable variable, ArrayList<Object> values, ArrayList<Double> probabilities, Random random) {
 		super(list(variable), random);
 		myAssert( ! values.isEmpty(), () -> getClass() + " requires at least one value, but got none.");
 		myAssert( values.size() == probabilities.size(), () -> getClass() + " requires one probability for each value, but got " + values.size() + " values and " + probabilities.size() + " probabilities.");
 		this.variable = variable;
 		this.values = values;
-		this.probabilities = mapIntoArrayList(probabilities, p -> p.doubleValue());
+		this.probabilities = probabilities;
 		this.fromValueToProbability = mapFromLists(values, probabilities);
 	}
 
@@ -65,7 +64,7 @@ public class TableSamplingFactor extends AbstractSamplingFactor {
 	
 	private Potential probabilityOfVariableValue(Sample sample) {
 		Object value = getValue(variable, sample);
-		Potential probability = getOrUseDefault(fromValueToProbability, value, sample.getPotential().zero());
+		Potential probability = sample.getPotential().make(getOrUseDefault(fromValueToProbability, value, 0.0));
 		return probability;
 	}
 	

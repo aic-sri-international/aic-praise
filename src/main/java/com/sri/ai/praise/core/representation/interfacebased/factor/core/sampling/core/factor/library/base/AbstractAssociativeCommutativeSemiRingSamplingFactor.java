@@ -137,7 +137,7 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 	private FunctionOnSetOfVariablesSatisfiesCondition<T> argumentIsAbsorbingValue(Integer i) {
 		return 
 				new FunctionOnSetOfVariablesSatisfiesCondition<T>(
-						"argumentIs" + getAbsorbingElement(),
+						"argumentIsAbsorbingElement=" + getAbsorbingElement(),
 						list(getArguments().get(i)), 
 						c -> getFirst(c), 
 						v -> v.equals(getAbsorbingElement()));

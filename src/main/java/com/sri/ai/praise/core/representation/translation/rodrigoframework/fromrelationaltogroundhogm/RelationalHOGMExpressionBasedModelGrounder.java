@@ -4,6 +4,7 @@ import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.makeIndexExpression;
+import static com.sri.ai.praise.core.representation.translation.rodrigoframework.NonBooleanFactorError.assertExpressionIsValidFactor;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.join;
@@ -23,6 +24,7 @@ import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.IndexExpressionsSet;
+import com.sri.ai.expresso.api.IntensionalSet;
 import com.sri.ai.expresso.api.UniversallyQuantifiedFormula;
 import com.sri.ai.expresso.core.ExtensionalIndexExpressionsSet;
 import com.sri.ai.expresso.helper.Expressions;
@@ -31,6 +33,7 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.helper.AssignmentsIterator;
 import com.sri.ai.grinder.interpreter.Assignment;
 import com.sri.ai.grinder.interpreter.BruteForceCommonInterpreter;
+import com.sri.ai.grinder.library.FunctorConstants;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
@@ -104,8 +107,8 @@ public class RelationalHOGMExpressionBasedModelGrounder {
 		return groundedModelString;
 	}
 
-	public static IndexExpressionsSet getIndexExpressionsSet(Expression expression, Context context) {
-		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsSetAndBody(expression);
+	public static ExtensionalIndexExpressionsSet getIndexExpressionsSet(Expression expression, Context context) {
+		Pair<ExtensionalIndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsSetAndBody(expression);
 		return indexExpressionsAndBody.first;
 	}
 
@@ -113,22 +116,44 @@ public class RelationalHOGMExpressionBasedModelGrounder {
 		return expression.replaceAllOccurrences(e -> groundExpression(e, assignment, null, context), context);
 	}
 	
-	public static Pair<IndexExpressionsSet, Expression> getIndexExpressionsSetAndBody(Expression expression) {
+	public static Pair<ExtensionalIndexExpressionsSet, Expression> getIndexExpressionsSetAndBody(Expression expression) {
 		return explanationBlock("Getting index expressions and body for ", expression, code(() -> {
-	
-			List<Expression> indexExpressions = list();
-			Expression current = expression;
-			while (current.getSyntacticFormType().equals("For all")) {
-				UniversallyQuantifiedFormula universallyQuantifiedCurrent = (UniversallyQuantifiedFormula) current;
-				ExtensionalIndexExpressionsSet indexExpressionsSet = (ExtensionalIndexExpressionsSet) universallyQuantifiedCurrent.getIndexExpressions();
-				indexExpressions.addAll(indexExpressionsSet.getList());
-				current = universallyQuantifiedCurrent.getBody();
+
+			if (expression.hasFunctor(FunctorConstants.PRODUCT)) {
+				return getIndexExpressionsSetAndBodyForFunctionApplicationOnIntensionalSet(expression);
 			}
-			Expression body = current;
-			ExtensionalIndexExpressionsSet indexExpressionsSet = new ExtensionalIndexExpressionsSet(indexExpressions);
-			return pair(indexExpressionsSet, body);
-	
+			else {
+				return getIndexExpressionsSetAndBodyForUniversallyQuantifiedExpression(expression);
+			}
+
 		}), "Result: ", RESULT);
+	}
+
+	public static Pair<ExtensionalIndexExpressionsSet, Expression> 
+	getIndexExpressionsSetAndBodyForUniversallyQuantifiedExpression(
+			Expression universallyQuantifiedExpression) {
+		
+		List<Expression> indexExpressions = list();
+		Expression current = universallyQuantifiedExpression;
+		while (current.getSyntacticFormType().equals("For all")) {
+			UniversallyQuantifiedFormula universallyQuantifiedCurrent = (UniversallyQuantifiedFormula) current;
+			ExtensionalIndexExpressionsSet indexExpressionsSet = (ExtensionalIndexExpressionsSet) universallyQuantifiedCurrent.getIndexExpressions();
+			indexExpressions.addAll(indexExpressionsSet.getList());
+			current = universallyQuantifiedCurrent.getBody();
+		}
+		Expression body = current;
+		ExtensionalIndexExpressionsSet indexExpressionsSet = new ExtensionalIndexExpressionsSet(indexExpressions);
+		return pair(indexExpressionsSet, body);
+	}
+
+	public static Pair<ExtensionalIndexExpressionsSet, Expression> 
+	getIndexExpressionsSetAndBodyForFunctionApplicationOnIntensionalSet(
+			Expression expression) {
+		
+		IntensionalSet set = (IntensionalSet) expression.get(0); // TODO won't work if expression is an intensional set but not an instance of IntensionalSet, such as a proxy or wrapper
+		ExtensionalIndexExpressionsSet indexExpressionsSet = (ExtensionalIndexExpressionsSet) set.getIndexExpressions();
+		Expression body = set.getHead();
+		return pair(indexExpressionsSet, body);
 	}
 
 	private String getGroundedModelStringPrivate(HOGMExpressionBasedModel model) {
@@ -304,6 +329,8 @@ public class RelationalHOGMExpressionBasedModelGrounder {
 	private String groundFactorIntoItsGroundings(Expression factor, Context context) {
 		return explanationBlock("Grounding factor ", factor, code(() -> {
 			
+			assertExpressionIsValidFactor(factor, context);
+			
 			String factorString;
 			if (IfThenElse.isIfThenElse(factor)) {
 				factorString = groundIfThenElse(factor, context);
@@ -337,8 +364,8 @@ public class RelationalHOGMExpressionBasedModelGrounder {
 	}
 
 	private String groundBooleanFactor(Expression factor, Context context) {
-		Pair<IndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsSetAndBody(factor);
-		IndexExpressionsSet indexExpressions = indexExpressionsAndBody.first;
+		Pair<ExtensionalIndexExpressionsSet, Expression> indexExpressionsAndBody = getIndexExpressionsSetAndBody(factor);
+		ExtensionalIndexExpressionsSet indexExpressions = indexExpressionsAndBody.first;
 		Expression body = indexExpressionsAndBody.second;
 		AssignmentsIterator assignments = new AssignmentsIterator(indexExpressions, context);
 		List<String> bodyGroundings = mapIntoList(assignments, a -> groundNonQuantifiedFactorWithAssignment(body, a, context).toString() + ";");

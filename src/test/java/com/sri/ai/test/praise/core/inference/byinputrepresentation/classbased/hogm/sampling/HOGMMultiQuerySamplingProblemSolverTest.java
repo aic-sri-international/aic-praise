@@ -24,7 +24,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.FromExpressionToSamplingFactors.NonBooleanFactorError;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.NonBooleanFactorError;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.function.api.functions.Function;
 import com.sri.ai.util.function.api.functions.Functions;
@@ -1514,7 +1514,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"random temp: 0..5 -> [0;60];\n" + 
 				"\n" + 
 				"for all Month in 0..5 : if Month = 0 then temp(Month) = Normal(20,5) else temp(Month) = Normal(temp(Month - 1), 2);" +
-				"temp(0);" + 
+				"for all Month in 0..5 : temp(Month);" + // incorrect because temp(Month) is not boolean 
 				"";
 		
 		String query = "temp(0)";
@@ -1527,12 +1527,179 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 		}
 		catch (NonBooleanFactorError e) {
+			println(e.getMessage());
 			error = true;
 		}
 		assertTrue(error);
 		
 	}
 
+	@Test
+	public void nonBooleanFactorErrorTest2() {
+	
+		String model = "" +
+				"random temp: 0..5 -> [0;60];\n" + 
+				"\n" + 
+				"for all Month in 0..5 : if Month = 0 then temp(Month) = Normal(20,5) else temp(Month) = Normal(temp(Month - 1), 2);" +
+				"temp(0) 0.6;" + // incorrect because temp(Month) is not boolean 
+				"";
+		
+		String query = "temp(0)";
+		Expression expected = null;
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		boolean error = false;
+		try {
+			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+		}
+		catch (AssertionError e) {
+			println(e.getMessage());
+			error = true;
+		}
+		assertTrue(error);
+		
+	}
+
+	@Test
+	public void nonBooleanFactorErrorTest3() {
+	
+		String model = "" +
+				"random temp: 0..5 -> [0;60];\n" + 
+				"\n" + 
+				"for all Month in 0..5 : if Month = 0 then temp(Month) = Normal(20,5) else temp(Month) = Normal(temp(Month - 1), 2);" +
+				"if temp(0) then 0.4 else 0.6;" + // incorrect because temp(Month) is not boolean 
+				"";
+		
+		String query = "temp(0)";
+		Expression expected = null;
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		boolean error = false;
+		try {
+			runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+		}
+		catch (AssertionError e) {
+			println(e.getMessage());
+			error = true;
+		}
+		assertTrue(error);
+		
+	}
+
+	@Test
+	public void histogramSamplingTest() {
+	
+		String model = "" +
+				"random beta: [0;60];\n" + 
+				"if beta < 5 then 0 else if beta < 10 then 0.2 else if beta < 15 then 0.8 else 0;" + 
+				"";
+		
+		String query = "beta";
+		Expression expected = parse("if beta < 1.5 then 0 else if beta < 4.5 then 0 else if beta < 7.5 then 0 else if beta < 10.5 then 0.194 else if beta < 13.5 then 0 else if beta < 16.5 then 0.806 else if beta < 19.5 then 0 else if beta < 22.5 then 0 else if beta < 25.5 then 0 else if beta < 28.5 then 0 else if beta < 31.5 then 0 else if beta < 34.5 then 0 else if beta < 37.5 then 0 else if beta < 40.5 then 0 else if beta < 43.5 then 0 else if beta < 46.5 then 0 else if beta < 49.5 then 0 else if beta < 52.5 then 0 else if beta < 55.5 then 0 else if beta < 58.5 then 0 else 0");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void barChartSamplingTest() {
+	
+		String model = "" +
+				"sort Person: 4, bob, mary;" + 
+				"random neighbor : 1990..1995 -> Person;" + 
+				"for all Y in 1990..1995 : "
+				+ "if Y > 1992 "
+				+ "then neighbor(Y) = bob "
+				+ "else if Normal(0,1) < 0 then neighbor(Y) = bob else neighbor(Y) = mary;" + 
+				"";
+		
+		String query = "for all Y in 1990..1995: neighbor(Y)";
+		Expression expected = parse("if Y = 1990 then if neighbor(Y) = bob then 0.506 else if neighbor(Y) = mary then 0.494 else if neighbor(Y) = person3 then 0 else 0 else if Y = 1991 then if neighbor(Y) = bob then 0.5 else if neighbor(Y) = mary then 0.5 else if neighbor(Y) = person3 then 0 else 0 else if Y = 1992 then if neighbor(Y) = bob then 0.489 else if neighbor(Y) = mary then 0.511 else if neighbor(Y) = person3 then 0 else 0 else if Y = 1993 then if neighbor(Y) = bob then 1 else if neighbor(Y) = mary then 0 else if neighbor(Y) = person3 then 0 else 0 else if Y = 1994 then if neighbor(Y) = bob then 1 else if neighbor(Y) = mary then 0 else if neighbor(Y) = person3 then 0 else 0 else if neighbor(Y) = bob then 1 else if neighbor(Y) = mary then 0 else if neighbor(Y) = person3 then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+	
+	@Test
+	public void barChartExtraDimensionSamplingTest() {
+	
+		String model = "" +
+				"sort Person: 4, bob, mary;\r\n" + 
+				"random neighbor : Person x 1990..2000 -> Person;\r\n" + 
+				"random coin : Person x 1990..2000 -> [-10;10];\r\n" +
+				
+				"for all X in Person : for all Y in 1990..2000 : coin(X, Y) = Normal(0,1);" +
+				
+				"for all X in Person : for all Y in 1990..2000 : " +
+				"if Y > 1995 "
+				+ " then neighbor(X, Y) = bob"
+				+ " else if coin(X,Y) < 0 then neighbor(X, Y) = bob else neighbor(X, Y) = mary;";
+		
+		String query = "for all X in Person : for all t in 1990..2000 : neighbor(X, t)";
+		
+		Expression expected = parse("if (X = bob) and (t = 1990) then if neighbor(X, t) = bob then 0.498 else if neighbor(X, t) = mary then 0.502 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1990) then if neighbor(X, t) = bob then 0.499 else if neighbor(X, t) = mary then 0.501 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1990) then if neighbor(X, t) = bob then 0.513 else if neighbor(X, t) = mary then 0.487 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1990) then if neighbor(X, t) = bob then 0.491 else if neighbor(X, t) = mary then 0.509 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1991) then if neighbor(X, t) = bob then 0.487 else if neighbor(X, t) = mary then 0.513 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1991) then if neighbor(X, t) = bob then 0.492 else if neighbor(X, t) = mary then 0.508 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1991) then if neighbor(X, t) = bob then 0.495 else if neighbor(X, t) = mary then 0.505 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1991) then if neighbor(X, t) = bob then 0.532 else if neighbor(X, t) = mary then 0.468 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1992) then if neighbor(X, t) = bob then 0.478 else if neighbor(X, t) = mary then 0.522 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1992) then if neighbor(X, t) = bob then 0.486 else if neighbor(X, t) = mary then 0.514 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1992) then if neighbor(X, t) = bob then 0.504 else if neighbor(X, t) = mary then 0.496 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1992) then if neighbor(X, t) = bob then 0.492 else if neighbor(X, t) = mary then 0.508 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1993) then if neighbor(X, t) = bob then 0.49 else if neighbor(X, t) = mary then 0.51 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1993) then if neighbor(X, t) = bob then 0.503 else if neighbor(X, t) = mary then 0.497 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1993) then if neighbor(X, t) = bob then 0.523 else if neighbor(X, t) = mary then 0.477 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1993) then if neighbor(X, t) = bob then 0.5 else if neighbor(X, t) = mary then 0.5 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1994) then if neighbor(X, t) = bob then 0.482 else if neighbor(X, t) = mary then 0.518 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1994) then if neighbor(X, t) = bob then 0.48 else if neighbor(X, t) = mary then 0.52 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1994) then if neighbor(X, t) = bob then 0.519 else if neighbor(X, t) = mary then 0.481 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1994) then if neighbor(X, t) = bob then 0.506 else if neighbor(X, t) = mary then 0.494 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1995) then if neighbor(X, t) = bob then 0.474 else if neighbor(X, t) = mary then 0.526 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1995) then if neighbor(X, t) = bob then 0.481 else if neighbor(X, t) = mary then 0.519 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1995) then if neighbor(X, t) = bob then 0.516 else if neighbor(X, t) = mary then 0.484 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1995) then if neighbor(X, t) = bob then 0.503 else if neighbor(X, t) = mary then 0.497 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1996) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1996) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1996) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1996) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1997) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1997) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1997) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1997) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1998) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1998) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1998) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1998) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1999) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1999) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1999) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1999) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 2000) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 2000) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 2000) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 5;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void simpleFoodSecurityTest() {
+
+		String model = "" +
+				"random food_availability : 0..6 -> [-4000;4000];\r\n" + 
+				"random food_availabilityDif : 0..6 -> [-4000;4000];\r\n" + 
+				"\r\n" + 
+				"for all t in 0..6 : \r\n" + 
+				"	if t = 0\r\n" + 
+				"	   then\r\n" + 
+				"	     food_availability(t) = 0\r\n" + 
+				"	   else\r\n" + 
+				"	     food_availability(t) = Normal(food_availability(t-1) \r\n" + 
+				"		 + food_availabilityDif(t-1), 10);\r\n" + 
+				"\r\n" + 
+				"for all t in 0..6 : \r\n" + 
+				"	if t = 0\r\n" + 
+				"	   then\r\n" + 
+				"	     food_availabilityDif(t) = 100\r\n" + 
+				"	   else\r\n" + 
+				"	     food_availabilityDif(t) = food_availability(t) - food_availability(t-1);";
+		
+		String query = "for all t in 0..6 : food_availability(t)";
+		Expression expected = parse("if t = 0 then if food_availability(t) < -3833.333 then 0 else if food_availability(t) < -3500 then 0 else if food_availability(t) < -3166.667 then 0 else if food_availability(t) < -2833.333 then 0 else if food_availability(t) < -2500 then 0 else if food_availability(t) < -2166.667 then 0 else if food_availability(t) < -1833.333 then 0 else if food_availability(t) < -1500 then 0 else if food_availability(t) < -1166.667 then 0 else if food_availability(t) < -833.333 then 0 else if food_availability(t) < -500 then 0 else if food_availability(t) < -166.667 then 0 else if food_availability(t) < 166.667 then 1 else if food_availability(t) < 500 then 0 else if food_availability(t) < 833.333 then 0 else if food_availability(t) < 1166.667 then 0 else if food_availability(t) < 1500 then 0 else if food_availability(t) < 1833.333 then 0 else if food_availability(t) < 2166.667 then 0 else if food_availability(t) < 2500 then 0 else if food_availability(t) < 2833.333 then 0 else if food_availability(t) < 3166.667 then 0 else if food_availability(t) < 3500 then 0 else if food_availability(t) < 3833.333 then 0 else 0 else if t = 1 then if food_availability(t) < -3833.333 then 0 else if food_availability(t) < -3500 then 0 else if food_availability(t) < -3166.667 then 0 else if food_availability(t) < -2833.333 then 0 else if food_availability(t) < -2500 then 0 else if food_availability(t) < -2166.667 then 0 else if food_availability(t) < -1833.333 then 0 else if food_availability(t) < -1500 then 0 else if food_availability(t) < -1166.667 then 0 else if food_availability(t) < -833.333 then 0 else if food_availability(t) < -500 then 0 else if food_availability(t) < -166.667 then 0 else if food_availability(t) < 166.667 then 1 else if food_availability(t) < 500 then 0 else if food_availability(t) < 833.333 then 0 else if food_availability(t) < 1166.667 then 0 else if food_availability(t) < 1500 then 0 else if food_availability(t) < 1833.333 then 0 else if food_availability(t) < 2166.667 then 0 else if food_availability(t) < 2500 then 0 else if food_availability(t) < 2833.333 then 0 else if food_availability(t) < 3166.667 then 0 else if food_availability(t) < 3500 then 0 else if food_availability(t) < 3833.333 then 0 else 0 else if t = 2 then if food_availability(t) < -3833.333 then 0 else if food_availability(t) < -3500 then 0 else if food_availability(t) < -3166.667 then 0 else if food_availability(t) < -2833.333 then 0 else if food_availability(t) < -2500 then 0 else if food_availability(t) < -2166.667 then 0 else if food_availability(t) < -1833.333 then 0 else if food_availability(t) < -1500 then 0 else if food_availability(t) < -1166.667 then 0 else if food_availability(t) < -833.333 then 0 else if food_availability(t) < -500 then 0 else if food_availability(t) < -166.667 then 0 else if food_availability(t) < 166.667 then 0.085 else if food_availability(t) < 500 then 0.915 else if food_availability(t) < 833.333 then 0 else if food_availability(t) < 1166.667 then 0 else if food_availability(t) < 1500 then 0 else if food_availability(t) < 1833.333 then 0 else if food_availability(t) < 2166.667 then 0 else if food_availability(t) < 2500 then 0 else if food_availability(t) < 2833.333 then 0 else if food_availability(t) < 3166.667 then 0 else if food_availability(t) < 3500 then 0 else if food_availability(t) < 3833.333 then 0 else 0 else if t = 3 then if food_availability(t) < -3833.333 then 0 else if food_availability(t) < -3500 then 0 else if food_availability(t) < -3166.667 then 0 else if food_availability(t) < -2833.333 then 0 else if food_availability(t) < -2500 then 0 else if food_availability(t) < -2166.667 then 0 else if food_availability(t) < -1833.333 then 0 else if food_availability(t) < -1500 then 0 else if food_availability(t) < -1166.667 then 0 else if food_availability(t) < -833.333 then 0 else if food_availability(t) < -500 then 0 else if food_availability(t) < -166.667 then 0 else if food_availability(t) < 166.667 then 0 else if food_availability(t) < 500 then 1 else if food_availability(t) < 833.333 then 0 else if food_availability(t) < 1166.667 then 0 else if food_availability(t) < 1500 then 0 else if food_availability(t) < 1833.333 then 0 else if food_availability(t) < 2166.667 then 0 else if food_availability(t) < 2500 then 0 else if food_availability(t) < 2833.333 then 0 else if food_availability(t) < 3166.667 then 0 else if food_availability(t) < 3500 then 0 else if food_availability(t) < 3833.333 then 0 else 0 else if t = 4 then if food_availability(t) < -3833.333 then 0 else if food_availability(t) < -3500 then 0 else if food_availability(t) < -3166.667 then 0 else if food_availability(t) < -2833.333 then 0 else if food_availability(t) < -2500 then 0 else if food_availability(t) < -2166.667 then 0 else if food_availability(t) < -1833.333 then 0 else if food_availability(t) < -1500 then 0 else if food_availability(t) < -1166.667 then 0 else if food_availability(t) < -833.333 then 0 else if food_availability(t) < -500 then 0 else if food_availability(t) < -166.667 then 0 else if food_availability(t) < 166.667 then 0 else if food_availability(t) < 500 then 0.969 else if food_availability(t) < 833.333 then 0.031 else if food_availability(t) < 1166.667 then 0 else if food_availability(t) < 1500 then 0 else if food_availability(t) < 1833.333 then 0 else if food_availability(t) < 2166.667 then 0 else if food_availability(t) < 2500 then 0 else if food_availability(t) < 2833.333 then 0 else if food_availability(t) < 3166.667 then 0 else if food_availability(t) < 3500 then 0 else if food_availability(t) < 3833.333 then 0 else 0 else if t = 5 then if food_availability(t) < -3833.333 then 0 else if food_availability(t) < -3500 then 0 else if food_availability(t) < -3166.667 then 0 else if food_availability(t) < -2833.333 then 0 else if food_availability(t) < -2500 then 0 else if food_availability(t) < -2166.667 then 0 else if food_availability(t) < -1833.333 then 0 else if food_availability(t) < -1500 then 0 else if food_availability(t) < -1166.667 then 0 else if food_availability(t) < -833.333 then 0 else if food_availability(t) < -500 then 0 else if food_availability(t) < -166.667 then 0 else if food_availability(t) < 166.667 then 0 else if food_availability(t) < 500 then 0.507 else if food_availability(t) < 833.333 then 0.493 else if food_availability(t) < 1166.667 then 0 else if food_availability(t) < 1500 then 0 else if food_availability(t) < 1833.333 then 0 else if food_availability(t) < 2166.667 then 0 else if food_availability(t) < 2500 then 0 else if food_availability(t) < 2833.333 then 0 else if food_availability(t) < 3166.667 then 0 else if food_availability(t) < 3500 then 0 else if food_availability(t) < 3833.333 then 0 else 0 else if food_availability(t) < -3833.333 then 0 else if food_availability(t) < -3500 then 0 else if food_availability(t) < -3166.667 then 0 else if food_availability(t) < -2833.333 then 0 else if food_availability(t) < -2500 then 0 else if food_availability(t) < -2166.667 then 0 else if food_availability(t) < -1833.333 then 0 else if food_availability(t) < -1500 then 0 else if food_availability(t) < -1166.667 then 0 else if food_availability(t) < -833.333 then 0 else if food_availability(t) < -500 then 0 else if food_availability(t) < -166.667 then 0 else if food_availability(t) < 166.667 then 0 else if food_availability(t) < 500 then 0.154 else if food_availability(t) < 833.333 then 0.838 else if food_availability(t) < 1166.667 then 0.008 else if food_availability(t) < 1500 then 0 else if food_availability(t) < 1833.333 then 0 else if food_availability(t) < 2166.667 then 0 else if food_availability(t) < 2500 then 0 else if food_availability(t) < 2833.333 then 0 else if food_availability(t) < 3166.667 then 0 else if food_availability(t) < 3500 then 0 else if food_availability(t) < 3833.333 then 0 else 0");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 25;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+	
+	@Test
+	public void randomWalkSamplingTest() {
+
+		String model = "" +
+				"random food_availability : 0..10 -> [-50;50];\r\n" + 
+				"\r\n" + 
+				"for all t in 0..10 : \r\n" + 
+				"	if t = 0\r\n" + 
+				"	   then\r\n" + 
+				"	     food_availability(t) = 0\r\n" + 
+				"	   else\r\n" + 
+				"	     food_availability(t) = Normal(food_availability(t-1), 10);";
+		
+		String query = "for all t in 0..10 : food_availability(t)";
+		Expression expected = parse("if t = 0 then if food_availability(t) < -47.917 then 0 else if food_availability(t) < -43.75 then 0 else if food_availability(t) < -39.583 then 0 else if food_availability(t) < -35.417 then 0 else if food_availability(t) < -31.25 then 0 else if food_availability(t) < -27.083 then 0 else if food_availability(t) < -22.917 then 0 else if food_availability(t) < -18.75 then 0 else if food_availability(t) < -14.583 then 0 else if food_availability(t) < -10.417 then 0 else if food_availability(t) < -6.25 then 0 else if food_availability(t) < -2.083 then 0 else if food_availability(t) < 2.083 then 1 else if food_availability(t) < 6.25 then 0 else if food_availability(t) < 10.417 then 0 else if food_availability(t) < 14.583 then 0 else if food_availability(t) < 18.75 then 0 else if food_availability(t) < 22.917 then 0 else if food_availability(t) < 27.083 then 0 else if food_availability(t) < 31.25 then 0 else if food_availability(t) < 35.417 then 0 else if food_availability(t) < 39.583 then 0 else if food_availability(t) < 43.75 then 0 else if food_availability(t) < 47.917 then 0 else 0 else if t = 1 then if food_availability(t) < -47.917 then 0 else if food_availability(t) < -43.75 then 0 else if food_availability(t) < -39.583 then 0 else if food_availability(t) < -35.417 then 0 else if food_availability(t) < -31.25 then 0 else if food_availability(t) < -27.083 then 0.002 else if food_availability(t) < -22.917 then 0.007 else if food_availability(t) < -18.75 then 0.025 else if food_availability(t) < -14.583 then 0.048 else if food_availability(t) < -10.417 then 0.075 else if food_availability(t) < -6.25 then 0.114 else if food_availability(t) < -2.083 then 0.151 else if food_availability(t) < 2.083 then 0.153 else if food_availability(t) < 6.25 then 0.159 else if food_availability(t) < 10.417 then 0.109 else if food_availability(t) < 14.583 then 0.078 else if food_availability(t) < 18.75 then 0.045 else if food_availability(t) < 22.917 then 0.022 else if food_availability(t) < 27.083 then 0.007 else if food_availability(t) < 31.25 then 0.004 else if food_availability(t) < 35.417 then 0 else if food_availability(t) < 39.583 then 0.001 else if food_availability(t) < 43.75 then 0 else if food_availability(t) < 47.917 then 0 else 0 else if t = 2 then if food_availability(t) < -47.917 then 0 else if food_availability(t) < -43.75 then 0.001 else if food_availability(t) < -39.583 then 0.001 else if food_availability(t) < -35.417 then 0.003 else if food_availability(t) < -31.25 then 0.007 else if food_availability(t) < -27.083 then 0.013 else if food_availability(t) < -22.917 then 0.029 else if food_availability(t) < -18.75 then 0.038 else if food_availability(t) < -14.583 then 0.06 else if food_availability(t) < -10.417 then 0.082 else if food_availability(t) < -6.25 then 0.086 else if food_availability(t) < -2.083 then 0.114 else if food_availability(t) < 2.083 then 0.118 else if food_availability(t) < 6.25 then 0.109 else if food_availability(t) < 10.417 then 0.108 else if food_availability(t) < 14.583 then 0.079 else if food_availability(t) < 18.75 then 0.06 else if food_availability(t) < 22.917 then 0.04 else if food_availability(t) < 27.083 then 0.023 else if food_availability(t) < 31.25 then 0.018 else if food_availability(t) < 35.417 then 0.008 else if food_availability(t) < 39.583 then 0.003 else if food_availability(t) < 43.75 then 0.001 else if food_availability(t) < 47.917 then 9.257E-6 else 0 else if t = 3 then if food_availability(t) < -47.917 then 0.001 else if food_availability(t) < -43.75 then 0.004 else if food_availability(t) < -39.583 then 0.007 else if food_availability(t) < -35.417 then 0.012 else if food_availability(t) < -31.25 then 0.016 else if food_availability(t) < -27.083 then 0.024 else if food_availability(t) < -22.917 then 0.031 else if food_availability(t) < -18.75 then 0.041 else if food_availability(t) < -14.583 then 0.066 else if food_availability(t) < -10.417 then 0.077 else if food_availability(t) < -6.25 then 0.084 else if food_availability(t) < -2.083 then 0.093 else if food_availability(t) < 2.083 then 0.097 else if food_availability(t) < 6.25 then 0.09 else if food_availability(t) < 10.417 then 0.076 else if food_availability(t) < 14.583 then 0.076 else if food_availability(t) < 18.75 then 0.061 else if food_availability(t) < 22.917 then 0.048 else if food_availability(t) < 27.083 then 0.033 else if food_availability(t) < 31.25 then 0.029 else if food_availability(t) < 35.417 then 0.013 else if food_availability(t) < 39.583 then 0.01 else if food_availability(t) < 43.75 then 0.006 else if food_availability(t) < 47.917 then 0.003 else 0.001 else if t = 4 then if food_availability(t) < -47.917 then 0.004 else if food_availability(t) < -43.75 then 0.004 else if food_availability(t) < -39.583 then 0.011 else if food_availability(t) < -35.417 then 0.012 else if food_availability(t) < -31.25 then 0.02 else if food_availability(t) < -27.083 then 0.028 else if food_availability(t) < -22.917 then 0.041 else if food_availability(t) < -18.75 then 0.052 else if food_availability(t) < -14.583 then 0.054 else if food_availability(t) < -10.417 then 0.067 else if food_availability(t) < -6.25 then 0.076 else if food_availability(t) < -2.083 then 0.086 else if food_availability(t) < 2.083 then 0.088 else if food_availability(t) < 6.25 then 0.08 else if food_availability(t) < 10.417 then 0.079 else if food_availability(t) < 14.583 then 0.067 else if food_availability(t) < 18.75 then 0.057 else if food_availability(t) < 22.917 then 0.05 else if food_availability(t) < 27.083 then 0.042 else if food_availability(t) < 31.25 then 0.032 else if food_availability(t) < 35.417 then 0.019 else if food_availability(t) < 39.583 then 0.016 else if food_availability(t) < 43.75 then 0.009 else if food_availability(t) < 47.917 then 0.007 else 0.002 else if t = 5 then if food_availability(t) < -47.917 then 0.004 else if food_availability(t) < -43.75 then 0.013 else if food_availability(t) < -39.583 then 0.014 else if food_availability(t) < -35.417 then 0.019 else if food_availability(t) < -31.25 then 0.026 else if food_availability(t) < -27.083 then 0.035 else if food_availability(t) < -22.917 then 0.044 else if food_availability(t) < -18.75 then 0.048 else if food_availability(t) < -14.583 then 0.054 else if food_availability(t) < -10.417 then 0.061 else if food_availability(t) < -6.25 then 0.076 else if food_availability(t) < -2.083 then 0.079 else if food_availability(t) < 2.083 then 0.075 else if food_availability(t) < 6.25 then 0.08 else if food_availability(t) < 10.417 then 0.073 else if food_availability(t) < 14.583 then 0.061 else if food_availability(t) < 18.75 then 0.054 else if food_availability(t) < 22.917 then 0.047 else if food_availability(t) < 27.083 then 0.033 else if food_availability(t) < 31.25 then 0.034 else if food_availability(t) < 35.417 then 0.025 else if food_availability(t) < 39.583 then 0.02 else if food_availability(t) < 43.75 then 0.012 else if food_availability(t) < 47.917 then 0.008 else 0.004 else if t = 6 then if food_availability(t) < -47.917 then 0.006 else if food_availability(t) < -43.75 then 0.013 else if food_availability(t) < -39.583 then 0.015 else if food_availability(t) < -35.417 then 0.022 else if food_availability(t) < -31.25 then 0.027 else if food_availability(t) < -27.083 then 0.039 else if food_availability(t) < -22.917 then 0.039 else if food_availability(t) < -18.75 then 0.046 else if food_availability(t) < -14.583 then 0.055 else if food_availability(t) < -10.417 then 0.068 else if food_availability(t) < -6.25 then 0.072 else if food_availability(t) < -2.083 then 0.069 else if food_availability(t) < 2.083 then 0.071 else if food_availability(t) < 6.25 then 0.071 else if food_availability(t) < 10.417 then 0.059 else if food_availability(t) < 14.583 then 0.06 else if food_availability(t) < 18.75 then 0.056 else if food_availability(t) < 22.917 then 0.046 else if food_availability(t) < 27.083 then 0.045 else if food_availability(t) < 31.25 then 0.036 else if food_availability(t) < 35.417 then 0.033 else if food_availability(t) < 39.583 then 0.023 else if food_availability(t) < 43.75 then 0.018 else if food_availability(t) < 47.917 then 0.011 else 0.004 else if t = 7 then if food_availability(t) < -47.917 then 0.005 else if food_availability(t) < -43.75 then 0.016 else if food_availability(t) < -39.583 then 0.021 else if food_availability(t) < -35.417 then 0.02 else if food_availability(t) < -31.25 then 0.03 else if food_availability(t) < -27.083 then 0.038 else if food_availability(t) < -22.917 then 0.04 else if food_availability(t) < -18.75 then 0.049 else if food_availability(t) < -14.583 then 0.051 else if food_availability(t) < -10.417 then 0.063 else if food_availability(t) < -6.25 then 0.061 else if food_availability(t) < -2.083 then 0.072 else if food_availability(t) < 2.083 then 0.067 else if food_availability(t) < 6.25 then 0.064 else if food_availability(t) < 10.417 then 0.066 else if food_availability(t) < 14.583 then 0.06 else if food_availability(t) < 18.75 then 0.054 else if food_availability(t) < 22.917 then 0.047 else if food_availability(t) < 27.083 then 0.041 else if food_availability(t) < 31.25 then 0.037 else if food_availability(t) < 35.417 then 0.031 else if food_availability(t) < 39.583 then 0.023 else if food_availability(t) < 43.75 then 0.019 else if food_availability(t) < 47.917 then 0.018 else 0.006 else if t = 8 then if food_availability(t) < -47.917 then 0.007 else if food_availability(t) < -43.75 then 0.016 else if food_availability(t) < -39.583 then 0.02 else if food_availability(t) < -35.417 then 0.027 else if food_availability(t) < -31.25 then 0.032 else if food_availability(t) < -27.083 then 0.04 else if food_availability(t) < -22.917 then 0.043 else if food_availability(t) < -18.75 then 0.044 else if food_availability(t) < -14.583 then 0.055 else if food_availability(t) < -10.417 then 0.058 else if food_availability(t) < -6.25 then 0.059 else if food_availability(t) < -2.083 then 0.063 else if food_availability(t) < 2.083 then 0.065 else if food_availability(t) < 6.25 then 0.062 else if food_availability(t) < 10.417 then 0.059 else if food_availability(t) < 14.583 then 0.059 else if food_availability(t) < 18.75 then 0.055 else if food_availability(t) < 22.917 then 0.052 else if food_availability(t) < 27.083 then 0.043 else if food_availability(t) < 31.25 then 0.036 else if food_availability(t) < 35.417 then 0.034 else if food_availability(t) < 39.583 then 0.027 else if food_availability(t) < 43.75 then 0.02 else if food_availability(t) < 47.917 then 0.016 else 0.008 else if t = 9 then if food_availability(t) < -47.917 then 0.008 else if food_availability(t) < -43.75 then 0.019 else if food_availability(t) < -39.583 then 0.022 else if food_availability(t) < -35.417 then 0.028 else if food_availability(t) < -31.25 then 0.033 else if food_availability(t) < -27.083 then 0.038 else if food_availability(t) < -22.917 then 0.044 else if food_availability(t) < -18.75 then 0.049 else if food_availability(t) < -14.583 then 0.054 else if food_availability(t) < -10.417 then 0.057 else if food_availability(t) < -6.25 then 0.064 else if food_availability(t) < -2.083 then 0.058 else if food_availability(t) < 2.083 then 0.06 else if food_availability(t) < 6.25 then 0.059 else if food_availability(t) < 10.417 then 0.062 else if food_availability(t) < 14.583 then 0.053 else if food_availability(t) < 18.75 then 0.051 else if food_availability(t) < 22.917 then 0.047 else if food_availability(t) < 27.083 then 0.042 else if food_availability(t) < 31.25 then 0.039 else if food_availability(t) < 35.417 then 0.034 else if food_availability(t) < 39.583 then 0.025 else if food_availability(t) < 43.75 then 0.027 else if food_availability(t) < 47.917 then 0.021 else 0.006 else if food_availability(t) < -47.917 then 0.008 else if food_availability(t) < -43.75 then 0.023 else if food_availability(t) < -39.583 then 0.026 else if food_availability(t) < -35.417 then 0.027 else if food_availability(t) < -31.25 then 0.035 else if food_availability(t) < -27.083 then 0.038 else if food_availability(t) < -22.917 then 0.045 else if food_availability(t) < -18.75 then 0.048 else if food_availability(t) < -14.583 then 0.048 else if food_availability(t) < -10.417 then 0.057 else if food_availability(t) < -6.25 then 0.055 else if food_availability(t) < -2.083 then 0.057 else if food_availability(t) < 2.083 then 0.058 else if food_availability(t) < 6.25 then 0.061 else if food_availability(t) < 10.417 then 0.059 else if food_availability(t) < 14.583 then 0.058 else if food_availability(t) < 18.75 then 0.05 else if food_availability(t) < 22.917 then 0.048 else if food_availability(t) < 27.083 then 0.045 else if food_availability(t) < 31.25 then 0.041 else if food_availability(t) < 35.417 then 0.033 else if food_availability(t) < 39.583 then 0.029 else if food_availability(t) < 43.75 then 0.026 else if food_availability(t) < 47.917 then 0.02 else 0.01");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	
 	///////////////////////////////
 
 	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests) {
