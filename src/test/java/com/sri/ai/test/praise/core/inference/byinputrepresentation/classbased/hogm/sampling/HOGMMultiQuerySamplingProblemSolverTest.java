@@ -188,6 +188,25 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
+
+	@Test
+	public void ifThenElseFunctionWithRandomConditionSamplingTest() {
+
+		String model = "" +
+				"random x : [-10;10];" +
+				"sort Weather : 2, Cloudy, Sunny;" +
+				"random i : Weather;" +
+				"i = if Normal(0,1) < -1 then Cloudy else Sunny;" +
+				"";
+
+		String query = "i";
+		Expression expected = parse("if i = Cloudy then 0.15 else 0.85");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 50;
+
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
 	@Test
 	public void normalSamplingTest() {
 
@@ -1630,19 +1649,19 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		String model = "" +
 				"sort Person: 4, bob, mary;\r\n" + 
 				"random neighbor : Person x 1990..2000 -> Person;\r\n" + 
-				"random coin : Person x 1990..2000 -> [-10;10];\r\n" +
-				
-				"for all X in Person : for all Y in 1990..2000 : coin(X, Y) = Normal(0,1);" +
+//				"random coin : Person x 1990..2000 -> [-10;10];\r\n" +
+//				
+//				"for all X in Person : for all Y in 1990..2000 : coin(X, Y) = Normal(0,1);" +
 				
 				"for all X in Person : for all Y in 1990..2000 : " +
 				"if Y > 1995 "
 				+ " then neighbor(X, Y) = bob"
-				+ " else if coin(X,Y) < 0 then neighbor(X, Y) = bob else neighbor(X, Y) = mary;";
+				+ " else if Normal(0,1) < 0 then neighbor(X, Y) = bob else neighbor(X, Y) = mary;";
 		
 		String query = "for all X in Person : for all t in 1990..2000 : neighbor(X, t)";
 		
 		Expression expected = parse("if (X = bob) and (t = 1990) then if neighbor(X, t) = bob then 0.498 else if neighbor(X, t) = mary then 0.502 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1990) then if neighbor(X, t) = bob then 0.499 else if neighbor(X, t) = mary then 0.501 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1990) then if neighbor(X, t) = bob then 0.513 else if neighbor(X, t) = mary then 0.487 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1990) then if neighbor(X, t) = bob then 0.491 else if neighbor(X, t) = mary then 0.509 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1991) then if neighbor(X, t) = bob then 0.487 else if neighbor(X, t) = mary then 0.513 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1991) then if neighbor(X, t) = bob then 0.492 else if neighbor(X, t) = mary then 0.508 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1991) then if neighbor(X, t) = bob then 0.495 else if neighbor(X, t) = mary then 0.505 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1991) then if neighbor(X, t) = bob then 0.532 else if neighbor(X, t) = mary then 0.468 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1992) then if neighbor(X, t) = bob then 0.478 else if neighbor(X, t) = mary then 0.522 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1992) then if neighbor(X, t) = bob then 0.486 else if neighbor(X, t) = mary then 0.514 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1992) then if neighbor(X, t) = bob then 0.504 else if neighbor(X, t) = mary then 0.496 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1992) then if neighbor(X, t) = bob then 0.492 else if neighbor(X, t) = mary then 0.508 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1993) then if neighbor(X, t) = bob then 0.49 else if neighbor(X, t) = mary then 0.51 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1993) then if neighbor(X, t) = bob then 0.503 else if neighbor(X, t) = mary then 0.497 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1993) then if neighbor(X, t) = bob then 0.523 else if neighbor(X, t) = mary then 0.477 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1993) then if neighbor(X, t) = bob then 0.5 else if neighbor(X, t) = mary then 0.5 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1994) then if neighbor(X, t) = bob then 0.482 else if neighbor(X, t) = mary then 0.518 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1994) then if neighbor(X, t) = bob then 0.48 else if neighbor(X, t) = mary then 0.52 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1994) then if neighbor(X, t) = bob then 0.519 else if neighbor(X, t) = mary then 0.481 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1994) then if neighbor(X, t) = bob then 0.506 else if neighbor(X, t) = mary then 0.494 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1995) then if neighbor(X, t) = bob then 0.474 else if neighbor(X, t) = mary then 0.526 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1995) then if neighbor(X, t) = bob then 0.481 else if neighbor(X, t) = mary then 0.519 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1995) then if neighbor(X, t) = bob then 0.516 else if neighbor(X, t) = mary then 0.484 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1995) then if neighbor(X, t) = bob then 0.503 else if neighbor(X, t) = mary then 0.497 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1996) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1996) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1996) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1996) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1997) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1997) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1997) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1997) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1998) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1998) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1998) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1998) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 1999) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 1999) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 1999) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person4) and (t = 1999) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = bob) and (t = 2000) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = mary) and (t = 2000) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if (X = person3) and (t = 2000) then if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0 else if neighbor(X, t) = bob then 1 else if neighbor(X, t) = mary then 0 else if neighbor(X, t) = person3 then 0 else 0");
-		int initialNumberOfSamples = 1000;
+		int initialNumberOfSamples = 100;
 		int numberOfDiscreteValues = 5;
 	
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
@@ -1699,7 +1718,6 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
-	
 	///////////////////////////////
 
 	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests) {

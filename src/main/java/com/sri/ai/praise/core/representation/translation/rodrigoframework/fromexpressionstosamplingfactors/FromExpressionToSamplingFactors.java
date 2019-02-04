@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors;
 
 import static com.sri.ai.expresso.helper.Expressions.ONE;
+import static com.sri.ai.expresso.helper.Expressions.TRUE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.expresso.helper.Expressions.getConstantDoubleValueOrThrowErrorWithMessage;
 import static com.sri.ai.expresso.helper.Expressions.isNumber;
@@ -33,7 +34,6 @@ import static com.sri.ai.util.Util.myAssert;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
@@ -45,7 +45,6 @@ import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
-import com.sri.ai.grinder.library.boole.Or;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -78,8 +77,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 
 public class FromExpressionToSamplingFactors {
 	
-	private static final LinkedList<String> NON_RANDOM_VARIABLE_RANDOM_FUNCTIONS = list("Normal");
-
 	private Predicate<Expression> isVariable;
 
 	private Random random;
@@ -181,11 +178,41 @@ public class FromExpressionToSamplingFactors {
 		Expression condition = IfThenElse.condition(expression);
 		Expression thenBranch = IfThenElse.thenBranch(expression);
 		Expression elseBranch = IfThenElse.elseBranch(expression);
-		Expression equivalent = 
-				Or.make(
-						And.make(condition, thenBranch), 
-						And.make(Not.make(condition), elseBranch));
-		factorCompilation(equivalent, factors);
+
+		Expression conditionAndThenBranch = And.make(condition, thenBranch);
+		Expression notCondition = Not.make(condition);
+		Expression notConditionAndElseBranch = And.make(notCondition, elseBranch);
+		
+		Variable conditionVariable = expressionCompilation(condition, factors);
+		Variable thenBranchVariable = expressionCompilation(thenBranch, factors);
+		Variable elseBranchVariable = expressionCompilation(elseBranch, factors);
+		
+		Variable conditionAndThenBranchVariable = makeUniqueRandomVariable(conditionAndThenBranch);
+		factors.add(
+				new ConjunctionSamplingFactor(
+						conditionAndThenBranchVariable, 
+						list(conditionVariable, thenBranchVariable),
+						getRandom()));
+		
+		Variable notConditionVariable = makeUniqueRandomVariable(notCondition);
+		factors.add(
+				new NegationSamplingFactor(
+						notConditionVariable, 
+						conditionVariable,
+						getRandom()));
+		
+		Variable notConditionAndElseBranchVariable = makeUniqueRandomVariable(notConditionAndElseBranch);
+		factors.add(
+				new ConjunctionSamplingFactor(
+						notConditionAndElseBranchVariable, 
+						list(notConditionVariable, elseBranchVariable),
+						getRandom()));
+		
+		factors.add(
+				new DisjunctionSamplingFactor(
+						expressionVariable(TRUE), // needs to be an expression variable with a constant to be conditioned to be always true
+						list(conditionAndThenBranchVariable, notConditionAndElseBranchVariable),
+						getRandom()));
 	}
 	
 	private void equalityFactorCompilation(Expression expression, List<SamplingFactor> factors) {
@@ -292,7 +319,7 @@ public class FromExpressionToSamplingFactors {
 	private Variable compoundExpressionCompilation(Expression expression, Variable compoundExpressionVariableIfAvailable, List<SamplingFactor> factors) throws Error {
 		Variable compoundExpressionVariable = 
 				compoundExpressionVariableIfAvailable != null
-				? compoundExpressionVariableIfAvailable : makeExpressionVariable(expression);
+				? compoundExpressionVariableIfAvailable : makeUniqueRandomVariable(expression);
 		
 		if (isConstant(expression)) {
 			constantCompilation(compoundExpressionVariable, expression, factors);
@@ -351,21 +378,6 @@ public class FromExpressionToSamplingFactors {
 		return compoundExpressionVariable;
 	}
 
-	public ExpressionVariable makeExpressionVariable(Expression expression) {
-		if (isApplicationOfNonRandomVariableRandomFunction(expression)) {
-			return makeUniqueRandomVariable(expression);
-		}
-		else {
-			return expressionVariable(expression);
-		}
-	}
-
-	private boolean isApplicationOfNonRandomVariableRandomFunction(Expression expression) {
-		Expression functor = expression.getFunctor();
-		boolean result = functor != null && NON_RANDOM_VARIABLE_RANDOM_FUNCTIONS.contains(functor.toString());
-		return result;
-	}
-
 	private ExpressionVariable makeUniqueRandomVariable(Expression expression) {
 		Expression unique = Expressions.apply("unique", expression, uniqueVariableOccurrenceIndex++);
 		ExpressionVariable result = expressionVariable(unique);
@@ -381,13 +393,15 @@ public class FromExpressionToSamplingFactors {
 		Expression condition  = IfThenElse.condition(expression);
 		Expression thenBranch = IfThenElse.thenBranch(expression);
 		Expression elseBranch = IfThenElse.elseBranch(expression);
-		Expression equivalent = 
-				Or.make(
-						And.make(         condition , Equality.make(compoundExpressionVariable, thenBranch)),
-						And.make(Not.make(condition), Equality.make(compoundExpressionVariable, elseBranch)));
-		factorCompilation(equivalent, factors);
-		// note that this is different from the compilation of other
-		// expressions as functions, because we are asserting that the above disjunction is true.
+
+		Expression compoundExpression = ((ExpressionVariable) compoundExpressionVariable);
+		
+		Expression compoundEqualsThenBranch = Equality.make(compoundExpression, thenBranch);
+		Expression compoundEqualsElseBranch = Equality.make(compoundExpression, elseBranch);
+		
+		Expression ifThenElseFactor = IfThenElse.make(condition, compoundEqualsThenBranch, compoundEqualsElseBranch);
+		
+		ifThenElseFactorCompilation(ifThenElseFactor, factors);
 	}
 
 	private void sumCompilation(Variable compoundExpressionVariable, Expression expression, List<SamplingFactor> factors) {

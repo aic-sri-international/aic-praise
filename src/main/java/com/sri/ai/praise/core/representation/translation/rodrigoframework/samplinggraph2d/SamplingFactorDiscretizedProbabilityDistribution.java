@@ -80,7 +80,12 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 	@Override
 	protected void beforeFirstUseOfUnderlyingDistribution() {
 		println("Taking " + initialNumberOfSamples + " samples from " + id + "-th " + getClass().getSimpleName() + " on " + samplingFactor);
-		repeat(initialNumberOfSamples, () -> sample());
+		repeat(initialNumberOfSamples, i -> {
+			if (i % 25 == 0) {
+				println("Taking sample #" + i);
+			}
+			sample(); 
+		});
 	}
 	
 	//////////////////////////////

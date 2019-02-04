@@ -72,7 +72,7 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 		long initialTime = System.currentTimeMillis();
 		if (debug) {
 			println("Sampling DynamicSamplingProductFactor for " + join(variablesToSample) + " starting with " + sample);
-			getThreadExplanationLogger().setIsActive(join(variablesToSample).equals("neighbor__bob_1993"));
+			getThreadExplanationLogger().setIsActive(join(variablesToSample).equals("neighbor__person4_1995"));
 		}
 		stackOfVariablesWeAreTryingToInstantiate = list();
 		uninstantiableWithCurrentSample = set();
