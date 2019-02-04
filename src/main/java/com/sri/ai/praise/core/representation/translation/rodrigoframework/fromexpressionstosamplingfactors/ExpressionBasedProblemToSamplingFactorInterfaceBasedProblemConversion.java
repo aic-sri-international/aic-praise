@@ -37,8 +37,6 @@
  */
 package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors;
 
-import static com.sri.ai.util.Util.join;
-import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.unionArrayList;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
@@ -81,11 +79,11 @@ public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversi
 		List<Factor> factors = makeFactors(expressionBasedProblem, isVariablePredicate, expressionBasedProblem.getContext());
 		FactorNetwork factorNetwork = new DefaultFactorNetwork(factors);
 		
-		println("Variables:");
-		println(join("\n", factorNetwork.getVariables()));
-		
-		println("Factors:");
-		println(join("\n", factors));
+//		println("Variables:");
+//		println(join("\n", factorNetwork.getVariables()));
+//		
+//		println("Factors:");
+//		println(join("\n", factors));
 		
 		return factorNetwork;
 	}
