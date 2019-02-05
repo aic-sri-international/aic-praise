@@ -1751,6 +1751,48 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
+	@Test
+	public void meanOnLargerModelSamplingTest() {
+
+		String model = ""
+				+ "sort Counties: 4, TonjEast, TonjNorth, Panyijiar, Mayendit;\r\n" + 
+				"\r\n" + 
+				"random precip : Counties x 0..6 -> [500;2000];\r\n" + 
+				"random temp : Counties x 0..6 -> [0;70];\r\n" + 
+				"random crop : Counties x 0..6 -> [0;800];\r\n" + 
+				"\r\n" + 
+				"for all County in Counties :\r\n" + 
+				"for all Month in 0..6 :\r\n" + 
+				"precip(County, Month) = \r\n" + 
+				"    if Month = 0 \r\n" + 
+				"	   then Normal(1000, 2) \r\n" + 
+				"	   else Normal(precip(County, Month - 1), 50);\r\n" + 
+				"\r\n" + 
+				"for all County in Counties :\r\n" + 
+				"for all Month in 0..6 :\r\n" + 
+				"temp(County, Month) = \r\n" + 
+				"    if Month = 0 \r\n" + 
+				"	   then Normal(20, 2) \r\n" + 
+				"	   else Normal(temp(County, Month - 1), 1);\r\n" + 
+				"	   \r\n" + 
+				"for all County in Counties :\r\n" + 
+				"for all Month in 0..6 :\r\n" + 
+				"crop(County, Month) = Normal(5*temp(County, Month) + 0.25*precip(County, Month), 30);\r\n" + 
+				"\r\n" + 
+				"// precip(TonjEast, 3) = 1200;\r\n" + 
+				"precip(TonjEast, 4) = 1500;\r\n" + 
+				"precip(Panyijiar, 5) = 1600;\r\n" + 
+				"crop(TonjEast, 5) = 400;" +
+				"";
+		
+		String query = "for all County in Counties : for all Month in 0..6 : mean(precip(County, Month))";
+		Expression expected = parse("if (County = TonjEast) and (Month = 0) then 1000 else if (County = TonjNorth) and (Month = 0) then 1000 else if (County = Panyijiar) and (Month = 0) then 1000 else if (County = Mayendit) and (Month = 0) then 1000 else if (County = TonjEast) and (Month = 1) then 1064.953 else if (County = TonjNorth) and (Month = 1) then 1005.111 else if (County = Panyijiar) and (Month = 1) then 1039.465 else if (County = Mayendit) and (Month = 1) then 1007.088 else if (County = TonjEast) and (Month = 2) then 1187.49 else if (County = TonjNorth) and (Month = 2) then 981.358 else if (County = Panyijiar) and (Month = 2) then 1126.146 else if (County = Mayendit) and (Month = 2) then 997.147 else if (County = TonjEast) and (Month = 3) then 1187.499 else if (County = TonjNorth) and (Month = 3) then 1017.261 else if (County = Panyijiar) and (Month = 3) then 1116.605 else if (County = Mayendit) and (Month = 3) then 1030.485 else if (County = TonjEast) and (Month = 4) then 1500 else if (County = TonjNorth) and (Month = 4) then 972.613 else if (County = Panyijiar) and (Month = 4) then 1249.999 else if (County = Mayendit) and (Month = 4) then 1047.643 else if (County = TonjEast) and (Month = 5) then 1312.5 else if (County = TonjNorth) and (Month = 5) then 985.758 else if (County = Panyijiar) and (Month = 5) then 1625 else if (County = Mayendit) and (Month = 5) then 1006.077 else if (County = TonjEast) and (Month = 6) then 1499.188 else if (County = TonjNorth) and (Month = 6) then 1000.999 else if (County = Panyijiar) and (Month = 6) then 1625 else 964.952");
+		int initialNumberOfSamples = 100;
+		int numberOfDiscreteValues = 25;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
 	///////////////////////////////
 
 	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests) {

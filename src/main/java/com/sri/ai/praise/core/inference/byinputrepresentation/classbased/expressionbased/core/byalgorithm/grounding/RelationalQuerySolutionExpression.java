@@ -201,7 +201,17 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 	public int getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex() {
 		Expression queryBody = getQueryBody(problem);
 		AggregatorFunction aggregator = getDiscretizedConditionalProbabilityDistributionFunction();
-		int result = Util.getIndexOfFirstSatisfyingPredicateOrMinusOne(aggregator.getSetOfInputVariables().getVariables(), v -> v.getName().equals(queryBody.toString()));
+		int result;
+		if (queryBody.hasFunctor("mean")) {
+			result = aggregator.getSetOfInputVariables().size() != 0? 0 : -1;
+			// TODO: here we get the first index of a lifted query (if any) as the new query.
+			// However, any of the indices of lifted query would work, so we want to offer that possibility
+			// somehow at some point, either at this point, or just passing the information along
+			// as to what indices are eligible.
+		}
+		else {
+			result = Util.getIndexOfFirstSatisfyingPredicateOrMinusOne(aggregator.getSetOfInputVariables().getVariables(), v -> v.getName().equals(queryBody.toString()));
+		}
 		return result;
 	}
 	
