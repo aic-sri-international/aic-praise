@@ -93,8 +93,6 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	@Override
 	public void sampleOrWeigh(Sample sample) {
 		
-		// completeFunctionResultFromPossiblyPartialAssignmentIfPossible(sample);
-	
 		int missingArgumentIndex = analyzeMissingArguments(sample);
 		
 		if (missingArgumentIndex == -1) {

@@ -23,6 +23,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.so
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.DynamicSamplingProductFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.NonBooleanFactorError;
 import com.sri.ai.util.Util;
@@ -84,6 +85,58 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int numberOfDiscreteValues = 25;
 
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, /* no graph - waiting for bar chart implementation */ false);
+	}
+
+	@Test
+	public void normalSamplingTest() {
+	
+		String model = "" +
+				"random x : [-10;10];" +
+				"x = Normal(0.0, 3.0);"
+				;
+	
+		String query = "x";
+		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0.001 else if x < -7.917 then 0.002 else if x < -7.083 then 0.005 else if x < -6.25 then 0.009 else if x < -5.417 then 0.017 else if x < -4.583 then 0.028 else if x < -3.75 then 0.042 else if x < -2.917 then 0.059 else if x < -2.083 then 0.08 else if x < -1.25 then 0.095 else if x < -0.417 then 0.107 else if x < 0.417 then 0.111 else if x < 1.25 then 0.106 else if x < 2.083 then 0.095 else if x < 2.917 then 0.078 else if x < 3.75 then 0.059 else if x < 4.583 then 0.042 else if x < 5.417 then 0.028 else if x < 6.25 then 0.016 else if x < 7.083 then 0.01 else if x < 7.917 then 0.005 else if x < 8.75 then 0.003 else if x < 9.583 then 0.001 else 0");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void normalAndEqualitySamplingTest() {
+	
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"y = Normal(0.0, 3);" +
+				"x = y;"
+				;
+	
+		String query = "x";
+		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0.001 else if x < -7.917 then 0.002 else if x < -7.083 then 0.005 else if x < -6.25 then 0.01 else if x < -5.417 then 0.017 else if x < -4.583 then 0.028 else if x < -3.75 then 0.042 else if x < -2.917 then 0.06 else if x < -2.083 then 0.078 else if x < -1.25 then 0.094 else if x < -0.417 then 0.106 else if x < 0.417 then 0.111 else if x < 1.25 then 0.106 else if x < 2.083 then 0.095 else if x < 2.917 then 0.078 else if x < 3.75 then 0.06 else if x < 4.583 then 0.042 else if x < 5.417 then 0.028 else if x < 6.25 then 0.017 else if x < 7.083 then 0.009 else if x < 7.917 then 0.005 else if x < 8.75 then 0.002 else if x < 9.583 then 0.001 else 0");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
+	public void normalWithVariableMeanSamplingTest() {
+	
+		String model = "" +
+				"random x : [-10;10];" +
+				"random y : [-10;10];" +
+				"y = Normal(0.0, 1);" +
+				"x = Normal(y, 3);"
+				;
+	
+		String query = "x";
+		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0.002 else if x < -7.917 then 0.003 else if x < -7.083 then 0.006 else if x < -6.25 then 0.012 else if x < -5.417 then 0.019 else if x < -4.583 then 0.03 else if x < -3.75 then 0.044 else if x < -2.917 then 0.06 else if x < -2.083 then 0.077 else if x < -1.25 then 0.091 else if x < -0.417 then 0.101 else if x < 0.417 then 0.105 else if x < 1.25 then 0.101 else if x < 2.083 then 0.092 else if x < 2.917 then 0.077 else if x < 3.75 then 0.06 else if x < 4.583 then 0.044 else if x < 5.417 then 0.03 else if x < 6.25 then 0.019 else if x < 7.083 then 0.012 else if x < 7.917 then 0.006 else if x < 8.75 then 0.003 else if x < 9.583 then 0.002 else 0");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	@Test
@@ -207,22 +260,6 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
-	@Test
-	public void normalSamplingTest() {
-
-		String model = "" +
-				"random x : [-10;10];" +
-				"x = Normal(0.0, 3.0);"
-				;
-
-		String query = "x";
-		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0.001 else if x < -7.917 then 0.002 else if x < -7.083 then 0.005 else if x < -6.25 then 0.009 else if x < -5.417 then 0.017 else if x < -4.583 then 0.028 else if x < -3.75 then 0.042 else if x < -2.917 then 0.059 else if x < -2.083 then 0.08 else if x < -1.25 then 0.095 else if x < -0.417 then 0.107 else if x < 0.417 then 0.111 else if x < 1.25 then 0.106 else if x < 2.083 then 0.095 else if x < 2.917 then 0.078 else if x < 3.75 then 0.059 else if x < 4.583 then 0.042 else if x < 5.417 then 0.028 else if x < 6.25 then 0.016 else if x < 7.083 then 0.01 else if x < 7.917 then 0.005 else if x < 8.75 then 0.003 else if x < 9.583 then 0.001 else 0");
-		int initialNumberOfSamples = 10000;
-		int numberOfDiscreteValues = 25;
-
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
-	}
-
 	@Test 
 	public void queryWithTwoVariablesSamplingTest() {
 
@@ -276,42 +313,6 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int numberOfDiscreteValues = 25;
 
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests);
-	}
-
-	@Test
-	public void normalAndEqualitySamplingTest() {
-
-		String model = "" +
-				"random x : [-10;10];" +
-				"random y : [-10;10];" +
-				"y = Normal(0.0, 3);" +
-				"x = y;"
-				;
-
-		String query = "x";
-		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0.001 else if x < -7.917 then 0.002 else if x < -7.083 then 0.005 else if x < -6.25 then 0.01 else if x < -5.417 then 0.017 else if x < -4.583 then 0.028 else if x < -3.75 then 0.042 else if x < -2.917 then 0.06 else if x < -2.083 then 0.078 else if x < -1.25 then 0.094 else if x < -0.417 then 0.106 else if x < 0.417 then 0.111 else if x < 1.25 then 0.106 else if x < 2.083 then 0.095 else if x < 2.917 then 0.078 else if x < 3.75 then 0.06 else if x < 4.583 then 0.042 else if x < 5.417 then 0.028 else if x < 6.25 then 0.017 else if x < 7.083 then 0.009 else if x < 7.917 then 0.005 else if x < 8.75 then 0.002 else if x < 9.583 then 0.001 else 0");
-		int initialNumberOfSamples = 10000;
-		int numberOfDiscreteValues = 25;
-
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
-	}
-
-	@Test
-	public void normalWithVariableMeanSamplingTest() {
-
-		String model = "" +
-				"random x : [-10;10];" +
-				"random y : [-10;10];" +
-				"y = Normal(0.0, 1);" +
-				"x = Normal(y, 3);"
-				;
-
-		String query = "x";
-		Expression expected = parse("if x < -9.583 then 0 else if x < -8.75 then 0.002 else if x < -7.917 then 0.003 else if x < -7.083 then 0.006 else if x < -6.25 then 0.012 else if x < -5.417 then 0.019 else if x < -4.583 then 0.03 else if x < -3.75 then 0.044 else if x < -2.917 then 0.06 else if x < -2.083 then 0.077 else if x < -1.25 then 0.091 else if x < -0.417 then 0.101 else if x < 0.417 then 0.105 else if x < 1.25 then 0.101 else if x < 2.083 then 0.092 else if x < 2.917 then 0.077 else if x < 3.75 then 0.06 else if x < 4.583 then 0.044 else if x < 5.417 then 0.03 else if x < 6.25 then 0.019 else if x < 7.083 then 0.012 else if x < 7.917 then 0.006 else if x < 8.75 then 0.003 else if x < 9.583 then 0.002 else 0");
-		int initialNumberOfSamples = 10000;
-		int numberOfDiscreteValues = 25;
-
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
 	// @Test
@@ -1345,6 +1346,23 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
+	//@Test
+	public void minimalCountiesSamplingTest3() {
+	
+		String model = "" +
+				"sort Counties: 2, Abyei', Akobo';" + // the quotes makes them not be region names and makes plots be recorded, not maps. 
+				"random capital: Counties;" + 
+				"constant x : [-10;10];" + 
+				"capital = if x > 0 then Abyei' else Akobo';";
+		
+		String query = "capital";
+		Expression expected = parse("if (x < 0) and (capital = Abyei') then 0 else if (x < 0) and (capital = Akobo') then 1 else if (x < 10) and (capital = Abyei') then 1 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 2;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
 	@Test
 	public void countiesSamplingTest3() {
 	
@@ -1809,6 +1827,41 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	
 	private void runTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph, Sample conditioningSample) {
 
+//		// warm up
+//		runGibbsTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+//		runMonteCarloTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+//		runGibbsTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+//		runMonteCarloTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+
+		// measure time
+
+//		long gibbsInitialTime = System.currentTimeMillis();
+//		runGibbsTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+//		long gibbsTime = System.currentTimeMillis() - gibbsInitialTime;
+
+		long monteCarloInitialTime = System.currentTimeMillis();
+		runMonteCarloTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+		long monteCarloTime = System.currentTimeMillis() - monteCarloInitialTime;
+		
+//		println("Monte Carlo time: " + monteCarloTime + " ms");
+//		println("Gibbs time: " + gibbsTime + " ms");
+		
+	}
+
+	private void runMonteCarloTest(String model, String query, Expression expected, int initialNumberOfSamples,
+			int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph, Sample conditioningSample) {
+		DynamicSamplingProductFactor.gibbs = false;
+		runTestForOneSolver(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+	}
+
+	private void runGibbsTest(String model, String query, Expression expected, int initialNumberOfSamples,
+			int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph, Sample conditioningSample) {
+		DynamicSamplingProductFactor.gibbs = true;
+		runTestForOneSolver(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+	}
+
+	private void runTestForOneSolver(String model, String query, Expression expected, int initialNumberOfSamples,
+			int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph, Sample conditioningSample) {
 		if (generateGraph) {
 			generateGraph(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 		}

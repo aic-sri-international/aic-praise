@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample;
 
+import java.util.Collection;
 import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -18,4 +19,6 @@ public interface Assignment {
 
 	Map<Variable, Object> mapValue();
 
+	Collection<? extends Variable> getVariables();
+	
 }

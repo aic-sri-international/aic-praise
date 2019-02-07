@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule;
 
 import static com.sri.ai.util.Util.assertType;
+import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
 
@@ -10,7 +11,7 @@ import java.util.List;
 
 import com.google.common.base.Function;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.Sampler;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableIsDefinedGoal;
@@ -23,7 +24,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	
 	public static final double MAXIMUM_ESTIMATED_SUCCESS_WEIGHT = Plan.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT;
 
-	private Sampler sampler;
+	private SamplingFactor sampler;
 
 	private Collection<? extends SamplingGoal> antecedents;
 
@@ -32,7 +33,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	private boolean hasFired;
 	
 	public static SamplingRule samplingRuleFromGoals(
-			Sampler sampler, 
+			SamplingFactor sampler, 
 			Collection<? extends SamplingGoal> consequents, 
 			Collection<? extends SamplingGoal> antecedents, 
 			double estimatedSuccessWeight) {
@@ -49,7 +50,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	 * @return
 	 */
 	public static SamplingRule samplingRuleFromVariables(
-			Sampler sampler, 
+			SamplingFactor sampler, 
 			Collection<? extends Variable> consequentVariables, 
 			Collection<? extends Variable> antecedentVariables, 
 			double estimatedSuccessWeight) {
@@ -68,7 +69,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	 * @return
 	 */
 	public static SamplingRule deterministicSamplingRuleFromVariables(
-			Sampler sampler, 
+			SamplingFactor sampler, 
 			Collection<? extends Variable> consequentVariables, 
 			Collection<? extends Variable> antecedentVariables) {
 		
@@ -76,14 +77,14 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	}
 
 	public static SamplingRule deterministicSamplingRuleFromGoals(
-			Sampler sampler, 
+			SamplingFactor sampler, 
 			Collection<? extends SamplingGoal> consequentVariables, 
 			Collection<? extends SamplingGoal> antecedentVariables) {
 		
 		return samplingRuleFromGoals(sampler, consequentVariables, antecedentVariables, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
 	}
 
-	public SamplingRule(Sampler sampler, Collection<? extends SamplingGoal> consequents, Collection<? extends SamplingGoal> antecedents, double estimatedSuccessWeight) {
+	public SamplingRule(SamplingFactor sampler, Collection<? extends SamplingGoal> consequents, Collection<? extends SamplingGoal> antecedents, double estimatedSuccessWeight) {
 		super(estimatedSuccessWeight);
 		this.sampler = sampler;
 		this.antecedents = antecedents;
@@ -91,7 +92,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		this.hasFired = false;
 	}
 
-	public Sampler getSampler() {
+	public SamplingFactor getSampler() {
 		return sampler;
 	}
 	
@@ -113,7 +114,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		hasFired = false;
 	}
 
-	public SamplingRule replaceFactor(Sampler newSamplingFactor) {
+	public SamplingRule replaceFactor(SamplingFactor newSamplingFactor) {
 		SamplingRule result = new SamplingRule(newSamplingFactor, getConsequents(), getAntecendents(), getEstimatedSuccessWeight());
 		return result;
 	}
@@ -140,7 +141,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	public String toString() {
 		String consequentsString = join(consequents);
 		String antecedentsString = join(antecedents);
-		Sampler factorString = getSampler();
+		SamplingFactor factorString = getSampler();
 		String result = consequentsString + " <= " + antecedentsString + " with " + factorString;
 		return result;
 	}
@@ -155,4 +156,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		
 	};
 
+	public boolean isSatisfied(Sample sample) {
+		return forAll(getAntecendents(), a -> a.isSatisfied(sample));
+	}
 }

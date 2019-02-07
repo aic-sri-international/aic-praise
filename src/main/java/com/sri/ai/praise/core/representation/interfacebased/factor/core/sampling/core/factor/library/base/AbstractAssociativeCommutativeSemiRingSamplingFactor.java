@@ -2,7 +2,10 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.util.Util.fold;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.notNullAndEquals;
+import static com.sri.ai.util.Util.thereExists;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.Iterator;
@@ -11,6 +14,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractDeterministicFunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SpecificationForFunctionResultSamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
@@ -96,6 +100,22 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 	//////////////////////
 	
 	@Override
+	public void sampleOrWeigh(Sample sample) {
+		if (someArgumentIsTheAbsorbingElement(sample)) {
+			sample.set(getFunctionResult(), getAbsorbingElement());
+			// no need to do anything else; the fact that the result is the absorbing element means
+			// no argument that is not already instantiated can be determined from it
+		}
+		else {
+			super.sampleOrWeigh(sample);
+		}
+	}
+
+	private boolean someArgumentIsTheAbsorbingElement(Sample sample) {
+		return getAbsorbingElement() != null && thereExists(getArguments(), a -> notNullAndEquals(sample.get(a), getAbsorbingElement()));
+	}
+	
+	@Override
 	protected Object evaluateFunctionFromAllArguments(Function<Variable, Object> fromVariableToValue) {
 		Iterator<T> doubleValues = functionIterator(getArguments(), v -> getValue(fromVariableToValue, v));
 		T result = evaluateFunctionFromAllArgumentsValues(doubleValues);
@@ -124,11 +144,20 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 
 	@Override
 	protected Iterator<SpecificationForFunctionResultSamplingRule> specificationsForShortCircuitingSamplingRules() {
+		if (getAbsorbingElement() == null) {
+			return iterator();
+		}
+		else {
+			return specificationsForShortCircuitingSamplingRulesWhenThereIsAnAbsorbingElement();
+		}
+	}
+
+	private Iterator<SpecificationForFunctionResultSamplingRule> specificationsForShortCircuitingSamplingRulesWhenThereIsAnAbsorbingElement() {
 		return functionIterator(
 				new IntegerIterator(0, getArguments().size()),
 				argumentIndex ->
 				new SpecificationForFunctionResultSamplingRule(
-						sample -> sample.getAssignment().set(getFunctionResult(), getAbsorbingElement()),
+						this,
 						list(argumentIndex),
 						list(argumentIsAbsorbingValue(argumentIndex)),
 						SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT));

@@ -38,13 +38,17 @@ public interface Potential extends ArithmeticNumber {
 		return getThreadPotentialFactory().make(number);
 	}
 	
-	public static Map<Thread, PotentialFactory> threadPotentialFactory = map();
+	static Map<Thread, PotentialFactory> threadPotentialFactory = map();
 	
-	public static void setThreadPotentialFactory(PotentialFactory potentialFactory) {
+	static void setThreadPotentialFactory(PotentialFactory potentialFactory) {
 		threadPotentialFactory.put(Thread.currentThread(), potentialFactory);
 	}
 	
-	public static PotentialFactory getThreadPotentialFactory() {
+	static PotentialFactory getThreadPotentialFactory() {
 		return Util.getValuePossiblyCreatingIt(threadPotentialFactory, Thread.currentThread(), (key) -> new DoublePotentialFactory());
+	}
+	
+	default Potential inverse() {
+		return one().divide(this);
 	}
 }

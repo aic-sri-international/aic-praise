@@ -39,6 +39,9 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.frome
 
 import static com.sri.ai.util.Util.unionArrayList;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 
 import java.util.List;
 import java.util.Random;
@@ -79,11 +82,15 @@ public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversi
 		List<Factor> factors = makeFactors(expressionBasedProblem, isVariablePredicate, expressionBasedProblem.getContext());
 		FactorNetwork factorNetwork = new DefaultFactorNetwork(factors);
 		
-//		println("Variables:");
-//		println(join("\n", factorNetwork.getVariables()));
-//		
-//		println("Factors:");
-//		println(join("\n", factors));
+		explanationBlock("Sampling factors generated from expressions: ", code( () -> {
+			for (Factor factor : factors) {
+				explanationBlock("Sampling factor: ", factor, code( () -> {
+					for (Variable variable : factor.getVariables()) {
+						explain(variable);
+					}
+				}));
+			}
+		}));
 		
 		return factorNetwork;
 	}

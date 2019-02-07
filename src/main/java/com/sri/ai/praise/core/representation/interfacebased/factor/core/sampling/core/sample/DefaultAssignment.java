@@ -2,6 +2,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.util.Util.map;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -12,6 +13,11 @@ public class DefaultAssignment implements Assignment {
 	
 	private Map<Variable, Object> fromVariablesToValues = map();
 	
+	@Override
+	public Collection<? extends Variable> getVariables() {
+		return Collections.unmodifiableCollection(fromVariablesToValues.keySet());
+	}
+
 	@Override
 	public Object get(Variable variable) {
 		return fromVariablesToValues.get(variable);
@@ -46,7 +52,7 @@ public class DefaultAssignment implements Assignment {
 
 	@Override
 	public Map<Variable, Object> mapValue() {
-		return Collections.unmodifiableMap(fromVariablesToValues);
+		return fromVariablesToValues;
 	}
 
 	@Override

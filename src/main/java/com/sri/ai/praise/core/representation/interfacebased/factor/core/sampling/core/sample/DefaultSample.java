@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample;
 
+import static com.sri.ai.util.Util.assertType;
 import static com.sri.ai.util.Util.myAssert;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Assignment;
@@ -28,6 +29,14 @@ public class DefaultSample implements Sample {
 	}
 
 	@Override
+	public void copyToSameInstance(Sample anotherSample) {
+		DefaultSample anotherDefaultSample = assertType(anotherSample, DefaultSample.class, this);
+		this.assignment = anotherDefaultSample.assignment;
+		this.importance = anotherDefaultSample.importance;
+		this.potential = anotherDefaultSample.potential;
+	}
+
+	@Override
 	public Assignment getAssignment() {
 		return assignment;
 	}
@@ -35,6 +44,11 @@ public class DefaultSample implements Sample {
 	@Override
 	public Importance getImportance() {
 		return importance;
+	}
+	
+	@Override
+	public void setPotential(Potential potential) {
+		this.potential = potential;
 	}
 
 	@Override

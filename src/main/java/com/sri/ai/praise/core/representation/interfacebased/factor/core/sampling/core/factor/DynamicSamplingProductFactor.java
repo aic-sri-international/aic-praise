@@ -5,6 +5,7 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.s
 import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.forAll;
+import static com.sri.ai.util.Util.get;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
@@ -13,12 +14,17 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.notContainedBy;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.set;
 import static com.sri.ai.util.Util.setFrom;
 import static com.sri.ai.util.Util.thereExists;
+import static com.sri.ai.util.Util.union;
 import static com.sri.ai.util.Util.whileDo;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 import static com.sri.ai.util.collect.PredicateIterator.predicateIterator;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
@@ -27,6 +33,7 @@ import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.ge
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -34,6 +41,7 @@ import java.util.Set;
 
 import com.google.common.base.Function;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.GibbsSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
@@ -43,8 +51,10 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.util.collect.PredicateIterator;
 import com.sri.ai.util.planning.api.Goal;
 
-public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor {
+public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor implements GibbsSamplingFactor {
 
+	public static boolean gibbs = false;
+	
 	private Deque<Variable> stackOfVariablesWeAreTryingToInstantiate;
 	private Set<SamplingFactor> inputFactorsYetToUse;
 	private Set<Variable> uninstantiableWithCurrentSample;
@@ -68,6 +78,16 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 	 * @param sample
 	 */
 	public void sampleOrWeigh(List<? extends Variable> variablesToSample, Sample sample) {
+		
+		if (gibbs) {
+			gibbsSampleOrWeight(variablesToSample, sample);
+		}
+		else {
+			monteCarloSampleOrWeigh(variablesToSample, sample);
+		}
+	}
+
+	public void monteCarloSampleOrWeigh(List<? extends Variable> variablesToSample, Sample sample) {
 		boolean debug = false;
 		long initialTime = System.currentTimeMillis();
 		if (debug) {
@@ -320,5 +340,125 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 		boolean result = g.isSatisfied(sample);
 		return result;
 	}
+	
+	////////////////////////// Gibbs sampling
+	
+	private Sample previousSample = null;
+	private Collection<Variable> conditionedVariables = list();
+	
+	private void gibbsSampleOrWeight(List<? extends Variable> variables, Sample sample) {
+		if (previousSample == null) {
+			conditionedVariables = collectToList(sample.getVariables(), sample::instantiates);
+			monteCarloSampleOrWeigh(variables, sample);
+			previousSample = sample;
+		}
+		else {
+			gibbs(variables, previousSample, conditionedVariables);
+			sample.copyToSameInstance(previousSample); // TODO: get rid of this hideousness
+		}
+	}
+	
+	@Override
+	public void gibbs(List<? extends Variable> variables, Sample sample, Collection<? extends Variable> conditionedVariables) {
+		explanationBlock("Gibbs step with previous sample ", sample, " and conditioned variables ", join(conditionedVariables), code( () -> {
+			
+			Variable variable = pickNonConditionedVariableAtRandom(sample, conditionedVariables);
+			int initialNumberOfVariables = sample.size();
+			uninstantiateVariableAndItsDeterminers(variable, sample, conditionedVariables);
+			int finalNumberOfVariables = sample.size();
+			println("Uninstantiated " + (initialNumberOfVariables - finalNumberOfVariables) + " out of " + initialNumberOfVariables + " variables");
+			if (finalNumberOfVariables != 0) {
+				println("Got a good case!!!");
+			}
+			resetPotential(sample);
+			monteCarloSampleOrWeigh(variables, sample);
+			
+		}), "After Gibbs step, sample is ", sample);
+	}
 
+	public void resetPotential(Sample sample) {
+		sample.setPotential(sample.getPotential().one());
+	}
+
+	private Variable pickNonConditionedVariableAtRandom(Sample sample, Collection<? extends Variable> conditionedVariables) {
+		return explanationBlock("Picking non conditioned variable", code( () -> {
+
+			// TODO: this is potentially picking non-conditioned variables that are effectively conditioned if they are a deterministic function of conditioned variables.
+			// So we can improve this by detecting those in advance.
+			int i = pickNonConditionedVariableIndex(sample, conditionedVariables);
+			Variable variable = get(nonConditionedVariables(conditionedVariables, sample), i);
+			myAssert(variable != null, () -> "Gibbs sampling needs to uninstantiate some variable in sample but they are all declared to be conditioned (fixed): " + sample);
+			return variable;
+
+		}), "Picked ", RESULT);
+	}
+
+	private int pickNonConditionedVariableIndex(Sample sample, Collection<? extends Variable> conditionedVariables) {
+		int numberOfNonConditionedVariables = sample.size() - conditionedVariables.size();
+		int i = getRandom().nextInt(numberOfNonConditionedVariables);
+		return i;
+	}
+
+	private PredicateIterator<? extends Variable> nonConditionedVariables(
+			Collection<? extends Variable> conditionedVariables, Sample sample) {
+		return predicateIterator(sample.getVariables(), notContainedBy(conditionedVariables));
+	}
+
+	/////////////////// Uninstantiation
+	
+	private void uninstantiateVariableAndItsDeterminers(Variable variable, Sample sample, Collection<? extends Variable> conditionedVariables) {
+		if ( ! conditionedVariables.contains(variable) && sample.instantiates(variable)) {
+			uninstantiateVariable(variable, sample);
+			uninstantiateDeterminers(variable, conditionedVariables, sample);
+		}
+	}
+
+	private void uninstantiateVariable(Variable variable, Sample sample) {
+		explanationBlock("Uninstantiating ", variable, " from ", sample, code( () -> {
+
+			sample.remove(variable);
+
+		}), "After removal, sample is ", sample);
+	}
+
+	private void uninstantiateDeterminers(Variable variable, Collection<? extends Variable> conditionedVariables, Sample sample) {
+		explanationBlock("Uninstantiate determiners for ", variable, " in sample ", sample, code( () -> {
+
+			Collection<? extends Variable> determiners = getAllVariablesInDeterministicApplicableSamplingRulesFor(variable, sample);
+			determiners.forEach(v -> uninstantiateVariableAndItsDeterminers(v, sample, conditionedVariables));
+			// TODO: we can provide allVariablesInDeterministicApplicableSamplingRulesFor
+			// with conditionedVariables to prune search for uninstantiable variable a little earlier
+			// and gain a bit more performance
+
+		}), "After removing determiners, sample is ", sample);
+	}
+	
+	private Collection<? extends Variable> getAllVariablesInDeterministicApplicableSamplingRulesFor(Variable variable, Sample sample) {
+		return explanationBlock("Computing determiners for ", variable, " in ", sample, " and conditioned variables ", join(conditionedVariables), code( () -> {
+
+			Collection<? extends SamplingRule> applicableDeterministicSamplingRules = 
+					getApplicableDeterministicSamplingRulesFor(variable, sample);
+
+			LinkedHashSet<Variable> union = 
+					union(
+							functionIterator(
+									applicableDeterministicSamplingRules, 
+									r -> r.getSampler().getVariables()));
+
+			return union;
+
+		}), "Determiners are ", RESULT);
+	}
+	
+	private Collection<? extends SamplingRule> getApplicableDeterministicSamplingRulesFor(Variable variable, Sample sample) {
+		List<? extends SamplingRule> applicableDeterministicSamplingRules = 
+				collectToList(
+						getPrioritizedSamplingRules(variable), 
+						r -> r.isDeterministic() && r.isSatisfied(sample));
+		return applicableDeterministicSamplingRules;
+	}
+
+	///////////////////// Instantiating relevant uninstantiated variables
+	
 }
+

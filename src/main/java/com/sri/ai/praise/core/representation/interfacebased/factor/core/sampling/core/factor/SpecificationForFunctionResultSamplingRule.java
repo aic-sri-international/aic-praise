@@ -2,18 +2,18 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import java.util.Collection;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.Sampler;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 
 public class SpecificationForFunctionResultSamplingRule {
 
-	public Sampler sampler;
+	public SamplingFactor sampler;
 	public Collection<? extends Integer> argumentsIndices;
 	public Collection<? extends SamplingGoal> goalsBesidesArgumentsBeingDefined;
 	public double estimatedSuccessWeight;
 	
 	public SpecificationForFunctionResultSamplingRule(
-			Sampler sampler,
+			SamplingFactor sampler,
 			Collection<? extends Integer> argumentsIndices,
 			Collection<? extends SamplingGoal> goalsBesidesArgumentsBeingDefined,
 			double estimatedSuccessWeight) {

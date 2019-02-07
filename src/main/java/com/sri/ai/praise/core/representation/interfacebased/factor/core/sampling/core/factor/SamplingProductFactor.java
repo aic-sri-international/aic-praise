@@ -24,7 +24,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.Sampler;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
@@ -106,19 +105,17 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		
 		getSamplingRuleSet().getSamplingRules().forEach(SamplingRule::reset);
 		samplingPlan.execute(new SamplingState(sampleToComplete, getRandom()));
-		List<? extends Sampler> samplersThatFired = 
+		List<? extends SamplingFactor> samplersThatFired = 
 				getSamplingRuleSet()
 				.getSamplingRules()
 				.stream()
 				.filter(SamplingRule::hasFired)
-				.map(SamplingRule::getSampler) // only samplers that are sampling factors will reach here
+				.map(SamplingRule::getSampler)
 				.collect(Collectors.toList());
 
 		List<SamplingFactor> factorsThatFired = list();
-		for (Sampler s : samplersThatFired) {
-			if (s instanceof SamplingFactor) {
-				factorsThatFired.add((SamplingFactor) s);
-			}
+		for (SamplingFactor s : samplersThatFired) {
+			factorsThatFired.add(s);
 		}
 		return factorsThatFired;
 	}

@@ -310,6 +310,9 @@ public class FromExpressionToSamplingFactors {
 		else if (isVariable(expression)) {
 			variable = DefaultExpressionVariable.expressionVariable(expression);
 		}
+//		else if (isConstant(expression)) {
+//			variable = expressionVariable(expression);
+//		}
 		else {
 			variable = compoundExpressionCompilation(expression, compoundExpressionVariableIfAvailable, factors);
 		}
