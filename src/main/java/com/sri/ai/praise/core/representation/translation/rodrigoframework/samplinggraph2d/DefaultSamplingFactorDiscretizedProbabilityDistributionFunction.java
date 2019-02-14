@@ -84,11 +84,11 @@ implements SamplingFactorDiscretizedProbabilityDistributionFunction {
 		
 	}
 	
-	@Override
-	public SamplingFactorDiscretizedProbabilityDistributionSingleInputFunctionAdapter
-	project(Variable variable, Assignment assignmentToRemainingVariables) {
-		return (SamplingFactorDiscretizedProbabilityDistributionSingleInputFunctionAdapter) super.project(variable, assignmentToRemainingVariables);
-	}
+//	@Override
+//	public SamplingFactorDiscretizedProbabilityDistributionSingleInputFunctionAdapter
+//	project(Variable variable, Assignment assignmentToRemainingVariables) {
+//		return (SamplingFactorDiscretizedProbabilityDistributionSingleInputFunctionAdapter) super.project(variable, assignmentToRemainingVariables);
+//	}
 
 	/**
 	 * Conditions the distribution to the values described in a given sample.

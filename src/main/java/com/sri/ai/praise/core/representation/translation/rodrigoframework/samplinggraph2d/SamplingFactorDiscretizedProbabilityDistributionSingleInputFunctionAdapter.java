@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.sampl
 import java.util.ArrayList;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
+import com.sri.ai.util.function.api.functions.SingleInputFunction;
 import com.sri.ai.util.function.api.values.Value;
 import com.sri.ai.util.function.api.variables.Assignment;
 import com.sri.ai.util.function.api.variables.Variable;
@@ -39,7 +40,7 @@ implements SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction {
 	}
 
 	@Override
-	protected SamplingFactorDiscretizedProbabilityDistributionSingleInputFunction 
+	protected SingleInputFunction 
 	projectIfNeeded(Variable variable, Assignment assignmentToRemainingVariables) {
 		
 		return getBase().project(variable, assignmentToRemainingVariables);

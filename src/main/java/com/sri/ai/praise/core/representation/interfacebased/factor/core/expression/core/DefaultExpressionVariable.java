@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
 
+import static com.sri.ai.expresso.helper.Expressions.parse;
+
 import java.util.List;
 
 import com.sri.ai.expresso.api.Expression;
@@ -54,6 +56,10 @@ public class DefaultExpressionVariable extends WrappedExpression implements Expr
 		else {
 			return new DefaultExpressionVariable(expression);
 		}
+	}
+	
+	public static ExpressionVariable expressionVariable(String expressionString) {
+		return expressionVariable(parse(expressionString));
 	}
 
 	private DefaultExpressionVariable(Expression expression) {
