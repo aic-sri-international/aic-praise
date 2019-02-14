@@ -80,9 +80,16 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 
 		private void sampleOrWeigh(Sample sample) {
 			for(Entry<Variable, Object> entry : conditioningSample.getAssignment().mapValue().entrySet()) {
-				sample.getAssignment().set(entry.getKey(), entry.getValue());
+				sample.set(entry.getKey(), entry.getValue());
 			}
+			
 			samplingFactor.sampleOrWeigh(sample);
+			
+			for(Entry<Variable, Object> entry : conditioningSample.getAssignment().mapValue().entrySet()) {
+				sample.remove(entry.getKey());
+			}
+			// TODO: having to add and remove variables to sample at every sampling slows things down.
+			// Instead, we should be able to tell a factor that some variables are bound.
 		}
 		
 		public SamplingRuleSet makeConditionedSamplingRuleSet() {

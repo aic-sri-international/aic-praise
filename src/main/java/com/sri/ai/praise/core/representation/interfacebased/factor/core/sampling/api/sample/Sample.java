@@ -42,7 +42,8 @@ public interface Sample {
 	}
 	
 	default void removePotential(Potential potential) {
-		updatePotential(potential.inverse());
+		setPotential(getPotential().divide(potential));
+//		updatePotential(potential.inverse());
 	}
 	
 	default Collection<? extends Variable> getVariables() {

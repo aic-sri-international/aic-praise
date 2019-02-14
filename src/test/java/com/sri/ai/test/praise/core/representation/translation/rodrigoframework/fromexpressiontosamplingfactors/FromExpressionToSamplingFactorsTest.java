@@ -4,6 +4,7 @@ import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +16,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedStandardDeviation;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.FromExpressionToSamplingFactors;
 
@@ -59,13 +60,12 @@ class FromExpressionToSamplingFactorsTest {
 		println(factors);
 
 		assertEquals(1, factors.size());
-		assertEquals(ConstantSamplingFactor.class, factors.get(0).getClass());
+		assertTrue(factors.get(0) instanceof ConditionedSamplingFactor);
 		
-		ConstantSamplingFactor constantSamplingFactor = (ConstantSamplingFactor) factors.get(0);
+		ConditionedSamplingFactor constantSamplingFactor = (ConditionedSamplingFactor) factors.get(0);
 		Expression variableConstrainedToBeingConstant = (Expression) constantSamplingFactor.getVariables().get(0);
 		
 		assertEquals(parse("X"), variableConstrainedToBeingConstant);
-		assertEquals(new Double(10.0), constantSamplingFactor.getConstant());
 	}
 
 	@Test

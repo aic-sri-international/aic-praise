@@ -1346,19 +1346,20 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
-	//@Test
+	@Test
 	public void minimalCountiesSamplingTest3() {
 	
 		String model = "" +
 				"sort Counties: 2, Abyei', Akobo';" + // the quotes makes them not be region names and makes plots be recorded, not maps. 
 				"random capital: Counties;" + 
-				"constant x : [-10;10];" + 
+				"random x : [-10;10];" + 
+				"x = Normal(0, 1);" + 
 				"capital = if x > 0 then Abyei' else Akobo';";
 		
 		String query = "capital";
-		Expression expected = parse("if (x < 0) and (capital = Abyei') then 0 else if (x < 0) and (capital = Akobo') then 1 else if (x < 10) and (capital = Abyei') then 1 else 0");
-		int initialNumberOfSamples = 1;
-		int numberOfDiscreteValues = 2;
+		Expression expected = parse("if capital = Abyei' then 0.5 else 0.5");
+		int initialNumberOfSamples = 1000;
+		int numberOfDiscreteValues = 25;
 	
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
@@ -1504,7 +1505,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		
 		String query = "temp(0)";
 		Expression expected = parse("if temp(0) < 1.5 then 0 else if temp(0) < 4.5 then 0.001 else if temp(0) < 7.5 then 0.005 else if temp(0) < 10.5 then 0.022 else if temp(0) < 13.5 then 0.069 else if temp(0) < 16.5 then 0.146 else if temp(0) < 19.5 then 0.218 else if temp(0) < 22.5 then 0.231 else if temp(0) < 25.5 then 0.172 else if temp(0) < 28.5 then 0.09 else if temp(0) < 31.5 then 0.034 else if temp(0) < 34.5 then 0.009 else if temp(0) < 37.5 then 0.002 else if temp(0) < 40.5 then 0 else if temp(0) < 43.5 then 0 else if temp(0) < 46.5 then 0 else if temp(0) < 49.5 then 0 else if temp(0) < 52.5 then 0 else if temp(0) < 55.5 then 0 else if temp(0) < 58.5 then 0 else 0");
-		int initialNumberOfSamples = 1000;
+		int initialNumberOfSamples = 10000;
 		int numberOfDiscreteValues = 21;
 	
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
@@ -1665,9 +1666,9 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	public void barChartExtraDimensionSamplingTest() {
 	
 		String model = "" +
-				"sort Person: 4, bob, mary;\r\n" + 
-				"random neighbor : Person x 1990..2000 -> Person;\r\n" + 
-//				"random coin : Person x 1990..2000 -> [-10;10];\r\n" +
+				"sort Person: 4, bob, mary;" + 
+				"random neighbor : Person x 1990..2000 -> Person;" + 
+//				"random coin : Person x 1990..2000 -> [-10;10];" +
 //				
 //				"for all X in Person : for all Y in 1990..2000 : coin(X, Y) = Normal(0,1);" +
 				
@@ -1689,22 +1690,22 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	public void simpleFoodSecurityTest() {
 
 		String model = "" +
-				"random food_availability : 0..6 -> [-4000;4000];\r\n" + 
-				"random food_availabilityDif : 0..6 -> [-4000;4000];\r\n" + 
-				"\r\n" + 
-				"for all t in 0..6 : \r\n" + 
-				"	if t = 0\r\n" + 
-				"	   then\r\n" + 
-				"	     food_availability(t) = 0\r\n" + 
-				"	   else\r\n" + 
-				"	     food_availability(t) = Normal(food_availability(t-1) \r\n" + 
-				"		 + food_availabilityDif(t-1), 10);\r\n" + 
-				"\r\n" + 
-				"for all t in 0..6 : \r\n" + 
-				"	if t = 0\r\n" + 
-				"	   then\r\n" + 
-				"	     food_availabilityDif(t) = 100\r\n" + 
-				"	   else\r\n" + 
+				"random food_availability : 0..6 -> [-4000;4000];" + 
+				"random food_availabilityDif : 0..6 -> [-4000;4000];" + 
+				"" + 
+				"for all t in 0..6 : " + 
+				"	if t = 0" + 
+				"	   then" + 
+				"	     food_availability(t) = 0" + 
+				"	   else" + 
+				"	     food_availability(t) = Normal(food_availability(t-1) " + 
+				"		 + food_availabilityDif(t-1), 10);" + 
+				"" + 
+				"for all t in 0..6 : " + 
+				"	if t = 0" + 
+				"	   then" + 
+				"	     food_availabilityDif(t) = 100" + 
+				"	   else" + 
 				"	     food_availabilityDif(t) = food_availability(t) - food_availability(t-1);";
 		
 		String query = "for all t in 0..6 : food_availability(t)";
@@ -1716,16 +1717,37 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 	
 	@Test
+	public void miniRandomWalkSamplingTest() {
+
+		String model = "" +
+				"random food_availability : 0..5 -> [-50;50];" + 
+				"" + 
+				"for all t in 0..5 : " + 
+				"	if t = 0" + 
+				"	   then" + 
+				"	     food_availability(t) = 0" + 
+				"	   else" + 
+				"	     food_availability(t) = Normal(food_availability(t-1), 10);";
+		
+		String query = "for all t in 0..5 : food_availability(t)";
+		Expression expected = parse("if t = 0 then if food_availability(t) < -47.917 then 0 else if food_availability(t) < -43.75 then 0 else if food_availability(t) < -39.583 then 0 else if food_availability(t) < -35.417 then 0 else if food_availability(t) < -31.25 then 0 else if food_availability(t) < -27.083 then 0 else if food_availability(t) < -22.917 then 0 else if food_availability(t) < -18.75 then 0 else if food_availability(t) < -14.583 then 0 else if food_availability(t) < -10.417 then 0 else if food_availability(t) < -6.25 then 0 else if food_availability(t) < -2.083 then 0 else if food_availability(t) < 2.083 then 1 else if food_availability(t) < 6.25 then 0 else if food_availability(t) < 10.417 then 0 else if food_availability(t) < 14.583 then 0 else if food_availability(t) < 18.75 then 0 else if food_availability(t) < 22.917 then 0 else if food_availability(t) < 27.083 then 0 else if food_availability(t) < 31.25 then 0 else if food_availability(t) < 35.417 then 0 else if food_availability(t) < 39.583 then 0 else if food_availability(t) < 43.75 then 0 else if food_availability(t) < 47.917 then 0 else 0 else if t = 1 then if food_availability(t) < -47.917 then 0 else if food_availability(t) < -43.75 then 0 else if food_availability(t) < -39.583 then 0 else if food_availability(t) < -35.417 then 0 else if food_availability(t) < -31.25 then 0.001 else if food_availability(t) < -27.083 then 0.002 else if food_availability(t) < -22.917 then 0.007 else if food_availability(t) < -18.75 then 0.02 else if food_availability(t) < -14.583 then 0.041 else if food_availability(t) < -10.417 then 0.074 else if food_availability(t) < -6.25 then 0.118 else if food_availability(t) < -2.083 then 0.152 else if food_availability(t) < 2.083 then 0.166 else if food_availability(t) < 6.25 then 0.153 else if food_availability(t) < 10.417 then 0.116 else if food_availability(t) < 14.583 then 0.077 else if food_availability(t) < 18.75 then 0.041 else if food_availability(t) < 22.917 then 0.02 else if food_availability(t) < 27.083 then 0.007 else if food_availability(t) < 31.25 then 0.003 else if food_availability(t) < 35.417 then 0.001 else if food_availability(t) < 39.583 then 0 else if food_availability(t) < 43.75 then 0 else if food_availability(t) < 47.917 then 0 else 0 else if t = 2 then if food_availability(t) < -47.917 then 0 else if food_availability(t) < -43.75 then 0.001 else if food_availability(t) < -39.583 then 0.002 else if food_availability(t) < -35.417 then 0.004 else if food_availability(t) < -31.25 then 0.008 else if food_availability(t) < -27.083 then 0.014 else if food_availability(t) < -22.917 then 0.026 else if food_availability(t) < -18.75 then 0.04 else if food_availability(t) < -14.583 then 0.058 else if food_availability(t) < -10.417 then 0.077 else if food_availability(t) < -6.25 then 0.099 else if food_availability(t) < -2.083 then 0.111 else if food_availability(t) < 2.083 then 0.117 else if food_availability(t) < 6.25 then 0.112 else if food_availability(t) < 10.417 then 0.1 else if food_availability(t) < 14.583 then 0.08 else if food_availability(t) < 18.75 then 0.06 else if food_availability(t) < 22.917 then 0.04 else if food_availability(t) < 27.083 then 0.024 else if food_availability(t) < 31.25 then 0.013 else if food_availability(t) < 35.417 then 0.007 else if food_availability(t) < 39.583 then 0.004 else if food_availability(t) < 43.75 then 0.001 else if food_availability(t) < 47.917 then 0.001 else 0 else if t = 3 then if food_availability(t) < -47.917 then 0.001 else if food_availability(t) < -43.75 then 0.003 else if food_availability(t) < -39.583 then 0.005 else if food_availability(t) < -35.417 then 0.01 else if food_availability(t) < -31.25 then 0.015 else if food_availability(t) < -27.083 then 0.023 else if food_availability(t) < -22.917 then 0.034 else if food_availability(t) < -18.75 then 0.047 else if food_availability(t) < -14.583 then 0.061 else if food_availability(t) < -10.417 then 0.074 else if food_availability(t) < -6.25 then 0.086 else if food_availability(t) < -2.083 then 0.094 else if food_availability(t) < 2.083 then 0.096 else if food_availability(t) < 6.25 then 0.091 else if food_availability(t) < 10.417 then 0.086 else if food_availability(t) < 14.583 then 0.076 else if food_availability(t) < 18.75 then 0.061 else if food_availability(t) < 22.917 then 0.046 else if food_availability(t) < 27.083 then 0.035 else if food_availability(t) < 31.25 then 0.023 else if food_availability(t) < 35.417 then 0.015 else if food_availability(t) < 39.583 then 0.009 else if food_availability(t) < 43.75 then 0.005 else if food_availability(t) < 47.917 then 0.003 else 0.001 else if t = 4 then if food_availability(t) < -47.917 then 0.002 else if food_availability(t) < -43.75 then 0.006 else if food_availability(t) < -39.583 then 0.009 else if food_availability(t) < -35.417 then 0.015 else if food_availability(t) < -31.25 then 0.02 else if food_availability(t) < -27.083 then 0.029 else if food_availability(t) < -22.917 then 0.039 else if food_availability(t) < -18.75 then 0.049 else if food_availability(t) < -14.583 then 0.062 else if food_availability(t) < -10.417 then 0.068 else if food_availability(t) < -6.25 then 0.076 else if food_availability(t) < -2.083 then 0.082 else if food_availability(t) < 2.083 then 0.083 else if food_availability(t) < 6.25 then 0.082 else if food_availability(t) < 10.417 then 0.077 else if food_availability(t) < 14.583 then 0.07 else if food_availability(t) < 18.75 then 0.06 else if food_availability(t) < 22.917 then 0.049 else if food_availability(t) < 27.083 then 0.039 else if food_availability(t) < 31.25 then 0.029 else if food_availability(t) < 35.417 then 0.021 else if food_availability(t) < 39.583 then 0.015 else if food_availability(t) < 43.75 then 0.01 else if food_availability(t) < 47.917 then 0.006 else 0.002 else if food_availability(t) < -47.917 then 0.003 else if food_availability(t) < -43.75 then 0.009 else if food_availability(t) < -39.583 then 0.014 else if food_availability(t) < -35.417 then 0.019 else if food_availability(t) < -31.25 then 0.026 else if food_availability(t) < -27.083 then 0.034 else if food_availability(t) < -22.917 then 0.041 else if food_availability(t) < -18.75 then 0.049 else if food_availability(t) < -14.583 then 0.056 else if food_availability(t) < -10.417 then 0.066 else if food_availability(t) < -6.25 then 0.071 else if food_availability(t) < -2.083 then 0.074 else if food_availability(t) < 2.083 then 0.075 else if food_availability(t) < 6.25 then 0.077 else if food_availability(t) < 10.417 then 0.071 else if food_availability(t) < 14.583 then 0.064 else if food_availability(t) < 18.75 then 0.059 else if food_availability(t) < 22.917 then 0.05 else if food_availability(t) < 27.083 then 0.042 else if food_availability(t) < 31.25 then 0.033 else if food_availability(t) < 35.417 then 0.025 else if food_availability(t) < 39.583 then 0.018 else if food_availability(t) < 43.75 then 0.014 else if food_availability(t) < 47.917 then 0.009 else 0.003");
+		int initialNumberOfSamples = 10000;
+		int numberOfDiscreteValues = 25;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
 	public void randomWalkSamplingTest() {
 
 		String model = "" +
-				"random food_availability : 0..10 -> [-50;50];\r\n" + 
-				"\r\n" + 
-				"for all t in 0..10 : \r\n" + 
-				"	if t = 0\r\n" + 
-				"	   then\r\n" + 
-				"	     food_availability(t) = 0\r\n" + 
-				"	   else\r\n" + 
+				"random food_availability : 0..10 -> [-50;50];" + 
+				"" + 
+				"for all t in 0..10 : " + 
+				"	if t = 0" + 
+				"	   then" + 
+				"	     food_availability(t) = 0" + 
+				"	   else" + 
 				"	     food_availability(t) = Normal(food_availability(t-1), 10);";
 		
 		String query = "for all t in 0..10 : food_availability(t)";
@@ -1741,7 +1763,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 		String model = "" +
 				"sort Counties: 3, a, b, c;"
-				+ "random x : Counties x 0..5 -> [-50;50];\r\n" + 
+				+ "random x : Counties x 0..5 -> [-50;50];" + 
 				"for all c in Counties : for all t in 0..5 : x(c,t) = Normal(20, 5);" +
 				"";
 		
@@ -1757,7 +1779,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	public void meanWithoutIndicesSamplingTest() {
 
 		String model = ""
-				+ "random x : [-50;50];\r\n" + 
+				+ "random x : [-50;50];" + 
 				"x = Normal(20, 5);" +
 				"";
 		
@@ -1773,33 +1795,33 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	public void meanOnLargerModelSamplingTest() {
 
 		String model = ""
-				+ "sort Counties: 4, TonjEast, TonjNorth, Panyijiar, Mayendit;\r\n" + 
-				"\r\n" + 
-				"random precip : Counties x 0..6 -> [500;2000];\r\n" + 
-				"random temp : Counties x 0..6 -> [0;70];\r\n" + 
-				"random crop : Counties x 0..6 -> [0;800];\r\n" + 
-				"\r\n" + 
-				"for all County in Counties :\r\n" + 
-				"for all Month in 0..6 :\r\n" + 
-				"precip(County, Month) = \r\n" + 
-				"    if Month = 0 \r\n" + 
-				"	   then Normal(1000, 2) \r\n" + 
-				"	   else Normal(precip(County, Month - 1), 50);\r\n" + 
-				"\r\n" + 
-				"for all County in Counties :\r\n" + 
-				"for all Month in 0..6 :\r\n" + 
-				"temp(County, Month) = \r\n" + 
-				"    if Month = 0 \r\n" + 
-				"	   then Normal(20, 2) \r\n" + 
-				"	   else Normal(temp(County, Month - 1), 1);\r\n" + 
-				"	   \r\n" + 
-				"for all County in Counties :\r\n" + 
-				"for all Month in 0..6 :\r\n" + 
-				"crop(County, Month) = Normal(5*temp(County, Month) + 0.25*precip(County, Month), 30);\r\n" + 
-				"\r\n" + 
-				"// precip(TonjEast, 3) = 1200;\r\n" + 
-				"precip(TonjEast, 4) = 1500;\r\n" + 
-				"precip(Panyijiar, 5) = 1600;\r\n" + 
+				+ "sort Counties: 4, TonjEast, TonjNorth, Panyijiar, Mayendit;" + 
+				"" + 
+				"random precip : Counties x 0..6 -> [500;2000];" + 
+				"random temp : Counties x 0..6 -> [0;70];" + 
+				"random crop : Counties x 0..6 -> [0;800];" + 
+				"" + 
+				"for all County in Counties :" + 
+				"for all Month in 0..6 :" + 
+				"precip(County, Month) = " + 
+				"    if Month = 0 " + 
+				"	   then Normal(1000, 2) " + 
+				"	   else Normal(precip(County, Month - 1), 50);" + 
+				"" + 
+				"for all County in Counties :" + 
+				"for all Month in 0..6 :" + 
+				"temp(County, Month) = " + 
+				"    if Month = 0 " + 
+				"	   then Normal(20, 2) " + 
+				"	   else Normal(temp(County, Month - 1), 1);" + 
+				"	   " + 
+				"for all County in Counties :" + 
+				"for all Month in 0..6 :" + 
+				"crop(County, Month) = Normal(5*temp(County, Month) + 0.25*precip(County, Month), 30);" + 
+				"" + 
+				"// precip(TonjEast, 3) = 1200;" + 
+				"precip(TonjEast, 4) = 1500;" + 
+				"precip(Panyijiar, 5) = 1600;" + 
 				"crop(TonjEast, 5) = 400;" +
 				"";
 		
@@ -1842,7 +1864,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		long monteCarloInitialTime = System.currentTimeMillis();
 		runMonteCarloTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
 		long monteCarloTime = System.currentTimeMillis() - monteCarloInitialTime;
-		
+
 //		println("Monte Carlo time: " + monteCarloTime + " ms");
 //		println("Gibbs time: " + gibbsTime + " ms");
 		

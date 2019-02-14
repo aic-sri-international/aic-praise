@@ -110,7 +110,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 				.getSamplingRules()
 				.stream()
 				.filter(SamplingRule::hasFired)
-				.map(SamplingRule::getSampler)
+				.map(SamplingRule::getSamplingFactor)
 				.collect(Collectors.toList());
 
 		List<SamplingFactor> factorsThatFired = list();

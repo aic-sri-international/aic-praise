@@ -92,7 +92,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		this.hasFired = false;
 	}
 
-	public SamplingFactor getSampler() {
+	public SamplingFactor getSamplingFactor() {
 		return sampler;
 	}
 	
@@ -122,7 +122,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	public SamplingRule replaceGoals(Function<SamplingGoal, SamplingGoal> replacement) {
 		List<SamplingGoal> newAntecedents = mapIntoList(getAntecendents(), replacement);
 		List<SamplingGoal> newConsequents = mapIntoList(getConsequents(), replacement);
-		SamplingRule result = new SamplingRule(getSampler(), newConsequents, newAntecedents, getEstimatedSuccessWeight());
+		SamplingRule result = new SamplingRule(getSamplingFactor(), newConsequents, newAntecedents, getEstimatedSuccessWeight());
 		return result;
 	}
 	
@@ -134,14 +134,14 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	}
 
 	public void sampleOrWeigh(Sample sample) {
-		getSampler().sampleOrWeigh(sample);
+		getSamplingFactor().sampleOrWeigh(sample);
 	}
 	
 	@Override
 	public String toString() {
 		String consequentsString = join(consequents);
 		String antecedentsString = join(antecedents);
-		SamplingFactor factorString = getSampler();
+		SamplingFactor factorString = getSamplingFactor();
 		String result = consequentsString + " <= " + antecedentsString + " with " + factorString;
 		return result;
 	}

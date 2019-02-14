@@ -8,7 +8,6 @@ import static com.sri.ai.util.Util.mapIntegersIntoArrayList;
 import static com.sri.ai.util.Util.mapIntegersIntoList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.objectStringEqualsOneOf;
-import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.base.PairOf.makePairOf;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
@@ -86,12 +85,7 @@ public class FromFunctionToExpression {
 	}
 
 	private int computeNumberOfAssignments() {
-		int numberOfAssignments = (int) product(functionIterator(getFunctionVariables(), v -> {
-			int size = v.getSetOfValuesOrNull().size();
-			println("Variable " + v + " has " + size + " number Of assignments");
-			return size;	
-		}));
-		println("Total number of assignments: " + numberOfAssignments);
+		int numberOfAssignments = (int) product(functionIterator(getFunctionVariables(), v -> v.getSetOfValuesOrNull().size()));
 		return numberOfAssignments;
 	}
 
