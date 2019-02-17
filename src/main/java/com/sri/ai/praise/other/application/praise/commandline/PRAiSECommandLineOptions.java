@@ -40,7 +40,7 @@ package com.sri.ai.praise.other.application.praise.commandline;
 import static com.sri.ai.praise.core.representation.classbased.modelscontainer.PagedModelContainer.getModelPagesFromURI;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirstNonNullResultOrNull;
-import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
+import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.thereExists;
@@ -339,7 +339,7 @@ public class PRAiSECommandLineOptions {
 
 	private static ModelLanguage findLanguageModel(String languageCode) {
 		List<ModelLanguage> modelLanguages = Arrays.asList(ModelLanguage.values());
-		ModelLanguage result = getFirstSatisfyingPredicateOrNull(modelLanguages, hasLanguageCode(languageCode));
+		ModelLanguage result = getFirst(modelLanguages, hasLanguageCode(languageCode));
 		return result;
 	}
 
@@ -363,7 +363,7 @@ public class PRAiSECommandLineOptions {
 
 	private ModelLanguage getLanguageMatchingExtensionOfSomeInputFile() {
 		List<ModelLanguage> modelLanguages = Arrays.asList(ModelLanguage.values());
-		ModelLanguage result = getFirstSatisfyingPredicateOrNull(modelLanguages, isExtensionForSomeOfTheInputFiles());
+		ModelLanguage result = getFirst(modelLanguages, isExtensionForSomeOfTheInputFiles());
 		return result;
 	}
 

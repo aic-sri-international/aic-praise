@@ -25,7 +25,7 @@ import static com.sri.ai.grinder.library.controlflow.IfThenElse.thenBranch;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable.expressionVariable;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor.conditionResult;
 import static com.sri.ai.util.Util.arrayList;
-import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
+import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -255,7 +255,7 @@ public class FromExpressionToSamplingFactors {
 	private void notFactorCompilation(Expression expression, List<SamplingFactor> factors) {
 		Variable expressionVariable = expressionCompilation(expression, factors);
 		SamplingFactor resultFactor = 
-				getFirstSatisfyingPredicateOrNull(
+				getFirst(
 				factors, 
 				f -> f.getVariables().get(0).equals(expressionVariable));
 		myAssert(resultFactor != null, () -> "Factors generated for negation " + expression + " do not contain result variable '" + expressionVariable + "'");

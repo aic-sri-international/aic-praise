@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sandbox;
 
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.removeNonDestructively;
 import static com.sri.ai.util.function.api.functions.Functions.functions;
 
@@ -20,18 +21,39 @@ public class SamplingComparison {
 
 	public static void main(String[] args) {
 		
-		int length = 6;
-		int numberOfSamples = 1000000;
+		int length = 40;
+		int numberOfSamples = 1000;
 		int queryVariableIndex = length - 1;
-		int standardDeviation = 10;
-		String filePathnameBase = "Random Walk";
+		int standardDeviation = 4;
 		
-		SamplingFactor factor = new RandomWalkWeighedGibbs(length, standardDeviation, new Random());
-//		SamplingFactor factor = new RandomWalkMonteCarlo(length, standardDeviation, new Random());
+		// warmup
+		executeAllModels(length, numberOfSamples, queryVariableIndex, standardDeviation);
+		
+		executeAllModels(length, numberOfSamples, queryVariableIndex, standardDeviation);
+	}
 
-		factor = makeMarginalFactor(queryVariableIndex, factor);
+	private static void executeAllModels(int length, int numberOfSamples, int queryVariableIndex, int standardDeviation) {
 		
-		plot(factor, queryVariableIndex, numberOfSamples, filePathnameBase);
+		SamplingFactor monteCarlo = new RandomWalkMonteCarlo(length, standardDeviation, new Random());
+		SamplingFactor weighedGibbs = new RandomWalkWeighedGibbs(length, standardDeviation, new Random());
+		SamplingFactor gibbs = new RandomWalkGibbs(length, standardDeviation, new Random());
+
+//		long mcTime = execute(monteCarlo, queryVariableIndex, numberOfSamples, "Monte Carlo");
+		long wgTime = execute(weighedGibbs, queryVariableIndex, numberOfSamples, "Weighted Gibbs");
+//		long gTime = execute(gibbs, queryVariableIndex, numberOfSamples, "Gibbs");
+		
+//		println("Monte Carlo took " + mcTime + " ms");
+		println("Weighed Gibbs took " + wgTime + " ms");
+//		println("Gibbs took " + gTime + " ms");
+	}
+
+	private static long execute(SamplingFactor factor, int queryVariableIndex, int numberOfSamples, String description) {
+		long initialTime = System.currentTimeMillis();
+		factor = makeMarginalFactor(queryVariableIndex, factor);
+		plot(factor, queryVariableIndex, numberOfSamples, description);
+		long finalTime = System.currentTimeMillis();
+		long time = finalTime - initialTime;
+		return time;
 	}
 
 	private static void plot(SamplingFactor factor, int queryVariableIndex, int numberOfSamples, String filePathnameBase) {

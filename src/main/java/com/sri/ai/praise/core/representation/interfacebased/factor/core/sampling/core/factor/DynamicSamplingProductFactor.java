@@ -7,7 +7,7 @@ import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.fold;
 import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.get;
-import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
+import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
 import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.join;
@@ -192,7 +192,7 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 	}
 	
 	private SamplingFactor getSamplingFactorNotUsedYetAndIntersectingSample(Sample sample) {
-		return getFirstSatisfyingPredicateOrNull(inputFactorsYetToUse, f -> thereExists(f.getVariables(), sample::instantiates));
+		return getFirst(inputFactorsYetToUse, f -> thereExists(f.getVariables(), sample::instantiates));
 	}
 
 	private void tryToInstantiate(Collection<? extends Variable> variables, Sample sample) {

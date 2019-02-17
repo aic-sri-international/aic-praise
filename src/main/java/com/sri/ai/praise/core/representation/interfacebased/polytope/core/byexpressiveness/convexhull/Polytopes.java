@@ -41,7 +41,6 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.b
 import static com.sri.ai.util.Util.addAllElementsOfCollectionsToList;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
-import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.list;
@@ -180,7 +179,7 @@ public class Polytopes {
 		
 		final List<? extends AtomicPolytope> nonIdentityAtomicPolytopes = getNonIdentityAtomicPolytopes(list(polytope));
 
-		Simplex simplexOnVariableIfAny = (Simplex) getFirstSatisfyingPredicateOrNull(nonIdentityAtomicPolytopes, p -> isSimplexOn(p, query));
+		Simplex simplexOnVariableIfAny = (Simplex) getFirst(nonIdentityAtomicPolytopes, p -> isSimplexOn(p, query));
 		
 		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
 		

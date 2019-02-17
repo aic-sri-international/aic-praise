@@ -1,7 +1,7 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
+import static com.sri.ai.util.Util.getFirst;
 
 import java.util.ArrayList;
 
@@ -67,7 +67,7 @@ public class VariableMaskingExpressionWithProbabilityFunction extends AbstractEx
 
 	private Variable getOldVariable(Function baseFunction) {
 		ArrayList<? extends Variable> oldVariables = baseFunction.getSetOfInputVariables().getVariables();
-		Variable oldVariable = getFirstSatisfyingPredicateOrNull(oldVariables, v -> v.getName().equals(oldVariableName));
+		Variable oldVariable = getFirst(oldVariables, v -> v.getName().equals(oldVariableName));
 		return oldVariable;
 	}
 
