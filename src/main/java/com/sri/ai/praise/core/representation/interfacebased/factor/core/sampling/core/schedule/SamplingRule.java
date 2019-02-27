@@ -19,6 +19,8 @@ import com.sri.ai.util.planning.api.Plan;
 import com.sri.ai.util.planning.api.Rule;
 import com.sri.ai.util.planning.api.State;
 import com.sri.ai.util.planning.core.AbstractAtomicPlan;
+import com.sri.ai.util.tree.DefaultTree;
+import com.sri.ai.util.tree.Tree;
 
 public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoal> {
 	
@@ -137,6 +139,11 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		getSamplingFactor().sampleOrWeigh(sample);
 	}
 	
+	@Override
+	public Tree<String> stringTree() {
+		return new DefaultTree<String>(toString());
+	}
+
 	@Override
 	public String toString() {
 		String consequentsString = join(consequents);
