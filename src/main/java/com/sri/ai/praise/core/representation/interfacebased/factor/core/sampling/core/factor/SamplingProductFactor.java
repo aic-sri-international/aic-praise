@@ -10,9 +10,11 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.set;
 import static com.sri.ai.util.Util.subtract;
+import static com.sri.ai.util.base.Pair.pair;
 import static com.sri.ai.util.planning.core.PlannerUsingEachRuleAtMostOnce.planUsingEachRuleAtMostOnce;
 
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
@@ -31,6 +34,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingState;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableIsDefinedGoal;
+import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.planning.api.Plan;
 
 public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
@@ -41,13 +45,13 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	 */
 	public static boolean adaptiveSampling = true;
 	
-	private Map<Set<SamplingGoal>, Plan> fromSatisfiedGoalsToPlan;
+	private Map<Pair<Set<? extends SamplingGoal>, Set<? extends SamplingGoal>>, Plan> fromRequiredGoalsAndSatisfiedGoalsToPlan;
 
 	public SamplingProductFactor(ArrayList<? extends SamplingFactor> multipliedFactors, Random random) {
 		super(flattenOneLevel(multipliedFactors), random);
 		// it is important that product factors be flat because we must be sure that all incoming messages of a variable in Exact BP
 		// are present in the same product factor if we are to limit the search for samplers to a single product factor.
-		this.fromSatisfiedGoalsToPlan = map();
+		this.fromRequiredGoalsAndSatisfiedGoalsToPlan = map();
 	}
 
 	@Override
@@ -56,9 +60,9 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		return samplingRules;
 	}
 
-	public Plan getSamplingPlan(Sample sampleToComplete) {
-		Set<SamplingGoal> satisfiedGoals = getSatisfiedGoals(sampleToComplete);
-		return getSamplingPlan(satisfiedGoals);
+	public Plan getSamplingPlan(List<? extends Variable> variablesToSample, Sample sampleToComplete) {
+		Set<? extends SamplingGoal> satisfiedGoals = getSatisfiedGoals(sampleToComplete);
+		return getSamplingPlan(variablesToSample, satisfiedGoals);
 	}
 
 	private Set<SamplingGoal> getSatisfiedGoals(Sample sample) {
@@ -67,31 +71,41 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		return result;
 	}
 
-	public Plan getSamplingPlan(Set<SamplingGoal> satisfiedGoals) {
-		Plan samplingPlan = getValuePossiblyCreatingIt(fromSatisfiedGoalsToPlan, satisfiedGoals, this::makePlan);
+	public Plan getSamplingPlan(Set<? extends SamplingGoal> satisfiedGoals) {
+		return getSamplingPlan(getVariables(), satisfiedGoals);
+	}
+	
+	public Plan getSamplingPlan(List<? extends Variable> variablesToSample, Set<? extends SamplingGoal> satisfiedGoals) {
+		Set<? extends SamplingGoal> requiredGoals = mapIntoSet(variablesToSample, v -> new VariableIsDefinedGoal(v));
+		Plan samplingPlan = getValuePossiblyCreatingIt(fromRequiredGoalsAndSatisfiedGoalsToPlan, pair(requiredGoals, satisfiedGoals), this::makePlan);
 		return samplingPlan;
 	}
 	
-	private Plan makePlan(Set<SamplingGoal> satisfiedGoals) {
+	private Plan makePlan(Pair<Set<? extends SamplingGoal>, Set<? extends SamplingGoal>> requiredGoalsAndSatisfiedGoals) {
+		Set<? extends SamplingGoal> requiredGoals = requiredGoalsAndSatisfiedGoals.first;
+		Set<? extends SamplingGoal> satisfiedGoals = requiredGoalsAndSatisfiedGoals.second;
 		Predicate<SamplingGoal> isEffectivelyStaticGoal = g -> g instanceof VariableIsDefinedGoal;
-		Set<? extends SamplingGoal> allRequiredGoals = collectToSet(getSamplingRuleSet().getAllGoals(), g -> isEffectivelyStaticGoal.test(g));
 		ArrayList<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
-		Plan plan = planUsingEachRuleAtMostOnce(allRequiredGoals, satisfiedGoals, set() /* TODO can do better */, isEffectivelyStaticGoal, samplingRules);
+		Plan plan = planUsingEachRuleAtMostOnce(requiredGoals, satisfiedGoals, set() /* TODO can do better */, isEffectivelyStaticGoal, samplingRules);
 		myAssert(!plan.isFailedPlan(), () -> "Plan for sampling product factor has failed: " + this);
 		return plan;
 	}
 
 	@Override
-	public void sampleOrWeigh(Sample sampleToComplete) {
-		List<? extends SamplingFactor> factorsThatFired = executeSamplingPlanIfAny(sampleToComplete);
-		myAssert(complete(sampleToComplete), () -> "Factor was not able to complete sample.\nSample: " + sampleToComplete + "\nFactor: " + this + "\nSampling plan: " + (getSamplingPlan(sampleToComplete) == null? "none" : getSamplingPlan(sampleToComplete).nestedString()));
+	public void sampleOrWeigh(Sample sample) {
+		sampleOrWeigh(getVariables(), sample);
+	}
+
+	public void sampleOrWeigh(List<? extends Variable> variablesToSample, Sample sampleToComplete) {
+		List<? extends SamplingFactor> factorsThatFired = executeSamplingPlanIfAny(variablesToSample, sampleToComplete);
+		myAssert(complete(sampleToComplete), () -> "Factor was not able to complete sample.\nSample: " + sampleToComplete + "\nFactor: " + this + "\nSampling plan: " + (getSamplingPlan(variablesToSample, sampleToComplete) == null? "none" : getSamplingPlan(variablesToSample, sampleToComplete).nestedString()));
 		makeSureToConsultAllInputFactors(sampleToComplete, factorsThatFired);
 		rewardIfNeeded(sampleToComplete);
 	}
 
-	private List<? extends SamplingFactor> executeSamplingPlanIfAny(Sample sampleToComplete) {
+	private List<? extends SamplingFactor> executeSamplingPlanIfAny(List<? extends Variable> variablesToSample, Sample sampleToComplete) {
 		List<? extends SamplingFactor> factorsThatFired;
-		Plan samplingPlan = getSamplingPlan(sampleToComplete);
+		Plan samplingPlan = getSamplingPlan(variablesToSample, sampleToComplete);
 		if (samplingPlan != null) {
 			factorsThatFired = executeSamplingPlan(samplingPlan, sampleToComplete);
 		}
@@ -105,7 +119,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		
 		getSamplingRuleSet().getSamplingRules().forEach(SamplingRule::reset);
 		samplingPlan.execute(new SamplingState(sampleToComplete, getRandom()));
-		List<? extends SamplingFactor> samplersThatFired = 
+		List<? extends SamplingFactor> factorsThatFired = 
 				getSamplingRuleSet()
 				.getSamplingRules()
 				.stream()
@@ -113,10 +127,6 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 				.map(SamplingRule::getSamplingFactor)
 				.collect(Collectors.toList());
 
-		List<SamplingFactor> factorsThatFired = list();
-		for (SamplingFactor s : samplersThatFired) {
-			factorsThatFired.add(s);
-		}
 		return factorsThatFired;
 	}
 
@@ -131,9 +141,10 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	}
 
 	private void rewardIfNeeded(Sample sampleToComplete) {
-		if (adaptiveSampling && getSamplingPlan(sampleToComplete) != null) {
-			getSamplingPlan(sampleToComplete).reward(sampleToComplete.getPotential().doubleValue());
-		}
+		// Code because is incorrect because it uses the plan for the complete sample, that is, not the sample plan that was used to generate the sample!
+//		if (adaptiveSampling && getSamplingPlan(sampleToComplete) != null) {
+//			getSamplingPlan(sampleToComplete).reward(sampleToComplete.getPotential().doubleValue());
+//		}
 	}
 
 	private boolean complete(Sample sampleToComplete) {
@@ -154,8 +165,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		// Note we are relying on the fact that previous sampling product factors are already flattened.
 	}
 
-	private static ArrayList<? extends SamplingFactor> getInputFactors(
-			SamplingFactor factorKnownToBeSamplingProductFactor) {
+	private static ArrayList<? extends SamplingFactor> getInputFactors(SamplingFactor factorKnownToBeSamplingProductFactor) {
 		return ((SamplingProductFactor) factorKnownToBeSamplingProductFactor).getInputFactors();
 	}
 
