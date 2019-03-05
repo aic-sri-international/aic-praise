@@ -69,6 +69,12 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 				}
 				return conditionedSamplingRuleSet;
 			}
+			else if (method.getName().equals("equals")) {
+				return proxy == args[0];
+			}
+			else if (method.getName().equals("hashCode")) {
+				return System.identityHashCode(proxy);
+			}
 			else if (method.getDeclaringClass().isAssignableFrom(SamplingFactor.class)) {
 				Object result = method.invoke(samplingFactor, args);
 				return result;
