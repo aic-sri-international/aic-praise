@@ -10,6 +10,7 @@ import static com.sri.ai.util.Util.set;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -23,11 +24,11 @@ import com.sri.ai.util.planning.core.ProjectionOfSetOfRules;
 
 public class DefaultSamplingRuleSet implements SamplingRuleSet {
 
-	private ArrayList<? extends SamplingRule> samplingRules;
+	private Collection<? extends SamplingRule> samplingRules;
 
 	private Set<SamplingGoal> allGoals;
 	
-	public static DefaultSamplingRuleSet samplingRuleSet(ArrayList<? extends SamplingRule> samplingRules) {
+	public static DefaultSamplingRuleSet samplingRuleSet(Collection<? extends SamplingRule> samplingRules) {
 		return new DefaultSamplingRuleSet(samplingRules);
 	}
 
@@ -35,13 +36,13 @@ public class DefaultSamplingRuleSet implements SamplingRuleSet {
 		this(new ArrayList<>(Arrays.asList(samplingRules)));
 	}
 
-	public DefaultSamplingRuleSet(ArrayList<? extends SamplingRule> samplingRules) {
+	public DefaultSamplingRuleSet(Collection<? extends SamplingRule> samplingRules) {
 		this.samplingRules = samplingRules;
 		this.allGoals = null;
 	}
 
 	@Override
-	public ArrayList<? extends SamplingRule> getSamplingRules() {
+	public Collection<? extends SamplingRule> getSamplingRules() {
 		return samplingRules;
 	}
 

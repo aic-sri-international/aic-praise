@@ -37,6 +37,7 @@ public abstract class AbstractVariablesRelatedGoal implements SamplingGoal {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((getGoalName() == null) ? 0 : getGoalName().hashCode());
 		result = prime * result + ((variables == null) ? 0 : variables.hashCode());
 		return result;
 	}
@@ -50,6 +51,11 @@ public abstract class AbstractVariablesRelatedGoal implements SamplingGoal {
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractVariablesRelatedGoal other = (AbstractVariablesRelatedGoal) obj;
+		if (other.getGoalName() == null) {
+			if (other.getGoalName() != null)
+				return false;
+		} else if (!getGoalName().equals(other.getGoalName()))
+			return false;                                     
 		if (variables == null) {
 			if (other.variables != null)
 				return false;

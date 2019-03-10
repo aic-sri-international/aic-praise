@@ -34,6 +34,7 @@ public class VariableEqualsGoal extends AbstractVariablesRelatedGoal {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((getVariable() == null) ? 0 : getVariable().hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
 	}
@@ -47,6 +48,11 @@ public class VariableEqualsGoal extends AbstractVariablesRelatedGoal {
 		if (getClass() != obj.getClass())
 			return false;
 		VariableEqualsGoal other = (VariableEqualsGoal) obj;
+		if (other.getVariable() == null) {
+			if (other.getVariable() != null)
+				return false;
+		} else if (!getVariable().equals(other.getVariable()))
+			return false;
 		if (value == null) {
 			if (other.value != null)
 				return false;
@@ -58,7 +64,7 @@ public class VariableEqualsGoal extends AbstractVariablesRelatedGoal {
 
 	@Override
 	public String toString() {
-		return "Goal[" + super.toString() + " = " + getValue() + "]";
+		return getVariable() + " = " + getValue();
 	}
 
 	@Override

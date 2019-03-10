@@ -5,6 +5,7 @@ import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -165,5 +166,13 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 
 	public boolean isSatisfied(Sample sample) {
 		return forAll(getAntecendents(), a -> a.isSatisfied(sample));
+	}
+
+	public SamplingRule copyWithNewSamplerAndAntecedents(SamplingFactor newSampler, ArrayList<SamplingGoal> newAntecendents) {
+		return new SamplingRule(newSampler, consequents, newAntecendents, getEstimatedSuccessWeight());
+	}
+
+	public SamplingRule copyWithNewAntecedents(ArrayList<SamplingGoal> newAntecendents) {
+		return new SamplingRule(sampler, consequents, newAntecendents, getEstimatedSuccessWeight());
 	}
 }

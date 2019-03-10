@@ -57,12 +57,12 @@ public class FromTableToExpressionFactorConverter {
 	}
 
 	private CartesianProductIterator<Integer> makeAssignmentsIterator(List<Integer> cardinalities) {
-		List<NullaryFunction<Iterator<Integer>>> valuesIteratorMakers = mapIntoList(cardinalities, c -> makeIteratorMakerFrom0To(c));
+		List<NullaryFunction<Iterator<? extends Integer>>> valuesIteratorMakers = mapIntoList(cardinalities, c -> makeIteratorMakerFrom0To(c));
 		CartesianProductIterator<Integer> assignmentsIterator = new CartesianProductIterator<>(valuesIteratorMakers);
 		return assignmentsIterator;
 	}
 
-	private NullaryFunction<Iterator<Integer>> makeIteratorMakerFrom0To(Integer i) {
+	private NullaryFunction<Iterator<? extends Integer>> makeIteratorMakerFrom0To(Integer i) {
 		return () -> new IntegerIterator(0, i);
 	}
 

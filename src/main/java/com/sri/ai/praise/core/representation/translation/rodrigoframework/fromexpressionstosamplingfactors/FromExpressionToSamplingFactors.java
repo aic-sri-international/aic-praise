@@ -36,13 +36,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Predicate;
 
+import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Registry;
 import com.sri.ai.grinder.core.TrueContext;
 import com.sri.ai.grinder.library.Equality;
+import com.sri.ai.grinder.library.IsVariable;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
@@ -83,14 +85,14 @@ public class FromExpressionToSamplingFactors {
 	
 	private int uniqueVariableOccurrenceIndex;
 
-	@SuppressWarnings("unused")
-	private Registry context;
-	
-	public FromExpressionToSamplingFactors(Predicate<Expression> isVariable, Random random, Registry context) {
+	public FromExpressionToSamplingFactors(Predicate<Expression> isVariable, Random random, Registry registry) {
 		this.isVariable = isVariable;
 		this.random = random;
 		this.uniqueVariableOccurrenceIndex = 0;
-		this.context = context;
+	}
+
+	public FromExpressionToSamplingFactors(Random random, Context context) {
+		this(new IsVariable(context), random, context);
 	}
 
 	public List<? extends Factor> factorCompilation(Expression expression) {
@@ -109,7 +111,7 @@ public class FromExpressionToSamplingFactors {
 		if (isFormulaAssertedToBeTrueWithProbabilityOne(expression)) {
 			factorCompilation(IfThenElse.condition(expression), factors);
 		}
-		else if (isVariable.test(expression)) {
+		else if (isVariable.apply(expression)) {
 			booleanVariableFactorCompilation(expression, factors);
 		}
 		else if ((histogram = Histogram.getHistogramOrNull(expression)) != null) {
@@ -533,7 +535,7 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private boolean isVariable(Expression expression) {
-		boolean result = isVariable.test(expression);
+		boolean result = isVariable.apply(expression);
 		return result;
 	}
 

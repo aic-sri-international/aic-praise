@@ -21,6 +21,7 @@ import static com.sri.ai.util.collect.DefaultManyToManyRelation.manyToManyRelati
 import static com.sri.ai.util.planning.core.PlannerUsingEachRuleAtMostOnce.planUsingEachRuleAtMostOnce;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -93,7 +94,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		Set<? extends SamplingGoal> requiredGoals = requiredGoalsAndSatisfiedGoals.first;
 		Set<? extends SamplingGoal> satisfiedGoals = requiredGoalsAndSatisfiedGoals.second;
 		Predicate<SamplingGoal> isEffectivelyStaticGoal = g -> g instanceof VariableIsDefinedGoal;
-		ArrayList<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
+		Collection<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
 		Plan plan = planUsingEachRuleAtMostOnce(requiredGoals, satisfiedGoals, set() /* TODO can do better */, isEffectivelyStaticGoal, samplingRules);
 		myAssert(!plan.isFailedPlan(), () -> "Plan for sampling product factor has failed: " + this);
 		return plan;

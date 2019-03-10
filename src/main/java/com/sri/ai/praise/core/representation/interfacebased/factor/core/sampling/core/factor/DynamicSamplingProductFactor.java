@@ -383,7 +383,7 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 		return result;
 	}
 
-	private ArrayList<? extends SamplingRule> getSamplingRules() {
+	private Collection<? extends SamplingRule> getSamplingRules() {
 		return getSamplingRuleSet().getSamplingRules();
 	}
 

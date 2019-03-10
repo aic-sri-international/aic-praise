@@ -17,6 +17,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
+/**
+ * An abstract implementation of {@link SamplingFactor} with fields for variables, sampling rules, and random number generator,
+ * as well as implementing marginalization with {@link SamplingMarginalizingFactor}.
+ * 
+ * @author braz
+ *
+ */
 public abstract class AbstractSamplingFactor implements SamplingFactor {
 	
 	@Override

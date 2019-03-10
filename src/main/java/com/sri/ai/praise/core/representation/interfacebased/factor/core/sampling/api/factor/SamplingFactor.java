@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.Random;
@@ -11,6 +12,7 @@ import java.util.function.Function;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Potential;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor;
@@ -71,6 +73,23 @@ public interface SamplingFactor extends Factor {
 		sample.getAssignment().set(variable, value);
 		SamplingFactor conditioned = ConditionedSamplingFactor.condition(samplingFactor, sample);
 		return conditioned;
+	}
+	
+	/**
+	 * Assumes that the sample is now complete as far as this sampling factor is concerned, and returns the weight contributed by this factor to the assignment in the sample.
+	 * It does this by invoking {@link #sampleOrWeigh(Sample)} on the sample and returning now much its potential is reduced, then restoring the initial potential.
+	 * It throws an assertion error if the new variables do get sampled by the invocation of {@link #sampleOrWeigh(Sample)}.
+	 * @param sample
+	 * @return
+	 */
+	default Potential weight(Sample sample) {
+		Potential initialPotential = sample.getPotential();
+		int initialSize = sample.size();
+		sampleOrWeigh(sample);
+		myAssert(sample.size() == initialSize, this, () -> " is not supposed to change the size of given sample but changed it from " + initialSize + " to " + sample.size());
+		Potential result = sample.getPotential().divide(initialPotential);
+		sample.setPotential(initialPotential);
+		return result;
 	}
 
 }

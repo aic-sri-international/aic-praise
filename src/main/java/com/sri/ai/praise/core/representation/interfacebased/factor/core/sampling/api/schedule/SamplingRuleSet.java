@@ -4,6 +4,7 @@ import static com.sri.ai.util.Util.unionArrayList;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -13,7 +14,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 
 public interface SamplingRuleSet {
 
-	ArrayList<? extends SamplingRule> getSamplingRules();
+	Collection<? extends SamplingRule> getSamplingRules();
 
 	Set<? extends SamplingGoal> getAllGoals();
 	

@@ -457,7 +457,7 @@ public class Polytopes {
 		List<TableVariable> indexes = mapIntoArrayList(polytope.getIndices(),v -> (TableVariable) v);
 		List<List<Integer>> listOfListOfValues = mapIntoList(indexes, v -> mapIntoList(v.getValues(), o -> (Integer) o));
 		
-		List<NullaryFunction<Iterator<Integer>>> iteratorForListOfVariableValues = 
+		List<NullaryFunction<Iterator<? extends Integer>>> iteratorForListOfVariableValues = 
 				mapIntoList(listOfListOfValues, element -> () -> element.iterator());
 		
 		Iterator<ArrayList<Integer>> cartesianProduct = new CartesianProductIterator<Integer>(iteratorForListOfVariableValues);

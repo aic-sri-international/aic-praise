@@ -159,7 +159,7 @@ public class Box extends IntensionalConvexHullOfFactors{
 	}
 
 	private static Iterator<ArrayList<Integer>> getCartesianProductWitZerosAndOnes(int n) {
-		ArrayList<NullaryFunction<Iterator<Integer>>> l = new ArrayList<>();
+		ArrayList<NullaryFunction<Iterator<? extends Integer>>> l = new ArrayList<>();
 		 
 		for (int i = 0; i < n; i++) {
 			l.add(() -> list(0,1).iterator());

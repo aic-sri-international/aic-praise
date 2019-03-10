@@ -107,7 +107,7 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 			return new DefaultSamplingRuleSet(rules);
 		}
 
-		private ArrayList<? extends SamplingRule> getOriginalSamplingRules() {
+		private Collection<? extends SamplingRule> getOriginalSamplingRules() {
 			return samplingFactor.getSamplingRuleSet().getSamplingRules();
 		}
 		

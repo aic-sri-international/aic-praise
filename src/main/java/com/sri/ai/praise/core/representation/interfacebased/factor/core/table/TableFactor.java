@@ -142,7 +142,7 @@ public class TableFactor implements Factor {
 		
 		ArrayList<ArrayList<Integer>> listOfValuesForTheVariables = mapIntoArrayList(listOfVariables, 
 																	v -> makeArrayWithValuesFromZeroToCardinalityMinusOne(v.getCardinality()));
-		ArrayList<NullaryFunction<Iterator<Integer>>> iteratorForListOfVariableValues = 
+		ArrayList<NullaryFunction<Iterator<? extends Integer>>> iteratorForListOfVariableValues = 
 				mapIntoArrayList(listOfValuesForTheVariables, element -> () -> element.iterator());
 		
 		Iterator<ArrayList<Integer>> cartesianProduct = new CartesianProductIterator<Integer>(iteratorForListOfVariableValues);
