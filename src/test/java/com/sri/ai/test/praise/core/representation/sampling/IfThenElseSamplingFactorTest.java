@@ -97,7 +97,7 @@ class IfThenElseSamplingFactorTest {
 	}
 	
 	@Test
-	public void samplingTest() {
+	void samplingTest() {
 		IfThenElseSamplingFactor ifThenElseSamplingFactor;
 		SamplingFactor testedSamplingFactor;
 		SetOfVariables variablesWithRange;
@@ -223,6 +223,39 @@ class IfThenElseSamplingFactorTest {
 		queryIndex = 0;
 		expectedValuesTupleString = "(0.366, 0.634)";
 		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+
+		////////////////////////
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedStandardDeviation(x, y, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+
+		conditioningSample = doubleBasedSample(rainy, true, y, 0.0);
+		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		variablesWithRange = new DefaultSetOfVariables(new RealVariable("x", Unit.NONE, "-5", "1", "5"));
+		queryIndex = 0;
+		expectedValuesTupleString = "(0.0, 0.0, 0.003, 0.067, 0.258, 0.363, 0.242, 0.066, 0.001, 0.0, 0.0)";
+		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+
+		////////////////////////
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedStandardDeviation(x, y, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+
+		conditioningSample = doubleBasedSample(x, 2.5, y, 0.0);
+		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
+		queryIndex = 0;
+		expectedValuesTupleString = "(0.5, 0.5)";
+		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+
 	}
 
 	private void runSamplingTest(
@@ -247,6 +280,44 @@ class IfThenElseSamplingFactorTest {
 			println(comparison);
 			fail(comparison);
 		}
+	}
+
+	@Test
+	void weighingTest() {
+		IfThenElseSamplingFactor ifThenElseSamplingFactor;
+		double expectedWeight;
+		Sample sample;
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+	
+		sample = doubleBasedSample(rainy, true, x, 2.0);
+		expectedWeight = 0.053990966513188056;
+		runWeighingTest(ifThenElseSamplingFactor, sample, expectedWeight);
+
+		//////////////////
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+	
+		sample = doubleBasedSample(rainy, false, x, 2.0);
+		expectedWeight = 0.004431848411938009;
+		runWeighingTest(ifThenElseSamplingFactor, sample, expectedWeight);
+	}
+
+	private void runWeighingTest(IfThenElseSamplingFactor ifThenElseSamplingFactor, Sample sample, double expectedWeight) {
+		ifThenElseSamplingFactor.sampleOrWeigh(sample);
+		println("Expected weight: " + expectedWeight);
+		println("Actual   weight: " + sample.getPotential());
+		assertEquals(expectedWeight, sample.getPotential().doubleValue(), 0.0);
 	}
 
 }
