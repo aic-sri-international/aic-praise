@@ -35,7 +35,7 @@ import com.sri.ai.util.function.core.variables.DefaultAssignment;
 import com.sri.ai.util.function.core.variables.EnumVariable;
 import com.sri.ai.util.function.core.variables.IntegerVariable;
 
-public class FromFunctionToExpression {
+public class FromFunctionToProbabilityExpression {
 
 	/**
 	 * The maximum number of assignments to factor's discretized values
@@ -55,7 +55,7 @@ public class FromFunctionToExpression {
 	private int queryIndex;
 	private com.sri.ai.util.function.api.functions.Function function;
 
-	public FromFunctionToExpression(
+	public FromFunctionToProbabilityExpression(
 			com.sri.ai.util.function.api.functions.Function function, 
 			int queryIndex) {
 		
@@ -176,7 +176,9 @@ public class FromFunctionToExpression {
 	 * @param assignment
 	 * @return
 	 */
-	private com.sri.ai.util.function.api.functions.Function projectIfNeeded(
+	private 
+	com.sri.ai.util.function.api.functions.Function 
+	projectIfNeeded(
 			com.sri.ai.util.function.api.functions.Function function,
 			Assignment assignment) {
 

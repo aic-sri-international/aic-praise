@@ -35,52 +35,55 @@ import com.sri.ai.util.function.core.variables.DefaultSetOfVariables;
 import com.sri.ai.util.function.core.variables.EnumVariable;
 import com.sri.ai.util.function.core.variables.IntegerVariable;
 
-public class ExpressionDiscretization {
+public class VariableExpressionDiscretization {
 
 	/**
-	 * Prepare a {@link SetOfVariables} specifying discretization for the {@link Expression}s 
+	 * Prepare a {@link SetOfVariables} specifying discretization for the {@link Expression}s representing variables 
 	 * in a given a factor and a function indicating the number of discrete variables specified for each expression variable.
 	 * 
-	 * @param expressions
+	 * @param variableExpressions
 	 * @param numberOfDiscreteValues
-	 * @param context
+	 * @param registry
 	 * @return
 	 */
 	public static SetOfVariables makeSetOfVariablesWithRanges(
-			Collection<? extends Expression> expressions, 
+			Collection<? extends Expression> variableExpressions, 
 			Function<Expression, Integer> numberOfDiscreteValues,
-			Registry context) {
+			Registry registry) {
 		
 		ArrayList<Variable> variables = 
 				mapIntoArrayList(
-						expressions,
-						v -> makeVariableWithRange(v, numberOfDiscreteValues.apply(v), context));
+						variableExpressions,
+						e -> makeVariableWithRange(e, numberOfDiscreteValues.apply(e), registry));
 		
 		SetOfVariables result = new DefaultSetOfVariables(variables);
 		return result;
 	
 	}
 
-	public static Variable makeVariableWithRange(Expression expression, Integer numberOfDiscreteValues, Registry context) {
+	/** 
+	 * Make a {@link Variable} based on an expression variable, number of discrete values, and type as registered in given registry.
+	 */
+	public static Variable makeVariableWithRange(Expression variable, Integer numberOfDiscreteValues, Registry registry) {
 		Variable result;
-		String name = expression.toString();
-		Type type = context.getTypeOfRegisteredSymbol(expression);
+		String name = variable.toString();
+		Type type = registry.getTypeOfRegisteredSymbol(variable);
 		if (type instanceof RealInterval) {
-			result = makeRealVariableWithRange(name, (RealInterval) type, numberOfDiscreteValues, context);
+			result = makeRealVariableWithRange(name, (RealInterval) type, numberOfDiscreteValues, registry);
 		}
 		else if (type instanceof IntegerInterval) {
-			result = makeIntegerVariableWithRange(name, (IntegerInterval) type, context);
+			result = makeIntegerVariableWithRange(name, (IntegerInterval) type);
 		}
 		else if (type instanceof Categorical) {
-			result = makeEnumVariableWithRange(name, (Categorical) type, context);
+			result = makeEnumVariableWithRange(name, (Categorical) type);
 		}
 		else {
-			throw new Error("Discretization only supports real, integer and enum types, but got variable " + expression + " of type " + type);
+			throw new Error("Discretization only supports real, integer and enum types, but got variable " + variable + " of type " + type);
 		}
 		return result;
 	}
 
-	public static Variable makeIntegerVariableWithRange(String name, IntegerInterval type, Registry context) {
+	public static Variable makeIntegerVariableWithRange(String name, IntegerInterval type) {
 		int first = type.getNonStrictLowerBound().intValue();
 		int last = type.getNonStrictUpperBound().intValue();
 		SetOfIntegerValues setOfIntegerValues = new SetOfIntegerValues(first, last);
@@ -88,15 +91,22 @@ public class ExpressionDiscretization {
 		return integerVariable;
 	}
 
-	public static Variable makeEnumVariableWithRange(String name, Categorical type, Registry context) {
+	public static Variable makeEnumVariableWithRange(String name, Categorical type) {
 		myAssert(Expressions.isNumber(type.cardinality()), () -> "Discretization requires categorical types to have known finite cardinality, but got " + type);
 		String[] values = mapIntoArray(String.class, type.cardinality().intValue(), type.iterator(), Expression::toString);
 		return new EnumVariable(name, values);
 	}
 
-	public static UniformSamplingFactor makeUniformSamplingFactor(ExpressionVariable variable, Random random, Registry context) {
+	/**
+	 * Make a uniform sampling factor for a given {@link ExpressionVariable} according to its type registered in given registry.
+	 * @param variable
+	 * @param random
+	 * @param registry
+	 * @return
+	 */
+	public static UniformSamplingFactor makeUniformSamplingFactor(ExpressionVariable variable, Random random, Registry registry) {
 		UniformSamplingFactor result;
-		Type type = context.getTypeOfRegisteredSymbol(variable);
+		Type type = registry.getTypeOfRegisteredSymbol(variable);
 		if (type instanceof RealInterval) {
 			RealInterval realInterval = (RealInterval) type;
 			result = 
@@ -135,7 +145,10 @@ public class ExpressionDiscretization {
 
 	public
 	static
-	com.sri.ai.grinder.interpreter.Assignment fromFunctionAssignmentToExpressoAssigment(com.sri.ai.util.function.api.variables.Assignment assignment) {
+	com.sri.ai.grinder.interpreter.Assignment 
+	fromFunctionAssignmentToExpressoAssigment(
+			com.sri.ai.util.function.api.variables.Assignment assignment) {
+		
 		Map<Expression, Expression> expressoMap = map();
 		for (com.sri.ai.util.function.api.variables.Variable variable : assignment.getSetOfVariables().getVariables()) {
 			Value value = assignment.get(variable);

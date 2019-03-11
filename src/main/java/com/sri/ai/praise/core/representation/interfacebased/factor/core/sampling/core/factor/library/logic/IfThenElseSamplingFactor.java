@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule.samplingRuleFromVariables;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
+import static com.sri.ai.util.Util.setFrom;
 import static com.sri.ai.util.Util.union;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
@@ -30,7 +31,7 @@ public class IfThenElseSamplingFactor extends AbstractSamplingFactor {
 	private SamplingFactor elseSamplingFactor;
 
 	public IfThenElseSamplingFactor(Variable condition, SamplingFactor thenSamplingFactor, SamplingFactor elseSamplingFactor, Random random) {
-		super(listFrom(nestedIterator(condition, thenSamplingFactor.getVariables(), elseSamplingFactor.getVariables())), random);
+		super(listFrom(setFrom(nestedIterator(condition, thenSamplingFactor.getVariables(), elseSamplingFactor.getVariables()))), random);
 		this.condition = condition;
 		this.thenSamplingFactor = thenSamplingFactor;
 		this.elseSamplingFactor = elseSamplingFactor;

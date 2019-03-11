@@ -49,7 +49,7 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 		}
 
 		private ArrayList<Variable> makeConditionedVariables(SamplingFactor samplingFactor, Sample conditioningSample) {
-			Collection<? extends Variable> variablesInAssignment = conditioningSample.getAssignment().mapValue().keySet();
+			Collection<? extends Variable> variablesInAssignment = conditioningSample.getVariables();
 			ArrayList<Variable> conditionedVariables = collectToArrayList(samplingFactor.getVariables(), v -> ! variablesInAssignment.contains(v));
 			return conditionedVariables;
 		}

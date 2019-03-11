@@ -62,6 +62,11 @@ public class DefaultSample implements Sample {
 	}
 
 	@Override
+	public void setAssignment(Assignment assignment) {
+		this.assignment = assignment;
+	}
+
+	@Override
 	public String toString() {
 		return "(" + assignment + ", " + importance + ", " + potential + ")";
 	}

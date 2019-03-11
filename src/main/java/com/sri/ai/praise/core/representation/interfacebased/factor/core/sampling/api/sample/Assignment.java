@@ -18,6 +18,8 @@ public interface Assignment {
 	int size();
 
 	Map<Variable, Object> mapValue();
+	
+	void setMapValue(Map<Variable, Object> map);
 
 	Collection<? extends Variable> getVariables();
 	

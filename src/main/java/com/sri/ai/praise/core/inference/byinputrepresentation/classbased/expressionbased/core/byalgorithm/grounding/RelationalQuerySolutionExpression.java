@@ -2,7 +2,7 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expres
 
 import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.getIndices;
 import static com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.VariableMaskingExpressionWithProbabilityFunction.mask;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization.makeSetOfVariablesWithRanges;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.VariableExpressionDiscretization.makeSetOfVariablesWithRanges;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getIndexExpressionsSet;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryBody;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryIndexExpressionsSet;
@@ -23,7 +23,7 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedProblem;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionDiscretization;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.VariableExpressionDiscretization;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.NonBooleanFactorError;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder;
@@ -236,7 +236,7 @@ public class RelationalQuerySolutionExpression extends LazyIfThenElse implements
 	private com.sri.ai.util.function.api.functions.Function computeDiscretizedFunctionForSubSolution(
 			com.sri.ai.util.function.api.variables.Assignment assignment) {
 		
-		Assignment expressoAssignment = ExpressionDiscretization.fromFunctionAssignmentToExpressoAssigment(assignment);
+		Assignment expressoAssignment = VariableExpressionDiscretization.fromFunctionAssignmentToExpressoAssigment(assignment);
 		ExpressionWithProbabilityFunction solutionWithFunction = getSolutionForSubProblemWithFunction(expressoAssignment);
 		com.sri.ai.util.function.api.functions.Function function = solutionWithFunction.getDiscretizedConditionalProbabilityDistributionFunction();
 		return function;

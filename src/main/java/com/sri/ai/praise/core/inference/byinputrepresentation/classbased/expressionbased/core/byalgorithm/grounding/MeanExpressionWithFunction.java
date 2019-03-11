@@ -3,7 +3,7 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expres
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.AbstractExpressionWrapper;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.FromFunctionToExpression;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.FromFunctionToProbabilityExpression;
 import com.sri.ai.util.function.api.variables.SetOfVariables;
 import com.sri.ai.util.function.api.variables.Variable;
 import com.sri.ai.util.function.core.functions.MeanFunction;
@@ -40,8 +40,8 @@ public class MeanExpressionWithFunction extends AbstractExpressionWrapper implem
 
 	@Override
 	protected Expression computeInnerExpression() {
-		FromFunctionToExpression expressionMaker = 
-				new FromFunctionToExpression(
+		FromFunctionToProbabilityExpression expressionMaker = 
+				new FromFunctionToProbabilityExpression(
 						getDiscretizedConditionalProbabilityDistributionFunction(),
 						getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex());
 		Expression result = expressionMaker.getFactorExpression();

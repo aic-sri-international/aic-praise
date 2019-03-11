@@ -11,8 +11,16 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 
 public class DefaultAssignment implements Assignment {
 	
-	private Map<Variable, Object> fromVariablesToValues = map();
+	private Map<Variable, Object> fromVariablesToValues;
 	
+	public DefaultAssignment() {
+		this(map());
+	}
+
+	public DefaultAssignment(Map<Variable, Object> assignmentMap) {
+		this.fromVariablesToValues = assignmentMap;
+	}
+
 	@Override
 	public Collection<? extends Variable> getVariables() {
 		return Collections.unmodifiableCollection(fromVariablesToValues.keySet());
@@ -53,6 +61,11 @@ public class DefaultAssignment implements Assignment {
 	@Override
 	public Map<Variable, Object> mapValue() {
 		return fromVariablesToValues;
+	}
+	
+	@Override
+	public void setMapValue(Map<Variable, Object> map) {
+		fromVariablesToValues = map;
 	}
 
 	@Override

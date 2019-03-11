@@ -1,17 +1,38 @@
 package com.sri.ai.test.praise.core.representation.sampling;
 
+import static com.sri.ai.expresso.helper.Expressions.areEqualUpToNumericProportion;
+import static com.sri.ai.expresso.helper.Expressions.parse;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor.condition;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleBasedSample.doubleBasedSample;
 import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
+import static com.sri.ai.util.function.api.variables.Assignment.assignments;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
+import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.IfThenElseSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedMeanAndStandardDeviation;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedStandardDeviation;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.DefaultSamplingFactorDiscretizedProbabilityDistributionFunction;
+import com.sri.ai.util.function.api.functions.Function;
+import com.sri.ai.util.function.api.values.Value;
+import com.sri.ai.util.function.api.variables.SetOfVariables;
+import com.sri.ai.util.function.api.variables.Unit;
+import com.sri.ai.util.function.core.variables.DefaultSetOfVariables;
+import com.sri.ai.util.function.core.variables.EnumVariable;
+import com.sri.ai.util.function.core.variables.RealVariable;
 
 class IfThenElseSamplingFactorTest {
 
@@ -38,6 +59,7 @@ class IfThenElseSamplingFactorTest {
 		runSamplingRulesTest(ifThenElseSamplingFactor, expectedSamplingRulesString);
 
 		
+		
 		ifThenElseSamplingFactor = 
 				new IfThenElseSamplingFactor(
 						rainy,
@@ -49,6 +71,22 @@ class IfThenElseSamplingFactorTest {
 						"y <= rainy, rainy = false with if (rainy) then x = Normal(0.0, 1.0) else y = Normal(5.0, 1.0)\n" + 
 						"rainy <= x, y with if (rainy) then x = Normal(0.0, 1.0) else y = Normal(5.0, 1.0)";
 		runSamplingRulesTest(ifThenElseSamplingFactor, expectedSamplingRulesString);
+
+		
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedStandardDeviation(x, y, 1.0, random),
+						new NormalWithFixedStandardDeviation(y, x, 1.0, random),
+						random);
+		expectedSamplingRulesString = 
+				"y <= rainy, rainy = true, x with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)\n" + 
+				"x <= rainy, rainy = true, y with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)\n" + 
+				"x <= rainy, rainy = false, y with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)\n" + 
+				"y <= rainy, rainy = false, x with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)\n" + 
+				"rainy <= x, y with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)";
+		runSamplingRulesTest(ifThenElseSamplingFactor, expectedSamplingRulesString);
 	}
 
 	private void runSamplingRulesTest(IfThenElseSamplingFactor ifThenElseSamplingFactor, String expectedSamplingRulesString) {
@@ -56,6 +94,159 @@ class IfThenElseSamplingFactorTest {
 		println("Expected:\n" + expectedSamplingRulesString);
 		println("Actual  :\n" + actualSamplingRulesString);
 		assertEquals(expectedSamplingRulesString, actualSamplingRulesString);
+	}
+	
+	@Test
+	public void samplingTest() {
+		IfThenElseSamplingFactor ifThenElseSamplingFactor;
+		SamplingFactor testedSamplingFactor;
+		SetOfVariables variablesWithRange;
+		String expectedValuesTupleString;
+		Sample conditioningSample;
+		int queryIndex;
+		
+		int numberOfSamples = 1000;
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+
+		conditioningSample = doubleBasedSample(rainy, true);
+		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		variablesWithRange = new DefaultSetOfVariables(new RealVariable("x", Unit.NONE, "-5", "1", "5"));
+		queryIndex = 0;
+		expectedValuesTupleString = "(0.0, 0.0, 0.003, 0.067, 0.258, 0.363, 0.242, 0.066, 0.001, 0.0, 0.0)";
+		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+
+		////////////////////////
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+
+		conditioningSample = doubleBasedSample(rainy, false);
+		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		variablesWithRange = new DefaultSetOfVariables(new RealVariable("x", Unit.NONE, "0", "1", "10"));
+		queryIndex = 0;
+		expectedValuesTupleString = "(0.0, 0.0, 0.003, 0.067, 0.258, 0.363, 0.242, 0.066, 0.001, 0.0, 0.0)";
+		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+
+		////////////////////////
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+
+		conditioningSample = doubleBasedSample(x, 0.0);
+		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
+		queryIndex = 0;
+		expectedValuesTupleString = "(0.0, 1.0)";
+		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+
+		////////////////////////
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+
+		conditioningSample = doubleBasedSample(x, 0.0);
+		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
+		queryIndex = 0;
+		expectedValuesTupleString = "(0.0, 1.0)";
+		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+
+		////////////////////////
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+
+		conditioningSample = doubleBasedSample(x, 5.0);
+		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
+		queryIndex = 0;
+		expectedValuesTupleString = "(1.0, 0.0)";
+		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+
+		////////////////////////
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 1.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
+						random);
+
+		conditioningSample = doubleBasedSample(x, 2.5);
+		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
+		queryIndex = 0;
+		expectedValuesTupleString = "(0.5, 0.5)";
+		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+
+		////////////////////////
+		
+		ifThenElseSamplingFactor = 
+				new IfThenElseSamplingFactor(
+						rainy,
+						new NormalWithFixedMeanAndStandardDeviation(x, 0.0, 4.0, random),
+						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 4.0, random),
+						random);
+
+		conditioningSample = doubleBasedSample(x, 1.0);
+		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
+		queryIndex = 0;
+		expectedValuesTupleString = "(0.366, 0.634)";
+		runSamplingTest(testedSamplingFactor, variablesWithRange, queryIndex, expectedValuesTupleString, numberOfSamples);
+	}
+
+	private void runSamplingTest(
+			SamplingFactor testedSamplingFactor,
+			SetOfVariables variablesWithRange,
+			int queryIndex,
+			String expectedValuesTupleString,
+			int numberOfSamples) {
+		
+		Function distribution = new DefaultSamplingFactorDiscretizedProbabilityDistributionFunction(
+				testedSamplingFactor,
+				variablesWithRange,
+				queryIndex,
+				numberOfSamples);
+		List<Value> distributionValues = listFrom(functionIterator(assignments(variablesWithRange), distribution::evaluate));
+		Expression actualValues = parse("(" + join(distributionValues) + ")");
+		Expression expectedValues = parse(expectedValuesTupleString);
+		String comparison = areEqualUpToNumericProportion(expectedValues, actualValues, 0.8, 0.1);
+		if (!comparison.isEmpty()) {
+			println("Expected: " + expectedValuesTupleString);
+			println("Actual  : " + actualValues);
+			println(comparison);
+			fail(comparison);
+		}
 	}
 
 }
