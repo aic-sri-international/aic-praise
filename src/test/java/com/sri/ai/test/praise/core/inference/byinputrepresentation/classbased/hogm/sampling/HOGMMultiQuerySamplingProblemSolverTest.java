@@ -188,7 +188,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 		String query = "p";
 		Expression expected = parse("if p then 1 else 0");
-		int initialNumberOfSamples = 1000;
+		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 50;
 
 		try {
@@ -1391,6 +1391,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"capital = if year then Abyei' else Akobo';";
 		
 		String query = "capital";
+//		Expression expected = parse("if year and (capital = Abyei') then 1 else if year and (capital = Akobo') then 0 else if not year and (capital = Abyei') then 0 else 1");
 		Expression expected = parse("if (capital = Abyei') and year then 1 else if (capital = Abyei') and not year then 0 else if (capital = Akobo') and year then 0 else 1");
 		int initialNumberOfSamples = 1;
 		int numberOfDiscreteValues = 21;

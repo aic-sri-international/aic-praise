@@ -28,7 +28,6 @@ import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
-import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 
 import java.lang.reflect.Constructor;
@@ -48,7 +47,6 @@ import com.sri.ai.grinder.library.IsVariable;
 import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.boole.Not;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
@@ -56,10 +54,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConstantSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.DynamicSamplingProductFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.TableSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.EqualitySamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.ConjunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.DisjunctionSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.IfThenElseSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.NegationSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.DivisionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.ExponentiationSamplingFactor;
@@ -95,10 +95,10 @@ public class FromExpressionToSamplingFactors {
 		this(new IsVariable(context), random, context);
 	}
 
-	public List<? extends Factor> factorCompilation(Expression expression) {
+	public ArrayList<? extends SamplingFactor> factorCompilation(Expression expression) {
 		List<SamplingFactor> factors = list();
 		factorCompilation(expression, factors);
-		List<SamplingFactor> factorsConditionedOnConstants = mapIntoList(factors, this::conditionOnConstants);
+		ArrayList<SamplingFactor> factorsConditionedOnConstants = mapIntoArrayList(factors, this::conditionOnConstants);
 		return factorsConditionedOnConstants;
 	}
 	
@@ -217,6 +217,37 @@ public class FromExpressionToSamplingFactors {
 						getRandom()));
 	}
 	
+	private void ifThenElseFactorCompilationNew(Expression expression, List<SamplingFactor> factors) {
+		Expression condition  = IfThenElse.condition(expression);
+		Expression thenBranch = IfThenElse.thenBranch(expression);
+		Expression elseBranch = IfThenElse.elseBranch(expression);
+		
+		Variable conditionVariable = expressionCompilation(condition, factors);
+		SamplingFactor thenBranchFactor = getSingleSamplingFactor(thenBranch);
+		SamplingFactor elseBranchFactor = getSingleSamplingFactor(elseBranch);
+		
+		SamplingFactor ifThenElseSamplingFactor =
+				new IfThenElseSamplingFactor(conditionVariable, thenBranchFactor, elseBranchFactor, getRandom());
+		
+		factors.add(ifThenElseSamplingFactor);
+	}
+
+	private SamplingFactor getSingleSamplingFactor(Expression expression) {
+		SamplingFactor singleFactor = getSingleSamplingFactor(factorCompilation(expression));
+		return singleFactor;
+	}
+
+	private SamplingFactor getSingleSamplingFactor(ArrayList<? extends SamplingFactor> factors) {
+		SamplingFactor singleFactor;
+		if (factors.size() == 1) {
+			singleFactor = factors.get(0); 
+		}
+		else {
+			singleFactor = new DynamicSamplingProductFactor(factors, getRandom());
+		}
+		return singleFactor;
+	}
+	
 	private void equalityFactorCompilation(Expression expression, List<SamplingFactor> factors) {
 		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
 		Variable rightHandSideVariable = expressionCompilation(expression.get(1), leftHandSideVariable, factors);
@@ -231,23 +262,23 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private void lessThanFactorCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorCompilation(LessThanSamplingFactor.class, expression, factors);
+		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(LessThanSamplingFactor.class, expression, factors);
 	}
 
 	private void greaterFactorThanCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorCompilation(GreaterThanSamplingFactor.class, expression, factors);
+		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(GreaterThanSamplingFactor.class, expression, factors);
 	}
 
 	private void lessThanOrEqualToFactorCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorCompilation(LessThanOrEqualToSamplingFactor.class, expression, factors);
+		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(LessThanOrEqualToSamplingFactor.class, expression, factors);
 	}
 
 	private void greaterThanOrEqualToFactorCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorCompilation(GreaterThanOrEqualToSamplingFactor.class, expression, factors);
+		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(GreaterThanOrEqualToSamplingFactor.class, expression, factors);
 	}
 
 	private void orFactorCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorCompilation(DisjunctionSamplingFactor.class, expression, factors);
+		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(DisjunctionSamplingFactor.class, expression, factors);
 	}
 
 	private void andFactorCompilation(Expression expression, List<SamplingFactor> factors) {
@@ -268,8 +299,9 @@ public class FromExpressionToSamplingFactors {
 
 	//////////////////////
 	
-	private void trueBooleanVarArgSamplingFactorCompilation(Class<? extends SamplingFactor> samplingFactorClass, Expression expression, List<SamplingFactor> factors) {
-		List<Variable> argumentVariables = mapIntoArrayList(expression.getArguments(), a -> expressionCompilation(a, factors));
+	private void trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(Class<? extends SamplingFactor> samplingFactorClass, Expression expression, List<SamplingFactor> factors) {
+		List<Expression> arguments = expression.getArguments();
+		List<Variable> argumentVariables = mapIntoArrayList(arguments, a -> expressionCompilation(a, factors));
 		trueBooleanVarArgSamplingFactorCompilation(samplingFactorClass, argumentVariables, factors);
 	}
 
@@ -286,16 +318,26 @@ public class FromExpressionToSamplingFactors {
 		SamplingFactor factor = 
 				conditionResult(
 						truthValue, 
-						truth -> {
-							Constructor<?> constructor = samplingFactorClass.getConstructors()[0];
-							try {
-								return (SamplingFactor) constructor.newInstance(truth, argumentVariables, random);
-							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-									| InvocationTargetException e) {
-								throw new Error(e);
-							}	
-						});
+						truthValueVariable ->
+							makeVarArgSamplingFactorWithResultConditionedToBeEqualToGivenVariable(
+									samplingFactorClass,
+									argumentVariables,
+									truthValueVariable));
 		factors.add(factor);
+	}
+
+	private SamplingFactor makeVarArgSamplingFactorWithResultConditionedToBeEqualToGivenVariable(
+			Class<? extends SamplingFactor> samplingFactorClass,
+			List<Variable> argumentVariables,
+			Variable resultVariable) {
+		
+		Constructor<?> constructor = samplingFactorClass.getConstructors()[0];
+		try {
+			return (SamplingFactor) constructor.newInstance(resultVariable, argumentVariables, random);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			throw new Error(e);
+		}
 	}
 
 	////////////////////
