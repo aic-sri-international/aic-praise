@@ -34,8 +34,10 @@ public class SamplingComparison {
 
 	private static void executeAllModels(int length, int numberOfSamples, int queryVariableIndex, int standardDeviation) {
 		
+		@SuppressWarnings("unused")
 		SamplingFactor monteCarlo = new RandomWalkMonteCarlo(length, standardDeviation, new Random());
 		SamplingFactor weighedGibbs = new RandomWalkWeighedGibbs(length, standardDeviation, new Random());
+		@SuppressWarnings("unused")
 		SamplingFactor gibbs = new RandomWalkGibbs(length, standardDeviation, new Random());
 
 //		long mcTime = execute(monteCarlo, queryVariableIndex, numberOfSamples, "Monte Carlo");

@@ -35,6 +35,7 @@ public class RandomWalkWeighedGibbs extends AbstractSamplingFactor implements Sa
 	private int length;
 	private double standardDeviation;
 	private Sample currentSample;
+	@SuppressWarnings("unused")
 	private Potential productOfPs;
 	private Map<Variable, Double> fromVariableToQ;
 	

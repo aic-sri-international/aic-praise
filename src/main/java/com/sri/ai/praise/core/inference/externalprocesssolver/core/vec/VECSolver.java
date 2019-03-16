@@ -165,7 +165,7 @@ public class VECSolver extends AbstractExternalProcessSolver {
 		result.translationTookMS = translationEnd - translationStart;
 		result.vecProcessTookMS  = vecEnd - vecStart;
 		try {
-			result.resultLog10  = new Double(results.get(results.size()-1));
+			result.resultLog10  = Double.valueOf(results.get(results.size()-1));
 		}
 		catch (Throwable t) {
 			result.resultLog10 = Double.NaN;

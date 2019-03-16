@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.other.empiricalevaluation.solverevaluation;
 
+import java.lang.reflect.InvocationTargetException;
+
 import com.sri.ai.praise.core.inference.externalprocesssolver.api.ExternalProcessSolver;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverConfiguration;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.ExternalProcessSolverResult;
@@ -147,8 +149,8 @@ public class SolverEvaluation {
 
 	private ExternalProcessSolver newSolverInstance(Class<? extends ExternalProcessSolver> classObject) {
 		try {
-			return classObject.newInstance();
-		} catch (InstantiationException | IllegalAccessException exception) {
+			return classObject.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
 			throw new IllegalArgumentException(exception);
 		}
 	}

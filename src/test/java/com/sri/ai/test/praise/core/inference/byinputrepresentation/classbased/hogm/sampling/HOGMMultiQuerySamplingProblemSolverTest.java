@@ -1864,6 +1864,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 
 		long monteCarloInitialTime = System.currentTimeMillis();
 		runMonteCarloTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+		@SuppressWarnings("unused")
 		long monteCarloTime = System.currentTimeMillis() - monteCarloInitialTime;
 
 //		println("Monte Carlo time: " + monteCarloTime + " ms");
@@ -1877,6 +1878,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTestForOneSolver(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
 	}
 
+	@SuppressWarnings("unused")
 	private void runGibbsTest(String model, String query, Expression expected, int initialNumberOfSamples,
 			int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph, Sample conditioningSample) {
 		DynamicSamplingProductFactor.gibbs = true;

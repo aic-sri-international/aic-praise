@@ -23,7 +23,7 @@ public class SpecsForRandomTableFactorGeneration {
 		cardinalities = new ArrayList<>(toCopy.cardinalities.size());
 		for(Integer cardinality : toCopy.cardinalities)
 		{
-			this.cardinalities.add(new Integer(cardinality));
+			this.cardinalities.add(Integer.valueOf(cardinality));
 		}
 		this.minimumPotential = toCopy.minimumPotential;
 		this.maximumPotential = toCopy.maximumPotential;

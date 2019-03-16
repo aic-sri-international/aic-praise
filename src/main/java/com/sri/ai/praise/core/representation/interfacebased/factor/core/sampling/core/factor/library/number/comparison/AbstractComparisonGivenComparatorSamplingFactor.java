@@ -32,10 +32,10 @@ public class AbstractComparisonGivenComparatorSamplingFactor<T> extends Abstract
 		int comparisonResult;
 		// TODO this should be cleaner, and taken care of somewhere else
 		if (firstValue instanceof Integer && secondValue instanceof Double) {
-			comparisonResult = new Double(((Integer) firstValue).doubleValue()).compareTo((Double) secondValue);
+			comparisonResult = Double.valueOf(((Integer) firstValue).doubleValue()).compareTo((Double) secondValue);
 		}
 		else if (secondValue instanceof Integer && firstValue instanceof Double) {
-			comparisonResult = ((Double) firstValue).compareTo(new Double(((Integer) secondValue).doubleValue()));
+			comparisonResult = ((Double) firstValue).compareTo(Double.valueOf(((Integer) secondValue).doubleValue()));
 		}
 		else {
 			comparisonResult = comparator.compare(firstValue, secondValue);

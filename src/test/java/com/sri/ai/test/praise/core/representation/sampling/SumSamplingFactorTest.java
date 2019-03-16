@@ -99,7 +99,7 @@ public class SumSamplingFactorTest {
 			factor.sampleOrWeigh(sample);
 			println(sample);
 			assertEquals(1.0, sample.getPotential().doubleValue(), 0.0);
-			assertEquals(new Double(3.0), sample.getAssignment().get(x));
+			assertEquals(Double.valueOf(3.0), sample.getAssignment().get(x));
 			assertEquals(1.0, sample.getAssignment().get(y));
 			assertEquals(2.0, sample.getAssignment().get(z));
 		}

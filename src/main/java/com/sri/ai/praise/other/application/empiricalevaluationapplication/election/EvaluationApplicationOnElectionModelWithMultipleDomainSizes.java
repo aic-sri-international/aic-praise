@@ -103,12 +103,12 @@ public class EvaluationApplicationOnElectionModelWithMultipleDomainSizes extends
 		"\r\n" + 
 		"// P(likeIncumbent) = \r\n" + 
 		"if dow > 160 or newJobs > 70\r\n" + 
-		"   then if likeIncumbent > " + new Double(0.7*domainSize).intValue() + " then 0.9/(" + domainSize + " + 1) else 0.1/(" + domainSize + " + 1)\r\n" + 
+		"   then if likeIncumbent > " + Double.valueOf(0.7*domainSize).intValue() + " then 0.9/(" + domainSize + " + 1) else 0.1/(" + domainSize + " + 1)\r\n" + 
 		"else\r\n" + 
 		"if dow < 130 or newJobs < 30\r\n" + 
-		"   then if likeIncumbent < " + new Double(0.5*domainSize).intValue() + " then 0.8/(" + domainSize + " + 1) else 0.2/(" + domainSize + " + 1)\r\n" + 
+		"   then if likeIncumbent < " + Double.valueOf(0.5*domainSize).intValue() + " then 0.8/(" + domainSize + " + 1) else 0.2/(" + domainSize + " + 1)\r\n" + 
 		"   else if terrorAttacks > 4\r\n" + 
-		"        then if likeIncumbent < " + new Double(0.6*domainSize).intValue() + " then 0.9/(" + domainSize + " + 1) else 0.1/(" + domainSize + " + 1)\r\n" + 
+		"        then if likeIncumbent < " + Double.valueOf(0.6*domainSize).intValue() + " then 0.9/(" + domainSize + " + 1) else 0.1/(" + domainSize + " + 1)\r\n" + 
 		"        else if likeIncumbent = 0  then 1/(" + domainSize + " + 1) else 1/(" + domainSize + " + 1); // uniform\r\n" + 
 		"\r\n" + 
 		"// P(likeChallenger) =\r\n" + 

@@ -26,10 +26,10 @@ public class EqualitySamplingFactor extends AbstractDeterministicBinaryFunctionS
 		// TODO this should be cleaner, and taken care of somewhere else
 		boolean equals;
 		if (firstValue instanceof Integer && secondValue instanceof Double) {
-			equals = new Double(((Integer) firstValue).doubleValue()).equals(secondValue);
+			equals = Double.valueOf(((Integer) firstValue).doubleValue()).equals(secondValue);
 		}
 		else if (secondValue instanceof Integer && firstValue instanceof Double) {
-			equals = ((Double) firstValue).equals(new Double(((Integer) secondValue).doubleValue()));
+			equals = ((Double) firstValue).equals(Double.valueOf(((Integer) secondValue).doubleValue()));
 		}
 		else {
 			 equals = firstValue.equals(secondValue);

@@ -217,6 +217,7 @@ public class FromExpressionToSamplingFactors {
 						getRandom()));
 	}
 	
+	@SuppressWarnings("unused")
 	private void ifThenElseFactorCompilationNew(Expression expression, List<SamplingFactor> factors) {
 		Expression condition  = IfThenElse.condition(expression);
 		Expression thenBranch = IfThenElse.thenBranch(expression);

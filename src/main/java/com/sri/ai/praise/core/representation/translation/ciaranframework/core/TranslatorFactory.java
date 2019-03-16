@@ -88,7 +88,7 @@ public class TranslatorFactory {
 		Class<?>   translatorClass = _translators.get(new Pair<ModelLanguage, ModelLanguage>(source, target));
 		
 		try {
-			result = (Translator) translatorClass.newInstance();
+			result = (Translator) translatorClass.getDeclaredConstructor().newInstance();
 		}
 		catch (Exception ex) {
 			throw new RuntimeException("Unable to create a new translator for "+source+"->"+target, ex);
