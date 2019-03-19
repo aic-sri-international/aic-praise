@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 
@@ -18,8 +17,6 @@ public interface SamplingRuleSet {
 
 	Set<? extends SamplingGoal> getAllGoals();
 	
-	SamplingRuleSet project(List<? extends SamplingGoal> remainingGoals, SamplingFactor factorOnProjectedSamplingRules, SamplingFactor originalFactor);
-
 	static SamplingRuleSet union(List<? extends SamplingRuleSet> samplingRulesSet) {
 		ArrayList<? extends SamplingRule> unionOfRules = unionArrayList(functionIterator(samplingRulesSet, SamplingRuleSet::getSamplingRules));
 		return new DefaultSamplingRuleSet(unionOfRules);

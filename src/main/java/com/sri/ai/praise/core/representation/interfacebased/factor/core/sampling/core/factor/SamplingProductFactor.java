@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -93,9 +92,8 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	private Plan makePlan(Pair<Set<? extends SamplingGoal>, Set<? extends SamplingGoal>> requiredGoalsAndSatisfiedGoals) {
 		Set<? extends SamplingGoal> requiredGoals = requiredGoalsAndSatisfiedGoals.first;
 		Set<? extends SamplingGoal> satisfiedGoals = requiredGoalsAndSatisfiedGoals.second;
-		Predicate<SamplingGoal> isEffectivelyStaticGoal = g -> g instanceof VariableIsDefinedGoal;
 		Collection<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
-		Plan plan = planUsingEachRuleAtMostOnce(requiredGoals, satisfiedGoals, set() /* TODO can do better */, isEffectivelyStaticGoal, samplingRules);
+		Plan plan = planUsingEachRuleAtMostOnce(requiredGoals, satisfiedGoals, set() /* TODO can do better */, samplingRules);
 		myAssert(!plan.isFailedPlan(), () -> "Plan for sampling product factor has failed: " + this);
 		return plan;
 	}

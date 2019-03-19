@@ -2,8 +2,9 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.ContingentSamplingGoal;
 
-public class VariableEqualsSomethingDifferentFrom extends AbstractSingleVariableRelatedGoal {
+public class VariableEqualsSomethingDifferentFrom extends AbstractSingleVariableRelatedGoal implements ContingentSamplingGoal {
 
 	private Object value;
 	

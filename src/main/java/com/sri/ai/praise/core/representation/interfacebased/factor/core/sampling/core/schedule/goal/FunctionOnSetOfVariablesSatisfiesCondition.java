@@ -9,8 +9,9 @@ import java.util.function.Predicate;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.ContingentSamplingGoal;
 
-public class FunctionOnSetOfVariablesSatisfiesCondition<T> extends AbstractVariablesRelatedGoal {
+public class FunctionOnSetOfVariablesSatisfiesCondition<T> extends AbstractVariablesRelatedGoal implements ContingentSamplingGoal {
 
 	private Function<Collection<T>, T> function;
 	private Predicate<T> condition;

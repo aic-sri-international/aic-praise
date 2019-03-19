@@ -4,6 +4,7 @@ import static com.sri.ai.util.Util.list;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.ContingentSamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 
 /**
@@ -20,27 +21,27 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
  * @author braz 
  *
  */
-public class LuckySamplingGoal extends AbstractVariablesRelatedGoal {
+public class LuckySamplingGoal extends AbstractVariablesRelatedGoal implements ContingentSamplingGoal {
 
 	private SamplingFactor factor;
-	private SamplingGoal goal;
+	private SamplingGoal innerGoal;
 	
-	public LuckySamplingGoal(SamplingGoal goal, SamplingFactor factor) {
+	public LuckySamplingGoal(SamplingGoal innerGoal, SamplingFactor factor) {
 		super(list());
 		this.factor = factor;
-		this.goal = goal;
+		this.innerGoal = innerGoal;
 	}
 
 	@Override
 	public boolean isSatisfied(Sample sample) {
 		factor.sampleOrWeigh(sample);
-		boolean result = goal.isSatisfied(sample);
+		boolean result = innerGoal.isSatisfied(sample);
 		return result;
 	}
 
 	@Override
 	public String getGoalName() {
-		return "lucky[" + factor + ", " + goal + "]";
+		return "lucky[" + factor + ", " + innerGoal + "]";
 	}
 
 }

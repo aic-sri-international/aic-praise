@@ -5,8 +5,9 @@ import static com.sri.ai.util.Util.list;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.ContingentSamplingGoal;
 
-public class VariableEqualsGoal extends AbstractVariablesRelatedGoal {
+public class VariableEqualsGoal extends AbstractVariablesRelatedGoal implements ContingentSamplingGoal {
 
 	private Object value;
 	

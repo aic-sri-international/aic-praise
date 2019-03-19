@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.ProjectionOfSamplingRuleSet.project;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.intersect;
@@ -50,7 +51,7 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 	public SamplingRuleSet makeSamplingRules() {
 		SamplingRuleSet samplingRuleSet = getMarginalizedFactor().getSamplingRuleSet();
 		List<? extends SamplingGoal> remainingGoals = computeRemainingGoals(samplingRuleSet);
-		SamplingRuleSet marginalSamplingRules = samplingRuleSet.project(remainingGoals, this, marginalizedFactor);
+		SamplingRuleSet marginalSamplingRules = project(remainingGoals, this, getMarginalizedFactor());
 		return marginalSamplingRules;
 	}
 
