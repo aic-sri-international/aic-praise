@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.representation.sampling;
+package com.sri.ai.test.praise.core.representation.interfacebased.factor.core.sampling;
 
 import static com.sri.ai.expresso.helper.Expressions.areEqualUpToNumericProportion;
 import static com.sri.ai.expresso.helper.Expressions.parse;

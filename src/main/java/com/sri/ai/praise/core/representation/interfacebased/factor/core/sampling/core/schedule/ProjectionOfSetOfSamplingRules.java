@@ -4,9 +4,13 @@ import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.arrayListFrom;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.mapIntoArrayList;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explainList;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -40,46 +44,54 @@ public class ProjectionOfSetOfSamplingRules {
 	
 	/**
 	 * Projects this set of sampling rules into a new one restricted to a set of remaining goals
-	 * @param factorToBeUsedAsSamplerOfProjectedSamplingRules
+	 * @param newFactor
 	 * @param originalFactor the sampling factor from which the original set of sampling rules comes from
 	 * @return
 	 */
 	public static SamplingRuleSet project(
 			List<? extends Variable> remainingVariables,
-			SamplingFactor factorToBeUsedAsSamplerOfProjectedSamplingRules,
+			SamplingFactor newFactor,
 			SamplingFactor originalFactor) {
 		
-		Set<? extends SamplingRule> projectedSamplingRules =
-				projectSamplingRules(remainingVariables, factorToBeUsedAsSamplerOfProjectedSamplingRules, originalFactor);
-		DefaultSamplingRuleSet result = new DefaultSamplingRuleSet(new ArrayList<>(projectedSamplingRules));
-		return result;
-	}
+		return explanationBlock("Computing projection of sampling rules (expand to see arguments)", code(() -> {
+			
+			explain("Remaining variables: ", remainingVariables);
+			explain("New factor         : ", newFactor);
+			explain("Original factor    : ", originalFactor);
+			explain("Remaining variables: ", remainingVariables);
+			explainList("Original sampling rules", originalFactor.getSamplingRuleSet().getSamplingRules());
 
-	private static Set<? extends SamplingRule> projectSamplingRules(
-			List<? extends Variable> remainingVariables,
-			SamplingFactor factorToBeUsedAsSamplerOfProjectedSamplingRules, 
-			SamplingFactor originalFactor) {
-		
-		ArrayList<? extends SamplingRule> samplingRulesWithFinalGoals = getSamplingRulesWithFinalGoals(remainingVariables, originalFactor);
-		List<? extends SamplingGoal> remainingFinalGoals = getRemainingFinalGoals(remainingVariables, originalFactor);
-		Set<? extends SamplingRule> projectedSamplingRulesWithFinalGoals =
-				getProjectedSamplingRules(
-						remainingFinalGoals,
-						samplingRulesWithFinalGoals,
-						factorToBeUsedAsSamplerOfProjectedSamplingRules);
-		return projectedSamplingRulesWithFinalGoals;
+			var setOfSamplingRulesWithFinalGoals = getSamplingRulesWithFinalGoals(remainingVariables, originalFactor);
+			var remainingFinalGoals = getRemainingFinalGoals(remainingVariables, setOfSamplingRulesWithFinalGoals);
+			var projectedSamplingRulesWithFinalGoals = getProjectedSamplingRules(remainingFinalGoals, setOfSamplingRulesWithFinalGoals, newFactor);
+			var result = new DefaultSamplingRuleSet(new ArrayList<>(projectedSamplingRulesWithFinalGoals));
+
+			explainList("Final sampling rules", result.getSamplingRules());
+			
+			return result;
+
+		}), "Computed projection of sampling rules (open block to see result)");
 	}
 
 	///////////////////// COMPUTE SAMPLING RULES WITH FINAL GOALS
 	
-	private static ArrayList<? extends SamplingRule> 
+	private static SamplingRuleSet
 	getSamplingRulesWithFinalGoals(
 			List<? extends Variable> remainingVariables, 
 			SamplingFactor originalFactor) {
 		
-		Collection<? extends SamplingRule> samplingRules = originalFactor.getSamplingRuleSet().getSamplingRules();
-		ArrayList<? extends SamplingRule> result = mapIntoArrayList(samplingRules, r -> replaceByLucky(r, remainingVariables, originalFactor));
-		return result;
+		return explanationBlock("Computing sampling rules with final goals", code(() -> {
+
+			explainList("Original sampling rules", originalFactor.getSamplingRuleSet().getSamplingRules());
+
+			var samplingRules = originalFactor.getSamplingRuleSet().getSamplingRules();
+			var result = mapIntoArrayList(samplingRules, r -> replaceByLucky(r, remainingVariables, originalFactor));
+
+			explainList("Sampling rules with final goals", result);
+
+			return new DefaultSamplingRuleSet(result);
+
+		}), "Computed sampling rules with final goals (open block to see result)");
 	}
 	
 	private static SamplingRule
@@ -116,40 +128,55 @@ public class ProjectionOfSetOfSamplingRules {
 	
 	private static 
 	List<? extends SamplingGoal> 
-	getRemainingFinalGoals(List<? extends Variable> remainingVariables, SamplingFactor originalFactor) {
-		return collectToList(
-				originalFactor.getSamplingRuleSet().getAllGoals(), 
-				g -> (g instanceof ContingentGoal) || isCompletelyContainedInRemainingVariables(g, remainingVariables));
+	getRemainingFinalGoals(List<? extends Variable> remainingVariables, SamplingRuleSet setOfSamplingRulesWithFinalGoals) {
+		
+		return explanationBlock("Computing remaining goals", code(() -> {
+
+			explainList("All goals", setOfSamplingRulesWithFinalGoals.getAllGoals());
+			
+			var result = 
+					collectToList(
+							setOfSamplingRulesWithFinalGoals.getAllGoals(), 
+							g -> (g instanceof ContingentGoal) || isCompletelyContainedInRemainingVariables(g, remainingVariables));
+			return result;
+
+		}), "Remaining goals are ", RESULT);
+
 	}
 
 	///////////////////// PROJECT
 	
 	private static Set<? extends SamplingRule> getProjectedSamplingRules(
 			List<? extends SamplingGoal> remainingFinalGoals,
-			ArrayList<? extends SamplingRule> samplingRulesWithFinalGoals,
-			SamplingFactor factorToBeUsedAsSamplerOfProjectedSamplingRules) {
-		
-		ProjectionOfSetOfRules<SamplingRule, SamplingGoal> projectionOfSetOfRules = 
-				new ProjectionOfSetOfRules<>(
-						samplingRulesWithFinalGoals,
-						remainingFinalGoals,
-						(consequent, antecedents) -> 
-						new SamplingRule(
-								factorToBeUsedAsSamplerOfProjectedSamplingRules, 
-								arrayList(consequent), 
-								arrayListFrom(antecedents), 
-								0.5)); // TODO: can we do better than just use 0.5 here?
-		
-		Set<? extends SamplingRule> projectedSamplingRules = projectionOfSetOfRules.getProjectedSetOfRules();
-		return projectedSamplingRules;
+			SamplingRuleSet setOfSamplingRulesWithFinalGoals,
+			SamplingFactor newFactor) {
+
+		return explanationBlock("Computing projection of rules with final goals (expand to see arguments)", code(() -> {
+
+			explainList("Remaining final goals", remainingFinalGoals);
+			explainList("Sampling rules with final goals", setOfSamplingRulesWithFinalGoals.getSamplingRules());
+
+			var samplingRulesArrayList = new ArrayList<>(setOfSamplingRulesWithFinalGoals.getSamplingRules());
+			ProjectionOfSetOfRules<SamplingRule, SamplingGoal> projectionOfSetOfRules = 
+					new ProjectionOfSetOfRules<>(
+							samplingRulesArrayList,
+							remainingFinalGoals,
+							(consequent, antecedents) -> 
+							new SamplingRule(newFactor, arrayList(consequent), arrayListFrom(antecedents), 0.5));
+			// TODO: can we do better than just use 0.5 here?
+
+			Set<? extends SamplingRule> projectedSamplingRules = projectionOfSetOfRules.getProjectedSetOfRules();
+
+			explainList("Projection of sampling rules with final goals", projectedSamplingRules);
+
+			return projectedSamplingRules;
+
+		}), "Computed projection of rules with final goals (open block to see result)");
 	}
 	
 	////////////////////// UTIL
 	
-	private static boolean isCompletelyContainedInRemainingVariables(
-			SamplingGoal goal, 
-			List<? extends Variable> remainingVariables) {
-		
+	private static boolean isCompletelyContainedInRemainingVariables(SamplingGoal goal, List<? extends Variable> remainingVariables) {
 		return remainingVariables.containsAll(goal.getVariables());
 	}
 

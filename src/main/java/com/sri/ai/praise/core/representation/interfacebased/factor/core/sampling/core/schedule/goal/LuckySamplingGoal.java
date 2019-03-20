@@ -41,7 +41,7 @@ public class LuckySamplingGoal extends AbstractVariablesRelatedGoal implements C
 
 	@Override
 	public String getGoalName() {
-		return "lucky[" + factor + ", " + innerGoal + "]";
+		return "lucky[" + innerGoal + ", " + factor + "]";
 	}
 
 }

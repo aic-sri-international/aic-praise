@@ -4,6 +4,7 @@ import static com.sri.ai.util.Util.assertType;
 import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.myAssert;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,6 +66,52 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	}
 
 	/**
+	 * Convenience creator taking either variables or goals as consequents and antecedents.
+	 * Variables are converted into {@link VariableIsDefined} goals.
+	 * @param sampler
+	 * @param consequents
+	 * @param antecedents
+	 * @param estimatedSuccessWeight
+	 * @return
+	 */
+	public static SamplingRule samplingRule(
+			SamplingFactor sampler, 
+			Collection<?> consequents, 
+			Collection<?> antecedents, 
+			double estimatedSuccessWeight) {
+		
+		List<? extends SamplingGoal> antecedentGoals = mapIntoList(antecedents, SamplingRule::convertToGoal);
+		List<? extends SamplingGoal> consequentGoals = mapIntoList(consequents, SamplingRule::convertToGoal);
+		
+		return new SamplingRule(sampler, consequentGoals, antecedentGoals, estimatedSuccessWeight);
+	}
+	
+	private static SamplingGoal convertToGoal(Object object) {
+		if (object instanceof Variable) {
+			return new VariableIsDefinedGoal((Variable) object);
+		}
+		else if (object instanceof SamplingGoal){
+			return (SamplingGoal) object;
+		}
+		else {
+			throw new Error("Sampling rule should have received either variable or sampling goal, but got " + object.getClass().getSimpleName() + " " + object);
+		}
+	}
+
+	/**
+	 * Convenience deterministic sampling rule creator taking variables to stand for {@link VariableIsDefined} goals.
+	 * @param consequentVariables
+	 * @param antecedentVariables
+	 * @return
+	 */
+	public static SamplingRule deterministicSamplingRuleFromVariables(
+			Collection<? extends Variable> consequentVariables, 
+			Collection<? extends Variable> antecedentVariables) {
+		
+		return samplingRuleFromVariables(null, consequentVariables, antecedentVariables, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
+	}
+
+	/**
 	 * Convenience deterministic sampling rule creator taking variables to stand for {@link VariableIsDefined} goals.
 	 * @param sampler
 	 * @param consequentVariables
@@ -87,6 +134,31 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		return samplingRuleFromGoals(sampler, consequentVariables, antecedentVariables, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
 	}
 
+	/**
+	 * Convenience creator for deterministic sampling rule taking either variables or goals as consequents and antecedents.
+	 * Variables are converted into {@link VariableIsDefined} goals.
+	 * @param sampler
+	 * @param consequents
+	 * @param antecedents
+	 * @return
+	 */
+	public static SamplingRule deterministicSamplingRule(SamplingFactor sampler, Collection<?> consequents, Collection<?> antecedents) {
+		return samplingRule(sampler, consequents, antecedents, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
+	}
+
+	/**
+	 * Convenience creator for deterministic sampling rule taking either variables or goals as consequents and antecedents
+	 * and setting sampler factor to null.
+	 * Variables are converted into {@link VariableIsDefined} goals.
+	 * @param sampler
+	 * @param consequents
+	 * @param antecedents
+	 * @return
+	 */
+	public static SamplingRule deterministicSamplingRule(Collection<?> consequents, Collection<?> antecedents) {
+		return samplingRule(null, consequents, antecedents, MAXIMUM_ESTIMATED_SUCCESS_WEIGHT);
+	}
+	
 	public SamplingRule(SamplingFactor sampler, Collection<? extends SamplingGoal> consequents, Collection<? extends SamplingGoal> antecedents, double estimatedSuccessWeight) {
 		super(estimatedSuccessWeight);
 		this.sampler = sampler;
@@ -96,6 +168,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	}
 
 	public SamplingFactor getSamplingFactor() {
+		myAssert(sampler != null, this, () -> " does not have a sampling factor associated with it but it has been requested.");
 		return sampler;
 	}
 	
@@ -145,15 +218,6 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		return new DefaultTree<String>(toString());
 	}
 
-	@Override
-	public String toString() {
-		String consequentsString = join(consequents);
-		String antecedentsString = join(antecedents);
-		SamplingFactor factorString = getSamplingFactor();
-		String result = consequentsString + " <= " + antecedentsString + " with " + factorString;
-		return result;
-	}
-
 	public static final Comparator<? super SamplingRule> SUCCESS_COMPARATOR = new Comparator<SamplingRule>() {
 	
 		@Override
@@ -168,11 +232,70 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		return forAll(getAntecendents(), a -> a.isSatisfied(sample));
 	}
 
-	public SamplingRule copyWithNewSamplerAndAntecedents(SamplingFactor newSampler, ArrayList<SamplingGoal> newAntecendents) {
-		return new SamplingRule(newSampler, consequents, newAntecendents, getEstimatedSuccessWeight());
+	public SamplingRule copyWithNewSampler(SamplingFactor newSampler) {
+		return new SamplingRule(newSampler, consequents, antecedents, getEstimatedSuccessWeight());
 	}
 
-	public SamplingRule copyWithNewAntecedents(ArrayList<SamplingGoal> newAntecendents) {
-		return new SamplingRule(sampler, consequents, newAntecendents, getEstimatedSuccessWeight());
+	public SamplingRule copyWithNewSamplerAndAntecedents(SamplingFactor newSampler, ArrayList<SamplingGoal> newAntecedents) {
+		return new SamplingRule(newSampler, consequents, newAntecedents, getEstimatedSuccessWeight());
+	}
+
+	public SamplingRule copyWithNewAntecedents(ArrayList<SamplingGoal> newAntecedents) {
+		return new SamplingRule(sampler, consequents, newAntecedents, getEstimatedSuccessWeight());
+	}
+
+	@Override
+	public String toString() {
+		String consequentsString = join(getConsequents());
+		String antecedentsString = join(getAntecendents());
+		SamplingFactor factorString = getSamplingFactor();
+		String result = consequentsString + " <= " + antecedentsString + " with " + factorString;
+		return result;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((antecedents == null) ? 0 : antecedents.hashCode());
+		result = prime * result + ((consequents == null) ? 0 : consequents.hashCode());
+		result = prime * result + ((sampler == null) ? 0 : sampler.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		SamplingRule other = (SamplingRule) obj;
+		if (antecedents == null) {
+			if (other.antecedents != null) {
+				return false;
+			}
+		} else if (!antecedents.equals(other.antecedents)) {
+			return false;
+		}
+		if (consequents == null) {
+			if (other.consequents != null) {
+				return false;
+			}
+		} else if (!consequents.equals(other.consequents)) {
+			return false;
+		}
+		if (sampler == null) {
+			if (other.sampler != null) {
+				return false;
+			}
+		} else if (!sampler.equals(other.sampler)) {
+			return false;
+		}
+		return true;
 	}
 }

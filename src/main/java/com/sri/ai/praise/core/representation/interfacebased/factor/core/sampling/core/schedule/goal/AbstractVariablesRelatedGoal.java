@@ -9,6 +9,16 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 
+/**
+ * An abstract basic implementation for {@link SamplingGoal}
+ * that defines a field for storing involved variables
+ * as well as {@link #hashCode()} and {@link #equals(Object)} methods that compare
+ * instances by value (IMPORTANT: equality depends on instances that are equal to produce identical results
+ * for {@link #getGoalName()}.
+ * 
+ * @author braz
+ *
+ */
 public abstract class AbstractVariablesRelatedGoal implements SamplingGoal {
 
 	@Override
