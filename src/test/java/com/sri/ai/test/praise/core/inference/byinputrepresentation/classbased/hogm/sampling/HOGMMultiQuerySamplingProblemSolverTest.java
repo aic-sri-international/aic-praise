@@ -1400,6 +1400,29 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 	}
 
 	@Test
+	public void smallCountiesWithIntegerExternalVariableSamplingTest() {
+	
+		String model = "" +
+				"sort Counties: 3, Abiemnhom', Abyei', Akobo';" + // the quotes makes them not be region names and makes plots be recorded, not maps. 
+				"random capital: Counties;" + 
+				"constant month : 0..2;" +
+				"constant year : 0..2;" +
+				"capital = "
+				+ "if year = 1"
+				+ "        then if month = 0 then Abyei' "
+				+ "        else if month = 1 then Akobo' "
+				+ "        else Abiemnhom' "
+				+ "else Abiemnhom';";
+		
+		String query = "capital";
+		Expression expected = parse("if (year = 0) and (month = 0) and (capital = Abiemnhom') then 1 else if (year = 0) and (month = 0) and (capital = Abyei') then 0 else if (year = 0) and (month = 0) and (capital = Akobo') then 0 else if (year = 0) and (month = 1) and (capital = Abiemnhom') then 1 else if (year = 0) and (month = 1) and (capital = Abyei') then 0 else if (year = 0) and (month = 1) and (capital = Akobo') then 0 else if (year = 0) and (month = 2) and (capital = Abiemnhom') then 1 else if (year = 0) and (month = 2) and (capital = Abyei') then 0 else if (year = 0) and (month = 2) and (capital = Akobo') then 0 else if (year = 1) and (month = 0) and (capital = Abiemnhom') then 0 else if (year = 1) and (month = 0) and (capital = Abyei') then 1 else if (year = 1) and (month = 0) and (capital = Akobo') then 0 else if (year = 1) and (month = 1) and (capital = Abiemnhom') then 0 else if (year = 1) and (month = 1) and (capital = Abyei') then 0 else if (year = 1) and (month = 1) and (capital = Akobo') then 1 else if (year = 1) and (month = 2) and (capital = Abiemnhom') then 1 else if (year = 1) and (month = 2) and (capital = Abyei') then 0 else if (year = 1) and (month = 2) and (capital = Akobo') then 0 else if (year = 2) and (month = 0) and (capital = Abiemnhom') then 1 else if (year = 2) and (month = 0) and (capital = Abyei') then 0 else if (year = 2) and (month = 0) and (capital = Akobo') then 0 else if (year = 2) and (month = 1) and (capital = Abiemnhom') then 1 else if (year = 2) and (month = 1) and (capital = Abyei') then 0 else if (year = 2) and (month = 1) and (capital = Akobo') then 0 else if (year = 2) and (month = 2) and (capital = Abiemnhom') then 1 else if (year = 2) and (month = 2) and (capital = Abyei') then 0 else 0");
+		int initialNumberOfSamples = 1;
+		int numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
+	}
+
+	@Test
 	public void countiesWithIntegerExternalVariableSamplingTest() {
 	
 		String model = "" +

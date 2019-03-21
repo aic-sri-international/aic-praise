@@ -5,6 +5,7 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.setFrom;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
@@ -190,6 +191,45 @@ class ProjectionOfSetOfSamplingRulesTest {
 		
 		runTest(variables, samplingRules, remainingVariables, expectedSamplingRules);
 		
+		//////// Variation: all variables remain;
+		//////// I initially expected the exact same set of sampling rules,
+		//////// but because x can be sampled from nothing, there is a variation of the more complex rule
+		//////// without x as a prerequisite
+		
+		remainingVariables = variables;
+		expectedSamplingRules =
+				list(
+						rule(list(y), list(w)),
+						
+						rule(list(x), list()),
+						
+						rule(
+								list(y), 
+								list(
+										new VariableEqualsSomethingDifferentFrom(x, 0), 
+										z, 
+										new VariableEqualsSomethingDifferentFrom(z, 0),
+										new FunctionOnSetOfVariablesSatisfiesCondition<Integer>(
+												"dummy function", 
+												list(x,z), 
+												dummyFunction, 
+												dummyPredicate))),
+						
+						rule(
+								list(y), 
+								list(
+										x, 
+										new VariableEqualsSomethingDifferentFrom(x, 0), 
+										z, 
+										new VariableEqualsSomethingDifferentFrom(z, 0),
+										new FunctionOnSetOfVariablesSatisfiesCondition<Integer>(
+												"dummy function", 
+												list(x,z), 
+												dummyFunction, 
+												dummyPredicate))));
+		
+		runTest(variables, samplingRules, remainingVariables, expectedSamplingRules);
+		
 		////////////////
 		
 		variables = list(x, y, w, z);
@@ -260,7 +300,7 @@ class ProjectionOfSetOfSamplingRulesTest {
 		println(join(".\n", expectedSamplingRules));
 		println("Actual:");
 		println(join(".\n", result.getSamplingRules()));
-		assertEquals(expectedSamplingRules, result.getSamplingRules());
+		assertEquals(setFrom(expectedSamplingRules), setFrom(result.getSamplingRules()));
 	}
 
 	private TestSamplingFactor originalFactor(List<Variable> variables, List<SamplingRule> samplingRules) {
