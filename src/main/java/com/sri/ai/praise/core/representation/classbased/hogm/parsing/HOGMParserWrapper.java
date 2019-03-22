@@ -37,8 +37,9 @@
  */
 package com.sri.ai.praise.core.representation.classbased.hogm.parsing;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -98,7 +99,7 @@ public class HOGMParserWrapper implements Parser {
 		
 		AntlrErrorListener antlrErrorListener = new AntlrErrorListener(errorListener);
 
-		ANTLRInputStream input = new ANTLRInputStream(string);
+		CharStream input = CharStreams.fromString(string);
 		HOGMLexer        lexer = new HOGMLexer(input);
 		
 		CommonTokenStream tokens = new CommonTokenStream(lexer);

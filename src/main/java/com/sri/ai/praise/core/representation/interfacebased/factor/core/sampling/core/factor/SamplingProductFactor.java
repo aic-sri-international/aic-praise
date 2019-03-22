@@ -1,7 +1,9 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet.union;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet.samplingRuleSet;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.arrayListFrom;
 import static com.sri.ai.util.Util.collectToSet;
 import static com.sri.ai.util.Util.flattenOneLevelToArrayList;
 import static com.sri.ai.util.Util.forAll;
@@ -16,9 +18,14 @@ import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.set;
 import static com.sri.ai.util.Util.thereExists;
+import static com.sri.ai.util.Util.union;
+import static com.sri.ai.util.Util.unionArrayList;
+import static com.sri.ai.util.Util.valueOrDefaultIfNull;
 import static com.sri.ai.util.base.Pair.pair;
 import static com.sri.ai.util.collect.DefaultManyToManyRelation.manyToManyRelation;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 import static com.sri.ai.util.planning.core.PlannerUsingEachRuleAtMostOnce.planUsingEachRuleAtMostOnce;
+import static com.sri.ai.util.planning.core.ProjectionOfSetOfRules.project;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +42,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingState;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableIsDefinedGoal;
@@ -67,6 +75,20 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		SamplingRuleSet samplingRules = union(mapIntoList(getInputFactors(), SamplingFactor::getSamplingRuleSet));
 		return samplingRules;
 	}
+	
+	protected SamplingRuleSet makeSamplingRulesNew() {
+		var allSamplingRulesArrayList = unionArrayList(functionIterator(getInputFactors(), f -> f.getSamplingRuleSet().getSamplingRules()));
+		Set<? extends SamplingRule> projectionOfSetOfSamplingRules =  
+				project(
+						allSamplingRulesArrayList,
+						samplingRuleSet(allSamplingRulesArrayList).getAllGoals(),
+						(consequent, antecedents) -> 
+						new SamplingRule(this, arrayList(consequent), arrayListFrom(antecedents), 0.5));
+		// TODO: can we do better than just use 0.5 here?
+
+		SamplingRuleSet result = new DefaultSamplingRuleSet(projectionOfSetOfSamplingRules);
+		return result;
+	}
 
 	public Plan getSamplingPlan(List<? extends Variable> variablesToSample, Sample sampleToComplete) {
 		Set<? extends SamplingGoal> satisfiedGoals = getSatisfiedGoals(sampleToComplete);
@@ -92,10 +114,21 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	private Plan makePlan(Pair<Set<? extends SamplingGoal>, Set<? extends SamplingGoal>> requiredGoalsAndSatisfiedGoals) {
 		Set<? extends SamplingGoal> requiredGoals = requiredGoalsAndSatisfiedGoals.first;
 		Set<? extends SamplingGoal> satisfiedGoals = requiredGoalsAndSatisfiedGoals.second;
-		Collection<? extends SamplingRule> samplingRules = getSamplingRuleSet().getSamplingRules();
+		Collection<? extends SamplingRule> samplingRules = getInputFactorsSamplingRulesUnion();
 		Plan plan = planUsingEachRuleAtMostOnce(requiredGoals, satisfiedGoals, set() /* TODO can do better */, samplingRules);
 		myAssert(!plan.isFailedPlan(), () -> "Plan for sampling product factor has failed: " + this);
 		return plan;
+	}
+	
+	private Collection<? extends SamplingRule> inputFactorsSamplingRulesUnion;
+	
+	private Collection<? extends SamplingRule> getInputFactorsSamplingRulesUnion() {
+		return valueOrDefaultIfNull(inputFactorsSamplingRulesUnion, () -> makeInputFactorsSamplingRulesUnion()); 
+	}
+
+	private Collection<? extends SamplingRule> makeInputFactorsSamplingRulesUnion() {
+		var samplingRules = union(functionIterator(getInputFactors(), f -> f.getSamplingRuleSet().getSamplingRules()));
+		return samplingRules;
 	}
 
 	@Override

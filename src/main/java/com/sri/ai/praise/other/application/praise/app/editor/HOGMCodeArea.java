@@ -40,7 +40,8 @@ package com.sri.ai.praise.other.application.praise.app.editor;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.fxmisc.richtext.CodeArea;
@@ -129,7 +130,7 @@ public class HOGMCodeArea extends AnchorPane {
 	private static StyleSpans<Collection<String>> computeHighlighting(String text) {
 		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
 		int lastTokenEnd = 0;
-		ANTLRInputStream input = new ANTLRInputStream(text);
+		CharStream input = CharStreams.fromString(text);
 		HOGMLexer lexer = new HOGMLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		tokens.fill();	

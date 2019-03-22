@@ -24,6 +24,8 @@ import com.sri.ai.util.planning.core.ProjectionOfSetOfRules;
 
 /**
  * A utility class with a method for projecting a set of sampling rules into a sub set of their goals.
+ * This is similar to {@link ProjectionOfSetOfRules} but deals with contingent goals on eliminated variables
+ * in a way that depends on the knowledge that these are sampling rules.
  * 
  * @author braz
  *
@@ -157,15 +159,15 @@ public class ProjectionOfSetOfSamplingRules {
 			explainList("Sampling rules with final goals", setOfSamplingRulesWithFinalGoals.getSamplingRules());
 
 			var samplingRulesArrayList = new ArrayList<>(setOfSamplingRulesWithFinalGoals.getSamplingRules());
-			ProjectionOfSetOfRules<SamplingRule, SamplingGoal> projectionOfSetOfRules = 
-					new ProjectionOfSetOfRules<>(
+
+			Set<? extends SamplingRule> projectedSamplingRules = 
+					ProjectionOfSetOfRules.project(
 							samplingRulesArrayList,
 							remainingFinalGoals,
 							(consequent, antecedents) -> 
 							new SamplingRule(newFactor, arrayList(consequent), arrayListFrom(antecedents), 0.5));
 			// TODO: can we do better than just use 0.5 here?
-
-			Set<? extends SamplingRule> projectedSamplingRules = projectionOfSetOfRules.getProjectedSetOfRules();
+					
 
 			explainList("Projection of sampling rules with final goals", projectedSamplingRules);
 
