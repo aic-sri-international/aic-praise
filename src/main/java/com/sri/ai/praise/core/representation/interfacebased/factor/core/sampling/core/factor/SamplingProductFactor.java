@@ -70,13 +70,14 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		this.factorsAndVariablesRelation = manyToManyRelation(multipliedFactors, Factor::getVariables);
 	}
 
-	@Override
-	protected SamplingRuleSet makeSamplingRules() {
+	//@Override
+	protected SamplingRuleSet makeSamplingRulesOld() {
 		SamplingRuleSet samplingRules = union(mapIntoList(getInputFactors(), SamplingFactor::getSamplingRuleSet));
 		return samplingRules;
 	}
 	
-	protected SamplingRuleSet makeSamplingRulesNew() {
+	@Override
+	protected SamplingRuleSet makeSamplingRules() {
 		var allSamplingRulesArrayList = unionArrayList(functionIterator(getInputFactors(), f -> f.getSamplingRuleSet().getSamplingRules()));
 		Set<? extends SamplingRule> projectionOfSetOfSamplingRules =  
 				project(
@@ -157,11 +158,10 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	
 	private List<SamplingFactor> executeSamplingPlan(Plan samplingPlan, Sample sampleToComplete) {
 		
-		getSamplingRuleSet().getSamplingRules().forEach(SamplingRule::reset);
+		getInputFactorsSamplingRulesUnion().forEach(SamplingRule::reset);
 		samplingPlan.execute(new SamplingState(sampleToComplete, getRandom()));
 		List<SamplingFactor> factorsThatFired = 
-				getSamplingRuleSet()
-				.getSamplingRules()
+				getInputFactorsSamplingRulesUnion()
 				.stream()
 				.filter(SamplingRule::hasFired)
 				.map(SamplingRule::getSamplingFactor)

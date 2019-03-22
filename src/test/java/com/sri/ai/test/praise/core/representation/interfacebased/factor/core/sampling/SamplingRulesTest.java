@@ -87,7 +87,7 @@ public class SamplingRulesTest {
 
 		SamplingProductFactor incomingToY = (SamplingProductFactor) messageFromYToZ.getMarginalizedFactor();
 		factor = incomingToY;
-		expectedString = "z <= y; y <= z";
+		expectedString = "y <= z; z <= y";
 		runSamplingRulesTest();
 
 		SamplingFactor YIsNormalZ = incomingToY.getInputFactors().get(0);
