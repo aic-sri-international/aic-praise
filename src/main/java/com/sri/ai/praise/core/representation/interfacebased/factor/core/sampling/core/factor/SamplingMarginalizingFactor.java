@@ -2,7 +2,9 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.ProjectionOfSetOfSamplingRules.project;
 import static com.sri.ai.util.Util.fill;
+import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
 
 import java.util.List;
@@ -35,12 +37,14 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 
 	@Override
 	public void sampleOrWeigh(Sample sampleToComplete) {
-		if (marginalizedFactor instanceof DynamicSamplingProductFactor) { // TODO: too hard-wired; create interface for factors that can sample a subset of its variables
-			((DynamicSamplingProductFactor) marginalizedFactor).sampleOrWeigh(getVariables(), sampleToComplete);
-		}
-		else {
-			marginalizedFactor.sampleOrWeigh(sampleToComplete);
-		}
+		checkAgainstMarginalizedButInstantiatedVariables(sampleToComplete); // TODO: may be too expensive since it's run at every sample
+		marginalizedFactor.sampleOrWeigh(sampleToComplete);
+		marginalizedVariables.forEach(sampleToComplete::remove);
+	}
+
+	private void checkAgainstMarginalizedButInstantiatedVariables(Sample sampleToComplete) {
+		Variable marginalizedButInstantiated = getFirst(marginalizedVariables, sampleToComplete::instantiates);
+		myAssert(marginalizedButInstantiated == null, this, () -> "requires incoming samples not to instantiate its marginalized variables, but incoming sample instantiates " + marginalizedButInstantiated);
 	}
 
 	@Override

@@ -8,9 +8,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.ImportanceFactory;
@@ -25,9 +23,6 @@ public class SumSamplingFactorTest {
 
 	private ImportanceFactory importanceFactory = new DoubleImportanceFactory();
 	private PotentialFactory potentialFactory = new DoublePotentialFactory();
-	private DefaultFactorNetwork network;
-	private ExactBP solver;
-	private SamplingFactor marginalOfX;
 	
 	private Random getRandom() {
 		return new Random();
@@ -45,12 +40,6 @@ public class SumSamplingFactorTest {
 		SumSamplingFactor xEqualsYPlusZ = new SumSamplingFactor(x, list(y,z), getRandom());
 
 		runSumOfDistinctThreeTest(numberOfSamples, x, y, z, xEqualsYPlusZ);
-
-		network = new DefaultFactorNetwork(list(xEqualsYPlusZ));
-		solver = new ExactBP(x, network);
-		marginalOfX = (SamplingFactor) solver.apply();
-
-		runSumOfDistinctThreeTest(numberOfSamples, x, y, z, marginalOfX);
 
 	}
 
@@ -158,12 +147,6 @@ public class SumSamplingFactorTest {
 
 		runSumOfRepeatingArgumentTest(numberOfSamples, x, y, xEqualsYPlusY);
 
-		network = new DefaultFactorNetwork(list(xEqualsYPlusY));
-		solver = new ExactBP(x, network);
-		marginalOfX = (SamplingFactor) solver.apply();
-
-		runSumOfRepeatingArgumentTest(numberOfSamples, x, y, marginalOfX);
-
 	}
 
 	private void runSumOfRepeatingArgumentTest(long numberOfSamples, Variable x, Variable y, SamplingFactor factor) {
@@ -236,12 +219,6 @@ public class SumSamplingFactorTest {
 		SumSamplingFactor xEqualsXPlusY = new SumSamplingFactor(x, list(x,y), getRandom());
 
 		runSumOfRepeatingSumVariableTest(numberOfSamples, x, y, xEqualsXPlusY);
-
-		network = new DefaultFactorNetwork(list(xEqualsXPlusY));
-		solver = new ExactBP(x, network);
-		marginalOfX = (SamplingFactor) solver.apply();
-
-		runSumOfRepeatingSumVariableTest(numberOfSamples, x, y, marginalOfX);
 
 	}
 
@@ -326,12 +303,6 @@ public class SumSamplingFactorTest {
 		SumSamplingFactor xEqualsSumOfNone = new SumSamplingFactor(x, list(), getRandom());
 
 		runSumOfNoneTest(numberOfSamples, x, xEqualsSumOfNone);
-
-		network = new DefaultFactorNetwork(list(xEqualsSumOfNone));
-		solver = new ExactBP(x, network);
-		marginalOfX = (SamplingFactor) solver.apply();
-
-		runSumOfNoneTest(numberOfSamples, x, marginalOfX);
 
 	}
 
