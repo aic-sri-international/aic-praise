@@ -38,13 +38,22 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 	@Override
 	public void sampleOrWeigh(Sample sampleToComplete) {
 		checkAgainstMarginalizedButInstantiatedVariables(sampleToComplete); // TODO: may be too expensive since it's run at every sample
-		marginalizedFactor.sampleOrWeigh(sampleToComplete);
+		sampleOnlyRequiredVariablesIfPossible(sampleToComplete);
 		marginalizedVariables.forEach(sampleToComplete::remove);
 	}
 
 	private void checkAgainstMarginalizedButInstantiatedVariables(Sample sampleToComplete) {
 		Variable marginalizedButInstantiated = getFirst(marginalizedVariables, sampleToComplete::instantiates);
 		myAssert(marginalizedButInstantiated == null, this, () -> "requires incoming samples not to instantiate its marginalized variables, but incoming sample instantiates " + marginalizedButInstantiated);
+	}
+
+	private void sampleOnlyRequiredVariablesIfPossible(Sample sampleToComplete) {
+		if (marginalizedFactor instanceof DynamicSamplingProductFactor) { // TODO: too hard-wired; create interface for factors that can sample a subset of its variables
+			((DynamicSamplingProductFactor) marginalizedFactor).sampleOrWeigh(getVariables(), sampleToComplete);
+		}
+		else {
+			marginalizedFactor.sampleOrWeigh(sampleToComplete);
+		}
 	}
 
 	@Override

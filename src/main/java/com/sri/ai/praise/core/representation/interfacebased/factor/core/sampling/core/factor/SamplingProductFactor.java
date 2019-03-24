@@ -70,14 +70,13 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		this.factorsAndVariablesRelation = manyToManyRelation(multipliedFactors, Factor::getVariables);
 	}
 
-	@Override
-	protected SamplingRuleSet makeSamplingRules() {
+	protected SamplingRuleSet makeSamplingRulesOld() {
 		SamplingRuleSet samplingRules = union(mapIntoList(getInputFactors(), SamplingFactor::getSamplingRuleSet));
 		return samplingRules;
 	}
 	
-	//@Override
-	protected SamplingRuleSet makeSamplingRulesNew() {
+	@Override
+	protected SamplingRuleSet makeSamplingRules() {
 		var allSamplingRulesArrayList = unionArrayList(functionIterator(getInputFactors(), f -> f.getSamplingRuleSet().getSamplingRules()));
 		Set<? extends SamplingRule> projectionOfSetOfSamplingRules =  
 				project(
