@@ -127,6 +127,19 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 		int queryVariableIndexInProjection = 
 				projectedVariablesWithRange.indexOf(getQueryVariable());
 		
+		if (queryVariableIndexInProjection == -1) {
+			println("*********************************************************************");
+			println("Query variable " + getQueryVariable() + " not found in projection");
+			println("Sampling factor: " + samplingFactor);
+			println("Sampling factor variables: " + samplingFactor.getVariables());
+			println("Conditioning sample: " + conditioningSample);
+			println("Conditioned sampling factor: " + conditionedSamplingFactor);
+			println("Conditioned sampling factor variables: " + conditionedSamplingFactor.getVariables());
+			println("Original variables with range: " + getSetOfVariablesWithRange().getVariables());
+			println("Conditioned variables with range: " + projectedVariablesWithRange);
+			println("*********************************************************************");
+		}
+		
 		SamplingFactorDiscretizedProbabilityDistribution result = 
 				new SamplingFactorDiscretizedProbabilityDistribution(
 						conditionedSamplingFactor, 
