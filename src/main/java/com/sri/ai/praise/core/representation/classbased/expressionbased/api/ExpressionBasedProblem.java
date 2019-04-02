@@ -29,6 +29,8 @@ public interface ExpressionBasedProblem {
 
 	List<Expression> getRandomVariablesExcludingQuerySymbol();
 
+	List<Expression> getParameters();
+
 	Expression getQueryExpression();
 
 	boolean modelIsKnownToBeBayesianNetwork();

@@ -28,6 +28,7 @@ import static com.sri.ai.util.collect.PredicateIterator.predicateIterator;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explainList;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.getThreadExplanationLogger;
 
@@ -364,8 +365,15 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 	private Map<Variable, Collection<? extends SamplingRule>> fromVariableToPrioritizedSamplingRules = map();
 
 	private Collection<? extends SamplingRule> getPrioritizedSamplingRules(Variable variable) {
-		// println("Size of sampling rules map: " + fromVariableToPrioritizedSamplingRules.size());
-		return getValuePossiblyCreatingIt(fromVariableToPrioritizedSamplingRules, variable, this::makePrioritizedSamplingRules);
+		
+		Collection<? extends SamplingRule> prioritizedSamplingRules = 
+				getValuePossiblyCreatingIt(fromVariableToPrioritizedSamplingRules, variable, this::makePrioritizedSamplingRules);
+
+		explainList(
+				"Prioritized rules for " + variable,
+				mapIntoList(prioritizedSamplingRules, r -> r + " with weight " + r.getEstimatedSuccessWeight()));
+		
+		return prioritizedSamplingRules;
 	}
 	
 	private Collection<? extends SamplingRule> makePrioritizedSamplingRules(Variable variable) {

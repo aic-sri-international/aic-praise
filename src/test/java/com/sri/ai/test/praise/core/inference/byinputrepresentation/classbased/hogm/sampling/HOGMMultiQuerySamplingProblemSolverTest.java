@@ -1009,19 +1009,24 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				"not q;" +
 				"";
 		
-		String query = "r";
-		Expression expected = parse("if r then 0 else 1");
-		int initialNumberOfSamples = 1;
-		int numberOfDiscreteValues = 21;
+		String query;
+		Expression expected;
+		int initialNumberOfSamples;
+		int numberOfDiscreteValues;
 	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, true);
-		
-		query = "p";
-		expected = parse("if p then 1 else 0");
-		initialNumberOfSamples = 1;
-		numberOfDiscreteValues = 21;
-	
-		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, true);
+//		query = "r";
+//		expected = parse("if r then 0 else 1");
+//		initialNumberOfSamples = 1;
+//		numberOfDiscreteValues = 21;
+//	
+//		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, true);
+//		
+//		query = "p";
+//		expected = parse("if p then 1 else 0");
+//		initialNumberOfSamples = 1;
+//		numberOfDiscreteValues = 21;
+//	
+//		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, true);
 		
 		query = "q";
 		expected = parse("if q then 0 else 1");
@@ -1945,6 +1950,15 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 				Functions functions = Functions.functions(conditionedFunction);
 				myAssert(queryIndex != -1, () -> "Query variable " + query + " not found in variables " + conditionedFunction.getSetOfInputVariables().getVariables());
 				GraphSet.plot(functions, queryIndex, GRAPH_FILENAME_WITHOUT_EXTENSION);
+				
+//				// DEBUG for smallCounties
+//				Variable month = conditionedFunction.getVariable("month");
+//				Variable capital = conditionedFunction.getVariable("capital");
+//				Variable year = conditionedFunction.getVariable("year");
+//				DefaultGraphSetMaker graphSetMaker = new DefaultGraphSetMaker();
+//				graphSetMaker.setFunctions(functions);
+//				graphSetMaker.setFilePathnameBase(GRAPH_FILENAME_WITHOUT_EXTENSION);
+//				graphSetMaker.plot(assignment(capital, "Abiemnhom", year, 0), month);
 			}
 		}
 	}

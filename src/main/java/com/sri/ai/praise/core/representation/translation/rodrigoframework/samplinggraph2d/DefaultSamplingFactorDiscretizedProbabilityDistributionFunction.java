@@ -75,7 +75,7 @@ implements SamplingFactorDiscretizedProbabilityDistributionFunction {
 				getCorrespondingSample(getSamplingFactor(), getSetOfVariablesWithRange(), assignmentToRemainingVariables);
 		
 		SamplingFactorDiscretizedProbabilityDistributionFunction conditionedDistributionFunction = 
-				condition(conditioningSample);
+				condition(variable, conditioningSample);
 		
 		SamplingFactorDiscretizedProbabilityDistributionSingleInputFunctionAdapter singleInputDistributionFunction =
 				new SamplingFactorDiscretizedProbabilityDistributionSingleInputFunctionAdapter(conditionedDistributionFunction);
@@ -98,10 +98,10 @@ implements SamplingFactorDiscretizedProbabilityDistributionFunction {
 	 *
 	 */
 	//@Override
-	public SamplingFactorDiscretizedProbabilityDistributionFunction condition(Sample conditioningSample) {
+	public SamplingFactorDiscretizedProbabilityDistributionFunction condition(Variable queryVariable, Sample conditioningSample) {
 		
 		SamplingFactorDiscretizedProbabilityDistribution conditionedDistribution = 
-				getConditionalDistribution().condition(conditioningSample);
+				getConditionalDistribution().condition(queryVariable, conditioningSample);
 		
 		SamplingFactorDiscretizedProbabilityDistributionFunction conditionedDistributionFunction = 
 				new DefaultSamplingFactorDiscretizedProbabilityDistributionFunction(conditionedDistribution);

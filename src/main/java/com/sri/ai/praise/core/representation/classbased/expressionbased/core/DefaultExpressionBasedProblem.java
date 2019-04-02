@@ -45,6 +45,7 @@ import static com.sri.ai.grinder.helper.GrinderUtil.getTypeExpressionOfExpressio
 import static com.sri.ai.grinder.helper.GrinderUtil.getTypeOfExpression;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUAL;
 import static com.sri.ai.grinder.library.FunctorConstants.EQUIVALENCE;
+import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -54,6 +55,7 @@ import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
+import com.sri.ai.expresso.core.DefaultSymbol;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
@@ -83,6 +85,8 @@ public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 	
 	private List<Expression> originalRandomVariables;
 
+	private List<Expression> parameters;
+
 	private Predicate<Expression> isParameterPredicate;
 	
 	/** The original query. */
@@ -104,6 +108,7 @@ public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 		this.originalExpressionBasedModel = model;
 		this.queryExpression = queryExpression;
 		this.originalRandomVariables = originalExpressionBasedModel.getRandomVariables();
+		this.parameters = mapIntoList(originalExpressionBasedModel.getMapFromNonUniquelyNamedConstantNameToTypeName().keySet(), DefaultSymbol::createSymbol);
 		this.isParameterPredicate = e -> model.getMapFromNonUniquelyNamedConstantNameToTypeName().containsKey(e.toString());
 		this.modelIsKnownToBeBayesianNetwork = originalExpressionBasedModel.isKnownToBeBayesianNetwork();
 		this.proceduralAttachments = originalExpressionBasedModel.getProceduralAttachments();
@@ -208,6 +213,11 @@ public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 	@Override
 	public List<Expression> getRandomVariablesExcludingQuerySymbol() {
 		return Collections.unmodifiableList(originalRandomVariables);
+	}
+
+	@Override
+	public List<Expression> getParameters() {
+		return Collections.unmodifiableList(parameters);
 	}
 
 	@Override

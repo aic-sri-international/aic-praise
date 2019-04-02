@@ -102,16 +102,16 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 
 	private Map<Sample, SamplingFactorDiscretizedProbabilityDistribution> conditionings = map();
 	
-	public SamplingFactorDiscretizedProbabilityDistribution condition(Sample conditioningSample) {
+	public SamplingFactorDiscretizedProbabilityDistribution condition(Variable queryVariable, Sample conditioningSample) {
 //		println("Conditioning on " + conditioningSample);
 //		println("Within          " + System.identityHashCode(this));
 //		println("Id            : " + id);
 //		println("Keys in map:\n" + join("\n", conditionings.keySet()));
 //		println("Conditioning sample belongs in map: " + conditionings.containsKey(conditioningSample));
-		return getValuePossiblyCreatingIt(conditionings, conditioningSample, this::makeConditioning);
+		return getValuePossiblyCreatingIt(conditionings, conditioningSample, cs -> makeConditioning(queryVariable, cs));
 	}
 
-	private SamplingFactorDiscretizedProbabilityDistribution makeConditioning(Sample conditioningSample) {
+	private SamplingFactorDiscretizedProbabilityDistribution makeConditioning(Variable queryVariable, Sample conditioningSample) {
 		SamplingFactor conditionedSamplingFactor = 
 				ConditionedSamplingFactor.condition(samplingFactor, conditioningSample);
 		
@@ -121,15 +121,13 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 						getSetOfVariablesWithRange().getVariables(), /* corresponding list */
 						conditionedSamplingFactor.getVariables());   /* reduced version of original list */
 		
-		SetOfVariables projectedSetOfVariablesWithRange = 
-				new DefaultSetOfVariables(projectedVariablesWithRange);
+		var projectedSetOfVariablesWithRange = new DefaultSetOfVariables(projectedVariablesWithRange);
 		
-		int queryVariableIndexInProjection = 
-				projectedVariablesWithRange.indexOf(getQueryVariable());
+		int queryVariableIndexInProjection = projectedVariablesWithRange.indexOf(queryVariable);
 		
 		if (queryVariableIndexInProjection == -1) {
 			println("*********************************************************************");
-			println("Query variable " + getQueryVariable() + " not found in projection");
+			println("Query variable " + queryVariable + " not found in projection");
 			println("Sampling factor: " + samplingFactor);
 			println("Sampling factor variables: " + samplingFactor.getVariables());
 			println("Conditioning sample: " + conditioningSample);
@@ -139,8 +137,8 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 			println("Conditioned variables with range: " + projectedVariablesWithRange);
 			println("*********************************************************************");
 		}
-		
-		SamplingFactorDiscretizedProbabilityDistribution result = 
+
+		var result = 
 				new SamplingFactorDiscretizedProbabilityDistribution(
 						conditionedSamplingFactor, 
 						projectedSetOfVariablesWithRange, 
@@ -156,6 +154,7 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 		// good to get done when we have the time.
 	}
 
+	@SuppressWarnings("unused")
 	private Variable getQueryVariable() {
 		return getSetOfVariablesWithRange().get(getQueryVariableIndex());
 	}
