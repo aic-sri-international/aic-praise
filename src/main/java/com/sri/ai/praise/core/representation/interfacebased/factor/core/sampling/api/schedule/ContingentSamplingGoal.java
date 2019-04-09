@@ -1,9 +1,11 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule;
 
 import static com.sri.ai.util.Util.assertType;
+import static com.sri.ai.util.Util.pair;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingState;
+import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.planning.api.ContingentGoal;
 import com.sri.ai.util.planning.api.State;
 
@@ -22,10 +24,10 @@ public interface ContingentSamplingGoal extends ContingentGoal, SamplingGoal {
 	 * and invoking {@link SamplingGoal#isSatisfied(Sample)} on it.
 	 */
 	@Override
-	default boolean isSatisfied(State state) {
+	default Pair<Boolean, State> isSatisfied(State state) {
 		SamplingState sampleState = assertType(state, SamplingState.class, getClass());
 		boolean result = isSatisfied(sampleState.getSample());
-		return result;
+		return pair(result, state); // note that we are relying on SamplingState's sample being modified in-place. This is not true for non-sampling Goals.
 	}
 	
 }
