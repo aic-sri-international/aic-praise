@@ -39,6 +39,7 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.frome
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable.expressionVariable;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.unionArrayList;
@@ -124,7 +125,25 @@ public class ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversi
 	}
 
 	private ArrayList<Factor> factorsFromFactorExpressions(ExpressionBasedProblem expressionBasedProblem) {
-		ArrayList<Factor> result = unionArrayList(arrayListsOfSamplingFactorsForEachFactorExpression(expressionBasedProblem));
+
+		boolean combineSamplingFactorsFromEachFactorExpressionIntoASingleNormalizedFactor = false;
+		// This is false for now until we fix marginalized sampling factors to generate contingent rather than "lucky" goals.
+
+		ArrayList<Factor> result;
+
+		if (combineSamplingFactorsFromEachFactorExpressionIntoASingleNormalizedFactor) {
+			FromExpressionToSamplingFactors factorTranslator = 
+					new FromExpressionToSamplingFactors(random, expressionBasedProblem.getContext());
+
+			List<Expression> factorExpressions = 
+					expressionBasedProblem.getFactorExpressionsIncludingQueryDefinitionIfAny();
+
+			result = mapIntoArrayList(factorExpressions, factorTranslator::getSingleSamplingFactor);
+		}
+		else {
+			result = unionArrayList(arrayListsOfSamplingFactorsForEachFactorExpression(expressionBasedProblem));
+		}
+
 		return result;
 	}
 

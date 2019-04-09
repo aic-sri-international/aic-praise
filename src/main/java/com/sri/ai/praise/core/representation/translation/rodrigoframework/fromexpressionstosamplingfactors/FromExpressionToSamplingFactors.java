@@ -25,6 +25,7 @@ import static com.sri.ai.grinder.library.controlflow.IfThenElse.thenBranch;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable.expressionVariable;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor.conditionResult;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
@@ -95,6 +96,38 @@ public class FromExpressionToSamplingFactors {
 		this(new IsVariable(context), random, context);
 	}
 
+	/////////////////////////////////////
+	
+	public SamplingFactor getSingleSamplingFactor(Expression expression) {
+		SamplingFactor singleFactor = getSingleSamplingFactor(factorCompilation(expression));
+		return singleFactor;
+	}
+
+	private SamplingFactor getSingleSamplingFactor(ArrayList<? extends SamplingFactor> factors) {
+		SamplingFactor singleFactor;
+		if (factors.size() == 1) {
+			singleFactor = factors.get(0); 
+		}
+		else {
+			singleFactor = makeFactorOnSymbolVariablesOnly(factors);
+		}
+		return singleFactor;
+	}
+
+	private SamplingFactor makeFactorOnSymbolVariablesOnly(ArrayList<? extends SamplingFactor> factors) {
+		SamplingFactor productFactor = new DynamicSamplingProductFactor(factors, getRandom());
+		var nonSymbolVariables = collectToList(productFactor.getVariables(), this::notBasedOnSymbol);
+		var singleFactor = (SamplingFactor) productFactor.sumOut(nonSymbolVariables);
+		return singleFactor;
+	}
+
+	private boolean notBasedOnSymbol(Variable variable) {
+		boolean result = ! ((ExpressionVariable) variable).getSyntacticFormType().equals("Symbol");
+		return result;
+	}
+
+	/////////////////////////////////////
+	
 	public ArrayList<? extends SamplingFactor> factorCompilation(Expression expression) {
 		List<SamplingFactor> factors = list();
 		factorCompilation(expression, factors);
@@ -233,22 +266,6 @@ public class FromExpressionToSamplingFactors {
 		factors.add(ifThenElseSamplingFactor);
 	}
 
-	private SamplingFactor getSingleSamplingFactor(Expression expression) {
-		SamplingFactor singleFactor = getSingleSamplingFactor(factorCompilation(expression));
-		return singleFactor;
-	}
-
-	private SamplingFactor getSingleSamplingFactor(ArrayList<? extends SamplingFactor> factors) {
-		SamplingFactor singleFactor;
-		if (factors.size() == 1) {
-			singleFactor = factors.get(0); 
-		}
-		else {
-			singleFactor = new DynamicSamplingProductFactor(factors, getRandom());
-		}
-		return singleFactor;
-	}
-	
 	private void equalityFactorCompilation(Expression expression, List<SamplingFactor> factors) {
 		Variable leftHandSideVariable = expressionCompilation(expression.get(0), factors);
 		Variable rightHandSideVariable = expressionCompilation(expression.get(1), leftHandSideVariable, factors);
