@@ -127,7 +127,7 @@ public interface ConditionedSamplingFactor extends SamplingFactor {
 		}
 
 		private ArrayList<SamplingGoal> getConditionedAntecedents(SamplingRule rule) {
-			return collectToArrayList(rule.getAntecendents(), g -> ! g.isSatisfied(conditioningSample));
+			return collectToArrayList(rule.getAntecendents(), g -> ! g.isSatisfiedBySampleWithoutModifyingIt(conditioningSample));
 		}
 
 		private Variable getVariable(SamplingGoal variableIsDefinedGoal) {

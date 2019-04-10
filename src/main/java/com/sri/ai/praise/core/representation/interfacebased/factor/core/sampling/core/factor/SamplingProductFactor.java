@@ -97,7 +97,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 
 	private Set<SamplingGoal> getSatisfiedGoals(Sample sample) {
 		Set<? extends SamplingGoal> allGoals = getSamplingRuleSet().getAllGoals();
-		Set<SamplingGoal> result = collectToSet(allGoals, g -> g.isSatisfied(sample));
+		Set<SamplingGoal> result = collectToSet(allGoals, g -> g.isSatisfiedBySampleWithoutModifyingIt(sample));
 		return result;
 	}
 
@@ -158,7 +158,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	private List<SamplingFactor> executeSamplingPlan(Plan samplingPlan, Sample sampleToComplete) {
 		
 		getInputFactorsSamplingRulesUnion().forEach(SamplingRule::reset);
-		samplingPlan.execute(new SamplingState(sampleToComplete, getRandom()));
+		samplingPlan.execute(new SamplingState(sampleToComplete, getInputFactors(), getRandom()));
 		List<SamplingFactor> factorsThatFired = 
 				getInputFactorsSamplingRulesUnion()
 				.stream()

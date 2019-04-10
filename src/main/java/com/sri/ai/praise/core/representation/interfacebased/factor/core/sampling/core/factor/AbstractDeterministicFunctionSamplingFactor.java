@@ -165,7 +165,7 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 	}
 	
 	private void completeMissingArgument(Sample sample, int missingArgumentIndex) {
-		if (forAll(conditionsForInverseOfArgument(missingArgumentIndex), g -> g.isSatisfied(sample))) {
+		if (forAll(conditionsForInverseOfArgument(missingArgumentIndex), g -> g.isSatisfiedBySampleWithoutModifyingIt(sample))) {
 			Object missingArgumentValue = computeMissingArgumentValue(fromSampleToValueFunction(sample), missingArgumentIndex);
 			setMissingArgumentValue(sample, missingArgumentIndex, missingArgumentValue);
 		}

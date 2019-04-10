@@ -30,7 +30,7 @@ public class FunctionOnSetOfVariablesSatisfiesCondition<T> extends AbstractVaria
 	}
 
 	@Override
-	public boolean isSatisfied(Sample sample) {
+	public boolean isSatisfiedBySampleWithoutModifyingIt(Sample sample) {
 		@SuppressWarnings("unchecked")
 		ArrayList<T> values = mapIntoArrayList(getVariables(), v -> (T) sample.getAssignment().get(v));
 		boolean result;

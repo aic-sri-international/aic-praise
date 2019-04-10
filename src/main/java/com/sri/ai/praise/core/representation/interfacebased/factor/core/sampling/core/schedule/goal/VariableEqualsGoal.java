@@ -25,7 +25,7 @@ public class VariableEqualsGoal extends AbstractVariablesRelatedGoal implements 
 	}
 
 	@Override
-	public boolean isSatisfied(Sample sample) {
+	public boolean isSatisfiedBySampleWithoutModifyingIt(Sample sample) {
 		Object variableValue = sample.getAssignment().get(getVariable());
 		boolean result = variableValue != null && variableValue.equals(value);
 		return result;

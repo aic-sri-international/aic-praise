@@ -205,7 +205,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	@Override
 	public State execute(State state) {
 		SamplingState sampleState = assertType(state, SamplingState.class, getClass());
-		sampleOrWeigh(sampleState.getSample());
+		sampleOrWeigh(sampleState.getUnmodifiableSample());
 		hasFired = true;
 		return state;
 	}
@@ -230,7 +230,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	};
 
 	public boolean isSatisfied(Sample sample) {
-		return forAll(getAntecendents(), a -> a.isSatisfied(sample));
+		return forAll(getAntecendents(), a -> a.isSatisfiedBySampleWithoutModifyingIt(sample));
 	}
 
 	public SamplingRule copyWithNewSampler(SamplingFactor newSampler) {

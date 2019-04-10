@@ -14,7 +14,12 @@ import com.sri.ai.util.planning.api.Goal;
  */
 public interface SamplingGoal extends Goal {
 
-	boolean isSatisfied(Sample sample);
+	/**
+	 * Determines whether this goal is satisfied by this sample (without being allowed to modify the sample).
+	 * @param sample
+	 * @return
+	 */
+	boolean isSatisfiedBySampleWithoutModifyingIt(Sample sample);
 
 	/**
 	 * Provides the variables on which this goal depends.
