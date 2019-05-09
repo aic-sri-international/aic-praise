@@ -11,6 +11,7 @@ import com.sri.ai.util.planning.api.State;
 public class SamplingState implements State {
 
 	private Sample sample;
+	@SuppressWarnings("unused")
 	private Collection<? extends SamplingFactor> factors;
 	private Random random;
 

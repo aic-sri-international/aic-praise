@@ -35,29 +35,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api;
 
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultProblem;
+import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 
-
-/**
- * A convenience class for creating a {@link ExactBP} based on expressions.
- * @author braz
- *
- */
-public class ExpressionExactBP extends ExactBP {
-
-	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
-		this(DefaultExpressionVariable.expressionVariable(query), factorNetwork, v -> false);
-	}
-
-	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork, Predicate<Variable> isParameterPredicate) {
-		super(new DefaultProblem(DefaultExpressionVariable.expressionVariable(query), factorNetwork, isParameterPredicate));
-	}
+public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Factor> {
 	
+	SubRootType getParent();
+
+	RootType getRoot();
+	
+	/**
+	 * Returns the {@link Variable} over which the message coming from this algorithm is defined;
+	 * effectively, this is the root if this is rooted on a variable, and the parent, if any, otherwise.
+	 * @return
+	 */
+	Variable getMessageVariable();
+	
+	/**
+	 * Given the product of incoming messages and factor at root,
+	 * returns a list of indices being summed out at the root level,
+	 * based on the overall tree computation constructed so far
+	 * (this determines which indices are external cutset indices and which ones are internal ones,
+	 * which in turn determines which ones must be summed out).
+	 * @return
+	 */
+	List<? extends Variable> determinedVariablesToBeSummedOut(Collection<? extends Variable> allFreeVariablesInSummand);
+	
+	/**
+	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
+	 */
+	List<? extends Factor> getFactorsAtRoot();
+
+	Factor sumOutWithBookkeeping(List<? extends Variable> variablesToBeSummedOut, Factor factor);
+
+	@Override
+	ArrayList<ExactBPNode<SubRootType,RootType>> getSubs();
+
 }

@@ -35,35 +35,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.sampling;
+
+import static com.sri.ai.util.Util.println;
 
 import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.sampling.SolverAdapterForDynamicSampling;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion;
+import com.sri.ai.grinder.api.Context;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 
-public class SamplingPropositionalExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
+/**
+ * A {@link Solver} adapter based on {@link ExactBP} for {@link Problem}s using {@link SamplingFactor}s defined on {@link ExpressionVariable}s.
+ * 
+ * @author braz
+ *
+ */
+public class SolverAdapterForExactBPOnSamplingFactors extends AbstractSolverAdapterForSampling {
 
-	public SamplingPropositionalExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int initialNumberOfSamples, Random random) {
+	public SolverAdapterForExactBPOnSamplingFactors(
+			Function<Expression, Integer> fromExpressionVariableToNumberOfDiscreteValues,
+			int initialNumberOfSamples,
+			Context context) {
+		
 		super(
-				new ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion(random)::translate, 
-
-				ebp -> makeSolver(fromVariableToNumberOfDiscreteValues, initialNumberOfSamples, ebp));
+				fromExpressionVariableToNumberOfDiscreteValues,
+				initialNumberOfSamples,
+				context);
+	}
+	
+	@Override
+	protected Factor computeUnnormalizedMarginal(Problem problem, Random random) {
+		return useExactBP(problem);
 	}
 
-	private static SolverAdapterForDynamicSampling makeSolver(
-			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues,
-			int initialNumberOfSamples,
-			ExpressionBasedProblem expressionBasedSolver) {
-		
-		return new SolverAdapterForDynamicSampling(
-				fromVariableToNumberOfDiscreteValues, 
-				initialNumberOfSamples, 
-				expressionBasedSolver.getContext());
+	private Factor useExactBP(Problem problem) {
+		Factor unnormalizedMarginal = new ExactBP(problem).apply();
+		println("ExactBP result:");
+		if (unnormalizedMarginal instanceof SamplingFactor) {
+			println(((SamplingFactor)unnormalizedMarginal).nestedString(true));
+		}
+		return unnormalizedMarginal;
 	}
 
 }
