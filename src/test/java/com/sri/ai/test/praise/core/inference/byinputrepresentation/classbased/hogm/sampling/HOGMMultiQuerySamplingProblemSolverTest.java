@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.ExpressoConfiguration;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling.SolverType;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.sampling.HOGMMultiQuerySamplingProblemSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
@@ -1891,7 +1892,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 //		long gibbsTime = System.currentTimeMillis() - gibbsInitialTime;
 
 		long monteCarloInitialTime = System.currentTimeMillis();
-		runMonteCarloTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+		runMonteCarloTest(model, query, expected, SolverType.dynamic, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
 		@SuppressWarnings("unused")
 		long monteCarloTime = System.currentTimeMillis() - monteCarloInitialTime;
 
@@ -1900,31 +1901,31 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		
 	}
 
-	private void runMonteCarloTest(String model, String query, Expression expected, int initialNumberOfSamples,
+	private void runMonteCarloTest(String model, String query, Expression expected, SolverType solverType, int initialNumberOfSamples,
 			int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph, Sample conditioningSample) {
 		DynamicSamplingProductFactor.gibbs = false;
-		runTestForOneSolver(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+		runTestForOneSolver(model, query, expected, solverType, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
 	}
 
 	@SuppressWarnings("unused")
-	private void runGibbsTest(String model, String query, Expression expected, int initialNumberOfSamples,
+	private void runGibbsTest(String model, String query, Expression expected, SolverType solverType, int initialNumberOfSamples,
 			int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph, Sample conditioningSample) {
 		DynamicSamplingProductFactor.gibbs = true;
-		runTestForOneSolver(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
+		runTestForOneSolver(model, query, expected, solverType, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
 	}
 
-	private void runTestForOneSolver(String model, String query, Expression expected, int initialNumberOfSamples,
+	private void runTestForOneSolver(String model, String query, Expression expected, SolverType solverType, int initialNumberOfSamples,
 			int numberOfDiscreteValues, boolean quantitativeTests, boolean generateGraph, Sample conditioningSample) {
 		if (generateGraph) {
-			generateGraph(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
+			generateGraph(model, query, solverType, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 		}
 		
 		if (quantitativeTests) {
-			runQuantitativeTests(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
+			runQuantitativeTests(model, query, expected, solverType, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 		}
 	}
 
-	private void runQuantitativeTests(String model, String query, Expression expected, int initialNumberOfSamples,
+	private void runQuantitativeTests(String model, String query, Expression expected, SolverType solverType, int initialNumberOfSamples,
 			int numberOfDiscreteValues, Sample conditioningSample) {
 		// if the number of samples is just one, the test problem should be deterministic
 		// (the user is betting on getting the right answer in one shot)
@@ -1933,13 +1934,13 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int numberOfCompletTests = testProblemIsMeantToBeDeterministic? 10 : 1;
 		repeat(
 				numberOfCompletTests, 
-				testIndex -> runNumericalTestWithCorrectPrecision(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, testProblemIsMeantToBeDeterministic, conditioningSample, testIndex));
+				testIndex -> runNumericalTestWithCorrectPrecision(model, query, expected, solverType, initialNumberOfSamples, numberOfDiscreteValues, testProblemIsMeantToBeDeterministic, conditioningSample, testIndex));
 	}
 
-	private void generateGraph(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
+	private void generateGraph(String model, String query, SolverType solverType, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
 
 		if (System.getProperty(PROPERTY_KEY_GENERATING_GRAPH_FILE) != null) {
-			ExpressionWithProbabilityFunction conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
+			ExpressionWithProbabilityFunction conditioned = computeConditionedResult(model, query, solverType, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 			Function conditionedFunction = conditioned.getDiscretizedConditionalProbabilityDistributionFunction();
 //			int queryIndex = Util.getIndexOfFirstSatisfyingPredicateOrMinusOne(conditionedFunction.getSetOfInputVariables().getVariables(), v -> v.getName().equals(query));
 			int queryIndex = conditioned.getDiscretizedConditionalProbabilityDistributionFunctionQueryIndex();
@@ -1963,12 +1964,12 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		}
 	}
 
-	private void runNumericalTestWithCorrectPrecision(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean deterministic, Sample conditioningSample, int testIndex) {
+	private void runNumericalTestWithCorrectPrecision(String model, String query, Expression expected, SolverType solverType, int initialNumberOfSamples, int numberOfDiscreteValues, boolean deterministic, Sample conditioningSample, int testIndex) {
 		
 		int oldPrecision = ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(3);
 		try {
 			
-			runNumericalTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, deterministic, conditioningSample, testIndex);
+			runNumericalTest(model, query, expected, solverType, initialNumberOfSamples, numberOfDiscreteValues, deterministic, conditioningSample, testIndex);
 			
 		} catch (Throwable t) {
 			throw t;
@@ -1978,31 +1979,32 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		}
 	}
 
-	private void runNumericalTest(String model, String query, Expression expected, int initialNumberOfSamples, int numberOfDiscreteValues, boolean deterministic, Sample conditioningSample, int testIndex) {
-		ExpressionWithProbabilityFunction conditioned = computeConditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
+	private void runNumericalTest(String model, String query, Expression expected, SolverType solverType, int initialNumberOfSamples, int numberOfDiscreteValues, boolean deterministic, Sample conditioningSample, int testIndex) {
+		ExpressionWithProbabilityFunction conditioned = computeConditionedResult(model, query, solverType, initialNumberOfSamples, numberOfDiscreteValues, conditioningSample);
 		printAndCompare(query, conditioned, expected, deterministic, conditioningSample, testIndex);
 	}
 
-	private ExpressionWithProbabilityFunction computeConditionedResult(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
-		ExpressionWithProbabilityFunction solution = computeUnconditionedResult(model, query, initialNumberOfSamples, numberOfDiscreteValues);
+	private ExpressionWithProbabilityFunction computeConditionedResult(String model, String query, SolverType solverType, int initialNumberOfSamples, int numberOfDiscreteValues, Sample conditioningSample) {
+		ExpressionWithProbabilityFunction solution = computeUnconditionedResult(model, query, solverType, initialNumberOfSamples, numberOfDiscreteValues);
 //		ExpressionSamplingFactor conditioned = solution.condition(conditioningSample);
 //		return conditioned;
 		return solution;
 	}
 
-	private ExpressionWithProbabilityFunction computeUnconditionedResult(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues) {
-		HOGMProblemResult hogmResult = computeResult(model, query, initialNumberOfSamples, numberOfDiscreteValues);
+	private ExpressionWithProbabilityFunction computeUnconditionedResult(String model, String query, SolverType solverType, int initialNumberOfSamples, int numberOfDiscreteValues) {
+		HOGMProblemResult hogmResult = computeResult(model, query, solverType, initialNumberOfSamples, numberOfDiscreteValues);
 		assertNoErrors(hogmResult);
 		Expression result = hogmResult.getResult();
 		ExpressionWithProbabilityFunction solution = (ExpressionWithProbabilityFunction) result;
 		return solution;
 	}
 
-	private HOGMProblemResult computeResult(String model, String query, int initialNumberOfSamples, int numberOfDiscreteValues) {
+	private HOGMProblemResult computeResult(String model, String query, SolverType solverType, int initialNumberOfSamples, int numberOfDiscreteValues) {
 		HOGMMultiQuerySamplingProblemSolver solver = 
 				new HOGMMultiQuerySamplingProblemSolver(
 						model, 
 						list(query),
+						solverType, 
 						v -> numberOfDiscreteValues, 
 						initialNumberOfSamples, 
 						new Random());

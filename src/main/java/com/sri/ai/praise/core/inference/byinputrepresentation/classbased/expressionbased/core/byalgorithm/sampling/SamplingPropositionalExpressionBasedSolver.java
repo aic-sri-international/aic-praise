@@ -41,29 +41,57 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.sampling.SolverAdapterForDynamicSampling;
-import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.sampling.SolverAdapterForExactBPOnSamplingFactors;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.sampling.SolverAdapterForStaticSampling;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion;
 
 public class SamplingPropositionalExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 
-	public SamplingPropositionalExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int initialNumberOfSamples, Random random) {
+	public SamplingPropositionalExpressionBasedSolver(
+			SolverType solverType, 
+			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, 
+			int initialNumberOfSamples, 
+			Random random) {
+		
 		super(
 				new ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion(random)::translate, 
 
-				ebp -> makeSolver(fromVariableToNumberOfDiscreteValues, initialNumberOfSamples, ebp));
+				ebp -> makeSolver(solverType, fromVariableToNumberOfDiscreteValues, initialNumberOfSamples, ebp.getContext()));
 	}
 
-	private static SolverAdapterForDynamicSampling makeSolver(
+	private static Solver makeSolver(
+			SolverType solverType,
 			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues,
-			int initialNumberOfSamples,
-			ExpressionBasedProblem expressionBasedSolver) {
-		
-		return new SolverAdapterForDynamicSampling(
-				fromVariableToNumberOfDiscreteValues, 
-				initialNumberOfSamples, 
-				expressionBasedSolver.getContext());
+			int initialNumberOfSamples, 
+			Context context) {
+
+		switch (solverType) {
+
+		case dynamic:
+			return new SolverAdapterForDynamicSampling(
+					fromVariableToNumberOfDiscreteValues, 
+					initialNumberOfSamples, 
+					context);
+
+		case planned:
+			return new SolverAdapterForStaticSampling(
+					fromVariableToNumberOfDiscreteValues, 
+					initialNumberOfSamples, 
+					context);
+
+		case exactbp:
+			return new SolverAdapterForExactBPOnSamplingFactors(
+					fromVariableToNumberOfDiscreteValues, 
+					initialNumberOfSamples, 
+					context);
+
+		default: throw new Error(SamplingPropositionalExpressionBasedSolver.class.getSimpleName() + " received illegal solver type " + solverType);
+
+		}
 	}
 
 }

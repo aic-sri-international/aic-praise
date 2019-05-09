@@ -45,9 +45,15 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.express
 
 public class GroundingAndSamplingExpressionBasedSolver extends GroundingExpressionBasedSolver {
 
-	public GroundingAndSamplingExpressionBasedSolver(Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, int initialNumberOfSamples, Random random) {
+	public GroundingAndSamplingExpressionBasedSolver(
+			SolverType solverType, 
+			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, 
+			int initialNumberOfSamples, 
+			Random random) {
+		
 		super(
 				new SamplingPropositionalExpressionBasedSolver(
+						solverType, 
 						fromVariableToNumberOfDiscreteValues, 
 						initialNumberOfSamples, 
 						random));

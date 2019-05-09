@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling.GroundingAndSamplingExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.sampling.SolverType;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 
 public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSolver {
@@ -13,6 +14,7 @@ public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSo
 	public HOGMMultiQuerySamplingProblemSolver(
 			String model, 
 			List<String> queries,
+			SolverType solverType,
 			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues,
 			int initialNumberOfSamples,
 			Random random) {
@@ -21,6 +23,7 @@ public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSo
 				model, 
 				queries, 
 				new GroundingAndSamplingExpressionBasedSolver(
+						solverType,
 						fromVariableToNumberOfDiscreteValues, 
 						initialNumberOfSamples, 
 						random));
@@ -32,7 +35,7 @@ public class HOGMMultiQuerySamplingProblemSolver extends HOGMMultiQueryProblemSo
 	 * @param model
 	 * @param queries
 	 */
-	public HOGMMultiQuerySamplingProblemSolver(String model, List<String> queries) {
-		this(model, queries, v -> 10, 10000, new Random()); 
+	public HOGMMultiQuerySamplingProblemSolver(String model, List<String> queries, SolverType solverType) {
+		this(model, queries, solverType, v -> 10, 10000, new Random()); 
 	}
 }
