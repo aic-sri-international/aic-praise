@@ -1014,19 +1014,19 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		int initialNumberOfSamples;
 		int numberOfDiscreteValues;
 	
-//		query = "r";
-//		expected = parse("if r then 0 else 1");
-//		initialNumberOfSamples = 1;
-//		numberOfDiscreteValues = 21;
-//	
-//		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, true);
-//		
-//		query = "p";
-//		expected = parse("if p then 1 else 0");
-//		initialNumberOfSamples = 1;
-//		numberOfDiscreteValues = 21;
-//	
-//		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, true);
+		query = "r";
+		expected = parse("if r then 0 else 1");
+		initialNumberOfSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, true);
+		
+		query = "p";
+		expected = parse("if p then 1 else 0");
+		initialNumberOfSamples = 1;
+		numberOfDiscreteValues = 21;
+	
+		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true, true);
 		
 		query = "q";
 		expected = parse("if q then 0 else 1");
@@ -1697,14 +1697,14 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		String model = "" +
 				"sort Person: 4, bob, mary;" + 
 				"random neighbor : Person x 1990..2000 -> Person;" + 
-//				"random coin : Person x 1990..2000 -> [-10;10];" +
-//				
-//				"for all X in Person : for all Y in 1990..2000 : coin(X, Y) = Normal(0,1);" +
+				"random coin : Person x 1990..2000 -> [-10;10];" +
+				
+				"for all X in Person : for all Y in 1990..2000 : coin(X, Y) = Normal(0,1);" +
 				
 				"for all X in Person : for all Y in 1990..2000 : " +
 				"if Y > 1995 "
 				+ " then neighbor(X, Y) = bob"
-				+ " else if Normal(0,1) < 0 then neighbor(X, Y) = bob else neighbor(X, Y) = mary;";
+				+ " else if coin(X,Y) < 0 then neighbor(X, Y) = bob else neighbor(X, Y) = mary;";
 		
 		String query = "for all X in Person : for all t in 1990..2000 : neighbor(X, t)";
 		
