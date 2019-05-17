@@ -1892,7 +1892,8 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 //		long gibbsTime = System.currentTimeMillis() - gibbsInitialTime;
 
 		long monteCarloInitialTime = System.currentTimeMillis();
-		for (SolverType solverType : list( SolverType.dynamic /*, SolverType.planned */)) {
+//		for (SolverType solverType : list( SolverType.planned )) {
+		for (SolverType solverType : list( SolverType.dynamic )) {
 			runMonteCarloTest(model, query, expected, solverType, initialNumberOfSamples, numberOfDiscreteValues, quantitativeTests, generateGraph, conditioningSample);
 		}
 		@SuppressWarnings("unused")

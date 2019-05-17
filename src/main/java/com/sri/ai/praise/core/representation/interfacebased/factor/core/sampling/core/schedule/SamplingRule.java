@@ -204,8 +204,9 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	
 	@Override
 	public State execute(State state) {
-		SamplingState sampleState = assertType(state, SamplingState.class, getClass());
-		sampleOrWeigh(sampleState.getUnmodifiableSample());
+		// println("Executing SamplingRule " + getSamplingFactor());
+		SamplingState samplingState = assertType(state, SamplingState.class, getClass());
+		samplingState.sampleOrWeight(getSamplingFactor());
 		hasFired = true;
 		return state;
 	}

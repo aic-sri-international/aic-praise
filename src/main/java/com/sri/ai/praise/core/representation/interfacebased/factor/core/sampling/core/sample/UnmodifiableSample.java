@@ -21,8 +21,7 @@ public class UnmodifiableSample implements Sample {
 
 	@Override
 	public Assignment getAssignment() {
-		// TODO: should have an unmodifiable assignment class as well
-		return base.getAssignment();
+		return new UnmodifiableAssignment(base.getAssignment());
 	}
 
 	@Override
