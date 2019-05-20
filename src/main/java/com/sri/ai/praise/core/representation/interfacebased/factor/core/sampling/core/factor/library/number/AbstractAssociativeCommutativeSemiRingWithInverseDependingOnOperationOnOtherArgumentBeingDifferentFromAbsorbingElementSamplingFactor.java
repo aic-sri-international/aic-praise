@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number;
 
 import static com.sri.ai.util.Util.getValuePossiblyCreatingIt;
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 
@@ -46,6 +47,7 @@ extends AbstractAssociativeCommutativeSemiRingSamplingFactor<T> {
 		FunctionOnSetOfVariablesSatisfiesCondition<T> 
 		operationOnOtherArgumentsIsNotAbsorbingElement = 
 		new FunctionOnSetOfVariablesSatisfiesCondition<T>(
+				join(getFunctionName(), getArgumentsOtherThan(i)) + " != " + getAbsorbingElement(),
 				getFunctionName() + "IsNot" + getAbsorbingElement(),
 				getArgumentsOtherThan(i), 
 				c -> evaluateFunctionFromAllArgumentsValues(c.iterator()), 

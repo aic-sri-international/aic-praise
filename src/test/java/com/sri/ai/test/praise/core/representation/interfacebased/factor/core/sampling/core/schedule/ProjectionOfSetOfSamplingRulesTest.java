@@ -165,6 +165,7 @@ class ProjectionOfSetOfSamplingRulesTest {
 										z, 
 										new VariableEqualsSomethingDifferentFrom(z, 0),
 										new FunctionOnSetOfVariablesSatisfiesCondition<Integer>(
+												"dummy function(" + x + ", " + z + ")", 
 												"dummy function", 
 												list(x,z), 
 												dummyFunction, 
@@ -182,6 +183,7 @@ class ProjectionOfSetOfSamplingRulesTest {
 										new VariableEqualsSomethingDifferentFrom(z, 0),
 										lucky(
 												new FunctionOnSetOfVariablesSatisfiesCondition<Integer>(
+														"dummy function(" + x + ", " + z + ")", 
 														"dummy function", 
 														list(x,z), 
 														dummyFunction, 
@@ -210,6 +212,7 @@ class ProjectionOfSetOfSamplingRulesTest {
 										z, 
 										new VariableEqualsSomethingDifferentFrom(z, 0),
 										new FunctionOnSetOfVariablesSatisfiesCondition<Integer>(
+												"dummy function(" + x + ", " + z + ")", 
 												"dummy function", 
 												list(x,z), 
 												dummyFunction, 
@@ -223,6 +226,7 @@ class ProjectionOfSetOfSamplingRulesTest {
 										z, 
 										new VariableEqualsSomethingDifferentFrom(z, 0),
 										new FunctionOnSetOfVariablesSatisfiesCondition<Integer>(
+												"dummy function(" + x + ", " + z + ")", 
 												"dummy function", 
 												list(x,z), 
 												dummyFunction, 

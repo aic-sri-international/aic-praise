@@ -1,7 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base;
 
 import static com.sri.ai.util.Util.fold;
-import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.notNullAndEquals;
@@ -15,10 +14,11 @@ import java.util.function.Function;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.AbstractDeterministicFunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SpecificationForFunctionResultSamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.FunctionOnSetOfVariablesSatisfiesCondition;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableEqualsGoal;
 import com.sri.ai.util.collect.IntegerIterator;
 import com.sri.ai.util.collect.PredicateIterator;
 
@@ -163,13 +163,15 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 						SamplingRule.MAXIMUM_ESTIMATED_SUCCESS_WEIGHT));
 	}
 
-	private FunctionOnSetOfVariablesSatisfiesCondition<T> argumentIsAbsorbingValue(Integer i) {
-		return 
-				new FunctionOnSetOfVariablesSatisfiesCondition<T>(
-						"argumentIsAbsorbingElement=" + getAbsorbingElement(),
-						list(getArguments().get(i)), 
-						c -> getFirst(c), 
-						v -> v.equals(getAbsorbingElement()));
+	private SamplingGoal argumentIsAbsorbingValue(Integer i) {
+		Variable variable = getArguments().get(i);
+		return new VariableEqualsGoal(variable, getAbsorbingElement());
+		
+//				new FunctionOnSetOfVariablesSatisfiesCondition<T>(
+//						"argumentIsAbsorbingElement=" + getAbsorbingElement(),
+//						list(variable), 
+//						c -> getFirst(c), 
+//						v -> v.equals(getAbsorbingElement()));
 	}
 
 	@SuppressWarnings("unchecked")

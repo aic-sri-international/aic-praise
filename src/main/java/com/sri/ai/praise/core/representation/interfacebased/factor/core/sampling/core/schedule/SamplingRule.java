@@ -251,7 +251,7 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 		String consequentsString = join(getConsequents());
 		String antecedentsString = join(getAntecendents());
 		SamplingFactor factorString = getSamplingFactor();
-		String result = consequentsString + " <= " + antecedentsString + " with " + factorString;
+		String result = consequentsString + " <= " + antecedentsString + "        with sampling factor: " + factorString;
 		return result;
 	}
 

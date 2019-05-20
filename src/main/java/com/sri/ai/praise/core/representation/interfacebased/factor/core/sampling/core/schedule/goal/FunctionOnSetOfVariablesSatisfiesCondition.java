@@ -15,9 +15,11 @@ public class FunctionOnSetOfVariablesSatisfiesCondition<T> extends AbstractVaria
 
 	private Function<Collection<T>, T> function;
 	private Predicate<T> condition;
+	private String description;
 	private String goalName;
 	
 	public FunctionOnSetOfVariablesSatisfiesCondition(
+			String description,
 			String goalName, 
 			Collection<? extends Variable> variables, 
 			Function<Collection<T>, T> function,
@@ -26,6 +28,7 @@ public class FunctionOnSetOfVariablesSatisfiesCondition<T> extends AbstractVaria
 		super(variables);
 		this.function = function;
 		this.condition = condition;
+		this.description = description;
 		this.goalName = goalName;
 	}
 
@@ -42,6 +45,15 @@ public class FunctionOnSetOfVariablesSatisfiesCondition<T> extends AbstractVaria
 			result = condition.test(valueFromSample);
 		}
 		return result;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+	
+	@Override
+	public String toString() {
+		return description;
 	}
 	
 	@Override
