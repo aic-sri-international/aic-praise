@@ -39,7 +39,6 @@ import java.util.Random;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Registry;
 import com.sri.ai.grinder.core.TrueContext;
@@ -84,12 +83,9 @@ public class FromExpressionToSamplingFactors {
 
 	private Random random;
 	
-	private int uniqueVariableOccurrenceIndex;
-
 	public FromExpressionToSamplingFactors(Predicate<Expression> isVariable, Random random, Registry registry) {
 		this.isVariable = isVariable;
 		this.random = random;
-		this.uniqueVariableOccurrenceIndex = 0;
 	}
 
 	public FromExpressionToSamplingFactors(Random random, Context context) {
@@ -444,9 +440,12 @@ public class FromExpressionToSamplingFactors {
 	}
 
 	private ExpressionVariable makeUniqueRandomVariable(Expression expression) {
-		Expression unique = Expressions.apply("unique", expression, uniqueVariableOccurrenceIndex++);
-		ExpressionVariable result = expressionVariable(unique);
-		return result;
+		ExpressionVariable unique = new UniqueExpressionVariable(expression);
+		return unique;
+
+//		Expression unique = Expressions.apply("unique", expression, uniqueVariableOccurrenceIndex++);
+//		ExpressionVariable result = expressionVariable(unique);
+//		return result;
 	}
 
 	private void constantCompilation(Variable compoundExpressionVariable, Expression expression, List<SamplingFactor> factors) {

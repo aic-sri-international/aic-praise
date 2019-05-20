@@ -49,6 +49,16 @@ public class DefaultExpressionVariable extends WrappedExpression implements Expr
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Given an expression, returns an {@link ExpressionVariable} based on it,
+	 * unless the given expression is already an {@link ExpressionVariable},
+	 * in which case it is returned itself.
+	 * <p>
+	 * Because we may return the original object as a result, we do not allow a public constructor
+	 * in this class, which would be forced to always construct a new instance.
+	 * @param expression
+	 * @return
+	 */
 	public static ExpressionVariable expressionVariable(Expression expression) {
 		if (expression instanceof ExpressionVariable) {
 			return (ExpressionVariable) expression;
@@ -62,7 +72,7 @@ public class DefaultExpressionVariable extends WrappedExpression implements Expr
 		return expressionVariable(parse(expressionString));
 	}
 
-	private DefaultExpressionVariable(Expression expression) {
+	protected DefaultExpressionVariable(Expression expression) {
 		super(expression);
 	}
 	

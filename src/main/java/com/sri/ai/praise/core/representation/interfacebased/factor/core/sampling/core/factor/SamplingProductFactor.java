@@ -11,6 +11,7 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.set;
 import static com.sri.ai.util.Util.union;
 import static com.sri.ai.util.Util.unionArrayList;
@@ -59,7 +60,12 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 
 	@Override
 	protected SamplingRuleSet makeSamplingRules() {
+		// We must provide a set of sampling rules that describe which goals can
+		// be achieved from which sets of antecedents concerning the *entire* set of multiplied factors,
+		// including antecedents from distinct factors.
+		// This requires projecting the set of rules on the total set of goals.
 		var allSamplingRulesArrayList = unionArrayList(functionIterator(getInputFactors(), f -> f.getSamplingRuleSet().getSamplingRules()));
+		println("Projecting sampling rules for sampling product factor " + this);
 		Set<? extends SamplingRule> projectionOfSetOfSamplingRules =  
 				project(
 						allSamplingRulesArrayList,
@@ -72,13 +78,17 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		return result;
 	}
 
-	public Plan getSamplingPlan(List<? extends Variable> variablesToSample, Sample sampleToComplete) {
-		Set<? extends SamplingGoal> satisfiedGoals = getSatisfiedGoals(sampleToComplete);
+	public Plan getSamplingPlan(List<? extends Variable> variablesToSample, Sample sample) {
+		Set<? extends SamplingGoal> satisfiedGoals = getSatisfiedGoals(sample);
 		return getSamplingPlan(variablesToSample, satisfiedGoals);
 	}
 
 	private Set<SamplingGoal> getSatisfiedGoals(Sample sample) {
-		Set<? extends SamplingGoal> allGoals = getSamplingRuleSet().getAllGoals();
+		Set<? extends SamplingGoal> allGoals = 
+				union(
+						functionIterator(
+								this.getInputFactors(), 
+								f -> f.getSamplingRuleSet().getAllGoals()));
 		Set<SamplingGoal> result = collectToSet(allGoals, g -> g.isSatisfiedBySampleWithoutModifyingIt(sample));
 		return result;
 	}
@@ -121,23 +131,23 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	public void sampleOrWeigh(List<? extends Variable> variablesToSample, Sample sample) {
 		SamplingState samplingState = new SamplingState(sample, getInputFactors(), getRandom());
 		Plan samplingPlan = getSamplingPlan(variablesToSample, sample);
-		// println("Executing sampling plan");
+		println("Executing sampling plan");
 		samplingPlan.execute(samplingState);
 		myAssert(complete(sample), () -> "Factor was not able to complete sample.\nSample: " + sample + "\nFactors: " + this + "\nSampling plan: " + (samplingPlan == null? "none" : samplingPlan.nestedString()));
 		samplingState.makeSureToConsultAllRelevantInputFactors();
 		rewardIfNeeded(sample);
 	}
 
-	private void rewardIfNeeded(Sample sampleToComplete) {
+	private void rewardIfNeeded(Sample sample) {
 		// Code because is incorrect because it uses the plan for the complete sample, that is, not the sample plan that was used to generate the sample!
-//		if (adaptiveSampling && getSamplingPlan(sampleToComplete) != null) {
-//			getSamplingPlan(sampleToComplete).reward(sampleToComplete.getPotential().doubleValue());
+//		if (adaptiveSampling && getSamplingPlan(sample) != null) {
+//			getSamplingPlan(sample).reward(sample.getPotential().doubleValue());
 //		}
 	}
 
-	private boolean complete(Sample sampleToComplete) {
+	private boolean complete(Sample sample) {
 		// TODO: this can be made better than checking every variable at every iteration. We can instead update it according to factor used
-		boolean result = forAll(getVariables(), v -> sampleToComplete.getAssignment().contains(v));
+		boolean result = forAll(getVariables(), v -> sample.getAssignment().contains(v));
 		return result;
 	}
 
