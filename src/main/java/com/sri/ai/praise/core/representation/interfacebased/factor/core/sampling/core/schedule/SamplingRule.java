@@ -3,13 +3,16 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.util.Util.assertType;
 import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.println;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.base.Function;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -204,11 +207,37 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	
 	@Override
 	public State execute(State state) {
-		// println("Executing SamplingRule " + getSamplingFactor());
+		println("Executing rule " + this);
+		println("Factor: " + getSamplingFactor());
 		SamplingState samplingState = assertType(state, SamplingState.class, getClass());
+		println("Values of variable antecedents: " + getVariableAntecendentsAndTheirValues(samplingState.getUnmodifiableSample()));
 		samplingState.sampleOrWeight(getSamplingFactor());
+		println("Values of variable consequents: " + getVariableConsequentsAndTheirValues(samplingState.getUnmodifiableSample()));
+		println("Weight: " + samplingState.getUnmodifiableSample().getPotential());
+		println();
 		hasFired = true;
 		return state;
+	}	
+	private Map<Variable, Object> getVariableAntecendentsAndTheirValues(Sample sample) {
+		return getGoalVariablesAndTheirValues(getAntecendents(), sample);
+	}
+
+	private Map<Variable, Object> getVariableConsequentsAndTheirValues(Sample sample) {
+		return getGoalVariablesAndTheirValues(getConsequents(), sample);
+	}
+
+	private
+	Map<Variable, Object>
+	getGoalVariablesAndTheirValues(Collection<? extends SamplingGoal> goals, Sample sample) {
+		Map<Variable, Object> result = map();
+		for (SamplingGoal goal : goals) {
+			if (goal instanceof VariableIsDefinedGoal) {
+				Variable variable = ((VariableIsDefinedGoal) goal).getVariable();
+				Object value = sample.get(variable);
+				result.put(variable, value);
+			}
+		}
+		return result;
 	}
 
 	public void sampleOrWeigh(Sample sample) {
@@ -250,8 +279,9 @@ public class SamplingRule extends AbstractAtomicPlan implements Rule<SamplingGoa
 	public String toString() {
 		String consequentsString = join(getConsequents());
 		String antecedentsString = join(getAntecendents());
-		SamplingFactor factorString = getSamplingFactor();
-		String result = consequentsString + " <= " + antecedentsString + "        with sampling factor: " + factorString;
+		String factorString = getSamplingFactor().toString();
+		String weightString = isDeterministic()? "infinite" : Double.toString(getEstimatedSuccessWeight());
+		String result = consequentsString + " <= " + antecedentsString + "        with sampling factor: " + factorString + " and weight " + weightString;
 		return result;
 	}
 

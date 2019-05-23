@@ -53,9 +53,9 @@ class IfThenElseSamplingFactorTest {
 						new NormalWithFixedMeanAndStandardDeviation(x, 5.0, 1.0, random),
 						random);
 		expectedSamplingRulesString = 
-				"x <= rainy, rainy = true with if (rainy) then x = Normal(0.0, 1.0) else x = Normal(5.0, 1.0)\n" + 
-						"x <= rainy, rainy = false with if (rainy) then x = Normal(0.0, 1.0) else x = Normal(5.0, 1.0)\n" + 
-						"rainy <= x with if (rainy) then x = Normal(0.0, 1.0) else x = Normal(5.0, 1.0)";
+				"x <= rainy, rainy = true        with sampling factor: if (rainy) then x = Normal(0.0, 1.0) else x = Normal(5.0, 1.0) and weight 1.0\n" + 
+				"x <= rainy, rainy = false        with sampling factor: if (rainy) then x = Normal(0.0, 1.0) else x = Normal(5.0, 1.0) and weight 1.0\n" + 
+				"rainy <= x        with sampling factor: if (rainy) then x = Normal(0.0, 1.0) else x = Normal(5.0, 1.0) and weight 1.0";
 		runSamplingRulesTest(ifThenElseSamplingFactor, expectedSamplingRulesString);
 
 		
@@ -67,9 +67,9 @@ class IfThenElseSamplingFactorTest {
 						new NormalWithFixedMeanAndStandardDeviation(y, 5.0, 1.0, random),
 						random);
 		expectedSamplingRulesString = 
-				"x <= rainy, rainy = true with if (rainy) then x = Normal(0.0, 1.0) else y = Normal(5.0, 1.0)\n" + 
-						"y <= rainy, rainy = false with if (rainy) then x = Normal(0.0, 1.0) else y = Normal(5.0, 1.0)\n" + 
-						"rainy <= x, y with if (rainy) then x = Normal(0.0, 1.0) else y = Normal(5.0, 1.0)";
+				"x <= rainy, rainy = true        with sampling factor: if (rainy) then x = Normal(0.0, 1.0) else y = Normal(5.0, 1.0) and weight 1.0\n" + 
+				"y <= rainy, rainy = false        with sampling factor: if (rainy) then x = Normal(0.0, 1.0) else y = Normal(5.0, 1.0) and weight 1.0\n" + 
+				"rainy <= x, y        with sampling factor: if (rainy) then x = Normal(0.0, 1.0) else y = Normal(5.0, 1.0) and weight 1.0";
 		runSamplingRulesTest(ifThenElseSamplingFactor, expectedSamplingRulesString);
 
 		
@@ -81,11 +81,11 @@ class IfThenElseSamplingFactorTest {
 						new NormalWithFixedStandardDeviation(y, x, 1.0, random),
 						random);
 		expectedSamplingRulesString = 
-				"y <= rainy, rainy = true, x with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)\n" + 
-				"x <= rainy, rainy = true, y with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)\n" + 
-				"x <= rainy, rainy = false, y with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)\n" + 
-				"y <= rainy, rainy = false, x with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)\n" + 
-				"rainy <= x, y with if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0)";
+				"y <= rainy, rainy = true, x        with sampling factor: if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0) and weight 1.0\n" + 
+				"x <= rainy, rainy = true, y        with sampling factor: if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0) and weight 1.0\n" + 
+				"x <= rainy, rainy = false, y        with sampling factor: if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0) and weight 1.0\n" + 
+				"y <= rainy, rainy = false, x        with sampling factor: if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0) and weight 1.0\n" + 
+				"rainy <= x, y        with sampling factor: if (rainy) then x = Normal(y, 1.0) else y = Normal(x, 1.0) and weight 1.0";
 		runSamplingRulesTest(ifThenElseSamplingFactor, expectedSamplingRulesString);
 	}
 

@@ -2,6 +2,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.util.Util.getFirstNonNullResultOrNull;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.set;
 import static com.sri.ai.util.Util.thereExists;
 import static com.sri.ai.util.collect.DefaultManyToManyRelation.manyToManyRelation;
@@ -49,7 +50,9 @@ public class SamplingState implements State {
 		// println("Making sure all factors are applied");
 		SamplingFactor unfiredButRelevantSamplingFactor;
 		while ((unfiredButRelevantSamplingFactor = getUnfiredButRelevantSamplingFactor()) != null) {
+			println("SamplingState: applying remaining factor " + unfiredButRelevantSamplingFactor);
 			unfiredButRelevantSamplingFactor.sampleOrWeigh(sample);
+			println("SamplingState: sampling weight now is " + sample.getPotential());
 			factorsThatFired.add(unfiredButRelevantSamplingFactor);
 		}
 

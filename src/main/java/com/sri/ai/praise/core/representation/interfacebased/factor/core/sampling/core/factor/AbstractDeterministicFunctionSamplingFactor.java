@@ -217,7 +217,7 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 		List<SamplingGoal> antecedents = list();
 		mapIntoList(specification.argumentsIndices, i -> new VariableIsDefinedGoal(getArguments().get(i)), antecedents);
 		antecedents.addAll(specification.goalsBesidesArgumentsBeingDefined);
-		LinkedList<VariableIsDefinedGoal> consequents = list(new VariableIsDefinedGoal(getFunctionResult()));
+		LinkedList<VariableIsDefinedGoal> consequents = list(new VariableIsDefinedGoal(getFunctionResultVariable()));
 		SamplingRule result = new SamplingRule(specification.sampler, consequents, antecedents, specification.estimatedSuccessWeight);
 		return result;
 	}
@@ -284,7 +284,7 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 		return v -> sample.getAssignment().get(v);
 	}
 
-	public Variable getFunctionResult() {
+	public Variable getFunctionResultVariable() {
 		return functionResult;
 	}
 
@@ -300,6 +300,6 @@ public abstract class AbstractDeterministicFunctionSamplingFactor extends Abstra
 
 	@Override
 	public String toString() {
-		return getFunctionResult() + " = " + getFunctionName() + "(" + join(getArguments()) + ")";
+		return getFunctionResultVariable() + " = " + getFunctionName() + "(" + join(getArguments()) + ")";
 	}
 }

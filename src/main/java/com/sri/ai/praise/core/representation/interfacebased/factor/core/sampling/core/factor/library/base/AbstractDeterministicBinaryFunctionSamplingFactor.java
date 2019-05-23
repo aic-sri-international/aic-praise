@@ -60,7 +60,7 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 		A firstValue = getFirstValue(fromVariableToValue);
 		B secondValue = getSecondValue(fromVariableToValue);
 		Object result = computeWithErrorChecking(fromVariableToValue, () -> operation(firstValue, secondValue));
-		check(isInvalidFunctionResult((R)result), getFunctionResult(), result, fromVariableToValue);
+		check(isInvalidFunctionResult((R)result), getFunctionResultVariable(), result, fromVariableToValue);
 		return result;
 	}
 
@@ -120,7 +120,7 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 	
 	@SuppressWarnings("unchecked")
 	private R getResultValue(Function<Variable, Object> fromVariableToValue) {
-		R resultValue = (R) fromVariableToValue.apply(getFunctionResult());
+		R resultValue = (R) fromVariableToValue.apply(getFunctionResultVariable());
 		return resultValue;
 	}
 
@@ -140,7 +140,7 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 	
 	private String problemDescription(Function<Variable, Object> fromVariableToValue) {
 		return 
-				valueOrVariable(getFunctionResult(), fromVariableToValue) 
+				valueOrVariable(getFunctionResultVariable(), fromVariableToValue) 
 				+ " = " 
 				+ valueOrVariable(first, fromVariableToValue) 
 				+ getFunctionName() 
@@ -175,6 +175,6 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 
 	@Override
 	public String toString() {
-		return getFunctionResult() + " = (" + getFirst() + " " + getFunctionName() + " " + getSecond() + ")";
+		return getFunctionResultVariable() + " = (" + getFirst() + " " + getFunctionName() + " " + getSecond() + ")";
 	}
 }

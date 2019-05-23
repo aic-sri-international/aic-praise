@@ -44,7 +44,7 @@ public class EqualitySamplingFactor extends AbstractDeterministicBinaryFunctionS
 
 	@Override
 	protected Collection<? extends SamplingGoal> conditionsForInverseOfArgument(int i) {
-		return list(new VariableEqualsGoal(getFunctionResult(), true));
+		return list(new VariableEqualsGoal(getFunctionResultVariable(), true));
 	}
 
 	@Override
@@ -54,13 +54,13 @@ public class EqualitySamplingFactor extends AbstractDeterministicBinaryFunctionS
 
 	@Override
 	protected Object computeFirstFromOthers(Object secondValue, Boolean functionResultValue) {
-		myAssert(functionResultValue, () -> getClass().getSimpleName() + " asked to set first argument " + getFirst() + " equal to " + getSecond() + " but " + getFunctionResult() + " is set to false");
+		myAssert(functionResultValue, () -> getClass().getSimpleName() + " asked to set first argument " + getFirst() + " equal to " + getSecond() + " but " + getFunctionResultVariable() + " is set to false");
 		return secondValue;
 	}
 
 	@Override
 	protected Object computeSecondFromOthers(Object firstValue, Boolean functionResultValue) {
-		myAssert(functionResultValue, () -> getClass().getSimpleName() + " asked to set second argument " + getSecond() + " equal to " + getFirst() + " but " + getFunctionResult() + " is set to false");
+		myAssert(functionResultValue, () -> getClass().getSimpleName() + " asked to set second argument " + getSecond() + " equal to " + getFirst() + " but " + getFunctionResultVariable() + " is set to false");
 		return firstValue;
 	}
 
@@ -86,6 +86,6 @@ public class EqualitySamplingFactor extends AbstractDeterministicBinaryFunctionS
 
 	@Override
 	public String toString() {
-		return getFunctionResult() + " = (" + getFirst() + " = " + getSecond() + ")";
+		return getFunctionResultVariable() + " = (" + getFirst() + " = " + getSecond() + ")";
 	}
 }

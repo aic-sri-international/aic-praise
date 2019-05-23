@@ -43,8 +43,8 @@ public class EqualitySamplingFactorTest {
 		Variable y = new DefaultVariable("y");
 		Variable z = new DefaultVariable("z");
 
-		SamplingFactor xEqualsY = SamplingFactor.conditionResult((Object) true, t -> new EqualitySamplingFactor(t, arrayList(x, y), new Random()));
-		SamplingFactor xEqualsZ = SamplingFactor.conditionResult((Object) true, t -> new EqualitySamplingFactor(t, arrayList(x, z), new Random()));
+		SamplingFactor xEqualsY = SamplingFactor.conditionResult(true, t -> new EqualitySamplingFactor(t, arrayList(x, y), new Random()));
+		SamplingFactor xEqualsZ = SamplingFactor.conditionResult(true, t -> new EqualitySamplingFactor(t, arrayList(x, z), new Random()));
 
 		SamplingFactor xEqualsYAndXEqualsZ = new SamplingProductFactor(arrayList(xEqualsY, xEqualsZ), new Random());
 		println(xEqualsYAndXEqualsZ.nestedString(true));
@@ -138,9 +138,16 @@ public class EqualitySamplingFactorTest {
 			assertEquals("A string value", sample.getAssignment().get(y));
 			assertEquals("Another string value", sample.getAssignment().get(z));
 		}
-		println("Distribution of x: " + xDistribution.getValue());
-		assertEquals(0.5, xDistribution.getValue().get("A string value").doubleValue(), 0.1);
-		assertEquals(0.5, xDistribution.getValue().get("Another string value").doubleValue(), 0.1);
+		
+		// We used to test whether the value of x would go either way 50% of the times
+		// However, when changing sampling from dynamic to planned on May 2019,
+		// the behavior changed and the value of x always got set to the value of y.
+		// This is ok because the behavior is undefined since the distribution is ill-defined (contradictory).
+		// So this is now commented out.
+//		println("Distribution of x: " + xDistribution.getValue());
+//		assertEquals(0.5, xDistribution.getValue().get("A string value").doubleValue(), 0.1);
+//		assertEquals(0.5, xDistribution.getValue().get("Another string value").doubleValue(), 0.1);
+
 		numberOfSamples = oldNumberOfSamples;
 	}
 
@@ -152,7 +159,7 @@ public class EqualitySamplingFactorTest {
 		Variable x = new DefaultVariable("x");
 		Variable y = new DefaultVariable("y");
 
-		SamplingFactor xEqualsY = SamplingFactor.conditionResult((Object) true, t -> new EqualitySamplingFactor(t, arrayList(x, y), new Random()));
+		SamplingFactor xEqualsY = SamplingFactor.conditionResult(true, t -> new EqualitySamplingFactor(t, arrayList(x, y), new Random()));
 
 		runEqualityTest(numberOfSamples, x, y, xEqualsY);
 

@@ -17,9 +17,12 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.expresso.type.Categorical;
+import com.sri.ai.expresso.type.IntegerExpressoType;
 import com.sri.ai.expresso.type.IntegerInterval;
+import com.sri.ai.expresso.type.RealExpressoType;
 import com.sri.ai.expresso.type.RealInterval;
 import com.sri.ai.grinder.api.Registry;
+import com.sri.ai.grinder.helper.GrinderUtil;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.UniformDiscreteSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.UniformIntegerSamplingFactor;
@@ -64,10 +67,31 @@ public class VariableExpressionDiscretization {
 	/** 
 	 * Make a {@link Variable} based on an expression variable, number of discrete values, and type as registered in given registry.
 	 */
-	public static Variable makeVariableWithRange(Expression variable, Integer numberOfDiscreteValues, Registry registry) {
+	public static Variable makeVariableWithRange(Expression variableExpression, Integer numberOfDiscreteValues, Registry registry) {
 		Variable result;
-		String name = variable.toString();
-		Type type = registry.getTypeOfRegisteredSymbol(variable);
+		String name = variableExpression.toString();
+		Type type = GrinderUtil.getTypeOfExpression(variableExpression, registry);
+		
+		
+		if (type instanceof IntegerExpressoType) {
+			if (Expressions.isNumber(variableExpression)) {
+				int value = variableExpression.intValue();
+				type = new IntegerInterval(value, value);
+			}
+			else {
+				throw new Error("Cannot create variable with infinite (integer) range based on " + variableExpression);
+			}
+		}
+		else if (type instanceof RealExpressoType) {
+			if (Expressions.isNumber(variableExpression)) {
+				type = new RealInterval(variableExpression, variableExpression, false, false);
+			}
+			else {
+				throw new Error("Cannot create variable with infinite (real) range based on " + variableExpression);
+			}
+		}
+		
+		// Type type = registry.getTypeOfRegisteredSymbol(variable);
 		if (type instanceof RealInterval) {
 			result = makeRealVariableWithRange(name, (RealInterval) type, numberOfDiscreteValues, registry);
 		}
@@ -78,7 +102,7 @@ public class VariableExpressionDiscretization {
 			result = makeEnumVariableWithRange(name, (Categorical) type);
 		}
 		else {
-			throw new Error("Discretization only supports real, integer and enum types, but got variable " + variable + " of type " + type);
+			throw new Error("Discretization only supports real, integer and enum types, but got variable " + variableExpression + " of type " + type);
 		}
 		return result;
 	}

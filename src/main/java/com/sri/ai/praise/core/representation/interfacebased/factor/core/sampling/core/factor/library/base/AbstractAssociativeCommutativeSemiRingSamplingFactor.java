@@ -19,6 +19,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SpecificationForFunctionResultSamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableEqualsGoal;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.collect.IntegerIterator;
 import com.sri.ai.util.collect.PredicateIterator;
 
@@ -32,7 +33,7 @@ import com.sri.ai.util.collect.PredicateIterator;
  * If all are instantiated, it will update the weight of the sample to 1 if the values are consistent, or 0 if not.
  * If more than one are uninstantiated, it does nothing.
  * <p>
-* Note that this does not solve equations. Given an equation <code>x = y + y</code> with instantiated <code>x</code>,
+ * Note that this does not solve equations. Given an equation <code>x = y + y</code> with instantiated <code>x</code>,
  * it will <b>not</not> instantiate <code>y</code> even though that would be possible in principle.
  * This choice was made because variables can be arbitrarily complex (consider <code>x = y + z</code> where <code>z</code>
  * is defined somewhere else to be <code>x * y</code>), and going this route is out of scope.
@@ -93,6 +94,21 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 
 	//////////////////////
 
+	/**
+	 * Converts the object representing a value in a sample to an object representing
+	 * a value in whatever representation is appropriate for the arguments and result value of this function.
+	 * The default implementation simply casts the object to {@link T}, but some specialization
+	 * may need to do more about it -- for example, functions taking numeric values
+	 * may normalize them to the same representation (using Double and converting Integers to Double, for example).
+	 * @param value
+	 * @return
+	 * @throws Error
+	 */
+	@SuppressWarnings("unchecked")
+	protected T fromSampleValueToFunctionAppropriateValue(Object value) throws Error {
+		return (T) value;
+	}
+
 	public AbstractAssociativeCommutativeSemiRingSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);
 	}
@@ -102,7 +118,7 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 	@Override
 	public void sampleOrWeigh(Sample sample) {
 		if (someArgumentIsTheAbsorbingElement(sample)) {
-			sample.set(getFunctionResult(), getAbsorbingElement());
+			sample.set(getFunctionResultVariable(), getAbsorbingElement());
 			// no need to do anything else; the fact that the result is the absorbing element means
 			// no argument that is not already instantiated can be determined from it
 		}
@@ -123,6 +139,8 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 	}
 
 	protected T evaluateFunctionFromAllArgumentsValues(Iterator<T> values) {
+		var valuesList = Util.listFrom(values);
+		values = valuesList.iterator();
 		T result = fold(values, (v1, v2) -> apply(v1, v2), getIdentityElement());
 		return result;
 	}
@@ -131,7 +149,7 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 	protected T computeMissingArgumentValue(Function<Variable, Object> fromVariableToValue, int missingArgumentIndex) {
 		Iterator<T> argumentsButMissingOne = otherArgumentsIterator(fromVariableToValue, missingArgumentIndex);
 		T definedArgumentsOperatorApplication = evaluateFunctionFromAllArgumentsValues(argumentsButMissingOne);
-		T functionResultValue = getValue(fromVariableToValue, getFunctionResult());
+		T functionResultValue = getValue(fromVariableToValue, getFunctionResultVariable());
 		T missingArgumentValue = computeMissingArgument(functionResultValue, definedArgumentsOperatorApplication, missingArgumentIndex);
 		return missingArgumentValue;
 	}
@@ -165,22 +183,13 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 
 	private SamplingGoal argumentIsAbsorbingValue(Integer i) {
 		Variable variable = getArguments().get(i);
-		return new VariableEqualsGoal(variable, getAbsorbingElement());
-		
-//				new FunctionOnSetOfVariablesSatisfiesCondition<T>(
-//						"argumentIsAbsorbingElement=" + getAbsorbingElement(),
-//						list(variable), 
-//						c -> getFirst(c), 
-//						v -> v.equals(getAbsorbingElement()));
+		VariableEqualsGoal goal = new VariableEqualsGoal(variable, getAbsorbingElement());
+		return goal;
 	}
 
-	@SuppressWarnings("unchecked")
 	private T getValue(Function<Variable, Object> fromVariableToValue, Variable variable) {
-		try {
-			return (T) fromVariableToValue.apply(variable);
-		} catch(ClassCastException e) {
-			throw new Error("All arguments of " + getClass() + " must be of type " + getValueClass());
-		}
+		Object value = fromVariableToValue.apply(variable);
+		return fromSampleValueToFunctionAppropriateValue(value);
 	}
 
 }

@@ -11,6 +11,7 @@ import java.util.Random;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractAssociativeCommutativeSemiRingSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractAssociativeCommutativeSemiRingSamplingFactorOnDouble;
 import com.sri.ai.util.collect.IntegerIterator;
 
 /**
@@ -18,7 +19,7 @@ import com.sri.ai.util.collect.IntegerIterator;
  * @author braz
  *
  */
-public class SumSamplingFactor extends AbstractAssociativeCommutativeSemiRingSamplingFactor<Double> {
+public class SumSamplingFactor extends AbstractAssociativeCommutativeSemiRingSamplingFactorOnDouble {
 
 	public SumSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);

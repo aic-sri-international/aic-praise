@@ -102,7 +102,7 @@ public abstract class AbstractDeterministicInvertibleUnaryFunctionSamplingFactor
 	
 	private T getResultValue(Function<Variable, Object> fromVariableToValue) {
 		@SuppressWarnings("unchecked")
-		T resultValue = (T) fromVariableToValue.apply(getFunctionResult());
+		T resultValue = (T) fromVariableToValue.apply(getFunctionResultVariable());
 		return resultValue;
 	}
 
@@ -116,7 +116,7 @@ public abstract class AbstractDeterministicInvertibleUnaryFunctionSamplingFactor
 	
 	protected String problemDescription(Function<Variable, Object> fromVariableToValue) {
 		return 
-				valueOrVariable(getFunctionResult(), fromVariableToValue) 
+				valueOrVariable(getFunctionResultVariable(), fromVariableToValue) 
 				+ " = " 
 				+ operatorSymbol()
 				+ valueOrVariable(argument, fromVariableToValue); 
