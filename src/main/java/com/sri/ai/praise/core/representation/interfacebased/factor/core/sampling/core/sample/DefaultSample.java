@@ -85,6 +85,11 @@ public class DefaultSample implements Sample {
 		potential = another.getPotential();
 	}
 
+	@Override
+	public Sample copyWithNewAssignment(Assignment newAssignment) {
+		return new DefaultSample(newAssignment, getImportance(), getPotential());
+	}
+
 	public static DefaultSample makeFreshSample() {
 		return new DefaultSample(new DoubleImportanceFactory(), new DoublePotentialFactory());
 		// TODO: change this to use samplingFactor's factories

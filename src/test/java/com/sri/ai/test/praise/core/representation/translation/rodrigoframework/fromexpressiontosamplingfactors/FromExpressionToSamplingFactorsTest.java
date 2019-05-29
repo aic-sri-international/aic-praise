@@ -62,7 +62,7 @@ class FromExpressionToSamplingFactorsTest {
 		assertEquals(1, factors.size());
 		assertTrue(factors.get(0) instanceof ConditionedSamplingFactor);
 		
-		ConditionedSamplingFactor constantSamplingFactor = (ConditionedSamplingFactor) factors.get(0);
+		Factor constantSamplingFactor = factors.get(0);
 		Expression variableConstrainedToBeingConstant = (Expression) constantSamplingFactor.getVariables().get(0);
 		
 		assertEquals(parse("X"), variableConstrainedToBeingConstant);

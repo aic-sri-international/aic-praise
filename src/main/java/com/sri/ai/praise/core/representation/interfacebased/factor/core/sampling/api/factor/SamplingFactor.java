@@ -26,6 +26,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
  */
 public interface SamplingFactor extends Factor {
 	
+	static final int LEVEL_INDENTATION = 4;
+	
 	/**
 	 * Attempts to fill in the current sample and update its potential and importance.
 	 * Sampling factors are allowed to do no sampling if the given initial sample does not have enough information.
@@ -43,11 +45,23 @@ public interface SamplingFactor extends Factor {
 		return nestedString(0, showSamplingRules);
 	}
 	
+	/**
+	 * Produces a visualization of factor with an indentation of <code>level * </code>{@link #LEVEL_INDENTATION} spaces.
+	 * @param level
+	 * @param showSamplingRules
+	 * @return
+	 */
 	String nestedString(int level, boolean showSamplingRules);
 
+	/**
+	 * Produces a visualization of sampling rules with an indentation of <code>level * </code>{@link #LEVEL_INDENTATION} spaces.
+	 * @param level
+	 * @param showSamplingRules
+	 * @return
+	 */
 	default String rulesString(int level, boolean showSamplingRules) {
 		if (!showSamplingRules) return "";
-		String tab = fill(level*4, ' ');
+		String tab = fill(level*LEVEL_INDENTATION, ' ');
 		return 
 				"\n" + tab + "--------------\n"
 				+ join("\n", functionIterator(getSamplingRuleSet().getSamplingRules(), r -> tab + r))
@@ -71,7 +85,7 @@ public interface SamplingFactor extends Factor {
 	public static SamplingFactor condition(SamplingFactor samplingFactor, Variable variable, Object value) {
 		Sample sample = DefaultSample.makeFreshSample();
 		sample.getAssignment().set(variable, value);
-		SamplingFactor conditioned = ConditionedSamplingFactor.condition(samplingFactor, sample);
+		SamplingFactor conditioned = ConditionedSamplingFactor.build(sample, samplingFactor);
 		return conditioned;
 	}
 	

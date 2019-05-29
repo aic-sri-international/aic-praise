@@ -65,6 +65,11 @@ public class UnmodifiableSample implements Sample {
 	}
 
 	@Override
+	public Sample copyWithNewAssignment(Assignment newAssignment) {
+		return new UnmodifiableSample(base.copyWithNewAssignment(newAssignment));
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

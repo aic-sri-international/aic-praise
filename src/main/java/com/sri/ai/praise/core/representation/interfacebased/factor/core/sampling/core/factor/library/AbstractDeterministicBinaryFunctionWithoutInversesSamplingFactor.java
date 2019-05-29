@@ -13,7 +13,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SpecificationForFunctionResultSamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractDeterministicBinaryFunctionSamplingFactor;
 
-public abstract class AbstractDeterministicBinaryFunctionWithoutInversesSamplingFactor<A, B, R> extends AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R> {
+public abstract class AbstractDeterministicBinaryFunctionWithoutInversesSamplingFactor<A, B, R> 
+extends AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R> {
 
 	public AbstractDeterministicBinaryFunctionWithoutInversesSamplingFactor(
 			Variable functionResult, 

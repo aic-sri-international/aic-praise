@@ -16,6 +16,12 @@ import com.sri.ai.util.base.NullaryFunction;
  */
 public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 		extends AbstractDeterministicFunctionSamplingFactor {
+	
+	protected abstract R fromSampleValueToFunctionAppropriateResultValue(Object resultSampleValueObject);
+
+	protected abstract A fromSampleValueToFunctionAppropriateFirstValue(Object firstArgumentSampleValueObject);
+
+	protected abstract B fromSampleValueToFunctionAppropriateSecondValue(Object secondArgumentSampleValueObject);
 
 	protected abstract R operation(A firstValue, B secondValue);
 
@@ -118,21 +124,21 @@ public abstract class AbstractDeterministicBinaryFunctionSamplingFactor<A, B, R>
 
 	////////////////////
 	
-	@SuppressWarnings("unchecked")
 	private R getResultValue(Function<Variable, Object> fromVariableToValue) {
-		R resultValue = (R) fromVariableToValue.apply(getFunctionResultVariable());
+		Object sampleValueObject = fromVariableToValue.apply(getFunctionResultVariable());
+		R resultValue = fromSampleValueToFunctionAppropriateResultValue(sampleValueObject);
 		return resultValue;
 	}
 
-	@SuppressWarnings("unchecked")
 	private A getFirstValue(Function<Variable, Object> fromVariableToValue) {
-		A firstValue = (A) fromVariableToValue.apply(first);
+		Object sampleValueObject = fromVariableToValue.apply(getFirst());
+		A firstValue = fromSampleValueToFunctionAppropriateFirstValue(sampleValueObject);
 		return firstValue;
 	}
 
-	@SuppressWarnings("unchecked")
 	private B getSecondValue(Function<Variable, Object> fromVariableToValue) {
-		B secondValue = (B) fromVariableToValue.apply(second);
+		Object sampleValueObject = fromVariableToValue.apply(getSecond());
+		B secondValue = fromSampleValueToFunctionAppropriateSecondValue(sampleValueObject);
 		return secondValue;
 	}
 

@@ -119,7 +119,18 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	}
 
 	private Collection<? extends SamplingRule> makeInputFactorsSamplingRulesUnion() {
-		var samplingRules = union(functionIterator(getInputFactors(), f -> f.getSamplingRuleSet().getSamplingRules()));
+		var samplingRules = union(functionIterator(getInputFactors(), f -> methodForGettingSamplingRulesDEBUG(f)));
+		return samplingRules;
+	}
+
+	private Collection<? extends SamplingRule> methodForGettingSamplingRulesDEBUG(SamplingFactor factor) {
+		Collection<? extends SamplingRule> samplingRules = factor.getSamplingRuleSet().getSamplingRules();
+		println("SamplingProductFactor: Making sampling rules");
+		println("SamplingProductFactor: factor: " + factor);
+		println("SamplingProductFactor: factor variables: " + factor.getVariables());
+		println("SamplingProductFactor: factor sampling rules:");
+		samplingRules.forEach(r -> println(r));
+		println();
 		return samplingRules;
 	}
 

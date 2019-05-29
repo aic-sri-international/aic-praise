@@ -14,6 +14,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.SpecificationForFunctionResultSamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractDeterministicBinaryFunctionSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableEqualsGoal;
+import com.sri.ai.util.Util;
 
 public class EqualitySamplingFactor extends AbstractDeterministicBinaryFunctionSamplingFactor<Object, Object, Boolean> {
 
@@ -88,4 +89,20 @@ public class EqualitySamplingFactor extends AbstractDeterministicBinaryFunctionS
 	public String toString() {
 		return getFunctionResultVariable() + " = (" + getFirst() + " = " + getSecond() + ")";
 	}
+
+	@Override
+	protected Boolean fromSampleValueToFunctionAppropriateResultValue(Object resultSampleValueObject) {
+		return (Boolean) resultSampleValueObject;
+	}
+
+	@Override
+	protected Object fromSampleValueToFunctionAppropriateFirstValue(Object firstArgumentSampleValueObject) {
+		return Util.getDoubleValueWithDoubleZeroNormalizedToPositiveOrSelfOtherwise(firstArgumentSampleValueObject);
+	}
+
+	@Override
+	protected Object fromSampleValueToFunctionAppropriateSecondValue(Object secondArgumentSampleValueObject) {
+		return Util.getDoubleValueWithDoubleZeroNormalizedToPositiveOrSelfOtherwise(secondArgumentSampleValueObject);
+	}
+
 }

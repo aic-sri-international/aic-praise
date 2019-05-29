@@ -53,4 +53,6 @@ public interface Sample {
 	void copyToSameInstance(Sample anotherSample);
 	
 	void setAssignment(Assignment assignment);
+
+	Sample copyWithNewAssignment(Assignment newAssignment);
 }

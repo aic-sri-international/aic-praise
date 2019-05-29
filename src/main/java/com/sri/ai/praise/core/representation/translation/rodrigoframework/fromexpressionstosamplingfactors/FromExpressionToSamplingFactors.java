@@ -30,6 +30,7 @@ import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.println;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -640,7 +641,9 @@ public class FromExpressionToSamplingFactors {
 		Sample sample = new DefaultSample(new DoubleImportanceFactory(), new DoublePotentialFactory());
 		for (Variable variable : factor.getVariables()) {
 			ExpressionVariable expressionVariable = (ExpressionVariable) variable;
+			println("FromExpressionToSamplingFactors: checking if factor argument " + expressionVariable + " is constant to condition");
 			if (isConstant(expressionVariable)) {
+				println("FromExpressionToSamplingFactors: it is!");
 				sample.getAssignment().set(expressionVariable, fromExpressionValueToSampleValue(expressionVariable));
 			}
 		}
@@ -650,7 +653,16 @@ public class FromExpressionToSamplingFactors {
 	private SamplingFactor conditionOnSampleIfNotEmpty(SamplingFactor factor, Sample sample) {
 		SamplingFactor result;
 		if (sample.size() != 0) {
-			result = ConditionedSamplingFactor.condition(factor, sample);
+			println("FromExpressionToSamplingFactors: Conditioning on constant arguments");
+			println("FromExpressionToSamplingFactors: factor   : " + factor);
+			println("FromExpressionToSamplingFactors: constants: " + sample);
+			println("FromExpressionToSamplingFactors: factor variables: " + factor.getVariables());
+			result = ConditionedSamplingFactor.build(sample, factor);
+			println("FromExpressionToSamplingFactors: conditioned factor: " + result);
+			println("FromExpressionToSamplingFactors: conditioned factor variables: " + result.getVariables());
+			println("Conditioned factor sampling rules:");
+			result.getSamplingRuleSet().getSamplingRules().forEach(r -> println(r));
+			println();
 		}
 		else {
 			result = factor;

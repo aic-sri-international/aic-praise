@@ -2,16 +2,15 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.collectToArrayList;
-import static com.sri.ai.util.Util.makeProxy;
+import static com.sri.ai.util.Util.fill;
 import static java.util.stream.Collectors.toCollection;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map.Entry;
+import java.util.Random;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
@@ -20,119 +19,136 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableIsDefinedGoal;
+import com.sri.ai.util.Util;
 
-public interface ConditionedSamplingFactor extends SamplingFactor {
+/**
+ * A conditioned sampling factor, that is, the result of conditioning a sampling factor by a set of assignments to some of its variables.
+ * 
+ * @author braz
+ *
+ */
+public class ConditionedSamplingFactor extends AbstractConditionedFactor implements SamplingFactor {
 
-	public static SamplingFactor condition(SamplingFactor samplingFactor, Sample conditioningSample) {
-
-		if (conditioningSample.size() == 0) {
-			return samplingFactor;
-		}
-
-		ConditionedSamplingFactor proxy = makeProxy(ConditionedSamplingFactor.class, samplingFactor, conditioningSample);
-		return proxy;		
+	/**
+	 * A protected constructor which, like {@link AbstractConditionedFactor}'s constructor,
+	 * assumes that the conditions are not empty and the given factor is not zero;
+	 * this one, furthermore, also requires the factor is a sampling factor.
+	 * @param conditioningSample
+	 * @param factor
+	 */
+	protected ConditionedSamplingFactor(Sample conditioningSample, SamplingFactor factor) {
+		super(conditioningSample, factor);
 	}
+
+	@Override
+	public void sampleOrWeigh(Sample sample) {
+		for(Entry<Variable, Object> entry : getConditioningSample().getAssignment().mapValue().entrySet()) {
+			sample.set(entry.getKey(), entry.getValue());
+		}
+		
+		getFactor().sampleOrWeigh(sample);
+		
+		for(Entry<Variable, Object> entry : getConditioningSample().getAssignment().mapValue().entrySet()) {
+			sample.remove(entry.getKey());
+		}
+	}
+
+	///////// BASIC GETTERS
 	
-	public static class ConditionedSamplingFactorProxyInvocationHandler implements InvocationHandler {
+	@Override
+	public SamplingFactor getFactor() {
+		return (SamplingFactor) super.getFactor();
+	}
 
-		private SamplingFactor samplingFactor;
-		private Sample conditioningSample;
-		private ArrayList<Variable> conditionedVariables;
-		private SamplingRuleSet conditionedSamplingRuleSet;
-		public ConditionedSamplingFactor proxy;
+	@Override
+	public Random getRandom() {
+		return getFactor().getRandom();
+	}
 
-		public ConditionedSamplingFactorProxyInvocationHandler(SamplingFactor samplingFactor, Sample conditioningSample) {
-			this.samplingFactor = samplingFactor;
-			this.conditioningSample = conditioningSample;
-			this.conditionedVariables = makeConditionedVariables(samplingFactor, conditioningSample);
-			this.conditionedSamplingRuleSet = null; // needs to be made after construction, because 'proxy' field has not been set yet.
-		}
 
-		private ArrayList<Variable> makeConditionedVariables(SamplingFactor samplingFactor, Sample conditioningSample) {
-			Collection<? extends Variable> variablesInAssignment = conditioningSample.getVariables();
-			ArrayList<Variable> conditionedVariables = collectToArrayList(samplingFactor.getVariables(), v -> ! variablesInAssignment.contains(v));
-			return conditionedVariables;
-		}
+	///////// BUILDING
+
+	private static class ConditionedSamplingFactorBuildingPolicy implements BuildingPolicy {
 
 		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getName().equals("sampleOrWeigh")) {
-				sampleOrWeigh((Sample) args[0]);
-				return null;
-			}
-			else if (method.getName().equals("getVariables")) {
-				return Collections.unmodifiableList(conditionedVariables);
-			}
-			else if (method.getName().equals("getSamplingRuleSet")) {
-				if (conditionedSamplingRuleSet == null) {
-					conditionedSamplingRuleSet = makeConditionedSamplingRuleSet();
-				}
-				return conditionedSamplingRuleSet;
-			}
-			else if (method.getName().equals("equals")) {
-				return proxy == args[0];
-			}
-			else if (method.getName().equals("hashCode")) {
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getDeclaringClass().isAssignableFrom(SamplingFactor.class)) {
-				Object result = method.invoke(samplingFactor, args);
-				return result;
-			}
-			else {
-				throw new Error(getClass() + " received method '" + method + "' of " + method.getDeclaringClass() + " which it is not prepared to execute.");
-			}
-		}
-
-		private void sampleOrWeigh(Sample sample) {
-			for(Entry<Variable, Object> entry : conditioningSample.getAssignment().mapValue().entrySet()) {
-				sample.set(entry.getKey(), entry.getValue());
-			}
-			
-			samplingFactor.sampleOrWeigh(sample);
-			
-			for(Entry<Variable, Object> entry : conditioningSample.getAssignment().mapValue().entrySet()) {
-				sample.remove(entry.getKey());
-			}
-			// TODO: having to add and remove variables to sample at every sampling slows things down.
-			// Instead, we should be able to tell a factor that some variables are bound.
+		public Factor makeConditionedNonZeroAndNonConditionedFactor(Sample conditioningSample, Factor factor) {
+			SamplingFactor samplingFactor = Util.assertType(factor, SamplingFactor.class, this);
+			return new ConditionedSamplingFactor(conditioningSample, samplingFactor);
 		}
 		
-		public SamplingRuleSet makeConditionedSamplingRuleSet() {
-			ArrayList<SamplingRule> rules = 
-					getOriginalSamplingRules().stream()
-					.map(this::conditionOrNull)
-					.filter(c -> c != null)
-					.collect(toCollection(() -> arrayList()));
-			return new DefaultSamplingRuleSet(rules);
-		}
-
-		private Collection<? extends SamplingRule> getOriginalSamplingRules() {
-			return samplingFactor.getSamplingRuleSet().getSamplingRules();
-		}
-		
-		private SamplingRule conditionOrNull(SamplingRule rule) {
-			ArrayList<SamplingGoal> conditionedConsequents = getConditionedConsequents(rule);
-			if (conditionedConsequents.isEmpty()) {
-				return null;
-			}
-			else {
-				ArrayList<SamplingGoal> conditionedAntecedents = getConditionedAntecedents(rule);
-				return new SamplingRule(proxy, conditionedConsequents, conditionedAntecedents, rule.getEstimatedSuccessWeight());
-			}
-		}
-
-		private ArrayList<SamplingGoal> getConditionedConsequents(SamplingRule rule) {
-			return collectToArrayList(rule.getConsequents(), g -> ! conditioningSample.instantiates(getVariable(g)));
-		}
-
-		private ArrayList<SamplingGoal> getConditionedAntecedents(SamplingRule rule) {
-			return collectToArrayList(rule.getAntecendents(), g -> ! g.isSatisfiedBySampleWithoutModifyingIt(conditioningSample));
-		}
-
-		private Variable getVariable(SamplingGoal variableIsDefinedGoal) {
-			return ((VariableIsDefinedGoal) variableIsDefinedGoal).getVariable();
-		}
-
 	}
+	
+	@Override
+	protected BuildingPolicy getBuildingPolicy() {
+		return new ConditionedSamplingFactorBuildingPolicy();
+	}
+	
+	public static SamplingFactor build(Sample conditioningSample, SamplingFactor factor) {
+		return (SamplingFactor) build(conditioningSample, factor, new ConditionedSamplingFactorBuildingPolicy());
+	}
+
+	///////// NORMALIZATION
+
+	@Override
+	public Factor normalize() {
+		return this; // nothing to do because sampling factors are normalized in the process of generating samples
+	}
+
+	///////// GETTER FOR SAMPLING RULES
+	
+	private SamplingRuleSet conditionedSamplingRuleSet;
+
+	@Override
+	public SamplingRuleSet getSamplingRuleSet() {
+		if (conditionedSamplingRuleSet == null) {
+			conditionedSamplingRuleSet = makeConditionedSamplingRuleSet();
+		}
+		return conditionedSamplingRuleSet;
+	}
+	
+	public SamplingRuleSet makeConditionedSamplingRuleSet() {
+		ArrayList<SamplingRule> rules = 
+				getOriginalSamplingRules().stream()
+				.map(this::conditionOrNull)
+				.filter(c -> c != null)
+				.collect(toCollection(() -> arrayList()));
+		return new DefaultSamplingRuleSet(rules);
+	}
+
+	private Collection<? extends SamplingRule> getOriginalSamplingRules() {
+		return getFactor().getSamplingRuleSet().getSamplingRules();
+	}
+	
+	private SamplingRule conditionOrNull(SamplingRule rule) {
+		ArrayList<SamplingGoal> conditionedConsequents = getConditionedConsequents(rule);
+		if (conditionedConsequents.isEmpty()) {
+			return null; // there is no point in keeping a rule that has no consequents
+		}
+		else {
+			ArrayList<SamplingGoal> conditionedAntecedents = getConditionedAntecedents(rule);
+			return new SamplingRule(this, conditionedConsequents, conditionedAntecedents, rule.getEstimatedSuccessWeight());
+		}
+	}
+
+	private ArrayList<SamplingGoal> getConditionedConsequents(SamplingRule rule) {
+		return collectToArrayList(rule.getConsequents(), g -> ! getConditioningSample().instantiates(getVariable(g)));
+	}
+
+	private ArrayList<SamplingGoal> getConditionedAntecedents(SamplingRule rule) {
+		return collectToArrayList(rule.getAntecendents(), g -> ! g.isSatisfiedBySampleWithoutModifyingIt(getConditioningSample()));
+	}
+
+	private Variable getVariable(SamplingGoal variableIsDefinedGoal) {
+		return ((VariableIsDefinedGoal) variableIsDefinedGoal).getVariable();
+	}
+
+	///////////// NESTED STRING
+	
+	@Override
+	public String nestedString(int level, boolean showSamplingRules) {
+		return 
+				fill(LEVEL_INDENTATION, ' ') + "Factor conditioned by " + getConditioningSample() + "\n" +
+				getFactor().nestedString(level + 1, showSamplingRules);
+	}
+
 }

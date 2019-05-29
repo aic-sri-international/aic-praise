@@ -113,7 +113,7 @@ public class SamplingFactorDiscretizedProbabilityDistribution extends Discretize
 
 	private SamplingFactorDiscretizedProbabilityDistribution makeConditioning(Variable queryVariable, Sample conditioningSample) {
 		SamplingFactor conditionedSamplingFactor = 
-				ConditionedSamplingFactor.condition(samplingFactor, conditioningSample);
+				ConditionedSamplingFactor.build(conditioningSample, samplingFactor);
 		
 		List<Variable> projectedVariablesWithRange =                 /* reduced version of corresponding list */
 				getReducedCorresponding(

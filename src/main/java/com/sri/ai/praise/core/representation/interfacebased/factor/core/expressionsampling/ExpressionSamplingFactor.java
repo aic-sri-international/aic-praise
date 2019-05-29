@@ -151,8 +151,7 @@ public interface ExpressionSamplingFactor extends Expression, SamplingFactor, Ex
 
 		public ExpressionWithProbabilityFunction condition(Sample conditioningSample) {
 			
-			SamplingFactor conditionedSamplingFactor = 
-					ConditionedSamplingFactor.condition(samplingFactor, conditioningSample);
+			SamplingFactor conditionedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, samplingFactor);
 			
 			ExpressionWithProbabilityFunction result = 
 					expressionSamplingFactor(conditionedSamplingFactor, queryIndex, fromVariableToNumberOfDiscreteValues, initialNumberOfSamples, context);

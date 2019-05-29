@@ -1,5 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number;
 
+import static com.sri.ai.util.Util.getDoubleValueWithDoubleZeroNormalizedToPositive;
+
 import java.util.List;
 import java.util.Random;
 
@@ -35,6 +37,21 @@ public abstract class AbstractDeterministicNumericBinaryFunctionSamplingFactor
 	@Override
 	protected boolean isInvalidSecondArgument(Double value) {
 		return Double.isNaN(value) || Double.isInfinite(value);
+	}
+
+	@Override
+	protected Double fromSampleValueToFunctionAppropriateResultValue(Object resultSampleValueObject) {
+		return getDoubleValueWithDoubleZeroNormalizedToPositive(resultSampleValueObject);
+	}
+
+	@Override
+	protected Double fromSampleValueToFunctionAppropriateFirstValue(Object firstArgumentSampleValueObject) {
+		return getDoubleValueWithDoubleZeroNormalizedToPositive(firstArgumentSampleValueObject);
+	}
+
+	@Override
+	protected Double fromSampleValueToFunctionAppropriateSecondValue(Object secondArgumentSampleValueObject) {
+		return getDoubleValueWithDoubleZeroNormalizedToPositive(secondArgumentSampleValueObject);
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.comparison;
 
+import static com.sri.ai.util.Util.getDoubleValueWithDoubleZeroNormalizedToPositive;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Random;
@@ -7,7 +9,8 @@ import java.util.Random;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.AbstractDeterministicBinaryFunctionWithoutInversesSamplingFactor;
 
-public class AbstractComparisonGivenComparatorSamplingFactor<T> extends AbstractDeterministicBinaryFunctionWithoutInversesSamplingFactor<T, T, Boolean> {
+public class AbstractComparisonGivenComparatorSamplingFactor<T>
+extends AbstractDeterministicBinaryFunctionWithoutInversesSamplingFactor<T, T, Boolean> {
 
 	private Comparator<T> comparator;
 	private ArrayList<Integer> comparisonResults;
@@ -51,5 +54,22 @@ public class AbstractComparisonGivenComparatorSamplingFactor<T> extends Abstract
 	@Override
 	protected String getFunctionName() {
 		return functionName;
+	}
+
+	@Override
+	protected Boolean fromSampleValueToFunctionAppropriateResultValue(Object resultSampleValueObject) {
+		return (Boolean) resultSampleValueObject;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected T fromSampleValueToFunctionAppropriateFirstValue(Object firstArgumentSampleValueObject) {
+		return (T) getDoubleValueWithDoubleZeroNormalizedToPositive(firstArgumentSampleValueObject);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected T fromSampleValueToFunctionAppropriateSecondValue(Object secondArgumentSampleValueObject) {
+		return (T) getDoubleValueWithDoubleZeroNormalizedToPositive(secondArgumentSampleValueObject);
 	}
 }

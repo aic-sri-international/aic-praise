@@ -45,6 +45,23 @@ import com.sri.ai.util.collect.PredicateIterator;
  */
 public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> extends AbstractDeterministicFunctionSamplingFactor {
 
+	//////////////////////
+	
+	/**
+	 * Converts the object representing a value in a sample to an object representing
+	 * a value in whatever representation is appropriate for the arguments and result value of this function.
+	 * The default implementation simply casts the object to {@link T}, but some specialization
+	 * may need to do more about it -- for example, functions taking numeric values
+	 * may normalize them to the same representation (using Double and converting Integers to Double, for example).
+	 * @param value
+	 * @return
+	 * @throws Error
+	 */
+	@SuppressWarnings("unchecked")
+	protected T fromSampleValueToFunctionAppropriateValue(Object value) throws Error {
+		return (T) value;
+	}
+
 	/**
 	 * Specifies the indices of arguments for which there is an inverse operation given any values of all the other variables, including the result. 
 	 */
@@ -93,21 +110,6 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactor<T> ex
 	abstract protected Class<T> getValueClass();
 
 	//////////////////////
-
-	/**
-	 * Converts the object representing a value in a sample to an object representing
-	 * a value in whatever representation is appropriate for the arguments and result value of this function.
-	 * The default implementation simply casts the object to {@link T}, but some specialization
-	 * may need to do more about it -- for example, functions taking numeric values
-	 * may normalize them to the same representation (using Double and converting Integers to Double, for example).
-	 * @param value
-	 * @return
-	 * @throws Error
-	 */
-	@SuppressWarnings("unchecked")
-	protected T fromSampleValueToFunctionAppropriateValue(Object value) throws Error {
-		return (T) value;
-	}
 
 	public AbstractAssociativeCommutativeSemiRingSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);

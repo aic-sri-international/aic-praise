@@ -1,5 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base;
 
+import static com.sri.ai.util.Util.getDoubleValueWithDoubleZeroNormalizedToPositive;
+
 import java.util.List;
 import java.util.Random;
 
@@ -18,11 +20,6 @@ public abstract class AbstractAssociativeCommutativeSemiRingSamplingFactorOnDoub
 
 	@Override
 	protected Double fromSampleValueToFunctionAppropriateValue(Object value) {
-		if (value instanceof Number) {
-			return ((Number) value).doubleValue();
-		}
-		else {
-			throw new Error(getClass() + " requires numeric values but got " + value);
-		}
+		return getDoubleValueWithDoubleZeroNormalizedToPositive(value);
 	}
 }

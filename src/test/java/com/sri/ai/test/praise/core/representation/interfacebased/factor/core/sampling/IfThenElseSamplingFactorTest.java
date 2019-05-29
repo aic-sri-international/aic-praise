@@ -2,7 +2,6 @@ package com.sri.ai.test.praise.core.representation.interfacebased.factor.core.sa
 
 import static com.sri.ai.expresso.helper.Expressions.areEqualUpToNumericProportion;
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor.condition;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DoubleBasedSample.doubleBasedSample;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.listFrom;
@@ -22,6 +21,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic.IfThenElseSamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedMeanAndStandardDeviation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.statistics.NormalWithFixedStandardDeviation;
@@ -115,7 +115,7 @@ class IfThenElseSamplingFactorTest {
 						random);
 
 		conditioningSample = doubleBasedSample(rainy, true);
-		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		testedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, ifThenElseSamplingFactor);
 		variablesWithRange = new DefaultSetOfVariables(new RealVariable("x", Unit.NONE, "-5", "1", "5"));
 		queryIndex = 0;
 		expectedValuesTupleString = "(0.0, 0.0, 0.003, 0.067, 0.258, 0.363, 0.242, 0.066, 0.001, 0.0, 0.0)";
@@ -138,7 +138,7 @@ class IfThenElseSamplingFactorTest {
 						random);
 
 		conditioningSample = doubleBasedSample(rainy, false);
-		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		testedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, ifThenElseSamplingFactor);
 		variablesWithRange = new DefaultSetOfVariables(new RealVariable("x", Unit.NONE, "0", "1", "10"));
 		queryIndex = 0;
 		expectedValuesTupleString = "(0.0, 0.0, 0.003, 0.067, 0.258, 0.363, 0.242, 0.066, 0.001, 0.0, 0.0)";
@@ -154,7 +154,7 @@ class IfThenElseSamplingFactorTest {
 						random);
 
 		conditioningSample = doubleBasedSample(x, 0.0);
-		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		testedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, ifThenElseSamplingFactor);
 		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
 		queryIndex = 0;
 		expectedValuesTupleString = "(0.0, 1.0)";
@@ -170,7 +170,7 @@ class IfThenElseSamplingFactorTest {
 						random);
 
 		conditioningSample = doubleBasedSample(x, 0.0);
-		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		testedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, ifThenElseSamplingFactor);
 		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
 		queryIndex = 0;
 		expectedValuesTupleString = "(0.0, 1.0)";
@@ -186,7 +186,7 @@ class IfThenElseSamplingFactorTest {
 						random);
 
 		conditioningSample = doubleBasedSample(x, 5.0);
-		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		testedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, ifThenElseSamplingFactor);
 		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
 		queryIndex = 0;
 		expectedValuesTupleString = "(1.0, 0.0)";
@@ -202,7 +202,7 @@ class IfThenElseSamplingFactorTest {
 						random);
 
 		conditioningSample = doubleBasedSample(x, 2.5);
-		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		testedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, ifThenElseSamplingFactor);
 		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
 		queryIndex = 0;
 		expectedValuesTupleString = "(0.5, 0.5)";
@@ -218,7 +218,7 @@ class IfThenElseSamplingFactorTest {
 						random);
 
 		conditioningSample = doubleBasedSample(x, 1.0);
-		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		testedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, ifThenElseSamplingFactor);
 		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
 		queryIndex = 0;
 		expectedValuesTupleString = "(0.366, 0.634)";
@@ -234,7 +234,7 @@ class IfThenElseSamplingFactorTest {
 						random);
 
 		conditioningSample = doubleBasedSample(rainy, true, y, 0.0);
-		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		testedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, ifThenElseSamplingFactor);
 		variablesWithRange = new DefaultSetOfVariables(new RealVariable("x", Unit.NONE, "-5", "1", "5"));
 		queryIndex = 0;
 		expectedValuesTupleString = "(0.0, 0.0, 0.003, 0.067, 0.258, 0.363, 0.242, 0.066, 0.001, 0.0, 0.0)";
@@ -250,7 +250,7 @@ class IfThenElseSamplingFactorTest {
 						random);
 
 		conditioningSample = doubleBasedSample(x, 2.5, y, 0.0);
-		testedSamplingFactor = condition(ifThenElseSamplingFactor, conditioningSample);
+		testedSamplingFactor = ConditionedSamplingFactor.build(conditioningSample, ifThenElseSamplingFactor);
 		variablesWithRange = new DefaultSetOfVariables(new EnumVariable("rainy", "false", "true"));
 		queryIndex = 0;
 		expectedValuesTupleString = "(0.5, 0.5)";
