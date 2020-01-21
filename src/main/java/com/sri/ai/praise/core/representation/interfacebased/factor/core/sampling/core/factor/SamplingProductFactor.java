@@ -189,6 +189,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		instantiate(factor.getVariables(), samplingState);
 	}
 	
+	@SuppressWarnings("unused")
 	private void instantiateSmallSetOfRequiredVariables2(SamplingFactor factor, SamplingState samplingState) {
 		var samplingRules = samplingRulesInDecreasingOrderOfNumberOfRequiredVariablesToInstantiate(factor, samplingState);
 		samplingRules.forEach(r -> attemptToSatisfy(r, samplingState));
