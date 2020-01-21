@@ -10,7 +10,7 @@ public class VariableIsDefinedGoal extends AbstractSingleVariableRelatedGoal {
 	}
 
 	@Override
-	public boolean isSatisfiedBySampleWithoutModifyingIt(Sample sample) {
+	public boolean isSatisfied(Sample sample) {
 		boolean result = sample.getAssignment().get(getVariable()) != null;
 		return result;
 	}

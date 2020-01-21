@@ -416,7 +416,7 @@ public class DynamicSamplingProductFactor extends AbstractCompoundSamplingFactor
 	}
 
 	private boolean isSatisfied(Sample sample, SamplingGoal g) {
-		boolean result = g.isSatisfiedBySampleWithoutModifyingIt(sample);
+		boolean result = g.isSatisfied(sample);
 		return result;
 	}
 	

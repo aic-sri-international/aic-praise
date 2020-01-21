@@ -30,7 +30,6 @@ import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.myAssert;
-import static com.sri.ai.util.Util.println;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -272,28 +271,28 @@ public class FromExpressionToSamplingFactors {
 		}
 		else {
 			ArrayList<Variable> argumentVariables = arrayList(leftHandSideVariable, rightHandSideVariable);
-			trueBooleanVarArgSamplingFactorCompilation(EqualitySamplingFactor.class, argumentVariables, factors);
+			booleanFunctionAppliedToAListOfArgumentsAndConditionedToBeTrueSamplingFactorCompilation(EqualitySamplingFactor.class, argumentVariables, factors);
 		}
 	}
 
 	private void lessThanFactorCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(LessThanSamplingFactor.class, expression, factors);
+		booleanFunctionAppliedToArgumentsOfExpressionAndConditionedToTrueCompilation(LessThanSamplingFactor.class, expression, factors);
 	}
 
 	private void greaterFactorThanCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(GreaterThanSamplingFactor.class, expression, factors);
+		booleanFunctionAppliedToArgumentsOfExpressionAndConditionedToTrueCompilation(GreaterThanSamplingFactor.class, expression, factors);
 	}
 
 	private void lessThanOrEqualToFactorCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(LessThanOrEqualToSamplingFactor.class, expression, factors);
+		booleanFunctionAppliedToArgumentsOfExpressionAndConditionedToTrueCompilation(LessThanOrEqualToSamplingFactor.class, expression, factors);
 	}
 
 	private void greaterThanOrEqualToFactorCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(GreaterThanOrEqualToSamplingFactor.class, expression, factors);
+		booleanFunctionAppliedToArgumentsOfExpressionAndConditionedToTrueCompilation(GreaterThanOrEqualToSamplingFactor.class, expression, factors);
 	}
 
 	private void orFactorCompilation(Expression expression, List<SamplingFactor> factors) {
-		trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(DisjunctionSamplingFactor.class, expression, factors);
+		booleanFunctionAppliedToArgumentsOfExpressionAndConditionedToTrueCompilation(DisjunctionSamplingFactor.class, expression, factors);
 	}
 
 	private void andFactorCompilation(Expression expression, List<SamplingFactor> factors) {
@@ -314,17 +313,17 @@ public class FromExpressionToSamplingFactors {
 
 	//////////////////////
 	
-	private void trueBooleanVarArgSamplingFactorAppliedToArgumentsOfExpressionCompilation(Class<? extends SamplingFactor> samplingFactorClass, Expression expression, List<SamplingFactor> factors) {
+	private void booleanFunctionAppliedToArgumentsOfExpressionAndConditionedToTrueCompilation(Class<? extends SamplingFactor> samplingFactorClass, Expression expression, List<SamplingFactor> factors) {
 		List<Expression> arguments = expression.getArguments();
 		List<Variable> argumentVariables = mapIntoArrayList(arguments, a -> expressionCompilation(a, factors));
-		trueBooleanVarArgSamplingFactorCompilation(samplingFactorClass, argumentVariables, factors);
+		booleanFunctionAppliedToAListOfArgumentsAndConditionedToBeTrueSamplingFactorCompilation(samplingFactorClass, argumentVariables, factors);
 	}
 
-	private void trueBooleanVarArgSamplingFactorCompilation(Class<? extends SamplingFactor> samplingFactorClass, List<Variable> argumentVariables, List<SamplingFactor> factors) {
-		booleanVarArgSamplingFactorCompilation(true, samplingFactorClass, argumentVariables, factors);
+	private void booleanFunctionAppliedToAListOfArgumentsAndConditionedToBeTrueSamplingFactorCompilation(Class<? extends SamplingFactor> samplingFactorClass, List<Variable> argumentVariables, List<SamplingFactor> factors) {
+		booleanFunctionAppliedToAListOfArgumentsAndConditionedToBeTrueSamplingFactorCompilation(true, samplingFactorClass, argumentVariables, factors);
 	}
 
-	private void booleanVarArgSamplingFactorCompilation(
+	private void booleanFunctionAppliedToAListOfArgumentsAndConditionedToBeTrueSamplingFactorCompilation(
 			boolean truthValue,
 			Class<? extends SamplingFactor> samplingFactorClass, 
 			List<Variable> argumentVariables,
@@ -641,9 +640,9 @@ public class FromExpressionToSamplingFactors {
 		Sample sample = new DefaultSample(new DoubleImportanceFactory(), new DoublePotentialFactory());
 		for (Variable variable : factor.getVariables()) {
 			ExpressionVariable expressionVariable = (ExpressionVariable) variable;
-			println("FromExpressionToSamplingFactors: checking if factor argument " + expressionVariable + " is constant to condition");
+//			println("FromExpressionToSamplingFactors: checking if factor argument " + expressionVariable + " is constant to condition");
 			if (isConstant(expressionVariable)) {
-				println("FromExpressionToSamplingFactors: it is!");
+//				println("FromExpressionToSamplingFactors: it is!");
 				sample.getAssignment().set(expressionVariable, fromExpressionValueToSampleValue(expressionVariable));
 			}
 		}
@@ -653,16 +652,16 @@ public class FromExpressionToSamplingFactors {
 	private SamplingFactor conditionOnSampleIfNotEmpty(SamplingFactor factor, Sample sample) {
 		SamplingFactor result;
 		if (sample.size() != 0) {
-			println("FromExpressionToSamplingFactors: Conditioning on constant arguments");
-			println("FromExpressionToSamplingFactors: factor   : " + factor);
-			println("FromExpressionToSamplingFactors: constants: " + sample);
-			println("FromExpressionToSamplingFactors: factor variables: " + factor.getVariables());
+//			println("FromExpressionToSamplingFactors: Conditioning on constant arguments");
+//			println("FromExpressionToSamplingFactors: factor   : " + factor);
+//			println("FromExpressionToSamplingFactors: constants: " + sample);
+//			println("FromExpressionToSamplingFactors: factor variables: " + factor.getVariables());
 			result = ConditionedSamplingFactor.build(sample, factor);
-			println("FromExpressionToSamplingFactors: conditioned factor: " + result);
-			println("FromExpressionToSamplingFactors: conditioned factor variables: " + result.getVariables());
-			println("Conditioned factor sampling rules:");
-			result.getSamplingRuleSet().getSamplingRules().forEach(r -> println(r));
-			println();
+//			println("FromExpressionToSamplingFactors: conditioned factor: " + result);
+//			println("FromExpressionToSamplingFactors: conditioned factor variables: " + result.getVariables());
+//			println("Conditioned factor sampling rules:");
+//			result.getSamplingRuleSet().getSamplingRules().forEach(r -> println(r));
+//			println();
 		}
 		else {
 			result = factor;

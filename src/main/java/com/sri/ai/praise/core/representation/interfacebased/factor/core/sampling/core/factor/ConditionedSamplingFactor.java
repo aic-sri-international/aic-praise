@@ -3,12 +3,15 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.fill;
+import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.set;
 import static java.util.stream.Collectors.toCollection;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -42,14 +45,44 @@ public class ConditionedSamplingFactor extends AbstractConditionedFactor impleme
 
 	@Override
 	public void sampleOrWeigh(Sample sample) {
-		for(Entry<Variable, Object> entry : getConditioningSample().getAssignment().mapValue().entrySet()) {
-			sample.set(entry.getKey(), entry.getValue());
-		}
+		
+		Set<Variable> newlyBoundVariables = set();
+		
+		addConditionsToSample(sample, newlyBoundVariables);
 		
 		getFactor().sampleOrWeigh(sample);
 		
-		for(Entry<Variable, Object> entry : getConditioningSample().getAssignment().mapValue().entrySet()) {
-			sample.remove(entry.getKey());
+		removeNewlyBoundVariables(sample, newlyBoundVariables);
+	}
+
+	public void addConditionsToSample(Sample sample, Set<Variable> newlyBoundVariables) {
+		var conditioningSampleEntries = getConditioningSample().getAssignment().mapValue().entrySet();
+		for (Entry<Variable, Object> conditioningSampleEntry : conditioningSampleEntries) {
+			addConditionToSampleIfNeeded(sample, conditioningSampleEntry, newlyBoundVariables);
+		}
+	}
+
+	public void addConditionToSampleIfNeeded(
+			Sample sample,
+			Entry<Variable, Object> conditioningSampleEntry,
+			Set<Variable> newlyBoundVariables) {
+		
+		Variable variable = conditioningSampleEntry.getKey();
+		Object value = conditioningSampleEntry.getValue();
+
+		Object sampleValue = sample.get(variable);
+		if (sampleValue == null) {
+			sample.set(variable, value);
+			newlyBoundVariables.add(variable);
+		}
+		else {
+			myAssert(sampleValue.equals(value), () -> "Conditioned factor requires " + variable + " to be " + value + " but received sample with the same variable bound to " + sampleValue + ". Factor was " + this);
+		}
+	}
+
+	public void removeNewlyBoundVariables(Sample sample, Set<Variable> newlyBoundVariables) {
+		for (Variable newlyBoundVariable : newlyBoundVariables) {
+			sample.remove(newlyBoundVariable);
 		}
 	}
 
@@ -135,7 +168,7 @@ public class ConditionedSamplingFactor extends AbstractConditionedFactor impleme
 	}
 
 	private ArrayList<SamplingGoal> getConditionedAntecedents(SamplingRule rule) {
-		return collectToArrayList(rule.getAntecendents(), g -> ! g.isSatisfiedBySampleWithoutModifyingIt(getConditioningSample()));
+		return collectToArrayList(rule.getAntecendents(), g -> ! g.isSatisfied(getConditioningSample()));
 	}
 
 	private Variable getVariable(SamplingGoal variableIsDefinedGoal) {

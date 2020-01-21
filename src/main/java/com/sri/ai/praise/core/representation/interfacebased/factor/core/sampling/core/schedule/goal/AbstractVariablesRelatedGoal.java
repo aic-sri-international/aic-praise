@@ -22,7 +22,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 public abstract class AbstractVariablesRelatedGoal implements SamplingGoal {
 
 	@Override
-	abstract public boolean isSatisfiedBySampleWithoutModifyingIt(Sample sample);
+	abstract public boolean isSatisfied(Sample sample);
 
 	abstract protected String getGoalName();
 	

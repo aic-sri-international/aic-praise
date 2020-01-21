@@ -2,7 +2,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.samplin
 
 import static com.sri.ai.util.Util.getFirstNonNullResultOrNull;
 import static com.sri.ai.util.Util.getFirstSatisfyingPredicateOrNull;
-import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.set;
 import static com.sri.ai.util.Util.thereExists;
 import static com.sri.ai.util.collect.DefaultManyToManyRelation.manyToManyRelation;
@@ -42,23 +41,11 @@ public class SamplingState implements State {
 			factorsThatFired.add(factor);
 		}
 		else {
-			// do nothing because factor had already been applied
+			// do nothing because factor has already been applied
 		}
 	}
 	
-	public void makeSureToConsultAllRelevantInputFactors() {
-		// println("Making sure all factors are applied");
-		SamplingFactor unfiredButRelevantSamplingFactor;
-		while ((unfiredButRelevantSamplingFactor = getUnfiredButRelevantSamplingFactor()) != null) {
-			println("SamplingState: applying remaining factor " + unfiredButRelevantSamplingFactor);
-			unfiredButRelevantSamplingFactor.sampleOrWeigh(sample);
-			println("SamplingState: sampling weight now is " + sample.getPotential());
-			factorsThatFired.add(unfiredButRelevantSamplingFactor);
-		}
-
-	}
-	
-	private SamplingFactor getUnfiredButRelevantSamplingFactor() {
+	public SamplingFactor getUnfiredButRelevantSamplingFactor() {
 		SamplingFactor result = 
 				getFirstNonNullResultOrNull(
 						sample.getVariables(), 

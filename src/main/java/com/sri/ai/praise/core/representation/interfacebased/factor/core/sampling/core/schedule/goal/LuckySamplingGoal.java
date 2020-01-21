@@ -33,10 +33,10 @@ public class LuckySamplingGoal extends AbstractVariablesRelatedGoal implements C
 	}
 
 	@Override
-	public boolean isSatisfiedBySampleWithoutModifyingIt(Sample sample) {
+	public boolean isSatisfied(Sample sample) {
 		// TODO: this is violating the constraint of not modifying the sample; that is one of the reasons LuckySamplingGoal is going away.
 		factor.sampleOrWeigh(sample);
-		boolean result = innerGoal.isSatisfiedBySampleWithoutModifyingIt(sample);
+		boolean result = innerGoal.isSatisfied(sample);
 		return result;
 	}
 

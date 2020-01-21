@@ -13,6 +13,7 @@ import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.set;
+import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.union;
 import static com.sri.ai.util.Util.unionArrayList;
 import static com.sri.ai.util.Util.valueOrDefaultIfNull;
@@ -40,6 +41,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableIsDefinedGoal;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.planning.api.Plan;
+import com.sri.ai.util.planning.core.SequentialPlan;
 
 public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 	
@@ -78,7 +80,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		return result;
 	}
 
-	public Plan getSamplingPlan(List<? extends Variable> variablesToSample, Sample sample) {
+	public Plan getSamplingPlan(Collection<? extends Variable> variablesToSample, Sample sample) {
 		Set<? extends SamplingGoal> satisfiedGoals = getSatisfiedGoals(sample);
 		return getSamplingPlan(variablesToSample, satisfiedGoals);
 	}
@@ -89,7 +91,7 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 						functionIterator(
 								this.getInputFactors(), 
 								f -> f.getSamplingRuleSet().getAllGoals()));
-		Set<SamplingGoal> result = collectToSet(allGoals, g -> g.isSatisfiedBySampleWithoutModifyingIt(sample));
+		Set<SamplingGoal> result = collectToSet(allGoals, g -> g.isSatisfied(sample));
 		return result;
 	}
 
@@ -97,9 +99,15 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 		return getSamplingPlan(getVariables(), satisfiedGoals);
 	}
 	
-	public Plan getSamplingPlan(List<? extends Variable> variablesToSample, Set<? extends SamplingGoal> satisfiedGoals) {
+	private Plan getSamplingPlan(Collection<? extends Variable> variablesToSample, Set<? extends SamplingGoal> satisfiedGoals) {
+		Plan samplingPlan;
 		Set<? extends SamplingGoal> requiredGoals = mapIntoSet(variablesToSample, v -> new VariableIsDefinedGoal(v));
-		Plan samplingPlan = getValuePossiblyCreatingIt(fromRequiredGoalsAndSatisfiedGoalsToPlan, pair(requiredGoals, satisfiedGoals), this::makePlan);
+		if (satisfiedGoals.containsAll(requiredGoals)) { // check this case before storing it unnecessarily in cache below
+			samplingPlan = SequentialPlan.and(); // do nothing
+		}
+		else {
+			samplingPlan = getValuePossiblyCreatingIt(fromRequiredGoalsAndSatisfiedGoalsToPlan, pair(requiredGoals, satisfiedGoals), this::makePlan);
+		}
 		return samplingPlan;
 	}
 	
@@ -125,12 +133,12 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 
 	private Collection<? extends SamplingRule> methodForGettingSamplingRulesDEBUG(SamplingFactor factor) {
 		Collection<? extends SamplingRule> samplingRules = factor.getSamplingRuleSet().getSamplingRules();
-		println("SamplingProductFactor: Making sampling rules");
-		println("SamplingProductFactor: factor: " + factor);
-		println("SamplingProductFactor: factor variables: " + factor.getVariables());
-		println("SamplingProductFactor: factor sampling rules:");
-		samplingRules.forEach(r -> println(r));
-		println();
+//		println("SamplingProductFactor: Making sampling rules");
+//		println("SamplingProductFactor: factor: " + factor);
+//		println("SamplingProductFactor: factor variables: " + factor.getVariables());
+//		println("SamplingProductFactor: factor sampling rules:");
+//		samplingRules.forEach(r -> println(r));
+//		println();
 		return samplingRules;
 	}
 
@@ -141,12 +149,86 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 
 	public void sampleOrWeigh(List<? extends Variable> variablesToSample, Sample sample) {
 		SamplingState samplingState = new SamplingState(sample, getInputFactors(), getRandom());
-		Plan samplingPlan = getSamplingPlan(variablesToSample, sample);
-		println("Executing sampling plan");
-		samplingPlan.execute(samplingState);
-		myAssert(complete(sample), () -> "Factor was not able to complete sample.\nSample: " + sample + "\nFactors: " + this + "\nSampling plan: " + (samplingPlan == null? "none" : samplingPlan.nestedString()));
-		samplingState.makeSureToConsultAllRelevantInputFactors();
+		instantiate(variablesToSample, samplingState);
+		makeSureToConsultAllRelevantInputFactors(samplingState);
 		rewardIfNeeded(sample);
+	}
+
+	private void instantiate(Collection<? extends Variable> variablesToSample, SamplingState samplingState) {
+		Sample unmodifiableSample = samplingState.getUnmodifiableSample();
+		Plan samplingPlan = getSamplingPlan(variablesToSample, unmodifiableSample);
+//		println("SamplingProductFactor: Executing sampling plan");
+		samplingPlan.execute(samplingState);
+		myAssert(complete(variablesToSample, unmodifiableSample), () -> "Could not sample " + join(subtract(variablesToSample,  unmodifiableSample.getVariables())) + "\nSample: " + unmodifiableSample + "\nFactors: " + this + "\nSampling plan: " + (samplingPlan == null? "none" : samplingPlan.nestedString()));
+	}
+
+	private void makeSureToConsultAllRelevantInputFactors(SamplingState samplingState) {
+		// println("Making sure all factors are applied");
+		SamplingFactor unfiredButRelevantSamplingFactor;
+		while ((unfiredButRelevantSamplingFactor = samplingState.getUnfiredButRelevantSamplingFactor()) != null) {
+			conservativelySampleOrWeight(unfiredButRelevantSamplingFactor, samplingState);
+		}
+	}
+
+	/**
+	 * Seeks to sample or weight a given factor, but only while instantiating as few variables as possible.
+	 * @param factor
+	 * @param samplingState
+	 */
+	public void conservativelySampleOrWeight(SamplingFactor factor, SamplingState samplingState) {
+//      println("SamplingProductFactor: applying remaining factor " + unfiredButRelevantSamplingFactor);
+		// all variables in relevant factor must be instantiated, even if they were not originally requested
+		instantiateSmallSetOfRequiredVariables(factor, samplingState);
+		samplingState.sampleOrWeight(factor);
+		// Note that factor may have been used to instantiate its own variables, in which case {@link SamplingState#sampleOrWeight(SamplingFactor)}
+		// won't do anything.
+//		println("SamplingProductFactor: sampling weight now is " + samplingState.getUnmodifiableSample().getPotential());
+	}
+
+	private void instantiateSmallSetOfRequiredVariables(SamplingFactor factor, SamplingState samplingState) {
+		instantiate(factor.getVariables(), samplingState);
+	}
+	
+	private void instantiateSmallSetOfRequiredVariables2(SamplingFactor factor, SamplingState samplingState) {
+		var samplingRules = samplingRulesInDecreasingOrderOfNumberOfRequiredVariablesToInstantiate(factor, samplingState);
+		samplingRules.forEach(r -> attemptToSatisfy(r, samplingState));
+	}
+
+	private
+	Collection<? extends SamplingRule>
+	samplingRulesInDecreasingOrderOfNumberOfRequiredVariablesToInstantiate(SamplingFactor factor, SamplingState samplingState) {
+		// TODO: sort by decreasing number of variables to instantiate
+		return factor.getSamplingRuleSet().getSamplingRules();
+	}
+
+	private boolean attemptToSatisfy(SamplingRule samplingRule, SamplingState samplingState) {
+		boolean result =
+				forAll(
+						samplingRule.getAntecendents(), 
+						a -> isSatisfiedPossiblyByCausingIt(a, samplingState));
+		return result;
+	}
+	
+	private boolean isSatisfiedPossiblyByCausingIt(SamplingGoal goal, SamplingState samplingState) {
+		if (goal.isSatisfied(samplingState.getUnmodifiableSample())) {
+			return true;
+		}
+		else if (goal instanceof VariableIsDefinedGoal) {
+			return tryToSatisfy((VariableIsDefinedGoal) goal, samplingState);
+		}
+		else {
+			return false;
+		}
+	}
+
+	private boolean tryToSatisfy(VariableIsDefinedGoal variableIsDefinedGoal, SamplingState samplingState) {
+		try {
+			instantiate(variableIsDefinedGoal.getVariables(), samplingState);
+			return true;
+		}
+		catch (Throwable t) {
+			return false;
+		}
 	}
 
 	private void rewardIfNeeded(Sample sample) {
@@ -156,9 +238,9 @@ public class SamplingProductFactor extends AbstractCompoundSamplingFactor {
 //		}
 	}
 
-	private boolean complete(Sample sample) {
+	private boolean complete(Collection<? extends Variable> variablesToSample, Sample sample) {
 		// TODO: this can be made better than checking every variable at every iteration. We can instead update it according to factor used
-		boolean result = forAll(getVariables(), v -> sample.getAssignment().contains(v));
+		boolean result = forAll(variablesToSample, v -> sample.getAssignment().contains(v));
 		return result;
 	}
 

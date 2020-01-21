@@ -52,6 +52,9 @@ public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 		if (marginalizedFactor instanceof DynamicSamplingProductFactor) { // TODO: too hard-wired; create interface for factors that can sample a subset of its variables
 			((DynamicSamplingProductFactor) marginalizedFactor).sampleOrWeigh(getVariables(), sampleToComplete);
 		}
+		else if (marginalizedFactor instanceof SamplingProductFactor) { // TODO: too hard-wired; create interface for factors that can sample a subset of its variables
+			((SamplingProductFactor) marginalizedFactor).sampleOrWeigh(getVariables(), sampleToComplete);
+		}
 		else {
 			marginalizedFactor.sampleOrWeigh(sampleToComplete);
 		}

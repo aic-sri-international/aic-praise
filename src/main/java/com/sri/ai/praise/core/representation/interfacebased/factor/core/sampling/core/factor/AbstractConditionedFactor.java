@@ -293,4 +293,10 @@ public abstract class AbstractConditionedFactor implements Factor {
 		throw new Error((new Enclosing() {}).methodName() + " not supported by " + AbstractConditionedFactor.class);
 	}
 
+	///////////////////
+	
+	@Override
+	public String toString() {
+		return "Conditioned factor by " + conditioningSample.getAssignment() + ", original factor is " + factor;
+	}
 }

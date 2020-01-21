@@ -77,9 +77,9 @@ public interface SamplingFactor extends Factor {
 	 * @return
 	 */
 	public static SamplingFactor conditionResult(Object value, Function<Variable, SamplingFactor> makeSamplingFactorGivenResultVariable) {
-		Variable functionResult = DefaultExpressionVariable.expressionVariable(makeSymbol(value));
-		SamplingFactor samplingFactorAsFunction = makeSamplingFactorGivenResultVariable.apply(functionResult);
-		return condition(samplingFactorAsFunction, functionResult, value);
+		Variable variableRepresentingFunctionResult = DefaultExpressionVariable.expressionVariable(makeSymbol(value));
+		SamplingFactor samplingFactorAsFunction = makeSamplingFactorGivenResultVariable.apply(variableRepresentingFunctionResult);
+		return condition(samplingFactorAsFunction, variableRepresentingFunctionResult, value);
 	}
 
 	public static SamplingFactor condition(SamplingFactor samplingFactor, Variable variable, Object value) {

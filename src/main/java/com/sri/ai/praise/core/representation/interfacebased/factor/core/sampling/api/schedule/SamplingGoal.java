@@ -19,7 +19,7 @@ public interface SamplingGoal extends Goal {
 	 * @param sample
 	 * @return
 	 */
-	boolean isSatisfiedBySampleWithoutModifyingIt(Sample sample);
+	boolean isSatisfied(Sample sample);
 
 	/**
 	 * Provides the variables on which this goal depends.
