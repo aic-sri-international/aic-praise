@@ -67,6 +67,7 @@
 	</developers>
 
 	<properties>
+		<dl4j.version>1.0.0-beta4</dl4j.version>
 		<jackson-2-version>2.9.5</jackson-2-version>
 		<target.jdk.version>11</target.jdk.version>
 		<targetJdk>11</targetJdk>
@@ -85,6 +86,16 @@
 	<dependencies>
 		<!-- Internal Dependencies -->
 		<!-- Compile Dependencies -->
+	  <dependency>
+	      <groupId>org.deeplearning4j</groupId>
+	      <artifactId>deeplearning4j-core</artifactId>
+	      <version>${dl4j.version}</version>
+	  </dependency>
+	  <dependency>
+	      <groupId>org.nd4j</groupId>
+	      <artifactId>nd4j-native-platform</artifactId>
+	      <version>${dl4j.version}</version>
+	  </dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
@@ -130,6 +141,11 @@
 			<artifactId>apache-jena-libs</artifactId>
 			<type>pom</type>
 			<version>3.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
 		</dependency>
 		<!-- Testing Dependencies -->
 		<dependency>

@@ -319,16 +319,16 @@ public class TestCases {
 	 */
 	public static ArrayList<TableFactor> TableFactorALARM(){
 		UAIModel model = retrievaALARMUaiFile();
-		return uaiModelToListOfTableFactors(model);
+		return makeListOfTableFactorsFromUAIModel(model);
 	}
 
 	public static ArrayList<ExpressionFactor> ExpressionFactorALARM(){
 		UAIModel model = retrievaALARMUaiFile();
-		return uaiModelToListOfExpressionFactors(model);
+		return makeListOfExpressionFactorsFromUAIModel(model);
 	}
 	
 	private static UAIModel retrievaALARMUaiFile() {
-		return retrieveUAIFile("alarm", "alarm.uai");
+		return makeUAIModelFromUAIFile("alarm", "alarm.uai");
 	}
 	
 	/**
@@ -352,26 +352,22 @@ public class TestCases {
 
 		//-----------------
 	
-	public static ArrayList<TableFactor> getListOfTableFactors(String folderName, String modelNameWithoutDotUAIExtension){
-		return uaiModelToListOfTableFactors(retrieveUAIFile(folderName, modelNameWithoutDotUAIExtension));
-	}
-
 	public static ArrayList<ExpressionFactor> getListOfExpressionFactors(String folderName, String modelNameWithoutDotUAIExtension){
-		return uaiModelToListOfExpressionFactors(retrieveUAIFile(folderName, modelNameWithoutDotUAIExtension));
+		return makeListOfExpressionFactorsFromUAIModel(makeUAIModelFromUAIFile(folderName, modelNameWithoutDotUAIExtension));
 	}
 
-	public static ArrayList<ExpressionFactor> uaiModelToListOfExpressionFactors(UAIModel model) {
+	public static ArrayList<TableFactor> makeListOfTableFactorsFromUAIModel(UAIModel uaiModel) {
+		TableFactorNetwork net = new TableFactorNetwork(uaiModel);
+		ArrayList<TableFactor> result = mapIntoArrayList(net.getAs(), (fwrapper)->(TableFactor)fwrapper.getObject());
+		return result;
+	}
+	
+	public static ArrayList<ExpressionFactor> makeListOfExpressionFactorsFromUAIModel(UAIModel model) {
 		ExpressionFactorNetwork net = UAIModelToExpressionFactorNetwork.convert(model);
 		ArrayList<ExpressionFactor> result = mapIntoArrayList(net.getAs(), (fwrapper)->(ExpressionFactor)fwrapper.getObject());
 		return result;
 	}
 
-	public static ArrayList<TableFactor> uaiModelToListOfTableFactors(UAIModel model) {
-		TableFactorNetwork net = new TableFactorNetwork(model);
-		ArrayList<TableFactor> result = mapIntoArrayList(net.getAs(), (fwrapper)->(TableFactor)fwrapper.getObject());
-		return result;
-	}
-	
 	public static ArrayList<File> retrieveUAIFilesInFolder(String folderName) {
 		File directory = new File("UAITests/" + folderName);
 		File[] directoryListing = directory.listFiles();
@@ -389,7 +385,7 @@ public class TestCases {
 		return result;
 	}
 	
-	private static UAIModel retrieveUAIFile(String folderName,String fileName) {
+	private static UAIModel makeUAIModelFromUAIFile(String folderName,String fileName) {
 		if(!fileName.endsWith(".uai")) {
 			fileName = fileName + ".uai";
 		}
