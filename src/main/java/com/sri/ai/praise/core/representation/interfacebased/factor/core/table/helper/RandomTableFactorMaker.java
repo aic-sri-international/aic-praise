@@ -12,8 +12,11 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.Ta
 
 public class RandomTableFactorMaker {
 	
-	public static TableFactor makeRandomTableFactor(SpecsForRandomTableFactorGeneration specs, Function<Integer, String> fromVariableIndexToName, Random random)
-	{
+	public static TableFactor makeRandomTableFactor(
+			SpecsForRandomTableFactorGeneration specs, 
+			Function<Integer, String> fromVariableIndexToName, 
+			Random random) {
+		
 		ArrayList<TableVariable> variables = makeVariables(specs.cardinalities, fromVariableIndexToName);
 		ArrayList<Double> entries = makeUniformlyDistributedRandomEntries(specs, random);
 		TableFactor tableFactor = new TableFactor(variables, entries);
@@ -21,17 +24,27 @@ public class RandomTableFactorMaker {
 	}
 
 
-	private static ArrayList<TableVariable> makeVariables(ArrayList<Integer> cardinalities, Function<Integer, String> fromVariableIndexToName) {
+	private static ArrayList<TableVariable> makeVariables(
+			ArrayList<Integer> cardinalities, 
+			Function<Integer, String> fromVariableIndexToName) {
+		
 		int numberOfVariables = cardinalities.size();
-		ArrayList<TableVariable> result = mapIntegersIntoArrayList(numberOfVariables, fromIndexToTableVariable(cardinalities, fromVariableIndexToName));
+		ArrayList<TableVariable> result = 
+				mapIntegersIntoArrayList(numberOfVariables, fromIndexToTableVariable(cardinalities, fromVariableIndexToName));
 		return result;
 	}
 
-	private static Function<Integer, TableVariable> fromIndexToTableVariable(ArrayList<Integer> cardinalities, Function<Integer, String> fromVariableIndexToName) {
+	private static Function<Integer, TableVariable> fromIndexToTableVariable(
+			ArrayList<Integer> cardinalities, 
+			Function<Integer, String> fromVariableIndexToName) {
 		return i -> makeTableVariable(i, cardinalities, fromVariableIndexToName);
 	}
 
-	private static TableVariable makeTableVariable(Integer i, ArrayList<Integer> cardinalities, Function<Integer, String> fromVariableIndexToName) {
+	private static TableVariable makeTableVariable(
+			Integer i, 
+			ArrayList<Integer> cardinalities, 
+			Function<Integer, String> fromVariableIndexToName) {
+		
 		TableVariable result = new TableVariable(fromVariableIndexToName.apply(i), cardinalities.get(i));
 		return result;
 	}
@@ -46,7 +59,7 @@ public class RandomTableFactorMaker {
 
 	private static Double samplePotentialInRange(SpecsForRandomTableFactorGeneration specs, Random random) {
 		double result;
-		if(specs.integerIncrements) {
+		if (specs.integerIncrements) {
 			result = specs.minimumPotential + random.nextInt((int) (Math.round(specs.maximumPotential)));
 		}
 		else {

@@ -62,13 +62,13 @@ extends DefaultManyToManyRelation<IdentityWrapper<Factor>, Variable> implements 
 		indexFactorsAndVariables(factors);
 	}
 
-	private void indexFactorsAndVariables(List<? extends Factor> factors) {
+	protected void indexFactorsAndVariables(List<? extends Factor> factors) {
 		for (Factor factor : factors) {
 			indexFactorAndItsVariables(factor);
 		}
 	}
 
-	private void indexFactorAndItsVariables(Factor factor) {
+	protected void indexFactorAndItsVariables(Factor factor) {
 		for (Variable variable : factor.getVariables()) {
 			indexFactorAndVariable(factor, variable);
 		}

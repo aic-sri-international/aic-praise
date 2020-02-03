@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
@@ -28,5 +29,20 @@ public class DefaultEditableFactorNetwork extends DefaultFactorNetwork implement
 	@Override
 	public EditableFactorNetwork makeEmptyNetwork() {
 		return new DefaultEditableFactorNetwork(list());
+	}
+
+	@Override
+	public void add(Factor factor) {
+		indexFactorAndItsVariables(factor);
+	}
+
+	@Override
+	public void remove(Factor factor) {
+		removeA(identityWrapper(factor));
+	}
+
+	@Override
+	public void removeAll(Collection<? extends Factor> factors) {
+		factors.forEach(f -> remove(f));
 	}
 }
