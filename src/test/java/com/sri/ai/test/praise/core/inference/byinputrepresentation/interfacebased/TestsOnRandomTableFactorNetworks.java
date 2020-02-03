@@ -4,6 +4,7 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.t
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.repeat;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Random;
@@ -43,7 +44,7 @@ class TestsOnRandomTableFactorNetworks {
 		double maximumPotential = 4.0;
 		
 //		// Larger models:
-		
+//		
 //		int minimumNumberOfVariables = 10;
 //		int maximumNumberOfVariables = 25;
 //		
@@ -51,18 +52,20 @@ class TestsOnRandomTableFactorNetworks {
 //		int maximumCardinality = 2;
 //		
 //		int minimumNumberOfFactors = 5;
-//		int maximumNumberOfFactors = 10;
+//		int maximumNumberOfFactors = 20;
 //
 //		int minimumNumberOfVariablesPerFactor = 3;
 //		int maximumNumberOfVariablesPerFactor = 5;
 //
 //		double minimumPotential = 1.0;
 //		double maximumPotential = 4.0;
-//		
+
+		
 		Random random = new Random();
 
-		repeat(10, () ->
+		repeat(1000, i ->
 		runTestForARandomFactorNetwork(
+				i,
 				minimumNumberOfVariables,
 				maximumNumberOfVariables,
 				minimumCardinality,
@@ -79,6 +82,7 @@ class TestsOnRandomTableFactorNetworks {
 	}
 
 	public void runTestForARandomFactorNetwork(
+			int i,
 			int minimumNumberOfVariables,
 			int maximumNumberOfVariables,
 			int minimumCardinality,
@@ -102,6 +106,10 @@ class TestsOnRandomTableFactorNetworks {
 		
 		Variable query = getFirst(factorNetwork.getFactors()).getVariables().get(0);
 		
+		println();
+		println("********************");
+		println("Test #" + i);
+		println();
 		println("Number of variables: " + factorNetwork.getVariables().size());
 		println("Number of factors: " + factorNetwork.getFactors().size());
 		println();
@@ -122,14 +130,15 @@ class TestsOnRandomTableFactorNetworks {
 		Pair<Factor, Long> exactBPResult = Timer.timeAndGetResult(() -> exactBP.apply());
 		println("Done running EBP. Time: " + exactBPResult.second + " ms.");
 
+		println();
 		println("VE : " + resultAndTimeString(variableEliminationResult));
 		println("EBP: " + resultAndTimeString(exactBPResult));
 		
-//		var variableEliminationArray = ((TableFactor) variableEliminationResult.first).getEntries();
-//		var exactBPArray = ((TableFactor) exactBPResult.first).getEntries();
-//		for (int i = 0; i != exactBPArray.size(); i++) {
-//			assertEquals(variableEliminationArray.get(i).doubleValue(), exactBPArray.get(i).doubleValue(), 0.001);
-//		}
+		var variableEliminationArray = ((TableFactor) variableEliminationResult.first).getEntries();
+		var exactBPArray = ((TableFactor) exactBPResult.first).getEntries();
+		for (int j  = 0; j != exactBPArray.size(); j++) {
+			assertEquals(variableEliminationArray.get(j).doubleValue() / exactBPArray.get(j).doubleValue(), 1.0, 0.001);
+		}
 
 		// TODO: commented out because comparison fails for some examples; must be debugged
 		// I suspect this is happening when the model is disconnected; EBP may be buggy for that case

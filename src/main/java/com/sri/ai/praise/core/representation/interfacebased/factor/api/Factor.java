@@ -40,6 +40,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.api;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ZeroFactor.ZERO_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
+import static com.sri.ai.util.Util.list;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -61,6 +62,10 @@ public interface Factor {
 	
 	/** Sums a variable out of factor up to a constant. */
 	Factor sumOut(List<? extends Variable> variablesToSumOut);
+	
+	default Factor sumOut(Variable variableToSumOut) {
+		return sumOut(list(variableToSumOut));
+	}
 	
 	boolean isIdentity();
 	
