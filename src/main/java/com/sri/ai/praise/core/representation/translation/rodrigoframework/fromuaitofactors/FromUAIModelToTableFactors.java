@@ -1,7 +1,7 @@
 package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromuaitofactors;
 
 import static com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil.genericVariableName;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.copyToSubTableFactor;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.slice;
 import static com.sri.ai.util.Util.filter;
 
 import java.util.ArrayList;
@@ -79,7 +79,7 @@ public class FromUAIModelToTableFactors {
 	}
 
 	private static List<TableFactor> incorporateEvidenceAndSimplifyFactors(List<TableFactor> factors, LinkedHashMap<TableVariable, Integer> mapOfEvidences) {
-		List<TableFactor> result = Util.mapIntoList(factors, f -> copyToSubTableFactor(f, mapOfEvidences));
+		List<TableFactor> result = Util.mapIntoList(factors, f -> slice(f, mapOfEvidences));
 		result = filter(result, v -> v != null);
 		return result;
 	}

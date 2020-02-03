@@ -1,9 +1,9 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box;
 
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.copyToSubTableFactor;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.getCartesianProduct;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.numEntries;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.slice;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.makeCartesianProductIterator;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.numberOfTableEntries;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.TableBoxVariable.TABLE_BOX_VARIABLE;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.arrayListFilledWith;
@@ -152,10 +152,10 @@ public class TableFactorBoxBuilder {
 			
 			LinkedHashMap<TableVariable, Integer> mapOfvaluesPredetermined = new LinkedHashMap<>();
 			mapOfvaluesPredetermined.put(TABLE_BOX_VARIABLE, 0);
-			minValueHalfFactor = copyToSubTableFactor(factor,mapOfvaluesPredetermined);
+			minValueHalfFactor = slice(factor,mapOfvaluesPredetermined);
 			mapOfvaluesPredetermined = new LinkedHashMap<>();
 			mapOfvaluesPredetermined.put(TABLE_BOX_VARIABLE, 1);
-			maxValueHalfFactor = copyToSubTableFactor(factor,mapOfvaluesPredetermined);
+			maxValueHalfFactor = slice(factor,mapOfvaluesPredetermined);
 		}
 
 		Pair<TableFactor, TableFactor> result = new Pair<>(minValueHalfFactor,maxValueHalfFactor);
@@ -195,16 +195,16 @@ public class TableFactorBoxBuilder {
 
 	public static TableFactor maxOrMinOut(TableFactor nonBoxfactor, ArrayList<TableVariable> freeVariables,ArrayList<TableVariable> notFreeVariables, 
 			BiFunction<Double,Double,Boolean> comparisson) {
-		TableFactor result = new TableFactor(freeVariables,arrayListFilledWith(-1.0, numEntries(freeVariables)));
+		TableFactor result = new TableFactor(freeVariables,arrayListFilledWith(-1.0, numberOfTableEntries(freeVariables)));
 
-		for(ArrayList<Integer> notFreeVariablesInstantiation : in(getCartesianProduct(notFreeVariables))) {
+		for(ArrayList<Integer> notFreeVariablesInstantiation : in(makeCartesianProductIterator(notFreeVariables))) {
 			LinkedHashMap<TableVariable, Integer> mapOfInstantiations = new LinkedHashMap<>();
 			addValuesToMapFromVariableToInstantiation(notFreeVariables, notFreeVariablesInstantiation, mapOfInstantiations);
-			TableFactor thisInstanciation = copyToSubTableFactor(nonBoxfactor, mapOfInstantiations);
+			TableFactor thisInstanciation = slice(nonBoxfactor, mapOfInstantiations);
 			if(normalize_) {
 				thisInstanciation = thisInstanciation.normalize();
 			}
-			for(ArrayList<Integer> freeVariablesInstantiation : in(getCartesianProduct(freeVariables))) {
+			for(ArrayList<Integer> freeVariablesInstantiation : in(makeCartesianProductIterator(freeVariables))) {
 				addValuesToMapFromVariableToInstantiation(freeVariables, freeVariablesInstantiation, mapOfInstantiations);
 
 				Double currentValue = result.getEntryFor(mapOfInstantiations);
@@ -246,7 +246,7 @@ public class TableFactorBoxBuilder {
 		TableFactor fABCDBox = new TableFactor(list);
 		
 		LinkedHashMap<TableVariable,Integer> map = new LinkedHashMap<>();
-		for(ArrayList<Integer> instantiation:in(getCartesianProduct(list))) {
+		for(ArrayList<Integer> instantiation:in(makeCartesianProductIterator(list))) {
 			addValuesToMapFromVariableToInstantiation(list, instantiation, map);
 			fABCDBox.setEntryFor(map, fBoxABCD.getEntryFor(map));
 		}
@@ -282,10 +282,10 @@ public class TableFactorBoxBuilder {
 
 	private static TableFactor copyFactorInDifferentOrder(ArrayList<TableVariable> arrayList, TableFactor factor) {
 		
-		TableFactor result = new TableFactor(arrayList,arrayListFilledWith(-1.0, numEntries(arrayList)));
+		TableFactor result = new TableFactor(arrayList,arrayListFilledWith(-1.0, numberOfTableEntries(arrayList)));
 
 		ArrayList<TableVariable> var = new ArrayList<>(factor.getVariables());
-		for(ArrayList<Integer> notFreeVariablesInstantiation : in(getCartesianProduct(var ))) {
+		for(ArrayList<Integer> notFreeVariablesInstantiation : in(makeCartesianProductIterator(var ))) {
 			LinkedHashMap<TableVariable, Integer> mapOfInstantiations = new LinkedHashMap<>();
 			addValuesToMapFromVariableToInstantiation(var, notFreeVariablesInstantiation, mapOfInstantiations);
 			result.setEntryFor(mapOfInstantiations, factor.getEntryFor(mapOfInstantiations));

@@ -64,7 +64,9 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 	@Override
 	public void incrementCountForChildAndParentsAssignment(List<? extends Object> childAndParentsValues) {
 		verifyIfInputHasExpectedTypeAndSize(childAndParentsValues);
-		incrementCountForThatParameter((List<Integer>) childAndParentsValues);
+		incrementCountForThatParameter(new ArrayList<Integer>((List<Integer>) childAndParentsValues));
+		// TODO: temporarily building a new ArrayList but ideally we should get an ArrayList as the argument.
+		// I am not doing it now to minimize changes while taking care of something else.
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -74,7 +76,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		for(ArrayList<Integer> parentsAssignment : allPossibleParentsAssignments) {
 			double countForThatParentsAssignment = getCountForThatParentsAssignment(parentsAssignment);
 			
-			List<Integer> childAndParentsAssignment = mergeElementsIntoOneList(0, parentsAssignment);
+			ArrayList<Integer> childAndParentsAssignment = mergeElementsIntoOneList(0, parentsAssignment);
 			for(int childAssignment : (List<Integer>) child.getValues()) {
 				childAndParentsAssignment.set(0, childAssignment);
 				double currentParamenterValue = this.getEntryFor(childAndParentsAssignment);
@@ -92,7 +94,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 	
 	private List<ArrayList<Integer>> getAllPossibleVariablesAssignments(ArrayList<TableVariable> variables) {
 		List<ArrayList<Integer>> allPossibleVariablesAssignments = list();
-		Iterator<ArrayList<Integer>> iteratorForParentsAssignments = TableFactor.getCartesianProduct(variables);
+		Iterator<ArrayList<Integer>> iteratorForParentsAssignments = TableFactor.makeCartesianProductIterator(variables);
 		while(iteratorForParentsAssignments.hasNext()) {
 			allPossibleVariablesAssignments.add(iteratorForParentsAssignments.next());
 		}
@@ -100,7 +102,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 		return allPossibleVariablesAssignments;
 	}
 	
-	private void incrementCountForThatParameter(List<Integer> childAndParentsAssignment) {
+	private void incrementCountForThatParameter(ArrayList<Integer> childAndParentsAssignment) {
 		double newParameterValue = this.getEntryFor(childAndParentsAssignment) + 1;
 		this.setEntryFor(childAndParentsAssignment, newParameterValue);
 	}
@@ -118,7 +120,7 @@ public class TableBayesianNode extends TableFactor implements BayesianNode {
 	@SuppressWarnings("unchecked")
 	private double getCountForThatParentsAssignment(ArrayList<Integer> parentsAssignment) {
 		double countForThatParentsAssignment = 0.0;
-		List<Integer> childAndParentsAssignment = mergeElementsIntoOneList(0, parentsAssignment);
+		ArrayList<Integer> childAndParentsAssignment = mergeElementsIntoOneList(0, parentsAssignment);
 		for(int childAssignment : (List<Integer>) child.getValues()) {
 			childAndParentsAssignment.set(0, childAssignment);
 			double countForThatChildAndParentsAssignment = this.getEntryFor(childAndParentsAssignment);

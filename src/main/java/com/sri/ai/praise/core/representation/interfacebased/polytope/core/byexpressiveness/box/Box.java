@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.getCartesianProduct;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor.makeCartesianProductIterator;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.TableBoxVariable.TABLE_BOX_VARIABLE;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.list;
@@ -58,7 +58,7 @@ public class Box extends IntensionalConvexHullOfFactors{
 		
 		TableFactor phiMin= new TableFactor(variables);
 		TableFactor phiMax= new TableFactor(variables);
-		for(ArrayList<Integer> values : in(getCartesianProduct(variables))){
+		for(ArrayList<Integer> values : in(makeCartesianProductIterator(variables))){
 			Map<TableVariable, Integer> map = Util.mapFromListOfKeysAndListOfValues(variables, values);
 			List<Double> phiValues = mapIntoList(normalizedFactors, (f)-> f.getEntryFor(map));
 
@@ -91,8 +91,8 @@ public class Box extends IntensionalConvexHullOfFactors{
 		boolean isABox = indexes.size() < polytope.getIndices().size();
 		
 		List<TableFactor> result = new LinkedList<>();
-		for(List<Integer> instantiations : in(TableFactor.getCartesianProduct(indexes))) {
-			TableFactor subFactor = TableFactor.copyToSubTableFactor(factor, indexes, instantiations);
+		for(List<Integer> instantiations : in(TableFactor.makeCartesianProductIterator(indexes))) {
+			TableFactor subFactor = TableFactor.slice(factor, indexes, instantiations);
 			if (isABox) {
 				List<TableFactor> factorsFromBox = instantiateAllEdgesOfABox(new Box(TABLE_BOX_VARIABLE, subFactor));
 				result.addAll(factorsFromBox);
@@ -171,13 +171,13 @@ public class Box extends IntensionalConvexHullOfFactors{
 	
 	public TableFactor getPhiMax() {
 		TableFactor tableFactor = (TableFactor) this.getFactor();
-		TableFactor result = TableFactor.copyToSubTableFactor(tableFactor, list(TABLE_BOX_VARIABLE), list(1));
+		TableFactor result = TableFactor.slice(tableFactor, list(TABLE_BOX_VARIABLE), list(1));
 		return result;
 	}
 
 	public TableFactor getPhiMin() {
 		TableFactor tableFactor = (TableFactor) this.getFactor();
-		TableFactor result = TableFactor.copyToSubTableFactor(tableFactor, list(TABLE_BOX_VARIABLE), list(0));
+		TableFactor result = TableFactor.slice(tableFactor, list(TABLE_BOX_VARIABLE), list(0));
 		return result;
 	}
 

@@ -81,7 +81,7 @@ public interface Factor {
 		return result;
 	}
 	
-	Double getEntryFor(Map<? extends Variable,? extends Object> variableInstantiations);
+	Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations);
 	
 	Factor normalize();
 	

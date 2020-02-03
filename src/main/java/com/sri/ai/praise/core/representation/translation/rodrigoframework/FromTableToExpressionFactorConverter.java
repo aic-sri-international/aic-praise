@@ -68,7 +68,7 @@ public class FromTableToExpressionFactorConverter {
 
 	private Expression ifThenElseLinearTableExpressionFromCurrentPositionOf(CartesianProductIterator<Integer> assignmentsIterator, TableFactor tableFactor) {
 		myAssert(assignmentsIterator.hasNext(), () -> "ifThenElseExpressionFromCurrentPositionOf: requires assignmentsIterator to be non-empty");
-		ArrayList<? extends Integer> assignment = assignmentsIterator.next();
+		ArrayList<Integer> assignment = assignmentsIterator.next();
 		Double potentionForAssignment = tableFactor.getEntryFor(assignment);
 		Expression potentialExpression = createSymbol(potentionForAssignment);
 		Expression result;
@@ -96,7 +96,7 @@ public class FromTableToExpressionFactorConverter {
 		{
 			for(int i = 0; i < varCardinality; ++i)
 			{
-				ArrayList<? extends Integer> assignment = assignmentsIterator.next();
+				ArrayList<Integer> assignment = assignmentsIterator.next();
 				Double potentialForAssignment = tableFactor.getEntryFor(assignment);
 				Expression potentialExpression = createSymbol(potentialForAssignment);
 				subBranchExpressions.add(potentialExpression);
