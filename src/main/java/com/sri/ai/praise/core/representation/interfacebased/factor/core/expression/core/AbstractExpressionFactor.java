@@ -49,7 +49,6 @@ import static com.sri.ai.util.collect.PredicateIterator.predicateIterator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
@@ -188,12 +187,6 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 	private ExpressionFactor makeFactor(Expression expression) {
 		ExpressionFactor result = new DefaultExpressionFactor(expression, getContext());
 		return result;
-	}
-
-	@Override
-	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
-		//TODO replace variables by it's value and evaluate
-		return null;
 	}
 
 	@Override

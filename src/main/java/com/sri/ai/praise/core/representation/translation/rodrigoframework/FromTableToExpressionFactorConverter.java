@@ -21,7 +21,7 @@ import com.sri.ai.grinder.library.boole.And;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
@@ -29,18 +29,18 @@ import com.sri.ai.util.collect.IntegerIterator;
 
 public class FromTableToExpressionFactorConverter {
 
-	public ExpressionFactor convert(TableFactor tableFactor, Theory theory) {
+	public ExpressionFactor convert(ArrayListTableFactor tableFactor, Theory theory) {
 		return convert(tableFactor, theory, true);
 	}
 	
-	public ExpressionFactor convert(TableFactor tableFactor, Theory theory, boolean convertAsTreeBasedExpression) {
+	public ExpressionFactor convert(ArrayListTableFactor tableFactor, Theory theory, boolean convertAsTreeBasedExpression) {
 		Expression expression = makeExpressionEquivalentToTableFactor(tableFactor, convertAsTreeBasedExpression);
 		Context context = makeContextWithVariablesFrom(tableFactor, theory);
 		ExpressionFactor expressionFactor = new DefaultExpressionFactor(expression, context);
 		return expressionFactor;
 	}
 	
-	private Expression makeExpressionEquivalentToTableFactor(TableFactor tableFactor, boolean convertAsTreeBasedExpression) {
+	private Expression makeExpressionEquivalentToTableFactor(ArrayListTableFactor tableFactor, boolean convertAsTreeBasedExpression) {
 		List<Integer> cardinalities = mapIntoArrayList(tableFactor.getVariables(), TableVariable::getCardinality);
 		CartesianProductIterator<Integer> assignmentsIterator = makeAssignmentsIterator(cardinalities);
 		Expression expression;
@@ -66,7 +66,7 @@ public class FromTableToExpressionFactorConverter {
 		return () -> new IntegerIterator(0, i);
 	}
 
-	private Expression ifThenElseLinearTableExpressionFromCurrentPositionOf(CartesianProductIterator<Integer> assignmentsIterator, TableFactor tableFactor) {
+	private Expression ifThenElseLinearTableExpressionFromCurrentPositionOf(CartesianProductIterator<Integer> assignmentsIterator, ArrayListTableFactor tableFactor) {
 		myAssert(assignmentsIterator.hasNext(), () -> "ifThenElseExpressionFromCurrentPositionOf: requires assignmentsIterator to be non-empty");
 		ArrayList<Integer> assignment = assignmentsIterator.next();
 		Double potentionForAssignment = tableFactor.ABS_getEntryFor(assignment);
@@ -84,7 +84,7 @@ public class FromTableToExpressionFactorConverter {
 		return result;
 	}
 	
-	private Expression ifThenElseTreeExpressionFromCurrentPositionOf(CartesianProductIterator<Integer> assignmentsIterator, TableFactor tableFactor, int variableIndex) {
+	private Expression ifThenElseTreeExpressionFromCurrentPositionOf(CartesianProductIterator<Integer> assignmentsIterator, ArrayListTableFactor tableFactor, int variableIndex) {
 		myAssert(assignmentsIterator.hasNext(), () -> "ifThenElseExpressionFromCurrentPositionOf: requires assignmentsIterator to be non-empty");
 		
 		ArrayList<TableVariable> variables = tableFactor.getVariables();
@@ -161,7 +161,7 @@ public class FromTableToExpressionFactorConverter {
 		return result;
 	}
 
-	private Context makeContextWithVariablesFrom(TableFactor tableFactor, Theory theory) {
+	private Context makeContextWithVariablesFrom(ArrayListTableFactor tableFactor, Theory theory) {
 		Context context = new TrueContext(theory);
 		for (TableVariable tableVariable : tableFactor.getVariables()) {
 			context = register(tableVariable, context);

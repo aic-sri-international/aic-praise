@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.util.Util;
 
@@ -29,9 +29,9 @@ public class TableFactorTest {
 	TableVariable V3 = new TableVariable("V3", 4);
 	TableVariable V4 = new TableVariable("V4", 2);
 
-	TableFactor f1 = new TableFactor("f1",arrayList(V1,V2,V3),
+	ArrayListTableFactor f1 = new ArrayListTableFactor("f1",arrayList(V1,V2,V3),
 			arrayList(1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.));
-	TableFactor f2 = new TableFactor("f2",arrayList(V2,V4), 
+	ArrayListTableFactor f2 = new ArrayListTableFactor("f2",arrayList(V2,V4), 
 			arrayList(11., 12., 21., 22., 31., 32.));
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ public class TableFactorTest {
 		println("MULTIPLYING f1 * f2");
 		println("-------------------");
 		
-		TableFactor f1f2 = (TableFactor) f1.multiply(f2);
+		ArrayListTableFactor f1f2 = (ArrayListTableFactor) f1.multiply(f2);
 		f1f2.setName("f1f2");
 		
 		println(f1f2);
@@ -85,7 +85,7 @@ public class TableFactorTest {
 		println("MULTIPLYING f2 * f1");
 		println("-------------------");
 		
-		TableFactor f2f1 = (TableFactor) f2.multiply(f1);
+		ArrayListTableFactor f2f1 = (ArrayListTableFactor) f2.multiply(f1);
 		f2f1.setName("f2f1");
 
 		println(f2f1);
@@ -108,7 +108,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1);
-		TableFactor f1SumOutV1 = (TableFactor)f1.sumOut(variablesToSumOut);
+		ArrayListTableFactor f1SumOutV1 = (ArrayListTableFactor)f1.sumOut(variablesToSumOut);
 		f1SumOutV1.setName("f1SumOutV1");
 		
 		println(f1SumOutV1);
@@ -125,7 +125,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V2);
-		TableFactor f1SumOutV2 = (TableFactor)f1.sumOut(variablesToSumOut);
+		ArrayListTableFactor f1SumOutV2 = (ArrayListTableFactor)f1.sumOut(variablesToSumOut);
 		f1SumOutV2.setName("f1SumOutV2");
 		
 		println(f1SumOutV2);
@@ -142,7 +142,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V3);
-		TableFactor f1SumOutV3 = (TableFactor)f1.sumOut(variablesToSumOut);
+		ArrayListTableFactor f1SumOutV3 = (ArrayListTableFactor)f1.sumOut(variablesToSumOut);
 		f1SumOutV3.setName("f1SumOutV3");
 		
 		println(f1SumOutV3);
@@ -158,7 +158,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V2);
-		TableFactor f2SumOutV2 = (TableFactor)f2.sumOut(variablesToSumOut);
+		ArrayListTableFactor f2SumOutV2 = (ArrayListTableFactor)f2.sumOut(variablesToSumOut);
 		f2SumOutV2.setName("f2SumOutV2");
 		
 		println(f2SumOutV2);
@@ -174,7 +174,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V4);
-		TableFactor f2SumOutV4 = (TableFactor)f2.sumOut(variablesToSumOut);
+		ArrayListTableFactor f2SumOutV4 = (ArrayListTableFactor)f2.sumOut(variablesToSumOut);
 		f2SumOutV4.setName("f2SumOutV4");
 		
 		println(f2SumOutV4);
@@ -193,7 +193,7 @@ public class TableFactorTest {
 		println("-------------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2);
-		TableFactor f1SumOutV1V2 = (TableFactor)f1.sumOut(variablesToSumOut);
+		ArrayListTableFactor f1SumOutV1V2 = (ArrayListTableFactor)f1.sumOut(variablesToSumOut);
 		f1SumOutV1V2.setName("f1SumOutV1V2");
 		
 		println(f1SumOutV1V2);
@@ -210,7 +210,7 @@ public class TableFactorTest {
 		println("-------------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V3);
-		TableFactor f1SumOutV1V3 = (TableFactor)f1.sumOut(variablesToSumOut);
+		ArrayListTableFactor f1SumOutV1V3 = (ArrayListTableFactor)f1.sumOut(variablesToSumOut);
 		f1SumOutV1V3.setName("f1SumOutV1V3");
 		
 		println(f1SumOutV1V3);
@@ -227,7 +227,7 @@ public class TableFactorTest {
 		println("-------------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V2,V3);
-		TableFactor f1SumOutV2V3 = (TableFactor)f1.sumOut(variablesToSumOut);
+		ArrayListTableFactor f1SumOutV2V3 = (ArrayListTableFactor)f1.sumOut(variablesToSumOut);
 		f1SumOutV2V3.setName("f1SumOutV2V3");
 		
 		println(f1SumOutV2V3);
@@ -282,7 +282,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1);
-		TableFactor f2f1SumOutV1 = (TableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
+		ArrayListTableFactor f2f1SumOutV1 = (ArrayListTableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
 		f2f1SumOutV1.setName("f2f1SumOutV1");
 		
 		println(f2f1SumOutV1);
@@ -304,7 +304,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2);
-		TableFactor f2f1SumOutV1V2 = (TableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
+		ArrayListTableFactor f2f1SumOutV1V2 = (ArrayListTableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
 		f2f1SumOutV1V2.setName("f2f1SumOutV1V2");
 		
 		println(f2f1SumOutV1V2);
@@ -321,7 +321,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2,V3);
-		TableFactor f2f1SumOutV1V2V3 = (TableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
+		ArrayListTableFactor f2f1SumOutV1V2V3 = (ArrayListTableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
 		f2f1SumOutV1V2V3.setName("f2f1SumOutV1V2");
 		
 		println(f2f1SumOutV1V2V3);

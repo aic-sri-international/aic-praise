@@ -37,10 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 
-import java.util.Map;
-
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
 /**
  * A class representing an {@link Factor} that is an identity factor.
@@ -71,11 +68,6 @@ public class IdentityFactor extends ConstantFactor {
 	@Override
 	public String toString() {
 		return "1";
-	}
-
-	@Override
-	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
-		return 1.;
 	}
 
 	@Override

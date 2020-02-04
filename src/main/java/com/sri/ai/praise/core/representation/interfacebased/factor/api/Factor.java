@@ -45,7 +45,6 @@ import static com.sri.ai.util.Util.list;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
@@ -80,8 +79,6 @@ public interface Factor {
 		Factor result = multiply(factors.iterator());
 		return result;
 	}
-	
-	Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations);
 	
 	Factor normalize();
 	

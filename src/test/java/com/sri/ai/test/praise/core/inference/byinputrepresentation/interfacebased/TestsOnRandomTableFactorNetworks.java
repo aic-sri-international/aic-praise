@@ -15,7 +15,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exa
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableElimination;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.base.Pair;
@@ -118,7 +118,7 @@ class TestsOnRandomTableFactorNetworks {
 		println("Running VE...");
 		@SuppressWarnings("unchecked") // TODO: make FactorNetwork generic so we can avoid such unsafe casts
 		VariableElimination variableElimination = new VariableElimination(query, 
-				new TableFactorNetwork((List<? extends TableFactor>) factorNetwork.getFactors()));
+				new TableFactorNetwork((List<? extends ArrayListTableFactor>) factorNetwork.getFactors()));
 		Pair<Factor, Long> variableEliminationResult = Timer.timeAndGetResult(() -> variableElimination.apply());
 		println("Done running  VE. Time: " + variableEliminationResult.second + " ms.");
 		ThreadExplanationLogger.setIsActive(false);
@@ -134,8 +134,8 @@ class TestsOnRandomTableFactorNetworks {
 		println("VE : " + resultAndTimeString(variableEliminationResult));
 		println("EBP: " + resultAndTimeString(exactBPResult));
 		
-		var variableEliminationArray = ((TableFactor) variableEliminationResult.first).STAY_getEntries();
-		var exactBPArray = ((TableFactor) exactBPResult.first).STAY_getEntries();
+		var variableEliminationArray = ((ArrayListTableFactor) variableEliminationResult.first).STAY_getEntries();
+		var exactBPArray = ((ArrayListTableFactor) exactBPResult.first).STAY_getEntries();
 		for (int j  = 0; j != exactBPArray.size(); j++) {
 			assertEquals(variableEliminationArray.get(j).doubleValue() / exactBPArray.get(j).doubleValue(), 1.0, 0.001);
 		}

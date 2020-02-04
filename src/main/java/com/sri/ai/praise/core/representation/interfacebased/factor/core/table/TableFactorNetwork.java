@@ -17,7 +17,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.Def
  */
 public class TableFactorNetwork extends DefaultEditableFactorNetwork {
 	
-	public TableFactorNetwork(List<? extends TableFactor> factors) {
+	public TableFactorNetwork(List<? extends ArrayListTableFactor> factors) {
 		super(factors);
 	}
 	

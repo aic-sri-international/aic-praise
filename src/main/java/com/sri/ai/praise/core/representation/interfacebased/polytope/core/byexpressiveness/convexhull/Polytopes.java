@@ -58,7 +58,7 @@ import java.util.List;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
@@ -438,7 +438,7 @@ public class Polytopes {
 		for(Polytope p : toBeBoxed) {
 			if(p instanceof IntensionalConvexHullOfFactors && 
 					!((IntensionalConvexHullOfFactors)p).getIndices().isEmpty() &&
-					((IntensionalConvexHullOfFactors)p).getFactor() instanceof TableFactor){
+					((IntensionalConvexHullOfFactors)p).getFactor() instanceof ArrayListTableFactor){
 				
 					//Box boxedP = TableFactorBoxBuilder.makeTableBox((IntensionalConvexHullOfFactors) p);
 				Box boxedP = Box.boxIt((IntensionalConvexHullOfFactors) p);	
@@ -452,8 +452,8 @@ public class Polytopes {
 		return result;
 	}
 	
-	public static List<TableFactor> IntensionalConvexHullToListOfFactors(IntensionalConvexHullOfFactors polytope) {
-		TableFactor factor = (TableFactor) polytope.getFactor();
+	public static List<ArrayListTableFactor> IntensionalConvexHullToListOfFactors(IntensionalConvexHullOfFactors polytope) {
+		ArrayListTableFactor factor = (ArrayListTableFactor) polytope.getFactor();
 		List<TableVariable> indexes = mapIntoArrayList(polytope.getIndices(),v -> (TableVariable) v);
 		List<List<Integer>> listOfListOfValues = mapIntoList(indexes, v -> mapIntoList(v.getValues(), o -> (Integer) o));
 		
@@ -462,7 +462,7 @@ public class Polytopes {
 		
 		Iterator<ArrayList<Integer>> cartesianProduct = new CartesianProductIterator<Integer>(iteratorForListOfVariableValues);
 		
-		List<TableFactor> result = new LinkedList<>();
+		List<ArrayListTableFactor> result = new LinkedList<>();
 		for(List<Integer> instantiations : in(cartesianProduct)) {
 			result.add(factor.slice(indexes, instantiations));
 		}

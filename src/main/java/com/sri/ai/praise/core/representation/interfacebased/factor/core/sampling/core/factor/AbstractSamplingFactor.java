@@ -7,7 +7,6 @@ import static com.sri.ai.util.Util.myAssert;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -105,11 +104,6 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	@Override
 	public boolean isZero() {
 		return false;
-	}
-
-	@Override
-	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
-		throw new Error("getEntryFor not supported for " + getClass());
 	}
 
 	@Override

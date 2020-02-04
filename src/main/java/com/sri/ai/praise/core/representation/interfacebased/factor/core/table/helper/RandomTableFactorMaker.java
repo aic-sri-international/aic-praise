@@ -7,19 +7,19 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import com.google.common.base.Function;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 
 public class RandomTableFactorMaker {
 	
-	public static TableFactor makeRandomTableFactor(
+	public static ArrayListTableFactor makeRandomTableFactor(
 			SpecsForRandomTableFactorGeneration specs, 
 			Function<Integer, String> fromVariableIndexToName, 
 			Random random) {
 		
 		ArrayList<TableVariable> variables = makeVariables(specs.cardinalities, fromVariableIndexToName);
 		ArrayList<Double> entries = makeUniformlyDistributedRandomEntries(specs, random);
-		TableFactor tableFactor = new TableFactor(variables, entries);
+		ArrayListTableFactor tableFactor = new ArrayListTableFactor(variables, entries);
 		return tableFactor;
 	}
 

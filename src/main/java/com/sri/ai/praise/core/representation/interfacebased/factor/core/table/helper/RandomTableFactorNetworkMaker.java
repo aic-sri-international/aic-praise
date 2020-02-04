@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
@@ -99,20 +99,20 @@ public class RandomTableFactorNetworkMaker implements NullaryFunction<TableFacto
 		cardinalitiesByVariable[i] = pickInt(minimumCardinality, maximumCardinality + 1, random);
 	}
 
-	public List<TableFactor> makeFactors() {
+	public List<ArrayListTableFactor> makeFactors() {
 		int numberOfFactors = pickInt(minimumNumberOfFactors, maximumNumberOfFactors + 1, random);
-		List<TableFactor> factors = mapIntegersIntoList(numberOfFactors, i -> makeFactor());
+		List<ArrayListTableFactor> factors = mapIntegersIntoList(numberOfFactors, i -> makeFactor());
 		return factors;
 	}
 
-	public TableFactor makeFactor() {
+	public ArrayListTableFactor makeFactor() {
 		int numberOfVariablesInFactor = pickInt(minimumNumberOfVariablesPerFactor, maximumNumberOfVariablesPerFactor + 1, random);
 		ArrayList<Integer> variablesInFactor = pickKElementsWithoutReplacement(variableIndices, numberOfVariablesInFactor, random);
 		explain("Number of variables in factor: ", numberOfVariablesInFactor);
 		explain("Variables in factor: ", variablesInFactor);
 		ArrayList<Integer> cardinalitiesInFactor = mapIntoArrayList(variablesInFactor, index -> cardinalitiesByVariable[index]);
 		SpecsForRandomTableFactorGeneration specs = makeSpecs(cardinalitiesInFactor);
-		TableFactor factor = makeRandomTableFactor(specs, index -> "X" + variablesInFactor.get(index), random);
+		ArrayListTableFactor factor = makeRandomTableFactor(specs, index -> "X" + variablesInFactor.get(index), random);
 		return factor;
 	}
 

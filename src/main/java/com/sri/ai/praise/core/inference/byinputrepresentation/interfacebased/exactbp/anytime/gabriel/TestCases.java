@@ -38,7 +38,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.UAIModelToExpressionFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.util.Util;
@@ -125,7 +125,7 @@ public class TestCases {
 						0.001*randomGenerator.nextInt(1000)
 						);
 		if(TableOrExpression) {
-			ArrayList<TableFactor> result = tableFactorIsingModel(gridSize, entries, (i)->null);
+			ArrayList<ArrayListTableFactor> result = tableFactorIsingModel(gridSize, entries, (i)->null);
 			return  result;
 		}
 		else {
@@ -147,7 +147,7 @@ public class TestCases {
 													:
 													arrayList(exp(theta),exp(-theta));
 		if(TableOrExpression) {
-			ArrayList<TableFactor> result = tableFactorIsingModel(gridSize,
+			ArrayList<ArrayListTableFactor> result = tableFactorIsingModel(gridSize,
 					(i,j)-> parwiseEntries ,(i)->singleEntries);
 			return  result;
 		}
@@ -174,7 +174,7 @@ public class TestCases {
 		Function<Pair<Integer, Integer>, ArrayList<Double>> singleEntries = 
 				(i) -> thetaPotentialEntries.apply(gen.nextGaussian());
 		if(TableOrExpression) {
-			ArrayList<TableFactor> result = tableFactorIsingModel(gridSize,
+			ArrayList<ArrayListTableFactor> result = tableFactorIsingModel(gridSize,
 					 parwiseEntries,singleEntries );
 			return  result;
 		}
@@ -185,7 +185,7 @@ public class TestCases {
 		}
 	}
 			
-	private static ArrayList<TableFactor> tableFactorIsingModel(int gridSize,
+	private static ArrayList<ArrayListTableFactor> tableFactorIsingModel(int gridSize,
 			BiFunction<Pair<Integer, Integer>, Pair<Integer,Integer>, ArrayList<Double>> pairwiseFactorentries,
 			Function<Pair<Integer,Integer>,ArrayList<Double>>singleVariableFactorEntries) {
 		ArrayList<ArrayList<TableVariable>> variables = new ArrayList<>();
@@ -197,11 +197,11 @@ public class TestCases {
 			}
 		}	
 		
-		ArrayList<TableFactor> result = new ArrayList<>();
+		ArrayList<ArrayListTableFactor> result = new ArrayList<>();
 		for(int i = 0; i < gridSize-1; i++) {
 			for (int j = 0; j < gridSize; j++) {
 				result.add(
-						new TableFactor(
+						new ArrayListTableFactor(
 								arrayList(variables.get(i).get(j),variables.get(i+1).get(j)),
 								pairwiseFactorentries.apply(new Pair<>(i,j), new Pair<>(i+1,j))
 								)
@@ -211,7 +211,7 @@ public class TestCases {
 		for(int i = 0; i < gridSize; i++) {
 			for (int j = 0; j < gridSize-1; j++) {
 				result.add(
-						new TableFactor(
+						new ArrayListTableFactor(
 								arrayList(variables.get(i).get(j),variables.get(i).get(j+1)),
 								pairwiseFactorentries.apply(new Pair<>(i,j), new Pair<>(i,j+1))
 								)
@@ -222,7 +222,7 @@ public class TestCases {
 			for(int i = 0; i < gridSize; i++) {
 				for (int j = 0; j < gridSize; j++) {
 					result.add(
-							new TableFactor(
+							new ArrayListTableFactor(
 									arrayList(variables.get(i).get(j)),
 									singleVariableFactorEntries.apply(new Pair<>(i,j))
 									)
@@ -317,7 +317,7 @@ public class TestCases {
 	 * generates the alarm network
 	 * @return UAIModel
 	 */
-	public static ArrayList<TableFactor> TableFactorALARM(){
+	public static ArrayList<ArrayListTableFactor> TableFactorALARM(){
 		UAIModel model = retrievaALARMUaiFile();
 		return makeListOfTableFactorsFromUAIModel(model);
 	}
@@ -356,9 +356,9 @@ public class TestCases {
 		return makeListOfExpressionFactorsFromUAIModel(makeUAIModelFromUAIFile(folderName, modelNameWithoutDotUAIExtension));
 	}
 
-	public static ArrayList<TableFactor> makeListOfTableFactorsFromUAIModel(UAIModel uaiModel) {
+	public static ArrayList<ArrayListTableFactor> makeListOfTableFactorsFromUAIModel(UAIModel uaiModel) {
 		TableFactorNetwork net = new TableFactorNetwork(uaiModel);
-		ArrayList<TableFactor> result = mapIntoArrayList(net.getAs(), (fwrapper)->(TableFactor)fwrapper.getObject());
+		ArrayList<ArrayListTableFactor> result = mapIntoArrayList(net.getAs(), (fwrapper)->(ArrayListTableFactor)fwrapper.getObject());
 		return result;
 	}
 	
@@ -437,16 +437,16 @@ public class TestCases {
 		return BigInteger.valueOf(a).pow(b).intValue();
 	}
 	
-	private static List<TableFactor> tree(int depth, int childrenPerNode,Function<ArrayList<TableVariable>, ArrayList<Double>> entryGen,int cardinality){
+	private static List<ArrayListTableFactor> tree(int depth, int childrenPerNode,Function<ArrayList<TableVariable>, ArrayList<Double>> entryGen,int cardinality){
 		TableVariable[][] treeVars = treeVariables(depth, childrenPerNode, cardinality);
 		
-		List<TableFactor> result = new ArrayList<>();
+		List<ArrayListTableFactor> result = new ArrayList<>();
 		for (int i = 0; i < depth; i++) {		
 			for (int j = 0; j < pow(childrenPerNode,i); j++) {
 				ArrayList<TableVariable> vars =
 						listWithVariableNodeAndItschildren(depth, childrenPerNode, treeVars, i,j);
 				
-				TableFactor newNode = new TableFactor(vars,entryGen.apply(vars));
+				ArrayListTableFactor newNode = new ArrayListTableFactor(vars,entryGen.apply(vars));
 				result.add(newNode);
 			}
 		}
@@ -465,36 +465,36 @@ public class TestCases {
 		return vars;
 	}
 	
-	public static List<TableFactor> treeWithFixedEntries(int depth, int childrenPerNode,ArrayList<Double> entry,ArrayList<Double> entryLeaf){
+	public static List<ArrayListTableFactor> treeWithFixedEntries(int depth, int childrenPerNode,ArrayList<Double> entry,ArrayList<Double> entryLeaf){
 		Function<ArrayList<TableVariable>, ArrayList<Double>> entryGen = (l) -> (l!=null && l.size() == 1)? entryLeaf : entry;
 		int cardinality = (int) round(log(entry.size())/log(childrenPerNode+1));
-		List<TableFactor> result = tree(depth, childrenPerNode, entryGen,cardinality);
+		List<ArrayListTableFactor> result = tree(depth, childrenPerNode, entryGen,cardinality);
 		return result;
 	}
 	
-	public static List<TableFactor> treeWithRandomEntries(int depth, int childrenPerNode,int cardinality,Function<Random, Double> randomGen){
+	public static List<ArrayListTableFactor> treeWithRandomEntries(int depth, int childrenPerNode,int cardinality,Function<Random, Double> randomGen){
 		Random r = new Random();
 		
 		Function<ArrayList<TableVariable>, ArrayList<Double>> entryGen = (l) -> Util.fill(pow(cardinality,l.size()),
 																									()-> randomGen.apply(r));
-		List<TableFactor> result = tree(depth, childrenPerNode, entryGen,cardinality);
+		List<ArrayListTableFactor> result = tree(depth, childrenPerNode, entryGen,cardinality);
 		return result;
 	}
-	public static List<TableFactor> treeWithUniformlyRandomEntries(int depth, int childrenPerNode,int cardinality){
+	public static List<ArrayListTableFactor> treeWithUniformlyRandomEntries(int depth, int childrenPerNode,int cardinality){
 		Function<Random, Double> randomGen = (r)-> r.nextInt(1000)*.001;
 		return treeWithRandomEntries(depth, childrenPerNode, cardinality, randomGen);
 	}
 	
-	public static List<TableFactor> treeWithGaussianRandomEntries(int depth, int childrenPerNode,int cardinality, Double mean,Double standardDeviation){
+	public static List<ArrayListTableFactor> treeWithGaussianRandomEntries(int depth, int childrenPerNode,int cardinality, Double mean,Double standardDeviation){
 		Function<Random, Double> randomGen = (r)-> max(.00001,mean + r.nextGaussian()*standardDeviation);
 		return treeWithRandomEntries(depth, childrenPerNode, cardinality, randomGen);
 	}
-	public static List<TableFactor> treeWithExponentialUniformRandomEntries(int depth, int childrenPerNode,int cardinality){
+	public static List<ArrayListTableFactor> treeWithExponentialUniformRandomEntries(int depth, int childrenPerNode,int cardinality){
 		Function<Random, Double> randomGen = (r)-> exp(r.nextInt(1000)*.001 - .5);
 		return treeWithRandomEntries(depth, childrenPerNode, cardinality, randomGen);
 	}
 	
-	public static List<TableFactor> treeWithExponentialGaussianRandomEntries(int depth, int childrenPerNode,int cardinality, Double mean,Double standardDeviation){
+	public static List<ArrayListTableFactor> treeWithExponentialGaussianRandomEntries(int depth, int childrenPerNode,int cardinality, Double mean,Double standardDeviation){
 		Function<Random, Double> randomGen = (r)-> exp(mean + r.nextGaussian()*standardDeviation);
 		return treeWithRandomEntries(depth, childrenPerNode, cardinality, randomGen);
 	}
@@ -502,13 +502,13 @@ public class TestCases {
 	
 	public static void main(String[] args) {
 		
-		List<TableFactor> fact = treeWithFixedEntries(5, 2, arrayList(1.,2.,3.,4.,5.,6.,7.,8.),arrayList(1.,1.));
-		for(TableFactor f : fact) {
+		List<ArrayListTableFactor> fact = treeWithFixedEntries(5, 2, arrayList(1.,2.,3.,4.,5.,6.,7.,8.),arrayList(1.,1.));
+		for(ArrayListTableFactor f : fact) {
 			println(f);
 		}
 		
 		fact = treeWithGaussianRandomEntries(5, 2, 2, 0., 3.);
-		for(TableFactor f : fact) {
+		for(ArrayListTableFactor f : fact) {
 			println(f);
 		}
 		/*File file = retrieveUAIFilesInFolder("promedas").get(0);
@@ -541,10 +541,10 @@ public class TestCases {
 		*/
 	}
 	
-	public static TableVariable getTableVariableByName(String queryName,List<TableFactor> grid){
+	public static TableVariable getTableVariableByName(String queryName,List<ArrayListTableFactor> grid){
 		
 		TableVariable query = null;
-		for(TableFactor f : grid) {
+		for(ArrayListTableFactor f : grid) {
 			for(TableVariable v : f.getVariables()) {
 				if(v.getName().equals(queryName) ){
 					query = v;

@@ -8,7 +8,6 @@ import static com.sri.ai.util.Util.unionOfMapsIfCompatibleOrNull;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -285,11 +284,6 @@ public abstract class AbstractConditionedFactor implements Factor {
 
 	@Override
 	public void setExplanation(ExplanationTree explanation) {
-		throw new Error((new Enclosing() {}).methodName() + " not supported by " + AbstractConditionedFactor.class);
-	}
-
-	@Override
-	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
 		throw new Error((new Enclosing() {}).methodName() + " not supported by " + AbstractConditionedFactor.class);
 	}
 

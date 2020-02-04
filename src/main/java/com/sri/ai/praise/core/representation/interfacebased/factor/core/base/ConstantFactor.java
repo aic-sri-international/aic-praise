@@ -9,7 +9,6 @@ import static java.util.Collections.unmodifiableList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
@@ -19,7 +18,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
@@ -65,8 +64,8 @@ public class ConstantFactor implements Factor {
 			result = evaluateAsFactor(Times.make(makeSymbol(getConstant()), (Expression) another),anotherExpression.getContext());
 		}
 		
-		else if (another instanceof TableFactor) {
-			TableFactor anotherTable = (TableFactor) another;
+		else if (another instanceof ArrayListTableFactor) {
+			ArrayListTableFactor anotherTable = (ArrayListTableFactor) another;
 			result = multiplyWithTableFactor(anotherTable);
 		}
 		
@@ -124,13 +123,13 @@ public class ConstantFactor implements Factor {
 		return result;
 	}
 	
-	private TableFactor multiplyWithTableFactor(TableFactor table) {
-		TableFactor result;
+	private ArrayListTableFactor multiplyWithTableFactor(ArrayListTableFactor table) {
+		ArrayListTableFactor result;
 		ArrayList<Double> newEntries = new ArrayList<>(table.STAY_getEntries().size());
 		for (Double entry : table.STAY_getEntries()) {
 			newEntries.add(getConstant()*entry);
 		}
-		result = new TableFactor(table.getVariables(), newEntries);
+		result = new ArrayListTableFactor(table.getVariables(), newEntries);
 		return result;
 	}
 
@@ -148,11 +147,6 @@ public class ConstantFactor implements Factor {
 	@Override
 	public boolean isZero() {
 		return Math.abs(getConstant() - 0.) < 0.0000001;
-	}
-
-	@Override
-	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
-		return getConstant();
 	}
 
 	@Override
@@ -175,8 +169,8 @@ public class ConstantFactor implements Factor {
 			result = evaluateAsFactor(Plus.make(makeSymbol(getConstant()), (Expression) another),anotherExpression.getContext());
 		}
 		
-		else if (another instanceof TableFactor) {
-			TableFactor anotherTable = (TableFactor) another;
+		else if (another instanceof ArrayListTableFactor) {
+			ArrayListTableFactor anotherTable = (ArrayListTableFactor) another;
 			result = addATableFactor(anotherTable);
 		}
 		
@@ -202,13 +196,13 @@ public class ConstantFactor implements Factor {
 		return result;
 	}
 	
-	private TableFactor addATableFactor(TableFactor table) {
-		TableFactor result;
+	private ArrayListTableFactor addATableFactor(ArrayListTableFactor table) {
+		ArrayListTableFactor result;
 		ArrayList<Double> newEntries = new ArrayList<>(table.STAY_getEntries().size());
 		for (Double entry : table.STAY_getEntries()) {
 			newEntries.add(getConstant() + entry);
 		}
-		result = new TableFactor(table.getVariables(), newEntries);
+		result = new ArrayListTableFactor(table.getVariables(), newEntries);
 		return result;
 	}
 

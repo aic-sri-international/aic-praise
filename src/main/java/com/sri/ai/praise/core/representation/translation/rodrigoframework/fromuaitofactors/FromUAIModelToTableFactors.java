@@ -11,13 +11,13 @@ import java.util.Map.Entry;
 
 import com.sri.ai.praise.core.representation.classbased.table.core.data.markov.FactorTable;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.util.Util;
 
 /**
- * A utility for converting a {@link UAIModel} to a list of {@link TableFactor}s.
+ * A utility for converting a {@link UAIModel} to a list of {@link ArrayListTableFactor}s.
  * 
  * @author gabriel
  *
@@ -28,17 +28,17 @@ public class FromUAIModelToTableFactors {
 		return new TableFactorNetwork(fromUAIModelToTableFactors(model));
 	}
 	
-	public static List<? extends TableFactor> fromUAIModelToTableFactors(UAIModel model) {
+	public static List<? extends ArrayListTableFactor> fromUAIModelToTableFactors(UAIModel model) {
 		LinkedHashMap<Integer, TableVariable> mapFromVariableIndexToVariable = computeMapFromVariableIndexToVariable(model);
 
-		List<TableFactor> factors = new ArrayList<>();
+		List<ArrayListTableFactor> factors = new ArrayList<>();
 		for(int i = 0; i < model.numberFactors(); i++) {
-			TableFactor f = convertUAIFactorToTableFactor(model.getFactor(i), mapFromVariableIndexToVariable);
+			ArrayListTableFactor f = convertUAIFactorToTableFactor(model.getFactor(i), mapFromVariableIndexToVariable);
 			factors.add(f);
 		}
 		
 		LinkedHashMap<TableVariable, Integer> mapOfEvidence = computeMapOfEvidence(model.getEvidence(), mapFromVariableIndexToVariable);
-		List<TableFactor> result = incorporateEvidenceAndSimplifyFactors(factors,mapOfEvidence);
+		List<ArrayListTableFactor> result = incorporateEvidenceAndSimplifyFactors(factors,mapOfEvidence);
 		
 		return result;
 	}
@@ -53,7 +53,7 @@ public class FromUAIModelToTableFactors {
 		return mapFromVariableIndexToVariable;
 	}
 
-	private static TableFactor convertUAIFactorToTableFactor(FactorTable factor, LinkedHashMap<Integer,TableVariable> mapFromVariableIndexToVariable) {
+	private static ArrayListTableFactor convertUAIFactorToTableFactor(FactorTable factor, LinkedHashMap<Integer,TableVariable> mapFromVariableIndexToVariable) {
 			
 		ArrayList<TableVariable> listOfVariables = new ArrayList<>();
 		
@@ -61,7 +61,7 @@ public class FromUAIModelToTableFactors {
 			listOfVariables.add(mapFromVariableIndexToVariable.get(variableIndex));
 		}
 		
-		TableFactor result = new TableFactor(listOfVariables, new ArrayList<>(factor.getTable().getEntries()));
+		ArrayListTableFactor result = new ArrayListTableFactor(listOfVariables, new ArrayList<>(factor.getTable().getEntries()));
 		return result;
 	}
 
@@ -77,8 +77,8 @@ public class FromUAIModelToTableFactors {
 		return result;
 	}
 
-	private static List<TableFactor> incorporateEvidenceAndSimplifyFactors(List<TableFactor> factors, LinkedHashMap<TableVariable, Integer> mapOfEvidences) {
-		List<TableFactor> result = Util.mapIntoList(factors, f -> f.slice(mapOfEvidences));
+	private static List<ArrayListTableFactor> incorporateEvidenceAndSimplifyFactors(List<ArrayListTableFactor> factors, LinkedHashMap<TableVariable, Integer> mapOfEvidences) {
+		List<ArrayListTableFactor> result = Util.mapIntoList(factors, f -> f.slice(mapOfEvidences));
 		result = filter(result, v -> v != null);
 		return result;
 	}

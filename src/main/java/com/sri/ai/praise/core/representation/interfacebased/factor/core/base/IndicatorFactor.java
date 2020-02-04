@@ -2,7 +2,6 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -44,12 +43,6 @@ public class IndicatorFactor implements Factor {
 	public boolean isZero() {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

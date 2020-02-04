@@ -1,9 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 
-import java.util.Map;
-
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
 
 /**
@@ -35,11 +32,6 @@ public class ZeroFactor extends ConstantFactor {
 	@Override
 	public String toString() {
 		return "0";
-	}
-
-	@Override
-	public Double getEntryFor(Map<? extends Variable, ? extends Object> variableInstantiations) {
-		return 0.;
 	}
 
 	@Override
