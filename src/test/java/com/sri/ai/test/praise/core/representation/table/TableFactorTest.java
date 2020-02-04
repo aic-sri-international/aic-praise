@@ -65,7 +65,7 @@ public class TableFactorTest {
 		println("MULTIPLYING f1 * f2");
 		println("-------------------");
 		
-		TableFactor f1f2 = f1.multiply(f2);
+		TableFactor f1f2 = (TableFactor) f1.multiply(f2);
 		f1f2.setName("f1f2");
 		
 		println(f1f2);
@@ -85,7 +85,7 @@ public class TableFactorTest {
 		println("MULTIPLYING f2 * f1");
 		println("-------------------");
 		
-		TableFactor f2f1 = f2.multiply(f1);
+		TableFactor f2f1 = (TableFactor) f2.multiply(f1);
 		f2f1.setName("f2f1");
 
 		println(f2f1);

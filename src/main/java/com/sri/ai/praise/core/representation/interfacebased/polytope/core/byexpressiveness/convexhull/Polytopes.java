@@ -464,7 +464,7 @@ public class Polytopes {
 		
 		List<TableFactor> result = new LinkedList<>();
 		for(List<Integer> instantiations : in(cartesianProduct)) {
-			result.add(TableFactor.slice(factor, indexes, instantiations));
+			result.add(factor.slice(indexes, instantiations));
 		}
 		return result;
 	}

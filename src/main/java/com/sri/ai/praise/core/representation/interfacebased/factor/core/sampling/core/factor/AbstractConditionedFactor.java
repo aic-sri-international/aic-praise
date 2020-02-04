@@ -244,8 +244,8 @@ public abstract class AbstractConditionedFactor implements Factor {
 	}
 
 	@Override
-	public Factor invert() {
-		Factor invertedFactor = factor.invert();
+	public Factor ABS_invert() {
+		Factor invertedFactor = factor.ABS_invert();
 		Factor result = getConditionedFactor(conditioningSample, invertedFactor);
 		return result;
 	}

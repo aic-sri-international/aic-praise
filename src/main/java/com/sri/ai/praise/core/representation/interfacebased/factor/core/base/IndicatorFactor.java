@@ -65,7 +65,7 @@ public class IndicatorFactor implements Factor {
 	}
 
 	@Override
-	public Factor invert() {
+	public Factor ABS_invert() {
 		// TODO Auto-generated method stub
 		return null;
 	}

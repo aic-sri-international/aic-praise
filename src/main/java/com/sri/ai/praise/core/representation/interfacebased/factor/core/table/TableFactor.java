@@ -76,15 +76,16 @@ public class TableFactor implements Factor {
 
 		this.name = factorName;
 		
-		if (variables instanceof ArrayList<?>) {
+		if (variables instanceof ArrayList) {
 			this.variables = (ArrayList<TableVariable>) variables;
 		}
 		else {
 			this.variables = new ArrayList<TableVariable>(variables);
 		}
 
+		// NDARRAY
 		this.parameters = parameters;
-		this.parameterIndexRadix = createMixedRadixNumberForIndexingFactorParameters();
+		this.parameterIndexRadix = ABS_createMixedRadixNumberForIndexingFactorParameters();
 	}
 	
 	public TableFactor(Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
@@ -92,14 +93,14 @@ public class TableFactor implements Factor {
 	}
 	
 	public TableFactor(Collection<? extends TableVariable> variables, Double defaultValue) {
-		this(variables, arrayListFilledWith(defaultValue, numberOfTableEntries(variables)));
+		this(variables, arrayListFilledWith(defaultValue, STAY_numberOfTableEntries(variables)));
 	}
 	
 	public TableFactor(Collection<? extends TableVariable> variables) {
 		this(variables, -1.0);
 	}
 
-	private MixedRadixNumber createMixedRadixNumberForIndexingFactorParameters() {
+	private MixedRadixNumber ABS_createMixedRadixNumberForIndexingFactorParameters() { // NDARRAY
 		ArrayList<Integer> cardinalities = mapIntoArrayList(variables, v->v.getCardinality());
 		return new MixedRadixNumber(BigInteger.ZERO, cardinalities);
 	}
@@ -124,15 +125,15 @@ public class TableFactor implements Factor {
 
 	@Override
 	public boolean isIdentity() {
-		if (parameters.size() == 0) {
+		if (ABS_thereAreZeroParameters()) {
 			return true;	
 		}
-		if (parameters.get(0) == 0) {
+		if (ABS_firstParameterIsZero()) {
 			return false;	
 		}
-		return allEqual(parameters);
+		return ABS_parametersAreAllEqual();
 	}
-	
+
 	@Override
 	public boolean isZero() {
 		return false;
@@ -140,7 +141,23 @@ public class TableFactor implements Factor {
 
 	@Override
 	public String toString() {
-		return name + variables.toString() + ": " + parameters.toString();
+		return name + variables.toString() + ": " + ABS_parametersString();
+	}
+
+	public boolean ABS_firstParameterIsZero() { // NDARRAY
+		return parameters.get(0) == 0;
+	}
+
+	public boolean ABS_thereAreZeroParameters() { // NDARRAY
+		return parameters.size() == 0;
+	}
+	
+	public boolean ABS_parametersAreAllEqual() { // NDARRAY
+		return allEqual(parameters);
+	}
+
+	public String ABS_parametersString() { // NDARRAY
+		return parameters.toString();
 	}
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,32 +173,36 @@ public class TableFactor implements Factor {
 	 * @param values (values of the above-mentioned variables to slice by)
 	 * @return sub-factor produced from slicing the passed variables at their given values
 	 */
-	public static TableFactor slice(TableFactor factor, List<TableVariable> variables, List<Integer> values) {
-		Map<TableVariable, Integer> assignment = mapFromListOfKeysAndListOfValues(variables, values);
-		TableFactor result = slicePossiblyModifyingAssignment(factor, assignment);
+	public TableFactor slice(List<TableVariable> variables, List<Integer> values) {
+		var assignment = mapFromListOfKeysAndListOfValues(variables, values);
+		TableFactor result = slicePossiblyModifyingAssignment(assignment);
 		return result;
 	}
 	
-	public static TableFactor slice(TableFactor factor, Map<TableVariable, Integer> assignment) {
-		Map<TableVariable, Integer> assignmentCopy = new LinkedHashMap<>(assignment);
-		TableFactor result = slicePossiblyModifyingAssignment(factor, assignmentCopy);
+	public TableFactor slice(Map<TableVariable, Integer> assignment) {
+		var assignmentCopy = new LinkedHashMap<>(assignment);
+		TableFactor result = slicePossiblyModifyingAssignment(assignmentCopy);
 		return result;
 	}
 	
-	private static TableFactor slicePossiblyModifyingAssignment(TableFactor factor, Map<TableVariable, Integer> assignment) {
-
-		ArrayList<TableVariable> remainingVariables = new ArrayList<>(factor.getVariables());
-		
+	private TableFactor slicePossiblyModifyingAssignment(Map<TableVariable, Integer> assignment) {
+		var remainingVariables = new ArrayList<>(getVariables());
 		remainingVariables.removeAll(assignment.keySet());
+		TableFactor result = ABS_slicePossiblyModifyingAssignment(assignment, remainingVariables);
+		return result;
+	}
+
+	private TableFactor ABS_slicePossiblyModifyingAssignment(
+			Map<TableVariable, Integer> assignment,
+			ArrayList<TableVariable> remainingVariables) { // NDARRAY
 		
-		Iterator<ArrayList<Integer>> assignmentsToRemainingVariables = makeCartesianProductIterator(remainingVariables);
 		TableFactor result = new TableFactor(remainingVariables);
+		Iterator<ArrayList<Integer>> assignmentsToRemainingVariables = STAY_makeCartesianProductIterator(remainingVariables);
 		for (ArrayList<Integer> remainingVariablesValues: in(assignmentsToRemainingVariables)) {
 			Util.putAll(assignment, remainingVariables, remainingVariablesValues);
-			var value = factor.getEntryFor(assignment);
+			var value = getEntryFor(assignment);
 			result.setEntryFor(assignment, value);
 		}
-		
 		return result;
 	}
 
@@ -200,11 +221,82 @@ public class TableFactor implements Factor {
 						this.getClass() + "and another is a " + another.getClass());
 		}
 		else {
-			result = add((TableFactor) another);
+			result = ABS_addAbstractTableFactor((TableFactor) another);
 		}
 		return result;
 	}
 
+	protected TableFactor ABS_addAbstractTableFactor(TableFactor another) { // NDARRAY
+		TableFactor result = STAY_initializeNewFactorUnioningVariables(another);
+		result = STAY_operateOnUnionedParameters(another, result, (a,b) -> a + b);
+		return result;
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// MULTIPLICATION ///////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Multiplies current TableFactor to another passed in TableFactor
+	 * 
+	 * @param another (the other TableFactor to be multiplied to)
+	 * @return a Factor reference to the TableFactor product of the multiplication
+	 */
+	@Override
+	public Factor multiply(Factor another) {
+
+		Factor result;
+		
+		if (another instanceof ConstantFactor) {
+			result = another.multiply(this);
+		}
+		else if (another.getClass() != this.getClass()) {
+			throw new Error("Trying to multiply different types of factors: this is a " +
+							this.getClass() + "and another is a " + another.getClass());
+		}
+		else {
+			result = ABS_multiplyTableFactor((TableFactor) another);
+		}
+		
+		return result;
+	}
+
+	protected TableFactor ABS_multiplyTableFactor(TableFactor another) { // NDARRAY
+		TableFactor result = STAY_initializeNewFactorUnioningVariables(another);
+		result = STAY_operateOnUnionedParameters(another, result, (a,b) -> a * b);
+		return result;
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// SHARED SUPPORT FOR ADDING AND MULTIPLYING ////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	 // NDARRAY - TableFactor only
+	
+	private TableFactor STAY_initializeNewFactorUnioningVariables(TableFactor another) {
+		LinkedHashSet<TableVariable> newSetOfVariables = new LinkedHashSet<>(this.variables);
+		newSetOfVariables.addAll(another.variables);
+		Integer numberOfParametersForNewListOfVariables = STAY_numberOfTableEntries(newSetOfVariables);
+		ArrayList<Double> newParameters = arrayListFilledWith(-1.0, numberOfParametersForNewListOfVariables);	
+		TableFactor newFactor = new TableFactor(new ArrayList<>(newSetOfVariables), newParameters);
+		return newFactor;
+	}
+
+	private TableFactor STAY_operateOnUnionedParameters(TableFactor another, TableFactor result, BiFunction<Double, Double, Double> operator) {
+		Iterator<ArrayList<Integer>> cartesianProduct = STAY_makeCartesianProductIterator(result.variables);
+		LinkedHashMap<Variable, Integer> variableValueMap = new LinkedHashMap<>();
+		for(ArrayList<Integer> values: in(cartesianProduct)) {
+			variableValueMap = result.STAY_putAll(variableValueMap, values);
+			Double product = operator.apply(this.getEntryFor(variableValueMap), another.getEntryFor(variableValueMap));
+			result.setEntryFor(variableValueMap, product);
+		}
+		return result;
+	}
+	
+	private static int STAY_numberOfTableEntries(Collection<? extends TableVariable> variables) {
+		return product(functionIterator(variables, TableVariable::getCardinality)).intValue();
+	}
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// NORMALIZATION ////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -216,17 +308,21 @@ public class TableFactor implements Factor {
 	 */
 	@Override
 	public TableFactor normalize() {
-		Double normalizationConstant = sum(parameters).doubleValue();
+		Double normalizationConstant = ABS_computeNormalizationConstant();
 		if (normalizationConstant != 0.0 && normalizationConstant != 1.0) {
-			normalizeBy(normalizationConstant);
+			ABS_normalizeBy(normalizationConstant);
 		}
 		return this ;
 	}
+
+	protected double ABS_computeNormalizationConstant() { // NDARRAY
+		return sum(parameters).doubleValue();
+	}
 	
-	private void normalizeBy(Double normalizationConstant) {
+	protected void ABS_normalizeBy(Double normalizationConstant) { // NDARRAY
 		int numParameters = parameters.size();
 		for (int i = 0; i < numParameters; ++i) {
-			parameters.set(i, parameters.get(i) / normalizationConstant);
+			parameters.set(i, STAY_getParameter(i) / normalizationConstant);
 		}
 	}
 
@@ -255,22 +351,22 @@ public class TableFactor implements Factor {
 		Factor result;
 		// if every variable is summed out, return the sum of all the parameters in a constant factor
 		if (variablesNotToSumOut.isEmpty()) {
-			result = new ConstantFactor(sum(parameters).doubleValue());
+			result = new ConstantFactor(ABS_computeNormalizationConstant());
 		}
 		else {
-			result = sumOutEverythingExcept(variablesNotToSumOut);
+			result = ABS_sumOutEverythingExcept(variablesNotToSumOut);
 		}
 		
 		return result;
 	}
 
-	private TableFactor sumOutEverythingExcept(LinkedHashSet<TableVariable> variablesNotToSumOut) {
+	protected TableFactor ABS_sumOutEverythingExcept(LinkedHashSet<TableVariable> variablesNotToSumOut) { // NDARRAY
 
 		TableFactor result = new TableFactor(variablesNotToSumOut, 0.0);
 		
 		LinkedHashMap<Variable, Integer> assignment = new LinkedHashMap<>();
-		for (ArrayList<Integer> values: in(makeCartesianProductIterator(variables))) {
-			assignment = putAll(assignment, values);
+		for (ArrayList<Integer> values: in(STAY_makeCartesianProductIterator(variables))) {
+			assignment = STAY_putAll(assignment, values);
 			Double currentValue = result.getEntryFor(assignment);
 			Double addedValue = getEntryFor(assignment);
 			result.setEntryFor(assignment, currentValue + addedValue);
@@ -278,7 +374,8 @@ public class TableFactor implements Factor {
 		return result;
 	}
 	
-	private LinkedHashMap<Variable,Integer> putAll(LinkedHashMap<Variable, Integer> assignment, ArrayList<Integer> values) {
+	 // NDARRAY - TableFactor only
+	private LinkedHashMap<Variable,Integer> STAY_putAll(LinkedHashMap<Variable, Integer> assignment, ArrayList<Integer> values) {
 		for (int i = 0; i < variables.size(); i++) {
 			assignment.put(variables.get(i), values.get(i));
 		}
@@ -286,42 +383,13 @@ public class TableFactor implements Factor {
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// MULTIPLICATION ///////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Multiplies current TableFactor to another passed in TableFactor
-	 * 
-	 * @param another (the other TableFactor to be multiplied to)
-	 * @return a Factor reference to the TableFactor product of the multiplication
-	 */
-	@Override
-	public Factor multiply(Factor another) {
-
-		Factor result;
-		
-		if (another instanceof ConstantFactor) {
-			result = another.multiply(this);
-		}
-		else if (another.getClass() != this.getClass()) {
-			throw new Error("Trying to multiply different types of factors: this is a " +
-							this.getClass() + "and another is a " + another.getClass());
-		}
-		else {
-			result = multiply((TableFactor) another);
-		}
-		
-		return result;
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// INVERSION ////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	public Factor invert() {
+	public Factor ABS_invert() { // NDARRAY
 		TableFactor result;
-		ArrayList<Double> newEntries = new ArrayList<>(getEntries().size());
+		ArrayList<Double> newEntries = new ArrayList<>(STAY_getEntries().size());
 		for (Double entry : this.parameters) {
 			if (Math.abs(entry) < 0.00000001) {
 				throw new Error("Can't invert : 0 value in the table factor.");
@@ -343,19 +411,22 @@ public class TableFactor implements Factor {
 
 	@Override
 	public Double getEntryFor(Map<? extends Variable, ?> assignment) {
-		int[] variableValues = variableValuesInFactorVariableOrder(assignment);
-		Double result = getEntryFor(variableValues);
+		int[] values = variableValuesInFactorVariableOrder(assignment);
+		Double result = ABS_getEntryFor(values);
 		return result;
 	}
 	
-	private Double getEntryFor(int[] values) {
-		int parameterIndex = getParameterIndex(values);
-		return parameters.get(parameterIndex);
+	private Double ABS_getEntryFor(int[] values) { // NDARRAY
+		int parameterIndex = STAY_getParameterIndex(values);
+		return STAY_getParameter(parameterIndex);
+	}
+
+	public Double ABS_getEntryFor(ArrayList<Integer> values) { // NDARRAY
+		int parameterIndex = STAY_getParameterIndex(values);
+		return STAY_getParameter(parameterIndex);
 	}
 	
-	
-	public Double getEntryFor(ArrayList<Integer> values) {
-		int parameterIndex = getParameterIndex(values);
+	private Double STAY_getParameter(int parameterIndex) { // NDARRAY - TableFactor only
 		return parameters.get(parameterIndex);
 	}
 	
@@ -363,43 +434,35 @@ public class TableFactor implements Factor {
 	// INDEXED ACCESS - SETTERS /////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public void setEntryFor(Map<? extends Variable, ? extends Integer> assignment, Double newParameterValue) {
-		int parameterIndex = getParameterIndex(assignment);
-		parameters.set(parameterIndex, newParameterValue);
-	}
-	
 	public <T extends Variable> void setEntryFor(List<T> variableList, List<Integer> variableValues, Double newParameterValue) {
-		Map<T, Integer> variablesAndTheirValues = mapFromListOfKeysAndListOfValues(variableList, variableValues);
-		int parameterIndex = getParameterIndex(variablesAndTheirValues);
-		parameters.set(parameterIndex, newParameterValue);
+		Map<T, Integer> assignment = mapFromListOfKeysAndListOfValues(variableList, variableValues);
+		setEntryFor(assignment, newParameterValue);
 	}
 	
-	public void setEntryFor(ArrayList<Integer> variableValuesInTheRightOrder, Double newParameterValue) {
-		int parameterIndex = getParameterIndex(variableValuesInTheRightOrder);
-		parameters.set(parameterIndex, newParameterValue);
-	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// INDEX UTILITIES //////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	private int getParameterIndex(Map<? extends Variable, ? extends Integer> assignment) {
-		int[] varValues = variableValuesInFactorVariableOrder(assignment);
-		int parameterIndex = getParameterIndex(varValues);
-		return parameterIndex;
-	}
-	
-	private int getParameterIndex(ArrayList<Integer> values) {
-		int[] variableValuesArray = Ints.toArray(values);
-		int parameterIndex = getParameterIndex(variableValuesArray);
-		return parameterIndex;
-	}
-	
-	private int getParameterIndex(int[] values) {
-		return parameterIndexRadix.getValueFor(values).intValue();
+	public void setEntryFor(Map<? extends Variable, ? extends Integer> assignment, Double newParameterValue) {
+		int[] values = variableValuesInFactorVariableOrder(assignment);
+		ABS_setEntryFor(values, newParameterValue);
 	}
 
-	private int[] variableValuesInFactorVariableOrder(Map<? extends Variable, ?> assignment) {
+	private void ABS_setEntryFor(int[] values, Double newParameterValue) { // NDARRAY
+		int parameterIndex = STAY_getParameterIndex(values);
+		STAY_setParameter(parameterIndex, newParameterValue);
+	}
+	
+	public void ABS_setEntryFor(ArrayList<Integer> values, Double newParameterValue) { // NDARRAY
+		int parameterIndex = STAY_getParameterIndex(values);
+		STAY_setParameter(parameterIndex, newParameterValue);
+	}
+	
+	private Double STAY_setParameter(int parameterIndex, Double newParameterValue) { // NDARRAY - TableFactor only
+		return parameters.set(parameterIndex, newParameterValue);
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ASSIGNMENT UTILITIES /////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	protected int[] variableValuesInFactorVariableOrder(Map<? extends Variable, ?> assignment) {
 		//TODO: error checking
 		//TODO: there is no mechanism for handling partial variable assignments
 		int numVariables = variables.size();
@@ -411,6 +474,22 @@ public class TableFactor implements Factor {
 		return indexOfVariablesValues;
 	}
 	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// INDEX UTILITIES //////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	// NDARRAY - TableFactor only
+	
+	private int STAY_getParameterIndex(ArrayList<Integer> values) {
+		int[] variableValuesArray = Ints.toArray(values);
+		int parameterIndex = STAY_getParameterIndex(variableValuesArray);
+		return parameterIndex;
+	}
+	
+	private int STAY_getParameterIndex(int[] values) {
+		return parameterIndexRadix.getValueFor(values).intValue();
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// UNIMPLEMENTED AGGREGATIONS ///////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -463,54 +542,20 @@ public class TableFactor implements Factor {
 	// TODO: revisit and possibly get rid of them                             ///////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static int numberOfTableEntries(Collection<? extends TableVariable> variables) {
-		return product(functionIterator(variables, TableVariable::getCardinality)).intValue();
-	}
+	// NDARRAY - TableFactor only
 	
-	public static Iterator<ArrayList<Integer>> makeCartesianProductIterator(Collection<? extends TableVariable> variables) {
+	public static Iterator<ArrayList<Integer>> STAY_makeCartesianProductIterator(Collection<? extends TableVariable> variables) {
 		List<NullaryFunction<Iterator<? extends Integer>>> makersOfIteratorsOverValues = 
 				mapIntoList(variables, v -> () -> new IntegerIterator(0, v.getCardinality()));
 		
 		return new CartesianProductIterator<Integer>(makersOfIteratorsOverValues);
 	}
 	
-	public void reinitializeEntries(Double defaultValue) {
+	public void STAY_reinitializeEntries(Double defaultValue) {
 		this.parameters = arrayListFilledWith(defaultValue, parameters.size());
 	}
 	
-	public TableFactor add(TableFactor another) {
-		TableFactor result = initializeNewFactorUnioningVariables(another);
-		result = operateOnUnionedParameters(another, result, (a,b) -> a + b);
-		return result;
-	}
-	
-	public TableFactor multiply(TableFactor another) {
-		TableFactor result = initializeNewFactorUnioningVariables(another);
-		result = operateOnUnionedParameters(another, result, (a,b) -> a * b);
-		return result;
-	}
-	
-	private TableFactor initializeNewFactorUnioningVariables(TableFactor another) {
-		LinkedHashSet<TableVariable> newSetOfVariables = new LinkedHashSet<>(this.variables);
-		newSetOfVariables.addAll(another.variables);
-		Integer numberOfParametersForNewListOfVariables = numberOfTableEntries(newSetOfVariables);
-		ArrayList<Double> newParameters = arrayListFilledWith(-1.0, numberOfParametersForNewListOfVariables);	
-		TableFactor newFactor = new TableFactor(new ArrayList<>(newSetOfVariables), newParameters);
-		return newFactor;
-	}
-
-	private TableFactor operateOnUnionedParameters(TableFactor another, TableFactor result, BiFunction<Double, Double, Double> operator) {
-		Iterator<ArrayList<Integer>> cartesianProduct = makeCartesianProductIterator(result.variables);
-		LinkedHashMap<Variable, Integer> variableValueMap = new LinkedHashMap<>();
-		for(ArrayList<Integer> values: in(cartesianProduct)) {
-			variableValueMap = result.putAll(variableValueMap, values);
-			Double product = operator.apply(this.getEntryFor(variableValueMap), another.getEntryFor(variableValueMap));
-			result.setEntryFor(variableValueMap, product);
-		}
-		return result;
-	}
-	
-	public ArrayList<Double> getEntries() {
+	public ArrayList<Double> STAY_getEntries() {
 		return this.parameters;
 	}
 

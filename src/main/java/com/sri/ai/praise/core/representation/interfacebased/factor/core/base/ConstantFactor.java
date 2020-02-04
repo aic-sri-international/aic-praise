@@ -126,8 +126,8 @@ public class ConstantFactor implements Factor {
 	
 	private TableFactor multiplyWithTableFactor(TableFactor table) {
 		TableFactor result;
-		ArrayList<Double> newEntries = new ArrayList<>(table.getEntries().size());
-		for (Double entry : table.getEntries()) {
+		ArrayList<Double> newEntries = new ArrayList<>(table.STAY_getEntries().size());
+		for (Double entry : table.STAY_getEntries()) {
 			newEntries.add(getConstant()*entry);
 		}
 		result = new TableFactor(table.getVariables(), newEntries);
@@ -204,8 +204,8 @@ public class ConstantFactor implements Factor {
 	
 	private TableFactor addATableFactor(TableFactor table) {
 		TableFactor result;
-		ArrayList<Double> newEntries = new ArrayList<>(table.getEntries().size());
-		for (Double entry : table.getEntries()) {
+		ArrayList<Double> newEntries = new ArrayList<>(table.STAY_getEntries().size());
+		for (Double entry : table.STAY_getEntries()) {
 			newEntries.add(getConstant() + entry);
 		}
 		result = new TableFactor(table.getVariables(), newEntries);
@@ -213,7 +213,7 @@ public class ConstantFactor implements Factor {
 	}
 
 	@Override
-	public Factor invert() {
+	public Factor ABS_invert() {
 		if(isZero()) {
 			throw new Error("Cannot invert the Zero factor.");
 		}

@@ -84,7 +84,7 @@ public class IdentityFactor extends ConstantFactor {
 	}
 
 	@Override
-	public Factor invert() {
+	public Factor ABS_invert() {
 		return this;
 	}
 	@Override

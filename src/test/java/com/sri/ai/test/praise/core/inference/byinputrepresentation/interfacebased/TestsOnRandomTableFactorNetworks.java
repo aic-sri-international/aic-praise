@@ -134,8 +134,8 @@ class TestsOnRandomTableFactorNetworks {
 		println("VE : " + resultAndTimeString(variableEliminationResult));
 		println("EBP: " + resultAndTimeString(exactBPResult));
 		
-		var variableEliminationArray = ((TableFactor) variableEliminationResult.first).getEntries();
-		var exactBPArray = ((TableFactor) exactBPResult.first).getEntries();
+		var variableEliminationArray = ((TableFactor) variableEliminationResult.first).STAY_getEntries();
+		var exactBPArray = ((TableFactor) exactBPResult.first).STAY_getEntries();
 		for (int j  = 0; j != exactBPArray.size(); j++) {
 			assertEquals(variableEliminationArray.get(j).doubleValue() / exactBPArray.get(j).doubleValue(), 1.0, 0.001);
 		}
