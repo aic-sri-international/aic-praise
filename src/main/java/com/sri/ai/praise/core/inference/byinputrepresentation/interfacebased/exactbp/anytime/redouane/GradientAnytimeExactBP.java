@@ -227,12 +227,12 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		
 		Factor maxFactor = rootFactor.max(rootIndices);
 		Factor maxNormalizationConstant = maxFactor.sumOut(rootFreeVariables);
-		Factor invertedMaxNormalizationConstant = maxNormalizationConstant.ABS_invert();
+		Factor invertedMaxNormalizationConstant = maxNormalizationConstant.invert();
 		invertedMaxMinusMinFactor.multiply(invertedMaxNormalizationConstant);
 		
 		Factor minFactor = rootFactor.min(rootIndices);
 		Factor minNormalizationConstant = minFactor.sumOut(rootFreeVariables);
-		Factor invertedMinNormalizationConstant = minNormalizationConstant.ABS_invert();
+		Factor invertedMinNormalizationConstant = minNormalizationConstant.invert();
 		invertedMaxMinusMinFactor.multiply(invertedMinNormalizationConstant);
 		
 		Polytope  summedOutPolytopeWithoutOneSub = sumOutWithoutOneSub(sub);
@@ -261,7 +261,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		Factor normalizedMinFactor = minFactor.normalize();
 		Factor minusMinFactor = normalizedMinFactor.multiply(new ConstantFactor(-1.));
 		Factor maxMinusMinFactor = normalizedMaxFactor.add(minusMinFactor);
-		Factor invertMaxMinusMinFactor = maxMinusMinFactor.ABS_invert();
+		Factor invertMaxMinusMinFactor = maxMinusMinFactor.invert();
 		return invertMaxMinusMinFactor;
 	}
 	

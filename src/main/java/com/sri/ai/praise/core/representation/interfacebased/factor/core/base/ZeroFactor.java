@@ -45,7 +45,7 @@ public class ZeroFactor extends ConstantFactor {
 	}
 
 	@Override
-	public Factor ABS_invert() {
+	public Factor invert() {
 		throw new Error("Zero factor cannot be inverted");
 	}
 	

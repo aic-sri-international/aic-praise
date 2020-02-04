@@ -98,7 +98,7 @@ public interface Factor {
 	}
 	
 	/** if f is a factor, returns 1/f */
-	Factor ABS_invert();
+	Factor invert();
 	
 	/** returns the factor obtained by maximizing according to the variables provided */
 	Factor max(Collection<? extends Variable> variablesToMaximize);

@@ -201,7 +201,7 @@ public class ExpressionFactorTest {
 		
 		ExpressionFactor factorUV = new DefaultExpressionFactor(parse("if U and V then 2 else 3"), context);
 		
-		Factor invertedFactor = factorUV.ABS_invert();
+		Factor invertedFactor = factorUV.invert();
 
 		assertEquals("if U then if V then 0.5 else 1/3 else 1/3", invertedFactor.toString());
 	}

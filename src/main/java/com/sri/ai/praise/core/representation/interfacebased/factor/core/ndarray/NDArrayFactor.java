@@ -58,7 +58,7 @@ public class NDArrayFactor implements Factor {
 	}
 
 	@Override
-	public Factor ABS_invert() {
+	public Factor invert() {
 		// TODO Auto-generated method stub
 		return null;
 	}

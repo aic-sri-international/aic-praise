@@ -57,7 +57,7 @@ public class TableBayesianNode extends ArrayListTableFactor implements BayesianN
 
 	@Override
 	public void setInitialCountsForAllPossibleChildAndParentsAssignments() {
-		this.STAY_reinitializeEntries(1.0); // the initial count is 1 for all possible childAndParentsAssignments
+		this.reinitializeEntries(1.0); // the initial count is 1 for all possible childAndParentsAssignments
 	}
 
 	@SuppressWarnings("unchecked")
@@ -79,9 +79,9 @@ public class TableBayesianNode extends ArrayListTableFactor implements BayesianN
 			ArrayList<Integer> childAndParentsAssignment = mergeElementsIntoOneList(0, parentsAssignment);
 			for(int childAssignment : (List<Integer>) child.getValues()) {
 				childAndParentsAssignment.set(0, childAssignment);
-				double currentParamenterValue = this.ABS_getEntryFor(childAndParentsAssignment);
+				double currentParamenterValue = this.getEntryFor(childAndParentsAssignment);
 				double newParameterValue = currentParamenterValue / countForThatParentsAssignment;
-				this.ABS_setEntryFor(childAndParentsAssignment, newParameterValue);
+				this.setEntryFor(childAndParentsAssignment, newParameterValue);
 			}
 		}
 	}
@@ -94,7 +94,7 @@ public class TableBayesianNode extends ArrayListTableFactor implements BayesianN
 	
 	private List<ArrayList<Integer>> getAllPossibleVariablesAssignments(ArrayList<TableVariable> variables) {
 		List<ArrayList<Integer>> allPossibleVariablesAssignments = list();
-		Iterator<ArrayList<Integer>> iteratorForParentsAssignments = ArrayListTableFactor.STAY_makeCartesianProductIterator(variables);
+		Iterator<ArrayList<Integer>> iteratorForParentsAssignments = ArrayListTableFactor.makeCartesianProductIterator(variables);
 		while(iteratorForParentsAssignments.hasNext()) {
 			allPossibleVariablesAssignments.add(iteratorForParentsAssignments.next());
 		}
@@ -103,8 +103,8 @@ public class TableBayesianNode extends ArrayListTableFactor implements BayesianN
 	}
 	
 	private void incrementCountForThatParameter(ArrayList<Integer> childAndParentsAssignment) {
-		double newParameterValue = this.ABS_getEntryFor(childAndParentsAssignment) + 1;
-		this.ABS_setEntryFor(childAndParentsAssignment, newParameterValue);
+		double newParameterValue = this.getEntryFor(childAndParentsAssignment) + 1;
+		this.setEntryFor(childAndParentsAssignment, newParameterValue);
 	}
 
 	private void verifyIfInputHasExpectedTypeAndSize(List<? extends Object> childAndParentsValues) throws Error {
@@ -123,7 +123,7 @@ public class TableBayesianNode extends ArrayListTableFactor implements BayesianN
 		ArrayList<Integer> childAndParentsAssignment = mergeElementsIntoOneList(0, parentsAssignment);
 		for(int childAssignment : (List<Integer>) child.getValues()) {
 			childAndParentsAssignment.set(0, childAssignment);
-			double countForThatChildAndParentsAssignment = this.ABS_getEntryFor(childAndParentsAssignment);
+			double countForThatChildAndParentsAssignment = this.getEntryFor(childAndParentsAssignment);
 			countForThatParentsAssignment += countForThatChildAndParentsAssignment;
 		}
 		return countForThatParentsAssignment;

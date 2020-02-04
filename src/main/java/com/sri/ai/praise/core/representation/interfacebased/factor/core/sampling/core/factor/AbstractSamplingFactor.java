@@ -118,7 +118,7 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	}
 
 	@Override
-	public Factor ABS_invert() {
+	public Factor invert() {
 		throw new Error("invert not supported for " + getClass());
 	}
 

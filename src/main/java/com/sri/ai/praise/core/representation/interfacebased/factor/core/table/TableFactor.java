@@ -20,10 +20,10 @@ public interface TableFactor extends Factor {
 
 	Double getEntryFor(Map<? extends Variable, ?> assignment);
 
-	Double ABS_getEntryFor(ArrayList<Integer> values);
+	Double getEntryFor(ArrayList<Integer> values);
 
 	void setEntryFor(Map<? extends Variable, ? extends Integer> assignment, Double newParameterValue);
 
-	void ABS_setEntryFor(ArrayList<Integer> values, Double newParameterValue);
+	void setEntryFor(ArrayList<Integer> values, Double newParameterValue);
 
 }

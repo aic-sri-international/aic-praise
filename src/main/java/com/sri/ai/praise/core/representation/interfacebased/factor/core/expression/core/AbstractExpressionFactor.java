@@ -223,7 +223,7 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 	}
 
 	@Override
-	public Factor ABS_invert() {
+	public Factor invert() {
 		Factor result;
 		if(isZero()) {
 			throw new Error("Division by zero impossible.");

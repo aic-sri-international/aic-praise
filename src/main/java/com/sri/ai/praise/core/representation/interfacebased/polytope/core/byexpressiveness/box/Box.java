@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor.STAY_makeCartesianProductIterator;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor.makeCartesianProductIterator;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.TableBoxVariable.TABLE_BOX_VARIABLE;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.list;
@@ -36,8 +36,8 @@ public class Box extends IntensionalConvexHullOfFactors{
 	private static ArrayListTableFactor makeTableFactorBox(ArrayListTableFactor phiMin, ArrayListTableFactor phiMax) {
 		ArrayList<TableVariable> variables = Util.arrayList(TABLE_BOX_VARIABLE);
 		variables.addAll(phiMax.getVariables());
-		ArrayList<Double> entries = new ArrayList<>(phiMin.STAY_getEntries());
-		entries.addAll(phiMax.STAY_getEntries());
+		ArrayList<Double> entries = new ArrayList<>(phiMin.getEntries());
+		entries.addAll(phiMax.getEntries());
 		ArrayListTableFactor result = new ArrayListTableFactor(variables,entries);
 		return result;
 	}
@@ -58,7 +58,7 @@ public class Box extends IntensionalConvexHullOfFactors{
 		
 		ArrayListTableFactor phiMin= new ArrayListTableFactor(variables);
 		ArrayListTableFactor phiMax= new ArrayListTableFactor(variables);
-		for(ArrayList<Integer> values : in(STAY_makeCartesianProductIterator(variables))){
+		for(ArrayList<Integer> values : in(makeCartesianProductIterator(variables))){
 			Map<TableVariable, Integer> map = Util.mapFromListOfKeysAndListOfValues(variables, values);
 			List<Double> phiValues = mapIntoList(normalizedFactors, (f)-> f.getEntryFor(map));
 
@@ -91,7 +91,7 @@ public class Box extends IntensionalConvexHullOfFactors{
 		boolean isABox = indexes.size() < polytope.getIndices().size();
 		
 		List<ArrayListTableFactor> result = new LinkedList<>();
-		for(List<Integer> instantiations : in(ArrayListTableFactor.STAY_makeCartesianProductIterator(indexes))) {
+		for(List<Integer> instantiations : in(ArrayListTableFactor.makeCartesianProductIterator(indexes))) {
 			ArrayListTableFactor subFactor = factor.slice(indexes, instantiations);
 			if (isABox) {
 				List<ArrayListTableFactor> factorsFromBox = instantiateAllEdgesOfABox(new Box(TABLE_BOX_VARIABLE, subFactor));
@@ -107,7 +107,7 @@ public class Box extends IntensionalConvexHullOfFactors{
 	}
 
 	private static boolean isNullProbability(ArrayListTableFactor subFactor) {
-		for(Double entry :  subFactor.STAY_getEntries()) {
+		for(Double entry :  subFactor.getEntries()) {
 			if(entry!=0.) {
 				return false;
 			}
@@ -131,7 +131,7 @@ public class Box extends IntensionalConvexHullOfFactors{
 		
 		List<ArrayListTableFactor> result = new LinkedList<>();
 		
-		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProductWitZerosAndOnes(phiMax.STAY_getEntries().size());
+		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProductWitZerosAndOnes(phiMax.getEntries().size());
 		for(ArrayList<Integer> binaryNumber : in(cartesianProduct)) {
 			ArrayListTableFactor newFactor = makeFactorWithAPermutationOfTheEntriesOnPhiMaxAndPhiMin(phiMin,phiMax,binaryNumber);
 			result.add(newFactor);
@@ -141,10 +141,10 @@ public class Box extends IntensionalConvexHullOfFactors{
 
 	private static ArrayListTableFactor makeFactorWithAPermutationOfTheEntriesOnPhiMaxAndPhiMin(ArrayListTableFactor phiMin, ArrayListTableFactor phiMax,
 			ArrayList<Integer> binaryNumber) {
-		ArrayList<Double> phiMinEntries = phiMin.STAY_getEntries();
-		ArrayList<Double> phiMaxEntries = phiMax.STAY_getEntries();
+		ArrayList<Double> phiMinEntries = phiMin.getEntries();
+		ArrayList<Double> phiMaxEntries = phiMax.getEntries();
 		
-		ArrayList<Double> newEntries = new ArrayList<>(phiMin.STAY_getEntries().size()); 
+		ArrayList<Double> newEntries = new ArrayList<>(phiMin.getEntries().size()); 
 		for (int i = 0; i < binaryNumber.size(); i++) {
 			newEntries.add(
 					binaryNumber.get(i) == 0?
