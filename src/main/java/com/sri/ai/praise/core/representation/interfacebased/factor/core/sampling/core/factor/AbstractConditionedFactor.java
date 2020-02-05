@@ -293,4 +293,9 @@ public abstract class AbstractConditionedFactor implements Factor {
 	public String toString() {
 		return "Conditioned factor by " + conditioningSample.getAssignment() + ", original factor is " + factor;
 	}
+
+	@Override
+	public int summationCost() {
+		throw new Error("Summation cost not yet implemented for " + getClass() + ".");
+	}
 }

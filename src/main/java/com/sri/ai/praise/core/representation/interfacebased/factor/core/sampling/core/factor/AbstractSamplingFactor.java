@@ -168,4 +168,9 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	public String nestedString(int level, boolean rules) {
 		return fill(level*4, ' ') + this + rulesString(level, rules);
 	}
+
+	@Override
+	public int summationCost() {
+		throw new Error("Summation cost not yet implemented for sampling factors.");
+	}
 }

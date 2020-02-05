@@ -252,4 +252,9 @@ public class ConstantFactor implements Factor {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public int summationCost() {
+		return 0; // costs constant time to sum over
+	}
 }

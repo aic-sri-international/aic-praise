@@ -1,7 +1,9 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
 
 import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
+import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.Util.setDifference;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +15,7 @@ import java.util.Map;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
@@ -35,17 +38,17 @@ public abstract class AbstractTableFactor implements TableFactor {
 	@Override
 	public abstract Factor invert();
 
-	protected abstract ArrayListTableFactor sumOutEverythingExcept(LinkedHashSet<TableVariable> variablesNotToSumOut);
+	protected abstract TableFactor sumOutEverythingExcept(LinkedHashSet<TableVariable> variablesNotToSumOut);
 
 	protected abstract void normalizeBy(Double normalizationConstant);
 
 	protected abstract double computeNormalizationConstant();
 
-	protected abstract ArrayListTableFactor multiplyTableFactor(ArrayListTableFactor another);
+	protected abstract TableFactor addTableFactor(TableFactor another);
 
-	protected abstract ArrayListTableFactor addAbstractTableFactor(ArrayListTableFactor another);
+	protected abstract TableFactor multiplyTableFactor(TableFactor another);
 
-	protected abstract ArrayListTableFactor slicePossiblyModifyingAssignment(Map<TableVariable, Integer> assignment, ArrayList<TableVariable> remainingVariables);
+	protected abstract TableFactor slicePossiblyModifyingAssignment(Map<TableVariable, Integer> assignment, ArrayList<? extends TableVariable> remainingVariables);
 
 	protected abstract String parametersString();
 
@@ -54,13 +57,13 @@ public abstract class AbstractTableFactor implements TableFactor {
 	protected abstract boolean thereAreZeroParameters();
 
 	protected abstract boolean firstParameterIsZero();
-
+	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// DATA MEMBERS ////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	protected String name;
-	protected final ArrayList<TableVariable> variables;
+	protected final ArrayList<? extends TableVariable> variables;
 	private ExplanationTree explanation = DefaultExplanationTree.PLACEHOLDER;
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +98,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 	}
 
 	@Override
-	public ArrayList<TableVariable> getVariables() {
+	public ArrayList<? extends TableVariable> getVariables() {
 		return variables;
 	}
 
@@ -120,6 +123,24 @@ public abstract class AbstractTableFactor implements TableFactor {
 		return name + variables.toString() + ": " + parametersString();
 	}
 
+	@Override
+	public int summationCost() {
+		return numberOfEntries();
+	}
+	
+	private int numberOfEntries = -1;
+	@Override
+	public int numberOfEntries() {
+		if (numberOfEntries == -1) {
+			numberOfEntries = numberOfEntries(variables);
+		}
+		return numberOfEntries;
+	}
+	
+	protected static int numberOfEntries(Collection<? extends TableVariable> variables) {
+		return product(functionIterator(variables, TableVariable::getCardinality)).intValue();
+	}
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// SLICING //////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,23 +154,23 @@ public abstract class AbstractTableFactor implements TableFactor {
 	 * @return sub-factor produced from slicing the passed variables at their given values
 	 */
 	@Override
-	public ArrayListTableFactor slice(List<TableVariable> variables, List<Integer> values) {
+	public TableFactor slice(List<TableVariable> variables, List<Integer> values) {
 		var assignment = mapFromListOfKeysAndListOfValues(variables, values);
-		ArrayListTableFactor result = slicePossiblyModifyingAssignment(assignment);
+		TableFactor result = slicePossiblyModifyingAssignment(assignment);
 		return result;
 	}
 
 	@Override
-	public ArrayListTableFactor slice(Map<TableVariable, Integer> assignment) {
+	public TableFactor slice(Map<TableVariable, Integer> assignment) {
 		var assignmentCopy = new LinkedHashMap<>(assignment);
-		ArrayListTableFactor result = slicePossiblyModifyingAssignment(assignmentCopy);
+		TableFactor result = slicePossiblyModifyingAssignment(assignmentCopy);
 		return result;
 	}
 
-	private ArrayListTableFactor slicePossiblyModifyingAssignment(Map<TableVariable, Integer> assignment) {
+	private TableFactor slicePossiblyModifyingAssignment(Map<TableVariable, Integer> assignment) {
 		var remainingVariables = new ArrayList<>(getVariables());
 		remainingVariables.removeAll(assignment.keySet());
-		ArrayListTableFactor result = slicePossiblyModifyingAssignment(assignment, remainingVariables);
+		TableFactor result = slicePossiblyModifyingAssignment(assignment, remainingVariables);
 		return result;
 	}
 
@@ -168,7 +189,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 						this.getClass() + "and another is a " + another.getClass());
 		}
 		else {
-			result = addAbstractTableFactor((ArrayListTableFactor) another);
+			result = addTableFactor((ArrayListTableFactor) another);
 		}
 		return result;
 	}

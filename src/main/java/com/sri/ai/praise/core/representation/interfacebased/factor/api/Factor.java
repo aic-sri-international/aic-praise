@@ -57,6 +57,11 @@ public interface Factor {
 
 	List<? extends Variable> getVariables();
 	
+	/**
+	 * The the cost of summing out a variable (similar to <code>2^width</code> but more general; for example, a constant factor has this equal to a fixed cost even if it has many variables).
+	 */
+	int summationCost();
+	
 	Factor multiply(Factor another);
 	
 	/** Sums a variable out of factor up to a constant. */

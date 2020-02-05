@@ -87,7 +87,7 @@ public class FromTableToExpressionFactorConverter {
 	private Expression ifThenElseTreeExpressionFromCurrentPositionOf(CartesianProductIterator<Integer> assignmentsIterator, ArrayListTableFactor tableFactor, int variableIndex) {
 		myAssert(assignmentsIterator.hasNext(), () -> "ifThenElseExpressionFromCurrentPositionOf: requires assignmentsIterator to be non-empty");
 		
-		ArrayList<TableVariable> variables = tableFactor.getVariables();
+		ArrayList<? extends TableVariable> variables = tableFactor.getVariables();
 		int varCardinality = variables.get(variableIndex).getCardinality();
 		int nextVariableIndex = variableIndex + 1;
 		
@@ -134,7 +134,7 @@ public class FromTableToExpressionFactorConverter {
 		return result;
 	}
 
-	private Expression makeAssignmentTestExpression(List<TableVariable> tableVariables, ArrayList<? extends Integer> assignment) {
+	private Expression makeAssignmentTestExpression(List<? extends TableVariable> tableVariables, ArrayList<? extends Integer> assignment) {
 		ArrayList<Expression> individualVariableConditions = mapIntegersIntoArrayList(assignment.size(), i -> makeComparisonToAssignedValue(i, tableVariables, assignment));
 		Expression result = And.make(individualVariableConditions);
 		return result;
@@ -147,7 +147,7 @@ public class FromTableToExpressionFactorConverter {
 		return result;
 	}
 
-	private Expression makeComparisonToAssignedValue(Integer variableIndex, List<TableVariable> tableVariables, ArrayList<? extends Integer> assignment) {
+	private Expression makeComparisonToAssignedValue(Integer variableIndex, List<? extends TableVariable> tableVariables, ArrayList<? extends Integer> assignment) {
 		Integer assignedValue = assignment.get(variableIndex);
 		Symbol assignedValueExpression = createSymbol(assignedValue);
 		TableVariable tableVariable = tableVariables.get(variableIndex);

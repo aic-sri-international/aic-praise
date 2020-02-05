@@ -6,6 +6,7 @@ import java.util.List;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
 public class TableVariable implements Variable {
+
 	private String name;
 	private Integer cardinality;
 	
@@ -13,8 +14,14 @@ public class TableVariable implements Variable {
 		this.name = variableName;
 		this.cardinality=cardinality;
 	}
-	public String getName() { return this.name;}
-	public int getCardinality() { return this.cardinality;}
+	
+	public String getName() { 
+		return this.name;
+	}
+	
+	public int getCardinality() { 
+		return this.cardinality;
+	}
 	
 	@Override
 	public String toString() {
@@ -43,6 +50,7 @@ public class TableVariable implements Variable {
 				&& 
 				this.cardinality.equals(v.cardinality);
 	}
+	
 	@Override
 	public int hashCode() {
 		int result = 17;

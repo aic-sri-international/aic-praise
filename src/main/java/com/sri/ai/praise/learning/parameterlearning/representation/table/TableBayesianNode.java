@@ -24,7 +24,7 @@ public class TableBayesianNode extends ArrayListTableFactor implements BayesianN
 	
 	private TableVariable child;
 	private ArrayList<TableVariable> parents;
-	private ArrayList<TableVariable> allVariables;
+	private ArrayList<? extends TableVariable> allVariables;
 	
 	public TableBayesianNode(TableVariable child) {
 		super(arrayList(child));
@@ -51,7 +51,7 @@ public class TableBayesianNode extends ArrayListTableFactor implements BayesianN
 	}
 	
 	@Override
-	public List<TableVariable> getAllVariables() {
+	public List<? extends TableVariable> getAllVariables() {
 		return allVariables;
 	}
 

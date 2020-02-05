@@ -41,6 +41,12 @@ public class TableFactorTest {
 	// TEST CASES //////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Test
+	public void testSummationCost() {
+		assertEquals(24, f1.summationCost());
+		assertEquals(6,  f2.summationCost());
+	}
+	
+	@Test
 	public void checkInitialFactors() {
 		
 		println();

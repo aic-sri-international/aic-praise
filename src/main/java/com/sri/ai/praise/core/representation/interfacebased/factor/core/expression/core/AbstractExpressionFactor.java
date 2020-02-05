@@ -274,4 +274,8 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 		this.explanation = explanation;
 	}
 
+	@Override
+	public int summationCost() {
+		throw new Error("Summation cost not yet implemented for " + getClass() + ".");
+	}
 }
