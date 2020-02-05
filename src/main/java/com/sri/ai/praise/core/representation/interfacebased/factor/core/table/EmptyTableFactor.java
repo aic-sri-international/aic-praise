@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.util.Enclosing;
 
@@ -36,6 +35,22 @@ public class EmptyTableFactor extends AbstractTableFactor {
 	// BASIC METHODS ////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	@Override
+	public boolean isIdentity() {
+		if (numberOfEntries() == 1) {
+			return true;
+		}
+		else {
+			throw new Error(getClass().getSimpleName() + " cannot decide if an empty factor is the identity factor unless it has a single entry (zero variables).");
+		}
+	}
+	
+	@Override
+	public boolean isZero() {
+		indicateLackOfData((new Enclosing(){}).methodName());
+		return false;
+	}
+
 	@Override
 	protected boolean firstParameterIsZero() {
 		indicateLackOfData((new Enclosing(){}).methodName());
@@ -117,8 +132,7 @@ public class EmptyTableFactor extends AbstractTableFactor {
 	
 	@Override
 	public EmptyTableFactor normalize() {
-		indicateLackOfData((new Enclosing(){}).methodName());
-		return null;
+		return this;
 	}
 
 	@Override
@@ -131,7 +145,7 @@ public class EmptyTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	protected EmptyTableFactor sumOutEverythingExcept(LinkedHashSet<TableVariable> variablesNotToSumOut) {
+	protected EmptyTableFactor sumOutEverythingExcept(ArrayList<? extends TableVariable> variablesNotToSumOut) {
 		return new EmptyTableFactor(variablesNotToSumOut);
 	}
 	
@@ -140,9 +154,8 @@ public class EmptyTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	public Factor invert() {
-		indicateLackOfData((new Enclosing(){}).methodName());
-		return null;
+	public EmptyTableFactor invert() {
+		return this;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

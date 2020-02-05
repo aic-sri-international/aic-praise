@@ -43,7 +43,6 @@ import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.util.explanation.tree.ExplanationTree;
@@ -75,16 +74,10 @@ public interface Factor {
 	
 	boolean isZero();
 	
-	static Factor multiply(Iterator<? extends Factor> factors) {
-		Factor result = accumulate(factors, Factor::multiply, IDENTITY_FACTOR);
-		return result;
+	static Factor multiply(Iterable<? extends Factor> factors) {
+		return accumulate(factors.iterator(), Factor::multiply, IDENTITY_FACTOR);
 	}
 
-	static Factor multiply(Collection<? extends Factor> factors) {
-		Factor result = multiply(factors.iterator());
-		return result;
-	}
-	
 	Factor normalize();
 	
 	Factor add(Factor another);
@@ -92,14 +85,8 @@ public interface Factor {
 	@Override
 	String toString();
 	
-	static Factor add(Iterator<? extends Factor> factors) {
-		Factor result = accumulate(factors, Factor::add, ZERO_FACTOR);
-		return result;
-	}
-
-	static Factor add(Collection<? extends Factor> factors) {
-		Factor result = add(factors.iterator());
-		return result;
+	static Factor add(Iterable<? extends Factor> factors) {
+		return accumulate(factors.iterator(), Factor::add, ZERO_FACTOR);
 	}
 	
 	/** if f is a factor, returns 1/f */

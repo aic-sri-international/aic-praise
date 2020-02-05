@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
 
+import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.Util.setDifference;
@@ -16,6 +17,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
+import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
@@ -36,9 +38,9 @@ public abstract class AbstractTableFactor implements TableFactor {
 	protected abstract Double getEntryFor(int[] values);
 
 	@Override
-	public abstract Factor invert();
+	public abstract TableFactor invert();
 
-	protected abstract TableFactor sumOutEverythingExcept(LinkedHashSet<TableVariable> variablesNotToSumOut);
+	protected abstract TableFactor sumOutEverythingExcept(ArrayList<? extends TableVariable> variablesNotToSumOut);
 
 	protected abstract void normalizeBy(Double normalizationConstant);
 
@@ -88,6 +90,11 @@ public abstract class AbstractTableFactor implements TableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
+	public ArrayList<? extends TableVariable> getVariables() {
+		return variables;
+	}
+	
+	@Override
 	public void setName(String newName) {
 		this.name = newName;
 	}
@@ -95,11 +102,6 @@ public abstract class AbstractTableFactor implements TableFactor {
 	@Override
 	public boolean contains(Variable variable) {
 		return variables.contains(variable);
-	}
-
-	@Override
-	public ArrayList<? extends TableVariable> getVariables() {
-		return variables;
 	}
 
 	@Override
@@ -115,7 +117,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 
 	@Override
 	public boolean isZero() {
-		return false;
+		return firstParameterIsZero() && parametersAreAllEqual();
 	}
 
 	@Override
@@ -123,11 +125,6 @@ public abstract class AbstractTableFactor implements TableFactor {
 		return name + variables.toString() + ": " + parametersString();
 	}
 
-	@Override
-	public int summationCost() {
-		return numberOfEntries();
-	}
-	
 	private int numberOfEntries = -1;
 	@Override
 	public int numberOfEntries() {
@@ -139,6 +136,11 @@ public abstract class AbstractTableFactor implements TableFactor {
 	
 	protected static int numberOfEntries(Collection<? extends TableVariable> variables) {
 		return product(functionIterator(variables, TableVariable::getCardinality)).intValue();
+	}
+	
+	@Override
+	public int summationCost() {
+		return numberOfEntries();
 	}
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +191,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 						this.getClass() + "and another is a " + another.getClass());
 		}
 		else {
-			result = addTableFactor((ArrayListTableFactor) another);
+			result = addTableFactor((TableFactor) another);
 		}
 		return result;
 	}
@@ -217,7 +219,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 							this.getClass() + "and another is a " + another.getClass());
 		}
 		else {
-			result = multiplyTableFactor((ArrayListTableFactor) another);
+			result = multiplyTableFactor((TableFactor) another);
 		}
 		
 		return result;
@@ -234,6 +236,9 @@ public abstract class AbstractTableFactor implements TableFactor {
 	 */
 	@Override
 	public AbstractTableFactor normalize() {
+		
+		// TODO: big problem here, operation is not supposed to be in-place!
+		
 		Double normalizationConstant = computeNormalizationConstant();
 		if (normalizationConstant != 0.0 && normalizationConstant != 1.0) {
 			normalizeBy(normalizationConstant);
@@ -252,25 +257,20 @@ public abstract class AbstractTableFactor implements TableFactor {
 	 * @return new factor with given variables summed out
 	 */
 	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOutList) {
+	public TableFactor sumOut(List<? extends Variable> variablesToSumOutList) {
 		
 		//TODO: Error check for if variablesToSumOut is of type List<? extends TableVariable>
 		//TODO: Error check for if a variable listed to sum out exists in the factor
 		
+		// TODO: to avoid this ugly cast we would have to make TableFactor generic with the
+		// type of variable V it applies to, so the parameter of this method would be
+		// List<? extends V>.
 		@SuppressWarnings("unchecked")
 		LinkedHashSet<TableVariable> variablesToSumOut = new LinkedHashSet<>((List<TableVariable>) variablesToSumOutList);
 		
-		LinkedHashSet<TableVariable> variablesNotToSumOut = new LinkedHashSet<>();
-		variablesNotToSumOut = (LinkedHashSet<TableVariable>) setDifference(variables, variablesToSumOut, variablesNotToSumOut);
+		var variablesNotToSumOut = setDifference(variables, variablesToSumOut, arrayList());
 		
-		Factor result;
-		// if every variable is summed out, return the sum of all the parameters in a constant factor
-		if (variablesNotToSumOut.isEmpty()) {
-			result = new ConstantFactor(computeNormalizationConstant());
-		}
-		else {
-			result = sumOutEverythingExcept(variablesNotToSumOut);
-		}
+		TableFactor result = sumOutEverythingExcept(variablesNotToSumOut);
 		
 		return result;
 	}
@@ -314,26 +314,22 @@ public abstract class AbstractTableFactor implements TableFactor {
 	
 	@Override
 	public Factor max(Collection<? extends Variable> variablesToMaximize) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass().getSimpleName());
 	}
 
 	@Override
 	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass().getSimpleName());
 	}
 
 	@Override
 	public Factor min(Collection<? extends Variable> variablesToMinimize) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass().getSimpleName());
 	}
 
 	@Override
 	public Factor argmin(Collection<? extends Variable> variablesToMinimize) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass().getSimpleName());
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

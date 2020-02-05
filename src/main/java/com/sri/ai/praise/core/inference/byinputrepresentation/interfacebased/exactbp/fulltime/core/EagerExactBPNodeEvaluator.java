@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.ex
 import static com.sri.ai.praise.core.PRAiSEUtil.conditionOnlyIfDeterministic;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor.multiply;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.collect.NestedIterator.nestedIterator;
 
@@ -51,7 +52,7 @@ public class EagerExactBPNodeEvaluator implements EagerTreeComputationEvaluator<
 	 */
 	private Factor computeProductOfFactorsAtRootAndIncomingMessages(List<? extends Factor> incomingMessages) {
 		Iterator<Factor> allFactors = nestedIterator(getFactorsAtRoot.apply(), incomingMessages);
-		Factor result = multiply(allFactors);
+		Factor result = multiply(in(allFactors));
 		return result;
 	}
 

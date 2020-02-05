@@ -52,6 +52,10 @@ public class ConstantFactor implements Factor {
 	@Override
 	public Factor multiply(Factor another) {
 		
+		// TODO: given that ConstantFactor is a more fundamental type of Factor,
+		// it makes sense the other types know about it, as opposed to it knowing about them as below.
+		// Therefore we must invert the responsibility of multiplication between them.
+		
 		Factor result = null;
 		
 		if (another instanceof ConstantFactor) {

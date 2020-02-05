@@ -43,7 +43,7 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	private ArrayList<Double> parameters;
-	private final MixedRadixNumber parameterIndexRadix;
+	private final MixedRadixNumber parameterIndexRadix; // null if number of variables is 0.
 
 	/*  NOTE:  Understanding the Parameter Order
 	 * 
@@ -84,7 +84,12 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 
 	private MixedRadixNumber createMixedRadixNumberForIndexingFactorParameters() {
 		ArrayList<Integer> cardinalities = getNumberOfEntries();
-		return new MixedRadixNumber(BigInteger.ZERO, cardinalities);
+		if (cardinalities.isEmpty()) {
+			return null;
+		}
+		else {
+			return new MixedRadixNumber(BigInteger.ZERO, cardinalities);
+		}
 	}
 
 	public ArrayList<Integer> getNumberOfEntries() {
@@ -160,6 +165,11 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override
+	public ArrayListTableFactor multiply(Factor another) {
+		return (ArrayListTableFactor) super.multiply(another);
+	}
+
+	@Override
 	protected ArrayListTableFactor multiplyTableFactor(TableFactor another) {
 		ArrayListTableFactor result = initializeNewFactorUnioningVariables(another);
 		result = operateOnUnionedParameters(another, result, (a,b) -> a * b);
@@ -218,7 +228,12 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	protected ArrayListTableFactor sumOutEverythingExcept(LinkedHashSet<TableVariable> variablesNotToSumOut) {
+	public ArrayListTableFactor sumOut(List<? extends Variable> variablesToSumOut) {
+		return (ArrayListTableFactor) super.sumOut(variablesToSumOut);
+	}
+
+	@Override
+	protected ArrayListTableFactor sumOutEverythingExcept(ArrayList<? extends TableVariable> variablesNotToSumOut) {
 
 		ArrayListTableFactor result = new ArrayListTableFactor(variablesNotToSumOut, 0.0);
 		
@@ -244,7 +259,7 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	public Factor invert() {
+	public ArrayListTableFactor invert() {
 		ArrayListTableFactor result;
 		ArrayList<Double> newEntries = new ArrayList<>(getEntries().size());
 		for (Double entry : this.parameters) {
@@ -308,7 +323,12 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	}
 	
 	private int getParameterIndex(int[] values) {
-		return parameterIndexRadix.getValueFor(values).intValue();
+		if (parameterIndexRadix == null) {
+			return 0;
+		}
+		else {
+			return parameterIndexRadix.getValueFor(values).intValue();
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
