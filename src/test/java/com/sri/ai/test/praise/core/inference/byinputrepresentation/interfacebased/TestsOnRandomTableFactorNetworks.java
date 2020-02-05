@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableElimination;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.DontCareEliminationOrdering;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
@@ -23,6 +24,10 @@ import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
 
 class TestsOnRandomTableFactorNetworks {
 
+	int totalVETime = 0;
+	int totalMITime = 0;
+	int totalEBPTime = 0;
+	
 	@Test
 	void test() {
 		
@@ -51,11 +56,11 @@ class TestsOnRandomTableFactorNetworks {
 //		int minimumCardinality = 2;
 //		int maximumCardinality = 2;
 //		
-//		int minimumNumberOfFactors = 5;
-//		int maximumNumberOfFactors = 20;
+//		int minimumNumberOfFactors = 10;
+//		int maximumNumberOfFactors = 25;
 //
 //		int minimumNumberOfVariablesPerFactor = 3;
-//		int maximumNumberOfVariablesPerFactor = 5;
+//		int maximumNumberOfVariablesPerFactor = 6;
 //
 //		double minimumPotential = 1.0;
 //		double maximumPotential = 4.0;
@@ -78,6 +83,10 @@ class TestsOnRandomTableFactorNetworks {
 				maximumPotential,
 				random)
 				);
+		
+		println("Total time VE : " + totalVETime);
+		println("Total time MI : " + totalMITime);
+		println("Total time EBP: " + totalEBPTime);
 		
 	}
 
@@ -116,11 +125,20 @@ class TestsOnRandomTableFactorNetworks {
 		
 		ThreadExplanationLogger.setIsActive(false);
 		println("Running VE...");
-		@SuppressWarnings("unchecked") // TODO: make FactorNetwork generic so we can avoid such unsafe casts
-		VariableElimination variableElimination = new VariableElimination(query, 
-				new TableFactorNetwork((List<? extends ArrayListTableFactor>) factorNetwork.getFactors()));
+		VariableElimination variableElimination = new VariableElimination(query, copy(factorNetwork), new DontCareEliminationOrdering());
 		Pair<Factor, Long> variableEliminationResult = Timer.timeAndGetResult(() -> variableElimination.apply());
 		println("Done running  VE. Time: " + variableEliminationResult.second + " ms.");
+		totalVETime += variableEliminationResult.second;
+		ThreadExplanationLogger.setIsActive(false);
+
+		println();
+
+		ThreadExplanationLogger.setIsActive(false);
+		println("Running MI...");
+		VariableElimination variableEliminationMinFill = new VariableElimination(query, copy(factorNetwork));
+		Pair<Factor, Long> variableEliminationResultMinFill = Timer.timeAndGetResult(() -> variableEliminationMinFill.apply());
+		println("Done running  VE. Time: " + variableEliminationResultMinFill.second + " ms.");
+		totalMITime += variableEliminationResultMinFill.second;
 		ThreadExplanationLogger.setIsActive(false);
 
 		println();
@@ -129,20 +147,32 @@ class TestsOnRandomTableFactorNetworks {
 		ExactBP exactBP = new ExactBP(query, factorNetwork);
 		Pair<Factor, Long> exactBPResult = Timer.timeAndGetResult(() -> exactBP.apply());
 		println("Done running EBP. Time: " + exactBPResult.second + " ms.");
+		totalEBPTime += exactBPResult.second;
 
 		println();
 		println("VE : " + resultAndTimeString(variableEliminationResult));
+		println("MI : " + resultAndTimeString(variableEliminationResultMinFill));
 		println("EBP: " + resultAndTimeString(exactBPResult));
 		
 		var variableEliminationArray = ((ArrayListTableFactor) variableEliminationResult.first).getEntries();
+		var variableEliminationMinFillArray = ((ArrayListTableFactor) variableEliminationResultMinFill.first).getEntries();
 		var exactBPArray = ((ArrayListTableFactor) exactBPResult.first).getEntries();
+		
+		println("Comparing VE and EBP...");
 		for (int j  = 0; j != exactBPArray.size(); j++) {
 			assertEquals(variableEliminationArray.get(j).doubleValue() / exactBPArray.get(j).doubleValue(), 1.0, 0.001);
 		}
 
-		// TODO: commented out because comparison fails for some examples; must be debugged
-		// I suspect this is happening when the model is disconnected; EBP may be buggy for that case
-		// Generating small models with few variables makes the error more evident, which seems to corroborate that hypothesis.
+		println("Comparing VE and MI...");
+		for (int j  = 0; j != variableEliminationArray.size(); j++) {
+			assertEquals(variableEliminationArray.get(j).doubleValue() / variableEliminationMinFillArray.get(j).doubleValue(), 1.0, 0.001);
+		}
+		println("Done!");
+	}
+
+	@SuppressWarnings("unchecked")
+	public TableFactorNetwork copy(TableFactorNetwork factorNetwork) {
+		return new TableFactorNetwork((List<? extends ArrayListTableFactor>) factorNetwork.getFactors());
 	}
 
 	public String resultAndTimeString(Pair<Factor, Long> resultAndTime) {

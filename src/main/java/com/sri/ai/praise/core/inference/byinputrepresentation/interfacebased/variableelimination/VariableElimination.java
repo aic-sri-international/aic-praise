@@ -7,6 +7,10 @@ import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.ex
 
 import java.util.List;
 
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.EliminationOrder;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.EliminationOrdering;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.MinFillEliminationOrdering;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.NextVariableInformation;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -16,21 +20,22 @@ public class VariableElimination implements NullaryFunction<Factor> {
 	
 	private Variable query;
 	private EditableFactorNetwork factorNetwork;
-	private EliminationOrdering eliminationOrdering;
+	private EliminationOrder eliminationOrder;
 	
 	public VariableElimination(Variable query, EditableFactorNetwork factorNetwork, EliminationOrdering eliminationOrdering) {
 		this.query = query;
 		this.factorNetwork = factorNetwork;
-		this.eliminationOrdering = eliminationOrdering;
+		this.eliminationOrder = eliminationOrdering.make(query, factorNetwork);
 	}
 	
 	public VariableElimination(Variable query, EditableFactorNetwork factorNetwork) {
-		this(query, factorNetwork, new DontCareEliminationOrdering(query, factorNetwork));
+		this(query, factorNetwork, new MinFillEliminationOrdering());
+//		this(query, factorNetwork, new DontCareEliminationOrdering(query, factorNetwork));
 	}
 	
 	@Override
 	public Factor apply() {
-		in(eliminationOrdering).forEach(this::eliminate);
+		in(eliminationOrder).forEach(this::eliminate);
 		Factor queryResult = Factor.multiply(factorNetwork.getFactors());
 		checkQueryResult(queryResult);
 		return queryResult;

@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering;
 
 import java.util.List;
 

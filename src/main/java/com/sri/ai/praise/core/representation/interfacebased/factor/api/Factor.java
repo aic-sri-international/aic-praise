@@ -45,6 +45,7 @@ import static com.sri.ai.util.Util.list;
 import java.util.Collection;
 import java.util.List;
 
+import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
 /**
@@ -60,6 +61,10 @@ public interface Factor {
 	 * The the cost of summing out a variable (similar to <code>2^width</code> but more general; for example, a constant factor has this equal to a fixed cost even if it has many variables).
 	 */
 	int summationCost();
+	
+	default Factor emptyVersion() {
+		throw new Error(getClass().getSimpleName() + " does not yet implement " + (new Enclosing(){}).methodName());
+	}
 	
 	Factor multiply(Factor another);
 	
