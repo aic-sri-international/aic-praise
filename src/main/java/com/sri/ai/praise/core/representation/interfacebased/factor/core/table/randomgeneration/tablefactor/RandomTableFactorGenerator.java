@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactor;
 
 import static com.sri.ai.util.Util.mapIntegersIntoArrayList;
 import static com.sri.ai.util.Util.product;
@@ -10,10 +10,10 @@ import com.google.common.base.Function;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 
-public class RandomTableFactorMaker {
+public class RandomTableFactorGenerator {
 	
 	public static ArrayListTableFactor makeRandomTableFactor(
-			SpecsForRandomTableFactorGeneration specs, 
+			ConfigurationForRandomTableFactorGeneration specs, 
 			Function<Integer, String> fromVariableIndexToName, 
 			Random random) {
 		
@@ -50,14 +50,14 @@ public class RandomTableFactorMaker {
 	}
 
 	private static ArrayList<Double> makeUniformlyDistributedRandomEntries(
-			SpecsForRandomTableFactorGeneration specs, Random random) {
+			ConfigurationForRandomTableFactorGeneration specs, Random random) {
 		
 		int numberOfEntries = product(specs.cardinalities).intValue();
 		ArrayList<Double> entries = mapIntegersIntoArrayList(numberOfEntries, i -> samplePotentialInRange(specs, random));
 		return entries;
 	}
 
-	private static Double samplePotentialInRange(SpecsForRandomTableFactorGeneration specs, Random random) {
+	private static Double samplePotentialInRange(ConfigurationForRandomTableFactorGeneration specs, Random random) {
 		double result;
 		if (specs.integerIncrements) {
 			result = specs.minimumPotential + random.nextInt((int) (Math.round(specs.maximumPotential)));

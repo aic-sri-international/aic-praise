@@ -1,8 +1,6 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactornetwork;
 
-public interface ConfigurationForTestsOnRandomTableFactorNetworks {
-
-	int getNumberOfTests();
+public interface ConfigurationForRandomTableFactorNetworksGeneration {
 
 	int getMinimumNumberOfVariables();
 

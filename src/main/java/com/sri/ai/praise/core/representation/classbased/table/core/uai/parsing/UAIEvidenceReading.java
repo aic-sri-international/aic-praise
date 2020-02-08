@@ -50,7 +50,7 @@ import com.google.common.annotations.Beta;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 
 /**
- * Utility file for reading in Uncertainty in Artificial Intelligence (UAI) 
+ * Utility for reading in Uncertainty in Artificial Intelligence (UAI) 
  * <a href="http://www.hlt.utdallas.edu/~vgogate/uai14-competition/evidformat.html">Inference Competition Evidence Format files</a>.
  * 
  * @author oreilly

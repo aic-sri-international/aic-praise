@@ -1,6 +1,6 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactornetwork;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.RandomTableFactorMaker.makeRandomTableFactor;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactor.RandomTableFactorGenerator.makeRandomTableFactor;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntegersIntoList;
 import static com.sri.ai.util.Util.mapIntoArrayList;
@@ -15,13 +15,14 @@ import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactor.ConfigurationForRandomTableFactorGeneration;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
 
 /** 
  * A utility for generating random table factor networks given a set of parameters with self-explanatory names.
  */
-public class RandomTableFactorNetworkMaker implements NullaryFunction<TableFactorNetwork> {
+public class RandomTableFactorNetworkGenerator implements NullaryFunction<TableFactorNetwork> {
 
 	private int minimumNumberOfVariables;
 	private int maximumNumberOfVariables;
@@ -43,7 +44,13 @@ public class RandomTableFactorNetworkMaker implements NullaryFunction<TableFacto
 	private ArrayList<Integer> variableIndices;
 	private int[] cardinalitiesByVariable;
 	
-	public static TableFactorNetwork makeRandomTableFactorNetwork(
+	public static TableFactorNetwork generateRandomTableFactorNetwork(ConfigurationForRandomTableFactorNetworksGeneration configuration, Random random) {
+		return 
+				new RandomTableFactorNetworkGenerator(configuration, random)
+				.apply();
+	}
+	
+	public static TableFactorNetwork generateRandomTableFactorNetwork(
 			int minimumNumberOfVariables, int maximumNumberOfVariables,
 			int minimumCardinality, int maximumCardinality, 
 			int minimumNumberOfFactors, int maximumNumberOfFactors,
@@ -52,11 +59,11 @@ public class RandomTableFactorNetworkMaker implements NullaryFunction<TableFacto
 			Random random) {
 		
 		return 
-				new RandomTableFactorNetworkMaker(minimumNumberOfVariables, maximumNumberOfVariables, minimumCardinality, maximumCardinality, minimumNumberOfFactors, maximumNumberOfFactors, minimumNumberOfVariablesPerFactor, maximumNumberOfVariablesPerFactor, minimumPotential, maximumPotential, random)
+				new RandomTableFactorNetworkGenerator(minimumNumberOfVariables, maximumNumberOfVariables, minimumCardinality, maximumCardinality, minimumNumberOfFactors, maximumNumberOfFactors, minimumNumberOfVariablesPerFactor, maximumNumberOfVariablesPerFactor, minimumPotential, maximumPotential, random)
 				.apply();
 	}
 	
-	public RandomTableFactorNetworkMaker(
+	public RandomTableFactorNetworkGenerator(
 			int minimumNumberOfVariables, int maximumNumberOfVariables,
 			int minimumCardinality, int maximumCardinality, 
 			int minimumNumberOfFactors, int maximumNumberOfFactors,
@@ -64,16 +71,33 @@ public class RandomTableFactorNetworkMaker implements NullaryFunction<TableFacto
 			double minimumPotential, double maximumPotential, 
 			Random random) {
 		
-		this.minimumNumberOfVariables = minimumNumberOfVariables;
-		this.maximumNumberOfVariables = maximumNumberOfVariables;
-		this.minimumCardinality = minimumCardinality;
-		this.maximumCardinality = maximumCardinality;
-		this.minimumNumberOfFactors = minimumNumberOfFactors;
-		this.maximumNumberOfFactors = maximumNumberOfFactors;
-		this.minimumNumberOfVariablesPerFactor = minimumNumberOfVariablesPerFactor;
-		this.maximumNumberOfVariablesPerFactor = maximumNumberOfVariablesPerFactor;
-		this.minimumPotential = minimumPotential;
-		this.maximumPotential = maximumPotential;
+		this(
+				new DefaultConfigurationForRandomTableFactorNetworksGeneration(
+						minimumNumberOfVariables,
+						maximumNumberOfVariables,
+						minimumCardinality,
+						maximumCardinality,
+						minimumNumberOfFactors,
+						maximumNumberOfFactors,
+						minimumNumberOfVariablesPerFactor,
+						maximumNumberOfVariablesPerFactor,
+						minimumPotential,
+						maximumPotential),
+						random);
+	}
+
+	public RandomTableFactorNetworkGenerator(ConfigurationForRandomTableFactorNetworksGeneration configuration, Random random) {
+		
+		this.minimumNumberOfVariables = configuration.getMinimumNumberOfVariables();
+		this.maximumNumberOfVariables = configuration.getMaximumNumberOfVariables();
+		this.minimumCardinality = configuration.getMinimumCardinality();
+		this.maximumCardinality = configuration.getMaximumCardinality();
+		this.minimumNumberOfFactors = configuration.getMinimumNumberOfFactors();
+		this.maximumNumberOfFactors = configuration.getMaximumNumberOfFactors();
+		this.minimumNumberOfVariablesPerFactor = configuration.getMinimumNumberOfVariablesPerFactor();
+		this.maximumNumberOfVariablesPerFactor = configuration.getMaximumNumberOfVariablesPerFactor();
+		this.minimumPotential = configuration.getMinimumPotential();
+		this.maximumPotential = configuration.getMaximumPotential();
 		this.random = random;
 	}
 
@@ -111,13 +135,13 @@ public class RandomTableFactorNetworkMaker implements NullaryFunction<TableFacto
 		explain("Number of variables in factor: ", numberOfVariablesInFactor);
 		explain("Variables in factor: ", variablesInFactor);
 		ArrayList<Integer> cardinalitiesInFactor = mapIntoArrayList(variablesInFactor, index -> cardinalitiesByVariable[index]);
-		SpecsForRandomTableFactorGeneration specs = makeSpecs(cardinalitiesInFactor);
+		ConfigurationForRandomTableFactorGeneration specs = makeSpecs(cardinalitiesInFactor);
 		ArrayListTableFactor factor = makeRandomTableFactor(specs, index -> "X" + variablesInFactor.get(index), random);
 		return factor;
 	}
 
-	public SpecsForRandomTableFactorGeneration makeSpecs(ArrayList<Integer> cardinalitiesInFactor) {
-		return new SpecsForRandomTableFactorGeneration(cardinalitiesInFactor, minimumPotential, maximumPotential, false);
+	public ConfigurationForRandomTableFactorGeneration makeSpecs(ArrayList<Integer> cardinalitiesInFactor) {
+		return new ConfigurationForRandomTableFactorGeneration(cardinalitiesInFactor, minimumPotential, maximumPotential, false);
 	}
 	
 	public static void main(String[] args) {
@@ -140,7 +164,7 @@ public class RandomTableFactorNetworkMaker implements NullaryFunction<TableFacto
 		double maximumPotential = 4.0;
 		
 		TableFactorNetwork network = 
-				makeRandomTableFactorNetwork(
+				generateRandomTableFactorNetwork(
 						minimumNumberOfVariables, maximumNumberOfVariables, 
 						minimumCardinality, maximumCardinality, 
 						minimumNumberOfFactors, maximumNumberOfFactors, 

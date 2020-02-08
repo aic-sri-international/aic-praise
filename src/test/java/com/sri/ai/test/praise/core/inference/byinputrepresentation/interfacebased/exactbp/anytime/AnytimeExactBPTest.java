@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.core.exactbp.anytime;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime;
 
 import static com.sri.ai.expresso.helper.Expressions.TRUE;
 import static com.sri.ai.expresso.helper.Expressions.apply;

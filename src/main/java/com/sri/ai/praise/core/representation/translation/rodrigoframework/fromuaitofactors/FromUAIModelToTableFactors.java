@@ -32,7 +32,7 @@ public class FromUAIModelToTableFactors {
 		LinkedHashMap<Integer, TableVariable> mapFromVariableIndexToVariable = computeMapFromVariableIndexToVariable(model);
 
 		List<ArrayListTableFactor> factors = new ArrayList<>();
-		for(int i = 0; i < model.numberFactors(); i++) {
+		for (int i = 0; i < model.numberFactors(); i++) {
 			ArrayListTableFactor f = convertUAIFactorToTableFactor(model.getFactor(i), mapFromVariableIndexToVariable);
 			factors.add(f);
 		}
@@ -46,7 +46,7 @@ public class FromUAIModelToTableFactors {
 	private static LinkedHashMap<Integer,TableVariable> computeMapFromVariableIndexToVariable(UAIModel model) {
 		LinkedHashMap<Integer,TableVariable> mapFromVariableIndexToVariable = new LinkedHashMap<>();
 		int nFactors = model.numberFactors();
-		for(int i = 0; i < nFactors; i++) {
+		for (int i = 0; i < nFactors; i++) {
 			FactorTable f = model.getFactor(i);
 			addVariablesFromFactorToMapFromVariableIndexToVariable(f,mapFromVariableIndexToVariable);
 		}
@@ -57,7 +57,7 @@ public class FromUAIModelToTableFactors {
 			
 		ArrayList<TableVariable> listOfVariables = new ArrayList<>();
 		
-		for(Integer variableIndex : factor.getVariableIndexes()) {
+		for (Integer variableIndex : factor.getVariableIndexes()) {
 			listOfVariables.add(mapFromVariableIndexToVariable.get(variableIndex));
 		}
 		
@@ -68,7 +68,7 @@ public class FromUAIModelToTableFactors {
 	private static LinkedHashMap<TableVariable, Integer> computeMapOfEvidence(Map<Integer, Integer> evidenceMapIndexVarToValue,
 			LinkedHashMap<Integer, TableVariable> mapFromVariableIndexToVariable) {
 		LinkedHashMap<TableVariable, Integer> result = new LinkedHashMap<TableVariable,Integer>();
-		for(Entry<Integer, Integer> entry : evidenceMapIndexVarToValue.entrySet()) {
+		for (Entry<Integer, Integer> entry : evidenceMapIndexVarToValue.entrySet()) {
 			TableVariable var = mapFromVariableIndexToVariable.get(entry.getKey());
 			Integer val = entry.getValue();
 			result.put(var, val);
@@ -87,11 +87,11 @@ public class FromUAIModelToTableFactors {
 		List<Integer> variablesIndex = f.getVariableIndexes();
 		List<Integer> variablesCardinality = f.getTable().getVariableCardinalities();
 		
-		if(variablesIndex.size() != variablesCardinality.size()) {
+		if (variablesIndex.size() != variablesCardinality.size()) {
 			//TODO error message
 		}
 		
-		for(int i = 0; i < variablesIndex.size();i++) {
+		for (int i = 0; i < variablesIndex.size();i++) {
 			Integer variableIndex = variablesIndex.get(i);
 			Integer variableCardinality = variablesCardinality.get(i);
 			TableVariable variable = new TableVariable(genericVariableName(variableIndex),variableCardinality );

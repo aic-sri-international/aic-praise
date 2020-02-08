@@ -1,6 +1,6 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.RandomTableFactorNetworkMaker.makeRandomTableFactorNetwork;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactornetwork.RandomTableFactorNetworkGenerator.generateRandomTableFactorNetwork;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.println;
@@ -20,6 +20,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.ConfigurationForTestsOnRandomTableFactorNetworks;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.LargerProblems;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.SmallProblems;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.BinaryFunction;
@@ -56,14 +59,7 @@ class TestsOnRandomTableFactorNetworks {
 			ConfigurationForTestsOnRandomTableFactorNetworks configuration,
 			Random random) {
 		
-		TableFactorNetwork factorNetwork = 
-				makeRandomTableFactorNetwork(
-						configuration.getMinimumNumberOfVariables(), configuration.getMaximumNumberOfVariables(), 
-						configuration.getMinimumCardinality(), configuration.getMaximumCardinality(), 
-						configuration.getMinimumNumberOfFactors(), configuration.getMaximumNumberOfFactors(), 
-						configuration.getMinimumNumberOfVariablesPerFactor(), configuration.getMaximumNumberOfVariablesPerFactor(), 
-						configuration.getMinimumPotential(), configuration.getMaximumPotential(), 
-						random);
+		TableFactorNetwork factorNetwork = generateRandomTableFactorNetwork(configuration, random);
 
 		Variable query = getFirst(factorNetwork.getFactors()).getVariables().get(0);
 		
@@ -91,11 +87,18 @@ class TestsOnRandomTableFactorNetworks {
 		for (int i = 0; i != algorithms.size(); i++) {
 			var name = algorithms.get(i).first;
 			var algorithm = algorithms.get(i).second;
-			Pair<Factor, Long> resultAndTime = resultAndTime(name, () -> algorithm.apply(query, factorNetwork));
+			var resultAndTime = resultAndTime(name, () -> algorithm.apply(query, factorNetwork));
 			totalTime[i] += resultAndTime.second;
 			resultsAndTimes.add(resultAndTime);
 			println();
 		}
+	}
+
+	private Pair<Factor, Long> resultAndTime(String name, NullaryFunction<Factor> algorithmInstance) {
+		println("Running " + name + "...");
+		var resultAndTime = Timer.timeAndGetResult(algorithmInstance);
+		println("Done running  " + name + ". Time: " + resultAndTime.second + " ms.");
+		return resultAndTime;
 	}
 
 	private void printResults(ArrayList<Pair<Factor, Long>> resultsAndTimes) {
@@ -105,6 +108,10 @@ class TestsOnRandomTableFactorNetworks {
 			println(name + ": " + resultAndTimeString(resultAndTime));
 		}
 		println();
+	}
+
+	public String resultAndTimeString(Pair<Factor, Long> resultAndTime) {
+		return resultAndTime.first + ", " + resultAndTime.second + " ms";
 	}
 
 	private void compareResults(ArrayList<Pair<Factor, Long>> resultsAndTimes) {
@@ -119,17 +126,6 @@ class TestsOnRandomTableFactorNetworks {
 			Util.compareNumbersComponentWise(array1, array2, 0.001);
 		}
 		println();
-	}
-
-	private Pair<Factor, Long> resultAndTime(String name, NullaryFunction<Factor> algorithmInstance) {
-		println("Running " + name + "...");
-		var resultAndTime = Timer.timeAndGetResult(algorithmInstance);
-		println("Done running  " + name + ". Time: " + resultAndTime.second + " ms.");
-		return resultAndTime;
-	}
-
-	public String resultAndTimeString(Pair<Factor, Long> resultAndTime) {
-		return resultAndTime.first + ", " + resultAndTime.second + " ms";
 	}
 
 	private void printTotalTimes() {

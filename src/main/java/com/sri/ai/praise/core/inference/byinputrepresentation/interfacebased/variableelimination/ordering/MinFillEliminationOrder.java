@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor.multiply;
 import static com.sri.ai.util.Util.argmin;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -37,19 +38,19 @@ public class MinFillEliminationOrder extends EZIterator<NextVariableInformation>
 		}
 		
 	}
-
-	private MinFillNextVariableInformation computeVariableInformation(Variable variable) {
-		List<Factor> factorsOnVariable = collectToList(factorNetwork.getFactors(), f -> f.contains(variable));
-		List<Factor> emptyFactorsOnVariable = mapIntoList(factorsOnVariable, Factor::emptyVersion);
-		Factor emptyProduct = Factor.multiply(emptyFactorsOnVariable);
-		return new MinFillNextVariableInformation(variable, factorsOnVariable, emptyProduct.summationCost());
-	}
 	
 	@Override
 	protected NextVariableInformation calculateNext() {
 		var remainingVariables = predicateIterator(factorNetwork.getVariables(), notEquals(query));
 		var remainingVariablesInformation = mapIntoList(remainingVariables, this::computeVariableInformation);
 		return argmin(remainingVariablesInformation, MinFillNextVariableInformation::getSummationCost);
+	}
+
+	private MinFillNextVariableInformation computeVariableInformation(Variable variable) {
+		List<Factor> factorsOnVariable = collectToList(factorNetwork.getFactors(), f -> f.contains(variable));
+		List<Factor> emptyFactorsOnVariable = mapIntoList(factorsOnVariable, Factor::emptyVersion);
+		Factor emptyProduct = multiply(emptyFactorsOnVariable);
+		return new MinFillNextVariableInformation(variable, factorsOnVariable, emptyProduct.summationCost());
 	}
 
 }

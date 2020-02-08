@@ -1,6 +1,6 @@
 package com.sri.ai.test.praise.performance;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.RandomTableFactorMaker.makeRandomTableFactor;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactor.RandomTableFactorGenerator.makeRandomTableFactor;
 import static com.sri.ai.util.Timer.timeAndGetResult;
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.getFirstHalfSubList;
@@ -31,7 +31,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.SpecsForRandomTableFactorGeneration;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactor.ConfigurationForRandomTableFactorGeneration;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.FromTableToExpressionFactorConverter;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
@@ -114,8 +114,8 @@ public class PerformanceTest {
 
 	private static final FromTableToExpressionFactorConverter TABLE_TO_EXPRESSION_FACTOR_CONVERTER = new FromTableToExpressionFactorConverter();
 
-	private static final SpecsForRandomTableFactorGeneration GLOBAL_TABLE_FACTOR_SPECS = 
-			new SpecsForRandomTableFactorGeneration( 
+	private static final ConfigurationForRandomTableFactorGeneration GLOBAL_TABLE_FACTOR_SPECS = 
+			new ConfigurationForRandomTableFactorGeneration( 
 					fill(numberOfVariablesPerFactor, cardinalityOfVariables), // ArrayList of variable cardinalities
 					minimumPotential, maximumPotential, integerIncrements);
 
@@ -170,7 +170,7 @@ public class PerformanceTest {
 		println("      variable cardinality = " + cardinalityOfVariables);
 		println("==================================================================================================");
 
-		SpecsForRandomTableFactorGeneration factorGenerationSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
+		ConfigurationForRandomTableFactorGeneration factorGenerationSpecs = new ConfigurationForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
 
 		List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorGenerationSpecs);
 
@@ -215,7 +215,7 @@ public class PerformanceTest {
 		println("      variable cardinality = " + cardinalityOfVariables);
 		println("==================================================================================================");
 
-		SpecsForRandomTableFactorGeneration factorSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
+		ConfigurationForRandomTableFactorGeneration factorSpecs = new ConfigurationForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
 
 		explanationBlockToFile("explanation.txt", "Perfomance tests of unary operation...", code( () -> {	
 			// STARTING VARIABLE NUMBER
@@ -235,7 +235,7 @@ public class PerformanceTest {
 
 	private ArrayList<FactorOperationResultAndTimes> evaluateForGivenNumberOfVariables(
 			int numberOfVariables,
-			SpecsForRandomTableFactorGeneration factorSpecs) {
+			ConfigurationForRandomTableFactorGeneration factorSpecs) {
 
 		return
 				explanationBlock(numberOfVariables + " variables...", code( () -> {	
@@ -261,7 +261,7 @@ public class PerformanceTest {
 		println("      variable cardinality = ||varies||");
 		println("==================================================================================================");
 
-		SpecsForRandomTableFactorGeneration factorSpecs = new SpecsForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
+		ConfigurationForRandomTableFactorGeneration factorSpecs = new ConfigurationForRandomTableFactorGeneration(GLOBAL_TABLE_FACTOR_SPECS);
 
 		// STARTING VARIABLE NUMBER
 		int cardinality = 0;
@@ -282,7 +282,7 @@ public class PerformanceTest {
 	}
 
 
-	private ArrayList<FactorOperationResultAndTimes> evaluate(SpecsForRandomTableFactorGeneration factorSpecs) {
+	private ArrayList<FactorOperationResultAndTimes> evaluate(ConfigurationForRandomTableFactorGeneration factorSpecs) {
 		ArrayList<FactorOperationResultAndTimes> operationResultsAndTimes;
 		List<Factor> factors = constructEquivalentRandomFactorsRepresentedInDifferentWays(factorSpecs);
 
@@ -394,7 +394,7 @@ public class PerformanceTest {
 	/// FACTOR CONSTRUCTION METHODS ////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private List<Factor> constructEquivalentRandomFactorsRepresentedInDifferentWays(SpecsForRandomTableFactorGeneration factorSpecs)
+	private List<Factor> constructEquivalentRandomFactorsRepresentedInDifferentWays(ConfigurationForRandomTableFactorGeneration factorSpecs)
 	{
 		ArrayListTableFactor tableFactor = makeRandomTableFactor(factorSpecs, FROM_VARIABLE_INDEX_TO_NAME, RANDOM);
 

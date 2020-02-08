@@ -56,8 +56,10 @@ import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModelType;
 
 /**
- * Utility file for reading in Uncertainty in Artificial Intelligence (UAI) 
+ * Utility for reading in Uncertainty in Artificial Intelligence (UAI) 
  * <a href="http://www.hlt.utdallas.edu/~vgogate/uai14-competition/modelformat.html">Inference Competition FactorNetwork Format files</a>.
+ * 
+ * Evidence can be read and added to the model by {@link UAIEvidenceReading}.
  * 
  * @author oreilly
  */
