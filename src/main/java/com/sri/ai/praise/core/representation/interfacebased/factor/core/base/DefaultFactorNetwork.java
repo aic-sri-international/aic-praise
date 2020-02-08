@@ -57,12 +57,12 @@ import com.sri.ai.util.collect.DefaultManyToManyRelation;
 public class DefaultFactorNetwork 
 extends DefaultManyToManyRelation<IdentityWrapper<Factor>, Variable> implements FactorNetwork {
 
-	public DefaultFactorNetwork(List<? extends Factor> factors) {
+	public DefaultFactorNetwork(Collection<? extends Factor> factors) {
 		super();
 		indexFactorsAndVariables(factors);
 	}
 
-	protected void indexFactorsAndVariables(List<? extends Factor> factors) {
+	protected void indexFactorsAndVariables(Collection<? extends Factor> factors) {
 		for (Factor factor : factors) {
 			indexFactorAndItsVariables(factor);
 		}
@@ -99,4 +99,8 @@ extends DefaultManyToManyRelation<IdentityWrapper<Factor>, Variable> implements 
 		return result;
 	}
 
+	@Override
+	public DefaultFactorNetwork clone() {
+		return (DefaultFactorNetwork) super.clone();
+	}
 }

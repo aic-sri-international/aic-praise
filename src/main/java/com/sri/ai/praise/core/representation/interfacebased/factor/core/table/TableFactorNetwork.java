@@ -29,4 +29,9 @@ public class TableFactorNetwork extends DefaultEditableFactorNetwork {
 	public EditableFactorNetwork makeEmptyNetwork() {
 		return new TableFactorNetwork(new ArrayList<>());
 	}
+	
+	@Override
+	public TableFactorNetwork clone() {
+		return (TableFactorNetwork) super.clone();
+	}
 }

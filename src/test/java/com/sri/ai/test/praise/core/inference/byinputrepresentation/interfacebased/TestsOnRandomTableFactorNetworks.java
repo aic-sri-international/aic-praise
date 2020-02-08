@@ -1,182 +1,145 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.helper.RandomTableFactorNetworkMaker.makeRandomTableFactorNetwork;
+import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.repeat;
-import static org.junit.Assert.assertEquals;
+import static com.sri.ai.util.base.Pair.pair;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableElimination;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.DontCareEliminationOrdering;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableEliminationSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.MinFillEliminationOrdering;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
 import com.sri.ai.util.Timer;
+import com.sri.ai.util.Util;
+import com.sri.ai.util.base.BinaryFunction;
+import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
-import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
 
 class TestsOnRandomTableFactorNetworks {
 
-	int totalVETime = 0;
-	int totalMITime = 0;
-	int totalEBPTime = 0;
+	private
+	ArrayList<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> algorithms = arrayList( 
+			pair("VE_MI", new VariableEliminationSolver(new MinFillEliminationOrdering())),
+			// pair("VE_DC", new VariableEliminationSolver(new DontCareEliminationOrdering())),
+			pair("  EBP", new ExactBPSolver())
+	);
+	
+	int totalTime[] = new int[algorithms.size()];
 	
 	@Test
 	void test() {
-		
-		// Small models:
-		
-		int minimumNumberOfVariables = 2;
-		int maximumNumberOfVariables = 3;
-		
-		int minimumCardinality = 2;
-		int maximumCardinality = 2;
-		
-		int minimumNumberOfFactors = 1;
-		int maximumNumberOfFactors = 3;
+		run(new SmallProblems());
+	}
 
-		int minimumNumberOfVariablesPerFactor = 1;
-		int maximumNumberOfVariablesPerFactor = 2;
-
-		double minimumPotential = 1.0;
-		double maximumPotential = 4.0;
-		
-//		// Larger models:
-//		
-//		int minimumNumberOfVariables = 10;
-//		int maximumNumberOfVariables = 25;
-//		
-//		int minimumCardinality = 2;
-//		int maximumCardinality = 2;
-//		
-//		int minimumNumberOfFactors = 10;
-//		int maximumNumberOfFactors = 25;
-//
-//		int minimumNumberOfVariablesPerFactor = 3;
-//		int maximumNumberOfVariablesPerFactor = 6;
-//
-//		double minimumPotential = 1.0;
-//		double maximumPotential = 4.0;
-
-		
+	private void run(ConfigurationForTestsOnRandomTableFactorNetworks configuration) {
 		Random random = new Random();
 
-		repeat(1000, i ->
-		runTestForARandomFactorNetwork(
-				i,
-				minimumNumberOfVariables,
-				maximumNumberOfVariables,
-				minimumCardinality,
-				maximumCardinality,
-				minimumNumberOfFactors,
-				maximumNumberOfFactors,
-				minimumNumberOfVariablesPerFactor,
-				maximumNumberOfVariablesPerFactor,
-				minimumPotential,
-				maximumPotential,
-				random)
-				);
+		repeat(configuration.getNumberOfTests(), testNumber ->
+		runTestForARandomFactorNetwork(testNumber, configuration, random));
 		
-		println("Total time VE : " + totalVETime);
-		println("Total time MI : " + totalMITime);
-		println("Total time EBP: " + totalEBPTime);
-		
+		printTotalTimes();
 	}
 
 	public void runTestForARandomFactorNetwork(
-			int i,
-			int minimumNumberOfVariables,
-			int maximumNumberOfVariables,
-			int minimumCardinality,
-			int maximumCardinality,
-			int minimumNumberOfFactors,
-			int maximumNumberOfFactors,
-			int minimumNumberOfVariablesPerFactor,
-			int maximumNumberOfVariablesPerFactor,
-			double minimumPotential,
-			double maximumPotential,
+			int testNumber,
+			ConfigurationForTestsOnRandomTableFactorNetworks configuration,
 			Random random) {
 		
 		TableFactorNetwork factorNetwork = 
 				makeRandomTableFactorNetwork(
-						minimumNumberOfVariables, maximumNumberOfVariables, 
-						minimumCardinality, maximumCardinality, 
-						minimumNumberOfFactors, maximumNumberOfFactors, 
-						minimumNumberOfVariablesPerFactor, maximumNumberOfVariablesPerFactor, 
-						minimumPotential, maximumPotential, 
+						configuration.getMinimumNumberOfVariables(), configuration.getMaximumNumberOfVariables(), 
+						configuration.getMinimumCardinality(), configuration.getMaximumCardinality(), 
+						configuration.getMinimumNumberOfFactors(), configuration.getMaximumNumberOfFactors(), 
+						configuration.getMinimumNumberOfVariablesPerFactor(), configuration.getMaximumNumberOfVariablesPerFactor(), 
+						configuration.getMinimumPotential(), configuration.getMaximumPotential(), 
 						random);
-		
+
 		Variable query = getFirst(factorNetwork.getFactors()).getVariables().get(0);
 		
 		println();
 		println("********************");
-		println("Test #" + i);
+		println("Test #" + testNumber);
 		println();
 		println("Number of variables: " + factorNetwork.getVariables().size());
 		println("Number of factors: " + factorNetwork.getFactors().size());
 		println();
+
+		ArrayList<Pair<Factor, Long>> resultsAndTimes = new ArrayList<>(algorithms.size());
 		
-		ThreadExplanationLogger.setIsActive(false);
-		println("Running VE...");
-		VariableElimination variableElimination = new VariableElimination(query, copy(factorNetwork), new DontCareEliminationOrdering());
-		Pair<Factor, Long> variableEliminationResult = Timer.timeAndGetResult(() -> variableElimination.apply());
-		println("Done running  VE. Time: " + variableEliminationResult.second + " ms.");
-		totalVETime += variableEliminationResult.second;
-		ThreadExplanationLogger.setIsActive(false);
-
-		println();
-
-		ThreadExplanationLogger.setIsActive(false);
-		println("Running MI...");
-		VariableElimination variableEliminationMinFill = new VariableElimination(query, copy(factorNetwork));
-		Pair<Factor, Long> variableEliminationResultMinFill = Timer.timeAndGetResult(() -> variableEliminationMinFill.apply());
-		println("Done running  VE. Time: " + variableEliminationResultMinFill.second + " ms.");
-		totalMITime += variableEliminationResultMinFill.second;
-		ThreadExplanationLogger.setIsActive(false);
-
-		println();
-
-		println("Running EBP...");
-		ExactBP exactBP = new ExactBP(query, factorNetwork);
-		Pair<Factor, Long> exactBPResult = Timer.timeAndGetResult(() -> exactBP.apply());
-		println("Done running EBP. Time: " + exactBPResult.second + " ms.");
-		totalEBPTime += exactBPResult.second;
-
-		println();
-		println("VE : " + resultAndTimeString(variableEliminationResult));
-		println("MI : " + resultAndTimeString(variableEliminationResultMinFill));
-		println("EBP: " + resultAndTimeString(exactBPResult));
+		computeResults(query, factorNetwork, resultsAndTimes);
 		
-		var variableEliminationArray = ((ArrayListTableFactor) variableEliminationResult.first).getEntries();
-		var variableEliminationMinFillArray = ((ArrayListTableFactor) variableEliminationResultMinFill.first).getEntries();
-		var exactBPArray = ((ArrayListTableFactor) exactBPResult.first).getEntries();
+		printResults(resultsAndTimes);
 		
-		println("Comparing VE and EBP...");
-		for (int j  = 0; j != exactBPArray.size(); j++) {
-			assertEquals(variableEliminationArray.get(j).doubleValue() / exactBPArray.get(j).doubleValue(), 1.0, 0.001);
-		}
+		compareResults(resultsAndTimes);
 
-		println("Comparing VE and MI...");
-		for (int j  = 0; j != variableEliminationArray.size(); j++) {
-			assertEquals(variableEliminationArray.get(j).doubleValue() / variableEliminationMinFillArray.get(j).doubleValue(), 1.0, 0.001);
-		}
-		println("Done!");
+		println("Done!\n");
+		
 	}
 
-	@SuppressWarnings("unchecked")
-	public TableFactorNetwork copy(TableFactorNetwork factorNetwork) {
-		return new TableFactorNetwork((List<? extends ArrayListTableFactor>) factorNetwork.getFactors());
+	private void computeResults(Variable query, TableFactorNetwork factorNetwork, ArrayList<Pair<Factor, Long>> resultsAndTimes) {
+		for (int i = 0; i != algorithms.size(); i++) {
+			var name = algorithms.get(i).first;
+			var algorithm = algorithms.get(i).second;
+			Pair<Factor, Long> resultAndTime = resultAndTime(name, () -> algorithm.apply(query, factorNetwork));
+			totalTime[i] += resultAndTime.second;
+			resultsAndTimes.add(resultAndTime);
+			println();
+		}
+	}
+
+	private void printResults(ArrayList<Pair<Factor, Long>> resultsAndTimes) {
+		for (int i = 0; i != algorithms.size(); i++) {
+			var name = algorithms.get(i).first;
+			var resultAndTime = resultsAndTimes.get(i);
+			println(name + ": " + resultAndTimeString(resultAndTime));
+		}
+		println();
+	}
+
+	private void compareResults(ArrayList<Pair<Factor, Long>> resultsAndTimes) {
+		for (int i = 0; i != algorithms.size() - 1; i++) {
+			var name1 = algorithms.get(i).first;
+			var name2 = algorithms.get(i + 1).first;
+			var resultAndTime1 = resultsAndTimes.get(i);
+			var resultAndTime2 = resultsAndTimes.get(i + 1);
+			var array1 = ((ArrayListTableFactor) resultAndTime1.first).getEntries();
+			var array2 = ((ArrayListTableFactor) resultAndTime2.first).getEntries();
+			println("Comparing " + name1 + " and " + name2 + "...");
+			Util.compareNumbersComponentWise(array1, array2, 0.001);
+		}
+		println();
+	}
+
+	private Pair<Factor, Long> resultAndTime(String name, NullaryFunction<Factor> algorithmInstance) {
+		println("Running " + name + "...");
+		var resultAndTime = Timer.timeAndGetResult(algorithmInstance);
+		println("Done running  " + name + ". Time: " + resultAndTime.second + " ms.");
+		return resultAndTime;
 	}
 
 	public String resultAndTimeString(Pair<Factor, Long> resultAndTime) {
 		return resultAndTime.first + ", " + resultAndTime.second + " ms";
 	}
 
+	private void printTotalTimes() {
+		for (int i = 0; i != algorithms.size(); i++) {
+			var name = algorithms.get(i).first;
+			println("Total time " + name + ": " + totalTime[i]);
+		}
+	}
+
+	public static void main(String[] args) {
+		new TestsOnRandomTableFactorNetworks().run(new LargerProblems());
+	}
 }

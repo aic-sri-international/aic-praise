@@ -8,7 +8,7 @@ import java.util.Collection;
  * @author gabriel
  *
  */
-public interface EditableFactorNetwork extends FactorNetwork {
+public interface EditableFactorNetwork extends FactorNetwork, Cloneable {
 	
 	EditableFactorNetwork makeEmptyNetwork();
 	
@@ -27,5 +27,6 @@ public interface EditableFactorNetwork extends FactorNetwork {
 	 * @param variable
 	 */
 	void add(Factor factor, Variable variable);
-	
+
+	EditableFactorNetwork clone();
 }

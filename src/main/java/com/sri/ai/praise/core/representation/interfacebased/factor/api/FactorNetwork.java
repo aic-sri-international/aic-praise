@@ -48,9 +48,9 @@ import java.util.List;
  */
 public interface FactorNetwork extends Model {
 
-	Collection<Variable> getVariables();
+	Collection<? extends Variable> getVariables();
 
-	Collection<Factor> getFactors();
+	Collection<? extends Factor> getFactors();
 
 	List<? extends Variable> getNeighbors(Factor factor);
 

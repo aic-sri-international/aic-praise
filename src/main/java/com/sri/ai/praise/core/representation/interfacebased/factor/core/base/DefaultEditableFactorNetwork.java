@@ -4,7 +4,6 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -12,7 +11,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 
 public class DefaultEditableFactorNetwork extends DefaultFactorNetwork implements EditableFactorNetwork {
 	
-	public DefaultEditableFactorNetwork(List<? extends Factor> factors) {
+	public DefaultEditableFactorNetwork(Collection<? extends Factor> factors) {
 		super(factors);
 	}
 	
@@ -44,5 +43,10 @@ public class DefaultEditableFactorNetwork extends DefaultFactorNetwork implement
 	@Override
 	public void removeAll(Collection<? extends Factor> factors) {
 		factors.forEach(f -> remove(f));
+	}
+	
+	@Override
+	public DefaultEditableFactorNetwork clone() {
+		return (DefaultEditableFactorNetwork) super.clone();
 	}
 }
