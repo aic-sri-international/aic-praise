@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.util.Enclosing;
 
@@ -140,8 +141,9 @@ public class EmptyTableFactor extends AbstractTableFactor {
 	}
 
 	@Override
-	protected void normalizeBy(Double normalizationConstant) {
+	protected EmptyTableFactor normalizeBy(Double normalizationConstant) {
 		indicateLackOfData((new Enclosing(){}).methodName());
+		return null;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +151,7 @@ public class EmptyTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	protected EmptyTableFactor sumOutEverythingExcept(ArrayList<? extends TableVariable> variablesNotToSumOut) {
+	protected EmptyTableFactor sumOutEverythingExcept(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut) {
 		return new EmptyTableFactor(variablesNotToSumOut);
 	}
 	

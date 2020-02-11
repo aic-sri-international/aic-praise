@@ -40,9 +40,9 @@ public abstract class AbstractTableFactor implements TableFactor {
 	@Override
 	public abstract TableFactor invert();
 
-	protected abstract TableFactor sumOutEverythingExcept(ArrayList<? extends TableVariable> variablesNotToSumOut);
+	protected abstract TableFactor sumOutEverythingExcept(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut);
 
-	protected abstract void normalizeBy(Double normalizationConstant);
+	protected abstract TableFactor normalizeBy(Double normalizationConstant);
 
 	protected abstract double computeNormalizationConstant();
 
@@ -276,7 +276,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 		
 		var variablesNotToSumOut = setDifference(variables, variablesToSumOut, arrayList());
 		
-		TableFactor result = sumOutEverythingExcept(variablesNotToSumOut);
+		TableFactor result = sumOutEverythingExcept(variablesToSumOutList, variablesNotToSumOut);
 		
 		return result;
 	}

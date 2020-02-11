@@ -92,11 +92,14 @@ public class UAIModelReader {
 		
 		//
 		// The preamble starts with one line denoting the type of network
+		@SuppressWarnings("unused")
 		String typeOfNetwork = readLine(br);
-		if (!UAIModelType.MARKOV.name().equals(typeOfNetwork)) {
-			// NOTE: 2014 competitions files only contain markov networks.
-			throw new IllegalArgumentException("Type of network ["+typeOfNetwork+"] is not supported");
-		}
+//		if (!UAIModelType.MARKOV.name().equals(typeOfNetwork)) {
+//			// NOTE: 2014 competitions files only contain markov networks.
+//			throw new IllegalArgumentException("Type of network ["+typeOfNetwork+"] is not supported");
+//		}
+// Commented out in the assumption that BAYES only indicates normalization but the structure can be interpreted as Markov anyway
+		
 		result.type = UAIModelType.MARKOV; // Only type currently supported
 		
 		//

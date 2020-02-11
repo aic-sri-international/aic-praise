@@ -28,4 +28,5 @@ public interface TableFactor extends Factor {
 	void setEntryFor(ArrayList<Integer> values, Double newParameterValue);
 
 	int numberOfEntries();
+	
 }

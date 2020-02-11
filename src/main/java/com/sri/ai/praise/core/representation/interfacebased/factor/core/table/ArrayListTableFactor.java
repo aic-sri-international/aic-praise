@@ -216,11 +216,19 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	}
 
 	@Override
-	protected void normalizeBy(Double normalizationConstant) {
-		int numParameters = parameters.size();
-		for (int i = 0; i < numParameters; ++i) {
-			parameters.set(i, getParameter(i) / normalizationConstant);
+	protected ArrayListTableFactor normalizeBy(Double normalizationConstant) {
+		ArrayListTableFactor result;
+		ArrayList<Double> newEntries = new ArrayList<>(getEntries().size());
+		for (Double entry : this.parameters) {
+			newEntries.add(entry/normalizationConstant);
 		}
+		result = new ArrayListTableFactor(getVariables(), newEntries);
+		return result;
+
+//		int numParameters = parameters.size();
+//		for (int i = 0; i < numParameters; ++i) {
+//			parameters.set(i, getParameter(i) / normalizationConstant);
+//		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,7 +241,7 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	}
 
 	@Override
-	protected ArrayListTableFactor sumOutEverythingExcept(ArrayList<? extends TableVariable> variablesNotToSumOut) {
+	protected ArrayListTableFactor sumOutEverythingExcept(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut) {
 
 		ArrayListTableFactor result = new ArrayListTableFactor(variablesNotToSumOut, 0.0);
 		
