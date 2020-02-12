@@ -54,7 +54,15 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 	}
 	
 	public NDArrayTableFactor(String factorName, Collection<? extends TableVariable> variables, double[] parameters) {
-		this(factorName, variables, Nd4j.create(parameters).reshape(getShape(variables)));
+		this(factorName, variables, create(variables, parameters));
+	}
+
+	private static INDArray create(Collection<? extends TableVariable> variables, double[] parameters) {
+		int[] localShape = getShape(variables);
+//		println("Going to create new ndarray with shape " + localShape);
+		INDArray newNDArray = Nd4j.create(parameters).reshape(localShape);
+//		println("Creation successful, number of entries is " + newNDArray.length());
+		return newNDArray;
 	}
 	
 	public NDArrayTableFactor(String factorName, Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
@@ -221,8 +229,10 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 		INDArray firstFactor = NDArrayUtil.broadcastByNAtKthDimension(a1, numberOfAssignmentsToExternalDimensionsInA2, numberOfExternalDimensionsInA1).reshape(1, resultLength);
 		INDArray secondFactor = NDArrayUtil.broadcastByN(a2, numberOfAssignmentsToExternalDimensionsInA1).reshape(1, resultLength);
 		long[] resultShape = makeResultShape(a1, a2, numberOfExternalDimensionsInA1);
+		//println("Going to multiply to shape " + Util.join(Arrays.stream(resultShape).boxed().collect(Collectors.toList())));
 		INDArray product = firstFactor.mul(secondFactor);
 		INDArray result = product.reshape(resultShape);
+		//println("Product successful, length is " + result.length());
 		return result;
 	}
 

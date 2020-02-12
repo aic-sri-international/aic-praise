@@ -18,7 +18,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
@@ -68,8 +68,8 @@ public class ConstantFactor implements Factor {
 			result = evaluateAsFactor(Times.make(makeSymbol(getConstant()), (Expression) another),anotherExpression.getContext());
 		}
 		
-		else if (another instanceof ArrayListTableFactor) {
-			ArrayListTableFactor anotherTable = (ArrayListTableFactor) another;
+		else if (another instanceof ArrayTableFactor) {
+			ArrayTableFactor anotherTable = (ArrayTableFactor) another;
 			result = multiplyWithTableFactor(anotherTable);
 		}
 		
@@ -127,13 +127,13 @@ public class ConstantFactor implements Factor {
 		return result;
 	}
 	
-	private ArrayListTableFactor multiplyWithTableFactor(ArrayListTableFactor table) {
-		ArrayListTableFactor result;
+	private ArrayTableFactor multiplyWithTableFactor(ArrayTableFactor table) {
+		ArrayTableFactor result;
 		ArrayList<Double> newEntries = new ArrayList<>(table.getEntries().size());
 		for (Double entry : table.getEntries()) {
 			newEntries.add(getConstant()*entry);
 		}
-		result = new ArrayListTableFactor(table.getVariables(), newEntries);
+		result = new ArrayTableFactor(table.getVariables(), newEntries);
 		return result;
 	}
 
@@ -173,8 +173,8 @@ public class ConstantFactor implements Factor {
 			result = evaluateAsFactor(Plus.make(makeSymbol(getConstant()), (Expression) another),anotherExpression.getContext());
 		}
 		
-		else if (another instanceof ArrayListTableFactor) {
-			ArrayListTableFactor anotherTable = (ArrayListTableFactor) another;
+		else if (another instanceof ArrayTableFactor) {
+			ArrayTableFactor anotherTable = (ArrayTableFactor) another;
 			result = addATableFactor(anotherTable);
 		}
 		
@@ -200,13 +200,13 @@ public class ConstantFactor implements Factor {
 		return result;
 	}
 	
-	private ArrayListTableFactor addATableFactor(ArrayListTableFactor table) {
-		ArrayListTableFactor result;
+	private ArrayTableFactor addATableFactor(ArrayTableFactor table) {
+		ArrayTableFactor result;
 		ArrayList<Double> newEntries = new ArrayList<>(table.getEntries().size());
 		for (Double entry : table.getEntries()) {
 			newEntries.add(getConstant() + entry);
 		}
-		result = new ArrayListTableFactor(table.getVariables(), newEntries);
+		result = new ArrayTableFactor(table.getVariables(), newEntries);
 		return result;
 	}
 

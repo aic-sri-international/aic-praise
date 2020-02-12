@@ -9,7 +9,7 @@ import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.EditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultEditableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 
 /**
  * 
@@ -24,7 +24,7 @@ public class TableFactorNetwork extends DefaultEditableFactorNetwork {
 	}
 	
 	public TableFactorNetwork(UAIModel model) {
-		this(fromUAIModelToTableFactors(model, (v,e) -> new ArrayListTableFactor(v,e)));
+		this(fromUAIModelToTableFactors(model, (v,e) -> new ArrayTableFactor(v,e)));
 	}
 
 	@Override

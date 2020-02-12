@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableEliminationSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.MinFillEliminationOrdering;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -18,9 +17,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.ndarray.NDArrayTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.AbstractTestsOnBatchOfFactorNetworks;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.tablefactorconverter.ArrayListSolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.tablefactorconverter.NDArraySolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.ConfigurationForTestsOnRandomTableFactorNetworks;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.LargerProblems;
@@ -35,8 +33,8 @@ class TestsOnRandomTableFactorNetworks extends AbstractTestsOnBatchOfFactorNetwo
 
 	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> 
 	tableFactorMaker = 
-			(v,e) -> new NDArrayTableFactor(v,e);
-//			(v,e) -> new ArrayListTableFactor(v,e);
+//			(v,e) -> new NDArrayTableFactor(v,e);
+			(v,e) -> new ArrayTableFactor(v,e);
 	
 	@Test
 	void test() {
@@ -50,11 +48,13 @@ class TestsOnRandomTableFactorNetworks extends AbstractTestsOnBatchOfFactorNetwo
 	@Override
 	protected ArrayList<Pair<String, BinaryFunction<Variable,FactorNetwork,Factor>>> makeAlgorithms() {
 		return arrayList( 
-				pair("VE_MI_AL", new ArrayListSolver(new VariableEliminationSolver(new MinFillEliminationOrdering()))),
-				pair("VE_MI_ND", new NDArraySolver(new VariableEliminationSolver(new MinFillEliminationOrdering()))),
+				pair("VE_MI_AL", new VariableEliminationSolver(new MinFillEliminationOrdering()))
+				,
+				pair("VE_MI_ND", new NDArraySolver(new VariableEliminationSolver(new MinFillEliminationOrdering())))
+				//,
 				// pair("VE_DC", new VariableEliminationSolver(new DontCareEliminationOrdering())),
-				pair("  EBP_AL", new ArrayListSolver(new ExactBPSolver())),
-				pair("  EBP_ND", new NDArraySolver(new ExactBPSolver()))
+//				pair("  EBP_AL", new ArrayListSolver(new ExactBPSolver())),
+//				pair("  EBP_ND", new NDArraySolver(new ExactBPSolver()))
 		);
 	}
 

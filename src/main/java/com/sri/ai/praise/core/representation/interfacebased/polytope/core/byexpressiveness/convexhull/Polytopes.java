@@ -59,7 +59,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.Box;
@@ -438,7 +438,7 @@ public class Polytopes {
 		for(Polytope p : toBeBoxed) {
 			if(p instanceof IntensionalConvexHullOfFactors && 
 					!((IntensionalConvexHullOfFactors)p).getIndices().isEmpty() &&
-					((IntensionalConvexHullOfFactors)p).getFactor() instanceof ArrayListTableFactor){
+					((IntensionalConvexHullOfFactors)p).getFactor() instanceof ArrayTableFactor){
 				
 					//Box boxedP = TableFactorBoxBuilder.makeTableBox((IntensionalConvexHullOfFactors) p);
 				Box boxedP = Box.boxIt((IntensionalConvexHullOfFactors) p);	
@@ -452,8 +452,8 @@ public class Polytopes {
 		return result;
 	}
 	
-	public static List<ArrayListTableFactor> IntensionalConvexHullToListOfFactors(IntensionalConvexHullOfFactors polytope) {
-		ArrayListTableFactor factor = (ArrayListTableFactor) polytope.getFactor();
+	public static List<ArrayTableFactor> IntensionalConvexHullToListOfFactors(IntensionalConvexHullOfFactors polytope) {
+		ArrayTableFactor factor = (ArrayTableFactor) polytope.getFactor();
 		List<TableVariable> indexes = mapIntoArrayList(polytope.getIndices(),v -> (TableVariable) v);
 		List<List<Integer>> listOfListOfValues = mapIntoList(indexes, v -> mapIntoList(v.getValues(), o -> (Integer) o));
 		
@@ -462,7 +462,7 @@ public class Polytopes {
 		
 		Iterator<ArrayList<Integer>> cartesianProduct = new CartesianProductIterator<Integer>(iteratorForListOfVariableValues);
 		
-		List<ArrayListTableFactor> result = new LinkedList<>();
+		List<ArrayTableFactor> result = new LinkedList<>();
 		for(List<Integer> instantiations : in(cartesianProduct)) {
 			result.add(factor.slice(indexes, instantiations));
 		}

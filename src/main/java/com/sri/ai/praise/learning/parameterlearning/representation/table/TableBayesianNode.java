@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
 
 /**
@@ -20,7 +20,7 @@ import com.sri.ai.praise.learning.parameterlearning.BayesianNode;
  *
  */
 
-public class TableBayesianNode extends ArrayListTableFactor implements BayesianNode {
+public class TableBayesianNode extends ArrayTableFactor implements BayesianNode {
 	
 	private TableVariable child;
 	private ArrayList<TableVariable> parents;
@@ -94,7 +94,7 @@ public class TableBayesianNode extends ArrayListTableFactor implements BayesianN
 	
 	private List<ArrayList<Integer>> getAllPossibleVariablesAssignments(ArrayList<TableVariable> variables) {
 		List<ArrayList<Integer>> allPossibleVariablesAssignments = list();
-		Iterator<ArrayList<Integer>> iteratorForParentsAssignments = ArrayListTableFactor.makeCartesianProductIterator(variables);
+		Iterator<ArrayList<Integer>> iteratorForParentsAssignments = ArrayTableFactor.makeCartesianProductIterator(variables);
 		while(iteratorForParentsAssignments.hasNext()) {
 			allPossibleVariablesAssignments.add(iteratorForParentsAssignments.next());
 		}

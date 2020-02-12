@@ -30,7 +30,7 @@ import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactor.ConfigurationForRandomTableFactorGeneration;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.FromTableToExpressionFactorConverter;
 import com.sri.ai.util.base.NullaryFunction;
@@ -396,11 +396,11 @@ public class PerformanceTest {
 
 	private List<Factor> constructEquivalentRandomFactorsRepresentedInDifferentWays(ConfigurationForRandomTableFactorGeneration factorSpecs)
 	{
-		ArrayListTableFactor tableFactor = 
+		ArrayTableFactor tableFactor = 
 				makeRandomTableFactor(
 				factorSpecs, 
 				FROM_VARIABLE_INDEX_TO_NAME,
-				(variables, entries) -> new ArrayListTableFactor(variables, entries),
+				(variables, entries) -> new ArrayTableFactor(variables, entries),
 				RANDOM);
 
 		ArrayList<Factor> factors = new ArrayList<>(NUMBER_OF_TESTED_FACTORS);
@@ -419,11 +419,11 @@ public class PerformanceTest {
 	}
 
 
-	private void addTableFactorToListOfFactors(ArrayListTableFactor tableFactor, ArrayList<Factor> factors) {
+	private void addTableFactorToListOfFactors(ArrayTableFactor tableFactor, ArrayList<Factor> factors) {
 		factors.add(tableFactor);
 	}
 
-	private void addTreeBasedExpressionFactorsToListOfFactors(ArrayListTableFactor tableFactor, ArrayList<Factor> factors) {
+	private void addTreeBasedExpressionFactorsToListOfFactors(ArrayTableFactor tableFactor, ArrayList<Factor> factors) {
 		Factor newFactor;
 		for (Theory theory : THEORIES_TO_TEST) {
 			newFactor = TABLE_TO_EXPRESSION_FACTOR_CONVERTER.convert(tableFactor, theory, true);
@@ -431,7 +431,7 @@ public class PerformanceTest {
 		}
 	}
 
-	private void addLinearTableExpressionFactorsToListOfFactors(ArrayListTableFactor tableFactor, ArrayList<Factor> factors) {
+	private void addLinearTableExpressionFactorsToListOfFactors(ArrayTableFactor tableFactor, ArrayList<Factor> factors) {
 		Factor newFactor;
 		for (Theory theory : THEORIES_TO_TEST) {
 			newFactor = TABLE_TO_EXPRESSION_FACTOR_CONVERTER.convert(tableFactor, theory, false);

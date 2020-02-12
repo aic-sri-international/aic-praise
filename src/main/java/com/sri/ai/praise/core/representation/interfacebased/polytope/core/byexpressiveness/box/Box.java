@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor.makeCartesianProductIterator;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor.makeCartesianProductIterator;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.TableBoxVariable.TABLE_BOX_VARIABLE;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.list;
@@ -17,7 +17,7 @@ import java.util.Map;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
@@ -29,24 +29,24 @@ public class Box extends IntensionalConvexHullOfFactors{
 		super(list(boxVariable), boxUnderTheFormOfAFactor);
 	}
 	
-	public Box(ArrayListTableFactor phiMin,ArrayListTableFactor phiMax) {
+	public Box(ArrayTableFactor phiMin,ArrayTableFactor phiMax) {
 		super(list(TABLE_BOX_VARIABLE), makeTableFactorBox(phiMin,phiMax));
 	}
 	
-	private static ArrayListTableFactor makeTableFactorBox(ArrayListTableFactor phiMin, ArrayListTableFactor phiMax) {
+	private static ArrayTableFactor makeTableFactorBox(ArrayTableFactor phiMin, ArrayTableFactor phiMax) {
 		ArrayList<TableVariable> variables = Util.arrayList(TABLE_BOX_VARIABLE);
 		variables.addAll(phiMax.getVariables());
 		ArrayList<Double> entries = new ArrayList<>(phiMin.getEntries());
 		entries.addAll(phiMax.getEntries());
-		ArrayListTableFactor result = new ArrayListTableFactor(variables,entries);
+		ArrayTableFactor result = new ArrayTableFactor(variables,entries);
 		return result;
 	}
 
 	public static Box boxIt(IntensionalConvexHullOfFactors polytope) {
-		if(!(polytope.getFactor() instanceof ArrayListTableFactor)) {
+		if(!(polytope.getFactor() instanceof ArrayTableFactor)) {
 			throw new Error("For now only support convex hulls on Table Factors");
 		}
-		List<ArrayListTableFactor> normalizedFactors = normalize(polytope);
+		List<ArrayTableFactor> normalizedFactors = normalize(polytope);
 		ArrayList<TableVariable> freeVariables = mapIntoArrayList(polytope.getFreeVariables(), v->(TableVariable)v);
 		
 		Box result =  boxNormalizedFactors(normalizedFactors,freeVariables);
@@ -54,10 +54,10 @@ public class Box extends IntensionalConvexHullOfFactors{
 		return result;
 	}
 
-	private static Box boxNormalizedFactors(List<ArrayListTableFactor> normalizedFactors, ArrayList<TableVariable> variables) {
+	private static Box boxNormalizedFactors(List<ArrayTableFactor> normalizedFactors, ArrayList<TableVariable> variables) {
 		
-		ArrayListTableFactor phiMin= new ArrayListTableFactor(variables);
-		ArrayListTableFactor phiMax= new ArrayListTableFactor(variables);
+		ArrayTableFactor phiMin= new ArrayTableFactor(variables);
+		ArrayTableFactor phiMax= new ArrayTableFactor(variables);
 		for(ArrayList<Integer> values : in(makeCartesianProductIterator(variables))){
 			Map<TableVariable, Integer> map = Util.mapFromListOfKeysAndListOfValues(variables, values);
 			List<Double> phiValues = mapIntoList(normalizedFactors, (f)-> f.getEntryFor(map));
@@ -68,9 +68,9 @@ public class Box extends IntensionalConvexHullOfFactors{
 		return new Box(phiMin,phiMax);
 	}
 
-	private static List<ArrayListTableFactor> normalize(IntensionalConvexHullOfFactors polytope) {
-		List<ArrayListTableFactor> nonNormalizedFactors = instantiateAllEdgesOfAICHOF(polytope);
-		List<ArrayListTableFactor> result = Util.mapIntoList(nonNormalizedFactors, f->f.normalize());
+	private static List<ArrayTableFactor> normalize(IntensionalConvexHullOfFactors polytope) {
+		List<ArrayTableFactor> nonNormalizedFactors = instantiateAllEdgesOfAICHOF(polytope);
+		List<ArrayTableFactor> result = Util.mapIntoList(nonNormalizedFactors, f->f.normalize());
 		return result;
 	}
 
@@ -84,17 +84,17 @@ public class Box extends IntensionalConvexHullOfFactors{
 		//return nonNormalizedFactors;
 //	}
 
-	private static List<ArrayListTableFactor> instantiateAllEdgesOfAICHOF(IntensionalConvexHullOfFactors polytope) {
-		ArrayListTableFactor factor = (ArrayListTableFactor) polytope.getFactor();
+	private static List<ArrayTableFactor> instantiateAllEdgesOfAICHOF(IntensionalConvexHullOfFactors polytope) {
+		ArrayTableFactor factor = (ArrayTableFactor) polytope.getFactor();
 		
 		ArrayList<TableVariable> indexes = indexesThatAreNotTableBoxVariable(polytope);
 		boolean isABox = indexes.size() < polytope.getIndices().size();
 		
-		List<ArrayListTableFactor> result = new LinkedList<>();
-		for(List<Integer> instantiations : in(ArrayListTableFactor.makeCartesianProductIterator(indexes))) {
-			ArrayListTableFactor subFactor = factor.slice(indexes, instantiations);
+		List<ArrayTableFactor> result = new LinkedList<>();
+		for(List<Integer> instantiations : in(ArrayTableFactor.makeCartesianProductIterator(indexes))) {
+			ArrayTableFactor subFactor = factor.slice(indexes, instantiations);
 			if (isABox) {
-				List<ArrayListTableFactor> factorsFromBox = instantiateAllEdgesOfABox(new Box(TABLE_BOX_VARIABLE, subFactor));
+				List<ArrayTableFactor> factorsFromBox = instantiateAllEdgesOfABox(new Box(TABLE_BOX_VARIABLE, subFactor));
 				result.addAll(factorsFromBox);
 			}
 			else {
@@ -106,7 +106,7 @@ public class Box extends IntensionalConvexHullOfFactors{
 		return result;
 	}
 
-	private static boolean isNullProbability(ArrayListTableFactor subFactor) {
+	private static boolean isNullProbability(ArrayTableFactor subFactor) {
 		for(Double entry :  subFactor.getEntries()) {
 			if(entry!=0.) {
 				return false;
@@ -125,21 +125,21 @@ public class Box extends IntensionalConvexHullOfFactors{
 		return result;
 	}
 
-	private static List<ArrayListTableFactor> instantiateAllEdgesOfABox(Box box) {
-		ArrayListTableFactor phiMin = box.getPhiMin();
-		ArrayListTableFactor phiMax = box.getPhiMax();
+	private static List<ArrayTableFactor> instantiateAllEdgesOfABox(Box box) {
+		ArrayTableFactor phiMin = box.getPhiMin();
+		ArrayTableFactor phiMax = box.getPhiMax();
 		
-		List<ArrayListTableFactor> result = new LinkedList<>();
+		List<ArrayTableFactor> result = new LinkedList<>();
 		
 		Iterator<ArrayList<Integer>> cartesianProduct = getCartesianProductWitZerosAndOnes(phiMax.getEntries().size());
 		for(ArrayList<Integer> binaryNumber : in(cartesianProduct)) {
-			ArrayListTableFactor newFactor = makeFactorWithAPermutationOfTheEntriesOnPhiMaxAndPhiMin(phiMin,phiMax,binaryNumber);
+			ArrayTableFactor newFactor = makeFactorWithAPermutationOfTheEntriesOnPhiMaxAndPhiMin(phiMin,phiMax,binaryNumber);
 			result.add(newFactor);
 		}
 		return result;
 	}
 
-	private static ArrayListTableFactor makeFactorWithAPermutationOfTheEntriesOnPhiMaxAndPhiMin(ArrayListTableFactor phiMin, ArrayListTableFactor phiMax,
+	private static ArrayTableFactor makeFactorWithAPermutationOfTheEntriesOnPhiMaxAndPhiMin(ArrayTableFactor phiMin, ArrayTableFactor phiMax,
 			ArrayList<Integer> binaryNumber) {
 		ArrayList<Double> phiMinEntries = phiMin.getEntries();
 		ArrayList<Double> phiMaxEntries = phiMax.getEntries();
@@ -154,7 +154,7 @@ public class Box extends IntensionalConvexHullOfFactors{
 					);
 		}
 		ArrayList<? extends TableVariable> variables = phiMax.getVariables();
-		ArrayListTableFactor result = new ArrayListTableFactor(variables,newEntries);
+		ArrayTableFactor result = new ArrayTableFactor(variables,newEntries);
 		return result;
 	}
 
@@ -169,15 +169,15 @@ public class Box extends IntensionalConvexHullOfFactors{
 		return cartesianProduct;
 	}
 	
-	public ArrayListTableFactor getPhiMax() {
-		ArrayListTableFactor tableFactor = (ArrayListTableFactor) this.getFactor();
-		ArrayListTableFactor result = tableFactor.slice(list(TABLE_BOX_VARIABLE), list(1));
+	public ArrayTableFactor getPhiMax() {
+		ArrayTableFactor tableFactor = (ArrayTableFactor) this.getFactor();
+		ArrayTableFactor result = tableFactor.slice(list(TABLE_BOX_VARIABLE), list(1));
 		return result;
 	}
 
-	public ArrayListTableFactor getPhiMin() {
-		ArrayListTableFactor tableFactor = (ArrayListTableFactor) this.getFactor();
-		ArrayListTableFactor result = tableFactor.slice(list(TABLE_BOX_VARIABLE), list(0));
+	public ArrayTableFactor getPhiMin() {
+		ArrayTableFactor tableFactor = (ArrayTableFactor) this.getFactor();
+		ArrayTableFactor result = tableFactor.slice(list(TABLE_BOX_VARIABLE), list(0));
 		return result;
 	}
 

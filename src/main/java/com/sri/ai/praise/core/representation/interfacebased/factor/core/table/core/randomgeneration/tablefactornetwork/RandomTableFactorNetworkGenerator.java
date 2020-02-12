@@ -16,7 +16,7 @@ import java.util.Random;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactor.ConfigurationForRandomTableFactorGeneration;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
@@ -185,7 +185,7 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 						minimumNumberOfFactors, maximumNumberOfFactors, 
 						minimumNumberOfVariablesPerFactor, maximumNumberOfVariablesPerFactor, 
 						minimumPotential, maximumPotential,
-						(variables, entries) -> new ArrayListTableFactor(variables, entries),
+						(variables, entries) -> new ArrayTableFactor(variables, entries),
 						new Random());
 		
 		println(join("\n", network.getVariables()));

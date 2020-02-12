@@ -1,11 +1,9 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist;
 
-import static com.sri.ai.util.Util.allEqual;
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.sum;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -17,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -41,13 +40,12 @@ import com.sri.ai.util.math.MixedRadixNumber;
  *
  */
 
-public class ArrayListTableFactor extends AbstractTableFactor {
+public class ArrayTableFactor extends AbstractTableFactor {
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// DATA MEMBERS ////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private ArrayList<Double> parameters;
 	private final MixedRadixNumber parameterIndexRadix; // null if number of variables is 0.
 
 	/*  NOTE:  Understanding the Parameter Order
@@ -68,30 +66,36 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	// CONSTRUCTORS /////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public ArrayListTableFactor(String factorName, Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
+	public ArrayTableFactor(String factorName, Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
 		super(factorName, variables);
-		this.parameters = parameters;
+		set(parameters);
+		this.parameterIndexRadix = createMixedRadixNumberForIndexingFactorParameters();
+	}
+
+	public ArrayTableFactor(String factorName, Collection<? extends TableVariable> variables, double[] parameters) {
+		super(factorName, variables);
+		set(parameters);
 		this.parameterIndexRadix = createMixedRadixNumberForIndexingFactorParameters();
 	}
 	
-	public ArrayListTableFactor(String factorName, Collection<? extends TableVariable> variables, double[] parameters) {
-		this(factorName, variables, new ArrayList<Double>(Arrays.asList(ArrayUtils.toObject(parameters))));
-	}
-	
-	public ArrayListTableFactor(Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
+	public ArrayTableFactor(Collection<? extends TableVariable> variables, double[] parameters) {
 		this("phi", variables, parameters);
 	}
 	
-	public ArrayListTableFactor(Collection<? extends TableVariable> variables, Double defaultValue) {
+	public ArrayTableFactor(Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
+		this("phi", variables, parameters);
+	}
+	
+	public ArrayTableFactor(Collection<? extends TableVariable> variables, Double defaultValue) {
 		this(variables, arrayListFilledWith(defaultValue, numberOfEntries(variables)));
 	}
 	
-	public ArrayListTableFactor(Collection<? extends TableVariable> variables) {
+	public ArrayTableFactor(Collection<? extends TableVariable> variables) {
 		this(variables, -1.0);
 	}
 
 	private MixedRadixNumber createMixedRadixNumberForIndexingFactorParameters() {
-		ArrayList<Integer> cardinalities = getNumberOfEntries();
+		ArrayList<Integer> cardinalities = getCardinalities();
 		if (cardinalities.isEmpty()) {
 			return null;
 		}
@@ -100,8 +104,89 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 		}
 	}
 
-	public ArrayList<Integer> getNumberOfEntries() {
+	public ArrayList<Integer> getCardinalities() {
 		return mapIntoArrayList(variables, v->v.getCardinality());
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// PARAMETERS ACCESS - ARRAY ////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	private double[] parameters;
+
+	private void set(ArrayList<Double> parameters) {
+		this.parameters = ArrayUtils.toPrimitive(parameters.toArray(new Double[parameters.size()]));
+	}
+
+	private void set(double[] parameters) {
+		this.parameters = parameters;
+	}
+
+	private double get(int i) {
+		return parameters[i];
+	}
+	
+	private double set(int i, double value) {
+		return parameters[i] =value;
+	}
+	
+	@Override
+	protected boolean parametersAreAllEqual() {
+		return Util.allEqual(parameters);
+	}
+	
+	@Override
+	protected String parametersString() {
+		return Util.join(Arrays.stream(parameters).boxed().collect(Collectors.toList()));
+	}
+	
+	private double parametersSum() {
+		double result = 0;
+		for (int i = 0; i != parameters.length; i++) {
+			result += parameters[i];
+		}
+		return result;
+	}
+	
+	private double[] parametersDividedBy(double divider) {
+		double[] newEntries = new double[numberOfEntries()];
+		for (int i = 0; i != parameters.length; i++) {
+			newEntries[i] = parameters[i]/divider;
+		}
+		return newEntries;
+	}
+
+	private double[] parametersInversion() {
+		double[] newEntries = new double[numberOfEntries()];
+		for (int i = 0; i != parameters.length; i++) {
+			newEntries[i] = 1.0/parameters[i];
+		}
+		return newEntries;
+	}
+
+	private double getParameter(int parameterIndex) {
+		return parameters[parameterIndex];
+	}
+
+	@Override
+	public ArrayList<Double> getEntries() {
+		ArrayList<Double> result = new ArrayList<>(parameters.length);
+		for (int i = 0; i != parameters.length; i++) {
+			result.add(parameters[i]);
+		}
+		return result;
+	}
+
+	/**
+	 * @deprecated
+	 * @param defaultValue
+	 */
+	@Deprecated
+	public void reinitializeEntries(Double defaultValue) {
+		parameters = new double[numberOfEntries()];
+		for (int i = 0; i != parameters.length; i++) {
+			parameters[i] = defaultValue;
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +195,7 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	
 	@Override
 	protected boolean firstParameterIsZero() {
-		return parameters.get(0) == 0;
+		return get(0) == 0;
 	}
 
 	@Override
@@ -118,36 +203,26 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 		return numberOfEntries() == 0;
 	}
 	
-	@Override
-	protected boolean parametersAreAllEqual() {
-		return allEqual(parameters);
-	}
-
-	@Override
-	protected String parametersString() {
-		return parameters.toString();
-	}
-	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// SLICING //////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	public ArrayListTableFactor slice(List<TableVariable> variables, List<Integer> values) {
-		return (ArrayListTableFactor) super.slice(variables, values);
+	public ArrayTableFactor slice(List<TableVariable> variables, List<Integer> values) {
+		return (ArrayTableFactor) super.slice(variables, values);
 	}
 
 	@Override
-	public ArrayListTableFactor slice(Map<TableVariable, Integer> assignment) {
-		return (ArrayListTableFactor) super.slice(assignment);
+	public ArrayTableFactor slice(Map<TableVariable, Integer> assignment) {
+		return (ArrayTableFactor) super.slice(assignment);
 	}
 
 	@Override
-	protected ArrayListTableFactor slicePossiblyModifyingAssignment(
+	protected ArrayTableFactor slicePossiblyModifyingAssignment(
 			Map<TableVariable, Integer> assignment,
 			ArrayList<? extends TableVariable> remainingVariables) {
 		
-		ArrayListTableFactor result = new ArrayListTableFactor(remainingVariables);
+		ArrayTableFactor result = new ArrayTableFactor(remainingVariables);
 		Iterator<ArrayList<Integer>> assignmentsToRemainingVariables = makeCartesianProductIterator(remainingVariables);
 		for (ArrayList<Integer> remainingVariablesValues: in(assignmentsToRemainingVariables)) {
 			Util.putAll(assignment, remainingVariables, remainingVariablesValues);
@@ -162,8 +237,8 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	protected ArrayListTableFactor addTableFactor(TableFactor another) {
-		ArrayListTableFactor result = initializeNewFactorUnioningVariables(another);
+	protected ArrayTableFactor addTableFactor(TableFactor another) {
+		ArrayTableFactor result = initializeNewFactorUnioningVariables(another);
 		result = operateOnUnionedParameters(another, result, (a,b) -> a + b);
 		return result;
 	}
@@ -173,13 +248,13 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override
-	public ArrayListTableFactor multiply(Factor another) {
-		return (ArrayListTableFactor) super.multiply(another);
+	public ArrayTableFactor multiply(Factor another) {
+		return (ArrayTableFactor) super.multiply(another);
 	}
 
 	@Override
-	protected ArrayListTableFactor multiplyTableFactor(TableFactor another) {
-		ArrayListTableFactor result = initializeNewFactorUnioningVariables(another);
+	protected ArrayTableFactor multiplyTableFactor(TableFactor another) {
+		ArrayTableFactor result = initializeNewFactorUnioningVariables(another);
 		result = operateOnUnionedParameters(another, result, (a,b) -> a * b);
 		return result;
 	}
@@ -188,16 +263,16 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	// SHARED SUPPORT FOR ADDING AND MULTIPLYING ////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private ArrayListTableFactor initializeNewFactorUnioningVariables(TableFactor another) {
+	private ArrayTableFactor initializeNewFactorUnioningVariables(TableFactor another) {
 		LinkedHashSet<TableVariable> newSetOfVariables = new LinkedHashSet<>(this.variables);
 		newSetOfVariables.addAll(another.getVariables());
 		Integer numberOfParametersForNewListOfVariables = numberOfEntries(newSetOfVariables);
 		ArrayList<Double> newParameters = arrayListFilledWith(-1.0, numberOfParametersForNewListOfVariables);	
-		ArrayListTableFactor newFactor = new ArrayListTableFactor(new ArrayList<>(newSetOfVariables), newParameters);
+		ArrayTableFactor newFactor = new ArrayTableFactor(new ArrayList<>(newSetOfVariables), newParameters);
 		return newFactor;
 	}
 
-	private ArrayListTableFactor operateOnUnionedParameters(TableFactor another, ArrayListTableFactor result, BiFunction<Double, Double, Double> operator) {
+	private ArrayTableFactor operateOnUnionedParameters(TableFactor another, ArrayTableFactor result, BiFunction<Double, Double, Double> operator) {
 		Iterator<ArrayList<Integer>> cartesianProduct = makeCartesianProductIterator(result.variables);
 		LinkedHashMap<Variable, Integer> variableValueMap = new LinkedHashMap<>();
 		for(ArrayList<Integer> values: in(cartesianProduct)) {
@@ -215,28 +290,21 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	
 	@Override
 	protected double computeNormalizationConstant() {
-		return sum(parameters).doubleValue();
-	}
-	
-	@Override
-	public ArrayListTableFactor normalize() {
-		return (ArrayListTableFactor) super.normalize();
+		return parametersSum();
 	}
 
 	@Override
-	protected ArrayListTableFactor normalizeBy(Double normalizationConstant) {
-		ArrayListTableFactor result;
-		ArrayList<Double> newEntries = new ArrayList<>(getEntries().size());
-		for (Double entry : this.parameters) {
-			newEntries.add(entry/normalizationConstant);
-		}
-		result = new ArrayListTableFactor(getVariables(), newEntries);
+	public ArrayTableFactor normalize() {
+		return (ArrayTableFactor) super.normalize();
+	}
+
+	@Override
+	protected ArrayTableFactor normalizeBy(Double normalizationConstant) {
+		ArrayTableFactor result;
+		Double divider = normalizationConstant;
+		var newEntries = parametersDividedBy(divider);
+		result = new ArrayTableFactor(getVariables(), newEntries);
 		return result;
-
-//		int numParameters = parameters.size();
-//		for (int i = 0; i < numParameters; ++i) {
-//			parameters.set(i, getParameter(i) / normalizationConstant);
-//		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -244,14 +312,14 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	public ArrayListTableFactor sumOut(List<? extends Variable> variablesToSumOut) {
-		return (ArrayListTableFactor) super.sumOut(variablesToSumOut);
+	public ArrayTableFactor sumOut(List<? extends Variable> variablesToSumOut) {
+		return (ArrayTableFactor) super.sumOut(variablesToSumOut);
 	}
 
 	@Override
-	protected ArrayListTableFactor sumOutEverythingExcept(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut) {
+	protected ArrayTableFactor sumOutEverythingExcept(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut) {
 
-		ArrayListTableFactor result = new ArrayListTableFactor(variablesNotToSumOut, 0.0);
+		ArrayTableFactor result = new ArrayTableFactor(variablesNotToSumOut, 0.0);
 		
 		LinkedHashMap<Variable, Integer> assignment = new LinkedHashMap<>();
 		for (ArrayList<Integer> values: in(makeCartesianProductIterator(variables))) {
@@ -275,17 +343,9 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	public ArrayListTableFactor invert() {
-		ArrayListTableFactor result;
-		ArrayList<Double> newEntries = new ArrayList<>(getEntries().size());
-		for (Double entry : this.parameters) {
-			if (Math.abs(entry) < 0.00000001) {
-				throw new Error("Can't invert : 0 value in the table factor.");
-			}
-			newEntries.add(1/entry);
-		}
-		result = new ArrayListTableFactor(getVariables(), newEntries);
-		return result;
+	public ArrayTableFactor invert() {
+		var newEntries = parametersInversion();
+		return new ArrayTableFactor(getVariables(), newEntries);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,19 +364,6 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 		return getParameter(parameterIndex);
 	}
 	
-	private Double getParameter(int parameterIndex) {
-		return parameters.get(parameterIndex);
-	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// GET ENTRIES //////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	@Override
-	public ArrayList<Double> getEntries() {
-		return this.parameters;
-	}
-
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// INDEXED ACCESS - SETTERS /////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -324,17 +371,13 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	@Override
 	protected void setEntryFor(int[] values, Double newParameterValue) {
 		int parameterIndex = getParameterIndex(values);
-		setParameter(parameterIndex, newParameterValue);
+		set(parameterIndex, newParameterValue);
 	}
 	
 	@Override
 	public void setEntryFor(ArrayList<Integer> values, Double newParameterValue) {
 		int parameterIndex = getParameterIndex(values);
-		setParameter(parameterIndex, newParameterValue);
-	}
-	
-	private Double setParameter(int parameterIndex, Double newParameterValue) {
-		return parameters.set(parameterIndex, newParameterValue);
+		set(parameterIndex, newParameterValue);
 	}
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -366,10 +409,6 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 				mapIntoList(variables, v -> () -> new IntegerIterator(0, v.getCardinality()));
 		
 		return new CartesianProductIterator<Integer>(makersOfIteratorsOverValues);
-	}
-	
-	public void reinitializeEntries(Double defaultValue) {
-		this.parameters = arrayListFilledWith(defaultValue, parameters.size());
 	}
 	
 }
